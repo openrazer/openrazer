@@ -1,12 +1,8 @@
 #!/bin/bash
 
-DIRECTION=$1
-if [ "$DIRECTION" = "left" ]; then
-    MODE=2
-fi
-if [ "$DIRECTION" = "right" ]; then
-    MODE=1
-fi
+R=`printf '%x' $1`
+G=`printf '%x' $2`
+B=`printf '%x' $3`
 
 RAZER_BLACKWIDOW_CHROMA_DEVICES=`ls /sys/bus/hid/devices/ | grep "1532:0203"`
 for DEV in $RAZER_BLACKWIDOW_CHROMA_DEVICES
@@ -19,7 +15,7 @@ do
 			if [ $MOUSE ]; then
 				#echo "Found Razer LED Device : $DEV"
 				DEVPATH=/sys/bus/hid/devices/$DEV
-				echo -n "$MODE" > $DEVPATH/mode_wave
+				echo -n -e "\x$R\x$G\x$B" > $DEVPATH/mode_reactive
 			fi
 		done
 	fi

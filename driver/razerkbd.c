@@ -268,6 +268,23 @@ int razer_reset(struct usb_device *usb_dev)
     return retval;
 }
 
+int razer_set_brightness(struct usb_device *usb_dev,unsigned char brightness)
+{
+    int retval;
+    struct razer_report report;
+    razer_prepare_report(&report);
+    report.parameter_bytes_num = 3;
+    report.command = 0x3; /*set brightness command id*/
+    report.sub_command = 0x01;/*unknown*/
+    report.command_parameters[0] = 5;/*unknown*/
+    report.command_parameters[1] = brightness;
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_send_report(usb_dev,&report);
+    msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    return retval;
+}
+
+
 int razer_activate_macro_keys(struct usb_device *usb_dev)
 {
     int retval;
@@ -440,6 +457,26 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
     return count;                           
 }                                   
 
+static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_attribute *attr,
+                char *buf)                  
+{                                   
+    //struct usb_interface *intf = to_usb_interface(dev->parent);     
+    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+    return sprintf(buf, "%d\n", 0);            
+}
+
+static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device_attribute *attr,
+               const char *buf, size_t count)       
+{                                   
+    struct usb_interface *intf = to_usb_interface(dev->parent);     
+    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int temp = simple_strtoul(buf, NULL, 10);           
+    razer_set_brightness(usb_dev,(unsigned char)temp);
+    return count;                           
+}                                   
+
+
 static ssize_t razer_attr_read_mode_reactive(struct device *dev, struct device_attribute *attr,
                 char *buf)                  
 {                                   
@@ -600,6 +637,7 @@ static DEVICE_ATTR(temp_clear_row, S_IRUGO | S_IWUSR, razer_attr_read_temp_clear
 static DEVICE_ATTR(set_key_row, S_IRUGO | S_IWUSR, razer_attr_read_set_key_row, razer_attr_write_set_key_row);
 static DEVICE_ATTR(reset, S_IRUGO | S_IWUSR, razer_attr_read_reset, razer_attr_write_reset);
 static DEVICE_ATTR(macro_keys, S_IRUGO | S_IWUSR, razer_attr_read_macro_keys, razer_attr_write_macro_keys);
+static DEVICE_ATTR(set_brightness, S_IRUGO | S_IWUSR, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
 
 
 
@@ -651,6 +689,9 @@ static int razer_kbd_probe(struct hid_device *hdev,
     retval = device_create_file(&hdev->dev, &dev_attr_macro_keys);
     if (retval)
         goto exit_free;
+    retval = device_create_file(&hdev->dev, &dev_attr_set_brightness);
+    if (retval)
+        goto exit_free;
 
     hid_set_drvdata(hdev, dev);
 
@@ -692,6 +733,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     device_remove_file(&hdev->dev, &dev_attr_set_key_row);
     device_remove_file(&hdev->dev, &dev_attr_reset);
     device_remove_file(&hdev->dev, &dev_attr_macro_keys);
+    device_remove_file(&hdev->dev, &dev_attr_set_brightness);
 
     hid_hw_stop(hdev);
     kfree(dev);
