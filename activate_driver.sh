@@ -4,7 +4,7 @@
 #need to compile ?
 
 make 
-insmod razerkbd.ko
+insmod driver/razerkbd.ko
 
 
 

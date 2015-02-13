@@ -1,3 +1,3 @@
 
-obj-razerkbd := razerkbd.o
+obj-m := razerkbd.o
 

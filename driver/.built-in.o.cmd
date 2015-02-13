@@ -1,0 +1,1 @@
+cmd_/home/pez2001/development/razer_blackwidow_chroma_driver/driver/built-in.o :=  rm -f /home/pez2001/development/razer_blackwidow_chroma_driver/driver/built-in.o; ar rcsD /home/pez2001/development/razer_blackwidow_chroma_driver/driver/built-in.o
