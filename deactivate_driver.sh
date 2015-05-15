@@ -1,10 +1,5 @@
 #!/bin/bash
 
-#TODO insert module
-#need to compile ?
-
-make -s all
-insmod driver/razerkbd.ko
 
 
 
@@ -18,12 +13,13 @@ do
 			MOUSE=`ls /sys/bus/hid/devices/$DEV/input/$INPUT_DEV/ | grep "mouse"`
 			if [ $MOUSE ]; then
 				echo "Found Razer LED Device : $DEV"
-				echo -n "$DEV" > /sys/bus/hid/drivers/hid-generic/unbind 2> /dev/null
+				echo -n "$DEV" > /sys/bus/hid/drivers/razerkbd/unbind 2> /dev/null
 				echo $?
-				echo -n "$DEV" > /sys/bus/hid/drivers/razerkbd/bind 2> /dev/null
+				echo -n "$DEV" > /sys/bus/hid/drivers/hid-generic/bind 2> /dev/null
 				echo $?
 			fi
 		done
 	fi
 done
 
+rmmod driver/razerkbd.ko

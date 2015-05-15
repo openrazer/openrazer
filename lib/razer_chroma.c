@@ -1,4 +1,122 @@
-const char *sys_hid_devices_path = "/sys/bus/hid/devices/";
+#include "razer_chroma.h"
+
+const char *razer_sys_hid_devices_path = "/sys/bus/hid/devices/";
+
+const char *razer_sys_event_path = "/dev/input/by-id/usb-Razer_Razer_BlackWidow_Chroma-event-kbd";
+
+const char *razer_custom_mode_pathname = "/mode_custom";
+const char *razer_update_keys_pathname = "/set_key_row";
+
+int razer_open_custom_mode_file(struct razer_chroma *chroma)
+{
+	chroma->custom_mode_file=fopen(chroma->custom_mode_filename,"wt");
+	#ifdef USE_DEBUGGING
+		printf("opening custom mode file:%s\n",chroma->custom_mode_filename);
+	#endif
+	if(chroma->custom_mode_file)
+		return(1);
+	else
+		return(0);
+}
+
+void razer_close_custom_mode_file(struct razer_chroma *chroma)
+{
+	#ifdef USE_DEBUGGING
+		printf("closing custom mode file:%s\n",chroma->custom_mode_filename);
+	#endif
+    if(chroma->custom_mode_file)
+    	fclose(chroma->custom_mode_file);
+    chroma->custom_mode_file = NULL;
+}
+
+int razer_open_update_keys_file(struct razer_chroma *chroma)
+{
+	chroma->update_keys_file=fopen(chroma->update_keys_filename,"wb");
+	#ifdef USE_DEBUGGING
+		printf("opening update keys file:%s\n",chroma->update_keys_filename);
+	#endif
+	if(chroma->update_keys_file)
+		return(1);
+	else
+		return(0);
+}
+
+void razer_close_update_keys_file(struct razer_chroma *chroma)
+{
+	#ifdef USE_DEBUGGING
+		printf("closing update keys file:%s\n",chroma->update_keys_filename);
+	#endif
+    if(chroma->update_keys_file)
+    	fclose(chroma->update_keys_file);
+    chroma->update_keys_file = NULL;
+}
+
+
+void razer_init_keys(struct razer_keys *keys)
+{
+	memset(keys->heatmap,0,sizeof(long)*22*6);
+	memset(keys->rows,0,sizeof(struct razer_rgb_row)*6);
+	keys->update_mask = 63;
+	int i;
+	for(i = 0; i < 6; ++i)
+	{
+		keys->rows[i].row_index = i;
+	}
+}
+
+int razer_open(struct razer_chroma *chroma)
+{
+	#ifdef USE_DEBUGGING
+		printf("opening chroma lib\n");
+	#endif
+	chroma->custom_mode_file = NULL;
+	chroma->update_keys_file = NULL;
+	chroma->device_path = razer_get_device_path();
+	if(!chroma->device_path)
+	{
+		#ifdef USE_DEBUGGING
+			printf("error no compatible device found\n");
+		#endif
+		return(0);
+	}
+	#ifdef USE_DEBUGGING
+		printf("found device at path:%s\n",chroma->device_path);
+	#endif
+
+	chroma->keys = (struct razer_keys*)malloc(sizeof(struct razer_keys));
+	razer_init_keys(chroma->keys);
+
+	chroma->custom_mode_filename = (char*)malloc(strlen(chroma->device_path)+strlen(razer_custom_mode_pathname)+1);
+	memset(chroma->custom_mode_filename,0,strlen(chroma->device_path)+strlen(razer_custom_mode_pathname)+1);
+	memcpy(chroma->custom_mode_filename,chroma->device_path,strlen(chroma->device_path));
+	memcpy(chroma->custom_mode_filename+strlen(chroma->device_path),razer_custom_mode_pathname,strlen(razer_custom_mode_pathname));
+	chroma->update_keys_filename = (char*)malloc(strlen(chroma->device_path)+strlen(razer_update_keys_pathname)+1);
+	memset(chroma->update_keys_filename,0,strlen(chroma->device_path)+strlen(razer_update_keys_pathname)+1);
+	memcpy(chroma->update_keys_filename,chroma->device_path,strlen(chroma->device_path));
+	memcpy(chroma->update_keys_filename+strlen(chroma->device_path),razer_update_keys_pathname,strlen(razer_update_keys_pathname));
+
+	return(1);
+}
+
+void razer_close(struct razer_chroma *chroma)
+{
+	#ifdef USE_DEBUGGING
+		printf("closing chroma lib\n");
+	#endif
+	if(chroma->device_path)
+	{
+		free(chroma->keys);
+		free(chroma->device_path);
+		if(chroma->update_keys_file)
+			razer_close_update_keys_file(chroma);
+		if(chroma->custom_mode_file)
+			razer_close_custom_mode_file(chroma);
+		free(chroma->custom_mode_filename);
+		free(chroma->update_keys_filename);
+	}
+}
+
+
 
 void release_locks(struct razer_keys_locks *locks)
 {
@@ -73,15 +191,9 @@ void rgb_mix(struct razer_rgb *dst,struct razer_rgb *src,float dst_opacity)
 	dst->b = rgb_clamp((1.0f-dst_opacity)*dst->b + src->b*dst_opacity);
 }
 
-
-
-
-char *key_filename = NULL;
-char *custom_filename = NULL;
-
-char *get_device_path()
+char *razer_get_device_path()
 {
-	DIR *d = opendir(sys_hid_devices_path);
+	DIR *d = opendir(razer_sys_hid_devices_path);
 	struct dirent *entry=NULL;
 	while((entry=readdir(d)))
 	{
@@ -102,41 +214,28 @@ char *get_device_path()
 		sscanf(s_device_hid_id,"%x",&device_hid_id);
 		if(device_vendor_id==RAZER_VENDOR_ID && device_product_id == RAZER_BLACKWIDOW_CHROMA_PRODUCT_ID)
 		{
-			//printf("Found Keyboard device\n");
 			char *custom_path_name = "/mode_custom";
-			//char *keys_path_name = "/set_key_row";
-			int base_path_len = strlen(sys_hid_devices_path)+strlen(entry->d_name);
+			int base_path_len = strlen(razer_sys_hid_devices_path)+strlen(entry->d_name);
 			int custom_path_len = base_path_len+strlen(custom_path_name);
-			//int keys_path_len = base_path_len+strlen(keys_path_name);
 			char *custom_filename = (char*)malloc(custom_path_len+1);
 			char *device_path = (char*)malloc(base_path_len+1);
 			memset(custom_filename,0,custom_path_len+1);			
-			memcpy(custom_filename,sys_hid_devices_path,strlen(sys_hid_devices_path));
-			memcpy(custom_filename+strlen(sys_hid_devices_path),entry->d_name,strlen(entry->d_name));
-			memcpy(custom_filename+strlen(sys_hid_devices_path)+strlen(entry->d_name),custom_path_name,strlen(custom_path_name));
+			memcpy(custom_filename,razer_sys_hid_devices_path,strlen(razer_sys_hid_devices_path));
+			memcpy(custom_filename+strlen(razer_sys_hid_devices_path),entry->d_name,strlen(entry->d_name));
+			memcpy(custom_filename+strlen(razer_sys_hid_devices_path)+strlen(entry->d_name),custom_path_name,strlen(custom_path_name));
 
 			memset(device_path,0,custom_path_len+1);			
-			memcpy(device_path,sys_hid_devices_path,strlen(sys_hid_devices_path));
-			memcpy(device_path+strlen(sys_hid_devices_path),entry->d_name,strlen(entry->d_name));
-			//memcpy(keys_filename+strlen(sys_hid_devices_path)+strlen(entry->d_name),keys_path_name,strlen(keys_path_name));
+			memcpy(device_path,razer_sys_hid_devices_path,strlen(razer_sys_hid_devices_path));
+			memcpy(device_path+strlen(razer_sys_hid_devices_path),entry->d_name,strlen(entry->d_name));
 			FILE *fmode=fopen(custom_filename,"wt");
 			if(fmode)
 			{
-				//printf("opened mode file\n");
-				//fwrite("1",1,1,fmode);
 				fclose(fmode);
 				closedir(d);
 				free(custom_filename);
 				return(device_path);
 			}
-			/*DIR *dinput = opendir(sys_hid_devices_path);
-			struct dirent *input_entry=NULL;
-			printf("opened dir:%s\n",input_path);
-
-			closedir(dinput);*/
 		}
-			
-
 	}
 	closedir(d);
 	return(NULL);
@@ -451,34 +550,40 @@ void convert_ascii_to_pos(unsigned char letter,struct razer_pos *pos)
 
 }
 
-void set_mode_custom(void)
+void razer_set_custom_mode(struct razer_chroma *chroma)
 {
-	FILE *fmode=fopen(custom_filename,"wt");
-	if(fmode)
-		fwrite("1",1,1,fmode);
-    fclose(fmode);
+	if(!chroma->custom_mode_file)
+		razer_open_custom_mode_file(chroma);
+	if(chroma->custom_mode_file)
+		fwrite("1",1,1,chroma->custom_mode_file);
+	#ifdef USE_DEBUGGING
+	else
+		printf("error setting mode to custom\n");
+	#endif
+	razer_close_custom_mode_file(chroma);
 }
 
-void update_keys(struct razer_keys *keys)
+void razer_update_keys(struct razer_chroma *chroma, struct razer_keys *keys)
 {
 	int i;
-	FILE *fkey=fopen(key_filename,"wb");
-	if(fkey)
+	if(!chroma->update_keys_file)
+		razer_open_update_keys_file(chroma);
+	if(chroma->update_keys_file)
 	{
-	for(i=0;i<6;i++)
-	{
-		if(keys->update_mask &(1<<i))
+		for(i=0;i<6;i++)
 		{
-				fwrite((void*)&keys->rows[i],sizeof(struct razer_rgb_row),1,fkey);
-	    	//else
-	    	//	printf("error updating keys");
+			if(keys->update_mask &(1<<i))
+				fwrite((void*)&keys->rows[i],sizeof(struct razer_rgb_row),1,chroma->update_keys_file);
 		}
 	}
-	   	fclose(fkey);
-	}
+	#ifdef USE_DEBUGGING
+	else
+		printf("error setting mode to custom\n");
+	#endif
 	if(keys->update_mask)
-    	set_mode_custom();
+    	razer_set_custom_mode(chroma);
     keys->update_mask=0;
+    razer_close_update_keys_file(chroma);
 }
 
 void set_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color)
@@ -520,7 +625,6 @@ void add_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *
 }
 void sub_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color)
 {
-	struct razer_rgb add;
 	int r,g,b;
 	if(column_index<0 || column_index>21)
 		return;
@@ -581,7 +685,6 @@ void add_keys_row(struct razer_keys *keys,int row_index,struct razer_rgb *color)
 }
 void sub_keys_row(struct razer_keys *keys,int row_index,struct razer_rgb *color)
 {
-	struct razer_rgb add;
 	int r,g,b;
 	if(row_index<0 || row_index>5)
 		return;
@@ -639,7 +742,6 @@ void clear_all(struct razer_keys *keys)
 	for(i=0;i<6;i++)
 		set_keys_row(keys,i,&color);
 }
-
 
 void sub_heatmap(struct razer_keys *keys,int heatmap_reduction_amount)
 {
@@ -779,13 +881,18 @@ double pos_angle_radians(struct razer_pos *src,struct razer_pos *dst)
 	return(angle);
 }
 
+float scroll_x,scroll_y;
+int scroll_width,scroll_height;
+double scroll_dir_x,scroll_dir_y;
+unsigned char *scroll_buf=NULL;
 
+/*
 void capture_keys(struct razer_keys *keys,SDL_Renderer *renderer,SDL_Window *window,SDL_Texture *tex)
 {
 	struct timeval start,tv,select_tv;
 	gettimeofday(&start, NULL);
 	int ev_count = 0;
-	int finput=open("/dev/input/event3",O_RDONLY | O_NONBLOCK | O_NOCTTY | O_NDELAY);
+	int finput=open(sys_event_path,O_RDONLY | O_NONBLOCK | O_NOCTTY | O_NDELAY);
 	fcntl(finput,F_SETFL,0);
 	int last_keycode=0;
 	fd_set rs;
@@ -1001,16 +1108,11 @@ void capture_keys(struct razer_keys *keys,SDL_Renderer *renderer,SDL_Window *win
 		last_event_count = ev_count;
 	}
 }
+*/
 
-
-int main(int argc,char *argv[])
+/*
+void create_sdl_window()
 {
-
-	struct razer_daemon daemon;
-
-	razor_open(&daemon);
-
-
    	SDL_Init(SDL_INIT_VIDEO);      
 	SDL_Window *sdl_window;
 	SDL_Renderer *sdl_renderer;
@@ -1021,84 +1123,12 @@ int main(int argc,char *argv[])
 	SDL_RenderPresent(sdl_renderer);
 	SDL_Texture *sdl_texture = SDL_CreateTexture(sdl_renderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STREAMING,22,6);
 	load_icons(sdl_renderer,"icons",sdl_icons);
+}
 
 
-
-	printf("setting custom mode\n");
-	//FILE *mode = fopen("/sys/bus")
-	char *device_path = get_device_path();
-	char *custom_path_name = "/mode_custom";
-	custom_filename = (char*)malloc(strlen(device_path)+strlen(custom_path_name)+1);
-	memset(custom_filename,0,strlen(device_path)+strlen(custom_path_name)+1);
-	memcpy(custom_filename,device_path,strlen(device_path));
-	memcpy(custom_filename+strlen(device_path),custom_path_name,strlen(custom_path_name));
-	char *key_path_name = "/set_key_row";
-	key_filename = (char*)malloc(strlen(device_path)+strlen(key_path_name)+1);
-	memset(key_filename,0,strlen(device_path)+strlen(key_path_name)+1);
-	memcpy(key_filename,device_path,strlen(device_path));
-	memcpy(key_filename+strlen(device_path),key_path_name,strlen(key_path_name));
-    set_mode_custom();
-
-    //FILE *scroll_pic = fopen("test3b.rgb","rb");
-    //FILE *scroll_pic = fopen("glare.rgb","rb");
-    //FILE *scroll_pic = fopen("rainbow.rgb","rb");
-    FILE *scroll_pic = fopen("fractal.rgb","rb");
-    //FILE *scroll_pic = fopen("blackhole.rgb","rb");
-    fseek(scroll_pic,0,SEEK_END);
-    long scroll_pic_size = ftell(scroll_pic);
-    fseek(scroll_pic,0,SEEK_SET);
-    scroll_buf = (unsigned char*)malloc(scroll_pic_size);
-    fread(scroll_buf,scroll_pic_size,1,scroll_pic);
-    //scroll_width = 2752;
-    //scroll_height = 1836;
-    //scroll_width = 580;
-    //scroll_height = 388;
-    //scroll_width = 380;
-    //scroll_height = 400;
-    //scroll_width = 406;
-    //scroll_height = 405;
-    //scroll_width = 471;
-    //scroll_height = 629;
-
-    //glare
-    //scroll_width = 1920;
-    //scroll_height = 1200;
-    //rainbow
-    scroll_width = 2560;
-    scroll_height = 1600;
-    //fractal
-    scroll_width = 1920;
-    scroll_height = 1200;
-    //blackhole
-    //scroll_width = 1600;
-    //scroll_height = 1200;
-
-    scroll_y=0;
-    scroll_x=0;
-    scroll_dir_y=0.5f;
-    scroll_dir_x=0.5f;
-    fclose(scroll_pic);
-
-	struct razer_keys keys;
-	memset(&keys.heatmap,0,sizeof(long)*22*6);
-	memset(&keys.rows,0,sizeof(struct razer_rgb_row)*6);
-	keys.update_mask = 63;
-	int i;
-	for(i = 0; i < 6; ++i)
-	{
-		keys.rows[i].row_index = i;
-	}
-	clear_all(&keys);
-	update_keys(&keys);
-	capture_keys(&keys,sdl_renderer,sdl_window,sdl_texture);
-	//test_effect4(&keys);
-	free(custom_filename);
-	free(key_filename);
-	free(device_path);
-	free(scroll_buf);
-
-
+void close_sdl_window()
+{
   	SDL_DestroyWindow(sdl_window);
     SDL_Quit();
-
 }
+*/

@@ -75,7 +75,7 @@ struct razer_kbd_device {
 
 struct razer_report {
 	unsigned char report_start_marker; /*0x0*/
-	unsigned char id; /*always 0xFF maybe it's an i2c id or some range , brightness maybe ?*/
+	unsigned char id; /*always 0xFF maybe it's an i2c id or some range*/
 	unsigned char reserved1[3];
 	unsigned char parameter_bytes_num;
 	unsigned char reserved2;/*always 0x03 maybe some command class id*/

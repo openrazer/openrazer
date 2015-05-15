@@ -1,26 +1,64 @@
+#include "razer_daemon.h"
 
-void release_locks(struct razer_keys_locks *locks)
+int daemon_open(struct razer_daemon **daemon)
 {
-	memset(locks,0,sizeof(struct razer_keys_locks));
+ 
+ 	*daemon = (struct razer_daemon*)malloc(sizeof(struct razer_daemon));
+ 	(*daemon)->chroma = (struct razer_chroma*)malloc(sizeof(struct razer_chroma));
+ 	razer_open((*daemon)->chroma);
 }
 
-int razer_open(struct razer_daemon *daemon)
+int daemon_close(struct razer_daemon **daemon)
 {
-
-
+ 	razer_close((*daemon)->chroma);
+ 	free((*daemon)->chroma);
+ 	free(*daemon);
 }
 
-int razer_close(struct razer_daemon *daemon)
-{
-
-
-}
-
-int razer_loop(struct razer_daemon *daemon)
+int daemon_loop(struct razer_daemon *daemon)
 {
 
 }
 
+void test_effect4(struct razer_chroma *chroma,struct razer_keys *keys)
+{
+	int r,g,b;
+	float fr,fg,fb;
+	int rnd=random();
+	int rnd2=random();
+	int rnd3=random();
+	int count = 0;
+	int count_dir = 1;
+	float s = 0.1f;
+	while(1)
+	{	
+		int x,y;
+		for(x=0;x<22;x++)
+			for(y=0;y<6;y++)
+		{
+			r = (count+x)*(255/22);
+			g = (count-x)*(255/22);
+			b = (count+y)*(255/22);
+
+			keys->rows[y].column[x].r = (unsigned char)r;
+			keys->rows[y].column[x].g = (unsigned char)g;
+			keys->rows[y].column[x].b = (unsigned char)b;
+			keys->update_mask |= 1<<y;
+		}
+		razer_update_keys(chroma,keys);
+		count+=count_dir;
+		if(count<=0 || count>=44)
+		{
+			count_dir=-count_dir;
+			rnd = random();
+			rnd2 = random();
+			rnd3 = random();
+		}
+		usleep(6000);
+	}
+}
+
+/*
 void test_effect1(struct razer_keys *keys)
 {
 	int r=random();
@@ -143,43 +181,6 @@ void test_effect3(struct razer_keys *keys)
 	}
 }
 
-void test_effect4(struct razer_keys *keys)
-{
-	int r,g,b;
-	float fr,fg,fb;
-	int rnd=random();
-	int rnd2=random();
-	int rnd3=random();
-	int count = 0;
-	int count_dir = 1;
-	float s = 0.1f;
-	while(1)
-	{	
-		int x,y;
-		for(x=0;x<22;x++)
-			for(y=0;y<6;y++)
-		{
-			r = (count+x)*(255/22);
-			g = (count-x)*(255/22);
-			b = (count+y)*(255/22);
-
-			keys->rows[y].column[x].r = (unsigned char)r;
-			keys->rows[y].column[x].g = (unsigned char)g;
-			keys->rows[y].column[x].b = (unsigned char)b;
-			keys->update_mask |= 1<<y;
-		}
-		update_keys(keys);
-		count+=count_dir;
-		if(count<=0 || count>=44)
-		{
-			count_dir=-count_dir;
-			rnd = random();
-			rnd2 = random();
-			rnd3 = random();
-		}
-		usleep(6000);
-	}
-}
 
 void test_effect5(struct razer_keys *keys)
 {
@@ -596,7 +597,8 @@ void test_effect_heatmap_frame(struct razer_keys *keys)
 	}
 	keys->update_mask = 63;//update all rows
 }
-float scroll_x,scroll_y;
+*/
+/*float scroll_x,scroll_y;
 int scroll_width,scroll_height;
 double scroll_dir_x,scroll_dir_y;
 unsigned char *scroll_buf=NULL;
@@ -608,11 +610,6 @@ void test_effect_scroll_frame(struct razer_keys *keys)
 	{
 		for(y=0;y<6;y++)
 		{
-			/*
-			color.r = scroll_buf[((((int)scroll_x+x)*3)+((((int)scroll_y+y)*scroll_width)*3))+0];
-			color.g = scroll_buf[((((int)scroll_x+x)*3)+((((int)scroll_y+y)*scroll_width)*3))+1];
-			color.b = scroll_buf[((((int)scroll_x+x)*3)+((((int)scroll_y+y)*scroll_width)*3))+2];
-			*/
 			color.r = scroll_buf[((int)scroll_x+x+((int)scroll_y+y)*scroll_width)*3+0];
 			color.g = scroll_buf[((int)scroll_x+x+((int)scroll_y+y)*scroll_width)*3+1];
 			color.b = scroll_buf[((int)scroll_x+x+((int)scroll_y+y)*scroll_width)*3+2];
@@ -920,103 +917,46 @@ void capture_keys(struct razer_keys *keys,SDL_Renderer *renderer,SDL_Window *win
 		last_event_count = ev_count;
 	}
 }
+*/
+
+int daemonize()
+{
+	pid_t pid = 0;
+	pid_t sid = 0;
+	pid = fork();
+	if(pid<0)
+	{
+		printf("razer_bcd: fork failed\n");
+		exit(1);
+	}
+	if(pid)
+	{
+		#ifdef USE_DEBUGGING
+			printf("killing razer_bcd parent process\n");
+		#endif
+		exit(0);
+	}
+	umask(0);
+	sid = setsid();
+	if(sid < 0)
+		exit(1);
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
+	return(1);
+}
 
 
 int main(int argc,char *argv[])
 {
 
-	struct razer_daemon daemon;
-
-	razor_open(&daemon);
-
-
-   	SDL_Init(SDL_INIT_VIDEO);      
-	SDL_Window *sdl_window;
-	SDL_Renderer *sdl_renderer;
-	SDL_CreateWindowAndRenderer(22*32, 6*32, SDL_WINDOW_RESIZABLE, &sdl_window, &sdl_renderer);
-	SDL_SetWindowTitle(sdl_window,"Razer Chroma Setup/Debug");
-	SDL_SetRenderDrawColor(sdl_renderer, 0, 0, 0, 255);
-	SDL_RenderClear(sdl_renderer);
-	SDL_RenderPresent(sdl_renderer);
-	SDL_Texture *sdl_texture = SDL_CreateTexture(sdl_renderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STREAMING,22,6);
-	load_icons(sdl_renderer,"icons",sdl_icons);
-
-
-
-	printf("setting custom mode\n");
-	//FILE *mode = fopen("/sys/bus")
-	char *device_path = get_device_path();
-	char *custom_path_name = "/mode_custom";
-	custom_filename = (char*)malloc(strlen(device_path)+strlen(custom_path_name)+1);
-	memset(custom_filename,0,strlen(device_path)+strlen(custom_path_name)+1);
-	memcpy(custom_filename,device_path,strlen(device_path));
-	memcpy(custom_filename+strlen(device_path),custom_path_name,strlen(custom_path_name));
-	char *key_path_name = "/set_key_row";
-	key_filename = (char*)malloc(strlen(device_path)+strlen(key_path_name)+1);
-	memset(key_filename,0,strlen(device_path)+strlen(key_path_name)+1);
-	memcpy(key_filename,device_path,strlen(device_path));
-	memcpy(key_filename+strlen(device_path),key_path_name,strlen(key_path_name));
-    set_mode_custom();
-
-    //FILE *scroll_pic = fopen("test3b.rgb","rb");
-    //FILE *scroll_pic = fopen("glare.rgb","rb");
-    //FILE *scroll_pic = fopen("rainbow.rgb","rb");
-    FILE *scroll_pic = fopen("fractal.rgb","rb");
-    //FILE *scroll_pic = fopen("blackhole.rgb","rb");
-    fseek(scroll_pic,0,SEEK_END);
-    long scroll_pic_size = ftell(scroll_pic);
-    fseek(scroll_pic,0,SEEK_SET);
-    scroll_buf = (unsigned char*)malloc(scroll_pic_size);
-    fread(scroll_buf,scroll_pic_size,1,scroll_pic);
-    //scroll_width = 2752;
-    //scroll_height = 1836;
-    //scroll_width = 580;
-    //scroll_height = 388;
-    //scroll_width = 380;
-    //scroll_height = 400;
-    //scroll_width = 406;
-    //scroll_height = 405;
-    //scroll_width = 471;
-    //scroll_height = 629;
-
-    //glare
-    //scroll_width = 1920;
-    //scroll_height = 1200;
-    //rainbow
-    scroll_width = 2560;
-    scroll_height = 1600;
-    //fractal
-    scroll_width = 1920;
-    scroll_height = 1200;
-    //blackhole
-    //scroll_width = 1600;
-    //scroll_height = 1200;
-
-    scroll_y=0;
-    scroll_x=0;
-    scroll_dir_y=0.5f;
-    scroll_dir_x=0.5f;
-    fclose(scroll_pic);
-
-	struct razer_keys keys;
-	memset(&keys.heatmap,0,sizeof(long)*22*6);
-	memset(&keys.rows,0,sizeof(struct razer_rgb_row)*6);
-	keys.update_mask = 63;
-	int i;
-	for(i = 0; i < 6; ++i)
-	{
-		keys.rows[i].row_index = i;
-	}
-	clear_all(&keys);
-	update_keys(&keys);
-	capture_keys(&keys,sdl_renderer,sdl_window,sdl_texture);
-	//test_effect4(&keys);
-	free(custom_filename);
-	free(key_filename);
-	free(device_path);
-	free(scroll_buf);
-
-
-  	SDL_DestroyWindow(sdl_window);
-    SDL_Quit();
+	struct razer_daemon *daemon=NULL;
+	daemon_open(&daemon);
+    razer_set_custom_mode(daemon->chroma);
+	clear_all(daemon->chroma->keys);
+	razer_update_keys(daemon->chroma,daemon->chroma->keys);
+	//capture_keys(&keys,sdl_renderer,sdl_window,sdl_texture);
+	daemonize();
+	test_effect4(daemon->chroma,daemon->chroma->keys);
+    daemon_close(&daemon);
 }

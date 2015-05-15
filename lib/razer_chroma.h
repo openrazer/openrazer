@@ -29,7 +29,6 @@
 #define RAZER_ROW_LENGTH 22
 #define RAZER_ROWS_NUM 6
 
-const char *sys_hid_devices_path = "/sys/bus/hid/devices/";
 
 struct razer_pos
 {
@@ -77,6 +76,26 @@ struct razer_keys_set
 	unsigned char *keys;/*buffer to keycodes?ascii? */
 };
 
+struct razer_chroma
+{
+	char *device_path;
+	char *update_keys_filename;
+	char *custom_mode_filename;
+	FILE *custom_mode_file;
+	FILE *update_keys_file;
+	SDL_Texture *sdl_icons[32];
+	struct razer_keys *keys;
+};
+
+int razer_open(struct razer_chroma *chroma);
+void razer_close(struct razer_chroma *chroma);
+
+void razer_set_custom_mode(struct razer_chroma *chroma);
+void razer_update_keys(struct razer_chroma *chroma,struct razer_keys *keys);
+char *razer_get_device_path();
+
+
+
 void release_locks(struct razer_keys_locks *locks);
 float hue2rgb(float p,float q,float t);
 void hsl2rgb(struct razer_hsl *hsl,struct razer_rgb *rgb);
@@ -87,19 +106,11 @@ void rgb_mix(struct razer_rgb *dst,struct razer_rgb *src,float factor);
 
 
 
-int razer_chroma_open();
-int razer_chroma_close();
 
-
-char *key_filename = NULL;
-char *custom_filename = NULL;
-char *get_device_path();
 
 void convert_keycode_to_pos(int keycode,struct razer_pos *pos);
 void convert_pos_to_keycode(struct razer_pos *pos,int *keycode);
 void convert_ascii_to_pos(unsigned char letter,struct razer_pos *pos);
-void set_mode_custom(void);
-void update_keys(struct razer_keys *keys);
 void set_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color);
 void add_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color);
 void sub_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color);
@@ -114,7 +125,6 @@ void draw_circle(struct razer_keys *keys,struct razer_pos *pos,int radius,struct
 void draw_ring(struct razer_keys *keys,struct razer_pos *pos,int radius,struct razer_rgb *color);
 
 
-SDL_Texture *sdl_icons[32];
 
 
 void update_sdl(struct razer_keys *keys,SDL_Renderer *sdl,SDL_Window *window,SDL_Texture *tex);

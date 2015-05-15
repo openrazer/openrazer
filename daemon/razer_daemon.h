@@ -1,7 +1,15 @@
 #ifndef _RAZER_DAEMON_H_
 #define _RAZER_DAEMON_H_
 
-#include "razer_chroma.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <string.h>
+
+#include "../lib/razer_chroma.h"
 
 
 #define RAZER_MAX_EFFECTS 200
@@ -32,7 +40,8 @@ struct razer_effect
 
 struct razer_daemon 
 {
-	struct razer_keys *keys;
+	struct razer_chroma *chroma;
+	//struct razer_keys *keys;
 	int effects_num;
 	struct razer_effect *effects[RAZER_MAX_EFFECTS];
 };
