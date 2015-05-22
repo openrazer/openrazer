@@ -71,6 +71,7 @@ int razer_send_report(struct usb_device *usb_dev,void const *data)
 			USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT,
 			report_id,
 			index, buf, size, USB_CTRL_SET_TIMEOUT);
+    usleep_range(RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US,RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
 	kfree(buf);
 	return ((len < 0) ? len : ((len != size) ? -EIO : 0));
 }
@@ -108,7 +109,9 @@ int razer_set_wave_mode(struct usb_device *usb_dev,unsigned char direction)
     report.command_parameters[0] = direction;/*direction 2=left / 1=right*/
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev,&report);
-    msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //mdelay(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //usleep_range(300,600);
     return retval;
 }
 
@@ -123,7 +126,9 @@ int razer_set_none_mode(struct usb_device *usb_dev)
     //report.command_parameters[0] = 0x01; /*profile index? active ?*/
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev,&report);
-    msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //mdelay(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //usleep_range(300,600);
     return retval;
 }
 
@@ -141,7 +146,9 @@ int razer_set_reactive_mode(struct usb_device *usb_dev,struct razer_rgb *color)
     report.command_parameters[3] = color->b;
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev,&report);
-    msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //mdelay(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //usleep_range(300,600);
     return retval;
 }
 
@@ -162,7 +169,9 @@ int razer_set_breath_mode(struct usb_device *usb_dev,struct razer_rgb *first_col
     report.command_parameters[6] = second_color->b;
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev,&report);
-    msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //mdelay(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //usleep_range(300,600);
     return retval;
 }
 
@@ -176,7 +185,9 @@ int razer_set_spectrum_mode(struct usb_device *usb_dev)
     report.sub_command = RAZER_BLACKWIDOW_CHROMA_EFFECT_SPECTRUM;/*spectrum mode id*/
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev,&report);
-    msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //mdelay(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //usleep_range(300,600);
     return retval;
 }
 
@@ -191,7 +202,9 @@ int razer_set_custom_mode(struct usb_device *usb_dev)
     report.command_parameters[0] = 0x01; /*profile index? active ?*/
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev,&report);
-    msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //mdelay(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //usleep_range(300,600);
     return retval;
 }
 
@@ -208,7 +221,9 @@ int razer_set_static_mode(struct usb_device *usb_dev,struct razer_rgb *color)
     report.command_parameters[2] = color->b;
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev,&report);
-    msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //mdelay(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //usleep_range(300,600);
     return retval;
 }
 
@@ -223,7 +238,9 @@ int razer_temp_clear_row(struct usb_device *usb_dev,unsigned char row_index)
     report.command_parameters[0] = row_index; /*line number starting from top*/
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev,&report);
-    msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //mdelay(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //usleep_range(300,600);
     return retval;
 }
 
@@ -248,7 +265,9 @@ int razer_set_key_row(struct usb_device *usb_dev,unsigned char row_index,struct 
     memcpy(&report.command_parameters[3],row_cols,sizeof(struct razer_row_rgb));
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev,&report);
-    msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //mdelay(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //usleep_range(300,600);
     return retval;
 }
 
@@ -264,7 +283,9 @@ int razer_reset(struct usb_device *usb_dev)
     report.command_parameters[1] = 0;/*unknown*/
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev,&report);
-    msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //mdelay(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //usleep_range(300,600);
     return retval;
 }
 
@@ -280,7 +301,9 @@ int razer_set_brightness(struct usb_device *usb_dev,unsigned char brightness)
     report.command_parameters[1] = brightness;
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev,&report);
-    msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //mdelay(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //usleep_range(300,600);
     return retval;
 }
 
@@ -296,7 +319,9 @@ int razer_activate_macro_keys(struct usb_device *usb_dev)
     report.sub_command = 0x02;/*unknown*/
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev,&report);
-    msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //msleep(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //mdelay(RAZER_BLACKWIDOW_CHROMA_WAIT_MS);
+    //usleep_range(300,600);
     return retval;
 }
 
@@ -626,18 +651,18 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 
 
 
-static DEVICE_ATTR(mode_wave, S_IRUGO | S_IWUSR, razer_attr_read_mode_wave, razer_attr_write_mode_wave);
-static DEVICE_ATTR(mode_spectrum, S_IRUGO | S_IWUSR, razer_attr_read_mode_spectrum, razer_attr_write_mode_spectrum);
-static DEVICE_ATTR(mode_none, S_IRUGO | S_IWUSR, razer_attr_read_mode_none, razer_attr_write_mode_none);
-static DEVICE_ATTR(mode_reactive, S_IRUGO | S_IWUSR, razer_attr_read_mode_reactive, razer_attr_write_mode_reactive);
-static DEVICE_ATTR(mode_breath, S_IRUGO | S_IWUSR, razer_attr_read_mode_breath, razer_attr_write_mode_breath);
-static DEVICE_ATTR(mode_custom, S_IRUGO | S_IWUSR, razer_attr_read_mode_custom, razer_attr_write_mode_custom);
-static DEVICE_ATTR(mode_static, S_IRUGO | S_IWUSR, razer_attr_read_mode_static, razer_attr_write_mode_static);
-static DEVICE_ATTR(temp_clear_row, S_IRUGO | S_IWUSR, razer_attr_read_temp_clear_row, razer_attr_write_temp_clear_row);
-static DEVICE_ATTR(set_key_row, S_IRUGO | S_IWUSR, razer_attr_read_set_key_row, razer_attr_write_set_key_row);
-static DEVICE_ATTR(reset, S_IRUGO | S_IWUSR, razer_attr_read_reset, razer_attr_write_reset);
-static DEVICE_ATTR(macro_keys, S_IRUGO | S_IWUSR, razer_attr_read_macro_keys, razer_attr_write_macro_keys);
-static DEVICE_ATTR(set_brightness, S_IRUGO | S_IWUSR, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
+static DEVICE_ATTR(mode_wave, S_IRUGO | S_IWUSR | S_IWGRP | S_IWOTH, razer_attr_read_mode_wave, razer_attr_write_mode_wave);
+static DEVICE_ATTR(mode_spectrum, S_IRUGO | S_IWUSR | S_IWGRP | S_IWOTH, razer_attr_read_mode_spectrum, razer_attr_write_mode_spectrum);
+static DEVICE_ATTR(mode_none, S_IRUGO | S_IWUSR | S_IWGRP | S_IWOTH, razer_attr_read_mode_none, razer_attr_write_mode_none);
+static DEVICE_ATTR(mode_reactive, S_IRUGO | S_IWUSR | S_IWGRP | S_IWOTH, razer_attr_read_mode_reactive, razer_attr_write_mode_reactive);
+static DEVICE_ATTR(mode_breath, S_IRUGO | S_IWUSR | S_IWGRP | S_IWOTH, razer_attr_read_mode_breath, razer_attr_write_mode_breath);
+static DEVICE_ATTR(mode_custom, S_IRUGO | S_IWUSR | S_IWGRP | S_IWOTH, razer_attr_read_mode_custom, razer_attr_write_mode_custom);
+static DEVICE_ATTR(mode_static, S_IRUGO | S_IWUSR | S_IWGRP | S_IWOTH, razer_attr_read_mode_static, razer_attr_write_mode_static);
+static DEVICE_ATTR(temp_clear_row, S_IRUGO | S_IWUSR | S_IWGRP | S_IWOTH, razer_attr_read_temp_clear_row, razer_attr_write_temp_clear_row);
+static DEVICE_ATTR(set_key_row, S_IRUGO | S_IWUSR | S_IWGRP | S_IWOTH, razer_attr_read_set_key_row, razer_attr_write_set_key_row);
+static DEVICE_ATTR(reset, S_IRUGO | S_IWUSR | S_IWGRP | S_IWOTH, razer_attr_read_reset, razer_attr_write_reset);
+static DEVICE_ATTR(macro_keys, S_IRUGO | S_IWUSR | S_IWGRP | S_IWOTH, razer_attr_read_macro_keys, razer_attr_write_macro_keys);
+static DEVICE_ATTR(set_brightness, S_IRUGO | S_IWUSR | S_IWGRP | S_IWOTH, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
 
 
 

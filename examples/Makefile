@@ -13,19 +13,22 @@ all: examples_debug examples
 
 examples_debug: 
 	@echo "====================================================="
-	@echo "::::::::::::::::\033[32m COMPILING example 1 [DEBUG]\033[0m ::::::::::::::"
+	@echo "::::::::::::::::\033[32m COMPILING examples [DEBUG]\033[0m ::::::::::::::"
 	@echo "====================================================="
 	$(CC) example1.c $(DEBUG_CFLAGS) $(LIBS) ../lib/librazer_chroma.da -o example1_debug $<
+	$(CC) input_example.c $(DEBUG_CFLAGS) $(LIBS) ../lib/librazer_chroma.da -o input_example_debug $<
 
 examples: 
 	@echo "====================================================="
-	@echo "::::::::::::::::\033[32m COMPILING example 1\033[0m ::::::::::::::"
+	@echo "::::::::::::::::\033[32m COMPILING examples\033[0m ::::::::::::::"
 	@echo "====================================================="
 	$(CC) example1.c $(CFLAGS) $(LIBS) ../lib/librazer_chroma.a -o example1 $<
 	@strip example1
+	$(CC) input_example.c $(CFLAGS) $(LIBS) ../lib/librazer_chroma.a -o input_example $<
+	@strip input_example
 
 clean: 
-	rm -f *.do *.o example1 example1_debug
+	rm -f *.do *.o input_example input_example_debug example1 example1_debug
 
 indent:	
 	indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 *.c *.h

@@ -13,6 +13,7 @@
 #include <linux/input.h>
 
 
+
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_audio.h"
 #include "SDL2/SDL_opengl.h"
@@ -28,6 +29,8 @@
 
 #define RAZER_ROW_LENGTH 22
 #define RAZER_ROWS_NUM 6
+
+
 
 
 struct razer_pos
@@ -63,6 +66,7 @@ struct razer_keys
 	int update_mask;
 	long heatmap[RAZER_ROWS_NUM][RAZER_ROW_LENGTH];
 	int lockmap[RAZER_ROWS_NUM][RAZER_ROW_LENGTH];//sets to effect id if locked by effect
+	int pushedmap[RAZER_ROWS_NUM][RAZER_ROW_LENGTH];//all keys pressed will be set 1 (needs razer_update calls to work)
 };
 
 struct razer_keys_locks
@@ -76,6 +80,11 @@ struct razer_keys_set
 	unsigned char *keys;/*buffer to keycodes?ascii? */
 };
 
+
+struct razer_chroma;
+
+typedef int (*razer_input_handler)(struct razer_chroma *chroma,int keycode,int pressed);
+
 struct razer_chroma
 {
 	char *device_path;
@@ -83,12 +92,26 @@ struct razer_chroma
 	char *custom_mode_filename;
 	FILE *custom_mode_file;
 	FILE *update_keys_file;
-	SDL_Texture *sdl_icons[32];
+	int input_file;
+	long last_update_ms;
+	long update_ms;
+	long last_key_event_ms;
+	float update_dt;
+	float key_event_dt;
 	struct razer_keys *keys;
+	razer_input_handler input_handler;
+	struct razer_pos last_key_pos;//TODO move to sub struct pointer to pointers
+	struct razer_pos key_pos;//or remove
 };
+
+
 
 int razer_open(struct razer_chroma *chroma);
 void razer_close(struct razer_chroma *chroma);
+void razer_update(struct razer_chroma *chroma);
+void razer_set_input_handler(struct razer_chroma *chroma,razer_input_handler handler);
+unsigned long razer_get_ticks();
+
 
 void razer_set_custom_mode(struct razer_chroma *chroma);
 void razer_update_keys(struct razer_chroma *chroma,struct razer_keys *keys);
@@ -120,15 +143,10 @@ void sub_keys_row(struct razer_keys *keys,int row_index,struct razer_rgb *color)
 void set_key(struct razer_keys *keys,int column_index,int row_index,struct razer_rgb *color);
 void set_key_pos(struct razer_keys *keys,struct razer_pos *pos,struct razer_rgb *color);
 void clear_all(struct razer_keys *keys);
+void set_all(struct razer_keys *keys,struct razer_rgb *color);
 void sub_heatmap(struct razer_keys *keys,int heatmap_reduction_amount);
 void draw_circle(struct razer_keys *keys,struct razer_pos *pos,int radius,struct razer_rgb *color);
-void draw_ring(struct razer_keys *keys,struct razer_pos *pos,int radius,struct razer_rgb *color);
-
-
-
-
-void update_sdl(struct razer_keys *keys,SDL_Renderer *sdl,SDL_Window *window,SDL_Texture *tex);
-void load_icons(SDL_Renderer *renderer,char *path,SDL_Texture **icons);
+void draw_ring(struct razer_keys *keys,struct razer_pos *pos,struct razer_rgb *color);
 
 
 //list of last keystrokes
@@ -139,6 +157,6 @@ double rad2deg(double rad);
 double pos_angle_radians(struct razer_pos *src,struct razer_pos *dst);
 
 
-void capture_keys(struct razer_keys *keys,SDL_Renderer *renderer,SDL_Window *window,SDL_Texture *tex);
+//void capture_keys(struct razer_keys *keys,SDL_Renderer *renderer,SDL_Window *window,SDL_Texture *tex);
 
 

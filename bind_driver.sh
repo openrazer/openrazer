@@ -1,8 +1,6 @@
 #!/bin/bash
 
 
-
-
 RAZER_BLACKWIDOW_CHROMA_DEVICES=`ls /sys/bus/hid/devices/ | grep "1532:0203"`
 for DEV in $RAZER_BLACKWIDOW_CHROMA_DEVICES
 do 
@@ -13,13 +11,12 @@ do
 			MOUSE=`ls /sys/bus/hid/devices/$DEV/input/$INPUT_DEV/ | grep "mouse"`
 			if [ $MOUSE ]; then
 				echo "Found Razer LED Device : $DEV"
-				echo -n "$DEV" > /sys/bus/hid/drivers/razerkbd/unbind 2> /dev/null
+				echo -n "$DEV" > /sys/bus/hid/drivers/hid-generic/unbind 2> /dev/null
 				echo $?
-				echo -n "$DEV" > /sys/bus/hid/drivers/hid-generic/bind 2> /dev/null
+				echo -n "$DEV" > /sys/bus/hid/drivers/razerkbd/bind 2> /dev/null
 				echo $?
 			fi
 		done
 	fi
 done
 
-rmmod razerkbd

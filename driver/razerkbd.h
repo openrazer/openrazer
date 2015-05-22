@@ -1,6 +1,3 @@
-#ifndef __HID_RAZER_KEYBOARD_BLACKWIDOW_CHROMA_H
-#define __HID_RAZER_KEYBOARD_BLACKWIDOW_CHROMA_H
-
 /*
  * Copyright (c) 2015 Tim Theede <pez2001@voyagerproject.de>
  */
@@ -11,6 +8,10 @@
  * Software Foundation; either version 2 of the License, or (at your option)
  * any later version.
  */
+
+#ifndef __HID_RAZER_KEYBOARD_BLACKWIDOW_CHROMA_H
+#define __HID_RAZER_KEYBOARD_BLACKWIDOW_CHROMA_H
+
 #ifndef USB_VENDOR_ID_RAZER
  #define USB_VENDOR_ID_RAZER 0x1532
 #endif
@@ -50,6 +51,8 @@
 
 
 #define RAZER_BLACKWIDOW_CHROMA_WAIT_MS 1
+#define RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US 600
+#define RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US 800
 
 
 
@@ -72,6 +75,8 @@ struct razer_kbd_device {
 	struct razer_row_rgb matrix[RAZER_BLACKWIDOW_CHROMA_ROWS_NUM];
 	bool effect_submitted;
 };
+
+//TODO speed parameter ?
 
 struct razer_report {
 	unsigned char report_start_marker; /*0x0*/

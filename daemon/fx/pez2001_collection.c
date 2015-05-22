@@ -1,4 +1,4 @@
-#include "example1.h"
+#include "pez2001_collection.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
@@ -27,25 +27,9 @@ void effect(struct razer_chroma *chroma)
 		count+=count_dir;
 		if(count<=0 || count>=44)
 			count_dir=-count_dir;
-		usleep(60000);
+		usleep(60);
 	}
 }
 
 #pragma GCC diagnostic pop
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-int main(int argc,char *argv[])
-{
-	struct razer_chroma *chroma =(struct razer_chroma*)malloc(sizeof(struct razer_chroma));
- 	razer_open(chroma);
-    razer_set_custom_mode(chroma);
-	clear_all(chroma->keys);
-	razer_update_keys(chroma,chroma->keys);
-	effect(chroma);
- 	razer_close(chroma);
- 	free(chroma);
-}
-
-#pragma GCC diagnostic pop

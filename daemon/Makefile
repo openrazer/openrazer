@@ -1,19 +1,18 @@
-LIBS = -lm -lSDL2 -lSDL2_image
-MAJOR_VERSION = 0
-MINOR_VERSION = 1
-CSTD = -std=c99
+LIBS=`pkg-config --libs dbus-1` -lm -lSDL2 -lSDL2_image
+MAJOR_VERSION=0
+MINOR_VERSION=1
+CSTD=-std=c99
 CC=gcc
-CFLAGS= -Wall -Wextra -W -w -Os $(CSTD) -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
-DEBUG_CFLAGS = -Wall -Wextra -Wformat=0 -pedantic -fbounds-check -Wuninitialized -O0 -g3 $(CSTD) -DUSE_DEBUGGING -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
+CFLAGS=`pkg-config --cflags dbus-1` -Wall -Wextra -W -w -Os $(CSTD) -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
+DEBUG_CFLAGS=`pkg-config --cflags dbus-1` -Wall -Wextra -Wformat=0 -pedantic -fbounds-check -Wuninitialized -O0 -g3 $(CSTD) -DUSE_DEBUGGING -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
 #-pedantic -fbounds-check -Wuninitialized -O0 -g3 -Wstrict-prototypes
 
-RAZER_CHROMA_DAEMON_FILES = razer_daemon.c
-RAZER_CHROMA_DAEMON_BINS = razer_daemon.a
-RAZER_CHROMA_DAEMON_INCLUDE_FILES = razer_daemon.h
-RAZER_CHROMA_DAEMON_OBJ = razer_daemon.o
-RAZER_CHROMA_DAEMON_DEBUG_OBJ = razer_daemon.do
+RAZER_CHROMA_DAEMON_FILES=razer_daemon.c
+RAZER_CHROMA_DAEMON_INCLUDE_FILES=razer_daemon.h
+RAZER_CHROMA_DAEMON_OBJ=razer_daemon.o
+RAZER_CHROMA_DAEMON_DEBUG_OBJ=razer_daemon.do
 
-all: daemon_shared daemon_static daemon_debug
+all: daemon_shared daemon_static daemon_debug daemon_fx
 
 daemon_debug: 
 	@echo "====================================================="
@@ -36,6 +35,12 @@ daemon_shared:
 	$(CC) razer_daemon.c $(CFLAGS) $(LIBS) librazer_chroma.so -o razer_bcd $<
 	@strip razer_bcd
 
+daemon_fx: 
+	make -C fx all
+
+daemon_fx_clean: 
+	make -C fx clean 
+
 install:
 	@echo "====================================================="
 	@echo "::::::::::::::::\033[32m INSTALLING razer_bcd daemon\033[0m ::::::::::::::"
@@ -48,7 +53,7 @@ uninstall:
 	@echo "====================================================="
 	@rm /usr/sbin/razer_bcd
 
-clean: 
+clean: daemon_fx_clean
 	rm -f *.do *.o razer_bcd razer_bcd_debug_shared razer_bcd_debug_static razer_bcd_static
 
 indent:	
