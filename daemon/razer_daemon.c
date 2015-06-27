@@ -220,13 +220,21 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node","add_sub"))
 		return(0);
-	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.parameters","set"))
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.parameter","set"))
 		return(0);
-	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.parameters","get"))
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.parameter","get"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.parameters","list"))
 		return(0);
 	return(1);
+}
+
+int daemon_dbus_get_string_array_len(char **path)
+{
+	int i = 0;
+	while(path[i]!=NULL)
+		i++;
+	return(i);
 }
 
 
@@ -346,6 +354,164 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		free(rn_list_json);
 	}
 
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_node.parameters", "list")) 
+	{
+		char **path = NULL;
+		int rn_index = -1;
+		dbus_message_get_path_decomposed(msg,&path);
+		#ifdef USE_DEBUGGING
+			printf("dbus: method list render_nodes.parameters called for : %s\n",path[0]);
+		#endif
+		reply = dbus_message_new_method_return(msg);
+		dbus_message_iter_init_append(reply,&parameters);
+		if(path[0] != NULL)
+			rn_index = atoi(path[0]);
+		char *rn_list_json = str_CreateEmpty();
+		dbus_free_string_array(path);
+		if(rn_index>=0 && rn_index < daemon->fx_render_nodes_num)
+		{
+			struct razer_fx_render_node *render_node = daemon->fx_render_nodes[rn_index];
+			rn_list_json = str_CatFree(rn_list_json,"{\n");
+			rn_list_json = str_CatFree(rn_list_json," \"parameters_num\" : ");
+			char *rn_num_string = str_FromLong(render_node->effect->parameters->num);
+			rn_list_json = str_CatFree(rn_list_json,rn_num_string);
+			rn_list_json = str_CatFree(rn_list_json," ,\n");
+			free(rn_num_string);
+			rn_list_json = str_CatFree(rn_list_json," \"parameters_list\": [\n");
+			for(int i=0;i<render_node->effect->parameters->num;i++)
+			{
+				char *rn_json = daemon_parameter_to_json(render_node->effect->parameters->items[i]);
+				rn_list_json = str_CatFree(rn_list_json,rn_json);
+				free(rn_json);
+			}
+			rn_list_json = str_CatFree(rn_list_json,"]}\n");
+		}
+		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&rn_list_json)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+		free(rn_list_json);
+	}
+
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_node.parameter", "get")) //TODO address by id not by index
+	{
+		char **path = NULL;
+		int rn_index = -1;
+		int p_index = -1;
+		dbus_message_get_path_decomposed(msg,&path);
+		int path_len = daemon_dbus_get_string_array_len(path);
+		#ifdef USE_DEBUGGING
+			printf("dbus: method get render_nodes.parameter called for : %d\n",path_len);
+		#endif
+		reply = dbus_message_new_method_return(msg);
+		dbus_message_iter_init_append(reply,&parameters);
+		if(path_len == 2)
+		{
+			rn_index = atoi(path[0]);
+			p_index = atoi(path[1]);
+			#ifdef USE_DEBUGGING
+				printf("dbus: get parameter path : %d , %d\n",rn_index,p_index);
+				printf("dbus: get parameter max path render_node : %d\n",daemon->fx_render_nodes_num);
+				if(daemon->fx_render_nodes_num && rn_index>= 0 && rn_index < daemon->fx_render_nodes_num)
+					printf("dbus: get parameter max path render_node parameter: %d\n",daemon->fx_render_nodes[rn_index]->effect->parameters->num);
+			#endif
+		}
+		char *rn_list_json = str_CreateEmpty();
+		dbus_free_string_array(path);
+		if(daemon->fx_render_nodes_num && rn_index>=0 && rn_index < daemon->fx_render_nodes_num && daemon->fx_render_nodes[rn_index]->effect->parameters->num && p_index >= 0 && p_index < daemon->fx_render_nodes[rn_index]->effect->parameters->num)
+		{
+			struct razer_fx_render_node *render_node = daemon->fx_render_nodes[rn_index];
+			struct razer_parameter *parameter = render_node->effect->parameters->items[p_index];
+			char *parameter_json = daemon_parameter_to_json(parameter);
+			rn_list_json = str_CatFree(rn_list_json,parameter_json);
+			free(parameter_json);
+		}
+		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&rn_list_json)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+		free(rn_list_json);
+	}
+
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_node.parameter", "set")) //TODO address by id not index
+	{
+		char **path = NULL;
+		int rn_index = -1;
+		int p_index = -1;
+		dbus_message_get_path_decomposed(msg,&path);
+		int path_len = daemon_dbus_get_string_array_len(path);
+		#ifdef USE_DEBUGGING
+			printf("dbus: method set render_nodes.parameter called for : %d\n",path_len);
+		#endif
+		reply = dbus_message_new_method_return(msg);
+		dbus_message_iter_init_append(reply,&parameters);
+		if(path_len == 2)
+		{
+			rn_index = atoi(path[0]);
+			p_index = atoi(path[1]);
+			#ifdef USE_DEBUGGING
+				printf("dbus: set parameter path : %d , %d\n",rn_index,p_index);
+				printf("dbus: set parameter max path render_node : %d\n",daemon->fx_render_nodes_num);
+				if(daemon->fx_render_nodes_num && rn_index>= 0 && rn_index < daemon->fx_render_nodes_num)
+					printf("dbus: set parameter max path render_node parameter: %d\n",daemon->fx_render_nodes[rn_index]->effect->parameters->num);
+			#endif
+		}
+		dbus_free_string_array(path);
+		if(dbus_message_iter_init(msg, &parameters) && daemon->fx_render_nodes_num && rn_index>=0 && rn_index < daemon->fx_render_nodes_num && daemon->fx_render_nodes[rn_index]->effect->parameters->num && p_index >= 0 && p_index < daemon->fx_render_nodes[rn_index]->effect->parameters->num)
+		{
+			struct razer_fx_render_node *render_node = daemon->fx_render_nodes[rn_index];
+			struct razer_parameter *parameter = render_node->effect->parameters->items[p_index];
+			switch(parameter->type)
+			{
+				case RAZER_PARAMETER_TYPE_STRING:
+					if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_STRING)
+					{
+						char *fxname;
+						dbus_message_iter_get_basic(&parameters,&fxname);
+						printf("dbus: string parameter:%s\n",fxname);
+					}
+					break;
+				case RAZER_PARAMETER_TYPE_FLOAT:
+					if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_DOUBLE)
+					{
+						double value = 0;
+						dbus_message_iter_get_basic(&parameters,&value);
+						#ifdef USE_DEBUGGING
+							printf("dbus: float parameter:%d\n",value);
+						#endif
+						daemon_set_parameter_float(parameter,value);
+					}
+					break;
+				case RAZER_PARAMETER_TYPE_INT:
+					if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+					{
+						long value = 0;
+						dbus_message_iter_get_basic(&parameters,&value);
+						#ifdef USE_DEBUGGING
+							printf("dbus: int parameter:%d\n",value);
+						#endif
+						daemon_set_parameter_int(parameter,value);
+					}
+					break;
+				case RAZER_PARAMETER_TYPE_RGB:
+					break;
+				case RAZER_PARAMETER_TYPE_RENDER_NODE:
+					break;
+			}
+
+		}
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+	}
+
+
+
 
     if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.fx", "set")) 
 	{
@@ -376,10 +542,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		reply = dbus_message_new_method_return(msg);
  		dbus_uint32_t serial = 0;
  		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
- 		{
-			printf(stderr, "Out Of Memory!\n");
-			exit(1);
-		}
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
 		dbus_connection_flush(daemon->dbus);
 	}
 
@@ -420,16 +583,10 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		</interface>\n\
 		</node>\n";
 		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&xml_data)) 
-		{
-			printf("dbus: Out Of Memory!\n");
-			exit(1);
-		} 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
  		dbus_uint32_t serial = 0;
  		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
- 		{
-			printf(stderr, "Out Of Memory!\n");
-			exit(1);
-		}
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
 		dbus_connection_flush(daemon->dbus);
 	}
 
@@ -550,12 +707,13 @@ struct razer_daemon *daemon_open(void)
 	if(lib)
 		daemon_register_lib(daemon,lib);
 
-	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,4),input_frame,output_frame,"First Test Render Node");
+	//daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,1),input_frame,output_frame,"First Test Render Node");
+	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,1),input_frame,daemon->frame_buffer,"First Test Render Node");
 	struct razer_fx_render_node *sub = daemon_create_render_node(daemon,daemon_get_effect(daemon,2),sub_input_frame,sub_output_frame,"Sub Test Render Node");
 	struct razer_fx_render_node *sub2= daemon_create_render_node(daemon,daemon_get_effect(daemon,7),sub2_input_frame,daemon->frame_buffer,"2nd Level Sub Test Render Node");
-	daemon_render_node_add_sub(daemon->render_node,sub);
-	daemon_render_node_add_sub(sub,sub2);
-	daemon->render_node->opacity = 0.5f;
+	//daemon_render_node_add_sub(daemon->render_node,sub);
+	//daemon_render_node_add_sub(sub,sub2);
+	daemon->render_node->opacity = 0.0f;
 	sub->opacity = 0.5f;
 	sub2->opacity = 0.5f;
 	//daemon_get_effect(daemon,1)->parameters->items[0]->value = (int)88;
