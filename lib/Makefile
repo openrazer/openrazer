@@ -19,14 +19,12 @@ RAZER_CHROMA_DEBUG_OBJ=razer_chroma.do
 all: library library_debug
 
 library_debug: razer_chroma_static_debug razer_chroma_shared_debug
-	@echo "====================================================="
-	@echo "::::::::::::::::\033[32m COMPILING librazer_chroma.so [DEBUG]\033[0m ::::::::::::::"
-	@echo "====================================================="
+	@echo "::\033[32m COMPILING librazer_chroma.so [DEBUG]\033[0m"
+	@echo "========================================"
 
 library: razer_chroma_static razer_chroma_shared
-	@echo "====================================================="
-	@echo "::::::::::::::::\033[32m COMPILING librazer_chroma.so\033[0m ::::::::::::::"
-	@echo "====================================================="
+	@echo "::\033[32m COMPILING librazer_chroma.so\033[0m"
+	@echo "================================"
 
 razer_chroma_static: $(RAZER_CHROMA_OBJ)
 	$(AR) -rs librazer_chroma.a $(RAZER_CHROMA_OBJ)
@@ -48,15 +46,13 @@ razer_chroma_shared_debug: $(RAZER_CHROMA_DEBUG_OBJ)
 	$(CC) $(DEBUG_CFLAGS) -c -o $@ $<
 
 install:
-	@echo "====================================================="
-	@echo "::::::::::::::::\033[32m INSTALLING librazer_chroma.so\033[0m ::::::::::::::"
-	@echo "====================================================="
+	@echo "::\033[32m INSTALLING librazer_chroma.so\033[0m"
+	@echo "===================================="
 	@cp librazer_chroma.so /usr/lib
 
 uninstall:
-	@echo "====================================================="
-	@echo ":::::::::::::::::\033[32m REMOVING librazer_chroma.so\033[0m :::::::::::::::"
-	@echo "====================================================="
+	@echo "::\033[32m REMOVING librazer_chroma.so\033[0m"
+	@echo "===================================="
 	@rm /usr/lib/librazer_chroma.so
 
 clean: 

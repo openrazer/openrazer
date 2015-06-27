@@ -1,10 +1,22 @@
-LIBS=`pkg-config --libs dbus-1` -lm -lSDL2 -lSDL2_image
+LIBS=-lm -ldl
+CFLAGS=
+DEBUG_CFLAGS=
+LIBDBUS = $(shell echo \\\#include \<dbus/dbus.h\>\\n int main\(int c,char**v\){} | gcc `pkg-config --libs dbus-1` `pkg-config --cflags dbus-1`  -xc -o a.out - 2>/dev/null ;echo $$? ;rm a.out 2>/dev/null )
+
+ifeq ($(LIBDBUS), 0)
+	LIBS+= `pkg-config --libs dbus-1` 
+	CFLAGS+= `pkg-config --cflags dbus-1` -DUSE_DBUS
+	DEBUG_CFLAGS+= `pkg-config --cflags dbus-1` -DUSE_DBUS
+endif
+
+#-lSDL2 -lSDL2_image
 MAJOR_VERSION=0
-MINOR_VERSION=1
+MINOR_VERSION=2
 CSTD=-std=c99
 CC=gcc
-CFLAGS=`pkg-config --cflags dbus-1` -Wall -Wextra -W -w -Os $(CSTD) -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
-DEBUG_CFLAGS=`pkg-config --cflags dbus-1` -Wall -Wextra -Wformat=0 -pedantic -fbounds-check -Wuninitialized -O0 -g3 $(CSTD) -DUSE_DEBUGGING -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
+CFLAGS+= -Wl,-E -Wall -Wextra -W -w -Os $(CSTD) -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
+DEBUG_CFLAGS+= -Wl,-E -Wall -Wextra -Wformat=0 -pedantic -fbounds-check -Wuninitialized -O0 -g3 $(CSTD) -DUSE_DEBUGGING -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
+
 #-pedantic -fbounds-check -Wuninitialized -O0 -g3 -Wstrict-prototypes
 
 RAZER_CHROMA_DAEMON_FILES=razer_daemon.c
@@ -15,23 +27,20 @@ RAZER_CHROMA_DAEMON_DEBUG_OBJ=razer_daemon.do
 all: daemon_shared daemon_static daemon_debug daemon_fx
 
 daemon_debug: 
-	@echo "====================================================="
-	@echo "::::::::::::::::\033[32m COMPILING razer_bcd daemon [DEBUG]\033[0m ::::::::::::::"
-	@echo "====================================================="
+	@echo "::\033[32m COMPILING razer_bcd daemon [DEBUG]\033[0m"
+	@echo "======================================"
 	$(CC) razer_daemon.c $(DEBUG_CFLAGS) $(LIBS) librazer_chroma.da -o razer_bcd_debug_static $<
 	$(CC) razer_daemon.c $(DEBUG_CFLAGS) $(LIBS) librazer_chroma_debug.so -o razer_bcd_debug_shared $<
 
 daemon_static: 
-	@echo "====================================================="
-	@echo "::::::::::::::::\033[32m COMPILING razer_bcd daemon\033[0m ::::::::::::::"
-	@echo "====================================================="
+	@echo "::\033[32m COMPILING razer_bcd daemon\033[0m"
+	@echo "=============================="
 	$(CC) razer_daemon.c $(CFLAGS) $(LIBS) librazer_chroma.a -o razer_bcd_static $<
 	@strip razer_bcd_static
 
 daemon_shared: 
-	@echo "====================================================="
-	@echo "::::::::::::::::\033[32m COMPILING razer_bcd [SHARED]\033[0m ::::::::::::::"
-	@echo "====================================================="
+	@echo "::\033[32m COMPILING razer_bcd [SHARED]\033[0m"
+	@echo "================================"
 	$(CC) razer_daemon.c $(CFLAGS) $(LIBS) librazer_chroma.so -o razer_bcd $<
 	@strip razer_bcd
 
@@ -42,15 +51,13 @@ daemon_fx_clean:
 	make -C fx clean 
 
 install:
-	@echo "====================================================="
-	@echo "::::::::::::::::\033[32m INSTALLING razer_bcd daemon\033[0m ::::::::::::::"
-	@echo "====================================================="
+	@echo "::\033[32m INSTALLING razer_bcd daemon\033[0m"
+	@echo "======================================"
 	@cp razer_bcd /usr/sbin
 
 uninstall:
-	@echo "====================================================="
-	@echo ":::::::::::::::::\033[32m REMOVING razer_bcd daemon\033[0m :::::::::::::::"
-	@echo "====================================================="
+	@echo "::\033[32m REMOVING razer_bcd daemon\033[0m"
+	@echo "====================================="
 	@rm /usr/sbin/razer_bcd
 
 clean: daemon_fx_clean

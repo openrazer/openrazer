@@ -3,9 +3,8 @@ DRIVERDIR := $(shell pwd)/driver
 MODULEDIR=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
 
 all: librazer_chroma razer_daemon razer_examples
-	@echo "====================================================="
-	@echo "::::::::::::::::\033[32m COMPILING razer chroma kernel module\033[0m ::::::::::::::"
-	@echo "====================================================="
+	@echo "::\033[32m COMPILING razer chroma kernel module\033[0m"
+	@echo "========================================"
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules
 
 librazer_chroma: 
@@ -30,22 +29,21 @@ razer_examples_clean:
 install: all
 	make -C lib install
 	make -C daemon install
-	@echo "====================================================="
-	@echo "::::::::::::::::\033[32m INSTALLING razer chroma kernel module\033[0m ::::::::::::::"
+	@echo "::\033[32m INSTALLING razer chroma kernel module\033[0m"
 	@echo "====================================================="
 	cp $(DRIVERDIR)/razerkbd.ko $(MODULEDIR)
 	chown root:root $(MODULEDIR)/razerkbd.ko
 	depmod
-	@echo "====================================================="
-	@echo "::::::::::::::::\033[32m INSTALLING razer chroma udev rules\033[0m ::::::::::::::"
+	@echo "::\033[32m INSTALLING razer chroma udev rules\033[0m"
 	@echo "====================================================="
 	cp udev/95-razerkbd.rules /etc/udev/rules.d
 	chown root:root /etc/udev/rules.d/95-razerkbd.rules
-	@echo "====================================================="
-	@echo "::::::::::::::::\033[32m INSTALLING razer daemon init.d file\033[0m ::::::::::::::"
+	@echo "::\033[32m INSTALLING razer daemon init.d file\033[0m"
 	@echo "====================================================="
 	cp init.d/razer_bcd /etc/init.d
 	chown root:root /etc/init.d/razer_bcd
+	cp init.d/activate_driver /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
+	chown root:root /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
 	ln -fs ../init.d/razer_bcd /etc/rc2.d/S24razer_bcd
 	ln -fs ../init.d/razer_bcd /etc/rc3.d/S24razer_bcd
 	ln -fs ../init.d/razer_bcd /etc/rc4.d/S24razer_bcd
@@ -71,5 +69,5 @@ uninstall:
 
 clean: librazer_chroma_clean razer_daemon_clean razer_examples_clean
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) clean
-	rm daemon/librazer_chroma.a daemon/librazer_chroma.da daemon/librazer_chroma.so daemon/librazer_chroma_debug.so
+	rm -f daemon/librazer_chroma.a daemon/librazer_chroma.da daemon/librazer_chroma.so daemon/librazer_chroma_debug.so
 

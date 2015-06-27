@@ -7,6 +7,84 @@ const char *razer_sys_event_path = "/dev/input/by-id/usb-Razer_Razer_BlackWidow_
 const char *razer_custom_mode_pathname = "/mode_custom";
 const char *razer_update_keys_pathname = "/set_key_row";
 
+char *str_CreateEmpty(void)
+{
+    char *string = (char*)malloc(1);
+    string[0] = 0;
+    return(string);
+}
+
+char *str_Copy(char *src)
+{
+  if(src==NULL)
+  	return(str_CreateEmpty());
+  char *a = (char*)malloc(strlen(src)+1);
+  memcpy(a, src, strlen(src)+1);
+  return(a);
+}
+
+char *str_Cat(char *a,char *b)
+{
+  if(a == NULL && b != NULL)
+    return(str_Copy(b));
+  else
+    if(a != NULL && b == NULL)
+      return(str_Copy(a));
+  else
+    if(a == NULL && b == NULL)
+      return(str_CreateEmpty());
+  char *tmp = (char*)malloc(strlen(a) + strlen(b) + 1);
+  memcpy(tmp, a, strlen(a));
+  memcpy(tmp + strlen(a), b, strlen(b)+1);
+  return(tmp);
+}
+
+char *str_CatFree(char *a,char *b)
+{
+  if(a == NULL && b != NULL)
+    return(str_Copy(b));
+  else
+    if(a != NULL && b == NULL)
+      return(a);
+  else
+    if(a == NULL && b == NULL)
+      return(str_CreateEmpty());
+  char *tmp = (char*)malloc(strlen(a) + strlen(b) + 1);
+  memcpy(tmp, a, strlen(a));
+  memcpy(tmp + strlen(a), b, strlen(b)+1);
+  free(a);
+  return(tmp);
+}
+
+char *str_FromLong(long i)
+{
+  char *ret=NULL;
+  long len = snprintf(NULL,0,"%ld",i);
+  if(len)
+  {
+    ret = (char*)malloc(len+1);
+    snprintf(ret,len+1,"%ld",i);
+  }
+  else
+    ret=str_CreateEmpty();
+  return(ret);
+} 
+
+char *str_FromDouble(double d)
+{
+  char *ret=NULL;
+  long len = snprintf(NULL,0,"%f",d);
+  if(len)
+  {
+    ret = (char*)malloc(len+1);
+    snprintf(ret,len+1,"%f",d);
+  }
+  else
+    ret=str_CreateEmpty();
+  return(ret);
+} 
+
+
 int razer_open_custom_mode_file(struct razer_chroma *chroma)
 {
 	chroma->custom_mode_file=fopen(chroma->custom_mode_filename,"wb");
@@ -74,8 +152,6 @@ void razer_close_input_file(struct razer_chroma *chroma)
     chroma->input_file = 0;
 }
 
-
-
 void razer_init_keys(struct razer_keys *keys)
 {
 	memset(keys->heatmap,0,sizeof(long)*22*6);
@@ -85,6 +161,17 @@ void razer_init_keys(struct razer_keys *keys)
 	for(i = 0; i < 6; ++i)
 	{
 		keys->rows[i].row_index = i;
+	}
+}
+
+void razer_init_frame(struct razer_rgb_frame *frame)
+{
+	memset(frame->rows,0,sizeof(struct razer_rgb_row)*6);
+	frame->update_mask = 63;
+	int i;
+	for(i = 0; i < 6; ++i)
+	{
+		frame->rows[i].row_index = i;
 	}
 }
 
@@ -110,16 +197,14 @@ int razer_open(struct razer_chroma *chroma)
 
 	chroma->keys = (struct razer_keys*)malloc(sizeof(struct razer_keys));
 	razer_init_keys(chroma->keys);
+	chroma->custom_mode_filename = str_CreateEmpty();
+	chroma->custom_mode_filename = str_CatFree(chroma->custom_mode_filename,chroma->device_path);
+	chroma->custom_mode_filename = str_CatFree(chroma->custom_mode_filename,razer_custom_mode_pathname);
 
-	chroma->custom_mode_filename = (char*)malloc(strlen(chroma->device_path)+strlen(razer_custom_mode_pathname)+1);
-	memset(chroma->custom_mode_filename,0,strlen(chroma->device_path)+strlen(razer_custom_mode_pathname)+1);
-	memcpy(chroma->custom_mode_filename,chroma->device_path,strlen(chroma->device_path));
-	memcpy(chroma->custom_mode_filename+strlen(chroma->device_path),razer_custom_mode_pathname,strlen(razer_custom_mode_pathname));
-	chroma->update_keys_filename = (char*)malloc(strlen(chroma->device_path)+strlen(razer_update_keys_pathname)+1);
-	memset(chroma->update_keys_filename,0,strlen(chroma->device_path)+strlen(razer_update_keys_pathname)+1);
-	memcpy(chroma->update_keys_filename,chroma->device_path,strlen(chroma->device_path));
-	memcpy(chroma->update_keys_filename+strlen(chroma->device_path),razer_update_keys_pathname,strlen(razer_update_keys_pathname));
-
+	chroma->update_keys_filename = str_CreateEmpty();
+	chroma->update_keys_filename = str_CatFree(chroma->update_keys_filename,chroma->device_path);
+	chroma->update_keys_filename = str_CatFree(chroma->update_keys_filename,razer_update_keys_pathname);
+	
 	chroma->input_handler = NULL;
 	chroma->last_key_pos.x = -1;
 	chroma->last_key_pos.y = -1;
@@ -147,6 +232,31 @@ void razer_close(struct razer_chroma *chroma)
 		free(chroma->custom_mode_filename);
 		free(chroma->update_keys_filename);
 	}
+}
+
+void razer_copy_rows(struct razer_rgb_row *src_rows,struct razer_rgb_row *dst_rows,int update_mask,int use_update_mask)
+{
+	int i;
+	if(use_update_mask)
+	{
+		for(i=0;i<6;i++)
+			if(update_mask &(1<<i))
+			{
+				memcpy( (void*)dst_rows+(i*sizeof(struct razer_rgb_row)),(void*)src_rows+(i*sizeof(struct razer_rgb_row)),sizeof(struct razer_rgb_row));
+			}
+	}
+	else
+	{
+		memcpy((void*)dst_rows,(void*)src_rows,sizeof(struct razer_rgb_row)*6);
+	}
+}
+
+void razer_clear_frame(struct razer_rgb_frame *frame)
+{
+	int i;
+	for(i=0;i<6;i++)
+		memset((void*)frame->rows+(i*sizeof(struct razer_rgb_row)),0,sizeof(struct razer_rgb_row));
+	frame->update_mask = 0;
 }
 
 
@@ -223,6 +333,14 @@ void rgb_mix(struct razer_rgb *dst,struct razer_rgb *src,float dst_opacity)
 	dst->g = rgb_clamp((1.0f-dst_opacity)*dst->g + src->g*dst_opacity);
 	dst->b = rgb_clamp((1.0f-dst_opacity)*dst->b + src->b*dst_opacity);
 }
+
+void rgb_mix_into(struct razer_rgb *dst,struct razer_rgb *src_a,struct razer_rgb *src_b,float dst_opacity)
+{
+	dst->r = rgb_clamp((1.0f-dst_opacity)*src_a->r + src_b->r*dst_opacity);
+	dst->g = rgb_clamp((1.0f-dst_opacity)*src_a->g + src_b->g*dst_opacity);
+	dst->b = rgb_clamp((1.0f-dst_opacity)*src_a->b + src_b->b*dst_opacity);
+}
+
 
 char *razer_get_device_path()
 {
@@ -891,6 +1009,8 @@ void razer_set_custom_mode(struct razer_chroma *chroma)
 void razer_update_keys(struct razer_chroma *chroma, struct razer_keys *keys)
 {
 	int i;
+	if(!keys->update_mask)
+		return;
 	if(!chroma->update_keys_file)
 		razer_open_update_keys_file(chroma);
 	if(chroma->update_keys_file)
@@ -906,10 +1026,73 @@ void razer_update_keys(struct razer_chroma *chroma, struct razer_keys *keys)
 		printf("error setting mode to custom\n");
 	#endif
 	fflush(chroma->update_keys_file);
-	if(keys->update_mask)
-    	razer_set_custom_mode(chroma);
+   	razer_set_custom_mode(chroma);
     keys->update_mask=0;
 }
+
+void razer_update_frame(struct razer_chroma *chroma, struct razer_rgb_frame *frame)
+{
+	int i;
+	if(!frame->update_mask)
+		return;
+	if(!chroma->update_keys_file)
+		razer_open_update_keys_file(chroma);
+	if(chroma->update_keys_file)
+	{
+		for(i=0;i<6;i++)
+		{
+			if(frame->update_mask &(1<<i))
+				fwrite((void*)&frame->rows[i],sizeof(struct razer_rgb_row),1,chroma->update_keys_file);
+		}
+	}
+	#ifdef USE_DEBUGGING
+	else
+		printf("error setting mode to custom\n");
+	#endif
+	fflush(chroma->update_keys_file);
+   	razer_set_custom_mode(chroma);
+   	//printf(" update_mask: %d",frame->update_mask);
+    frame->update_mask=0;
+}
+
+void razer_set_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color)
+{
+	if(column_index<0 || column_index>21)
+		return;
+	int y;
+	for(y=0;y<6;y++)
+	{
+		frame->rows[y].column[column_index].r = color->r;
+		frame->rows[y].column[column_index].g = color->g;
+		frame->rows[y].column[column_index].b = color->b;
+	}
+	frame->update_mask = 63;
+}
+
+void razer_mix_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color,float opacity)
+{
+	if(column_index<0 || column_index>21)
+		return;
+	int y;
+	for(y=0;y<6;y++)
+	{
+		frame->rows[y].column[column_index].r = rgb_clamp((1.0f-opacity)*frame->rows[y].column[column_index].r + color->r*opacity);
+		frame->rows[y].column[column_index].g = rgb_clamp((1.0f-opacity)*frame->rows[y].column[column_index].g + color->g*opacity);
+		frame->rows[y].column[column_index].b = rgb_clamp((1.0f-opacity)*frame->rows[y].column[column_index].b + color->b*opacity);
+	}
+	frame->update_mask = 63;
+}
+
+void razer_mix_frames(struct razer_rgb_frame *dst_frame,struct razer_rgb_frame *src_frame,float opacity)
+{
+	int x,y;
+	for(y=0;y<6;y++)
+		for(x=0;x<22;x++)
+		{
+			rgb_mix_into(&dst_frame->rows[y].column[x],&dst_frame->rows[y].column[x],&src_frame->rows[y].column[x],opacity);
+		}
+}
+
 
 void set_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color)
 {
@@ -1226,7 +1409,7 @@ void razer_frame_limiter(struct razer_chroma *chroma,int fps)
 		usleep((wanted_ms-diff_ms)*1000);
 	}
 	//chroma->last_update_ms = chroma->update_ms;
-	chroma->last_update_ms = razer_get_ticks();
+	chroma->last_update_ms = razer_get_ticks(); //TODO too hidden .. move or explain
 }
 
 #pragma GCC diagnostic pop

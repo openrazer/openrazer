@@ -8,6 +8,6 @@
 #include <sys/stat.h>
 #include <string.h>
 
-#include "../../lib/razer_chroma.h"
+#include "../razer_daemon.h"
 
 #endif

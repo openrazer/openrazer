@@ -1,3 +1,6 @@
+#ifndef _RAZER_CHROMA_H_
+#define _RAZER_CHROMA_H_
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -13,12 +16,12 @@
 #include <linux/input.h>
 
 
-
+/*
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_audio.h"
 #include "SDL2/SDL_opengl.h"
 #include "SDL2/SDL_image.h"
-
+*/
 
 
 #define PI 3.1415926535897932384626433832795
@@ -105,6 +108,14 @@ struct razer_chroma
 };
 
 
+char *str_CreateEmpty(void);
+char *str_Copy(char *src);
+char *str_Cat(char *a,char *b);
+char *str_CatFree(char *a,char *b);
+char *str_FromLong(long i);
+char *str_FromDouble(double d);
+
+
 
 int razer_open(struct razer_chroma *chroma);
 void razer_close(struct razer_chroma *chroma);
@@ -113,9 +124,22 @@ void razer_set_input_handler(struct razer_chroma *chroma,razer_input_handler han
 unsigned long razer_get_ticks();
 
 
+
 void razer_set_custom_mode(struct razer_chroma *chroma);
 void razer_update_keys(struct razer_chroma *chroma,struct razer_keys *keys);
+void razer_update_frame(struct razer_chroma *chroma,struct razer_rgb_frame *frame);
+void razer_clear_frame(struct razer_rgb_frame *frame);
 char *razer_get_device_path();
+
+
+void razer_copy_rows(struct razer_rgb_row *src_rows,struct razer_rgb_row *dst_rows,int update_mask,int use_update_mask);
+void razer_init_frame(struct razer_rgb_frame *frame);
+void razer_init_keys(struct razer_keys *keys);
+
+
+void razer_set_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color);
+void razer_mix_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color,float opacity);
+void razer_mix_frames(struct razer_rgb_frame *dst_frame,struct razer_rgb_frame *src_frame,float opacity);
 
 
 
@@ -128,7 +152,7 @@ void rgb_add(struct razer_rgb *dst,struct razer_rgb *src);
 void rgb_mix(struct razer_rgb *dst,struct razer_rgb *src,float factor);
 
 
-
+void rgb_mix_into(struct razer_rgb *dst,struct razer_rgb *src_a,struct razer_rgb *src_b,float dst_opacity);
 
 
 void convert_keycode_to_pos(int keycode,struct razer_pos *pos);
@@ -159,4 +183,4 @@ double pos_angle_radians(struct razer_pos *src,struct razer_pos *dst);
 
 //void capture_keys(struct razer_keys *keys,SDL_Renderer *renderer,SDL_Window *window,SDL_Texture *tex);
 
-
+#endif
