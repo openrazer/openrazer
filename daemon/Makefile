@@ -16,7 +16,7 @@ CSTD=-std=c99
 CC=gcc
 CFLAGS+= -Wl,-E -Wall -Wextra -W -w -Os $(CSTD) -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
 DEBUG_CFLAGS+= -Wl,-E -Wall -Wextra -Wformat=0 -pedantic -fbounds-check -Wuninitialized -O0 -g3 $(CSTD) -DUSE_DEBUGGING -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
-
+#-DUSE_VERBOSE_DEBUGGING
 #-pedantic -fbounds-check -Wuninitialized -O0 -g3 -Wstrict-prototypes
 
 RAZER_CHROMA_DAEMON_FILES=razer_daemon.c

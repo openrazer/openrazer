@@ -88,7 +88,7 @@ char *str_FromDouble(double d)
 int razer_open_custom_mode_file(struct razer_chroma *chroma)
 {
 	chroma->custom_mode_file=fopen(chroma->custom_mode_filename,"wb");
-	#ifdef USE_DEBUGGING
+	#ifdef USE_VERBOSE_DEBUGGING
 		printf("opening custom mode file:%s\n",chroma->custom_mode_filename);
 	#endif
 	if(chroma->custom_mode_file)
@@ -99,7 +99,7 @@ int razer_open_custom_mode_file(struct razer_chroma *chroma)
 
 void razer_close_custom_mode_file(struct razer_chroma *chroma)
 {
-	#ifdef USE_DEBUGGING
+	#ifdef USE_VERBOSE_DEBUGGING
 		printf("closing custom mode file:%s\n",chroma->custom_mode_filename);
 	#endif
     if(chroma->custom_mode_file)
@@ -110,7 +110,7 @@ void razer_close_custom_mode_file(struct razer_chroma *chroma)
 int razer_open_update_keys_file(struct razer_chroma *chroma)
 {
 	chroma->update_keys_file=fopen(chroma->update_keys_filename,"wb");
-	#ifdef USE_DEBUGGING
+	#ifdef USE_VERBOSE_DEBUGGING
 		printf("opening update keys file:%s\n",chroma->update_keys_filename);
 	#endif
 	if(chroma->update_keys_file)
@@ -121,7 +121,7 @@ int razer_open_update_keys_file(struct razer_chroma *chroma)
 
 void razer_close_update_keys_file(struct razer_chroma *chroma)
 {
-	#ifdef USE_DEBUGGING
+	#ifdef USE_VERBOSE_DEBUGGING
 		printf("closing update keys file:%s\n",chroma->update_keys_filename);
 	#endif
     if(chroma->update_keys_file)
@@ -133,7 +133,7 @@ int razer_open_input_file(struct razer_chroma *chroma)
 {
 	chroma->input_file=open(razer_sys_event_path,O_RDONLY | O_NONBLOCK | O_NOCTTY | O_NDELAY);
 	fcntl(chroma->input_file,F_SETFL,0);
-	#ifdef USE_DEBUGGING
+	#ifdef USE_VERBOSE_DEBUGGING
 		printf("opening input file:%s\n",razer_sys_event_path);
 	#endif
 	if(chroma->input_file)
@@ -144,7 +144,7 @@ int razer_open_input_file(struct razer_chroma *chroma)
 
 void razer_close_input_file(struct razer_chroma *chroma)
 {
-	#ifdef USE_DEBUGGING
+	#ifdef USE_VERBOSE_DEBUGGING
 		printf("closing input file:%s\n",razer_sys_event_path);
 	#endif
     if(chroma->input_file)
@@ -191,7 +191,7 @@ int razer_open(struct razer_chroma *chroma)
 		#endif
 		return(0);
 	}
-	#ifdef USE_DEBUGGING
+	#ifdef USE_VERBOSE_DEBUGGING
 		printf("found device at path:%s\n",chroma->device_path);
 	#endif
 
@@ -339,6 +339,15 @@ void rgb_mix_into(struct razer_rgb *dst,struct razer_rgb *src_a,struct razer_rgb
 	dst->r = rgb_clamp((1.0f-dst_opacity)*src_a->r + src_b->r*dst_opacity);
 	dst->g = rgb_clamp((1.0f-dst_opacity)*src_a->g + src_b->g*dst_opacity);
 	dst->b = rgb_clamp((1.0f-dst_opacity)*src_a->b + src_b->b*dst_opacity);
+}
+
+struct razer_rgb *rgb_copy(struct razer_rgb *color)
+{
+	struct razer_rgb *copy = (struct razer_rgb*)malloc(sizeof(struct razer_rgb));
+	copy->r = color->r;
+	copy->g = color->g;
+	copy->b = color->b;
+	return(copy);
 }
 
 

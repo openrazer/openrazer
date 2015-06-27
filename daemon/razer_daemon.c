@@ -9,9 +9,65 @@ void daemon_kill(struct razer_daemon *daemon,char *error_message)
 char *daemon_parameter_to_json(struct razer_parameter *parameter)
 {
 	char *parameter_json = str_CreateEmpty();
-	parameter_json = str_CatFree(parameter_json,"\n {\n \"key\": \"");
+	parameter_json = str_CatFree(parameter_json,"{\n \"key\": \"");
 	parameter_json = str_CatFree(parameter_json,parameter->key);
 	parameter_json = str_CatFree(parameter_json,"\",\n");
+	parameter_json = str_CatFree(parameter_json," \"id\" : ");
+	char *id_string = str_FromLong(parameter->id);
+	parameter_json = str_CatFree(parameter_json,id_string);
+	parameter_json = str_CatFree(parameter_json," ,\n");
+	free(id_string);
+	parameter_json = str_CatFree(parameter_json," \"type\" : ");
+	char *type_string = str_FromLong(parameter->type);
+	parameter_json = str_CatFree(parameter_json,type_string);
+	parameter_json = str_CatFree(parameter_json," ,\n");
+	free(type_string);
+	parameter_json = str_CatFree(parameter_json," \"value\" : ");
+	switch(parameter->type)
+	{
+		case RAZER_PARAMETER_TYPE_STRING:
+			{
+				parameter_json = str_CatFree(parameter_json,"\"");
+				parameter_json = str_CatFree(parameter_json,daemon_get_parameter_string(parameter));
+				parameter_json = str_CatFree(parameter_json,"\" ,\n");
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_INT:
+			{
+				char *int_string = str_FromLong(daemon_get_parameter_int(parameter));
+				parameter_json = str_CatFree(parameter_json,int_string);
+				free(int_string);
+				parameter_json = str_CatFree(parameter_json," ,\n");
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_FLOAT:
+			{
+				char *float_string = str_FromDouble(daemon_get_parameter_float(parameter));
+				parameter_json = str_CatFree(parameter_json,float_string);
+				free(float_string);
+				parameter_json = str_CatFree(parameter_json," ,\n");
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_RGB:
+			{
+				parameter_json = str_CatFree(parameter_json,"[");
+				struct razer_rgb *color = daemon_get_parameter_rgb(parameter);
+				char *r_string = str_FromLong(color->r);
+				parameter_json = str_CatFree(parameter_json,r_string);
+				parameter_json = str_CatFree(parameter_json," ,");
+				free(r_string);
+				char *g_string = str_FromLong(color->g);
+				parameter_json = str_CatFree(parameter_json,g_string);
+				parameter_json = str_CatFree(parameter_json," ,");
+				free(g_string);
+				char *b_string = str_FromLong(color->b);
+				parameter_json = str_CatFree(parameter_json,b_string);
+				free(b_string);
+				parameter_json = str_CatFree(parameter_json,"] ,\n");
+			}
+			break;
+	}
+
 	parameter_json = str_CatFree(parameter_json," \"description\": \"");
 	parameter_json = str_CatFree(parameter_json,parameter->description);
 	parameter_json = str_CatFree(parameter_json,"\" },\n");
@@ -47,6 +103,34 @@ char *daemon_effect_to_json(struct razer_effect *effect)
 	}
 	effect_json = str_CatFree(effect_json,"] },\n");
 	return(effect_json);
+}
+
+char *daemon_render_node_to_json(struct razer_fx_render_node *render_node)
+{
+	char *rn_json = str_CreateEmpty();
+	rn_json = str_CatFree(rn_json,"\n {\n");
+	rn_json = str_CatFree(rn_json," \"id\" : ");
+	char *id_string = str_FromLong(render_node->id);
+	rn_json = str_CatFree(rn_json,id_string);
+	rn_json = str_CatFree(rn_json," ,\n");
+	free(id_string);
+	rn_json = str_CatFree(rn_json," \"description\": \"");
+	rn_json = str_CatFree(rn_json,render_node->description);
+	/*effect_json = str_CatFree(effect_json,"\" ,\n \"subs_num\" : ");
+	char *parameters_num_string = str_FromLong(effect->parameters->num);
+	effect_json = str_CatFree(effect_json,parameters_num_string);
+	effect_json = str_CatFree(effect_json," ,\n");
+	free(parameters_num_string);
+	effect_json = str_CatFree(effect_json," \"parameters\" :  [\n");
+	for(int i = 0;i<effect->parameters->num;i++)
+	{
+		struct razer_parameter *parameter = effect->parameters->items[i];
+		char *parameter_json = daemon_parameter_to_json(parameter);
+		effect_json = str_CatFree(effect_json,parameter_json);
+		free(parameter_json);
+	}*/
+	rn_json = str_CatFree(rn_json,"\"\n },\n");
+	return(rn_json);
 }
 
 #ifdef USE_DBUS
@@ -89,7 +173,7 @@ int daemon_dbus_add_method(struct razer_daemon *daemon,char *interface_name, cha
 	match = str_CatFree(match,".");
 	match = str_CatFree(match,method_name);
 	match = str_CatFree(match,"'");
-	#ifdef USE_DEBUGGING
+	#ifdef USE_VERBOSE_DEBUGGING
 	printf("adding dbus method_call: %s\n",match);
 	#endif
 	dbus_bus_add_match(daemon->dbus,match,&error);
@@ -111,6 +195,8 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.fx","get"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.fx","list"))
+		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.fx.instances","list"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.fps","set"))
 		return(0);
@@ -226,6 +312,38 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			daemon_kill(daemon,"dbus: Out Of Memory!\n");
 		dbus_connection_flush(daemon->dbus);
 		free(fx_list_json);
+	}
+
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_nodes", "list")) 
+	{
+		#ifdef USE_DEBUGGING
+			printf("dbus: method list render_nodes called\n");
+		#endif
+		reply = dbus_message_new_method_return(msg);
+		dbus_message_iter_init_append(reply,&parameters);
+		char *rn_list_json = str_CreateEmpty();
+		rn_list_json = str_CatFree(rn_list_json,"{\n");
+		rn_list_json = str_CatFree(rn_list_json," \"render_nodes_num\" : ");
+		char *rn_num_string = str_FromLong(daemon->fx_render_nodes_num);
+		rn_list_json = str_CatFree(rn_list_json,rn_num_string);
+		rn_list_json = str_CatFree(rn_list_json," ,\n");
+		free(rn_num_string);
+		rn_list_json = str_CatFree(rn_list_json," \"render_nodes_list\": [\n");
+		for(int i=0;i<daemon->fx_render_nodes_num;i++)
+		{
+			struct razer_fx_render_node *render_node = daemon->fx_render_nodes[i];
+			char *rn_json = daemon_render_node_to_json(render_node);
+			rn_list_json = str_CatFree(rn_list_json,rn_json);
+			free(rn_json);
+		}
+		rn_list_json = str_CatFree(rn_list_json,"]}\n");
+		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&rn_list_json)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+		free(rn_list_json);
 	}
 
 
@@ -437,6 +555,9 @@ struct razer_daemon *daemon_open(void)
 	struct razer_fx_render_node *sub2= daemon_create_render_node(daemon,daemon_get_effect(daemon,7),sub2_input_frame,daemon->frame_buffer,"2nd Level Sub Test Render Node");
 	daemon_render_node_add_sub(daemon->render_node,sub);
 	daemon_render_node_add_sub(sub,sub2);
+	daemon->render_node->opacity = 0.5f;
+	sub->opacity = 0.5f;
+	sub2->opacity = 0.5f;
 	//daemon_get_effect(daemon,1)->parameters->items[0]->value = (int)88;
 	//struct razer_rgb *render_rgb = daemon_get_parameter_rgb(daemon_get_effect(daemon,2)->parameters->items[0]);
 	//render_rgb->r = 0;
@@ -454,6 +575,31 @@ void daemon_close(struct razer_daemon **daemon)
  	free((*daemon)->chroma);
  	free(*daemon);
 }
+
+//needed for using different parameter sets for multiple copies of the same effect in der render_nodes chain
+struct razer_effect *daemon_create_effect_instance(struct razer_daemon *daemon,struct razer_effect *lib_effect)
+{
+	//create an instance of a base effect housed in external libs
+	//create own instances of each razer_parameter included
+	//register instance with daemon ?
+	//return the instance
+	struct razer_effect *instance = daemon_create_effect();
+	instance->id = daemon->effects_uid++;
+	instance->name = str_Copy(lib_effect->name);
+	instance->description = str_Copy(lib_effect->description);
+	instance->fps = lib_effect->fps;
+	instance->open = lib_effect->open;
+	instance->close = lib_effect->close;
+	instance->update = lib_effect->update;
+	instance->key_event = lib_effect->key_event;
+	instance->dbus_event = lib_effect->dbus_event;
+	for(int i=0;i<lib_effect->parameters->num;i++)
+	{
+		daemon_add_parameter(instance->parameters,daemon_copy_parameter(lib_effect->parameters->items[i]));
+	}
+	return(instance);
+}
+
 
 int daemon_update_render_node(struct razer_fx_render_node *render_node)
 {
@@ -531,7 +677,7 @@ int daemon_register_render_node(struct razer_daemon *daemon,struct razer_fx_rend
 		daemon->fx_render_nodes = (struct razer_fx_render_node**)malloc(sizeof(struct razer_fx_render_node*));
 	daemon->fx_render_nodes[daemon->fx_render_nodes_num] = render_node;
 	daemon->fx_render_nodes[daemon->fx_render_nodes_num]->id = daemon->fx_render_nodes_uid++;
-	daemon->fx_render_nodes++;
+	daemon->fx_render_nodes_num++;
 	return(daemon->fx_render_nodes[daemon->fx_render_nodes_num-1]->id);
 }
 
@@ -547,7 +693,9 @@ struct razer_fx_render_node *daemon_create_render_node(struct razer_daemon *daem
 {
 	struct razer_fx_render_node *render_node = (struct razer_fx_render_node*)malloc(sizeof(struct razer_fx_render_node));
 	render_node->daemon = daemon;
-	render_node->effect = effect;
+	//render_node->effect = effect;
+	render_node->effect = daemon_create_effect_instance(daemon,effect);
+	render_node->opacity = 1.0f;
 	render_node->input_frame = input_frame;
 	render_node->output_frame = output_frame;
 	render_node->description = description;
@@ -599,6 +747,38 @@ struct razer_parameter *daemon_create_parameter(void)
 {
 	struct razer_parameter *parameter = (struct razer_parameter*)malloc(sizeof(struct razer_parameter));
 	return(parameter);
+}
+
+struct razer_parameter *daemon_copy_parameter(struct razer_parameter *parameter)
+{
+	struct razer_parameter *copy = daemon_create_parameter();
+	copy->id = parameter->id;
+	copy->key = str_Copy(parameter->key);
+	copy->description = str_Copy(parameter->description);
+	copy->type = parameter->type;
+	switch(parameter->type)
+	{
+		case RAZER_PARAMETER_TYPE_STRING:
+			daemon_set_parameter_string(copy,str_Copy(daemon_get_parameter_string(parameter)));
+			break;
+		case RAZER_PARAMETER_TYPE_INT:
+			daemon_set_parameter_int(copy,daemon_get_parameter_int(parameter));
+			break;
+		case RAZER_PARAMETER_TYPE_FLOAT:
+			daemon_set_parameter_float(copy,daemon_get_parameter_float(parameter));
+			break;
+		case RAZER_PARAMETER_TYPE_RGB:
+			{
+				struct razer_rgb *color = rgb_copy(daemon_get_parameter_rgb(parameter));
+				daemon_set_parameter_rgb(copy,color);
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_RENDER_NODE:
+			daemon_set_parameter_render_node(copy,daemon_get_parameter_render_node(parameter));
+			break;
+	}
+	
+	return(copy);
 }
 
 void daemon_free_parameter(struct razer_parameter **parameter)

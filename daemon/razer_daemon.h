@@ -86,8 +86,7 @@ struct razer_fx_render_node
 	struct razer_rgb_frame *output_frame;
 	struct razer_daemon *daemon;
 	struct razer_effect *effect;//create a copy of the effect struct for every render node
-	//int parameters_num;
-	//struct razer_parameter **parameters;
+	float opacity;
 	struct razer_fx_render_node *parent;
 	int subs_num;
 	struct razer_fx_render_node **subs;
@@ -106,12 +105,14 @@ struct razer_daemon
 	struct razer_fx_render_node *render_node;
 	struct razer_rgb_frame *frame_buffer;
 	//struct razer_keys *keys;
+	//struct razer_keys_locks locks;
 	int libs_num;
 	void **libs;
 	int effects_uid;
 	int effects_num;
-	//struct razer_keys_locks locks;
 	struct razer_effect **effects;
+	//int effect_instances_num;
+	//struct razer_effect **effect_instances;
 	int fx_render_nodes_uid;
 	int fx_render_nodes_num;
 	struct razer_fx_render_node **fx_render_nodes;
@@ -146,6 +147,7 @@ void daemon_set_parameter_rgb(struct razer_parameter *parameter,struct razer_rgb
 void daemon_set_parameter_render_node(struct razer_parameter *parameter,struct razer_fx_render_node *value);
 
 struct razer_parameter *daemon_create_parameter(void);
+struct razer_parameter *daemon_copy_parameter(struct razer_parameter *parameter);
 void daemon_free_parameter(struct razer_parameter **parameter);
 void daemon_free_parameters(struct razer_parameters **parameters);
 
