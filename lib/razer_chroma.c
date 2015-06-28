@@ -1100,6 +1100,7 @@ void razer_mix_frames(struct razer_rgb_frame *dst_frame,struct razer_rgb_frame *
 		{
 			rgb_mix_into(&dst_frame->rows[y].column[x],&dst_frame->rows[y].column[x],&src_frame->rows[y].column[x],opacity);
 		}
+	dst_frame->update_mask = 63;
 }
 
 

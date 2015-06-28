@@ -39,6 +39,7 @@ typedef void (*razer_effect_shutdown)(struct razer_daemon *daemon);//called when
 #define RAZER_PARAMETER_TYPE_FLOAT 3
 #define RAZER_PARAMETER_TYPE_RGB 4
 #define RAZER_PARAMETER_TYPE_RENDER_NODE 5
+//#define RAZER_PARAMETER_TYPE_F 5
 //#define RAZER_PARAMETER_TYPE_MATH_OP 5
 //TODO RANDOM TYPES (Range included)
 
@@ -82,8 +83,10 @@ struct razer_fx_render_node
 	int id;
 	char *description;
 	int compose_mode;
-	struct razer_rgb_frame *input_frame;
+	struct razer_rgb_frame *input_frame;//TODO add second input frame here for mixing ?
 	struct razer_rgb_frame *output_frame;
+	int is_input_frame_linked;
+	int is_output_frame_linked;
 	struct razer_daemon *daemon;
 	struct razer_effect *effect;//create a copy of the effect struct for every render node
 	float opacity;
@@ -94,7 +97,7 @@ struct razer_fx_render_node
 	int limit_render_time_ms;
 	int continue_chain;
 	int loop_count;// -1 == no looping
-	struct razer_fx_render_node *loop_target;
+	struct razer_fx_render_node *next;
 };
 
 struct razer_daemon 
@@ -104,6 +107,7 @@ struct razer_daemon
 	int fps;
 	struct razer_fx_render_node *render_node;
 	struct razer_rgb_frame *frame_buffer;
+	int is_frame_buffer_linked;//need to know if i have to free it or it is a link to another buffer
 	//struct razer_keys *keys;
 	//struct razer_keys_locks locks;
 	int libs_num;
@@ -120,6 +124,8 @@ struct razer_daemon
 		DBusConnection *dbus;
 	#endif
 };
+
+void *daemon_load_fx_lib(struct razer_daemon *daemon,char *fx_pathname);
 
 struct razer_effect *daemon_create_effect(void);
 void daemon_free_effect(struct razer_effect **effect);
