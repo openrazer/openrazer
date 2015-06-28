@@ -131,7 +131,7 @@ struct razer_fx_render_node *daemon_create_render_node(struct razer_daemon *daem
 int daemon_register_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node);
 struct razer_rgb_frame *daemon_create_rgb_frame(void);
 void daemon_free_rgb_frame(struct razer_rgb_frame **frame);
-
+struct razer_fx_render_node *daemon_get_render_node(struct razer_daemon *daemon,int uid);
 
 
 struct razer_parameter *daemon_create_parameter_string(char *key,char *description,char *value);

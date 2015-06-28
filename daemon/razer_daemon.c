@@ -196,8 +196,8 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.fx","list"))
 		return(0);
-	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.fx.instances","list"))
-		return(0);
+	//if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.fx.instances","list"))
+	//	return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.fps","set"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.fps","get"))
@@ -256,7 +256,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		if(!dbus_message_iter_init(msg, &parameters))
 		{
 			#ifdef USE_DEBUGGING
-				printf("dbus: signal set fps received without parameter\n");
+				printf("dbus: set fps received without parameter\n");
 			#endif
 		}
 		if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
@@ -420,13 +420,17 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		}
 		char *rn_list_json = str_CreateEmpty();
 		dbus_free_string_array(path);
-		if(daemon->fx_render_nodes_num && rn_index>=0 && rn_index < daemon->fx_render_nodes_num && daemon->fx_render_nodes[rn_index]->effect->parameters->num && p_index >= 0 && p_index < daemon->fx_render_nodes[rn_index]->effect->parameters->num)
+		if(daemon->fx_render_nodes_num)
 		{
-			struct razer_fx_render_node *render_node = daemon->fx_render_nodes[rn_index];
-			struct razer_parameter *parameter = render_node->effect->parameters->items[p_index];
-			char *parameter_json = daemon_parameter_to_json(parameter);
-			rn_list_json = str_CatFree(rn_list_json,parameter_json);
-			free(parameter_json);
+			//struct razer_fx_render_node *render_node = daemon->fx_render_nodes[rn_index];
+			struct razer_fx_render_node *render_node = daemon_get_render_node(daemon,rn_index);
+			if(render_node && p_index>=0 && p_index < render_node->effect->parameters->num)
+			{
+				struct razer_parameter *parameter = render_node->effect->parameters->items[p_index];
+				char *parameter_json = daemon_parameter_to_json(parameter);
+				rn_list_json = str_CatFree(rn_list_json,parameter_json);
+				free(parameter_json);
+			}
 		}
 		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&rn_list_json)) 
 			daemon_kill(daemon,"dbus: Out Of Memory!\n");
@@ -437,7 +441,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		free(rn_list_json);
 	}
 
-    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_node.parameter", "set")) //TODO address by id not index
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_node.parameter", "set"))
 	{
 		char **path = NULL;
 		int rn_index = -1;
@@ -461,46 +465,86 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			#endif
 		}
 		dbus_free_string_array(path);
-		if(dbus_message_iter_init(msg, &parameters) && daemon->fx_render_nodes_num && rn_index>=0 && rn_index < daemon->fx_render_nodes_num && daemon->fx_render_nodes[rn_index]->effect->parameters->num && p_index >= 0 && p_index < daemon->fx_render_nodes[rn_index]->effect->parameters->num)
+		if(dbus_message_iter_init(msg, &parameters) && daemon->fx_render_nodes_num)
 		{
-			struct razer_fx_render_node *render_node = daemon->fx_render_nodes[rn_index];
-			struct razer_parameter *parameter = render_node->effect->parameters->items[p_index];
-			switch(parameter->type)
+			//struct razer_fx_render_node *render_node = daemon->fx_render_nodes[rn_index];
+			struct razer_fx_render_node *render_node = daemon_get_render_node(daemon,rn_index);
+			
+			if(render_node && p_index>=0 && p_index < render_node->effect->parameters->num)
 			{
-				case RAZER_PARAMETER_TYPE_STRING:
-					if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_STRING)
-					{
-						char *fxname;
-						dbus_message_iter_get_basic(&parameters,&fxname);
-						printf("dbus: string parameter:%s\n",fxname);
-					}
-					break;
-				case RAZER_PARAMETER_TYPE_FLOAT:
-					if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_DOUBLE)
-					{
-						double value = 0;
-						dbus_message_iter_get_basic(&parameters,&value);
-						#ifdef USE_DEBUGGING
-							printf("dbus: float parameter:%d\n",value);
-						#endif
-						daemon_set_parameter_float(parameter,value);
-					}
-					break;
-				case RAZER_PARAMETER_TYPE_INT:
-					if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
-					{
-						long value = 0;
-						dbus_message_iter_get_basic(&parameters,&value);
-						#ifdef USE_DEBUGGING
-							printf("dbus: int parameter:%d\n",value);
-						#endif
-						daemon_set_parameter_int(parameter,value);
-					}
-					break;
-				case RAZER_PARAMETER_TYPE_RGB:
-					break;
-				case RAZER_PARAMETER_TYPE_RENDER_NODE:
-					break;
+				struct razer_parameter *parameter = render_node->effect->parameters->items[p_index];
+				switch(parameter->type)
+				{
+					case RAZER_PARAMETER_TYPE_STRING:
+						if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_STRING)
+						{
+							char *fxname;
+							dbus_message_iter_get_basic(&parameters,&fxname);
+							#ifdef USE_DEBUGGING
+								printf("dbus: string parameter:%s\n",fxname);
+							#endif
+						}
+						break;
+					case RAZER_PARAMETER_TYPE_FLOAT:
+						if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_DOUBLE)
+						{
+							double value = 0;
+							dbus_message_iter_get_basic(&parameters,&value);
+							#ifdef USE_DEBUGGING
+								printf("dbus: float parameter:%d\n",value);
+							#endif
+							daemon_set_parameter_float(parameter,value);
+						}
+						break;
+					case RAZER_PARAMETER_TYPE_INT:
+						if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+						{
+							long value = 0;
+							dbus_message_iter_get_basic(&parameters,&value);
+							#ifdef USE_DEBUGGING
+								printf("dbus: int parameter:%d\n",value);
+							#endif
+							daemon_set_parameter_int(parameter,value);
+						}
+						break;
+					case RAZER_PARAMETER_TYPE_RGB:
+						{
+							int got_parms = 0;
+							struct razer_rgb *color = daemon_get_parameter_rgb(parameter);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: R parameter:%d\n",value);
+								#endif
+								color->r = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: G parameter:%d\n",value);
+								#endif
+								color->g = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: B parameter:%d\n",value);
+								#endif
+								color->b = value;
+							}
+						}
+						break;
+					case RAZER_PARAMETER_TYPE_RENDER_NODE:
+						break;
+				}
 			}
 
 		}
@@ -680,6 +724,9 @@ struct razer_daemon *daemon_open(void)
 	}
 	#ifdef USE_DBUS
 	 	daemon->dbus = NULL;
+		#ifdef USE_DEBUGGING
+			printf("dbus: opened\n");
+		#endif
 	 	if(!daemon_dbus_open(daemon))
 	 	{
 	 		free(daemon->chroma);
@@ -708,7 +755,7 @@ struct razer_daemon *daemon_open(void)
 		daemon_register_lib(daemon,lib);
 
 	//daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,1),input_frame,output_frame,"First Test Render Node");
-	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,1),input_frame,daemon->frame_buffer,"First Test Render Node");
+	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,2),input_frame,daemon->frame_buffer,"First Test Render Node");
 	struct razer_fx_render_node *sub = daemon_create_render_node(daemon,daemon_get_effect(daemon,2),sub_input_frame,sub_output_frame,"Sub Test Render Node");
 	struct razer_fx_render_node *sub2= daemon_create_render_node(daemon,daemon_get_effect(daemon,7),sub2_input_frame,daemon->frame_buffer,"2nd Level Sub Test Render Node");
 	//daemon_render_node_add_sub(daemon->render_node,sub);
@@ -882,6 +929,17 @@ struct razer_effect *daemon_get_effect(struct razer_daemon *daemon,int uid)
 	}
 	return(NULL);
 }
+
+struct razer_fx_render_node *daemon_get_render_node(struct razer_daemon *daemon,int uid)
+{
+	for(int i = 0;i<daemon->fx_render_nodes_num;i++)
+	{
+		if(daemon->fx_render_nodes[i]->id == uid)
+			return(daemon->fx_render_nodes[i]);
+	}
+	return(NULL);
+}
+
 
 struct razer_effect *daemon_create_effect(void)
 {
