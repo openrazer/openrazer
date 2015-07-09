@@ -7,6 +7,7 @@ const char *razer_sys_event_path = "/dev/input/by-id/usb-Razer_Razer_BlackWidow_
 const char *razer_custom_mode_pathname = "/mode_custom";
 const char *razer_update_keys_pathname = "/set_key_row";
 
+/*some string routines from node.c*/
 char *str_CreateEmpty(void)
 {
     char *string = (char*)malloc(1);

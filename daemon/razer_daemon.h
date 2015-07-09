@@ -71,6 +71,7 @@ struct razer_effect
 	char *description;
 	int fps;
 	struct razer_parameters *parameters;
+	int input_usage_mask;//bitmask showing the effects usage of inputs
 	razer_effect_open open;
 	razer_effect_close close;
 	razer_effect_update update;
@@ -83,16 +84,19 @@ struct razer_fx_render_node
 	int id;
 	char *description;
 	int compose_mode;
-	struct razer_rgb_frame *input_frame;//TODO add second input frame here for mixing ?
+	struct razer_rgb_frame *input_frame;//TODO add second/multiple input frame(s) here for mixing ?
+	struct razer_rgb_frame *second_input_frame;//TODO add second/multiple input frame(s) here for mixing ?
 	struct razer_rgb_frame *output_frame;
-	int is_input_frame_linked;
-	int is_output_frame_linked;
+	int input_frame_linked_uid;//-1==empty input frame buffer 
+	int second_input_frame_linked_uid;//-1==empty input frame buffer 
+	int output_frame_linked_uid;//-1==internal frame buffer used ; 0 == daemon output buffer is used
 	struct razer_daemon *daemon;
 	struct razer_effect *effect;//create a copy of the effect struct for every render node
 	float opacity;
+	float second_opacity;
 	struct razer_fx_render_node *parent;
 	int subs_num;
-	struct razer_fx_render_node **subs;
+	struct razer_fx_render_node **subs; //TODO reuse subs for computational only effects (seeding /randomizing values etc)
 	unsigned long start_ms;
 	int limit_render_time_ms;
 	int continue_chain;
@@ -106,8 +110,12 @@ struct razer_daemon
 	int running;
 	int fps;
 	struct razer_fx_render_node *render_node;
+	struct razer_fx_render_node **render_nodes;
+	int render_nodes_num;
+	int is_render_nodes_dirty;
+	struct razer_fx_render_node *return_render_node;
 	struct razer_rgb_frame *frame_buffer;
-	int is_frame_buffer_linked;//need to know if i have to free it or it is a link to another buffer
+	int frame_buffer_linked_uid;//need to know if i have to free it or it is a link to another buffer
 	//struct razer_keys *keys;
 	//struct razer_keys_locks locks;
 	int libs_num;
@@ -125,6 +133,14 @@ struct razer_daemon
 	#endif
 };
 
+struct razer_queue
+{
+	void **items;
+	int num;
+	int pos;
+};
+
+
 void *daemon_load_fx_lib(struct razer_daemon *daemon,char *fx_pathname);
 
 struct razer_effect *daemon_create_effect(void);
@@ -133,7 +149,7 @@ int daemon_register_effect(struct razer_daemon *daemon,struct razer_effect *effe
 int daemon_unregister_effect(struct razer_daemon *daemon,struct razer_effect *effect);
 struct razer_effect *daemon_get_effect(struct razer_daemon *daemon,int uid);
 
-struct razer_fx_render_node *daemon_create_render_node(struct razer_daemon *daemon,struct razer_effect *effect,struct razer_rgb_frame *input_frame,struct razer_rgb_frame *output_frame,char *description);
+struct razer_fx_render_node *daemon_create_render_node(struct razer_daemon *daemon,struct razer_effect *effect,int input_render_node_uid,int second_input_render_node_uid,int output_render_node_uid,char *description);
 int daemon_register_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node);
 struct razer_rgb_frame *daemon_create_rgb_frame(void);
 void daemon_free_rgb_frame(struct razer_rgb_frame **frame);
@@ -151,6 +167,9 @@ void daemon_set_parameter_float(struct razer_parameter *parameter,float value);
 void daemon_set_parameter_int(struct razer_parameter *parameter,int value);
 void daemon_set_parameter_rgb(struct razer_parameter *parameter,struct razer_rgb *value);
 void daemon_set_parameter_render_node(struct razer_parameter *parameter,struct razer_fx_render_node *value);
+
+struct razer_queue *daemon_create_queue(void);
+void daemon_free_queue(struct razer_queue **queue);
 
 struct razer_parameter *daemon_create_parameter(void);
 struct razer_parameter *daemon_copy_parameter(struct razer_parameter *parameter);
