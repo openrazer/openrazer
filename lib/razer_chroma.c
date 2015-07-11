@@ -1,11 +1,10 @@
 #include "razer_chroma.h"
 
-const char *razer_sys_hid_devices_path = "/sys/bus/hid/devices/";
+char *razer_sys_hid_devices_path = "/sys/bus/hid/devices/";
+char *razer_sys_event_path = "/dev/input/by-id/usb-Razer_Razer_BlackWidow_Chroma-event-kbd";
 
-const char *razer_sys_event_path = "/dev/input/by-id/usb-Razer_Razer_BlackWidow_Chroma-event-kbd";
-
-const char *razer_custom_mode_pathname = "/mode_custom";
-const char *razer_update_keys_pathname = "/set_key_row";
+char *razer_custom_mode_pathname = "/mode_custom";
+char *razer_update_keys_pathname = "/set_key_row";
 
 /*some string routines from node.c*/
 char *str_CreateEmpty(void)
@@ -243,7 +242,7 @@ void razer_copy_rows(struct razer_rgb_row *src_rows,struct razer_rgb_row *dst_ro
 		for(i=0;i<6;i++)
 			if(update_mask &(1<<i))
 			{
-				memcpy( (void*)dst_rows+(i*sizeof(struct razer_rgb_row)),(void*)src_rows+(i*sizeof(struct razer_rgb_row)),sizeof(struct razer_rgb_row));
+				memcpy((void*)((char*)dst_rows+(i*sizeof(struct razer_rgb_row))),(void*)((char*)src_rows+(i*sizeof(struct razer_rgb_row))),sizeof(struct razer_rgb_row));
 			}
 	}
 	else
@@ -256,7 +255,7 @@ void razer_clear_frame(struct razer_rgb_frame *frame)
 {
 	int i;
 	for(i=0;i<6;i++)
-		memset((void*)frame->rows+(i*sizeof(struct razer_rgb_row)),0,sizeof(struct razer_rgb_row));
+		memset((void*)((char*)frame->rows+(i*sizeof(struct razer_rgb_row))),0,sizeof(struct razer_rgb_row));
 	frame->update_mask = 0;
 }
 
@@ -1061,7 +1060,6 @@ void razer_update_frame(struct razer_chroma *chroma, struct razer_rgb_frame *fra
 	#endif
 	fflush(chroma->update_keys_file);
    	razer_set_custom_mode(chroma);
-   	//printf(" update_mask: %d",frame->update_mask);
     frame->update_mask=0;
 }
 
@@ -1416,7 +1414,6 @@ void razer_frame_limiter(struct razer_chroma *chroma,int fps)
 	int wanted_ms = 1000/fps;
 	if(diff_ms<wanted_ms)
 	{
-		//printf("diff:%ums,sleeping for:%ums\n",diff_ms,(wanted_ms-diff_ms));
 		usleep((wanted_ms-diff_ms)*1000);
 	}
 	//chroma->last_update_ms = chroma->update_ms;
@@ -1427,7 +1424,7 @@ void razer_frame_limiter(struct razer_chroma *chroma,int fps)
 
 void razer_update(struct razer_chroma *chroma)
 {
-	struct timeval tv,select_tv;
+	struct timeval select_tv;
 	int keycode = -1;
 	if(!chroma->input_file)
 		razer_open_input_file(chroma);

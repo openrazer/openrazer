@@ -3,6 +3,21 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 
+struct razer_effect *effect_mix1 = NULL;
+
+int effectmix1_update(struct razer_fx_render_node *render)
+{
+	int x,y;
+	for(x=0;x<22;x++)
+		for(y=0;y<6;y++)
+		{
+			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&render->second_input_frame->rows[y].column[x],render->opacity);
+			render->output_frame->update_mask |= 1<<y;
+		}
+	return(1);
+}
+
+
 
 struct razer_effect *effect1 = NULL;
 
@@ -39,6 +54,7 @@ int effect1_update(struct razer_fx_render_node *render)
 		dir=-dir;
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),count);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2),dir);	
+	return(1);
 }
 
 struct razer_effect *effect2 = NULL;
@@ -69,11 +85,12 @@ int effect2_update(struct razer_fx_render_node *render)
 		dir=-dir;
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),count);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2),dir);	
+	return(1);
 }
 
 struct razer_effect *effect3 = NULL;
 
-void effect3_update(struct razer_fx_render_node *render)
+int effect3_update(struct razer_fx_render_node *render)
 {
 	struct razer_rgb color;
 	int count = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0));
@@ -110,11 +127,12 @@ void effect3_update(struct razer_fx_render_node *render)
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2),rnd1);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3),rnd2);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4),rnd3);	
+	return(1);
 }
 
 struct razer_effect *effect4 = NULL;
 
-void effect4_update(struct razer_fx_render_node *render)
+int effect4_update(struct razer_fx_render_node *render)
 {
 	struct razer_rgb color;
 	int v1 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0));
@@ -167,11 +185,12 @@ void effect4_update(struct razer_fx_render_node *render)
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,6),rnd1);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,7),rnd2);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,8),rnd3);	
+	return(1);
 }
 
 struct razer_effect *effect5 = NULL;
 
-void effect5_update(struct razer_fx_render_node *render)
+int effect5_update(struct razer_fx_render_node *render)
 {
 	struct razer_rgb color;
 	int count = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0));
@@ -203,11 +222,12 @@ void effect5_update(struct razer_fx_render_node *render)
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2),rnd1);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3),rnd2);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4),rnd3);	
+	return(1);
 }
 
 struct razer_effect *effect6 = NULL;
 
-void effect6_update(struct razer_fx_render_node *render)
+int effect6_update(struct razer_fx_render_node *render)
 {
 	struct razer_rgb color;
 	int count = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0));
@@ -215,7 +235,6 @@ void effect6_update(struct razer_fx_render_node *render)
 	int rnd1 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2));
 	int rnd2 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3));
 	int rnd3 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4));
-	float s = 0.1f;
 	int x,y;
 	for(x=0;x<22;x++)
 		for(y=0;y<6;y++)
@@ -239,15 +258,15 @@ void effect6_update(struct razer_fx_render_node *render)
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2),rnd1);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3),rnd2);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4),rnd3);	
+	return(1);
 }
 
 struct razer_effect *effect7 = NULL;
 
-void effect7_update(struct razer_fx_render_node *render)
+int effect7_update(struct razer_fx_render_node *render)
 {
 	int count = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0));
 	int dir = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1));
-	int x,y;
 	struct razer_rgb color1={.r=50,.g=0,.b=0};
 	struct razer_rgb color2={.r=120,.g=0,.b=0};
 	struct razer_rgb color3={.r=255,.g=0,.b=0};
@@ -266,11 +285,12 @@ void effect7_update(struct razer_fx_render_node *render)
 		dir=-dir;
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0),count);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),dir);	
+	return(1);
 }
 
 struct razer_effect *effect8 = NULL;
 
-void effect8_update(struct razer_fx_render_node *render)
+int effect8_update(struct razer_fx_render_node *render)
 {
 	int v[3]={daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,6))};
 	int vdir[3] = {daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,7))};
@@ -306,11 +326,12 @@ void effect8_update(struct razer_fx_render_node *render)
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,5),v[2]);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,6),vdir[2]);	
 	//daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),&col);	
+	return(1);
 }
 
 struct razer_effect *effect9 = NULL;
 
-void effect9_update(struct razer_fx_render_node *render)
+int effect9_update(struct razer_fx_render_node *render)
 {
 	int v[3]={daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,6))};
 	int vdir[3] = {daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,7))};
@@ -345,6 +366,7 @@ void effect9_update(struct razer_fx_render_node *render)
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4),vdir[1]);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,5),v[2]);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,6),vdir[2]);	
+	return(1);
 }
 
 
@@ -575,6 +597,8 @@ void test_effect_scroll_frame(struct razer_keys *keys)
 
 #pragma GCC diagnostic pop
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 
 void fx_init(struct razer_daemon *daemon)
 {
@@ -749,7 +773,22 @@ void fx_init(struct razer_daemon *daemon)
 		printf("registered effect: %s (uid:%d)\n",effect8->name,effect8->id);
 	#endif
 
+
+	effect_mix1 = daemon_create_effect();
+	effect_mix1->update = effect1_update;
+	effect_mix1->name = "Default Mixer";
+	effect_mix1->description = "Standard effect mixer";
+	effect_mix1->fps = daemon->fps;
+	int effect_mix1_uid = daemon_register_effect(daemon,effect_mix1);
+	#ifdef USE_DEBUGGING
+		printf("registered mix effect: %s (uid:%d)\n",effect_mix1->name,effect_mix1->id);
+	#endif
+
+
 }
+
+#pragma GCC diagnostic pop
+
 
 void fx_shutdown(struct razer_daemon *daemon)
 {
@@ -780,4 +819,9 @@ void fx_shutdown(struct razer_daemon *daemon)
 	daemon_unregister_effect(daemon,effect7);
 	daemon_free_parameters(&effect7->parameters);
 	daemon_free_effect(&effect7);
+
+	daemon_unregister_effect(daemon,effect_mix1);
+	daemon_free_parameters(&effect_mix1->parameters);
+	daemon_free_effect(&effect_mix1);
+
 }

@@ -2,9 +2,12 @@
 
 void daemon_kill(struct razer_daemon *daemon,char *error_message)
 {
+	daemon->running = 0;
 	printf("Exiting daemon.\nError: %s\n",error_message);
 	exit(1);
 }
+
+
 
 char *daemon_parameter_to_json(struct razer_parameter *parameter)
 {
@@ -166,7 +169,6 @@ int daemon_dbus_add_method(struct razer_daemon *daemon,char *interface_name, cha
 	DBusError error;
 	dbus_error_init(&error);
 	char *match_front = "type='method_call',interface='";
-	int match_len = strlen(interface_name)+strlen(method_name)+strlen(match_front)+3;
 	char *match = str_CreateEmpty();
 	match = str_CatFree(match,match_front);
 	match = str_CatFree(match,interface_name);
@@ -519,7 +521,6 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 						break;
 					case RAZER_PARAMETER_TYPE_RGB:
 						{
-							int got_parms = 0;
 							struct razer_rgb *color = daemon_get_parameter_rgb(parameter);
 							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
 							{
@@ -566,6 +567,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
     if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_node", "create"))
 	{
 		int fx_uid=0;
+		char *name = NULL;
 		char *description = NULL;
 		reply = dbus_message_new_method_return(msg);
 
@@ -578,13 +580,18 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			dbus_message_iter_next(&parameters);
 			if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_STRING)
 			{
+				dbus_message_iter_get_basic(&parameters,&name);
+			}
+			dbus_message_iter_next(&parameters);
+			if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_STRING)
+			{
 				dbus_message_iter_get_basic(&parameters,&description);
 			}
 
-			if(fx_uid && description)
+			if(fx_uid && description && name)
 			{
 				dbus_message_iter_init_append(reply,&parameters);
-				struct razer_fx_render_node *rn = daemon_create_render_node(daemon,daemon_get_effect(daemon,fx_uid),-1,-1,-1,description);
+				struct razer_fx_render_node *rn = daemon_create_render_node(daemon,daemon_get_effect(daemon,fx_uid),-1,-1,-1,name,description);
 				daemon_register_render_node(daemon,rn);
 				char *rn_uid_json = str_CreateEmpty();
 				rn_uid_json = str_CatFree(rn_uid_json,"{\n");
@@ -652,27 +659,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				#ifdef USE_DEBUGGING
 					printf("dbus: connecting output frame buffer to render_node to: %d (@%x)\n",rn_uid,rn);
 				#endif
-				//if(daemon->is_frame_buffer_linked)
-				//{
-				//	daemon->frame_buffer = rn->output_frame;
-				//}
-				//else
-				//{
-				//	daemon_free_rgb_frame(&daemon->frame_buffer);
-				//	daemon->is_frame_buffer_linked = 1;
-				//	daemon->frame_buffer = rn->output_frame;
-				//}
-				if(daemon->frame_buffer_linked_uid != 0) //unlink old render node first
-				{
-					struct razer_fx_render_node *old_rn = daemon_get_render_node(daemon,daemon->frame_buffer_linked_uid);
-					old_rn->output_frame = daemon_create_rgb_frame();
-					old_rn->output_frame_linked_uid = -1;
-				}
-				if(rn->output_frame_linked_uid == -1)
-					daemon_free_rgb_frame(&rn->output_frame);
-				rn->output_frame = daemon->frame_buffer;
-				daemon->frame_buffer_linked_uid = rn->id;
-				daemon->is_render_nodes_dirty = 1;
+				daemon_connect_frame_buffer(daemon,rn);
 			}
 		}
  		dbus_uint32_t serial = 0;
@@ -770,17 +757,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				#ifdef USE_DEBUGGING
 					printf("dbus: connecting input frame buffer to render_node : %d (@%x) to %d (@%x)\n",rn_uid,rn,dst_rn_uid,dst_rn);
 				#endif
-				//if(rn->input_frame_linked_uid != 0) //unlink old render node first
-				//{
-				//	struct razer_fx_render_node *old_rn = daemon_get_render_node(daemon,daemon->frame_buffer_linked_uid);
-				//	old_rn->output_frame = daemon_create_rgb_frame();
-				//	old_rn->output_frame_linked_uid = -1;
-				//}
-				if(rn->input_frame_linked_uid == -1)
-					daemon_free_rgb_frame(&rn->input_frame);
-				rn->input_frame = dst_rn->output_frame;
-				rn->input_frame_linked_uid = dst_rn->id;
-				daemon->is_render_nodes_dirty = 1;
+				daemon_connect_input(daemon,rn,dst_rn);
 			}
 		}
  		dbus_uint32_t serial = 0;
@@ -817,17 +794,41 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				#ifdef USE_DEBUGGING
 					printf("dbus: connecting second input frame buffer to render_node : %d (@%x) to %d (@%x)\n",rn_uid,rn,dst_rn_uid,dst_rn);
 				#endif
-				//if(rn->input_frame_linked_uid != 0) //unlink old render node first
-				//{
-				//	struct razer_fx_render_node *old_rn = daemon_get_render_node(daemon,daemon->frame_buffer_linked_uid);
-				//	old_rn->output_frame = daemon_create_rgb_frame();
-				//	old_rn->output_frame_linked_uid = -1;
-				//}
-				if(rn->second_input_frame_linked_uid == -1)
-					daemon_free_rgb_frame(&rn->second_input_frame);
-				rn->second_input_frame = dst_rn->output_frame;
-				rn->second_input_frame_linked_uid = dst_rn->id;
-				daemon->is_render_nodes_dirty = 1;
+				daemon_connect_second_input(daemon,rn,dst_rn);
+			}
+		}
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+	}
+
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_node.next", "set"))
+	{
+		char **path = NULL;
+		dbus_message_get_path_decomposed(msg,&path);
+		#ifdef USE_DEBUGGING
+			printf("dbus: method set render_node.next called for : %s\n",path[0]);
+		#endif
+		int rn_uid=0;
+		int dst_rn_uid=0;
+		if(path[0] != NULL)
+			rn_uid = atoi(path[0]);
+		dbus_free_string_array(path);
+		reply = dbus_message_new_method_return(msg);
+
+		if(dbus_message_iter_init(msg, &parameters))
+		{
+			if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+			{
+				dbus_message_iter_get_basic(&parameters,&dst_rn_uid);
+			}
+			if(rn_uid && dst_rn_uid)
+			{
+				dbus_message_iter_init_append(reply,&parameters);
+				struct razer_fx_render_node *rn = daemon_get_render_node(daemon,rn_uid);
+				struct razer_fx_render_node *dst_rn = daemon_get_render_node(daemon,dst_rn_uid);
+				rn->next = dst_rn;
 			}
 		}
  		dbus_uint32_t serial = 0;
@@ -995,8 +996,59 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		}
 	}
 	dbus_message_unref(msg);
+	return(1);
 }
 
+void daemon_connect_frame_buffer(struct razer_daemon *daemon,struct razer_fx_render_node *render_node)
+{
+	if(daemon->frame_buffer_linked_uid != 0) //unlink old render node first
+	{
+		struct razer_fx_render_node *old_rn = daemon_get_render_node(daemon,daemon->frame_buffer_linked_uid);
+		old_rn->output_frame = daemon_create_rgb_frame();
+		old_rn->output_frame_linked_uid = -1;
+	}
+	if(render_node->output_frame_linked_uid == -1)
+		daemon_free_rgb_frame(&render_node->output_frame);
+	render_node->output_frame = daemon->frame_buffer;
+	daemon->frame_buffer_linked_uid = render_node->id;
+	daemon->is_render_nodes_dirty = 1;
+}
+
+void daemon_connect_input(struct razer_daemon *daemon,struct razer_fx_render_node *render_node,struct razer_fx_render_node *input_node)
+{
+	//if(render_node->input_frame_linked_uid != 0) //unlink old render node first
+	//{
+	//	struct razer_fx_render_node *old_rn = daemon_get_render_node(daemon,daemon->frame_buffer_linked_uid);
+	//	old_rn->output_frame = daemon_create_rgb_frame();
+	//	old_rn->output_frame_linked_uid = -1;
+	//}
+	if(render_node->input_frame_linked_uid == -1)
+		daemon_free_rgb_frame(&render_node->input_frame);
+	render_node->input_frame = input_node->output_frame;
+	render_node->input_frame_linked_uid = input_node->id;
+	daemon->is_render_nodes_dirty = 1;
+}
+
+void daemon_set_default_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node)
+{
+	daemon->render_node = render_node;
+}
+
+
+void daemon_connect_second_input(struct razer_daemon *daemon,struct razer_fx_render_node *render_node,struct razer_fx_render_node *input_node)
+{
+	//if(render_node->input_frame_linked_uid != 0) //unlink old render node first
+	//{
+	//	struct razer_fx_render_node *old_rn = daemon_get_render_node(daemon,daemon->frame_buffer_linked_uid);
+	//	old_rn->output_frame = daemon_create_rgb_frame();
+	//	old_rn->output_frame_linked_uid = -1;
+	//}
+	if(render_node->second_input_frame_linked_uid == -1)
+		daemon_free_rgb_frame(&render_node->second_input_frame);
+	render_node->second_input_frame = input_node->output_frame;
+	render_node->second_input_frame_linked_uid = input_node->id;
+	daemon->is_render_nodes_dirty = 1;
+}
 
 void daemon_dbus_close(struct razer_daemon *daemon)
 {
@@ -1005,6 +1057,10 @@ void daemon_dbus_close(struct razer_daemon *daemon)
 }
 
 #endif
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 
 void *daemon_load_fx_lib(struct razer_daemon *daemon,char *fx_pathname)
 {
@@ -1038,6 +1094,9 @@ void *daemon_load_fx_lib(struct razer_daemon *daemon,char *fx_pathname)
 	}
 	return(lib);
 }
+
+#pragma GCC diagnostic pop
+
 //int daemon_unload_fx_lib(struct razer_daemon *daemon,)
 
 struct razer_daemon *daemon_open(void)
@@ -1056,7 +1115,7 @@ struct razer_daemon *daemon_open(void)
  	daemon->effects = NULL;
  	daemon->fx_render_nodes_num = 0;
  	daemon->fx_render_nodes_uid = 1;
- 	daemon->fx_render_nodes = NULL;
+ 	daemon->fx_render_nodes = NULL;//list of all render_nodes available
  	daemon->is_render_nodes_dirty = 0;
  	daemon->render_nodes = NULL;
  	daemon->render_nodes_num = 0;
@@ -1089,14 +1148,10 @@ struct razer_daemon *daemon_open(void)
 	daemon->frame_buffer_linked_uid = 0;
 	daemon->return_render_node = NULL;
 
-	//struct razer_rgb_frame *input_frame = daemon_create_rgb_frame();
-	//struct razer_rgb_frame *output_frame = daemon_create_rgb_frame();
-    //struct razer_rgb_frame *sub_input_frame = daemon_create_rgb_frame();
-	//struct razer_rgb_frame *sub_output_frame = daemon_create_rgb_frame();
-	//struct razer_rgb_frame *sub2_input_frame = daemon_create_rgb_frame();
 	razer_set_custom_mode(daemon->chroma);
 	clear_all(daemon->chroma->keys);
 	razer_update_keys(daemon->chroma,daemon->chroma->keys);
+
 	#ifdef USE_DEBUGGING
 		void *lib = daemon_load_fx_lib(daemon,"daemon/fx/pez2001_collection_debug.so");
 	#else
@@ -1105,26 +1160,15 @@ struct razer_daemon *daemon_open(void)
 	if(lib)
 		daemon_register_lib(daemon,lib);
 
-	//daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,1),input_frame,output_frame,"First Test Render Node");
-	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,2),-1,-1,0,"First Test Render Node");
+	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,2),-1,-1,0,"First Test Render Node","Default Render Node");
 	daemon_register_render_node(daemon,daemon->render_node);
 	daemon_compute_render_nodes(daemon);
 
-	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,3),-1,-1,0,"Second Test Render Node");
+	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,3),-1,-1,0,"Second Test Render Node","Additional Testing Render Node");
 	daemon_register_render_node(daemon,daemon->render_node);
 	daemon_compute_render_nodes(daemon);
+	daemon_connect_frame_buffer(daemon,daemon->render_node);
 
-	//struct razer_fx_render_node *sub = daemon_create_render_node(daemon,daemon_get_effect(daemon,2),sub_input_frame,sub_output_frame,"Sub Test Render Node");
-	//struct razer_fx_render_node *sub2= daemon_create_render_node(daemon,daemon_get_effect(daemon,7),sub2_input_frame,daemon->frame_buffer,"2nd Level Sub Test Render Node");
-	//daemon_render_node_add_sub(daemon->render_node,sub);
-	//daemon_render_node_add_sub(sub,sub2);
-	//daemon->render_node->opacity = 1.0f;
-	//sub->opacity = 0.5f;
-	//sub2->opacity = 0.5f;
-	//daemon_get_effect(daemon,1)->parameters->items[0]->value = (int)88;
-	//struct razer_rgb *render_rgb = daemon_get_parameter_rgb(daemon_get_effect(daemon,2)->parameters->items[0]);
-	//render_rgb->r = 0;
-	//render_rgb->g = 255;
  	return(daemon);
 }
 
@@ -1165,7 +1209,7 @@ struct razer_effect *daemon_create_effect_instance(struct razer_daemon *daemon,s
 int daemon_update_render_node(struct razer_fx_render_node *render_node)
 {
 	if(!render_node || !render_node->effect)
-		return(0);
+		return(-1);
 
 	if(render_node->subs_num)
 	{
@@ -1174,27 +1218,37 @@ int daemon_update_render_node(struct razer_fx_render_node *render_node)
 			//razer_copy_rows(render_node->output_frame->rows,render_node->subs[i]->input_frame->rows,render_node->output_frame->update_mask,1);
 			//render_node->input_frame->update_mask |= render_node->output_frame->update_mask;
 			//int sub_ret = render_node->subs[i]->effect->update(render_node->subs[i]);
-			//int sub_ret = daemon_update_render_node(render_node->subs[i]);
+			int sub_ret = daemon_update_render_node(render_node->subs[i]);
+			if(sub_ret)
+			{
+
+			}
 		}
 	}
 	int ret = render_node->effect->update(render_node);
+	return(ret);
 }
 
 int daemon_update_render_nodes(struct razer_daemon *daemon)
 {
-	//if(daemon->render_node)
-	//{
 	if(daemon->is_render_nodes_dirty)
 		daemon_compute_render_nodes(daemon);
 		//printf("daemon render_nodes to update:%d\n",daemon->render_nodes_num);
+	int ret = 0;
 	for(int i = daemon->render_nodes_num-1;i>=0;i--)
 	{
-		daemon_update_render_node(daemon->render_nodes[i]);
+		ret = daemon_update_render_node(daemon->render_nodes[i]);
+	}
+	if(ret)
+	{
+		//root render_node effect returned 0
+		//start next render_node in chain or default
+
 	}
 		//razer_clear_frame(daemon->render_node->input_frame);
 		//daemon_update_render_node(daemon->render_node);
 	razer_update_frame(daemon->chroma,daemon->frame_buffer);
-	//}
+	return(1);
 }
 
 
@@ -1214,9 +1268,10 @@ int daemon_run(struct razer_daemon *daemon)
 			printf("\rframe time:%ums,actual fps:%f (Wanted:%d)",end_ticks-ticks,1000.0f/(float)(end_ticks-ticks),daemon->render_node->effect->fps);
 		#endif
 	}
+	return(1);
 }
 
-void daemon_compute_queue_append_render_node(struct razer_fx_render_node *render_node,struct razer_queue *queue)
+void daemon_queue_append_render_node(struct razer_queue *queue,struct razer_fx_render_node *render_node)
 {
 	if(queue->items!=NULL)
 		queue->items = (void**)realloc(queue->items,sizeof(void*)*(queue->num+1));
@@ -1229,9 +1284,9 @@ void daemon_compute_queue_append_render_node(struct razer_fx_render_node *render
 void daemon_compute_append_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node)
 {
 	if(daemon->render_nodes!=NULL)
-		daemon->render_nodes = (void**)realloc(daemon->render_nodes,sizeof(void*)*(daemon->render_nodes_num+1));
+		daemon->render_nodes = (struct razer_fx_render_node**)realloc(daemon->render_nodes,sizeof(void*)*(daemon->render_nodes_num+1));
 	else
-		daemon->render_nodes = (void**)malloc(sizeof(void*));
+		daemon->render_nodes = (struct razer_fx_render_node**)malloc(sizeof(void*));
 	daemon->render_nodes[daemon->render_nodes_num] = render_node;
 	daemon->render_nodes_num++;
 }
@@ -1243,9 +1298,9 @@ void daemon_compute_append_queue(struct razer_daemon *daemon,struct razer_queue 
 		struct razer_fx_render_node *render_node = (struct razer_fx_render_node*)queue->items[queue->pos];
 		daemon_compute_append_render_node(daemon,render_node);
 		if(render_node->input_frame_linked_uid!=-1 && render_node->input_frame_linked_uid != 0)
-			daemon_compute_queue_append_render_node(daemon_get_render_node(daemon,render_node->input_frame_linked_uid),queue);
+			daemon_queue_append_render_node(queue,daemon_get_render_node(daemon,render_node->input_frame_linked_uid));
 		if(render_node->second_input_frame_linked_uid!=-1 && render_node->second_input_frame_linked_uid != 0)
-			daemon_compute_queue_append_render_node(daemon_get_render_node(daemon,render_node->second_input_frame_linked_uid),queue);
+			daemon_queue_append_render_node(queue,daemon_get_render_node(daemon,render_node->second_input_frame_linked_uid));
 		queue->pos++;
 	}
 }
@@ -1262,7 +1317,7 @@ void daemon_compute_render_nodes(struct razer_daemon *daemon)
 	struct razer_fx_render_node *rn = daemon_get_render_node(daemon,daemon->frame_buffer_linked_uid);
 	if(rn)
 	{
-		daemon_compute_queue_append_render_node(rn,queue);
+		daemon_queue_append_render_node(queue,rn);
 		daemon_compute_append_queue(daemon,queue);
 	}
 	daemon_free_queue(&queue);
@@ -1321,16 +1376,17 @@ int daemon_register_render_node(struct razer_daemon *daemon,struct razer_fx_rend
 	daemon->fx_render_nodes_num++;
 	return(daemon->fx_render_nodes[daemon->fx_render_nodes_num-1]->id);
 }
-
+/*
 int daemon_unregister_effect(struct razer_daemon *daemon,struct razer_effect *effect)
 {
 	//remove effect
 	//fill gap if there is one left by effect
 	//realloc
 }
+*/
 
 //struct razer_fx_render_node *daemon_create_render_node(struct razer_daemon *daemon,struct razer_effect *effect,struct razer_rgb_frame *input_frame,struct razer_rgb_frame *second_input_frame,struct razer_rgb_frame *output_frame,char *description)
-struct razer_fx_render_node *daemon_create_render_node(struct razer_daemon *daemon,struct razer_effect *effect,int input_render_node_uid,int second_input_render_node_uid,int output_render_node_uid,char *description)
+struct razer_fx_render_node *daemon_create_render_node(struct razer_daemon *daemon,struct razer_effect *effect,int input_render_node_uid,int second_input_render_node_uid,int output_render_node_uid,char *name,char *description)
 {
 	struct razer_fx_render_node *render_node = (struct razer_fx_render_node*)malloc(sizeof(struct razer_fx_render_node));
 	render_node->daemon = daemon;
@@ -1395,6 +1451,7 @@ struct razer_fx_render_node *daemon_create_render_node(struct razer_daemon *daem
 	}*/
 
 	render_node->description = str_Copy(description);
+	render_node->name = str_Copy(name);
 	//render_node->fps = daemon->fps;
 	render_node->compose_mode = RAZER_COMPOSE_MODE_MIX;
 	render_node->next = NULL;
@@ -1525,7 +1582,7 @@ struct razer_parameter *daemon_create_parameter_string(char *key,char *descripti
 	struct razer_parameter *parameter = daemon_create_parameter();
 	parameter->key = key;
 	parameter->description = description;
-	parameter->value = value;
+	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_STRING;
 	return(parameter);
 }
@@ -1535,7 +1592,8 @@ struct razer_parameter *daemon_create_parameter_float(char *key,char *descriptio
 	struct razer_parameter *parameter = daemon_create_parameter();
 	parameter->key = key;
 	parameter->description = description;
-	parameter->value = value;
+	float *fp = (float*)&(parameter->value);
+    *fp = value;
 	parameter->type = RAZER_PARAMETER_TYPE_FLOAT;
 	return(parameter);
 }
@@ -1545,7 +1603,7 @@ struct razer_parameter *daemon_create_parameter_int(char *key,char *description,
 	struct razer_parameter *parameter = daemon_create_parameter();
 	parameter->key = key;
 	parameter->description = description;
-	parameter->value = value;
+	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_INT;
 	return(parameter);
 }
@@ -1555,7 +1613,7 @@ struct razer_parameter *daemon_create_parameter_rgb(char *key,char *description,
 	struct razer_parameter *parameter = daemon_create_parameter();
 	parameter->key = key;
 	parameter->description = description;
-	parameter->value = value;
+	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_RGB;
 	return(parameter);
 }
@@ -1565,7 +1623,7 @@ struct razer_parameter *daemon_create_parameter_render_node(char *key,char *desc
 	struct razer_parameter *parameter = daemon_create_parameter();
 	parameter->key = key;
 	parameter->description = description;
-	parameter->value = value;
+	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_RENDER_NODE;
 	return(parameter);
 }
@@ -1579,7 +1637,7 @@ void daemon_set_parameter_string(struct razer_parameter *parameter,char *value)
 		#endif
 		return;
 	}
-	parameter->value = value;
+	parameter->value = (unsigned long)value;
 }
 
 void daemon_set_parameter_float(struct razer_parameter *parameter,float value)
@@ -1591,7 +1649,9 @@ void daemon_set_parameter_float(struct razer_parameter *parameter,float value)
 		#endif
 		return;
 	}
-	parameter->value = value;
+	float *fp = (float*)&(parameter->value);
+    *fp = value;
+	//parameter->value = value;
 }
 
 void daemon_set_parameter_int(struct razer_parameter *parameter,int value)
@@ -1603,7 +1663,7 @@ void daemon_set_parameter_int(struct razer_parameter *parameter,int value)
 		#endif
 		return;
 	}
-	parameter->value = value;
+	parameter->value = (unsigned long)value;
 }
 
 void daemon_set_parameter_rgb(struct razer_parameter *parameter,struct razer_rgb *value)
@@ -1615,7 +1675,7 @@ void daemon_set_parameter_rgb(struct razer_parameter *parameter,struct razer_rgb
 		#endif
 		return;
 	}
-	parameter->value = value;
+	parameter->value = (unsigned long)value;
 }
 
 void daemon_set_parameter_render_node(struct razer_parameter *parameter,struct razer_fx_render_node *value)
@@ -1627,7 +1687,7 @@ void daemon_set_parameter_render_node(struct razer_parameter *parameter,struct r
 		#endif
 		return;
 	}
-	parameter->value = value;
+	parameter->value = (unsigned long)value;
 }
 
 
@@ -1638,7 +1698,9 @@ char *daemon_get_parameter_string(struct razer_parameter *parameter)
 
 float daemon_get_parameter_float(struct razer_parameter *parameter)
 {
-	return((float)parameter->value);
+	float *fp = (float*)&(parameter->value);
+	return(*fp);
+	//return((float)parameter->value);
 }
 
 int daemon_get_parameter_int(struct razer_parameter *parameter)
@@ -1794,6 +1856,8 @@ int daemonize()
 	return(1);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 int main(int argc,char *argv[])
 {
@@ -1811,3 +1875,6 @@ int main(int argc,char *argv[])
 	daemon_run(daemon);
     daemon_close(&daemon);
 }
+
+#pragma GCC diagnostic pop
+

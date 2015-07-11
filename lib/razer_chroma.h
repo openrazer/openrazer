@@ -122,7 +122,7 @@ void razer_close(struct razer_chroma *chroma);
 void razer_update(struct razer_chroma *chroma);
 void razer_set_input_handler(struct razer_chroma *chroma,razer_input_handler handler);
 unsigned long razer_get_ticks();
-
+void razer_frame_limiter(struct razer_chroma *chroma,int fps);
 
 
 void razer_set_custom_mode(struct razer_chroma *chroma);

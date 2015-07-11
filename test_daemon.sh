@@ -9,9 +9,9 @@
 
 #first parameter is the effect uid
 #returns the uid of the render node created as json
-RUID=`sudo dbus-send --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:1 string:"Ext Node" | jq '.uid'`
-RUID2=`sudo dbus-send --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:2 string:"Ext Node 2" | jq '.uid'`
-RUID3=`sudo dbus-send --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:3 string:"Ext Node 3" | jq '.uid'`
+RUID=`sudo dbus-send --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:1 string:"Ext Node" string:"a test node" | jq '.uid'`
+RUID2=`sudo dbus-send --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:2 string:"Ext Node 2" string:"test node 2" | jq '.uid'`
+RUID3=`sudo dbus-send --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:3 string:"Ext Node 3" string:"test node 3" | jq '.uid'`
 #[ $? -eq 0 ] || echo "no daemon found";exit $?;
 echo "setting render node uid : $RUID"
 
