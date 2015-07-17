@@ -27,7 +27,7 @@ typedef int (*razer_effect_open)(struct razer_fx_render_node *render);//called w
 typedef int (*razer_effect_close)(struct razer_fx_render_node *render);//called when effect is removed from a render node
 typedef int (*razer_effect_reset)(struct razer_fx_render_node *render);//called every time a effect is called for the first time in a render node(loops trigger too)
 typedef int (*razer_effect_update)(struct razer_fx_render_node *render);//called every frame - returns 0 if execution is completed
-typedef int (*razer_effect_key_event)(struct razer_fx_render_node *render);//handler for key events
+typedef int (*razer_effect_key_event)(struct razer_fx_render_node *render,int keycode,int pressed);//handler for key events
 typedef int (*razer_effect_dbus_event)(struct razer_fx_render_node *render);//handler for dbus events
 
 typedef void (*razer_effect_init)(struct razer_daemon *daemon);//called when libray is loaded
@@ -54,6 +54,7 @@ struct razer_parameter
 	char *description;
 	//void *value;
 	unsigned long value;
+	//unsigned long default_value
 	int type;
 };
 
@@ -63,6 +64,10 @@ struct razer_parameters
 	int items_uid;
 	struct razer_parameter **items;
 };
+
+#define RAZER_EFFECT_NO_INPUT_USED 0
+#define RAZER_EFFECT_FIRST_INPUT_USED 1
+#define RAZER_EFFECT_SECOND_INPUT_USED 2
 
 struct razer_effect
 {
@@ -99,10 +104,12 @@ struct razer_fx_render_node
 	struct razer_fx_render_node *parent;
 	int subs_num;
 	struct razer_fx_render_node **subs; //TODO reuse subs for computational only effects (seeding /randomizing values etc)
-	unsigned long start_ms;
+	unsigned long start_ticks;
 	int limit_render_time_ms;
+	int running;//set to zero to stop node before next update
 	int continue_chain;
 	int loop_count;// -1 == no looping
+	struct razer_fx_render_node *prev;
 	struct razer_fx_render_node *next;
 };
 
@@ -197,5 +204,7 @@ struct razer_fx_render_node *daemon_get_parameter_render_node(struct razer_param
 
 void daemon_render_node_add_sub(struct razer_fx_render_node *render_node,struct razer_fx_render_node *sub_node);
 
+
+int daemon_key_event_handler(struct razer_chroma *chroma,int keycode,int pressed);
 
 #endif

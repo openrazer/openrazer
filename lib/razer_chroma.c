@@ -1466,9 +1466,9 @@ void razer_update(struct razer_chroma *chroma)
 				struct input_event *event = (struct input_event*)(buf+(i*sizeof(struct input_event)));
 				if(event->type==EV_KEY)
 				{
+					keycode = event->code;
 					if(event->value==1)
 					{
-						keycode = event->code;
 						//if(keycode!=last_keycode)
 						{
 							/*if(keycode==183)

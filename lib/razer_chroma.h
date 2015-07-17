@@ -105,6 +105,7 @@ struct razer_chroma
 	razer_input_handler input_handler;
 	struct razer_pos last_key_pos;//TODO move to sub struct pointer to pointers
 	struct razer_pos key_pos;//or remove
+	void *tag;
 };
 
 
@@ -160,6 +161,9 @@ void rgb_mix_into(struct razer_rgb *dst,struct razer_rgb *src_a,struct razer_rgb
 void convert_keycode_to_pos(int keycode,struct razer_pos *pos);
 void convert_pos_to_keycode(struct razer_pos *pos,int *keycode);
 void convert_ascii_to_pos(unsigned char letter,struct razer_pos *pos);
+int razer_get_key_class(int keycode);
+
+
 void set_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color);
 void add_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color);
 void sub_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color);
