@@ -14,24 +14,24 @@ all: fx_debug fx
 fx_debug: 
 	@echo "::\033[32m COMPILING pez2001 fx collection [DEBUG]\033[0m"
 	@echo "==========================================="
-	$(CC) pez2001_collection.c $(DEBUG_CFLAGS) $(LIBS) -c -o pez2001_collection.do $<
+	$(CC) pez2001_collection.c $(DEBUG_CFLAGS) $(LIBS) -c -o pez2001_collection.do 
 	$(CC) $(LDFLAGS) -rdynamic -nostdlib -DCREATELIB -shared pez2001_collection.do -o pez2001_collection_debug.so
 
 	@echo "::\033[32m COMPILING pez2001 fx mixer[DEBUG]\033[0m"
 	@echo "==========================================="
-	$(CC) pez2001_mixer.c $(DEBUG_CFLAGS) $(LIBS) -c -o pez2001_mixer.do $<
+	$(CC) pez2001_mixer.c $(DEBUG_CFLAGS) $(LIBS) -c -o pez2001_mixer.do 
 	$(CC) $(LDFLAGS) -rdynamic -nostdlib -DCREATELIB -shared pez2001_mixer.do -o pez2001_mixer_debug.so
 
 fx: 
 	@echo "::\033[32m COMPILING pez2001 fx collection\033[0m"
 	@echo "==================================="
-	$(CC) pez2001_collection.c $(CFLAGS) $(LIBS) -c -o pez2001_collection.o $<
+	$(CC) pez2001_collection.c $(CFLAGS) $(LIBS) -c -o pez2001_collection.o 
 	$(CC) $(LDFLAGS) -rdynamic -nostdlib -DCREATELIB -shared pez2001_collection.o -o pez2001_collection.so
 	@strip pez2001_collection.so
 
 	@echo "::\033[32m COMPILING pez2001 fx mixer\033[0m"
 	@echo "==================================="
-	$(CC) pez2001_mixer.c $(CFLAGS) $(LIBS) -c -o pez2001_mixer.o $<
+	$(CC) pez2001_mixer.c $(CFLAGS) $(LIBS) -c -o pez2001_mixer.o
 	$(CC) $(LDFLAGS) -rdynamic -nostdlib -DCREATELIB -shared pez2001_mixer.o -o pez2001_mixer.so
 	@strip pez2001_mixer.so
 

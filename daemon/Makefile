@@ -29,19 +29,19 @@ all: daemon_shared daemon_static daemon_debug daemon_fx
 daemon_debug: 
 	@echo "::\033[32m COMPILING razer_bcd daemon [DEBUG]\033[0m"
 	@echo "======================================"
-	$(CC) razer_daemon.c $(DEBUG_CFLAGS) $(LIBS) librazer_chroma.da -o razer_bcd_debug_static $<
-	$(CC) razer_daemon.c $(DEBUG_CFLAGS) $(LIBS) librazer_chroma_debug.so -o razer_bcd_debug_shared $<
+	$(CC) razer_daemon.c $(DEBUG_CFLAGS) $(LIBS) librazer_chroma.da -o razer_bcd_debug_static 
+	$(CC) razer_daemon.c $(DEBUG_CFLAGS) $(LIBS) librazer_chroma_debug.so -o razer_bcd_debug_shared 
 
 daemon_static: 
 	@echo "::\033[32m COMPILING razer_bcd daemon\033[0m"
 	@echo "=============================="
-	$(CC) razer_daemon.c $(CFLAGS) $(LIBS) librazer_chroma.a -o razer_bcd_static $<
+	$(CC) razer_daemon.c $(CFLAGS) $(LIBS) librazer_chroma.a -o razer_bcd_static 
 	@strip razer_bcd_static
 
 daemon_shared: 
 	@echo "::\033[32m COMPILING razer_bcd [SHARED]\033[0m"
 	@echo "================================"
-	$(CC) razer_daemon.c $(CFLAGS) $(LIBS) librazer_chroma.so -o razer_bcd $<
+	$(CC) razer_daemon.c $(CFLAGS) $(LIBS) librazer_chroma.so -o razer_bcd
 	@strip razer_bcd
 
 daemon_fx: 
