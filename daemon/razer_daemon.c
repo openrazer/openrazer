@@ -590,6 +590,19 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 						}
 						break;
 					case RAZER_PARAMETER_TYPE_RENDER_NODE:
+						{
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: Node id parameter:%d\n",value);
+								#endif
+								struct razer_fx_render_node *dst_rn = daemon_get_render_node(daemon,(int)value);
+								if(dst_rn)
+									daemon_set_parameter_render_node(parameter,dst_rn);
+							}
+						}
 						break;
 				}
 			}
