@@ -1383,7 +1383,8 @@ struct razer_daemon *daemon_open(void)
 	#ifdef USE_DEBUGGING
 		void *lib = daemon_load_fx_lib(daemon,"daemon/fx/pez2001_collection_debug.so");
 	#else
-		void *lib = daemon_load_fx_lib(daemon,"daemon/fx/pez2001_collection.so");
+		//void *lib = daemon_load_fx_lib(daemon,"daemon/fx/pez2001_collection.so");
+		void *lib = daemon_load_fx_lib(daemon,"/usr/share/razer_bcd/fx/pez2001_collection.so");
 	#endif
 	if(lib)
 		daemon_register_lib(daemon,lib);
@@ -1458,6 +1459,12 @@ int daemon_update_render_node(struct razer_daemon *daemon,struct razer_fx_render
 	{
 		render_node->start_ticks = razer_get_ticks();
 		render_node->running  = 1;
+		for(int i=0;i<render_node->subs_num;i++)
+		{
+			struct razer_fx_render_node *sub = render_node->subs[i];
+			sub->start_ticks = 0;
+			sub->running  = 1;
+		}
 	}
 	if(!render_node->running)
 		return(0);
@@ -1469,11 +1476,17 @@ int daemon_update_render_node(struct razer_daemon *daemon,struct razer_fx_render
 		for(int i=0;i<render_node->subs_num;i++)
 		{
 			struct razer_fx_render_node *sub = render_node->subs[i];
+			if(!sub->effect)
+				continue;
+			if(sub->effect->class&=2)
+				continue;//only execute compute effects
 			if(!sub->start_ticks)
 			{
 				sub->start_ticks = razer_get_ticks();
 				sub->running  = 1;
 			}
+			if(!sub->running)
+				continue;
 			int sub_ret = daemon_update_render_node(daemon,sub);
 			if(!sub_ret || daemon_has_render_node_reached_render_limit(daemon,sub) || !sub->running)
 			{
@@ -1483,7 +1496,7 @@ int daemon_update_render_node(struct razer_daemon *daemon,struct razer_fx_render
 					sub->next->parent = render_node;
 					sub->next->start_ticks = 0; 
 				}
-				//render_node->running = 0;
+				sub->running = 0;
 				//return(0);
 			}
 		}
@@ -1567,6 +1580,8 @@ int daemon_key_event_render_node(struct razer_daemon *daemon,struct razer_fx_ren
 				sub->start_ticks = razer_get_ticks();
 				sub->running  = 1;
 			}
+			if(!sub->running)
+				continue;
 			int sub_ret = daemon_key_event_render_node(daemon,sub,keycode,pressed);
 			if(!sub_ret || daemon_has_render_node_reached_render_limit(daemon,sub) || !sub->running)
 			{
@@ -1576,7 +1591,7 @@ int daemon_key_event_render_node(struct razer_daemon *daemon,struct razer_fx_ren
 					sub->next->parent = render_node;
 					sub->next->start_ticks = 0; 
 				}
-				//render_node->running = 0;
+				sub->running = 0;
 				//return(0);
 			}
 		}
@@ -1853,7 +1868,7 @@ struct razer_fx_render_node *daemon_create_render_node(struct razer_daemon *daem
 	render_node->start_ticks = 0;
 	render_node->running = 0;//set to 1 with first update
 	render_node->limit_render_time_ms = 0;
-	render_node->continue_chain=1;
+	//render_node->continue_chain=1;
 	render_node->loop_count = -1;
 	return(render_node);
 }
@@ -2094,11 +2109,15 @@ void daemon_set_parameter_render_node(struct razer_parameter *parameter,struct r
 
 char *daemon_get_parameter_string(struct razer_parameter *parameter)
 {
+	if(!parameter)
+		return(NULL);
 	return((char*)parameter->value);
 }
 
 float daemon_get_parameter_float(struct razer_parameter *parameter)
 {
+	if(!parameter)
+		return(0.0f);
 	float *fp = (float*)&(parameter->value);
 	return(*fp);
 	//return((float)parameter->value);
@@ -2106,11 +2125,15 @@ float daemon_get_parameter_float(struct razer_parameter *parameter)
 
 int daemon_get_parameter_int(struct razer_parameter *parameter)
 {
+	if(!parameter)
+		return(0);
 	return((int)parameter->value);
 }
 
 struct razer_rgb *daemon_get_parameter_rgb(struct razer_parameter *parameter)
 {
+	if(!parameter)
+		return(NULL);
 	return((struct razer_rgb*)parameter->value);
 }
 

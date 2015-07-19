@@ -58,9 +58,7 @@ struct razer_effect *effect_transition = NULL;
 int effect_transition_update(struct razer_fx_render_node *render)
 {
 	int length_ms = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0));
-	//int count = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1));
 	int dir = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1));
-	//count+=dir;
 	unsigned long start = render->start_ticks;
 	unsigned long end = start + length_ms;
 	unsigned long ticks_left = end - render->daemon->chroma->update_ms;
@@ -91,11 +89,75 @@ int effect_transition_update(struct razer_fx_render_node *render)
 	}
 	if(render->parent) //compute effects should only be added as sub so this should be always fine
 		render->parent->opacity = opacity;
-
-	//if(count<=0 || count>=daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0)))
-	//	dir=-dir;
-	//daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0),length_ms);	
 	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),dir);	
+	return(1);
+}
+
+struct razer_effect *effect_random_col = NULL;
+struct razer_rgb effect_random_col_dst_rgb = {.r=0,.g=0,.b=0};
+struct razer_rgb effect_random_col_src_rgb = {.r=0,.g=0,.b=0};
+
+int effect_random_col_update(struct razer_fx_render_node *render)
+{
+	int length_ms = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0));
+	int par_index = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1));
+	if(par_index == -1)
+		return(0);
+	int randomize_now = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2));
+	struct razer_rgb *dst_color = daemon_get_parameter_rgb(daemon_get_parameter_by_index(render->effect->parameters,3));
+	struct razer_rgb *src_color = daemon_get_parameter_rgb(daemon_get_parameter_by_index(render->effect->parameters,4));
+	if(randomize_now)
+	{
+		struct razer_rgb *org_color = NULL;
+		if(render->parent) 
+		{
+			org_color = daemon_get_parameter_rgb(daemon_get_parameter_by_index(render->parent->effect->parameters,par_index));
+		}
+		if(org_color)
+		{
+			src_color->r = org_color->r;
+			src_color->g = org_color->g;
+			src_color->b = org_color->b;
+		}
+
+		dst_color->r = random() % 256;
+		dst_color->g = random() % 256;
+		dst_color->b = random() % 256;
+		daemon_set_parameter_rgb(daemon_get_parameter_by_index(render->effect->parameters,3),dst_color);	
+		daemon_set_parameter_rgb(daemon_get_parameter_by_index(render->effect->parameters,4),src_color);	
+		randomize_now = 0;
+	}
+	unsigned long start = render->start_ticks;
+	unsigned long end = start + length_ms;
+	unsigned long ticks_left = end - render->daemon->chroma->update_ms;
+	float trans = 0.0f;
+	trans = (float)ticks_left / (float)length_ms;
+	if(end<render->daemon->chroma->update_ms)
+	{
+		//#ifdef USE_DEBUGGING
+		//	printf("\n(Compute::RandomCol.%d ## finished)\n",render->id);
+		//#endif
+		daemon_set_parameter_rgb(daemon_get_parameter_by_index(render->parent->effect->parameters,par_index),dst_color);	
+		randomize_now = 1;
+		daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2),randomize_now);	
+		return(0);
+	}
+	else
+	{
+		#ifdef USE_DEBUGGING
+			printf(" (Compute::RandomCol.%d ## length_ms:%d,trans_color:%d,%d,%d,trans:%f)",render->id,length_ms,dst_color->r,dst_color->g,dst_color->b,trans);
+		#endif
+		if(render->parent) 
+		{
+			struct razer_rgb trans_color;
+			//trans_color.r=dst_color->r*trans;
+			rgb_mix_into(&trans_color,dst_color,src_color,trans);
+			daemon_set_parameter_rgb(daemon_get_parameter_by_index(render->parent->effect->parameters,par_index),&trans_color);	
+		}
+	}
+
+
+	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2),randomize_now);	
 	return(1);
 }
 
@@ -107,6 +169,7 @@ int effect_transition_update(struct razer_fx_render_node *render)
 
 void fx_init(struct razer_daemon *daemon)
 {
+	srand(time(NULL));
 	struct razer_parameter *parameter = NULL;
 	effect_transition = daemon_create_effect();
 	effect_transition->update = effect_transition_update;
@@ -152,7 +215,7 @@ void fx_init(struct razer_daemon *daemon)
 	#endif
 
 	effect_wait = daemon_create_effect();
-	effect_wait->update = effect_wait_update;
+	//effect_wait->update = effect_wait_update;
 	effect_wait->key_event = effect_wait_key_event;
 	effect_wait->name = "Wait For Key Compute Node";
 	effect_wait->description = "Waits for a key and returns 0 ,it does nothing else";
@@ -163,6 +226,29 @@ void fx_init(struct razer_daemon *daemon)
 	#ifdef USE_DEBUGGING
 		printf("registered compute effect: %s (uid:%d)\n",effect_wait->name,effect_wait->id);
 	#endif
+
+	effect_random_col = daemon_create_effect();
+	effect_random_col->update = effect_random_col_update;
+	effect_random_col->name = "Randomize Color Parameter Compute Node";
+	effect_random_col->description = "Randomizes a color parameter of his parent (able to transition slowly)";
+	effect_random_col->fps = 1;
+	effect_random_col->class = 1;
+	effect_random_col->input_usage_mask = RAZER_EFFECT_NO_INPUT_USED;
+	parameter = daemon_create_parameter_int("Effect Length","Time transition lasts in ms(INT)",2000);
+	daemon_add_parameter(effect_random_col->parameters,parameter);	
+	parameter = daemon_create_parameter_int("Parameter Index","Parent color parameter index to randomize(INT)",-1);
+	daemon_add_parameter(effect_random_col->parameters,parameter);	
+	parameter = daemon_create_parameter_int("Randomize Now","Set to 1 to randomize the color(INT)",1);
+	daemon_add_parameter(effect_random_col->parameters,parameter);	
+	parameter = daemon_create_parameter_rgb("Transition Destination Color","Randomized color store(RGB)",&effect_random_col_dst_rgb);
+	daemon_add_parameter(effect_random_col->parameters,parameter);	
+	parameter = daemon_create_parameter_rgb("Transition Start Color","Internal color store(RGB)",&effect_random_col_src_rgb);
+	daemon_add_parameter(effect_random_col->parameters,parameter);	
+	int effect_random_col_uid = daemon_register_effect(daemon,effect_random_col);
+	#ifdef USE_DEBUGGING
+		printf("registered compute effect: %s (uid:%d)\n",effect_random_col->name,effect_random_col->id);
+	#endif
+
 
 
 }

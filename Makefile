@@ -42,7 +42,7 @@ install: all
 	@echo "====================================================="
 	cp init.d/razer_bcd /etc/init.d
 	chown root:root /etc/init.d/razer_bcd
-	cp init.d/activate_driver /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
+	cp init.d/activate_driver.sh /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
 	chown root:root /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
 	ln -fs ../init.d/razer_bcd /etc/rc2.d/S24razer_bcd
 	ln -fs ../init.d/razer_bcd /etc/rc3.d/S24razer_bcd
@@ -52,6 +52,12 @@ install: all
 	ln -fs ../init.d/razer_bcd /etc/rc0.d/K02razer_bcd
 	ln -fs ../init.d/razer_bcd /etc/rc1.d/K02razer_bcd
 	ln -fs ../init.d/razer_bcd /etc/rc6.d/K02razer_bcd
+	@echo "::\033[32m INSTALLING razer daemon fx files\033[0m"
+	@echo "====================================================="
+	mkdir -p /usr/share/razer_bcd/fx
+	cp daemon/fx/pez2001_collection.so /usr/share/razer_bcd/fx
+	cp daemon/fx/pez2001_mixer.so /usr/share/razer_bcd/fx
+
 
 uninstall:
 	make -C lib uninstall

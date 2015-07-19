@@ -83,6 +83,7 @@ struct razer_effect
 	razer_effect_update update;
 	razer_effect_key_event key_event;
 	razer_effect_dbus_event dbus_event;
+	void *tag;
 };
 
 struct razer_fx_render_node 
@@ -107,7 +108,7 @@ struct razer_fx_render_node
 	unsigned long start_ticks;
 	int limit_render_time_ms;
 	int running;//set to zero to stop node before next update
-	int continue_chain;
+	//int continue_chain;
 	int loop_count;// -1 == no looping
 	struct razer_fx_render_node *prev;
 	struct razer_fx_render_node *next;
@@ -132,8 +133,6 @@ struct razer_daemon
 	int effects_uid;
 	int effects_num;
 	struct razer_effect **effects;
-	//int effect_instances_num;
-	//struct razer_effect **effect_instances;
 	int fx_render_nodes_uid;
 	int fx_render_nodes_num;
 	struct razer_fx_render_node **fx_render_nodes;
