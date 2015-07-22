@@ -288,30 +288,6 @@ char *razer_get_device_path()
 
 
 
-void razer_copy_rows(struct razer_rgb_row *src_rows,struct razer_rgb_row *dst_rows,int update_mask,int use_update_mask)
-{
-	int i;
-	if(use_update_mask)
-	{
-		for(i=0;i<6;i++)
-			if(update_mask &(1<<i))
-			{
-				memcpy((void*)((char*)dst_rows+(i*sizeof(struct razer_rgb_row))),(void*)((char*)src_rows+(i*sizeof(struct razer_rgb_row))),sizeof(struct razer_rgb_row));
-			}
-	}
-	else
-	{
-		memcpy((void*)dst_rows,(void*)src_rows,sizeof(struct razer_rgb_row)*6);
-	}
-}
-
-void razer_clear_frame(struct razer_rgb_frame *frame)
-{
-	int i;
-	for(i=0;i<6;i++)
-		memset((void*)((char*)frame->rows+(i*sizeof(struct razer_rgb_row))),0,sizeof(struct razer_rgb_row));
-	frame->update_mask = 0;
-}
 
 
 
@@ -695,16 +671,152 @@ void razer_convert_keycode_to_pos(int keycode,struct razer_pos *pos)
 		case 57:/**/
 			pos->x=7;
 			pos->y=5;
-		
 		break;
 		default:
-			printf("unknown key:%d\n",keycode);
+			#ifdef USE_DEBUGGING
+				printf("unknown key:%d\n",keycode);
+			#endif
+		break;
 	}
 }
 
 void razer_convert_pos_to_keycode(struct razer_pos *pos,int *keycode)
 {
 
+}
+
+int razer_get_key_class(int keycode)
+{
+	switch(keycode)
+	{
+		case 59:/*F1-F10*/
+		case 60:
+		case 61:
+		case 62:
+		case 63:
+		case 64:
+		case 65:
+		case 66:
+		case 67:
+		case 68:
+		case 87:/*F11*/
+		case 88:/*F12*/
+			return(RAZER_KEY_CLASS_FUNCTION_KEYS);
+		case 183:/*M1*/
+		case 184:/*M2*/
+		case 185:/*M3*/
+		case 186:/*M4*/
+		case 187:/*M5*/
+			return(RAZER_KEY_CLASS_MACRO_KEYS);
+		case 99:/*printscreen*/
+		case 70:/*roll*/
+		case 119:/*pause/sys req*/
+			return(RAZER_KEY_CLASS_SYSTEM_CONTROLS);
+		case 41:/*caret*/
+		case 2:/*1 - 10*/
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+		case 8:
+		case 9:
+		case 10:
+		case 11:
+			return(RAZER_KEY_CLASS_NUMBERS);
+		case 110:/*insert*/
+		case 111:/*delete*/
+		case 102:/*home*/
+		case 107:/*end*/
+		case 104:/*pgup*/
+		case 109:/*pgdown*/
+			return(RAZER_KEY_CLASS_POSITION_CONTROLS);
+		case 98:/*numpad divide*/
+		case 55:/*numpad multiply*/
+		case 74:/*numpad subtract*/
+		case 78:/*numpad add*/
+			return(RAZER_KEY_CLASS_NUMPAD_OPERATIONS);
+		case 79:/*numpad 1*/
+		case 80:/*numpad 2*/
+		case 81:/*numpad 3*/
+		case 75:/*numpad 4*/
+		case 76:/*numpad 5*/
+		case 77:/*numapd 6*/
+		case 71:/*numpad 7*/
+		case 72:/*numpad 8*/
+		case 73:/*numpad 9*/
+		case 82:/*numpad insert*/
+		case 83:/*numpad delete*/
+			return(RAZER_KEY_CLASS_NUMPAD_NUMBERS);
+		case 96:/*numpad enter*/
+		case 69:/*numlock*/
+			return(RAZER_KEY_CLASS_NUMPAD_CONTROLS);
+		case 1:/*ESC*/
+		case 15:/*tabulator*/
+		case 58:/*capslock*/
+		case 42:/*left shift*/
+		case 56:/*left alt*/
+		case 29:/*left control*/
+		case 125:/*left windows*/
+			return(RAZER_KEY_CLASS_LEFT_CONTROLS);
+		case 14:/*backspace*/
+		case 28:/*return*/
+		case 54:/*right shift*/
+		case 100:/*right alt*/
+		case 194:/*FN*/
+		case 127:/*window context*/
+		case 97:/*right control*/
+			return(RAZER_KEY_CLASS_RIGHT_CONTROLS);
+		case 103:/*cursor up*/
+		case 105:/*cursor left*/
+		case 108:/*cursor down*/
+		case 106:/*cursor right*/
+			return(RAZER_KEY_CLASS_ARROWS);
+		case 12:/*question mark*/
+		case 13:/*quotes*/
+		case 16:/*q-asterisk*/
+		case 17:
+		case 18:
+		case 19:
+		case 20:
+		case 21:
+		case 22:
+		case 23:
+		case 24:
+		case 25:
+		case 26:
+		case 27:/*asterisk*/
+		case 43:/*grave*/
+		case 30:/*a-grave*/
+		case 31:
+		case 32:
+		case 33:
+		case 34:
+		case 35:
+		case 36:
+		case 37:
+		case 38:
+		case 39:
+		case 40:
+		case 280:
+		case 86:/*arrows*/
+		case 44:/*y-right shift*/
+		case 45:
+		case 46:
+		case 47:
+		case 48:
+		case 49:
+		case 50:
+		case 51:
+		case 52:
+		case 53:
+			return(RAZER_KEY_CLASS_LETTERS);
+		default:
+			#ifdef USE_DEBUGGING
+				printf("unknown key:%d\n",keycode);
+			#endif
+			return(RAZER_KEY_CLASS_UNKNOWN);
+	}
 }
 
 void razer_convert_ascii_to_pos(unsigned char letter,struct razer_pos *pos)
@@ -1178,7 +1290,10 @@ void razer_convert_ascii_to_pos(unsigned char letter,struct razer_pos *pos)
 			pos->y=5;
 		break;*/
 		default:
-			printf("no known key for ascii:%d\n",letter);
+			#ifdef USE_DEBUGGING
+				printf("no known key for ascii:%d\n",letter);
+			#endif
+		break;
 	}
 }
 
@@ -1243,6 +1358,14 @@ void razer_update_frame(struct razer_chroma *chroma, struct razer_rgb_frame *fra
     frame->update_mask=0;
 }
 
+void razer_clear_frame(struct razer_rgb_frame *frame)
+{
+	int i;
+	for(i=0;i<6;i++)
+		memset((void*)((char*)frame->rows+(i*sizeof(struct razer_rgb_row))),0,sizeof(struct razer_rgb_row));
+	frame->update_mask = 0;
+}
+
 void razer_set_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color)
 {
 	if(column_index<0 || column_index>21)
@@ -1282,6 +1405,22 @@ void razer_mix_frames(struct razer_rgb_frame *dst_frame,struct razer_rgb_frame *
 	dst_frame->update_mask = 63;
 }
 
+void razer_copy_rows(struct razer_rgb_row *src_rows,struct razer_rgb_row *dst_rows,int update_mask,int use_update_mask)
+{
+	int i;
+	if(use_update_mask)
+	{
+		for(i=0;i<6;i++)
+			if(update_mask &(1<<i))
+			{
+				memcpy((void*)((char*)dst_rows+(i*sizeof(struct razer_rgb_row))),(void*)((char*)src_rows+(i*sizeof(struct razer_rgb_row))),sizeof(struct razer_rgb_row));
+			}
+	}
+	else
+	{
+		memcpy((void*)dst_rows,(void*)src_rows,sizeof(struct razer_rgb_row)*6);
+	}
+}
 
 void set_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color)
 {
@@ -1296,6 +1435,7 @@ void set_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *
 	}
 	keys->update_mask = 63;
 }
+
 void add_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color)
 {
 	int r,g,b;
@@ -1320,6 +1460,7 @@ void add_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *
 	}
 	keys->update_mask = 63;
 }
+
 void sub_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color)
 {
 	int r,g,b;
@@ -1357,6 +1498,7 @@ void set_keys_row(struct razer_keys *keys,int row_index,struct razer_rgb *color)
 	}
 	keys->update_mask |= 1<<row_index;
 }
+
 void add_keys_row(struct razer_keys *keys,int row_index,struct razer_rgb *color)
 {
 	int r,g,b;
@@ -1380,6 +1522,7 @@ void add_keys_row(struct razer_keys *keys,int row_index,struct razer_rgb *color)
 	}
 	keys->update_mask |= 1<<row_index;
 }
+
 void sub_keys_row(struct razer_keys *keys,int row_index,struct razer_rgb *color)
 {
 	int r,g,b;
@@ -1430,7 +1573,6 @@ void razer_set_key_pos(struct razer_keys *keys,struct razer_pos *pos,struct raze
 	keys->rows[row_index].column[column_index].b = color->b;
 	keys->update_mask |= 1<<row_index;
 }
-
 
 void razer_clear_all(struct razer_keys *keys)
 {

@@ -153,14 +153,28 @@ int daemon_dbus_error_check(char*message,DBusError *error)
 	return(1);
 }
 
+dbus_bool_t daemon_dbus_check_user_handler(DBusConnection *connection, unsigned long uid, void *data)
+{
+	#ifdef USE_DEBUGGING
+		printf("dbus: authenticated user:%lu\n",uid);
+	#endif
+	/*no user id check performed*/
+	return(TRUE);
+}
+
 int daemon_dbus_open(struct razer_daemon *daemon)
 {
 	DBusError error;
 	dbus_error_init(&error);
-	daemon->dbus = dbus_bus_get(DBUS_BUS_SESSION,&error);
+	daemon->dbus = dbus_bus_get(DBUS_BUS_SYSTEM,&error);
 	if(!daemon_dbus_error_check("open",&error))
 		return(0);
 	if(!daemon->dbus)
+		return(0);
+	dbus_connection_set_unix_user_function(daemon->dbus,daemon_dbus_check_user_handler,NULL,NULL);
+	dbus_connection_set_allow_anonymous(daemon->dbus,TRUE);
+	dbus_connection_set_route_peer_messages(daemon->dbus,TRUE);
+	if(!daemon_dbus_error_check("open_user_check",&error))
 		return(0);
 	return(1);
 }
@@ -234,7 +248,7 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.parent","get"))
 		return(0);
-	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.subs","add"))
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.sub","add"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.subs","list"))
 		return(0);
@@ -2310,7 +2324,7 @@ int main(int argc,char *argv[])
 		return(1);
 	}
 	daemon_run(daemon);
-    daemon_close(&daemon);
+    daemon_close(daemon);
 }
 
 #pragma GCC diagnostic pop

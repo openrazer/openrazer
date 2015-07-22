@@ -37,7 +37,6 @@ So now that we got a black keyboard we want to light some keys in different colo
 
 	struct razer_rgb red = {.r=255,.g=0,.b=0}; //define a red color
 	struct razer_rgb yellow = {.r=255,.g=255,.b=0}; //define a yellow color
-	struct razer_rgb purple = {.r=255,.g=0,.b=255}; //define a purple color
 	struct razer_rgb green = {.r=0,.g=255,.b=0}; //define a green color
 	struct razer_rgb blue = {.r=0,.g=0,.b=255}; //define a blue color
 	struct razer_rgb light_blue = {.r=0,.g=255,.b=255}; //define a light blue color
@@ -94,12 +93,17 @@ To compile just type:
 	gcc  -std=c99  dota_keys.c  -lrazer_chroma  -lm  -o dota_keys
 
 After executing it you should now have a dota profile lighting up your keyboard.
+This is just a simple example using a ascii helper,if your profile needs to color function keys ,etc
+you can set the key colors by manually setting the pos.
 
 
 
 
 
 
+How to create an effect to be used in the daemon ?
+
+Why not shoot for something crazy like a light blast originating from keys being pressed this time?
 
 
 

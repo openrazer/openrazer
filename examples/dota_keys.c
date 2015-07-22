@@ -7,7 +7,7 @@
 
 #include "../lib/razer_chroma.h"
 
-
+/*ignore unused parameters warning*/
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
@@ -23,7 +23,6 @@ int main(int argc,char *argv[])
 
 	struct razer_rgb red = {.r=255,.g=0,.b=0}; //define a red color
 	struct razer_rgb yellow = {.r=255,.g=255,.b=0}; //define a yellow color
-	struct razer_rgb purple = {.r=255,.g=0,.b=255}; //define a purple color
 	struct razer_rgb green = {.r=0,.g=255,.b=0}; //define a green color
 	struct razer_rgb blue = {.r=0,.g=0,.b=255}; //define a blue color
 	struct razer_rgb light_blue = {.r=0,.g=255,.b=255}; //define a light blue color

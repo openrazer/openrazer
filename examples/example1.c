@@ -1,5 +1,9 @@
 #include "example1.h"
 
+/*usleep doesnt seem to have been defined in libc... have to investigate this someday
+  ignore the warning for now
+*/
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 
@@ -33,6 +37,7 @@ void effect(struct razer_chroma *chroma)
 
 #pragma GCC diagnostic pop
 
+/*ignore unused parameters warning*/
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 

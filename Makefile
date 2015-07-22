@@ -38,6 +38,10 @@ install: all
 	@echo "====================================================="
 	cp udev/95-razerkbd.rules /etc/udev/rules.d
 	chown root:root /etc/udev/rules.d/95-razerkbd.rules
+	@echo "::\033[32m INSTALLING razer chroma dbus policy\033[0m"
+	@echo "====================================================="
+	cp dbus/org.voyagerproject.razer.daemon.conf /etc/dbus-1/system.d
+	chown root:root /etc/dbus-1/system.d/org.voyagerproject.razer.daemon.conf
 	@echo "::\033[32m INSTALLING razer daemon init.d file\033[0m"
 	@echo "====================================================="
 	cp init.d/razer_bcd /etc/init.d
@@ -52,12 +56,6 @@ install: all
 	ln -fs ../init.d/razer_bcd /etc/rc0.d/K02razer_bcd
 	ln -fs ../init.d/razer_bcd /etc/rc1.d/K02razer_bcd
 	ln -fs ../init.d/razer_bcd /etc/rc6.d/K02razer_bcd
-	@echo "::\033[32m INSTALLING razer daemon fx files\033[0m"
-	@echo "====================================================="
-	mkdir -p /usr/share/razer_bcd/fx
-	cp daemon/fx/pez2001_collection.so /usr/share/razer_bcd/fx
-	cp daemon/fx/pez2001_mixer.so /usr/share/razer_bcd/fx
-
 
 uninstall:
 	make -C lib uninstall
@@ -71,6 +69,8 @@ uninstall:
 	rm /etc/rc0.d/K02razer_bcd
 	rm /etc/rc1.d/K02razer_bcd
 	rm /etc/rc6.d/K02razer_bcd
+	rm /etc/dbus-1/system.d/org.voyagerproject.razer.daemon.conf
+	rm /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
 
 
 clean: librazer_chroma_clean razer_daemon_clean razer_examples_clean
