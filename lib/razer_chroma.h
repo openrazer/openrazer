@@ -118,7 +118,7 @@ char *str_FromDouble(double d);
 
 
 
-int razer_open(struct razer_chroma *chroma);
+struct razer_chroma *razer_open(void);
 void razer_close(struct razer_chroma *chroma);
 void razer_update(struct razer_chroma *chroma);
 void razer_set_input_handler(struct razer_chroma *chroma,razer_input_handler handler);
@@ -158,9 +158,9 @@ struct razer_rgb *rgb_copy(struct razer_rgb *color);
 void rgb_mix_into(struct razer_rgb *dst,struct razer_rgb *src_a,struct razer_rgb *src_b,float dst_opacity);
 
 
-void convert_keycode_to_pos(int keycode,struct razer_pos *pos);
-void convert_pos_to_keycode(struct razer_pos *pos,int *keycode);
-void convert_ascii_to_pos(unsigned char letter,struct razer_pos *pos);
+void razer_convert_keycode_to_pos(int keycode,struct razer_pos *pos);
+void razer_convert_pos_to_keycode(struct razer_pos *pos,int *keycode);
+void razer_convert_ascii_to_pos(unsigned char letter,struct razer_pos *pos);
 int razer_get_key_class(int keycode);
 
 
@@ -170,10 +170,10 @@ void sub_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *
 void set_keys_row(struct razer_keys *keys,int row_index,struct razer_rgb *color);
 void add_keys_row(struct razer_keys *keys,int row_index,struct razer_rgb *color);
 void sub_keys_row(struct razer_keys *keys,int row_index,struct razer_rgb *color);
-void set_key(struct razer_keys *keys,int column_index,int row_index,struct razer_rgb *color);
-void set_key_pos(struct razer_keys *keys,struct razer_pos *pos,struct razer_rgb *color);
-void clear_all(struct razer_keys *keys);
-void set_all(struct razer_keys *keys,struct razer_rgb *color);
+void razer_set_key(struct razer_keys *keys,int column_index,int row_index,struct razer_rgb *color);
+void razer_set_key_pos(struct razer_keys *keys,struct razer_pos *pos,struct razer_rgb *color);
+void razer_clear_all(struct razer_keys *keys);
+void razer_set_all(struct razer_keys *keys,struct razer_rgb *color);
 void sub_heatmap(struct razer_keys *keys,int heatmap_reduction_amount);
 void draw_circle(struct razer_keys *keys,struct razer_pos *pos,int radius,struct razer_rgb *color);
 void draw_ring(struct razer_keys *keys,struct razer_pos *pos,struct razer_rgb *color);

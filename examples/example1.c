@@ -38,14 +38,14 @@ void effect(struct razer_chroma *chroma)
 
 int main(int argc,char *argv[])
 {
-	struct razer_chroma *chroma =(struct razer_chroma*)malloc(sizeof(struct razer_chroma));
- 	razer_open(chroma);
-    razer_set_custom_mode(chroma);
-	clear_all(chroma->keys);
+	struct razer_chroma *chroma = razer_open();
+	if(!chroma)
+		exit(1);
+	razer_set_custom_mode(chroma);
+	razer_clear_all(chroma->keys);
 	razer_update_keys(chroma,chroma->keys);
 	effect(chroma);
  	razer_close(chroma);
- 	free(chroma);
 }
 
 #pragma GCC diagnostic pop

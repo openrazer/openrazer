@@ -1,6 +1,6 @@
 LIBS=-lm
 MAJOR_VERSION=0
-MINOR_VERSION=2
+MINOR_VERSION=3
 CSTD=-std=c99
 CFLAGS=-Wall -Wextra -W -w -Os $(CSTD) -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
 DEBUG_CFLAGS=-Wall -Wextra -Wformat=0 -pedantic -fbounds-check -Wuninitialized -O0 -g3 $(CSTD) -DUSE_DEBUGGING -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
@@ -33,11 +33,11 @@ razer_chroma_static_debug: $(RAZER_CHROMA_DEBUG_OBJ)
 	$(AR) -rs librazer_chroma.da $(RAZER_CHROMA_DEBUG_OBJ)
 
 razer_chroma_shared: $(RAZER_CHROMA_OBJ)
-	$(CC) $(LDFLAGS) -rdynamic -nostdlib -DCREATELIB -shared $(RAZER_CHROMA_OBJ) -o librazer_chroma.so
+	$(CC) -rdynamic -nostdlib -DCREATELIB -shared $(RAZER_CHROMA_OBJ) $(LDFLAGS) -o librazer_chroma.so
 	@strip librazer_chroma.so
 
 razer_chroma_shared_debug: $(RAZER_CHROMA_DEBUG_OBJ)
-	$(CC) $(LDFLAGS) -rdynamic -nostdlib -DCREATELIB -shared $(RAZER_CHROMA_DEBUG_OBJ) -o librazer_chroma_debug.so
+	$(CC) -rdynamic -nostdlib -DCREATELIB -shared $(RAZER_CHROMA_DEBUG_OBJ) $(LDFLAGS) -o librazer_chroma_debug.so
 
 %.o: %.c 
 	$(CC) $(CFLAGS) -c -o $@ $<

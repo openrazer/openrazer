@@ -1160,7 +1160,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		for(int i=0;i<250;i++)
 		{
 			col.r = 5+(i*1);
-			set_all(daemon->chroma->keys,&col);
+			razer_set_all(daemon->chroma->keys,&col);
 			razer_update_keys(daemon->chroma,daemon->chroma->keys);
 			//usleep((1000*1000)/255);
 		}
@@ -1344,7 +1344,7 @@ struct razer_daemon *daemon_open(void)
  	//signal(SIGKILL,stop);
     //signal(SIGTERM,stop);	
 	struct razer_daemon *daemon = (struct razer_daemon*)malloc(sizeof(struct razer_daemon));
- 	daemon->chroma = (struct razer_chroma*)malloc(sizeof(struct razer_chroma));
+ 	daemon->chroma = NULL;
  	daemon->running = 1;
  	daemon->fps = 12;
  	daemon->libs_num = 0;
@@ -1359,7 +1359,7 @@ struct razer_daemon *daemon_open(void)
  	daemon->render_nodes = NULL;
  	daemon->render_nodes_num = 0;
 
- 	if(!razer_open(daemon->chroma))
+ 	if(!(daemon->chroma=razer_open()))
  	{
  		free(daemon->chroma);
  		free(daemon);
@@ -1390,7 +1390,7 @@ struct razer_daemon *daemon_open(void)
 	daemon->return_render_node = NULL;
 
 	razer_set_custom_mode(daemon->chroma);
-	clear_all(daemon->chroma->keys);
+	razer_clear_all(daemon->chroma->keys);
 	razer_update_keys(daemon->chroma,daemon->chroma->keys);
 
 	#ifdef USE_DEBUGGING
@@ -1414,14 +1414,13 @@ struct razer_daemon *daemon_open(void)
  	return(daemon);
 }
 
-void daemon_close(struct razer_daemon **daemon)
+void daemon_close(struct razer_daemon *daemon)
 {
 	#ifdef USE_DBUS
-		daemon_dbus_close((*daemon));
+		daemon_dbus_close(daemon);
 	#endif
- 	razer_close((*daemon)->chroma);
- 	free((*daemon)->chroma);
- 	free(*daemon);
+ 	razer_close(daemon->chroma);
+ 	free(daemon);
 }
 
 //needed to be able to use different parameter sets for multiple copies of the same effect in der render_nodes chain
@@ -2221,7 +2220,7 @@ void sdl_update()
 		    		int ky = event.button.y/kh;
 		    		//printf("button pressed in:%d,%d\n",kx,ky);
 					struct razer_rgb cr = {.r=128,.g=0,.b=0};
-					set_key(keys,kx,ky,&cr);
+					razer_set_key(keys,kx,ky,&cr);
 		    	}
 			    //	done=1;
 

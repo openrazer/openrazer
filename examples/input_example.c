@@ -40,8 +40,8 @@ void effect(struct razer_chroma *chroma)
 		for(int i=0;i<keys_max;i++)
 			if(keys_history[i]!=-1)
 			{
-				convert_keycode_to_pos(keys_history[i],&pos);							
-				set_key_pos(chroma->keys,&pos,&col);
+				razer_convert_keycode_to_pos(keys_history[i],&pos);							
+				razer_set_key_pos(chroma->keys,&pos,&col);
 			}
 		razer_update_keys(chroma,chroma->keys);
 		count+=count_dir;
@@ -88,20 +88,20 @@ int main(int argc,char *argv[])
 	uid_t uid = getuid();
 	if(uid != 0)
 		printf("input example needs root to work correctly.\n");	
-	struct razer_chroma *chroma =(struct razer_chroma*)malloc(sizeof(struct razer_chroma));
- 	razer_open(chroma);
+	struct razer_chroma *chroma = razer_open();
+	if(!chroma)
+		exit(1);
  	razer_set_input_handler(chroma,input_handler);
-    razer_set_custom_mode(chroma);
-	clear_all(chroma->keys);
+ 	razer_set_custom_mode(chroma);
+	razer_clear_all(chroma->keys);
 	razer_update_keys(chroma,chroma->keys);
 	for(int i=0;i<10;i++)
 		keys_history[i] = -1;
  	signal(SIGINT,stop);
  	signal(SIGKILL,stop);
-    signal(SIGTERM,stop);	
+ 	signal(SIGTERM,stop);	
 	effect(chroma);
  	razer_close(chroma);
- 	free(chroma);
 }
 
 #pragma GCC diagnostic pop
