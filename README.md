@@ -33,8 +33,7 @@ To actually update the keyboard leds we need to razer_update (using the integrat
 
 	razer_update_keys(chroma,chroma->keys);
 
-So now that we got a black keyboard we want to light some keys in different colors,
-lets start with the abilities (Q,W,E,R,D,F):
+So now that we got a black keyboard we want to light some keys in different colors
 
 	struct razer_rgb red = {.r=255,.g=0,.b=0}; //define a red color
 	struct razer_rgb yellow = {.r=255,.g=255,.b=0}; //define a yellow color
