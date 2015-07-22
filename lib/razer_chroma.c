@@ -711,14 +711,14 @@ void razer_convert_ascii_to_pos(unsigned char letter,struct razer_pos *pos)
 {
 	switch(letter)
 	{
-		case 1:/*ESC*/
+		case 27:/*ESC*/
 			pos->x=1;
 			pos->y=0;
 		break;
-		case 59:/*F1-F10*/
+		/*case 59://F1-F10
 		case 60:
 		case 61:
-		case 62:/*buggy*/
+		case 62:
 		case 63:
 		case 64:
 		case 65:
@@ -727,281 +727,458 @@ void razer_convert_ascii_to_pos(unsigned char letter,struct razer_pos *pos)
 		case 68:
 			pos->x=3+(letter-59);
 			pos->y=0;
-		break;
-		case 87:/*F11*/
+		break;*/
+		/*case 87://F11
 			pos->x=13;
 			pos->y=0;
-		break;
-		case 88:/*F12*/
+		break;*/
+		/*case 88://F12
 			pos->x=14;
 			pos->y=0;
-		break;
-		case 99:/*printscreen*/
+		break;*/
+		/*case 99://printscreen
 			pos->x=15;
 			pos->y=0;
-		break;
-		case 70:/*roll*/
+		break;*/
+		/*case 70://roll
 			pos->x=16;
 			pos->y=0;
-		break;
-		case 119:/*pause/sys req*/
+		break;*/
+		/*case 119://pause/sys req
 			pos->x=17;
 			pos->y=0;
-		break;
-		case 183:/*M1*/
+		break;*/
+		/*case 183://M1
 			pos->x=0;
 			pos->y=1;
-		break;
-		case 41:/*caret*/
+		break;*/
+		case 94:/*caret*/
+		case 186:
 			pos->x=1;
 			pos->y=1;
 		break;
-		case 2:/*1 - 10*/
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		case 8:
-		case 9:
-		case 10:
-		case 11:
-		case 12:/*question mark*/
-		case 13:/*quotes*/
-		case 14:/*backspace*/
-			pos->x=2 +(letter-2);
-			pos->y=1;
-		break;
-		case 110:/*insert*/
-			pos->x=15;
-			pos->y=1;
-		break;
-		case 102:/*home*/
-			pos->x=16;
-			pos->y=1;
-		break;
-		case 104:/*pgup*/
-			pos->x=17;
-			pos->y=1;
-		break;
-		case 69:/*numlock*/
-			pos->x=18;
-			pos->y=1;
-		break;
-		case 98:/*numpad divide*/
-			pos->x=19;
-			pos->y=1;
-		break;
-		case 55:/*numpad multiply*/
-			pos->x=20;
-			pos->y=1;
-		break;
-		case 74:/*numpad subtract*/
-			pos->x=21;
-			pos->y=1;
-		break;
-		case 184:/*M2*/
-			pos->x=0;
-			pos->y=2;
-		break;
-		case 15:/*tabulator*/
-			pos->x=1;
-			pos->y=2;
-		break;
-		case 16:/*q-asterisk*/
-		case 17:
-		case 18:
-		case 19:
-		case 20:
-		case 21:
-		case 22:
-		case 23:
-		case 24:
-		case 25:
-		case 26:
-		case 27:/*asterisk*/
-			pos->x=2+(letter-16);
-			pos->y=2;
-		break;
-		case 111:/*delete*/
-			pos->x=15;
-			pos->y=2;
-		break;
-		case 107:/*end*/
-			pos->x=16;
-			pos->y=2;
-		break;
-		case 109:/*pgdown*/
-			pos->x=17;
-			pos->y=2;
-		break;
-		case 71:/*numpad 7*/
-			pos->x=18;
-			pos->y=2;
-		break;
-		case 72:/*numpad 8*/
-			pos->x=19;
-			pos->y=2;
-		break;
-		case 73:/*numpad 9*/
-			pos->x=20;
-			pos->y=2;
-		break;
-		case 78:/*numpad add*/
-			pos->x=21;
-			pos->y=2;
-		break;
-		case 185:/*M3*/
-			pos->x=0;
-			pos->y=3;
-		break;
-		case 58:/*capslock*/
-			pos->x=1;
-			pos->y=3;
-		break;
-		case 43:/*grave*/
-			pos->x=13;
-			pos->y=3;
-		break;
-		case 28:/*return*/
-			pos->x=14;
-			pos->y=3;
-		break;
-		case 30:/*a-grave*/
-		case 31:
-		case 32:
+		case 49:/*1*/
 		case 33:
+			pos->x=2;
+			pos->y=1;
+		break;
+		case 50:/*2*/
 		case 34:
-		case 35:
+		case 178:
+			pos->x=3;
+			pos->y=1;
+		break;
+		case 51:/*3*/
+		case 167:
+		case 179:
+			pos->x=4;
+			pos->y=1;
+		break;
+		case 52:/*4*/
 		case 36:
+			pos->x=5;
+			pos->y=1;
+		break;
+		case 53:/*5*/
 		case 37:
+			pos->x=6;
+			pos->y=1;
+		break;
+		case 54:/*6*/
 		case 38:
-		case 39:
+			pos->x=7;
+			pos->y=1;
+		break;
+		case 55:/*7*/
+		case 47:
+		case 123:
+			pos->x=8;
+			pos->y=1;
+		break;
+		case 56:/*8*/
 		case 40:
-		case 280:
-			pos->x=2+(letter-30);
+		case 91:
+			pos->x=9;
+			pos->y=1;
+		break;
+		case 57:/*9*/
+		case 41:
+		case 93:
+			pos->x=10;
+			pos->y=1;
+		break;
+		case 48:/*0*/
+		case 61:
+		case 125:
+			pos->x=11;
+			pos->y=1;
+		break;
+		case 63:/*question mark*/
+		case 92:
+			pos->x=12;
+			pos->y=1;
+		break;
+		case 96:/*quotes*/
+			pos->x=13;
+			pos->y=1;
+		break;
+		case 8:/*backspace*/
+			pos->x=14;
+			pos->y=1;
+		break;
+		/*case 110://insert
+			pos->x=15;
+			pos->y=1;
+		break;
+		case 102://home
+			pos->x=16;
+			pos->y=1;
+		break;
+		case 104://pgup
+			pos->x=17;
+			pos->y=1;
+		break;
+		case 69://numlock
+			pos->x=18;
+			pos->y=1;
+		break;
+		case 98://numpad divide
+			pos->x=19;
+			pos->y=1;
+		break;
+		case 55://numpad multiply
+			pos->x=20;
+			pos->y=1;
+		break;
+		case 74://numpad subtract
+			pos->x=21;
+			pos->y=1;
+		break;
+		case 184://M2
+			pos->x=0;
+			pos->y=2;
+		break;*/
+		case 9:/*tabulator*/
+			pos->x=1;
+			pos->y=2;
+		break;
+		case 113:/*q*/
+		case 81:
+			pos->x=2;
+			pos->y=2;
+		break;
+		case 119:/*w*/
+		case 87:
+			pos->x=3;
+			pos->y=2;
+		break;
+		case 101:/*e*/
+		case 69:
+		case 128:
+			pos->x=4;
+			pos->y=2;
+		break;
+		case 114:/*r*/
+		case 82:
+			pos->x=5;
+			pos->y=2;
+		break;
+		case 116:/*t*/
+		case 84:
+			pos->x=6;
+			pos->y=2;
+		break;
+		case 122:/*z*/
+		case 90:
+			pos->x=7;
+			pos->y=2;
+		break;
+		case 117:/*u*/
+		case 85:
+			pos->x=8;
+			pos->y=2;
+		break;
+		case 105:/*i*/
+		case 73:
+			pos->x=9;
+			pos->y=2;
+		break;
+		case 111:/*o*/
+		case 79:
+			pos->x=10;
+			pos->y=2;
+		break;
+		case 112:/*p*/
+		case 80:
+			pos->x=11;
+			pos->y=2;
+		break;
+		case 252:/*ue*/
+		case 220:
+			pos->x=12;
+			pos->y=2;
+		break;
+		case 42:/*asterisk*/
+		case 43:
+		case 152:
+			pos->x=13;
+			pos->y=2;
+		break;
+		case 127:/*delete*/
+			pos->x=15;
+			pos->y=2;
+		break;
+		/*case 107://end
+			pos->x=16;
+			pos->y=2;
+		break;
+		case 109://pgdown
+			pos->x=17;
+			pos->y=2;
+		break;
+		case 71://numpad 7
+			pos->x=18;
+			pos->y=2;
+		break;
+		case 72://numpad 8
+			pos->x=19;
+			pos->y=2;
+		break;
+		case 73://numpad 9
+			pos->x=20;
+			pos->y=2;
+		break;
+		case 78://numpad add
+			pos->x=21;
+			pos->y=2;
+		break;
+		case 185://M3
+			pos->x=0;
 			pos->y=3;
 		break;
-		case 75:/*numpad 4*/
+		case 58://capslock
+			pos->x=1;
+			pos->y=3;
+		break;*/
+		case 97:/*a*/
+		case 65:
+		case 64:
+			pos->x=2;
+			pos->y=3;
+		break;
+		case 115:/*s*/
+		case 83:
+			pos->x=3;
+			pos->y=3;
+		break;
+		case 100:/*d*/
+		case 68:
+			pos->x=4;
+			pos->y=3;
+		break;
+		case 102:/*f*/
+		case 70:
+			pos->x=5;
+			pos->y=3;
+		break;
+		case 103:/*g*/
+		case 71:
+			pos->x=6;
+			pos->y=3;
+		break;
+		case 104:/*h*/
+		case 72:
+			pos->x=7;
+			pos->y=3;
+		break;
+		case 106:/*j*/
+		case 74:
+			pos->x=8;
+			pos->y=3;
+		break;
+		case 107:/*k*/
+		case 75:
+			pos->x=9;
+			pos->y=3;
+		break;
+		case 108:/*l*/
+		case 76:
+			pos->x=10;
+			pos->y=3;
+		break;
+		case 246:/*oe*/
+		case 214:
+			pos->x=11;
+			pos->y=3;
+		break;
+		case 228:/*ae*/
+		case 196:
+			pos->x=12;
+			pos->y=3;
+		break;
+		case 35:/*grave*/
+		case 39:
+			pos->x=13;
+			pos->y=3;
+		break;
+		case 13:/*return*/
+			pos->x=14;
+			pos->y=3;
+		break;
+		/*case 75://numpad 4
 			pos->x=18;
 			pos->y=3;
 		break;
-		case 76:/*numpad 5*/
+		case 76://numpad 5
 			pos->x=19;
 			pos->y=3;
 		break;
-		case 77:/*numapd 6*/
+		case 77://numapd 6
 			pos->x=20;
 			pos->y=3;
 		break;
-		case 186:/*M4*/
+		case 186://M4
 			pos->x=0;
 			pos->y=4;
 		break;
-		case 42:/*left shift*/
+		case 42://left shift
 			pos->x=1;
 			pos->y=4;
-		break;
-		case 86:/*arrows*/
+		break;*/
+		case 60:/*arrows*/
+		case 62:
+		case 124:
 			pos->x=2;
 			pos->y=4;
 		break;
-		case 44:/*y-right shift*/
-		case 45:
-		case 46:
-		case 47:
-		case 48:
-		case 49:
-		case 50:
-		case 51:
-		case 52:
-		case 53:
-			pos->x=3+(letter-44);
+		case 121:/*y*/
+		case 89:
+			pos->x=3;
 			pos->y=4;
 		break;
-		case 54:/*right shift*/
+		case 120:/*x*/
+		case 88:
+			pos->x=4;
+			pos->y=4;
+		break;
+		case 99:/*c*/
+		case 67:
+			pos->x=5;
+			pos->y=4;
+		break;
+		case 118:/*v*/
+		case 86:
+			pos->x=6;
+			pos->y=4;
+		break;
+		case 98:/*b*/
+		case 66:
+			pos->x=7;
+			pos->y=4;
+		break;
+		case 110:/*n*/
+		case 78:
+			pos->x=8;
+			pos->y=4;
+		break;
+		case 109:/*m*/
+		case 77:
+			pos->x=9;
+			pos->y=4;
+		break;
+		case 44:/*,*/
+		case 59:
+			pos->x=10;
+			pos->y=4;
+		break;
+		case 46:/*.*/
+		case 58:
+			pos->x=11;
+			pos->y=4;
+		break;
+		case 45:/*-*/
+		case 95:
+			pos->x=12;
+			pos->y=4;
+		break;
+		/*case 54://right shift
 			pos->x=14;
 			pos->y=4;
 		break;
-		case 103:/*cursor up*/
+		case 103://cursor up
 			pos->x=16;
 			pos->y=4;
 		break;
-		case 79:/*numpad 1*/
+		case 79://numpad 1
 			pos->x=18;
 			pos->y=4;
 		break;
-		case 80:/*numpad 2*/
+		case 80://numpad 2
 			pos->x=19;
 			pos->y=4;
 		break;
-		case 81:/*numpad 3*/
+		case 81://numpad 3
 			pos->x=20;
 			pos->y=4;
 		break;
-		case 96:/*numpad enter*/
+		case 96://numpad enter
 			pos->x=21;
 			pos->y=4;
 		break;
-		case 187:/*M5*/
+		case 187://M5
 			pos->x=0;
 			pos->y=5;
 		break;
-		case 29:/*left control*/
+		case 29://left control
 			pos->x=1;
 			pos->y=5;
 		break;
-		case 125:/*left windows*/
+		case 125://left windows
 			pos->x=2;
 			pos->y=5;
 		break;
-		case 56:/*left alt*/
+		case 56://left alt
 			pos->x=3;
 			pos->y=5;
 		break;
-		case 100:/*right alt*/
+		case 100://right alt
 			pos->x=11;
 			pos->y=5;
 		break;
-		case 194:/*FN*/
+		case 194://FN
 			pos->x=12;
 			pos->y=5;
 		break;
-		case 127:/*window context*/
+		case 127://window context
 			pos->x=13;
 			pos->y=5;
 		break;
-		case 97:/*right control*/
+		case 97://right control
 			pos->x=14;
 			pos->y=5;
 		break;
-		case 105:/*cursor left*/
+		case 105://cursor left
 			pos->x=15;
 			pos->y=5;
 		break;
-		case 108:/*cursor down*/
+		case 108://cursor down
 			pos->x=16;
 			pos->y=5;
 		break;
-		case 106:/*cursor right*/
+		case 106://cursor right
 			pos->x=17;
 			pos->y=5;
 		break;
-		case 82:/*numpad insert*/
+		case 82://numpad insert
 			pos->x=19;
 			pos->y=5;
 		break;
-		case 83:/*numpad delete*/
+		case 83://numpad delete
 			pos->x=20;
 			pos->y=5;
-		break;
-		case 57:/**/
-			pos->x=7;
-			pos->y=5;
-		
-		break;
+		break;*/
 		default:
-			printf("unknown ascii:%d\n",letter);
+			printf("no known key for ascii:%d\n",letter);
 	}
 }
 
