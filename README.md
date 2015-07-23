@@ -9,6 +9,7 @@ Installation:
 
 
 
+=== First Steps Tutorial ===
 
 How to create a standalone effect easily using the included library ?
 
@@ -99,8 +100,11 @@ you can set the key colors by manually setting the pos.
 
 
 
+=== Daemon effects tutorial ===
 
+How to create an effect to be used in the daemon ?
 
+Why not shoot for something crazy like a light blast originating from keys being pressed this time?
 
 
 

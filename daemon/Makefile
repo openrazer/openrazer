@@ -59,15 +59,17 @@ install:
 	mkdir -p /usr/share/razer_bcd/fx
 	cp fx/pez2001_collection.so /usr/share/razer_bcd/fx
 	cp fx/pez2001_mixer.so /usr/share/razer_bcd/fx
+	cp fx/pez2001_light_blast.so /usr/share/razer_bcd/fx
 
 uninstall:
 	@echo "::\033[32m REMOVING razer_bcd daemon\033[0m"
 	@echo "====================================="
-	@rm /usr/sbin/razer_bcd
+	@rm -f /usr/sbin/razer_bcd
 	@echo "::\033[32m REMOVING razer daemon fx files\033[0m"
 	@echo "====================================================="
-	@rm /usr/share/razer_bcd/fx/pez2001_collection.so
-	@rm /usr/share/razer_bcd/fx/pez2001_mixer.so
+	@rm -f /usr/share/razer_bcd/fx/pez2001_collection.so
+	@rm -f /usr/share/razer_bcd/fx/pez2001_mixer.so
+	@rm -f /usr/share/razer_bcd/fx/pez2001_light_blast.so
 
 clean: daemon_fx_clean
 	rm -f *.do *.o razer_bcd razer_bcd_debug_shared razer_bcd_debug_static razer_bcd_static
