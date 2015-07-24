@@ -36,17 +36,17 @@ install: all
 	depmod
 	@echo "::\033[32m INSTALLING razer chroma udev rules\033[0m"
 	@echo "====================================================="
-	cp udev/95-razerkbd.rules /etc/udev/rules.d
+	cp install_files/udev/95-razerkbd.rules /etc/udev/rules.d
 	chown root:root /etc/udev/rules.d/95-razerkbd.rules
 	@echo "::\033[32m INSTALLING razer chroma dbus policy\033[0m"
 	@echo "====================================================="
-	cp dbus/org.voyagerproject.razer.daemon.conf /etc/dbus-1/system.d
+	cp install_files/dbus/org.voyagerproject.razer.daemon.conf /etc/dbus-1/system.d
 	chown root:root /etc/dbus-1/system.d/org.voyagerproject.razer.daemon.conf
 	@echo "::\033[32m INSTALLING razer daemon init.d file\033[0m"
 	@echo "====================================================="
-	cp init.d/razer_bcd /etc/init.d
+	cp install_files/init.d/razer_bcd /etc/init.d
 	chown root:root /etc/init.d/razer_bcd
-	cp init.d/activate_driver.sh /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
+	cp install_files/init.d/activate_driver.sh /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
 	chown root:root /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
 	ln -fs ../init.d/razer_bcd /etc/rc2.d/S24razer_bcd
 	ln -fs ../init.d/razer_bcd /etc/rc3.d/S24razer_bcd
