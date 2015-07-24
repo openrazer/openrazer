@@ -11,10 +11,10 @@ CC=gcc
 AR=ar -c
 LD=ld
 
-RAZER_CHROMA_FILES=razer_chroma.c
-RAZER_CHROMA_INCLUDE_FILES=razer_chroma.h
-RAZER_CHROMA_OBJ=razer_chroma.o
-RAZER_CHROMA_DEBUG_OBJ=razer_chroma.do
+RAZER_CHROMA_FILES=razer_chroma.c list.c
+RAZER_CHROMA_INCLUDE_FILES=razer_chroma.h list.h
+RAZER_CHROMA_OBJ=razer_chroma.o list.o
+RAZER_CHROMA_DEBUG_OBJ=razer_chroma.do list.do
 
 all: library library_debug
 

@@ -15,6 +15,8 @@
 #include <fcntl.h>
 #include <linux/input.h>
 
+#include "list.h"
+
 
 /*
 #include "SDL2/SDL.h"
@@ -115,9 +117,9 @@ struct razer_chroma
 	FILE *custom_mode_file;
 	FILE *update_keys_file;
 	int input_file;
-	long last_update_ms;
-	long update_ms;
-	long last_key_event_ms;
+	unsigned long last_update_ms;
+	unsigned long update_ms;
+	unsigned long last_key_event_ms;
 	float update_dt;
 	float key_event_dt;
 	struct razer_keys *keys;

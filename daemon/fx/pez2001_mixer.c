@@ -41,6 +41,9 @@ int effect_wait_update(struct razer_fx_render_node *render)
 	return(1);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 int effect_wait_key_event(struct razer_fx_render_node *render,int keycode,int pressed)
 {
 	#ifdef USE_DEBUGGING
@@ -51,6 +54,7 @@ int effect_wait_key_event(struct razer_fx_render_node *render,int keycode,int pr
 	return(1);
 }
 
+#pragma GCC diagnostic pop
 
 
 struct razer_effect *effect_transition = NULL;

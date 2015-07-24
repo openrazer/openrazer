@@ -72,7 +72,7 @@ uninstall:
 	@rm -f /usr/share/razer_bcd/fx/pez2001_light_blast.so
 
 clean: daemon_fx_clean
-	rm -f *.do *.o razer_bcd razer_bcd_debug_shared razer_bcd_debug_static razer_bcd_static
+	rm -f *.do *.da *.o razer_bcd razer_bcd_debug_shared razer_bcd_debug_static razer_bcd_static
 
 indent:	
 	indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 *.c *.h

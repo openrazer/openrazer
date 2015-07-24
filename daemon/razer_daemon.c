@@ -7,8 +7,6 @@ void daemon_kill(struct razer_daemon *daemon,char *error_message)
 	exit(1);
 }
 
-
-
 char *daemon_parameter_to_json(struct razer_parameter *parameter)
 {
 	char *parameter_json = str_CreateEmpty();
@@ -153,6 +151,9 @@ int daemon_dbus_error_check(char*message,DBusError *error)
 	return(1);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 dbus_bool_t daemon_dbus_check_user_handler(DBusConnection *connection, unsigned long uid, void *data)
 {
 	#ifdef USE_DEBUGGING
@@ -161,6 +162,8 @@ dbus_bool_t daemon_dbus_check_user_handler(DBusConnection *connection, unsigned 
 	/*no user id check performed*/
 	return(TRUE);
 }
+
+#pragma GCC diagnostic pop
 
 int daemon_dbus_open(struct razer_daemon *daemon)
 {
@@ -177,6 +180,12 @@ int daemon_dbus_open(struct razer_daemon *daemon)
 	if(!daemon_dbus_error_check("open_user_check",&error))
 		return(0);
 	return(1);
+}
+
+void daemon_dbus_close(struct razer_daemon *daemon)
+{
+	if(daemon->dbus)
+		dbus_connection_unref(daemon->dbus);
 }
 
 int daemon_dbus_add_method(struct razer_daemon *daemon,char *interface_name, char *method_name)
@@ -248,6 +257,10 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.parent","get"))
 		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.next.move_frame_buffer_linkage","set"))
+		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.next.move_frame_buffer_linkage","get"))
+		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.sub","add"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.subs","list"))
@@ -259,6 +272,10 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.parameter","get"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.frame_buffer","connect"))
+		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.frame_buffer","get"))
+		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon","quit"))
 		return(0);
 	return(1);
 }
@@ -282,80 +299,6 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 	if(!msg)
 		return(0);
 	//printf("dbus: received message:type:%d ,path:%s ,interface:%s ,member:%s\n",dbus_message_get_type(msg),dbus_message_get_path(msg),dbus_message_get_interface(msg),dbus_message_get_member(msg));
-    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.fps", "set")) 
-	{
-		#ifdef USE_DEBUGGING
-			printf("\ndbus: method set fps called\n");
-		#endif
-		if(!dbus_message_iter_init(msg, &parameters))
-		{
-			#ifdef USE_DEBUGGING
-				printf("dbus: set fps received without parameter\n");
-			#endif
-		}
-		if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
-		{
-			dbus_message_iter_get_basic(&parameters,&daemon->render_node->effect->fps);
-			#ifdef USE_DEBUGGING
-				printf("parameter:%d\n",daemon->render_node->effect->fps);
-			#endif
-		}
-		reply = dbus_message_new_method_return(msg);
-		dbus_message_iter_init_append(reply,&parameters);
-		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_INT32,&daemon->render_node->effect->fps)) 
-			daemon_kill(daemon,"dbus: Out Of Memory!\n");
- 		dbus_uint32_t serial = 0;
- 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
-			daemon_kill(daemon,"dbus: Out Of Memory!\n");
-		dbus_connection_flush(daemon->dbus);
-	}
-    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.fps", "get")) 
-	{
-		#ifdef USE_DEBUGGING
-			printf("\ndbus: method get fps called\n");
-		#endif
-		reply = dbus_message_new_method_return(msg);
-		dbus_message_iter_init_append(reply,&parameters);
-		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_INT32,&daemon->render_node->effect->fps)) 
-			daemon_kill(daemon,"dbus: Out Of Memory!\n");
- 		dbus_uint32_t serial = 0;
- 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
-			daemon_kill(daemon,"dbus: Out Of Memory!\n");
-		dbus_connection_flush(daemon->dbus);
-	}
-
-    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.fx", "list")) 
-	{
-		#ifdef USE_DEBUGGING
-			printf("\ndbus: method list fx called\n");
-		#endif
-		reply = dbus_message_new_method_return(msg);
-		dbus_message_iter_init_append(reply,&parameters);
-		char *fx_list_json = str_CreateEmpty();
-		fx_list_json = str_CatFree(fx_list_json,"{\n");
-		fx_list_json = str_CatFree(fx_list_json," \"effects_num\" : ");
-		char *effects_num_string = str_FromLong(daemon->effects_num);
-		fx_list_json = str_CatFree(fx_list_json,effects_num_string);
-		fx_list_json = str_CatFree(fx_list_json," ,\n");
-		free(effects_num_string);
-		fx_list_json = str_CatFree(fx_list_json," \"effects_list\": [\n");
-		for(int i=0;i<daemon->effects_num;i++)
-		{
-			struct razer_effect *effect = daemon->effects[i];
-			char *effect_json = daemon_effect_to_json(effect);
-			fx_list_json = str_CatFree(fx_list_json,effect_json);
-			free(effect_json);
-		}
-		fx_list_json = str_CatFree(fx_list_json,"]}\n");
-		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&fx_list_json)) 
-			daemon_kill(daemon,"dbus: Out Of Memory!\n");
- 		dbus_uint32_t serial = 0;
- 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
-			daemon_kill(daemon,"dbus: Out Of Memory!\n");
-		dbus_connection_flush(daemon->dbus);
-		free(fx_list_json);
-	}
-
     if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_nodes", "list")) 
 	{
 		#ifdef USE_DEBUGGING
@@ -569,6 +512,17 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 							daemon_set_parameter_int(parameter,value);
 						}
 						break;
+					case RAZER_PARAMETER_TYPE_UINT:
+						if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_UINT32)
+						{
+							unsigned long value = 0;
+							dbus_message_iter_get_basic(&parameters,&value);
+							#ifdef USE_DEBUGGING
+								printf("dbus: unsigned int parameter:%d\n",value);
+							#endif
+							daemon_set_parameter_uint(parameter,value);
+						}
+						break;
 					case RAZER_PARAMETER_TYPE_RGB:
 						{
 							struct razer_rgb *color = daemon_get_parameter_rgb(parameter);
@@ -618,6 +572,276 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 							}
 						}
 						break;
+					case RAZER_PARAMETER_TYPE_FLOAT_RANGE:
+						{
+							struct razer_float_range *range = daemon_get_parameter_float_range(parameter);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_DOUBLE)
+							{
+								double value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: min parameter:%f\n",value);
+								#endif
+								range->min = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_DOUBLE)
+							{
+								double value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: max parameter:%f\n",value);
+								#endif
+								range->max = value;
+							}
+						}
+						break;
+					case RAZER_PARAMETER_TYPE_INT_RANGE:
+						{
+							struct razer_int_range *range = daemon_get_parameter_int_range(parameter);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: min parameter:%l\n",value);
+								#endif
+								range->min = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: max parameter:%l\n",value);
+								#endif
+								range->max = value;
+							}
+						}
+						break;
+					case RAZER_PARAMETER_TYPE_UINT_RANGE:
+						{
+							struct razer_uint_range *range = daemon_get_parameter_uint_range(parameter);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_UINT32)
+							{
+								unsigned long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: min parameter:%ul\n",value);
+								#endif
+								range->min = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_UINT32)
+							{
+								unsigned long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: max parameter:%l\n",value);
+								#endif
+								range->max = value;
+							}
+						}
+						break;
+					case RAZER_PARAMETER_TYPE_RGB_RANGE:
+						{
+							struct razer_rgb_range *range = daemon_get_parameter_rgb_range(parameter);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: min R parameter:%d\n",value);
+								#endif
+								range->min->r = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: min G parameter:%d\n",value);
+								#endif
+								range->min->g = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: min B parameter:%d\n",value);
+								#endif
+								range->min->b = value;
+							}
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: max R parameter:%d\n",value);
+								#endif
+								range->max->r = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: max G parameter:%d\n",value);
+								#endif
+								range->max->g = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: max B parameter:%d\n",value);
+								#endif
+								range->max->b = value;
+							}
+						}
+						break;
+					/*case RAZER_PARAMETER_TYPE_FLOAT_ARRAY:
+						{
+							struct razer_float_array *array = daemon_get_parameter_float_array(parameter);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_DOUBLE)
+							{
+								double value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: min parameter:%f\n",value);
+								#endif
+								range->min = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_DOUBLE)
+							{
+								double value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: max parameter:%f\n",value);
+								#endif
+								range->max = value;
+							}
+						}
+						break;
+					case RAZER_PARAMETER_TYPE_INT_ARRAY:
+						{
+							struct razer_int_range *range = daemon_get_parameter_int_range(parameter);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: min parameter:%l\n",value);
+								#endif
+								range->min = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: max parameter:%l\n",value);
+								#endif
+								range->max = value;
+							}
+						}
+						break;
+					case RAZER_PARAMETER_TYPE_UINT_ARRAY:
+						{
+							struct razer_uint_range *range = daemon_get_parameter_uint_range(parameter);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_UINT32)
+							{
+								unsigned long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: min parameter:%ul\n",value);
+								#endif
+								range->min = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_UINT32)
+							{
+								unsigned long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: max parameter:%l\n",value);
+								#endif
+								range->max = value;
+							}
+						}
+						break;
+					case RAZER_PARAMETER_TYPE_RGB_ARRAY:
+						{
+							struct razer_rgb_range *range = daemon_get_parameter_rgb_range(parameter);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: min R parameter:%d\n",value);
+								#endif
+								range->min->r = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: min G parameter:%d\n",value);
+								#endif
+								range->min->g = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: min B parameter:%d\n",value);
+								#endif
+								range->min->b = value;
+							}
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: max R parameter:%d\n",value);
+								#endif
+								range->max->r = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: max G parameter:%d\n",value);
+								#endif
+								range->max->g = value;
+							}
+							dbus_message_iter_next(&parameters);
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: max B parameter:%d\n",value);
+								#endif
+								range->max->b = value;
+							}
+						}
+						break;*/
 				}
 			}
 		}
@@ -699,33 +923,6 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				#endif
 				if(rn)
 					daemon->render_node = rn;
-			}
-		}
- 		dbus_uint32_t serial = 0;
- 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
-			daemon_kill(daemon,"dbus: Out Of Memory!\n");
-		dbus_connection_flush(daemon->dbus);
-	}
-
-    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.frame_buffer", "connect"))
-	{
-		int rn_uid=0;
-		reply = dbus_message_new_method_return(msg);
-
-		if(dbus_message_iter_init(msg, &parameters))
-		{
-			if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
-			{
-				dbus_message_iter_get_basic(&parameters,&rn_uid);
-			}
-			if(rn_uid)
-			{
-				dbus_message_iter_init_append(reply,&parameters);
-				struct razer_fx_render_node *rn = daemon_get_render_node(daemon,rn_uid);
-				#ifdef USE_DEBUGGING
-					printf("\ndbus: connecting output frame buffer to render_node to: %d (@%x)\n",rn_uid,rn);
-				#endif
-				daemon_connect_frame_buffer(daemon,rn);
 			}
 		}
  		dbus_uint32_t serial = 0;
@@ -937,6 +1134,65 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		dbus_connection_flush(daemon->dbus);
 	}
 
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_node.next.move_frame_buffer_linkage", "set"))
+	{
+		char **path = NULL;
+		dbus_message_get_path_decomposed(msg,&path);
+		#ifdef USE_DEBUGGING
+			printf("\ndbus: method set render_node.next.move_frame_buffer_linkage called for : %s\n",path[0]);
+		#endif
+		int rn_uid=0;
+		int move_linkage=0;
+		if(path[0] != NULL)
+			rn_uid = atoi(path[0]);
+		dbus_free_string_array(path);
+		reply = dbus_message_new_method_return(msg);
+
+		if(dbus_message_iter_init(msg, &parameters))
+		{
+			if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+			{
+				dbus_message_iter_get_basic(&parameters,&move_linkage);
+			}
+			if(rn_uid && (move_linkage == 1 || move_linkage == 0))
+			{
+				dbus_message_iter_init_append(reply,&parameters);
+				struct razer_fx_render_node *rn = daemon_get_render_node(daemon,rn_uid);
+				rn->move_frame_buffer_linkage_to_next = move_linkage;
+			}
+		}
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+	}
+
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_node.next.move_frame_buffer_linkage", "get"))
+	{
+		char **path = NULL;
+		dbus_message_get_path_decomposed(msg,&path);
+		#ifdef USE_DEBUGGING
+			printf("\ndbus: method get render_node.next.move_frame_buffer_linkage called for : %s\n",path[0]);
+		#endif
+		int rn_uid=0;
+		if(path[0] != NULL)
+			rn_uid = atoi(path[0]);
+		dbus_free_string_array(path);
+		reply = dbus_message_new_method_return(msg);
+
+		if(rn_uid)
+		{
+			dbus_message_iter_init_append(reply,&parameters);
+			struct razer_fx_render_node *rn = daemon_get_render_node(daemon,rn_uid);
+			if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_INT32,&rn->move_frame_buffer_linkage_to_next)) 
+				daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		}
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+	}
+
     if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_node.parent", "get"))
 	{
 		char **path = NULL;
@@ -1088,6 +1344,131 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		dbus_connection_flush(daemon->dbus);
 	}
 
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.frame_buffer", "connect"))
+	{
+		int rn_uid=0;
+		reply = dbus_message_new_method_return(msg);
+
+		if(dbus_message_iter_init(msg, &parameters))
+		{
+			if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+			{
+				dbus_message_iter_get_basic(&parameters,&rn_uid);
+			}
+			if(rn_uid)
+			{
+				dbus_message_iter_init_append(reply,&parameters);
+				struct razer_fx_render_node *rn = daemon_get_render_node(daemon,rn_uid);
+				#ifdef USE_DEBUGGING
+					printf("\ndbus: connecting output frame buffer to render_node to: %d (@%x)\n",rn_uid,rn);
+				#endif
+				daemon_connect_frame_buffer(daemon,rn);
+			}
+		}
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+	}
+
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.frame_buffer", "get")) 
+	{
+		#ifdef USE_DEBUGGING
+			printf("\ndbus: method get frame_buffer called\n");
+		#endif
+		reply = dbus_message_new_method_return(msg);
+		dbus_message_iter_init_append(reply,&parameters);
+		char *rn_uid_json = str_CreateEmpty();
+		rn_uid_json = str_CatFree(rn_uid_json,"{\n");
+		rn_uid_json = str_CatFree(rn_uid_json," \"uid\" : ");
+		char *rn_uid_string = str_FromLong(daemon->frame_buffer_linked_uid);
+		rn_uid_json = str_CatFree(rn_uid_json,rn_uid_string);
+		rn_uid_json = str_CatFree(rn_uid_json,"\n");
+		free(rn_uid_string);
+		rn_uid_json = str_CatFree(rn_uid_json,"}\n");
+		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&rn_uid_json)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		free(rn_uid_json);
+		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+	}
+
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.fps", "set")) 
+	{
+		#ifdef USE_DEBUGGING
+			printf("\ndbus: method set fps called\n");
+		#endif
+		if(!dbus_message_iter_init(msg, &parameters))
+		{
+			#ifdef USE_DEBUGGING
+				printf("dbus: set fps received without parameter\n");
+			#endif
+		}
+		if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+		{
+			dbus_message_iter_get_basic(&parameters,&daemon->render_node->effect->fps);
+			#ifdef USE_DEBUGGING
+				printf("parameter:%d\n",daemon->render_node->effect->fps);
+			#endif
+		}
+		reply = dbus_message_new_method_return(msg);
+		dbus_message_iter_init_append(reply,&parameters);
+		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_INT32,&daemon->render_node->effect->fps)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+	}
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.fps", "get")) 
+	{
+		#ifdef USE_DEBUGGING
+			printf("\ndbus: method get fps called\n");
+		#endif
+		reply = dbus_message_new_method_return(msg);
+		dbus_message_iter_init_append(reply,&parameters);
+		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_INT32,&daemon->render_node->effect->fps)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+	}
+
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.fx", "list")) 
+	{
+		#ifdef USE_DEBUGGING
+			printf("\ndbus: method list fx called\n");
+		#endif
+		reply = dbus_message_new_method_return(msg);
+		dbus_message_iter_init_append(reply,&parameters);
+		char *fx_list_json = str_CreateEmpty();
+		fx_list_json = str_CatFree(fx_list_json,"{\n");
+		fx_list_json = str_CatFree(fx_list_json," \"effects_num\" : ");
+		char *effects_num_string = str_FromLong(daemon->effects_num);
+		fx_list_json = str_CatFree(fx_list_json,effects_num_string);
+		fx_list_json = str_CatFree(fx_list_json," ,\n");
+		free(effects_num_string);
+		fx_list_json = str_CatFree(fx_list_json," \"effects_list\": [\n");
+		for(int i=0;i<daemon->effects_num;i++)
+		{
+			struct razer_effect *effect = daemon->effects[i];
+			char *effect_json = daemon_effect_to_json(effect);
+			fx_list_json = str_CatFree(fx_list_json,effect_json);
+			free(effect_json);
+		}
+		fx_list_json = str_CatFree(fx_list_json,"]}\n");
+		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&fx_list_json)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+		free(fx_list_json);
+	}
+
     if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.fx.lib", "load"))
 	{
 		#ifdef USE_DEBUGGING
@@ -1116,6 +1497,20 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			daemon_kill(daemon,"dbus: Out Of Memory!\n");
 		dbus_connection_flush(daemon->dbus);
 	}
+
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon", "quit"))
+	{
+		#ifdef USE_DEBUGGING
+			printf("\ndbus: method quit daemon called for\n");
+		#endif
+		reply = dbus_message_new_method_return(msg);
+		daemon->running = 0;
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+	}
+
 	/*
     if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.fx.libs.", "list")) 
 	{
@@ -1151,7 +1546,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 	*/
 
 
-
+	/*
     if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.fx", "set")) 
 	{
 		#ifdef USE_DEBUGGING
@@ -1184,6 +1579,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			daemon_kill(daemon,"dbus: Out Of Memory!\n");
 		dbus_connection_flush(daemon->dbus);
 	}
+	*/
 
     if(dbus_message_is_method_call(msg, "org.freedesktop.DBus.Introspectable", "Introspect")) 
 	{
@@ -1195,32 +1591,173 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		char *xml_data = 
 		"<!DOCTYPE node PUBLIC \"-//freedesktop//DTD D-BUS Object Introspection 1.0//EN\"\n\"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd\">\n\
 		<node>\n\
-		<interface name=\"org.freedesktop.DBus.Introspectable\">\n\
-		<method name=\"Introspect\">\n\
-		<arg direction=\"out\" name=\"data\" type=\"s\">\n\
-		</arg></method>\n\
-		</interface>\n\
-		<interface name=\"org.voyagerproject.razer.daemon.fx\">\n\
-		<method name=\"set\">\n\
-		<arg direction=\"in\" name=\"fxname\" type=\"s\">\n\
-		</arg></method></interface>\n\
-		<interface name=\"org.freedesktop.DBus.Properties\">\n\
-		<method name=\"Get\">\n\
-		<arg direction=\"in\" name=\"interface\" type=\"s\">\n\
-		<arg direction=\"in\" name=\"propname\" type=\"s\">\n\
-		<arg direction=\"out\" name=\"value\" type=\"v\">\n\
-		</arg></arg></arg></method>\n\
-		<method name=\"Set\">\n\
-		<arg direction=\"in\" name=\"interface\" type=\"s\">\n\
-		<arg direction=\"in\" name=\"propname\" type=\"s\">\n\
-		<arg direction=\"in\" name=\"value\" type=\"v\">\n\
-		</arg></arg></arg></method>\n\
-		<method name=\"GetAll\">\n\
-		<arg direction=\"in\" name=\"interface\" type=\"s\">\n\
-		<arg direction=\"out\" name=\"props\" type=\"a{sv}\">\n\
-		</arg></arg></method>\n\
-		</interface>\n\
+			<interface name=\"org.freedesktop.DBus.Introspectable\">\n\
+				<method name=\"Introspect\">\n\
+					<arg direction=\"out\" name=\"data\" type=\"s\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon\">\n\
+				<method name=\"quit\">\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.fps\">\n\
+				<method name=\"set\">\n\
+					<arg direction=\"in\" name=\"fps_rate\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"get\">\n\
+					<arg direction=\"out\" name=\"fps_rate\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.fx\">\n\
+				<method name=\"list\">\n\
+					<arg direction=\"out\" name=\"fx_list_json\" type=\"s\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"load\">\n\
+					<arg direction=\"in\" name=\"fx_so_pathname\" type=\"s\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_nodes\">\n\
+				<method name=\"list\">\n\
+					<arg direction=\"out\" name=\"render_nodes_list_json\" type=\"s\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"render_list\">\n\
+					<arg direction=\"out\" name=\"render_list_render_nodes_list_json\" type=\"s\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_node\">\n\
+				<method name=\"set\">\n\
+					<arg direction=\"in\" name=\"render_node_uid\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"create\">\n\
+					<arg direction=\"in\" name=\"effect_uid\" type=\"i\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"name\" type=\"s\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"description\" type=\"s\">\n\
+					</arg>\n\
+					<arg direction=\"out\" name=\"render_node_uid\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_node.parameters\">\n\
+				<method name=\"list\">\n\
+					<arg direction=\"out\" name=\"parameters_list_json\" type=\"s\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_node.parameter\">\n\
+				<method name=\"set\">\n\
+					<arg direction=\"in\" name=\"parameter_value\" type=\"v\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"get\">\n\
+					<arg direction=\"out\" name=\"parameter_value\" type=\"v\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_node.opacity\">\n\
+				<method name=\"set\">\n\
+					<arg direction=\"in\" name=\"opacity\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"get\">\n\
+					<arg direction=\"out\" name=\"opacity\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_node.input\">\n\
+				<method name=\"connect\">\n\
+					<arg direction=\"in\" name=\"render_node_uid\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_node.second_input\">\n\
+				<method name=\"connect\">\n\
+					<arg direction=\"in\" name=\"render_node_uid\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_node.next\">\n\
+				<method name=\"set\">\n\
+					<arg direction=\"in\" name=\"render_node_uid\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"get\">\n\
+					<arg direction=\"out\" name=\"render_node_uid\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_node.next.move_frame_buffer_linkage\">\n\
+				<method name=\"set\">\n\
+					<arg direction=\"in\" name=\"move_linkage_bool\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"get\">\n\
+					<arg direction=\"out\" name=\"move_linkage_bool\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_node.parent\">\n\
+				<method name=\"get\">\n\
+					<arg direction=\"out\" name=\"render_node_uid\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_node.limit_render_time_ms\">\n\
+				<method name=\"set\">\n\
+					<arg direction=\"in\" name=\"limit_render_time_ms\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_node.subs\">\n\
+				<method name=\"list\">\n\
+					<arg direction=\"out\" name=\"render_node_subs_list_json\" type=\"s\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_node.sub\">\n\
+				<method name=\"add\">\n\
+					<arg direction=\"in\" name=\"compute_render_node_uid\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.frame_buffer\">\n\
+				<method name=\"connect\">\n\
+					<arg direction=\"in\" name=\"render_node_uid\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"get\">\n\
+					<arg direction=\"out\" name=\"render_node_uid\" type=\"i\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
 		</node>\n";
+/*			<interface name=\"org.freedesktop.DBus.Properties\">\n\
+				<method name=\"Get\">\n\
+					<arg direction=\"in\" name=\"interface\" type=\"s\">\n\
+					<arg direction=\"in\" name=\"propname\" type=\"s\">\n\
+					<arg direction=\"out\" name=\"value\" type=\"v\">\n\
+				</arg></arg></arg></method>\n\
+				<method name=\"Set\">\n\
+					<arg direction=\"in\" name=\"interface\" type=\"s\">\n\
+					<arg direction=\"in\" name=\"propname\" type=\"s\">\n\
+					<arg direction=\"in\" name=\"value\" type=\"v\">\n\
+				</arg></arg></arg></method>\n\
+				<method name=\"GetAll\">\n\
+					<arg direction=\"in\" name=\"interface\" type=\"s\">\n\
+					<arg direction=\"out\" name=\"props\" type=\"a{sv}\">\n\
+				</arg></arg></method>\n\
+			</interface>\n\
+*/
+
 		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&xml_data)) 
 			daemon_kill(daemon,"dbus: Out Of Memory!\n");
  		dbus_uint32_t serial = 0;
@@ -1229,7 +1766,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		dbus_connection_flush(daemon->dbus);
 	}
 
-
+	/*
 	if(dbus_message_is_signal(msg,"org.voyagerproject.razer.daemon.fx.set.Type","set"))
 	{
 		#ifdef USE_DEBUGGING
@@ -1248,9 +1785,13 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			printf("parameter:%s\n",fxname);
 		}
 	}
+	*/
 	dbus_message_unref(msg);
 	return(1);
 }
+
+//end of dbus ifdef
+#endif 
 
 void daemon_connect_frame_buffer(struct razer_daemon *daemon,struct razer_fx_render_node *render_node)
 {
@@ -1302,18 +1843,10 @@ void daemon_set_default_render_node(struct razer_daemon *daemon,struct razer_fx_
 	daemon->render_node = render_node;
 }
 
-
-void daemon_dbus_close(struct razer_daemon *daemon)
-{
-	if(daemon->dbus)
-		dbus_connection_unref(daemon->dbus);
-}
-
-#endif
-
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
+
+//TODO check if library is already loaded
 
 void *daemon_load_fx_lib(struct razer_daemon *daemon,char *fx_pathname)
 {
@@ -1416,7 +1949,7 @@ struct razer_daemon *daemon_open(void)
 	if(lib)
 		daemon_register_lib(daemon,lib);
 
-	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,2),-1,-1,0,"First Test Render Node","Default Render Node");
+	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,2),-1,-1,0,"First Render Node","Default Render Node");
 	daemon_register_render_node(daemon,daemon->render_node);
 	daemon_compute_render_nodes(daemon);
 	daemon_connect_frame_buffer(daemon,daemon->render_node);
@@ -1492,7 +2025,7 @@ int daemon_update_render_node(struct razer_daemon *daemon,struct razer_fx_render
 			sub->running  = 1;
 		}
 	}
-	if(!render_node->running)
+	if(!render_node->running || daemon_has_render_node_reached_render_limit(daemon,render_node))
 		return(0);
 	if(render_node->subs_num)
 	{
@@ -1544,26 +2077,31 @@ int daemon_update_render_nodes(struct razer_daemon *daemon)
 	{
 		rn = daemon->render_nodes[i];
 		ret = daemon_update_render_node(daemon,rn);
-		if(!ret || daemon_has_render_node_reached_render_limit(daemon,rn))
+		if(!ret)
 		{
-
+			//TODO rewrite
 			if(rn->next)
 			{
 				//exchange this render_node with the next one
 				daemon->render_nodes[i] = rn->next;
-				if(rn->next->output_frame_linked_uid == -1)
-					daemon_free_rgb_frame(&rn->next->output_frame);
-				if(rn->next->input_frame_linked_uid == -1)
-					daemon_free_rgb_frame(&rn->next->input_frame);
-				if(rn->next->second_input_frame_linked_uid == -1)
-					daemon_free_rgb_frame(&rn->next->second_input_frame);
-				rn->next->input_frame = rn->input_frame;
-				rn->next->second_input_frame = rn->second_input_frame;
+				if(rn->move_frame_buffer_linkage_to_next)
+				{
+					if(rn->next->output_frame_linked_uid == -1)
+						daemon_free_rgb_frame(&rn->next->output_frame);
+					if(rn->next->input_frame_linked_uid == -1)
+						daemon_free_rgb_frame(&rn->next->input_frame);
+					if(rn->next->second_input_frame_linked_uid == -1)
+						daemon_free_rgb_frame(&rn->next->second_input_frame);
+					rn->next->input_frame = rn->input_frame;
+					rn->next->second_input_frame = rn->second_input_frame;
+					rn->next->input_frame_linked_uid = rn->input_frame_linked_uid;
+					rn->next->second_input_frame_linked_uid = rn->second_input_frame_linked_uid;
+					//if(rn->output_frame_linked_uid!= -1)
+				}
 				rn->next->output_frame = rn->output_frame;
-				rn->next->input_frame_linked_uid = rn->input_frame_linked_uid;
-				rn->next->second_input_frame_linked_uid = rn->second_input_frame_linked_uid;
-				//if(rn->output_frame_linked_uid!= -1)
 				rn->next->output_frame_linked_uid = rn->output_frame_linked_uid;
+
+
 				rn->next->prev = rn;
 				rn->next->start_ticks = 0;
 				rn->start_ticks = 0;
@@ -1572,7 +2110,7 @@ int daemon_update_render_nodes(struct razer_daemon *daemon)
 			}
 		}
 	}
-	if(!rn->next && (!ret || daemon_has_render_node_reached_render_limit(daemon,rn)))
+	if(!rn->next && !ret)
 	{
 		//root render_node effect returned 0
 		//start next render_node in chain or default
@@ -1594,7 +2132,7 @@ int daemon_key_event_render_node(struct razer_daemon *daemon,struct razer_fx_ren
 		render_node->start_ticks = razer_get_ticks();
 		render_node->running  = 1;
 	}
-	if(!render_node->running)
+	if(!render_node->running || daemon_has_render_node_reached_render_limit(daemon,render_node))
 		return(0);
 	if(render_node->subs_num)
 	{
@@ -1638,25 +2176,28 @@ int daemon_key_event_render_nodes(struct razer_daemon *daemon,int keycode,int pr
 	{
 		rn = daemon->render_nodes[i];
 		ret = daemon_key_event_render_node(daemon,rn,keycode,pressed);
-		if(!ret || daemon_has_render_node_reached_render_limit(daemon,rn))
+		if(!ret)
 		{
 			if(rn->next)
 			{
 				//exchange this render_node with the next one
 				daemon->render_nodes[i] = rn->next;
-				if(rn->next->output_frame_linked_uid == -1)
-					daemon_free_rgb_frame(&rn->next->output_frame);
-				if(rn->next->input_frame_linked_uid == -1)
-					daemon_free_rgb_frame(&rn->next->input_frame);
-				if(rn->next->second_input_frame_linked_uid == -1)
-					daemon_free_rgb_frame(&rn->next->second_input_frame);
-				rn->next->input_frame = rn->input_frame;
-				rn->next->second_input_frame = rn->second_input_frame;
-				rn->next->output_frame = rn->output_frame;
-				rn->next->input_frame_linked_uid = rn->input_frame_linked_uid;
-				rn->next->second_input_frame_linked_uid = rn->second_input_frame_linked_uid;
-				//if(rn->output_frame_linked_uid!= -1)
-				rn->next->output_frame_linked_uid = rn->output_frame_linked_uid;
+				if(rn->move_frame_buffer_linkage_to_next)
+				{
+					if(rn->next->output_frame_linked_uid == -1)
+						daemon_free_rgb_frame(&rn->next->output_frame);
+					if(rn->next->input_frame_linked_uid == -1)
+						daemon_free_rgb_frame(&rn->next->input_frame);
+					if(rn->next->second_input_frame_linked_uid == -1)
+						daemon_free_rgb_frame(&rn->next->second_input_frame);
+					rn->next->input_frame = rn->input_frame;
+					rn->next->second_input_frame = rn->second_input_frame;
+					rn->next->output_frame = rn->output_frame;
+					rn->next->input_frame_linked_uid = rn->input_frame_linked_uid;
+					rn->next->second_input_frame_linked_uid = rn->second_input_frame_linked_uid;
+					//if(rn->output_frame_linked_uid!= -1)
+					rn->next->output_frame_linked_uid = rn->output_frame_linked_uid;
+				}
 				rn->next->prev = rn;
 				rn->next->start_ticks = 0;
 				rn->start_ticks = 0;
@@ -1665,7 +2206,7 @@ int daemon_key_event_render_nodes(struct razer_daemon *daemon,int keycode,int pr
 			}
 		}
 	}
-	if(!rn->next && (!ret || daemon_has_render_node_reached_render_limit(daemon,rn)))
+	if(!rn->next && !ret)
 	{
 		//root render_node effect returned 0
 		//start next render_node in chain or default
@@ -1754,6 +2295,25 @@ void daemon_compute_render_nodes(struct razer_daemon *daemon)
 	daemon_free_queue(&queue);
 	daemon->is_render_nodes_dirty = 0;
 }
+
+void daemon_compute_render_nodes_from(struct razer_daemon *daemon,struct razer_fx_render_node *render_node)
+{
+	struct razer_queue *queue = daemon_create_queue();
+	if(daemon->render_nodes)
+	{
+		free(daemon->render_nodes);
+		//daemon->render_nodes = NULL;
+	}
+	//daemon->render_nodes_num = 0;
+	if(render_node)
+	{
+		daemon_queue_append_render_node(queue,render_node);
+		daemon_compute_append_queue(daemon,queue);
+	}
+	daemon_free_queue(&queue);
+	daemon->is_render_nodes_dirty = 0;
+}
+
 
 struct razer_queue *daemon_create_queue(void)
 {
@@ -1894,6 +2454,7 @@ struct razer_fx_render_node *daemon_create_render_node(struct razer_daemon *daem
 	render_node->start_ticks = 0;
 	render_node->running = 0;//set to 1 with first update
 	render_node->limit_render_time_ms = 0;
+	render_node->move_frame_buffer_linkage_to_next = 1;
 	//render_node->continue_chain=1;
 	render_node->loop_count = -1;
 	return(render_node);
@@ -1955,6 +2516,75 @@ struct razer_parameter *daemon_create_parameter(void)
 	return(parameter);
 }
 
+struct razer_float_range *razer_float_range_copy(struct razer_float_range *range)
+{
+	struct razer_float_range *copy = (struct razer_float_range*)malloc(sizeof(struct razer_float_range));
+	copy->min = range->min;
+	copy->max = range->max;
+	return(copy);
+}
+
+struct razer_int_range *razer_int_range_copy(struct razer_int_range *range)
+{
+	struct razer_int_range *copy = (struct razer_int_range*)malloc(sizeof(struct razer_int_range));
+	copy->min = range->min;
+	copy->max = range->max;
+	return(copy);
+}
+
+struct razer_uint_range *razer_uint_range_copy(struct razer_uint_range *range)
+{
+	struct razer_uint_range *copy = (struct razer_uint_range*)malloc(sizeof(struct razer_uint_range));
+	copy->min = range->min;
+	copy->max = range->max;
+	return(copy);
+}
+
+struct razer_rgb_range *razer_rgb_range_copy(struct razer_rgb_range *range)
+{
+	struct razer_rgb_range *copy = (struct razer_rgb_range*)malloc(sizeof(struct razer_rgb_range));
+	copy->min = rgb_copy(range->min);
+	copy->max = rgb_copy(range->max);
+	return(copy);
+}
+
+struct razer_float_array *razer_float_array_copy(struct razer_float_array *array)
+{
+	struct razer_float_array *copy = (struct razer_float_array*)malloc(sizeof(struct razer_float_array));
+	copy->items = (float*)malloc(sizeof(float)*array->num);
+	memcpy(copy->items,array->items,sizeof(float)*array->num);
+	copy->num = array->num;
+	return(copy);
+}
+
+struct razer_int_array *razer_int_array_copy(struct razer_int_array *array)
+{
+	struct razer_int_array *copy = (struct razer_int_array*)malloc(sizeof(struct razer_int_array));
+	copy->items = (long*)malloc(sizeof(long)*array->num);
+	memcpy(copy->items,array->items,sizeof(long)*array->num);
+	copy->num = array->num;
+	return(copy);
+}
+
+struct razer_uint_array *razer_uint_array_copy(struct razer_uint_array *array)
+{
+	struct razer_uint_array *copy = (struct razer_uint_array*)malloc(sizeof(struct razer_uint_array));
+	copy->items = (unsigned long*)malloc(sizeof(unsigned long)*array->num);
+	memcpy(copy->items,array->items,sizeof(unsigned long)*array->num);
+	copy->num = array->num;
+	return(copy);
+}
+
+struct razer_rgb_array *razer_rgb_array_copy(struct razer_rgb_array *array)
+{
+	struct razer_rgb_array *copy = (struct razer_rgb_array*)malloc(sizeof(struct razer_rgb_array));
+	copy->items = (struct razer_rgb*)malloc(sizeof(struct razer_rgb*)*array->num);
+	memcpy(copy->items,array->items,sizeof(struct razer_rgb*)*array->num);
+	copy->num = array->num;
+	return(copy);
+}
+
+
 struct razer_parameter *daemon_copy_parameter(struct razer_parameter *parameter)
 {
 	struct razer_parameter *copy = daemon_create_parameter();
@@ -1981,6 +2611,54 @@ struct razer_parameter *daemon_copy_parameter(struct razer_parameter *parameter)
 			break;
 		case RAZER_PARAMETER_TYPE_RENDER_NODE:
 			daemon_set_parameter_render_node(copy,daemon_get_parameter_render_node(parameter));
+			break;
+		case RAZER_PARAMETER_TYPE_FLOAT_RANGE:
+			{
+				struct razer_float_range *range = razer_float_range_copy(daemon_get_parameter_float_range(parameter));
+				daemon_set_parameter_float_range(copy,range);
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_INT_RANGE:
+			{
+				struct razer_int_range *range = razer_int_range_copy(daemon_get_parameter_int_range(parameter));
+				daemon_set_parameter_int_range(copy,range);
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_UINT_RANGE:
+			{
+				struct razer_uint_range *range = razer_uint_range_copy(daemon_get_parameter_uint_range(parameter));
+				daemon_set_parameter_uint_range(copy,range);
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_RGB_RANGE:
+			{
+				struct razer_rgb_range *range = razer_rgb_range_copy(daemon_get_parameter_rgb_range(parameter));
+				daemon_set_parameter_rgb_range(copy,range);
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_FLOAT_ARRAY:
+			{
+				struct razer_float_array *array = razer_float_array_copy(daemon_get_parameter_float_array(parameter));
+				daemon_set_parameter_float_array(copy,array);
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_INT_ARRAY:
+			{
+				struct razer_int_array *array = razer_int_array_copy(daemon_get_parameter_int_array(parameter));
+				daemon_set_parameter_int_array(copy,array);
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_UINT_ARRAY:
+			{
+				struct razer_uint_array *array = razer_uint_array_copy(daemon_get_parameter_uint_array(parameter));
+				daemon_set_parameter_uint_array(copy,array);
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_RGB_ARRAY:
+			{
+				struct razer_rgb_array *array = razer_rgb_array_copy(daemon_get_parameter_rgb_array(parameter));
+				daemon_set_parameter_rgb_array(copy,array);
+			}
 			break;
 	}
 	
@@ -2019,6 +2697,7 @@ void daemon_free_rgb_frame(struct razer_rgb_frame **frame)
 	(*frame) = NULL;
 }
 
+//TODO maybe remove some redundancy here
 struct razer_parameter *daemon_create_parameter_string(char *key,char *description,char *value)
 {
 	struct razer_parameter *parameter = daemon_create_parameter();
@@ -2040,13 +2719,23 @@ struct razer_parameter *daemon_create_parameter_float(char *key,char *descriptio
 	return(parameter);
 }
 
-struct razer_parameter *daemon_create_parameter_int(char *key,char *description,int value)
+struct razer_parameter *daemon_create_parameter_int(char *key,char *description,long value)
 {
 	struct razer_parameter *parameter = daemon_create_parameter();
 	parameter->key = key;
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_INT;
+	return(parameter);
+}
+
+struct razer_parameter *daemon_create_parameter_uint(char *key,char *description,unsigned long value)
+{
+	struct razer_parameter *parameter = daemon_create_parameter();
+	parameter->key = key;
+	parameter->description = description;
+	parameter->value = value;
+	parameter->type = RAZER_PARAMETER_TYPE_UINT;
 	return(parameter);
 }
 
@@ -2069,6 +2758,89 @@ struct razer_parameter *daemon_create_parameter_render_node(char *key,char *desc
 	parameter->type = RAZER_PARAMETER_TYPE_RENDER_NODE;
 	return(parameter);
 }
+
+struct razer_parameter *daemon_create_parameter_float_range(char *key,char *description,struct razer_float_range *value)
+{
+	struct razer_parameter *parameter = daemon_create_parameter();
+	parameter->key = key;
+	parameter->description = description;
+	parameter->value = (unsigned long)value;
+	parameter->type = RAZER_PARAMETER_TYPE_FLOAT_RANGE;
+	return(parameter);
+}
+
+struct razer_parameter *daemon_create_parameter_int_range(char *key,char *description,struct razer_int_range *value)
+{
+	struct razer_parameter *parameter = daemon_create_parameter();
+	parameter->key = key;
+	parameter->description = description;
+	parameter->value = (unsigned long)value;
+	parameter->type = RAZER_PARAMETER_TYPE_INT_RANGE;
+	return(parameter);
+}
+
+struct razer_parameter *daemon_create_parameter_uint_range(char *key,char *description,struct razer_uint_range *value)
+{
+	struct razer_parameter *parameter = daemon_create_parameter();
+	parameter->key = key;
+	parameter->description = description;
+	parameter->value = (unsigned long)value;
+	parameter->type = RAZER_PARAMETER_TYPE_UINT_RANGE;
+	return(parameter);
+}
+
+struct razer_parameter *daemon_create_parameter_rgb_range(char *key,char *description,struct razer_rgb_range *value)
+{
+	struct razer_parameter *parameter = daemon_create_parameter();
+	parameter->key = key;
+	parameter->description = description;
+	parameter->value = (unsigned long)value;
+	parameter->type = RAZER_PARAMETER_TYPE_RGB_RANGE;
+	return(parameter);
+}
+
+struct razer_parameter *daemon_create_parameter_float_array(char *key,char *description,struct razer_float_array *value)
+{
+	struct razer_parameter *parameter = daemon_create_parameter();
+	parameter->key = key;
+	parameter->description = description;
+	parameter->value = (unsigned long)value;
+	parameter->type = RAZER_PARAMETER_TYPE_FLOAT_ARRAY;
+	return(parameter);
+}
+
+struct razer_parameter *daemon_create_parameter_int_array(char *key,char *description,struct razer_int_array *value)
+{
+	struct razer_parameter *parameter = daemon_create_parameter();
+	parameter->key = key;
+	parameter->description = description;
+	parameter->value = (unsigned long)value;
+	parameter->type = RAZER_PARAMETER_TYPE_INT_ARRAY;
+	return(parameter);
+}
+
+struct razer_parameter *daemon_create_parameter_uint_array(char *key,char *description,struct razer_uint_array *value)
+{
+	struct razer_parameter *parameter = daemon_create_parameter();
+	parameter->key = key;
+	parameter->description = description;
+	parameter->value = (unsigned long)value;
+	parameter->type = RAZER_PARAMETER_TYPE_UINT_ARRAY;
+	return(parameter);
+}
+
+struct razer_parameter *daemon_create_parameter_rgb_array(char *key,char *description,struct razer_rgb_array *value)
+{
+	struct razer_parameter *parameter = daemon_create_parameter();
+	parameter->key = key;
+	parameter->description = description;
+	parameter->value = (unsigned long)value;
+	parameter->type = RAZER_PARAMETER_TYPE_RGB_ARRAY;
+	return(parameter);
+}
+
+
+
 
 void daemon_set_parameter_string(struct razer_parameter *parameter,char *value)
 {
@@ -2096,7 +2868,7 @@ void daemon_set_parameter_float(struct razer_parameter *parameter,float value)
 	//parameter->value = value;
 }
 
-void daemon_set_parameter_int(struct razer_parameter *parameter,int value)
+void daemon_set_parameter_int(struct razer_parameter *parameter,long value)
 {
 	if(parameter->type != RAZER_PARAMETER_TYPE_INT)
 	{
@@ -2106,6 +2878,18 @@ void daemon_set_parameter_int(struct razer_parameter *parameter,int value)
 		return;
 	}
 	parameter->value = (unsigned long)value;
+}
+
+void daemon_set_parameter_uint(struct razer_parameter *parameter,unsigned long value)
+{
+	if(parameter->type != RAZER_PARAMETER_TYPE_UINT)
+	{
+		#ifdef USE_DEBUGGING
+			printf("changing of parameter types is not allowed\n");
+		#endif
+		return;
+	}
+	parameter->value = value;
 }
 
 void daemon_set_parameter_rgb(struct razer_parameter *parameter,struct razer_rgb *value)
@@ -2132,6 +2916,104 @@ void daemon_set_parameter_render_node(struct razer_parameter *parameter,struct r
 	parameter->value = (unsigned long)value;
 }
 
+void daemon_set_parameter_float_range(struct razer_parameter *parameter,struct razer_float_range *value)
+{
+	if(parameter->type != RAZER_PARAMETER_TYPE_FLOAT_RANGE)
+	{
+		#ifdef USE_DEBUGGING
+			printf("changing of parameter types is not allowed\n");
+		#endif
+		return;
+	}
+	parameter->value = (unsigned long)value;
+}
+
+void daemon_set_parameter_int_range(struct razer_parameter *parameter,struct razer_int_range *value)
+{
+	if(parameter->type != RAZER_PARAMETER_TYPE_INT_RANGE)
+	{
+		#ifdef USE_DEBUGGING
+			printf("changing of parameter types is not allowed\n");
+		#endif
+		return;
+	}
+	parameter->value = (unsigned long)value;
+}
+
+void daemon_set_parameter_uint_range(struct razer_parameter *parameter,struct razer_uint_range *value)
+{
+	if(parameter->type != RAZER_PARAMETER_TYPE_UINT_RANGE)
+	{
+		#ifdef USE_DEBUGGING
+			printf("changing of parameter types is not allowed\n");
+		#endif
+		return;
+	}
+	parameter->value = (unsigned long)value;
+}
+
+void daemon_set_parameter_rgb_range(struct razer_parameter *parameter,struct razer_rgb_range *value)
+{
+	if(parameter->type != RAZER_PARAMETER_TYPE_RGB_RANGE)
+	{
+		#ifdef USE_DEBUGGING
+			printf("changing of parameter types is not allowed\n");
+		#endif
+		return;
+	}
+	parameter->value = (unsigned long)value;
+}
+
+void daemon_set_parameter_float_array(struct razer_parameter *parameter,struct razer_float_array *value)
+{
+	if(parameter->type != RAZER_PARAMETER_TYPE_FLOAT_ARRAY)
+	{
+		#ifdef USE_DEBUGGING
+			printf("changing of parameter types is not allowed\n");
+		#endif
+		return;
+	}
+	parameter->value = (unsigned long)value;
+}
+
+void daemon_set_parameter_int_array(struct razer_parameter *parameter,struct razer_int_array *value)
+{
+	if(parameter->type != RAZER_PARAMETER_TYPE_INT_ARRAY)
+	{
+		#ifdef USE_DEBUGGING
+			printf("changing of parameter types is not allowed\n");
+		#endif
+		return;
+	}
+	parameter->value = (unsigned long)value;
+}
+
+void daemon_set_parameter_uint_array(struct razer_parameter *parameter,struct razer_uint_array *value)
+{
+	if(parameter->type != RAZER_PARAMETER_TYPE_UINT_ARRAY)
+	{
+		#ifdef USE_DEBUGGING
+			printf("changing of parameter types is not allowed\n");
+		#endif
+		return;
+	}
+	parameter->value = (unsigned long)value;
+}
+
+void daemon_set_parameter_rgb_array(struct razer_parameter *parameter,struct razer_rgb_array *value)
+{
+	if(parameter->type != RAZER_PARAMETER_TYPE_RGB_ARRAY)
+	{
+		#ifdef USE_DEBUGGING
+			printf("changing of parameter types is not allowed\n");
+		#endif
+		return;
+	}
+	parameter->value = (unsigned long)value;
+}
+
+
+
 
 char *daemon_get_parameter_string(struct razer_parameter *parameter)
 {
@@ -2149,11 +3031,18 @@ float daemon_get_parameter_float(struct razer_parameter *parameter)
 	//return((float)parameter->value);
 }
 
-int daemon_get_parameter_int(struct razer_parameter *parameter)
+long daemon_get_parameter_int(struct razer_parameter *parameter)
 {
 	if(!parameter)
 		return(0);
-	return((int)parameter->value);
+	return((long)parameter->value);
+}
+
+unsigned long daemon_get_parameter_uint(struct razer_parameter *parameter)
+{
+	if(!parameter)
+		return(0);
+	return(parameter->value);
 }
 
 struct razer_rgb *daemon_get_parameter_rgb(struct razer_parameter *parameter)
@@ -2167,6 +3056,63 @@ struct razer_fx_render_node *daemon_get_parameter_render_node(struct razer_param
 {
 	return((struct razer_fx_render_node*)parameter->value);
 }
+
+struct razer_float_range *daemon_get_parameter_float_range(struct razer_parameter *parameter)
+{
+	if(!parameter)
+		return(NULL);
+	return((struct razer_float_range*)parameter->value);
+}
+
+struct razer_int_range *daemon_get_parameter_int_range(struct razer_parameter *parameter)
+{
+	if(!parameter)
+		return(NULL);
+	return((struct razer_int_range*)parameter->value);
+}
+
+struct razer_uint_range *daemon_get_parameter_uint_range(struct razer_parameter *parameter)
+{
+	if(!parameter)
+		return(NULL);
+	return((struct razer_uint_range*)parameter->value);
+}
+
+struct razer_rgb_range *daemon_get_parameter_rgb_range(struct razer_parameter *parameter)
+{
+	if(!parameter)
+		return(NULL);
+	return((struct razer_rgb_range*)parameter->value);
+}
+
+struct razer_float_array *daemon_get_parameter_float_array(struct razer_parameter *parameter)
+{
+	if(!parameter)
+		return(NULL);
+	return((struct razer_float_array*)parameter->value);
+}
+
+struct razer_int_array *daemon_get_parameter_int_array(struct razer_parameter *parameter)
+{
+	if(!parameter)
+		return(NULL);
+	return((struct razer_int_array*)parameter->value);
+}
+
+struct razer_uint_array *daemon_get_parameter_uint_array(struct razer_parameter *parameter)
+{
+	if(!parameter)
+		return(NULL);
+	return((struct razer_uint_array*)parameter->value);
+}
+
+struct razer_rgb_array *daemon_get_parameter_rgb_array(struct razer_parameter *parameter)
+{
+	if(!parameter)
+		return(NULL);
+	return((struct razer_rgb_array*)parameter->value);
+}
+
 
 
 int daemon_add_parameter(struct razer_parameters *parameters,struct razer_parameter *parameter)

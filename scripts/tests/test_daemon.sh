@@ -10,6 +10,7 @@
 #first parameter is the effect uid
 #returns the uid of the render node created as json
 
+
 dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.fx.lib.load string:"daemon/fx/pez2001_mixer_debug.so"
 
 RUID=`dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:1 string:"First One Node" string:"a test node" | jq '.uid'`
