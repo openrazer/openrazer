@@ -2,18 +2,25 @@
 A Linux driver for the Razer Blackwidow Chroma keyboard (supports all lighting modes) includes a daemon for advanced effects
 
 
-Installation: 
+=== Installation === 
+
 
  - execute install_driver_debian.sh
  - reboot
  
- Installation for non debian based distros:
+
+
+=== Installation for non debian based distros ===
+
 
  - install dependencies (libdbus-1-dev,jq)
  - execute sudo make -s all install
  - reboot
 
-Usage:
+
+
+=== Usage ===
+
 
  Have a look at the scripts directory.
  In the driver sub directory you will find the scripts to
@@ -25,12 +32,15 @@ Usage:
  (someone may even write a Gui to control the daemon , maybe like the node editor in blender)
 
 
-Daemon IPC details:
 
+=== Daemon IPC details ===
+
+[... To be written ...]
 
 
 
 === First Steps Tutorial ===
+
 
 How to create a standalone effect easily using the included library ?
 
@@ -123,17 +133,18 @@ you can set the key colors by manually setting the pos.
 
 === Daemon effects tutorial ===
 
-How to create an effect to be used in the daemon ?
 
+How to create an effect to be used in the daemon ?
 Why not shoot for something crazy like a light blast originating from keys being pressed this time?
 Its not that much different than writing a self-hosted effect.
 
-
+[... To be written ...]
 
 
 
 
 === Contributions ===
+
 
 Any effect you might want to contribute is welcome.
 Please use your own source files to host your effects for merging.
@@ -142,7 +153,8 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 
 
 
- Additional Credits:
+=== Additional Credits ===
+
 
  - Various installation and makefile related fixes by Jordan King (manual merge)
  - Ubuntu file permission fixes by Carsten Teibes (pulled)

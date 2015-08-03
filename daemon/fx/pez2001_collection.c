@@ -26,8 +26,8 @@ int effect1_update(struct razer_fx_render_node *render)
 	struct razer_rgb color;
 	//struct razer_chroma *chroma = render->daemon->chroma;
 	int x,y;
-	int count = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1));
-	int dir = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2));
+	int count = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1));
+	int dir = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2));
 	for(x=0;x<22;x++)
 		for(y=0;y<6;y++)
 		{
@@ -48,12 +48,12 @@ int effect1_update(struct razer_fx_render_node *render)
 	//razer_update_keys(chroma,chroma->keys);
 	count+=dir;
 	#ifdef USE_DEBUGGING
-		printf(" (1st One ## end counter:%d,count:%d,dir:%d)",daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0)),count,dir);
+		printf(" (1st One ## end counter:%d,count:%d,dir:%d)",daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0)),count,dir);
 	#endif
-	if(count<=0 || count>=daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0)))
+	if(count<=0 || count>=daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0)))
 		dir=-dir;
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),count);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2),dir);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),count);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2),dir);	
 	return(1);
 }
 
@@ -64,9 +64,9 @@ int effect2_update(struct razer_fx_render_node *render)
 {
 	struct razer_rgb color;
 	int x,y;
-	struct razer_rgb *base_color = daemon_get_parameter_rgb(daemon_get_parameter_by_index(render->effect->parameters,0));
-	int count = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1));
-	int dir = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2));
+	struct razer_rgb *base_color = daemon_get_parameter_rgb(daemon_effect_get_parameter_by_index(render->effect,0));
+	int count = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1));
+	int dir = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2));
 	#ifdef USE_DEBUGGING
 		printf(" (breath ## breathing color: %d,%d,%d,count:%d,dir:%d)",base_color->r,base_color->g,base_color->b,count,dir);
 	#endif
@@ -83,8 +83,8 @@ int effect2_update(struct razer_fx_render_node *render)
 	count+=dir;
 	if(count<1 || count>99)
 		dir=-dir;
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),count);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2),dir);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),count);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2),dir);	
 	return(1);
 }
 
@@ -93,11 +93,11 @@ struct razer_effect *effect3 = NULL;
 int effect3_update(struct razer_fx_render_node *render)
 {
 	struct razer_rgb color;
-	int count = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0));
-	int dir = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1));
-	int rnd1 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2));
-	int rnd2 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3));
-	int rnd3 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4));
+	int count = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0));
+	int dir = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1));
+	int rnd1 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2));
+	int rnd2 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3));
+	int rnd3 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4));
 	int x,y;
 	float s = 0.1f;
 	#ifdef USE_DEBUGGING
@@ -122,11 +122,11 @@ int effect3_update(struct razer_fx_render_node *render)
 		rnd2 = random();
 		rnd3 = random();
 	}
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0),count);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),dir);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2),rnd1);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3),rnd2);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4),rnd3);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0),count);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),dir);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2),rnd1);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3),rnd2);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4),rnd3);	
 	return(1);
 }
 
@@ -135,15 +135,15 @@ struct razer_effect *effect4 = NULL;
 int effect4_update(struct razer_fx_render_node *render)
 {
 	struct razer_rgb color;
-	int v1 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0));
-	int v1_dir = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1));
-	int v2 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2));
-	int v2_dir = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3));
-	int v3 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4));
-	int v3_dir = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,5));
-	int rnd1 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,6));
-	int rnd2 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,7));
-	int rnd3 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,8));
+	int v1 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0));
+	int v1_dir = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1));
+	int v2 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2));
+	int v2_dir = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3));
+	int v3 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4));
+	int v3_dir = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,5));
+	int rnd1 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,6));
+	int rnd2 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,7));
+	int rnd3 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,8));
 	int x,y;
 	#ifdef USE_DEBUGGING
 		printf(" (Random ## v1:%d,v1dir:%d,v2:%d,v2dir:%d,v3:%d,v3dir:%d)",v1,v1_dir,v2,v2_dir,v3,v3_dir);
@@ -176,15 +176,15 @@ int effect4_update(struct razer_fx_render_node *render)
 	v1=v1+v1_dir*rnd1;
 	v2=v2+v2_dir*rnd2;
 	v3=v3+v3_dir*rnd3;
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0),v1);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),v1_dir);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2),v2);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3),v2_dir);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4),v3);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,5),v3_dir);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,6),rnd1);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,7),rnd2);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,8),rnd3);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0),v1);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),v1_dir);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2),v2);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3),v2_dir);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4),v3);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,5),v3_dir);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,6),rnd1);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,7),rnd2);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,8),rnd3);	
 	return(1);
 }
 
@@ -193,11 +193,11 @@ struct razer_effect *effect5 = NULL;
 int effect5_update(struct razer_fx_render_node *render)
 {
 	struct razer_rgb color;
-	int count = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0));
-	int dir = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1));
-	int rnd1 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2));
-	int rnd2 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3));
-	int rnd3 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4));
+	int count = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0));
+	int dir = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1));
+	int rnd1 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2));
+	int rnd2 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3));
+	int rnd3 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4));
 	float s = 0.1f;
 	int x,y;
 	for(x=0;x<22;x++)
@@ -217,11 +217,11 @@ int effect5_update(struct razer_fx_render_node *render)
 		rnd2 = random();
 		rnd3 = random();
 	}
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0),count);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),dir);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2),rnd1);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3),rnd2);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4),rnd3);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0),count);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),dir);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2),rnd1);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3),rnd2);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4),rnd3);	
 	return(1);
 }
 
@@ -230,11 +230,11 @@ struct razer_effect *effect6 = NULL;
 int effect6_update(struct razer_fx_render_node *render)
 {
 	struct razer_rgb color;
-	int count = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0));
-	int dir = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1));
-	int rnd1 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2));
-	int rnd2 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3));
-	int rnd3 = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4));
+	int count = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0));
+	int dir = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1));
+	int rnd1 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2));
+	int rnd2 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3));
+	int rnd3 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4));
 	int x,y;
 	for(x=0;x<22;x++)
 		for(y=0;y<6;y++)
@@ -253,11 +253,11 @@ int effect6_update(struct razer_fx_render_node *render)
 		rnd2 = random();
 		rnd3 = random();
 	}
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0),count);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),dir);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,2),rnd1);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3),rnd2);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4),rnd3);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0),count);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),dir);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2),rnd1);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3),rnd2);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4),rnd3);	
 	return(1);
 }
 
@@ -265,8 +265,8 @@ struct razer_effect *effect7 = NULL;
 
 int effect7_update(struct razer_fx_render_node *render)
 {
-	int count = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0));
-	int dir = daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1));
+	int count = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0));
+	int dir = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1));
 	struct razer_rgb color1={.r=50,.g=0,.b=0};
 	struct razer_rgb color2={.r=120,.g=0,.b=0};
 	struct razer_rgb color3={.r=255,.g=0,.b=0};
@@ -283,8 +283,8 @@ int effect7_update(struct razer_fx_render_node *render)
 	count=count+dir;
 	if(count>27 || count<-7)
 		dir=-dir;
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0),count);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),dir);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0),count);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),dir);	
 	return(1);
 }
 
@@ -292,9 +292,9 @@ struct razer_effect *effect8 = NULL;
 
 int effect8_update(struct razer_fx_render_node *render)
 {
-	int v[3]={daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,6))};
-	int vdir[3] = {daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,7))};
-	struct razer_rgb *vcols[3] = {daemon_get_parameter_rgb(daemon_get_parameter_by_index(render->effect->parameters,2)),daemon_get_parameter_rgb(daemon_get_parameter_by_index(render->effect->parameters,5)),daemon_get_parameter_rgb(daemon_get_parameter_by_index(render->effect->parameters,8))};
+	int v[3]={daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,6))};
+	int vdir[3] = {daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,7))};
+	struct razer_rgb *vcols[3] = {daemon_get_parameter_rgb(daemon_effect_get_parameter_by_index(render->effect,2)),daemon_get_parameter_rgb(daemon_effect_get_parameter_by_index(render->effect,5)),daemon_get_parameter_rgb(daemon_effect_get_parameter_by_index(render->effect,8))};
 
 	//int v[3]={1,12,22};
 	//int vdir[3] = {1,1,1};
@@ -319,13 +319,13 @@ int effect8_update(struct razer_fx_render_node *render)
 			vdir[i]=-vdir[i];
 	}
 	razer_mix_frames(render->output_frame,render->input_frame,render->opacity);
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0),v[0]);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),vdir[0]);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3),v[1]);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4),vdir[1]);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,5),v[2]);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,6),vdir[2]);	
-	//daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),&col);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0),v[0]);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),vdir[0]);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3),v[1]);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4),vdir[1]);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,5),v[2]);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,6),vdir[2]);	
+	//daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect->parameters,1),&col);	
 	return(1);
 }
 
@@ -333,9 +333,9 @@ struct razer_effect *effect9 = NULL;
 
 int effect9_update(struct razer_fx_render_node *render)
 {
-	int v[3]={daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,6))};
-	int vdir[3] = {daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4)),daemon_get_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,7))};
-	struct razer_rgb *vcols[3] = {daemon_get_parameter_rgb(daemon_get_parameter_by_index(render->effect->parameters,2)),daemon_get_parameter_rgb(daemon_get_parameter_by_index(render->effect->parameters,5)),daemon_get_parameter_rgb(daemon_get_parameter_by_index(render->effect->parameters,8))};
+	int v[3]={daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,6))};
+	int vdir[3] = {daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,7))};
+	struct razer_rgb *vcols[3] = {daemon_get_parameter_rgb(daemon_effect_get_parameter_by_index(render->effect,2)),daemon_get_parameter_rgb(daemon_effect_get_parameter_by_index(render->effect,5)),daemon_get_parameter_rgb(daemon_effect_get_parameter_by_index(render->effect,8))};
 	//int v[3]={1,12,16};
 	//int vdir[3] = {1,1,-1};
 	//int vcols[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
@@ -360,12 +360,12 @@ int effect9_update(struct razer_fx_render_node *render)
 
 	}
 	razer_mix_frames(render->output_frame,render->input_frame,render->opacity);
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,0),v[0]);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,1),vdir[0]);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,3),v[1]);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,4),vdir[1]);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,5),v[2]);	
-	daemon_set_parameter_int(daemon_get_parameter_by_index(render->effect->parameters,6),vdir[2]);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0),v[0]);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),vdir[0]);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3),v[1]);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4),vdir[1]);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,5),v[2]);	
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,6),vdir[2]);	
 	return(1);
 }
 
@@ -611,11 +611,11 @@ void fx_init(struct razer_daemon *daemon)
 	effect1->class = 1;
 	effect1->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 	parameter = daemon_create_parameter_int("End Counter","End of animation (Integer)",44);//TODO refactor to daemon_add_effect_parameter_int(effect,key,desc,value)
-	daemon_add_parameter(effect1->parameters,parameter);	
+	daemon_effect_add_parameter(effect1,parameter);	
 	parameter = daemon_create_parameter_int("Effect Counter","Counter value(INT)",0);
-	daemon_add_parameter(effect1->parameters,parameter);	
+	daemon_effect_add_parameter(effect1,parameter);	
 	parameter = daemon_create_parameter_int("Effect Direction","Effect direction value(INT)",1);
-	daemon_add_parameter(effect1->parameters,parameter);	
+	daemon_effect_add_parameter(effect1,parameter);	
 
 	int effect1_uid = daemon_register_effect(daemon,effect1);
 	#ifdef USE_DEBUGGING
@@ -631,11 +631,11 @@ void fx_init(struct razer_daemon *daemon)
 	effect2->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 	
 	parameter = daemon_create_parameter_rgb("Base Color","Flashing Color (RGB)",&effect2_base_rgb);
-	daemon_add_parameter(effect2->parameters,parameter);	
+	daemon_effect_add_parameter(effect2,parameter);	
 	parameter = daemon_create_parameter_int("Effect Counter","Counter value(INT)",0);
-	daemon_add_parameter(effect2->parameters,parameter);	
+	daemon_effect_add_parameter(effect2,parameter);	
 	parameter = daemon_create_parameter_int("Effect Direction","Effect direction value(INT)",1);
-	daemon_add_parameter(effect2->parameters,parameter);	
+	daemon_effect_add_parameter(effect2,parameter);	
 	int effect2_uid = daemon_register_effect(daemon,effect2);
 	#ifdef USE_DEBUGGING
 		printf("registered effect: %s (uid:%d)\n",effect2->name,effect2->id);
@@ -650,15 +650,15 @@ void fx_init(struct razer_daemon *daemon)
 	effect3->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 
 	parameter = daemon_create_parameter_int("Effect Counter","Counter value(INT)",0);
-	daemon_add_parameter(effect3->parameters,parameter);	
+	daemon_effect_add_parameter(effect3,parameter);	
 	parameter = daemon_create_parameter_int("Effect Direction","Effect direction value(INT)",1);
-	daemon_add_parameter(effect3->parameters,parameter);	
+	daemon_effect_add_parameter(effect3,parameter);	
 	parameter = daemon_create_parameter_int("Effect Randomization R","Red randomized parameter value(INT)",random());
-	daemon_add_parameter(effect3->parameters,parameter);	
+	daemon_effect_add_parameter(effect3,parameter);	
 	parameter = daemon_create_parameter_int("Effect Randomization G","Green randomized parameter value(INT)",random());
-	daemon_add_parameter(effect3->parameters,parameter);	
+	daemon_effect_add_parameter(effect3,parameter);	
 	parameter = daemon_create_parameter_int("Effect Randomization B","Blue randomized parameter value(INT)",random());
-	daemon_add_parameter(effect3->parameters,parameter);	
+	daemon_effect_add_parameter(effect3,parameter);	
 
 	int effect3_uid = daemon_register_effect(daemon,effect3);
 	#ifdef USE_DEBUGGING
@@ -674,25 +674,25 @@ void fx_init(struct razer_daemon *daemon)
 	effect4->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 
 	parameter = daemon_create_parameter_int("Effect Counter R","Red counter value(INT)",1);
-	daemon_add_parameter(effect4->parameters,parameter);	
+	daemon_effect_add_parameter(effect4,parameter);	
 	parameter = daemon_create_parameter_int("Effect Direction R","Red effect direction value(INT)",1);
-	daemon_add_parameter(effect4->parameters,parameter);	
+	daemon_effect_add_parameter(effect4,parameter);	
 	parameter = daemon_create_parameter_int("Effect Counter G","Green counter value(INT)",254);
-	daemon_add_parameter(effect4->parameters,parameter);	
+	daemon_effect_add_parameter(effect4,parameter);	
 	parameter = daemon_create_parameter_int("Effect Direction G","Green effect direction value(INT)",-1);
-	daemon_add_parameter(effect4->parameters,parameter);	
+	daemon_effect_add_parameter(effect4,parameter);	
 	parameter = daemon_create_parameter_int("Effect Counter B","Blue counter value(INT)",127);
-	daemon_add_parameter(effect4->parameters,parameter);	
+	daemon_effect_add_parameter(effect4,parameter);	
 	parameter = daemon_create_parameter_int("Effect Direction B","Blue effect direction value(INT)",-1);
-	daemon_add_parameter(effect4->parameters,parameter);	
+	daemon_effect_add_parameter(effect4,parameter);	
 
 
 	parameter = daemon_create_parameter_int("Effect Randomization R","Red randomized parameter value(INT)",(random()%3)+1);
-	daemon_add_parameter(effect4->parameters,parameter);	
+	daemon_effect_add_parameter(effect4,parameter);	
 	parameter = daemon_create_parameter_int("Effect Randomization G","Green randomized parameter value(INT)",(random()%3)+1);
-	daemon_add_parameter(effect4->parameters,parameter);	
+	daemon_effect_add_parameter(effect4,parameter);	
 	parameter = daemon_create_parameter_int("Effect Randomization B","Blue randomized parameter value(INT)",(random()%3)+1);
-	daemon_add_parameter(effect4->parameters,parameter);	
+	daemon_effect_add_parameter(effect4,parameter);	
 
 	int effect4_uid = daemon_register_effect(daemon,effect4);
 	#ifdef USE_DEBUGGING
@@ -708,15 +708,15 @@ void fx_init(struct razer_daemon *daemon)
 	effect5->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 
 	parameter = daemon_create_parameter_int("Effect Counter","Counter value(INT)",0);
-	daemon_add_parameter(effect5->parameters,parameter);	
+	daemon_effect_add_parameter(effect5,parameter);	
 	parameter = daemon_create_parameter_int("Effect Direction ","Effect direction value(INT)",1);
-	daemon_add_parameter(effect5->parameters,parameter);	
+	daemon_effect_add_parameter(effect5,parameter);	
 	parameter = daemon_create_parameter_int("Effect Randomization R","Red randomized parameter value(INT)",random());
-	daemon_add_parameter(effect5->parameters,parameter);	
+	daemon_effect_add_parameter(effect5,parameter);	
 	parameter = daemon_create_parameter_int("Effect Randomization G","Green randomized parameter value(INT)",random());
-	daemon_add_parameter(effect5->parameters,parameter);	
+	daemon_effect_add_parameter(effect5,parameter);	
 	parameter = daemon_create_parameter_int("Effect Randomization B","Blue randomized parameter value(INT)",random());
-	daemon_add_parameter(effect5->parameters,parameter);	
+	daemon_effect_add_parameter(effect5,parameter);	
 
 	int effect5_uid = daemon_register_effect(daemon,effect5);
 	#ifdef USE_DEBUGGING
@@ -732,15 +732,15 @@ void fx_init(struct razer_daemon *daemon)
 	effect6->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 
 	parameter = daemon_create_parameter_int("Effect Counter","Counter value(INT)",0);
-	daemon_add_parameter(effect6->parameters,parameter);	
+	daemon_effect_add_parameter(effect6,parameter);	
 	parameter = daemon_create_parameter_int("Effect Direction ","Effect direction value(INT)",1);
-	daemon_add_parameter(effect6->parameters,parameter);	
+	daemon_effect_add_parameter(effect6,parameter);	
 	parameter = daemon_create_parameter_int("Effect Randomization R","Red randomized parameter value(INT)",random());
-	daemon_add_parameter(effect6->parameters,parameter);	
+	daemon_effect_add_parameter(effect6,parameter);	
 	parameter = daemon_create_parameter_int("Effect Randomization G","Green randomized parameter value(INT)",random());
-	daemon_add_parameter(effect6->parameters,parameter);	
+	daemon_effect_add_parameter(effect6,parameter);	
 	parameter = daemon_create_parameter_int("Effect Randomization B","Blue randomized parameter value(INT)",random());
-	daemon_add_parameter(effect6->parameters,parameter);	
+	daemon_effect_add_parameter(effect6,parameter);	
 
 	int effect6_uid = daemon_register_effect(daemon,effect6);
 	#ifdef USE_DEBUGGING
@@ -756,9 +756,9 @@ void fx_init(struct razer_daemon *daemon)
 	effect7->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 
 	parameter = daemon_create_parameter_int("Effect Counter","Counter value(INT)",1);
-	daemon_add_parameter(effect7->parameters,parameter);	
+	daemon_effect_add_parameter(effect7,parameter);	
 	parameter = daemon_create_parameter_int("Effect Direction ","Effect direction value(INT)",1);
-	daemon_add_parameter(effect7->parameters,parameter);	
+	daemon_effect_add_parameter(effect7,parameter);	
 
 	int effect7_uid = daemon_register_effect(daemon,effect7);
 	#ifdef USE_DEBUGGING
@@ -777,9 +777,9 @@ void fx_init(struct razer_daemon *daemon)
 	//int vdir[3] = {1,1,1};
 	//int vcols[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
 	parameter = daemon_create_parameter_int("Effect Counter","Counter value(INT)",1);
-	daemon_add_parameter(effect8->parameters,parameter);	
+	daemon_effect_add_parameter(effect8,parameter);	
 	parameter = daemon_create_parameter_int("Effect Direction ","Effect direction value(INT)",1);
-	daemon_add_parameter(effect8->parameters,parameter);	
+	daemon_effect_add_parameter(effect8,parameter);	
 	
 	//parameter = daemon_create_parameter_rgb("Effect Color ","Effect base color value(RGB)",&);
 	//daemon_add_parameter(effect8->parameters,parameter);	
@@ -811,35 +811,35 @@ void fx_init(struct razer_daemon *daemon)
 void fx_shutdown(struct razer_daemon *daemon)
 {
 	daemon_unregister_effect(daemon,effect1);
-	daemon_free_parameters(&effect1->parameters);
-	daemon_free_effect(&effect1);
+	daemon_free_parameters(effect1->parameters);
+	daemon_free_effect(effect1);
 
 	daemon_unregister_effect(daemon,effect2);
-	daemon_free_parameters(&effect2->parameters);
-	daemon_free_effect(&effect2);
+	daemon_free_parameters(effect2->parameters);
+	daemon_free_effect(effect2);
 
 	daemon_unregister_effect(daemon,effect3);
-	daemon_free_parameters(&effect3->parameters);
-	daemon_free_effect(&effect3);
+	daemon_free_parameters(effect3->parameters);
+	daemon_free_effect(effect3);
 
 	daemon_unregister_effect(daemon,effect4);
-	daemon_free_parameters(&effect4->parameters);
-	daemon_free_effect(&effect4);
+	daemon_free_parameters(effect4->parameters);
+	daemon_free_effect(effect4);
 
 	daemon_unregister_effect(daemon,effect5);
-	daemon_free_parameters(&effect5->parameters);
-	daemon_free_effect(&effect5);
+	daemon_free_parameters(effect5->parameters);
+	daemon_free_effect(effect5);
 
 	daemon_unregister_effect(daemon,effect6);
-	daemon_free_parameters(&effect6->parameters);
-	daemon_free_effect(&effect6);
+	daemon_free_parameters(effect6->parameters);
+	daemon_free_effect(effect6);
 
 	daemon_unregister_effect(daemon,effect7);
-	daemon_free_parameters(&effect7->parameters);
-	daemon_free_effect(&effect7);
+	daemon_free_parameters(effect7->parameters);
+	daemon_free_effect(effect7);
 
 	daemon_unregister_effect(daemon,effect_mix1);
-	daemon_free_parameters(&effect_mix1->parameters);
-	daemon_free_effect(&effect_mix1);
+	daemon_free_parameters(effect_mix1->parameters);
+	daemon_free_effect(effect_mix1);
 
 }

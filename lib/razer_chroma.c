@@ -380,6 +380,15 @@ struct razer_rgb *rgb_copy(struct razer_rgb *color)
 	return(copy);
 }
 
+struct razer_pos *razer_pos_copy(struct razer_pos *pos)
+{
+	struct razer_pos *copy = (struct razer_pos*)malloc(sizeof(struct razer_pos));
+	copy->x = pos->x;
+	copy->y = pos->y;
+	return(copy);
+}
+
+
 void razer_convert_keycode_to_pos(int keycode,struct razer_pos *pos)
 {
 	switch(keycode)

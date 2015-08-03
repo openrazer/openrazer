@@ -175,6 +175,7 @@ void rgb_mix(struct razer_rgb *dst,struct razer_rgb *src,float factor);
 
 
 struct razer_rgb *rgb_copy(struct razer_rgb *color);
+struct razer_pos *razer_pos_copy(struct razer_pos *pos);
 
 void rgb_mix_into(struct razer_rgb *dst,struct razer_rgb *src_a,struct razer_rgb *src_b,float dst_opacity);
 
