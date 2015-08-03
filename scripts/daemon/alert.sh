@@ -20,8 +20,9 @@ fi
 
 if [ "$1" == "run" ]; then
 
-RUID=`dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:2 string:"Breathing Node" string:"alert node" | jq '.uid'`
-#OUID=`dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.get | jq '.uid'`
+RUID=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:2 string:"Breathing Node" string:"alert node"` )
+RUID=${RUID[1]}
+#OUID=`dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.get | jq '.uid'`
 #dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RUID org.voyagerproject.razer.daemon.render_node.limit_render_time_ms.set int32:1000
 #dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$WUID org.voyagerproject.razer.daemon.render_node.next.set int32:$OUID
 dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RUID org.voyagerproject.razer.daemon.render_node.limit_render_time_ms.set int32:1000
@@ -30,7 +31,8 @@ dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$R
 while read line
 do
 	#echo "$line"
-	OUID=`dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.get | jq '.uid'`
+	OUID=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.get` )
+	OUID=${OUID[1]}
 	#echo "actual render_node:$OUID"
 	dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RUID org.voyagerproject.razer.daemon.render_node.next.set int32:$OUID
 	dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.connect int32:$RUID

@@ -311,4 +311,8 @@ void fx_shutdown(struct razer_daemon *daemon)
 	daemon_unregister_effect(daemon,effect_wait);
 	daemon_free_parameters(effect_wait->parameters);
 	daemon_free_effect(effect_wait);
+
+	daemon_unregister_effect(daemon,effect_glimmer);
+	daemon_free_parameters(effect_glimmer->parameters);
+	daemon_free_effect(effect_glimmer);
 }

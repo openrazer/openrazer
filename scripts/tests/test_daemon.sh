@@ -13,9 +13,13 @@
 
 dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.fx.lib.load string:"daemon/fx/pez2001_mixer_debug.so"
 
-RUID=`dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:1 string:"First One Node" string:"a test node" | jq '.uid'`
-RUID2=`dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:2 string:"Breathing Node" string:"test node 2" | jq '.uid'`
-RUID3=`dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:3 string:"Random Color Waves Node" string:"test node 3" | jq '.uid'`
+#RUID=`dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:1 string:"First One Node" string:"a test node" | jq '.uid'`
+RUID=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:1 string:"First One Node" string:"a test node"` )
+RUID=${RUID[1]}
+RUID2=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:2 string:"Breathing Node" string:"test node 2"` )
+RUID2=${RUID2[1]}
+RUID3=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:3 string:"Random Color Waves Node" string:"test node 3"` )
+RUID3=${RUID3[1]}
 #[ $? -eq 0 ] || echo "no daemon found";exit $?;
 echo "setting render node uid : $RUID"
 
@@ -51,11 +55,16 @@ echo "setting render node uid : $RUID"
 
 
 
-TUID=`dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:13 string:"Transition Node" string:"transition test" | jq '.uid'`
-MUID=`dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:14 string:"Mixer Node" string:"a mixer node" | jq '.uid'`
-NUID=`dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:15 string:"Empty Node" string:"empty node for timing" | jq '.uid'`
-WUID=`dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:16 string:"Wait for key Node" string:"use input for timing" | jq '.uid'`
-RNDUID=`dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:17 string:"Randomize Color Node" string:"randomize effect color" | jq '.uid'`
+TUID=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:12 string:"Transition Node" string:"transition test"` )
+TUID=${TUID[1]}
+MUID=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:13 string:"Mixer Node" string:"a mixer node"` )
+MUID=${MUID[1]}
+NUID=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:14 string:"Empty Node" string:"empty node for timing"` )
+NUID=${NUID[1]}
+WUID=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:15 string:"Wait for key Node" string:"use input for timing"` )
+WUID=${WUID[1]}
+RNDUID=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:16 string:"Randomize Color Node" string:"randomize effect color"` )
+RNDUID=${RNDUID[1]}
 
 dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RNDUID/0 org.voyagerproject.razer.daemon.render_node.parameter.set int32:5000
 dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RNDUID/1 org.voyagerproject.razer.daemon.render_node.parameter.set int32:0

@@ -1,0 +1,72 @@
+LIBS=-lm -ldl
+CFLAGS=
+DEBUG_CFLAGS=
+#LDFLAGS=
+#DEBUG_LDFLAGS=
+LIBDBUS = $(shell echo \\\#include \<dbus/dbus.h\>\\n int main\(int c,char**v\){} | gcc `pkg-config --libs dbus-1` `pkg-config --cflags dbus-1`  -xc -o a.out - 2>/dev/null ;echo $$? ;rm a.out 2>/dev/null )
+
+ifeq ($(LIBDBUS), 0)
+	LIBS+= `pkg-config --libs dbus-1` 
+	CFLAGS+= `pkg-config --cflags dbus-1` -DUSE_DBUS
+	DEBUG_CFLAGS+= `pkg-config --cflags dbus-1` -DUSE_DBUS
+endif
+
+#-lSDL2 -lSDL2_image
+MAJOR_VERSION=0
+MINOR_VERSION=1
+CSTD=-std=c99
+CC=gcc
+CFLAGS+= -Wl,-E -Wall -Wextra -W -w -Os $(CSTD) -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
+DEBUG_CFLAGS+= -Wl,-E -Wall -Wextra -Wformat=0 -pedantic -fbounds-check -Wuninitialized -O0 -g3 $(CSTD) -DUSE_DEBUGGING -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
+LDFLAGS=$(LIBS)
+DEBUG_LDFLAGS= $(LIBS)
+#-DUSE_VERBOSE_DEBUGGING
+#-pedantic -fbounds-check -Wuninitialized -O0 -g3 -Wstrict-prototypes
+
+RAZER_CHROMA_DAEMON_CONTROLLER_FILES=razer_daemon_controller.c
+RAZER_CHROMA_DAEMON_CONTROLLER_INCLUDE_FILES=razer_daemon_controller.h
+RAZER_CHROMA_DAEMON_CONTROLLER_OBJ=razer_daemon_controller.o
+RAZER_CHROMA_DAEMON_CONTROLLER_DEBUG_OBJ=razer_daemon_controller.do
+
+all: daemon_controller_shared daemon_controller_static daemon_controller_debug
+
+daemon_controller_debug: $(RAZER_CHROMA_DAEMON_CONTROLLER_DEBUG_OBJ)
+	@echo "::\033[32m COMPILING razer_bcd daemon controller [DEBUG]\033[0m"
+	@echo "======================================"
+	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_CONTROLLER_DEBUG_OBJ) librazer_chroma.da $(LIBS) -o razer_bcd_controller_debug_static 
+	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_CONTROLLER_DEBUG_OBJ) librazer_chroma_debug.so $(LIBS) -o razer_bcd_controller_debug_shared 
+
+daemon_controller_static: $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ)
+	@echo "::\033[32m COMPILING razer_bcd daemon controller\033[0m"
+	@echo "=============================="
+	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ) librazer_chroma.a $(LIBS) -o razer_bcd_controller_static 
+	@strip razer_bcd_controller_static
+
+daemon_controller_shared: $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ)
+	@echo "::\033[32m COMPILING razer_bcd controller [SHARED]\033[0m"
+	@echo "================================"
+	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ) librazer_chroma.so $(LIBS) -o razer_bcd_controller
+	@strip razer_bcd_controller
+
+%.o: %.c 
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+%.do: %.c 
+	$(CC) $(DEBUG_CFLAGS) -c -o $@ $<
+
+install:
+	@echo "::\033[32m INSTALLING razer_bcd daemon controller\033[0m"
+	@echo "======================================"
+	@cp razer_bcd_controller /usr/sbin
+
+uninstall:
+	@echo "::\033[32m REMOVING razer_bcd daemon controller\033[0m"
+	@echo "====================================="
+	@rm -f /usr/sbin/razer_bcd_controller
+
+clean: 
+	rm -f *.do *.da *.o razer_bcd_controller razer_bcd_controller_debug_shared razer_bcd_controller_debug_static razer_bcd_controller_static
+
+indent:	
+	indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 *.c *.h
+

@@ -8,17 +8,16 @@ struct razer_int_array *effect_keystrokes = NULL;
 
 int effect_update(struct razer_fx_render_node *render)
 {
-	int length_ms = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0));
+	//int length_ms = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0));
 	int dir = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1));
-	int key_ring_buffer_index = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2));
+	//int key_ring_buffer_index = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2));
 	struct razer_int_array *keystrokes = daemon_get_parameter_int_array(daemon_effect_get_parameter_by_index(render->effect,3));
-	unsigned long start = render->start_ticks;
-	unsigned long end = start + length_ms;
-	unsigned long ticks_left = end - render->daemon->chroma->update_ms;
+	//unsigned long start = render->start_ticks;
+	//unsigned long end = start + length_ms;
+	//unsigned long ticks_left = end - render->daemon->chroma->update_ms;
 	int x,y;
 	struct razer_pos key_pos[10];
-	struct razer_rgb col_max = {.r=255,.g=0,.b=0};
-	struct razer_rgb col = {.r=255,.g=0,.b=0};
+	struct razer_rgb col;
 	for(int i =0;i<10;i++)
 	{
 		if(keystrokes->values[i]!=0)

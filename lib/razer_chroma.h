@@ -146,6 +146,9 @@ void razer_set_input_handler(struct razer_chroma *chroma,razer_input_handler han
 unsigned long razer_get_ticks();
 void razer_frame_limiter(struct razer_chroma *chroma,int fps);
 
+struct razer_rgb_frame *razer_create_rgb_frame(void);
+void razer_free_rgb_frame(struct razer_rgb_frame *frame);
+
 
 void razer_set_custom_mode(struct razer_chroma *chroma);
 void razer_update_keys(struct razer_chroma *chroma,struct razer_keys *keys);

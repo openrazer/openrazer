@@ -287,6 +287,17 @@ char *razer_get_device_path()
 }
 
 
+struct razer_rgb_frame *razer_create_rgb_frame(void)
+{
+	struct razer_rgb_frame *frame = (struct razer_rgb_frame*)malloc(sizeof(struct razer_rgb_frame));
+	razer_init_frame(frame);
+	return(frame);
+}
+
+void razer_free_rgb_frame(struct razer_rgb_frame *frame)
+{
+	free(frame);
+}
 
 
 

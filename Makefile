@@ -2,7 +2,7 @@ KERNELDIR := /lib/modules/$(shell uname -r)/build
 DRIVERDIR := $(shell pwd)/driver
 MODULEDIR=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
 
-all: librazer_chroma razer_daemon razer_examples
+all: librazer_chroma razer_daemon razer_daemon_controller razer_examples
 	@echo "::\033[32m COMPILING razer chroma kernel module\033[0m"
 	@echo "========================================"
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules
@@ -10,6 +10,7 @@ all: librazer_chroma razer_daemon razer_examples
 librazer_chroma: 
 	make -C lib all
 	cp lib/librazer_chroma.a lib/librazer_chroma.da lib/librazer_chroma.so lib/librazer_chroma_debug.so daemon
+	cp lib/librazer_chroma.a lib/librazer_chroma.da lib/librazer_chroma.so lib/librazer_chroma_debug.so daemon_controller
 
 librazer_chroma_clean: 
 	make -C lib clean 
@@ -19,6 +20,12 @@ razer_daemon:
 
 razer_daemon_clean: 
 	make -C daemon clean 
+
+razer_daemon_controller: 
+	make -C daemon_controller all
+
+razer_daemon_controller_clean: 
+	make -C daemon_controller clean 
 
 razer_examples: 
 	make -C examples all
@@ -73,7 +80,8 @@ uninstall:
 	rm /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
 
 
-clean: librazer_chroma_clean razer_daemon_clean razer_examples_clean
+clean: librazer_chroma_clean razer_daemon_clean razer_daemon_controller_clean razer_examples_clean
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) clean
 	rm -f daemon/librazer_chroma.a daemon/librazer_chroma.da daemon/librazer_chroma.so daemon/librazer_chroma_debug.so
+	rm -f daemon_controller/librazer_chroma.a daemon_controller/librazer_chroma.da daemon_controller/librazer_chroma.so daemon_controller/librazer_chroma_debug.so
 
