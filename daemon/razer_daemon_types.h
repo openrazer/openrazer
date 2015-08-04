@@ -53,14 +53,14 @@ struct razer_uint_array
 
 struct razer_rgb_array
 {
-	struct razer_rgb *values;
+	struct razer_rgb **values;
 	int size;
 	int has_fixed_size;
 };
 
 struct razer_pos_array
 {
-	struct razer_pos *values;
+	struct razer_pos **values;
 	int size;
 	int has_fixed_size;
 };

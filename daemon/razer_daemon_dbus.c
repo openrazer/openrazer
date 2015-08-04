@@ -1317,7 +1317,6 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 
     if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.frame_buffer", "disconnect"))
 	{
-		int rn_uid=0;
 		reply = dbus_message_new_method_return(msg);
 		daemon_disconnect_frame_buffer(daemon);
  		dbus_uint32_t serial = 0;

@@ -70,9 +70,9 @@ int razer_send_report(struct usb_device *usb_dev,void const *data)
 			value,
 			USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT,
 			report_id,
-			index, buf, size, USB_CTRL_SET_TIMEOUT);
+            index, buf, size, USB_CTRL_SET_TIMEOUT);
     usleep_range(RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US,RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
-	kfree(buf);
+    kfree(buf);
 	return ((len < 0) ? len : ((len != size) ? -EIO : 0));
 }
 

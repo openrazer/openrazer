@@ -33,7 +33,7 @@ struct razer_uint_array *daemon_create_uint_array(int size,int has_fixed_size)
 struct razer_rgb_array *daemon_create_rgb_array(int size,int has_fixed_size)
 {
 	struct razer_rgb_array *array = (struct razer_rgb_array*)malloc(sizeof(struct razer_rgb_array));
-	array->values = (struct razer_rgb*)malloc(sizeof(struct razer_rgb*)*size);
+	array->values = (struct razer_rgb**)malloc(sizeof(struct razer_rgb*)*size);
 	memset(array->values,0,sizeof(float*)*size);
 	array->size = size;
 	array->has_fixed_size = has_fixed_size;
@@ -43,7 +43,7 @@ struct razer_rgb_array *daemon_create_rgb_array(int size,int has_fixed_size)
 struct razer_pos_array *daemon_create_pos_array(int size,int has_fixed_size)
 {
 	struct razer_pos_array *array = (struct razer_pos_array*)malloc(sizeof(struct razer_pos_array));
-	array->values = (struct razer_pos*)malloc(sizeof(struct razer_pos*)*size);
+	array->values = (struct razer_pos**)malloc(sizeof(struct razer_pos*)*size);
 	memset(array->values,0,sizeof(float*)*size);
 	array->size = size;
 	array->has_fixed_size = has_fixed_size;
@@ -165,8 +165,10 @@ struct razer_uint_array *razer_uint_array_copy(struct razer_uint_array *array)
 struct razer_rgb_array *razer_rgb_array_copy(struct razer_rgb_array *array)
 {
 	struct razer_rgb_array *copy = (struct razer_rgb_array*)malloc(sizeof(struct razer_rgb_array));
-	copy->values = (struct razer_rgb*)malloc(sizeof(struct razer_rgb*)*array->size);
-	memcpy(copy->values,array->values,sizeof(struct razer_rgb*)*array->size);
+	copy->values = (struct razer_rgb**)malloc(sizeof(struct razer_rgb*)*array->size);
+	//memcpy(copy->values,array->values,sizeof(struct razer_rgb*)*array->size);
+	for(int i=0;i<array->size;i++)
+		copy->values[i] = rgb_copy(array->values[i]);
 	copy->size = array->size;
 	copy->has_fixed_size = array->has_fixed_size;
 	return(copy);
@@ -175,8 +177,10 @@ struct razer_rgb_array *razer_rgb_array_copy(struct razer_rgb_array *array)
 struct razer_pos_array *razer_pos_array_copy(struct razer_pos_array *array)
 {
 	struct razer_pos_array *copy = (struct razer_pos_array*)malloc(sizeof(struct razer_pos_array));
-	copy->values = (struct razer_pos*)malloc(sizeof(struct razer_pos*)*array->size);
-	memcpy(copy->values,array->values,sizeof(struct razer_pos*)*array->size);
+	copy->values = (struct razer_pos**)malloc(sizeof(struct razer_pos*)*array->size);
+	//memcpy(copy->values,array->values,sizeof(struct razer_pos*)*array->size);
+	for(int i=0;i<array->size;i++)
+		copy->values[i] = razer_pos_copy(array->values[i]);
 	copy->size = array->size;
 	copy->has_fixed_size = array->has_fixed_size;
 	return(copy);

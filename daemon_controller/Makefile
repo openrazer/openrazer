@@ -13,7 +13,7 @@ endif
 
 #-lSDL2 -lSDL2_image
 MAJOR_VERSION=0
-MINOR_VERSION=1
+MINOR_VERSION=2
 CSTD=-std=c99
 CC=gcc
 CFLAGS+= -Wl,-E -Wall -Wextra -W -w -Os $(CSTD) -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
@@ -32,19 +32,19 @@ all: daemon_controller_shared daemon_controller_static daemon_controller_debug
 
 daemon_controller_debug: $(RAZER_CHROMA_DAEMON_CONTROLLER_DEBUG_OBJ)
 	@echo "::\033[32m COMPILING razer_bcd daemon controller [DEBUG]\033[0m"
-	@echo "======================================"
+	@echo "================================================="
 	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_CONTROLLER_DEBUG_OBJ) librazer_chroma.da $(LIBS) -o razer_bcd_controller_debug_static 
 	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_CONTROLLER_DEBUG_OBJ) librazer_chroma_debug.so $(LIBS) -o razer_bcd_controller_debug_shared 
 
 daemon_controller_static: $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ)
 	@echo "::\033[32m COMPILING razer_bcd daemon controller\033[0m"
-	@echo "=============================="
+	@echo "========================================="
 	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ) librazer_chroma.a $(LIBS) -o razer_bcd_controller_static 
 	@strip razer_bcd_controller_static
 
 daemon_controller_shared: $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ)
 	@echo "::\033[32m COMPILING razer_bcd controller [SHARED]\033[0m"
-	@echo "================================"
+	@echo "==========================================="
 	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ) librazer_chroma.so $(LIBS) -o razer_bcd_controller
 	@strip razer_bcd_controller
 
@@ -56,7 +56,7 @@ daemon_controller_shared: $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ)
 
 install:
 	@echo "::\033[32m INSTALLING razer_bcd daemon controller\033[0m"
-	@echo "======================================"
+	@echo "======================================="
 	@cp razer_bcd_controller /usr/sbin
 
 uninstall:

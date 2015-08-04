@@ -163,6 +163,8 @@ void razer_init_keys(struct razer_keys *keys);
 
 
 void razer_set_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color);
+void razer_add_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color);
+void razer_sub_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color);
 void razer_mix_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color,float opacity);
 void razer_mix_frames(struct razer_rgb_frame *dst_frame,struct razer_rgb_frame *src_frame,float opacity);
 
@@ -177,6 +179,8 @@ void rgb_add(struct razer_rgb *dst,struct razer_rgb *src);
 void rgb_mix(struct razer_rgb *dst,struct razer_rgb *src,float factor);
 
 
+struct razer_rgb *rgb_create(unsigned char r,unsigned char g,unsigned char b);
+
 struct razer_rgb *rgb_copy(struct razer_rgb *color);
 struct razer_pos *razer_pos_copy(struct razer_pos *pos);
 
@@ -184,7 +188,7 @@ void rgb_mix_into(struct razer_rgb *dst,struct razer_rgb *src_a,struct razer_rgb
 
 
 void razer_convert_keycode_to_pos(int keycode,struct razer_pos *pos);
-void razer_convert_pos_to_keycode(struct razer_pos *pos,int *keycode);
+//void razer_convert_pos_to_keycode(struct razer_pos *pos,int *keycode);
 void razer_convert_ascii_to_pos(unsigned char letter,struct razer_pos *pos);
 int razer_get_key_class(int keycode);
 

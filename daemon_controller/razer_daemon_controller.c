@@ -37,10 +37,44 @@ void dc_dbus_close(struct razer_daemon_controller *controller)
 //end of dbus ifdef
 #endif 
 
+struct razer_daemon_controller *dc_open(void)
+{
+	struct razer_daemon_controller *controller = (struct razer_daemon_controller*)malloc(sizeof(struct razer_daemon_controller));
+	#ifdef USE_DBUS
+	 	controller->dbus = NULL;
+		#ifdef USE_DEBUGGING
+			printf("dbus: opened\n");
+		#endif
+	 	if(!dc_dbus_open(controller))
+	 	{
+	 		free(controller);
+			return(NULL);
+		}
+	#endif
+ 	return(controller);
+}
+
+void dc_close(struct razer_daemon_controller *controller)
+{
+	#ifdef USE_DBUS
+		dc_dbus_close(controller);
+	#endif
+ 	free(controller);
+}
+
+void dc_error_close(struct razer_daemon_controller *controller,char *message)
+{
+	printf("daemon controller error: %s\n",message);
+	#ifdef USE_DBUS
+		dc_dbus_close(controller);
+	#endif
+ 	free(controller);
+ 	exit(1);
+}
+
 void dc_quit(struct razer_daemon_controller *controller)
 {
 	DBusMessage *msg;
-	DBusMessageIter args;
 	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon","/","org.voyagerproject.razer.daemon","quit");
 	if(!msg)
 		dc_error_close(controller,"Error creating Message\n");
@@ -55,7 +89,6 @@ void dc_quit(struct razer_daemon_controller *controller)
 void dc_continue(struct razer_daemon_controller *controller)
 {
 	DBusMessage *msg;
-	DBusMessageIter args;
 	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon","/","org.voyagerproject.razer.daemon","continue");
 	if(!msg)
 		dc_error_close(controller,"Error creating Message\n");
@@ -70,7 +103,6 @@ void dc_continue(struct razer_daemon_controller *controller)
 void dc_pause(struct razer_daemon_controller *controller)
 {
 	DBusMessage *msg;
-	DBusMessageIter args;
 	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon","/","org.voyagerproject.razer.daemon","pause");
 	if(!msg)
 		dc_error_close(controller,"Error creating Message\n");
@@ -539,7 +571,6 @@ void dc_frame_buffer_connect(struct razer_daemon_controller *controller,int rend
 void dc_frame_buffer_disconnect(struct razer_daemon_controller *controller)
 {
 	DBusMessage *msg;
-	DBusMessageIter args;
 	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon","/","org.voyagerproject.razer.daemon.frame_buffer","disconnect");
 	if(!msg)
 		dc_error_close(controller,"Error creating Message\n");
@@ -717,41 +748,7 @@ void dc_load_fx_lib(struct razer_daemon_controller *controller,char *fx_pathname
 	dbus_message_unref(msg);
 }
 
-struct razer_daemon_controller *dc_open(void)
-{
-	struct razer_daemon_controller *controller = (struct razer_daemon_controller*)malloc(sizeof(struct razer_daemon_controller));
-	#ifdef USE_DBUS
-	 	controller->dbus = NULL;
-		#ifdef USE_DEBUGGING
-			printf("dbus: opened\n");
-		#endif
-	 	if(!dc_dbus_open(controller))
-	 	{
-	 		free(controller);
-			return(NULL);
-		}
-	#endif
- 	return(controller);
-}
-
-void dc_close(struct razer_daemon_controller *controller)
-{
-	#ifdef USE_DBUS
-		dc_dbus_close(controller);
-	#endif
- 	free(controller);
-}
-
-void dc_error_close(struct razer_daemon_controller *controller,char *message)
-{
-	printf("daemon controller error: %s\n");
-	#ifdef USE_DBUS
-		dc_dbus_close(controller);
-	#endif
- 	free(controller);
- 	exit(1);
-}
-
+/*
 int dc_create_render_node(struct razer_daemon_controller *controller,int effect_uid,int input_render_node_uid,int second_input_render_node_uid,int output_render_node_uid,char *name,char *description)
 {
 }
@@ -763,6 +760,7 @@ struct razer_effect *dc_get_effect(struct razer_daemon_controller *controller,in
 struct razer_fx_render_node *dc_get_render_node(struct razer_daemon_controller *controller,int render_node_uid)
 {
 }
+*/
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -770,6 +768,23 @@ struct razer_fx_render_node *dc_get_render_node(struct razer_daemon_controller *
 int main(int argc,char *argv[])
 {
 	printf("Executing razer blackwidow chroma daemon controller\n");
+
+	//TODO controller parse options
+	//dbus introspect split up string creation
+	//support array parameters (with another path level added as index into the array)
+	//daemon update render_nodes -> next /subs/framebuffer handling etc
+	//support remaining effect handlers not called yet once
+	//key locking / automatically skip key on following frame changes / manual overwrite still possible / catch in convience functions
+	//heatmap example
+	//gui controller (web interface?)
+	//move remaining lib functions to razer_ namespace
+	//move daemon types to daemon_ namespace
+	//split library into seperate source files (rgb,frames,hsl,drawing)
+	//free memory / fix leaks
+	//packaging ?
+	//submit kernel patch ?
+	//customizable layout effect
+
 
 	struct razer_daemon_controller *controller=NULL;
 	if(!(controller=dc_open()))
@@ -786,17 +801,16 @@ int main(int argc,char *argv[])
 	printf("daemon paused : %d\n",dc_is_paused(controller));
 	dc_fps_set(controller,25);
 	printf("fps:%d\n",dc_fps_get(controller));
-    int uid = dc_frame_buffer_get(controller);
-    printf("actual render_node uid: %d\n",uid);
-    printf("parent uid: %d\n",dc_render_node_parent_get(controller,uid));
-    dc_render_node_opacity_set(controller,uid,0.5f);
-    printf("opacity: %f\n",dc_render_node_opacity_get(controller,uid));
-    int cuid = dc_render_node_create(controller,6,"Copper","test");
-    dc_frame_buffer_connect(controller,cuid);
-    printf("set frame buffer to: %d\n",cuid);
-    //dc_render_node_limit_render_time_ms_set(controller,uid,1000);
-
-    dc_close(controller);
+	int uid = dc_frame_buffer_get(controller);
+	printf("actual render_node uid: %d\n",uid);
+	printf("parent uid: %d\n",dc_render_node_parent_get(controller,uid));
+	dc_render_node_opacity_set(controller,uid,0.5f);
+	printf("opacity: %f\n",dc_render_node_opacity_get(controller,uid));
+	int cuid = dc_render_node_create(controller,9,"array","test");
+	dc_frame_buffer_connect(controller,cuid);
+	printf("set frame buffer to: %d\n",cuid);
+	//dc_render_node_limit_render_time_ms_set(controller,uid,1000);
+	dc_close(controller);
 }
 
 #pragma GCC diagnostic pop

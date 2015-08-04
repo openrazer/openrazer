@@ -17,13 +17,13 @@ fx_debug:
 	$(CC) pez2001_collection.c $(DEBUG_CFLAGS) $(LIBS) -c -o pez2001_collection.do 
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_collection.do $(LDFLAGS) -o pez2001_collection_debug.so
 
-	@echo "::\033[32m COMPILING pez2001 fx mixer[DEBUG]\033[0m"
-	@echo "==========================================="
+	@echo "::\033[32m COMPILING pez2001 fx mixer [DEBUG]\033[0m"
+	@echo "======================================"
 	$(CC) pez2001_mixer.c $(DEBUG_CFLAGS) $(LIBS) -c -o pez2001_mixer.do 
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_mixer.do $(LDFLAGS) -o pez2001_mixer_debug.so
 
-	@echo "::\033[32m COMPILING pez2001 fx light blast[DEBUG]\033[0m"
-	@echo "==========================================="
+	@echo "::\033[32m COMPILING pez2001 fx light blast [DEBUG]\033[0m"
+	@echo "============================================"
 	$(CC) pez2001_light_blast.c $(DEBUG_CFLAGS) $(LIBS) -c -o pez2001_light_blast.do 
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_light_blast.do $(LDFLAGS) -o pez2001_light_blast_debug.so
 
@@ -35,13 +35,13 @@ fx:
 	@strip pez2001_collection.so
 
 	@echo "::\033[32m COMPILING pez2001 fx mixer\033[0m"
-	@echo "==================================="
+	@echo "=============================="
 	$(CC) pez2001_mixer.c $(CFLAGS) $(LIBS) -c -o pez2001_mixer.o
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_mixer.o $(LDFLAGS) -o pez2001_mixer.so
 	@strip pez2001_mixer.so
 
 	@echo "::\033[32m COMPILING pez2001 fx light blast\033[0m"
-	@echo "==================================="
+	@echo "===================================="
 	$(CC) pez2001_light_blast.c $(CFLAGS) $(LIBS) -c -o pez2001_light_blast.o
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_light_blast.o $(LDFLAGS) -o pez2001_light_blast.so
 	@strip pez2001_light_blast.so

@@ -299,7 +299,14 @@ void razer_free_rgb_frame(struct razer_rgb_frame *frame)
 	free(frame);
 }
 
-
+struct razer_rgb *rgb_create(unsigned char r,unsigned char g,unsigned char b)
+{
+	struct razer_rgb *color = (struct razer_rgb*)malloc(sizeof(struct razer_rgb));
+	color->r = r;
+	color->g = g;
+	color->b = b;
+	return(color);	
+}
 
 
 void release_locks(struct razer_keys_locks *locks)
@@ -700,10 +707,10 @@ void razer_convert_keycode_to_pos(int keycode,struct razer_pos *pos)
 	}
 }
 
-void razer_convert_pos_to_keycode(struct razer_pos *pos,int *keycode)
+/*void razer_convert_pos_to_keycode(struct razer_pos *pos,int *keycode)
 {
 
-}
+}*/
 
 int razer_get_key_class(int keycode)
 {
@@ -1400,6 +1407,55 @@ void razer_set_frame_column(struct razer_rgb_frame *frame,int column_index,struc
 	frame->update_mask = 63;
 }
 
+void razer_add_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color)
+{
+	int r,g,b;
+	if(column_index<0 || column_index>21)
+		return;
+
+	int y;
+	for(y=0;y<6;y++)
+	{
+		r = frame->rows[y].column[column_index].r+color->r;
+		g = frame->rows[y].column[column_index].g+color->g;
+		b = frame->rows[y].column[column_index].b+color->b;
+		if(r>255)
+			r=255;
+		if(g>255)
+			g=255;
+		if(b>255)
+			b=255;
+		frame->rows[y].column[column_index].r = (unsigned char)r;
+		frame->rows[y].column[column_index].g = (unsigned char)g;
+		frame->rows[y].column[column_index].b = (unsigned char)b;
+	}
+	frame->update_mask = 63;
+}
+
+void razer_sub_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color)
+{
+	int r,g,b;
+	if(column_index<0 || column_index>21)
+		return;
+	int y;
+	for(y=0;y<6;y++)
+	{
+		r = frame->rows[y].column[column_index].r-color->r;
+		g = frame->rows[y].column[column_index].g-color->g;
+		b = frame->rows[y].column[column_index].b-color->b;
+		if(r<0)
+			r=0;
+		if(g<0)
+			g=0;
+		if(b<0)
+			b=0;
+		frame->rows[y].column[column_index].r = (unsigned char)r;
+		frame->rows[y].column[column_index].g = (unsigned char)g;
+		frame->rows[y].column[column_index].b = (unsigned char)b;
+	}
+	frame->update_mask = 63;
+}
+
 void razer_mix_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color,float opacity)
 {
 	if(column_index<0 || column_index>21)
@@ -1420,7 +1476,8 @@ void razer_mix_frames(struct razer_rgb_frame *dst_frame,struct razer_rgb_frame *
 	for(y=0;y<6;y++)
 		for(x=0;x<22;x++)
 		{
-			rgb_mix_into(&dst_frame->rows[y].column[x],&dst_frame->rows[y].column[x],&src_frame->rows[y].column[x],opacity);
+			//rgb_mix_into(&dst_frame->rows[y].column[x],&dst_frame->rows[y].column[x],&src_frame->rows[y].column[x],opacity);
+			rgb_mix_into(&dst_frame->rows[y].column[x],&src_frame->rows[y].column[x],&dst_frame->rows[y].column[x],opacity);
 		}
 	dst_frame->update_mask = 63;
 }

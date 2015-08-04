@@ -279,7 +279,11 @@ int effect7_update(struct razer_fx_render_node *render)
 	razer_set_frame_column(render->output_frame,count-(dir*4),&color4);
 	razer_set_frame_column(render->output_frame,count-(dir*5),&color5);
 	razer_set_frame_column(render->output_frame,count-(dir*6),&color_black);
+	//razer_mix_frames(render->output_frame,render->input_frame,render->opacity);
 	razer_mix_frames(render->output_frame,render->input_frame,render->opacity);
+	#ifdef USE_DEBUGGING
+		printf(" (Copper ## count:%d,dir:%d)",count,dir);
+	#endif
 	count=count+dir;
 	if(count>27 || count<-7)
 		dir=-dir;
@@ -289,12 +293,18 @@ int effect7_update(struct razer_fx_render_node *render)
 }
 
 struct razer_effect *effect8 = NULL;
+struct razer_int_array *effect8_v = NULL;
+struct razer_int_array *effect8_vdir = NULL;
+struct razer_rgb_array *effect8_vcols = NULL;
+struct razer_rgb *effect8_vcol1 = NULL;
+struct razer_rgb *effect8_vcol2 = NULL;
+struct razer_rgb *effect8_vcol3 = NULL;
 
 int effect8_update(struct razer_fx_render_node *render)
 {
-	int v[3]={daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,6))};
-	int vdir[3] = {daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,7))};
-	struct razer_rgb *vcols[3] = {daemon_get_parameter_rgb(daemon_effect_get_parameter_by_index(render->effect,2)),daemon_get_parameter_rgb(daemon_effect_get_parameter_by_index(render->effect,5)),daemon_get_parameter_rgb(daemon_effect_get_parameter_by_index(render->effect,8))};
+	struct razer_int_array *v=daemon_get_parameter_int_array(daemon_effect_get_parameter_by_index(render->effect,0));
+	struct razer_int_array *vdir = daemon_get_parameter_int_array(daemon_effect_get_parameter_by_index(render->effect,1));
+	struct razer_rgb_array *vcols = daemon_get_parameter_rgb_array(daemon_effect_get_parameter_by_index(render->effect,2));
 
 	//int v[3]={1,12,22};
 	//int vdir[3] = {1,1,1};
@@ -303,39 +313,38 @@ int effect8_update(struct razer_fx_render_node *render)
 	int i;
 	for(i=0;i<3;i++)
 	{
-		struct razer_rgb color1={.r=50*vcols[i]->r,.g=50*vcols[i]->g,.b=50*vcols[i]->b};
-		struct razer_rgb color2={.r=120*vcols[i]->r,.g=120*vcols[i]->g,.b=120*vcols[i]->b};
-		struct razer_rgb color3={.r=255*vcols[i]->r,.g=255*vcols[i]->g,.b=255*vcols[i]->b};
-		struct razer_rgb color4={.r=120*vcols[i]->r,.g=120*vcols[i]->g,.b=120*vcols[i]->b};
-		struct razer_rgb color5={.r=50*vcols[i]->r,.g=50*vcols[i]->g,.b=50*vcols[i]->b};
-		struct razer_rgb color_black={.r=0,.g=0,.b=0};
-		razer_set_frame_column(render->output_frame,v[i],&color1);
-		razer_set_frame_column(render->output_frame,v[i]-(vdir[i]*2),&color2);
-		razer_set_frame_column(render->output_frame,v[i]-(vdir[i]*3),&color3);
-		razer_set_frame_column(render->output_frame,v[i]-(vdir[i]*4),&color4);
-		razer_set_frame_column(render->output_frame,v[i]-(vdir[i]*5),&color5);
-		v[i]=v[i]+vdir[i];
-		if(v[i]>27 || v[i]<-7)
-			vdir[i]=-vdir[i];
+		struct razer_rgb color1={.r=50*vcols->values[i]->r,.g=50*vcols->values[i]->g,.b=50*vcols->values[i]->b};
+		struct razer_rgb color2={.r=120*vcols->values[i]->r,.g=120*vcols->values[i]->g,.b=120*vcols->values[i]->b};
+		struct razer_rgb color3={.r=255*vcols->values[i]->r,.g=255*vcols->values[i]->g,.b=255*vcols->values[i]->b};
+		struct razer_rgb color4={.r=120*vcols->values[i]->r,.g=120*vcols->values[i]->g,.b=120*vcols->values[i]->b};
+		struct razer_rgb color5={.r=50*vcols->values[i]->r,.g=50*vcols->values[i]->g,.b=50*vcols->values[i]->b};
+		//struct razer_rgb color_black={.r=0,.g=0,.b=0};
+		razer_set_frame_column(render->output_frame,v->values[i],&color1);
+		razer_set_frame_column(render->output_frame,v->values[i]-(vdir->values[i]*2),&color2);
+		razer_set_frame_column(render->output_frame,v->values[i]-(vdir->values[i]*3),&color3);
+		razer_set_frame_column(render->output_frame,v->values[i]-(vdir->values[i]*4),&color4);
+		razer_set_frame_column(render->output_frame,v->values[i]-(vdir->values[i]*5),&color5);
+		v->values[i]=v->values[i]+vdir->values[i];
+		if(v->values[i]>27 || v->values[i]<-7)
+			vdir->values[i]=-vdir->values[i];
 	}
 	razer_mix_frames(render->output_frame,render->input_frame,render->opacity);
-	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0),v[0]);	
-	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),vdir[0]);	
-	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3),v[1]);	
-	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4),vdir[1]);	
-	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,5),v[2]);	
-	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,6),vdir[2]);	
-	//daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect->parameters,1),&col);	
 	return(1);
 }
 
 struct razer_effect *effect9 = NULL;
+struct razer_int_array *effect9_v = NULL;
+struct razer_int_array *effect9_vdir = NULL;
+struct razer_rgb_array *effect9_vcols = NULL;
+struct razer_rgb *effect9_vcol1 = NULL;
+struct razer_rgb *effect9_vcol2 = NULL;
+struct razer_rgb *effect9_vcol3 = NULL;
 
 int effect9_update(struct razer_fx_render_node *render)
 {
-	int v[3]={daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,6))};
-	int vdir[3] = {daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4)),daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,7))};
-	struct razer_rgb *vcols[3] = {daemon_get_parameter_rgb(daemon_effect_get_parameter_by_index(render->effect,2)),daemon_get_parameter_rgb(daemon_effect_get_parameter_by_index(render->effect,5)),daemon_get_parameter_rgb(daemon_effect_get_parameter_by_index(render->effect,8))};
+	struct razer_int_array *v=daemon_get_parameter_int_array(daemon_effect_get_parameter_by_index(render->effect,0));
+	struct razer_int_array *vdir = daemon_get_parameter_int_array(daemon_effect_get_parameter_by_index(render->effect,1));
+	struct razer_rgb_array *vcols = daemon_get_parameter_rgb_array(daemon_effect_get_parameter_by_index(render->effect,2));
 	//int v[3]={1,12,16};
 	//int vdir[3] = {1,1,-1};
 	//int vcols[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
@@ -344,28 +353,22 @@ int effect9_update(struct razer_fx_render_node *render)
 	{
 		for(r=1;r<2;r++)
 		{
-			struct razer_rgb color_black={.r=0,.g=0,.b=0};
-			struct razer_rgb color={.r=50*vcols[i]->r,.g=50*vcols[i]->g,.b=50*vcols[i]->b};
-			struct razer_rgb color2={.r=25*vcols[i]->r,.g=25*vcols[i]->g,.b=25*vcols[i]->b};
-			add_keys_column(render->output_frame,v[i],&color);
-			add_keys_column(render->output_frame,v[i]-1,&color2);
-			sub_keys_column(render->output_frame,v[i]-(vdir[i]*17),&color);
-			sub_keys_column(render->output_frame,v[i]-(vdir[i]*18),&color);
-			sub_keys_column(render->output_frame,v[i]-(vdir[i]*19),&color2);
-			sub_keys_column(render->output_frame,v[i]-(vdir[i]*20),&color2);
+			//struct razer_rgb color_black={.r=0,.g=0,.b=0};
+			struct razer_rgb color={.r=50*vcols->values[i]->r,.g=50*vcols->values[i]->g,.b=50*vcols->values[i]->b};
+			struct razer_rgb color2={.r=25*vcols->values[i]->r,.g=25*vcols->values[i]->g,.b=25*vcols->values[i]->b};
+			razer_add_frame_column(render->output_frame,v->values[i],&color);
+			razer_add_frame_column(render->output_frame,v->values[i]-1,&color2);
+			razer_sub_frame_column(render->output_frame,v->values[i]-(vdir->values[i]*17),&color);
+			razer_sub_frame_column(render->output_frame,v->values[i]-(vdir->values[i]*18),&color);
+			razer_sub_frame_column(render->output_frame,v->values[i]-(vdir->values[i]*19),&color2);
+			razer_sub_frame_column(render->output_frame,v->values[i]-(vdir->values[i]*20),&color2);
 		}
-		v[i]=v[i]+vdir[i];
-		if(v[i]>27 || v[i]<-7)
-			vdir[i]=-vdir[i];
+		v->values[i]=v->values[i]+vdir->values[i];
+		if(v->values[i]>27 || v->values[i]<-7)
+			vdir->values[i]=-vdir->values[i];
 
 	}
 	razer_mix_frames(render->output_frame,render->input_frame,render->opacity);
-	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,0),v[0]);	
-	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),vdir[0]);	
-	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3),v[1]);	
-	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4),vdir[1]);	
-	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,5),v[2]);	
-	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,6),vdir[2]);	
 	return(1);
 }
 
@@ -769,24 +772,78 @@ void fx_init(struct razer_daemon *daemon)
 	effect8->update = effect8_update;
 	effect8->name = "Arrayi Bars";
 	effect8->description = "Test Array like usage";
-	effect8->fps = 12;
+	effect8->fps = 30;
 	effect8->class = 1;
 	effect8->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 
 	//int v[3]={1,12,22};
 	//int vdir[3] = {1,1,1};
 	//int vcols[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
-	parameter = daemon_create_parameter_int("Effect Counter","Counter value(INT)",1);
+	effect8_v = daemon_create_int_array(3,1);
+	effect8_vdir = daemon_create_int_array(3,1);
+	effect8_vcols = daemon_create_rgb_array(3,1);
+	effect8_v->values[0] = 1;
+	effect8_v->values[1] = 12;
+	effect8_v->values[2] = 22;
+	effect8_vdir->values[0] = 1;
+	effect8_vdir->values[1] = 1;
+	effect8_vdir->values[2] = 1;
+	effect8_vcol1 = rgb_create(255,0,0);
+	effect8_vcol2 = rgb_create(0,255,0);
+	effect8_vcol3 = rgb_create(0,0,255);
+	effect8_vcols->values[0] = effect8_vcol1;
+	effect8_vcols->values[1] = effect8_vcol2;
+	effect8_vcols->values[2] = effect8_vcol3;
+	parameter = daemon_create_parameter_int_array("Effect Counter Array","Counter values(int array)",effect8_v);
 	daemon_effect_add_parameter(effect8,parameter);	
-	parameter = daemon_create_parameter_int("Effect Direction ","Effect direction value(INT)",1);
+	parameter = daemon_create_parameter_int_array("Effect Direction Array","Direction values(int array)",effect8_vdir);
 	daemon_effect_add_parameter(effect8,parameter);	
-	
-	//parameter = daemon_create_parameter_rgb("Effect Color ","Effect base color value(RGB)",&);
-	//daemon_add_parameter(effect8->parameters,parameter);	
+	parameter = daemon_create_parameter_rgb_array("Effect Counter Array","Base colors(rgb array)",effect8_vcols);
+	daemon_effect_add_parameter(effect8,parameter);	
 
 	int effect8_uid = daemon_register_effect(daemon,effect8);
 	#ifdef USE_DEBUGGING
 		printf("registered effect: %s (uid:%d)\n",effect8->name,effect8->id);
+	#endif
+
+
+
+	effect9 = daemon_create_effect();
+	effect9->update = effect9_update;
+	effect9->name = "Arrayi Bars 2";
+	effect9->description = "Test Array like usage";
+	effect9->fps = 35;
+	effect9->class = 1;
+	effect9->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
+
+	//int v[3]={1,12,16};
+	//int vdir[3] = {1,1,-1};
+	//int vcols[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
+	effect9_v = daemon_create_int_array(3,1);
+	effect9_vdir = daemon_create_int_array(3,1);
+	effect9_vcols = daemon_create_rgb_array(3,1);
+	effect9_v->values[0] = 1;
+	effect9_v->values[1] = 12;
+	effect9_v->values[2] = 16;
+	effect9_vdir->values[0] = 1;
+	effect9_vdir->values[1] = 1;
+	effect9_vdir->values[2] = -1;
+	effect9_vcol1 = rgb_create(255,0,0);
+	effect9_vcol2 = rgb_create(0,255,0);
+	effect9_vcol3 = rgb_create(0,0,255);
+	effect9_vcols->values[0] = effect9_vcol1;
+	effect9_vcols->values[1] = effect9_vcol2;
+	effect9_vcols->values[2] = effect9_vcol3;
+	parameter = daemon_create_parameter_int_array("Effect Counter Array","Counter values(int array)",effect8_v);
+	daemon_effect_add_parameter(effect9,parameter);	
+	parameter = daemon_create_parameter_int_array("Effect Direction Array","Direction values(int array)",effect8_vdir);
+	daemon_effect_add_parameter(effect9,parameter);	
+	parameter = daemon_create_parameter_rgb_array("Effect Counter Array","Base colors(rgb array)",effect8_vcols);
+	daemon_effect_add_parameter(effect9,parameter);	
+
+	int effect9_uid = daemon_register_effect(daemon,effect9);
+	#ifdef USE_DEBUGGING
+		printf("registered effect: %s (uid:%d)\n",effect9->name,effect9->id);
 	#endif
 
 
