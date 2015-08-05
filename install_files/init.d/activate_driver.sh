@@ -17,6 +17,15 @@ do
 				#echo $?
 			fi
 		done
+	else
+		#no input directories ? use .0003 as default and try that
+		if [[ "$DEV" == *.0003 ]]; then
+				#echo "Found Razer LED Device : $DEV"
+				echo -n "$DEV" > /sys/bus/hid/drivers/hid-generic/unbind 2> /dev/null
+				echo $?
+				echo -n "$DEV" > /sys/bus/hid/drivers/razerkbd/bind 2> /dev/null
+				echo $?
+		fi
 	fi
 done
 

@@ -24,6 +24,12 @@ do
 				echo -n -e "\x$R\x$G\x$B\x$R2\x$G2\x$B2" > $DEVPATH/mode_breath
 			fi
 		done
+	else
+		#no input directories ? use .0003 as default and try that
+		if [[ "$DEV" == *.0003 ]]; then
+			DEVPATH=/sys/bus/hid/devices/$DEV
+			echo -n -e "\x$R\x$G\x$B\x$R2\x$G2\x$B2" > $DEVPATH/mode_breath
+		fi
 	fi
 done
 

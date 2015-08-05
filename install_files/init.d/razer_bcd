@@ -16,7 +16,7 @@ BIND=/usr/sbin/razer_blackwidow_chroma_activate_driver.sh
 NAME=razer_bcd
 DESC=razer_bcd
 
-RAZER_BLACKWIDOW_CHROMA_DEVICES=`ls /sys/bus/hid/devices/ | grep "1532:0203"`
+#RAZER_BLACKWIDOW_CHROMA_DEVICES=`ls /sys/bus/hid/devices/ | grep "1532:0203"`
 
 test -x $DAEMON || exit 0
 test -x $BIND || exit 0

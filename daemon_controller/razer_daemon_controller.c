@@ -778,7 +778,7 @@ int main(int argc,char *argv[])
 	//heatmap example
 	//gui controller (web interface?)
 	//move remaining lib functions to razer_ namespace
-	//move daemon types to daemon_ namespace
+	//move all daemon types to daemon_ namespace
 	//split library into seperate source files (rgb,frames,hsl,drawing)
 	//free memory / fix leaks
 	//packaging ?

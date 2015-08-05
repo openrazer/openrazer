@@ -158,3 +158,4 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 
  - Various installation and makefile related fixes by Jordan King (manual merge)
  - Ubuntu file permission fixes by Carsten Teibes (pulled)
+ - Debugging help of Mosie1 with Linux Mint script bugs (testing)

@@ -22,6 +22,12 @@ do
 				echo -n "$MODE" > $DEVPATH/mode_wave
 			fi
 		done
+	else
+		#no input directories ? use .0003 as default and try that
+		if [[ "$DEV" == *.0003 ]]; then
+			DEVPATH=/sys/bus/hid/devices/$DEV
+			echo -n "$MODE" > $DEVPATH/mode_wave
+		fi
 	fi
 done
 

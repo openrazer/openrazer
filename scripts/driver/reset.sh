@@ -14,6 +14,12 @@ do
 				echo -n "1" > $DEVPATH/reset
 			fi
 		done
+	else
+		#no input directories ? use .0003 as default and try that
+		if [[ "$DEV" == *.0003 ]]; then
+			DEVPATH=/sys/bus/hid/devices/$DEV
+			echo -n "1" > $DEVPATH/reset
+		fi
 	fi
 done
 

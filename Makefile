@@ -10,6 +10,12 @@ razer_kbd:
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules > /dev/null 2>&1
 	#added redirect to remove output of a useless makefile warning
 
+razer_kbd_verbose:
+	@echo "::\033[32m COMPILING razer chroma kernel module\033[0m"
+	@echo "========================================"
+	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules
+
+
 librazer_chroma: 
 	make -C lib all
 	cp lib/librazer_chroma.a lib/librazer_chroma.da lib/librazer_chroma.so lib/librazer_chroma_debug.so daemon
