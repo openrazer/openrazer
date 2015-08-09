@@ -1585,7 +1585,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		#endif
 		reply = dbus_message_new_method_return(msg);
 		dbus_message_iter_init_append(reply,&parameters);
-		char *xml_data = 
+		char *xml_data_start = 
 		"<!DOCTYPE node PUBLIC \"-//freedesktop//DTD D-BUS Object Introspection 1.0//EN\"\n\"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd\">\n\
 		<node>\n\
 			<interface name=\"org.freedesktop.DBus.Introspectable\">\n\
@@ -1667,8 +1667,8 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 					<arg direction=\"out\" name=\"parameter_value\" type=\"v\">\n\
 					</arg>\n\
 				</method>\n\
-			</interface>\n\
-			<interface name=\"org.voyagerproject.razer.daemon.render_node.opacity\">\n\
+			</interface>\n"; //split done to remove warning
+			char *xml_data_end = "<interface name=\"org.voyagerproject.razer.daemon.render_node.opacity\">\n\
 				<method name=\"set\">\n\
 					<arg direction=\"in\" name=\"opacity\" type=\"i\">\n\
 					</arg>\n\
@@ -1764,13 +1764,16 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				</arg></arg></method>\n\
 			</interface>\n\
 */
-
+		char *xml_data = str_CreateEmpty();
+		xml_data = str_CatFree(xml_data,xml_data_start);
+		xml_data = str_CatFree(xml_data,xml_data_end);
 		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&xml_data)) 
 			daemon_kill(daemon,"dbus: Out Of Memory!\n");
  		dbus_uint32_t serial = 0;
  		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
 			daemon_kill(daemon,"dbus: Out Of Memory!\n");
 		dbus_connection_flush(daemon->dbus);
+		free(xml_data);
 	}
 
 	/*

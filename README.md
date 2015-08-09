@@ -124,7 +124,7 @@ To compile just type:
 
 	gcc  -std=c99  dota_keys.c  -lrazer_chroma  -lm  -o dota_keys
 
-After executing it you should now have a dota profile lighting up your keyboard.
+After executing it you should now have a dota profile lighting up your keyboard.(dont forget to sudo)
 This is just a simple example using a ascii helper,if your profile needs to color function keys ,etc
 you can set the key colors by manually setting the pos.
 

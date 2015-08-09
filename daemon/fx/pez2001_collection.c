@@ -895,6 +895,14 @@ void fx_shutdown(struct razer_daemon *daemon)
 	daemon_free_parameters(effect7->parameters);
 	daemon_free_effect(effect7);
 
+	daemon_unregister_effect(daemon,effect8);
+	daemon_free_parameters(effect8->parameters);
+	daemon_free_effect(effect8);
+
+	daemon_unregister_effect(daemon,effect9);
+	daemon_free_parameters(effect9->parameters);
+	daemon_free_effect(effect9);
+
 	daemon_unregister_effect(daemon,effect_mix1);
 	daemon_free_parameters(effect_mix1->parameters);
 	daemon_free_effect(effect_mix1);

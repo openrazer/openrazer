@@ -9,7 +9,8 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <signal.h>
-#include <dlfcn.h>
+#include "getopt.h"
+#include "ctype.h"
 
 
 #include "../lib/razer_chroma.h"

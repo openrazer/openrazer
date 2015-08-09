@@ -63,6 +63,12 @@ int main(int argc,char *argv[])
 	razer_convert_ascii_to_pos('S',&pos);
 	razer_set_key_pos(chroma->keys,&pos,&green);
 
+	/*set the logo too*/
+	pos.x = 20;
+	pos.y = 0;
+	razer_set_key_pos(chroma->keys,&pos,&green);
+
+
 	razer_update_keys(chroma,chroma->keys);
 
  	razer_close(chroma);

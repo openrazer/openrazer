@@ -27,6 +27,11 @@ fx_debug:
 	$(CC) pez2001_light_blast.c $(DEBUG_CFLAGS) $(LIBS) -c -o pez2001_light_blast.do 
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_light_blast.do $(LDFLAGS) -o pez2001_light_blast_debug.so
 
+	@echo "::\033[32m COMPILING pez2001 fx progress bar [DEBUG]\033[0m"
+	@echo "============================================"
+	$(CC) pez2001_progress_bar.c $(DEBUG_CFLAGS) $(LIBS) -c -o pez2001_progress_bar.do 
+	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_progress_bar.do $(LDFLAGS) -o pez2001_progress_bar_debug.so
+
 fx: 
 	@echo "::\033[32m COMPILING pez2001 fx collection\033[0m"
 	@echo "==================================="
@@ -46,8 +51,14 @@ fx:
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_light_blast.o $(LDFLAGS) -o pez2001_light_blast.so
 	@strip pez2001_light_blast.so
 
+	@echo "::\033[32m COMPILING pez2001 fx progress bar\033[0m"
+	@echo "===================================="
+	$(CC) pez2001_progress_bar.c $(CFLAGS) $(LIBS) -c -o pez2001_progress_bar.o
+	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_progress_bar.o $(LDFLAGS) -o pez2001_progress_bar.so
+	@strip pez2001_progress_bar.so
+
 clean: 
-	rm -f *.do *.o pez2001_collection.so pez2001_collection_debug.so pez2001_mixer.so pez2001_mixer_debug.so pez2001_light_blast.so pez2001_light_blast_debug.so
+	rm -f *.do *.o pez2001_collection.so pez2001_collection_debug.so pez2001_mixer.so pez2001_mixer_debug.so pez2001_light_blast.so pez2001_light_blast_debug.so pez2001_progress_bar.so pez2001_progress_bar_debug.so
 
 indent:	
 	indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 *.c *.h
