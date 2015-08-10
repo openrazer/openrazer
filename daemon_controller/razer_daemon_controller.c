@@ -1065,7 +1065,7 @@ int main(int argc,char *argv[])
 				break;
 			case 'h':
 				printf("Razer blackwidow chroma daemon controller\n");
-				printf(dc_helpmsg,argv[0]);
+				printf(dc_helpmsg,argv[0],argv[0]);
 				return(0);
 			case 'V':
 				printf("razer_bcd daemon controller %d.%d (build %d)\n",MAJOR_VERSION,MINOR_VERSION);
@@ -1084,21 +1084,6 @@ int main(int argc,char *argv[])
 	}
 	dc_close(controller);
 	return(0);
-	//TODO controller parse options
-	//dbus introspect split up string creation
-	//support array parameters (with another path level added as index into the array)
-	//daemon update render_nodes -> next /subs/framebuffer handling etc
-	//support remaining effect handlers not called yet once
-	//key locking / automatically skip key on following frame changes / manual overwrite still possible / catch in convience functions
-	//heatmap example
-	//gui controller (web interface?)
-	//move remaining lib functions to razer_ namespace
-	//move all daemon types to daemon_ namespace
-	//split library into seperate source files (rgb,frames,hsl,drawing)
-	//free memory / fix leaks
-	//packaging ?
-	//submit kernel patch ?
-	//customizable layout effect
 
 
 }

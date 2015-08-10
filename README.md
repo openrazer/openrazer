@@ -151,6 +151,24 @@ Please use your own source files to host your effects for merging.
 Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 
 
+=== TODO ===
+
+
+	dbus interface support array parameters (with another path level added as index into the array)
+	daemon update render_nodes -> next /subs/framebuffer handling etc
+	support remaining effect handlers not called yet once
+	key locking / automatically skip key on following frame changes / manual overwrite still possible / catch in convience functions
+	daemon,heatmap examples
+	gui controller (web interface?)
+	move remaining lib functions to razer_ namespace
+	move all daemon types to daemon_ namespace
+	split library into seperate source files (rgb,frames,hsl,drawing)
+	free memory / fix leaks
+	packaging ?
+	submit kernel patch ?
+	customizable layout effect
+
+
 
 
 === Additional Credits ===

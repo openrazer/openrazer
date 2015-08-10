@@ -122,7 +122,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect->description = "Light field influenced by last keystrokes";
 	effect->fps = 20;
 	effect->class = 1;
-	effect->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED | RAZER_EFFECT_SECOND_INPUT_USED;
+	effect->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 	parameter = daemon_create_parameter_int("Effect Length","Time effect lasts in ms(INT)",2000);
 	daemon_effect_add_parameter(effect,parameter);	
 	parameter = daemon_create_parameter_int("Effect Direction","Effect direction value(INT)",1);
@@ -131,7 +131,7 @@ void fx_init(struct razer_daemon *daemon)
 	daemon_effect_add_parameter(effect,parameter);	
 	parameter = daemon_create_parameter_int_array("Effect Keystrokes","Effect last keystrokes storage array(INT)",effect_keystrokes);
 	daemon_effect_add_parameter(effect,parameter);	
-	int effect_mix_uid = daemon_register_effect(daemon,effect);
+	int effect_uid = daemon_register_effect(daemon,effect);
 	#ifdef USE_DEBUGGING
 		printf("registered effect: %s (uid:%d)\n",effect->name,effect->id);
 	#endif
