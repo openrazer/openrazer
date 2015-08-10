@@ -789,46 +789,61 @@ const char *dc_helpmsg = "Usage: %s [OPTIONS]... [COMMAND] [PARAMETERS]...\n\
 Send commands to razer_bcd daemon.\n\
 \n\
 Commands:\n\
-  -q    close daemon\n\
-  -c    continue rendering\n\
-  -p    pause rendering\n\
-  -C    create rendering node\n\
+  -q    Close daemon\n\
+  -c    Continue rendering\n\
+  -p    Pause rendering\n\
+  -C    Create rendering node\n\
            1. Parameter: Effect uid - sets effect render node uses\n\
            2. Parameter: Name - sets the render nodes name\n\
            3. Parameter: Description - sets the render nodes description\n\
 \n\
            For example: %s -C 1 \"My render node\" \"My description\"\n\
-  -l    load fx library\n\
+  -l    Load fx library\n\
            1. Parameter: Library filename\n\
-  -f    set fps rate\n\
+  -f    Set fps rate\n\
            1. Parameter: fps rate\n\
-  -g    get fps rate\n\
+  -g    Get fps rate\n\
            Returns: actual fps rate of daemon\n\
-  -o    set render node opacity\n\
+  -o    Set render node opacity\n\
            1. Parameter: render node uid - render node to set the opacity to\n\
            2. Parameter: opacity value - float value between 0.0 and 1.0\n\
-  -O    get render node opacity\n\
+  -O    Get render node opacity\n\
            1. Parameter: render node uid - render node to get the opacity of\n\
            Returns: opacity of render node as a float value between 0.0 and 1.0\n\
-  -i    is rendering paused ?\n\
+  -i    Is rendering paused ?\n\
            Returns: 0/1 running/paused\n\
-  -x    get fx list\n\
+  -x    Get fx list\n\
            Returns: fx list as json string\n\
-  -a    get the actual render node uid connected to the framebuffer\n\
+  -a    Get the actual render node uid connected to the framebuffer\n\
            Returns: uid of node\n\
-  -t    get the parent of a render node\n\
+  -t    Get the parent of a render node\n\
            1. Parameter: render node uid - render node to get the parent of\n\
            Returns: uid of parent node\n\
-  -L    set render node rendering time limit\n\
+  -L    Set render node rendering time limit\n\
            1. Parameter: render node uid - render node to set the time limit\n\
            2. Parameter: time limit value - time span in ms\n\
-  -b    connect frame buffer to render node\n\
+  -b    Connect frame buffer to render node\n\
            1. Parameter: render node uid - render node that gets connected to the frame buffer\n\
-  -d    disconnect frame buffer\n\
-  -h    display this help and exit\n\
+  -s    Add Sub-node to render node\n\
+           1. Parameter: render node uid - render node the sub node should be added to\n\
+           2. Parameter: sub node uid - sub node that gets added\n\
+  -r    Connect input node to render nodes first input slot\n\
+           1. Parameter: render node uid - render node the input node should be connected to\n\
+           2. Parameter: input node uid - input node to connect\n\
+  -r    Connect input node to render nodes second input slot\n\
+           1. Parameter: render node uid - render node the input node should be connected to\n\
+           2. Parameter: input node uid - input node to connect\n\
+  -w    Get the next node of a render node\n\
+           1. Parameter: render node uid - render node to get the next node of\n\
+           Returns: uid of next node\n\
+  -y    Set the next node of a render node\n\
+           1. Parameter: render node uid - render node to get the next node of\n\
+           2. Parameter: next node uid - next node to run after render node finished\n\
+  -d    Disconnect frame buffer\n\
+  -h    Display this help and exit\n\
 \n\
 Options:\n\
-  -v    more verbose output\n\
+  -v    More verbose output\n\
 \n\
 	DBUS must be running on the system to communicate with daemon.\n\
 \n\
@@ -849,10 +864,73 @@ int main(int argc,char *argv[])
 		printf("razer_bcd_controller: error initializing daemon controller\n");
 		return(1);
 	}
-	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbd")) != -1)
+	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyC")) != -1)
 	{
 		switch(c)
 		{
+			case 'C':
+				{
+					int fx_uid = atoi(argv[optind++]);
+					char *node_name = argv[optind++];
+					char *node_description = argv[optind++];
+					if(verbose)
+					{
+						printf("sending create render node command to daemon.\n");
+						printf("new render node uid: %d.\n",dc_render_node_create(controller,fx_uid,node_name,node_description));
+					}
+					else
+						printf("%d",dc_render_node_create(controller,fx_uid,node_name,node_description));
+
+				}
+				break;
+			case 'y':
+				{
+					int render_node_uid = atoi(argv[optind++]);
+					int next_node_uid = atoi(argv[optind]);
+					if(verbose)
+						printf("sending set next node : %d for render node: %d command to daemon.\n",next_node_uid,render_node_uid);
+					dc_render_node_next_set(controller,render_node_uid,next_node_uid);
+				}
+				break;
+			case 'w':
+				{
+					int render_node_uid = atoi(argv[optind++]);
+					if(verbose)
+					{
+						printf("sending get next node of render node: %d.\n",render_node_uid);
+						printf("next render node: %d.\n",dc_render_node_next_get(controller,render_node_uid));
+					}
+					else
+						printf("%d",dc_render_node_next_get(controller,render_node_uid));
+				}
+				break;
+			case 'r':
+				{
+					int render_node_uid = atoi(argv[optind++]);
+					int input_node_uid = atoi(argv[optind]);
+					if(verbose)
+						printf("sending connect node : %d to render nodes: %d first input command to daemon.\n",input_node_uid,render_node_uid);
+					dc_render_node_input_connect(controller,render_node_uid,input_node_uid);
+				}
+				break;
+			case 'n':
+				{
+					int render_node_uid = atoi(argv[optind++]);
+					int input_node_uid = atoi(argv[optind]);
+					if(verbose)
+						printf("sending connect node : %d to render nodes: %d second input command to daemon.\n",input_node_uid,render_node_uid);
+					dc_render_node_second_input_connect(controller,render_node_uid,input_node_uid);
+				}
+				break;
+			case 's':
+				{
+					int render_node_uid = atoi(argv[optind++]);
+					int sub_node_uid = atoi(argv[optind]);
+					if(verbose)
+						printf("sending add sub node: %d to render node: %d command to daemon.\n",sub_node_uid,render_node_uid);
+					dc_render_node_sub_add(controller,render_node_uid,sub_node_uid);
+				}
+				break;
 			case 'b':
 				{
 					int render_node_uid = atoi(argv[optind]);

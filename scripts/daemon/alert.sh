@@ -20,22 +20,26 @@ fi
 
 if [ "$1" == "run" ]; then
 
-RUID=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.render_node.create int32:2 string:"Breathing Node" string:"alert node"` )
-RUID=${RUID[1]}
+RUID=( `razer_bcd_controller -C 2 "Breathing Node" "alert node"` )
+#RUID=${RUID[1]}
 #OUID=`dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.get | jq '.uid'`
 #dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RUID org.voyagerproject.razer.daemon.render_node.limit_render_time_ms.set int32:1000
 #dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$WUID org.voyagerproject.razer.daemon.render_node.next.set int32:$OUID
-dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RUID org.voyagerproject.razer.daemon.render_node.limit_render_time_ms.set int32:1000
+#dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RUID org.voyagerproject.razer.daemon.render_node.limit_render_time_ms.set int32:1000
+razer_bcd_controller -L $RUID 1000
 #dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RUID org.voyagerproject.razer.daemon.render_node.next.move_frame_buffer_linkage.set int32:0
 
 while read line
 do
-	#echo "$line"
-	OUID=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.get` )
-	OUID=${OUID[1]}
+	echo "$line"
+	#OUID=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.get` )
+	OUID=( `razer_bcd_controller -a` )
+	#OUID=${OUID[1]}
 	#echo "actual render_node:$OUID"
-	dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RUID org.voyagerproject.razer.daemon.render_node.next.set int32:$OUID
-	dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.connect int32:$RUID
+	#dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RUID org.voyagerproject.razer.daemon.render_node.next.set int32:$OUID
+	razer_bcd_controller -y $RUID $OUID
+	#dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.connect int32:$RUID
+	razer_bcd_controller -b $RUID
 done < /dev/key_alert
 fi
 

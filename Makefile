@@ -45,6 +45,7 @@ razer_examples_clean:
 install: all
 	make -C lib install
 	make -C daemon install
+	make -C daemon_controller install
 	@echo "::\033[32m INSTALLING razer chroma kernel module\033[0m"
 	@echo "====================================================="
 	cp $(DRIVERDIR)/razerkbd.ko $(MODULEDIR)
