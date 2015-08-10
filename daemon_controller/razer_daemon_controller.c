@@ -839,6 +839,13 @@ Commands:\n\
   -y    Set the next node of a render node\n\
            1. Parameter: render node uid - render node to get the next node of\n\
            2. Parameter: next node uid - next node to run after render node finished\n\
+  -M    Get the move_linkage value of a render node\n\
+           1. Parameter: render node uid - render node to get the move_linkage value of\n\
+           Returns: uid of next node\n\
+  -G    Set the move_linkage value of a render node\n\
+           1. Parameter: render node uid - render node to get the next node of\n\
+           2. Parameter: move_linkage - 0/1 activate/deactivate moving of framebuffer\n\
+                         linkage of a render node\n\
   -d    Disconnect frame buffer\n\
   -h    Display this help and exit\n\
 \n\
@@ -864,10 +871,31 @@ int main(int argc,char *argv[])
 		printf("razer_bcd_controller: error initializing daemon controller\n");
 		return(1);
 	}
-	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyC")) != -1)
+	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyCMG")) != -1)
 	{
 		switch(c)
 		{
+			case 'M':
+				{
+					int render_node_uid = atoi(argv[optind++]);
+					int move_linkage = atoi(argv[optind]);
+					if(verbose)
+						printf("sending set move_linkage to %d for render node: %d command to daemon.\n",move_linkage,render_node_uid);
+					dc_render_node_next_move_frame_buffer_linkage_set(controller,render_node_uid,move_linkage);
+				}
+				break;
+			case 'G':
+				{
+					int render_node_uid = atoi(argv[optind++]);
+					if(verbose)
+					{
+						printf("sending get move_linkage of render node: %d.\n",render_node_uid);
+						printf("move linkage of render node: %d.\n",dc_render_node_next_move_frame_buffer_linkage_get(controller,render_node_uid));
+					}
+					else
+						printf("%d",dc_render_node_next_move_frame_buffer_linkage_get(controller,render_node_uid));
+				}
+				break;
 			case 'C':
 				{
 					int fx_uid = atoi(argv[optind++]);
