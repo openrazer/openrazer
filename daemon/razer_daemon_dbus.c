@@ -135,6 +135,8 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.parameter","get"))
 		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.parameter.value","get"))
+		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.frame_buffer","connect"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.frame_buffer","disconnect"))
@@ -281,6 +283,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		char **path = NULL;
 		int rn_uid = -1;
 		int p_index = -1;
+		int a_index = -1;
 		dbus_message_get_path_decomposed(msg,&path);
 		int path_len = daemon_dbus_get_string_array_len(path);
 		#ifdef USE_DEBUGGING

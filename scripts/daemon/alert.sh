@@ -29,18 +29,20 @@ RUID=( `razer_bcd_controller -C 2 "Breathing Node" "alert node"` )
 razer_bcd_controller -L $RUID 1000
 #dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RUID org.voyagerproject.razer.daemon.render_node.next.move_frame_buffer_linkage.set int32:0
 
-while read line
+tail -f /dev/key_alert | while read line
 do
 	echo "$line"
 	#OUID=( `dbus-send --system --type=method_call --print-reply=literal --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.get` )
 	OUID=( `razer_bcd_controller -a` )
 	#OUID=${OUID[1]}
-	#echo "actual render_node:$OUID"
+	echo "actual render_node:$OUID"
 	#dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RUID org.voyagerproject.razer.daemon.render_node.next.set int32:$OUID
-	razer_bcd_controller -y $RUID $OUID
-	#dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.connect int32:$RUID
-	razer_bcd_controller -b $RUID
-done < /dev/key_alert
+	if [ $OUID != $RUID ]; then
+		razer_bcd_controller -y $RUID $OUID
+		#dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.connect int32:$RUID
+		razer_bcd_controller -b $RUID
+	fi
+done 
 fi
 
 if [ "$1" == "uninstall" ]; then

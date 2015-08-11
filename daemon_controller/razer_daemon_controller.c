@@ -193,7 +193,7 @@ void dc_render_node_set(struct razer_daemon_controller *controller,int render_no
 	dbus_message_unref(msg);
 }
 
-/*int dc_render_node_parameter_get(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid)
+int dc_render_node_parameter_get(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid)
 {
 	DBusMessage *msg;
 	DBusMessageIter args;
@@ -230,7 +230,8 @@ void dc_render_node_set(struct razer_daemon_controller *controller,int render_no
 	return(next_uid);
 }
 
-void dc_render_node_parameter_set(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid)
+
+/*void dc_render_node_parameter_set(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid)
 {
 	DBusMessage *msg;
 	DBusMessageIter args;

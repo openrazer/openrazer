@@ -122,7 +122,7 @@ int daemon_update_render_nodes(struct razer_daemon *daemon)
 	{
 		rn = list_Get(daemon->render_nodes,i);
 		ret = daemon_update_render_node(daemon,rn);
-		if(!ret)
+		if(!ret && rn->id != daemon->frame_buffer_linked_uid)
 		{
 			//TODO rewrite
 			if(rn->next)
@@ -154,9 +154,19 @@ int daemon_update_render_nodes(struct razer_daemon *daemon)
 
 			}
 		}
+		//else
+		//	if(!ret)
+		//		printf("skipping root render node:%d at %d\n",rn->id,i);
 	}
-	if(!rn->next && !ret)
+	//printf("ret:%d\n",ret);
+	//if(rn && rn->next)
+	//	printf("rn->next->id:%d\n",rn->next->id);
+	if(rn->next && !ret)
 	{
+		//printf("switching root render node from %d to %d\n",rn->id,rn->next->id);
+		rn->start_ticks = 0;
+		rn->running = 0;
+		daemon_connect_frame_buffer(daemon,rn->next);
 		//root render_node effect returned 0
 		//start next render_node in chain or default
 
@@ -177,7 +187,7 @@ int daemon_key_event_render_nodes(struct razer_daemon *daemon,int keycode,int pr
 	{
 		rn = list_Get(daemon->render_nodes,i);
 		ret = daemon_key_event_render_node(daemon,rn,keycode,pressed);
-		if(!ret)
+		if(!ret && rn->id != daemon->frame_buffer_linked_uid)
 		{
 			if(rn->next)
 			{
@@ -207,10 +217,15 @@ int daemon_key_event_render_nodes(struct razer_daemon *daemon,int keycode,int pr
 			}
 		}
 	}
-	if(!rn->next && !ret)
+	if(rn->next && !ret)
 	{
+		//printf("switching root render node from %d to %d\n",rn->id,rn->next->id);
+		rn->start_ticks = 0;
+		rn->running = 0;
+		daemon_connect_frame_buffer(daemon,rn->next);
 		//root render_node effect returned 0
 		//start next render_node in chain or default
+
 	}
 	return(1);
 }
