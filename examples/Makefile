@@ -4,9 +4,6 @@ MAJOR_VERSION = 0
 MINOR_VERSION = 3
 CSTD = -std=c99
 CFLAGS= -Wall -Wextra -W -w -Os $(CSTD) -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
-
-TUICFLAGS = -Wall -Wextra
-
 DEBUG_CFLAGS = -Wall -Wextra -Wformat=0 -pedantic -fbounds-check -Wuninitialized -O0 -g3 $(CSTD) -DUSE_DEBUGGING -DMAJOR_VERSION=$(MAJOR_VERSION) -DMINOR_VERSION=$(MINOR_VERSION) -fPIC -DPIC -DLINUX -D_XOPEN_SOURCE=700
 #-pedantic -fbounds-check -Wuninitialized -O0 -g3 -Wstrict-prototypes
 LDFLAGS= $(LIBS)
