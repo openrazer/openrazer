@@ -28,10 +28,15 @@ examples:
 	@strip input_example
 	$(CC) dota_keys.c $(CFLAGS) ../lib/librazer_chroma.a $(LIBS) -o dota_keys
 	@strip dota_keys
+dynamic:
+	@echo "::\033[32m COMPILING dynamic\033[0m"
+	@echo "======================"
+
+	$(CC) dynamic.c $(CFLAGS) ../lib/librazer_chroma.a $(LIBS) -o dynamic
+	@strip dynamic
 
 clean: 
 	rm -f *.do *.o input_example input_example_debug example1 example1_debug dota_keys dota_keys_debug
 
 indent:	
 	indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 *.c *.h
-
