@@ -4,18 +4,24 @@ A Linux driver for the Razer Blackwidow Chroma keyboard (supports all lighting m
 
 === Installation === 
 
-
- - execute install_driver_debian.sh
- - reboot
+ - Download Sourcecode:
+ 	git clone --depth=1 https://github.com/pez2001/razer_blackwidow_chroma_driver.git
+ 
+ - Execute installation script:
+ 	cd razer_blackwidow_chroma_driver
+ 	./install_driver_debian.sh
+ 
+ - Reboot
  
 
 
 === Installation for non debian based distros ===
 
 
- - install dependencies (libdbus-1-dev,jq)
- - execute sudo make -s all install
- - reboot
+ - Install dependencies (libdbus-1-dev,jq)
+ - Execute install script:
+	sudo make -s all install
+ - Reboot
 
 
 
@@ -37,6 +43,15 @@ A Linux driver for the Razer Blackwidow Chroma keyboard (supports all lighting m
 
 [... To be written ...]
 
+
+=== Status of Code ===
+
+ - Driver : Release Candidate
+ - Daemon : Alpha
+ - Daemon Effects : Release Candidate
+ - Daemon Controller : Beta
+ - Installer : Beta
+ - Packages : Non Existant
 
 
 === First Steps Tutorial ===
@@ -146,7 +161,7 @@ Its not that much different than writing a self-hosted effect.
 === Contributions ===
 
 
-Any effect you might want to contribute is welcome.
+Any effect or tool you might want to contribute is welcome.
 Please use your own source files to host your effects for merging.
 Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 
@@ -155,7 +170,6 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 
 
 	dbus interface support array parameters (with another path level added as index into the array)
-	daemon update render_nodes -> next /subs/framebuffer handling etc
 	support remaining effect handlers not called yet once
 	key locking / automatically skip key on following frame changes / manual overwrite still possible / catch in convience functions
 	daemon,heatmap examples
@@ -169,11 +183,33 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 	customizable layout effect
 
 
-
-
 === Additional Credits ===
 
 
  - Various installation and makefile related fixes by Jordan King (manual merge)
  - Ubuntu file permission fixes by Carsten Teibes (pulled)
  - Debugging help of Mosie1 with Linux Mint script bugs (testing)
+ - Example Effect  : Dynamic by TheKiwi5000 (pulled)
+
+
+ === Donations ===
+
+Goal 1 (5/66) : 
+ All donations go towards buying a Razer Firefly Led-Mousepad (no driver written yet/easy to incorporate)
+ Reward:  Sound driven example effect(Spectrum based).
+
+Stretch Goal 1 (>166):
+ Buying a Razer Tartarus (also no driver written yet)
+ Reward:  Packaging for major distributions (debian based,redhat based,tar balls)
+
+Stretch Goal 2 (>333):
+ Buying a Razer Deathstalker Utimate (no driver too)
+ Reward:  A gtk based GUI (simple , something to build upon further).
+
+All goals contain the linux driver for the respective device as reward also.
+
+Thank you for all donation i really appreciate it!
+
+  - Luca Steeb 
+
+  You can send your donations via PayPal to : feckelburger [at] gmx.net

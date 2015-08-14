@@ -291,7 +291,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		#endif
 		reply = dbus_message_new_method_return(msg);
 		dbus_message_iter_init_append(reply,&parameters);
-		if(path_len == 2)
+		if(path_len >= 2)
 		{
 			rn_uid = atoi(path[0]);
 			p_index = atoi(path[1]);
@@ -300,6 +300,11 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				printf("dbus: get parameter max path render_node : %d\n",list_GetLen(daemon->fx_render_nodes));
 			#endif
 		}
+		if(path_len == 3)
+		{
+			a_index = atoi(path[2]);
+		}
+			
 		char *rn_list_json = str_CreateEmpty();
 		dbus_free_string_array(path);
 		if(list_GetLen(daemon->fx_render_nodes))
@@ -309,9 +314,18 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			if(render_node && p_index>=0 && p_index < list_GetLen(render_node->effect->parameters))
 			{
 				struct razer_parameter *parameter = list_Get(render_node->effect->parameters,p_index);
-				char *parameter_json = daemon_parameter_to_json(parameter);
-				rn_list_json = str_CatFree(rn_list_json,parameter_json);
-				free(parameter_json);
+				if(a_index != -1 && (parameter->type == RAZER_PARAMETER_TYPE_INT_ARRAY || parameter->type == RAZER_PARAMETER_TYPE_UINT_ARRAY || parameter->type == RAZER_PARAMETER_TYPE_FLOAT_ARRAY || parameter->type == RAZER_PARAMETER_TYPE_POS_ARRAY || parameter->type == RAZER_PARAMETER_TYPE_RGB_ARRAY))
+				{
+					char *parameter_json = daemon_parameter_array_to_json(parameter,a_index);
+					rn_list_json = str_CatFree(rn_list_json,parameter_json);
+					free(parameter_json);
+				}
+				else
+				{
+					char *parameter_json = daemon_parameter_to_json(parameter);
+					rn_list_json = str_CatFree(rn_list_json,parameter_json);
+					free(parameter_json);
+				}
 			}
 		}
 		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&rn_list_json)) 
