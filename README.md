@@ -5,11 +5,13 @@ A Linux driver for the Razer Blackwidow Chroma keyboard (supports all lighting m
 === Installation === 
 
  - Download Sourcecode:
+
  	git clone --depth=1 https://github.com/pez2001/razer_blackwidow_chroma_driver.git
  
  - Execute installation script:
+
  	cd razer_blackwidow_chroma_driver
- 	./install_driver_debian.sh
+	./install_driver_debian.sh
  
  - Reboot
  
