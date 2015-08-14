@@ -210,7 +210,7 @@ Stretch Goal 2 (>333):
 
 All goals contain the linux driver for the respective device as reward also.
 
-Thank you for all donation i really appreciate it!
+Thank you for all donations i really appreciate it!
 
   - Luca Steeb 
 
