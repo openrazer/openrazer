@@ -2,6 +2,10 @@
 A Linux driver for the Razer Blackwidow Chroma keyboard (supports all lighting modes) includes a daemon for advanced effects
 
 
+
+
+
+
 === Installation === 
 
  - Download Sourcecode:
@@ -17,6 +21,12 @@ A Linux driver for the Razer Blackwidow Chroma keyboard (supports all lighting m
  
 
 
+
+
+
+
+
+
 === Installation for non debian based distros ===
 
 
@@ -24,6 +34,12 @@ A Linux driver for the Razer Blackwidow Chroma keyboard (supports all lighting m
  - Execute install script:
 	sudo make -s all install
  - Reboot
+
+
+
+
+
+
 
 
 
@@ -41,9 +57,20 @@ A Linux driver for the Razer Blackwidow Chroma keyboard (supports all lighting m
 
 
 
+
+
+
+
+
+
 === Daemon IPC details ===
 
 [... To be written ...]
+
+
+
+
+
 
 
 === Status of Code ===
@@ -54,6 +81,12 @@ A Linux driver for the Razer Blackwidow Chroma keyboard (supports all lighting m
  - Daemon Controller : Beta
  - Installer : Beta
  - Packages : Non Existant
+
+
+
+
+
+
 
 
 === First Steps Tutorial ===
@@ -148,6 +181,8 @@ you can set the key colors by manually setting the pos.
 
 
 
+
+
 === Daemon effects tutorial ===
 
 
@@ -156,6 +191,8 @@ Why not shoot for something crazy like a light blast originating from keys being
 Its not that much different than writing a self-hosted effect.
 
 [... To be written ...]
+
+
 
 
 
@@ -173,7 +210,8 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 
 	dbus interface support array parameters (with another path level added as index into the array)
 	support remaining effect handlers not called yet once
-	key locking / automatically skip key on following frame changes / manual overwrite still possible / catch in convience functions
+	key locking / automatically skip key on following frame changes 
+	  / manual overwrite still possible / catch in convience functions
 	daemon,heatmap examples
 	gui controller (web interface?)
 	move remaining lib functions to razer_ namespace
@@ -185,6 +223,12 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 	customizable layout effect
 
 
+
+
+
+
+
+
 === Additional Credits ===
 
 
@@ -194,15 +238,24 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
  - Example Effect  : Dynamic by TheKiwi5000 (pulled)
 
 
- === Donations ===
+
+
+
+
+
+=== Donations ===
 
 Goal 1 (5/66) : 
+
  All donations go towards buying a Razer Firefly Led-Mousepad (no driver written yet/easy to incorporate)
- Reward:  Sound driven example effect(Spectrum based).
+
+ - Reward:  Sound driven example effect(Spectrum based).
 
 Stretch Goal 1 (>166):
- Buying a Razer Tartarus (also no driver written yet)
- Reward:  Packaging for major distributions (debian based,redhat based,tar balls)
+ 
+Buying a Razer Tartarus (also no driver written yet)
+
+ - Reward:  Packaging for major distributions (debian based,redhat based,tar balls)
 
 Stretch Goal 2 (>333):
  Buying a Razer Deathstalker Utimate (no driver too)
