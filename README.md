@@ -208,7 +208,8 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 === TODO ===
 
 
-	dbus interface support array parameters (with another path level added as index into the array)
+	dbus interface support array parameters 
+	  (with another path level added as index into the array)
 	support remaining effect handlers not called yet once
 	key locking / automatically skip key on following frame changes 
 	  / manual overwrite still possible / catch in convience functions
