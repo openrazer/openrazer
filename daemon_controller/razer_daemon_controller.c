@@ -34,9 +34,6 @@ void dc_dbus_close(struct razer_daemon_controller *controller)
 		dbus_connection_unref(controller->dbus);
 }
 
-//end of dbus ifdef
-#endif 
-
 struct razer_daemon_controller *dc_open(void)
 {
 	struct razer_daemon_controller *controller = (struct razer_daemon_controller*)malloc(sizeof(struct razer_daemon_controller));
@@ -847,6 +844,9 @@ struct razer_fx_render_node *dc_get_render_node(struct razer_daemon_controller *
 }
 */
 
+//end of dbus ifdef
+#endif 
+
 const char *dc_helpmsg = "Usage: %s [OPTIONS]... [COMMAND] [PARAMETERS]...\n\
 Send commands to razer_bcd daemon.\n\
 \n\
@@ -931,6 +931,10 @@ int verbose = 0;
 
 int main(int argc,char *argv[])
 {
+	#ifndef USE_DBUS
+		printf("You need to have dbus & dbus dev packages installed\n");
+		return(1);
+	#else
 	char c;
 	struct razer_daemon_controller *controller=NULL;
 	if(!(controller=dc_open()))
@@ -1196,6 +1200,7 @@ int main(int argc,char *argv[])
 		}
 	}
 	dc_close(controller);
+	#endif
 	return(0);
 }
 
