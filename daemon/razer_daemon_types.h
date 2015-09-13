@@ -1,6 +1,11 @@
 #ifndef _RAZER_DAEMON_TYPES_H_
 #define _RAZER_DAEMON_TYPES_H_
 
+typedef unsigned long razer_uint;
+typedef long razer_int;
+typedef float razer_float;
+typedef int razer_index;
+
 struct razer_float_range 
 {
 	float min;
@@ -31,38 +36,44 @@ struct razer_pos_range
 	struct razer_pos *max;
 };
 
-struct razer_float_array //list *array //struct parameters
+struct razer_array_header
 {
-	float *values;
 	int size;
 	int has_fixed_size;
 };
-struct razer_int_array
+
+struct razer_float_array //list *array //struct parameters
 {
-	long *values;
 	int size;
 	int has_fixed_size;
+	float *values;
+};
+struct razer_int_array
+{
+	int size;
+	int has_fixed_size;
+	long *values;
 };
 
 struct razer_uint_array
 {
-	unsigned long *values;
 	int size;
 	int has_fixed_size;
+	unsigned long *values;
 };
 
 struct razer_rgb_array
 {
-	struct razer_rgb **values;
 	int size;
 	int has_fixed_size;
+	struct razer_rgb **values;
 };
 
 struct razer_pos_array
 {
-	struct razer_pos **values;
 	int size;
 	int has_fixed_size;
+	struct razer_pos **values;
 };
 
 

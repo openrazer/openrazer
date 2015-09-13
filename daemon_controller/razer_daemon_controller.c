@@ -34,9 +34,6 @@ void dc_dbus_close(struct razer_daemon_controller *controller)
 		dbus_connection_unref(controller->dbus);
 }
 
-//end of dbus ifdef
-#endif 
-
 struct razer_daemon_controller *dc_open(void)
 {
 	struct razer_daemon_controller *controller = (struct razer_daemon_controller*)malloc(sizeof(struct razer_daemon_controller));
@@ -193,7 +190,7 @@ void dc_render_node_set(struct razer_daemon_controller *controller,int render_no
 	dbus_message_unref(msg);
 }
 
-int dc_render_node_parameter_get(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid)
+char *dc_render_node_parameter_get(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid,int array_index)
 {
 	DBusMessage *msg;
 	DBusMessageIter args;
@@ -202,7 +199,18 @@ int dc_render_node_parameter_get(struct razer_daemon_controller *controller,int 
 	char *suid = str_FromLong(render_node_uid);
 	path = str_CatFree(path,suid);
 	free(suid);
-	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon",path,"org.voyagerproject.razer.daemon.render_node.next","get");
+	path = str_CatFree(path,"/");
+	char *puid = str_FromLong(parameter_uid);
+	path = str_CatFree(path,puid);
+	free(puid);
+	if(array_index!=-1)
+	{
+		path = str_CatFree(path,"/");
+		char *aid = str_FromLong(array_index);
+		path = str_CatFree(path,aid);
+		free(aid);
+	}
+	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon",path,"org.voyagerproject.razer.daemon.render_node.parameter","get");
 	if(!msg)
 		dc_error_close(controller,"Error creating Message\n");
 	if(!dbus_connection_send_with_reply(controller->dbus,msg,&controller->pending,-1))
@@ -212,7 +220,7 @@ int dc_render_node_parameter_get(struct razer_daemon_controller *controller,int 
 	dbus_connection_flush(controller->dbus);
 	dbus_message_unref(msg);
 
-	int next_uid = -1;
+	char *parameter_json = NULL;
 
 	dbus_pending_call_block(controller->pending);
 	msg = dbus_pending_call_steal_reply(controller->pending);
@@ -221,17 +229,17 @@ int dc_render_node_parameter_get(struct razer_daemon_controller *controller,int 
 	dbus_pending_call_unref(controller->pending);
 	if(!dbus_message_iter_init(msg,&args))
 		dc_error_close(controller,"Message has no arguments!\n"); 
-	else if(dbus_message_iter_get_arg_type(&args) != DBUS_TYPE_INT32) 
-		dc_error_close(controller,"Argument is not an int!\n"); 
+	else if(dbus_message_iter_get_arg_type(&args) != DBUS_TYPE_STRING) 
+		dc_error_close(controller,"Argument is not a string!\n"); 
 	else
-		dbus_message_iter_get_basic(&args,&next_uid);
+		dbus_message_iter_get_basic(&args,&parameter_json);
 	dbus_message_unref(msg);   
 	free(path);//TODO gets not freed on error
-	return(next_uid);
+	return(parameter_json);
 }
 
 
-/*void dc_render_node_parameter_set(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid)
+void dc_render_node_parameter_set(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid,int array_index,int type,void *value)
 {
 	DBusMessage *msg;
 	DBusMessageIter args;
@@ -240,12 +248,62 @@ int dc_render_node_parameter_get(struct razer_daemon_controller *controller,int 
 	char *suid = str_FromLong(render_node_uid);
 	path = str_CatFree(path,suid);
 	free(suid);
-	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon",path,"org.voyagerproject.razer.daemon.render_node.next","set");
+	path = str_CatFree(path,"/");
+	char *puid = str_FromLong(parameter_uid);
+	path = str_CatFree(path,puid);
+	free(puid);
+	if(array_index!=-1)
+	{
+		path = str_CatFree(path,"/");
+		char *aid = str_FromLong(array_index);
+		path = str_CatFree(path,aid);
+		free(aid);
+	}
+	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon",path,"org.voyagerproject.razer.daemon.render_node.parameter","set");
 	if(!msg)
 		dc_error_close(controller,"Error creating Message\n");
 	dbus_message_iter_init_append(msg,&args);
-	if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&next_render_node_uid))
-		dc_error_close(controller,"Out of memory!\n"); 
+	
+	switch(type)
+	{
+		case RAZER_PARAMETER_TYPE_STRING:
+			if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_STRING,&value))
+				dc_error_close(controller,"Out of memory!\n"); 
+			break;
+		case RAZER_PARAMETER_TYPE_INT:
+			if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&value))
+				dc_error_close(controller,"Out of memory!\n"); 
+			break;
+		case RAZER_PARAMETER_TYPE_FLOAT:
+			if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_DOUBLE,&value))
+				dc_error_close(controller,"Out of memory!\n"); 
+			break;
+		case RAZER_PARAMETER_TYPE_RENDER_NODE:
+			if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&value))
+				dc_error_close(controller,"Out of memory!\n"); 
+			break;
+		case RAZER_PARAMETER_TYPE_UINT:
+			if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_UINT32,&value))
+				dc_error_close(controller,"Out of memory!\n"); 
+			break;
+		case RAZER_PARAMETER_TYPE_RGB:
+		case RAZER_PARAMETER_TYPE_FLOAT_RANGE:
+		case RAZER_PARAMETER_TYPE_INT_RANGE:
+		case RAZER_PARAMETER_TYPE_UINT_RANGE:
+		case RAZER_PARAMETER_TYPE_RGB_RANGE:
+		case RAZER_PARAMETER_TYPE_INT_ARRAY:
+		case RAZER_PARAMETER_TYPE_UINT_ARRAY:
+		case RAZER_PARAMETER_TYPE_FLOAT_ARRAY:
+		case RAZER_PARAMETER_TYPE_RGB_ARRAY:
+		case RAZER_PARAMETER_TYPE_POS_ARRAY:
+		case RAZER_PARAMETER_TYPE_POS_RANGE:
+		case RAZER_PARAMETER_TYPE_POS:
+		default:
+			printf("Error unknown type :%d\n",type);
+			free(path);
+			return;
+	}
+
 	if(!dbus_connection_send_with_reply(controller->dbus,msg,&controller->pending,-1))
 		dc_error_close(controller,"Out of memory!\n"); 
 	if(!controller->pending)
@@ -254,7 +312,7 @@ int dc_render_node_parameter_get(struct razer_daemon_controller *controller,int 
 	dbus_message_unref(msg);
 	free(path);//TODO gets not freed on error
 }
-*/
+
 
 float dc_render_node_opacity_get(struct razer_daemon_controller *controller,int render_node_uid)
 {
@@ -786,6 +844,9 @@ struct razer_fx_render_node *dc_get_render_node(struct razer_daemon_controller *
 }
 */
 
+//end of dbus ifdef
+#endif 
+
 const char *dc_helpmsg = "Usage: %s [OPTIONS]... [COMMAND] [PARAMETERS]...\n\
 Send commands to razer_bcd daemon.\n\
 \n\
@@ -847,6 +908,11 @@ Commands:\n\
            1. Parameter: render node uid - render node to get the next node of\n\
            2. Parameter: move_linkage - 0/1 activate/deactivate moving of framebuffer\n\
                          linkage of a render node\n\
+  -P    Get the parameter of a render node\n\
+           1. Parameter: render node uid - render node the parameter belongs to\n\
+           2. Parameter: parameter uid - uid of parameter to get\n\
+           3. Parameter: array index - if parameter is an array this index will be used (optional)\n\
+           Returns: parameter as json\n\
   -d    Disconnect frame buffer\n\
   -h    Display this help and exit\n\
 \n\
@@ -865,6 +931,10 @@ int verbose = 0;
 
 int main(int argc,char *argv[])
 {
+	#ifndef USE_DBUS
+		printf("You need to have dbus & dbus dev packages installed\n");
+		return(1);
+	#else
 	char c;
 	struct razer_daemon_controller *controller=NULL;
 	if(!(controller=dc_open()))
@@ -872,10 +942,28 @@ int main(int argc,char *argv[])
 		printf("razer_bcd_controller: error initializing daemon controller\n");
 		return(1);
 	}
-	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyCMG")) != -1)
+	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyCMGP")) != -1)
 	{
 		switch(c)
 		{
+			case 'P':
+				{
+					int render_node_uid = atoi(argv[optind++]);
+					int parameter_uid = atoi(argv[optind++]);
+					int array_index = -1;
+					if(optind < argc)
+						array_index = atoi(argv[optind++]);
+					char *parameter_json = dc_render_node_parameter_get(controller,render_node_uid,parameter_uid,array_index);
+					if(verbose)
+					{
+						printf("sending get parameter value of render node: %d.%d.%d.\n",render_node_uid,parameter_uid,array_index);
+						printf("value: %s.\n",parameter_json);
+					}
+					else
+						printf("%s",parameter_json);
+					//free(parameter_json);
+				}
+				break;
 			case 'M':
 				{
 					int render_node_uid = atoi(argv[optind++]);
@@ -1112,9 +1200,8 @@ int main(int argc,char *argv[])
 		}
 	}
 	dc_close(controller);
+	#endif
 	return(0);
-
-
 }
 
 #pragma GCC diagnostic pop

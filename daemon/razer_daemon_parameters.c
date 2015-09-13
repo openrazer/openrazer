@@ -1,5 +1,49 @@
 #include "razer_daemon.h"
 
+
+char *daemon_parameter_type_to_string(struct razer_parameter *parameter)
+{
+	switch(parameter->type)
+	{
+		case RAZER_PARAMETER_TYPE_STRING:
+			return("String");
+		case RAZER_PARAMETER_TYPE_INT:
+			return("Integer");
+		case RAZER_PARAMETER_TYPE_UINT:
+			return("Unsigned Integer");
+		case RAZER_PARAMETER_TYPE_FLOAT:
+			return("Float");
+		case RAZER_PARAMETER_TYPE_RGB:
+			return("RGB");
+		case RAZER_PARAMETER_TYPE_POS:
+			return("Position");
+		case RAZER_PARAMETER_TYPE_RENDER_NODE:
+			return("Render Node");
+		case RAZER_PARAMETER_TYPE_FLOAT_RANGE:
+			return("Float Range");
+		case RAZER_PARAMETER_TYPE_INT_RANGE:
+			return("Integer Range");
+		case RAZER_PARAMETER_TYPE_UINT_RANGE:
+			return("Unsigned Integer Range");
+		case RAZER_PARAMETER_TYPE_RGB_RANGE:
+			return("RGB Range");
+		case RAZER_PARAMETER_TYPE_POS_RANGE:
+			return("Position Range");
+		case RAZER_PARAMETER_TYPE_INT_ARRAY:
+			return("Integer Array");
+		case RAZER_PARAMETER_TYPE_UINT_ARRAY:
+			return("Unsigned Integer Array");
+		case RAZER_PARAMETER_TYPE_FLOAT_ARRAY:
+			return("Float Array");
+		case RAZER_PARAMETER_TYPE_RGB_ARRAY:
+			return("RGB Array");
+		case RAZER_PARAMETER_TYPE_POS_ARRAY:
+			return("Position Array");
+		default:
+			return("Unknown Type");
+	}
+}
+
 char *daemon_parameter_to_json(struct razer_parameter *parameter)
 {
 	char *parameter_json = str_CreateEmpty();
@@ -34,6 +78,14 @@ char *daemon_parameter_to_json(struct razer_parameter *parameter)
 				parameter_json = str_CatFree(parameter_json," ,\n");
 			}
 			break;
+		case RAZER_PARAMETER_TYPE_UINT:
+			{
+				char *int_string = str_FromLong(daemon_get_parameter_int(parameter));
+				parameter_json = str_CatFree(parameter_json,int_string);
+				free(int_string);
+				parameter_json = str_CatFree(parameter_json," ,\n");
+			}
+			break;
 		case RAZER_PARAMETER_TYPE_FLOAT:
 			{
 				char *float_string = str_FromDouble(daemon_get_parameter_float(parameter));
@@ -60,6 +112,143 @@ char *daemon_parameter_to_json(struct razer_parameter *parameter)
 				parameter_json = str_CatFree(parameter_json,"] ,\n");
 			}
 			break;
+		case RAZER_PARAMETER_TYPE_POS:
+			{
+				parameter_json = str_CatFree(parameter_json,"[");
+				struct razer_pos *pos = daemon_get_parameter_pos(parameter);
+				char *x_string = str_FromLong(pos->x);
+				parameter_json = str_CatFree(parameter_json,x_string);
+				parameter_json = str_CatFree(parameter_json," ,");
+				free(x_string);
+				char *y_string = str_FromLong(pos->y);
+				parameter_json = str_CatFree(parameter_json,y_string);
+				free(y_string);
+				parameter_json = str_CatFree(parameter_json,"] ,\n");
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_RENDER_NODE:
+			{
+				struct razer_fx_render_node *render_node = daemon_get_parameter_render_node(parameter);
+				char *render_node_string = str_FromLong(render_node->id);
+				parameter_json = str_CatFree(parameter_json,render_node_string);
+				free(render_node_string);
+				parameter_json = str_CatFree(parameter_json," ,\n");
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_FLOAT_RANGE:
+			{
+				parameter_json = str_CatFree(parameter_json,"[");
+				struct razer_float_range *range = daemon_get_parameter_float_range(parameter);
+				char *min_string = str_FromDouble(range->min);
+				parameter_json = str_CatFree(parameter_json,min_string);
+				parameter_json = str_CatFree(parameter_json," ,");
+				free(min_string);
+				char *max_string = str_FromDouble(range->max);
+				parameter_json = str_CatFree(parameter_json,max_string);
+				free(max_string);
+				parameter_json = str_CatFree(parameter_json,"] ,\n");
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_INT_RANGE:
+			{
+				parameter_json = str_CatFree(parameter_json,"[");
+				struct razer_int_range *range = daemon_get_parameter_int_range(parameter);
+				char *min_string = str_FromLong(range->min);
+				parameter_json = str_CatFree(parameter_json,min_string);
+				parameter_json = str_CatFree(parameter_json," ,");
+				free(min_string);
+				char *max_string = str_FromLong(range->max);
+				parameter_json = str_CatFree(parameter_json,max_string);
+				free(max_string);
+				parameter_json = str_CatFree(parameter_json,"] ,\n");
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_UINT_RANGE:
+			{
+				parameter_json = str_CatFree(parameter_json,"[");
+				struct razer_uint_range *range = daemon_get_parameter_uint_range(parameter);
+				char *min_string = str_FromLong(range->min);
+				parameter_json = str_CatFree(parameter_json,min_string);
+				parameter_json = str_CatFree(parameter_json," ,");
+				free(min_string);
+				char *max_string = str_FromLong(range->max);
+				parameter_json = str_CatFree(parameter_json,max_string);
+				free(max_string);
+				parameter_json = str_CatFree(parameter_json,"] ,\n");
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_RGB_RANGE:
+			{
+				parameter_json = str_CatFree(parameter_json,"[");
+				struct razer_rgb_range *range = daemon_get_parameter_rgb_range(parameter);
+				struct razer_rgb *min = range->min;
+				parameter_json = str_CatFree(parameter_json,"{\n\"R\" : ");
+				char *min_r_string = str_FromLong(min->r);
+				parameter_json = str_CatFree(parameter_json,min_r_string);
+				parameter_json = str_CatFree(parameter_json," ,\n\"G\" : ");
+				free(min_r_string);
+				char *min_g_string = str_FromLong(min->g);
+				parameter_json = str_CatFree(parameter_json,min_g_string);
+				parameter_json = str_CatFree(parameter_json," ,\n\"B\" : ");
+				free(min_g_string);
+				char *min_b_string = str_FromLong(min->b);
+				parameter_json = str_CatFree(parameter_json,min_b_string);
+				free(min_b_string);
+				parameter_json = str_CatFree(parameter_json,"} ,\n");
+				parameter_json = str_CatFree(parameter_json," ,");
+				parameter_json = str_CatFree(parameter_json,"{");
+				struct razer_rgb *max = range->max;
+				parameter_json = str_CatFree(parameter_json,"{\n\"R\" : ");
+				char *max_r_string = str_FromLong(max->r);
+				parameter_json = str_CatFree(parameter_json,max_r_string);
+				parameter_json = str_CatFree(parameter_json," ,\n\"G\" : ");
+				free(max_r_string);
+				char *max_g_string = str_FromLong(max->g);
+				parameter_json = str_CatFree(parameter_json,max_g_string);
+				parameter_json = str_CatFree(parameter_json," ,\n\"B\" : ");
+				free(max_g_string);
+				char *max_b_string = str_FromLong(max->b);
+				parameter_json = str_CatFree(parameter_json,max_b_string);
+				free(max_b_string);
+				parameter_json = str_CatFree(parameter_json,"} ,\n");
+				parameter_json = str_CatFree(parameter_json,"] ,\n");
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_POS_RANGE:
+			{
+				parameter_json = str_CatFree(parameter_json,"[");
+				struct razer_pos_range *range = daemon_get_parameter_pos_range(parameter);
+				struct razer_pos *min = range->min;
+				parameter_json = str_CatFree(parameter_json,"{\n\"X\" : ");
+				char *min_x_string = str_FromLong(min->x);
+				parameter_json = str_CatFree(parameter_json,min_x_string);
+				parameter_json = str_CatFree(parameter_json," ,\n\"Y\" : ");
+				free(min_x_string);
+				char *min_y_string = str_FromLong(min->y);
+				parameter_json = str_CatFree(parameter_json,min_y_string);
+				free(min_y_string);
+				parameter_json = str_CatFree(parameter_json,"} ,\n");
+				parameter_json = str_CatFree(parameter_json," ,");
+				parameter_json = str_CatFree(parameter_json,"{");
+				struct razer_pos *max = range->max;
+				parameter_json = str_CatFree(parameter_json,"{\n\"X\" : ");
+				char *max_x_string = str_FromLong(max->x);
+				parameter_json = str_CatFree(parameter_json,max_x_string);
+				parameter_json = str_CatFree(parameter_json," ,\n\"Y\" : ");
+				free(max_x_string);
+				char *max_y_string = str_FromLong(max->y);
+				parameter_json = str_CatFree(parameter_json,max_y_string);
+				free(max_y_string);
+				parameter_json = str_CatFree(parameter_json,"} ,\n");
+				parameter_json = str_CatFree(parameter_json,"] ,\n");
+			}
+			break;
+		/*case RAZER_PARAMETER_TYPE_INT_ARRAY:
+		case RAZER_PARAMETER_TYPE_UINT_ARRAY:
+		case RAZER_PARAMETER_TYPE_FLOAT_ARRAY:
+		case RAZER_PARAMETER_TYPE_RGB_ARRAY:
+		case RAZER_PARAMETER_TYPE_POS_ARRAY:
+		*/
 	}
 
 	parameter_json = str_CatFree(parameter_json," \"description\": \"");
@@ -67,6 +256,93 @@ char *daemon_parameter_to_json(struct razer_parameter *parameter)
 	parameter_json = str_CatFree(parameter_json,"\" },\n");
 	return(parameter_json);
 }
+
+char *daemon_parameter_array_to_json(struct razer_parameter *parameter,int array_index)
+{
+	char *parameter_json = str_CreateEmpty();
+	parameter_json = str_CatFree(parameter_json,"{\n \"item\": \"");
+	parameter_json = str_CatFree(parameter_json,parameter->key);
+	parameter_json = str_CatFree(parameter_json,"\",\n");
+	parameter_json = str_CatFree(parameter_json," \"id\" : ");
+	char *id_string = str_FromLong(array_index);
+	parameter_json = str_CatFree(parameter_json,id_string);
+	parameter_json = str_CatFree(parameter_json," ,\n");
+	free(id_string);
+	parameter_json = str_CatFree(parameter_json," \"value\" : ");
+	struct razer_array_header *header = (struct razer_array_header*)parameter->value;
+	if(array_index<0 || array_index >= header->size)
+	{
+		parameter_json = str_CatFree(parameter_json," null \n},\n");
+		return(parameter_json);
+	}
+	switch(parameter->type)
+	{
+		case RAZER_PARAMETER_TYPE_POS_ARRAY:
+			{
+				struct razer_pos *pos = ((struct razer_pos_array*)parameter->value)->values[array_index];
+				parameter_json = str_CatFree(parameter_json,"[");
+				char *x_string = str_FromLong(pos->x);
+				parameter_json = str_CatFree(parameter_json,x_string);
+				parameter_json = str_CatFree(parameter_json," ,");
+				free(x_string);
+				char *y_string = str_FromLong(pos->y);
+				parameter_json = str_CatFree(parameter_json,y_string);
+				parameter_json = str_CatFree(parameter_json," ,");
+				free(y_string);
+				parameter_json = str_CatFree(parameter_json,"] ,\n");
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_UINT_ARRAY:
+			{
+				unsigned long value = ((struct razer_uint_array*)parameter->value)->values[array_index];
+				char *uint_string = str_FromLong(value);
+				parameter_json = str_CatFree(parameter_json,uint_string);
+				free(uint_string);
+				parameter_json = str_CatFree(parameter_json," ,\n");
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_INT_ARRAY:
+			{
+				long value = ((struct razer_int_array*)parameter->value)->values[array_index];
+				char *int_string = str_FromLong(value);
+				parameter_json = str_CatFree(parameter_json,int_string);
+				free(int_string);
+				parameter_json = str_CatFree(parameter_json," ,\n");
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_FLOAT_ARRAY:
+			{
+				float value = ((struct razer_float_array*)parameter->value)->values[array_index];
+				char *float_string = str_FromDouble((double)value);
+				parameter_json = str_CatFree(parameter_json,float_string);
+				parameter_json = str_CatFree(parameter_json," ,\n");
+				free(float_string);
+			}
+			break;
+		case RAZER_PARAMETER_TYPE_RGB_ARRAY:
+			{
+				parameter_json = str_CatFree(parameter_json,"[");
+				struct razer_rgb *color = ((struct razer_rgb_array*)parameter->value)->values[array_index];
+				char *r_string = str_FromLong(color->r);
+				parameter_json = str_CatFree(parameter_json,r_string);
+				parameter_json = str_CatFree(parameter_json," ,");
+				free(r_string);
+				char *g_string = str_FromLong(color->g);
+				parameter_json = str_CatFree(parameter_json,g_string);
+				parameter_json = str_CatFree(parameter_json," ,");
+				free(g_string);
+				char *b_string = str_FromLong(color->b);
+				parameter_json = str_CatFree(parameter_json,b_string);
+				free(b_string);
+				parameter_json = str_CatFree(parameter_json,"] ,\n");
+			}
+			break;
+	}
+
+	parameter_json = str_CatFree(parameter_json," },\n");
+	return(parameter_json);
+}
+
 
 struct razer_parameter *daemon_create_parameter(void)
 {

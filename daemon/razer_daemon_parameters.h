@@ -35,6 +35,11 @@ struct razer_parameter
 };
 
 char *daemon_parameter_to_json(struct razer_parameter *parameter);
+char *daemon_parameter_array_to_json(struct razer_parameter *parameter,int array_index);
+
+char *daemon_parameter_type_to_string(struct razer_parameter *parameter);
+
+
 
 struct razer_parameter *daemon_create_parameter_string(char *key,char *description,char *value);
 struct razer_parameter *daemon_create_parameter_float(char *key,char *description,float value);
