@@ -54,6 +54,10 @@
 
 
 
+#ifdef __cplusplus
+extern "C"{
+#endif 
+
 
 
 
@@ -213,5 +217,9 @@ double pos_angle_radians(struct razer_pos *src,struct razer_pos *dst);
 
 
 //void capture_keys(struct razer_keys *keys,SDL_Renderer *renderer,SDL_Window *window,SDL_Texture *tex);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

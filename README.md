@@ -237,7 +237,7 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
  - Ubuntu file permission fixes by Carsten Teibes (pulled)
  - Debugging help of Mosie1 with Linux Mint script bugs (testing)
  - Example Effect  : Dynamic by TheKiwi5000 (pulled)
-
+ - Snake Example by James Shawver (pulled and edited slightly)
 
 
 
@@ -246,13 +246,13 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 
 === Donations ===
 
-Goal 1 (5/66) : 
+Goal 1 (66/66)  [Completed]: 
 
  All donations go towards buying a Razer Firefly Led-Mousepad (no driver written yet/easy to incorporate)
 
  - Reward:  Sound driven example effect(Spectrum based).
 
-Stretch Goal 1 (>166):
+Stretch Goal 1 (155>166):
  
 Buying a Razer Tartarus (also no driver written yet)
 
@@ -260,12 +260,18 @@ Buying a Razer Tartarus (also no driver written yet)
 
 Stretch Goal 2 (>333):
  Buying a Razer Deathstalker Utimate (no driver too)
- Reward:  A gtk based GUI (simple , something to build upon further).
+ - Reward:  A gtk based GUI (simple , something to build upon further).
 
-All goals contain the linux driver for the respective device as reward also.
+ - All goals contain the linux driver for the respective device as reward also.
+
+
 
 Thank you for all donations i really appreciate it!
 
+
+
   - Luca Steeb 
+  - Klee Dienes
+
 
   You can send your donations via PayPal to : feckelburger [at] gmx.net

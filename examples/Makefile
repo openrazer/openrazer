@@ -10,7 +10,14 @@ LDFLAGS= $(LIBS)
 DEBUG_LDFLAGS = $(LIBS)
 CC=gcc
 
-all: examples_debug examples
+all: examples_debug examples snake
+
+
+snake: 
+	make -C snake_game all
+
+snake_clean: 
+	make -C snake_game clean
 
 examples_debug: 
 	@echo "::\033[32m COMPILING examples [DEBUG]\033[0m"
@@ -35,7 +42,7 @@ dynamic:
 	$(CC) dynamic.c $(CFLAGS) ../lib/librazer_chroma.a $(LIBS) -o dynamic
 	@strip dynamic
 
-clean: 
+clean: snake_clean
 	rm -f *.do *.o input_example input_example_debug example1 example1_debug dota_keys dota_keys_debug
 
 indent:	
