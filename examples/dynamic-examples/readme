@@ -1,0 +1,18 @@
+How to use dynamic-examples
+
+This is a try to be able to create custom profiles with no need of recompiling,
+due to "dynamic" example.
+
+Usage:
+
+As root, pipe the .template file to ./dynamic
+
+Example
+
+$ sudo su
+<enter password>
+# cat fps.template | ./dynamic
+
+You should see you keyboard change colors
+
+Animations are not supported (yet?)
