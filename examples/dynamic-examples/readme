@@ -1,7 +1,9 @@
 How to use dynamic-examples
 
-This is a try to be able to create custom profiles with no need of recompiling,
-due to "dynamic" example.
+This is a way of storing profiles as files, so you won't have to recompile any code.
+The fps profile is a modified version of FPS profile found in Razer's program.
+
+
 
 Usage:
 
@@ -16,3 +18,25 @@ $ sudo su
 You should see you keyboard change colors
 
 Animations are not supported (yet?)
+
+
+Making own profiles:
+The syntax of dynamic is as follows:
+<command> <params>
+command:
+  0 - exit
+  1 - set color by XY, params: <x> <y> <r 0-255> <g 0-255> <b 0-255>, 
+    where XY=(1,1) is the ~ key, and (1, 0) is ESC
+  2 - set color by string, params <r 0-255> <g 0-255> <b 0-255> <keys>
+  
+Example
+A template like
+2
+255 255 255
+FJ
+1 
+1 0 
+255 0 0
+
+will set F and J to white, and ESC to red.
+
