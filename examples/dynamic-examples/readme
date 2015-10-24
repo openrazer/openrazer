@@ -28,7 +28,9 @@ command:
   1 - set color by XY, params: <x> <y> <r 0-255> <g 0-255> <b 0-255>, 
     where XY=(1,1) is the ~ key, and (1, 0) is ESC
   2 - set color by string, params <r 0-255> <g 0-255> <b 0-255> <keys>
-  
+Every .template must end with "0" in order to exit the program!
+
+
 Example
 A template like
 2
@@ -37,6 +39,6 @@ FJ
 1 
 1 0 
 255 0 0
-
+0
 will set F and J to white, and ESC to red.
 
