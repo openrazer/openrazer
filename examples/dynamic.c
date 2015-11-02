@@ -68,6 +68,21 @@ int main(int argc,char *argv[])
       printf("Done!\n");
    
     }
+    
+    if(cmd == 3) {
+      int ir, ig, ib; 
+      printf("Enter r g b: ");
+      scanf("%u %u %u", &ir, &ig, &ib);
+      color.r = ir; 
+      color.g = ig; 
+      color.b = ib; 
+      printf("Setting keys to %u %u %u...\n", ir, ig, ib);
+      razer_set_all(klaw->keys, &color);
+      razer_update_keys(klaw, klaw->keys);
+      printf("Done!\n");
+    }
+
+
     if(cmd==0) break;
     
     }
