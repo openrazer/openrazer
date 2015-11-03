@@ -278,7 +278,7 @@ int daemon_update_render_node(struct razer_daemon *daemon,struct razer_fx_render
 	return(ret);
 }
 
-int daemon_key_event_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node,int keycode,int pressed)
+int daemon_input_event_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node,struct razer_chroma_event *event)
 {
 	if(!render_node || !render_node->effect)
 		return(-1);
@@ -302,7 +302,7 @@ int daemon_key_event_render_node(struct razer_daemon *daemon,struct razer_fx_ren
 			}
 			if(!sub->running)
 				continue;
-			int sub_ret = daemon_key_event_render_node(daemon,sub,keycode,pressed);
+			int sub_ret = daemon_input_event_render_node(daemon,sub,event);
 			if(!sub_ret || daemon_has_render_node_reached_render_limit(daemon,sub) || !sub->running)
 			{
 				if(sub->next)
@@ -316,8 +316,8 @@ int daemon_key_event_render_node(struct razer_daemon *daemon,struct razer_fx_ren
 			}
 		}
 	}
-	if(!render_node->effect->key_event)
+	if(!render_node->effect->input_event)
 		return(-1);
-	int ret = render_node->effect->key_event(render_node,keycode,pressed);
+	int ret = render_node->effect->input_event(render_node,event);
 	return(ret);
 }

@@ -2,6 +2,8 @@
 A Linux driver for the Razer Blackwidow Chroma keyboard (supports all lighting modes) includes a daemon for advanced effects
 
 
+Supports the Razer Firefly (internal effect switching).
+
 
 
 
@@ -238,13 +240,17 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
  - Debugging help of Mosie1 with Linux Mint script bugs (testing)
  - Example Effect  : Dynamic by TheKiwi5000 (pulled)
  - Snake Example by James Shawver (pulled and edited slightly)
+ - Identifying of missing speed parameter 
+   for the reactive mode by Oleg Finkelshteyn (implemented by maintainer)
+   and for discovering of a previous unknown reactive+wave mode existing.
+   (call reactive script & wave script with none as parameter)
 
 
 
 
 
 
-=== Donations ===
+=== Donations (in Euros) ===
 
 Goal 1 (66/66)  [Completed]: 
 
@@ -270,8 +276,8 @@ Thank you for all donations i really appreciate it!
 
 
 
-  - Luca Steeb 
-  - Klee Dienes
+  - Luca Steeb 5
+  - Klee Dienes 150
 
 
   You can send your donations via PayPal to : feckelburger [at] gmx.net

@@ -110,8 +110,9 @@ struct razer_keys_set
 
 
 struct razer_chroma;
-
-typedef int (*razer_input_handler)(struct razer_chroma *chroma,int keycode,int pressed);
+struct razer_chroma_event;
+//typedef int (*razer_input_handler)(struct razer_chroma *chroma,int keycode,int pressed);
+typedef int (*razer_input_handler)(struct razer_chroma *chroma,struct razer_chroma_event *event);
 
 struct razer_chroma
 {
@@ -120,7 +121,8 @@ struct razer_chroma
 	char *custom_mode_filename;
 	FILE *custom_mode_file;
 	FILE *update_keys_file;
-	int input_file;
+	int keyboard_input_file;
+	int mouse_input_file;
 	unsigned long last_update_ms;
 	unsigned long update_ms;
 	unsigned long last_key_event_ms;
@@ -131,6 +133,66 @@ struct razer_chroma
 	struct razer_pos last_key_pos;//TODO move to sub struct pointer to pointers
 	struct razer_pos key_pos;//or remove
 	void *tag;
+};
+
+
+#define RAZER_CHROMA_EVENT_TYPE_KEYBOARD 1
+#define RAZER_CHROMA_EVENT_TYPE_MOUSE 2
+#define RAZER_CHROMA_EVENT_TYPE_USER 3
+#define RAZER_CHROMA_EVENT_TYPE_JOYSTICK 4
+#define RAZER_CHROMA_EVENT_TYPE_SYSTEM 5
+#define RAZER_CHROMA_EVENT_TYPE_FX 6
+
+
+#define RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_X_AXIS_MOVEMENT 1
+#define RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_Y_AXIS_MOVEMENT 2
+#define RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_WHEEL_MOVEMENT 3
+//#define RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_WHEEL_DOWN 4
+#define RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_BUTTON_UP 4
+#define RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_BUTTON_DOWN 5
+
+#define RAZER_CHROMA_EVENT_SUBTYPE_KEYBOARD_KEY_UP 0
+#define RAZER_CHROMA_EVENT_SUBTYPE_KEYBOARD_KEY_DOWN 1
+
+#define RAZER_CHROMA_EVENT_BUTTON_LEFT 0
+#define RAZER_CHROMA_EVENT_BUTTON_MIDDLE 1
+#define RAZER_CHROMA_EVENT_BUTTON_RIGHT 2
+#define RAZER_CHROMA_EVENT_BUTTON_EXTRA 3
+
+/*struct razer_chroma_joystick_event_values
+{
+  long rel_x;
+  long rel_y;
+  int buttons_mask;
+};
+
+
+struct razer_chroma_mouse_event_values
+{
+  long rel_x;
+  long rel_y;
+  int buttons_mask;
+};
+
+struct razer_chroma_keyboard_event_values
+{
+  int keycode;
+  int pressed;
+};
+*/
+
+struct razer_chroma_event
+{
+  int type;
+  int sub_type;
+  char *key;
+  void *value;
+  /*union 
+  {
+	struct razer_chroma_keyboard_event_values keyboard;
+	struct razer_chroma_mouse_event_values mouse;
+  }values;
+  */
 };
 
 

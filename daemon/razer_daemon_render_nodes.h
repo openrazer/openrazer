@@ -43,5 +43,5 @@ void daemon_render_node_add_sub(struct razer_fx_render_node *render_node,struct 
 
 int daemon_has_render_node_reached_render_limit(struct razer_daemon *daemon,struct razer_fx_render_node *render_node);
 int daemon_update_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node);
-int daemon_key_event_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node,int keycode,int pressed);
+int daemon_input_event_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node,struct razer_chroma_event *event);
 #endif

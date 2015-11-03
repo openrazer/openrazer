@@ -70,14 +70,14 @@ void stop(int sig)
 	running = 0;
 }
 
-int input_handler(struct razer_chroma *chroma, int keycode,int pressed)
+int input_handler(struct razer_chroma *chroma, struct razer_chroma_event *event)
 {
 	#ifdef USE_DEBUGGING
 		printf("input_handler called\n");
 	#endif
-	if(!pressed)
+	if(event->type != RAZER_CHROMA_EVENT_TYPE_KEYBOARD || !event->sub_type)
 		return(1);
-	keys_history[keys_history_index++] = keycode;
+	keys_history[keys_history_index++] = (long)event->value;
 	if(keys_history_index==keys_max)
 		keys_history_index = 0;
 	return(1);

@@ -110,12 +110,12 @@ void stop(int sig)
 	exit(1);
 }
 
-int input_handler(struct razer_chroma *chroma, int keycode,int pressed)
+int input_handler(struct razer_chroma *chroma, struct razer_chroma_event *event)
 {
 	//printf("input_handler called\n");
-	if(!pressed)
+	if(event->type != RAZER_CHROMA_EVENT_TYPE_KEYBOARD || !event->sub_type)
 		return(1);//depressed
-	keys_history[0] = keycode;
+	keys_history[0] = (long)event->value;
 	return(1);
 }
 

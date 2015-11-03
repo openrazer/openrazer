@@ -3,8 +3,8 @@
 #TODO insert module
 #need to compile ?
 
-make -s -C ../.. all
-insmod ../../driver/razerkbd.ko
+#make -s -C ../.. all
+#insmod ../../driver/razerkbd.ko
 
 
 

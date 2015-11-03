@@ -10,7 +10,7 @@ LDFLAGS= $(LIBS)
 DEBUG_LDFLAGS = $(LIBS)
 CC=gcc
 
-all: examples_debug examples snake
+all: examples_debug examples snake dynamic
 
 
 snake: 

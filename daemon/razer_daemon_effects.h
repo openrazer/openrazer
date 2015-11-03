@@ -10,7 +10,8 @@ typedef int (*razer_effect_close)(struct razer_fx_render_node *render);//called 
 typedef int (*razer_effect_reset)(struct razer_fx_render_node *render);//called every time a effect is called for the first time in a render node(loops trigger too)
 typedef int (*razer_effect_added_to_render_nodes)(struct razer_fx_render_node *render);//called every time a render_node is added to the daemons render_nodes
 typedef int (*razer_effect_update)(struct razer_fx_render_node *render);//called every frame - returns 0 if execution is completed
-typedef int (*razer_effect_key_event)(struct razer_fx_render_node *render,int keycode,int pressed);//handler for key events
+typedef int (*razer_effect_input_event)(struct razer_fx_render_node *render,struct razer_chroma_event *event);//handler for key events
+//typedef int (*razer_effect_mouse_event)(struct razer_fx_render_node *render,int rel_x,int rel_y,int buttons_mask);//handler for mouse events
 typedef int (*razer_effect_dbus_event)(struct razer_fx_render_node *render);//handler for dbus events
 
 typedef void (*razer_effect_init)(struct razer_daemon *daemon);//called when libray is loaded
@@ -32,7 +33,7 @@ struct razer_effect
 	razer_effect_added_to_render_nodes added_to_render_nodes;
 	razer_effect_close close;
 	razer_effect_update update;
-	razer_effect_key_event key_event;
+	razer_effect_input_event input_event;
 	razer_effect_dbus_event dbus_event;
 	void *tag;
 };

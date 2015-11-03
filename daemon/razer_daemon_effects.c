@@ -46,7 +46,7 @@ struct razer_effect *daemon_create_effect_instance(struct razer_daemon *daemon,s
 	instance->open = lib_effect->open;
 	instance->close = lib_effect->close;
 	instance->update = lib_effect->update;
-	instance->key_event = lib_effect->key_event;
+	instance->input_event = lib_effect->input_event;
 	instance->dbus_event = lib_effect->dbus_event;
 	for(int i=0;i<lib_effect->parameters->num;i++)
 	{
@@ -95,7 +95,7 @@ struct razer_effect *daemon_create_effect(void)
 	effect->open = NULL;
 	effect->close = NULL;
 	effect->update = NULL;
-	effect->key_event = NULL;
+	effect->input_event = NULL;
 	effect->dbus_event = NULL;
 	effect->fps = 1;
 	effect->input_usage_mask = 0;

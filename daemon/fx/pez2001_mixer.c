@@ -44,12 +44,12 @@ int effect_wait_update(struct razer_fx_render_node *render)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-int effect_wait_key_event(struct razer_fx_render_node *render,int keycode,int pressed)
+int effect_wait_input_event(struct razer_fx_render_node *render,struct razer_chroma_event *event)
 {
 	#ifdef USE_DEBUGGING
 		printf(" (Compute::Wait_event.%d ## )",render->id);
 	#endif
-	if(pressed)
+	if(event->type == RAZER_CHROMA_EVENT_TYPE_KEYBOARD && event->sub_type)
 		return(0);
 	return(1);
 }
@@ -243,7 +243,7 @@ void fx_init(struct razer_daemon *daemon)
 
 	effect_wait = daemon_create_effect();
 	//effect_wait->update = effect_wait_update;
-	effect_wait->key_event = effect_wait_key_event;
+	effect_wait->input_event = effect_wait_input_event;
 	effect_wait->name = "Wait For Key Compute Node";
 	effect_wait->description = "Waits for a key and returns 0 ,it does nothing else";
 	effect_wait->fps = 1;

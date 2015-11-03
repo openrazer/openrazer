@@ -8,6 +8,10 @@ if [ "$DIRECTION" = "right" ]; then
     MODE=1
 fi
 
+if [ "$DIRECTION" = "none" ]; then
+    MODE=0
+fi
+
 RAZER_BLACKWIDOW_CHROMA_DEVICES=`ls /sys/bus/hid/devices/ | grep "1532:0203"`
 for DEV in $RAZER_BLACKWIDOW_CHROMA_DEVICES
 do 

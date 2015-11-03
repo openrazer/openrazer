@@ -54,6 +54,10 @@
 #define RAZER_BLACKWIDOW_CHROMA_ROW_LEN 0x15
 #define RAZER_BLACKWIDOW_CHROMA_ROWS_NUM 6
 
+//#define RAZER_BLACKWIDOW_CHROMA_ROW_LEN 6
+//#define RAZER_BLACKWIDOW_CHROMA_ROWS_NUM 4
+
+
 
 #define RAZER_BLACKWIDOW_CHROMA_WAIT_MS 1
 #define RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US 600
@@ -90,7 +94,7 @@ struct razer_report {
 	unsigned char parameter_bytes_num;
 	unsigned char reserved2;/*always 0x03 maybe some command class id*/
 	unsigned char command;
-	unsigned char sub_command;
+	unsigned char sub_command;/*named first parameter*/
 	unsigned char command_parameters[90-11];
 	unsigned char crc;/*xor'ed bytes of report*/		
 	unsigned char report_end_marker; /*0x0*/

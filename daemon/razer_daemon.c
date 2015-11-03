@@ -62,7 +62,7 @@ struct razer_daemon *daemon_open(void)
 			return(NULL);
 		}
 	#endif
-	razer_set_input_handler(daemon->chroma,daemon_key_event_handler);
+	razer_set_input_handler(daemon->chroma,daemon_input_event_handler);
 	daemon->chroma->tag = daemon;
 	daemon->frame_buffer = razer_create_rgb_frame();
 	daemon->frame_buffer_linked_uid = 0;
@@ -177,7 +177,7 @@ int daemon_update_render_nodes(struct razer_daemon *daemon)
 	return(1);
 }
 
-int daemon_key_event_render_nodes(struct razer_daemon *daemon,int keycode,int pressed)
+int daemon_input_event_render_nodes(struct razer_daemon *daemon,struct razer_chroma_event *event)
 {
 	if(daemon->is_render_nodes_dirty)
 		daemon_compute_render_nodes(daemon);
@@ -186,7 +186,7 @@ int daemon_key_event_render_nodes(struct razer_daemon *daemon,int keycode,int pr
 	for(int i = list_GetLen(daemon->render_nodes)-1;i>=0;i--)
 	{
 		rn = list_Get(daemon->render_nodes,i);
-		ret = daemon_key_event_render_node(daemon,rn,keycode,pressed);
+		ret = daemon_input_event_render_node(daemon,rn,event);
 		if(!ret && rn->id != daemon->frame_buffer_linked_uid)
 		{
 			if(rn->next)
@@ -230,14 +230,20 @@ int daemon_key_event_render_nodes(struct razer_daemon *daemon,int keycode,int pr
 	return(1);
 }
 
-int daemon_key_event_handler(struct razer_chroma *chroma,int keycode,int pressed)
+
+
+int daemon_input_event_handler(struct razer_chroma *chroma,struct razer_chroma_event *event)
 {
 	#ifdef USE_VERBOSE_DEBUGGING
-		printf("daemon key event handler called: %d,%d\n",keycode,pressed);
+		if(event->type == RAZER_CHROMA_EVENT_TYPE_KEYBOARD)
+			printf("daemon input event handler called (keyboard): %d,%d\n",event->values->keyboard.keycode,event->values.pressed);
+		if(event->type == RAZER_CHROMA_EVENT_TYPE_MOUSE)
+			printf("daemon input event handler called (mouse): %d,%d,%d\n",event->values->mouse.rel_x,event->values.mouse.rel_y,event->values.mouse.buttons_mask);
 	#endif
-	daemon_key_event_render_nodes((struct razer_daemon*)chroma->tag,keycode,pressed);		
+	daemon_input_event_render_nodes((struct razer_daemon*)chroma->tag,event);		
 	return(1);
 }
+
 
 int daemon_run(struct razer_daemon *daemon)
 {
