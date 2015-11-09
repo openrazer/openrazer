@@ -81,9 +81,13 @@ struct razer_daemon *daemon_open(void)
 	if(lib)
 		daemon_register_lib(daemon,lib);
 
-
-	struct daemon_lib *blib = daemon_load_fx_lib(daemon,"daemon/fx/pez2001_light_blast_debug.so");
-	daemon_register_lib(daemon,blib);
+	#ifdef USE_DEBUGGING
+		struct daemon_lib *blib = daemon_load_fx_lib(daemon,"daemon/fx/pez2001_light_blast_debug.so");
+	#else
+		struct daemon_lib *blib = daemon_load_fx_lib(daemon,"/usr/share/razer_bcd/fx/pez2001_light_blast.so");
+	#endif
+	if(lib)
+		daemon_register_lib(daemon,blib);
 
 	//daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,2),-1,-1,0,"First Render Node","Default Render Node");
 	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,11),-1,-1,0,"First Render Node","Default Render Node");
