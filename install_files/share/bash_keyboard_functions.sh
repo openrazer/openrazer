@@ -1,12 +1,12 @@
 bind_keyboard() {
 	# Check if the device is already binded
-	if [ -a "/sys/bus/hid/drivers/razerkbd/$1" ]; then
+	if [ -e "/sys/bus/hid/drivers/razerkbd/$1" ]; then
 		echo "Device already binded"
 		return 0
 	fi
 
 	# No point unbinding the device if its already unbinded
-	if [ -a "/sys/bus/hid/drivers/hid-generic/$1" ]; then
+	if [ -e "/sys/bus/hid/drivers/hid-generic/$1" ]; then
 		echo "Unbinding device ($1) from hid-generic"
 		echo -n "$1" > /sys/bus/hid/drivers/hid-generic/unbind 2> /dev/null
 		if [ $? -ne 0 ]; then
@@ -29,13 +29,13 @@ bind_keyboard() {
 
 unbind_keyboard() {
 	# Check if the device is already binded
-	if [ -a "/sys/bus/hid/drivers/hid-generic/$1" ]; then
+	if [ -e "/sys/bus/hid/drivers/hid-generic/$1" ]; then
 		echo "Device is not binded to razerkbd"
 		return 0
 	fi
 
 	# No point unbinding the device if its already unbinded
-	if [ -a "/sys/bus/hid/drivers/razerkbd/$1" ]; then
+	if [ -e "/sys/bus/hid/drivers/razerkbd/$1" ]; then
 		echo "Unbinding device ($1) from razerkbd"
 		echo -n "$1" > /sys/bus/hid/drivers/razerkbd/unbind 2> /dev/null
 		if [ $? -ne 0 ]; then
@@ -57,21 +57,26 @@ unbind_keyboard() {
 }
 
 bind_all_chromas() {
+	exit_number=1
+
 	for device in /sys/bus/hid/devices/*:1532:0203*
 	do
 		device_id=$(basename "${device}")
+
 		usb_interface_num=$(udevadm info "/sys/bus/hid/devices/${device_id}" | grep "ID_USB_INTERFACE_NUM" | sed -n "s/.*_NUM=\([0-9]\+\)/\1/p")
+		# When passed to a VM the interface number isnt in the udevadm response :/
+		phyiscal_device=$(udevadm info "/sys/bus/hid/devices/${device_id}" | grep "HID_PHYS" | sed -n "s/.*HID_PHYS.*\/\(input[0-9]\+\)/\1/p")
 
 		# If its interface 2 then thats the device we want
-		if [ "${usb_interface_num}" == "02" ]; then
+		if [ "${usb_interface_num}" = "02" ] || [ "${phyiscal_device}" = "input2" ]; then
 			bind_keyboard "${device_id}"
-		else
-			# Worst case try the 3rd entry as that should be it
-			if [[ "${device_id}" == *.0003 ]]; then
-				bind_keyboard "${device_id}"
+			if [ $? -eq 0 ]; then
+				exit_number=0
 			fi
 		fi
 	done
+
+	return ${exit_number}
 }
 
 unbind_all_chromas() {

@@ -29,3 +29,6 @@ case "$1" in
 	;;
 esac
 # End automatically added section
+
+## update udev rules
+udevadm control --reload-rules
