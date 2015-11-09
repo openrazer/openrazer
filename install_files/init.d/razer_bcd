@@ -12,7 +12,7 @@
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/sbin/razer_bcd
-BIND=/usr/sbin/razer_blackwidow_chroma_activate_driver.sh
+FUNCTIONS=/usr/share/razer_bcd/bash_keyboard_functions.sh
 NAME=razer_bcd
 DESC=razer_bcd
 
@@ -26,6 +26,9 @@ if [ -f /etc/default/razer_bcd ] ; then
 	. /etc/default/razer_bcd
 fi
 
+# Load in the binding and unbinding functions
+source $FUNCTIONS
+
 set -e
 
 case "$1" in
@@ -33,26 +36,9 @@ case "$1" in
 	echo -n "Starting $DESC: "
 	#start-stop-daemon --start --quiet \
 	#	--exec $DAEMON -- --pidfile /var/run/$NAME.pid $DAEMON_OPTS
-	#for DEV in $RAZER_BLACKWIDOW_CHROMA_DEVICES
-	#do 
-	#	if [ -d "/sys/bus/hid/devices/$DEV/input" ]; then
-	#		INPUT_DEVS=`ls /sys/bus/hid/devices/$DEV/input`
-	#		for INPUT_DEV in $INPUT_DEVS
-	#		do
-	#			MOUSE=`ls /sys/bus/hid/devices/$DEV/input/$INPUT_DEV/ | grep "mouse"`
-	#			if [ $MOUSE ]; then
-	#				#echo "Found Razer LED Device : $DEV"
-	#				echo "Activating Driver"
-	#				echo -n "$DEV" > /sys/bus/hid/drivers/hid-generic/unbind 2> /dev/null
-	#				#echo $?
-	#				echo -n "$DEV" > /sys/bus/hid/drivers/razerkbd/bind 2> /dev/null
-	#				#echo $?
-	#			fi
-	#		done
-	#	fi
-	#done
+	
+	bind_all_chromas
 
-	$BIND
 	$DAEMON
 	echo "$NAME."
 	;;
@@ -63,6 +49,8 @@ case "$1" in
 	case $PID in "");;*)
 		kill -INT $PID
 	;;esac
+
+	unbind_all_chromas
 	echo "$NAME."
 	;;
   #reload)

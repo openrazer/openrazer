@@ -1,4 +1,4 @@
-KERNELDIR:=/lib/modules/$(shell uname -r)/build
+KERNELDIR?=/lib/modules/$(shell uname -r)/build
 DRIVERDIR:=$(shell pwd)/driver
 MODULEDIR=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
 
@@ -63,8 +63,8 @@ install: all
 	@echo "====================================================="
 	cp install_files/init.d/razer_bcd /etc/init.d
 	chown root:root /etc/init.d/razer_bcd
-	cp install_files/init.d/activate_driver.sh /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
-	chown root:root /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
+	cp install_files/share/bash_keyboard_functions.sh /usr/share/razer_bcd/bash_keyboard_functions.sh
+	chown root:root /usr/share/razer_bcd/bash_keyboard_functions.sh
 	ln -fs ../init.d/razer_bcd /etc/rc2.d/S24razer_bcd
 	ln -fs ../init.d/razer_bcd /etc/rc3.d/S24razer_bcd
 	ln -fs ../init.d/razer_bcd /etc/rc4.d/S24razer_bcd
