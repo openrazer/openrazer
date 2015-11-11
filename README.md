@@ -8,28 +8,67 @@ Supports the Razer Firefly (internal effect switching).
 
 
 
-=== Installation === 
+## Installation for Debian based distros
 
- - Download Sourcecode:
+ 1. Download Sourcecode:
 
  	git clone --depth=1 https://github.com/pez2001/razer_blackwidow_chroma_driver.git
  
- - Execute installation script:
+ 1. Execute installation script:
 
  	cd razer_blackwidow_chroma_driver
 	./install_driver_debian.sh
  
- - Reboot
+ 1. Reboot
  
 
 
+## Installation for Ubuntu based distros
+You can either install this using the above Debian method or use the packaged method.
+
+ 1. First as above download the source code
+
+ 	git clone --depth=1 https://github.com/pez2001/razer_blackwidow_chroma_driver.git
+	cd razer_blackwidow_chroma_drive
+
+ 1. Install the needed packages which are needed to build the software
+
+	sudo apt-get install -y dpkg-dev libdbus-1-dev jq libsdl2-dev libsdl2-image-dev
+
+ 1. Build the software and driver
+
+        make
+
+ 1. Build the package
+
+	./package_for_ubuntu.sh
+
+ 1. The command above will output something like `dpkg-name: info: moved 'tmp.3PnAtckx3o.deb' to '/tmp/razer-chroma-driver_1.0.0_amd64.deb'` so then you will need to install the file using:
+
+        sudo dpkg -i /tmp/razer-chroma-driver_1.0.0_amd64.deb
+
+ 1. (Optional) You can clean source directoy if you so wish
+
+	make clean
+
+Installing the `.deb` file has multiple benefits. Firstly installing the deb file keeps track of all the installed files and simplifys removal of the driver and daemon. 
+Ubuntu uses upstart so there is an upstart style init script provided. The driver is registered with DKMS (Dynamic Kernel Module Support), this will recompile the driver
+whenever a new kernel is installed.
+
+To remove the driver/daemon
+	sudo dpkg -r razer-chroma-driver
+
+Normally people write wrappers for upstart jobs to go in `/etc/init.d`, haven't done this yet but to manage upstart jobs it't as simple as
+
+        sudo status razer_bcd
+        sudo start razer_bcd
+        sudo stop razer_bcd
+        sudo restart razer_bcd
+
+There is log file for upstart jobs under `/var/log/upstart` so you can view startup issues with `tail /var/log/upstart/razer_bcd.log`.
 
 
-
-
-
-
-=== Installation for non debian based distros ===
+## Installation for non debian based distros
 
 
  - Install dependencies (libdbus-1-dev,jq)
@@ -45,7 +84,7 @@ Supports the Razer Firefly (internal effect switching).
 
 
 
-=== Usage ===
+## Usage
 
 
  Have a look at the scripts directory.
@@ -58,14 +97,18 @@ Supports the Razer Firefly (internal effect switching).
  (someone may even write a Gui to control the daemon , maybe like the node editor in blender)
 
 
+### Bash functions
+
+In the file `/usr/share/razer_bcd/bash_keyboard_functions.sh` there are some functions used before and after the daemon is started/stopped. These functions bind and unbind the chroma to the kernel
+driver. You can source the file and then run `bind_all_chromas`, this will attempt to bind chromas and skip any already binded. There is also a function called `unbind_all_chromas` which as you would
+of guessed unbinds all chroma keyboards.
 
 
 
 
 
 
-
-=== Daemon IPC details ===
+## Daemon IPC details
 
 [... To be written ...]
 
@@ -75,14 +118,14 @@ Supports the Razer Firefly (internal effect switching).
 
 
 
-=== Status of Code ===
+## Status of Code
 
  - Driver : Release Candidate
  - Daemon : Alpha
  - Daemon Effects : Release Candidate
  - Daemon Controller : Beta
  - Installer : Beta
- - Packages : Non Existant
+ - Packages : Alpha
 
 
 
@@ -91,7 +134,7 @@ Supports the Razer Firefly (internal effect switching).
 
 
 
-=== First Steps Tutorial ===
+## First Steps Tutorial
 
 
 How to create a standalone effect easily using the included library ?
@@ -185,7 +228,7 @@ you can set the key colors by manually setting the pos.
 
 
 
-=== Daemon effects tutorial ===
+##Daemon effects tutorial
 
 
 How to create an effect to be used in the daemon ?
@@ -199,7 +242,7 @@ Its not that much different than writing a self-hosted effect.
 
 
 
-=== Contributions ===
+##Contributions
 
 
 Any effect or tool you might want to contribute is welcome.
@@ -207,32 +250,32 @@ Please use your own source files to host your effects for merging.
 Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 
 
-=== TODO ===
+## TODO
 
 
-	dbus interface support array parameters 
-	  (with another path level added as index into the array)
-	support remaining effect handlers not called yet once
-	key locking / automatically skip key on following frame changes 
-	  / manual overwrite still possible / catch in convience functions
-	daemon,heatmap examples
-	gui controller (web interface?)
-	move remaining lib functions to razer_ namespace
-	move all daemon types to daemon_ namespace
-	split library into seperate source files (rgb,frames,hsl,drawing)
-	free memory / fix leaks
-	packaging ?
-	submit kernel patch ?
-	customizable layout effect
-
-
-
+- dbus interface support array parameters 
+  (with another path level added as index into the array)
+- support remaining effect handlers not called yet once
+- key locking / automatically skip key on following frame changes 
+  / manual overwrite still possible / catch in convience functions
+- daemon,heatmap examples
+- gui controller (web interface?)
+- move remaining lib functions to razer_ namespace
+- move all daemon types to daemon_ namespace
+- split library into seperate source files (rgb,frames,hsl,drawing)
+- free memory / fix leaks
+- packaging (getting there)
+- submit kernel patch ?
+- customizable layout effect
 
 
 
 
 
-=== Additional Credits ===
+
+
+
+## Additional Credits
 
 
  - Various installation and makefile related fixes by Jordan King (manual merge)
@@ -248,9 +291,7 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 
 
 
-
-
-=== Donations (in Euros) ===
+## Donations (in Euros)
 
 Goal 1 (66/66)  [Completed]: 
 
