@@ -12,13 +12,13 @@ Supports the Razer Firefly (internal effect switching).
 
  1. Download Sourcecode:
 
- 	git clone --depth=1 https://github.com/pez2001/razer_blackwidow_chroma_driver.git
- 
+        git clone --depth=1 https://github.com/pez2001/razer_blackwidow_chroma_driver.git
+
  1. Execute installation script:
 
- 	cd razer_blackwidow_chroma_driver
-	./install_driver_debian.sh
- 
+        cd razer_blackwidow_chroma_driver
+        ./install_driver_debian.sh
+
  1. Reboot
  
 
@@ -28,12 +28,12 @@ You can either install this using the above Debian method or use the packaged me
 
  1. First as above download the source code
 
- 	git clone --depth=1 https://github.com/pez2001/razer_blackwidow_chroma_driver.git
-	cd razer_blackwidow_chroma_drive
+        git clone --depth=1 https://github.com/pez2001/razer_blackwidow_chroma_driver.git
+        cd razer_blackwidow_chroma_drive
 
  1. Install the needed packages which are needed to build the software
 
-	sudo apt-get install -y dpkg-dev libdbus-1-dev jq libsdl2-dev libsdl2-image-dev
+        sudo apt-get install -y dpkg-dev libdbus-1-dev jq libsdl2-dev libsdl2-image-dev
 
  1. Build the software and driver
 
@@ -41,7 +41,7 @@ You can either install this using the above Debian method or use the packaged me
 
  1. Build the package
 
-	./package_for_ubuntu.sh
+        ./package_for_ubuntu.sh
 
  1. The command above will output something like `dpkg-name: info: moved 'tmp.3PnAtckx3o.deb' to '/tmp/razer-chroma-driver_1.0.0_amd64.deb'` so then you will need to install the file using:
 
@@ -49,14 +49,14 @@ You can either install this using the above Debian method or use the packaged me
 
  1. (Optional) You can clean source directoy if you so wish
 
-	make clean
+        make clean
 
 Installing the `.deb` file has multiple benefits. Firstly installing the deb file keeps track of all the installed files and simplifys removal of the driver and daemon. 
 Ubuntu uses upstart so there is an upstart style init script provided. The driver is registered with DKMS (Dynamic Kernel Module Support), this will recompile the driver
 whenever a new kernel is installed.
 
 To remove the driver/daemon
-	sudo dpkg -r razer-chroma-driver
+        sudo dpkg -r razer-chroma-driver
 
 Normally people write wrappers for upstart jobs to go in `/etc/init.d`, haven't done this yet but to manage upstart jobs it't as simple as
 
@@ -73,7 +73,7 @@ There is log file for upstart jobs under `/var/log/upstart` so you can view star
 
  - Install dependencies (libdbus-1-dev,jq)
  - Execute install script:
-	sudo make -s all install
+        sudo make -s all install
  - Reboot
 
 
@@ -145,79 +145,79 @@ In this example i just setup the keyboard for a dota profile
 
 First we need to setup the library:
 
-	struct razer_chroma *chroma = razer_open();
+        struct razer_chroma *chroma = razer_open();
 
 
 To create an custom keyboard led layout we need to tell the library to activate the custom mode:
 
-	razer_set_custom_mode(chroma);
+        razer_set_custom_mode(chroma);
 
 If the keyboard was using the custom mode before the keys are still lit with the last color settings ,so let us clear it:
 
-	razer_clear_all(chroma->keys);
+        razer_clear_all(chroma->keys);
 
 To actually update the keyboard leds we need to razer_update (using the integrated keyboard led frame/keys struct):
 
-	razer_update_keys(chroma,chroma->keys);
+        razer_update_keys(chroma,chroma->keys);
 
 So now that we got a black keyboard we want to light some keys in different colors
 
-	struct razer_rgb red = {.r=255,.g=0,.b=0}; //define a red color
-	struct razer_rgb yellow = {.r=255,.g=255,.b=0}; //define a yellow color
-	struct razer_rgb green = {.r=0,.g=255,.b=0}; //define a green color
-	struct razer_rgb blue = {.r=0,.g=0,.b=255}; //define a blue color
-	struct razer_rgb light_blue = {.r=0,.g=255,.b=255}; //define a light blue color
+        struct razer_rgb red = {.r=255,.g=0,.b=0}; //define a red color
+        struct razer_rgb yellow = {.r=255,.g=255,.b=0}; //define a yellow color
+        struct razer_rgb green = {.r=0,.g=255,.b=0}; //define a green color
+        struct razer_rgb blue = {.r=0,.g=0,.b=255}; //define a blue color
+        struct razer_rgb light_blue = {.r=0,.g=255,.b=255}; //define a light blue color
 	
-	struct razer_pos pos;
+        struct razer_pos pos;
 
-	char *abilities = "QWERDF";
+        char *abilities = "QWERDF";
 
-	for(int i = 0;i<strlen(abilities);i++)
-	{	
+        for(int i = 0;i<strlen(abilities);i++)
+        {	
 		razer_convert_ascii_to_pos(abilities[i],&pos);
 		razer_set_key_pos(chroma->keys,&pos,&red);
-	}
+        }
 
-	char *groups = "1234567";
+        char *groups = "1234567";
 
-	for(int i = 0;i<strlen(groups);i++)
-	{	
+        for(int i = 0;i<strlen(groups);i++)
+        {	
 		razer_convert_ascii_to_pos(groups[i],&pos);
 		razer_set_key_pos(chroma->keys,&pos,&yellow);
-	}
+        }
 
-	char *items = "YXCV";
+        char *items = "YXCV";
 
-	for(int i = 0;i<strlen(items);i++)
-	{	
+        for(int i = 0;i<strlen(items);i++)
+        {	
 		razer_convert_ascii_to_pos(items[i],&pos);
 		razer_set_key_pos(chroma->keys,&pos,&light_blue);
-	}
+        }
 
 
-	razer_convert_ascii_to_pos('B',&pos);
-	razer_set_key_pos(chroma->keys,&pos,&green);
+        razer_convert_ascii_to_pos('B',&pos);
+        razer_set_key_pos(chroma->keys,&pos,&green);
 
-	razer_convert_ascii_to_pos('A',&pos);
-	razer_set_key_pos(chroma->keys,&pos,&blue);
+        razer_convert_ascii_to_pos('A',&pos);
+        razer_set_key_pos(chroma->keys,&pos,&blue);
 
-	razer_convert_ascii_to_pos('S',&pos);
-	razer_set_key_pos(chroma->keys,&pos,&green);
+        razer_convert_ascii_to_pos('S',&pos);
+        razer_set_key_pos(chroma->keys,&pos,&green);
 
 
 Dont forget to update the keyboard with the new led color values:
 
-	razer_update_keys(chroma,chroma->keys);
+        razer_update_keys(chroma,chroma->keys);
 
 
 Freeing the library is just as easy:
 
- 	razer_close(chroma);
+        razer_close(chroma);
 
 
 To compile just type:
 
-	gcc  -std=c99  dota_keys.c  -lrazer_chroma  -lm  -o dota_keys
+        gcc  -std=c99  dota_keys.c  -lrazer_chroma  -lm  -o dota_keys
 
 After executing it you should now have a dota profile lighting up your keyboard.(dont forget to sudo)
 This is just a simple example using a ascii helper,if your profile needs to color function keys ,etc
