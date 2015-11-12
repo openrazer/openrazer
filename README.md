@@ -1,7 +1,7 @@
 # razer_blackwidow_chroma_driver
 A Linux driver for the Razer Blackwidow Chroma keyboard (supports all lighting modes) includes a daemon for advanced effects
 
-
+Supports the Tournament Edition.
 Supports the Razer Firefly (internal effect switching).
 
 
@@ -264,7 +264,6 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 - move all daemon types to daemon_ namespace
 - split library into seperate source files (rgb,frames,hsl,drawing)
 - free memory / fix leaks
-- packaging (getting there)
 - submit kernel patch ?
 - customizable layout effect
 
@@ -287,8 +286,8 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
    for the reactive mode by Oleg Finkelshteyn (implemented by maintainer)
    and for discovering of a previous unknown reactive+wave mode existing.
    (call reactive script & wave script with none as parameter)
-
-
+ - Modifications to dynamic example by Stephanie Sunshine (pulled)
+ - Deb packaging, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
 
 
 ## Donations (in Euros)
