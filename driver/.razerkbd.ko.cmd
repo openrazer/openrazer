@@ -1,1 +1,0 @@
-cmd_/home/stephanie/Projects/razer_blackwidow_chroma_driver/driver/razerkbd.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/stephanie/Projects/razer_blackwidow_chroma_driver/driver/razerkbd.ko /home/stephanie/Projects/razer_blackwidow_chroma_driver/driver/razerkbd.o /home/stephanie/Projects/razer_blackwidow_chroma_driver/driver/razerkbd.mod.o
