@@ -11,6 +11,7 @@
 #include <signal.h>
 #include <dlfcn.h>
 #include <time.h>
+#include <getopt.h>
 
 #include "../lib/razer_chroma.h"
 
@@ -25,7 +26,7 @@
 
 #define RAZER_COMPOSE_MODE_MIX 1
 
-struct razer_daemon 
+struct razer_daemon
 {
 	struct razer_chroma *chroma;
 	int running;
@@ -46,6 +47,13 @@ struct razer_daemon
 	#ifdef USE_DBUS
 		DBusConnection *dbus;
 	#endif
+};
+
+struct daemon_options
+{
+	int daemonize;
+	int verbose;
+	char* pid_file;
 };
 
 void daemon_kill(struct razer_daemon *daemon,char *error_message);
