@@ -33,8 +33,11 @@ examples:
 	@strip example1
 	$(CC) input_example.c $(CFLAGS) ../lib/librazer_chroma.a $(LIBS) -o input_example
 	@strip input_example
+	$(CC) input_map.c $(CFLAGS) ../lib/librazer_chroma.a $(LIBS) -o input_map
+	@strip input_map
 	$(CC) dota_keys.c $(CFLAGS) ../lib/librazer_chroma.a $(LIBS) -o dota_keys
 	@strip dota_keys
+
 dynamic:
 	@echo "::\033[32m COMPILING dynamic\033[0m"
 	@echo "======================"
@@ -43,7 +46,11 @@ dynamic:
 	@strip dynamic
 
 clean: snake_clean
+<<<<<<< HEAD
 	rm -f *.do *.o input_example input_example_debug example1 example1_debug dota_keys dota_keys_debug dynamic
+=======
+	rm -f *.do *.o input_example input_example_debug example1 example1_debug dota_keys dota_keys_debug dynamic input_map
+>>>>>>> 8298993d7fcc4d101240cc9466b477b90fe0eea4
 
 indent:	
 	indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 *.c *.h
