@@ -1,5 +1,12 @@
 #!/bin/sh
 set -e
+
+
+if ([ -x "/etc/init.d/razer_bcd" ] || [ -e "/etc/init/razer_bcd" ]) && \
+   [ "$1" = remove ]; then
+	invoke-rc.d razer_bcd stop || true
+fi
+
 # Automatically added by dh_dkms
 DKMS_NAME=razer_chroma_driver
 DKMS_VERSION=1.0.0
@@ -12,3 +19,4 @@ case "$1" in
     ;;
 esac
 # End automatically added section
+

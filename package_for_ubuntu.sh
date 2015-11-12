@@ -5,17 +5,18 @@ directory=$(mktemp -d)
 
 # Copy DEBIAN directort
 mkdir -p ${directory}
-cp -r install_files/DEBIAN ${directory}/DEBIAN
+cp -r install_files/DEBIAN_ubuntu ${directory}/DEBIAN
 
 
 
 # Create file structure
-mkdir -p ${directory}/etc/{init,udev/rules.d,dbus-1/system.d}
+mkdir -p ${directory}/etc/{init,init.d,udev/rules.d,dbus-1/system.d}
 mkdir -p ${directory}/usr/{bin,lib,sbin,share/razer_bcd/fx,src/razer_chroma_driver-1.0.0/driver}
 
 
 # Copy over upstart script
 cp install_files/init/razer_bcd.conf ${directory}/etc/init/razer_bcd.conf
+cp install_files/init.d/razer_bcd_ubuntu ${directory}/etc/init.d/razer_bcd
 
 # Copy over udev rule
 cp install_files/udev/95-razerkbd.rules ${directory}/etc/udev/rules.d/95-razerkbd.rules
