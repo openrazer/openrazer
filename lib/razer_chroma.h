@@ -16,6 +16,7 @@
 #include <linux/input.h>
 
 #include "list.h"
+#include "razer_string.h"
 
 
 /*
@@ -196,13 +197,6 @@ struct razer_chroma_event
   */
 };
 
-
-char *str_CreateEmpty(void);
-char *str_Copy(char *src);
-char *str_Cat(char *a,char *b);
-char *str_CatFree(char *a,char *b);
-char *str_FromLong(long i);
-char *str_FromDouble(double d);
 
 
 

@@ -69,6 +69,11 @@ Commands:\n\
            2. Parameter: parameter uid - uid of parameter to get\n\
            3. Parameter: array index - if parameter is an array this index will be used (optional)\n\
            Returns: parameter as json\n\
+  -S    Set the parameter of a render node\n\
+           1. Parameter: render node uid - render node the parameter belongs to\n\
+           2. Parameter: parameter uid - uid of parameter to set\n\
+           3. Parameter: array index - if parameter is an array this index will be used (use -1 to skip)\n\
+           4. Parameter: parameter value - value to set\n\
   -d    Disconnect frame buffer\n\
   -h    Display this help and exit\n\
 \n\
@@ -100,11 +105,28 @@ int main(int argc,char *argv[])
 	}
 	
 	int opts_given = 0;
-	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyCMGP")) != -1)
+	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyCMGPS")) != -1)
 	{
 		opts_given = 1;
 		switch(c)
 		{
+			case 'S':
+				{
+					int render_node_uid = atoi(argv[optind++]);
+					int parameter_uid = atoi(argv[optind++]);
+					int array_index = -1;
+					if(optind < argc)
+						array_index = atoi(argv[optind++]);
+					char *parameter_json = dc_render_node_parameter_get(controller,render_node_uid,parameter_uid,array_index);
+					if(verbose)
+					{
+						printf("sending get parameter value of render node: %d.%d.%d.\n",render_node_uid,parameter_uid,array_index);
+						printf("value: %s.\n",parameter_json);
+					}
+					else
+						printf("%s",parameter_json);
+					//free(parameter_json);
+				}
 			case 'P':
 				{
 					int render_node_uid = atoi(argv[optind++]);

@@ -112,9 +112,21 @@ of guessed unbinds all chroma keyboards.
 
 [... To be written ...]
  
- for a sneak peak take a look at scrips/daemon/alert.sh
+ for a sneak peak take a look at:
+ 
+ (bash interface using daemon_controller)
+  - scripts/daemon/alert.sh
+  - scripts/tests/test_daemon.sh
+  - scripts/tests/test_glimmer.sh
+ 
  or simply call daemon_controller/razer_bcd_controller -h 
  for a command overview.
+
+ (c api)
+  - lib/razer_chroma_controller.h 
+  - examples/controller_example.c
+
+
 
 
 
@@ -128,6 +140,7 @@ of guessed unbinds all chroma keyboards.
  - Daemon : Alpha
  - Daemon Effects : Release Candidate
  - Daemon Controller : Beta
+ - Libraries : Beta
  - Installer : Beta
  - Packages : Beta
 
@@ -274,6 +287,7 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 - mouse input example
 - better multi device support
 - configuration for daemon (mouse input device,chroma devices to be used,etc)
+- add custom event sending via controller api
 
 
 

@@ -39,9 +39,9 @@ fx_debug:
 	@echo "============================================"
 	$(CC) pez2001_progress_bar.c $(DEBUG_CFLAGS) $(LIBS) -c -o pez2001_progress_bar.do 
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_progress_bar.do $(LDFLAGS) -o pez2001_progress_bar_debug.so
-ifeq ($(LIBFFTW3), 0)
-	@echo "Got FFTW3"
-endif
+#ifeq ($(LIBFFTW3), 0)
+#	@echo "Got FFTW3"
+#endif
 
 fx: 
 	@echo "::\033[32m COMPILING pez2001 fx collection\033[0m"
