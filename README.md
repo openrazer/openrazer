@@ -33,7 +33,7 @@ You can either install this using the above Debian method or use the packaged me
 
  1. Install the needed packages which are needed to build the software
 
-        sudo apt-get install -y dpkg-dev libdbus-1-dev jq libsdl2-dev libsdl2-image-dev
+        sudo apt-get install -y dpkg-dev libdbus-1-dev jq libsdl2-dev libsdl2-image-dev libfftw3-dev
 
  1. Build the software and driver
 
