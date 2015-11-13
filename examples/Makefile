@@ -58,7 +58,7 @@ dynamic:
 	@strip dynamic
 
 clean: snake_clean
-	rm -f *.do *.o input_example input_example_debug example1 example1_debug dota_keys dota_keys_debug dynamic input_map controller_example
+	rm -f *.do *.o input_example input_example_debug example1 example1_debug dota_keys dota_keys_debug dynamic input_map controller_example controller_example_debug input_map_debug
 
 indent:	
 	indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 *.c *.h
