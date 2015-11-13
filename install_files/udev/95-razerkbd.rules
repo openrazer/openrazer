@@ -1,5 +1,6 @@
 ACTION!="add|change", GOTO="razerkbd"
 
 KERNEL=="razerkbd*", SUBSYSTEM=="razerkbd", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0203", TAG+="uaccess"
+KERNEL=="razerkbd*", SUBSYSTEM=="razerkbd", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0209", TAG+="uaccess"
 
 LABEL="razerkbd"

@@ -30,7 +30,8 @@
 
 #define RAZER_VENDOR_ID 0x1532
 #define RAZER_BLACKWIDOW_CHROMA_PRODUCT_ID 0x203
-
+#define RAZER_BLACKWIDOW_CHROMA_TE_PRODUCT_ID 0x209
+#define RAZER_FIREFLY_PRODUCT_ID 0x0c00
 
 #define RAZER_ROW_LENGTH 22
 #define RAZER_ROWS_NUM 6
@@ -186,7 +187,7 @@ struct razer_chroma_event
   int type;
   int sub_type;
   char *key;
-  void *value;
+  unsigned long long value;
   /*union 
   {
 	struct razer_chroma_keyboard_event_values keyboard;

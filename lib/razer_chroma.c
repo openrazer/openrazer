@@ -286,7 +286,7 @@ char *razer_get_device_path()
 		sscanf(s_device_vendor_id,"%x",&device_vendor_id);
 		sscanf(s_device_product_id,"%x",&device_product_id);
 		sscanf(s_device_hid_id,"%x",&device_hid_id);
-		if(device_vendor_id==RAZER_VENDOR_ID && device_product_id == RAZER_BLACKWIDOW_CHROMA_PRODUCT_ID)
+		if(device_vendor_id==RAZER_VENDOR_ID && (device_product_id == RAZER_BLACKWIDOW_CHROMA_PRODUCT_ID || device_product_id == RAZER_BLACKWIDOW_CHROMA_TE_PRODUCT_ID))
 		{
 			char *custom_path_name = "/mode_custom";
 			int base_path_len = strlen(razer_sys_hid_devices_path)+strlen(entry->d_name);

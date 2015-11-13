@@ -942,8 +942,11 @@ int main(int argc,char *argv[])
 		printf("razer_bcd_controller: error initializing daemon controller\n");
 		return(1);
 	}
+	
+	int opts_given = 0;
 	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyCMGP")) != -1)
 	{
+		opts_given = 1;
 		switch(c)
 		{
 			case 'P':
@@ -1194,12 +1197,19 @@ int main(int argc,char *argv[])
 					printf("Unknown option `-%c'.\n",optopt);
 				else
 					printf("Unknown option character `\\x%x'.\n",optopt);
+				opts_given = 0;
 				return(1);
 			default:
+				opts_given = 0;
 				abort();
 		}
 	}
 	dc_close(controller);
+	if(!opts_given)
+	{
+		printf("Razer blackwidow chroma daemon controller\n");
+		printf(dc_helpmsg,argv[0],argv[0]);
+	}		
 	#endif
 	return(0);
 }

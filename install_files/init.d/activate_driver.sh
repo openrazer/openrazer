@@ -3,13 +3,13 @@
 modprobe razerkbd
 
 bind_device() {
-	# Check if the device is already binded
+	# Check if the device is already bound
 	if [ -a "/sys/bus/hid/drivers/razerkbd/$1" ]; then
-		echo "Device already binded"
+		echo "Device already bound"
 		return 0
 	fi
 
-	# No point unbinding the device if its already unbinded
+	# No point unbinding the device if its already unbound
 	if [ -a "/sys/bus/hid/drivers/hid-generic/$1" ]; then
 		echo "Unbinding device ($1) from hid-generic"
 		echo -n "$1" > /sys/bus/hid/drivers/hid-generic/unbind 2> /dev/null
@@ -33,7 +33,7 @@ bind_device() {
 
 
 
-for device in /sys/bus/hid/devices/*:1532:0203*
+for device in /sys/bus/hid/devices/*:1532:020[39]*
 do
 	device_id=$(basename "${device}")
 	usb_interface_num=$(udevadm info "/sys/bus/hid/devices/${device_id}" | grep "ID_USB_INTERFACE_NUM" | sed -n "s/.*_NUM=\([0-9]\+\)/\1/p")

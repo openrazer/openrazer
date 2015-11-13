@@ -111,6 +111,10 @@ of guessed unbinds all chroma keyboards.
 ## Daemon IPC details
 
 [... To be written ...]
+ 
+ for a sneak peak take a look at scrips/daemon/alert.sh
+ or simply call daemon_controller/razer_bcd_controller -h 
+ for a command overview.
 
 
 
@@ -125,7 +129,7 @@ of guessed unbinds all chroma keyboards.
  - Daemon Effects : Release Candidate
  - Daemon Controller : Beta
  - Installer : Beta
- - Packages : Alpha
+ - Packages : Beta
 
 
 
@@ -266,7 +270,10 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 - free memory / fix leaks
 - submit kernel patch ?
 - customizable layout effect
-
+- fft analyzer effect
+- mouse input example
+- better multi device support
+- configuration for daemon (mouse input device,chroma devices to be used,etc)
 
 
 
@@ -284,8 +291,9 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
  - Snake Example by James Shawver (pulled and edited slightly)
  - Identifying of missing speed parameter 
    for the reactive mode by Oleg Finkelshteyn (implemented by maintainer)
-   and for discovering of a previous unknown reactive+wave mode existing.
+   for discovering of a previous unknown reactive+wave mode existing.
    (call reactive script & wave script with none as parameter)
+   manual merged support for the tournament edition
  - Modifications to dynamic example by Stephanie Sunshine (pulled)
  - Deb packaging, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
 
