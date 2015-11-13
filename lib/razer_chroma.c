@@ -2,9 +2,9 @@
 
 char *razer_sys_hid_devices_path = "/sys/bus/hid/devices/";
 char *razer_sys_keyboard_event_path = "/dev/input/by-id/usb-Razer_Razer_BlackWidow_Chroma-event-kbd";
-//char *razer_sys_mouse_event_path = "/dev/input/mouse0";
+char *razer_sys_mouse_event_path = "/dev/input/mouse0";
 //char *razer_sys_mouse_event_path = "/dev/input/mouse2";
-char *razer_sys_mouse_event_path = "/dev/input/by-id/usb-ROCCAT_ROCCAT_Kone_Pure-event-mouse";
+//char *razer_sys_mouse_event_path = "/dev/input/by-id/usb-ROCCAT_ROCCAT_Kone_Pure-event-mouse";
 
 char *razer_custom_mode_pathname = "/mode_custom";
 char *razer_update_keys_pathname = "/set_key_row";

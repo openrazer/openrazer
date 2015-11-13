@@ -27,14 +27,15 @@ int main(int argc,char *argv[])
 		printf("You need to have dbus & dbus dev packages installed\n");
 		return(1);
 	#else
-	char c;
+
+
+
 	struct razer_daemon_controller *controller=NULL;
 	if(!(controller=dc_open()))
 	{
 		printf("controller_example: error initializing daemon controller example\n");
 		return(1);
 	}
-
 
 	char *mixer_fx_lib = "daemon/fx/pez2001_mixer_debug.so";
 	printf("sending load fx library command to daemon: library to load: \"%s\".\n",mixer_fx_lib);
