@@ -234,6 +234,7 @@ char *dc_render_node_parameter_get(struct razer_daemon_controller *controller,in
 	else
 		dbus_message_iter_get_basic(&args,&parameter_json);
 	dbus_message_unref(msg);   
+	parameter_json = str_Copy(parameter_json);
 	free(path);//TODO gets not freed on error
 	return(parameter_json);
 }
@@ -697,6 +698,7 @@ char *dc_fx_list(struct razer_daemon_controller *controller)
 	//else
 	//	dbus_message_iter_get_basic(&args,&level);
 	//printf("fx List: %s\n",list);
+	list = str_Copy(list);
 	dbus_message_unref(msg);   
 	return(list);
 }
