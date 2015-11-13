@@ -7,6 +7,8 @@ sudo apt-get install jq
 #install libsdl dependency
 sudo apt-get install libsdl2-dev
 sudo apt-get install libsdl2-image-dev
+#install fftw3 dependency
+sudo apt-get install libfftw3-3 libfftw3-bin libfftw3-dev
 
 make -s all
 sudo make -s install

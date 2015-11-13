@@ -3,7 +3,7 @@ CFLAGS=
 DEBUG_CFLAGS=
 #LDFLAGS=
 #DEBUG_LDFLAGS=
-LIBDBUS = $(shell echo \\\#include \<dbus/dbus.h\>\\n int main\(int c,char**v\){} | gcc `pkg-config --libs dbus-1` `pkg-config --cflags dbus-1`  -xc -o a.out - 2>/dev/null ;echo $$? ;rm a.out 2>/dev/null )
+LIBDBUS=$(shell echo \\\#include \<dbus/dbus.h\>\\n int main\(int c,char**v\){} | gcc `pkg-config --libs dbus-1` `pkg-config --cflags dbus-1`  -xc -o a.out - 2>/dev/null ;echo $$? ;rm a.out 2>/dev/null )
 
 ifeq ($(LIBDBUS), 0)
 	LIBS+= `pkg-config --libs dbus-1` 
@@ -33,19 +33,19 @@ all: daemon_shared daemon_static daemon_debug daemon_fx
 daemon_debug: $(RAZER_CHROMA_DAEMON_DEBUG_OBJ)
 	@echo "::\033[32m COMPILING razer_bcd daemon [DEBUG]\033[0m"
 	@echo "======================================"
-	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_DEBUG_OBJ) librazer_chroma.da $(LIBS) -o razer_bcd_debug_static 
-	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_DEBUG_OBJ) librazer_chroma_debug.so $(LIBS) -o razer_bcd_debug_shared 
+	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_DEBUG_OBJ) ../lib/librazer_chroma.da $(LIBS) -o razer_bcd_debug_static 
+	$(CC) -L../lib -rdynamic $(RAZER_CHROMA_DAEMON_DEBUG_OBJ) -lrazer_chroma_debug $(LIBS) -o razer_bcd_debug_shared 
 
 daemon_static: $(RAZER_CHROMA_DAEMON_OBJ)
 	@echo "::\033[32m COMPILING razer_bcd daemon\033[0m"
 	@echo "=============================="
-	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_OBJ) librazer_chroma.a $(LIBS) -o razer_bcd_static 
+	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_OBJ) ../lib/librazer_chroma.a $(LIBS) -o razer_bcd_static 
 	@strip razer_bcd_static
 
 daemon_shared: $(RAZER_CHROMA_DAEMON_OBJ)
 	@echo "::\033[32m COMPILING razer_bcd [SHARED]\033[0m"
 	@echo "================================"
-	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_OBJ) librazer_chroma.so $(LIBS) -o razer_bcd
+	$(CC) -L../lib -rdynamic $(RAZER_CHROMA_DAEMON_OBJ) -lrazer_chroma $(LIBS) -o razer_bcd
 	@strip razer_bcd
 
 %.o: %.c 

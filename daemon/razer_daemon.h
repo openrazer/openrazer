@@ -50,8 +50,6 @@ struct razer_daemon
 
 void daemon_kill(struct razer_daemon *daemon,char *error_message);
 void daemon_compute_render_nodes(struct razer_daemon *daemon);
-
-
 int daemon_input_event_handler(struct razer_chroma *chroma,struct razer_chroma_event *event);
 
 

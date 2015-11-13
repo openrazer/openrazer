@@ -293,7 +293,7 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
    for the reactive mode by Oleg Finkelshteyn (implemented by maintainer)
    for discovering of a previous unknown reactive+wave mode existing.
    (call reactive script & wave script with none as parameter)
-   manual merged support for the tournament edition
+   support for the tournament edition(manual merge)
  - Modifications to dynamic example by Stephanie Sunshine (pulled)
  - Deb packaging, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
 

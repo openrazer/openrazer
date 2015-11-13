@@ -11,18 +11,29 @@ CC=gcc
 AR=ar -c
 LD=ld
 
+LIBDBUS=$(shell echo \\\#include \<dbus/dbus.h\>\\n int main\(int c,char**v\){} | gcc `pkg-config --libs dbus-1` `pkg-config --cflags dbus-1`  -xc -o a.out - 2>/dev/null ;echo $$? ;rm a.out 2>/dev/null )
+
+ifeq ($(LIBDBUS), 0)
+	LIBS+= `pkg-config --libs dbus-1` 
+	CFLAGS+= `pkg-config --cflags dbus-1` -DUSE_DBUS
+	DEBUG_CFLAGS+= `pkg-config --cflags dbus-1` -DUSE_DBUS
+endif
+
+
 RAZER_CHROMA_FILES=razer_chroma.c list.c
 RAZER_CHROMA_INCLUDE_FILES=razer_chroma.h list.h
 RAZER_CHROMA_OBJ=razer_chroma.o list.o
 RAZER_CHROMA_DEBUG_OBJ=razer_chroma.do list.do
+RAZER_CHROMA_CONTROLLER_OBJ=razer_chroma_controller.o
+RAZER_CHROMA_CONTROLLER_DEBUG_OBJ=razer_chroma_controller.do 
 
 all: library library_debug
 
-library_debug: razer_chroma_static_debug razer_chroma_shared_debug
+library_debug: razer_chroma_static_debug razer_chroma_shared_debug razer_chroma_controller_shared_debug razer_chroma_controller_static_debug
 	@echo "::\033[32m COMPILING librazer_chroma.so [DEBUG]\033[0m"
 	@echo "========================================"
 
-library: razer_chroma_static razer_chroma_shared
+library: razer_chroma_static razer_chroma_shared razer_chroma_controller_shared razer_chroma_controller_static
 	@echo "::\033[32m COMPILING librazer_chroma.so\033[0m"
 	@echo "================================"
 
@@ -37,7 +48,28 @@ razer_chroma_shared: $(RAZER_CHROMA_OBJ)
 	@strip librazer_chroma.so
 
 razer_chroma_shared_debug: $(RAZER_CHROMA_DEBUG_OBJ)
+ifeq ($(LIBDBUS), 0)
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared $(RAZER_CHROMA_DEBUG_OBJ) $(LDFLAGS) -o librazer_chroma_debug.so
+endif
+
+razer_chroma_controller_static: $(RAZER_CHROMA_CONTROLLER_OBJ)
+ifeq ($(LIBDBUS), 0)
+	$(AR) -rs librazer_chroma_controller.a $(RAZER_CHROMA_CONTROLLER_OBJ)
+endif
+
+razer_chroma_controller_static_debug: $(RAZER_CHROMA_CONTROLLER_DEBUG_OBJ)
+ifeq ($(LIBDBUS), 0)
+	$(AR) -rs librazer_chroma_controller.da $(RAZER_CHROMA_CONTROLLER_DEBUG_OBJ)
+endif
+
+razer_chroma_controller_shared: $(RAZER_CHROMA_CONTROLLER_OBJ)
+ifeq ($(LIBDBUS), 0)
+	$(CC) -rdynamic -nostdlib -DCREATELIB -shared $(RAZER_CHROMA_CONTROLLER_OBJ) $(LDFLAGS) -o librazer_chroma_controller.so
+	@strip librazer_chroma_controller.so
+endif
+
+razer_chroma_controller_shared_debug: $(RAZER_CHROMA_CONTROLLER_DEBUG_OBJ)
+	$(CC) -rdynamic -nostdlib -DCREATELIB -shared $(RAZER_CHROMA_CONTROLLER_DEBUG_OBJ) $(LDFLAGS) -o librazer_chroma_controller_debug.so
 
 %.o: %.c 
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -49,11 +81,21 @@ install:
 	@echo "::\033[32m INSTALLING librazer_chroma.so\033[0m"
 	@echo "===================================="
 	@cp librazer_chroma.so /usr/lib
+ifeq ($(LIBDBUS), 0)
+	@echo "::\033[32m INSTALLING librazer_chroma_controller.so\033[0m"
+	@echo "===================================="
+	@cp librazer_chroma_controller.so /usr/lib
+endif
 
 uninstall:
 	@echo "::\033[32m REMOVING librazer_chroma.so\033[0m"
 	@echo "===================================="
 	@rm /usr/lib/librazer_chroma.so
+ifeq ($(LIBDBUS), 0)
+	@echo "::\033[32m REMOVING librazer_chroma_controller.so\033[0m"
+	@echo "===================================="
+	@rm /usr/lib/librazer_chroma_controller.so
+endif
 
 clean: 
 	rm -f *.do *.o *.a *.so *.da

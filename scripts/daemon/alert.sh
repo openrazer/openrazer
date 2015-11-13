@@ -20,7 +20,7 @@ fi
 
 if [ "$1" == "run" ]; then
 
-RUID=( `razer_bcd_controller -C 2 "Breathing Node" "alert node"` )
+RUID=( `razer_bcd_controller -C 2 "Breathing Effect" "alert node"` )
 #RUID=${RUID[1]}
 #OUID=`dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon / org.voyagerproject.razer.daemon.frame_buffer.get | jq '.uid'`
 #dbus-send --system --type=method_call --dest=org.voyagerproject.razer.daemon /$RUID org.voyagerproject.razer.daemon.render_node.limit_render_time_ms.set int32:1000

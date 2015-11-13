@@ -28,6 +28,7 @@ cp install_files/share/bash_keyboard_functions.sh ${directory}/usr/share/razer_b
 
 # Copy over libchroma and daemon
 cp daemon/librazer_chroma.so ${directory}/usr/lib/librazer_chroma.so
+cp daemon/librazer_chroma_controller.so ${directory}/usr/lib/librazer_chroma_controller.so
 cp daemon/razer_bcd ${directory}/usr/sbin/razer_bcd
 cp daemon/fx/pez2001_collection.so ${directory}/usr/share/razer_bcd/fx
 cp daemon/fx/pez2001_mixer.so ${directory}/usr/share/razer_bcd/fx

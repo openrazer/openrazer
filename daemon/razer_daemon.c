@@ -66,11 +66,13 @@ struct razer_daemon *daemon_open(void)
 	daemon->chroma->tag = daemon;
 	daemon->frame_buffer = razer_create_rgb_frame();
 	daemon->frame_buffer_linked_uid = 0;
-	daemon->return_render_node = NULL;
+	daemon->return_render_node = NULL; //TODO remember what i wanted to achieve with this variable ... :-)
 
 	razer_set_custom_mode(daemon->chroma);
 	razer_clear_all(daemon->chroma->keys);
 	razer_update_keys(daemon->chroma,daemon->chroma->keys);
+
+	//TODO Move to configuration options (dbus race condition present)
 
 	#ifdef USE_DEBUGGING
 		struct daemon_lib *lib = daemon_load_fx_lib(daemon,"daemon/fx/pez2001_collection_debug.so");

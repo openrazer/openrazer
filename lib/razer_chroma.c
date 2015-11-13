@@ -1855,192 +1855,198 @@ void razer_update(struct razer_chroma *chroma)
 	struct timeval select_tv;
 	struct razer_chroma_event chroma_event;
 	int keycode = -1;
-	if(!chroma->keyboard_input_file)
-		razer_open_keyboard_input_file(chroma);
-	if(!chroma->mouse_input_file)
-		razer_open_mouse_input_file(chroma);
 	fd_set keyboard_rs;
 	fd_set mouse_rs;
 	select_tv.tv_sec = 0;
 	select_tv.tv_usec = 0;
 	int r;
 	char buf[2048];
+	if(!chroma->keyboard_input_file)
+		razer_open_keyboard_input_file(chroma);
+	if(!chroma->mouse_input_file)
+		razer_open_mouse_input_file(chroma);
 	chroma->update_ms = razer_get_ticks();
 	long diff_ms = chroma->update_ms - chroma->last_update_ms;
 	chroma->update_dt = (float)diff_ms / 1000.0f;
-	FD_ZERO(&keyboard_rs);
-	FD_SET(chroma->keyboard_input_file,&keyboard_rs);
-	r = select(chroma->keyboard_input_file+1,&keyboard_rs,0,0,&select_tv);
-	if(r && FD_ISSET(chroma->keyboard_input_file,&keyboard_rs))
-	{
-		int n=2048;
-		n = read(chroma->keyboard_input_file,buf,2048);
-		if(n<0)
-		{
-			/*if(errno != EAGAIN)
-			{
-				razer_close_input_file(chroma);
-				return;
-			}*/
-		}
-		else if(n==0)
-		{
-			razer_close_keyboard_input_file(chroma);
-			return;
-		}
-		else				
-		{
-			unsigned int i;
-			for(i=0;i<n/sizeof(struct input_event);i++)
-			{
-				struct input_event *event = (struct input_event*)(buf+(i*sizeof(struct input_event)));
-				if(event->type==EV_KEY)
-				{
-					keycode = event->code;
-					if(event->value==1)
-					{
-						/*if(keycode!=last_keycode)
-						if(keycode==183)
-							actual_mode=0;
-						if(keycode==184)
-							actual_mode=1;
-						if(keycode==185)
-							actual_mode=2;
-						if(keycode==186)
-							actual_mode=3;
-						if(keycode==187)
-							actual_mode=4;
-						*/
-						razer_copy_pos(&chroma->key_pos,&chroma->last_key_pos);
-						razer_convert_keycode_to_pos(event->code,&chroma->key_pos);							
-						chroma->keys->heatmap[chroma->key_pos.y][chroma->key_pos.x]+=1;
-						chroma_event.key = "Key Down";
-					}
-					else
-						chroma_event.key = "Key Up";
-					if(chroma->input_handler)
-					{
-						chroma_event.type = RAZER_CHROMA_EVENT_TYPE_KEYBOARD;
-						chroma_event.sub_type = event->value;
-						chroma_event.value = keycode;
 
-						chroma->input_handler(chroma,&chroma_event);
+	if(chroma->keyboard_input_file)
+	{
+		FD_ZERO(&keyboard_rs);
+		FD_SET(chroma->keyboard_input_file,&keyboard_rs);
+		r = select(chroma->keyboard_input_file+1,&keyboard_rs,0,0,&select_tv);
+		if(r && FD_ISSET(chroma->keyboard_input_file,&keyboard_rs))
+		{
+			int n=2048;
+			n = read(chroma->keyboard_input_file,buf,2048);
+			if(n<0)
+			{
+				/*if(errno != EAGAIN)
+				{
+					razer_close_input_file(chroma);
+					return;
+				}*/
+			}
+			else if(n==0)
+			{
+				razer_close_keyboard_input_file(chroma);
+				return;
+			}
+			else				
+			{
+				unsigned int i;
+				for(i=0;i<n/sizeof(struct input_event);i++)
+				{
+					struct input_event *event = (struct input_event*)(buf+(i*sizeof(struct input_event)));
+					if(event->type==EV_KEY)
+					{
+						keycode = event->code;
+						if(event->value==1)
+						{
+							/*if(keycode!=last_keycode)
+							if(keycode==183)
+								actual_mode=0;
+							if(keycode==184)
+								actual_mode=1;
+							if(keycode==185)
+								actual_mode=2;
+							if(keycode==186)
+								actual_mode=3;
+							if(keycode==187)
+								actual_mode=4;
+							*/
+							razer_copy_pos(&chroma->key_pos,&chroma->last_key_pos);
+							razer_convert_keycode_to_pos(event->code,&chroma->key_pos);							
+							chroma->keys->heatmap[chroma->key_pos.y][chroma->key_pos.x]+=1;
+							chroma_event.key = "Key Down";
+						}
+						else
+							chroma_event.key = "Key Up";
+						if(chroma->input_handler)
+						{
+							chroma_event.type = RAZER_CHROMA_EVENT_TYPE_KEYBOARD;
+							chroma_event.sub_type = event->value;
+							chroma_event.value = keycode;
+
+							chroma->input_handler(chroma,&chroma_event);
+						}
+						long key_diff_ms = chroma->update_ms - chroma->last_key_event_ms;
+						chroma->key_event_dt = (float)key_diff_ms / 1000.0f;
+						chroma->last_key_event_ms = chroma->update_ms;			
 					}
-					long key_diff_ms = chroma->update_ms - chroma->last_key_event_ms;
-					chroma->key_event_dt = (float)key_diff_ms / 1000.0f;
-					chroma->last_key_event_ms = chroma->update_ms;			
 				}
 			}
-		}
-	}	
+		}	
+	}
 
-	FD_ZERO(&mouse_rs);
-	FD_SET(chroma->mouse_input_file,&mouse_rs);
-	select_tv.tv_sec = 0;
-	select_tv.tv_usec = 0;
-	r = select(chroma->mouse_input_file+1,&mouse_rs,0,0,&select_tv);
-	if(r && FD_ISSET(chroma->mouse_input_file,&mouse_rs))
+	if(chroma->mouse_input_file)
 	{
-		int n=2048;
-		n = read(chroma->mouse_input_file,buf,2048);
-		if(n<0)
+		FD_ZERO(&mouse_rs);
+		FD_SET(chroma->mouse_input_file,&mouse_rs);
+		select_tv.tv_sec = 0;
+		select_tv.tv_usec = 0;
+		r = select(chroma->mouse_input_file+1,&mouse_rs,0,0,&select_tv);
+		if(r && FD_ISSET(chroma->mouse_input_file,&mouse_rs))
 		{
-			/*if(errno != EAGAIN)
+			int n=2048;
+			n = read(chroma->mouse_input_file,buf,2048);
+			if(n<0)
 			{
-				razer_close_input_file(chroma);
-				return;
-			}*/
-		}
-		else if(n==0)
-		{
-			razer_close_mouse_input_file(chroma);
-			return;
-		}
-		else				
-		{
-			unsigned int i;
-			unsigned int event_size = sizeof(struct input_event);
-			for(i=0;i<n/event_size;i++)
-			{
-				struct input_event *event = (struct input_event*)(buf+(i*sizeof(struct input_event)));
-					if(chroma->input_handler)
-					{
-						chroma_event.type = RAZER_CHROMA_EVENT_TYPE_MOUSE;
-        				switch(event->type)
-        				{
-        					case EV_MSC:
-        						break;
-        					case EV_SYN:
-        						break;
-        					case EV_KEY:
-        						switch(event->code)
-        						{
-        							case BTN_LEFT:
-										chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_LEFT;
-										break;
-	    							case BTN_MIDDLE:
-										chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_MIDDLE;
-										break;
-	    							case BTN_RIGHT:
-										chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_RIGHT;
-										break;
-	    							case BTN_EXTRA:
-										chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_EXTRA;
-										break;
-									default:
-										#ifdef USE_DEBUGGING
-											printf("uknown button event: type:%d,code:%d,value:%d\n",event->type,event->code,event->value);
-										#endif
-										break;
-        						}
-        						switch(event->value)
-        						{
-        							case 0 :
-										chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_BUTTON_UP;
-										break;
-        							case 1 :
-										chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_BUTTON_DOWN;
-										break;
-
-        						}
-	       						break;
-							case EV_REL :
-								switch(event->code)
-								{
-									case 0 : 
-										chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_X_AXIS_MOVEMENT;
-										chroma_event.value = event->value;
-										break;
-									case 1 : 
-										chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_Y_AXIS_MOVEMENT;
-										chroma_event.value = event->value;
-										break;
-									case 8 : 
-										chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_WHEEL_MOVEMENT;
-										chroma_event.value = event->value;
-										break;
-									default:
-										#ifdef USE_DEBUGGING
-											printf("uknown relative movement event: type:%d,code:%d,value:%d\n",event->type,event->code,event->value);
-										#endif
-										break;
-								}
-								break;
-							default:
-								#ifdef USE_DEBUGGING
-									printf("uknown event: type:%d,code:%d,value:%d\n",event->type,event->code,event->value);
-								#endif
-								break;
-						}
-						chroma->input_handler(chroma,&chroma_event);
-					}
-					long key_diff_ms = chroma->update_ms - chroma->last_key_event_ms;
-					chroma->key_event_dt = (float)key_diff_ms / 1000.0f;
-					chroma->last_key_event_ms = chroma->update_ms;			
+				/*if(errno != EAGAIN)
+				{
+					razer_close_input_file(chroma);
+					return;
+				}*/
 			}
-		}
-	}	
+			else if(n==0)
+			{
+				razer_close_mouse_input_file(chroma);
+				return;
+			}
+			else				
+			{
+				unsigned int i;
+				unsigned int event_size = sizeof(struct input_event);
+				for(i=0;i<n/event_size;i++)
+				{
+					struct input_event *event = (struct input_event*)(buf+(i*sizeof(struct input_event)));
+						if(chroma->input_handler)
+						{
+							chroma_event.type = RAZER_CHROMA_EVENT_TYPE_MOUSE;
+	        				switch(event->type)
+	        				{
+	        					case EV_MSC:
+	        						break;
+	        					case EV_SYN:
+	        						break;
+	        					case EV_KEY:
+	        						switch(event->code)
+	        						{
+	        							case BTN_LEFT:
+											chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_LEFT;
+											break;
+		    							case BTN_MIDDLE:
+											chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_MIDDLE;
+											break;
+		    							case BTN_RIGHT:
+											chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_RIGHT;
+											break;
+		    							case BTN_EXTRA:
+											chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_EXTRA;
+											break;
+										default:
+											#ifdef USE_DEBUGGING
+												printf("uknown button event: type:%d,code:%d,value:%d\n",event->type,event->code,event->value);
+											#endif
+											break;
+	        						}
+	        						switch(event->value)
+	        						{
+	        							case 0 :
+											chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_BUTTON_UP;
+											break;
+	        							case 1 :
+											chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_BUTTON_DOWN;
+											break;
 
+	        						}
+		       						break;
+								case EV_REL :
+									switch(event->code)
+									{
+										case 0 : 
+											chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_X_AXIS_MOVEMENT;
+											chroma_event.value = event->value;
+											break;
+										case 1 : 
+											chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_Y_AXIS_MOVEMENT;
+											chroma_event.value = event->value;
+											break;
+										case 8 : 
+											chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_WHEEL_MOVEMENT;
+											chroma_event.value = event->value;
+											break;
+										default:
+											#ifdef USE_DEBUGGING
+												printf("uknown relative movement event: type:%d,code:%d,value:%d\n",event->type,event->code,event->value);
+											#endif
+											break;
+									}
+									break;
+								default:
+									#ifdef USE_DEBUGGING
+										printf("uknown event: type:%d,code:%d,value:%d\n",event->type,event->code,event->value);
+									#endif
+									break;
+							}
+							chroma->input_handler(chroma,&chroma_event);
+						}
+						long key_diff_ms = chroma->update_ms - chroma->last_key_event_ms;
+						chroma->key_event_dt = (float)key_diff_ms / 1000.0f;
+						chroma->last_key_event_ms = chroma->update_ms;			
+				}
+			}
+		}	
+	}
 }
 
 

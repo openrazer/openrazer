@@ -16,18 +16,5 @@
 #include "../lib/razer_chroma.h"
 #include "../daemon/razer_daemon.h"
 
-#ifdef USE_DBUS
-	#include <dbus/dbus.h>
-#endif
-
-
-struct razer_daemon_controller 
-{
-	int running;
-	#ifdef USE_DBUS
-		DBusConnection *dbus;
-		DBusPendingCall *pending;
-	#endif
-};
 
 #endif
