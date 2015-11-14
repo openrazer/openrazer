@@ -54,7 +54,9 @@ You can either install this using the above Debian method or use the packaged me
         make clean
 
 Installing the `.deb` file has multiple benefits. Firstly installing the deb file keeps track of all the installed files and simplifys removal of the driver and daemon. 
+
 Ubuntu uses upstart so there is an upstart style init script provided. There is log file for upstart jobs under `/var/log/upstart` so you can view startup issues with `tail /var/log/upstart/razer_bcd.log`.
+
 The Debian version I have packaged for is 8.2 which uses systemd so I've provided a script for that.
 
 The driver is registered with DKMS (Dynamic Kernel Module Support), this will recompile the driver whenever a new kernel is installed.
