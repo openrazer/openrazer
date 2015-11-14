@@ -5,19 +5,20 @@ directory=$(mktemp -d)
 
 # Copy DEBIAN directort
 mkdir -p ${directory}
-cp -r install_files/DEBIAN_ubuntu ${directory}/DEBIAN
+cp -r install_files/DEBIAN_debian ${directory}/DEBIAN
 chmod 755 ${directory}/DEBIAN
 chmod 755 ${directory}/DEBIAN/{pre,post}*
 
 
 # Create file structure
-mkdir -p ${directory}/etc/{init,init.d,udev/rules.d,dbus-1/system.d}
+mkdir -p ${directory}/etc/{init.d,udev/rules.d,dbus-1/system.d}
 mkdir -p ${directory}/usr/{bin,lib,sbin,share/razer_bcd/fx,src/razer_chroma_driver-1.0.0/driver}
+mkdir -p ${directory}/lib/systemd/system
 
 
 # Copy over upstart script
-cp install_files/init/razer_bcd.conf ${directory}/etc/init/razer_bcd.conf
-cp install_files/init.d/razer_bcd_ubuntu ${directory}/etc/init.d/razer_bcd
+cp install_files/systemd/razer_bcd.service ${directory}/lib/systemd/system/razer_bcd.service
+cp install_files/init.d/razer_bcd_debian ${directory}/etc/init.d/razer_bcd
 
 # Copy over udev rule
 cp install_files/udev/95-razerkbd.rules ${directory}/etc/udev/rules.d/95-razerkbd.rules
@@ -27,6 +28,7 @@ cp install_files/dbus/org.voyagerproject.razer.daemon.conf ${directory}/etc/dbus
 
 # Copy over bash helper
 cp install_files/share/bash_keyboard_functions.sh ${directory}/usr/share/razer_bcd/bash_keyboard_functions.sh
+cp install_files/share/systemd_helpers.sh ${directory}/usr/share/razer_bcd/systemd_helpers.sh
 
 # Copy over libchroma and daemon
 cp lib/librazer_chroma.so ${directory}/usr/lib/librazer_chroma.so
