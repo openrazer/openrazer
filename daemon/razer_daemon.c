@@ -423,7 +423,7 @@ struct daemon_options parse_args(int argc,char *argv[]) {
 				break;
 
 			case 'k':
-				if(options.pid_file == NULL)
+				if(options.keyboard_input_file == NULL)
 				{
 					options.keyboard_input_file = (char*)malloc(strlen(optarg) * sizeof(char));
 					strcpy(options.keyboard_input_file, optarg); //TODO free memory on shutdown
