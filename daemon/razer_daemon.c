@@ -508,11 +508,11 @@ int main(int argc,char *argv[])
 		return(1);
 	}
 	daemon_run(daemon);
-        daemon_close(daemon);
+	daemon_close(daemon);
 
-        // Remove the PID file if we exit normally
-        if(options.pid_file != NULL)
-        {
+	// Remove the PID file if we exit normally
+	if(options.pid_file != NULL)
+	{
 		remove(options.pid_file);
 		free(options.pid_file);
 	}

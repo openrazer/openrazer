@@ -41,6 +41,8 @@ int main(int argc,char *argv[])
 	printf("sending load fx library command to daemon: library to load: \"%s\".\n",mixer_fx_lib);
 	dc_load_fx_lib(controller,mixer_fx_lib);
 
+
+	//creating render nodes from loaded effects (hardcoded uids are used here)
 	int wv_fx_uid = 4;//uid of the wave fx
 	char *wv_node_name = "Wave Effect";
 	char *wv_node_description = "overlay";
@@ -64,32 +66,36 @@ int main(int argc,char *argv[])
 	printf("new render node uid (mx): %d.\n",mx_node_uid);
 
 	int ms_fx_uid = 20;//uid of the mixer fx
-	char *ms_node_name = "Mouse Mixer";
-	char *ms_node_description = "effects mixer";
+	char *ms_node_name = "Mouse Position based transition";
+	char *ms_node_description = "effects mixer transition";
 	printf("sending create render node command to daemon.\n");
 	int ms_node_uid = dc_render_node_create(controller,ms_fx_uid,ms_node_name,ms_node_description);
 	printf("new render node uid (ms): %d.\n",ms_node_uid);
 
+
+	//adding mouse mixer as subnode to default mixer node
+	//will influence the opacity of its parent
 	printf("sending add sub node: %d to render node: %d command to daemon.\n",ms_node_uid,lb_node_uid);
 	dc_render_node_sub_add(controller,mx_node_uid,ms_node_uid);
 
 
-
+	//connecting input effects to mixer node
 	printf("sending connect node : %d to render nodes: %d first input command to daemon.\n",wv_node_uid,mx_node_uid);
 	dc_render_node_input_connect(controller,mx_node_uid,wv_node_uid);
-
 	printf("sending connect second node : %d to render nodes: %d first input command to daemon.\n",lb_node_uid,mx_node_uid);
 	dc_render_node_second_input_connect(controller,mx_node_uid,lb_node_uid);
 
 
+	//set start opacity
 	double opacity = 0.8f;
 	printf("sending set opacity for render node: %d command to daemon: %f.\n",mx_node_uid,opacity);
 	dc_render_node_opacity_set(controller,mx_node_uid,opacity);
 
-
+	//connect mixer node to framebuffer (will use fps from effect fps member)
 	printf("sending connect frame buffer to render node: %d command to daemon.\n",mx_node_uid);
 	dc_frame_buffer_connect(controller,mx_node_uid);
 
+	//change the fps for fun ;-)
 	int fps = 8;
 	printf("sending set fps command to daemon: %d.\n",fps);
 	dc_fps_set(controller,fps);
