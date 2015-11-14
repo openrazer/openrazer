@@ -288,6 +288,7 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 - better multi device support
 - configuration for daemon (mouse input device,chroma devices to be used,etc)
 - add custom event sending via controller api
+- add list loaded libs command (automatic dupe check too)
 
 
 

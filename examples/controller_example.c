@@ -41,7 +41,7 @@ int main(int argc,char *argv[])
 	printf("sending load fx library command to daemon: library to load: \"%s\".\n",mixer_fx_lib);
 	dc_load_fx_lib(controller,mixer_fx_lib);
 
-	int wv_fx_uid = 6;//uid of the light_blast fx
+	int wv_fx_uid = 4;//uid of the wave fx
 	char *wv_node_name = "Wave Effect";
 	char *wv_node_description = "overlay";
 	printf("sending create render node command to daemon.\n");
@@ -55,32 +55,48 @@ int main(int argc,char *argv[])
 	int lb_node_uid = dc_render_node_create(controller,lb_fx_uid,lb_node_name,lb_node_description);
 	printf("new render node uid (lb): %d.\n",lb_node_uid);
 
-	int mx_fx_uid = 18;//uid of the light_blast fx
+	int mx_fx_uid = 14;//uid of the mixer fx
+	//int mx_fx_uid = 19;//uid of the mixer fx
 	char *mx_node_name = "Mixer";
 	char *mx_node_description = "effects mixer";
 	printf("sending create render node command to daemon.\n");
 	int mx_node_uid = dc_render_node_create(controller,mx_fx_uid,mx_node_name,mx_node_description);
 	printf("new render node uid (mx): %d.\n",mx_node_uid);
 
+	int ms_fx_uid = 20;//uid of the mixer fx
+	char *ms_node_name = "Mouse Mixer";
+	char *ms_node_description = "effects mixer";
+	printf("sending create render node command to daemon.\n");
+	int ms_node_uid = dc_render_node_create(controller,ms_fx_uid,ms_node_name,ms_node_description);
+	printf("new render node uid (ms): %d.\n",ms_node_uid);
+
+	printf("sending add sub node: %d to render node: %d command to daemon.\n",ms_node_uid,lb_node_uid);
+	dc_render_node_sub_add(controller,mx_node_uid,ms_node_uid);
+
+
 
 	printf("sending connect node : %d to render nodes: %d first input command to daemon.\n",wv_node_uid,mx_node_uid);
 	dc_render_node_input_connect(controller,mx_node_uid,wv_node_uid);
 
-	printf("sending connect node : %d to render nodes: %d first input command to daemon.\n",lb_node_uid,mx_node_uid);
-	dc_render_node_input_connect(controller,mx_node_uid,lb_node_uid);
+	printf("sending connect second node : %d to render nodes: %d first input command to daemon.\n",lb_node_uid,mx_node_uid);
+	dc_render_node_second_input_connect(controller,mx_node_uid,lb_node_uid);
 
 
-	int fps = 8;
-	printf("sending set fps command to daemon: %d.\n",fps);
-	dc_fps_set(controller,fps);
-
-	double opacity = 0.2f;
+	double opacity = 0.8f;
 	printf("sending set opacity for render node: %d command to daemon: %f.\n",mx_node_uid,opacity);
 	dc_render_node_opacity_set(controller,mx_node_uid,opacity);
 
 
 	printf("sending connect frame buffer to render node: %d command to daemon.\n",mx_node_uid);
 	dc_frame_buffer_connect(controller,mx_node_uid);
+
+	int fps = 8;
+	printf("sending set fps command to daemon: %d.\n",fps);
+	dc_fps_set(controller,fps);
+
+
+
+
 
 
 
@@ -124,10 +140,6 @@ int main(int argc,char *argv[])
 	dc_render_node_second_input_connect(controller,render_node_uid,input_node_uid);
 
 
-	int render_node_uid = atoi(argv[optind++]);
-	int sub_node_uid = atoi(argv[optind]);
-	printf("sending add sub node: %d to render node: %d command to daemon.\n",sub_node_uid,render_node_uid);
-	dc_render_node_sub_add(controller,render_node_uid,sub_node_uid);
 
 
 

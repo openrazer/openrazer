@@ -31,7 +31,8 @@ int effect_null_update(struct razer_fx_render_node *render)
 	return(1);
 }
 
-struct razer_effect *effect_wait = NULL;
+struct razer_effect *effect_wait_mouse = NULL;
+struct razer_effect *effect_wait_key = NULL;
 
 int effect_wait_update(struct razer_fx_render_node *render)
 {
@@ -41,10 +42,10 @@ int effect_wait_update(struct razer_fx_render_node *render)
 	return(1);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+//#pragma GCC diagnostic push
+//#pragma GCC diagnostic ignored "-Wunused-parameter"
 
-int effect_wait_input_event(struct razer_fx_render_node *render,struct razer_chroma_event *event)
+int effect_wait_key_input_event(struct razer_fx_render_node *render,struct razer_chroma_event *event)
 {
 	#ifdef USE_DEBUGGING
 		printf(" (Compute::Wait_event.%d ## )",render->id);
@@ -53,6 +54,19 @@ int effect_wait_input_event(struct razer_fx_render_node *render,struct razer_chr
 		return(0);
 	return(1);
 }
+
+int effect_wait_mouse_input_event(struct razer_fx_render_node *render,struct razer_chroma_event *event)
+{
+	#ifdef USE_DEBUGGING
+		printf(" (Compute::Wait_event.%d ## )",render->id);
+	#endif
+	if(event->type == RAZER_CHROMA_EVENT_TYPE_MOUSE && event->sub_type == RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_BUTTON_UP)
+	{
+		return(0);
+	}
+	return(1);
+}
+
 
 #pragma GCC diagnostic pop
 
@@ -96,6 +110,51 @@ int effect_transition_update(struct razer_fx_render_node *render)
 	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),dir);	
 	return(1);
 }
+
+struct razer_effect *effect_transition_mouse = NULL;
+struct razer_pos effect_transition_mouse_base_pos = {.x=0,.y=0};
+struct razer_pos effect_transition_mouse_base_range_min = {.x=0,.y=0};
+struct razer_pos effect_transition_mouse_base_range_max = {.x=256,.y=256};
+struct razer_pos_range effect_transition_mouse_base_range;
+
+int effect_transition_mouse_input_event(struct razer_fx_render_node *render,struct razer_chroma_event *event)
+{
+	struct razer_pos_range *range = daemon_get_parameter_pos_range(daemon_effect_get_parameter_by_index(render->effect,0));
+	int dir = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1));
+	struct razer_pos *pos = daemon_get_parameter_pos(daemon_effect_get_parameter_by_index(render->effect,2));
+	float opacity = 0.0f;
+	if(event->type == RAZER_CHROMA_EVENT_TYPE_MOUSE && event->sub_type == RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_X_AXIS_MOVEMENT)
+	{
+		int new_x = event->value + pos->x;
+		if(new_x <= range->max->x && new_x >= range->min->x)
+			pos->x = new_x;
+	}
+
+	if(event->type == RAZER_CHROMA_EVENT_TYPE_MOUSE && event->sub_type == RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_Y_AXIS_MOVEMENT)
+	{
+		int new_y = event->value + pos->y;
+		if(new_y <= range->max->y && new_y >= range->min->y)
+			pos->y = new_y;
+	}
+
+	if(dir == 0)
+		opacity = (float)pos->y / (float)range->max->y;
+	else
+		opacity = (float)pos->x / (float)range->max->x;
+	
+
+	//#ifdef USE_DEBUGGING
+	//	printf(" (Compute::Mouse Trans.%d ## pos:%d,%d,dir:%d,opacity:%f)",render->id,pos->x,pos->y,dir,opacity);
+	//#endif
+
+	if(render->parent) //compute effects should only be added as sub so this should be always fine
+		render->parent->opacity = opacity;
+	//daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),dir);	
+	//daemon_set_parameter_(daemon_effect_get_parameter_by_index(render->effect,1),dir);	
+	return(1);
+}
+
+
 
 struct razer_effect *effect_random_col = NULL;
 struct razer_rgb effect_random_col_dst_rgb = {.r=0,.g=0,.b=0};
@@ -241,18 +300,31 @@ void fx_init(struct razer_daemon *daemon)
 		printf("registered compute effect: %s (uid:%d)\n",effect_null->name,effect_null->id);
 	#endif
 
-	effect_wait = daemon_create_effect();
+	effect_wait_mouse = daemon_create_effect();
 	//effect_wait->update = effect_wait_update;
-	effect_wait->input_event = effect_wait_input_event;
-	effect_wait->name = "Wait For Key Compute Node";
-	effect_wait->description = "Waits for a key and returns 0 ,it does nothing else";
-	effect_wait->fps = 1;
-	effect_wait->class = 1;
-	effect_wait->input_usage_mask = RAZER_EFFECT_NO_INPUT_USED;
-	int effect_wait_uid = daemon_register_effect(daemon,effect_wait);
+	effect_wait_mouse->input_event = effect_wait_mouse_input_event;
+	effect_wait_mouse->name = "Wait For Mouse Button Up  Compute Node";
+	effect_wait_mouse->description = "Waits for a mouse button and returns 0 ,it does nothing else";
+	effect_wait_mouse->fps = 1;
+	effect_wait_mouse->class = 1;
+	effect_wait_mouse->input_usage_mask = RAZER_EFFECT_NO_INPUT_USED;
+	int effect_wait_mouse_uid = daemon_register_effect(daemon,effect_wait_mouse);
 	#ifdef USE_DEBUGGING
-		printf("registered compute effect: %s (uid:%d)\n",effect_wait->name,effect_wait->id);
+		printf("registered compute effect: %s (uid:%d)\n",effect_wait_mouse->name,effect_wait_mouse->id);
 	#endif
+
+	effect_wait_key = daemon_create_effect();
+	effect_wait_key->input_event = effect_wait_key_input_event;
+	effect_wait_key->name = "Wait For Key Compute Node";
+	effect_wait_key->description = "Waits for a key and returns 0 ,it does nothing else";
+	effect_wait_key->fps = 1;
+	effect_wait_key->class = 1;
+	effect_wait_key->input_usage_mask = RAZER_EFFECT_NO_INPUT_USED;
+	int effect_wait_key_uid = daemon_register_effect(daemon,effect_wait_key);
+	#ifdef USE_DEBUGGING
+		printf("registered compute effect: %s (uid:%d)\n",effect_wait_key->name,effect_wait_key->id);
+	#endif
+
 
 	effect_random_col = daemon_create_effect();
 	effect_random_col->update = effect_random_col_update;
@@ -288,6 +360,29 @@ void fx_init(struct razer_daemon *daemon)
 		printf("registered mix effect: %s (uid:%d)\n",effect_glimmer->name,effect_glimmer->id);
 	#endif
 
+	effect_transition_mouse = daemon_create_effect();
+	//effect_transition_mouse->update = effect_transition_mouse_update;
+	effect_transition_mouse->input_event = effect_transition_mouse_input_event;
+	effect_transition_mouse->name = "Mouse Position dependant Opacity Transition";
+	effect_transition_mouse->description = "Mouse based compute only effect";
+	effect_transition_mouse->fps = 20;
+	effect_transition_mouse->class = 2;
+	effect_transition_mouse->input_usage_mask = RAZER_EFFECT_NO_INPUT_USED;
+	effect_transition_mouse_base_range.min = &effect_transition_mouse_base_range_min;
+	effect_transition_mouse_base_range.max = &effect_transition_mouse_base_range_max;
+	parameter = daemon_create_parameter_pos_range("Effect Range","Min/Max Coords of mouse is able to travel (POS_RANGE)",&effect_transition_mouse_base_range);
+	daemon_effect_add_parameter(effect_transition_mouse,parameter);	
+	parameter = daemon_create_parameter_int("Effect Direction","Effect direction value 0 for vertical / 1 for horizontal(INT)",1);
+	daemon_effect_add_parameter(effect_transition_mouse,parameter);	
+	parameter = daemon_create_parameter_pos("Effect Position","Effect actual coordinate(POS)",&effect_transition_mouse_base_pos);
+	daemon_effect_add_parameter(effect_transition_mouse,parameter);	
+
+	int effect_transition_mouse_uid = daemon_register_effect(daemon,effect_transition_mouse);
+	#ifdef USE_DEBUGGING
+		printf("registered compute effect: %s (uid:%d)\n",effect_transition_mouse->name,effect_transition_mouse->id);
+	#endif
+
+
 
 }
 
@@ -308,11 +403,21 @@ void fx_shutdown(struct razer_daemon *daemon)
 	daemon_free_parameters(effect_null->parameters);
 	daemon_free_effect(effect_null);
 
-	daemon_unregister_effect(daemon,effect_wait);
-	daemon_free_parameters(effect_wait->parameters);
-	daemon_free_effect(effect_wait);
+	daemon_unregister_effect(daemon,effect_wait_mouse);
+	daemon_free_parameters(effect_wait_mouse->parameters);
+	daemon_free_effect(effect_wait_mouse);
+
+	daemon_unregister_effect(daemon,effect_wait_key);
+	daemon_free_parameters(effect_wait_key->parameters);
+	daemon_free_effect(effect_wait_key);
+	
 
 	daemon_unregister_effect(daemon,effect_glimmer);
 	daemon_free_parameters(effect_glimmer->parameters);
 	daemon_free_effect(effect_glimmer);
+
+	daemon_unregister_effect(daemon,effect_transition_mouse);
+	daemon_free_parameters(effect_transition_mouse->parameters);
+	daemon_free_effect(effect_transition_mouse);
+
 }
