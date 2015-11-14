@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <strings.h>
 #include <signal.h>
 #include "getopt.h"
 #include "ctype.h"
@@ -32,9 +33,12 @@ struct razer_daemon_controller
 
 
 
-int dc_dbus_error_check(char*message,DBusError *error);
-int dc_dbus_open(struct razer_daemon_controller *controller);
-void dc_dbus_close(struct razer_daemon_controller *controller);
+#ifdef USE_DBUS
+	int dc_dbus_error_check(char*message,DBusError *error);
+	int dc_dbus_open(struct razer_daemon_controller *controller);
+	void dc_dbus_close(struct razer_daemon_controller *controller);
+#endif
+
 struct razer_daemon_controller *dc_open(void);
 void dc_close(struct razer_daemon_controller *controller);
 void dc_error_close(struct razer_daemon_controller *controller,char *message);
@@ -44,7 +48,8 @@ void dc_pause(struct razer_daemon_controller *controller);
 int dc_render_node_create(struct razer_daemon_controller *controller,int effect_uid,char *name,char *description);
 void dc_render_node_set(struct razer_daemon_controller *controller,int render_node_uid);
 char *dc_render_node_parameter_get(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid,int array_index);
-void dc_render_node_parameter_set(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid,int array_index,int type,void *value);
+int dc_render_node_parameter_parsed_set(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid,int array_index,char *type,char *value_string);
+void dc_render_node_parameter_set(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid,int array_index,int type,unsigned long long value);
 float dc_render_node_opacity_get(struct razer_daemon_controller *controller,int render_node_uid);
 void dc_render_node_opacity_set(struct razer_daemon_controller *controller,int render_node_uid,float opacity);
 void dc_render_node_input_connect(struct razer_daemon_controller *controller,int render_node_uid,int input_render_node_uid);

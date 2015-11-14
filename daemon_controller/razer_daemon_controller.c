@@ -55,7 +55,7 @@ Commands:\n\
            1. Parameter: render node uid - render node to get the next node of\n\
            Returns: uid of next node\n\
   -y    Set the next node of a render node\n\
-           1. Parameter: render node uid - render node to get the next node of\n\
+           1. Parameter: render node uid - render node to set the next node of\n\
            2. Parameter: next node uid - next node to run after render node finished\n\
   -M    Get the move_linkage value of a render node\n\
            1. Parameter: render node uid - render node to get the move_linkage value of\n\
@@ -110,23 +110,6 @@ int main(int argc,char *argv[])
 		opts_given = 1;
 		switch(c)
 		{
-			case 'S':
-				{
-					int render_node_uid = atoi(argv[optind++]);
-					int parameter_uid = atoi(argv[optind++]);
-					int array_index = -1;
-					if(optind < argc)
-						array_index = atoi(argv[optind++]);
-					char *parameter_json = dc_render_node_parameter_get(controller,render_node_uid,parameter_uid,array_index);
-					if(verbose)
-					{
-						printf("sending get parameter value of render node: %d.%d.%d.\n",render_node_uid,parameter_uid,array_index);
-						printf("value: %s.\n",parameter_json);
-					}
-					else
-						printf("%s",parameter_json);
-					//free(parameter_json);
-				}
 			case 'P':
 				{
 					int render_node_uid = atoi(argv[optind++]);
@@ -143,6 +126,18 @@ int main(int argc,char *argv[])
 					else
 						printf("%s",parameter_json);
 					//free(parameter_json);
+				}
+			case 'S':
+				{
+					int render_node_uid = atoi(argv[optind++]);
+					int parameter_uid = atoi(argv[optind++]);
+					//int parameter_uid = atoi(argv[optind++]);
+					int	array_index = atoi(argv[optind++]);
+					char *type = argv[optind++];
+					char *value = argv[optind++];
+					if(verbose)
+						printf("sending set parameter value of render node: %d.%d.%d = [%s].\n",render_node_uid,parameter_uid,array_index,value);
+					dc_render_node_parameter_parsed_set(controller,render_node_uid,parameter_uid,array_index,type,value);
 				}
 				break;
 			case 'M':

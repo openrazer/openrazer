@@ -14,6 +14,7 @@
 
 
 #include "../lib/razer_chroma.h"
+#include "../lib/razer_chroma_controller.h"
 #include "../daemon/razer_daemon.h"
 
 
