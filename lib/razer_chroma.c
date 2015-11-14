@@ -1,8 +1,9 @@
 #include "razer_chroma.h"
 
 char *razer_sys_hid_devices_path = "/sys/bus/hid/devices/";
-char *razer_sys_keyboard_event_path = "/dev/input/by-id/usb-Razer_Razer_BlackWidow_Chroma-event-kbd";
-char *razer_sys_mouse_event_path = "/dev/input/event26";
+
+char *razer_sys_keyboard_event_default_path = "/dev/input/by-id/usb-Razer_Razer_BlackWidow_Chroma-event-kbd";
+char *razer_sys_mouse_event_default_path = "/dev/input/event26";
 //char *razer_sys_mouse_event_path = "/dev/input/mouse0";
 //char *razer_sys_mouse_event_path = "/dev/input/mouse2";
 //char *razer_sys_mouse_event_path = "/dev/input/by-id/usb-ROCCAT_ROCCAT_Kone_Pure-event-mouse";
@@ -58,10 +59,10 @@ void razer_close_update_keys_file(struct razer_chroma *chroma)
 
 int razer_open_keyboard_input_file(struct razer_chroma *chroma)
 {
-	chroma->keyboard_input_file=open(razer_sys_keyboard_event_path,O_RDONLY | O_NONBLOCK | O_NOCTTY | O_NDELAY);
+	chroma->keyboard_input_file=open(chroma->sys_keyboard_event_path,O_RDONLY | O_NONBLOCK | O_NOCTTY | O_NDELAY);
 	fcntl(chroma->keyboard_input_file,F_SETFL,0);
 	#ifdef USE_VERBOSE_DEBUGGING
-		printf("opening keyboard input file:%s\n",razer_sys_keyboard_event_path);
+		printf("opening keyboard input file:%s\n",chroma->sys_keyboard_event_path);
 	#endif
 	if(chroma->keyboard_input_file)
 		return(1);
@@ -72,7 +73,7 @@ int razer_open_keyboard_input_file(struct razer_chroma *chroma)
 void razer_close_keyboard_input_file(struct razer_chroma *chroma)
 {
 	#ifdef USE_VERBOSE_DEBUGGING
-		printf("closing keyboard input file:%s\n",razer_sys_keyboard_event_path);
+		printf("closing keyboard input file:%s\n",chroma->sys_keyboard_event_path);
 	#endif
     if(chroma->keyboard_input_file)
     	close(chroma->keyboard_input_file);
@@ -81,10 +82,10 @@ void razer_close_keyboard_input_file(struct razer_chroma *chroma)
 
 int razer_open_mouse_input_file(struct razer_chroma *chroma)
 {
-	chroma->mouse_input_file=open(razer_sys_mouse_event_path,O_RDONLY | O_NONBLOCK | O_NOCTTY | O_NDELAY);
+	chroma->mouse_input_file=open(chroma->sys_mouse_event_path,O_RDONLY | O_NONBLOCK | O_NOCTTY | O_NDELAY);
 	fcntl(chroma->mouse_input_file,F_SETFL,0);
 	#ifdef USE_VERBOSE_DEBUGGING
-		printf("opening mouse input file:%s\n",razer_sys_mouse_event_path);
+		printf("opening mouse input file:%s\n",chroma->sys_mouse_event_path);
 	#endif
 	if(chroma->mouse_input_file)
 		return(1);
@@ -95,7 +96,7 @@ int razer_open_mouse_input_file(struct razer_chroma *chroma)
 void razer_close_mouse_input_file(struct razer_chroma *chroma)
 {
 	#ifdef USE_VERBOSE_DEBUGGING
-		printf("closing mouse input file:%s\n",razer_sys_mouse_event_path);
+		printf("closing mouse input file:%s\n",chroma->sys_mouse_event_path);
 	#endif
     if(chroma->mouse_input_file)
     	close(chroma->mouse_input_file);
@@ -131,6 +132,8 @@ struct razer_chroma *razer_open(void)
 	#ifdef USE_DEBUGGING
 		printf("opening chroma lib\n");
 	#endif
+	chroma->sys_mouse_event_path = str_Copy(razer_sys_mouse_event_default_path);
+	chroma->sys_keyboard_event_path = str_Copy(razer_sys_keyboard_event_default_path);
 	chroma->custom_mode_file = NULL;
 	chroma->update_keys_file = NULL;
 	chroma->keyboard_input_file = 0;
@@ -175,6 +178,8 @@ void razer_close(struct razer_chroma *chroma)
 		chroma->input_handler = NULL;
 		free(chroma->keys);
 		free(chroma->device_path);
+		free(chroma->sys_mouse_event_path);
+		free(chroma->sys_keyboard_event_path);
 		if(chroma->update_keys_file)
 			razer_close_update_keys_file(chroma);
 		if(chroma->custom_mode_file)

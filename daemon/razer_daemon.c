@@ -390,6 +390,8 @@ struct daemon_options parse_args(int argc,char *argv[]) {
 	options.daemonize = 1;
 	options.verbose = 0;
 	options.pid_file = NULL;
+	options.keyboard_input_file = NULL;
+	options.mouse_input_file = NULL;
 
 	struct option long_options[] =
 	{
@@ -399,12 +401,14 @@ struct daemon_options parse_args(int argc,char *argv[]) {
 		{"help", no_argument, 0, 'h'},
 		// Have arguments
 		{"pid-file", required_argument, 0, 'p'},
+		{"keyboard-input-file", required_argument, 0, 'k'},
+		{"mouse-input-file", required_argument, 0, 'm'},
 		{0, 0, 0, 0}
 	};
 
 	int option_index = 0;
 	char c;
-	while((c=getopt_long(argc, argv, "vfhp:", long_options, &option_index)) != -1)
+	while((c=getopt_long(argc, argv, "vfhp:k:m:", long_options, &option_index)) != -1)
 	{
 		switch(c)
 		{
@@ -415,6 +419,26 @@ struct daemon_options parse_args(int argc,char *argv[]) {
 					strcpy(options.pid_file, optarg);
 				} else {
 					printf("PID file has already been specified! Ignoring.\n",optopt);
+				}
+				break;
+
+			case 'k':
+				if(options.pid_file == NULL)
+				{
+					options.keyboard_input_file = (char*)malloc(strlen(optarg) * sizeof(char));
+					strcpy(options.keyboard_input_file, optarg); //TODO free memory on shutdown
+				} else {
+					printf("keyboard input event file has already been specified! Ignoring.\n",optopt);
+				}
+				break;
+
+			case 'm':
+				if(options.mouse_input_file == NULL)
+				{
+					options.mouse_input_file = (char*)malloc(strlen(optarg) * sizeof(char));
+					strcpy(options.mouse_input_file, optarg); //TODO free memory on shutdown
+				} else {
+					printf("mouse input event file has already been specified! Ignoring.\n",optopt);
 				}
 				break;
 
@@ -507,6 +531,11 @@ int main(int argc,char *argv[])
 		printf("razer_bcd: error initializing daemon\n");
 		return(1);
 	}
+	if(options.mouse_input_file)
+		daemon->chroma->sys_mouse_event_path = options.mouse_input_file;
+	if(options.keyboard_input_file)
+		daemon->chroma->sys_keyboard_event_path = options.keyboard_input_file;
+
 	daemon_run(daemon);
 	daemon_close(daemon);
 

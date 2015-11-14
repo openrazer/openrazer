@@ -118,6 +118,10 @@ typedef int (*razer_input_handler)(struct razer_chroma *chroma,struct razer_chro
 
 struct razer_chroma
 {
+
+	char *sys_keyboard_event_path;//default = "/dev/input/by-id/usb-Razer_Razer_BlackWidow_Chroma-event-kbd";
+	char *sys_mouse_event_path;//default = "/dev/input/event26";
+
 	char *device_path;
 	char *update_keys_filename;
 	char *custom_mode_filename;

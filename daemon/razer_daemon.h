@@ -53,7 +53,9 @@ struct daemon_options
 {
 	int daemonize;
 	int verbose;
-	char* pid_file;
+	char *pid_file;
+	char *keyboard_input_file;
+	char *mouse_input_file;
 };
 
 void daemon_kill(struct razer_daemon *daemon,char *error_message);

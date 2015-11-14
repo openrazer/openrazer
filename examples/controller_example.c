@@ -28,8 +28,7 @@ int main(int argc,char *argv[])
 		return(1);
 	#else
 
-
-
+	//initating the controller code
 	struct razer_daemon_controller *controller=NULL;
 	if(!(controller=dc_open()))
 	{
@@ -37,6 +36,7 @@ int main(int argc,char *argv[])
 		return(1);
 	}
 
+	//loading the needed fx lib
 	char *mixer_fx_lib = "daemon/fx/pez2001_mixer_debug.so";
 	printf("sending load fx library command to daemon: library to load: \"%s\".\n",mixer_fx_lib);
 	dc_load_fx_lib(controller,mixer_fx_lib);
@@ -195,6 +195,8 @@ int main(int argc,char *argv[])
 	printf("sending quit command to daemon.\n");
 	dc_quit(controller);
 	*/
+
+	//shutting down the controller
 	dc_close(controller);
 	return(0);
 	#endif
