@@ -11,7 +11,7 @@ struct razer_daemon *daemon_open(void)
 {
  	//signal(SIGINT,stop);
  	//signal(SIGKILL,stop);
-    //signal(SIGTERM,stop);	
+        //signal(SIGTERM,stop);
 	struct razer_daemon *daemon = (struct razer_daemon*)malloc(sizeof(struct razer_daemon));
  	daemon->chroma = NULL;
  	daemon->running = 1;
@@ -246,7 +246,7 @@ int daemon_input_event_handler(struct razer_chroma *chroma,struct razer_chroma_e
 		if(event->type == RAZER_CHROMA_EVENT_TYPE_MOUSE)
 			printf("daemon input event handler called (mouse): %d,%d,%d\n",event->values->mouse.rel_x,event->values.mouse.rel_y,event->values.mouse.buttons_mask);
 	#endif
-	daemon_input_event_render_nodes((struct razer_daemon*)chroma->tag,event);		
+	daemon_input_event_render_nodes((struct razer_daemon*)chroma->tag,event);
 	return(1);
 }
 
@@ -254,10 +254,10 @@ int daemon_input_event_handler(struct razer_chroma *chroma,struct razer_chroma_e
 int daemon_run(struct razer_daemon *daemon)
 {
     while(daemon->running)
-	{	
+	{
 		unsigned long ticks = razer_get_ticks();
 		if(!daemon->is_paused)
-			daemon_update_render_nodes(daemon);		
+			daemon_update_render_nodes(daemon);
 		#ifdef USE_DBUS
 			daemon_dbus_handle_messages(daemon);
 		#endif
@@ -308,7 +308,7 @@ void daemon_compute_render_nodes(struct razer_daemon *daemon)
 void sdl_update()
 {
 		SDL_Event event;
-	    while(SDL_PollEvent(&event)) 
+	    while(SDL_PollEvent(&event))
     	{
 		    if(event.type == SDL_KEYUP)
     		{
@@ -347,7 +347,7 @@ void sdl_update()
 /*
 void create_sdl_window()
 {
-   	SDL_Init(SDL_INIT_VIDEO);      
+   	SDL_Init(SDL_INIT_VIDEO);
 	SDL_Window *sdl_window;
 	SDL_Renderer *sdl_renderer;
 	SDL_CreateWindowAndRenderer(22*32, 6*32, SDL_WINDOW_RESIZABLE, &sdl_window, &sdl_renderer);
@@ -370,8 +370,82 @@ void close_sdl_window()
 //list of last keystrokes
 //time since hit /hitstamps
 
+const char *dc_helpmsg = "razer_bcd\n\
+\n\
+Arguments:\n\
+  -f, --foreground	Don't daemonize. Run in foreground\n\
+  -p, --pid-file    File to write PID to\n\
+\
+  -h, --help        Display this help and exit\n\
+  -v, --verbose     Turn on verbose output\n\
+\n\
+\n\
+      Report bugs to <pez2001@voyagerproject.de>.\n";
 
-int daemonize()
+
+
+struct daemon_options parse_args(int argc,char *argv[]) {
+
+	struct daemon_options options;
+	options.daemonize = 1;
+	options.verbose = 0;
+	options.pid_file = NULL;
+
+	struct option long_options[] =
+	{
+		// No arguments
+		{"verbose", no_argument,        0, 'v'},
+		{"foreground", no_argument,     0, 'f'},
+		{"help", no_argument, 0, 'h'},
+		// Have arguments
+		{"pid-file", required_argument, 0, 'p'},
+		{0, 0, 0, 0}
+	};
+
+	int option_index = 0;
+	char c;
+	while((c=getopt_long(argc, argv, "vfhp:", long_options, &option_index)) != -1)
+	{
+		switch(c)
+		{
+			case 'p':
+				if(options.pid_file == NULL)
+				{
+					options.pid_file = (char*)malloc(strlen(optarg) * sizeof(char));
+					strcpy(options.pid_file, optarg);
+				} else {
+					printf("PID file has already been specified! Ignoring.\n",optopt);
+				}
+				break;
+
+			case 'v':
+				options.verbose = 1;
+				break;
+
+			case 'f':
+				options.daemonize = 0;
+				break;
+
+			case 'h':
+				printf(dc_helpmsg);
+				exit(0);
+
+			case '?':
+				printf(dc_helpmsg); // getopt_long will print error
+				exit(1);
+
+			default:
+				printf(dc_helpmsg);
+				exit(1);
+		}
+
+	}
+
+	return options;
+}
+
+
+int daemonize(char* pid_file)
 {
 	pid_t pid = 0;
 	pid_t sid = 0;
@@ -398,6 +472,16 @@ int daemonize()
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
+
+	// Write PID to file
+	if(pid_file != NULL)
+	{
+		FILE* fp;
+		fp = fopen(pid_file, "w+");
+		fprintf(fp, "%d\n", sid);
+		fclose(fp);
+	}
+
 	return(1);
 }
 
@@ -406,10 +490,16 @@ int daemonize()
 
 int main(int argc,char *argv[])
 {
-	printf("Starting razer blackwidow chroma daemon\n");
-	#ifndef USE_DEBUGGING
-		daemonize();
-	#endif
+	struct daemon_options options = parse_args(argc, argv);
+
+	if(options.daemonize)
+	{
+		printf("Starting razer blackwidow chroma daemon as a daemon\n");
+		daemonize(options.pid_file);
+	} else {
+		printf("Starting razer blackwidow chroma daemon in the foreground\n");
+	}
+
 
 	struct razer_daemon *daemon=NULL;
 	if(!(daemon=daemon_open()))
@@ -418,7 +508,14 @@ int main(int argc,char *argv[])
 		return(1);
 	}
 	daemon_run(daemon);
-    daemon_close(daemon);
+        daemon_close(daemon);
+
+        // Remove the PID file if we exit normally
+        if(options.pid_file != NULL)
+        {
+		remove(options.pid_file);
+		free(options.pid_file);
+	}
 }
 
 #pragma GCC diagnostic pop

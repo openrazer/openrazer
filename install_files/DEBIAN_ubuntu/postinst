@@ -32,3 +32,23 @@ esac
 
 ## update udev rules
 udevadm control --reload-rules
+
+
+## Install the SysVinit stuff
+
+if [ -x "/etc/init.d/razer_bcd" ]; then
+	update-rc.d razer_bcd defaults >/dev/null
+fi
+if [ -x "/etc/init.d/razer_bcd" ] || [ -e "/etc/init/razer_bcd.conf" ]; then
+	if [ -n "$2" ]; then
+		_dh_action=restart
+	else
+		_dh_action=start
+	fi
+	invoke-rc.d razer_bcd $_dh_action || true
+fi
+
+
+
+
+exit 0
