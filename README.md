@@ -23,7 +23,7 @@ Supports the Razer Firefly (internal effect switching).
  
 
 
-## Installation for Ubuntu based distros
+## Installation for Debian/Ubuntu based distros (creating a .deb package)
 You can either install this using the above Debian method or use the packaged method.
 
  1. First as above download the source code
@@ -42,6 +42,8 @@ You can either install this using the above Debian method or use the packaged me
  1. Build the package
 
         ./package_for_ubuntu.sh
+        OR
+        ./package_for_debian.sh
 
  1. The command above will output something like `dpkg-name: info: moved 'tmp.3PnAtckx3o.deb' to '/tmp/razer-chroma-driver_1.0.0_amd64.deb'` so then you will need to install the file using:
 
@@ -52,20 +54,30 @@ You can either install this using the above Debian method or use the packaged me
         make clean
 
 Installing the `.deb` file has multiple benefits. Firstly installing the deb file keeps track of all the installed files and simplifys removal of the driver and daemon. 
-Ubuntu uses upstart so there is an upstart style init script provided. The driver is registered with DKMS (Dynamic Kernel Module Support), this will recompile the driver
-whenever a new kernel is installed.
+Ubuntu uses upstart so there is an upstart style init script provided. There is log file for upstart jobs under `/var/log/upstart` so you can view startup issues with `tail /var/log/upstart/razer_bcd.log`.
+The Debian version I have packaged for is 8.2 which uses systemd so I've provided a script for that.
+
+The driver is registered with DKMS (Dynamic Kernel Module Support), this will recompile the driver whenever a new kernel is installed.
 
 To remove the driver/daemon
         sudo dpkg -r razer-chroma-driver
 
-Normally people write wrappers for upstart jobs to go in `/etc/init.d`, haven't done this yet but to manage upstart jobs it't as simple as
+To manage upstart jobs it't as simple as
 
         sudo status razer_bcd
         sudo start razer_bcd
         sudo stop razer_bcd
         sudo restart razer_bcd
+But on ubuntu you can use `service razer_bcd ACTION` where ACTION is `start|stop|status|restart`
 
-There is log file for upstart jobs under `/var/log/upstart` so you can view startup issues with `tail /var/log/upstart/razer_bcd.log`.
+On Debian you can control the driver doing `/etc/init.d/razer_bcd ACTION` or using systemd which is the preferred method (if you have systemd installed that is). Below are some systemd management commands
+
+        sudo systemctl status razer_bcd
+        sudo systemctl start razer_bcd
+        sudo systemctl stop razer_bcd
+        sudo systemctl restart razer_bcd
+
+
 
 
 ## Installation for non debian based distros
