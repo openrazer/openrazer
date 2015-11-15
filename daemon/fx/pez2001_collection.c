@@ -8,12 +8,15 @@ struct razer_effect *effect_mix1 = NULL;
 int effectmix1_update(struct razer_fx_render_node *render)
 {
 	int x,y;
-	for(x=0;x<22;x++)
-		for(y=0;y<6;y++)
-		{
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&render->second_input_frame->rows[y].column[x],render->opacity);
-			render->output_frame->update_mask |= 1<<y;
-		}
+	//if(render->second_input_frame && render->input_frame)
+	//{
+		for(x=0;x<22;x++)
+			for(y=0;y<6;y++)
+			{
+				rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&render->second_input_frame->rows[y].column[x],render->opacity);
+				render->output_frame->update_mask |= 1<<y;
+			}
+	//}
 	return(1);
 }
 

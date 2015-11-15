@@ -24,8 +24,8 @@ RAZER_CHROMA_FILES=razer_chroma.c list.c razer_string.c
 RAZER_CHROMA_INCLUDE_FILES=razer_chroma.h list.h razer_string.h
 RAZER_CHROMA_OBJ=razer_chroma.o list.o razer_string.o
 RAZER_CHROMA_DEBUG_OBJ=razer_chroma.do list.do razer_string.do
-RAZER_CHROMA_CONTROLLER_OBJ=razer_chroma_controller.o razer_string.o
-RAZER_CHROMA_CONTROLLER_DEBUG_OBJ=razer_chroma_controller.do razer_string.do
+RAZER_CHROMA_CONTROLLER_OBJ=razer_chroma_controller.o list.o razer_string.o
+RAZER_CHROMA_CONTROLLER_DEBUG_OBJ=razer_chroma_controller.do list.do razer_string.do
 
 all: library library_debug
 

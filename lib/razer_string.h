@@ -27,7 +27,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "list.h"
 
+char *str_Sub(char *a,long start,long len);
+long str_Tokenize(char *string,char *splitter,list **tokens);
+void str_FreeTokens(list *tokens);
 
 char *str_CreateEmpty(void);
 char *str_Copy(char *src);

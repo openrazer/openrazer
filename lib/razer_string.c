@@ -1,6 +1,70 @@
 /*some string routines from node.c*/
 #include "razer_string.h"
 
+
+char *str_Sub(char *a,long start,long len)
+{
+  if(a==NULL || (long)strlen(a)<=start)
+  {
+    return(str_CreateEmpty());
+  }
+  long l=0;
+  if(len>0)
+  {
+    long e = start + len;
+    l=len;
+    if(e>(long)strlen(a))
+      l = strlen(a) - start;
+  }
+  else
+  {
+    l = strlen(a) - start;
+  }
+  char *tmp = (char*)malloc(l + 1);
+  memset(tmp+l, 0, 1);
+  memcpy(tmp, a+start, l);
+  return(tmp);
+}
+
+long str_Tokenize(char *string,char *splitter,list **tokens)
+{
+  long tokens_num=0;
+  long offset = 0;
+  long splitter_len = strlen(splitter);
+  long string_len = strlen(string);
+  *tokens=list_Create(0,0);
+  char *pos=NULL;
+  while((pos = strstr(string+offset,splitter)))
+  {
+    long index = (long)(pos-(string+offset));
+    if(index)
+    {
+      char *sub = str_Sub(string+offset,0,index);
+      list_Push(*tokens,sub);
+      tokens_num++;
+    }
+    offset+=index+splitter_len;
+  } 
+  if(offset<string_len)
+  {
+    char *sub = str_Sub(string+offset,0,string_len-offset);
+    list_Push(*tokens,sub);
+    tokens_num++;
+  }
+
+  return(tokens_num);
+}
+
+void str_FreeTokens(list *tokens)
+{
+  list_IterationReset(tokens);
+  while(list_IterationUnfinished(tokens))
+  {
+    char *token = list_Iterate(tokens);
+    free(token);
+  }
+  list_Close(tokens);
+}
 char *str_CreateEmpty(void)
 {
     char *string = (char*)malloc(1);

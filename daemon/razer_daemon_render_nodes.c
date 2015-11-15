@@ -141,18 +141,20 @@ void daemon_render_node_add_sub(struct razer_fx_render_node *render_node,struct 
 
 void daemon_connect_frame_buffer(struct razer_daemon *daemon,struct razer_fx_render_node *render_node)
 {
+	daemon->is_render_nodes_dirty = 1;
 	if(daemon->frame_buffer_linked_uid != 0) //unlink old render node first
 	{
 		struct razer_fx_render_node *old_rn = daemon_get_render_node(daemon,daemon->frame_buffer_linked_uid);
 		old_rn->output_frame = razer_create_rgb_frame();
 		old_rn->output_frame_linked_uid = -1;
 	}
+	if(!render_node)
+		return;
 	if(render_node->output_frame_linked_uid == -1)
 		razer_free_rgb_frame(render_node->output_frame);
 	render_node->output_frame = daemon->frame_buffer;
 	daemon->frame_buffer_linked_uid = render_node->id;
 	daemon->fps = render_node->effect->fps;
-	daemon->is_render_nodes_dirty = 1;
 }
 
 void daemon_disconnect_frame_buffer(struct razer_daemon *daemon)
