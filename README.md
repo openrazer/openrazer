@@ -347,12 +347,10 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 ## TODO
 
 
-- dbus interface support array parameters 
-  (with another path level added as index into the array)
 - support remaining effect handlers not called yet once
 - key locking / automatically skip key on following frame changes 
   / manual overwrite still possible / catch in convience functions
-- daemon,heatmap examples
+- daemon,internal heatmap examples
 - gui controller (web interface?)
 - move remaining lib functions to razer_ namespace
 - move all daemon types to daemon_ namespace
@@ -361,7 +359,6 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 - submit kernel patch ?
 - customizable layout effect
 - fft analyzer effect
-- mouse input example
 - better multi device support
 - configuration for daemon (mouse input device,chroma devices to be used,etc)
 - add custom event sending via controller api
@@ -383,11 +380,11 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
  - Snake Example by James Shawver (pulled and edited slightly)
  - Identifying of missing speed parameter 
    for the reactive mode by Oleg Finkelshteyn (implemented by maintainer)
-   for discovering of a previous unknown reactive+wave mode existing.
+   discoverying of a previous unknown reactive+wave mode.
    (call reactive script & wave script with none as parameter)
    support for the tournament edition(manual merge)
  - Modifications to dynamic example by Stephanie Sunshine (pulled)
- - Deb packaging, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
+ - Deb packaging, dkms support, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
 
 
 ## Donations (in Euros)
