@@ -1,5 +1,7 @@
 #include "input_map.h"
 
+#define BUF_SIZE 100
+
 #define keys_max 10
 int keys_history_index = 0;
 int keys_history[keys_max];//ring buffer
@@ -92,8 +94,10 @@ int main(int argc,char *argv[])
 	if(uid != 0)
 		printf("input example needs root to work correctly.\n");	
 	struct razer_chroma *chroma = razer_open();
-	if(!chroma)
+  
+  if(!chroma)
 		exit(1);
+  system("stty -echo");
  	razer_set_input_handler(chroma,input_handler);
  	razer_set_custom_mode(chroma);
 	razer_clear_all(chroma->keys);
@@ -105,6 +109,7 @@ int main(int argc,char *argv[])
  	signal(SIGTERM,stop);	
 	effect(chroma);
  	razer_close(chroma);
+  system("stty echo");
 }
 
 #pragma GCC diagnostic pop
