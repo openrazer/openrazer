@@ -342,6 +342,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		char **path = NULL;
 		int rn_uid = -1;
 		int p_index = -1;
+		int a_index = -1;
 		dbus_message_get_path_decomposed(msg,&path);
 		int path_len = daemon_dbus_get_string_array_len(path);
 		#ifdef USE_DEBUGGING
@@ -349,7 +350,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		#endif
 		reply = dbus_message_new_method_return(msg);
 		dbus_message_iter_init_append(reply,&parameters);
-		if(path_len == 2)
+		if(path_len >= 2)
 		{
 			rn_uid = atoi(path[0]);
 			p_index = atoi(path[1]);
@@ -357,6 +358,10 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				printf("dbus: set parameter path : %d , %d\n",rn_uid,p_index);
 				printf("dbus: set parameter max path render_node : %d\n",list_GetLen(daemon->fx_render_nodes));
 			#endif
+		}
+		if(path_len == 3)
+		{
+			a_index = atoi(path[2]);
 		}
 		dbus_free_string_array(path);
 		if(dbus_message_iter_init(msg, &parameters) && list_GetLen(daemon->fx_render_nodes))
@@ -664,91 +669,93 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 							}
 						}
 						break;
-
-
-					/*case RAZER_PARAMETER_TYPE_FLOAT_ARRAY:
+					case RAZER_PARAMETER_TYPE_FLOAT_ARRAY:
 						{
 							struct razer_float_array *array = daemon_get_parameter_float_array(parameter);
+							if(a_index < 0 || a_index >= array->size)
+								break;
 							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_DOUBLE)
 							{
 								double value = 0;
 								dbus_message_iter_get_basic(&parameters,&value);
 								#ifdef USE_DEBUGGING
-									printf("dbus: min parameter:%f\n",value);
+									printf("dbus: float parameter:%f\n",value);
 								#endif
-								range->min = value;
-							}
-							dbus_message_iter_next(&parameters);
-							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_DOUBLE)
-							{
-								double value = 0;
-								dbus_message_iter_get_basic(&parameters,&value);
-								#ifdef USE_DEBUGGING
-									printf("dbus: max parameter:%f\n",value);
-								#endif
-								range->max = value;
+								array->values[a_index] = value;
 							}
 						}
 						break;
-					case RAZER_PARAMETER_TYPE_INT_ARRAY:
+					case RAZER_PARAMETER_TYPE_INT_ARRAY:						
 						{
-							struct razer_int_range *range = daemon_get_parameter_int_range(parameter);
+							struct razer_int_array *array = daemon_get_parameter_int_array(parameter);
+							if(a_index < 0 || a_index >= array->size)
+								break;
 							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
 							{
 								long value = 0;
 								dbus_message_iter_get_basic(&parameters,&value);
 								#ifdef USE_DEBUGGING
-									printf("dbus: min parameter:%l\n",value);
+									printf("dbus: integer parameter:%d\n",value);
 								#endif
-								range->min = value;
-							}
-							dbus_message_iter_next(&parameters);
-							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
-							{
-								long value = 0;
-								dbus_message_iter_get_basic(&parameters,&value);
-								#ifdef USE_DEBUGGING
-									printf("dbus: max parameter:%l\n",value);
-								#endif
-								range->max = value;
+								array->values[a_index] = value;
 							}
 						}
 						break;
 					case RAZER_PARAMETER_TYPE_UINT_ARRAY:
 						{
-							struct razer_uint_range *range = daemon_get_parameter_uint_range(parameter);
+							struct razer_uint_array *array = daemon_get_parameter_uint_array(parameter);
+							if(a_index < 0 || a_index >= array->size)
+								break;
 							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_UINT32)
 							{
 								unsigned long value = 0;
 								dbus_message_iter_get_basic(&parameters,&value);
 								#ifdef USE_DEBUGGING
-									printf("dbus: min parameter:%ul\n",value);
+									printf("dbus: integer parameter:%u\n",value);
 								#endif
-								range->min = value;
+								array->values[a_index] = value;
+							}
+						}
+						break;
+					case RAZER_PARAMETER_TYPE_POS_ARRAY:
+						{
+							struct razer_pos_array *array = daemon_get_parameter_pos_array(parameter);
+							if(a_index < 0 || a_index >= array->size)
+								break;
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
+							{
+								long value = 0;
+								dbus_message_iter_get_basic(&parameters,&value);
+								#ifdef USE_DEBUGGING
+									printf("dbus: integer parameter:%d\n",value);
+								#endif
+								array->values[a_index]->x = value;
 							}
 							dbus_message_iter_next(&parameters);
-							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_UINT32)
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
 							{
-								unsigned long value = 0;
+								long value = 0;
 								dbus_message_iter_get_basic(&parameters,&value);
 								#ifdef USE_DEBUGGING
-									printf("dbus: max parameter:%l\n",value);
+									printf("dbus: integer parameter:%d\n",value);
 								#endif
-								range->max = value;
+								array->values[a_index]->y = value;
 							}
 						}
 						break;
 					case RAZER_PARAMETER_TYPE_RGB_ARRAY:
 						{
-							struct razer_rgb_range *range = daemon_get_parameter_rgb_range(parameter);
+							struct razer_rgb_array *array = daemon_get_parameter_rgb_array(parameter);
+							if(a_index < 0 || a_index >= array->size)
+								break;
 							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
 							{
 								long value = 0;
 								dbus_message_iter_get_basic(&parameters,&value);
 								#ifdef USE_DEBUGGING
-									printf("dbus: min R parameter:%d\n",value);
+									printf("dbus: integer parameter:%d\n",value);
 								#endif
-								range->min->r = value;
+								array->values[a_index]->r = value;
 							}
 							dbus_message_iter_next(&parameters);
 							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
@@ -756,9 +763,9 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 								long value = 0;
 								dbus_message_iter_get_basic(&parameters,&value);
 								#ifdef USE_DEBUGGING
-									printf("dbus: min G parameter:%d\n",value);
+									printf("dbus: integer parameter:%d\n",value);
 								#endif
-								range->min->g = value;
+								array->values[a_index]->g = value;
 							}
 							dbus_message_iter_next(&parameters);
 							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
@@ -766,41 +773,12 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 								long value = 0;
 								dbus_message_iter_get_basic(&parameters,&value);
 								#ifdef USE_DEBUGGING
-									printf("dbus: min B parameter:%d\n",value);
+									printf("dbus: integer parameter:%d\n",value);
 								#endif
-								range->min->b = value;
-							}
-							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
-							{
-								long value = 0;
-								dbus_message_iter_get_basic(&parameters,&value);
-								#ifdef USE_DEBUGGING
-									printf("dbus: max R parameter:%d\n",value);
-								#endif
-								range->max->r = value;
-							}
-							dbus_message_iter_next(&parameters);
-							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
-							{
-								long value = 0;
-								dbus_message_iter_get_basic(&parameters,&value);
-								#ifdef USE_DEBUGGING
-									printf("dbus: max G parameter:%d\n",value);
-								#endif
-								range->max->g = value;
-							}
-							dbus_message_iter_next(&parameters);
-							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_INT32)
-							{
-								long value = 0;
-								dbus_message_iter_get_basic(&parameters,&value);
-								#ifdef USE_DEBUGGING
-									printf("dbus: max B parameter:%d\n",value);
-								#endif
-								range->max->b = value;
+								array->values[a_index]->b = value;
 							}
 						}
-						break;*/
+						break;
 				}
 			}
 		}

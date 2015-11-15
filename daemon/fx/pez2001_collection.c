@@ -801,7 +801,7 @@ void fx_init(struct razer_daemon *daemon)
 	daemon_effect_add_parameter(effect8,parameter);	
 	parameter = daemon_create_parameter_int_array("Effect Direction Array","Direction values(int array)",effect8_vdir);
 	daemon_effect_add_parameter(effect8,parameter);	
-	parameter = daemon_create_parameter_rgb_array("Effect Counter Array","Base colors(rgb array)",effect8_vcols);
+	parameter = daemon_create_parameter_rgb_array("Effect Colors Array","Base colors(rgb array)",effect8_vcols);
 	daemon_effect_add_parameter(effect8,parameter);	
 
 	int effect8_uid = daemon_register_effect(daemon,effect8);

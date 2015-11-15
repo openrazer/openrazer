@@ -430,15 +430,49 @@ int dc_render_node_parameter_parsed_set(struct razer_daemon_controller *controll
 				free_value_after = 1;
 			}
 			break;
-		case RAZER_PARAMETER_TYPE_INT_ARRAY:
+		case RAZER_PARAMETER_TYPE_INT_ARRAY: //TODO i know its redundant here.maybe remove later
+			value = atol(value_string);
 			break;
 		case RAZER_PARAMETER_TYPE_UINT_ARRAY:
+			value = atol(value_string);
 			break;
 		case RAZER_PARAMETER_TYPE_FLOAT_ARRAY:
+			value = atof(value_string);
 			break;
 		case RAZER_PARAMETER_TYPE_RGB_ARRAY:
+		 	{
+				value = (unsigned long long)malloc(sizeof(struct razer_rgb));
+				list *tokens = list_Create(3,0);
+				long items = str_Tokenize(value_string," ",&tokens);
+				if(items != 3)
+				{
+					str_FreeTokens(tokens);
+					break;
+				}
+				((struct razer_rgb*)value)->r = (unsigned char)atoi(list_Dequeue(tokens));
+				((struct razer_rgb*)value)->g = (unsigned char)atoi(list_Dequeue(tokens));
+				((struct razer_rgb*)value)->b = (unsigned char)atoi(list_Dequeue(tokens));
+				//printf("got 3 integers:%d,%d,%d\n",((struct razer_rgb*)value)->r,((struct razer_rgb*)value)->g,((struct razer_rgb*)value)->b);
+				str_FreeTokens(tokens);
+				free_value_after = 1;
+			}
 			break;
 		case RAZER_PARAMETER_TYPE_POS_ARRAY:
+			{
+				value = (unsigned long long)malloc(sizeof(struct razer_pos));
+				list *tokens = list_Create(2,0);
+				long items = str_Tokenize(value_string," ",&tokens);
+				if(items != 2)
+				{
+					str_FreeTokens(tokens);
+					break;
+				}
+				((struct razer_pos*)value)->x = (long)atol(list_Dequeue(tokens));
+				((struct razer_pos*)value)->y = (long)atol(list_Dequeue(tokens));
+				//printf("got 2 integers:%d,%d\n",((struct razer_pos*)value)->x,((struct razer_pos*)value)->y);
+				str_FreeTokens(tokens);
+				free_value_after = 1;
+			}
 			break;
 		case RAZER_PARAMETER_TYPE_UNKNOWN:
 			return(0);
@@ -482,24 +516,35 @@ void dc_render_node_parameter_set(struct razer_daemon_controller *controller,int
 				dc_error_close(controller,"Out of memory!\n"); 
 			break;
 		case RAZER_PARAMETER_TYPE_INT:
-			if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&value))
-				dc_error_close(controller,"Out of memory!\n"); 
+			{
+				long l = (long)value;
+				if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&l))
+					dc_error_close(controller,"Out of memory!\n"); 
+			}
 			break;
 		case RAZER_PARAMETER_TYPE_FLOAT:
-			if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_DOUBLE,&value))
-				dc_error_close(controller,"Out of memory!\n"); 
+			{
+				double f = (double)value;
+				if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_DOUBLE,&f))
+					dc_error_close(controller,"Out of memory!\n"); 
+			}
 			break;
 		case RAZER_PARAMETER_TYPE_RENDER_NODE:
-			if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&value))
-				dc_error_close(controller,"Out of memory!\n"); 
+			{
+				long rn_uid = (long)value;
+				if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&rn_uid))
+					dc_error_close(controller,"Out of memory!\n"); 
+			}
 			break;
 		case RAZER_PARAMETER_TYPE_UINT:
-			if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_UINT32,&value))
-				dc_error_close(controller,"Out of memory!\n"); 
+			{
+				unsigned long ul = (unsigned long)value;
+				if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_UINT32,&ul))
+					dc_error_close(controller,"Out of memory!\n");
+			}
 			break;
 		case RAZER_PARAMETER_TYPE_RGB:
 			{
-				//printf("setting rgb:%d,%d,%d\n",((struct razer_rgb*)value)->r,((struct razer_rgb*)value)->g,((struct razer_rgb*)value)->b);
 				long r = ((struct razer_rgb*)value)->r;
 				long g = ((struct razer_rgb*)value)->g;
 				long b = ((struct razer_rgb*)value)->b;
@@ -590,10 +635,49 @@ void dc_render_node_parameter_set(struct razer_daemon_controller *controller,int
 			}
 			break;
 		case RAZER_PARAMETER_TYPE_INT_ARRAY:
+			{
+				long l = (long)value;
+				if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&l))
+					dc_error_close(controller,"Out of memory!\n"); 
+			}
+			break;
 		case RAZER_PARAMETER_TYPE_UINT_ARRAY:
+			{
+				unsigned long ul = (unsigned long)value;
+				if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_UINT32,&ul))
+					dc_error_close(controller,"Out of memory!\n");
+			}
+			break;
 		case RAZER_PARAMETER_TYPE_FLOAT_ARRAY:
+			{
+				double f = (double)value;
+				if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_DOUBLE,&f))
+					dc_error_close(controller,"Out of memory!\n"); 
+			}
+			break;
 		case RAZER_PARAMETER_TYPE_RGB_ARRAY:
+			{
+				long r = ((struct razer_rgb*)value)->r;
+				long g = ((struct razer_rgb*)value)->g;
+				long b = ((struct razer_rgb*)value)->b;
+				if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&r))
+					dc_error_close(controller,"Out of memory!\n"); 
+				if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&g))
+					dc_error_close(controller,"Out of memory!\n"); 
+				if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&b))
+					dc_error_close(controller,"Out of memory!\n"); 
+			}
+			break;
 		case RAZER_PARAMETER_TYPE_POS_ARRAY:
+			{	
+				long x = ((struct razer_pos*)value)->x;
+				long y = ((struct razer_pos*)value)->y;
+				if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&x))
+					dc_error_close(controller,"Out of memory!\n"); 
+				if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&y))
+					dc_error_close(controller,"Out of memory!\n"); 
+			}
+			break;
 		default:
 			printf("Error unknown type :%d\n",type);
 			free(path);
