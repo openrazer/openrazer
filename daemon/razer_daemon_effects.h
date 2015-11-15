@@ -23,7 +23,7 @@ struct razer_effect
 	int id;
 	char *name;
 	char *description;
-	int class;//1=render effect / 2=supplemental effect (non rendering)
+	int effect_class;//1=render effect / 2=supplemental effect (non rendering)
 	int fps;
 	int parameters_uid;
 	list *parameters;//struct razer_parameter

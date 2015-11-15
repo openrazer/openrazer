@@ -262,7 +262,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect_transition->name = "Slow Opacity Transition";
 	effect_transition->description = "First compute only effect";
 	effect_transition->fps = 20;
-	effect_transition->class = 2;
+	effect_transition->effect_class = 2;
 	effect_transition->input_usage_mask = RAZER_EFFECT_NO_INPUT_USED;
 	//parameter = daemon_create_parameter_int("End Counter","End of animation (Integer)",44);//TODO refactor to daemon_add_effect_parameter_int(effect,key,desc,value)
 	//daemon_add_parameter(effect_transition->parameters,parameter);	
@@ -281,7 +281,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect_mix->name = "Default Mixer";
 	effect_mix->description = "Standard effect mixer";
 	effect_mix->fps = 20;
-	effect_mix->class = 1;
+	effect_mix->effect_class = 1;
 	effect_mix->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED | RAZER_EFFECT_SECOND_INPUT_USED;
 	int effect_mix_uid = daemon_register_effect(daemon,effect_mix);
 	#ifdef USE_DEBUGGING
@@ -293,7 +293,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect_null->name = "Empty Compute Node";
 	effect_null->description = "Does nothing";
 	effect_null->fps = 1;
-	effect_null->class = 1;
+	effect_null->effect_class = 1;
 	effect_null->input_usage_mask = RAZER_EFFECT_NO_INPUT_USED;
 	int effect_null_uid = daemon_register_effect(daemon,effect_null);
 	#ifdef USE_DEBUGGING
@@ -306,7 +306,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect_wait_mouse->name = "Wait For Mouse Button Up  Compute Node";
 	effect_wait_mouse->description = "Waits for a mouse button and returns 0 ,it does nothing else";
 	effect_wait_mouse->fps = 1;
-	effect_wait_mouse->class = 1;
+	effect_wait_mouse->effect_class = 1;
 	effect_wait_mouse->input_usage_mask = RAZER_EFFECT_NO_INPUT_USED;
 	int effect_wait_mouse_uid = daemon_register_effect(daemon,effect_wait_mouse);
 	#ifdef USE_DEBUGGING
@@ -318,7 +318,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect_wait_key->name = "Wait For Key Compute Node";
 	effect_wait_key->description = "Waits for a key and returns 0 ,it does nothing else";
 	effect_wait_key->fps = 1;
-	effect_wait_key->class = 1;
+	effect_wait_key->effect_class = 1;
 	effect_wait_key->input_usage_mask = RAZER_EFFECT_NO_INPUT_USED;
 	int effect_wait_key_uid = daemon_register_effect(daemon,effect_wait_key);
 	#ifdef USE_DEBUGGING
@@ -331,7 +331,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect_random_col->name = "Randomize Color Parameter Compute Node";
 	effect_random_col->description = "Randomizes a color parameter of his parent (able to transition slowly)";
 	effect_random_col->fps = 1;
-	effect_random_col->class = 1;
+	effect_random_col->effect_class = 1;
 	effect_random_col->input_usage_mask = RAZER_EFFECT_NO_INPUT_USED;
 	parameter = daemon_create_parameter_int("Effect Length","Time transition lasts in ms(INT)",2000);
 	daemon_effect_add_parameter(effect_random_col,parameter);	
@@ -353,7 +353,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect_glimmer->name = "Glimming Mixer";
 	effect_glimmer->description = "Glimming colors switching between input effects";
 	effect_glimmer->fps = 20;
-	effect_glimmer->class = 1;
+	effect_glimmer->effect_class = 1;
 	effect_glimmer->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED | RAZER_EFFECT_SECOND_INPUT_USED;
 	int effect_glimmer_uid = daemon_register_effect(daemon,effect_glimmer);
 	#ifdef USE_DEBUGGING
@@ -366,7 +366,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect_transition_mouse->name = "Mouse Position dependant Opacity Transition";
 	effect_transition_mouse->description = "Mouse based compute only effect";
 	effect_transition_mouse->fps = 20;
-	effect_transition_mouse->class = 2;
+	effect_transition_mouse->effect_class = 2;
 	effect_transition_mouse->input_usage_mask = RAZER_EFFECT_NO_INPUT_USED;
 	effect_transition_mouse_base_range.min = &effect_transition_mouse_base_range_min;
 	effect_transition_mouse_base_range.max = &effect_transition_mouse_base_range_max;

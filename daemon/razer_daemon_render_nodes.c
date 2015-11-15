@@ -251,7 +251,7 @@ int daemon_update_render_node(struct razer_daemon *daemon,struct razer_fx_render
 			struct razer_fx_render_node *sub = list_Get(render_node->subs,i);
 			if(!sub->effect)
 				continue;
-			if(sub->effect->class&=2)
+			if(sub->effect->effect_class&=2)
 				continue;//only execute compute effects
 			if(!sub->start_ticks)
 			{

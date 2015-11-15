@@ -99,7 +99,7 @@ struct razer_effect *daemon_create_effect(void)
 	effect->dbus_event = NULL;
 	effect->fps = 1;
 	effect->input_usage_mask = 0;
-	effect->class = 0;
+	effect->effect_class = 0;
 	effect->id = 0;
 	return(effect);
 }
