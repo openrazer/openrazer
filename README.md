@@ -139,17 +139,17 @@ On Debian you can control the driver doing `/etc/init.d/razer_bcd ACTION` or usi
  	"key": "Effect Counter Array",
  	"id" : 1 ,
  	"type" : 11 ,
- 	"value" :  "description": "Counter values(int array)" },
+ 	"description": "Counter values(int array)" },
 	{
  	"key": "Effect Direction Array",
  	"id" : 2 ,
  	"type" : 11 ,
- 	"value" :  "description": "Direction values(int array)" },
+ 	"description": "Direction values(int array)" },
 	{
  	"key": "Effect Colors Array",
  	"id" : 3 ,
  	"type" : 14 ,
- 	"value" :  "description": "Base colors(rgb array)" },
+ 	"description": "Base colors(rgb array)" },
 	]}
 
 :: Setting a parameter for an effect with the unique id: 2 

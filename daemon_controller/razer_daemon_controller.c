@@ -76,12 +76,12 @@ Commands:\n\
                          linkage of a render node\n\
   -P    Get the parameter of a render node\n\
            1. Parameter: render node uid - render node the parameter belongs to\n\
-           2. Parameter: parameter uid - uid of parameter to get\n\
+           2. Parameter: parameter index - index of parameter to get\n\
            3. Parameter: array index - if parameter is an array this index will be used (optional)\n\
            Returns: parameter as json\n\
   -S    Set the parameter of a render node\n\
            1. Parameter: render node uid - render node the parameter belongs to\n\
-           2. Parameter: parameter uid - uid of parameter to set\n\
+           2. Parameter: parameter index - index of parameter to set\n\
            3. Parameter: array index - if parameter is an array this index will be used (use -1 to skip)\n\
            4. Parameter: parameter value - value to set\n\
   -d    Disconnect frame buffer\n\
@@ -123,14 +123,14 @@ int main(int argc,char *argv[])
 			case 'P':
 				{
 					int render_node_uid = atoi(argv[optind++]);
-					int parameter_uid = atoi(argv[optind++]);
+					int parameter_index = atoi(argv[optind++]);
 					int array_index = -1;
 					if(optind < argc)
 						array_index = atoi(argv[optind++]);
-					char *parameter_json = dc_render_node_parameter_get(controller,render_node_uid,parameter_uid,array_index);
+					char *parameter_json = dc_render_node_parameter_get(controller,render_node_uid,parameter_index,array_index);
 					if(verbose)
 					{
-						printf("sending get parameter value of render node: %d.%d.%d.\n",render_node_uid,parameter_uid,array_index);
+						printf("sending get parameter value of render node: %d.%d.%d.\n",render_node_uid,parameter_index,array_index);
 						printf("value: %s.\n",parameter_json);
 					}
 					else
@@ -140,14 +140,14 @@ int main(int argc,char *argv[])
 			case 'S':
 				{
 					int render_node_uid = atoi(argv[optind++]);
-					int parameter_uid = atoi(argv[optind++]);
+					int parameter_index = atoi(argv[optind++]); // TODO switch to parameter uid someday
 					//int parameter_uid = atoi(argv[optind++]);
 					int	array_index = atoi(argv[optind++]);
 					char *type = argv[optind++];
 					char *value = argv[optind++];
 					if(verbose)
-						printf("sending set parameter value of render node: %d.%d.%d = [%s].\n",render_node_uid,parameter_uid,array_index,value);
-					dc_render_node_parameter_parsed_set(controller,render_node_uid,parameter_uid,array_index,type,value);
+						printf("sending set parameter value of render node: %d.%d.%d = [%s].\n",render_node_uid,parameter_index,array_index,value);
+					dc_render_node_parameter_parsed_set(controller,render_node_uid,parameter_index,array_index,type,value);
 				}
 				break;
 			case 'M':
