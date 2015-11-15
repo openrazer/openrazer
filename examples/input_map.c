@@ -1,7 +1,5 @@
 #include "input_map.h"
 
-#define BUF_SIZE 100
-
 #define keys_max 10
 int keys_history_index = 0;
 int keys_history[keys_max];//ring buffer
