@@ -105,8 +105,71 @@ On Debian you can control the driver doing `/etc/init.d/razer_bcd ACTION` or usi
  In the driver sub directory you will find the scripts to
  start the builtin keyboard effects.
 
- To control the effects daemon however more manual work is needed
- at the moment,inspect the daemon and tests sub directories in scripts.
+
+ - Changing effect example
+
+ :: the following command will create a render node for the effect with unique id: 8 [fx_uid,name,description] ::
+
+	razer_bcd_controller -C 8 "bars example" "new rendering node"
+
+[Returns the render node uid of the created node]
+
+
+:: to activate the render node with the unique id:2 execute the next command [rn_uid] (hint: the id was returned by the previous command) ::
+
+	razer_bcd_controller -b 2
+
+[You should now see 3 moving color bars (Red,Blue,Green)]
+
+
+ - Customizing effects (setting of parameters) example
+
+:: Getting the available parameters of an effect with the unique id: 2 [rn_uid] ::
+
+ 	razer_bcd_controller -F 2
+
+ [Returns a json formatted list of the available effect parameters]
+
+ in this case:
+
+	{
+ 	"parameters_num" : 3 ,
+ 	"parameters_list": [
+	{
+ 	"key": "Effect Counter Array",
+ 	"id" : 1 ,
+ 	"type" : 11 ,
+ 	"value" :  "description": "Counter values(int array)" },
+	{
+ 	"key": "Effect Direction Array",
+ 	"id" : 2 ,
+ 	"type" : 11 ,
+ 	"value" :  "description": "Direction values(int array)" },
+	{
+ 	"key": "Effect Colors Array",
+ 	"id" : 3 ,
+ 	"type" : 14 ,
+ 	"value" :  "description": "Base colors(rgb array)" },
+	]}
+
+:: Setting a parameter for an effect with the unique id: 2 
+   [rn_uid,parameter_uid,
+    array_index (use -1 if not an array),
+    parameter_type,value(s) (enquote multiple values and use whitespaces to seperate)] ::	
+
+	razer_bcd_controller -S 2 2 0 rgb "255 255 0"
+
+[One bar should now have a yellow color]
+
+:: Return to default effect :: 
+
+	razer_bcd_controller -b 1
+
+[You should now see the heatmap like default effect again]
+
+ 
+ 
+ And take a look at the daemon and tests sub directories in scripts.
  The daemon uses dbus as its IPC mechanism, so you are not bound to shell scripts
  (someone may even write a Gui to control the daemon , maybe like the node editor in blender)
 
