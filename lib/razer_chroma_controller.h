@@ -64,6 +64,10 @@ void dc_render_node_sub_add(struct razer_daemon_controller *controller,int rende
 void dc_frame_buffer_connect(struct razer_daemon_controller *controller,int render_node_uid);
 void dc_frame_buffer_disconnect(struct razer_daemon_controller *controller);
 char *dc_fx_list(struct razer_daemon_controller *controller);
+char *dc_render_nodes_list(struct razer_daemon_controller *controller);
+char *dc_rendering_nodes_list(struct razer_daemon_controller *controller);
+char *dc_sub_nodes_list(struct razer_daemon_controller *controller,int render_node_uid);
+char *dc_render_node_parameters_list(struct razer_daemon_controller *controller,int render_node_uid);
 int dc_is_paused(struct razer_daemon_controller *controller);
 void dc_fps_set(struct razer_daemon_controller *controller,int fps);
 int dc_fps_get(struct razer_daemon_controller *controller);

@@ -32,6 +32,16 @@ Commands:\n\
            Returns: 0/1 running/paused\n\
   -x    Get fx list\n\
            Returns: fx list as json string\n\
+  -X    Get render nodes list\n\
+           Returns: render nodes list as json string\n\
+  -R    Get rendering nodes list\n\
+           Returns: rendering nodes list as json string\n\
+  -U    Get sub nodes list\n\
+           1. Parameter: render node uid - render node to get the sub nodes of\n\
+           Returns: sub nodes list as json string\n\
+  -F    Get render node parameters list\n\
+           1. Parameter: render node uid - render node to get the parameters of\n\
+           Returns: render node parameter list as json string\n\
   -a    Get the actual render node uid connected to the framebuffer\n\
            Returns: uid of node\n\
   -t    Get the parent of a render node\n\
@@ -48,7 +58,7 @@ Commands:\n\
   -r    Connect input node to render nodes first input slot\n\
            1. Parameter: render node uid - render node the input node should be connected to\n\
            2. Parameter: input node uid - input node to connect\n\
-  -r    Connect input node to render nodes second input slot\n\
+  -n    Connect input node to render nodes second input slot\n\
            1. Parameter: render node uid - render node the input node should be connected to\n\
            2. Parameter: input node uid - input node to connect\n\
   -w    Get the next node of a render node\n\
@@ -105,7 +115,7 @@ int main(int argc,char *argv[])
 	}
 	
 	int opts_given = 0;
-	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyCMGPS")) != -1)
+	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyCMGPSXRUF")) != -1)
 	{
 		opts_given = 1;
 		switch(c)
@@ -246,6 +256,60 @@ int main(int argc,char *argv[])
 					{	
 						printf("sending get effects list command to daemon.\n");
 						printf("daemon fx list:\n%s.\n",list);
+					}
+					else
+						printf("%s",list);
+					free(list);
+				}
+				break;
+			case 'X':
+				{
+					char *list = dc_render_nodes_list(controller);
+					if(verbose)
+					{	
+						printf("sending get render nodes list command to daemon.\n");
+						printf("daemon render nodes list:\n%s.\n",list);
+					}
+					else
+						printf("%s",list);
+					free(list);
+				}
+				break;
+			case 'R':
+				{
+					char *list = dc_rendering_nodes_list(controller);
+					if(verbose)
+					{	
+						printf("sending get rendering nodes list command to daemon.\n");
+						printf("daemon rendering nodes list:\n%s.\n",list);
+					}
+					else
+						printf("%s",list);
+					free(list);
+				}
+				break;
+			case 'U':
+				{
+					int render_node_uid = atoi(argv[optind++]);
+					char *list = dc_sub_nodes_list(controller,render_node_uid);
+					if(verbose)
+					{	
+						printf("sending get sub nodes list command to daemon.\n");
+						printf("daemon sub nodes list:\n%s.\n",list);
+					}
+					else
+						printf("%s",list);
+					free(list);
+				}
+				break;
+			case 'F':
+				{
+					int render_node_uid = atoi(argv[optind++]);
+					char *list = dc_render_node_parameters_list(controller,render_node_uid);
+					if(verbose)
+					{	
+						printf("sending get render node parameters list command to daemon.\n");
+						printf("daemon render node parameters list:\n%s.\n",list);
 					}
 					else
 						printf("%s",list);

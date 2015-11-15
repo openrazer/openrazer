@@ -1082,6 +1082,174 @@ char *dc_fx_list(struct razer_daemon_controller *controller)
 	return(list);
 }
 
+char *dc_render_nodes_list(struct razer_daemon_controller *controller)
+{
+	DBusMessage *msg;
+	DBusMessageIter args;
+	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon","/","org.voyagerproject.razer.daemon.render_nodes","list");
+	if(!msg)
+		dc_error_close(controller,"Error creating Message\n");
+	if(!dbus_connection_send_with_reply(controller->dbus,msg,&controller->pending,-1))
+		dc_error_close(controller,"Out of memory!\n"); 
+	if(!controller->pending)
+		dc_error_close(controller,"No pending call\n"); 
+	dbus_connection_flush(controller->dbus);
+	dbus_message_unref(msg);
+
+	char *list = NULL;
+
+	dbus_pending_call_block(controller->pending);
+	msg = dbus_pending_call_steal_reply(controller->pending);
+	if(!msg)
+		dc_error_close(controller,"Empty reply\n"); 
+	dbus_pending_call_unref(controller->pending);
+	if(!dbus_message_iter_init(msg,&args))
+		dc_error_close(controller,"Message has no arguments!\n"); 
+	else if(dbus_message_iter_get_arg_type(&args) != DBUS_TYPE_STRING) 
+		dc_error_close(controller,"Argument is not a string!\n"); 
+	else
+		dbus_message_iter_get_basic(&args,&list);
+	//if(!dbus_message_iter_next(&args))
+	//	dc_error_close(controller,"Message has too few arguments!\n"); 
+	//else if(dbus_message_iter_get_arg_type(&args) != DBUS_TYPE_UINT32) 
+	//	dc_error_close(controller,"Argument is not int!\n"); 
+	//else
+	//	dbus_message_iter_get_basic(&args,&level);
+	//printf("fx List: %s\n",list);
+	list = str_Copy(list);
+	dbus_message_unref(msg);   
+	return(list);
+}
+
+char *dc_rendering_nodes_list(struct razer_daemon_controller *controller)
+{
+	DBusMessage *msg;
+	DBusMessageIter args;
+	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon","/","org.voyagerproject.razer.daemon.render_nodes","render_list");
+	if(!msg)
+		dc_error_close(controller,"Error creating Message\n");
+	if(!dbus_connection_send_with_reply(controller->dbus,msg,&controller->pending,-1))
+		dc_error_close(controller,"Out of memory!\n"); 
+	if(!controller->pending)
+		dc_error_close(controller,"No pending call\n"); 
+	dbus_connection_flush(controller->dbus);
+	dbus_message_unref(msg);
+
+	char *list = NULL;
+
+	dbus_pending_call_block(controller->pending);
+	msg = dbus_pending_call_steal_reply(controller->pending);
+	if(!msg)
+		dc_error_close(controller,"Empty reply\n"); 
+	dbus_pending_call_unref(controller->pending);
+	if(!dbus_message_iter_init(msg,&args))
+		dc_error_close(controller,"Message has no arguments!\n"); 
+	else if(dbus_message_iter_get_arg_type(&args) != DBUS_TYPE_STRING) 
+		dc_error_close(controller,"Argument is not a string!\n"); 
+	else
+		dbus_message_iter_get_basic(&args,&list);
+	//if(!dbus_message_iter_next(&args))
+	//	dc_error_close(controller,"Message has too few arguments!\n"); 
+	//else if(dbus_message_iter_get_arg_type(&args) != DBUS_TYPE_UINT32) 
+	//	dc_error_close(controller,"Argument is not int!\n"); 
+	//else
+	//	dbus_message_iter_get_basic(&args,&level);
+	//printf("fx List: %s\n",list);
+	list = str_Copy(list);
+	dbus_message_unref(msg);   
+	return(list);
+}
+
+char *dc_sub_nodes_list(struct razer_daemon_controller *controller,int render_node_uid)
+{
+	DBusMessage *msg;
+	DBusMessageIter args;
+	char *path = str_CreateEmpty();
+	path = str_CatFree(path,"/");
+	char *suid = str_FromLong(render_node_uid);
+	path = str_CatFree(path,suid);
+	free(suid);
+	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon",path,"org.voyagerproject.razer.daemon.render_node.subs","list");
+	if(!msg)
+		dc_error_close(controller,"Error creating Message\n");
+	if(!dbus_connection_send_with_reply(controller->dbus,msg,&controller->pending,-1))
+		dc_error_close(controller,"Out of memory!\n"); 
+	if(!controller->pending)
+		dc_error_close(controller,"No pending call\n"); 
+	dbus_connection_flush(controller->dbus);
+	dbus_message_unref(msg);
+
+	char *list = NULL;
+
+	dbus_pending_call_block(controller->pending);
+	msg = dbus_pending_call_steal_reply(controller->pending);
+	if(!msg)
+		dc_error_close(controller,"Empty reply\n"); 
+	dbus_pending_call_unref(controller->pending);
+	if(!dbus_message_iter_init(msg,&args))
+		dc_error_close(controller,"Message has no arguments!\n"); 
+	else if(dbus_message_iter_get_arg_type(&args) != DBUS_TYPE_STRING) 
+		dc_error_close(controller,"Argument is not a string!\n"); 
+	else
+		dbus_message_iter_get_basic(&args,&list);
+	//if(!dbus_message_iter_next(&args))
+	//	dc_error_close(controller,"Message has too few arguments!\n"); 
+	//else if(dbus_message_iter_get_arg_type(&args) != DBUS_TYPE_UINT32) 
+	//	dc_error_close(controller,"Argument is not int!\n"); 
+	//else
+	//	dbus_message_iter_get_basic(&args,&level);
+	//printf("fx List: %s\n",list);
+	list = str_Copy(list);
+	dbus_message_unref(msg);   
+	return(list);
+}
+
+char *dc_render_node_parameters_list(struct razer_daemon_controller *controller,int render_node_uid)
+{
+	DBusMessage *msg;
+	DBusMessageIter args;
+	char *path = str_CreateEmpty();
+	path = str_CatFree(path,"/");
+	char *suid = str_FromLong(render_node_uid);
+	path = str_CatFree(path,suid);
+	free(suid);
+	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon",path,"org.voyagerproject.razer.daemon.render_node.parameters","list");
+	if(!msg)
+		dc_error_close(controller,"Error creating Message\n");
+	if(!dbus_connection_send_with_reply(controller->dbus,msg,&controller->pending,-1))
+		dc_error_close(controller,"Out of memory!\n"); 
+	if(!controller->pending)
+		dc_error_close(controller,"No pending call\n"); 
+	dbus_connection_flush(controller->dbus);
+	dbus_message_unref(msg);
+
+	char *list = NULL;
+
+	dbus_pending_call_block(controller->pending);
+	msg = dbus_pending_call_steal_reply(controller->pending);
+	if(!msg)
+		dc_error_close(controller,"Empty reply\n"); 
+	dbus_pending_call_unref(controller->pending);
+	if(!dbus_message_iter_init(msg,&args))
+		dc_error_close(controller,"Message has no arguments!\n"); 
+	else if(dbus_message_iter_get_arg_type(&args) != DBUS_TYPE_STRING) 
+		dc_error_close(controller,"Argument is not a string!\n"); 
+	else
+		dbus_message_iter_get_basic(&args,&list);
+	//if(!dbus_message_iter_next(&args))
+	//	dc_error_close(controller,"Message has too few arguments!\n"); 
+	//else if(dbus_message_iter_get_arg_type(&args) != DBUS_TYPE_UINT32) 
+	//	dc_error_close(controller,"Argument is not int!\n"); 
+	//else
+	//	dbus_message_iter_get_basic(&args,&level);
+	//printf("fx List: %s\n",list);
+	list = str_Copy(list);
+	dbus_message_unref(msg);   
+	return(list);
+}
+
+
+
 int dc_is_paused(struct razer_daemon_controller *controller)
 {
 	DBusMessage *msg;
