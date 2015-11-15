@@ -302,30 +302,133 @@ int dc_render_node_parameter_parsed_set(struct razer_daemon_controller *controll
 			value = atof(value_string);
 			break;
 		case RAZER_PARAMETER_TYPE_RGB:
-			value = (unsigned long long)malloc(sizeof(struct razer_rgb));
-			list *tokens = list_Create(3,0);
-			long items = str_Tokenize(value_string," ",&tokens);
-			if(items != 3)
-				break;
-			((struct razer_rgb*)value)->r = (unsigned char)atoi(list_Dequeue(tokens));
-			((struct razer_rgb*)value)->g = (unsigned char)atoi(list_Dequeue(tokens));
-			((struct razer_rgb*)value)->b = (unsigned char)atoi(list_Dequeue(tokens));
-			//printf("got 3 integers:%d,%d,%d\n",((struct razer_rgb*)value)->r,((struct razer_rgb*)value)->g,((struct razer_rgb*)value)->b);
-			free_value_after = 1;
+		 	{
+				value = (unsigned long long)malloc(sizeof(struct razer_rgb));
+				list *tokens = list_Create(3,0);
+				long items = str_Tokenize(value_string," ",&tokens);
+				if(items != 3)
+				{
+					str_FreeTokens(tokens);
+					break;
+				}
+				((struct razer_rgb*)value)->r = (unsigned char)atoi(list_Dequeue(tokens));
+				((struct razer_rgb*)value)->g = (unsigned char)atoi(list_Dequeue(tokens));
+				((struct razer_rgb*)value)->b = (unsigned char)atoi(list_Dequeue(tokens));
+				//printf("got 3 integers:%d,%d,%d\n",((struct razer_rgb*)value)->r,((struct razer_rgb*)value)->g,((struct razer_rgb*)value)->b);
+				str_FreeTokens(tokens);
+				free_value_after = 1;
+			}
 			break;
 		case RAZER_PARAMETER_TYPE_POS:
+			{
+				value = (unsigned long long)malloc(sizeof(struct razer_pos));
+				list *tokens = list_Create(2,0);
+				long items = str_Tokenize(value_string," ",&tokens);
+				if(items != 2)
+				{
+					str_FreeTokens(tokens);
+					break;
+				}
+				((struct razer_pos*)value)->x = (long)atol(list_Dequeue(tokens));
+				((struct razer_pos*)value)->y = (long)atol(list_Dequeue(tokens));
+				//printf("got 2 integers:%d,%d\n",((struct razer_pos*)value)->x,((struct razer_pos*)value)->y);
+				str_FreeTokens(tokens);
+				free_value_after = 1;
+			}
 			break;
 		case RAZER_PARAMETER_TYPE_RENDER_NODE:
+			value = atol(value_string);
 			break;
 		case RAZER_PARAMETER_TYPE_FLOAT_RANGE:
+			{
+				value = (unsigned long long)malloc(sizeof(struct razer_float_range));
+				list *tokens = list_Create(2,0);
+				long items = str_Tokenize(value_string," ",&tokens);
+				if(items != 2)
+				{
+					str_FreeTokens(tokens);
+					break;
+				}
+				((struct razer_float_range*)value)->min = (float)atof(list_Dequeue(tokens));
+				((struct razer_float_range*)value)->max = (float)atof(list_Dequeue(tokens));
+				//printf("got 2 floats:%f,%f\n",((struct razer_float_range*)value)->min,((struct razer_float_range*)value)->max);
+				str_FreeTokens(tokens);
+				free_value_after = 1;
+			}
 			break;
 		case RAZER_PARAMETER_TYPE_INT_RANGE:
+			{
+				value = (unsigned long long)malloc(sizeof(struct razer_int_range));
+				list *tokens = list_Create(2,0);
+				long items = str_Tokenize(value_string," ",&tokens);
+				if(items != 2)
+				{
+					str_FreeTokens(tokens);
+					break;
+				}
+				((struct razer_int_range*)value)->min = (long)atol(list_Dequeue(tokens));
+				((struct razer_int_range*)value)->max = (long)atol(list_Dequeue(tokens));
+				//printf("got 2 integers:%d,%d\n",((struct razer_int_range*)value)->min,((struct razer_int_range*)value)->max);
+				str_FreeTokens(tokens);
+				free_value_after = 1;
+			}
 			break;
 		case RAZER_PARAMETER_TYPE_UINT_RANGE:
+			{
+				value = (unsigned long long)malloc(sizeof(struct razer_uint_range));
+				list *tokens = list_Create(2,0);
+				long items = str_Tokenize(value_string," ",&tokens);
+				if(items != 2)
+				{
+					str_FreeTokens(tokens);
+					break;
+				}
+				((struct razer_uint_range*)value)->min = (unsigned long)atol(list_Dequeue(tokens));
+				((struct razer_uint_range*)value)->max = (unsigned long)atol(list_Dequeue(tokens));
+				//printf("got 2 unsigned integers:%d,%d\n",((struct razer_uint_range*)value)->min,((struct razer_uint_range*)value)->max);
+				str_FreeTokens(tokens);
+				free_value_after = 1;
+			}
 			break;
 		case RAZER_PARAMETER_TYPE_RGB_RANGE:
+			{
+				value = (unsigned long long)malloc(sizeof(struct razer_rgb_range));
+				list *tokens = list_Create(6,0);
+				long items = str_Tokenize(value_string," ",&tokens);
+				if(items != 6)
+				{
+					str_FreeTokens(tokens);
+					break;
+				}
+				((struct razer_rgb_range*)value)->min->r = (unsigned char)atoi(list_Dequeue(tokens));
+				((struct razer_rgb_range*)value)->min->g = (unsigned char)atoi(list_Dequeue(tokens));
+				((struct razer_rgb_range*)value)->min->b = (unsigned char)atoi(list_Dequeue(tokens));
+				((struct razer_rgb_range*)value)->max->r = (unsigned char)atoi(list_Dequeue(tokens));
+				((struct razer_rgb_range*)value)->max->g = (unsigned char)atoi(list_Dequeue(tokens));
+				((struct razer_rgb_range*)value)->max->b = (unsigned char)atoi(list_Dequeue(tokens));
+				//printf("got 6 integers:%d,%d,%d,%d,%d,%d\n",((struct razer_rgb_range*)value)->min->r,((struct razer_rgb_range*)value)->min->g,((struct razer_rgb_range*)value)->min->b,((struct razer_rgb_range*)value)->max->r,((struct razer_rgb_range*)value)->max->g,((struct razer_rgb_range*)value)->max->b);
+				str_FreeTokens(tokens);
+				free_value_after = 1;
+			}
 			break;
 		case RAZER_PARAMETER_TYPE_POS_RANGE:
+			{
+				value = (unsigned long long)malloc(sizeof(struct razer_pos_range));
+				list *tokens = list_Create(4,0);
+				long items = str_Tokenize(value_string," ",&tokens);
+				if(items != 4)
+				{
+					str_FreeTokens(tokens);
+					break;
+				}
+				((struct razer_pos_range*)value)->min->x = (long)atol(list_Dequeue(tokens));
+				((struct razer_pos_range*)value)->min->y = (long)atol(list_Dequeue(tokens));
+				((struct razer_pos_range*)value)->max->x = (long)atol(list_Dequeue(tokens));
+				((struct razer_pos_range*)value)->max->y = (long)atol(list_Dequeue(tokens));
+				//printf("got 4 integers:%d,%d,%d,%d\n",((struct razer_pos_range*)value)->min->x,((struct razer_pos_range*)value)->min->y,((struct razer_pos_range*)value)->max->x,((struct razer_pos_range*)value)->max->y);
+				str_FreeTokens(tokens);
+				free_value_after = 1;
+			}
 			break;
 		case RAZER_PARAMETER_TYPE_INT_ARRAY:
 			break;
