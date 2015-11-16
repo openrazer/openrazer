@@ -11,8 +11,19 @@ char *daemon_render_node_to_json(struct razer_fx_render_node *render_node)
 	free(id_string);
 	rn_json = str_CatFree(rn_json," \"name\": \"");
 	rn_json = str_CatFree(rn_json,render_node->name);
-	rn_json = str_CatFree(rn_json,"\" ,\ndescription\": \"");
+	rn_json = str_CatFree(rn_json,"\" ,\n \"description\": \"");
 	rn_json = str_CatFree(rn_json,render_node->description);
+
+	rn_json = str_CatFree(rn_json,"\" ,\n \"effect_id\": \"");
+	if(render_node->effect != NULL)
+	{
+		char *effect_id_string = str_FromLong(render_node->effect->id);
+		rn_json = str_CatFree(rn_json, effect_id_string);
+		free(effect_id_string);
+	} else {
+		rn_json = str_CatFree(rn_json,"None");
+	}
+
 	/*effect_json = str_CatFree(effect_json,"\" ,\n \"subs_num\" : ");
 	char *parameters_num_string = str_FromLong(effect->parameters->num);
 	effect_json = str_CatFree(effect_json,parameters_num_string);
