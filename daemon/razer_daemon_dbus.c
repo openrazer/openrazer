@@ -1995,6 +1995,46 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				</method>\n\
 				<method name=\"continue\">\n\
 				</method>\n\
+				<method name=\"enable_macro_keys\">\n\
+				</method>\n\
+				<method name=\"raw_keyboard_brightness\">\n\
+					<arg direction=\"in\" name=\"brightness\" type=\"y\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.driver_effect\">\n\
+				<method name=\"none\">\n\
+				</method>\n\
+				<method name=\"spectrum\">\n\
+				</method>\n\
+				<method name=\"static\">\n\
+					<arg direction=\"in\" name=\"red\" type=\"y\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"green\" type=\"y\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"blue\" type=\"y\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"breath\">\n\
+					<arg direction=\"in\" name=\"red\" type=\"y\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"green\" type=\"y\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"blue\" type=\"y\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"reactive\">\n\
+					<arg direction=\"in\" name=\"red\" type=\"y\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"green\" type=\"y\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"blue\" type=\"y\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"wave\">\n\
+					<arg direction=\"in\" name=\"direction\" type=\"y\">\n\
+					</arg>\n\
+				</method>\n\
 			</interface>\n\
 			<interface name=\"org.voyagerproject.razer.daemon.fps\">\n\
 				<method name=\"set\">\n\
