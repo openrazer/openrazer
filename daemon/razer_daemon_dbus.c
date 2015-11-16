@@ -263,7 +263,14 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			rn_list_json = str_CatFree(rn_list_json," \"parameters_list\": [\n");
 			for(int i=0;i<render_node->effect->parameters->num;i++)
 			{
-				char *rn_json = daemon_parameter_to_json(render_node->effect->parameters->items[i]);
+				char *rn_json;
+				if(i == render_node->effect->parameters->num - 1)
+				{
+					rn_json = daemon_parameter_to_json(render_node->effect->parameters->items[i], 1);
+				} else {
+					rn_json = daemon_parameter_to_json(render_node->effect->parameters->items[i], 0);
+				}
+
 				rn_list_json = str_CatFree(rn_list_json,rn_json);
 				free(rn_json);
 			}
@@ -322,7 +329,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				}
 				else
 				{
-					char *parameter_json = daemon_parameter_to_json(parameter);
+					char *parameter_json = daemon_parameter_to_json(parameter, 1);
 					rn_list_json = str_CatFree(rn_list_json,parameter_json);
 					free(parameter_json);
 				}
@@ -1444,10 +1451,17 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		fx_list_json = str_CatFree(fx_list_json," ,\n");
 		free(effects_num_string);
 		fx_list_json = str_CatFree(fx_list_json," \"effects_list\": [\n");
-		for(int i=0;i<list_GetLen(daemon->effects);i++)
+		int list_length = list_GetLen(daemon->effects);
+		for(int i=0;i<list_length;i++)
 		{
 			struct razer_effect *effect = list_Get(daemon->effects,i);
-			char *effect_json = daemon_effect_to_json(effect);
+			char *effect_json;
+			if(i == list_length - 1)
+			{
+				effect_json = daemon_effect_to_json(effect, 1);
+			} else {
+				effect_json = daemon_effect_to_json(effect, 0);
+			}
 			fx_list_json = str_CatFree(fx_list_json,effect_json);
 			free(effect_json);
 		}

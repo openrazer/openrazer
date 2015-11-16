@@ -38,7 +38,7 @@ struct razer_effect
 	void *tag;
 };
 
-char *daemon_effect_to_json(struct razer_effect *effect);
+char *daemon_effect_to_json(struct razer_effect *effect, int final);
 
 struct razer_effect *daemon_create_effect(void);
 void daemon_free_effect(struct razer_effect *effect);
