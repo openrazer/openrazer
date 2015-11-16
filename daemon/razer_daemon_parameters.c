@@ -47,7 +47,7 @@ char *daemon_parameter_type_to_string(struct razer_parameter *parameter)
 
 
 
-char *daemon_parameter_to_json(struct razer_parameter *parameter)
+char *daemon_parameter_to_json(struct razer_parameter *parameter, int final)
 {
 	char *parameter_json = str_CreateEmpty();
 	parameter_json = str_CatFree(parameter_json,"{\n \"key\": \"");
@@ -275,7 +275,13 @@ char *daemon_parameter_to_json(struct razer_parameter *parameter)
 
 	parameter_json = str_CatFree(parameter_json," \"description\": \"");
 	parameter_json = str_CatFree(parameter_json,parameter->description);
-	parameter_json = str_CatFree(parameter_json,"\" },\n");
+	if(final)
+	{
+		parameter_json = str_CatFree(parameter_json,"\" }\n");
+	} else {
+		parameter_json = str_CatFree(parameter_json,"\" },\n");
+	}
+
 	return(parameter_json);
 }
 

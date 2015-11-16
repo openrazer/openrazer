@@ -199,7 +199,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect->name = "Simple Spectrum display #1";
 	effect->description = "Spectrum analyzer for sound input devices";
 	effect->fps = 15;
-	effect->class = 1;
+	effect->effect_class = 1;
 	effect->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 	parameter = daemon_create_parameter_string("Effect Input Device","Filepath pointing to the sound input device/file(wav format) (STRING)","/dev/dsp");
 	daemon_effect_add_parameter(effect,parameter);	

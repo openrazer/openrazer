@@ -151,6 +151,23 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon","quit"))
 		return(0);
+
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon","enable_macro_keys"))
+		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon","raw_keyboard_brightness"))
+		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","none"))
+		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","static"))
+		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","breath"))
+		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","reactive"))
+		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","wave"))
+		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","spectrum"))
+		return(0);
 	return(1);
 }
 
@@ -172,7 +189,371 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 	msg = dbus_connection_pop_message(daemon->dbus);
 	if(!msg)
 		return(0);
+
+
 	//printf("dbus: received message:type:%d ,path:%s ,interface:%s ,member:%s\n",dbus_message_get_type(msg),dbus_message_get_path(msg),dbus_message_get_interface(msg),dbus_message_get_member(msg));
+
+	if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon", "enable_macro_keys"))
+		{
+			#ifdef USE_DEBUGGING
+				printf("\ndbus: method enable_macro_keys called\n");
+			#endif
+
+			char *device_path = str_CreateEmpty();
+			device_path = str_CatFree(device_path, daemon->chroma->device_path);
+			device_path = str_CatFree(device_path, "/macro_keys");
+
+			#ifdef USE_DEBUGGING
+			printf("Device path: %s\n", device_path);
+			#endif
+
+			FILE* fp;
+			fp = fopen(device_path, "w");
+			fprintf(fp, "%d", 1);
+			fclose(fp);
+			free(device_path);
+
+
+			reply = dbus_message_new_method_return(msg);
+	 		dbus_uint32_t serial = 0;
+	 		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+				daemon_kill(daemon,"dbus: Out Of Memory!\n");
+			dbus_connection_flush(daemon->dbus);
+		}
+
+
+	if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon", "raw_keyboard_brightness"))
+		{
+			int brightness=0;
+			reply = dbus_message_new_method_return(msg);
+
+			if(dbus_message_iter_init(msg, &parameters))
+			{
+				if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_BYTE)
+				{
+					dbus_message_iter_get_basic(&parameters,&brightness);
+				}
+				dbus_message_iter_init_append(reply,&parameters);
+				#ifdef USE_DEBUGGING
+					printf("\ndbus: setting brightness to: %d\n", brightness);
+				#endif
+
+				char *device_path = str_CreateEmpty();
+				device_path = str_CatFree(device_path, daemon->chroma->device_path);
+				device_path = str_CatFree(device_path, "/set_brightness");
+
+				#ifdef USE_DEBUGGING
+				printf("Device path: %s\n", device_path);
+				#endif
+
+				FILE* fp;
+				fp = fopen(device_path, "w");
+				fprintf(fp, "%d", brightness);
+				fclose(fp);
+				free(device_path);
+
+			}
+	 		dbus_uint32_t serial = 0;
+	 		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+				daemon_kill(daemon,"dbus: Out Of Memory!\n");
+			dbus_connection_flush(daemon->dbus);
+		}
+	if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.driver_effect", "none"))
+			{
+				#ifdef USE_DEBUGGING
+					printf("\ndbus: method enable_macro_keys called\n");
+				#endif
+
+				char *device_path = str_CreateEmpty();
+				device_path = str_CatFree(device_path, daemon->chroma->device_path);
+				device_path = str_CatFree(device_path, "/mode_none");
+
+				#ifdef USE_DEBUGGING
+				printf("Device path: %s\n", device_path);
+				#endif
+
+				daemon->is_paused = 1;
+				FILE* fp;
+				fp = fopen(device_path, "w");
+				fprintf(fp, "%d", 1);
+				fclose(fp);
+				free(device_path);
+
+
+				reply = dbus_message_new_method_return(msg);
+		 		dbus_uint32_t serial = 0;
+		 		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+					daemon_kill(daemon,"dbus: Out Of Memory!\n");
+				dbus_connection_flush(daemon->dbus);
+			}
+
+	if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.driver_effect", "static"))
+		{
+			unsigned char red=0;
+			unsigned char green=0;
+			unsigned char blue=0;
+			reply = dbus_message_new_method_return(msg);
+
+			if(dbus_message_iter_init(msg, &parameters))
+			{
+				if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_BYTE)
+				{
+					dbus_message_iter_get_basic(&parameters,&red);
+				}
+				dbus_message_iter_next(&parameters);
+				if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_BYTE)
+				{
+					dbus_message_iter_get_basic(&parameters,&green);
+				}
+				dbus_message_iter_next(&parameters);
+				if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_BYTE)
+				{
+					dbus_message_iter_get_basic(&parameters,&blue);
+				}
+
+				dbus_message_iter_init_append(reply,&parameters);
+
+				#ifdef USE_DEBUGGING
+					printf("\ndbus: method set mode static called\n");
+				#endif
+
+				char *device_path = str_CreateEmpty();
+				device_path = str_CatFree(device_path, daemon->chroma->device_path);
+				device_path = str_CatFree(device_path, "/mode_static");
+
+				#ifdef USE_DEBUGGING
+				printf("Device path: %s -  R: %d, G: %d, B: %d\n", device_path, red, green, blue);
+				#endif
+
+				daemon->is_paused = 1;
+				FILE* fp;
+				fp = fopen(device_path, "w");
+				if(fp != NULL) {
+				  fwrite(&red, 1, 1, fp);
+				  fwrite(&green, 1, 1, fp);
+				  fwrite(&blue, 1, 1, fp);
+				  fclose(fp);
+				} else {
+				  printf("Writing static colour file buffer is NULL!\n");
+				}
+
+				free(device_path);
+
+			}
+	 		dbus_uint32_t serial = 0;
+	 		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+				daemon_kill(daemon,"dbus: Out Of Memory!\n");
+			dbus_connection_flush(daemon->dbus);
+		}
+	if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.driver_effect", "breath"))
+			{
+				unsigned char red=0; // TODO doesnt work yet
+				unsigned char green=0;
+				unsigned char blue=0;
+				unsigned char num_cols=255;
+				reply = dbus_message_new_method_return(msg);
+
+				if(dbus_message_iter_init(msg, &parameters))
+				{
+					if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_BYTE)
+					{
+						dbus_message_iter_get_basic(&parameters,&red);
+					}
+					dbus_message_iter_next(&parameters);
+					if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_BYTE)
+					{
+						dbus_message_iter_get_basic(&parameters,&green);
+					}
+					dbus_message_iter_next(&parameters);
+					if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_BYTE)
+					{
+						dbus_message_iter_get_basic(&parameters,&blue);
+					}
+
+					dbus_message_iter_init_append(reply,&parameters);
+
+					#ifdef USE_DEBUGGING
+						printf("\ndbus: method set mode breath called\n");
+					#endif
+
+					char *device_path = str_CreateEmpty();
+					device_path = str_CatFree(device_path, daemon->chroma->device_path);
+					device_path = str_CatFree(device_path, "/mode_breath");
+
+					#ifdef USE_DEBUGGING
+					printf("Device path: %s -  R: %d, G: %d, B: %d\n", device_path, red, green, blue);
+					#endif
+
+					daemon->is_paused = 1;
+					FILE* fp;
+					fp = fopen(device_path, "w");
+					if(fp != NULL) {
+					  fwrite(&num_cols, 1, 1, fp);
+					  fwrite(&red, 1, 1, fp);
+					  fwrite(&green, 1, 1, fp);
+					  fwrite(&blue, 1, 1, fp);
+
+					  fclose(fp);
+					} else {
+					  printf("Writing breath file buffer is NULL!\n");
+					}
+
+					free(device_path);
+
+				}
+		 		dbus_uint32_t serial = 0;
+		 		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+					daemon_kill(daemon,"dbus: Out Of Memory!\n");
+				dbus_connection_flush(daemon->dbus);
+			}
+
+	if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.driver_effect", "reactive"))
+				{
+					unsigned char red=0;
+					unsigned char green=0;
+					unsigned char blue=0;
+					unsigned char speed=255; // TODO dont know if speed works
+					reply = dbus_message_new_method_return(msg);
+
+					if(dbus_message_iter_init(msg, &parameters))
+					{
+						if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_BYTE)
+						{
+							dbus_message_iter_get_basic(&parameters,&red);
+						}
+						dbus_message_iter_next(&parameters);
+						if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_BYTE)
+						{
+							dbus_message_iter_get_basic(&parameters,&green);
+						}
+						dbus_message_iter_next(&parameters);
+						if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_BYTE)
+						{
+							dbus_message_iter_get_basic(&parameters,&blue);
+						}
+
+						dbus_message_iter_init_append(reply,&parameters);
+
+						#ifdef USE_DEBUGGING
+							printf("\ndbus: method set mode reactive called\n");
+						#endif
+
+						char *device_path = str_CreateEmpty();
+						device_path = str_CatFree(device_path, daemon->chroma->device_path);
+						device_path = str_CatFree(device_path, "/mode_reactive");
+
+						#ifdef USE_DEBUGGING
+						printf("Device path: %s -  R: %d, G: %d, B: %d, Speed: %d\n", device_path, red, green, blue, speed);
+						#endif
+
+						daemon->is_paused = 1;
+						FILE* fp;
+						fp = fopen(device_path, "w");
+						if(fp != NULL) {
+						  fwrite(&speed, 1, 1, fp);
+						  fwrite(&red, 1, 1, fp);
+						  fwrite(&green, 1, 1, fp);
+						  fwrite(&blue, 1, 1, fp);
+
+						  fclose(fp);
+						} else {
+						  printf("Writing reactive file buffer is NULL!\n");
+						}
+
+						free(device_path);
+
+					}
+			 		dbus_uint32_t serial = 0;
+			 		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+						daemon_kill(daemon,"dbus: Out Of Memory!\n");
+					dbus_connection_flush(daemon->dbus);
+				}
+	if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.driver_effect", "wave"))
+					{
+						unsigned char direction=0;
+						// None = 0
+						// Right = 1
+						// Left = 2
+						reply = dbus_message_new_method_return(msg);
+
+						if(dbus_message_iter_init(msg, &parameters))
+						{
+							if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_BYTE)
+							{
+								dbus_message_iter_get_basic(&parameters,&direction);
+							}
+
+							dbus_message_iter_init_append(reply,&parameters);
+
+							#ifdef USE_DEBUGGING
+								printf("\ndbus: method set mode wave called\n");
+							#endif
+
+							char *device_path = str_CreateEmpty();
+							device_path = str_CatFree(device_path, daemon->chroma->device_path);
+							device_path = str_CatFree(device_path, "/mode_wave");
+
+							#ifdef USE_DEBUGGING
+							if(direction == 0)
+							{
+							  printf("Device path: %s -  Direction None\n", device_path);
+							} else if(direction == 1)
+							{
+							  printf("Device path: %s -  Direction Right\n", device_path);
+							} else if(direction == 2)
+							{
+							  printf("Device path: %s -  Direction Left\n", device_path);
+							} else {
+							  printf("Device path: %s -  Direction Unknown\n", device_path);
+							}
+							#endif
+
+							daemon->is_paused = 1;
+							FILE* fp;
+							fp = fopen(device_path, "w");
+							if(fp != NULL) {
+							  fprintf(fp, "%d", direction);
+							  fclose(fp);
+							} else {
+							  printf("Writing wave file buffer is NULL!\n");
+							}
+
+							free(device_path);
+
+						}
+				 		dbus_uint32_t serial = 0;
+				 		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+							daemon_kill(daemon,"dbus: Out Of Memory!\n");
+						dbus_connection_flush(daemon->dbus);
+					}
+	if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.driver_effect", "spectrum"))
+				{
+					#ifdef USE_DEBUGGING
+						printf("\ndbus: method spectrum called\n");
+					#endif
+
+					char *device_path = str_CreateEmpty();
+					device_path = str_CatFree(device_path, daemon->chroma->device_path);
+					device_path = str_CatFree(device_path, "/mode_spectrum");
+
+					#ifdef USE_DEBUGGING
+					printf("Device path: %s\n", device_path);
+					#endif
+
+					daemon->is_paused = 1;
+					FILE* fp;
+					fp = fopen(device_path, "w");
+					fprintf(fp, "%d", 1);
+					fclose(fp);
+					free(device_path);
+
+
+					reply = dbus_message_new_method_return(msg);
+			 		dbus_uint32_t serial = 0;
+			 		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+						daemon_kill(daemon,"dbus: Out Of Memory!\n");
+					dbus_connection_flush(daemon->dbus);
+				}
     if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_nodes", "list")) 
 	{
 		#ifdef USE_DEBUGGING
@@ -263,7 +644,14 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			rn_list_json = str_CatFree(rn_list_json," \"parameters_list\": [\n");
 			for(int i=0;i<render_node->effect->parameters->num;i++)
 			{
-				char *rn_json = daemon_parameter_to_json(render_node->effect->parameters->items[i]);
+				char *rn_json;
+				if(i == render_node->effect->parameters->num - 1)
+				{
+					rn_json = daemon_parameter_to_json(render_node->effect->parameters->items[i], 1);
+				} else {
+					rn_json = daemon_parameter_to_json(render_node->effect->parameters->items[i], 0);
+				}
+
 				rn_list_json = str_CatFree(rn_list_json,rn_json);
 				free(rn_json);
 			}
@@ -322,7 +710,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				}
 				else
 				{
-					char *parameter_json = daemon_parameter_to_json(parameter);
+					char *parameter_json = daemon_parameter_to_json(parameter, 1);
 					rn_list_json = str_CatFree(rn_list_json,parameter_json);
 					free(parameter_json);
 				}
@@ -1444,10 +1832,17 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		fx_list_json = str_CatFree(fx_list_json," ,\n");
 		free(effects_num_string);
 		fx_list_json = str_CatFree(fx_list_json," \"effects_list\": [\n");
-		for(int i=0;i<list_GetLen(daemon->effects);i++)
+		int list_length = list_GetLen(daemon->effects);
+		for(int i=0;i<list_length;i++)
 		{
 			struct razer_effect *effect = list_Get(daemon->effects,i);
-			char *effect_json = daemon_effect_to_json(effect);
+			char *effect_json;
+			if(i == list_length - 1)
+			{
+				effect_json = daemon_effect_to_json(effect, 1);
+			} else {
+				effect_json = daemon_effect_to_json(effect, 0);
+			}
 			fx_list_json = str_CatFree(fx_list_json,effect_json);
 			free(effect_json);
 		}
@@ -1599,6 +1994,46 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 					</arg>\n\
 				</method>\n\
 				<method name=\"continue\">\n\
+				</method>\n\
+				<method name=\"enable_macro_keys\">\n\
+				</method>\n\
+				<method name=\"raw_keyboard_brightness\">\n\
+					<arg direction=\"in\" name=\"brightness\" type=\"y\">\n\
+					</arg>\n\
+				</method>\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.driver_effect\">\n\
+				<method name=\"none\">\n\
+				</method>\n\
+				<method name=\"spectrum\">\n\
+				</method>\n\
+				<method name=\"static\">\n\
+					<arg direction=\"in\" name=\"red\" type=\"y\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"green\" type=\"y\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"blue\" type=\"y\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"breath\">\n\
+					<arg direction=\"in\" name=\"red\" type=\"y\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"green\" type=\"y\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"blue\" type=\"y\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"reactive\">\n\
+					<arg direction=\"in\" name=\"red\" type=\"y\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"green\" type=\"y\">\n\
+					</arg>\n\
+					<arg direction=\"in\" name=\"blue\" type=\"y\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"wave\">\n\
+					<arg direction=\"in\" name=\"direction\" type=\"y\">\n\
+					</arg>\n\
 				</method>\n\
 			</interface>\n\
 			<interface name=\"org.voyagerproject.razer.daemon.fps\">\n\
