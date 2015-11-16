@@ -58,11 +58,19 @@ char *daemon_parameter_to_json(struct razer_parameter *parameter)
 	parameter_json = str_CatFree(parameter_json,id_string);
 	parameter_json = str_CatFree(parameter_json," ,\n");
 	free(id_string);
-	parameter_json = str_CatFree(parameter_json," \"type\" : ");
-	char *type_string = str_FromLong(parameter->type);
-	parameter_json = str_CatFree(parameter_json,type_string);
-	parameter_json = str_CatFree(parameter_json," ,\n");
-	free(type_string);
+	parameter_json = str_CatFree(parameter_json," \"type\" : \"");
+	//char *type_string = str_FromLong(parameter->type);
+	//parameter_json = str_CatFree(parameter_json,type_string);
+	parameter_json = str_CatFree(parameter_json,daemon_parameter_type_to_string(parameter));
+	parameter_json = str_CatFree(parameter_json,"\" ,\n");
+	//free(type_string);
+	parameter_json = str_CatFree(parameter_json," \"private\" : ");
+	if(parameter->private)
+		parameter_json = str_CatFree(parameter_json," true,\n");
+	else
+		parameter_json = str_CatFree(parameter_json," false,\n");
+
+
 	switch(parameter->type)
 	{
 		case RAZER_PARAMETER_TYPE_STRING:

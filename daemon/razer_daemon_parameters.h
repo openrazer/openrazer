@@ -33,6 +33,7 @@ struct razer_parameter
 	char *description;
 	unsigned long value;
 	int type;
+	int private;
 };
 
 char *daemon_parameter_to_json(struct razer_parameter *parameter);

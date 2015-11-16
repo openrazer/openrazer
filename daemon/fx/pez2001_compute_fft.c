@@ -1,4 +1,144 @@
-#include "../razer_daemon.h"
+#include "pez2001_compute_fft.h"
+
+
+const char RIFF_MAGIC[] = "RIFF";
+const char WAVE_MAGIC[] = "WAVE";
+const char WAVE_CHUNK_MAGIC[] = "fmt ";
+const char WAVE_CHUNK_DATA_MAGIC[] = "data";
+
+void close_wav(wav_file *wf)
+{
+ if(wf==NULL)
+  return;
+ fclose(wf->file);
+ free(wf->filename);
+ free(wf->header);
+ if(wf->sample_buffer!=NULL)
+  free(wf->sample_buffer);
+ free(wf);
+}
+
+unsigned long get_samplerate(wav_file *wf)
+{
+ return(wf->header->samplerate);
+}
+
+unsigned short get_channels(wav_file *wf)
+{
+ return(wf->header->channels);
+}
+
+unsigned long get_bitrate(wav_file *wf)
+{
+ return(wf->header->bitrate);
+}
+
+unsigned long get_bits_per_sample(wav_file *wf)
+{
+ return(wf->header->bits_per_sample);
+}
+
+unsigned short get_format_tag(wav_file *wf)
+{
+ return(wf->header->format_tag);
+}
+
+unsigned short get_block_align(wav_file *wf)
+{
+ return(wf->header->block_align);
+}
+
+unsigned long get_actual_sample_index(wav_file *wf)
+{
+ return( (wf->offset-WAVE_HEADER_LENGTH + wf->sample_buffer_offset )/wf->header->block_align);
+}
+
+int fill_sample_buffer(wav_file *wf)
+{
+ int samples_read = fread((void*)wf->sample_buffer,1,wf->sample_buffer_length,wf->file);
+ wf->offset+=samples_read;
+ wf->sample_buffer_used = samples_read;
+ wf->sample_buffer_offset = 0;
+}
+
+wav_file *open_wav(char *filename)
+{
+ wav_file *state = (wav_file*)malloc(sizeof(wav_file));
+ state->file = fopen(filename,"rb");
+ if(state->file==NULL)
+  {
+   free(state);
+   return(NULL);
+  }
+ state->filename = (char*)malloc(strlen(filename)+1);
+ strcpy(state->filename,filename);
+ state->header = (wav_header*)malloc(sizeof(wav_header));
+ state->sample_buffer=NULL;
+ state->sample_buffer_length=0;
+ memset(state->header,0,sizeof(wav_header));
+ int r = fread((void*)state->header,sizeof(wav_header),1,state->file);
+ if(!r)
+ {
+  close_wav(state);
+  return(NULL);
+ }
+ /*header sanity check*/
+ if(memcmp(state->header->riff_magic,&RIFF_MAGIC,4) || memcmp(state->header->wave_magic,&WAVE_MAGIC,4)
+ || memcmp(state->header->wave_chunk_magic,&WAVE_CHUNK_MAGIC,4) || memcmp(state->header->wave_chunk_data_magic,&WAVE_CHUNK_DATA_MAGIC,4) || state->header->format_tag != PCM_FORMAT_TAG)
+ {
+  printf("sanity check failed\n");
+  close_wav(state);
+  return(NULL);
+ }
+ state->offset = WAVE_HEADER_LENGTH; //set offset to beginning of data
+ printf("samplerate: %dhz\n",get_samplerate(state));
+ printf("bitrate: %d\n",state->header->bitrate);
+ printf("channels: %d\n",state->header->channels);
+ printf("bits per sample: %d\n",state->header->bits_per_sample);
+ printf("block align: %d\n",state->header->block_align);
+ printf("format_tag: %d\n",state->header->format_tag);
+ state->samples_num = state->header->wave_chunk_data_length/state->header->block_align;
+ //use a 1000 samples buffer
+ unsigned long sample_buffer_num = 1000;
+ if(state->samples_num<sample_buffer_num)
+  sample_buffer_num = state->samples_num;
+ state->sample_buffer_length = state->header->block_align*sample_buffer_num;
+ state->sample_buffer = (void*)malloc(state->sample_buffer_length);
+ printf("created a %d bytes samples buffer\n",state->sample_buffer_length);
+ printf("number of samples: %d\n",state->samples_num);
+ if(!fill_sample_buffer(state))
+ {
+  close_wav(state);
+  return(NULL);
+ }
+ return(state);
+}
+
+short read_wav_sample(wav_file *wf)
+{
+ short left = (((unsigned char*)wf->sample_buffer)[wf->sample_buffer_offset+1]<<8) + ((unsigned char*)wf->sample_buffer)[wf->sample_buffer_offset];
+ wf->sample_buffer_offset+=get_block_align(wf);
+ /*automatic buffer filling - may increase read time -> use polling mechanism for more stable function timings*/
+ if(wf->sample_buffer_offset>=wf->sample_buffer_length)
+  fill_sample_buffer(wf);
+ return(left);
+}
+
+unsigned int read_wav_stereo_sample(wav_file *wf)
+{
+ unsigned int both = ((unsigned int*)wf->sample_buffer)[wf->sample_buffer_offset/4];
+ wf->sample_buffer_offset+=get_block_align(wf);
+ /*automatic buffer filling - may increase read time -> use polling mechanism for more stable function timings*/
+ if(wf->sample_buffer_offset>=wf->sample_buffer_length)
+  fill_sample_buffer(wf);
+ return(both);
+}
+
+int wav_samples_left(wav_file *wf)
+{
+ return(((WAVE_HEADER_LENGTH + wf->header->wave_chunk_data_length)-wf->offset)-wf->sample_buffer_offset);
+}
+
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
@@ -12,25 +152,36 @@ int effect_update(struct razer_fx_render_node *render)
 	int x,y;
 	struct razer_rgb col;
 	#ifdef USE_DEBUGGING
-		printf(" (Bar.%d ## %%:%f)",render->id,percentage);
+		printf(" (Fft.%d ## %%:%f)",render->id,percentage);
 	#endif
 
-	int xmax = (int)((21.0f / 100.0f) * percentage);
+	//add sample to fft buffer
+
+
+	//enough samples gathered?
+
+	//compute fft
+
+
+	//set color to avg magnitude ,transformed to 0.0-1.0 space	
+
+
+	//calculate hue from magnitude
+	//rgb_from_hue(float percentage,0.3f,0.0f,&col);
+
 	for(x=0;x<22;x++)
 		for(y=0;y<6;y++)
 		{
-			float dist = 0.0f;
-			if(x-xmax <= 0)
-				dist = 1.0f;
-			else
-			{
-				dist = (21.0f / (x-xmax))/21.0f;
-			}
-			rgb_from_hue(dist,0.3f,0.0f,&col);
 			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&col,render->opacity);//*render->opacity  //&render->second_input_frame->rows[y].column[x]
 			render->output_frame->update_mask |= 1<<y;
 		}
 	return(1);
+}
+
+int effect_reset(struct razer_fx_render_node *render)
+{
+	//reopen input file
+
 }
 
 #pragma GCC diagnostic pop
@@ -44,17 +195,20 @@ void fx_init(struct razer_daemon *daemon)
 	struct razer_parameter *parameter = NULL;
 	effect = daemon_create_effect();
 	effect->update = effect_update;
-	effect->name = "Progress Bar #1";
-	effect->description = "Progress bar to display a percentage";
+	effect->reset = effect_reset;
+	effect->name = "Simple Spectrum display #1";
+	effect->description = "Spectrum analyzer for sound input devices";
 	effect->fps = 15;
 	effect->class = 1;
 	effect->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
-	parameter = daemon_create_parameter_float("Effect Percentage","Percentage to display(FLOAT)",0.0f);
+	parameter = daemon_create_parameter_string("Effect Input Device","Filepath pointing to the sound input device/file(wav format) (STRING)","/dev/dsp");
 	daemon_effect_add_parameter(effect,parameter);	
 	int effect_uid = daemon_register_effect(daemon,effect);
 	#ifdef USE_DEBUGGING
 		printf("registered effect: %s (uid:%d)\n",effect->name,effect->id);
 	#endif
+	
+
 
 }
 
@@ -63,7 +217,9 @@ void fx_init(struct razer_daemon *daemon)
 
 void fx_shutdown(struct razer_daemon *daemon)
 {
-	daemon_unregister_effect(daemon,effect);
+	daemon_unregister_effect(daemon,effect); //TODO do this automatically when the daemon closes - so an effects prodrammer will use this exported function only on special occasions
 	daemon_free_parameters(effect->parameters);
 	daemon_free_effect(effect);
+
+	//close input file
 }
