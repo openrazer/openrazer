@@ -47,7 +47,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect->name = "Progress Bar #1";
 	effect->description = "Progress bar to display a percentage";
 	effect->fps = 15;
-	effect->class = 1;
+	effect->effect_class = 1;
 	effect->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 	parameter = daemon_create_parameter_float("Effect Percentage","Percentage to display(FLOAT)",0.0f);
 	daemon_effect_add_parameter(effect,parameter);	

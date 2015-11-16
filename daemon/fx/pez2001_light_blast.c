@@ -123,7 +123,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect->name = "Lightblaster";
 	effect->description = "Light field influenced by last keystrokes";
 	effect->fps = 20;
-	effect->class = 1;
+	effect->effect_class = 1;
 	effect->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 	parameter = daemon_create_parameter_int("Effect Length","Time effect lasts in ms(INT)",2000);
 	daemon_effect_add_parameter(effect,parameter);	

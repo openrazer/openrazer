@@ -23,7 +23,7 @@ struct razer_effect
 	int id;
 	char *name;
 	char *description;
-	int class;//1=render effect / 2=supplemental effect (non rendering)
+	int effect_class;//1=render effect / 2=supplemental effect (non rendering)
 	int fps;
 	int parameters_uid;
 	list *parameters;//struct razer_parameter
@@ -38,7 +38,7 @@ struct razer_effect
 	void *tag;
 };
 
-char *daemon_effect_to_json(struct razer_effect *effect);
+char *daemon_effect_to_json(struct razer_effect *effect, int final);
 
 struct razer_effect *daemon_create_effect(void);
 void daemon_free_effect(struct razer_effect *effect);

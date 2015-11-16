@@ -614,7 +614,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect1->name = "First One";
 	effect1->description = "First effect converted to the new render architecture";
 	effect1->fps = 12;
-	effect1->class = 1;
+	effect1->effect_class = 1;
 	effect1->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 	parameter = daemon_create_parameter_int("End Counter","End of animation (Integer)",44);//TODO refactor to daemon_add_effect_parameter_int(effect,key,desc,value)
 	daemon_effect_add_parameter(effect1,parameter);	
@@ -633,7 +633,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect2->name = "Breathing Color";
 	effect2->description = "Color sweep from totally dimmed to full brightness";
 	effect2->fps = 15;
-	effect2->class = 1;
+	effect2->effect_class = 1;
 	effect2->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 	
 	parameter = daemon_create_parameter_rgb("Base Color","Flashing Color (RGB)",&effect2_base_rgb);
@@ -652,7 +652,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect3->name = "Random Color Waves";
 	effect3->description = "Floating color waves";
 	effect3->fps = 13;
-	effect3->class = 1;
+	effect3->effect_class = 1;
 	effect3->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 
 	parameter = daemon_create_parameter_int("Effect Counter","Counter value(INT)",0);
@@ -676,7 +676,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect4->name = "Random Color Waves #2";
 	effect4->description = "Floating color waves";
 	effect4->fps = 12;
-	effect4->class = 1;
+	effect4->effect_class = 1;
 	effect4->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 
 	parameter = daemon_create_parameter_int("Effect Counter R","Red counter value(INT)",1);
@@ -710,7 +710,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect5->name = "Random Color Waves #3";
 	effect5->description = "Floating color waves";
 	effect5->fps = 15;
-	effect5->class = 1;
+	effect5->effect_class = 1;
 	effect5->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 
 	parameter = daemon_create_parameter_int("Effect Counter","Counter value(INT)",0);
@@ -734,7 +734,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect6->name = "Random Color Waves #4";
 	effect6->description = "Floating color waves";
 	effect6->fps = 12;
-	effect6->class = 1;
+	effect6->effect_class = 1;
 	effect6->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 
 	parameter = daemon_create_parameter_int("Effect Counter","Counter value(INT)",0);
@@ -758,7 +758,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect7->name = "Copper Bars #4";
 	effect7->description = "Moving copper bars";
 	effect7->fps = 14;
-	effect7->class = 1;
+	effect7->effect_class = 1;
 	effect7->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 
 	parameter = daemon_create_parameter_int("Effect Counter","Counter value(INT)",1);
@@ -776,7 +776,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect8->name = "Arrayi Bars";
 	effect8->description = "Test Array like usage";
 	effect8->fps = 30;
-	effect8->class = 1;
+	effect8->effect_class = 1;
 	effect8->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 
 	//int v[3]={1,12,22};
@@ -816,7 +816,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect9->name = "Arrayi Bars 2";
 	effect9->description = "Test Array like usage";
 	effect9->fps = 35;
-	effect9->class = 1;
+	effect9->effect_class = 1;
 	effect9->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 
 	//int v[3]={1,12,16};
@@ -855,7 +855,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect_mix1->name = "Default Mixer";
 	effect_mix1->description = "Standard effect mixer";
 	effect_mix1->fps = 12;
-	effect_mix1->class = 2;
+	effect_mix1->effect_class = 2;
 	effect_mix1->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED | RAZER_EFFECT_SECOND_INPUT_USED;
 	int effect_mix1_uid = daemon_register_effect(daemon,effect_mix1);
 	#ifdef USE_DEBUGGING

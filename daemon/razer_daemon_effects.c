@@ -1,7 +1,7 @@
 #include "razer_daemon.h"
 
 
-char *daemon_effect_to_json(struct razer_effect *effect)
+char *daemon_effect_to_json(struct razer_effect *effect, int final)
 {
 	char *effect_json = str_CreateEmpty();
 	effect_json = str_CatFree(effect_json,"\n {\n \"name\": \"");
@@ -23,11 +23,24 @@ char *daemon_effect_to_json(struct razer_effect *effect)
 	for(int i = 0;i<effect->parameters->num;i++)
 	{
 		struct razer_parameter *parameter = effect->parameters->items[i];
-		char *parameter_json = daemon_parameter_to_json(parameter);
+		char *parameter_json;
+		if(i == effect->parameters->num - 1)
+		{
+			parameter_json= daemon_parameter_to_json(parameter, 1);
+		} else {
+			parameter_json= daemon_parameter_to_json(parameter, 0);
+		}
+
 		effect_json = str_CatFree(effect_json,parameter_json);
 		free(parameter_json);
 	}
-	effect_json = str_CatFree(effect_json,"] },\n");
+	if(final)
+	{
+		effect_json = str_CatFree(effect_json,"] }\n");
+	} else {
+		effect_json = str_CatFree(effect_json,"] },\n");
+	}
+
 	return(effect_json);
 }
 
@@ -99,7 +112,7 @@ struct razer_effect *daemon_create_effect(void)
 	effect->dbus_event = NULL;
 	effect->fps = 1;
 	effect->input_usage_mask = 0;
-	effect->class = 0;
+	effect->effect_class = 0;
 	effect->id = 0;
 	return(effect);
 }
