@@ -155,6 +155,7 @@ int main(int argc,char *argv[])
 		    dc_set_spectrum_mode(controller);
 
 		  }
+		  break;
 		  case '2':
 		  {
 		    // Wave effect
@@ -163,6 +164,7 @@ int main(int argc,char *argv[])
 		    dc_set_wave_mode(controller, direction);
 
 		  }
+		  break;
 		  case '3':
 		  {
 		    // Reactive Mode
@@ -173,6 +175,7 @@ int main(int argc,char *argv[])
 		    dc_set_reactive_mode(controller, red, green, blue);
 
 		  }
+		  break;
 		  case '4':
 		  {
 		    // Breath Mode
@@ -182,6 +185,7 @@ int main(int argc,char *argv[])
 
 		    dc_set_breath_mode(controller, red, green, blue);
 		  }
+		  break;
 		  case '5':
 		  {
 		    // Static Mode
@@ -191,12 +195,14 @@ int main(int argc,char *argv[])
 
 		    dc_set_static_mode(controller, red, green, blue);
 		  }
+		  break;
 		  case '6':
 		  {
 		    // No effect mode
 		    dc_set_none_mode(controller);
 
 		  }
+		  break;
 		  case '7':
 		  {
 		    // Set brightness
@@ -205,12 +211,14 @@ int main(int argc,char *argv[])
 		    dc_set_keyboard_brightness(controller, brightness);
 
 		  }
+		  break;
 		  case '8':
 		  {
 		    // Enable macro keys
 		    dc_enable_macro_keys(controller);
 
 		  }
+		  break;
 			case 'P':
 				{
 					int render_node_uid = atoi(argv[optind++]);
