@@ -1,5 +1,15 @@
 #include "razer_daemon.h"
 
+// end_daemon variable written to by function 'got_sigterm_signal' and used by 'daemon_run'
+volatile sig_atomic_t end_daemon = 0;
+
+// Used to catch SIGTERM
+void got_sigterm_signal(int sigal_number)
+{
+	end_daemon = 1;
+}
+
+
 void daemon_kill(struct razer_daemon *daemon,char *error_message)
 {
 	daemon->running = 0;
@@ -101,6 +111,13 @@ struct razer_daemon *daemon_open(void)
 	daemon_register_render_node(daemon,daemon->render_node);
 	daemon_compute_render_nodes(daemon);
 	*/
+	
+	// Catch SIGTERM
+	struct sigaction sigterm_action;
+	memset(&sigterm_action, 0, sizeof(struct sigaction));
+	sigterm_action.sa_handler = got_sigterm_signal;
+	sigaction(SIGTERM, &sigterm_action, NULL);
+	
  	return(daemon);
 }
 
@@ -268,6 +285,11 @@ int daemon_run(struct razer_daemon *daemon)
 			//printf("\rframe time:%ums,actual fps:%f (Wanted:%d)",end_ticks-ticks,1000.0f/(float)(end_ticks-ticks),daemon->render_node->effect->fps);
 			printf("                                                                             \rft:%ums,fps:%f(%d)",end_ticks-ticks,1000.0f/(float)(end_ticks-ticks),daemon->fps);
 		#endif
+		if(end_daemon)
+		{
+			daemon->running = 0;
+			printf("Caught SIGTERM. Exiting daemon.\n");
+		}
 	}
 	return(1);
 }
@@ -468,6 +490,13 @@ struct daemon_options parse_args(int argc,char *argv[]) {
 	return options;
 }
 
+void write_pid_file(char* pid_file, pid_t pid_number)
+{
+	FILE* fp;
+	fp = fopen(pid_file, "w+");
+	fprintf(fp, "%d\n", pid_number);
+	fclose(fp);
+}
 
 int daemonize(char* pid_file)
 {
@@ -500,10 +529,7 @@ int daemonize(char* pid_file)
 	// Write PID to file
 	if(pid_file != NULL)
 	{
-		FILE* fp;
-		fp = fopen(pid_file, "w+");
-		fprintf(fp, "%d\n", sid);
-		fclose(fp);
+		write_pid_file(pid_file, sid);
 	}
 
 	return(1);
@@ -522,8 +548,11 @@ int main(int argc,char *argv[])
 		daemonize(options.pid_file);
 	} else {
 		printf("Starting razer blackwidow chroma daemon in the foreground\n");
+		if(options.pid_file != NULL)
+		{
+			write_pid_file(options.pid_file, getpid());
+		}
 	}
-
 
 	struct razer_daemon *daemon=NULL;
 	if(!(daemon=daemon_open()))
