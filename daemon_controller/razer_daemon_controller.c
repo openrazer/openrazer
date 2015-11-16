@@ -85,6 +85,25 @@ Commands:\n\
            3. Parameter: array index - if parameter is an array this index will be used (use -1 to skip)\n\
            4. Parameter: parameter value - value to set\n\
   -d    Disconnect frame buffer\n\
+  -1    Spectrum Effect Mode\n\
+  -2    Wave Effect Mode\n\
+           1. Direction, 0 = None, 1 = Right, 2 = Left\n\
+  -3    Reactive Mode\n\
+           1. Red (0-255)\n\
+	   2. Blue (0-255)\n\
+	   3. Green (0-255)\n\
+  -4    Breath Mode\n\
+           1. Red (0-255)\n\
+	   2. Blue (0-255)\n\
+	   3. Green (0-255)\n\
+  -5    Static Mode\n\
+           1. Red (0-255)\n\
+  	   2. Blue (0-255)\n\
+  	   3. Green (0-255)\n\
+  -6    None Mode\n\
+  -7    Set keyboard brightness\n\
+           1. Brightness (0-255)\n\
+  -8    Enable Macro Keys\n\
   -h    Display this help and exit\n\
 \n\
 Options:\n\
@@ -93,6 +112,16 @@ Options:\n\
 	DBUS must be running on the system to communicate with daemon.\n\
 \n\
       Report bugs to <pez2001@voyagerproject.de>.\n";
+
+/* 1 spectrum mode
+ * 2 wave mode
+ * 3 reactive mode
+ * 4 breath mode
+ * 5 static mode
+ * 6 none mode
+ * 7 set brightness
+ * 8 enable macro keys
+ */
 
 int verbose = 0;
 
@@ -115,11 +144,73 @@ int main(int argc,char *argv[])
 	}
 	
 	int opts_given = 0;
-	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyCMGPSXRUF")) != -1)
+	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyCMGPSXRUF12345678")) != -1)
 	{
 		opts_given = 1;
 		switch(c)
 		{
+		  case '1':
+		  {
+		    // Spectrum Effect
+		    dc_set_spectrum_mode(controller);
+
+		  }
+		  case '2':
+		  {
+		    // Wave effect
+		    unsigned char direction = atoi(argv[optind++]);
+
+		    dc_set_wave_mode(controller, direction);
+
+		  }
+		  case '3':
+		  {
+		    // Reactive Mode
+		    unsigned char red = atoi(argv[optind++]);
+		    unsigned char green = atoi(argv[optind++]);
+		    unsigned char blue = atoi(argv[optind++]);
+
+		    dc_set_reactive_mode(controller, red, green, blue);
+
+		  }
+		  case '4':
+		  {
+		    // Breath Mode
+		    unsigned char red = atoi(argv[optind++]);
+		    unsigned char green = atoi(argv[optind++]);
+		    unsigned char blue = atoi(argv[optind++]);
+
+		    dc_set_breath_mode(controller, red, green, blue);
+		  }
+		  case '5':
+		  {
+		    // Static Mode
+		    unsigned char red = atoi(argv[optind++]);
+		    unsigned char green = atoi(argv[optind++]);
+		    unsigned char blue = atoi(argv[optind++]);
+
+		    dc_set_static_mode(controller, red, green, blue);
+		  }
+		  case '6':
+		  {
+		    // No effect mode
+		    dc_set_none_mode(controller);
+
+		  }
+		  case '7':
+		  {
+		    // Set brightness
+		    unsigned char brightness = atoi(argv[optind++]);
+
+		    dc_set_keyboard_brightness(controller, brightness);
+
+		  }
+		  case '8':
+		  {
+		    // Enable macro keys
+		    dc_enable_macro_keys(controller);
+
+		  }
 			case 'P':
 				{
 					int render_node_uid = atoi(argv[optind++]);

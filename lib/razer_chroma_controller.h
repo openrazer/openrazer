@@ -74,4 +74,13 @@ int dc_fps_get(struct razer_daemon_controller *controller);
 int dc_frame_buffer_get(struct razer_daemon_controller *controller);
 void dc_load_fx_lib(struct razer_daemon_controller *controller,char *fx_pathname);
 
+void dc_set_spectrum_mode(struct razer_daemon_controller *controller);
+void dc_set_wave_mode(struct razer_daemon_controller *controller, unsigned char direction);
+void dc_set_reactive_mode(struct razer_daemon_controller *controller, unsigned char red, unsigned char green, unsigned char blue);
+void dc_set_breath_mode(struct razer_daemon_controller *controller, unsigned char red, unsigned char green, unsigned char blue); // ?? num cols
+void dc_set_static_mode(struct razer_daemon_controller *controller, unsigned char red, unsigned char green, unsigned char blue); // TODO refactor to use one method instead of 3
+void dc_set_none_mode(struct razer_daemon_controller *controller);
+void dc_set_keyboard_brightness(struct razer_daemon_controller *controller, unsigned char brightness);
+void dc_enable_macro_keys(struct razer_daemon_controller *controller);
+
 #endif
