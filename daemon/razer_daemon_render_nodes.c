@@ -149,6 +149,15 @@ void daemon_render_node_add_sub(struct razer_fx_render_node *render_node,struct 
 }
 
 
+int daemon_reset_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node)
+{
+	if(!render_node)
+		return(-1);
+	if(!render_node->effect->reset)
+		return(-1);
+	int ret = render_node->effect->reset(render_node);
+	return(ret);
+}
 
 void daemon_connect_frame_buffer(struct razer_daemon *daemon,struct razer_fx_render_node *render_node)
 {

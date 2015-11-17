@@ -59,6 +59,7 @@ struct razer_effect *daemon_create_effect_instance(struct razer_daemon *daemon,s
 	instance->open = lib_effect->open;
 	instance->close = lib_effect->close;
 	instance->update = lib_effect->update;
+	instance->reset = lib_effect->reset;
 	instance->input_event = lib_effect->input_event;
 	instance->dbus_event = lib_effect->dbus_event;
 	for(int i=0;i<lib_effect->parameters->num;i++)

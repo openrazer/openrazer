@@ -145,14 +145,15 @@ int wav_samples_left(wav_file *wf)
 
 
 struct razer_effect *effect = NULL;
+wav_file *effect_input_file = NULL;
 
 int effect_update(struct razer_fx_render_node *render)
 {
-	float percentage = daemon_get_parameter_float(daemon_effect_get_parameter_by_index(render->effect,0));
+	//float percentage = daemon_get_parameter_float(daemon_effect_get_parameter_by_index(render->effect,0));
 	int x,y;
 	struct razer_rgb col;
 	#ifdef USE_DEBUGGING
-		printf(" (Fft.%d ## %%:%f)",render->id,percentage);
+		printf(" (Fft.%d ## %%:%f)",render->id);
 	#endif
 
 	//add sample to fft buffer
@@ -181,7 +182,14 @@ int effect_update(struct razer_fx_render_node *render)
 int effect_reset(struct razer_fx_render_node *render)
 {
 	//reopen input file
-
+	char *filename = daemon_get_parameter_string(daemon_effect_get_parameter_by_index(render->effect,0));
+	if(effect_input_file)
+	{
+		close_wav(effect_input_file);
+		effect_input_file = NULL;
+	}
+	effect_input_file =open_wav(filename);
+	printf("opened input wav file:%s,%x\n",filename,effect_input_file);
 }
 
 #pragma GCC diagnostic pop

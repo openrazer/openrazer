@@ -74,6 +74,8 @@ Commands:\n\
            1. Parameter: render node uid - render node to get the next node of\n\
            2. Parameter: move_linkage - 0/1 activate/deactivate moving of framebuffer\n\
                          linkage of a render node\n\
+  -A    Reset a render node\n\
+           1. Parameter: render node uid - render node to reset\n\
   -P    Get the parameter of a render node\n\
            1. Parameter: render node uid - render node the parameter belongs to\n\
            2. Parameter: parameter index - index of parameter to get\n\
@@ -83,7 +85,8 @@ Commands:\n\
            1. Parameter: render node uid - render node the parameter belongs to\n\
            2. Parameter: parameter index - index of parameter to set\n\
            3. Parameter: array index - if parameter is an array this index will be used (use -1 to skip)\n\
-           4. Parameter: parameter value - value to set\n\
+           4. Parameter: parameter type - type of value to be set (Int,Float,Rgb,String,etc)\n\
+           5. Parameter: parameter value - value to set\n\
   -d    Disconnect frame buffer\n\
   -1    Spectrum Effect Mode\n\
   -2    Wave Effect Mode\n\
@@ -144,81 +147,76 @@ int main(int argc,char *argv[])
 	}
 	
 	int opts_given = 0;
-	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyCMGPSXRUF12345678")) != -1)
+	while((c=getopt(argc,argv,"hvVcpqlfoigatOLxbdsrnwyCMGPSXRUF12345678A")) != -1)
 	{
 		opts_given = 1;
 		switch(c)
 		{
-		  case '1':
-		  {
-		    // Spectrum Effect
-		    dc_set_spectrum_mode(controller);
-
-		  }
-		  break;
-		  case '2':
-		  {
-		    // Wave effect
-		    unsigned char direction = atoi(argv[optind++]);
-
-		    dc_set_wave_mode(controller, direction);
-
-		  }
-		  break;
-		  case '3':
-		  {
-		    // Reactive Mode
-		    unsigned char red = atoi(argv[optind++]);
-		    unsigned char green = atoi(argv[optind++]);
-		    unsigned char blue = atoi(argv[optind++]);
-
-		    dc_set_reactive_mode(controller, red, green, blue);
-
-		  }
-		  break;
-		  case '4':
-		  {
-		    // Breath Mode
-		    unsigned char red = atoi(argv[optind++]);
-		    unsigned char green = atoi(argv[optind++]);
-		    unsigned char blue = atoi(argv[optind++]);
-
-		    dc_set_breath_mode(controller, red, green, blue);
-		  }
-		  break;
-		  case '5':
-		  {
-		    // Static Mode
-		    unsigned char red = atoi(argv[optind++]);
-		    unsigned char green = atoi(argv[optind++]);
-		    unsigned char blue = atoi(argv[optind++]);
-
-		    dc_set_static_mode(controller, red, green, blue);
-		  }
-		  break;
-		  case '6':
-		  {
-		    // No effect mode
-		    dc_set_none_mode(controller);
-
-		  }
-		  break;
-		  case '7':
-		  {
-		    // Set brightness
-		    unsigned char brightness = atoi(argv[optind++]);
-
-		    dc_set_keyboard_brightness(controller, brightness);
-
-		  }
-		  break;
-		  case '8':
-		  {
-		    // Enable macro keys
-		    dc_enable_macro_keys(controller);
-
-		  }
-		  break;
+			case '1':
+				{
+			    	// Spectrum Effect
+			    	dc_set_spectrum_mode(controller);
+				}
+				break;
+		  	case '2':
+		  		{
+			    	// Wave effect
+			    	unsigned char direction = atoi(argv[optind++]);
+				    dc_set_wave_mode(controller, direction);
+				}
+		  		break;
+			case '3':
+		  		{
+		    		// Reactive Mode
+		    		unsigned char red = atoi(argv[optind++]);
+		    		unsigned char green = atoi(argv[optind++]);
+		    		unsigned char blue = atoi(argv[optind++]);
+				    dc_set_reactive_mode(controller, red, green, blue);
+				}
+		  		break;
+		  	case '4':
+		  		{
+		    		// Breath Mode
+		    		unsigned char red = atoi(argv[optind++]);
+		    		unsigned char green = atoi(argv[optind++]);
+		    		unsigned char blue = atoi(argv[optind++]);
+				    dc_set_breath_mode(controller, red, green, blue);
+		  		}
+		  		break;
+		  	case '5':
+		  		{
+		    		// Static Mode
+		    		unsigned char red = atoi(argv[optind++]);
+		    		unsigned char green = atoi(argv[optind++]);
+		    		unsigned char blue = atoi(argv[optind++]);
+				    dc_set_static_mode(controller, red, green, blue);
+		  		}
+		  		break;
+		  	case '6':
+		  		{	
+		    		// No effect mode
+		    		dc_set_none_mode(controller);
+				}
+		  		break;
+			case '7':
+		  		{
+		    		// Set brightness
+		    		unsigned char brightness = atoi(argv[optind++]);
+				    dc_set_keyboard_brightness(controller, brightness);
+				}
+		  		break;
+		  	case '8':
+		  		{
+		    		// Enable macro keys
+		    		dc_enable_macro_keys(controller);
+				}
+				break;
+		  	case 'A':
+		  		{
+					int render_node_uid = atoi(argv[optind++]);
+				    dc_render_node_reset(controller,render_node_uid);
+				}
+		  		break;
 			case 'P':
 				{
 					int render_node_uid = atoi(argv[optind++]);
@@ -236,6 +234,7 @@ int main(int argc,char *argv[])
 						printf("%s",parameter_json);
 					//free(parameter_json);
 				}
+				break;
 			case 'S':
 				{
 					int render_node_uid = atoi(argv[optind++]);

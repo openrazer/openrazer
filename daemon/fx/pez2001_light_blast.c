@@ -83,6 +83,24 @@ int effect_update(struct razer_fx_render_node *render)
 	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1),dir);	
 	return(1);
 }
+
+int effect_reset(struct razer_fx_render_node *render)
+{
+	#ifdef USE_DEBUGGING
+		printf("Resetting render node: %d (Lightblast effect)\n",render->id);
+	#endif
+	int key_ring_buffer_index = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2));
+	struct razer_int_array *keystrokes = daemon_get_parameter_int_array(daemon_effect_get_parameter_by_index(render->effect,3));
+	key_ring_buffer_index = 0;
+	for(int i = 0; i<effect_key_ringbuffer_size;i++)
+	{
+		keystrokes->values[i] = 0;	
+	}
+	daemon_set_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2),key_ring_buffer_index);	
+	return(1);
+}
+
+
 int effect_input_event(struct razer_fx_render_node *render,struct razer_chroma_event *event)
 {
 	if(event->type != RAZER_CHROMA_EVENT_TYPE_KEYBOARD)
@@ -119,6 +137,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect_keystrokes = daemon_create_int_array(effect_key_ringbuffer_size,1);//storage for 10 keystrokes with a fixed size
 	effect = daemon_create_effect();
 	effect->update = effect_update;
+	effect->reset = effect_reset;
 	effect->input_event = effect_input_event;
 	effect->name = "Lightblaster";
 	effect->description = "Light field influenced by last keystrokes";

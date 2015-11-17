@@ -46,6 +46,7 @@ void dc_quit(struct razer_daemon_controller *controller);
 void dc_continue(struct razer_daemon_controller *controller);
 void dc_pause(struct razer_daemon_controller *controller);
 int dc_render_node_create(struct razer_daemon_controller *controller,int effect_uid,char *name,char *description);
+void dc_render_node_reset(struct razer_daemon_controller *controller,int render_node_uid);//TODO give back result
 void dc_render_node_set(struct razer_daemon_controller *controller,int render_node_uid);
 char *dc_render_node_parameter_get(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid,int array_index);
 int dc_render_node_parameter_parsed_set(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid,int array_index,char *type,char *value_string);

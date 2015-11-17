@@ -172,7 +172,27 @@ int dc_render_node_create(struct razer_daemon_controller *controller,int effect_
 	return(render_node_uid);
 }
 
-void dc_render_node_set(struct razer_daemon_controller *controller,int render_node_uid)
+void dc_render_node_reset(struct razer_daemon_controller *controller,int render_node_uid)
+{
+	DBusMessage *msg;
+	DBusMessageIter args;
+	char *path = str_CreateEmpty();
+	path = str_CatFree(path,"/");
+	char *suid = str_FromLong(render_node_uid);
+	path = str_CatFree(path,suid);
+	free(suid);
+	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon",path,"org.voyagerproject.razer.daemon.render_node","reset");
+	if(!msg)
+		dc_error_close(controller,"Error creating Message\n");
+	if(!dbus_connection_send_with_reply(controller->dbus,msg,&controller->pending,-1))
+		dc_error_close(controller,"Out of memory!\n"); 
+	if(!controller->pending)
+		dc_error_close(controller,"No pending call\n"); 
+	dbus_connection_flush(controller->dbus);
+	dbus_message_unref(msg);
+}
+
+void dc_render_node_set(struct razer_daemon_controller *controller,int render_node_uid) 
 {
 	DBusMessage *msg;
 	DBusMessageIter args;
@@ -189,6 +209,7 @@ void dc_render_node_set(struct razer_daemon_controller *controller,int render_no
 	dbus_connection_flush(controller->dbus);
 	dbus_message_unref(msg);
 }
+
 
 char *dc_render_node_parameter_get(struct razer_daemon_controller *controller,int render_node_uid,int parameter_uid,int array_index)
 {
@@ -256,6 +277,8 @@ int dc_parameter_type_from_string(char *type)
 		return(RAZER_PARAMETER_TYPE_POS);
 	else if(!strcasecmp(type,"Node"))
 		return(RAZER_PARAMETER_TYPE_RENDER_NODE);
+	else if(!strcasecmp(type,"String"))
+		return(RAZER_PARAMETER_TYPE_STRING);
 	else if(!strcasecmp(type,"Float_Range"))
 		return(RAZER_PARAMETER_TYPE_FLOAT_RANGE);
 	else if(!strcasecmp(type,"Int_Range"))

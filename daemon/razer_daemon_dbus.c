@@ -103,6 +103,8 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node","create"))
 		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node","reset"))
+		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node","set")) //TODO Remove 
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.render_node.opacity","set"))
@@ -765,11 +767,12 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 					case RAZER_PARAMETER_TYPE_STRING:
 						if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_STRING)
 						{
-							char *fxname;
-							dbus_message_iter_get_basic(&parameters,&fxname);
+							char *value;
+							dbus_message_iter_get_basic(&parameters,&value);
 							#ifdef USE_DEBUGGING
-								printf("dbus: string parameter:%s\n",fxname);
+								printf("dbus: string parameter:%s\n",value);
 							#endif
+							daemon_set_parameter_string(parameter,str_Copy(value));
 						}
 						break;
 					case RAZER_PARAMETER_TYPE_FLOAT:
@@ -1223,6 +1226,30 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_INT32,&rn->id)) 
 					daemon_kill(daemon,"dbus: Out Of Memory!\n");
 			}
+		}
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+	}
+
+    if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.render_node", "reset")) 
+	{
+		char **path = NULL;
+		int rn_uid = -1;
+		dbus_message_get_path_decomposed(msg,&path);
+		#ifdef USE_DEBUGGING
+			printf("\ndbus: method reset render_node called for : %s\n",path[0]);
+		#endif
+		reply = dbus_message_new_method_return(msg);
+		dbus_message_iter_init_append(reply,&parameters);
+		if(path[0] != NULL)
+			rn_uid = atoi(path[0]);
+		dbus_free_string_array(path);
+		struct razer_fx_render_node *render_node = daemon_get_render_node(daemon,rn_uid);
+		if(render_node)
+		{
+			daemon_reset_render_node(daemon,render_node);
 		}
  		dbus_uint32_t serial = 0;
  		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
