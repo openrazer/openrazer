@@ -209,10 +209,8 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			printf("Device path: %s\n", device_path);
 			#endif
 
-			FILE* fp;
-			fp = fopen(device_path, "w");
-			fprintf(fp, "%d", 1);
-			fclose(fp);
+			write_to_device_file(device_path, "1", 1);
+
 			free(device_path);
 
 
@@ -248,10 +246,10 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				printf("Device path: %s\n", device_path);
 				#endif
 
-				FILE* fp;
-				fp = fopen(device_path, "w");
-				fprintf(fp, "%d", brightness);
-				fclose(fp);
+				char buf[32];
+				sprintf(buf, "%d", brightness);
+				write_to_device_file(device_path, buf, strlen(buf));
+
 				free(device_path);
 
 			}
@@ -275,10 +273,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				#endif
 
 				daemon->is_paused = 1;
-				FILE* fp;
-				fp = fopen(device_path, "w");
-				fprintf(fp, "%d", 1);
-				fclose(fp);
+				write_to_device_file(device_path, "1", 1);
 				free(device_path);
 
 
@@ -328,16 +323,9 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				#endif
 
 				daemon->is_paused = 1;
-				FILE* fp;
-				fp = fopen(device_path, "w");
-				if(fp != NULL) {
-				  fwrite(&red, 1, 1, fp);
-				  fwrite(&green, 1, 1, fp);
-				  fwrite(&blue, 1, 1, fp);
-				  fclose(fp);
-				} else {
-				  printf("Writing static colour file buffer is NULL!\n");
-				}
+
+				char buf[3] = {red, green, blue};
+				write_to_device_file(device_path, buf, 3);
 
 				free(device_path);
 
@@ -387,18 +375,8 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 					#endif
 
 					daemon->is_paused = 1;
-					FILE* fp;
-					fp = fopen(device_path, "w");
-					if(fp != NULL) {
-					  fwrite(&num_cols, 1, 1, fp);
-					  fwrite(&red, 1, 1, fp);
-					  fwrite(&green, 1, 1, fp);
-					  fwrite(&blue, 1, 1, fp);
-
-					  fclose(fp);
-					} else {
-					  printf("Writing breath file buffer is NULL!\n");
-					}
+					char buf[4] = {num_cols, red, green, blue};
+					write_to_device_file(device_path, buf, 4);
 
 					free(device_path);
 
@@ -449,18 +427,8 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 						#endif
 
 						daemon->is_paused = 1;
-						FILE* fp;
-						fp = fopen(device_path, "w");
-						if(fp != NULL) {
-						  fwrite(&speed, 1, 1, fp);
-						  fwrite(&red, 1, 1, fp);
-						  fwrite(&green, 1, 1, fp);
-						  fwrite(&blue, 1, 1, fp);
-
-						  fclose(fp);
-						} else {
-						  printf("Writing reactive file buffer is NULL!\n");
-						}
+						char buf[4] = {speed, red, green, blue};
+						write_to_device_file(device_path, buf, 4);
 
 						free(device_path);
 
@@ -511,14 +479,10 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 							#endif
 
 							daemon->is_paused = 1;
-							FILE* fp;
-							fp = fopen(device_path, "w");
-							if(fp != NULL) {
-							  fprintf(fp, "%d", direction);
-							  fclose(fp);
-							} else {
-							  printf("Writing wave file buffer is NULL!\n");
-							}
+
+							char buf[32];
+							sprintf(buf, "%d", direction);
+							write_to_device_file(device_path, buf, strlen(buf));
 
 							free(device_path);
 
@@ -543,10 +507,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 					#endif
 
 					daemon->is_paused = 1;
-					FILE* fp;
-					fp = fopen(device_path, "w");
-					fprintf(fp, "%d", 1);
-					fclose(fp);
+					write_to_device_file(device_path, "1", 1);
 					free(device_path);
 
 
