@@ -158,6 +158,8 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon","raw_keyboard_brightness"))
 		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon","set_game_mode"))
+			return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","none"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","static"))
@@ -255,6 +257,42 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			}
 	 		dbus_uint32_t serial = 0;
 	 		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+				daemon_kill(daemon,"dbus: Out Of Memory!\n");
+			dbus_connection_flush(daemon->dbus);
+		}
+	if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon", "set_game_mode"))
+		{
+			int enable=0;
+			reply = dbus_message_new_method_return(msg);
+
+			if(dbus_message_iter_init(msg, &parameters))
+			{
+				if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_BYTE)
+				{
+					dbus_message_iter_get_basic(&parameters,&enable);
+				}
+				dbus_message_iter_init_append(reply,&parameters);
+				#ifdef USE_DEBUGGING
+					printf("\ndbus: setting game mode to: %d\n", enable);
+				#endif
+
+				char *device_path = str_CreateEmpty();
+				device_path = str_CatFree(device_path, daemon->chroma->device_path);
+				device_path = str_CatFree(device_path, "/mode_game");
+
+				#ifdef USE_DEBUGGING
+				printf("Device path: %s\n", device_path);
+				#endif
+
+				char buf[32];
+				sprintf(buf, "%d", enable);
+				write_to_device_file(device_path, buf, strlen(buf));
+
+				free(device_path);
+
+			}
+			dbus_uint32_t serial = 0;
+			if(!dbus_connection_send(daemon->dbus,reply,&serial))
 				daemon_kill(daemon,"dbus: Out Of Memory!\n");
 			dbus_connection_flush(daemon->dbus);
 		}
@@ -1987,6 +2025,10 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				</method>\n\
 				<method name=\"raw_keyboard_brightness\">\n\
 					<arg direction=\"in\" name=\"brightness\" type=\"y\">\n\
+					</arg>\n\
+				</method>\n\
+		        <method name=\"set_game_mode\">\n\
+					<arg direction=\"in\" name=\"enable\" type=\"y\">\n\
 					</arg>\n\
 				</method>\n\
 			</interface>\n\

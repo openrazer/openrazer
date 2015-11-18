@@ -28,6 +28,7 @@ class AppIndicatorExample:
         # Provides:
         # enable_macro_keys()
         # raw_keyboard_brightness(byte brightness)
+        # set_game_mode(byte enable)
         self.dbus_daemon_controls = dbus.Interface(self.dbus_daemon_object, "org.voyagerproject.razer.daemon")
 
         self.ind = appindicator.Indicator ("example-simple-client", "/usr/share/razer_tray_applet/razer_icon.png", appindicator.CATEGORY_APPLICATION_STATUS)
@@ -35,6 +36,29 @@ class AppIndicatorExample:
 
         # create a menu
         self.menu = gtk.Menu()
+        # Create effects submenu
+        effect_item = gtk.MenuItem("Effects")
+        effect_item.show()
+        self.effect_menu = gtk.Menu()
+        self.effect_menu.show()
+        effect_item.set_submenu(self.effect_menu)
+        self.menu.append(effect_item)
+        # Create brightness submenu
+        brightness_item = gtk.MenuItem("Brightness")
+        brightness_item.show()
+        self.brightness_menu = gtk.Menu()
+        self.brightness_menu.show()
+        brightness_item.set_submenu(self.brightness_menu)
+        self.menu.append(brightness_item)
+        # Create game mode submenu
+        game_mode_item = gtk.MenuItem("Game Mode")
+        game_mode_item.show()
+        self.game_mode_menu = gtk.Menu()
+        self.game_mode_menu.show()
+        game_mode_item.set_submenu(self.game_mode_menu)
+        self.menu.append(game_mode_item)
+
+
 
         self.effect_menu_items = collections.OrderedDict()
         self.effect_menu_items["spectrum"] = gtk.RadioMenuItem(None, "Spectrum Effect")
@@ -50,11 +74,7 @@ class AppIndicatorExample:
         for button_key, button in self.effect_menu_items.items():
             button.connect("activate", self.menuitem_keyboard_effect_response, button_key)
             button.show()
-            self.menu.append(button)
-
-        sep = gtk.SeparatorMenuItem()
-        sep.show()
-        self.menu.append(sep)
+            self.effect_menu.append(button)
 
         self.brightness_menu_items = collections.OrderedDict()
         self.brightness_menu_items[255] = gtk.RadioMenuItem(None, "Brightness 100%")
@@ -66,20 +86,30 @@ class AppIndicatorExample:
         for button_key, button in self.brightness_menu_items.items():
             button.connect("activate", self.menuitem_brightness_response, button_key)
             button.show()
-            self.menu.append(button)
+            self.brightness_menu.append(button)
 
-        sep2 = gtk.SeparatorMenuItem()
-        sep2.show()
-        self.menu.append(sep2)
+        enable_game_mode_button = gtk.MenuItem("Enable Game Mode")
+        enable_game_mode_button.connect("activate", self.menuitem_enable_game_mode, True)
+        enable_game_mode_button.show()
+        self.game_mode_menu.append(enable_game_mode_button)
+
+        disable_game_mode_button = gtk.MenuItem("Disable Game Mode")
+        disable_game_mode_button.connect("activate", self.menuitem_enable_game_mode, False)
+        disable_game_mode_button.show()
+        self.game_mode_menu.append(disable_game_mode_button)
+
+        sep1 = gtk.SeparatorMenuItem()
+        sep1.show()
+        self.menu.append(sep1)
 
         macro_button = gtk.MenuItem("Enable Macro Keys")
         macro_button.connect("activate", self.menuitem_enable_macro_buttons_response, "macros")
         macro_button.show()
         self.menu.append(macro_button)
 
-        sep3 = gtk.SeparatorMenuItem()
-        sep3.show()
-        self.menu.append(sep3)
+        sep2 = gtk.SeparatorMenuItem()
+        sep2.show()
+        self.menu.append(sep2)
 
         quit_button = gtk.MenuItem("Quit")
         quit_button.connect("activate", self.quit, "quit")
@@ -121,10 +151,20 @@ class AppIndicatorExample:
         print "[Driver] Enable macro keys"
         self.dbus_daemon_controls.enable_macro_keys()
 
+    def menuitem_enable_game_mode(self, widget, enable):
+        if enable:
+            print "[Driver] Enable game mode"
+            self.dbus_daemon_controls.set_game_mode(1)
+        else:
+            print "[Driver] Disable game mode"
+            self.dbus_daemon_controls.set_game_mode(0)
 
 
 def main():
-    gtk.main()
+    try:
+        gtk.main()
+    except KeyboardInterrupt:
+        pass # Dont error if Ctrl+C'd
     return 0
 
 if __name__ == "__main__":
