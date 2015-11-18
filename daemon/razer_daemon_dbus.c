@@ -158,6 +158,8 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon","raw_keyboard_brightness"))
 		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon","set_game_mode"))
+			return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","none"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","static"))
@@ -209,10 +211,8 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			printf("Device path: %s\n", device_path);
 			#endif
 
-			FILE* fp;
-			fp = fopen(device_path, "w");
-			fprintf(fp, "%d", 1);
-			fclose(fp);
+			write_to_device_file(device_path, "1", 1);
+
 			free(device_path);
 
 
@@ -248,15 +248,51 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				printf("Device path: %s\n", device_path);
 				#endif
 
-				FILE* fp;
-				fp = fopen(device_path, "w");
-				fprintf(fp, "%d", brightness);
-				fclose(fp);
+				char buf[32];
+				sprintf(buf, "%d", brightness);
+				write_to_device_file(device_path, buf, strlen(buf));
+
 				free(device_path);
 
 			}
 	 		dbus_uint32_t serial = 0;
 	 		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+				daemon_kill(daemon,"dbus: Out Of Memory!\n");
+			dbus_connection_flush(daemon->dbus);
+		}
+	if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon", "set_game_mode"))
+		{
+			int enable=0;
+			reply = dbus_message_new_method_return(msg);
+
+			if(dbus_message_iter_init(msg, &parameters))
+			{
+				if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_BYTE)
+				{
+					dbus_message_iter_get_basic(&parameters,&enable);
+				}
+				dbus_message_iter_init_append(reply,&parameters);
+				#ifdef USE_DEBUGGING
+					printf("\ndbus: setting game mode to: %d\n", enable);
+				#endif
+
+				char *device_path = str_CreateEmpty();
+				device_path = str_CatFree(device_path, daemon->chroma->device_path);
+				device_path = str_CatFree(device_path, "/mode_game");
+
+				#ifdef USE_DEBUGGING
+				printf("Device path: %s\n", device_path);
+				#endif
+
+				char buf[32];
+				sprintf(buf, "%d", enable);
+				write_to_device_file(device_path, buf, strlen(buf));
+
+				free(device_path);
+
+			}
+			dbus_uint32_t serial = 0;
+			if(!dbus_connection_send(daemon->dbus,reply,&serial))
 				daemon_kill(daemon,"dbus: Out Of Memory!\n");
 			dbus_connection_flush(daemon->dbus);
 		}
@@ -275,10 +311,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				#endif
 
 				daemon->is_paused = 1;
-				FILE* fp;
-				fp = fopen(device_path, "w");
-				fprintf(fp, "%d", 1);
-				fclose(fp);
+				write_to_device_file(device_path, "1", 1);
 				free(device_path);
 
 
@@ -328,16 +361,9 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				#endif
 
 				daemon->is_paused = 1;
-				FILE* fp;
-				fp = fopen(device_path, "w");
-				if(fp != NULL) {
-				  fwrite(&red, 1, 1, fp);
-				  fwrite(&green, 1, 1, fp);
-				  fwrite(&blue, 1, 1, fp);
-				  fclose(fp);
-				} else {
-				  printf("Writing static colour file buffer is NULL!\n");
-				}
+
+				char buf[3] = {red, green, blue};
+				write_to_device_file(device_path, buf, 3);
 
 				free(device_path);
 
@@ -387,18 +413,8 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 					#endif
 
 					daemon->is_paused = 1;
-					FILE* fp;
-					fp = fopen(device_path, "w");
-					if(fp != NULL) {
-					  fwrite(&num_cols, 1, 1, fp);
-					  fwrite(&red, 1, 1, fp);
-					  fwrite(&green, 1, 1, fp);
-					  fwrite(&blue, 1, 1, fp);
-
-					  fclose(fp);
-					} else {
-					  printf("Writing breath file buffer is NULL!\n");
-					}
+					char buf[4] = {num_cols, red, green, blue};
+					write_to_device_file(device_path, buf, 4);
 
 					free(device_path);
 
@@ -449,18 +465,8 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 						#endif
 
 						daemon->is_paused = 1;
-						FILE* fp;
-						fp = fopen(device_path, "w");
-						if(fp != NULL) {
-						  fwrite(&speed, 1, 1, fp);
-						  fwrite(&red, 1, 1, fp);
-						  fwrite(&green, 1, 1, fp);
-						  fwrite(&blue, 1, 1, fp);
-
-						  fclose(fp);
-						} else {
-						  printf("Writing reactive file buffer is NULL!\n");
-						}
+						char buf[4] = {speed, red, green, blue};
+						write_to_device_file(device_path, buf, 4);
 
 						free(device_path);
 
@@ -511,14 +517,10 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 							#endif
 
 							daemon->is_paused = 1;
-							FILE* fp;
-							fp = fopen(device_path, "w");
-							if(fp != NULL) {
-							  fprintf(fp, "%d", direction);
-							  fclose(fp);
-							} else {
-							  printf("Writing wave file buffer is NULL!\n");
-							}
+
+							char buf[32];
+							sprintf(buf, "%d", direction);
+							write_to_device_file(device_path, buf, strlen(buf));
 
 							free(device_path);
 
@@ -543,10 +545,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 					#endif
 
 					daemon->is_paused = 1;
-					FILE* fp;
-					fp = fopen(device_path, "w");
-					fprintf(fp, "%d", 1);
-					fclose(fp);
+					write_to_device_file(device_path, "1", 1);
 					free(device_path);
 
 
@@ -2026,6 +2025,10 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				</method>\n\
 				<method name=\"raw_keyboard_brightness\">\n\
 					<arg direction=\"in\" name=\"brightness\" type=\"y\">\n\
+					</arg>\n\
+				</method>\n\
+		        <method name=\"set_game_mode\">\n\
+					<arg direction=\"in\" name=\"enable\" type=\"y\">\n\
 					</arg>\n\
 				</method>\n\
 			</interface>\n\

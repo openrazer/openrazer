@@ -268,6 +268,7 @@ void sub_heatmap(struct razer_keys *keys,int heatmap_reduction_amount);
 void draw_circle(struct razer_keys *keys,struct razer_pos *pos,int radius,struct razer_rgb *color);
 void draw_ring(struct razer_keys *keys,struct razer_pos *pos,struct razer_rgb *color);
 
+void write_to_device_file(char *device_path, char *buffer, int buffer_length);
 
 //list of last keystrokes
 //time since hit /hitstamps

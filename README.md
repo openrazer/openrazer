@@ -205,10 +205,11 @@ of guessed unbinds all chroma keyboards.
 
 
 
+## GUI Tray Applet
+There is a very simple "gui" which sits in the notification tray and has a context menu. It shows off some basic features of the daemon/driver by allowing you to change 
+effects/brightness/toggle some stuff. It'll be expanded to allow for custom effect creation eventually.
 
-
-
-
+The app is here `/usr/share/razer_tray_applet/razer_tray_applet.py` and also has a `.desktop` entry and should appear in the startup applications menu if you log out and in again.
 
 
 ## Status of Code

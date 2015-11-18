@@ -98,6 +98,28 @@ void razer_prepare_report(struct razer_report *report)
    report->reserved2 = 0x03;
 }
 
+int razer_set_game_mode(struct usb_device *usb_dev,unsigned char enable)
+{
+    int retval;
+    if(enable > 1)
+    {
+		printk(KERN_WARNING "razerkbd: Cannot set game mode to %d. Only 1 or 0 allowed.", enable);
+	} else
+	{
+		struct razer_report report;
+		razer_prepare_report(&report);
+		report.parameter_bytes_num = 0x03;
+		report.command = 0x00;
+		report.sub_command = 0x01;
+		report.command_parameters[0] = 0x08;
+		report.command_parameters[1] = enable;
+		report.command_parameters[2] = 0x00;
+		report.crc = razer_calculate_crc(&report);
+		retval = razer_send_report(usb_dev,&report);
+	}
+    return retval;
+}
+
 int razer_set_wave_mode(struct usb_device *usb_dev,unsigned char direction)
 {
     int retval;
@@ -425,7 +447,26 @@ static ssize_t razer_attr_write_macro_keys(struct device *dev, struct device_att
     //int temp = simple_strtoul(buf, NULL, 10);           
     razer_activate_macro_keys(usb_dev);
     return count;                           
-}                                   
+}
+
+static ssize_t razer_attr_read_mode_game(struct device *dev, struct device_attribute *attr,
+                char *buf)                  
+{                                   
+    //struct usb_interface *intf = to_usb_interface(dev->parent);     
+    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+    return sprintf(buf, "%d\n", 0);            
+}
+
+static ssize_t razer_attr_write_mode_game(struct device *dev, struct device_attribute *attr,
+               const char *buf, size_t count)       
+{                                   
+    struct usb_interface *intf = to_usb_interface(dev->parent);     
+    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int temp = simple_strtoul(buf, NULL, 10);           
+    razer_set_game_mode(usb_dev,temp);
+    return count;                           
+}
 
 static ssize_t razer_attr_read_mode_wave(struct device *dev, struct device_attribute *attr,
                 char *buf)                  
@@ -444,7 +485,7 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
     int temp = simple_strtoul(buf, NULL, 10);           
     razer_set_wave_mode(usb_dev,temp);
     return count;                           
-}                                   
+}
 
 static ssize_t razer_attr_read_mode_spectrum(struct device *dev, struct device_attribute *attr,
                 char *buf)                  
@@ -649,7 +690,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 
 
 
-
+static DEVICE_ATTR(mode_game, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_mode_game, razer_attr_write_mode_game);
 static DEVICE_ATTR(mode_wave, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_mode_wave, razer_attr_write_mode_wave);
 static DEVICE_ATTR(mode_spectrum, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_mode_spectrum, razer_attr_write_mode_spectrum);
 static DEVICE_ATTR(mode_none, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_mode_none, razer_attr_write_mode_none);
@@ -681,6 +722,9 @@ static int razer_kbd_probe(struct hid_device *hdev,
         goto exit;
     }
     
+    retval = device_create_file(&hdev->dev, &dev_attr_mode_game);
+    if (retval)
+        goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_mode_wave);
     if (retval)
         goto exit_free;
@@ -750,6 +794,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     struct razer_kbd_device *dev;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     dev = hid_get_drvdata(hdev);
+    device_remove_file(&hdev->dev, &dev_attr_mode_game);
     device_remove_file(&hdev->dev, &dev_attr_mode_wave);
     device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);
     device_remove_file(&hdev->dev, &dev_attr_mode_none);
