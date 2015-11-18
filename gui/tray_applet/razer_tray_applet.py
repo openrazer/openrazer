@@ -68,9 +68,6 @@ class AppIndicatorExample:
         self.effect_menu_items["static"] = gtk.RadioMenuItem(self.effect_menu_items["spectrum"], "Static Effect")
         self.effect_menu_items["none"] = gtk.RadioMenuItem(self.effect_menu_items["spectrum"], "No Effect (Off)")
 
-        self.dbus_driver_effect_object.static(*STATIC_RGB)
-        self.effect_menu_items["static"].set_active(True)
-
         for button_key, button in self.effect_menu_items.items():
             button.connect("activate", self.menuitem_keyboard_effect_response, button_key)
             button.show()
