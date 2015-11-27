@@ -4,11 +4,11 @@ MODULEDIR=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
 
 all: librazer_chroma razer_daemon razer_daemon_controller razer_examples razer_kbd
 
+# added redirect to remove output of a useless makefile warning
 razer_kbd:
 	@echo "::\033[32m COMPILING razer chroma kernel module\033[0m"
 	@echo "========================================"
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules > /dev/null 2>&1
-	#added redirect to remove output of a useless makefile warning
 
 razer_kbd_verbose:
 	@echo "::\033[32m COMPILING razer chroma kernel module\033[0m"
