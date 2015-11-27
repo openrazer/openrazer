@@ -94,8 +94,6 @@ struct razer_kbd_device {
 	bool effect_submitted;
 };
 
-//TODO speed parameter ?
-
 struct razer_report {
 	unsigned char report_start_marker; /*0x0*/
 	unsigned char id; /*always 0xFF maybe it's an i2c id or some range*/
