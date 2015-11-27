@@ -33,19 +33,19 @@ RAZER_CHROMA_DAEMON_CONTROLLER_DEBUG_OBJ=razer_daemon_controller.do
 all: daemon_controller_shared daemon_controller_static daemon_controller_debug
 
 daemon_controller_debug: $(RAZER_CHROMA_DAEMON_CONTROLLER_DEBUG_OBJ)
-	@echo "::\033[32m COMPILING razer_bcd controller [DEBUG]\033[0m"
+	@echo "\n::\033[32m COMPILING razer_bcd controller [DEBUG]\033[0m"
 	@echo "================================================="
 	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_CONTROLLER_DEBUG_OBJ) ../lib/librazer_chroma.da ../lib/librazer_chroma_controller.da $(LIBS) -o razer_bcd_controller_debug_static 
 	$(CC) -L../lib -rdynamic $(RAZER_CHROMA_DAEMON_CONTROLLER_DEBUG_OBJ) -lrazer_chroma_debug -lrazer_chroma_controller $(LIBS) -o razer_bcd_controller_debug_shared 
 
 daemon_controller_static: $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ)
-	@echo "::\033[32m COMPILING razer_bcd controller\033[0m"
+	@echo "\n::\033[32m COMPILING razer_bcd controller\033[0m"
 	@echo "========================================="
 	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ) ../lib/librazer_chroma.a ../lib/librazer_chroma_controller.a $(LIBS) -o razer_bcd_controller_static 
 	@strip razer_bcd_controller_static
 
 daemon_controller_shared: $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ)
-	@echo "::\033[32m COMPILING razer_bcd controller [SHARED]\033[0m"
+	@echo "\n::\033[32m COMPILING razer_bcd controller [SHARED]\033[0m"
 	@echo "==========================================="
 	$(CC) -L../lib -rdynamic $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ) -lrazer_chroma -lrazer_chroma_controller $(LIBS) -o razer_bcd_controller
 	@strip razer_bcd_controller
@@ -57,12 +57,12 @@ daemon_controller_shared: $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ)
 	$(CC) $(DEBUG_CFLAGS) -c -o $@ $<
 
 install:
-	@echo "::\033[32m INSTALLING razer_bcd daemon controller\033[0m"
+	@echo "\n::\033[32m INSTALLING razer_bcd daemon controller\033[0m"
 	@echo "======================================="
 	@cp razer_bcd_controller /usr/sbin
 
 uninstall:
-	@echo "::\033[32m REMOVING razer_bcd daemon controller\033[0m"
+	@echo "\n::\033[32m REMOVING razer_bcd daemon controller\033[0m"
 	@echo "====================================="
 	@rm -f /usr/sbin/razer_bcd_controller
 
