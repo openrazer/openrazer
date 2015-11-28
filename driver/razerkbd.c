@@ -222,7 +222,7 @@ int razer_set_none_mode(struct usb_device *usb_dev)
 int razer_set_reactive_mode(struct usb_device *usb_dev, struct razer_rgb *color, unsigned char speed)
 {
     int retval = 0;
-    if(speed > 1 && speed < 4)
+    if(speed > 0 && speed < 4)
     {
     	struct razer_report report;
 		razer_prepare_report(&report);
