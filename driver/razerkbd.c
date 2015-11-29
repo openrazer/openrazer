@@ -1178,27 +1178,27 @@ static ssize_t razer_attr_write_device_type(struct device *dev, struct device_at
 
 
 
-
+// 0200 | 020 | (0400|040|04)
 
 /**
  * Set up the device driver files
  */
-static DEVICE_ATTR(device_type, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_device_type, razer_attr_write_device_type);
-static DEVICE_ATTR(mode_game, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_mode_game, razer_attr_write_mode_game);
-static DEVICE_ATTR(mode_pulsate, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_mode_pulsate, razer_attr_write_mode_pulsate);
-static DEVICE_ATTR(mode_wave, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_mode_wave, razer_attr_write_mode_wave);
-static DEVICE_ATTR(mode_spectrum, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_mode_spectrum, razer_attr_write_mode_spectrum);
-static DEVICE_ATTR(mode_none, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_mode_none, razer_attr_write_mode_none);
-static DEVICE_ATTR(mode_reactive, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_mode_reactive, razer_attr_write_mode_reactive);
-static DEVICE_ATTR(mode_breath, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_mode_breath, razer_attr_write_mode_breath);
-static DEVICE_ATTR(mode_custom, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_mode_custom, razer_attr_write_mode_custom);
-static DEVICE_ATTR(mode_static, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_mode_static, razer_attr_write_mode_static);
-static DEVICE_ATTR(temp_clear_row, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_temp_clear_row, razer_attr_write_temp_clear_row);
-static DEVICE_ATTR(set_key_row, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_set_key_row, razer_attr_write_set_key_row);
-static DEVICE_ATTR(reset, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_reset, razer_attr_write_reset);
-static DEVICE_ATTR(macro_keys, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_macro_keys, razer_attr_write_macro_keys);
-static DEVICE_ATTR(set_brightness, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
-static DEVICE_ATTR(test, S_IWUSR | S_IWGRP | S_IRUGO, razer_attr_read_test, razer_attr_write_test);
+static DEVICE_ATTR(device_type,    0664, razer_attr_read_device_type, razer_attr_write_device_type);
+static DEVICE_ATTR(mode_game,      0664, razer_attr_read_mode_game, razer_attr_write_mode_game);
+static DEVICE_ATTR(mode_pulsate,   0664, razer_attr_read_mode_pulsate, razer_attr_write_mode_pulsate);
+static DEVICE_ATTR(mode_wave,      0664, razer_attr_read_mode_wave, razer_attr_write_mode_wave);
+static DEVICE_ATTR(mode_spectrum,  0664, razer_attr_read_mode_spectrum, razer_attr_write_mode_spectrum);
+static DEVICE_ATTR(mode_none,      0664, razer_attr_read_mode_none, razer_attr_write_mode_none);
+static DEVICE_ATTR(mode_reactive,  0664, razer_attr_read_mode_reactive, razer_attr_write_mode_reactive);
+static DEVICE_ATTR(mode_breath,    0664, razer_attr_read_mode_breath, razer_attr_write_mode_breath);
+static DEVICE_ATTR(mode_custom,    0664, razer_attr_read_mode_custom, razer_attr_write_mode_custom);
+static DEVICE_ATTR(mode_static,    0664, razer_attr_read_mode_static, razer_attr_write_mode_static);
+static DEVICE_ATTR(temp_clear_row, 0664, razer_attr_read_temp_clear_row, razer_attr_write_temp_clear_row);
+static DEVICE_ATTR(set_key_row,    0664, razer_attr_read_set_key_row, razer_attr_write_set_key_row);
+static DEVICE_ATTR(reset,          0664, razer_attr_read_reset, razer_attr_write_reset);
+static DEVICE_ATTR(macro_keys,     0664, razer_attr_read_macro_keys, razer_attr_write_macro_keys);
+static DEVICE_ATTR(set_brightness, 0664, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
+static DEVICE_ATTR(test,           0664, razer_attr_read_test, razer_attr_write_test);
 
 
 /**
