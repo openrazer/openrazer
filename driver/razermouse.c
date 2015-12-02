@@ -316,21 +316,21 @@ int razer_set_reactive_mode(struct usb_device *usb_dev, struct razer_rgb *colour
 
     if(speed < 0 || speed > 4)
     {
-    	printk(KERN_WARNING "razerkbd: Reactive mode, Speed must be within 1-3. Got: %d. Defaulting to long\n", speed);
-    	speed = 3;
+        printk(KERN_WARNING "razerkbd: Reactive mode, Speed must be within 1-3. Got: %d. Defaulting to long\n", speed);
+        speed = 3;
     }
 
 
-	razer_prepare_report(&report);
-	report.parameter_bytes_num = 0x05;
-	report.command = 0x0A; /*change effect command id*/
-	report.sub_command = 0x02;/*reactive mode id*/
-	report.command_parameters[0] = speed;/*identified by Oleg Finkelshteyn*/
-	report.command_parameters[1] = colour->r; /*rgb color definition*/
-	report.command_parameters[2] = colour->g;
-	report.command_parameters[3] = colour->b;
-	report.crc = razer_calculate_crc(&report);
-	retval = razer_send_report(usb_dev, &report);
+    razer_prepare_report(&report);
+    report.parameter_bytes_num = 0x05;
+    report.command = 0x0A; /*change effect command id*/
+    report.sub_command = 0x02;/*reactive mode id*/
+    report.command_parameters[0] = speed;/*identified by Oleg Finkelshteyn*/
+    report.command_parameters[1] = colour->r; /*rgb color definition*/
+    report.command_parameters[2] = colour->g;
+    report.command_parameters[3] = colour->b;
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_send_report(usb_dev, &report);
 
     return retval;
 }
@@ -416,8 +416,8 @@ int razer_set_low_battery_threshold(struct usb_device *usb_dev, unsigned char th
 
     if(threshold >= 0x40)
     {
-    	printk(KERN_WARNING "razermouse: Setting low battery threshold over 25%% has not been tested so capping it to 25%%.\n");
-    	threshold = 0x3F;
+        printk(KERN_WARNING "razermouse: Setting low battery threshold over 25%% has not been tested so capping it to 25%%.\n");
+        threshold = 0x3F;
     }
 
     razer_prepare_report(&report);
@@ -447,8 +447,8 @@ int razer_set_idle_time(struct usb_device *usb_dev, unsigned short idle_time)
 
     if(idle_time > 900)
     {
-    	printk(KERN_WARNING "razermouse: Cannot set an idle time of greater than 15 minutes. Setting to 15.\n");
-    	idle_time = 900;
+        printk(KERN_WARNING "razermouse: Cannot set an idle time of greater than 15 minutes. Setting to 15.\n");
+        idle_time = 900;
     }
 
     part1 = (idle_time >> 8) & 0x00FF;
@@ -483,14 +483,14 @@ int razer_set_mouse_dpi(struct usb_device *usb_dev, unsigned short dpi_x, unsign
 
     if(dpi_x > 16000)
     {
-    	printk(KERN_WARNING "razermouse: Cannot set an X DPI greater than 16000 minutes. Got: %d Setting to 16000.\n", dpi_x);
-    	dpi_x = 16000;
+        printk(KERN_WARNING "razermouse: Cannot set an X DPI greater than 16000 minutes. Got: %d Setting to 16000.\n", dpi_x);
+        dpi_x = 16000;
     }
     if(dpi_y > 16000)
-	{
-		printk(KERN_WARNING "razermouse: Cannot set an Y DPI greater than 16000 minutes. Got: %d Setting to 16000.\n", dpi_y);
-		dpi_y = 16000;
-	}
+    {
+        printk(KERN_WARNING "razermouse: Cannot set an Y DPI greater than 16000 minutes. Got: %d Setting to 16000.\n", dpi_y);
+        dpi_y = 16000;
+    }
 
     dpi_x_part1 = (dpi_x >> 8) & 0x00FF;
     dpi_x_part2 = dpi_x & 0x00FF;
@@ -529,9 +529,9 @@ int razer_set_charging_effect(struct usb_device *usb_dev, unsigned char charge_t
 
     if(charge_type > 1 || charge_type < 0)
     {
-    	printk(KERN_WARNING "razermouse: Cannot set an charge_type to anything other than 0 or 1. Got: %d, setting to 1.\n", charge_type);
+        printk(KERN_WARNING "razermouse: Cannot set an charge_type to anything other than 0 or 1. Got: %d, setting to 1.\n", charge_type);
 
-    	charge_type = 0x01;
+        charge_type = 0x01;
     }
 
 
@@ -658,7 +658,7 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
     {
         razer_set_wave_mode(usb_dev, temp);
     } {
-    	return count;
+        return count;
     }
 }
 
@@ -743,7 +743,7 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
         razer_set_reactive_mode(usb_dev, (struct razer_rgb*)&buf[1], speed);
     } else
     {
-    	printk(KERN_WARNING "razermouse: Wrong number of bytes passed in for reactive effect mode. Got %d bytes\n", (int)count);
+        printk(KERN_WARNING "razermouse: Wrong number of bytes passed in for reactive effect mode. Got %d bytes\n", (int)count);
     }
     return count;
 }
@@ -888,19 +888,19 @@ static ssize_t razer_attr_write_set_mouse_dpi(struct device *dev, struct device_
     if(count == 2)
     {
 
-    	dpi_x = (buf[0] << 8) | (buf[1] & 0xFF);
+        dpi_x = (buf[0] << 8) | (buf[1] & 0xFF);
 
-    	razer_set_mouse_dpi(usb_dev, dpi_x, dpi_x);
+        razer_set_mouse_dpi(usb_dev, dpi_x, dpi_x);
     } else if(count == 4)
     {
-    	dpi_x = (buf[0] << 8) | (buf[1] & 0xFF); // Apparently the char buffer is rubbish, as buf[1] somehow can equal FFFFFF80????
-    	dpi_y = (buf[2] << 8) | (buf[3] & 0xFF);
+        dpi_x = (buf[0] << 8) | (buf[1] & 0xFF); // Apparently the char buffer is rubbish, as buf[1] somehow can equal FFFFFF80????
+        dpi_y = (buf[2] << 8) | (buf[3] & 0xFF);
 
-    	razer_set_mouse_dpi(usb_dev, dpi_x, dpi_y);
+        razer_set_mouse_dpi(usb_dev, dpi_x, dpi_y);
     } else
     {
-    	printk(KERN_WARNING "razermouse: Unknown DPI setting to X:1500 Y:1500\n");
-    	razer_set_mouse_dpi(usb_dev, 1500, 1500);
+        printk(KERN_WARNING "razermouse: Unknown DPI setting to X:1500 Y:1500\n");
+        razer_set_mouse_dpi(usb_dev, 1500, 1500);
     }
 
     return count;
@@ -928,7 +928,7 @@ static ssize_t razer_attr_write_set_charging_effect(struct device *dev, struct d
 
     if(count == 1)
     {
-    	razer_set_charging_effect(usb_dev, buf[0]);
+        razer_set_charging_effect(usb_dev, buf[0]);
     } else
     {
         printk(KERN_WARNING "razermouse: Incorrect number of bytes for setting the charging effect. Defaulting to 0x01\n");
@@ -961,11 +961,11 @@ static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct d
 
     if(count == 3)
     {
-    	razer_set_charging_colour(usb_dev, (struct razer_rgb*)&buf[0]);
+        razer_set_charging_colour(usb_dev, (struct razer_rgb*)&buf[0]);
     } else
     {
-    	printk(KERN_WARNING "razermouse: Wrong number of bytes setting charging colour. Defaulting to red (FF0000)\n");
-    	razer_set_charging_colour(usb_dev, (struct razer_rgb*)&alt_buf[0]);
+        printk(KERN_WARNING "razermouse: Wrong number of bytes setting charging colour. Defaulting to red (FF0000)\n");
+        razer_set_charging_colour(usb_dev, (struct razer_rgb*)&alt_buf[0]);
     }
     return count;
 }

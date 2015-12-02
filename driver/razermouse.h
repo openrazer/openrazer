@@ -30,29 +30,29 @@
 #define RAZER_WAIT_MAX_US 800
 
 struct razer_rgb {
-	unsigned char r,g,b;
+    unsigned char r,g,b;
 };
 
 struct razer_mouse_device {
-	//struct input_dev *dev;
-	struct usb_device *usbdev;
-	struct hid_device *hiddev;
-	unsigned char effect;
-	char name[128];
-	char phys[64];
+    //struct input_dev *dev;
+    struct usb_device *usbdev;
+    struct hid_device *hiddev;
+    unsigned char effect;
+    char name[128];
+    char phys[64];
 };
 
 struct razer_report {
-	unsigned char report_start_marker; /*0x0*/
-	unsigned char id; /*always 0xFF maybe it's an i2c id or some range*/
-	unsigned char reserved1[3];
-	unsigned char parameter_bytes_num;
-	unsigned char reserved2;/*always 0x03 maybe some command class id*/
-	unsigned char command;
-	unsigned char sub_command;/*named first parameter*/
-	unsigned char command_parameters[90-11];
-	unsigned char crc;/*xor'ed bytes of report*/
-	unsigned char report_end_marker; /*0x0*/
+    unsigned char report_start_marker; /*0x0*/
+    unsigned char id; /*always 0xFF maybe it's an i2c id or some range*/
+    unsigned char reserved1[3];
+    unsigned char parameter_bytes_num;
+    unsigned char reserved2;/*always 0x03 maybe some command class id*/
+    unsigned char command;
+    unsigned char sub_command;/*named first parameter*/
+    unsigned char command_parameters[90-11];
+    unsigned char crc;/*xor'ed bytes of report*/
+    unsigned char report_end_marker; /*0x0*/
 };
 
 #endif
