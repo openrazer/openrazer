@@ -27,7 +27,7 @@ if [ -f /etc/default/razer_bcd ] ; then
 fi
 
 # Load in the binding and unbinding functions
-source $FUNCTIONS
+. $FUNCTIONS
 
 set -e
 
