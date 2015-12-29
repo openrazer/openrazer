@@ -4,6 +4,7 @@ import dbus
 
 class DaemonInterface():
     def __init__(self):
+      try:
         # Load up the DBUS
         system_bus = dbus.SystemBus()
         self.dbus_daemon_object = system_bus.get_object("org.voyagerproject.razer.daemon", "/")
@@ -22,3 +23,7 @@ class DaemonInterface():
         # raw_keyboard_brightness(byte brightness)
         # set_game_mode(byte enable)
         self.dbus_daemon_controls = dbus.Interface(self.dbus_daemon_object, "org.voyagerproject.razer.daemon")
+
+      except:
+        print("Failed to connect to the dbus service. Is the razer_bcd service running?")
+        exit()
