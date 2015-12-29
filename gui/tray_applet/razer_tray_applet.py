@@ -9,6 +9,7 @@ import dbus
 import collections
 
 STATIC_RGB = [255, 0, 255]
+ACTIVE_EFFECT = 'unknown' # Currently not known when tray applet is initially started.
 
 class AppIndicatorExample:
     def __init__(self):
@@ -120,24 +121,31 @@ class AppIndicatorExample:
         gtk.main_quit()
 
     def menuitem_keyboard_effect_response(self, widget, effect_type):
+        global ACTIVE_EFFECT
         if widget.active:
             if effect_type == "breath":
                 print "[Effect] Breath mode"
+                ACTIVE_EFFECT = 'breath'
                 self.dbus_driver_effect_object.breath(*STATIC_RGB)
             elif effect_type == "none":
                 print "[Effect] No effect (off)"
+                ACTIVE_EFFECT = 'none'
                 self.dbus_driver_effect_object.none()
             elif effect_type == "reactive":
                 print "[Effect] Reactive mode"
+                ACTIVE_EFFECT = 'reactive'
                 self.dbus_driver_effect_object.reactive(*STATIC_RGB)
             elif effect_type == "spectrum":
                 print "[Effect] Spectrum mode"
+                ACTIVE_EFFECT = 'spectrum'
                 self.dbus_driver_effect_object.spectrum()
             elif effect_type == "static":
                 print "[Effect] Static mode"
+                ACTIVE_EFFECT = 'static'
                 self.dbus_driver_effect_object.static(*STATIC_RGB)
             elif effect_type == "wave":
                 print "[Effect] Wave mode"
+                ACTIVE_EFFECT = 'wave'
                 self.dbus_driver_effect_object.wave(1)
 
     def menuitem_brightness_response(self, widget, brightness):
