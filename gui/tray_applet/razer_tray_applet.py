@@ -5,33 +5,15 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import appindicator
-import dbus
 import collections
+import daemon_dbus
 
 STATIC_RGB = [255, 0, 255]
 ACTIVE_EFFECT = 'unknown' # Currently not known when tray applet is initially started.
 
-class AppIndicatorExample:
+class AppIndicator:
     def __init__(self):
-        # Load up teh DBUS
-        system_bus = dbus.SystemBus()
-        self.dbus_daemon_object = system_bus.get_object("org.voyagerproject.razer.daemon", "/")
-
-        # Provides:
-        # breath(byte red, byte green, byte blue)
-        # none()
-        # reactive(byte red, byte green, byte blue)
-        # spectrum()
-        # static(byte red, byte green, byte blue)
-        # wave(byte direction)
-        self.dbus_driver_effect_object = dbus.Interface(self.dbus_daemon_object, "org.voyagerproject.razer.daemon.driver_effect")
-
-        # Provides:
-        # enable_macro_keys()
-        # raw_keyboard_brightness(byte brightness)
-        # set_game_mode(byte enable)
-        self.dbus_daemon_controls = dbus.Interface(self.dbus_daemon_object, "org.voyagerproject.razer.daemon")
-
+        global daemon
         self.ind = appindicator.Indicator ("example-simple-client", "/usr/share/razer_tray_applet/razer_icon.png", appindicator.CATEGORY_APPLICATION_STATUS)
         self.ind.set_status (appindicator.STATUS_ACTIVE)
 
@@ -139,43 +121,43 @@ class AppIndicatorExample:
             if effect_type == "breath":
                 print "[Effect] Breath mode"
                 ACTIVE_EFFECT = 'breath'
-                self.dbus_driver_effect_object.breath(*STATIC_RGB)
+                daemon.dbus_driver_effect_object.breath(*STATIC_RGB)
             elif effect_type == "none":
                 print "[Effect] No effect (off)"
                 ACTIVE_EFFECT = 'none'
-                self.dbus_driver_effect_object.none()
+                daemon.dbus_driver_effect_object.none()
             elif effect_type == "reactive":
                 print "[Effect] Reactive mode"
                 ACTIVE_EFFECT = 'reactive'
-                self.dbus_driver_effect_object.reactive(*STATIC_RGB)
+                daemon.dbus_driver_effect_object.reactive(*STATIC_RGB)
             elif effect_type == "spectrum":
                 print "[Effect] Spectrum mode"
                 ACTIVE_EFFECT = 'spectrum'
-                self.dbus_driver_effect_object.spectrum()
+                daemon.dbus_driver_effect_object.spectrum()
             elif effect_type == "static":
                 print "[Effect] Static mode"
                 ACTIVE_EFFECT = 'static'
-                self.dbus_driver_effect_object.static(*STATIC_RGB)
+                daemon.dbus_driver_effect_object.static(*STATIC_RGB)
             elif effect_type == "wave":
                 print "[Effect] Wave mode"
                 ACTIVE_EFFECT = 'wave'
-                self.dbus_driver_effect_object.wave(1)
+                daemon.dbus_driver_effect_object.wave(1)
 
     def menuitem_brightness_response(self, widget, brightness):
         print "[Brightness] {0}%".format(round((100/255) * brightness, 0))
-        self.dbus_daemon_controls.raw_keyboard_brightness(brightness)
+        daemon.dbus_daemon_controls.raw_keyboard_brightness(brightness)
 
     def menuitem_enable_macro_buttons_response(self, widget, string):
         print "[Driver] Enable macro keys"
-        self.dbus_daemon_controls.enable_macro_keys()
+        daemon.dbus_daemon_controls.enable_macro_keys()
 
     def menuitem_enable_game_mode(self, widget, enable):
         if enable:
             print "[Driver] Enable game mode"
-            self.dbus_daemon_controls.set_game_mode(1)
+            daemon.dbus_daemon_controls.set_game_mode(1)
         else:
             print "[Driver] Disable game mode"
-            self.dbus_daemon_controls.set_game_mode(0)
+            daemon.dbus_daemon_controls.set_game_mode(0)
 
     def set_static_color(self, widget, color_status):
         global STATIC_RGB
@@ -221,5 +203,6 @@ def main():
     return 0
 
 if __name__ == "__main__":
-    indicator = AppIndicatorExample()
+    daemon = daemon_dbus.DaemonInterface()
+    indicator = AppIndicator()
     main()
