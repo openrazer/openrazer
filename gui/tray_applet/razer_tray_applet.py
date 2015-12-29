@@ -109,6 +109,19 @@ class AppIndicatorExample:
         sep2.show()
         self.menu.append(sep2)
 
+        color_button = gtk.MenuItem("Change Colour...")
+        color_status = gtk.MenuItem(str(STATIC_RGB))
+        color_button.connect("activate", self.set_static_color, color_status)
+        self.menu.append(color_button)
+        self.menu.append(color_status)
+        color_button.show()
+        color_status.show()
+        color_status.set_sensitive(False)
+
+        sep3 = gtk.SeparatorMenuItem()
+        sep3.show()
+        self.menu.append(sep3)
+
         quit_button = gtk.MenuItem("Quit")
         quit_button.connect("activate", self.quit, "quit")
         quit_button.show()
@@ -164,6 +177,41 @@ class AppIndicatorExample:
             print "[Driver] Disable game mode"
             self.dbus_daemon_controls.set_game_mode(0)
 
+    def set_static_color(self, widget, color_status):
+        global STATIC_RGB
+        global ACTIVE_EFFECT
+        print "[Change Colour] Current: " + str(STATIC_RGB)
+
+        # Create a colour selection dialog
+        colorsel = gtk.ColorSelection()
+        colorseldlg = gtk.ColorSelectionDialog('Change Static Colour')
+        response = colorseldlg.run()
+
+        # If new colour is chosen.
+        if response == gtk.RESPONSE_OK:
+            colorsel = colorseldlg.colorsel
+            colorhex = colorsel.get_current_color()
+            colorRGB = gtk.gdk.Color(str(colorhex))
+            # Returns value between 0.0 - 1.0 * 255 = 8-bit RGB Value
+            red = int(getattr(colorRGB, 'red_float') * 255)
+            green = int(getattr(colorRGB, 'green_float') * 255)
+            blue = int(getattr(colorRGB, 'blue_float') * 255)
+            STATIC_RGB = [int(red), int(green), int(blue)]
+            color_status.set_label(str(STATIC_RGB))
+            print "[Change Colour] New: " + str(STATIC_RGB) + " (" + str(colorhex) + ")"
+
+            # If 'static', 'reactive' or 'breath' mode is set, refresh the effect.
+            if ACTIVE_EFFECT == 'static':
+                print "[Change Colour] Refreshing Static Mode"
+                self.menuitem_keyboard_effect_response(self.effect_menu_items["static"], 'static')
+            elif ACTIVE_EFFECT == 'reactive':
+                print "[Change Colour] Refreshing Reactive Mode"
+                self.menuitem_keyboard_effect_response(self.effect_menu_items["reactive"], 'reactive')
+            elif ACTIVE_EFFECT == 'breath':
+                print "[Change Colour] Refreshing Breath Mode"
+                self.menuitem_keyboard_effect_response(self.effect_menu_items["breath"], 'breath')
+
+        colorseldlg.destroy()
 
 def main():
     try:
