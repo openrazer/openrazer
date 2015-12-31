@@ -117,47 +117,32 @@ class AppIndicator:
 
     def menuitem_keyboard_effect_response(self, widget, effect_type):
         global ACTIVE_EFFECT
+        ACTIVE_EFFECT = effect_type
         if widget.active:
             if effect_type == "breath":
-                print "[Effect] Breath mode"
-                ACTIVE_EFFECT = 'breath'
-                daemon.dbus_driver_effect_object.breath(*STATIC_RGB)
+                daemon.SetEffect('breath',*STATIC_RGB)
             elif effect_type == "none":
-                print "[Effect] No effect (off)"
-                ACTIVE_EFFECT = 'none'
-                daemon.dbus_driver_effect_object.none()
+                daemon.SetEffect('none')
             elif effect_type == "reactive":
-                print "[Effect] Reactive mode"
-                ACTIVE_EFFECT = 'reactive'
-                daemon.dbus_driver_effect_object.reactive(*STATIC_RGB)
+                daemon.SetEffect('reactive',*STATIC_RGB)
             elif effect_type == "spectrum":
-                print "[Effect] Spectrum mode"
-                ACTIVE_EFFECT = 'spectrum'
-                daemon.dbus_driver_effect_object.spectrum()
+                daemon.SetEffect('spectrum')
             elif effect_type == "static":
-                print "[Effect] Static mode"
-                ACTIVE_EFFECT = 'static'
-                daemon.dbus_driver_effect_object.static(*STATIC_RGB)
+                daemon.SetEffect('static',*STATIC_RGB)
             elif effect_type == "wave":
-                print "[Effect] Wave mode"
-                ACTIVE_EFFECT = 'wave'
-                daemon.dbus_driver_effect_object.wave(1)
+                daemon.SetEffect('wave',1)
 
     def menuitem_brightness_response(self, widget, brightness):
-        print "[Brightness] {0}%".format(round((100/255) * brightness, 0))
-        daemon.dbus_daemon_controls.raw_keyboard_brightness(brightness)
+        daemon.SetBrightness(brightness)
 
     def menuitem_enable_macro_buttons_response(self, widget, string):
-        print "[Driver] Enable macro keys"
-        daemon.dbus_daemon_controls.enable_macro_keys()
+        daemon.MarcoKeys(True)
 
     def menuitem_enable_game_mode(self, widget, enable):
         if enable:
-            print "[Driver] Enable game mode"
-            daemon.dbus_daemon_controls.set_game_mode(1)
+            daemon.GameMode(True)
         else:
-            print "[Driver] Disable game mode"
-            daemon.dbus_daemon_controls.set_game_mode(0)
+            daemon.GameMode(False)
 
     def set_static_color(self, widget, color_status):
         global STATIC_RGB
@@ -205,4 +190,4 @@ def main():
 if __name__ == "__main__":
     daemon = daemon_dbus.DaemonInterface()
     indicator = AppIndicator()
-    main()
+    app = main()
