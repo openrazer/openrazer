@@ -14,7 +14,7 @@ ACTIVE_EFFECT = 'unknown' # Currently not known when tray applet is initially st
 class AppIndicator:
     def __init__(self):
         global daemon
-        self.ind = appindicator.Indicator ("example-simple-client", "/usr/share/razer_tray_applet/razer_icon.png", appindicator.CATEGORY_APPLICATION_STATUS)
+        self.ind = appindicator.Indicator ("example-simple-client", "/usr/share/razer_tray_applet/tray_icon.png", appindicator.CATEGORY_APPLICATION_STATUS)
         self.ind.set_status (appindicator.STATUS_ACTIVE)
 
         # create a menu
