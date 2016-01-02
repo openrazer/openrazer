@@ -1,0 +1,307 @@
+/*
+ Chroma Controller is free software: you can redistribute it and/or modify
+ it under the temms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Chroma Controller is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Chroma Controller. If not, see <http://www.gnu.org/licenses/>.
+
+ Copyright (C) 2015-2016 Luke Horwell <lukehorwell37+code@gmail.com>
+*/
+
+/************************
+   Global
+*************************/
+html, body {
+  font-family: 'RazerF5', 'Ubuntu', 'DejaVu Sans', sans-serif;
+  background-color: #222222;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'RazerF5 Light', 'Ubuntu Light', 'DejaVu Sans', sans-serif;
+  font-weight: lighter;
+  color: lime;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+p, a, table, td, tr {
+  font-family: 'RazerF5', 'Ubuntu Light', 'DejaVu Sans', sans-serif;
+  color: #888;
+  font-size: small;
+}
+
+hr {
+  border-color: #565656;
+}
+
+.disabled {
+  color: #484848;
+}
+
+
+/************************
+   Header
+*************************/
+.header {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 40px;
+  padding: 8px;
+  background-color: #121212;
+  background-image: url('img/header.jpg');
+  background-repeat: no-repeat;
+  background-position: middle right;
+  font-weight: bold;
+}
+
+.header h3 {
+  padding: 0px;
+  margin: 0px;
+  margin-top: 5px;
+}
+
+
+/************************
+   Content
+*************************/
+.content {
+  padding-top: 64px;
+  padding-bottom: 64px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.content p {
+  padding: 0px;
+  margin: 0px;
+}
+
+.content td, tr {
+  color: #888;
+}
+
+.content td {
+  padding-left: 16px;
+}
+
+.content a {
+  color: lime;
+  font-style: underline;
+}
+
+.center {
+  text-align: center;
+}
+
+.content .left {
+  float: left;
+  width: 49%;
+}
+
+.content .center {
+  text-align: center;
+}
+.content .right {
+  float: right;
+  width: 49%;
+}
+
+.content select {
+  background-color: #222222;
+  color: white;
+  width: 100%;
+  color: #888;
+  font-size: small;
+}
+
+
+/************************
+   Footer
+*************************/
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 32px;
+  padding: 8px;
+  background-color: #121212;
+}
+
+.footer p {
+  margin: 0;
+  padding: 0;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.footer .left {
+  float: left;
+  width: auto;
+  margin-left: 8px;
+  padding: 0;
+  margin: 0;
+}
+
+.footer .right {
+  float: right;
+  text-align: right;
+  width: auto;
+  padding: 0;
+  margin: 0;
+  margin-right: 20px;
+}
+
+
+/************************
+   Status Indicator
+*************************/
+.status-detected {
+  color: lime;
+}
+
+.status-not-detected {
+  color: red;
+}
+
+
+/************************
+   Elements
+*************************/
+.btn {
+  width: auto;
+  height: 18px;
+  background-color: #323232;
+	color: #DED9CB;
+  display: inline-block;
+  padding: 4px 16px;
+  font-size: 14px;
+  line-height: 20px;
+  vertical-align: middle;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+
+.btn:hover {
+  color: #0DA902;
+}
+
+.btn:active {
+  background-color: #00FF00;
+  color: #000;
+}
+
+.btn-disabled {
+  background-color: #191919;
+  color: #959595;
+  pointer-events: none;
+  cursor: clashed-circle;
+}
+
+.color-preview {
+  display: inline-block;
+  width: 150px;
+  height: 24px;
+}
+
+.color-icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  border: 1px #888 solid;
+}
+
+/************************
+   Keyboard
+*************************/
+.keyboard {
+  width: 750px;
+  height: 252px;
+  margin-left: auto;
+  margin-right: auto;
+  background-image: url('img/keyboard_base.png');
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.keyboard td  {
+  padding: 0;
+  margin: 0;
+}
+
+.keyboard .key {
+  float: left;
+  width: 16px;
+  height: 16px;
+  overflow: hidden;
+  text-align: center;
+  padding: 6px;
+  background-color: #121212;
+  color: #959595;
+  border: 1px solid #959595;
+}
+
+.keyboard .small {
+  width: 20px;
+  height: 20px;
+  padding: 4px;
+  font-size: 8px;
+}
+
+.keyboard .key a {
+  text-decoration: none;
+}
+
+/************************
+   Enhancements
+*************************/
+
+/* Prevent dragging images and links */
+img, a {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+
+/************************
+   Icon Spritesheet
+*************************/
+.icon {
+  width: 24px; height: 24px;
+  object-position: 0 0;  object-fit: none;
+  background-image: url('img/spritesheet.png');
+  background-repeat: no-repeat;
+}
+.icon-left { background-position: 0px 0px; }
+.icon-right { background-position: -24px 0px; }
+.icon-up { background-position: -48px 0px; }
+.icon-down { background-position: -72px 0px; }
+.icon-menu { background-position: -96px 0px; }
+.icon-fn { background-position: -120px 0px; }
+.icon-bkspace { background-position: -144px 0px; }
+.icon-super { background-position: -168px 0px; }
+.icon-enter { background-position: -192px 0px; } /* FIXME: Not created */
+.icon-razer { background-position: -216px 0px; } /* FIXME: Not created */
+/* FIXME: Not positioned properly (offset somewhere?)
+
+/************************
+   Temp Data
+*************************/
+/**
+ * #222222          Background
+ * #121212          Footer
+ * #00FF00 (Lime)   Headings
+ * #888 Text
+ *
+ * *//
