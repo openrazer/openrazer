@@ -28,7 +28,7 @@ rgb_effects_blue = 0;
 current_effect = 'custom';
 layout = 'en-gb';
 
-class Paths():
+class Paths(object):
     # Initializes paths and directories
 
     ## Where are we?

@@ -55,6 +55,7 @@ mkdir ${directory}/usr/share/razer_chroma_controller/data
 cp gui/chroma_controller/*.py ${directory}/usr/share/razer_chroma_controller/
 cp -r gui/chroma_controller/data/* ${directory}/usr/share/razer_chroma_controller/data
 cp gui/tray_applet/daemon_dbus.py ${directory}/usr/share/razer_chroma_controller/daemon_dbus.py
+cp examples/dynamic ${directory}/usr/share/razer_chroma_controller/
 
 # Copy razer kernel driver to src
 cp Makefile ${directory}/usr/src/razer_chroma_driver-1.0.0/Makefile
