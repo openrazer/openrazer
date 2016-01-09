@@ -262,8 +262,8 @@ of guessed unbinds all chroma keyboards.
  - **Libraries :** Beta
  - **Installer :** Beta
  - **Packages :** Beta
- - **GUI - Tray Applet :** Alpha/Beta
- - **GUI - Chroma Controller :** Alpha/Beta
+ - **GUI - Tray Applet :** Alpha
+ - **GUI - Chroma Controller :** Alpha
 
 
 

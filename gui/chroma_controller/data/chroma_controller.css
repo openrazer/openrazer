@@ -18,13 +18,14 @@
 /************************
    Global
 *************************/
+/* Uses the RazerF5 font if available on the system. */
 html, body {
   font-family: 'RazerF5', 'Ubuntu', 'DejaVu Sans', sans-serif;
   background-color: #222222;
 }
 
 h1, h2, h3, h4, h5 {
-  font-family: 'RazerF5 Light', 'Ubuntu Light', 'DejaVu Sans', sans-serif;
+  font-family: 'RazerF5', 'Ubuntu Light', 'DejaVu Sans', sans-serif;
   font-weight: lighter;
   color: lime;
   margin-top: 16px;
@@ -37,13 +38,11 @@ p, a, table, td, tr {
   font-size: small;
 }
 
-hr {
-  border-color: #565656;
-}
+hr { border-color: #565656; }
 
-.disabled {
-  color: #484848;
-}
+.disabled {  color: #484848; }
+
+.cursor-wait { cursor: wait; }
 
 
 /************************
@@ -102,7 +101,7 @@ hr {
   text-align: center;
 }
 
-.content .left {
+.left {
   float: left;
   width: 49%;
 }
@@ -110,7 +109,8 @@ hr {
 .content .center {
   text-align: center;
 }
-.content .right {
+
+.right {
   float: right;
   width: 49%;
 }
@@ -205,7 +205,10 @@ hr {
   background-color: #191919;
   color: #959595;
   pointer-events: none;
-  cursor: clashed-circle;
+}
+
+.btn-dim {
+	color: #DED9CB;
 }
 
 .color-preview {
@@ -225,41 +228,65 @@ hr {
 /************************
    Keyboard
 *************************/
-.keyboard {
-  width: 750px;
-  height: 252px;
+#keyboard {
+  width: 850px;
+  height: 260px;
+  margin-top: 32px;
   margin-left: auto;
   margin-right: auto;
   background-image: url('img/keyboard_base.png');
   background-position: center;
+  background-size: contain;
   background-repeat: no-repeat;
 }
 
-.keyboard td  {
+#keyboard-inner {
+  padding-top: 8px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+#keyboard td  {
   padding: 0;
   margin: 0;
+  cursor: pointer;
+  background-color: #121212;
 }
 
-.keyboard .key {
+#keyboard tr {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+#keyboard .key {
   float: left;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   overflow: hidden;
   text-align: center;
-  padding: 6px;
-  background-color: #121212;
-  color: #959595;
-  border: 1px solid #959595;
+  padding: 4px;
+  border: 2px solid #464646; /* 70,70,70 */
+  color: #808080; /* 128,128,128 is considered 'cleared' */
 }
 
-.keyboard .small {
+.key-gap-marco { width: 20px; }
+.key-gap-functions { width: 8px; }
+.key-gap-middle { width: 8px; }
+.key-gap-middle-wide { width: 148px; }
+
+.key:hover {
+  background-color: #484848;
+  color: #000;
+}
+
+#keyboard .small {
   width: 20px;
   height: 20px;
   padding: 4px;
-  font-size: 8px;
+  font-size: 10px;
 }
 
-.keyboard .key a {
+#keyboard .key a {
   text-decoration: none;
 }
 
@@ -278,30 +305,16 @@ img, a {
    Icon Spritesheet
 *************************/
 .icon {
-  width: 24px; height: 24px;
-  object-position: 0 0;  object-fit: none;
-  background-image: url('img/spritesheet.png');
   background-repeat: no-repeat;
+  background-position: center;
 }
-.icon-left { background-position: 0px 0px; }
-.icon-right { background-position: -24px 0px; }
-.icon-up { background-position: -48px 0px; }
-.icon-down { background-position: -72px 0px; }
-.icon-menu { background-position: -96px 0px; }
-.icon-fn { background-position: -120px 0px; }
-.icon-bkspace { background-position: -144px 0px; }
-.icon-super { background-position: -168px 0px; }
-.icon-enter { background-position: -192px 0px; } /* FIXME: Not created */
-.icon-razer { background-position: -216px 0px; } /* FIXME: Not created */
-/* FIXME: Not positioned properly (offset somewhere?)
-
-/************************
-   Temp Data
-*************************/
-/**
- * #222222          Background
- * #121212          Footer
- * #00FF00 (Lime)   Headings
- * #888 Text
- *
- * *//
+.icon-left { background-image: url('img/keys/arrow-left.png'); }
+.icon-right { background-image: url('img/keys/arrow-right.png'); }
+.icon-up { background-image: url('img/keys/arrow-up.png'); }
+.icon-down { background-image: url('img/keys/arrow-down.png'); }
+.icon-menu { background-image: url('img/keys/menu.png'); }
+.icon-fn { background-image: url('img/keys/fn.png'); }
+.icon-bkspace { background-image: url('img/keys/backspace.png'); }
+.icon-super { background-image: url('img/keys/super.png'); }
+.icon-enter { background-image: url('img/keys/enter.png'); }
+.icon-razer { background-image: url('img/keys/logo.png'); }

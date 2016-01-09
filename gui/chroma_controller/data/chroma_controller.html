@@ -27,7 +27,7 @@
 
   <!--###########################################################################################-->
     <!-- Keyboard Not Detected -->
-    <div hidden id="not_detected" class="center">
+    <div hidden id="not_detected" class="center" class="menu_area">
       <img src="img/no_chroma.png"/>
       <h2>BlackWidow Chroma Keyboard Not Detected</h2>
       <p>Please plug it in to continue.</p>
@@ -37,7 +37,7 @@
 
   <!--###########################################################################################-->
     <!-- Main Menu Screen -->
-    <div hidden id="main_menu">
+    <div hidden id="main_menu" class="menu_area">
       <div class="left">
         <h4>Brightness</h4>
         <table>
@@ -49,7 +49,7 @@
 
         <h4>Effects</h4>
         <table>
-          <tr><td><label class="disabled"><input type="radio" name="effect" value="custom" id="custom" checked disabled /> Custom</label></td></tr>
+          <tr><td><label class="disabled"><input type="radio" name="effect" value="custom" checked disabled /> <span id="custom">Custom</span></label></td></tr>
           <tr><td><label><input type="radio" name="effect" value="none" onclick="cmd('effect-none')"/> None</label></td></tr>
           <tr><td><label><input type="radio" name="effect" value="spectrum" onclick="cmd('effect-spectrum')"/> Spectrum</label></td></tr>
           <tr><td><label><input type="radio" name="effect" value="wave" onclick="cmd('effect-wave?1');$('#wave-right').prop('checked',true);"/> Wave</label></td></tr>
@@ -58,24 +58,24 @@
           <tr><td><label><input type="radio" name="effect" value="static" onclick="cmd('effect-static')"/> Static</label></td></tr>
         </table>
         <hr>
-        <div id="rgb" hidden>
+        <div id="rgb_effects" hidden>
           <table>
             <tr>
-              <td>Colour: </td><td><div id="rgb_preview" class="color-preview" style="background-color:rgba(0,255,0,1)"></div></td>
-              <td><a class="btn" onclick="cmd('ask-color')">Custom...</a></td>
+              <td>Colour: </td><td><div id="rgb_effects_preview" class="color-preview" style="background-color:rgba(0,255,0,1)"></div></td>
+              <td><a class="btn" onclick="cmd('ask-color?rgb_effects')">Custom...</a></td>
             </tr>
             <tr>
               <td></td>
               <td colspan="2">
-                <a class="color-icon" onclick="cmd('set-color?255?255?255')" style="background-color:#FFFFFF"></a>
-                <a class="color-icon" onclick="cmd('set-color?255?0?0')" style="background-color:#FF0000"></a>
-                <a class="color-icon" onclick="cmd('set-color?255?165?0')" style="background-color:#FFA500"></a>
-                <a class="color-icon" onclick="cmd('set-color?255?255?0')" style="background-color:#FFFF00"></a>
-                <a class="color-icon" onclick="cmd('set-color?0?255?0')" style="background-color:#00FF00"></a>
-                <a class="color-icon" onclick="cmd('set-color?0?255?255')" style="background-color:#00FFFF"></a>
-                <a class="color-icon" onclick="cmd('set-color?0?0?255')" style="background-color:#0000FF"></a>
-                <a class="color-icon" onclick="cmd('set-color?128?0?128')" style="background-color:#800080"></a>
-                <a class="color-icon" onclick="cmd('set-color?255?0?255')" style="background-color:#FF00FF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_effects?255?255?255')" style="background-color:#FFFFFF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_effects?255?0?0')" style="background-color:#FF0000"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_effects?255?165?0')" style="background-color:#FFA500"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_effects?255?255?0')" style="background-color:#FFFF00"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_effects?0?255?0')" style="background-color:#00FF00"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_effects?0?255?255')" style="background-color:#00FFFF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_effects?0?0?255')" style="background-color:#0000FF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_effects?128?0?128')" style="background-color:#800080"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_effects?255?0?255')" style="background-color:#FF00FF"></a>
               </td>
             </tr>
           </table>
@@ -92,196 +92,76 @@
         <h4>Keys</h4>
         <p>
           Game Mode: <span id="game-mode-status"> Disabled</span>&nbsp;&nbsp;&nbsp;
-          <a id="game-mode-disable" class="btn" onclick="cmd('gamemode_disable')">Disable</a>
-          <a id="game-mode-enable" class="btn" onclick="cmd('gamemode_enable')">Enable</a>
+          <a id="game-mode-disable" class="btn" onclick="cmd('gamemode-disable')">Disable</a>
+          <a id="game-mode-enable" class="btn" onclick="cmd('gamemode-enable')">Enable</a>
         </p>
         <br>
-        <p><a id="marco-keys-enable" class="btn" onclick="cmd('enablemarcokeys')">Activate Marco Keys</a></p>
+        <p><a id="marco-keys-enable" class="btn" onclick="cmd('enable-marco-keys')">Activate Marco Keys</a></p>
 
-<!-- FIXME: Incomplete
         <h4>Profiles</h4>
-        <select name="profiles" size="3" style="width: 100%; height:140px">
-          <option value="hash123456">DOTA 2</option>
+        <select id="profiles_list" name="profiles" size="3" style="width: 100%; height:140px" onclick="profile_list_change()">
+            <!-- Generated list from config folder -->
         </select>
         <div class="left" style="width:auto">
-          <a id="profiles-activate" class="btn" onclick="">Activate</a>
+          <a id="profiles-activate" class="btn btn-disabled" onclick="cmd('profile-activate?'+profileName)">Activate</a>
         </div>
         <div class="right" style="width:auto;text-align:right">
-          <a id="profiles-new" class="btn" onclick="">New</a>
-          <a id="profiles-edit" class="btn" onclick="">Edit</a>
-          <a id="profiles-delete" class="btn" onclick="">Delete</a>
+          <a id="profiles-new" class="btn" onclick="profile_new()">New</a>
+          <a id="profiles-edit" class="btn btn-dim btn-disabled" onclick="cmd('profile-edit?'+profileName)">Edit</a>
+          <a id="profiles-delete" class="btn btn-dim btn-disabled" onclick="profile_del(profileName)">Delete</a>
         </div>
--->
       </div>
     </div>
 
   <!--###########################################################################################-->
     <!-- Preferences Menu -->
-    <div hidden id="preferences">
+    <div hidden id="preferences" class="menu_area">
       <p>Adjust settings for the Chroma Controller application.</p>
       <!-- FIXME: Incomplete -->
     </div>
 
   <!--###########################################################################################-->
     <!-- Edit Profile Menu -->
-    <div hidden id="profile_editor" class="center">
-      <div class="keyboard">
-        <table>
-          <tr>
-            <td style="width:30px"></td>
-            <td><a id="ESC" onclick=""><div class="key small" style="width:24px">esc</div></a></td>
-            <td style="width:10px"></td>
-            <td><a id="F1" onclick=""><div class="key small">F1</div></a></td>
-            <td><a id="F2" onclick=""><div class="key small">F2</div></a></td>
-            <td><a id="F3" onclick=""><div class="key small">F3</div></a></td>
-            <td><a id="F4" onclick=""><div class="key small">F4</div></a></td>
-            <td style="width:10px"></td>
-            <td><a id="F5" onclick=""><div class="key small">F5</div></a></td>
-            <td><a id="F6" onclick=""><div class="key small">F6</div></a></td>
-            <td><a id="F7" onclick=""><div class="key small">F7</div></a></td>
-            <td><a id="F8" onclick=""><div class="key small">F8</div></a></td>
-            <td style="width:10px"></td>
-            <td><a id="F9" onclick=""><div class="key small">F9</div></a></td>
-            <td><a id="F10" onclick=""><div class="key small">F10</div></a></td>
-            <td><a id="F11" onclick=""><div class="key small">F11</div></a></td>
-            <td><a id="F12" onclick=""><div class="key small">F12</div></a></td>
-            <td style="width:10px"></td>
-            <td><a id="prtsc" onclick=""><div class="key small">prtsc sysrq</div></a></td>
-            <td><a id="scrlk" onclick=""><div class="key small">scr lk</div></a></td>
-            <td><a id="pause" onclick=""><div class="key small">pause break</div></a></td>
-          </tr>
-        </table>
-        <table>
-          <tr>
-            <td><a id="M1" onclick=""><div class="key small">M1</div></a></td>
-            <td style="width:3px"></td>
-            <td><a id="backtick" onclick=""><div class="key">`</div></a></td>
-            <td><a id="1" onclick=""><div class="key">1</div></a></td>
-            <td><a id="2" onclick=""><div class="key">2</div></a></td>
-            <td><a id="3" onclick=""><div class="key">3</div></a></td>
-            <td><a id="4" onclick=""><div class="key">4</div></a></td>
-            <td><a id="5" onclick=""><div class="key">5</div></a></td>
-            <td><a id="6" onclick=""><div class="key">6</div></a></td>
-            <td><a id="7" onclick=""><div class="key">7</div></a></td>
-            <td><a id="8" onclick=""><div class="key">8</div></a></td>
-            <td><a id="9" onclick=""><div class="key">9</div></a></td>
-            <td><a id="0" onclick=""><div class="key">0</div></a></td>
-            <td><a id="minus" onclick=""><div class="key">-</div></a></td>
-            <td><a id="equal" onclick=""><div class="key">=</div></a></td>
-            <td><a id="bkspce" onclick=""><div class="key" style="width:30px">←</div></a></td>
-            <td style="width:7px"></td>
-            <td><a id="insert" onclick=""><div class="key small">ins</div></a></td>
-            <td><a id="home" onclick=""><div class="key small">home</div></a></td>
-            <td><a id="pageup" onclick=""><div class="key small">page up</div></a></td>
-            <td style="width:7px"></td>
-            <td><a id="num-lk" onclick=""><div class="key small">num lk</div></a></td>
-            <td><a id="num-slash" onclick=""><div class="key small">/</div></a></td>
-            <td><a id="num-star" onclick=""><div class="key small">*</div></a></td>
-            <td><a id="num-minus" onclick=""><div class="key small">-</div></a></td>
-          </tr>
-        </table>
-        <table>
-          <tr>
-            <td><a id="M1" onclick=""><div class="key small">M2</div></a></td>
-            <td style="width:3px"></td>
-            <td><a id="tab" onclick=""><div class="key small" style="width:32px">tab</div></a></td>
-            <td><a id="Q" onclick=""><div class="key">Q</div></a></td>
-            <td><a id="W" onclick=""><div class="key">W</div></a></td>
-            <td><a id="E" onclick=""><div class="key">E</div></a></td>
-            <td><a id="R" onclick=""><div class="key">R</div></a></td>
-            <td><a id="T" onclick=""><div class="key">T</div></a></td>
-            <td><a id="Y" onclick=""><div class="key">Y</div></a></td>
-            <td><a id="U" onclick=""><div class="key">U</div></a></td>
-            <td><a id="I" onclick=""><div class="key">I</div></a></td>
-            <td><a id="O" onclick=""><div class="key">O</div></a></td>
-            <td><a id="P" onclick=""><div class="key">P</div></a></td>
-            <td><a id="[" onclick=""><div class="key">[</div></a></td>
-            <td><a id="]" onclick=""><div class="key">]</div></a></td>
-            <td><a id="enter" onclick=""><div class="key small">enter</div></a></td>
-            <td style="width:9px"></td>
-            <td><a id="del" onclick=""><div class="key small">del</div></a></td>
-            <td><a id="end" onclick=""><div class="key small">end</div></a></td>
-            <td><a id="pagedown" onclick=""><div class="key small">page down</div></a></td>
-            <td style="width:7px"></td>
-            <td><a id="num-7" onclick=""><div class="key">7</div></a></td>
-            <td><a id="num-8" onclick=""><div class="key">8</div></a></td>
-            <td><a id="num-9" onclick=""><div class="key">9</div></a></td>
-            <td><a id="num-plus" onclick=""><div class="key">+</div></a></td>
-          </tr>
-        </table>
-        <table>
-          <tr>
-            <td><a id="M3" onclick=""><div class="key small">M3</div></a></td>
-            <td style="width:3px"></td>
-            <td><a id="capslck" onclick=""><div class="key small" style="width:38px">caps lk</div></a></td>
-            <td><a id="A" onclick=""><div class="key">A</div></a></td>
-            <td><a id="S" onclick=""><div class="key">S</div></a></td>
-            <td><a id="D" onclick=""><div class="key">D</div></a></td>
-            <td><a id="F" onclick=""><div class="key">F</div></a></td>
-            <td><a id="G" onclick=""><div class="key">G</div></a></td>
-            <td><a id="H" onclick=""><div class="key">H</div></a></td>
-            <td><a id="J" onclick=""><div class="key">J</div></a></td>
-            <td><a id="K" onclick=""><div class="key">K</div></a></td>
-            <td><a id="L" onclick=""><div class="key">L</div></a></td>
-            <td><a id=";" onclick=""><div class="key">;</div></a></td>
-            <td><a id="'" onclick=""><div class="key">'</div></a></td>
-            <td><a id="#" onclick=""><div class="key">#</div></a></td>
-            <td style="width:124px"></td>
-            <td><a id="num-4" onclick=""><div class="key">4</div></a></td>
-            <td><a id="num-5" onclick=""><div class="key">5</div></a></td>
-            <td><a id="num-6" onclick=""><div class="key">6</div></a></td>
-          </tr>
-        </table>
-        <table>
-          <tr>
-            <td><a id="M4" onclick=""><div class="key small">M4</div></a></td>
-            <td style="width:3px"></td>
-            <td><a id="shiftL" onclick=""><div class="key small">shift</div></a></td>
-            <td><a id="backslash" onclick=""><div class="key">\</div></a></td>
-            <td><a id="Z" onclick=""><div class="key">Z</div></a></td>
-            <td><a id="X" onclick=""><div class="key">X</div></a></td>
-            <td><a id="C" onclick=""><div class="key">C</div></a></td>
-            <td><a id="V" onclick=""><div class="key">V</div></a></td>
-            <td><a id="B" onclick=""><div class="key">B</div></a></td>
-            <td><a id="N" onclick=""><div class="key">N</div></a></td>
-            <td><a id="M" onclick=""><div class="key">M</div></a></td>
-            <td><a id="," onclick=""><div class="key">,</div></a></td>
-            <td><a id="." onclick=""><div class="key">.</div></a></td>
-            <td><a id="forwardslash" onclick=""><div class="key">/</div></a></td>
-            <td><a id="shiftR" onclick=""><div class="key small">shift</div></a></td>
-            <td></td>
-            <td><a id="up" onclick=""><div class="key small icon icon-up"></div></a></td>
-            <td></td>
-            <td><a id="num-1" onclick=""><div class="key">1</div></a></td>
-            <td><a id="num-2" onclick=""><div class="key">2</div></a></td>
-            <td><a id="num-3" onclick=""><div class="key">3</div></a></td>
-            <td><a id="num-enter" onclick=""><div class="key icon icon-enter"></div></a></td>
-          </tr>
-        </table>
-        <table>
-          <tr>
-            <td><a id="M5" onclick=""><div class="key small">M5</div></a></td>
-            <td style="width:3px"></td>
-            <td><a id="ctrlL" onclick=""><div class="key small">ctrl</div></a></td>
-            <td><a id="win" onclick=""><div class="key icon icon-super"></div></a></td>
-            <td><a id="altL" onclick=""><div class="key small">Alt</div></a></td>
-            <td><a id="space" onclick=""><div class="key small">_</div></a></td>
-            <td><a id="altR" onclick=""><div class="key small">Alt GR</div></a></td>
-            <td><div class="key icon icon-fn"></div></td>
-            <td><a id="menu" onclick=""><div class="key icon icon-menu"></div></a></td>
-            <td><a id="ctrlR" onclick=""><div class="key small">ctrl</div></a></td>
-            <td></td>
-            <td><a id="left" onclick=""><div class="key icon icon-left"></div></a></td>
-            <td><a id="down" onclick=""><div class="key icon icon-down"></div></a></td>
-            <td><a id="right" onclick=""><div class="key icon icon-right"></div></a></td>
-            <td></td>
-            <td><a id="num-0" onclick=""><div class="key">0</div></a></td>
-            <td><a id="num-period" onclick=""><div class="key">.</div></a></td>
-          </tr>
-        </table>
-        <table>
-          <tr><td><!--FIXME: Razer Logo--></td></tr>
-        </table>
+    <div hidden id="profile_editor" class="menu_area">
+      <div id="edit-panel">
+        <div id="rgb_tmp">
+          <table>
+            <tr>
+              <td>Colour: </td><td><div id="rgb_tmp_preview" class="color-preview" style="background-color:rgba(0,255,0,1)"></div></td>
+              <td><a class="btn" onclick="cmd('ask-color?rgb_tmp')">Custom...</a></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td colspan="2">
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?255?255')" style="background-color:#FFFFFF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?0?0')" style="background-color:#FF0000"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?165?0')" style="background-color:#FFA500"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?255?0')" style="background-color:#FFFF00"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?0?255?0')" style="background-color:#00FF00"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?0?255?255')" style="background-color:#00FFFF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?0?0?255')" style="background-color:#0000FF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?128?0?128')" style="background-color:#800080"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?0?255')" style="background-color:#FF00FF"></a>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div style="vertical-align:middle;">
+          <br>
+          <div class="left">
+            <p><span id="current_mode"><!-- Changed in JS --></span></p>
+          </div>
+          <div class="right">
+            <p>
+              <a class="btn" onclick="set_mode('set')">Set</a>
+              <a class="btn" onclick="set_mode('picker')">Picker</a>
+              <a class="btn" onclick="set_mode('clear')">Clear</a>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div id="keyboard" class="center">
+        <!-- Preferences determine keyboard layout. E.g. "en-gb" -->
       </div>
     </div>
 
@@ -293,28 +173,26 @@
     </div>
     <div class="right">
       <!-- Main Menu -->
-      <a id="preferences" class="btn" onclick="">More Options</a>
+      <!--a style="display: none;" class="btn" | id="pref-open"  onclick="cmd('pref-open')">Preferences</a-->
 
       <!-- Not Connected Page -->
-      <a id="retry" class="btn" onclick="">Retry</a>
+      <a style="display: none;" class="btn" | id="retry" onclick="cmd('check-again')">Retry</a>
+
+      <!-- Shared -->
+      <a style="display: none;" class="btn" | id="cancel" onclick="cmd('cancel-changes')">Cancel</a>
 
       <!-- Edit Profile Page -->
-      <a id="edit-save" class="btn" onclick="">Save Changes</a>
-      <a id="edit-discard" class="btn" onclick="">Discard</a>
+      <!--a style="display: none;" class="btn" | id="edit-preview" onclick="cmd('profile-preview')">Preview</a-->
+      <a style="display: none;" class="btn" | id="edit-save" onclick="cmd('profile-save')">Save Changes</a>
+
+      <!-- Preferences -->
+      <a style="display: none;" class="btn" | id="pref-save" onclick="cmd('pref-save')">Save Changes</a>
 
       <!-- Global -->
-      <a id="close-window" class="btn" onclick="cmd('quit')">Close</a>
+      <a style="display: none;" class="btn" | id="close-window" onclick="cmd('quit')">Close</a>
     </div>
   </div>
   <script src="lib/jquery-2.1.4.min.js"></script>
   <script src="chroma_controller.js"></script>
-  <script>
-    // Some btn a's are not hiding on page load.
-    $('#game-mode-disable').hide();
-  </script>
 </body>
 </html>
-<!-- NOTES
-  #title  Title
-  #status Whether the Chroma is connected or not.
--->

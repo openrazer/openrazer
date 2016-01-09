@@ -8,7 +8,7 @@ import appindicator
 import collections
 import daemon_dbus
 
-STATIC_RGB = [255, 0, 255]
+STATIC_RGB = [0, 0, 255]
 ACTIVE_EFFECT = 'unknown' # Currently not known when tray applet is initially started.
 
 class AppIndicator:
