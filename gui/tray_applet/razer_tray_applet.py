@@ -6,6 +6,8 @@ pygtk.require('2.0')
 import gtk
 import appindicator
 import collections
+import sys
+
 import daemon_dbus
 
 STATIC_RGB = [0, 0, 255]
@@ -13,7 +15,7 @@ ACTIVE_EFFECT = 'unknown' # Currently not known when tray applet is initially st
 
 class AppIndicator:
     def __init__(self):
-        global daemon
+        self.daemon = daemon_dbus.DaemonInterface()
         self.ind = appindicator.Indicator ("example-simple-client", "/usr/share/razer_tray_applet/tray_icon.png", appindicator.CATEGORY_APPLICATION_STATUS)
         self.ind.set_status (appindicator.STATUS_ACTIVE)
 
@@ -120,29 +122,30 @@ class AppIndicator:
         ACTIVE_EFFECT = effect_type
         if widget.active:
             if effect_type == "breath":
-                daemon.SetEffect('breath',*STATIC_RGB)
+                self.daemon.SetEffect('breath',*STATIC_RGB)
             elif effect_type == "none":
-                daemon.SetEffect('none')
+                self.daemon.SetEffect('none')
             elif effect_type == "reactive":
-                daemon.SetEffect('reactive',*STATIC_RGB)
+                self.daemon.SetEffect('reactive',*STATIC_RGB)
             elif effect_type == "spectrum":
-                daemon.SetEffect('spectrum')
+                self.daemon.SetEffect('spectrum')
             elif effect_type == "static":
-                daemon.SetEffect('static',*STATIC_RGB)
+                self.daemon.SetEffect('static',*STATIC_RGB)
             elif effect_type == "wave":
-                daemon.SetEffect('wave',1)
+                self.daemon.SetEffect('wave',1)
 
     def menuitem_brightness_response(self, widget, brightness):
-        daemon.SetBrightness(brightness)
+        self.daemon.SetBrightness(brightness)
 
     def menuitem_enable_macro_buttons_response(self, widget, string):
-        daemon.MarcoKeys(True)
+        self.daemon.MarcoKeys(True)
+
 
     def menuitem_enable_game_mode(self, widget, enable):
         if enable:
-            daemon.GameMode(True)
+            self.daemon.GameMode(True)
         else:
-            daemon.GameMode(False)
+            self.daemon.GameMode(False)
 
     def set_static_color(self, widget, color_status):
         global STATIC_RGB
@@ -180,14 +183,14 @@ class AppIndicator:
 
         colorseldlg.destroy()
 
+
 def main():
     try:
         gtk.main()
     except KeyboardInterrupt:
         pass # Dont error if Ctrl+C'd
-    return 0
+    sys.exit(0)
 
 if __name__ == "__main__":
-    daemon = daemon_dbus.DaemonInterface()
     indicator = AppIndicator()
-    app = main()
+    main()

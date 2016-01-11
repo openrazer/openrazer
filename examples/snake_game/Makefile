@@ -11,7 +11,7 @@ CC=g++
 all: snake
 
 snake:
-	@echo "::\033[32m COMPILING snake game\033[0m"
+	@echo "\n::\033[32m COMPILING snake game\033[0m"
 	@echo "======================"
 	$(CC) snake.cpp $(CFLAGS) ../../lib/librazer_chroma.a $(LIBS) -o snake_game
 	@strip snake_game

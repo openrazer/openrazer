@@ -3,7 +3,7 @@ CFLAGS=
 DEBUG_CFLAGS=
 #LDFLAGS=
 #DEBUG_LDFLAGS=
-LIBDBUS=$(shell echo \\\#include \<dbus/dbus.h\>\\n int main\(int c,char**v\){} | gcc `pkg-config --libs dbus-1` `pkg-config --cflags dbus-1`  -xc -o a.out - 2>/dev/null ;echo $$? ;rm a.out 2>/dev/null )
+LIBDBUS=$(shell pkg-config --libs dbus-1 > /dev/null 2>&1 && echo 0)
 
 ifeq ($(LIBDBUS), 0)
 	LIBS+= `pkg-config --libs dbus-1` 
@@ -31,19 +31,19 @@ RAZER_CHROMA_DAEMON_DEBUG_OBJ=razer_daemon.do razer_daemon_dbus.do razer_daemon_
 all: daemon_shared daemon_static daemon_debug daemon_fx
 
 daemon_debug: $(RAZER_CHROMA_DAEMON_DEBUG_OBJ)
-	@echo "::\033[32m COMPILING razer_bcd daemon [DEBUG]\033[0m"
+	@echo "\n::\033[32m COMPILING razer_bcd daemon [DEBUG]\033[0m"
 	@echo "======================================"
 	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_DEBUG_OBJ) ../lib/librazer_chroma.da $(LIBS) -o razer_bcd_debug_static 
 	$(CC) -L../lib -rdynamic $(RAZER_CHROMA_DAEMON_DEBUG_OBJ) -lrazer_chroma_debug $(LIBS) -o razer_bcd_debug_shared 
 
 daemon_static: $(RAZER_CHROMA_DAEMON_OBJ)
-	@echo "::\033[32m COMPILING razer_bcd daemon\033[0m"
+	@echo "\n::\033[32m COMPILING razer_bcd daemon\033[0m"
 	@echo "=============================="
 	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_OBJ) ../lib/librazer_chroma.a $(LIBS) -o razer_bcd_static 
 	@strip razer_bcd_static
 
 daemon_shared: $(RAZER_CHROMA_DAEMON_OBJ)
-	@echo "::\033[32m COMPILING razer_bcd [SHARED]\033[0m"
+	@echo "\n::\033[32m COMPILING razer_bcd [SHARED]\033[0m"
 	@echo "================================"
 	$(CC) -L../lib -rdynamic $(RAZER_CHROMA_DAEMON_OBJ) -lrazer_chroma $(LIBS) -o razer_bcd
 	@strip razer_bcd
@@ -62,10 +62,10 @@ daemon_fx_clean:
 	make -C fx clean 
 
 install:
-	@echo "::\033[32m INSTALLING razer_bcd daemon\033[0m"
+	@echo "\n::\033[32m INSTALLING razer_bcd daemon\033[0m"
 	@echo "======================================"
 	@cp razer_bcd /usr/sbin
-	@echo "::\033[32m INSTALLING razer daemon fx files\033[0m"
+	@echo "\n::\033[32m INSTALLING razer daemon fx files\033[0m"
 	@echo "====================================================="
 	mkdir -p /usr/share/razer_bcd/fx
 	cp fx/pez2001_collection.so /usr/share/razer_bcd/fx
@@ -75,10 +75,10 @@ install:
 	cp fx/pez2001_compute_fft.so /usr/share/razer_bcd/fx
 
 uninstall:
-	@echo "::\033[32m REMOVING razer_bcd daemon\033[0m"
+	@echo "\n::\033[32m REMOVING razer_bcd daemon\033[0m"
 	@echo "====================================="
 	@rm -f /usr/sbin/razer_bcd
-	@echo "::\033[32m REMOVING razer daemon fx files\033[0m"
+	@echo "\n::\033[32m REMOVING razer daemon fx files\033[0m"
 	@echo "====================================================="
 	@rm -f /usr/share/razer_bcd/fx/pez2001_collection.so
 	@rm -f /usr/share/razer_bcd/fx/pez2001_mixer.so
