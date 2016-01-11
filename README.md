@@ -431,6 +431,7 @@ FX setup scripts, bug fixes, feature requests, etc are also welcome.
    support for the tournament edition(manual merge)
  - Modifications to dynamic example by Stephanie Sunshine (pulled)
  - Deb packaging, dkms support, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
+ - GUI Interface for BlackWidow Chroma Keyboards by Luke Horwell (pulled)
 
 
 ## Donations (in Euros)
