@@ -3,7 +3,7 @@
 # Make deployment directory
 directory=$(mktemp -d)
 
-# Copy DEBIAN directort
+# Copy DEBIAN directory
 mkdir -p ${directory}
 cp -r install_files/DEBIAN_debian ${directory}/DEBIAN
 chmod 755 ${directory}/DEBIAN
@@ -12,7 +12,7 @@ chmod 755 ${directory}/DEBIAN/{pre,post}*
 
 # Create file structure
 mkdir -p ${directory}/etc/{init.d,udev/rules.d,dbus-1/system.d,xdg/autostart}
-mkdir -p ${directory}/usr/{bin,lib,sbin,share/razer_bcd/fx,src/razer_chroma_driver-1.0.0/driver,share/razer_tray_applet,share/applications}
+mkdir -p ${directory}/usr/{bin,lib,sbin,share/razer_bcd/fx,src/razer_chroma_driver-1.0.0/driver,share/razer_tray_applet,share/razer_chroma_controller,share/applications}
 mkdir -p ${directory}/lib/systemd/system
 
 
@@ -33,6 +33,7 @@ cp install_files/share/systemd_helpers.sh ${directory}/usr/share/razer_bcd/syste
 
 # Copy over application entry
 cp install_files/desktop/razer_tray_applet.desktop ${directory}/usr/share/applications/razer_tray_applet.desktop
+cp install_files/desktop/razer_chroma_controller.desktop ${directory}/usr/share/applications/razer_chroma_controller.desktop
 
 # Copy over libchroma and daemon
 cp lib/librazer_chroma.so ${directory}/usr/lib/librazer_chroma.so
@@ -48,6 +49,13 @@ cp daemon_controller/razer_bcd_controller ${directory}/usr/bin/razer_bcd_control
 
 # Copy Tray application
 cp -r gui/tray_applet/* ${directory}/usr/share/razer_tray_applet
+
+# Copy Configuration GUI application
+mkdir ${directory}/usr/share/razer_chroma_controller/data
+cp gui/chroma_controller/*.py ${directory}/usr/share/razer_chroma_controller/
+cp -r gui/chroma_controller/data/* ${directory}/usr/share/razer_chroma_controller/data
+cp gui/tray_applet/daemon_dbus.py ${directory}/usr/share/razer_chroma_controller/daemon_dbus.py
+cp examples/dynamic ${directory}/usr/share/razer_chroma_controller/
 
 # Copy razer kernel driver to src
 cp Makefile ${directory}/usr/src/razer_chroma_driver-1.0.0/Makefile

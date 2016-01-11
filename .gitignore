@@ -29,3 +29,7 @@
 *.i*86
 *.x86_64
 *.hex
+
+# Cached/Pre-compiled Python files
+*.pyc
+__pycache__

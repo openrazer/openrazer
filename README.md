@@ -1,16 +1,17 @@
 # razer_blackwidow_chroma_driver
-A Linux driver for the Razer Blackwidow Chroma keyboard (supports all lighting modes) includes a daemon for advanced effects
 
-Supports the Tournament Edition.
-Supports the Razer Firefly (internal effect switching).
+A Linux driver for the Razer Blackwidow Chroma keyboards, providing a daemon and graphical frontends.
 
-
+Supports:
+ * Razer Blackwidow Chroma *(all lighting modes)*
+ * Razer Blackwidow Tournament Edition
+ * Razer Firefly *(internal effect switching)*
 
 
 
 ## Installation for Debian based distros
 
- 1. Download Sourcecode:
+ 1. Download the source code:
 
         git clone --depth=1 https://github.com/pez2001/razer_blackwidow_chroma_driver.git
 
@@ -20,59 +21,67 @@ Supports the Razer Firefly (internal effect switching).
         ./install_driver_debian.sh
 
  1. Reboot
- 
+
 
 
 ## Installation for Debian/Ubuntu based distros (creating a .deb package)
-You can either install this using the above Debian method or use the packaged method.
+You can either install using the above Debian method or with the packaged method, which provides some benefits.
 
- 1. First as above download the source code
+ 1. Download the source code:
 
         git clone --depth=1 https://github.com/pez2001/razer_blackwidow_chroma_driver.git
         cd razer_blackwidow_chroma_drive
 
- 1. Install the needed packages which are needed to build the software
+ 1. Install the packages needed to build the software:
 
         sudo apt-get install -y dpkg-dev libdbus-1-dev jq libsdl2-dev libsdl2-image-dev libfftw3-dev
 
- 1. Build the software and driver
+ 1. Build the software and driver:
 
         make
 
- 1. Build the package
+ 1. Build the package:
 
         ./package_for_ubuntu.sh
         OR
         ./package_for_debian.sh
 
- 1. The command above will output something like `dpkg-name: info: moved 'tmp.3PnAtckx3o.deb' to '/tmp/razer-chroma-driver_1.0.0_amd64.deb'` so then you will need to install the file using:
+ 1. The command above will output something like `dpkg-name: info: moved 'tmp.3PnAtckx3o.deb' to '/tmp/razer-chroma-driver_1.0.0_amd64.deb'`.
+    To install the newly created package:
 
         sudo dpkg -i /tmp/razer-chroma-driver_1.0.0_amd64.deb
 
- 1. (Optional) You can clean source directoy if you so wish
+ 1. **(Optional)** If you wish, you can clean source directory:
 
         make clean
 
-Installing the `.deb` file has multiple benefits. Firstly installing the deb file keeps track of all the installed files and simplifys removal of the driver and daemon. 
+Installing the `.deb` file has multiple benefits:
 
-Ubuntu uses upstart so there is an upstart style init script provided. There is log file for upstart jobs under `/var/log/upstart` so you can view startup issues with `tail /var/log/upstart/razer_bcd.log`.
+  * Keeps track of all the installed files.
+  * Simplifies the removal of the driver and daemon later.
+  * Registers with DKMS (Dynamic Kernel Module Support) - this recompiles the driver whenever a new kernel is installed.
 
-The Debian version I have packaged for is 8.2 which uses systemd so I've provided a script for that.
+For **upstart** distros (such as Ubuntu 14.10 and prior), an upstart style init script is provided.
+There is log file for upstart jobs under `/var/log/upstart` so you can view startup issues with `tail /var/log/upstart/razer_bcd.log`.
 
-The driver is registered with DKMS (Dynamic Kernel Module Support), this will recompile the driver whenever a new kernel is installed.
+For **systemd** distros (such as Debian as well as Ubuntu 15.04 and later), a script is also provided.
 
-To remove the driver/daemon
+To remove the driver/daemon:
+
         sudo dpkg -r razer-chroma-driver
 
-To manage upstart jobs it't as simple as
+
+### Managing the Service
+To manage upstart jobs:
 
         sudo status razer_bcd
         sudo start razer_bcd
         sudo stop razer_bcd
         sudo restart razer_bcd
-But on ubuntu you can use `service razer_bcd ACTION` where ACTION is `start|stop|status|restart`
 
-On Debian you can control the driver doing `/etc/init.d/razer_bcd ACTION` or using systemd which is the preferred method (if you have systemd installed that is). Below are some systemd management commands
+On Ubuntu, you can use `sudo service razer_bcd `**`ACTION`** where **`ACTION`** is `start|stop|status|restart`
+
+On Debian, you can control the driver with `/etc/init.d/razer_bcd `**`ACTION`** or using `systemctl` which is the preferred method (providing systemd is installed).
 
         sudo systemctl status razer_bcd
         sudo systemctl start razer_bcd
@@ -82,23 +91,62 @@ On Debian you can control the driver doing `/etc/init.d/razer_bcd ACTION` or usi
 
 
 
-## Installation for non debian based distros
+## Installation for Non-Debian based distros
 
 
  - Install dependencies (libdbus-1-dev,jq)
  - Execute install script:
+
         sudo make -s all install
  - Reboot
 
 
 
+## Updating the driver
+When you'd like to update when new changes are made to the project, update your copy of the repository and follow the installation procedures again.
+
+    cd /path/to/razer_blackwidow_chroma_driver
+    git pull
 
 
 
 
+## GUI Tray Applet
+This is a simple GUI that sits in the notification tray. Clicking on this reveals a context menu allowing you to change some basic features
+of the daemon/driver such as effects, brightness and toggling some functions, including changing the base colour.
+It'll be expanded to allow for custom effect creation eventually.
+
+The application is at `/usr/share/razer_tray_applet/razer_tray_applet.py` and also has a `.desktop` entry to start from the Applications menu or at login.
+
+![Screenshot of GUI Tray Applet](gui/screenshot_tray_applet.jpg?raw=true)
 
 
-## Usage
+
+## GUI Chroma Controller
+This is a graphical frontend which interacts with the daemon/driver allowing easy configuration of the keyboard's features,
+including the creation of key profiles using the `dynamic` file format found in `examples/dynamic-examples/`.
+
+Custom animation effects are not yet supported.
+
+As the `dynamic` binary requires root privileges to communicate with the keyboard, password authentication is required to change profiles.
+This is essential unless work is done to integrate 'dynamic' to the daemon's dbus.
+
+On Debian/Ubuntu, this can be bypassed by creating a sudoers file as follows:
+
+    sudo echo "ALL ALL=NOPASSWD: /usr/share/razer_chroma_controller/dynamic" > /etc/sudoers.d/razer_chroma_dynamic
+    sudo chmod 0440 /etc/sudoers.d/razer_chroma_dynamic
+
+The GUI application will look for this file when changing profiles. If it doesn't exist, `gksudo` will be executed instead to
+present a graphical password prompt. Alternately, the application could be ran as root, but this is **not recommended**.
+
+
+The application is at `/usr/share/razer_chroma_controller/chroma_controller.py` and also has a `.desktop` entry, so it appears in the Applications menu.
+
+![Screenshot of GUI Chroma Configuration Utility](gui/screenshot_chroma_controller.jpg?raw=true)
+
+
+
+## Command Line Usage
 
 
  Have a look at the scripts directory.
@@ -205,22 +253,17 @@ of guessed unbinds all chroma keyboards.
 
 
 
-## GUI Tray Applet
-There is a very simple "gui" which sits in the notification tray and has a context menu. It shows off some basic features of the daemon/driver by allowing you to change 
-effects/brightness/toggle some stuff. It'll be expanded to allow for custom effect creation eventually.
-
-The app is here `/usr/share/razer_tray_applet/razer_tray_applet.py` and also has a `.desktop` entry and should appear in the startup applications menu if you log out and in again.
-
-
 ## Status of Code
 
- - Driver : Release Candidate
- - Daemon : Alpha
- - Daemon Effects : Release Candidate
- - Daemon Controller : Beta
- - Libraries : Beta
- - Installer : Beta
- - Packages : Beta
+ - **Driver :** Release Candidate
+ - **Daemon :** Alpha
+ - **Daemon Effects :** Release Candidate
+ - **Daemon Controller :** Beta
+ - **Libraries :** Beta
+ - **Installer :** Beta
+ - **Packages :** Beta
+ - **GUI - Tray Applet :** Alpha
+ - **GUI - Chroma Controller :** Alpha
 
 
 
@@ -342,7 +385,7 @@ Its not that much different than writing a self-hosted effect.
 
 Any effect or tool you might want to contribute is welcome.
 Please use your own source files to host your effects for merging.
-Fx setup scripts,bug fixes,feature requests,etc are also welcome.
+FX setup scripts, bug fixes, feature requests, etc are also welcome.
 
 
 ## TODO
@@ -352,7 +395,8 @@ Fx setup scripts,bug fixes,feature requests,etc are also welcome.
 - key locking / automatically skip key on following frame changes 
   / manual overwrite still possible / catch in convience functions
 - daemon,internal heatmap examples
-- gui controller (web interface?)
+- integrate `examples/dynamic` with daemon for passwordless GUI interface ?
+- daemon to remember current effect and colours in use ?
 - move remaining lib functions to razer_ namespace
 - move all daemon types to daemon_ namespace
 - split library into seperate source files (rgb,frames,hsl,drawing)
@@ -420,3 +464,7 @@ Thank you for all donations i really appreciate it!
 
 
   You can send your donations via PayPal to : feckelburger [at] gmx.net
+
+-----
+
+The project is licensed under the GPL and is not affiliated with [Razer, Inc](http://www.razerzone.com/).

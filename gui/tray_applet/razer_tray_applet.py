@@ -5,40 +5,18 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import appindicator
-import dbus
 import collections
+import sys
 
-STATIC_RGB = [255, 0, 255]
-STATIC_RGB2 = [255, 0, 255, 0, 255, 255]
+import razer.daemon_dbus
 
-class AppIndicatorExample:
-    def setup_dbus(self):
-        # Load up teh DBUS
-        system_bus = dbus.SystemBus()
-        self.dbus_daemon_object = system_bus.get_object("org.voyagerproject.razer.daemon", "/")
+STATIC_RGB = [0, 0, 255]
+ACTIVE_EFFECT = 'unknown' # Currently not known when tray applet is initially started.
 
-        # Provides:
-        # breath(byte red, byte green, byte blue)
-        # none()
-        # reactive(byte red, byte green, byte blue)
-        # spectrum()
-        # static(byte red, byte green, byte blue)
-        # wave(byte direction)
-        self.dbus_driver_effect_object = dbus.Interface(self.dbus_daemon_object, "org.voyagerproject.razer.daemon.driver_effect")
-
-        # Provides:
-        # enable_macro_keys()
-        # raw_keyboard_brightness(byte brightness)
-        # set_game_mode(byte enable)
-        self.dbus_daemon_controls = dbus.Interface(self.dbus_daemon_object, "org.voyagerproject.razer.daemon")
-
-
+class AppIndicator:
     def __init__(self):
-        # Load up teh DBUS
-        self.setup_dbus()
-
-
-        self.ind = appindicator.Indicator ("example-simple-client", "/usr/share/razer_tray_applet/razer_icon.png", appindicator.CATEGORY_APPLICATION_STATUS)
+        self.daemon = razer.daemon_dbus.DaemonInterface()
+        self.ind = appindicator.Indicator ("example-simple-client", "/usr/share/razer_tray_applet/tray_icon.png", appindicator.CATEGORY_APPLICATION_STATUS)
         self.ind.set_status (appindicator.STATUS_ACTIVE)
 
         # create a menu
@@ -115,6 +93,19 @@ class AppIndicatorExample:
         sep2.show()
         self.menu.append(sep2)
 
+        color_button = gtk.MenuItem("Change Colour...")
+        color_status = gtk.MenuItem(str(STATIC_RGB))
+        color_button.connect("activate", self.set_static_color, color_status)
+        self.menu.append(color_button)
+        self.menu.append(color_status)
+        color_button.show()
+        color_status.show()
+        color_status.set_sensitive(False)
+
+        sep3 = gtk.SeparatorMenuItem()
+        sep3.show()
+        self.menu.append(sep3)
+
         quit_button = gtk.MenuItem("Quit")
         quit_button.connect("activate", self.quit, "quit")
         quit_button.show()
@@ -127,90 +118,70 @@ class AppIndicatorExample:
         gtk.main_quit()
 
     def menuitem_keyboard_effect_response(self, widget, effect_type):
+        global ACTIVE_EFFECT
+        ACTIVE_EFFECT = effect_type
         if widget.active:
             if effect_type == "breath":
-                print "[Effect] Breath mode"
-                try:
-                    self.dbus_driver_effect_object.breath(*STATIC_RGB2, signature='yyyyyy')
-                except dbus.exceptions.DBusException:
-                    self.setup_dbus()
-                self.dbus_driver_effect_object.breath(*STATIC_RGB2, signature='yyyyyy')
-
+                self.daemon.set_effect('breath', *STATIC_RGB)
             elif effect_type == "none":
-                print "[Effect] No effect (off)"
-                try:
-                    self.dbus_driver_effect_object.none()
-                except dbus.exceptions.DBusException:
-                    self.setup_dbus()
-                self.dbus_driver_effect_object.none()
-
+                self.daemon.set_effect('none')
             elif effect_type == "reactive":
-                print "[Effect] Reactive mode"
-                try:
-                    self.dbus_driver_effect_object.reactive(3, *STATIC_RGB)
-                except dbus.exceptions.DBusException:
-                    self.setup_dbus()
-                self.dbus_driver_effect_object.reactive(3, *STATIC_RGB)
-
+                self.daemon.set_effect('reactive', *STATIC_RGB)
             elif effect_type == "spectrum":
-                print "[Effect] Spectrum mode"
-                try:
-                    self.dbus_driver_effect_object.spectrum()
-                except dbus.exceptions.DBusException:
-                    self.setup_dbus()
-                self.dbus_driver_effect_object.spectrum()
-
+                self.daemon.set_effect('spectrum')
             elif effect_type == "static":
-                print "[Effect] Static mode"
-                try:
-                    self.dbus_driver_effect_object.static(*STATIC_RGB)
-                except dbus.exceptions.DBusException:
-                    self.setup_dbus()
-                self.dbus_driver_effect_object.static(*STATIC_RGB)
-
+                self.daemon.set_effect('static', *STATIC_RGB)
             elif effect_type == "wave":
-                print "[Effect] Wave mode"
-                try:
-                    self.dbus_driver_effect_object.wave(1)
-                except dbus.exceptions.DBusException:
-                    self.setup_dbus()
-                self.dbus_driver_effect_object.wave(1)
-
-
+                self.daemon.set_effect('wave', 1)
 
     def menuitem_brightness_response(self, widget, brightness):
-        print "[Brightness] {0}%".format(round((100/255) * brightness, 0))
-        try:
-            self.dbus_daemon_controls.raw_keyboard_brightness(brightness)
-        except dbus.exceptions.DBusException:
-            self.setup_dbus()
-        self.dbus_daemon_controls.raw_keyboard_brightness(brightness)
+        self.daemon.set_brightness(brightness)
 
     def menuitem_enable_macro_buttons_response(self, widget, string):
-        print "[Driver] Enable macro keys"
-        try:
-            self.dbus_daemon_controls.enable_macro_keys()
-        except dbus.exceptions.DBusException:
-            self.setup_dbus()
-        self.dbus_daemon_controls.enable_macro_keys()
+        self.daemon.marco_keys(True)
 
 
     def menuitem_enable_game_mode(self, widget, enable):
         if enable:
-            print "[Driver] Enable game mode"
-            try:
-                self.dbus_daemon_controls.set_game_mode(1)
-            except dbus.exceptions.DBusException:
-                self.setup_dbus()
-            self.dbus_daemon_controls.set_game_mode(1)
+            self.daemon.game_mode(True)
         else:
-            print "[Driver] Disable game mode"
-            try:
-                self.dbus_daemon_controls.set_game_mode(0)
-            except dbus.exceptions.DBusException:
-                self.setup_dbus()
-            self.dbus_daemon_controls.set_game_mode(0)
+            self.daemon.game_mode(False)
 
+    def set_static_color(self, widget, color_status):
+        global STATIC_RGB
+        global ACTIVE_EFFECT
+        print "[Change Colour] Current: " + str(STATIC_RGB)
+
+        # Create a colour selection dialog
+        #colorsel = gtk.ColorSelection()
+        colorseldlg = gtk.ColorSelectionDialog('Change Static Colour')
+        response = colorseldlg.run()
+
+        # If new colour is chosen.
+        if response == gtk.RESPONSE_OK:
+            colorsel = colorseldlg.colorsel
+            colorhex = colorsel.get_current_color()
+            color_rgb = gtk.gdk.Color(str(colorhex))
+            # Returns value between 0.0 - 1.0 * 255 = 8-bit RGB Value
+            red = int(getattr(color_rgb, 'red_float') * 255)
+            green = int(getattr(color_rgb, 'green_float') * 255)
+            blue = int(getattr(color_rgb, 'blue_float') * 255)
+            STATIC_RGB = [int(red), int(green), int(blue)]
+            color_status.set_label(str(STATIC_RGB))
+            print "[Change Colour] New: " + str(STATIC_RGB) + " (" + str(colorhex) + ")"
+
+            # If 'static', 'reactive' or 'breath' mode is set, refresh the effect.
+            if ACTIVE_EFFECT == 'static':
+                print "[Change Colour] Refreshing Static Mode"
+                self.menuitem_keyboard_effect_response(self.effect_menu_items["static"], 'static')
+            elif ACTIVE_EFFECT == 'reactive':
+                print "[Change Colour] Refreshing Reactive Mode"
+                self.menuitem_keyboard_effect_response(self.effect_menu_items["reactive"], 'reactive')
+            elif ACTIVE_EFFECT == 'breath':
+                print "[Change Colour] Refreshing Breath Mode"
+                self.menuitem_keyboard_effect_response(self.effect_menu_items["breath"], 'breath')
+
+        colorseldlg.destroy()
 
 
 def main():
@@ -218,8 +189,8 @@ def main():
         gtk.main()
     except KeyboardInterrupt:
         pass # Dont error if Ctrl+C'd
-    return 0
+    sys.exit(0)
 
 if __name__ == "__main__":
-    indicator = AppIndicatorExample()
+    indicator = AppIndicator()
     main()
