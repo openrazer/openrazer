@@ -8,14 +8,14 @@ import appindicator
 import collections
 import sys
 
-import daemon_dbus
+import razer.daemon_dbus
 
 STATIC_RGB = [0, 0, 255]
 ACTIVE_EFFECT = 'unknown' # Currently not known when tray applet is initially started.
 
 class AppIndicator:
     def __init__(self):
-        self.daemon = daemon_dbus.DaemonInterface()
+        self.daemon = razer.daemon_dbus.DaemonInterface()
         self.ind = appindicator.Indicator ("example-simple-client", "/usr/share/razer_tray_applet/tray_icon.png", appindicator.CATEGORY_APPLICATION_STATUS)
         self.ind.set_status (appindicator.STATUS_ACTIVE)
 
@@ -122,30 +122,30 @@ class AppIndicator:
         ACTIVE_EFFECT = effect_type
         if widget.active:
             if effect_type == "breath":
-                self.daemon.SetEffect('breath',*STATIC_RGB)
+                self.daemon.set_effect('breath', *STATIC_RGB)
             elif effect_type == "none":
-                self.daemon.SetEffect('none')
+                self.daemon.set_effect('none')
             elif effect_type == "reactive":
-                self.daemon.SetEffect('reactive',*STATIC_RGB)
+                self.daemon.set_effect('reactive', *STATIC_RGB)
             elif effect_type == "spectrum":
-                self.daemon.SetEffect('spectrum')
+                self.daemon.set_effect('spectrum')
             elif effect_type == "static":
-                self.daemon.SetEffect('static',*STATIC_RGB)
+                self.daemon.set_effect('static', *STATIC_RGB)
             elif effect_type == "wave":
-                self.daemon.SetEffect('wave',1)
+                self.daemon.set_effect('wave', 1)
 
     def menuitem_brightness_response(self, widget, brightness):
-        self.daemon.SetBrightness(brightness)
+        self.daemon.set_brightness(brightness)
 
     def menuitem_enable_macro_buttons_response(self, widget, string):
-        self.daemon.MarcoKeys(True)
+        self.daemon.marco_keys(True)
 
 
     def menuitem_enable_game_mode(self, widget, enable):
         if enable:
-            self.daemon.GameMode(True)
+            self.daemon.game_mode(True)
         else:
-            self.daemon.GameMode(False)
+            self.daemon.game_mode(False)
 
     def set_static_color(self, widget, color_status):
         global STATIC_RGB
@@ -153,7 +153,7 @@ class AppIndicator:
         print "[Change Colour] Current: " + str(STATIC_RGB)
 
         # Create a colour selection dialog
-        colorsel = gtk.ColorSelection()
+        #colorsel = gtk.ColorSelection()
         colorseldlg = gtk.ColorSelectionDialog('Change Static Colour')
         response = colorseldlg.run()
 
@@ -161,11 +161,11 @@ class AppIndicator:
         if response == gtk.RESPONSE_OK:
             colorsel = colorseldlg.colorsel
             colorhex = colorsel.get_current_color()
-            colorRGB = gtk.gdk.Color(str(colorhex))
+            color_rgb = gtk.gdk.Color(str(colorhex))
             # Returns value between 0.0 - 1.0 * 255 = 8-bit RGB Value
-            red = int(getattr(colorRGB, 'red_float') * 255)
-            green = int(getattr(colorRGB, 'green_float') * 255)
-            blue = int(getattr(colorRGB, 'blue_float') * 255)
+            red = int(getattr(color_rgb, 'red_float') * 255)
+            green = int(getattr(color_rgb, 'green_float') * 255)
+            blue = int(getattr(color_rgb, 'blue_float') * 255)
             STATIC_RGB = [int(red), int(green), int(blue)]
             color_status.set_label(str(STATIC_RGB))
             print "[Change Colour] New: " + str(STATIC_RGB) + " (" + str(colorhex) + ")"
