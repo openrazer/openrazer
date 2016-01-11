@@ -1,6 +1,14 @@
-ACTION!="add|change", GOTO="razerkbd"
+# This seems to work
+KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="011a", ENV{is_razer_kbd}="yes"
+KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0203", ENV{is_razer_kbd}="yes"
+KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0208", ENV{is_razer_kbd}="yes"
 
-KERNEL=="razerkbd*", SUBSYSTEM=="razerkbd", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0203", TAG+="uaccess"
-KERNEL=="razerkbd*", SUBSYSTEM=="razerkbd", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0209", TAG+="uaccess"
+KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0045", ENV{is_razer_mouse}="yes"
 
-LABEL="razerkbd"
+SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_kbd}=="yes", ATTRS{bInterfaceNumber}=="02", RUN+="/bin/sh -c '/bin/echo -n $kernel > /sys/bus/hid/drivers/hid-generic/unbind'"
+SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_kbd}=="yes", ATTRS{bInterfaceNumber}=="02", RUN+="/bin/sh -c '/bin/echo -n $kernel > /sys/bus/hid/drivers/razerkbd/bind'"
+
+
+
+SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_mouse}=="yes", ATTRS{bInterfaceNumber}=="00", RUN+="/bin/sh -c '/bin/echo -n $kernel > /sys/bus/hid/drivers/hid-generic/unbind'"
+SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_mouse}=="yes", ATTRS{bInterfaceNumber}=="00", RUN+="/bin/sh -c '/bin/echo -n $kernel > /sys/bus/hid/drivers/razermouse/bind'"

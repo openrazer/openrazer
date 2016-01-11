@@ -90,22 +90,27 @@ Commands:\n\
   -d    Disconnect frame buffer\n\
   -1    Spectrum Effect Mode\n\
   -2    Wave Effect Mode\n\
-           1. Direction, 0 = None, 1 = Right, 2 = Left\n\
+           1. Parameter: Direction, 0 = None, 1 = Right, 2 = Left\n\
   -3    Reactive Mode\n\
-           1. Red (0-255)\n\
-	   2. Blue (0-255)\n\
-	   3. Green (0-255)\n\
+           1. Parameter: Speed (1-3)\n\
+           2. Parameter: Red (0-255)\n\
+           3. Parameter: Blue (0-255)\n\
+           4. Parameter: Green (0-255)\n\
   -4    Breath Mode\n\
-           1. Red (0-255)\n\
-	   2. Blue (0-255)\n\
-	   3. Green (0-255)\n\
+           1. Parameter: Random 1\n\n\
+           1. Parameter: Red (0-255)\n\
+           2. Parameter: Blue (0-255)\n\
+           3. Parameter: Green (0-255)\n\
+           4. Optional Parameter: Red 2 (0-255)\n\
+           5. Optional Parameter: Blue 2 (0-255)\n\
+           6. Optional Parameter: Green 2 (0-255)\n\
   -5    Static Mode\n\
-           1. Red (0-255)\n\
-  	   2. Blue (0-255)\n\
-  	   3. Green (0-255)\n\
+           1. Parameter: Red (0-255)\n\
+           2. Parameter: Blue (0-255)\n\
+           3. Parameter: Green (0-255)\n\
   -6    None Mode\n\
   -7    Set keyboard brightness\n\
-           1. Brightness (0-255)\n\
+           1. Parameter: Brightness (0-255)\n\
   -8    Enable Macro Keys\n\
   -h    Display this help and exit\n\
 \n\
@@ -168,19 +173,36 @@ int main(int argc,char *argv[])
 			case '3':
 		  		{
 		    		// Reactive Mode
+		  			unsigned char speed = atoi(argv[optind++]);
 		    		unsigned char red = atoi(argv[optind++]);
 		    		unsigned char green = atoi(argv[optind++]);
 		    		unsigned char blue = atoi(argv[optind++]);
-				    dc_set_reactive_mode(controller, red, green, blue);
+				    dc_set_reactive_mode(controller, speed, red, green, blue);
 				}
 		  		break;
 		  	case '4':
 		  		{
 		    		// Breath Mode
 		    		unsigned char red = atoi(argv[optind++]);
-		    		unsigned char green = atoi(argv[optind++]);
-		    		unsigned char blue = atoi(argv[optind++]);
-				    dc_set_breath_mode(controller, red, green, blue);
+		    		if(optind < argc)
+		    		{
+		    			unsigned char green = atoi(argv[optind++]);
+		    			unsigned char blue = atoi(argv[optind++]);
+
+		    			if(optind < argc)
+		    			{
+		    				unsigned char red2 = atoi(argv[optind++]);
+		    				unsigned char green2 = atoi(argv[optind++]);
+		    				unsigned char blue2 = atoi(argv[optind++]);
+		    				dc_set_breath_mode(controller, 1, red, green, blue, red2, green2, blue2);
+		    			} else
+		    			{
+		    				dc_set_breath_mode(controller, 1, red, green, blue, 0, 0, 0);
+		    			}
+		    		} else
+		    		{
+		    			dc_set_breath_mode(controller, 3, 0, 0, 0, 0, 0, 0);
+		    		}
 		  		}
 		  		break;
 		  	case '5':

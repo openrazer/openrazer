@@ -11,7 +11,7 @@ CC=gcc
 AR=ar -c
 LD=ld
 
-LIBDBUS=$(shell echo \\\#include \<dbus/dbus.h\>\\n int main\(int c,char**v\){} | gcc `pkg-config --libs dbus-1` `pkg-config --cflags dbus-1`  -xc -o a.out - 2>/dev/null ;echo $$? ;rm a.out 2>/dev/null )
+LIBDBUS=$(shell pkg-config --libs dbus-1 > /dev/null 2>&1 && echo 0)
 
 ifeq ($(LIBDBUS), 0)
 	LIBS+= `pkg-config --libs dbus-1` 
@@ -30,11 +30,11 @@ RAZER_CHROMA_CONTROLLER_DEBUG_OBJ=razer_chroma_controller.do list.do razer_strin
 all: library library_debug
 
 library_debug: razer_chroma_static_debug razer_chroma_shared_debug razer_chroma_controller_shared_debug razer_chroma_controller_static_debug
-	@echo "::\033[32m COMPILING librazer_chroma.so [DEBUG]\033[0m"
+	@echo "\n::\033[32m COMPILING librazer_chroma.so [DEBUG]\033[0m"
 	@echo "========================================"
 
 library: razer_chroma_static razer_chroma_shared razer_chroma_controller_shared razer_chroma_controller_static
-	@echo "::\033[32m COMPILING librazer_chroma.so\033[0m"
+	@echo "\n::\033[32m COMPILING librazer_chroma.so\033[0m"
 	@echo "================================"
 
 razer_chroma_static: $(RAZER_CHROMA_OBJ)
@@ -78,21 +78,21 @@ razer_chroma_controller_shared_debug: $(RAZER_CHROMA_CONTROLLER_DEBUG_OBJ)
 	$(CC) $(DEBUG_CFLAGS) -c -o $@ $<
 
 install:
-	@echo "::\033[32m INSTALLING librazer_chroma.so\033[0m"
+	@echo "\n::\033[32m INSTALLING librazer_chroma.so\033[0m"
 	@echo "===================================="
 	@cp librazer_chroma.so /usr/lib
 ifeq ($(LIBDBUS), 0)
-	@echo "::\033[32m INSTALLING librazer_chroma_controller.so\033[0m"
+	@echo "\n::\033[32m INSTALLING librazer_chroma_controller.so\033[0m"
 	@echo "===================================="
 	@cp librazer_chroma_controller.so /usr/lib
 endif
 
 uninstall:
-	@echo "::\033[32m REMOVING librazer_chroma.so\033[0m"
+	@echo "\n::\033[32m REMOVING librazer_chroma.so\033[0m"
 	@echo "===================================="
 	@rm /usr/lib/librazer_chroma.so
 ifeq ($(LIBDBUS), 0)
-	@echo "::\033[32m REMOVING librazer_chroma_controller.so\033[0m"
+	@echo "\n::\033[32m REMOVING librazer_chroma_controller.so\033[0m"
 	@echo "===================================="
 	@rm /usr/lib/librazer_chroma_controller.so
 endif
