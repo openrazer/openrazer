@@ -140,6 +140,20 @@ int wav_samples_left(wav_file *wf)
 }
 
 
+
+double *create_hamming_window_buffer(int size)
+{
+  double *buffer = (double*)malloc(sizeof(double)*size);
+  int i;
+  for(i=0;i<size;i++)
+  {
+    buffer[i] = 0.54-(0.46*cos(2*M_PI*(i/((size-1)*1.0))));
+  }
+  return(buffer);
+}
+
+
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 
@@ -147,28 +161,70 @@ int wav_samples_left(wav_file *wf)
 struct razer_effect *effect = NULL;
 wav_file *effect_input_file = NULL;
 
+fftw_complex  *effect_fft_in,*effect_fft_out;
+fftw_plan effect_fft_plan;
+double *effect_fft_hamming_buffer = NULL;
+unsigned long effect_fft_samples = 512;
+unsigned long effect_fft_samples_used = 0;
+
+
 int effect_update(struct razer_fx_render_node *render)
 {
-	//float percentage = daemon_get_parameter_float(daemon_effect_get_parameter_by_index(render->effect,0));
+	float magnitude = daemon_get_parameter_float(daemon_effect_get_parameter_by_index(render->effect,1));
 	int x,y;
 	struct razer_rgb col;
 	#ifdef USE_DEBUGGING
 		printf(" (Fft.%d ## %%:%f)",render->id);
 	#endif
 
-	//add sample to fft buffer
-
-
-	//enough samples gathered?
-
-	//compute fft
+	unsigned long samples_left=0;
+	while((samples_left=wav_samples_left(effect_input_file)))
+	{
+		unsigned int sample = read_wav_stereo_sample(effect_input_file);
+		short high = sample >> 16;
+		short low = sample & 0xFFFF;
+		//add sample to fft buffer
+		effect_fft_in[effect_fft_samples_used][0] = (double)high * effect_fft_hamming_buffer[effect_fft_samples_used];///(double)32768;//* windowHanning(step++, N);
+  		effect_fft_in[effect_fft_samples_used++][1] = 0.0f;
+		//enough samples gathered?
+		if(effect_fft_samples_used==effect_fft_samples)
+  		{
+  			printf("Computing fft, still %d samples left\n",samples_left);
+			//compute fft
+    		effect_fft_plan = fftw_plan_dft_1d(effect_fft_samples, effect_fft_in, effect_fft_out, FFTW_FORWARD, FFTW_ESTIMATE);
+    		fftw_execute(effect_fft_plan);
+    		fftw_destroy_plan(effect_fft_plan);
+    		effect_fft_samples_used = 0;
+ 		    double tmp_magnitude = sqrt(effect_fft_out[0][0]*effect_fft_out[0][0] + effect_fft_out[0][1]*effect_fft_out[0][1]);
+		    tmp_magnitude = 10./log(10.) * log(tmp_magnitude + 1e-6);
+    		printf("new fft mag db:%f\n",tmp_magnitude);
+    		double sum = 0.0f;
+    		for(int i=0;i<effect_fft_samples/2;i++)
+    		{
+	 		    double tmp_bin_magnitude = sqrt(effect_fft_out[i][0]*effect_fft_out[i][0] + effect_fft_out[i][1]*effect_fft_out[i][1]);
+			    tmp_bin_magnitude = 10./log(10.) * log(tmp_bin_magnitude + 1e-6);
+			    sum += tmp_bin_magnitude;
+    		}
+    		printf("sum:%f\n",sum/(effect_fft_samples/2));
+    		magnitude = (float)tmp_magnitude - 50.0f;
+    		break;
+  		}
+	}
+	if(!samples_left)
+	{
+		#ifdef USE_DEBUGGING
+			printf("no samples left to analyze, closing input file\n");
+		#endif
+		close_wav(effect_input_file);
+		effect_input_file = NULL;
+		return(0);
+	}
 
 
 	//set color to avg magnitude ,transformed to 0.0-1.0 space	
 
-
 	//calculate hue from magnitude
-	//rgb_from_hue(float percentage,0.3f,0.0f,&col);
+	rgb_from_hue(magnitude/96,0.3f,0.0f,&col);
 
 	for(x=0;x<22;x++)
 		for(y=0;y<6;y++)
@@ -176,6 +232,7 @@ int effect_update(struct razer_fx_render_node *render)
 			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&col,render->opacity);//*render->opacity  //&render->second_input_frame->rows[y].column[x]
 			render->output_frame->update_mask |= 1<<y;
 		}
+	daemon_set_parameter_float(daemon_effect_get_parameter_by_index(render->effect,1),magnitude);	
 	return(1);
 }
 
@@ -189,7 +246,13 @@ int effect_reset(struct razer_fx_render_node *render)
 		effect_input_file = NULL;
 	}
 	effect_input_file =open_wav(filename);
-	printf("opened input wav file:%s,%x\n",filename,effect_input_file);
+	#ifdef USE_DEBUGGING
+		printf("(fft) opened input wav file:%s,%x\n",filename);
+	#endif		
+	if(effect_input_file)
+		return(1);
+	else
+		return(0);
 }
 
 #pragma GCC diagnostic pop
@@ -200,6 +263,11 @@ int effect_reset(struct razer_fx_render_node *render)
 void fx_init(struct razer_daemon *daemon)
 {
 	srand(time(NULL));
+
+	effect_fft_in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*effect_fft_samples);
+	effect_fft_out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*effect_fft_samples);
+ 	effect_fft_hamming_buffer = create_hamming_window_buffer(effect_fft_samples);
+
 	struct razer_parameter *parameter = NULL;
 	effect = daemon_create_effect();
 	effect->update = effect_update;
@@ -210,6 +278,8 @@ void fx_init(struct razer_daemon *daemon)
 	effect->effect_class = 1;
 	effect->input_usage_mask = RAZER_EFFECT_FIRST_INPUT_USED;
 	parameter = daemon_create_parameter_string("Effect Input Device","Filepath pointing to the sound input device/file(wav format) (STRING)","/dev/dsp");
+	daemon_effect_add_parameter(effect,parameter);	
+	parameter = daemon_create_parameter_float("Effect Magnitude","actual spectrum energy display(FLOAT)",0.0f);
 	daemon_effect_add_parameter(effect,parameter);	
 	int effect_uid = daemon_register_effect(daemon,effect);
 	#ifdef USE_DEBUGGING
@@ -228,6 +298,9 @@ void fx_shutdown(struct razer_daemon *daemon)
 	daemon_unregister_effect(daemon,effect); //TODO do this automatically when the daemon closes - so an effects prodrammer will use this exported function only on special occasions
 	daemon_free_parameters(effect->parameters);
 	daemon_free_effect(effect);
+
+	fftw_free(effect_fft_in);
+ 	fftw_free(effect_fft_out);
 
 	//close input file
 }

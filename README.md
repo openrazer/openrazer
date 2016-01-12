@@ -156,7 +156,7 @@ The application is at `/usr/share/razer_chroma_controller/chroma_controller.py` 
 
  - Changing effect example
 
- :: the following command will create a render node for the effect with unique id: 8 [fx_uid,name,description] ::
+ :: the following command will create a render node for the effect with the unique id: 8 [fx_uid,name,description] ::
 
 	razer_bcd_controller -C 8 "bars example" "new rendering node"
 
@@ -201,7 +201,7 @@ The application is at `/usr/share/razer_chroma_controller/chroma_controller.py` 
 	]}
 
 :: Setting a parameter for an effect with the unique id: 2 
-   [rn_uid,parameter_uid,
+   [rn_uid,parameter_index,
     array_index (use -1 if not an array),
     parameter_type,value(s) (enquote multiple values and use whitespaces to seperate)] ::	
 
@@ -431,6 +431,7 @@ FX setup scripts, bug fixes, feature requests, etc are also welcome.
    support for the tournament edition(manual merge)
  - Modifications to dynamic example by Stephanie Sunshine (pulled)
  - Deb packaging, dkms support, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
+ - GUI Interface for BlackWidow Chroma Keyboards by Luke Horwell (pulled)
 
 
 ## Donations (in Euros)

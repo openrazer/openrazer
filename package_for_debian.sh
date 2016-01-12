@@ -47,7 +47,6 @@ cp daemon/fx/pez2001_progress_bar.so ${directory}/usr/share/razer_bcd/fx
 # Copy daemon controller
 cp daemon_controller/razer_bcd_controller ${directory}/usr/bin/razer_bcd_controller
 
-
 # Copy Python3 lib into the python path
 cp -r gui/lib/razer ${directory}/usr/lib/python3/dist-packages/razer
 
@@ -58,7 +57,6 @@ cp -r gui/tray_applet/* ${directory}/usr/share/razer_tray_applet
 mkdir ${directory}/usr/share/razer_chroma_controller/data
 cp gui/chroma_controller/*.py ${directory}/usr/share/razer_chroma_controller/
 cp -r gui/chroma_controller/data/* ${directory}/usr/share/razer_chroma_controller/data
-cp gui/tray_applet/daemon_dbus.py ${directory}/usr/share/razer_chroma_controller/daemon_dbus.py
 cp examples/dynamic ${directory}/usr/share/razer_chroma_controller/
 
 # Copy razer kernel driver to src

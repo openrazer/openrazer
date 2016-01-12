@@ -1,10 +1,5 @@
 LIBFFTW3=$(shell echo \\\#include \<fftw3.h\>\\n int main\(int c,char**v\){} | gcc `pkg-config --libs fftw3` `pkg-config --cflags fftw3`  -xc -o a.out - 2>/dev/null ;echo $$? ;rm a.out 2>/dev/null )
 
-#ifeq ($(LIBDBUS), 0)
-#	LIBS+= `pkg-config --libs dbus-1` 
-#	CFLAGS+= `pkg-config --cflags dbus-1` -DUSE_DBUS
-#	DEBUG_CFLAGS+= `pkg-config --cflags dbus-1` -DUSE_DBUS
-#endif
 
 LIBS=-lm
 MAJOR_VERSION=0
@@ -16,6 +11,13 @@ DEBUG_CFLAGS=`pkg-config --cflags dbus-1` -Wall -Wextra -Wformat=0 -pedantic -fb
 LDFLAGS=$(LIBS)
 DEBUG_LDFLAGS =$(LIBS)
 CC=gcc
+
+ifeq ($(LIBFFTW3), 0)
+	LIBS+= `pkg-config --libs fftw3` 
+	CFLAGS+= `pkg-config --cflags fftw3`
+	DEBUG_CFLAGS+= `pkg-config --cflags fftw3`
+endif
+
 
 all: fx_debug fx
 
@@ -40,13 +42,12 @@ fx_debug:
 	$(CC) pez2001_progress_bar.c $(DEBUG_CFLAGS) $(LIBS) -c -o pez2001_progress_bar.do 
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_progress_bar.do $(LDFLAGS) -o pez2001_progress_bar_debug.so
 
+ifeq ($(LIBFFTW3), 0)
 	@echo "\n::\033[32m COMPILING pez2001 fx compute fft [DEBUG]\033[0m"
 	@echo "============================================"
 	$(CC) pez2001_compute_fft.c $(DEBUG_CFLAGS) $(LIBS) -c -o pez2001_compute_fft.do 
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_compute_fft.do $(LDFLAGS) -o pez2001_compute_fft_debug.so
-#ifeq ($(LIBFFTW3), 0)
-#	@echo "Got FFTW3"
-#endif
+endif
 
 fx: 
 	@echo "\n::\033[32m COMPILING pez2001 fx collection\033[0m"
@@ -73,11 +74,13 @@ fx:
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_progress_bar.o $(LDFLAGS) -o pez2001_progress_bar.so
 	@strip pez2001_progress_bar.so
 
+ifeq ($(LIBFFTW3), 0)
 	@echo "\n::\033[32m COMPILING pez2001 fx compute fft\033[0m"
 	@echo "===================================="
 	$(CC) pez2001_compute_fft.c $(CFLAGS) $(LIBS) -c -o pez2001_compute_fft.o
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_progress_bar.o $(LDFLAGS) -o pez2001_compute_fft.so
 	@strip pez2001_compute_fft.so
+endif
 
 clean: 
 	rm -f *.do *.o pez2001_collection.so pez2001_collection_debug.so pez2001_mixer.so pez2001_mixer_debug.so pez2001_light_blast.so pez2001_light_blast_debug.so pez2001_progress_bar.so pez2001_progress_bar_debug.so pez2001_compute_fft.so pez2001_compute_fft_debug.so

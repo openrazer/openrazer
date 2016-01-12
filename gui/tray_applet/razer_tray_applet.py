@@ -149,9 +149,9 @@ class AppIndicator:
             if effect_type == "breath":
                 self.daemon.set_effect('breath', *self.colour)
             elif effect_type == "none":
-                self.daemon.set_effect('none')
+                self.daemon.set_effect('none', 1)
             elif effect_type == "reactive":
-                self.daemon.set_effect('reactive', *self.colour)
+                self.daemon.set_effect('reactive', 1, *self.colour)
             elif effect_type == "spectrum":
                 self.daemon.set_effect('spectrum')
             elif effect_type == "static":
