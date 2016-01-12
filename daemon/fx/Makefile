@@ -74,12 +74,8 @@ fx:
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_progress_bar.o $(LDFLAGS) -o pez2001_progress_bar.so
 	@strip pez2001_progress_bar.so
 
-<<<<<<< HEAD
 ifeq ($(LIBFFTW3), 0)
-	@echo "::\033[32m COMPILING pez2001 fx compute fft\033[0m"
-=======
 	@echo "\n::\033[32m COMPILING pez2001 fx compute fft\033[0m"
->>>>>>> refs/remotes/github.com/master
 	@echo "===================================="
 	$(CC) pez2001_compute_fft.c $(CFLAGS) $(LIBS) -c -o pez2001_compute_fft.o
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared pez2001_progress_bar.o $(LDFLAGS) -o pez2001_compute_fft.so
