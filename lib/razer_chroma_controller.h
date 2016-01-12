@@ -77,8 +77,9 @@ void dc_load_fx_lib(struct razer_daemon_controller *controller,char *fx_pathname
 
 void dc_set_spectrum_mode(struct razer_daemon_controller *controller);
 void dc_set_wave_mode(struct razer_daemon_controller *controller, unsigned char direction);
-void dc_set_reactive_mode(struct razer_daemon_controller *controller, unsigned char red, unsigned char green, unsigned char blue);
-void dc_set_breath_mode(struct razer_daemon_controller *controller, unsigned char red, unsigned char green, unsigned char blue); // ?? num cols
+void dc_set_reactive_mode(struct razer_daemon_controller *controller, unsigned char speed, unsigned char red, unsigned char green, unsigned char blue);
+void dc_set_breath_mode(struct razer_daemon_controller *controller, unsigned char breath_type, unsigned char red, unsigned char green, unsigned char blue,
+						unsigned char red2, unsigned char green2, unsigned char blue2);
 void dc_set_static_mode(struct razer_daemon_controller *controller, unsigned char red, unsigned char green, unsigned char blue); // TODO refactor to use one method instead of 3
 void dc_set_none_mode(struct razer_daemon_controller *controller);
 void dc_set_keyboard_brightness(struct razer_daemon_controller *controller, unsigned char brightness);

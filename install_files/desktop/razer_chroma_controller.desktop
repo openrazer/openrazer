@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Razer Chroma Configuration
+Comment=Graphical frontend to manage the keyboard's effects, brightness and profiles.
+Keywords=razer;keyboard;chroma;
+Exec=/usr/share/razer_chroma_controller/chroma_controller.py
+Icon=/usr/share/razer_chroma_controller/data/img/app-icon.svg
+Terminal=false
+Type=Application
+Categories=Keyboard;Razer;Chroma
+OnlyShowIn=Unity;MATE;

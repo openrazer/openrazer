@@ -1,3 +1,2 @@
 
-obj-m := razerkbd.o
-
+obj-m := razerkbd.o razermouse.o

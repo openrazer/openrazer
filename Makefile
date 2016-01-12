@@ -2,16 +2,16 @@ KERNELDIR?=/lib/modules/$(shell uname -r)/build
 DRIVERDIR:=$(shell pwd)/driver
 MODULEDIR=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
 
-all: librazer_chroma razer_daemon razer_daemon_controller razer_examples razer_kbd
+all: librazer_chroma razer_daemon razer_daemon_controller razer_examples razer_drv
 
-razer_kbd:
-	@echo "::\033[32m COMPILING razer chroma kernel module\033[0m"
+# added redirect to remove output of a useless makefile warning
+razer_drv:
+	@echo "\n::\033[32m COMPILING razer kernel modules\033[0m"
 	@echo "========================================"
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules > /dev/null 2>&1
-	#added redirect to remove output of a useless makefile warning
 
-razer_kbd_verbose:
-	@echo "::\033[32m COMPILING razer chroma kernel module\033[0m"
+razer_drv_verbose:
+	@echo "\n::\033[32m COMPILING razer kernel modules\033[0m"
 	@echo "========================================"
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules
 
@@ -44,20 +44,20 @@ install: all
 	make -C lib install
 	make -C daemon install
 	make -C daemon_controller install
-	@echo "::\033[32m INSTALLING razer chroma kernel module\033[0m"
+	@echo "\n::\033[32m INSTALLING razer chroma kernel module\033[0m"
 	@echo "====================================================="
 	cp $(DRIVERDIR)/razerkbd.ko $(MODULEDIR)
 	chown root:root $(MODULEDIR)/razerkbd.ko
 	depmod
-	@echo "::\033[32m INSTALLING razer chroma udev rules\033[0m"
+	@echo "\n::\033[32m INSTALLING razer chroma udev rules\033[0m"
 	@echo "====================================================="
 	cp install_files/udev/95-razerkbd.rules /etc/udev/rules.d
 	chown root:root /etc/udev/rules.d/95-razerkbd.rules
-	@echo "::\033[32m INSTALLING razer chroma dbus policy\033[0m"
+	@echo "\n::\033[32m INSTALLING razer chroma dbus policy\033[0m"
 	@echo "====================================================="
 	cp install_files/dbus/org.voyagerproject.razer.daemon.conf /etc/dbus-1/system.d
 	chown root:root /etc/dbus-1/system.d/org.voyagerproject.razer.daemon.conf
-	@echo "::\033[32m INSTALLING razer daemon init.d file\033[0m"
+	@echo "\n::\033[32m INSTALLING razer daemon init.d file\033[0m"
 	@echo "====================================================="
 	cp install_files/init.d/razer_bcd /etc/init.d
 	chown root:root /etc/init.d/razer_bcd
@@ -88,9 +88,9 @@ uninstall:
 	rm /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
 
 
-clean: librazer_chroma_clean razer_daemon_clean razer_daemon_controller_clean razer_examples_clean razer_kbd_clean
+clean: librazer_chroma_clean razer_daemon_clean razer_daemon_controller_clean razer_examples_clean razer_drv_clean
 
-razer_kbd_clean:
+razer_drv_clean:
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) clean > /dev/null 2>&1
 	#added redirect to remove output of a useless makefile warning
 

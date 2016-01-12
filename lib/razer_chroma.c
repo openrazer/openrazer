@@ -11,7 +11,18 @@ char *razer_sys_mouse_event_default_path = "/dev/input/event26";
 char *razer_custom_mode_pathname = "/mode_custom";
 char *razer_update_keys_pathname = "/set_key_row";
 
-
+void write_to_device_file(char *device_path, char *buffer, int buffer_length)
+{
+	FILE* fp;
+	fp = fopen(device_path, "w");
+	if(fp != NULL) {
+	  fwrite(buffer, sizeof(char), buffer_length, fp);
+	  fclose(fp);
+	} else
+	{
+	  printf("Failed to write to %s!\n", device_path);
+	}
+}
 
 int razer_open_custom_mode_file(struct razer_chroma *chroma)
 {

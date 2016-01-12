@@ -175,7 +175,7 @@ int dc_render_node_create(struct razer_daemon_controller *controller,int effect_
 void dc_render_node_reset(struct razer_daemon_controller *controller,int render_node_uid)
 {
 	DBusMessage *msg;
-	DBusMessageIter args;
+	//DBusMessageIter args;
 	char *path = str_CreateEmpty();
 	path = str_CatFree(path,"/");
 	char *suid = str_FromLong(render_node_uid);
@@ -1438,7 +1438,7 @@ void dc_set_wave_mode(struct razer_daemon_controller *controller, unsigned char 
 	dbus_message_unref(msg);
 }
 
-void dc_set_reactive_mode(struct razer_daemon_controller *controller, unsigned char red, unsigned char green, unsigned char blue)
+void dc_set_reactive_mode(struct razer_daemon_controller *controller, unsigned char speed, unsigned char red, unsigned char green, unsigned char blue)
 {
 	DBusMessage *msg;
 	DBusMessageIter args;
@@ -1446,6 +1446,8 @@ void dc_set_reactive_mode(struct razer_daemon_controller *controller, unsigned c
 	if(!msg)
 		dc_error_close(controller,"Error creating Message\n");
 	dbus_message_iter_init_append(msg,&args);
+	if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_BYTE,&speed))
+			dc_error_close(controller,"Out of memory!\n");
 	if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_BYTE,&red))
 		dc_error_close(controller,"Out of memory!\n");
 	if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_BYTE,&green))
@@ -1461,20 +1463,34 @@ void dc_set_reactive_mode(struct razer_daemon_controller *controller, unsigned c
 	dbus_message_unref(msg);
 }
 
-void dc_set_breath_mode(struct razer_daemon_controller *controller, unsigned char red, unsigned char green, unsigned char blue) // ??
+void dc_set_breath_mode(struct razer_daemon_controller *controller, unsigned char breath_type, unsigned char red, unsigned char green, unsigned char blue, unsigned char red2, unsigned char green2, unsigned char blue2) // ??
 {
 	DBusMessage *msg;
 	DBusMessageIter args;
 	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon","/","org.voyagerproject.razer.daemon.driver_effect","breath");
 	if(!msg)
 		dc_error_close(controller,"Error creating Message\n");
-	dbus_message_iter_init_append(msg,&args);
-	if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_BYTE,&red))
-		dc_error_close(controller,"Out of memory!\n");
-	if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_BYTE,&green))
+
+	if(breath_type == 1 || breath_type == 2)
+	{
+		dbus_message_iter_init_append(msg,&args);
+		if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_BYTE,&red))
 			dc_error_close(controller,"Out of memory!\n");
-	if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_BYTE,&blue))
+		if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_BYTE,&green))
 			dc_error_close(controller,"Out of memory!\n");
+		if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_BYTE,&blue))
+			dc_error_close(controller,"Out of memory!\n");
+	}
+	if(breath_type == 2)
+	{
+		dbus_message_iter_init_append(msg,&args);
+		if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_BYTE,&red2))
+			dc_error_close(controller,"Out of memory!\n");
+		if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_BYTE,&green2))
+			dc_error_close(controller,"Out of memory!\n");
+		if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_BYTE,&blue2))
+			dc_error_close(controller,"Out of memory!\n");
+	}
 
 	if(!dbus_connection_send_with_reply(controller->dbus,msg,&controller->pending,-1))
 		dc_error_close(controller,"Out of memory!\n");

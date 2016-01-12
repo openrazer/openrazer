@@ -10,7 +10,7 @@ LDFLAGS= $(LIBS)
 DEBUG_LDFLAGS = $(LIBS)
 CC=gcc
 
-LIBDBUS=$(shell echo \\\#include \<dbus/dbus.h\>\\n int main\(int c,char**v\){} | gcc `pkg-config --libs dbus-1` `pkg-config --cflags dbus-1`  -xc -o a.out - 2>/dev/null ;echo $$? ;rm a.out 2>/dev/null )
+LIBDBUS=$(shell pkg-config --libs dbus-1 > /dev/null 2>&1 && echo 0)
 
 ifeq ($(LIBDBUS), 0)
 	LIBS+= `pkg-config --libs dbus-1` 
@@ -22,7 +22,7 @@ endif
 all: examples_debug examples snake dynamic
 
 examples_debug: 
-	@echo "::\033[32m COMPILING examples [DEBUG]\033[0m"
+	@echo "\n::\033[32m COMPILING examples [DEBUG]\033[0m"
 	@echo "=============================="
 	$(CC) example1.c $(DEBUG_CFLAGS) ../lib/librazer_chroma.da $(LIBS) -o example1_debug
 	$(CC) input_example.c $(DEBUG_CFLAGS) ../lib/librazer_chroma.da $(LIBS) -o input_example_debug
@@ -31,7 +31,7 @@ examples_debug:
 	$(CC) controller_example.c $(DEBUG_CFLAGS) ../lib/librazer_chroma_controller.da $(LIBS) -o controller_example_debug
 
 examples: 
-	@echo "::\033[32m COMPILING examples\033[0m"
+	@echo "\n::\033[32m COMPILING examples\033[0m"
 	@echo "======================"
 	$(CC) example1.c $(CFLAGS) ../lib/librazer_chroma.a $(LIBS) -o example1
 	@strip example1
@@ -51,7 +51,7 @@ snake_clean:
 	make -C snake_game clean
 
 dynamic:
-	@echo "::\033[32m COMPILING dynamic\033[0m"
+	@echo "\n::\033[32m COMPILING dynamic\033[0m"
 	@echo "======================"
 
 	$(CC) dynamic.c $(CFLAGS) ../lib/librazer_chroma.a $(LIBS) -o dynamic
