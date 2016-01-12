@@ -359,7 +359,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 
 					dbus_message_iter_init_append(reply,&parameters);
 
-                    if(num_elements == 67) // 67 Is standard packet size which the driver accepts. 1 BYTE row id, 22 RBG (3xBYTE)
+                    if(num_elements % 67 == 0) // 67 Is standard packet size which the driver accepts. 1 BYTE row id, 22 RBG (3xBYTE)
                     {
 					    daemon->is_paused = 1;
 
