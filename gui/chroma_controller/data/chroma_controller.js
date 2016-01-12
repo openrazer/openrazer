@@ -77,12 +77,13 @@ function profile_list_change() {
 function key(pos) {
   current_color = $('#'+pos).css("color");
   picker_color  = $('#rgb_tmp_preview').css("background-color");
+  var key_id = $('#'+pos).attr('data-keyid');
 
   // Set Mode - Change this key's colour.
   if ( mode == 'set' ) {
     $('#'+pos).css("color",picker_color);
     $('#'+pos).css("border","2px solid "+picker_color);
-    cmd('set-key?'+pos+'?'+picker_color)
+    cmd('set-key?'+pos+'?'+picker_color+'?'+key_id);
 
   // Picker Mode - Take colour from this key.
   } else if ( mode == 'picker' ) {
@@ -93,7 +94,7 @@ function key(pos) {
   } else if ( mode == 'clear' ) {
     $('#'+pos).css("color",cleared);
     $('#'+pos).css("border","2px solid "+cleared_border);
-    cmd('clear-key?'+pos)
+    cmd('clear-key?'+pos+'?'+key_id);
   }
 }
 
@@ -120,7 +121,7 @@ set_mode('set');
 // Prompt for a new profile name.
 function profile_new() {
   response = window.prompt("Please name your new key profile.");
-  if ( response != null ) {
+  if ( response != null && response.length > 0) {
     cmd('profile-new?'+response)
   }
 }

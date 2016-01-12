@@ -275,7 +275,7 @@ a { cursor: pointer; }
 .key-gap-marco { width: 20px; }
 .key-gap-functions { width: 8px; }
 .key-gap-middle { width: 8px; }
-.key-gap-middle-wide { width: 148px; }
+.key-gap-middle-wide { width: 138px; }
 
 .key:hover {
   background-color: #484848;

@@ -17,66 +17,20 @@
 # Copyright (C) 2015-2016 Luke Horwell <lukehorwell37+code@gmail.com>
 #
 
-import os, sys, signal, inspect
+import os, sys, signal
 from gi.repository import Gtk, Gdk, WebKit
 import razer.daemon_dbus
+import razer.keyboard
 
 # Default Settings & Preferences
-### Primary colour used for effects
-rgb_primary_red = 0
-rgb_primary_green = 255
-rgb_primary_blue = 0
-### Colour used for breath mode.
-rgb_secondary_red = 0
-rgb_secondary_green = 0
-rgb_secondary_blue = 255
-current_effect = 'custom'
-last_effect = 'unknown'
 layout = 'en-gb'
 
-class Paths(object):
-    # Initializes paths and directories
+SAVE_ROOT = os.path.expanduser('~') + '/.config/razer_chroma'
+SAVE_PROFILES = SAVE_ROOT + '/profiles'
+SAVE_BACKUPS = SAVE_ROOT + '/backups'
 
-    ## Where are we?
-    location = os.path.dirname( os.path.abspath(inspect.getfile(inspect.currentframe())) )
-    location_data = os.path.join(location, 'data/')
-    location_installed = '/usr/share/razer_chroma_controller'
-
-    ## Where user's configuration is saved
-    save_root = os.path.expanduser('~') + '/.config/razer_chroma'
-    save_profiles = save_root + '/profiles'
-    save_backups = save_root + '/backups'
-
-    ## Check 'data' folder exists.
-    if not os.path.exists(location_data):
-        print('Data folder is missing. Exiting.')
-        exit()
-
-    ## Check we have a folder to save data (eg. profiles)
-    if not os.path.exists(save_root):
-        print('Configuration folder does not exist. Creating',save_root,)
-        os.makedirs(save_root)
-        os.makedirs(save_profiles)
-        os.makedirs(save_backups)
-
-    # Does the 'dynamic' binary exist? (required for key profiles)
-    ### In same folder as script.
-    if os.path.exists(location + '/dynamic'):
-        dynamicPath = location + '/dynamic'
-    ### Compiled in Git project 'examples' folder
-    elif os.path.exists(location + '/../../examples/dynamic'):
-        dynamicPath = location + '/../../examples/dynamic'
-    else:
-        dynamicPath = 'notfound'
-
-    ## Is a sudoers file present for the utility?
-    ## (This bypasses the password authentication prompt on Ubuntu/Debian distros and
-    ##  assumes the application is installed to the system)
-    if os.path.exists('/etc/sudoers.d/razer_chroma_dynamic'):
-        dynamicPath = '/usr/share/razer_chroma_controller/dynamic'
-        dynamicExecType = 'sudoers'
-    else:
-        dynamicExecType = 'pkexec'
+LOCATION_DATA = os.path.join(os.path.dirname(__file__), 'data/')
+LOCATION_INSTALLED = '/usr/share/razer_chroma_controller'
 
 class ChromaController(object):
     ##################################################
@@ -87,30 +41,29 @@ class ChromaController(object):
 
         # Hide all footer buttons
         for element in ['retry', 'edit-save', 'edit-preview', 'cancel', 'close-window', 'pref-open', 'pref-save']:
-            webkit.execute_script('$("#' + element + '").hide()')
+            self.webkit.execute_script('$("#' + element + '").hide()')
 
         if page == 'main_menu':
-            webkit.execute_script('changeTitle("Configuration Menu")')
-            webkit.execute_script('smoothFade(".menu_area",'+page+')')
-            webkit.execute_script('$("#close-window").show()')
-            webkit.execute_script('$("#pref-open").show()')
+            self.webkit.execute_script('changeTitle("Configuration Menu")')
+            self.webkit.execute_script('smoothFade(".menu_area",'+page+')')
+            self.webkit.execute_script('$("#close-window").show()')
+            self.webkit.execute_script('$("#pref-open").show()')
             self.refresh_profiles_list()
 
         elif page == 'not_detected':
-            webkit.execute_script('changeTitle("Keyboard Not Detected")')
+            self.webkit.execute_script('changeTitle("Keyboard Not Detected")')
 
         elif page == 'profile_editor':
-            global profile_name # TODO remove global
-            webkit.execute_script('changeTitle("Edit ' + profile_name + '")')
-            webkit.execute_script('smoothFade("#main_menu","#profile_editor")')
-            webkit.execute_script('$("#cancel").show()')
-            webkit.execute_script('$("#edit-preview").show()')
-            webkit.execute_script('$("#edit-save").show()')
+            self.webkit.execute_script('changeTitle("Edit ' + self.profiles.get_active_profile_name() + '")')
+            self.webkit.execute_script('smoothFade("#main_menu","#profile_editor")')
+            self.webkit.execute_script('$("#cancel").show()')
+            self.webkit.execute_script('$("#edit-preview").show()')
+            self.webkit.execute_script('$("#edit-save").show()')
 
         elif page == 'preferences':
-            webkit.execute_script('changeTitle("Preferences")')
-            webkit.execute_script('$("#cancel").show()')
-            webkit.execute_script('$("#pref-save").show()')
+            self.webkit.execute_script('changeTitle("Preferences")')
+            self.webkit.execute_script('$("#cancel").show()')
+            self.webkit.execute_script('$("#pref-save").show()')
 
         else:
             print("Unknown menu '"+page+"'!")
@@ -128,12 +81,12 @@ class ChromaController(object):
         # --  If not, kindly ask the user to do so.
         self.show_menu('main_menu')
 
-        # Load profiles and preferences
+        # Load preferences
         # FIXME: Not yet implemented!
         #~ self.preferences('load')
 
-        webkit.execute_script('instantProfileSwitch = false;') # Unimplemented instant profile change option.
-        webkit.execute_script("$('#profiles-activate').show()")
+        self.webkit.execute_script('instantProfileSwitch = false;') # Unimplemented instant profile change option.
+        self.webkit.execute_script("$('#profiles-activate').show()")
 
         # Load list of profiles
         self.refresh_profiles_list()
@@ -143,28 +96,17 @@ class ChromaController(object):
         #~ webkit.execute_script('$("#rgb_primary_preview").css("background-color","rgba('+str(rgb_primary_red)+','+str(rgb_primary_green)+','+str(rgb_primary_blue)+',1.0)")')
 
         ## Write keyboard
-        global layout # TODO remove global
-        keyboard_layout_ffile = open(Paths.location_data+'/layouts/'+layout+'.html','r')
+        keyboard_layout_ffile = open(LOCATION_DATA+'/layouts/'+layout+'.html','r')
         for line in keyboard_layout_ffile:
-          if '\n' == line[-1]:
-            webkit.execute_script("$('#keyboard').append('"+line.split('\n')[0]+"')")
+            if '\n' == line[-1]:
+                self.webkit.execute_script("$('#keyboard').append('"+line.split('\n')[0]+"')")
         print("Loaded keyboard layout '"+layout+"'")
 
-        # Does 'dynamic' exist? Without this, profiles can't be activated!
-        # See '/../examples/dynamic-examples/readme' for more details.
-        # If this is integrated to dbus, this external binary won't be needed (nor require root privileges to execute)
-        if Paths.dynamicPath == 'notfound':
-            webkit.execute_script('$("#profiles-activate").')
-            print("WARNING: Binary for 'dynamic' not found!")
-            print("         You won't be able to activate any key profiles created with the utility without compiling the program and placing beside this script.")
-            print("         See '/../examples/dynamic-examples/readme' for details about 'dynamic'.")
-
     def refresh_profiles_list(self):
-        global webkit # TODO remove global
-        webkit.execute_script('$("#profiles_list").html("")')
-        for profile in ChromaProfiles.getFileList():
+        self.webkit.execute_script('$("#profiles_list").html("")')
+        for profile in self.profiles.get_profiles():
             item = "<option value='"+profile+"'>"+profile+"</option>"
-            webkit.execute_script('$("#profiles_list").append("'+item+'")')
+            self.webkit.execute_script('$("#profiles_list").append("'+item+'")')
 
     ##################################################
     # Commands
@@ -183,91 +125,86 @@ class ChromaController(object):
             print('fixme:open web browser to URL')
 
     def process_command(self, command):
-        global rgb_primary_red, rgb_primary_green, rgb_primary_blue, current_effect # TODO remove global
-        global rgb_secondary_red, rgb_secondary_green, rgb_secondary_blue # TODO remove global
-        global profile_name, profileMemory # TODO remove global
-        global current_effect, last_effect # TODO remove global
-        global webkit # TODO remove global
-
         if command == 'quit':
             quit()
 
         ## Effects & Keyboard Controls
         elif command.startswith('brightness'):
             value = int(command[11:])
-            daemon.set_brightness(value)
+            self.daemon.set_brightness(value)
 
         elif command.startswith('effect'):
             enabled_options = []
 
             if command == 'effect-none':
-                current_effect = "none"
-                daemon.set_effect('none')
+                self.current_effect = "none"
+                self.daemon.set_effect('none')
 
             elif command == 'effect-spectrum':
-                current_effect = "spectrum"
-                daemon.set_effect('spectrum')
+                self.current_effect = "spectrum"
+                self.daemon.set_effect('spectrum')
 
             elif command.startswith('effect-wave'):
-                current_effect = "wave"
-                daemon.set_effect('wave', int(command[12:])) # ?1 or ?2 for direction
+                self.current_effect = "wave"
+                wave_direction = int(command.split('?')[1])
+                self.daemon.set_effect('wave', wave_direction) # ?1 or ?2 for direction
                 enabled_options = ['waves']
 
             elif command.startswith('effect-reactive'):
-                current_effect = "reactive"
-                global reactive_speed # TODO remove global
+                self.current_effect = "reactive"
                 if command.split('?')[1] == 'auto':
                     # Use the previous effect
-                    daemon.set_effect('reactive', reactive_speed, rgb_primary_red, rgb_primary_green, rgb_primary_blue)
+                    self.daemon.set_effect('reactive', self.reactive_speed, self.primary_rgb.red, self.primary_rgb.green, self.primary_rgb.blue)
                 else:
-                    reactive_speed = int(command[16])
-                    daemon.set_effect('reactive', reactive_speed, rgb_primary_red, rgb_primary_green, rgb_primary_blue)
+                    self.reactive_speed = int(command.split('?')[1])
+                    self.daemon.set_effect('reactive', self.reactive_speed, self.primary_rgb.red, self.primary_rgb.green, self.primary_rgb.blue)
                 enabled_options = ['rgb_primary', 'reactive']
 
             elif command.startswith('effect-breath'):
-                global breath_random # TODO remove global
-                breath_random = command[14]
-                if breath_random == '1':  # Random mode
-                    current_effect = "breath?random"
-                    daemon.set_effect('breath', 1)
+                breath_random = int(command.split('?')[1])
+                if breath_random == 1:  # Random mode
+                    self.current_effect = "breath?random"
+                    self.daemon.set_effect('breath', 1)
                     enabled_options = ['breath-select']
                 else:
-                    current_effect = "breath?colours"
-                    daemon.set_effect('breath', rgb_primary_red, rgb_primary_green, rgb_primary_blue, rgb_secondary_red, rgb_secondary_green, rgb_secondary_blue)
+                    self.current_effect = "breath?colours"
+                    self.daemon.set_effect('breath',
+                                           self.primary_rgb.red, self.primary_rgb.green, self.primary_rgb.blue,
+                                           self.secondary_rgb.red, self.secondary_rgb.green, self.secondary_rgb.blue)
                     enabled_options = ['breath-random', 'rgb_primary', 'rgb_secondary']
 
             elif command == 'effect-static':
-                current_effect = "static"
-                daemon.set_effect('static', rgb_primary_red, rgb_primary_green, rgb_primary_blue)
+                self.current_effect = "static"
+                self.daemon.set_effect('static', self.primary_rgb.red, self.primary_rgb.green, self.primary_rgb.blue)
                 enabled_options = ['rgb_primary']
 
             # Fade between options for that effect, should it have been changed.
-            if not current_effect == last_effect:
+            if not self.current_effect == self.last_effect:
                 # Effect changed, fade out all previous options.
                 for element in ['rgb_primary', 'rgb_secondary', 'waves', 'reactive', 'breath-random', 'breath-select']:
-                    webkit.execute_script('$("#' + element + '").fadeOut("fast")')
+                    self.webkit.execute_script('$("#' + element + '").fadeOut("fast")')
 
                 # Fade in desired options for this effect.
                 for element in enabled_options:
-                    webkit.execute_script("setTimeout(function(){ $('#" + element + "').fadeIn('fast');}, 200)")
-            last_effect = current_effect
+                    self.webkit.execute_script("setTimeout(function(){ $('#" + element + "').fadeIn('fast');}, 200)")
+            self.last_effect = self.current_effect
 
         elif command == 'enable-marco-keys':
-            daemon.marco_keys(True)
-            webkit.execute_script('$("#marco-keys-enable").addClass("btn-disabled")')
-            webkit.execute_script('$("#marco-keys-enable").html("Marco Keys In Use")')
+            self.daemon.marco_keys(True)
+            self.webkit.execute_script('$("#marco-keys-enable").addClass("btn-disabled")')
+            self.webkit.execute_script('$("#marco-keys-enable").html("Marco Keys In Use")')
 
         elif command == 'gamemode-enable':
-            daemon.game_mode(True)
-            webkit.execute_script('$("#game-mode-status").html("Enabled")')
-            webkit.execute_script('$("#game-mode-enable").hide()')
-            webkit.execute_script('$("#game-mode-disable").show()')
+            self.daemon.game_mode(True)
+            self.webkit.execute_script('$("#game-mode-status").html("Enabled")')
+            self.webkit.execute_script('$("#game-mode-enable").hide()')
+            self.webkit.execute_script('$("#game-mode-disable").show()')
 
         elif command == 'gamemode-disable':
-            daemon.game_mode(False)
-            webkit.execute_script('$("#game-mode-status").html("Disabled")')
-            webkit.execute_script('$("#game-mode-enable").show()')
-            webkit.execute_script('$("#game-mode-disable").hide()')
+            self.daemon.game_mode(False)
+            self.webkit.execute_script('$("#game-mode-status").html("Disabled")')
+            self.webkit.execute_script('$("#game-mode-enable").show()')
+            self.webkit.execute_script('$("#game-mode-disable").hide()')
 
         ## Changing colours for this session.
         elif command.startswith('ask-color'):
@@ -293,29 +230,24 @@ class ChromaController(object):
             green = int(colors.split('?')[2])
             blue = int(colors.split('?')[3])
             print("Set colour of '{0}' to RGB: {1}, {2}, {3}".format(element, red, green, blue))
-            webkit.execute_script('$("#'+element+'_preview").css("background-color","rgba(' + str(red) + ',' + str(green) + ',' + str(blue) + ',1.0)")')
-            webkit.execute_script('set_mode("set")')
+            self.webkit.execute_script('$("#'+element+'_preview").css("background-color","rgba(' + str(red) + ',' + str(green) + ',' + str(blue) + ',1.0)")')
+            self.webkit.execute_script('set_mode("set")')
 
-            # Update global variables if applicable
             if element == 'rgb_primary':    # Primary effect colour
-                rgb_primary_red = red
-                rgb_primary_green = green
-                rgb_primary_blue = blue
+                self.primary_rgb.set((red, green, blue))
             elif element == 'rgb_secondary':   # Secondary effect colour (used for Breath mode)
-                rgb_secondary_red = red
-                rgb_secondary_green = green
-                rgb_secondary_blue = blue
+                self.secondary_rgb.set((red, green, blue))
             elif element == 'rgb_tmp':      # Temporary colour while editing profiles.
                 rgb_edit_red = red
                 rgb_edit_green = green
                 rgb_edit_blue = blue
 
             # Update static colour effects if currently in use.
-            if current_effect == 'static':
+            if self.current_effect == 'static':
                 self.process_command('effect-static')
-            elif current_effect == 'breath?colours':
+            elif self.current_effect == 'breath?colours':
                 self.process_command('effect-breath?0')
-            elif current_effect == 'reactive':
+            elif self.current_effect == 'reactive':
                 self.process_command('effect-reactive?auto')
 
         ## Opening different pages
@@ -332,126 +264,91 @@ class ChromaController(object):
 
         elif command.startswith('profile-edit'):
             profile_name = command.split('profile-edit?')[1].replace('%20', ' ')
-            profile_path = Paths.save_profiles+'/' + profile_name
 
-            # Dynamic Profile File Format:
-            #   <cmd> <parm>
-            #   1 <x> <y> <red> <green> <blue>
-            # File MUST end with '0'.
+            if len(profile_name) > 0:
+                # Clear any existing colours / array memory
+                cleared_text = 'rgb(128,128,128)'
+                cleared_border = 'rgb(70,70,70)'
 
-            # Profile Memory within Python
-            # [ mode, x. y. red. green. blue ]
-            # Mode = 1 = static key at X,Y
+                self.profiles.set_active_profile(profile_name)
 
-            # Clear any existing colours / array memory
-            cleared_text = 'rgb(128,128,128)'
-            cleared_border = 'rgb(70,70,70)'
-            profileMemory = []
+                for posX in range(0,21):
+                    for posY in range(0,5):
+                        self.webkit.execute_script('$("#x'+str(posX)+'-y'+str(posY)+'").css("border","2px solid '+cleared_border+'")')
+                        self.webkit.execute_script('$("#x'+str(posX)+'-y'+str(posY)+'").css("color","'+cleared_text+'")')
 
-            for posX in range(0,21):
-              for posY in range(0,5):
-                webkit.execute_script('$("#x'+str(posX)+'-y'+str(posY)+'").css("border","2px solid '+cleared_border+'")')
-                webkit.execute_script('$("#x'+str(posX)+'-y'+str(posY)+'").css("color","'+cleared_text+'")')
+                for pos_y, row in enumerate(self.profiles.get_profile(profile_name).get_rows_raw()):
+                    for pos_x, rgb in enumerate(row):
+                        rgb_css = 'rgb({0},{1},{2})'.format(rgb.red, rgb.green, rgb.blue)
+                        self.webkit.execute_script('$("#x{0}-y{1}").css("border","2px solid {2}")'.format(pos_x, pos_y, rgb_css))
+                        self.webkit.execute_script('$("#x{0}-y{1}").css("color","{2}")'.format(pos_x, pos_y, rgb_css))
 
-            try:
-              with open(profile_path,'r') as f:
-                  profile_contents = f.read().splitlines()
-
-              # Load new values
-              for line in profile_contents:
-                if line != '0':
-                  posX = line.split(' ')[1]
-                  posY = line.split(' ')[2]
-                  red = line.split(' ')[3]
-                  green = line.split(' ')[4]
-                  blue = line.split(' ')[5]
-                  rgbCSS = 'rgb('+red+','+green+','+blue+')'
-                  webkit.execute_script('$("#x'+posX+'-y'+posY+'").css("border","2px solid '+rgbCSS+'")')
-                  webkit.execute_script('$("#x'+posX+'-y'+posY+'").css("color","'+rgbCSS+'")')
-                  profileMemory.append([1, int(posX), int(posY), int(red), int(green), int(blue)])
-
-              print('Opened profile "' + profile_name + '"')
-              self.show_menu('profile_editor')
-
-            except:
-              print('Problem opening "'+profile_path+'" for reading.')
+                self.show_menu('profile_editor')
 
         elif command.startswith('set-key'):
             # Replace any existing occurances first
-            self.process_command('clear-key?'+command.split('set-key?')[1])
+            self.process_command('clear-key?'+command.split('?')[1]+'?'+command.split('?')[3])
 
             # Parse position/colour information
             command = command.replace('%20',' ')
             posX = command.split('?')[1].strip('x').split('-')[0]
             posY = command.split('?')[1].split('-y')[1]
             color = command.split('?')[2]
+            key_id = command.split('?')[3]
             red = int(color.strip('rgb()').split(',')[0])
             green =int(color.strip('rgb()').split(',')[1])
             blue = int(color.strip('rgb()').split(',')[2])
+            rgb = (red, green, blue)
 
             # Write to memory
-            profileMemory.append([1, posX, posY, red, green, blue])
+            self.profiles.get_active_profile().set_key_colour(key_id, rgb)
 
         elif command.startswith('clear-key'):
             command = command.replace('%20',' ')
             posX = command.split('?')[1].strip('x').split('-')[0]
             posY = command.split('?')[1].split('-y')[1]
+            key_id = command.split('?')[2]
 
-            # Scan the profile in memory and erase any reference to it.
-            row = 0
-            for line in profileMemory:
-              if str(line).startswith('[1, ' + posX + ", " + posY + ","):
-                  del profileMemory[row]
-              row = row + 1
+            self.profiles.get_active_profile().reset_key(key_id)
 
         elif command.startswith('profile-activate'):
             command = command.replace('%20',' ')
             profile_name = command.split('profile-activate?')[1]
-            webkit.execute_script('setCursor("wait")')
-            ChromaProfiles.setProfile('file', profile_name)
-            webkit.execute_script('$("#custom").html("Profile - ' + profile_name + '")')
-            webkit.execute_script('$("#custom").prop("checked", true)')
-            webkit.execute_script('setCursor("normal")')
+            self.webkit.execute_script('setCursor("wait")')
+            self.profiles.activate_profile_from_file(profile_name)
+            self.webkit.execute_script('$("#custom").html("Profile - ' + profile_name + '")')
+            self.webkit.execute_script('$("#custom").prop("checked", true)')
+            self.webkit.execute_script('setCursor("normal")')
 
         elif command.startswith('profile-del'):
             # TODO: Instead of JS-based prompt, use PyGtk or within web page interface?
             profile_name = command.split('?')[1].replace('%20', ' ')
-            os.remove(Paths.save_profiles +'/' + profile_name)
-            print('Deleted profile: ' + Paths.save_profiles +'/' + profile_name)
-            if os.path.exists(Paths.save_backups + '/' + profile_name):
-                os.remove(Paths.save_backups +'/' + profile_name)
-                print('Deleted backup copy: ' + Paths.save_backups +'/' + profile_name)
-            print('Forcing refresh of profiles list...')
-            self.refresh_profiles_list()
+
+            if len(profile_name) > 0:
+                current_profile_path = os.path.join(SAVE_PROFILES, profile_name)
+                current_profile_path_backup = os.path.join(SAVE_BACKUPS, profile_name)
+                os.remove(current_profile_path)
+                print('Deleted profile: {0}'.format(current_profile_path))
+                if os.path.exists(current_profile_path_backup):
+                    os.remove(current_profile_path_backup)
+                    print('Deleted backup copy: ' + current_profile_path_backup)
+                print('Forcing refresh of profiles list...')
+                self.refresh_profiles_list()
 
         elif command.startswith('profile-new'):
             # TODO: Instead of JS-based prompt, use PyGtk or within web page interface?
             profile_name = command.split('?')[1].replace('%20', ' ')
-            profileMemory = []
+            self.profiles.new_profile(profile_name)
             self.show_menu('profile_editor')
 
         elif command == 'profile-save':
-            print('Saving profile "' + profile_name + '...')
-            profile_path = Paths.save_profiles + '/' + profile_name
+            profile_name = self.profiles.get_active_profile_name()
+            print('Saving profile "{0}" ...'.format(profile_name))
 
-            # Backup if it's an existing copy, then erase original copy.
-            if os.path.exists(profile_path):
-                os.rename(profile_path, Paths.save_backups +'/' + profile_name)
+            self.profiles.save_profile(profile_name)
 
-            # Prepare to write to file
-            profileSave = open(profile_path, "w")
+            print('Saved "{0}".'.format(profile_name))
 
-            for line in profileMemory:
-                lineBuffer=''
-                for data in line:
-                    lineBuffer = lineBuffer + str(data) + ' '
-
-                profileSave.write(str(lineBuffer+'\n'))
-
-            # Line must end with a zero ('0') to tell 'dynamic' this is the EOF.
-            profileSave.write('0')
-            profileSave.close()
-            print('Saved to "'+profile_path+'".')
             self.show_menu('main_menu')
 
         else:
@@ -467,24 +364,48 @@ class ChromaController(object):
         return
 
 
-    ##################################################
-    # Initialization
-    ##################################################
     def __init__(self):
+        """
+        Initialise the class
+        """
         w = Gtk.Window(title="Razer BlackWidow Chroma Configuration")
         w.set_wmclass('razer_bcd_utility', 'razer_bcd_utility')
         w.set_position(Gtk.WindowPosition.CENTER)
         w.set_size_request(900, 600)
         w.set_resizable(False)
-        w.set_icon_from_file(os.path.join(Paths.location_data, 'img/app-icon.svg'))
+        w.set_icon_from_file(os.path.join(LOCATION_DATA, 'img/app-icon.svg'))
         w.connect("delete-event", Gtk.main_quit)
 
+        if not os.path.exists(LOCATION_DATA):
+            print('Data folder is missing. Exiting.')
+            sys.exit(1)
+
+        ## Check we have a folder to save data (eg. profiles)
+        if not os.path.exists(SAVE_ROOT):
+            print('Configuration folder does not exist. Creating',SAVE_ROOT)
+            os.makedirs(SAVE_ROOT)
+            os.makedirs(SAVE_PROFILES)
+            os.makedirs(SAVE_BACKUPS)
+
+        # Set up the daemon
+        self.daemon = razer.daemon_dbus.DaemonInterface()
+
+        # Profiles
+        self.profiles = ChromaProfiles(self.daemon)
+
+        # "Globals"
+        self.reactive_speed = 1
+        self.primary_rgb = razer.keyboard.RGB(0, 255, 0)
+        self.secondary_rgb = razer.keyboard.RGB(0, 0, 255)
+        self.current_effect = 'custom'
+        self.last_effect = 'unknown'
+
+
         # Create WebKit Container
-        global webkit # TODO remove global
-        webkit = WebKit.WebView()
+        self.webkit = WebKit.WebView()
         sw = Gtk.ScrolledWindow()
         sw.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        sw.add(webkit)
+        sw.add(self.webkit)
 
         # Build an auto expanding box and add our scrolled window
         b = Gtk.VBox(homogeneous=False, spacing=0)
@@ -492,59 +413,143 @@ class ChromaController(object):
         w.add(b)
 
         # Disable right click context menu
-        webkit.props.settings.props.enable_default_context_menu = False
+        self.webkit.props.settings.props.enable_default_context_menu = False
 
         # Load page
-        webkit.open(os.path.join(Paths.location_data, 'chroma_controller.html'))
+        self.webkit.open(os.path.join(LOCATION_DATA, 'chroma_controller.html'))
 
         # Process pages once they fully load.
-        webkit.connect('load-finished',self.page_loaded)
+        self.webkit.connect('load-finished',self.page_loaded)
 
         # Process any commands from the web page.
-        webkit.connect('navigation-policy-decision-requested', self.process_uri)
+        self.webkit.connect('navigation-policy-decision-requested', self.process_uri)
 
         # Show the window.
         w.show_all()
         Gtk.main()
 
 class ChromaProfiles(object):
-    ##################################################
-    # Profile Creation
-    ##################################################
-    # Print the file names of existing profiles.
-    # Requires 'Paths' class.
+    def __init__(self, dbus_object):
+        self.profiles = {}
+        self.active_profile = None
+        self.daemon = dbus_object
+
+        self.load_profiles()
+
+    def load_profiles(self):
+        """
+        Load profiles
+        """
+        profiles = os.listdir(SAVE_PROFILES)
+
+        for profile in profiles:
+            keyboard = ChromaProfiles.get_profile_from_file(profile)
+            self.profiles[profile] = keyboard
+
+    def remove_profile(self, profile_name):
+        """
+        Delete profile
+
+        :param profile_name: Profile name
+        :type profile_name: str
+        """
+        if profile_name in self.profiles:
+            del self.profiles[profile_name]
+
+    def new_profile(self, profile_name):
+        """
+        Create new profile
+
+        :param profile_name: Profile name
+        :type profile_name: str
+        """
+        self.active_profile = profile_name
+        self.profiles[profile_name] = razer.keyboard.KeyboardColour()
+
+    def set_active_profile(self, profile_name):
+        """
+        Set the active profile name
+
+        :param profile_name: Profile name
+        :type profile_name: str
+        """
+        if profile_name in self.profiles:
+            self.active_profile = profile_name
+
+    def get_active_profile(self):
+        """
+        Gets active profile
+
+        :return: Keyboard object
+        :rtype: razer.keyboard.KeyboardColour
+        """
+        return self.profiles[self.active_profile]
+
+    def get_active_profile_name(self):
+        """
+        Gets active profile
+
+        :return: Profile name
+        :rtype: str
+        """
+        return self.active_profile
+
+    def get_profiles(self):
+        """
+        Get a list of profiles
+
+        :return: List of profiles
+        :rtype: list
+        """
+        return self.profiles.keys()
+
+    def get_profile(self, profile_name):
+        """
+        Get a profile
+
+        :param profile_name: Profile
+        :type profile_name: str
+
+        :return: Keyboard object
+        :rtype: razer.keyboard.KeyboardColour
+        """
+        return self.profiles[profile_name]
+
+    def save_profile(self, profile_name):
+
+        profile_path = os.path.join(SAVE_PROFILES, profile_name)
+
+        # Backup if it's an existing copy, then erase original copy.
+        if os.path.exists(profile_path):
+            os.rename(profile_path, os.path.join(SAVE_BACKUPS, profile_name))
+
+        with open(os.path.join(SAVE_PROFILES, profile_name), 'wb') as profile_file:
+            payload = self.profiles[profile_name].get_total_binary()
+            profile_file.write(payload)
+
+    def activate_profile_from_file(self, profile_name):
+        print("Applying profile '{0}' ... ".format(profile_name), end='')
+        with open(os.path.join(SAVE_PROFILES, profile_name), 'rb') as profile_file:
+            payload = profile_file.read()
+            keyboard = razer.keyboard.KeyboardColour()
+            keyboard.get_from_total_binary(payload)
+            self.daemon.set_custom_colour(keyboard)
 
     @staticmethod
-    def getFileList():
-        return os.listdir(Paths.save_profiles)
+    def get_profile_from_file(profile_name):
+        keyboard = razer.keyboard.KeyboardColour()
 
-    @staticmethod
-    def setProfile(source='memory', profileName=None):
-        print("Applying profile '"+profileName+"' ... ", end='')
-        global profileMemory
-        if Paths.dynamicExecType == 'sudoers':
-          print("using 'sudo' as sudoers file was detected.")
-          print('---[ Dynamic Output ]-----------------------')
-          if source == 'file':
-            os.system('cat "' + Paths.save_profiles + '/' + profileName + '" |  sudo ' + Paths.dynamicPath)
-          elif source == 'memory':
-            os.system('echo "' + profileMemory + '" |  sudo ' + Paths.dynamicPath)
-          print('\n--------------------------------------------')
+        with open(os.path.join(SAVE_PROFILES, profile_name), 'rb') as profile_file:
+            payload = profile_file.read()
+            keyboard.get_from_total_binary(payload)
 
-        elif Paths.dynamicExecType == 'pkexec':
-          print("using an authentication prompt to execute 'dynamic' with higher privileges to send data directly to the keyboard.")
-          print('---[ Dynamic Output ]-----------------------')
-          os.system('echo "' + profileMemory+ '" |  pkexec ' + Paths.dynamicPath)
-          print('\n--------------------------------------------')
+        return keyboard
+
+
 
 
 if __name__ == "__main__":
     # Kill the process when CTRL+C'd.
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    # Connect to the DBUS daemon and determine paths.
-    daemon = razer.daemon_dbus.DaemonInterface()
-    Paths()
-
-    # Show Time!
-    utilty = ChromaController()
+    ChromaController()

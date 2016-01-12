@@ -3,6 +3,7 @@ Module to handle custom colours
 """
 
 from gi.repository import Gdk
+import struct
 
 
 KEY_MAPPING = {
@@ -48,10 +49,10 @@ class RGB(object):
 
         return result
 
-    def __init__(self):
-        self._red = 0
-        self._green = 0
-        self._blue = 0
+    def __init__(self, red=0, green=0, blue=0):
+        self._red = red
+        self._green = green
+        self._blue = blue
 
     @property
     def red(self):
@@ -182,6 +183,15 @@ class KeyboardColour(object):
 
         self.reset_rows()
 
+    def get_rows_raw(self):
+        """
+        Gets the raw representation of the rows
+
+        :return: Rows
+        :rtype: list
+        """
+        return self.rows
+
     def reset_rows(self):
         """
         Reset the rows of the keyboard
@@ -271,3 +281,23 @@ class KeyboardColour(object):
             payload += self.get_row_binary(row)
 
         return payload
+
+    def get_from_total_binary(self, binary_blob):
+        """
+        Load in a binary blob which is the output from get_total_binary
+
+        :param binary_blob: Binary blob
+        :type binary_blob: bytes
+        """
+        self.reset_rows()
+
+        for row_id in range (0, 6):
+            binary_blob = binary_blob[1:] # Skip first byte
+
+            for col_id, binary_rgb in enumerate([binary_blob[i:i+3] for i in range(0, 66, 3)]):
+                rgb = struct.unpack('=BBB', binary_rgb)
+                self.rows[row_id][col_id].set(rgb)
+
+            binary_blob = binary_blob[66:] # Skip the current row
+
+
