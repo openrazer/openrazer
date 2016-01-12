@@ -13,6 +13,7 @@
  along with Chroma Controller. If not, see <http://www.gnu.org/licenses/>.
 
  Copyright (C) 2015-2016 Luke Horwell <lukehorwell37+code@gmail.com>
+               2015-2016 Terry Cain <terry@terrys-home.co.uk>
 */
 
 // Smoothly fade between two elements.
