@@ -2252,8 +2252,8 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 					<arg direction=\"out\" name=\"render_list_render_nodes_list_json\" type=\"s\">\n\
 					</arg>\n\
 				</method>\n\
-			</interface>\n\
-			<interface name=\"org.voyagerproject.razer.daemon.render_node\">\n\
+			</interface>\n"; //split done to remove warning
+			char *xml_data_end = "<interface name=\"org.voyagerproject.razer.daemon.render_node\">\n\
 				<method name=\"set\">\n\
 					<arg direction=\"in\" name=\"render_node_uid\" type=\"i\">\n\
 					</arg>\n\
@@ -2284,8 +2284,8 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 					<arg direction=\"out\" name=\"parameter_value\" type=\"v\">\n\
 					</arg>\n\
 				</method>\n\
-			</interface>\n"; //split done to remove warning
-			char *xml_data_end = "<interface name=\"org.voyagerproject.razer.daemon.render_node.opacity\">\n\
+			</interface>\n\
+			<interface name=\"org.voyagerproject.razer.daemon.render_node.opacity\">\n\
 				<method name=\"set\">\n\
 					<arg direction=\"in\" name=\"opacity\" type=\"i\">\n\
 					</arg>\n\
