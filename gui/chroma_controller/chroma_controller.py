@@ -22,9 +22,14 @@ from gi.repository import Gtk, Gdk, WebKit
 import razer.daemon_dbus
 
 # Default Settings & Preferences
-rgb_effects_red = 0
-rgb_effects_green = 255
-rgb_effects_blue = 0
+### Primary colour used for effects
+rgb_primary_red = 0
+rgb_primary_green = 255
+rgb_primary_blue = 0
+### Colour used for breath mode.
+rgb_secondary_red = 0
+rgb_secondary_green = 0
+rgb_secondary_blue = 255
 current_effect = 'custom'
 layout = 'en-gb'
 
@@ -139,7 +144,7 @@ class ChromaController(object):
 
         # Apply preferences
         ## FIXME: Unimplemented: Default starting colour.
-        #~ webkit.execute_script('$("#rgb_effects_preview").css("background-color","rgba('+str(rgb_effects_red)+','+str(rgb_effects_green)+','+str(rgb_effects_blue)+',1.0)")')
+        #~ webkit.execute_script('$("#rgb_primary_preview").css("background-color","rgba('+str(rgb_primary_red)+','+str(rgb_primary_green)+','+str(rgb_primary_blue)+',1.0)")')
 
         ## Write keyboard
         global layout # TODO remove global
@@ -174,7 +179,7 @@ class ChromaController(object):
 
         if uri.startswith('cmd://'):
             command = uri[6:]
-            print("Command: '"+command+"'")
+            print("\nCommand: '"+command+"'")
             self.process_command(command)
 
         if uri.startswith('web://'):
@@ -182,7 +187,8 @@ class ChromaController(object):
             print('fixme:open web browser to URL')
 
     def process_command(self, command):
-        global rgb_effects_red, rgb_effects_green, rgb_effects_blue, current_effect # TODO remove global
+        global rgb_primary_red, rgb_primary_green, rgb_primary_blue, current_effect # TODO remove global
+        global rgb_secondary_red, rgb_secondary_green, rgb_secondary_blue # TODO remove global
         global profile_name, profileMemory # TODO remove global
         global webkit # TODO remove global
 
@@ -195,37 +201,46 @@ class ChromaController(object):
             daemon.set_brightness(value)
 
         elif command.startswith('effect'):
+
+            # Fade out any previous extended settings.
+            webkit.execute_script('$("#rgb_effects").fadeOut("fast")')
+            webkit.execute_script('$("#waves").fadeOut("fast")')
+            webkit.execute_script('$("#reactive").fadeOut("fast")')
+            webkit.execute_script('$("#breath").fadeOut("fast")')
+
             if command == 'effect-none':
                 current_effect = "none"
                 daemon.set_effect('none')
-                webkit.execute_script('$("#rgb_effects").fadeOut("fast")')
-                webkit.execute_script('$("#waves").fadeOut("fast")')
 
             elif command == 'effect-spectrum':
                 current_effect = "spectrum"
                 daemon.set_effect('spectrum')
-                webkit.execute_script('$("#rgb_effects").fadeOut("fast")')
-                webkit.execute_script('$("#waves").fadeOut("fast")')
 
             elif command.startswith('effect-wave'):
                 current_effect = "wave"
                 daemon.set_effect('wave', int(command[12:])) # ?1 or ?2 for direction
-                webkit.execute_script('smoothFade("#rgb_effects","#waves")')
+                webkit.execute_script('smoothFade("","#waves")')
 
-            elif command == 'effect-reactive':
+            elif command.startswith('effect-reactive'):
                 current_effect = "reactive"
-                daemon.set_effect('reactive', rgb_effects_red, rgb_effects_green, rgb_effects_blue)
-                webkit.execute_script('smoothFade("#waves","#rgb_effects")')
+                daemon.set_effect('reactive', int(command[16]), rgb_primary_red, rgb_primary_green, rgb_primary_blue)
+                webkit.execute_script('smoothFade("","#reactive")')
+                webkit.execute_script('smoothFade("","#rgb_effects")')
 
-            elif command == 'effect-breath':
+            elif command.startswith('effect-breath'):
                 current_effect = "breath"
-                daemon.set_effect('breath', rgb_effects_red, rgb_effects_green, rgb_effects_blue)
-                webkit.execute_script('smoothFade("#waves","#rgb_effects")')
+                if command[13] == '1':  # Random mode
+                    daemon.set_effect('breath', 1)
+                else:
+                    daemon.set_effect('breath', rgb_primary_red, rgb_primary_green, rgb_primary_blue, rgb_secondary_red, rgb_secondary_green, rgb_secondary_blue)
+                webkit.execute_script('smoothFade("","#breath")')
+                webkit.execute_script('smoothFade("","#rgb_effects")')
+                webkit.execute_script('smoothFade("","#rgb_breath")')
 
             elif command == 'effect-static':
                 current_effect = "static"
-                daemon.set_effect('static', rgb_effects_red, rgb_effects_green, rgb_effects_blue)
-                webkit.execute_script('smoothFade("#waves","#rgb_effects")')
+                daemon.set_effect('static', rgb_primary_red, rgb_primary_green, rgb_primary_blue)
+                webkit.execute_script('smoothFade("","#rgb_effects")')
 
         elif command == 'enable-marco-keys':
             daemon.marco_keys(True)
@@ -267,14 +282,19 @@ class ChromaController(object):
             red = int(colors.split('?')[1])
             green = int(colors.split('?')[2])
             blue = int(colors.split('?')[3])
-            print("Set colour to: RGB("+str(red)+", "+str(green)+", "+str(blue)+")")
-            webkit.execute_script('$("#'+element+'_preview").css("background-color","rgba('+str(red)+','+str(green)+','+str(blue)+',1.0)")')
+            print("Set colour of '{0}' to RGB: {1}, {2}, {3}".format(element, red, green, blue))
+            webkit.execute_script('$("#'+element+'_preview").css("background-color","rgba(' + str(red) + ',' + str(green) + ',' + str(blue) + ',1.0)")')
+            webkit.execute_script('set_mode("set")')
 
             # Update global variables if applicable
-            if element == 'rgb_effects':    # Static effect colours
-                rgb_effects_red = red
-                rgb_effects_green = green
-                rgb_effects_blue = blue
+            if element == 'rgb_primary':    # Primary effect colour
+                rgb_primary_red = red
+                rgb_primary_green = green
+                rgb_primary_blue = blue
+            elif element == 'rgb_secondary':   # Secondary effect colour (used for Breath mode)
+                rgb_secondary_red = red
+                rgb_secondary_green = green
+                rgb_secondary_blue = blue
             elif element == 'rgb_tmp':      # Temporary colour while editing profiles.
                 rgb_edit_red = red
                 rgb_edit_green = green
@@ -284,10 +304,9 @@ class ChromaController(object):
             if current_effect == 'static':
                 self.process_command('effect-static')
             elif current_effect == 'breath':
-                self.process_command('effect-breath')
+                self.process_command('effect-breath?0')
             elif current_effect == 'reactive':
-                self.process_command('effect-reactive')
-            webkit.execute_script('$("#rgb_effects").fadeIn()')
+                self.process_command('effect-reactive?auto')
 
         ## Opening different pages
         elif command == 'cancel-changes':
