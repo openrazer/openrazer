@@ -60,6 +60,7 @@ hr { border-color: #565656; }
   background-repeat: no-repeat;
   background-position: middle right;
   font-weight: bold;
+  border-bottom: 2px solid #404040;
 }
 
 .header h3 {

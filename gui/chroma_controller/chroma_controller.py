@@ -31,6 +31,7 @@ rgb_secondary_red = 0
 rgb_secondary_green = 0
 rgb_secondary_blue = 255
 current_effect = 'custom'
+last_effect = 'unknown'
 layout = 'en-gb'
 
 class Paths(object):
@@ -190,6 +191,7 @@ class ChromaController(object):
         global rgb_primary_red, rgb_primary_green, rgb_primary_blue, current_effect # TODO remove global
         global rgb_secondary_red, rgb_secondary_green, rgb_secondary_blue # TODO remove global
         global profile_name, profileMemory # TODO remove global
+        global current_effect, last_effect # TODO remove global
         global webkit # TODO remove global
 
         if command == 'quit':
@@ -201,12 +203,7 @@ class ChromaController(object):
             daemon.set_brightness(value)
 
         elif command.startswith('effect'):
-
-            # Fade out any previous extended settings.
-            webkit.execute_script('$("#rgb_effects").fadeOut("fast")')
-            webkit.execute_script('$("#waves").fadeOut("fast")')
-            webkit.execute_script('$("#reactive").fadeOut("fast")')
-            webkit.execute_script('$("#breath").fadeOut("fast")')
+            enabled_options = []
 
             if command == 'effect-none':
                 current_effect = "none"
@@ -219,28 +216,45 @@ class ChromaController(object):
             elif command.startswith('effect-wave'):
                 current_effect = "wave"
                 daemon.set_effect('wave', int(command[12:])) # ?1 or ?2 for direction
-                webkit.execute_script('smoothFade("","#waves")')
+                enabled_options = ['waves']
 
             elif command.startswith('effect-reactive'):
                 current_effect = "reactive"
-                daemon.set_effect('reactive', int(command[16]), rgb_primary_red, rgb_primary_green, rgb_primary_blue)
-                webkit.execute_script('smoothFade("","#reactive")')
-                webkit.execute_script('smoothFade("","#rgb_effects")')
+                global reactive_speed # TODO remove global
+                if command.split('?')[1] == 'auto':
+                    # Use the previous effect
+                    daemon.set_effect('reactive', reactive_speed, rgb_primary_red, rgb_primary_green, rgb_primary_blue)
+                else:
+                    reactive_speed = int(command[16])
+                    daemon.set_effect('reactive', reactive_speed, rgb_primary_red, rgb_primary_green, rgb_primary_blue)
+                enabled_options = ['rgb_primary', 'reactive']
 
             elif command.startswith('effect-breath'):
                 current_effect = "breath"
-                if command[13] == '1':  # Random mode
+                global breath_random # TODO remove global
+                breath_random = command[14]
+                if breath_random == '1':  # Random mode
                     daemon.set_effect('breath', 1)
+                    enabled_options = ['breath-select']
                 else:
                     daemon.set_effect('breath', rgb_primary_red, rgb_primary_green, rgb_primary_blue, rgb_secondary_red, rgb_secondary_green, rgb_secondary_blue)
-                webkit.execute_script('smoothFade("","#breath")')
-                webkit.execute_script('smoothFade("","#rgb_effects")')
-                webkit.execute_script('smoothFade("","#rgb_breath")')
+                    enabled_options = ['breath-random', 'rgb_primary', 'rgb_secondary']
 
             elif command == 'effect-static':
                 current_effect = "static"
                 daemon.set_effect('static', rgb_primary_red, rgb_primary_green, rgb_primary_blue)
-                webkit.execute_script('smoothFade("","#rgb_effects")')
+                enabled_options = ['rgb_primary']
+
+            # Fade between options for that effect, should it have been changed.
+            if not current_effect == last_effect:
+                # Effect changed, fade out all previous options.
+                for element in ['rgb_primary', 'rgb_secondary', 'waves', 'reactive', 'breath-random', 'breath-select']:
+                    webkit.execute_script('$("#' + element + '").fadeOut("fast")')
+
+                # Fade in desired options for this effect.
+                for element in enabled_options:
+                    webkit.execute_script("setTimeout(function(){ $('#" + element + "').fadeIn('fast');}, 200)")
+            last_effect = current_effect
 
         elif command == 'enable-marco-keys':
             daemon.marco_keys(True)
@@ -402,6 +416,7 @@ class ChromaController(object):
             webkit.execute_script('$("#custom").html("Profile - ' + profile_name + '")')
             webkit.execute_script('$("#custom").prop("checked", true)')
             webkit.execute_script('setCursor("normal")')
+            process_command(self, 'effect-profile?'+profile_name)
 
         elif command.startswith('profile-del'):
             # TODO: Instead of JS-based prompt, use PyGtk or within web page interface?

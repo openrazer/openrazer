@@ -18,10 +18,10 @@
 // Smoothly fade between two elements.
 function smoothFade(from, to) {
   if ($(from).is(":visible") == false) {
-    $(to).fadeIn();
+    $(to).fadeIn('fast');
   } else {
-    $(from).fadeOut();
-    setTimeout(function(){ $(to).fadeIn(); }, 400 );
+    $(from).fadeOut('fast');
+    setTimeout(function(){ $(to).fadeIn('fast'); }, 200 );
   }
 }
 
