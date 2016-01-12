@@ -296,6 +296,86 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				daemon_kill(daemon,"dbus: Out Of Memory!\n");
 			dbus_connection_flush(daemon->dbus);
 		}
+	if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.driver_effect", "custom"))
+		{
+			#ifdef USE_DEBUGGING
+				printf("\ndbus: method driver_effect.custom called\n");
+			#endif
+
+			char *device_path = str_CreateEmpty();
+			device_path = str_CatFree(device_path, daemon->chroma->device_path);
+			device_path = str_CatFree(device_path, "/mode_custom");
+
+			#ifdef USE_DEBUGGING
+			printf("Device path: %s\n", device_path);
+			#endif
+
+			write_to_device_file(device_path, "1", 1);
+
+			free(device_path);
+
+
+			reply = dbus_message_new_method_return(msg);
+	 		dbus_uint32_t serial = 0;
+	 		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+				daemon_kill(daemon,"dbus: Out Of Memory!\n");
+			dbus_connection_flush(daemon->dbus);
+		}	
+	if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.driver_effect", "set_key_row"))
+			{
+				//#ifdef USE_DEBUGGING
+					printf("\ndbus: method set_key_row called\n");
+				//#endif
+				
+				char *dbus_array; // Shouldn't have to free this as DBUS "should" do it
+				int num_elements;
+
+				char *device_path = str_CreateEmpty();
+				device_path = str_CatFree(device_path, daemon->chroma->device_path);
+				device_path = str_CatFree(device_path, "/set_key_row");
+
+				//#ifdef USE_DEBUGGING
+				printf("Device path: %s\n", device_path);
+				//#endif
+
+				reply = dbus_message_new_method_return(msg);
+
+				if(dbus_message_iter_init(msg, &parameters))
+				{
+					if(dbus_message_iter_get_arg_type(&parameters) == DBUS_TYPE_ARRAY)
+					{
+						int element_type = dbus_message_iter_get_element_type (&parameters);
+						
+						
+						if(element_type == DBUS_TYPE_BYTE) {
+							DBusMessageIter iter_sub;
+							dbus_message_iter_recurse(&parameters, &iter_sub);
+							dbus_message_iter_get_fixed_array (&iter_sub, &dbus_array, &num_elements);
+							
+							printf("\ndbus-array: Number of elements %d\n", num_elements);
+							printf("\ndbus-array: Elements 1,2,3,4 %u,%u,%u,%u\n", dbus_array[0] & 0xFF, dbus_array[1] & 0xFF, dbus_array[2] & 0xFF, dbus_array[3] & 0xFF);
+						}
+					}
+
+					dbus_message_iter_init_append(reply,&parameters);
+
+                    if(num_elements == 67) // 67 Is standard packet size which the driver accepts. 1 BYTE row id, 22 RBG (3xBYTE)
+                    {
+					    daemon->is_paused = 1;
+
+					    write_to_device_file(device_path, dbus_array, num_elements);
+				    }
+
+					free(device_path);
+
+				}
+				dbus_uint32_t serial = 0;
+				if(!dbus_connection_send(daemon->dbus,reply,&serial))
+					daemon_kill(daemon,"dbus: Out Of Memory!\n");
+				dbus_connection_flush(daemon->dbus);
+
+				
+			}
 	if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.driver_effect", "none"))
 			{
 				#ifdef USE_DEBUGGING
@@ -2088,6 +2168,8 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			<interface name=\"org.voyagerproject.razer.daemon.driver_effect\">\n\
 				<method name=\"none\">\n\
 				</method>\n\
+				<method name=\"custom\">\n\
+				</method>\n\
 				<method name=\"spectrum\">\n\
 				</method>\n\
 				<method name=\"static\">\n\
@@ -2096,6 +2178,10 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 					<arg direction=\"in\" name=\"green\" type=\"y\">\n\
 					</arg>\n\
 					<arg direction=\"in\" name=\"blue\" type=\"y\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"set_key_row\">\n\
+					<arg direction=\"in\" name=\"data\" type=\"ay\">\n\
 					</arg>\n\
 				</method>\n\
 				<method name=\"breath\">\n\

@@ -397,9 +397,9 @@ int razer_temp_clear_row(struct usb_device *usb_dev, unsigned char row_index)
  * Set row colour on the keyboard
  *
  * This sets the colour of a row on the keyboard. Takes in an array of RGB bytes.
- * This is what I think I could get from the hex dumps of the set row usb messages
- * Unused fields are where 000000 is in the messages, I could be completely wrong but
- * do aim to test at some point
+ * The mappings below are correct for the BlackWidow Chroma. The BlackWidow Ultimate 2016
+ * contains LEDs under the spacebar and the FN key so there will be changes once I get the
+ * hardware.
  *
  * Row 0:
  *  0      Unused
@@ -408,14 +408,16 @@ int razer_temp_clear_row(struct usb_device *usb_dev, unsigned char row_index)
  *  3-14   F1-F12
  *  15-17  PrtScr, ScrLk, Pause
  *  18-19  Unused
- *  20     Razer Logo? confirm
- *  21     Used but not sure what it is ??
+ *  20     Razer Logo
+ *  21     Unused
  *
  * Row 1:
  *  0-21   M1 -> NP Minus
  *
  * Row 2:
- *  0-21   M2 -> NP Plus
+ *  0-13   M2 -> Right Square Bracket ]
+ *  14 Unused
+ *  15-21 Delete -> NP Plus
  *
  * Row 3:
  *  0-14   M3 -> Return
@@ -423,20 +425,20 @@ int razer_temp_clear_row(struct usb_device *usb_dev, unsigned char row_index)
  *  18-20  NP4 -> NP6
  *
  * Row 4:
- *  0-14   M4 -> Shift (shift counts as 2?)
+ *  0-12   M4 -> Forward Slash /
+ *  13     Unused
+ *  14     Right Shift
  *  15     Unused
- *  16     Up arrow key
+ *  16     Up Arrow Key
  *  17     Unused
  *  18-21  NP1 -> NP Enter
  *
  * Row 5:
- *  0-4    M5 -> Alt (one of the ctrl or alt is duplicated)
- *  5-6    Unused
- *  7      Alt GR
- *  8      Unused
- *  9-11   CTX -> Ctrl (think ctrl counts as 2)
+ *  0-3    M5 -> Alt
+ *  4-10   Unused
+ *  11     Alt GR
  *  12     Unused
- *  13-17  Left, Down, Right worth 5??
+ *  13-17  Context Menu Key -> Right Arrow Key
  *  18     Unused
  *  19-20  NP0 -> NP.
  *  21     Unused
