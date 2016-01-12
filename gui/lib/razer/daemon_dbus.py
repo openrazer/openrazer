@@ -64,9 +64,8 @@ class DaemonInterface(object):
             print("[Daemon] Invalid effect \"{0}\"".format(effect_type))
 
     def set_brightness(self, brightness):
-        raw = brightness
         percent = round( (brightness / 255.0) * 100 )
-        print("[Daemon] Brightness Set: {0} % ({1}/255)".format(percent, raw))
+        print("[Daemon] Brightness Set: {0} % ({1}/255)".format(percent, brightness))
         self.dbus_daemon_controls.raw_keyboard_brightness(brightness)
 
     def marco_keys(self, state):
