@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import dbus
+import razer.keyboard
 
 class DaemonInterface(object):
     """
@@ -120,3 +121,17 @@ class DaemonInterface(object):
         else:
             print("[Daemon] Game Mode: Disabled")
             self.dbus_daemon_controls.set_game_mode(False)
+
+    def set_custom_colour(self, keyboard_object):
+        """
+        Set the colour of the keyboard to a custom colour
+
+        :param keyboard_object: Keyboard object
+        :type keyboard_object: razer.keyboard.KeyboardColour
+        """
+        assert type(keyboard_object) is razer.keyboard.KeyboardColour, "keyboard_object is not a KeyboardColour object"
+
+        keyboard_payload = keyboard_object.get_total_binary()
+
+        self.dbus_driver_effect_object.set_key_row(keyboard_payload)
+        self.dbus_driver_effect_object.custom()

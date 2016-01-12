@@ -5,7 +5,7 @@ from gi.repository import Gtk, Gdk, AppIndicator3 as appindicator
 import collections
 import sys
 
-import razer.daemon_dbus
+import razer.daemon_dbus, razer.keyboard
 
 
 class AppIndicator:
@@ -217,10 +217,7 @@ class AppIndicator:
         if color_selection_result == Gtk.ResponseType.OK:
             color_rgb = color_selection_dlg.get_color_selection().get_current_color()
             # Returns value between 0.0 - 1.0 * 255 = 8-bit RGB Value
-            red = int(color_rgb.red_float * 255)
-            green = int(color_rgb.green_float * 255)
-            blue = int(color_rgb.blue_float * 255)
-            self.colour = (red, green, blue)
+            self.colour = razer.keyboard.Keyboard.gdk_colour_to_rgb(color_rgb)
             colour_menuitem.set_label(AppIndicator.colour_to_hex(self.colour)) # *array unpacks to seperate arguments
             print("[Change Colour] New: {0}".format(AppIndicator.colour_to_hex(self.colour)))
 
