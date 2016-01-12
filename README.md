@@ -153,7 +153,7 @@ On Debian you can control the driver doing `/etc/init.d/razer_bcd ACTION` or usi
 	]}
 
 :: Setting a parameter for an effect with the unique id: 2 
-   [rn_uid,parameter_uid,
+   [rn_uid,parameter_index,
     array_index (use -1 if not an array),
     parameter_type,value(s) (enquote multiple values and use whitespaces to seperate)] ::	
 
