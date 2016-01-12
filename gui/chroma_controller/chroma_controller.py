@@ -86,13 +86,8 @@ class ChromaController(object):
         print("Opening menu '"+page+"'")
 
         # Hide all footer buttons
-        webkit.execute_script('$("#retry").hide()')
-        webkit.execute_script('$("#edit-save").hide()')
-        webkit.execute_script('$("#edit-preview").hide()')
-        webkit.execute_script('$("#cancel").hide()')
-        webkit.execute_script('$("#close-window").hide()')
-        webkit.execute_script('$("#pref-open").hide()')
-        webkit.execute_script('$("#pref-save").hide()')
+        for element in ['retry', 'edit-save', 'edit-preview', 'cancel', 'close-window', 'pref-open', 'pref-save']:
+            webkit.execute_script('$("#' + element + '").hide()')
 
         if page == 'main_menu':
             webkit.execute_script('changeTitle("Configuration Menu")')
@@ -230,13 +225,14 @@ class ChromaController(object):
                 enabled_options = ['rgb_primary', 'reactive']
 
             elif command.startswith('effect-breath'):
-                current_effect = "breath"
                 global breath_random # TODO remove global
                 breath_random = command[14]
                 if breath_random == '1':  # Random mode
+                    current_effect = "breath?random"
                     daemon.set_effect('breath', 1)
                     enabled_options = ['breath-select']
                 else:
+                    current_effect = "breath?colours"
                     daemon.set_effect('breath', rgb_primary_red, rgb_primary_green, rgb_primary_blue, rgb_secondary_red, rgb_secondary_green, rgb_secondary_blue)
                     enabled_options = ['breath-random', 'rgb_primary', 'rgb_secondary']
 
@@ -317,7 +313,7 @@ class ChromaController(object):
             # Update static colour effects if currently in use.
             if current_effect == 'static':
                 self.process_command('effect-static')
-            elif current_effect == 'breath':
+            elif current_effect == 'breath?colours':
                 self.process_command('effect-breath?0')
             elif current_effect == 'reactive':
                 self.process_command('effect-reactive?auto')
@@ -416,7 +412,6 @@ class ChromaController(object):
             webkit.execute_script('$("#custom").html("Profile - ' + profile_name + '")')
             webkit.execute_script('$("#custom").prop("checked", true)')
             webkit.execute_script('setCursor("normal")')
-            process_command(self, 'effect-profile?'+profile_name)
 
         elif command.startswith('profile-del'):
             # TODO: Instead of JS-based prompt, use PyGtk or within web page interface?

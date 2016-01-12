@@ -124,6 +124,8 @@ hr { border-color: #565656; }
   font-size: small;
 }
 
+a { cursor: pointer; }
+.small-text { font-size: 12px; }
 
 /************************
    Footer

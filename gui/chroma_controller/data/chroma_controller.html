@@ -54,7 +54,11 @@
           <tr><td><label><input type="radio" name="effect" value="spectrum" onclick="cmd('effect-spectrum')"/> Spectrum</label></td></tr>
           <tr><td><label><input type="radio" name="effect" value="wave" onclick="cmd('effect-wave?1');$('#wave-right').prop('checked',true);"/> Wave</label></td></tr>
           <tr><td><label><input type="radio" name="effect" value="reactive" onclick="cmd('effect-reactive?2'); $('#reactive-normal').prop('checked',true);"/> Reactive</label></td></tr>
-          <tr><td><label><input type="radio" name="effect" value="breath" onclick="cmd('effect-breath?0')"/> Breath</label></td></tr>
+          <tr><td>
+            <label><input type="radio" name="effect" value="breath" onclick="cmd('effect-breath?0')"/> Breath</label>
+            <small><a id="breath-random" class="small-text" onclick="cmd('effect-breath?1')" hidden>- Switch to Random</a></small>
+            <small><a id="breath-select" class="small-text" onclick="cmd('effect-breath?0')" hidden>- Choose Colours</a></small>
+          </td></tr>
           <tr><td><label><input type="radio" name="effect" value="static" onclick="cmd('effect-static')"/> Static</label></td></tr>
         </table>
         <hr>
@@ -103,8 +107,6 @@
               </td>
             </tr>
           </table>
-          <a id="breath-random" onclick="cmd('effect-breath?1')">Use Random Colours</a>
-          <a id="breath-select" onclick="cmd('effect-breath?0')">Select Colours</a>
         </div>
         <table>
           <tr id="waves" hidden>

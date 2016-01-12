@@ -53,20 +53,25 @@ class DaemonInterface(object):
 
         elif effect_type == "breath":
             # Expects: <1 for random> or <red1> <green1> <blue1> [red2] [green2] [blue2]
-            if validate_parameters(1) == True:
-                if p1 == '1' and p2 == 'None':
+            # Two colour parameters
+            if not p6 == None:
+                if validate_parameters(5) == True:
+                    print("[DBUS] Breath: Two colours with RGB: {0},{1},{2} and {3},{4},{5}".format(p1,p2,p3,p4,p5,p6))
+                    self.dbus_driver_effect_object.breath(p1,p2,p3,p4,p5,p6)
+
+            # One colour parameters
+            if not p2 == None and p6 == None:
+                if validate_parameters(3) == True:
+                    print("[DBUS] Breath: One colour with RGB: {0},{1},{2}".format(p1,p2,p3))
+                    self.dbus_driver_effect_object.breath(p1,p2,p3)
+
+            # Random mode parameters
+            if p1 == 1 and p2 == None:
+                if validate_parameters(1) == True:
                     print("[DBUS] Breath: Random Mode".format(p1))  # Random Mode
-                    self.dbus_driver_effect_object.breath(p1)
-                    print('p1')
-                elif p4 == None:
-                    if validate_parameters(3) == True:
-                        print("[DBUS] Breath: One colour with RGB: {0},{1},{2}".format(p1,p2,p3))  # One colour
-                        self.dbus_driver_effect_object.breath(p1,p2,p3)
-                    print('p4')
-                else:
-                    if validate_parameters(5) == True:
-                        print("[DBUS] Breath: Two colours with RGB: {0},{1},{2} and {3},{4},{5}".format(p1,p2,p3,p4,p5,p6))  # Two colours
-                        self.dbus_driver_effect_object.breath(p1,p2,p3,p4,p5,p6)
+                    #~ self.dbus_driver_effect_object.breath(1) # FIXME: TypeError: More items found in D-Bus signature than in Python arguments
+                    print('FIXME: self.dbus_driver_effect_object.breath(1) returns a TypeError')
+                    return
 
         elif effect_type == "reactive":
             # Expects <speed> <red> <green> <blue>
