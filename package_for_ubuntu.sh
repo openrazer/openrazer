@@ -12,7 +12,7 @@ chmod 755 ${directory}/DEBIAN/{pre,post}*
 
 # Create file structure
 mkdir -p ${directory}/etc/{init,init.d,udev/rules.d,dbus-1/system.d,xdg/autostart}
-mkdir -p ${directory}/usr/{bin,lib,sbin,share/razer_bcd/fx,src/razer_chroma_driver-1.0.0/driver,share/razer_tray_applet,share/razer_chroma_controller,share/applications}
+mkdir -p ${directory}/usr/{bin,lib/python3/dist-packages/,sbin,share/razer_bcd/fx,src/razer_chroma_driver-1.0.0/driver,share/razer_tray_applet,share/razer_chroma_controller,share/applications}
 
 
 # Copy over upstart script
@@ -45,9 +45,8 @@ cp daemon/fx/pez2001_progress_bar.so ${directory}/usr/share/razer_bcd/fx
 # Copy daemon controller
 cp daemon_controller/razer_bcd_controller ${directory}/usr/bin/razer_bcd_controller
 
-# Copy Python library
-cp -r gui/lib/razer ${directory}/usr/lib/python3/dist-packages     # 3.0 - Chroma Controller
-cp -r gui/lib/razer ${directory}/usr/lib/python2.7/dist-packages   # 2.7 - Tray Applet (Library is backwards compatible)
+# Copy Python3 lib into the python path
+cp -r gui/lib/razer ${directory}/usr/lib/python3/dist-packages/razer
 
 # Copy Tray application
 cp -r gui/tray_applet/* ${directory}/usr/share/razer_tray_applet
