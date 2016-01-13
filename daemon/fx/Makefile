@@ -1,6 +1,4 @@
-LIBFFTW3=$(shell echo \\\#include \<fftw3.h\>\\n int main\(int c,char**v\){} | gcc `pkg-config --libs fftw3` `pkg-config --cflags fftw3`  -xc -o a.out - 2>/dev/null ;echo $$? ;rm a.out 2>/dev/null )
-
-
+LIBFFTW3=$(shell pkg-config --libs fftw3 > /dev/null 2>&1 && echo 0)
 LIBS=-lm
 MAJOR_VERSION=0
 MINOR_VERSION=2
@@ -11,6 +9,8 @@ DEBUG_CFLAGS=`pkg-config --cflags dbus-1` -Wall -Wextra -Wformat=0 -pedantic -fb
 LDFLAGS=$(LIBS)
 DEBUG_LDFLAGS =$(LIBS)
 CC=gcc
+
+
 
 ifeq ($(LIBFFTW3), 0)
 	LIBS+= `pkg-config --libs fftw3` 

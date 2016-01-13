@@ -29,8 +29,8 @@ SAVE_ROOT = os.path.expanduser('~') + '/.config/razer_chroma'
 SAVE_PROFILES = SAVE_ROOT + '/profiles'
 SAVE_BACKUPS = SAVE_ROOT + '/backups'
 
-LOCATION_DATA = os.path.join(os.path.dirname(__file__), 'data/')
-LOCATION_INSTALLED = '/usr/share/razer_chroma_controller'
+LOCATION_DATA = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data/'))
+
 
 class ChromaController(object):
     ##################################################
