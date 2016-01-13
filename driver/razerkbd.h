@@ -60,8 +60,12 @@
 #define RAZER_BLACKWIDOW_CHROMA_EFFECT_UNKNOWN4 14
 
 
-#define RAZER_BLACKWIDOW_CHROMA_ROW_LEN 0x15
+#define RAZER_BLACKWIDOW_CHROMA_ROW_LEN 0x16
 #define RAZER_BLACKWIDOW_CHROMA_ROWS_NUM 6
+
+#define RAZER_FIREFLY_ROW_LEN 0x0F
+#define RAZER_FIREFLY_ROWS_NUM 1
+
 
 //#define RAZER_BLACKWIDOW_CHROMA_ROW_LEN 6
 //#define RAZER_BLACKWIDOW_CHROMA_ROWS_NUM 4
@@ -78,9 +82,10 @@ struct razer_rgb {
     unsigned char r,g,b;
 };
 
-struct razer_row_rgb {
+/*struct razer_row_rgb {
     struct razer_rgb cols[RAZER_BLACKWIDOW_CHROMA_ROW_LEN+1];
 };
+*/
 
 
 struct razer_kbd_device {
@@ -90,7 +95,7 @@ struct razer_kbd_device {
     unsigned char effect;
     char name[128];
     char phys[64];
-    struct razer_row_rgb matrix[RAZER_BLACKWIDOW_CHROMA_ROWS_NUM];
+    //struct razer_row_rgb matrix[RAZER_BLACKWIDOW_CHROMA_ROWS_NUM];
     bool effect_submitted;
 };
 

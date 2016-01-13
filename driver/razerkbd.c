@@ -60,10 +60,14 @@ int razer_send_report(struct usb_device *usb_dev,void const *data)
 {
     uint report_id = 0x300;
     uint value = HID_REQ_SET_REPORT;
-    uint index = 0x02;
+    uint index = 0x02;//URB_CONTROL
     uint size = RAZER_BLACKWIDOW_REPORT_LEN;
     char *buf;
     int len;
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_FIREFLY) {
+    //    report_id = 0x600;
+        index = 0x00;
+    }
 
     buf = kmemdup(data, size, GFP_KERNEL);
     if (buf == NULL)
@@ -322,6 +326,9 @@ int razer_set_custom_mode(struct usb_device *usb_dev)
     report.command = RAZER_BLACKWIDOW_CHROMA_CHANGE_EFFECT; /*change effect command id*/
     report.sub_command = RAZER_BLACKWIDOW_CHROMA_EFFECT_CUSTOM;/*custom mode id*/
     report.command_parameters[0] = 0x01; /*profile index? active ?*/
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_FIREFLY) {
+        report.command_parameters[0] = 0x00; /*profile index? active ?*/
+    }
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev, &report);
     return retval;
@@ -444,19 +451,28 @@ int razer_temp_clear_row(struct usb_device *usb_dev, unsigned char row_index)
  * Supported by:
  *   Razer BlackWidow Chroma
  */
-int razer_set_key_row(struct usb_device *usb_dev, unsigned char row_index, struct razer_row_rgb *row_cols)
+int razer_set_key_row(struct usb_device *usb_dev, unsigned char row_index, unsigned char *row_cols) //struct razer_row_rgb *row_cols)
 {
     int retval;
     struct razer_report report;
     razer_prepare_report(&report);
     //report.parameter_bytes_num = 0x46;//70
-    report.parameter_bytes_num = (RAZER_BLACKWIDOW_CHROMA_ROW_LEN + 1) * 3 + 4;
+    report.parameter_bytes_num = RAZER_BLACKWIDOW_CHROMA_ROW_LEN * 3 + 4;
     report.command = 0x0B; /*set keys command id*/
     report.sub_command = 0xFF;/*set keys mode id*/
     report.command_parameters[0] = row_index; /*row number*/
     report.command_parameters[1] = 0x00; /*unknown always 0*/
-    report.command_parameters[2] = RAZER_BLACKWIDOW_CHROMA_ROW_LEN; /*number of keys in row always 21*/
-    memcpy(&report.command_parameters[3], row_cols, sizeof(struct razer_row_rgb));
+    report.command_parameters[2] = RAZER_BLACKWIDOW_CHROMA_ROW_LEN - 1; /*number of keys in row always 21*/
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_FIREFLY) {
+        report.command = 0x0C; /*set keys command id*/
+        report.sub_command = 0x00;/*set keys mode id*/
+        report.parameter_bytes_num = RAZER_FIREFLY_ROW_LEN * 3 + 5;
+        report.command_parameters[0] = RAZER_FIREFLY_ROW_LEN -1;
+        memcpy(&report.command_parameters[1], row_cols, RAZER_FIREFLY_ROW_LEN * 3);
+        printk(KERN_ALERT "setting firefly row\n");
+    }
+    else
+        memcpy(&report.command_parameters[3], row_cols, (report.command_parameters[2]+1)*3);
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev, &report);
     return retval;
@@ -1108,21 +1124,35 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
     struct usb_interface *intf = to_usb_interface(dev->parent);     
     //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    size_t buf_size = (RAZER_BLACKWIDOW_CHROMA_ROW_LEN + 1) * 3 + 1;
+    size_t buf_size = RAZER_BLACKWIDOW_CHROMA_ROW_LEN * 3 + 1;
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_FIREFLY)
+        buf_size = RAZER_FIREFLY_ROW_LEN * 3 + 1;
+
+    printk(KERN_ALERT "data written: %d of %d\n",(int)count, (int)buf_size);
     //printk(KERN_ALERT "sizeof(razer_row_rgb): %d\n",sizeof(struct razer_row_rgb));
+    //if(count != buf_size)
+    //    return -EINVAL;
     size_t offset = 0;
+    //while((offset+buf_size) <= count)
     while(offset < count)
     {
-        unsigned char row_index = (unsigned char)buf[offset];
-        if(count-offset < buf_size)
+        if((count-offset) < buf_size)
         {
-            printk(KERN_ALERT "Wrong Amount of RGB data provided: %d of %d\n",(int)count, (int)buf_size);
+            //printk(KERN_ALERT "Wrong Amount of RGB data provided: %d of %d\n",(int)(count-offset), (int)buf_size);
+            return offset;
             return 0;
         }
-        razer_set_key_row(usb_dev, row_index, (struct razer_row_rgb*)&buf[offset + 1]);
+        unsigned char row_index = (unsigned char)buf[offset];
+        razer_set_key_row(usb_dev, row_index, (unsigned char*)&buf[offset + 1]);
         offset += buf_size;
     }
     return count;                           
+    if(offset<count)
+        return 0;
+    else 
+        return count;
+    //    printk(KERN_ALERT "Wrong Amount of RGB data provided: %d of %d\n",(int)(count-offset), (int)buf_size);
+    return offset;
 }                                   
 
 /**
