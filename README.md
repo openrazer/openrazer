@@ -124,21 +124,9 @@ The application is at `/usr/share/razer_tray_applet/razer_tray_applet.py` and al
 
 ## GUI Chroma Controller
 This is a graphical frontend which interacts with the daemon/driver allowing easy configuration of the keyboard's features,
-including the creation of key profiles using the `dynamic` file format found in `examples/dynamic-examples/`.
+including the creation of key profiles.
 
 Custom animation effects are not yet supported.
-
-As the `dynamic` binary requires root privileges to communicate with the keyboard, password authentication is required to change profiles.
-This is essential unless work is done to integrate 'dynamic' to the daemon's dbus.
-
-On Debian/Ubuntu, this can be bypassed by creating a sudoers file as follows:
-
-    sudo echo "ALL ALL=NOPASSWD: /usr/share/razer_chroma_controller/dynamic" > /etc/sudoers.d/razer_chroma_dynamic
-    sudo chmod 0440 /etc/sudoers.d/razer_chroma_dynamic
-
-The GUI application will look for this file when changing profiles. If it doesn't exist, `gksudo` will be executed instead to
-present a graphical password prompt. Alternately, the application could be ran as root, but this is **not recommended**.
-
 
 The application is at `/usr/share/razer_chroma_controller/chroma_controller.py` and also has a `.desktop` entry, so it appears in the Applications menu.
 
@@ -431,6 +419,7 @@ FX setup scripts, bug fixes, feature requests, etc are also welcome.
    support for the tournament edition(manual merge)
  - Modifications to dynamic example by Stephanie Sunshine (pulled)
  - Deb packaging, dkms support, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
+ - GUI Interface for BlackWidow Chroma Keyboards by Luke Horwell (pulled)
 
 
 ## Donations (in Euros)
