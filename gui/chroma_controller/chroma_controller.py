@@ -325,13 +325,8 @@ class ChromaController(object):
             profile_name = command.split('?')[1].replace('%20', ' ')
 
             if len(profile_name) > 0:
-                current_profile_path = os.path.join(SAVE_PROFILES, profile_name)
-                current_profile_path_backup = os.path.join(SAVE_BACKUPS, profile_name)
-                os.remove(current_profile_path)
-                print('Deleted profile: {0}'.format(current_profile_path))
-                if os.path.exists(current_profile_path_backup):
-                    os.remove(current_profile_path_backup)
-                    print('Deleted backup copy: ' + current_profile_path_backup)
+                self.profiles.remove_profile(profile_name)
+
                 print('Forcing refresh of profiles list...')
                 self.refresh_profiles_list()
 
@@ -446,13 +441,25 @@ class ChromaProfiles(object):
             keyboard = ChromaProfiles.get_profile_from_file(profile)
             self.profiles[profile] = keyboard
 
-    def remove_profile(self, profile_name):
+    def remove_profile(self, profile_name, del_from_fs=True):
         """
-        Delete profile
+        Delete profile, from memory and optionally the system.
 
         :param profile_name: Profile name
         :type profile_name: str
+
+        :param del_from_fs: Delete from the file system
+        :type del_from_fs: bool
         """
+        if del_from_fs:
+            current_profile_path = os.path.join(SAVE_PROFILES, profile_name)
+            current_profile_path_backup = os.path.join(SAVE_BACKUPS, profile_name)
+            os.remove(current_profile_path)
+            # print('Deleted profile: {0}'.format(current_profile_path))
+            if os.path.exists(current_profile_path_backup):
+                os.remove(current_profile_path_backup)
+                # print('Deleted backup copy: ' + current_profile_path_backup)
+
         if profile_name in self.profiles:
             del self.profiles[profile_name]
 
