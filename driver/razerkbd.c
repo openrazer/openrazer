@@ -1130,7 +1130,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
     if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_FIREFLY)
         buf_size = RAZER_FIREFLY_ROW_LEN * 3 + 1;
 
-    printk(KERN_ALERT "data written: %d of %d\n",(int)count, (int)buf_size);
+    //printk(KERN_ALERT "data written: %d of %d\n",(int)count, (int)buf_size);
     //printk(KERN_ALERT "sizeof(razer_row_rgb): %d\n",sizeof(struct razer_row_rgb));
     //if(count != buf_size)
     //    return -EINVAL;
