@@ -1,8 +1,8 @@
 #!/bin/bash
 
-RAZER_BLACKWIDOW_CHROMA_DEVICES=`ls /sys/bus/hid/devices/ | grep "1532:0203"`
+RAZER_BLACKWIDOW_CHROMA_DEVICES=`ls /sys/bus/hid/devices/ | grep "1532:020[39]"`
 for DEV in $RAZER_BLACKWIDOW_CHROMA_DEVICES
-do 
+do
 	if [ -d "/sys/bus/hid/devices/$DEV/input" ]; then
 		INPUT_DEVS=`ls /sys/bus/hid/devices/$DEV/input`
 		for INPUT_DEV in $INPUT_DEVS
@@ -139,5 +139,3 @@ do
 		echo -n "1" > $DEVPATH/mode_custom
 	done
 done
-
-
