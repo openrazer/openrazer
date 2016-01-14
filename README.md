@@ -1,11 +1,12 @@
-# razer_blackwidow_chroma_driver
+# razer_chroma_drivers
 
-A Linux driver for the Razer Blackwidow Chroma keyboards, providing a daemon and graphical frontends.
+A Collection of Linux drivers for the Razer Chroma devices, providing a daemon and graphical frontends.
 
 Supports:
  * Razer Blackwidow Chroma *(all lighting modes)*
  * Razer Blackwidow Tournament Edition
- * Razer Firefly *(internal effect switching)*
+ * Razer Firefly *(all lighting modes)*
+ * Razer Mamba
 
 
 
@@ -91,7 +92,7 @@ On Debian, you can control the driver with `/etc/init.d/razer_bcd `**`ACTION`** 
 
 
 
-## Installation for Non-Debian based distros
+## Installation from source
 
 
  - Install dependencies (libdbus-1-dev,jq)
@@ -99,6 +100,10 @@ On Debian, you can control the driver with `/etc/init.d/razer_bcd `**`ACTION`** 
 
         sudo make -s all install
  - Reboot
+ 
+To uninstall run
+
+        sudo make uninstall
 
 
 
@@ -420,6 +425,7 @@ FX setup scripts, bug fixes, feature requests, etc are also welcome.
  - Modifications to dynamic example by Stephanie Sunshine (pulled)
  - Deb packaging, dkms support, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
  - GUI Interface for BlackWidow Chroma Keyboards by Luke Horwell (pulled)
+ - Ubuntu fixes by Brad Murmz (pulled)
 
 
 ## Donations (in Euros)

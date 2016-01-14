@@ -21,8 +21,8 @@ int main(int argc,char *argv[])
     exit(0);
   }
   razer_set_custom_mode(klaw);
-  razer_clear_all(klaw->keys);
-  razer_update_keys(klaw, klaw->keys);
+  razer_clear_all(klaw->active_device->keys);
+  razer_update_keys(klaw, klaw->active_device->keys);
   
   struct razer_rgb color;
   struct razer_pos pos;
@@ -42,8 +42,8 @@ int main(int argc,char *argv[])
       color.b = ib;
       pos.x = x;
       pos.y = y;
-      razer_set_key_pos(klaw->keys, &pos, &color);
-      razer_update_keys(klaw, klaw->keys);
+      razer_set_key_pos(klaw->active_device->keys, &pos, &color);
+      razer_update_keys(klaw, klaw->active_device->keys);
       printf("Done!\n");
     }
     if(cmd == 2){
@@ -62,9 +62,9 @@ int main(int argc,char *argv[])
       for(unsigned int i = 0; i < strlen(targs); i++){
 	printf("Setting %c...\n", targs[i]);
 	razer_convert_ascii_to_pos(targs[i],&pos);
-	razer_set_key_pos(klaw->keys,&pos,&color);
+	razer_set_key_pos(klaw->active_device->keys,&pos,&color);
       }
-      razer_update_keys(klaw, klaw->keys);
+      razer_update_keys(klaw, klaw->active_device->keys);
       printf("Done!\n");
    
     }
@@ -77,8 +77,8 @@ int main(int argc,char *argv[])
       color.g = ig; 
       color.b = ib; 
       printf("Setting keys to %u %u %u...\n", ir, ig, ib);
-      razer_set_all(klaw->keys, &color);
-      razer_update_keys(klaw, klaw->keys);
+      razer_set_all(klaw->active_device->keys, &color);
+      razer_update_keys(klaw, klaw->active_device->keys);
       printf("Done!\n");
     }
 

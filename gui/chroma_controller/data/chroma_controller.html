@@ -40,129 +40,108 @@
     <!--###########################################################################################-->
     <!-- Main Menu Screen -->
     <div hidden id="main_menu" class="menu_area">
-        <div class="left">
-            <h4>Brightness</h4>
-            <table>
-                <tr>
-                    <td><span class="fa fa-lightbulb-o"></span><input type="range" id="brightness" min="0" max="255" value="128"/></td>
-                    <td><p><span id="brightnessValue">50%</span></p></td>
-                </tr>
-            </table>
+      <div class="left">
+        <h4>Brightness</h4>
+        <table>
+          <tr>
+            <td><span class="fa fa-lightbulb-o"></span><input type="range" id="brightness" min="0" max="255" value="128"/></td>
+            <td><p><span id="brightnessValue">50%</span></p></td>
+          </tr>
+        </table>
 
-            <h4>Effects</h4>
-            <table>
-                <tr>
-                    <td><label class="disabled"><input type="radio" name="effect" value="custom" checked disabled/> <span id="custom">Custom</span></label></td>
-                </tr>
-                <tr>
-                    <td><label><input type="radio" name="effect" value="none" onclick="cmd('effect-none')"/> None</label></td>
-                </tr>
-                <tr>
-                    <td><label><input type="radio" name="effect" value="spectrum" onclick="cmd('effect-spectrum')"/> Spectrum</label></td>
-                </tr>
-                <tr>
-                    <td><label><input type="radio" name="effect" value="wave" onclick="cmd('effect-wave?1');$('#wave-right').prop('checked',true);"/> Wave</label></td>
-                </tr>
-                <tr>
-                    <td><label><input type="radio" name="effect" value="reactive" onclick="cmd('effect-reactive?2'); $('#reactive-normal').prop('checked',true);"/> Reactive</label></td>
-                </tr>
-                <tr>
-                    <td>
-                        <label><input type="radio" name="effect" value="breath" onclick="cmd('effect-breath?0')"/> Breath</label>
-                        <small><a id="breath-random" class="small-text" onclick="cmd('effect-breath?1')" hidden>- Switch to Random</a></small>
-                        <small><a id="breath-select" class="small-text" onclick="cmd('effect-breath?0')" hidden>- Choose Colours</a></small>
-                    </td>
-                </tr>
-                <tr>
-                    <td><label><input type="radio" name="effect" value="static" onclick="cmd('effect-static')"/> Static</label></td>
-                </tr>
-            </table>
-            <hr>
-            <div id="rgb_primary" hidden>
-                <table>
-                    <tr>
-                        <td>Colour:</td>
-                        <td>
-                            <div id="rgb_primary_preview" class="color-preview" style="background-color:rgba(0,255,0,1)"></div>
-                        </td>
-                        <td><a class="btn" onclick="cmd('ask-color?rgb_primary')">Custom...</a></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td colspan="2">
-                            <a class="color-icon" onclick="cmd('set-color?rgb_primary?255?255?255')" style="background-color:#FFFFFF"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_primary?255?0?0')" style="background-color:#FF0000"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_primary?255?165?0')" style="background-color:#FFA500"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_primary?255?255?0')" style="background-color:#FFFF00"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_primary?0?255?0')" style="background-color:#00FF00"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_primary?0?255?255')" style="background-color:#00FFFF"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_primary?0?0?255')" style="background-color:#0000FF"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_primary?128?0?128')" style="background-color:#800080"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_primary?255?0?255')" style="background-color:#FF00FF"></a>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            <div id="rgb_secondary" hidden>
-                <table>
-                    <tr>
-                        <td>Colour 2:</td>
-                        <td>
-                            <div id="rgb_secondary_preview" class="color-preview" style="background-color:rgba(0,0,255,1)"></div>
-                        </td>
-                        <td><a class="btn" onclick="cmd('ask-color?rgb_secondary')">Custom...</a></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td colspan="2">
-                            <a class="color-icon" onclick="cmd('set-color?rgb_secondary?255?255?255')" style="background-color:#FFFFFF"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_secondary?255?0?0')" style="background-color:#FF0000"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_secondary?255?165?0')" style="background-color:#FFA500"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_secondary?255?255?0')" style="background-color:#FFFF00"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_secondary?0?255?0')" style="background-color:#00FF00"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_secondary?0?255?255')" style="background-color:#00FFFF"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_secondary?0?0?255')" style="background-color:#0000FF"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_secondary?128?0?128')" style="background-color:#800080"></a>
-                            <a class="color-icon" onclick="cmd('set-color?rgb_secondary?255?0?255')" style="background-color:#FF00FF"></a>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            <table>
-                <tr id="waves" hidden>
-                    <td>Direction:</td>
-                    <td><label><input id="wave-left" type="radio" name="direction" value="left" onclick="cmd('effect-wave?2')"> Left</label></td>
-                    <td><label><input id="wave-right" type="radio" name="direction" value="right" onclick="cmd('effect-wave?1')" checked> Right</label></td>
-                </tr>
-            </table>
-            <table>
-                <tr id="reactive" hidden>
-                    <td>Speed:</td>
-                    <td><label><input id="reactive-slow" type="radio" name="speed" value="slow" onclick="cmd('effect-reactive?3')"> Slow</label></td>
-                    <td><label><input id="reactive-medium" type="radio" name="speed" value="medium" onclick="cmd('effect-reactive?2')" checked> Medium</label></td>
-                    <td><label><input id="reactive-fast" type="radio" name="speed" value="fast" onclick="cmd('effect-reactive?1')"> Fast</label></td>
-                </tr>
-            </table>
+        <h4>Effects</h4>
+        <table>
+          <tr><td><label class="disabled"><input type="radio" name="effect" value="custom" checked disabled /> <span id="custom">Custom</span></label></td></tr>
+          <tr><td><label><input type="radio" name="effect" value="none" onclick="cmd('effect-none')"/> None</label></td></tr>
+          <tr><td><label><input type="radio" name="effect" value="spectrum" onclick="cmd('effect-spectrum')"/> Spectrum</label></td></tr>
+          <tr><td><label><input type="radio" name="effect" value="wave" onclick="cmd('effect-wave?1');$('#wave-right').prop('checked',true);"/> Wave</label></td></tr>
+          <tr><td><label><input type="radio" name="effect" value="reactive" onclick="cmd('effect-reactive?2'); $('#reactive-normal').prop('checked',true);"/> Reactive</label></td></tr>
+          <tr><td>
+            <label><input type="radio" name="effect" value="breath" onclick="cmd('effect-breath?0')"/> Breath</label>
+            <small><a id="breath-random" class="small-text" onclick="cmd('effect-breath?1')" hidden>- Switch to Random</a></small>
+            <small><a id="breath-select" class="small-text" onclick="cmd('effect-breath?0')" hidden>- Choose Colours</a></small>
+          </td></tr>
+          <tr><td><label><input type="radio" name="effect" value="static" onclick="cmd('effect-static')"/> Static</label></td></tr>
+        </table>
+        <hr>
+        <div id="rgb_primary" hidden>
+          <table>
+            <tr>
+              <td>Colour: </td>
+              <td><div id="rgb_primary_preview" class="color-preview" style="background-color:rgba(0,255,0,1)"></div></td>
+              <td><a class="btn" onclick="cmd('ask-color?rgb_primary')">Custom...</a></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td colspan="2">
+                <a class="color-icon" onclick="cmd('set-color?rgb_primary?255?255?255')" style="background-color:#FFFFFF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_primary?255?0?0')" style="background-color:#FF0000"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_primary?255?165?0')" style="background-color:#FFA500"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_primary?255?255?0')" style="background-color:#FFFF00"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_primary?0?255?0')" style="background-color:#00FF00"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_primary?0?255?255')" style="background-color:#00FFFF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_primary?0?0?255')" style="background-color:#0000FF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_primary?128?0?128')" style="background-color:#800080"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_primary?255?0?255')" style="background-color:#FF00FF"></a>
+              </td>
+            </tr>
+          </table>
         </div>
-        <div class="right">
-            <h4>Keys</h4>
+        <div id="rgb_secondary" hidden>
+          <table>
+            <tr>
+              <td>Colour 2:</td>
+              <td><div id="rgb_secondary_preview" class="color-preview" style="background-color:rgba(0,0,255,1)"></div></td>
+              <td><a class="btn" onclick="cmd('ask-color?rgb_secondary')">Custom...</a></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td colspan="2">
+                <a class="color-icon" onclick="cmd('set-color?rgb_secondary?255?255?255')" style="background-color:#FFFFFF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_secondary?255?0?0')" style="background-color:#FF0000"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_secondary?255?165?0')" style="background-color:#FFA500"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_secondary?255?255?0')" style="background-color:#FFFF00"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_secondary?0?255?0')" style="background-color:#00FF00"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_secondary?0?255?255')" style="background-color:#00FFFF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_secondary?0?0?255')" style="background-color:#0000FF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_secondary?128?0?128')" style="background-color:#800080"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_secondary?255?0?255')" style="background-color:#FF00FF"></a>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <table>
+          <tr id="waves" hidden>
+            <td>Direction:</td>
+            <td><label><input id="wave-left"  type="radio" name="direction" value="left"  onclick="cmd('effect-wave?2')"> Left</label></td>
+            <td><label><input id="wave-right" type="radio" name="direction" value="right" onclick="cmd('effect-wave?1')" checked> Right</label></td>
+          </tr>
+        </table>
+        <table>
+          <tr id="reactive" hidden>
+            <td>Speed:</td>
+            <td><label><input id="reactive-slow"  type="radio" name="speed" value="slow"  onclick="cmd('effect-reactive?3')"> Slow</label></td>
+            <td><label><input id="reactive-medium" type="radio" name="speed" value="medium" onclick="cmd('effect-reactive?2')" checked> Medium</label></td>
+            <td><label><input id="reactive-fast" type="radio" name="speed" value="fast" onclick="cmd('effect-reactive?1')"> Fast</label></td>
+          </tr>
+        </table>
+      </div>
+      <div class="right">
+        <h4>Keys</h4>
+        <p>
+          Game Mode: <span id="game-mode-status"> Disabled</span>&nbsp;&nbsp;&nbsp;
+          <a id="game-mode-disable" class="btn" onclick="cmd('gamemode-disable')">Disable</a>
+          <a id="game-mode-enable" class="btn" onclick="cmd('gamemode-enable')">Enable</a>
+        </p>
+        <br>
+        <p><a id="marco-keys-enable" class="btn" onclick="cmd('enable-marco-keys')">Activate Marco Keys</a></p>
 
-            <p>
-                Game Mode: <span id="game-mode-status"> Disabled</span>&nbsp;&nbsp;&nbsp;
-                <a id="game-mode-disable" class="btn" onclick="cmd('gamemode-disable')">Disable</a>
-                <a id="game-mode-enable" class="btn" onclick="cmd('gamemode-enable')">Enable</a>
-            </p>
-            <br>
-
-            <p><a id="marco-keys-enable" class="btn" onclick="cmd('enable-marco-keys')">Activate Marco Keys</a></p>
-
-            <h4>Profiles</h4>
-            <select id="profiles_list" name="profiles" size="3" style="width: 100%; height:140px" onclick="profile_list_change()">
-                <!-- Generated list from config folder -->
-            </select>
-
-            <div class="left" style="width:auto">
-                <a id="profiles-activate" class="btn btn-disabled" onclick="cmd('profile-activate?'+profileName)">Activate</a>
+        <h4>Profiles</h4>
+        <select id="profiles_list" name="profiles" size="3" style="width: 100%; height:140px" onclick="profile_list_change()">
+            <!-- Generated list from config folder -->
+        </select>
+        <div class="left" style="width:auto">
+          <a id="profiles-activate" class="btn btn-disabled" onclick="cmd('profile-activate?'+profileName)">Activate</a>
             </div>
             <div class="right" style="width:auto;text-align:right">
                 <a id="profiles-new" class="btn" onclick="profile_new()">New</a>

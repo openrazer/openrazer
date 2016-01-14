@@ -79,8 +79,10 @@ struct razer_daemon *daemon_open(void)
 	daemon->return_render_node = NULL; //TODO remember what i wanted to achieve with this variable ... :-)
 
 	razer_set_custom_mode(daemon->chroma);
-	razer_clear_all(daemon->chroma->keys);
-	razer_update_keys(daemon->chroma,daemon->chroma->keys);
+	//razer_clear_all(daemon->chroma->keys);
+	razer_clear_all(daemon->chroma->active_device->keys);
+	//razer_update_keys(daemon->chroma,daemon->chroma->keys);
+	razer_update_keys(daemon->chroma,daemon->chroma->active_device->keys);
 
 	//TODO Move to configuration options (dbus race condition present)
 
