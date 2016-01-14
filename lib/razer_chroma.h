@@ -113,8 +113,50 @@ struct razer_keys_set
 
 struct razer_chroma;
 struct razer_chroma_event;
-//typedef int (*razer_input_handler)(struct razer_chroma *chroma,int keycode,int pressed);
 typedef int (*razer_input_handler)(struct razer_chroma *chroma,struct razer_chroma_event *event);
+
+#define RAZER_CHROMA_DEVICE_TYPE_KEYBOARD 1
+#define RAZER_CHROMA_DEVICE_TYPE_MOUSE 2
+#define RAZER_CHROMA_DEVICE_TYPE_MOUSEMAT 3
+#define RAZER_CHROMA_DEVICE_TYPE_MISC 4
+
+struct razer_chroma_device 
+{
+	struct razer_chroma *chroma;
+	char *path;
+	char *name;
+	int type;
+	//TODO keyboard dimensions,number of leds,etc
+	struct razer_keys *keys;//TODO rewrite with leds as basis for all devices
+
+	//driver io files
+	char *update_keys_filename;
+	FILE *update_keys_file;
+	char *custom_mode_filename;
+	FILE *custom_mode_file;
+	char *breath_mode_filename;
+	FILE *breath_mode_file;
+	char *game_mode_filename;
+	FILE *game_mode_file;
+	char *none_mode_filename;
+	FILE *none_mode_file;
+	char *reactive_mode_filename;
+	FILE *reactive_mode_file;
+	char *spectrum_mode_filename;
+	FILE *spectrum_mode_file;
+	char *static_mode_filename;
+	FILE *static_mode_file;
+	char *wave_mode_filename;
+	FILE *wave_mode_file;
+	char *brightness_filename;
+	FILE *brightness_file;
+	char *temp_clear_row_filename;
+	FILE *temp_clear_row_file;
+	char *reset_filename;
+	FILE *reset_file;
+	char *macro_keys_filename;
+	FILE *macro_keys_file;
+};
 
 struct razer_chroma
 {
@@ -122,11 +164,10 @@ struct razer_chroma
 	char *sys_keyboard_event_path;//default = "/dev/input/by-id/usb-Razer_Razer_BlackWidow_Chroma-event-kbd";
 	char *sys_mouse_event_path;//default = "/dev/input/event26";
 
-	char *device_path;
-	char *update_keys_filename;
-	char *custom_mode_filename;
-	FILE *custom_mode_file;
-	FILE *update_keys_file;
+	list *devices;//struct razer_chroma_device
+	struct razer_chroma_device *active_device;
+
+
 	int keyboard_input_file;
 	int mouse_input_file;
 	unsigned long last_update_ms;
@@ -134,7 +175,6 @@ struct razer_chroma
 	unsigned long last_key_event_ms;
 	float update_dt;
 	float key_event_dt;
-	struct razer_keys *keys;
 	razer_input_handler input_handler;
 	struct razer_pos last_key_pos;//TODO move to sub struct pointer to pointers
 	struct razer_pos key_pos;//or remove
@@ -206,6 +246,11 @@ struct razer_chroma_event
 
 struct razer_chroma *razer_open(void);
 void razer_close(struct razer_chroma *chroma);
+void razer_set_active_device(struct razer_chroma *chroma,struct razer_chroma_device *device);//easiest way so i dont have to rewrite everything in one shot
+
+
+
+
 void razer_update(struct razer_chroma *chroma);
 void razer_set_input_handler(struct razer_chroma *chroma,razer_input_handler handler);
 unsigned long razer_get_ticks();
@@ -215,11 +260,11 @@ struct razer_rgb_frame *razer_create_rgb_frame(void);
 void razer_free_rgb_frame(struct razer_rgb_frame *frame);
 
 
-void razer_set_custom_mode(struct razer_chroma *chroma);
-void razer_update_keys(struct razer_chroma *chroma,struct razer_keys *keys);
-void razer_update_frame(struct razer_chroma *chroma,struct razer_rgb_frame *frame);
+int razer_set_custom_mode(struct razer_chroma *chroma);
+int razer_update_keys(struct razer_chroma *chroma,struct razer_keys *keys);
+int razer_update_frame(struct razer_chroma *chroma,struct razer_rgb_frame *frame);
 void razer_clear_frame(struct razer_rgb_frame *frame);
-char *razer_get_device_path();
+//char *razer_get_device_path();
 
 
 void razer_copy_rows(struct razer_rgb_row *src_rows,struct razer_rgb_row *dst_rows,int update_mask,int use_update_mask);

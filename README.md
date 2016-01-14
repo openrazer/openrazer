@@ -1,11 +1,11 @@
-# razer_blackwidow_chroma_driver
+# razer_chroma_drivers
 
-A Linux driver for the Razer Blackwidow Chroma keyboards, providing a daemon and graphical frontends.
+A Collection of Linux drivers for the Razer Chroma devices, providing a daemon and graphical frontends.
 
 Supports:
  * Razer Blackwidow Chroma *(all lighting modes)*
  * Razer Blackwidow Tournament Edition
- * Razer Firefly *(internal effect switching)*
+ * Razer Firefly *(all lighting modes)*
 
 
 
