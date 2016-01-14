@@ -59,7 +59,7 @@ unbind_keyboard() {
 bind_all_chromas() {
 	exit_number=1
 
-	for device in /sys/bus/hid/devices/*:1532:0203*
+	for device in /sys/bus/hid/devices/*:1532:020[39]*
 	do
 		device_id=$(basename "${device}")
 
@@ -80,10 +80,10 @@ bind_all_chromas() {
 }
 
 unbind_all_chromas() {
-	for device in /sys/bus/hid/drivers/razerkbd/*:1532:0203*
+	for device in /sys/bus/hid/drivers/razerkbd/*:1532:020[39]*
 	do
 		device_id=$(basename "${device}")
-	
+
 		unbind_keyboard "${device_id}"
 	done
 }
