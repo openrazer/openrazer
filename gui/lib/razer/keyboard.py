@@ -202,23 +202,22 @@ class KeyboardColour(object):
             # Create 22 rgb values
             self.rows.append([RGB() for _ in range(0,22)])
 
-    def set_key_colour(self, key, colour):
+    def set_key_colour(self, row, col, colour):
         """
         Set the colour of a key
 
-        :param key: Key to set the colour of
-        :type key: str
+        :param row: Row ID
+        :type row: int
+
+        :param col: Column ID
+        :type col: int
 
         :param colour: Colour to set
         :type colour: Gdk.Color or tuple
 
         :raises KeyDoesNotExistError: If given key does not exist
         """
-        if key not in KEY_MAPPING:
-            raise KeyDoesNotExistError("The key \"{0}\" does not exist".format(key))
-
-        row_id, col_id = KEY_MAPPING[key]
-        self.rows[row_id][col_id].set(KeyboardColour.gdk_colour_to_rgb(colour))
+        self.rows[row][col].set(KeyboardColour.gdk_colour_to_rgb(colour))
 
     def get_key_colour(self, key):
         """
@@ -235,20 +234,19 @@ class KeyboardColour(object):
         row_id, col_id = KEY_MAPPING[key]
         return self.rows[row_id][col_id].get()
 
-    def reset_key(self, key):
+    def reset_key(self, row, col):
         """
         Reset the colour of a key
 
-        :param key: Key to set the colour of
-        :type key: str
+        :param row: Row ID
+        :type row: int
+
+        :param col: Column ID
+        :type col: int
 
         :raises KeyDoesNotExistError: If given key does not exist
         """
-        if key not in KEY_MAPPING:
-            raise KeyDoesNotExistError("The key \"{0}\" does not exist".format(key))
-
-        row_id, col_id = KEY_MAPPING[key]
-        self.rows[row_id][col_id].set((0, 0, 0))
+        self.rows[row][col].set((0, 0, 0))
 
     def get_row_binary(self, row_id):
         """
