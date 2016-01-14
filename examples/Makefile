@@ -25,6 +25,7 @@ examples_debug:
 	@echo "\n::\033[32m COMPILING examples [DEBUG]\033[0m"
 	@echo "=============================="
 	$(CC) example1.c $(DEBUG_CFLAGS) ../lib/librazer_chroma.da $(LIBS) -o example1_debug
+	$(CC) raw_example.c $(DEBUG_CFLAGS) $(LIBS) -o raw_example_debug
 	$(CC) input_example.c $(DEBUG_CFLAGS) ../lib/librazer_chroma.da $(LIBS) -o input_example_debug
 	$(CC) input_map.c $(DEBUG_CFLAGS) ../lib/librazer_chroma.da $(LIBS) -o input_map_debug
 	$(CC) dota_keys.c $(DEBUG_CFLAGS) ../lib/librazer_chroma.da $(LIBS) -o dota_keys_debug
@@ -35,6 +36,8 @@ examples:
 	@echo "======================"
 	$(CC) example1.c $(CFLAGS) ../lib/librazer_chroma.a $(LIBS) -o example1
 	@strip example1
+	$(CC) raw_example.c $(CFLAGS) $(LIBS) -o raw_example
+	@strip raw_example
 	$(CC) input_example.c $(CFLAGS) ../lib/librazer_chroma.a $(LIBS) -o input_example
 	@strip input_example
 	$(CC) input_map.c $(CFLAGS) ../lib/librazer_chroma.a $(LIBS) -o input_map
