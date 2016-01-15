@@ -77,7 +77,7 @@ function Keyboard(keyboard_element_id, keyboard_svg_path) {
 
         if(key) {
             key.selectAll("text").attr({fill: hex_colour});
-            key.selectAll("path, rect").attr({stroke: hex_colour});
+            key.selectAll("path, rect, ellipse").attr({stroke: hex_colour});
         }
     };
     /**
@@ -90,7 +90,7 @@ function Keyboard(keyboard_element_id, keyboard_svg_path) {
         var key = snap_object.select("#" + active_layout).select('#' + key_id);
 
         key.selectAll("text").attr({fill: hex_colour});
-        key.selectAll("path, rect").attr({stroke: hex_colour});
+        key.selectAll("path, rect, ellipse").attr({stroke: hex_colour});
     };
     /**
      * Clear the colour of a specified key
@@ -101,7 +101,7 @@ function Keyboard(keyboard_element_id, keyboard_svg_path) {
         var key = snap_object.select("#" + active_layout).select('#' + key_id);
 
         key.selectAll("text").attr({fill: "#777777"});
-        key.selectAll("path, rect").attr({stroke: "#777777"});
+        key.selectAll("path, rect, ellipse").attr({stroke: "#777777"});
     };
 
 
@@ -330,7 +330,7 @@ $(document).ready(function () {
  *
  * @param elem {object} This object of each key
  * @param row {int} Key row
- * @param row {int} Key column
+ * @param col {int} Key column
  */
 function key(elem, row, col)
 {

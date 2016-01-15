@@ -258,6 +258,7 @@ class ChromaController(object):
 
         elif command.startswith('profile-edit'):
             profile_name = command.split('profile-edit?')[1].replace('%20', ' ')
+            self.webkit.execute_script("keyboard_obj.set_layout(\"en-gb\")")
 
             if len(profile_name) > 0:
                 self.profiles.set_active_profile(profile_name)
@@ -271,8 +272,10 @@ class ChromaController(object):
                 # IF BLACKWIDOW ULTIMATE < 2016
                 # OR BLACKWIDOW CHROMA
                 # disable space key and FN
+
                 self.webkit.execute_script("keyboard_obj.disable_key(5,7)")
                 self.webkit.execute_script("keyboard_obj.disable_key(5,12)")
+
 
                 self.show_menu('profile_editor')
 
@@ -324,7 +327,9 @@ class ChromaController(object):
             profile_name = command.split('?')[1].replace('%20', ' ')
             self.profiles.new_profile(profile_name)
             # Clear editor
+            self.webkit.execute_script("keyboard_obj.set_layout(\"en-gb\")")
             self.webkit.execute_script("keyboard_obj.clear_all_keys()")
+
 
             self.show_menu('profile_editor')
 
