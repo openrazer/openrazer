@@ -19,7 +19,6 @@
 
 import os, sys, signal
 from gi.repository import Gtk, Gdk, WebKit
-import subprocess
 import razer.daemon_dbus
 import razer.keyboard
 
@@ -365,35 +364,6 @@ class ChromaController(object):
         # FIXME: Incomplete
         return
 
-
-    @staticmethod
-    def get_keyboard_layout():
-        cmd = ["setxkbmap", "-query"]
-        output = subprocess.check_output(cmd)
-
-        result = "gb"
-
-        if output:
-            output = output.decode("utf-8").splitlines()
-            layout = None
-            variant = None
-            for line in output:
-                if line.startswith("layout"):
-                    layout = line.split(':', 1)[1].strip()
-                    if layout.find(',') > -1:
-                        layout = layout.split(',')[0]
-
-                elif line.startswith("variant"):
-                    variant = line.split(':', 1)[1].strip().split(',')[0]
-
-            if variant == "":
-                result = layout
-            else:
-                result = layout + '-' + variant
-
-        return result
-
-
     def __init__(self):
         """
         Initialise the class
@@ -424,7 +394,7 @@ class ChromaController(object):
         self.profiles = ChromaProfiles(self.daemon)
 
         # "Globals"
-        self.kb_layout = ChromaController.get_keyboard_layout()
+        self.kb_layout = razer.keyboard.get_keyboard_layout()
         self.reactive_speed = 1
         self.primary_rgb = razer.keyboard.RGB(0, 255, 0)
         self.secondary_rgb = razer.keyboard.RGB(0, 0, 255)
