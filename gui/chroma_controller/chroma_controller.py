@@ -245,7 +245,13 @@ class ChromaController(object):
                 self.process_command('effect-reactive?auto')
 
         ## Opening different pages
-        elif command == 'cancel-changes':
+        elif command.startswith('cancel-changes'):
+            command, cancel_type, cancel_args = command.split('?')
+
+            if cancel_type == "new-profile":
+                self.profiles.remove_profile(cancel_args, del_from_fs=False)
+
+            self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes')\"})")
             self.show_menu('main_menu')
 
         elif command == 'pref-open':
@@ -331,6 +337,8 @@ class ChromaController(object):
             self.webkit.execute_script("keyboard_obj.clear_all_keys()")
             self.webkit.execute_script("keyboard_obj.disable_key(5,7)")
             self.webkit.execute_script("keyboard_obj.disable_key(5,12)")
+
+            self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes?new-profile?" + profile_name + "')\"})")
 
 
             self.show_menu('profile_editor')

@@ -221,7 +221,7 @@ function Keyboard(keyboard_element_id, keyboard_svg_path) {
      */
     this.clear_all_keys = function () {
         snap_object.select("#" + active_layout).selectAll(".key text").attr({fill: "#777777"});
-        snap_object.select("#" + active_layout).selectAll(".key path, rect").attr({stroke: "#777777"});
+        snap_object.select("#" + active_layout).selectAll(".key path, rect, ellipse").attr({stroke: "#777777"});
     };
 
     /**
@@ -412,7 +412,7 @@ function set_mode(id) {
  */
 function profile_new() {
     var dialog_response = window.prompt("Please name your new key profile.");
-    if (dialog_response != null && response.length > 0) {
+    if (dialog_response != null && dialog_response.length > 0) {
         cmd('profile-new?' + dialog_response);
     }
 }
