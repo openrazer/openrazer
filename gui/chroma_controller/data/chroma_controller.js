@@ -65,6 +65,22 @@ function Keyboard(keyboard_element_id, keyboard_svg_path) {
     };
 
     /**
+     * Return the colour of the selected key
+     * @param row {int} Row integer
+     * @param col {int} Column integer
+     * @returns {string|null} Hex colour value or null
+     */
+    this.get_key_colour = function (row, col) {
+        console.log("Row: " + row + " Col: " + col);
+        var key_id = '#key' + row + '-' + col;
+        var key = snap_object.select("#" + active_layout).select(key_id);
+
+        if(key) {
+            return key.selectAll("path, rect, ellipse")[0].attr("stroke");
+        }
+        return null;
+    };
+    /**
      * Set the colour of a specified key
      *
      * @param row {int} Row integer
@@ -273,10 +289,19 @@ function Keyboard(keyboard_element_id, keyboard_svg_path) {
     }
 }
 
-var keyboard_obj = new Keyboard("keyboard-div", "img/blackwidow-chroma-keyboard-layout.svg");
 
-// Smoothly fade between two elements.
-function smoothFade(from, to) {
+// Initialise keyboard object
+var keyboard_obj = new Keyboard("keyboard-div", "img/blackwidow-chroma-keyboard-layout.svg");
+var mode;
+
+
+/**
+ * Fade in and out between 2 elements
+ *
+ * @param from {string} Element
+ * @param to {string} Element
+ */
+function smooth_fade(from, to) {
     if ($(from).is(":visible") == false) {
         $(to).fadeIn('fast');
     } else {
@@ -287,43 +312,46 @@ function smoothFade(from, to) {
     }
 }
 
-// Change the header title between page views.
-function changeTitle(text) {
-    $('#title').fadeOut();
+/**
+ * Change the header of the page.
+ *
+ * @param text {string} Header text
+ */
+function change_header(text) {
+    var header = $('#page-header');
+    header.fadeOut();
+
     setTimeout(function () {
-        $('#title').fadeIn();
-        $('#title').html(text);
+        header.fadeIn();
+        header.html(text);
     }, 400);
 }
 
-// Communicate to Python via JavaScript
+/**
+ * Sends command to python.
+ *
+ * @param parameters {string} Command parameters
+ */
 function cmd(parameters) {
+    // TODO Change this to use the page title as that is quicker and the title is not used.
+    // If we use the title then we can then split up the main UI into seperate HMTL files
+    // Also will redo the command to pass through JSON as that way there is less
+    // string splitting and can do better communication.
     window.location.href = 'cmd://' + parameters;
 }
 
-// UI Elements
-function setCursor(type) {
+/**
+ * Change the cursor of the page.
+ *
+ * @param type {string} Cursor type
+ */
+function set_cursor(type) {
     if (type == 'normal') {
         $('html').removeClass('cursor-wait');
     } else if (type == 'wait') {
         $('html').addClass('cursor-wait');
     }
 }
-
-// Change brightness control
-$(document).ready(function () {
-
-    $("[type=range]").change(function () {
-        var brightnessRaw = ($(this).val() / 255.0) * 100;
-        $('#brightnessValue').text(Math.round(brightnessRaw) + "%");
-        if (brightnessRaw == 0) {
-            $(this).next().text("Off")
-        }
-        window.location.href = 'cmd://brightness?' + Math.round($(this).val());
-    });
-
-    keyboard_obj.load();
-});
 
 /**
  * onclick function of the keyboard SVG
@@ -334,61 +362,38 @@ $(document).ready(function () {
  */
 function key(elem, row, col)
 {
-    //var current_color = $('#' + pos).css("color");
-    var picker_color = $('#rgb_tmp_preview').css("background-color");
+    // Get colour box
+    var colour_box = $('#rgb_tmp_preview');
+    var picker_color = colour_box.css("background-color");
 
     if(mode == 'set') {
+        // Set key colour
         keyboard_obj.set_key_colour_by_id(elem.id, picker_color);
         cmd('set-key?' + row + '?' + col + '?' + picker_color);
     } else if(mode == 'clear') {
+        // Clear key colour
         keyboard_obj.clear_key_colour_by_id(elem.id);
         cmd('clear-key?' + row + '?' + col);
     } else if(mode == 'picker') {
-        // TODO
+        // Get colour from key
+        var current_colour = keyboard_obj.get_key_colour(row, col);
+        colour_box.css("background-color", current_colour);
+        set_mode("set");
     }
 }
 
-// Profile Management before the command is passed to Python.
+/**
+ * Enable buttons when a profile is clicked
+ */
 function profile_list_change() {
-    profileName = $("#profiles_list option:selected").text();
-
-    // Change profile right away, depending on preferences.
-    if (instantProfileSwitch == true) {
-        cmd('profile-activate?' + profileName)
-    } else {
-        $('#profiles-activate').removeClass('btn-disabled')
-        $('#profiles-edit').removeClass('btn-disabled')
-        $('#profiles-delete').removeClass('btn-disabled')
-    }
+    $('#profiles-activate, #profiles-edit, #profiles-delete').removeClass('btn-disabled');
 }
 
-// Profiles
-//// Colours are set to the 'color' and 'border' variables, but primarily from the 'color' attribute.
-/*function key(pos) {
-    current_color = $('#' + pos).css("color");
-    picker_color = $('#rgb_tmp_preview').css("background-color");
-    var key_id = $('#' + pos).attr('data-keyid');
-
-    // Set Mode - Change this key's colour.
-    if (mode == 'set') {
-        $('#' + pos).css("color", picker_color);
-        $('#' + pos).css("border", "2px solid " + picker_color);
-        cmd('set-key?' + pos + '?' + picker_color + '?' + key_id);
-
-        // Picker Mode - Take colour from this key.
-    } else if (mode == 'picker') {
-        $('#rgb_tmp_preview').css("background-color", current_color);
-        set_mode('set');
-
-        // Clear Mode - Remove customisation from this key.
-    } else if (mode == 'clear') {
-        $('#' + pos).css("color", cleared);
-        $('#' + pos).css("border", "2px solid " + cleared_border);
-        cmd('clear-key?' + pos + '?' + key_id);
-    }
-}*/
-
-// Change mode of cursor
+/**
+ * Change the mode of left clicking
+ *
+ * @param id {string} Mode ID
+ */
 function set_mode(id) {
     if (id == 'set') {
         mode = 'set';
@@ -402,24 +407,62 @@ function set_mode(id) {
     }
 }
 
-// Set variables at start.
-var mode;
-var cleared = 'rgb(128, 128, 128)';
-var cleared_border = 'rgb(70, 70, 70)';
-set_mode('set');
-
-// Prompt for a new profile name.
+/**
+ * Get the name for a new profile.
+ */
 function profile_new() {
-    response = window.prompt("Please name your new key profile.");
-    if (response != null && response.length > 0) {
-        cmd('profile-new?' + response)
+    var dialog_response = window.prompt("Please name your new key profile.");
+    if (dialog_response != null && response.length > 0) {
+        cmd('profile-new?' + dialog_response);
     }
 }
 
-// Confirm deletion of a profile.
-function profile_del(profileName) {
-    response = window.confirm("Are you sure you wish to delete '" + profileName + "'?")
-    if (response == true) {
-        cmd('profile-del?' + profileName)
+/**
+ * Edit profile.
+ */
+function profile_edit() {
+    var selected_profile = $("#profiles_list option:selected").text();
+    cmd('profile-edit?' + selected_profile);
+}
+
+/**
+ * Delete a profile confirmation box
+ */
+function profile_del() {
+    var selected_profile = $("#profiles_list option:selected").text();
+
+    var dialog_response = window.confirm("Are you sure you wish to delete '" + selected_profile + "'?");
+    if (dialog_response == true) {
+        cmd('profile-del?' + selected_profile);
     }
 }
+
+/**
+ * Actiavte profile.
+ */
+function profile_activate() {
+    var selected_profile = $("#profiles_list option:selected").text();
+    cmd('profile-activate?'+selected_profile);
+}
+
+/**
+ * Run once document has loaded
+ */
+$(document).ready(function () {
+
+    // Change brightness control
+    $("[type=range]").change(function () {
+        var brightnessRaw = ($(this).val() / 255.0) * 100;
+        $('#brightnessValue').text(Math.round(brightnessRaw) + "%");
+        if (brightnessRaw == 0) {
+            $(this).next().text("Off")
+        }
+        window.location.href = 'cmd://brightness?' + Math.round($(this).val());
+    });
+
+    // Load keyboard
+    keyboard_obj.load();
+
+    // Set key mode
+    set_mode('set');
+});

@@ -44,24 +44,24 @@ class ChromaController(object):
             self.webkit.execute_script('$("#' + element + '").hide()')
 
         if page == 'main_menu':
-            self.webkit.execute_script('changeTitle("Configuration Menu")')
-            self.webkit.execute_script('smoothFade(".menu_area",'+page+')')
+            self.webkit.execute_script('change_header("Configuration Menu")')
+            self.webkit.execute_script('smooth_fade(".menu_area",'+page+')')
             self.webkit.execute_script('$("#close-window").show()')
             self.webkit.execute_script('$("#pref-open").show()')
             self.refresh_profiles_list()
 
         elif page == 'not_detected':
-            self.webkit.execute_script('changeTitle("Keyboard Not Detected")')
+            self.webkit.execute_script('change_header("Keyboard Not Detected")')
 
         elif page == 'profile_editor':
-            self.webkit.execute_script('changeTitle("Edit ' + self.profiles.get_active_profile_name() + '")')
-            self.webkit.execute_script('smoothFade("#main_menu","#profile_editor")')
+            self.webkit.execute_script('change_header("Edit ' + self.profiles.get_active_profile_name() + '")')
+            self.webkit.execute_script('smooth_fade("#main_menu","#profile_editor")')
             self.webkit.execute_script('$("#cancel").show()')
             self.webkit.execute_script('$("#edit-preview").show()')
             self.webkit.execute_script('$("#edit-save").show()')
 
         elif page == 'preferences':
-            self.webkit.execute_script('changeTitle("Preferences")')
+            self.webkit.execute_script('change_header("Preferences")')
             self.webkit.execute_script('$("#cancel").show()')
             self.webkit.execute_script('$("#pref-save").show()')
 
@@ -306,11 +306,11 @@ class ChromaController(object):
         elif command.startswith('profile-activate'):
             command = command.replace('%20',' ')
             profile_name = command.split('profile-activate?')[1]
-            self.webkit.execute_script('setCursor("wait")')
+            self.webkit.execute_script('set_cursor("wait")')
             self.profiles.activate_profile_from_file(profile_name)
             self.webkit.execute_script('$("#custom").html("Profile - ' + profile_name + '")')
             self.webkit.execute_script('$("#custom").prop("checked", true)')
-            self.webkit.execute_script('setCursor("normal")')
+            self.webkit.execute_script('set_cursor("normal")')
 
         elif command.startswith('profile-del'):
             # TODO: Instead of JS-based prompt, use PyGtk or within web page interface?
@@ -329,6 +329,8 @@ class ChromaController(object):
             # Clear editor
             self.webkit.execute_script("keyboard_obj.set_layout(\"en-gb\")")
             self.webkit.execute_script("keyboard_obj.clear_all_keys()")
+            self.webkit.execute_script("keyboard_obj.disable_key(5,7)")
+            self.webkit.execute_script("keyboard_obj.disable_key(5,12)")
 
 
             self.show_menu('profile_editor')

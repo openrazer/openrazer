@@ -21,7 +21,7 @@
 </head>
 <body>
 <div class="header">
-    <h3 id="title"></h3>
+    <h3 id="page-header"></h3>
 </div>
 <div class="content">
 
@@ -141,12 +141,12 @@
             <!-- Generated list from config folder -->
         </select>
         <div class="left" style="width:auto">
-          <a id="profiles-activate" class="btn btn-disabled" onclick="cmd('profile-activate?'+profileName)">Activate</a>
+          <a id="profiles-activate" class="btn btn-disabled" onclick="profile_activate()">Activate</a>
             </div>
             <div class="right" style="width:auto;text-align:right">
                 <a id="profiles-new" class="btn" onclick="profile_new()">New</a>
-                <a id="profiles-edit" class="btn btn-dim btn-disabled" onclick="cmd('profile-edit?'+profileName)">Edit</a>
-                <a id="profiles-delete" class="btn btn-dim btn-disabled" onclick="profile_del(profileName)">Delete</a>
+                <a id="profiles-edit" class="btn btn-dim btn-disabled" onclick="profile_edit()">Edit</a>
+                <a id="profiles-delete" class="btn btn-dim btn-disabled" onclick="profile_del()">Delete</a>
             </div>
         </div>
     </div>
