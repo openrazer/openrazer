@@ -261,14 +261,15 @@ function Keyboard(keyboard_element_id, keyboard_svg_path) {
             }
         }
 
-        if (exists) {
-            snap_object.select("#" + active_layout).attr({display: "none"});
-            snap_object.select("#" + layout).attr({display: "inline"});
-            active_layout = layout;
-            this.setup();
-        } else {
-            console.error("Layout \"" + layout + "\" does not exist!");
+        if (!exists) {
+            console.error("Layout \"" + layout + "\" does not exist! Using GB");
+            layout = "kb-gb";
         }
+
+        snap_object.select("#" + active_layout).attr({display: "none"});
+        snap_object.select("#" + layout).attr({display: "inline"});
+        active_layout = layout;
+        this.setup();
 
         return exists;
     };

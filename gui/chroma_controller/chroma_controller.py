@@ -19,12 +19,11 @@
 
 import os, sys, signal
 from gi.repository import Gtk, Gdk, WebKit
+import subprocess
 import razer.daemon_dbus
 import razer.keyboard
 
 # Default Settings & Preferences
-layout = 'en-gb'
-
 SAVE_ROOT = os.path.expanduser('~') + '/.config/razer_chroma'
 SAVE_PROFILES = SAVE_ROOT + '/profiles'
 SAVE_BACKUPS = SAVE_ROOT + '/backups'
@@ -265,7 +264,7 @@ class ChromaController(object):
 
         elif command.startswith('profile-edit'):
             profile_name = command.split('profile-edit?')[1].replace('%20', ' ')
-            self.webkit.execute_script("keyboard_obj.set_layout(\"en-gb\")")
+            self.webkit.execute_script("keyboard_obj.set_layout(\"kb-" + self.kb_layout + "\")")
 
             if len(profile_name) > 0:
                 self.profiles.set_active_profile(profile_name)
@@ -334,7 +333,7 @@ class ChromaController(object):
             profile_name = command.split('?')[1].replace('%20', ' ')
             self.profiles.new_profile(profile_name)
             # Clear editor
-            self.webkit.execute_script("keyboard_obj.set_layout(\"en-gb\")")
+            self.webkit.execute_script("keyboard_obj.set_layout(\"kb-" + self.kb_layout + "\")")
             self.webkit.execute_script("keyboard_obj.clear_all_keys()")
             self.webkit.execute_script("keyboard_obj.disable_key(5,7)")
             self.webkit.execute_script("keyboard_obj.disable_key(5,12)")
@@ -367,6 +366,34 @@ class ChromaController(object):
         return
 
 
+    @staticmethod
+    def get_keyboard_layout():
+        cmd = ["setxkbmap", "-query"]
+        output = subprocess.check_output(cmd)
+
+        result = "gb"
+
+        if output:
+            output = output.decode("utf-8").splitlines()
+            layout = None
+            variant = None
+            for line in output:
+                if line.startswith("layout"):
+                    layout = line.split(':', 1)[1].strip()
+                    if layout.find(',') > -1:
+                        layout = layout.split(',')[0]
+
+                elif line.startswith("variant"):
+                    variant = line.split(':', 1)[1].strip().split(',')[0]
+
+            if variant == "":
+                result = layout
+            else:
+                result = layout + '-' + variant
+
+        return result
+
+
     def __init__(self):
         """
         Initialise the class
@@ -397,6 +424,7 @@ class ChromaController(object):
         self.profiles = ChromaProfiles(self.daemon)
 
         # "Globals"
+        self.kb_layout = ChromaController.get_keyboard_layout()
         self.reactive_speed = 1
         self.primary_rgb = razer.keyboard.RGB(0, 255, 0)
         self.secondary_rgb = razer.keyboard.RGB(0, 0, 255)

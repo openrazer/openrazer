@@ -609,7 +609,7 @@
   </g>
   <g
      inkscape:groupmode="layer"
-     id="en-us"
+     id="kb-us"
      class="kblayout"
      inkscape:label="Keys - en-us"
      style="display:none"
@@ -3310,7 +3310,7 @@
   <g
      style="display:inline"
      inkscape:label="Keys - en-gb"
-     id="en-gb"
+     id="kb-gb"
      class="kblayout"
      inkscape:groupmode="layer"
      transform="translate(0.0625,-103.15625)">
