@@ -11,6 +11,8 @@ char *device_path = NULL;
 char *set_key_row_fname = NULL;
 char *set_custom_mode_fname = NULL;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 
 int main(int argc,char *argv[])
 {
@@ -47,7 +49,9 @@ int main(int argc,char *argv[])
 	printf("round:%d\n",2000-count);
 	for(int i =1;i<((15*3)+1);i++)
 	{
+		if(count>1000)
 		cols[i] = (unsigned char)(rand()*255); //randomize colors each round
+		else cols[i] = count&0xff;
 	}
 	fwrite(cols,15*3+1,1,set_key_row);
 	fflush(set_key_row);//flush buffers
@@ -61,4 +65,5 @@ int main(int argc,char *argv[])
 	printf("Raw example finished.\n");
 }
 
+#pragma GCC diagnostic pop
 #pragma GCC diagnostic pop

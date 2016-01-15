@@ -361,7 +361,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			{
 				daemon->is_paused = 1;
 			    //write_to_device_file(device_path, dbus_array, num_elements);
-			    razer_set_key_row_buffered(daemon->chroma,dbus_array,num_elements);
+			    razer_set_key_row_buffered(daemon->chroma,(unsigned char*)dbus_array,num_elements);
 		    }
 			//free(device_path);
 		}
@@ -1392,7 +1392,8 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		struct razer_fx_render_node *render_node = daemon_get_render_node(daemon,rn_uid);
 		if(render_node)
 		{
-			daemon_reset_render_node(daemon,render_node);
+			//daemon_reset_render_node(daemon,render_node);
+			daemon_reset_render_node(render_node);
 		}
  		dbus_uint32_t serial = 0;
  		if(!dbus_connection_send(daemon->dbus,reply,&serial)) 

@@ -52,7 +52,7 @@
           <tr><td><label class="disabled"><input type="radio" name="effect" value="custom" checked disabled /> <span id="custom">Custom</span></label></td></tr>
           <tr><td><label><input type="radio" name="effect" value="none" onclick="cmd('effect-none')"/> None</label></td></tr>
           <tr><td><label><input type="radio" name="effect" value="spectrum" onclick="cmd('effect-spectrum')"/> Spectrum</label></td></tr>
-          <tr><td><label><input type="radio" name="effect" value="wave" onclick="cmd('effect-wave?1');$('#wave-right').prop('checked',true);"/> Wave</label></td></tr>
+          <tr><td><label><input type="radio" name="effect" value="wave" onclick="cmd('effect-wave?0');$('#wave-none').prop('checked',true);"/> Wave</label></td></tr>
           <tr><td><label><input type="radio" name="effect" value="reactive" onclick="cmd('effect-reactive?2'); $('#reactive-normal').prop('checked',true);"/> Reactive</label></td></tr>
           <tr><td>
             <label><input type="radio" name="effect" value="breath" onclick="cmd('effect-breath?0')"/> Breath</label>
@@ -111,9 +111,9 @@
         <table>
           <tr id="waves" hidden>
             <td>Direction:</td>
-            <td><label><input id="wave-none"  type="radio" name="direction" value="none"  onclick="cmd('effect-wave?0')"> None</label></td>
+            <td><label><input id="wave-none"  type="radio" name="direction" value="none"  onclick="cmd('effect-wave?0')" checked> None</label></td>
             <td><label><input id="wave-left"  type="radio" name="direction" value="left"  onclick="cmd('effect-wave?2')"> Left</label></td>
-            <td><label><input id="wave-right" type="radio" name="direction" value="right" onclick="cmd('effect-wave?1')" checked> Right</label></td>
+            <td><label><input id="wave-right" type="radio" name="direction" value="right" onclick="cmd('effect-wave?1')"> Right</label></td>
           </tr>
         </table>
         <table>

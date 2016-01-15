@@ -77,10 +77,21 @@ int razer_send_report(struct usb_device *usb_dev,void const *data)
             USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT,
             report_id,
             index, buf, size, USB_CTRL_SET_TIMEOUT);
-    usleep_range(RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US,RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_FIREFLY) {
+        usleep_range(RAZER_FIREFLY_WAIT_MIN_US,RAZER_FIREFLY_WAIT_MAX_US);
+    }
+    else
+        usleep_range(RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US,RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+
     kfree(buf);
+    if(len!=size)
+        printk(KERN_WARNING "razerkbd: Device data transfer failed.");
+
     return ((len < 0) ? len : ((len != size) ? -EIO : 0));
 }
+
+
+
 
 /**
  * Calculate the checksum for the usb message
@@ -1017,6 +1028,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
     struct usb_interface *intf = to_usb_interface(dev->parent);     
     //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
     struct usb_device *usb_dev = interface_to_usbdev(intf);
+    razer_reset(usb_dev);
     razer_set_custom_mode(usb_dev);
     return count;                           
 }                                   
@@ -1051,7 +1063,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         // Set BlackWidow Ultimate to static colour
         razer_set_static_mode_blackwidow_ultimate(usb_dev);
 
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA)
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_FIREFLY)
     {
         // Set BlackWidow Chroma to static colour
         struct razer_rgb color;
@@ -1307,6 +1319,7 @@ static int razer_kbd_probe(struct hid_device *hdev,
 
     hid_set_drvdata(hdev, dev);
 
+
     retval = hid_parse(hdev);
     if(retval)    {
         hid_err(hdev, "parse failed\n");
@@ -1318,7 +1331,9 @@ static int razer_kbd_probe(struct hid_device *hdev,
        goto exit_free;
     }
 
-    //razer_reset(usb_dev);
+
+    razer_reset(usb_dev);
+    usb_disable_autosuspend(usb_dev);
     //razer_activate_macro_keys(usb_dev);
     //msleep(3000);
     return 0;

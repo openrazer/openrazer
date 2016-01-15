@@ -4,10 +4,13 @@
 volatile sig_atomic_t end_daemon = 0;
 
 // Used to catch SIGTERM
-void got_sigterm_signal(int sigal_number)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+void daemon_got_sigterm_signal(int signal_number)
 {
 	end_daemon = 1;
 }
+#pragma GCC diagnostic pop
 
 
 void daemon_kill(struct razer_daemon *daemon,char *error_message)
@@ -117,7 +120,7 @@ struct razer_daemon *daemon_open(void)
 	// Catch SIGTERM
 	struct sigaction sigterm_action;
 	memset(&sigterm_action, 0, sizeof(struct sigaction));
-	sigterm_action.sa_handler = got_sigterm_signal;
+	sigterm_action.sa_handler = daemon_got_sigterm_signal;
 	sigaction(SIGTERM, &sigterm_action, NULL);
 	
  	return(daemon);

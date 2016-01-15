@@ -248,6 +248,46 @@ struct razer_chroma *razer_open(void);
 void razer_close(struct razer_chroma *chroma);
 void razer_set_active_device(struct razer_chroma *chroma,struct razer_chroma_device *device);//easiest way so i dont have to rewrite everything in one shot
 
+void razer_close_device(struct razer_chroma_device *device);
+void razer_close_devices(struct razer_chroma *chroma);
+
+
+
+int razer_device_enable_macro_keys(struct razer_chroma_device *device);
+int razer_enable_macro_keys(struct razer_chroma *chroma);
+int razer_device_set_custom_mode(struct razer_chroma_device *device);
+int razer_set_custom_mode(struct razer_chroma *chroma);
+int razer_device_set_breath_mode(struct razer_chroma_device *device,struct razer_rgb *first_color,struct razer_rgb *second_color);
+int razer_set_breath_mode(struct razer_chroma *chroma,struct razer_rgb *first_color,struct razer_rgb *second_color);
+int razer_device_set_one_color_breath_mode(struct razer_chroma_device *device,struct razer_rgb *first_color);
+int razer_set_one_color_breath_mode(struct razer_chroma *chroma,struct razer_rgb *first_color);
+int razer_device_set_random_breath_mode(struct razer_chroma_device *device);
+int razer_set_random_breath_mode(struct razer_chroma *chroma);
+int razer_device_set_game_mode(struct razer_chroma_device *device,unsigned char enable);
+int razer_set_game_mode(struct razer_chroma *chroma,unsigned char enable);
+int razer_device_set_none_mode(struct razer_chroma_device *device);
+int razer_set_none_mode(struct razer_chroma *chroma);
+int razer_device_set_reactive_mode(struct razer_chroma_device *device,unsigned char speed,struct razer_rgb *color);
+int razer_set_reactive_mode(struct razer_chroma *chroma,unsigned char speed,struct razer_rgb *color);
+int razer_device_set_spectrum_mode(struct razer_chroma_device *device);
+int razer_set_spectrum_mode(struct razer_chroma *chroma);
+int razer_device_set_static_mode(struct razer_chroma_device *device,struct razer_rgb *color);
+int razer_set_static_mode(struct razer_chroma *chroma,struct razer_rgb *color);
+int razer_device_set_wave_mode(struct razer_chroma_device *device,unsigned char direction);
+int razer_set_wave_mode(struct razer_chroma *chroma,unsigned char direction);
+int razer_device_reset(struct razer_chroma_device *device);
+int razer_reset_mode(struct razer_chroma *chroma);
+int razer_device_set_brightness(struct razer_chroma_device *device,unsigned char brightness);
+int razer_set_brightness(struct razer_chroma *chroma,unsigned char brightness);
+int razer_device_temp_clear_row(struct razer_chroma_device *device);
+int razer_temp_clear_row(struct razer_chroma *chroma);
+int razer_device_set_key_row(struct razer_chroma_device *device,unsigned char row_index,unsigned char num_colors,struct razer_rgb **colors);
+int razer_set_key_row(struct razer_chroma *chroma,unsigned char row_index,unsigned char num_colors,struct razer_rgb **colors);
+int razer_device_set_key_row_buffered(struct razer_chroma_device *device,unsigned char *buffer,int buffer_len);
+int razer_set_key_row_buffered(struct razer_chroma *chroma,unsigned char *buffer,int buffer_len);
+
+
+
 
 
 

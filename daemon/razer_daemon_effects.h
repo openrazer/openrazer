@@ -5,6 +5,9 @@
 #define RAZER_EFFECT_FIRST_INPUT_USED 1
 #define RAZER_EFFECT_SECOND_INPUT_USED 2
 
+//#define RAZER_EFFECT_DEVICE_ 0
+
+
 typedef int (*razer_effect_open)(struct razer_fx_render_node *render);//called when effect is added to a render node
 typedef int (*razer_effect_close)(struct razer_fx_render_node *render);//called when effect is removed from a render node
 typedef int (*razer_effect_reset)(struct razer_fx_render_node *render);//called every time a effect is called for the first time in a render node(loops trigger too) - a daemon manual reset command can be used too

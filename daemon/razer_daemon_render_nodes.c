@@ -149,7 +149,8 @@ void daemon_render_node_add_sub(struct razer_fx_render_node *render_node,struct 
 }
 
 
-int daemon_reset_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node)
+//int daemon_reset_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node)
+int daemon_reset_render_node(struct razer_fx_render_node *render_node)
 {
 	if(!render_node)
 		return(-1);

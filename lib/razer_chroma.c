@@ -424,7 +424,7 @@ struct razer_chroma_device *razer_create_device(struct razer_chroma *chroma,char
 	FILE *fname = fopen(name_filename,"rb");
 	if(!fname)
 	{
-		#ifdef USE_DEBUGGING
+		#ifdef USE_VERBOSE_DEBUGGING
 			printf("no device_type file found,skipping.\n");
 		#endif
 		free(device);
@@ -436,7 +436,7 @@ struct razer_chroma_device *razer_create_device(struct razer_chroma *chroma,char
 	rewind(fname);
 	if(!name_len)
 	{
-		#ifdef USE_DEBUGGING
+		#ifdef USE_VERBOSE_DEBUGGING
 			printf("device_type file empty,skipping.\n");
 		#endif
 		free(device);
@@ -447,12 +447,13 @@ struct razer_chroma_device *razer_create_device(struct razer_chroma *chroma,char
 	//device->name = (char*)malloc(name_len+1);
 	//memset(device->name,0,name_len+1);
 	unsigned char buffer[4096];
+	memset(&buffer,0,4096);
 	int fret = fread(buffer,1,4096,fname);
 	//printf("reading name with len:%d\n",name_len);
 	//int fret = fread(device->name,name_len,1,fname);
 	if(!fret)
 	{
-		#ifdef USE_DEBUGGING
+		#ifdef USE_VERBOSE_DEBUGGING
 			printf("device name can't be read,skipping.\n");
 		#endif
 		free(device);
@@ -462,9 +463,12 @@ struct razer_chroma_device *razer_create_device(struct razer_chroma *chroma,char
 	}
 	fclose(fname);
 	free(name_filename);
-	device->name = str_Copy(&buffer);
+	memset(&buffer[strlen((char*)buffer)-1],0,1); //removing trailing <CR>
+	device->name = str_Copy((char*)&buffer);
 
-	printf("device name:%s\n",device->name);
+	#ifdef USE_DEBUGGING
+		printf("found device:%s\n",device->name);
+	#endif
 
 	//create driver attribute path+filename strings
 	device->custom_mode_filename = str_CreateEmpty();
@@ -547,7 +551,7 @@ int razer_find_devices(struct razer_chroma *chroma)
 			memcpy(device_path,razer_sys_hid_devices_path,strlen(razer_sys_hid_devices_path));
 			memcpy(device_path+strlen(razer_sys_hid_devices_path),entry->d_name,strlen(entry->d_name));
 			//#ifdef USE_VERBOSE_DEBUGGING
-			#ifdef USE_DEBUGGING
+			#ifdef USE_VERBOSE_DEBUGGING
 				printf("found possible device at path:%s\n",device_path);
 			#endif
 			struct razer_chroma_device *device = razer_create_device(chroma,device_path);
@@ -666,6 +670,7 @@ struct razer_chroma *razer_open(void)
 		exit(1);
 	}
 	chroma->active_device = list_GetBottom(chroma->devices);
+	//chroma->active_device = list_GetTop(chroma->devices);
 
 	chroma->sys_mouse_event_path = str_Copy(razer_sys_mouse_event_default_path);
 	chroma->sys_keyboard_event_path = str_Copy(razer_sys_keyboard_event_default_path);

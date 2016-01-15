@@ -3,7 +3,7 @@
 
 
 
-const char *dc_helpmsg = "Usage: %s [OPTIONS]... [COMMAND] [PARAMETERS]...\n\
+const char *dc_helpmsg_start = "Usage: %s [OPTIONS]... [COMMAND] [PARAMETERS]...\n\
 Send commands to razer_bcd daemon.\n\
 \n\
 Commands:\n\
@@ -60,8 +60,8 @@ Commands:\n\
            2. Parameter: input node uid - input node to connect\n\
   -n    Connect input node to render nodes second input slot\n\
            1. Parameter: render node uid - render node the input node should be connected to\n\
-           2. Parameter: input node uid - input node to connect\n\
-  -w    Get the next node of a render node\n\
+           2. Parameter: input node uid - input node to connect\n";
+  const char *dc_helpmsg_end = "  -w    Get the next node of a render node\n\
            1. Parameter: render node uid - render node to get the next node of\n\
            Returns: uid of next node\n\
   -y    Set the next node of a render node\n\
@@ -542,7 +542,8 @@ int main(int argc,char *argv[])
 				break;
 			case 'h':
 				printf("Razer blackwidow chroma daemon controller\n");
-				printf(dc_helpmsg,argv[0],argv[0]);
+				printf(dc_helpmsg_start,argv[0],argv[0]);
+				printf(dc_helpmsg_end,argv[0],argv[0]);
 				return(0);
 			case 'V':
 				printf("razer_bcd daemon controller %d.%d (build %d)\n",MAJOR_VERSION,MINOR_VERSION);
@@ -565,7 +566,8 @@ int main(int argc,char *argv[])
 	if(!opts_given)
 	{
 		printf("Razer blackwidow chroma daemon controller\n");
-		printf(dc_helpmsg,argv[0],argv[0]);
+		printf(dc_helpmsg_start,argv[0],argv[0]);
+		printf(dc_helpmsg_end,argv[0],argv[0]);
 	}		
 	#endif
 	return(0);

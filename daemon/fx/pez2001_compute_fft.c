@@ -59,6 +59,7 @@ int fill_sample_buffer(wav_file *wf)
  wf->offset+=samples_read;
  wf->sample_buffer_used = samples_read;
  wf->sample_buffer_offset = 0;
+ return(samples_read);
 }
 
 wav_file *open_wav(char *filename)
@@ -182,7 +183,7 @@ int effect_update(struct razer_fx_render_node *render)
 	{
 		unsigned int sample = read_wav_stereo_sample(effect_input_file);
 		short high = sample >> 16;
-		short low = sample & 0xFFFF;
+		//short low = sample & 0xFFFF;
 		//add sample to fft buffer
 		effect_fft_in[effect_fft_samples_used][0] = (double)high * effect_fft_hamming_buffer[effect_fft_samples_used];///(double)32768;//* windowHanning(step++, N);
   		effect_fft_in[effect_fft_samples_used++][1] = 0.0f;
@@ -199,7 +200,7 @@ int effect_update(struct razer_fx_render_node *render)
 		    tmp_magnitude = 10./log(10.) * log(tmp_magnitude + 1e-6);
     		printf("new fft mag db:%f\n",tmp_magnitude);
     		double sum = 0.0f;
-    		for(int i=0;i<effect_fft_samples/2;i++)
+    		for(unsigned int i=0;i<effect_fft_samples/2;i++)
     		{
 	 		    double tmp_bin_magnitude = sqrt(effect_fft_out[i][0]*effect_fft_out[i][0] + effect_fft_out[i][1]*effect_fft_out[i][1]);
 			    tmp_bin_magnitude = 10./log(10.) * log(tmp_bin_magnitude + 1e-6);
