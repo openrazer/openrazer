@@ -17,25 +17,27 @@
 -->
 <html>
 <head>
-  <link href="chroma_controller.css" rel="stylesheet" media="screen">
+    <link href="chroma_controller.css" rel="stylesheet" media="screen">
 </head>
 <body>
-  <div class="header">
-    <h3 id="title"></h3>
-  </div>
-  <div class="content">
+<div class="header">
+    <h3 id="page-header"></h3>
+</div>
+<div class="content">
 
-  <!--###########################################################################################-->
+    <!--###########################################################################################-->
     <!-- Keyboard Not Detected -->
     <div hidden id="not_detected" class="center" class="menu_area">
-      <img src="img/no_chroma.png"/>
-      <h2>BlackWidow Chroma Keyboard Not Detected</h2>
-      <p>Please plug it in to continue.</p>
-      <br>
-      <a id="ignore-no-connection" onclick="" hidden>Ignore and continue anyway</a>
+        <img src="img/no_chroma.png"/>
+
+        <h2>BlackWidow Chroma Keyboard Not Detected</h2>
+
+        <p>Please plug it in to continue.</p>
+        <br>
+        <a id="ignore-no-connection" onclick="" hidden>Ignore and continue anyway</a>
     </div>
 
-  <!--###########################################################################################-->
+    <!--###########################################################################################-->
     <!-- Main Menu Screen -->
     <div hidden id="main_menu" class="menu_area">
       <div class="left">
@@ -140,96 +142,101 @@
             <!-- Generated list from config folder -->
         </select>
         <div class="left" style="width:auto">
-          <a id="profiles-activate" class="btn btn-disabled" onclick="cmd('profile-activate?'+profileName)">Activate</a>
+          <a id="profiles-activate" class="btn btn-disabled" onclick="profile_activate()">Activate</a>
+            </div>
+            <div class="right" style="width:auto;text-align:right">
+                <a id="profiles-new" class="btn" onclick="profile_new()">New</a>
+                <a id="profiles-edit" class="btn btn-dim btn-disabled" onclick="profile_edit()">Edit</a>
+                <a id="profiles-delete" class="btn btn-dim btn-disabled" onclick="profile_del()">Delete</a>
+            </div>
         </div>
-        <div class="right" style="width:auto;text-align:right">
-          <a id="profiles-new" class="btn" onclick="profile_new()">New</a>
-          <a id="profiles-edit" class="btn btn-dim btn-disabled" onclick="cmd('profile-edit?'+profileName)">Edit</a>
-          <a id="profiles-delete" class="btn btn-dim btn-disabled" onclick="profile_del(profileName)">Delete</a>
-        </div>
-      </div>
     </div>
 
-  <!--###########################################################################################-->
+    <!--###########################################################################################-->
     <!-- Preferences Menu -->
     <div hidden id="preferences" class="menu_area">
-      <p>Adjust settings for the Chroma Controller application.</p>
-      <!-- FIXME: Incomplete -->
+        <p>Adjust settings for the Chroma Controller application.</p>
+        <!-- FIXME: Incomplete -->
     </div>
 
-  <!--###########################################################################################-->
+    <!--###########################################################################################-->
     <!-- Edit Profile Menu -->
     <div hidden id="profile_editor" class="menu_area">
-      <div id="edit-panel">
-        <div id="rgb_tmp">
-          <table>
-            <tr>
-              <td>Colour: </td><td><div id="rgb_tmp_preview" class="color-preview" style="background-color:rgba(0,255,0,1)"></div></td>
-              <td><a class="btn" onclick="cmd('ask-color?rgb_tmp')">Custom...</a></td>
-            </tr>
-            <tr>
-              <td></td>
-              <td colspan="2">
-                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?255?255')" style="background-color:#FFFFFF"></a>
-                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?0?0')" style="background-color:#FF0000"></a>
-                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?165?0')" style="background-color:#FFA500"></a>
-                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?255?0')" style="background-color:#FFFF00"></a>
-                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?0?255?0')" style="background-color:#00FF00"></a>
-                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?0?255?255')" style="background-color:#00FFFF"></a>
-                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?0?0?255')" style="background-color:#0000FF"></a>
-                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?128?0?128')" style="background-color:#800080"></a>
-                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?0?255')" style="background-color:#FF00FF"></a>
-              </td>
-            </tr>
-          </table>
+        <div id="edit-panel">
+            <div id="rgb_tmp">
+                <table>
+                    <tr>
+                        <td>Colour:</td>
+                        <td>
+                            <div id="rgb_tmp_preview" class="color-preview" style="background-color:rgba(0,255,0,1)"></div>
+                        </td>
+                        <td><a class="btn" onclick="cmd('ask-color?rgb_tmp')">Custom...</a></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td colspan="2">
+                            <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?255?255')" style="background-color:#FFFFFF"></a>
+                            <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?0?0')" style="background-color:#FF0000"></a>
+                            <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?165?0')" style="background-color:#FFA500"></a>
+                            <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?255?0')" style="background-color:#FFFF00"></a>
+                            <a class="color-icon" onclick="cmd('set-color?rgb_tmp?0?255?0')" style="background-color:#00FF00"></a>
+                            <a class="color-icon" onclick="cmd('set-color?rgb_tmp?0?255?255')" style="background-color:#00FFFF"></a>
+                            <a class="color-icon" onclick="cmd('set-color?rgb_tmp?0?0?255')" style="background-color:#0000FF"></a>
+                            <a class="color-icon" onclick="cmd('set-color?rgb_tmp?128?0?128')" style="background-color:#800080"></a>
+                            <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?0?255')" style="background-color:#FF00FF"></a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div style="vertical-align:middle;">
+                <br>
+
+                <div class="left">
+                    <p><span id="current_mode"><!-- Changed in JS --></span></p>
+                </div>
+                <div class="right">
+                    <p>
+                        <a class="btn" onclick="set_mode('set')">Set</a>
+                        <a class="btn" onclick="set_mode('picker')">Picker</a>
+                        <a class="btn" onclick="set_mode('clear')">Clear</a>
+                    </p>
+                </div>
+            </div>
         </div>
-        <div style="vertical-align:middle;">
-          <br>
-          <div class="left">
-            <p><span id="current_mode"><!-- Changed in JS --></span></p>
-          </div>
-          <div class="right">
-            <p>
-              <a class="btn" onclick="set_mode('set')">Set</a>
-              <a class="btn" onclick="set_mode('picker')">Picker</a>
-              <a class="btn" onclick="set_mode('clear')">Clear</a>
-            </p>
-          </div>
+        <div id="keyboard-container">
+            <div id="keyboard-div" class="center"></div>
         </div>
-      </div>
-      <div id="keyboard" class="center">
-        <!-- Preferences determine keyboard layout. E.g. "en-gb" -->
-      </div>
     </div>
 
-  </div>
-  <!--###########################################################################################-->
-  <div class="footer">
+</div>
+<!--###########################################################################################-->
+<div class="footer">
     <div class="left">
-      <!-- <p>Status: <span id="status" class="status-detected">Connected</span></p> -->
+        <!-- <p>Status: <span id="status" class="status-detected">Connected</span></p> -->
     </div>
     <div class="right">
-      <!-- Main Menu -->
-      <!--a style="display: none;" class="btn" | id="pref-open"  onclick="cmd('pref-open')">Preferences</a-->
+        <!-- Main Menu -->
+        <!--a style="display: none;" class="btn" | id="pref-open"  onclick="cmd('pref-open')">Preferences</a-->
 
-      <!-- Not Connected Page -->
-      <a style="display: none;" class="btn" | id="retry" onclick="cmd('check-again')">Retry</a>
+        <!-- Not Connected Page -->
+        <a style="display: none;" class="btn" id="retry" onclick="cmd('check-again')">Retry</a>
 
-      <!-- Shared -->
-      <a style="display: none;" class="btn" | id="cancel" onclick="cmd('cancel-changes')">Cancel</a>
+        <!-- Shared -->
+        <a style="display: none;" class="btn" id="cancel" onclick="cmd('cancel-changes')">Cancel</a>
 
-      <!-- Edit Profile Page -->
-      <!--a style="display: none;" class="btn" | id="edit-preview" onclick="cmd('profile-preview')">Preview</a-->
-      <a style="display: none;" class="btn" | id="edit-save" onclick="cmd('profile-save')">Save Changes</a>
+        <!-- Edit Profile Page -->
+        <!--a style="display: none;" class="btn" | id="edit-preview" onclick="cmd('profile-preview')">Preview</a-->
+        <a style="display: none;" class="btn" id="edit-save" onclick="cmd('profile-save')">Save Changes</a>
 
-      <!-- Preferences -->
-      <a style="display: none;" class="btn" | id="pref-save" onclick="cmd('pref-save')">Save Changes</a>
+        <!-- Preferences -->
+        <a style="display: none;" class="btn" id="pref-save" onclick="cmd('pref-save')">Save Changes</a>
 
-      <!-- Global -->
-      <a style="display: none;" class="btn" | id="close-window" onclick="cmd('quit')">Close</a>
+        <!-- Global -->
+        <a style="display: none;" class="btn" id="close-window" onclick="cmd('quit')">Close</a>
     </div>
-  </div>
-  <script src="lib/jquery-2.1.4.min.js"></script>
-  <script src="chroma_controller.js"></script>
+</div>
+<script src="lib/jquery-2.1.4.min.js"></script>
+<script src="lib/snap.svg-min.js"></script>
+<script src="chroma_controller.js"></script>
 </body>
 </html>

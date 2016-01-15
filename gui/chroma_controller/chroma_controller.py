@@ -44,24 +44,24 @@ class ChromaController(object):
             self.webkit.execute_script('$("#' + element + '").hide()')
 
         if page == 'main_menu':
-            self.webkit.execute_script('changeTitle("Configuration Menu")')
-            self.webkit.execute_script('smoothFade(".menu_area",'+page+')')
+            self.webkit.execute_script('change_header("Configuration Menu")')
+            self.webkit.execute_script('smooth_fade(".menu_area",'+page+')')
             self.webkit.execute_script('$("#close-window").show()')
             self.webkit.execute_script('$("#pref-open").show()')
             self.refresh_profiles_list()
 
         elif page == 'not_detected':
-            self.webkit.execute_script('changeTitle("Keyboard Not Detected")')
+            self.webkit.execute_script('change_header("Keyboard Not Detected")')
 
         elif page == 'profile_editor':
-            self.webkit.execute_script('changeTitle("Edit ' + self.profiles.get_active_profile_name() + '")')
-            self.webkit.execute_script('smoothFade("#main_menu","#profile_editor")')
+            self.webkit.execute_script('change_header("Edit ' + self.profiles.get_active_profile_name() + '")')
+            self.webkit.execute_script('smooth_fade("#main_menu","#profile_editor")')
             self.webkit.execute_script('$("#cancel").show()')
             self.webkit.execute_script('$("#edit-preview").show()')
             self.webkit.execute_script('$("#edit-save").show()')
 
         elif page == 'preferences':
-            self.webkit.execute_script('changeTitle("Preferences")')
+            self.webkit.execute_script('change_header("Preferences")')
             self.webkit.execute_script('$("#cancel").show()')
             self.webkit.execute_script('$("#pref-save").show()')
 
@@ -95,12 +95,6 @@ class ChromaController(object):
         ## FIXME: Unimplemented: Default starting colour.
         #~ webkit.execute_script('$("#rgb_primary_preview").css("background-color","rgba('+str(rgb_primary_red)+','+str(rgb_primary_green)+','+str(rgb_primary_blue)+',1.0)")')
 
-        ## Write keyboard
-        keyboard_layout_ffile = open(LOCATION_DATA+'/layouts/'+layout+'.html','r')
-        for line in keyboard_layout_ffile:
-            if '\n' == line[-1]:
-                self.webkit.execute_script("$('#keyboard').append('"+line.split('\n')[0]+"')")
-        print("Loaded keyboard layout '"+layout+"'")
 
     def refresh_profiles_list(self):
         self.webkit.execute_script('$("#profiles_list").html("")')
@@ -251,7 +245,14 @@ class ChromaController(object):
                 self.process_command('effect-reactive?auto')
 
         ## Opening different pages
-        elif command == 'cancel-changes':
+        elif command.startswith('cancel-changes'):
+            if command.find('?') > -1:
+                command, cancel_type, cancel_args = command.split('?')
+
+                if cancel_type == "new-profile":
+                    self.profiles.remove_profile(cancel_args, del_from_fs=False)
+
+                self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes')\"})")
             self.show_menu('main_menu')
 
         elif command == 'pref-open':
@@ -264,61 +265,59 @@ class ChromaController(object):
 
         elif command.startswith('profile-edit'):
             profile_name = command.split('profile-edit?')[1].replace('%20', ' ')
+            self.webkit.execute_script("keyboard_obj.set_layout(\"en-gb\")")
 
             if len(profile_name) > 0:
-                # Clear any existing colours / array memory
-                cleared_text = 'rgb(128,128,128)'
-                cleared_border = 'rgb(70,70,70)'
-
                 self.profiles.set_active_profile(profile_name)
-
-                for posX in range(0,21):
-                    for posY in range(0,5):
-                        self.webkit.execute_script('$("#x'+str(posX)+'-y'+str(posY)+'").css("border","2px solid '+cleared_border+'")')
-                        self.webkit.execute_script('$("#x'+str(posX)+'-y'+str(posY)+'").css("color","'+cleared_text+'")')
 
                 for pos_y, row in enumerate(self.profiles.get_profile(profile_name).get_rows_raw()):
                     for pos_x, rgb in enumerate(row):
-                        rgb_css = 'rgb({0},{1},{2})'.format(rgb.red, rgb.green, rgb.blue)
-                        self.webkit.execute_script('$("#x{0}-y{1}").css("border","2px solid {2}")'.format(pos_x, pos_y, rgb_css))
-                        self.webkit.execute_script('$("#x{0}-y{1}").css("color","{2}")'.format(pos_x, pos_y, rgb_css))
+
+                        js_string = "keyboard_obj.set_key_colour({0},{1},\"#{2:02X}{3:02X}{4:02X}\")".format(pos_y, pos_x, rgb.red, rgb.green, rgb.blue)
+                        self.webkit.execute_script(js_string)
+
+                # IF BLACKWIDOW ULTIMATE < 2016
+                # OR BLACKWIDOW CHROMA
+                # disable space key and FN
+
+                self.webkit.execute_script("keyboard_obj.disable_key(5,7)")
+                self.webkit.execute_script("keyboard_obj.disable_key(5,12)")
+
 
                 self.show_menu('profile_editor')
 
         elif command.startswith('set-key'):
             # Replace any existing occurances first
-            self.process_command('clear-key?'+command.split('?')[1]+'?'+command.split('?')[3])
 
             # Parse position/colour information
             command = command.replace('%20',' ')
-            posX = command.split('?')[1].strip('x').split('-')[0]
-            posY = command.split('?')[1].split('-y')[1]
-            color = command.split('?')[2]
-            key_id = command.split('?')[3]
+            row = int(command.split('?')[1])
+            col = int(command.split('?')[2])
+            color = command.split('?')[3]
+
             red = int(color.strip('rgb()').split(',')[0])
-            green =int(color.strip('rgb()').split(',')[1])
+            green = int(color.strip('rgb()').split(',')[1])
             blue = int(color.strip('rgb()').split(',')[2])
             rgb = (red, green, blue)
 
             # Write to memory
-            self.profiles.get_active_profile().set_key_colour(key_id, rgb)
+            self.profiles.get_active_profile().set_key_colour(row, col, rgb)
 
         elif command.startswith('clear-key'):
             command = command.replace('%20',' ')
-            posX = command.split('?')[1].strip('x').split('-')[0]
-            posY = command.split('?')[1].split('-y')[1]
-            key_id = command.split('?')[2]
+            row = int(command.split('?')[1])
+            col = int(command.split('?')[2])
 
-            self.profiles.get_active_profile().reset_key(key_id)
+            self.profiles.get_active_profile().reset_key(row, col)
 
         elif command.startswith('profile-activate'):
             command = command.replace('%20',' ')
             profile_name = command.split('profile-activate?')[1]
-            self.webkit.execute_script('setCursor("wait")')
+            self.webkit.execute_script('set_cursor("wait")')
             self.profiles.activate_profile_from_file(profile_name)
             self.webkit.execute_script('$("#custom").html("Profile - ' + profile_name + '")')
             self.webkit.execute_script('$("#custom").prop("checked", true)')
-            self.webkit.execute_script('setCursor("normal")')
+            self.webkit.execute_script('set_cursor("normal")')
 
         elif command.startswith('profile-del'):
             # TODO: Instead of JS-based prompt, use PyGtk or within web page interface?
@@ -334,6 +333,15 @@ class ChromaController(object):
             # TODO: Instead of JS-based prompt, use PyGtk or within web page interface?
             profile_name = command.split('?')[1].replace('%20', ' ')
             self.profiles.new_profile(profile_name)
+            # Clear editor
+            self.webkit.execute_script("keyboard_obj.set_layout(\"en-gb\")")
+            self.webkit.execute_script("keyboard_obj.clear_all_keys()")
+            self.webkit.execute_script("keyboard_obj.disable_key(5,7)")
+            self.webkit.execute_script("keyboard_obj.disable_key(5,12)")
+
+            self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes?new-profile?" + profile_name + "')\"})")
+
+
             self.show_menu('profile_editor')
 
         elif command == 'profile-save':
@@ -366,7 +374,7 @@ class ChromaController(object):
         w = Gtk.Window(title="Razer BlackWidow Chroma Configuration")
         w.set_wmclass('razer_bcd_utility', 'razer_bcd_utility')
         w.set_position(Gtk.WindowPosition.CENTER)
-        w.set_size_request(900, 600)
+        w.set_size_request(1000, 600)
         w.set_resizable(False)
         w.set_icon_from_file(os.path.join(LOCATION_DATA, 'img/app-icon.svg'))
         w.connect("delete-event", Gtk.main_quit)
@@ -398,6 +406,11 @@ class ChromaController(object):
 
         # Create WebKit Container
         self.webkit = WebKit.WebView()
+        settings = WebKit.WebSettings()
+        # Needed so that can perform AJAX on file:// URLs
+        settings.set_property('enable-file-access-from-file-uris', True)
+        self.webkit.set_settings(settings)
+
         sw = Gtk.ScrolledWindow()
         sw.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         sw.add(self.webkit)

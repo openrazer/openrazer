@@ -6,6 +6,7 @@ Supports:
  * Razer Blackwidow Chroma *(all lighting modes)*
  * Razer Blackwidow Tournament Edition
  * Razer Firefly *(all lighting modes)*
+ * Razer Mamba
 
 
 
@@ -91,7 +92,7 @@ On Debian, you can control the driver with `/etc/init.d/razer_bcd `**`ACTION`** 
 
 
 
-## Installation for Non-Debian based distros
+## Installation from source
 
 
  - Install dependencies (libdbus-1-dev,jq)
@@ -99,6 +100,10 @@ On Debian, you can control the driver with `/etc/init.d/razer_bcd `**`ACTION`** 
 
         sudo make -s all install
  - Reboot
+ 
+To uninstall run
+
+        sudo make uninstall
 
 
 
