@@ -23,6 +23,10 @@
 html, body {
     font-family: 'RazerF5', 'Ubuntu', 'DejaVu Sans', sans-serif;
     background-color: #222222;
+    /* Not sure about this but it stops selecting the page (app behaves more app like)
+       But for elements will have to enable selection manually
+     */
+    -webkit-user-select: none;
 }
 
 h1, h2, h3, h4, h5 {
@@ -201,6 +205,7 @@ a {
     cursor: pointer;
     text-decoration: none;
     text-align: center;
+    -webkit-user-select: none;
 }
 
 .btn:hover {

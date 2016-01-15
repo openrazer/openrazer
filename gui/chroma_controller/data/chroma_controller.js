@@ -292,7 +292,7 @@ function Keyboard(keyboard_element_id, keyboard_svg_path) {
 
 
 // Initialise keyboard object
-var keyboard_obj = new Keyboard("keyboard-div", "img/blackwidow-chroma-keyboard-layout.svg");
+var keyboard_obj = new Keyboard("keyboard-div", "img/blackwidow-chroma-keyboard-layout.new.svg");
 var mode;
 
 
