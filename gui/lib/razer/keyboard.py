@@ -153,7 +153,7 @@ class RGB(object):
 
 class KeyboardColour(object):
     """
-    Keybord class which represents the colour state of the keyboard.
+    Keyboard class which represents the colour state of the keyboard.
     """
 
     @staticmethod

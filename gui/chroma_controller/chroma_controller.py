@@ -246,12 +246,13 @@ class ChromaController(object):
 
         ## Opening different pages
         elif command.startswith('cancel-changes'):
-            command, cancel_type, cancel_args = command.split('?')
+            if command.find('?') > -1:
+                command, cancel_type, cancel_args = command.split('?')
 
-            if cancel_type == "new-profile":
-                self.profiles.remove_profile(cancel_args, del_from_fs=False)
+                if cancel_type == "new-profile":
+                    self.profiles.remove_profile(cancel_args, del_from_fs=False)
 
-            self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes')\"})")
+                self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes')\"})")
             self.show_menu('main_menu')
 
         elif command == 'pref-open':
@@ -295,7 +296,7 @@ class ChromaController(object):
             color = command.split('?')[3]
 
             red = int(color.strip('rgb()').split(',')[0])
-            green =int(color.strip('rgb()').split(',')[1])
+            green = int(color.strip('rgb()').split(',')[1])
             blue = int(color.strip('rgb()').split(',')[2])
             rgb = (red, green, blue)
 
