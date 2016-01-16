@@ -35,65 +35,63 @@ class ChromaController(object):
     # Page Switcher
     ##################################################
     def show_menu(self, page):
-        print("Opening menu '"+page+"'")
+        self.current_page = page
+        print("Opening page '" + page + "'")
 
         # Hide all footer buttons
         for element in ['retry', 'edit-save', 'edit-preview', 'cancel', 'close-window', 'pref-open', 'pref-save']:
             self.webkit.execute_script('$("#' + element + '").hide()')
 
         if page == 'main_menu':
-            self.webkit.execute_script('change_header("Configuration Menu")')
-            self.webkit.execute_script('smooth_fade(".menu_area",'+page+')')
-            self.webkit.execute_script('$("#close-window").show()')
-            self.webkit.execute_script('$("#pref-open").show()')
-            self.refresh_profiles_list()
-
-        elif page == 'not_detected':
-            self.webkit.execute_script('change_header("Keyboard Not Detected")')
+            self.webkit.open(os.path.join(LOCATION_DATA, 'chroma_menu.html'))
 
         elif page == 'profile_editor':
-            self.webkit.execute_script('change_header("Edit ' + self.profiles.get_active_profile_name() + '")')
-            self.webkit.execute_script('smooth_fade("#main_menu","#profile_editor")')
-            self.webkit.execute_script('$("#cancel").show()')
-            self.webkit.execute_script('$("#edit-preview").show()')
-            self.webkit.execute_script('$("#edit-save").show()')
+            self.webkit.open(os.path.join(LOCATION_DATA, 'chroma_profiles.html'))
 
         elif page == 'preferences':
-            self.webkit.execute_script('change_header("Preferences")')
-            self.webkit.execute_script('$("#cancel").show()')
-            self.webkit.execute_script('$("#pref-save").show()')
+            self.webkit.open(os.path.join(LOCATION_DATA, 'chroma_preferences.html'))
 
         else:
-            print("Unknown menu '"+page+"'!")
+            print("Unknown menu '" + page + "'!")
 
     ##################################################
     # Page Initialization
     ##################################################
     def page_loaded(self, WebView, WebFrame):
-        # Check if the Chroma is plugged in as soon as the page finishes loading.
-        print("Detecting Chroma Keyboard... ", end='')
-        # FIXME: NOT YET IMPLEMENTED
-        # print('found at ####')
-        print("\nfixme: page_loaded detect chroma keyboard")
-        #  -- If it is, show the main menu.
-        # --  If not, kindly ask the user to do so.
-        self.show_menu('main_menu')
+        print('Running page post-actions for "' + self.current_page + '"...')
+        if self.current_page == 'main_menu':
+            self.webkit.execute_script('instantProfileSwitch = false;') # Unimplemented instant profile change option.
+            self.webkit.execute_script("$('#profiles-activate').show()")
+            self.refresh_profiles_list()
 
-        # Load preferences
-        # FIXME: Not yet implemented!
-        #~ self.preferences('load')
+        elif self.current_page == 'profile_editor':
+            self.webkit.execute_script('change_header("Edit ' + self.open_this_profile + '")')
 
-        self.webkit.execute_script('instantProfileSwitch = false;') # Unimplemented instant profile change option.
-        self.webkit.execute_script("$('#profiles-activate').show()")
+            # Initialize keyboard object.
+            self.webkit.execute_script("keyboard_obj.load();")
+            self.webkit.execute_script("keyboard_obj.set_layout(\"kb-" + self.kb_layout + "\")")
 
-        # Load list of profiles
-        self.refresh_profiles_list()
+            # Load profile into keyboard.
+            profile_name = self.open_this_profile
+            self.profiles.set_active_profile(profile_name)
+            for pos_y, row in enumerate(self.profiles.get_profile(profile_name).get_rows_raw()):
+                for pos_x, rgb in enumerate(row):
+                    js_string = "keyboard_obj.set_key_colour({0},{1},\"#{2:02X}{3:02X}{4:02X}\")".format(pos_y, pos_x, rgb.red, rgb.green, rgb.blue)
+                    self.webkit.execute_script(js_string)
 
-        # Apply preferences
-        ## FIXME: Unimplemented: Default starting colour.
-        #~ webkit.execute_script('$("#rgb_primary_preview").css("background-color","rgba('+str(rgb_primary_red)+','+str(rgb_primary_green)+','+str(rgb_primary_blue)+',1.0)")')
+            # IF BLACKWIDOW ULTIMATE < 2016
+            # OR BLACKWIDOW CHROMA
+            # disable space key and FN
+            self.webkit.execute_script("keyboard_obj.disable_key(5,7)")
+            self.webkit.execute_script("keyboard_obj.disable_key(5,12)")
+
+        else:
+            print('No post actions necessary.')
 
 
+    ##################################################
+    # Reusable Page Functions
+    ##################################################
     def refresh_profiles_list(self):
         self.webkit.execute_script('$("#profiles_list").html("")')
         for profile in self.profiles.get_profiles():
@@ -105,14 +103,15 @@ class ChromaController(object):
     ##################################################
     def process_uri(self, view, frame, net_req, nav_act, pol_dec):
         uri = net_req.get_uri()
-        frame.stop_loading()
 
         if uri.startswith('cmd://'):
+            frame.stop_loading()
             command = uri[6:]
             print("\nCommand: '"+command+"'")
             self.process_command(command)
 
         if uri.startswith('web://'):
+            frame.stop_loading()
             web_url = uri[6:]
             print('fixme:open web browser to URL')
 
@@ -262,31 +261,13 @@ class ChromaController(object):
             self.show_menu('main_menu')
 
         elif command.startswith('profile-edit'):
-            profile_name = command.split('profile-edit?')[1].replace('%20', ' ')
-            self.webkit.execute_script("keyboard_obj.set_layout(\"kb-" + self.kb_layout + "\")")
-
-            if len(profile_name) > 0:
-                self.profiles.set_active_profile(profile_name)
-
-                for pos_y, row in enumerate(self.profiles.get_profile(profile_name).get_rows_raw()):
-                    for pos_x, rgb in enumerate(row):
-
-                        js_string = "keyboard_obj.set_key_colour({0},{1},\"#{2:02X}{3:02X}{4:02X}\")".format(pos_y, pos_x, rgb.red, rgb.green, rgb.blue)
-                        self.webkit.execute_script(js_string)
-
-                # IF BLACKWIDOW ULTIMATE < 2016
-                # OR BLACKWIDOW CHROMA
-                # disable space key and FN
-
-                self.webkit.execute_script("keyboard_obj.disable_key(5,7)")
-                self.webkit.execute_script("keyboard_obj.disable_key(5,12)")
-
-
+            self.open_this_profile = command.split('profile-edit?')[1].replace('%20', ' ')
+            if self.open_this_profile != None:
                 self.show_menu('profile_editor')
+            else:
+                print('Refusing to open empty filename profile.')
 
         elif command.startswith('set-key'):
-            # Replace any existing occurances first
-
             # Parse position/colour information
             command = command.replace('%20',' ')
             row = int(command.split('?')[1])
@@ -422,9 +403,10 @@ class ChromaController(object):
         self.webkit.props.settings.props.enable_default_context_menu = False
 
         # Load page
-        self.webkit.open(os.path.join(LOCATION_DATA, 'chroma_controller.html'))
+        self.current_page = 'main_menu'
+        self.webkit.open(os.path.join(LOCATION_DATA, 'chroma_menu.html'))
 
-        # Process pages once they fully load.
+        # Post-actions after pages fully load.
         self.webkit.connect('load-finished',self.page_loaded)
 
         # Process any commands from the web page.

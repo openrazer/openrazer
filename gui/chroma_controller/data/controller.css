@@ -1,6 +1,6 @@
 /*
  Chroma Controller is free software: you can redistribute it and/or modify
- it under the temms of the GNU General Public License as published by
+ it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
 
@@ -23,9 +23,9 @@
 html, body {
     font-family: 'RazerF5', 'Ubuntu', 'DejaVu Sans', sans-serif;
     background-color: #222222;
-    /* Not sure about this but it stops selecting the page (app behaves more app like)
-       But for elements will have to enable selection manually
-     */
+
+    /* Behave more like an application.
+     * (Some elements may need selection activating manually) */
     -webkit-user-select: none;
 }
 

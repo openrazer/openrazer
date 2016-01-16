@@ -1,6 +1,6 @@
 /*
  Chroma Controller is free software: you can redistribute it and/or modify
- it under the temms of the GNU General Public License as published by
+ it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
 
@@ -14,7 +14,11 @@
 
  Copyright (C) 2015-2016 Luke Horwell <lukehorwell37+code@gmail.com>
                2015-2016 Terry Cain <terry@terrys-home.co.uk>
+
+
+ ** Functions for editing profiles and interactions with keyboard SVG.
  */
+
 
 /**
  * Keyboard class
@@ -22,6 +26,7 @@
  * @param keyboard_element_id {string} ID for container of keyboard
  * @param keyboard_svg_path {string} Path to keyboard SVG
  */
+
 function Keyboard(keyboard_element_id, keyboard_svg_path) {
 
     var keyboard_id = keyboard_element_id;
@@ -262,7 +267,7 @@ function Keyboard(keyboard_element_id, keyboard_svg_path) {
         }
 
         if (!exists) {
-            console.error("Layout \"" + layout + "\" does not exist! Using GB");
+            console.error("Layout \"" + layout + "\" does not exist! Using 'kb-gb'.");
             layout = "kb-gb";
         }
 
@@ -293,66 +298,7 @@ function Keyboard(keyboard_element_id, keyboard_svg_path) {
 
 // Initialise keyboard object
 var keyboard_obj = new Keyboard("keyboard-div", "img/blackwidow-chroma-keyboard-layout.svg");
-var mode;
 
-
-/**
- * Fade in and out between 2 elements
- *
- * @param from {string} Element
- * @param to {string} Element
- */
-function smooth_fade(from, to) {
-    if ($(from).is(":visible") == false) {
-        $(to).fadeIn('fast');
-    } else {
-        $(from).fadeOut('fast');
-        setTimeout(function () {
-            $(to).fadeIn('fast');
-        }, 200);
-    }
-}
-
-/**
- * Change the header of the page.
- *
- * @param text {string} Header text
- */
-function change_header(text) {
-    var header = $('#page-header');
-    header.fadeOut();
-
-    setTimeout(function () {
-        header.fadeIn();
-        header.html(text);
-    }, 400);
-}
-
-/**
- * Sends command to python.
- *
- * @param parameters {string} Command parameters
- */
-function cmd(parameters) {
-    // TODO Change this to use the page title as that is quicker and the title is not used.
-    // If we use the title then we can then split up the main UI into seperate HMTL files
-    // Also will redo the command to pass through JSON as that way there is less
-    // string splitting and can do better communication.
-    window.location.href = 'cmd://' + parameters;
-}
-
-/**
- * Change the cursor of the page.
- *
- * @param type {string} Cursor type
- */
-function set_cursor(type) {
-    if (type == 'normal') {
-        $('html').removeClass('cursor-wait');
-    } else if (type == 'wait') {
-        $('html').addClass('cursor-wait');
-    }
-}
 
 /**
  * onclick function of the keyboard SVG
@@ -384,17 +330,11 @@ function key(elem, row, col)
 }
 
 /**
- * Enable buttons when a profile is clicked
- */
-function profile_list_change() {
-    $('#profiles-activate, #profiles-edit, #profiles-delete').removeClass('btn-disabled');
-}
-
-/**
  * Change the mode of left clicking
  *
  * @param id {string} Mode ID
  */
+var mode;
 function set_mode(id) {
     if (id == 'set') {
         mode = 'set';
@@ -408,62 +348,13 @@ function set_mode(id) {
     }
 }
 
-/**
- * Get the name for a new profile.
- */
-function profile_new() {
-    var dialog_response = window.prompt("Please name your new key profile.");
-    if (dialog_response != null && dialog_response.length > 0) {
-        cmd('profile-new?' + dialog_response);
-    }
-}
-
-/**
- * Edit profile.
- */
-function profile_edit() {
-    var selected_profile = $("#profiles_list option:selected").text();
-    cmd('profile-edit?' + selected_profile);
-}
-
-/**
- * Delete a profile confirmation box
- */
-function profile_del() {
-    var selected_profile = $("#profiles_list option:selected").text();
-
-    var dialog_response = window.confirm("Are you sure you wish to delete '" + selected_profile + "'?");
-    if (dialog_response == true) {
-        cmd('profile-del?' + selected_profile);
-    }
-}
-
-/**
- * Actiavte profile.
- */
-function profile_activate() {
-    var selected_profile = $("#profiles_list option:selected").text();
-    cmd('profile-activate?'+selected_profile);
-}
 
 /**
  * Run once document has loaded
  */
 $(document).ready(function () {
 
-    // Change brightness control
-    $("[type=range]").change(function () {
-        var brightnessRaw = ($(this).val() / 255.0) * 100;
-        $('#brightnessValue').text(Math.round(brightnessRaw) + "%");
-        if (brightnessRaw == 0) {
-            $(this).next().text("Off")
-        }
-        window.location.href = 'cmd://brightness?' + Math.round($(this).val());
-    });
-
-    // Load keyboard
-    keyboard_obj.load();
-
-    // Set key mode
+    // Set initial key mode
     set_mode('set');
+
 });
