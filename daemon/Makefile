@@ -5,6 +5,7 @@ DEBUG_CFLAGS=
 #LDFLAGS=
 #DEBUG_LDFLAGS=
 LIBDBUS=$(shell pkg-config --libs dbus-1 > /dev/null 2>&1 && echo 0)
+LIBFFTW3=$(shell pkg-config --libs fftw3 > /dev/null 2>&1 && echo 0)
 
 ifeq ($(LIBDBUS), 0)
 	LIBS+= `pkg-config --libs dbus-1` 
@@ -68,7 +69,9 @@ fedora_install:
 	install -v -D fx/pez2001_mixer.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_mixer.so
 	install -v -D fx/pez2001_light_blast.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_light_blast.so
 	install -v -D fx/pez2001_progress_bar.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_progress_bar.so
+ifeq ($(LIBFFTW3), 0)
 	install -v -D fx/pez2001_compute_fft.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_compute_fft.so
+endif
 
 install:
 	@echo "\n::\033[32m INSTALLING razer_bcd daemon\033[0m"
@@ -81,7 +84,9 @@ install:
 	cp fx/pez2001_mixer.so /usr/share/razer_bcd/fx
 	cp fx/pez2001_light_blast.so /usr/share/razer_bcd/fx
 	cp fx/pez2001_progress_bar.so /usr/share/razer_bcd/fx
+ifeq ($(LIBFFTW3), 0)
 	cp fx/pez2001_compute_fft.so /usr/share/razer_bcd/fx
+endif
 
 uninstall:
 	@echo "\n::\033[32m REMOVING razer_bcd daemon\033[0m"
