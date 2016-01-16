@@ -310,28 +310,28 @@ def get_keyboard_layout():
     :return: Keyboard layout
     :rtype: str
     """
-    cmd = ["setxkbmap", "-query"]
+    cmd = ['setxkbmap', '-query']
     output = subprocess.check_output(cmd)
 
-    result = "gb"
+    result = 'gb'
 
     if output:
-        output = output.decode("utf-8").splitlines()
-        layout = None
-        variant = None
+        output = output.decode('utf-8').splitlines()
+        layout = 'gb'
+        variant = ''
         for line in output:
-            if line.startswith("layout"):
+            if line.startswith('layout'):
                 layout = line.split(':', 1)[1].strip()
                 if layout.find(',') > -1:
                     layout = layout.split(',')[0]
 
-            elif line.startswith("variant"):
+            elif line.startswith('variant'):
                 variant = line.split(':', 1)[1].strip().split(',')[0]
 
                 if 'latin9' in variant: # Removes some rubbish from ubuntu
                     variant = 'latin9'
 
-        if variant == "":
+        if variant == '':
             result = layout
         else:
             result = layout + '-' + variant
