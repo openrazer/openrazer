@@ -1,4 +1,5 @@
 #include "razer_chroma.h"
+#include <syslog.h>
 
 char *razer_sys_hid_devices_path = "/sys/bus/hid/devices/";
 
@@ -660,10 +661,12 @@ struct razer_chroma *razer_open(void)
 	#ifdef USE_DEBUGGING
 		printf("opening chroma lib\n");
 	#endif
+	syslog(LOG_DEBUG, "looking for chroma devices");
 	if(!razer_find_devices(chroma))
 	{
 		razer_free_devices(chroma);
 		free(chroma);
+		syslog(LOG_DEBUG, "could not find devices");
 		#ifdef USE_DEBUGGING
 			printf("No chroma devices found!");
 		#endif
@@ -672,6 +675,7 @@ struct razer_chroma *razer_open(void)
 	chroma->active_device = list_GetBottom(chroma->devices);
 	//chroma->active_device = list_GetTop(chroma->devices);
 
+	syslog(LOG_DEBUG, "activating device");
 	chroma->sys_mouse_event_path = str_Copy(razer_sys_mouse_event_default_path);
 	chroma->sys_keyboard_event_path = str_Copy(razer_sys_keyboard_event_default_path);
 	chroma->keyboard_input_file = 0;
@@ -690,6 +694,7 @@ void razer_close(struct razer_chroma *chroma)
 	#ifdef USE_DEBUGGING
 		printf("closing chroma lib\n");
 	#endif
+	syslog(LOG_DEBUG, "closing chroma library");
 	chroma->input_handler = NULL;
 	free(chroma->sys_mouse_event_path);
 	free(chroma->sys_keyboard_event_path);
@@ -700,6 +705,7 @@ void razer_close(struct razer_chroma *chroma)
 	razer_close_devices(chroma);
 	razer_free_devices(chroma);
 	free(chroma);
+	syslog(LOG_DEBUG, "closed chroma library");
 }
 
 struct razer_rgb_frame *razer_create_rgb_frame(void)
