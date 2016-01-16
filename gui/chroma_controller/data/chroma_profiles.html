@@ -61,11 +61,11 @@
             <p><span id="current_mode"><!-- Changed in JS --></span></p>
           </div>
           <div class="right">
-            <p>
-              <a class="btn" onclick="set_mode('set')">Set</a>
-              <a class="btn" onclick="set_mode('picker')">Picker</a>
-              <a class="btn" onclick="set_mode('clear')">Clear</a>
-            </p>
+            <span class="right" style="text-align:right">
+              <a class="btn" onclick="set_mode('set')"><span class="fa fa-hand-pointer-o"></span></a>
+              <a class="btn" onclick="set_mode('picker')"><span class="fa fa-eyedropper"></span></a>
+              <a class="btn" onclick="set_mode('clear')"><span class="fa fa-eraser"></span></a>
+            </span>
           </div>
         </div>
       </div>
@@ -80,8 +80,7 @@
     <div class="right">
       <a class="btn" id="cancel" onclick="cmd('cancel-changes')">Cancel</a>
       <!--a style="display: none;" class="btn" | id="edit-preview" onclick="cmd('profile-preview')">Preview</a-->
-      <a class="btn" id="edit-save" onclick="cmd('profile-save')">Save Changes</a>
-
+      <a class="btn" id="edit-save" onclick="cmd('profile-save')"><span class="fa fa-check"></span> Save</a>
     </div>
   </div>
 

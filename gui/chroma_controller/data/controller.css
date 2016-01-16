@@ -141,6 +141,11 @@ a {
     font-size: 12px;
 }
 
+.mode-text {
+  color: #06FF00;
+  font-weight: bold;
+}
+
 /************************
    Footer
 *************************/

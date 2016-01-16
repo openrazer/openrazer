@@ -183,7 +183,7 @@ class ChromaController(object):
         elif command == 'enable-marco-keys':
             self.daemon.marco_keys(True)
             self.webkit.execute_script('$("#marco-keys-enable").addClass("btn-disabled")')
-            self.webkit.execute_script('$("#marco-keys-enable").html("Marco Keys In Use")')
+            self.webkit.execute_script('$("#marco-keys-enable").html("In Use")')
 
         elif command == 'gamemode-enable':
             self.daemon.game_mode(True)

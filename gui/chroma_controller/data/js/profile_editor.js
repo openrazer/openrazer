@@ -338,13 +338,13 @@ var mode;
 function set_mode(id) {
     if (id == 'set') {
         mode = 'set';
-        $('#current_mode').html("<b>Set</b> - Click on a key to assign a colour here.");
+        $('#current_mode').html("<b class='mode-text'>Set</b> - Click on a key to assign a colour here.");
     } else if (id == 'picker') {
         mode = 'picker';
-        $('#current_mode').html("<b>Picker</b> - Click on a key to grab its colour.");
+        $('#current_mode').html("<b class='mode-text'>Picker</b> - Click on a key to grab its colour.");
     } else if (id == 'clear') {
         mode = 'clear';
-        $('#current_mode').html("<b>Clear</b> - Click on a key to clear.");
+        $('#current_mode').html("<b class='mode-text'>Clear</b> - Click on a key to clear.");
     }
 }
 
