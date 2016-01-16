@@ -107,7 +107,7 @@ struct razer_daemon *daemon_open(void)
 		daemon_register_lib(daemon,blib);
 
 	//daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,2),-1,-1,0,"First Render Node","Default Render Node");
-	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,11),-1,-1,0,"First Render Node","Default Render Node");
+	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,12),-1,-1,0,"First Render Node","Default Render Node");
 	daemon_register_render_node(daemon,daemon->render_node);
 	daemon_compute_render_nodes(daemon);
 	daemon_connect_frame_buffer(daemon,daemon->render_node);

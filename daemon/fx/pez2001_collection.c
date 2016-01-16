@@ -376,6 +376,73 @@ int effect9_update(struct razer_fx_render_node *render)
 }
 
 
+struct razer_effect *effect_profile = NULL;
+struct razer_rgb_frame *effect_profile_frame = NULL;
+
+
+int effect_profile_update(struct razer_fx_render_node *render)
+{
+	/*struct razer_rgb color;
+	//struct razer_chroma *chroma = render->daemon->chroma;
+	int x,y;
+	for(x=0;x<22;x++)
+		for(y=0;y<6;y++)
+		{
+			color.r = (count+x)*(255/22);
+			color.g = (count-x)*(255/22);
+			color.b = (count+y)*(255/22);
+			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&color,render->opacity);
+			render->output_frame->update_mask |= 1<<y;
+		}*/
+	razer_mix_frames(render->output_frame,effect_profile_frame,1.0f-render->opacity);
+	return(1);
+}
+
+int effect_profile_reset(struct razer_fx_render_node *render)
+{
+	FILE *effect_profile_file = NULL;
+	//reopen input file
+	char *filename = daemon_get_parameter_string(daemon_effect_get_parameter_by_index(render->effect,0));
+	effect_profile_file = fopen(filename,"rb");
+	if(!strlen(filename))
+	{
+		#ifdef USE_DEBUGGING
+			printf("(profile) warning: no profile used\n");
+		#endif		
+		return(1);
+	}
+
+	if(!effect_profile_file)
+	{
+		#ifdef USE_DEBUGGING
+			printf("(profile) error: opening profile:%s\n",filename);
+		#endif		
+		return(0);
+	}
+	fseek(effect_profile_file,0,SEEK_END);
+	int fsize = ftell(effect_profile_file);
+	rewind(effect_profile_file);
+	printf("file size:%d,struct size:%d,struct size-int size:%d\n",fsize,sizeof(struct razer_rgb_frame),sizeof(struct razer_rgb_frame)-sizeof(int));
+	effect_profile_frame->update_mask = 255;
+	//if(!fread(effect_profile_frame,sizeof(struct razer_rgb_frame)-sizeof(int),1,effect_profile_file))
+	if(!fread(effect_profile_frame,402,1,effect_profile_file))
+	{
+		#ifdef USE_DEBUGGING
+			printf("(profile) error: reading profile:%s\n",filename);
+		#endif		
+		return(0);
+	}
+		
+
+	fclose(effect_profile_file);
+	#ifdef USE_DEBUGGING
+		printf("(profile) opened profile:%s\n",filename);
+	#endif		
+	return(1);
+}
+
+
+
 /*
 void test_effect6(struct razer_keys *keys)
 {
@@ -863,6 +930,24 @@ void fx_init(struct razer_daemon *daemon)
 	#endif
 
 
+	effect_profile_frame = razer_create_rgb_frame();
+	effect_profile = daemon_create_effect();
+	effect_profile->update = effect_profile_update;
+	effect_profile->reset = effect_profile_reset;
+	effect_profile->name = "Profile display";
+	effect_profile->description = "loads and displays profiles on the keyboard";
+	effect_profile->fps = 15;
+	effect_profile->effect_class = 1;
+	effect_profile->input_usage_mask = RAZER_EFFECT_NO_INPUT_USED;
+	parameter = daemon_create_parameter_string("Effect Profile","Filepath pointing to the profile (STRING)","");
+	daemon_effect_add_parameter(effect_profile,parameter);	
+	int effect_uid = daemon_register_effect(daemon,effect_profile);
+	#ifdef USE_DEBUGGING
+		printf("registered effect: %s (uid:%d)\n",effect_profile->name,effect_profile->id);
+	#endif
+
+
+
 }
 
 #pragma GCC diagnostic pop
@@ -909,5 +994,9 @@ void fx_shutdown(struct razer_daemon *daemon)
 	daemon_unregister_effect(daemon,effect_mix1);
 	daemon_free_parameters(effect_mix1->parameters);
 	daemon_free_effect(effect_mix1);
+
+	daemon_unregister_effect(daemon,effect_profile);
+	daemon_free_parameters(effect_profile->parameters);
+	daemon_free_effect(effect_profile);
 
 }
