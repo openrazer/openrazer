@@ -67,8 +67,8 @@ fedora_install: all
 	install -v -D install_files/desktop/razer_chroma_controller.desktop $(DESTDIR)/usr/share/applications/razer_chroma_controller.desktop
 	
 	# Install Python3 library
-	install -v -d gui/lib/razer $(DESTDIR)/usr/lib/python3/dist-packages/razer
-	cp -v -r gui/lib/razer/* $(DESTDIR)/usr/lib/python3/dist-packages/razer
+	install -v -d gui/lib/razer $(DESTDIR)/usr/lib/python3.4/site-packages/razer
+	cp -v -r gui/lib/razer/* $(DESTDIR)/usr/lib/python3.4/site-packages/razer
 	
 	# Install Tray application
 	install -v -d gui/tray_applet $(DESTDIR)/usr/share/razer_tray_applet
