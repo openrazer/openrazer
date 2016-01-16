@@ -4,6 +4,7 @@ Module to handle custom colours
 
 from gi.repository import Gdk
 import struct
+import subprocess
 
 
 KEY_MAPPING = {
@@ -299,3 +300,40 @@ class KeyboardColour(object):
             binary_blob = binary_blob[66:] # Skip the current row
 
 
+def get_keyboard_layout():
+    """
+    Function to get the keyboard layout
+
+    I can see this becoming an ugly mess as it'll need to support multiple keyboard layouts which have different names
+    on different systems
+
+    :return: Keyboard layout
+    :rtype: str
+    """
+    cmd = ["setxkbmap", "-query"]
+    output = subprocess.check_output(cmd)
+
+    result = "gb"
+
+    if output:
+        output = output.decode("utf-8").splitlines()
+        layout = None
+        variant = None
+        for line in output:
+            if line.startswith("layout"):
+                layout = line.split(':', 1)[1].strip()
+                if layout.find(',') > -1:
+                    layout = layout.split(',')[0]
+
+            elif line.startswith("variant"):
+                variant = line.split(':', 1)[1].strip().split(',')[0]
+
+                if 'latin9' in variant: # Removes some rubbish from ubuntu
+                    variant = 'latin9'
+
+        if variant == "":
+            result = layout
+        else:
+            result = layout + '-' + variant
+
+    return result
