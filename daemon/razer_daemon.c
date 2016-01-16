@@ -1,3 +1,4 @@
+#include <syslog.h>
 #include "razer_daemon.h"
 
 // end_daemon variable written to by function 'got_sigterm_signal' and used by 'daemon_run'
@@ -16,6 +17,7 @@ void daemon_got_sigterm_signal(int signal_number)
 void daemon_kill(struct razer_daemon *daemon,char *error_message)
 {
 	daemon->running = 0;
+	syslog(LOG_DEBUG, "exiting. Error %s", error_message);
 	printf("Exiting daemon.\nError: %s\n",error_message);
 	exit(1);
 }
@@ -39,8 +41,11 @@ struct razer_daemon *daemon_open(void)
  	daemon->is_render_nodes_dirty = 0;
  	daemon->render_nodes = list_Create(0,0);
 
+	syslog(LOG_DEBUG, "opening razer chroma");
+
  	if(!(daemon->chroma=razer_open()))
  	{
+		syslog(LOG_DEBUG, "failed opening razer chroma");
  		free(daemon->chroma);
 		list_Close(daemon->libs);
 		list_Close(daemon->fx_render_nodes);
@@ -49,13 +54,16 @@ struct razer_daemon *daemon_open(void)
  		free(daemon);
 		return(NULL);
 	}
+	
 	#ifdef USE_DBUS
 	 	daemon->dbus = NULL;
 		#ifdef USE_DEBUGGING
 			printf("dbus: opened\n");
 		#endif
+		syslog(LOG_DEBUG, "opening dbus");
 	 	if(!daemon_dbus_open(daemon))
 	 	{
+			syslog(LOG_DEBUG, "failed opened dbus");
 	 		free(daemon->chroma);
 			list_Close(daemon->libs);
 			list_Close(daemon->fx_render_nodes);
@@ -64,8 +72,11 @@ struct razer_daemon *daemon_open(void)
 	 		free(daemon);
 			return(NULL);
 		}
+		
+		syslog(LOG_DEBUG, "advertising dbus");
 	 	if(!daemon_dbus_announce(daemon))
 	 	{
+			syslog(LOG_DEBUG, "failed advertising dbus");
  			free(daemon->chroma);
 			list_Close(daemon->libs);
 			list_Close(daemon->fx_render_nodes);
@@ -75,12 +86,14 @@ struct razer_daemon *daemon_open(void)
 			return(NULL);
 		}
 	#endif
+	
 	razer_set_input_handler(daemon->chroma,daemon_input_event_handler);
 	daemon->chroma->tag = daemon;
 	daemon->frame_buffer = razer_create_rgb_frame();
 	daemon->frame_buffer_linked_uid = 0;
 	daemon->return_render_node = NULL; //TODO remember what i wanted to achieve with this variable ... :-)
 
+	syslog(LOG_DEBUG, "clearing chroma keys");
 	razer_set_custom_mode(daemon->chroma);
 	//razer_clear_all(daemon->chroma->keys);
 	razer_clear_all(daemon->chroma->active_device->keys);
@@ -89,6 +102,7 @@ struct razer_daemon *daemon_open(void)
 
 	//TODO Move to configuration options (dbus race condition present)
 
+	syslog(LOG_DEBUG, "loading FX libraries");
 	#ifdef USE_DEBUGGING
 		struct daemon_lib *lib = daemon_load_fx_lib(daemon,"daemon/fx/pez2001_collection_debug.so");
 	#else
@@ -105,12 +119,14 @@ struct razer_daemon *daemon_open(void)
 	#endif
 	if(lib)
 		daemon_register_lib(daemon,blib);
+	syslog(LOG_DEBUG, "loaded 2 FX libraries");
 
 	//daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,2),-1,-1,0,"First Render Node","Default Render Node");
 	daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,12),-1,-1,0,"First Render Node","Default Render Node");
 	daemon_register_render_node(daemon,daemon->render_node);
 	daemon_compute_render_nodes(daemon);
 	daemon_connect_frame_buffer(daemon,daemon->render_node);
+	syslog(LOG_DEBUG, "connected first render node");
 
 	/*daemon->render_node = daemon_create_render_node(daemon,daemon_get_effect(daemon,3),-1,-1,0,"Second Test Render Node","Additional Testing Render Node");
 	daemon_register_render_node(daemon,daemon->render_node);
@@ -122,6 +138,8 @@ struct razer_daemon *daemon_open(void)
 	memset(&sigterm_action, 0, sizeof(struct sigaction));
 	sigterm_action.sa_handler = daemon_got_sigterm_signal;
 	sigaction(SIGTERM, &sigterm_action, NULL);
+	
+	syslog(LOG_DEBUG, "finished init");
 	
  	return(daemon);
 }
@@ -137,6 +155,7 @@ void daemon_close(struct razer_daemon *daemon)
 	list_Close(daemon->effects);
  	razer_close(daemon->chroma);
  	free(daemon);
+ 	syslog(LOG_DEBUG, "closing");
 }
 
 int daemon_update_render_nodes(struct razer_daemon *daemon)
@@ -275,11 +294,14 @@ int daemon_input_event_handler(struct razer_chroma *chroma,struct razer_chroma_e
 
 int daemon_run(struct razer_daemon *daemon)
 {
+	syslog(LOG_DEBUG, "entering render loop");
     while(daemon->running)
 	{
 		unsigned long ticks = razer_get_ticks();
 		if(!daemon->is_paused)
 			daemon_update_render_nodes(daemon);
+		
+		
 		#ifdef USE_DBUS
 			daemon_dbus_handle_messages(daemon);
 		#endif
@@ -400,11 +422,13 @@ void close_sdl_window()
 const char *dc_helpmsg = "razer_bcd\n\
 \n\
 Arguments:\n\
-  -f, --foreground	Don't daemonize. Run in foreground\n\
-  -p, --pid-file    File to write PID to\n\
+  -f,      --foreground         Don't daemonize. Run in foreground\n\
+  -p file, --pid-file file      File to write PID to\n\
 \
-  -h, --help        Display this help and exit\n\
-  -v, --verbose     Turn on verbose output\n\
+  -h,       --help              Display this help and exit\n\
+            --verbose=level     Turn on verbose output\n\
+                                1 Alert, 2 Critical, 3 Error, 4 Warning\n\
+                                5 Notice, 6 Info, 7 Debug\n\
 \n\
 \n\
       Report bugs to <pez2001@voyagerproject.de>.\n";
@@ -415,7 +439,7 @@ struct daemon_options parse_args(int argc,char *argv[]) {
 
 	struct daemon_options options;
 	options.daemonize = 1;
-	options.verbose = 0;
+	options.verbose = 1;
 	options.pid_file = NULL;
 	options.keyboard_input_file = NULL;
 	options.mouse_input_file = NULL;
@@ -423,8 +447,8 @@ struct daemon_options parse_args(int argc,char *argv[]) {
 	struct option long_options[] =
 	{
 		// No arguments
-		{"verbose", no_argument,        0, 'v'},
-		{"foreground", no_argument,     0, 'f'},
+		{"verbose", required_argument, 0, 'v'},
+		{"foreground", no_argument, 0, 'f'},
 		{"help", no_argument, 0, 'h'},
 		// Have arguments
 		{"pid-file", required_argument, 0, 'p'},
@@ -470,7 +494,10 @@ struct daemon_options parse_args(int argc,char *argv[]) {
 				break;
 
 			case 'v':
-				options.verbose = 1;
+				if (optarg)
+				{
+					options.verbose = atoi(optarg);
+				}
 				break;
 
 			case 'f':
@@ -540,18 +567,27 @@ int daemonize(char* pid_file)
 	return(1);
 }
 
+void setup_logging(int verbose) {
+	openlog("razer_daemon", LOG_CONS | LOG_NOWAIT, LOG_DAEMON);
+	setlogmask(LOG_UPTO (verbose));
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 int main(int argc,char *argv[])
 {
 	struct daemon_options options = parse_args(argc, argv);
+	
+	setup_logging(options.verbose);
 
 	if(options.daemonize)
 	{
+		syslog(LOG_INFO, "started");
 		printf("Starting razer blackwidow chroma daemon as a daemon\n");
 		daemonize(options.pid_file);
 	} else {
+		syslog(LOG_INFO, "started in foreground");
 		printf("Starting razer blackwidow chroma daemon in the foreground\n");
 		if(options.pid_file != NULL)
 		{
@@ -562,6 +598,7 @@ int main(int argc,char *argv[])
 	struct razer_daemon *daemon=NULL;
 	if(!(daemon=daemon_open()))
 	{
+		syslog(LOG_INFO, "failed to start");
 		printf("razer_bcd: error initializing daemon\n");
 		return(1);
 	}
