@@ -1,6 +1,7 @@
 LIBS=-lm -ldl
 CFLAGS=
 DEBUG_CFLAGS=
+DESTDIR?=/
 #LDFLAGS=
 #DEBUG_LDFLAGS=
 LIBDBUS=$(shell pkg-config --libs dbus-1 > /dev/null 2>&1 && echo 0)
@@ -60,6 +61,9 @@ install:
 	@echo "\n::\033[32m INSTALLING razer_bcd daemon controller\033[0m"
 	@echo "======================================="
 	@cp razer_bcd_controller /usr/sbin
+	
+fedora_install:
+	install -v -D razer_bcd_controller $(DESTDIR)/usr/sbin/razer_bcd_controller
 
 uninstall:
 	@echo "\n::\033[32m REMOVING razer_bcd daemon controller\033[0m"

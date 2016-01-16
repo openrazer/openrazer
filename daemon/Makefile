@@ -1,5 +1,6 @@
 LIBS=-lm -ldl
 CFLAGS=
+DESTDIR?=/
 DEBUG_CFLAGS=
 #LDFLAGS=
 #DEBUG_LDFLAGS=
@@ -60,6 +61,14 @@ daemon_fx:
 
 daemon_fx_clean: 
 	make -C fx clean 
+
+fedora_install:
+	install -v -D razer_bcd $(DESTDIR)/usr/sbin/razer_bcd
+	install -v -D fx/pez2001_collection.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_collection.so
+	install -v -D fx/pez2001_mixer.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_mixer.so
+	install -v -D fx/pez2001_light_blast.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_light_blast.so
+	install -v -D fx/pez2001_progress_bar.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_progress_bar.so
+	install -v -D fx/pez2001_compute_fft.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_compute_fft.so
 
 install:
 	@echo "\n::\033[32m INSTALLING razer_bcd daemon\033[0m"
