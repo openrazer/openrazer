@@ -60,7 +60,7 @@ fedora_install: all
 	# Copy over systemd config
 	mkdir -p $(DESTDIR)/etc/systemd/system/
 	install -v -D install_files/systemd/razer_bcd.service $(DESTDIR)/usr/lib/systemd/system/razer_bcd.service
-	ln -s /usr/lib/systemd/system/razer_bcd.service $(DESTDIR)/etc/systemd/system/razer_bcd.service
+	ln -f -s /usr/lib/systemd/system/razer_bcd.service $(DESTDIR)/etc/systemd/system/razer_bcd.service
 	
 	# Install application entries	
 	install -v -D install_files/desktop/razer_tray_applet.desktop $(DESTDIR)/usr/share/applications/razer_tray_applet.desktop
