@@ -298,6 +298,9 @@ class ChromaController(object):
             self.webkit.execute_script('$("#custom").prop("checked", true)')
             self.webkit.execute_script('set_cursor("normal")')
 
+        elif command == 'profile-preview':
+            self.profiles.activate_profile_from_memory()
+
         elif command.startswith('profile-del'):
             # TODO: Instead of JS-based prompt, use PyGtk or within web page interface?
             profile_name = command.split('?')[1].replace('%20', ' ')
@@ -534,6 +537,11 @@ class ChromaProfiles(object):
             keyboard = razer.keyboard.KeyboardColour()
             keyboard.get_from_total_binary(payload)
             self.daemon.set_custom_colour(keyboard)
+
+    def activate_profile_from_memory(self):
+        profile_name = self.get_active_profile_name()
+        print("Applying profile '{0}' from memory...".format(profile_name))
+        print('fixme:activate_profile_from_memory')
 
     @staticmethod
     def get_profile_from_file(profile_name):
