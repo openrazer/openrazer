@@ -55,7 +55,7 @@ fedora_install: all
 	
 	# Install bash helper functions
 	install -v -D install_files/share/bash_keyboard_functions.sh $(DESTDIR)/usr/share/razer_bcd/bash_keyboard_functions.sh
-	install -v -D  install_files/share/bash_keyboard_functions.sh $(DESTDIR)/usr/share/razer_bcd/systemd_helpers.sh
+	install -v -D install_files/share/systemd_helpers.sh $(DESTDIR)/usr/share/razer_bcd/systemd_helpers.sh
 	
 	# Copy over systemd config
 	mkdir -p $(DESTDIR)/etc/systemd/system/
@@ -86,6 +86,11 @@ fedora_install: all
 	cp -v driver/*.c $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
 	cp -v driver/*.h $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
 	rm -fv $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/*.mod.c
+	
+	# Set up DKMS
+	/usr/lib/dkms/common.postinst razer_chroma_driver 1.0.0 /usr/share/razer_chroma_driver-dkms
+	modprobe razerkbd
+	modprobe razermouse
 
 	
 
