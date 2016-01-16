@@ -1,4 +1,5 @@
 LIBS=-lm
+DESTDIR?=/
 MAJOR_VERSION=0
 MINOR_VERSION=3
 CSTD=-std=c99
@@ -85,6 +86,12 @@ ifeq ($(LIBDBUS), 0)
 	@echo "\n::\033[32m INSTALLING librazer_chroma_controller.so\033[0m"
 	@echo "===================================="
 	@cp librazer_chroma_controller.so /usr/lib
+endif
+
+fedora_install:
+	install -v -D librazer_chroma.so $(DESTDIR)/usr/lib/librazer_chroma.so
+ifeq ($(LIBDBUS), 0)
+	install -v -D librazer_chroma_controller.so $(DESTDIR)/usr/lib/librazer_chroma_controller.so
 endif
 
 uninstall:
