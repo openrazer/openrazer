@@ -89,9 +89,9 @@ ifeq ($(LIBDBUS), 0)
 endif
 
 fedora_install:
-	install -v -D librazer_chroma.so $(DESTDIR)/usr/lib/librazer_chroma.so
+	install -v -D librazer_chroma.so $(DESTDIR)/usr/lib64/librazer_chroma.so
 ifeq ($(LIBDBUS), 0)
-	install -v -D librazer_chroma_controller.so $(DESTDIR)/usr/lib/librazer_chroma_controller.so
+	install -v -D librazer_chroma_controller.so $(DESTDIR)/usr/lib64/librazer_chroma_controller.so
 endif
 
 uninstall:
