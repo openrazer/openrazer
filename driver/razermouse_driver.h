@@ -22,7 +22,7 @@
 
 /* Each keyboard report has 90 bytes*/
 #define RAZER_REPORT_LEN 0x5A
-
+#define RAZER_MAMBA_ROW_LEN 15
 
 
 #define RAZER_MOUSE_WAIT_MIN_US 600
