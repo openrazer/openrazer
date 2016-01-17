@@ -25,7 +25,7 @@
 #include <linux/usb/input.h>
 #include <linux/hid.h>
 
-#include "razermouse.h"
+#include "razermouse_driver.h"
 
 /*
  * Version Information

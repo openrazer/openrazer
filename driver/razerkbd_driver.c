@@ -27,8 +27,9 @@
 #include <linux/usb/input.h>
 #include <linux/hid.h>
 
+#include "razerkbd_driver.h"
 #include "razercommon.h"
-#include "razerkbd.h"
+
 
 /*
  * Version Information

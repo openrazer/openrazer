@@ -27,8 +27,7 @@
 #include <linux/usb/input.h>
 #include <linux/hid.h>
 
-#include "razerfirefly.h"
-
+#include "razerfirefly_driver.h"
 #include "razercommon.h"
 
 /*
