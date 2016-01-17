@@ -59,7 +59,7 @@ MODULE_LICENSE(DRIVER_LICENSE);
  * Send report to the firefly
  */
 int razer_send_report(struct usb_device *usb_dev,void const *data) {
-    return razer_send_control_msg(usb_dev, data, 0x02, RAZER_FIREFLY_WAIT_MIN_US, RAZER_FIREFLY_WAIT_MAX_US);
+    return razer_send_control_msg(usb_dev, data, 0x00, RAZER_FIREFLY_WAIT_MIN_US, RAZER_FIREFLY_WAIT_MAX_US);
 }
 
 /**
@@ -608,19 +608,20 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
  * Write only is 0220
  * Read and write is 0664
  */
-static DEVICE_ATTR(device_type,    0444, razer_attr_read_device_type,    NULL);
-static DEVICE_ATTR(mode_wave,      0220, NULL,                           razer_attr_write_mode_wave);
-static DEVICE_ATTR(mode_spectrum,  0220, NULL,                           razer_attr_write_mode_spectrum);
-static DEVICE_ATTR(mode_none,      0220, NULL,                           razer_attr_write_mode_none);
-static DEVICE_ATTR(mode_reactive,  0220, NULL,                           razer_attr_write_mode_reactive);
-static DEVICE_ATTR(mode_breath,    0220, NULL,                           razer_attr_write_mode_breath);
-static DEVICE_ATTR(mode_custom,    0220, NULL,                           razer_attr_write_mode_custom);
-static DEVICE_ATTR(mode_static,    0220, NULL,                           razer_attr_write_mode_static);
-static DEVICE_ATTR(temp_clear_row, 0220, NULL,                           razer_attr_write_temp_clear_row);
-static DEVICE_ATTR(set_key_row,    0220, NULL,                           razer_attr_write_set_key_row);
-static DEVICE_ATTR(reset,          0220, NULL,                           razer_attr_write_reset);
 static DEVICE_ATTR(set_brightness, 0664, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
+static DEVICE_ATTR(device_type,    0444, razer_attr_read_device_type,    NULL);
 static DEVICE_ATTR(get_serial,     0444, razer_attr_read_get_serial,     NULL);
+static DEVICE_ATTR(mode_wave,      0220, NULL, razer_attr_write_mode_wave);
+static DEVICE_ATTR(mode_spectrum,  0220, NULL, razer_attr_write_mode_spectrum);
+static DEVICE_ATTR(mode_none,      0220, NULL, razer_attr_write_mode_none);
+static DEVICE_ATTR(mode_reactive,  0220, NULL, razer_attr_write_mode_reactive);
+static DEVICE_ATTR(mode_breath,    0220, NULL, razer_attr_write_mode_breath);
+static DEVICE_ATTR(mode_custom,    0220, NULL, razer_attr_write_mode_custom);
+static DEVICE_ATTR(mode_static,    0220, NULL, razer_attr_write_mode_static);
+static DEVICE_ATTR(temp_clear_row, 0220, NULL, razer_attr_write_temp_clear_row);
+static DEVICE_ATTR(set_key_row,    0220, NULL, razer_attr_write_set_key_row);
+static DEVICE_ATTR(reset,          0220, NULL, razer_attr_write_reset);
+
 
 
 /**

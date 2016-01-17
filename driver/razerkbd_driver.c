@@ -63,8 +63,6 @@ int razer_send_report(struct usb_device *usb_dev,void const *data) {
     return razer_send_control_msg(usb_dev, data, 0x02, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
 }
 
-
-
 /**
  * Set pulsate effect on the keyboard
  *
@@ -323,9 +321,6 @@ int razer_set_custom_mode(struct usb_device *usb_dev)
     report.command = RAZER_BLACKWIDOW_CHROMA_CHANGE_EFFECT; /*change effect command id*/
     report.sub_command = RAZER_BLACKWIDOW_CHROMA_EFFECT_CUSTOM;/*custom mode id*/
     report.command_parameters[0] = 0x01; /*profile index? active ?*/
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_FIREFLY) {
-        report.command_parameters[0] = 0x00; /*profile index? active ?*/
-    }
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev, &report);
     return retval;
@@ -461,15 +456,7 @@ int razer_set_key_row(struct usb_device *usb_dev, unsigned char row_index, unsig
     report.command_parameters[0] = row_index; /*row number*/
     report.command_parameters[1] = 0x00; /*unknown always 0*/
     report.command_parameters[2] = RAZER_BLACKWIDOW_CHROMA_ROW_LEN - 1; /*number of keys in row always 21*/
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_FIREFLY) {
-        report.command = 0x0C; /*set keys command id*/
-        report.sub_command = 0x00;/*set keys mode id*/
-        report.parameter_bytes_num = RAZER_FIREFLY_ROW_LEN * 3 + 5;
-        report.command_parameters[0] = RAZER_FIREFLY_ROW_LEN -1;
-        memcpy(&report.command_parameters[1], row_cols, RAZER_FIREFLY_ROW_LEN * 3);
-    }
-    else
-        memcpy(&report.command_parameters[3], row_cols, (report.command_parameters[2]+1)*3);
+    memcpy(&report.command_parameters[3], row_cols, (report.command_parameters[2]+1)*3);
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev, &report);
     return retval;
@@ -652,44 +639,16 @@ static int razer_raw_event(struct hid_device *hdev,
 }
 
 /**
- * Read device file "test"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
-}
-
-/**
  * Write device file "test"
  *
  * Does nothing
  */
-static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)       
-{                                   
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     razer_test(usb_dev);
-    return count;                           
-}
-
-/**
- * Read device file "reset"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_reset(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
+    return count;
 }
 
 /**
@@ -697,27 +656,12 @@ static ssize_t razer_attr_read_reset(struct device *dev, struct device_attribute
  *
  * Resets the keyboard whenever anything is written
  */
-static ssize_t razer_attr_write_reset(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)       
-{                                   
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+static ssize_t razer_attr_write_reset(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     razer_reset(usb_dev);
-    return count;                           
-}                                   
-
-/**
- * Read device file "macro_keys"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_macro_keys(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
+    return count;
 }
 
 /**
@@ -725,28 +669,12 @@ static ssize_t razer_attr_read_macro_keys(struct device *dev, struct device_attr
  *
  * Enables the macro keys whenever the file is written to
  */
-static ssize_t razer_attr_write_macro_keys(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)       
-{                                   
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+static ssize_t razer_attr_write_macro_keys(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    //int temp = simple_strtoul(buf, NULL, 10);           
     razer_activate_macro_keys(usb_dev);
-    return count;                           
-}
-
-/**
- * Read device file "mode_game"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_mode_game(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
+    return count;
 }
 
 /**
@@ -759,28 +687,13 @@ static ssize_t razer_attr_read_mode_game(struct device *dev, struct device_attri
  * game mode as that keyboard device is missing a super key. A hacky and over-the-top way to disable
  * the super key if you ask me.
  */
-static ssize_t razer_attr_write_mode_game(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)       
-{                                   
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    int temp = simple_strtoul(buf, NULL, 10);           
-    razer_set_game_mode(usb_dev, temp);
-    return count;                           
-}
-
-/**
- * Read device file "mode_pulsate"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_mode_pulsate(struct device *dev, struct device_attribute *attr,
-                char *buf)
+static ssize_t razer_attr_write_mode_game(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    //struct usb_interface *intf = to_usb_interface(dev->parent);
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);
-    return sprintf(buf, "%d\n", 0);
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int temp = simple_strtoul(buf, NULL, 10);
+    razer_set_game_mode(usb_dev, temp);
+    return count;
 }
 
 /**
@@ -788,27 +701,12 @@ static ssize_t razer_attr_read_mode_pulsate(struct device *dev, struct device_at
  *
  * The brightness oscillates between fully on and fully off generating a pulsing effect
  */
-static ssize_t razer_attr_write_mode_pulsate(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)
+static ssize_t razer_attr_write_mode_pulsate(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     razer_set_pulsate_mode(usb_dev);
     return count;
-}
-
-/**
- * Read device file "mode_wave"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_mode_wave(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
 }
 
 /**
@@ -817,56 +715,26 @@ static ssize_t razer_attr_read_mode_wave(struct device *dev, struct device_attri
  * When 1 is written (as a character, 0x31) the wave effect is displayed moving left across the keyboard
  * if 2 is written (0x32) then the wave effect goes right
  */
-static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)       
-{                                   
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    int temp = simple_strtoul(buf, NULL, 10);           
+    int temp = simple_strtoul(buf, NULL, 10);
     razer_set_wave_mode(usb_dev, temp);
-    return count;                           
+    return count;
 }
-
-/**
- * Read device file "mode_spectrum"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_mode_spectrum(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
-}
-
 /**
  * Write device file "mode_spectrum"
  *
  * Specrum effect mode is activated whenever the file is written to
  */
 static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)       
-{                                   
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+               const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     razer_set_spectrum_mode(usb_dev);
-    return count;                           
-}                                   
-
-/**
- * Read device file "mode_none"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_mode_none(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
+    return count;
 }
 
 /**
@@ -877,24 +745,10 @@ static ssize_t razer_attr_read_mode_none(struct device *dev, struct device_attri
 static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attribute *attr,
                const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     razer_set_none_mode(usb_dev);
-    return count;                           
-}                                   
-
-/**
- * Read device file "set_brightness"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
+    return count;
 }
 
 /**
@@ -902,28 +756,13 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
  *
  * Sets the brightness to the ASCII number written to this file.
  */
-static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)       
-{                                   
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    int temp = simple_strtoul(buf, NULL, 10);           
+    int temp = simple_strtoul(buf, NULL, 10);
     razer_set_brightness(usb_dev, (unsigned char)temp);
-    return count;                           
-}                                   
-
-/**
- * Read device file "mode_reactive"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_mode_reactive(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
+    return count;
 }
 
 /**
@@ -931,46 +770,24 @@ static ssize_t razer_attr_read_mode_reactive(struct device *dev, struct device_a
  *
  * Sets reactive mode when this file is written to. A speed byte and 3 RGB bytes should be written
  */
-static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)       
-{                                   
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    //struct razer_rgb color;
     if(count == 4)
     {
         unsigned char speed = (unsigned char)buf[0];
-        //color.r = buf[1];
-        //color.g = buf[2];
-        //color.b = buf[3];
-        //razer_set_reactive_mode(usb_dev,&color,speed);
         razer_set_reactive_mode(usb_dev, (struct razer_rgb*)&buf[1], speed);
     }
-    return count;                           
-}                                   
-
-/**
- * Read device file "mode_breath"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_mode_breath(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
+    return count;
 }
 
 /**
  * Write device file "mode_breath"
  */
-static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)       
-{                                   
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     const char *alt_buf[6] = { 0 };
@@ -988,20 +805,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
         // "Random" colour mode
         razer_set_breath_mode(usb_dev, 0x03, (struct razer_rgb*)&alt_buf[0], (struct razer_rgb*)&alt_buf[3]);
     }
-    return count;                           
-}                                   
-
-/**
- * Read device file "mode_custom"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_mode_custom(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
+    return count;
 }
 
 /**
@@ -1009,28 +813,13 @@ static ssize_t razer_attr_read_mode_custom(struct device *dev, struct device_att
  *
  * Sets the keyboard to custom mode whenever the file is written to
  */
-static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)       
-{                                   
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     razer_reset(usb_dev);
     razer_set_custom_mode(usb_dev);
-    return count;                           
-}                                   
-
-/**
- * Read device file "mode_static"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_mode_static(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
+    return count;
 }
 
 /**
@@ -1038,11 +827,9 @@ static ssize_t razer_attr_read_mode_static(struct device *dev, struct device_att
  *
  * Set the keyboard to static mode when 3 RGB bytes are written
  */
-static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)       
-{                                   
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
@@ -1050,36 +837,19 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         // Set BlackWidow Ultimate to static colour
         razer_set_static_mode_blackwidow_ultimate(usb_dev);
 
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_FIREFLY)
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA)
     {
         // Set BlackWidow Chroma to static colour
-        struct razer_rgb color;
         if(count == 3)
         {
-            color.r = buf[0];
-            color.g = buf[1];
-            color.b = buf[2];
-            razer_set_static_mode(usb_dev, &color);
+            razer_set_static_mode(usb_dev, (struct razer_rgb*)&buf[0]);
         }
 
     } else
     {
         printk(KERN_WARNING "razerkbd: Cannot set static mode for this device");
     }
-    return count;                           
-}                                   
-
-/**
- * Read device file "temp_clear_row"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_temp_clear_row(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
+    return count;
 }
 
 /**
@@ -1087,28 +857,13 @@ static ssize_t razer_attr_read_temp_clear_row(struct device *dev, struct device_
  *
  * Clears a row when an ASCII number is written
  */
-static ssize_t razer_attr_write_temp_clear_row(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)       
-{                                   
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+static ssize_t razer_attr_write_temp_clear_row(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    int temp = simple_strtoul(buf, NULL, 10);           
+    int temp = simple_strtoul(buf, NULL, 10);
     razer_temp_clear_row(usb_dev, temp);
-    return count;                           
-}                                   
-
-/**
- * Read device file "set_key_row"
- *
- * Returns 0 when the file is read
- */
-static ssize_t razer_attr_read_set_key_row(struct device *dev, struct device_attribute *attr,
-                char *buf)                  
-{                                   
-    //struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
-    return sprintf(buf, "%d\n", 0);            
+    return count;
 }
 
 /**
@@ -1116,28 +871,14 @@ static ssize_t razer_attr_read_set_key_row(struct device *dev, struct device_att
  *
  * Writes the colour rows on the keyboard. Takes in all the colours for the keyboard
  */
-static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)       
-{   
-	size_t offset = 0;
-	unsigned char row_index;
-	                                
-    struct usb_interface *intf = to_usb_interface(dev->parent);     
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
+static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    size_t offset = 0;
+    unsigned char row_index;
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     size_t buf_size = RAZER_BLACKWIDOW_CHROMA_ROW_LEN * 3 + 1;
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_FIREFLY)
-        buf_size = RAZER_FIREFLY_ROW_LEN * 3 + 1;
 
-    //if(count != buf_size) {
-    //    printk(KERN_ALERT "Wrong Amount of RGB data provided: %d of %d\n",(int)count, (int)buf_size);
-    //    return -EINVAL;
-    //}
-    //unsigned char row_index = (unsigned char)buf[0];
-    //razer_set_key_row(usb_dev, row_index, (unsigned char*)buf + 1);
-    //return count;
-    
-    //while((offset+buf_size) <= count)
     while(offset < count) {
         if((count-offset) < buf_size) {
             printk(KERN_ALERT "Wrong Amount of RGB data provided: %d of %d\n",(int)(count-offset), (int)buf_size);
@@ -1147,14 +888,8 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
         razer_set_key_row(usb_dev, row_index, (unsigned char*)&buf[offset + 1]);
         offset += buf_size;
     }
-    return count;                           
-    //if(offset<count)
-    //    return 0;
-    //else 
-    //    return count;
-    //    printk(KERN_ALERT "Wrong Amount of RGB data provided: %d of %d\n",(int)(count-offset), (int)buf_size);
-    //return offset;
-}                                   
+    return count;
+}
 
 /**
  * Read device file "device_type"
@@ -1175,9 +910,6 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE)
     {
         write_count = sprintf(buf, "Razer BlackWidow Chroma Tournament Edition\n");
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_FIREFLY)
-    {
-        write_count = sprintf(buf, "Razer Firefly\n");
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
         write_count = sprintf(buf, "Razer BlackWidow Ultimate 2013\n");
@@ -1186,17 +918,6 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         write_count = sprintf(buf, "Unknown Device\n");
     }
     return write_count;
-}
-
-/**
- * Write device file "device_type"
- *
- * Does nothing
- */
-static ssize_t razer_attr_write_device_type(struct device *dev, struct device_attribute *attr,
-               const char *buf, size_t count)
-{
-    return count;
 }
 
 /**
@@ -1215,44 +936,31 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
     return sprintf(buf, "%s\n", &serial_string[0]);
 }
 
-/**
- * Write device file "get_serial"
- *
- * Does nothing
- */
-static ssize_t razer_attr_write_get_serial(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    return count;
-}
-
-
-
-
-
-
-
-
 
 /**
  * Set up the device driver files
+ *
+ * Read only is 0444
+ * Write only is 0220
+ * Read and write is 0664
  */
-static DEVICE_ATTR(device_type,    0664, razer_attr_read_device_type, razer_attr_write_device_type);
-static DEVICE_ATTR(mode_game,      0664, razer_attr_read_mode_game, razer_attr_write_mode_game);
-static DEVICE_ATTR(mode_pulsate,   0664, razer_attr_read_mode_pulsate, razer_attr_write_mode_pulsate);
-static DEVICE_ATTR(mode_wave,      0664, razer_attr_read_mode_wave, razer_attr_write_mode_wave);
-static DEVICE_ATTR(mode_spectrum,  0664, razer_attr_read_mode_spectrum, razer_attr_write_mode_spectrum);
-static DEVICE_ATTR(mode_none,      0664, razer_attr_read_mode_none, razer_attr_write_mode_none);
-static DEVICE_ATTR(mode_reactive,  0664, razer_attr_read_mode_reactive, razer_attr_write_mode_reactive);
-static DEVICE_ATTR(mode_breath,    0664, razer_attr_read_mode_breath, razer_attr_write_mode_breath);
-static DEVICE_ATTR(mode_custom,    0664, razer_attr_read_mode_custom, razer_attr_write_mode_custom);
-static DEVICE_ATTR(mode_static,    0664, razer_attr_read_mode_static, razer_attr_write_mode_static);
-static DEVICE_ATTR(temp_clear_row, 0664, razer_attr_read_temp_clear_row, razer_attr_write_temp_clear_row);
-static DEVICE_ATTR(set_key_row,    0664, razer_attr_read_set_key_row, razer_attr_write_set_key_row);
-static DEVICE_ATTR(reset,          0664, razer_attr_read_reset, razer_attr_write_reset);
-static DEVICE_ATTR(macro_keys,     0664, razer_attr_read_macro_keys, razer_attr_write_macro_keys);
-static DEVICE_ATTR(set_brightness, 0664, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
-static DEVICE_ATTR(get_serial,     0664, razer_attr_read_get_serial, razer_attr_write_get_serial);
-static DEVICE_ATTR(test,           0664, razer_attr_read_test, razer_attr_write_test);
+static DEVICE_ATTR(device_type,    0444, razer_attr_read_device_type, NULL);
+static DEVICE_ATTR(get_serial,     0444, razer_attr_read_get_serial,  NULL);
+static DEVICE_ATTR(mode_game,      0220, NULL, razer_attr_write_mode_game);
+static DEVICE_ATTR(mode_pulsate,   0220, NULL, razer_attr_write_mode_pulsate);
+static DEVICE_ATTR(mode_wave,      0220, NULL, razer_attr_write_mode_wave);
+static DEVICE_ATTR(mode_spectrum,  0220, NULL, razer_attr_write_mode_spectrum);
+static DEVICE_ATTR(mode_none,      0220, NULL, razer_attr_write_mode_none);
+static DEVICE_ATTR(mode_reactive,  0220, NULL, razer_attr_write_mode_reactive);
+static DEVICE_ATTR(mode_breath,    0220, NULL, razer_attr_write_mode_breath);
+static DEVICE_ATTR(mode_custom,    0220, NULL, razer_attr_write_mode_custom);
+static DEVICE_ATTR(mode_static,    0220, NULL, razer_attr_write_mode_static);
+static DEVICE_ATTR(temp_clear_row, 0220, NULL, razer_attr_write_temp_clear_row);
+static DEVICE_ATTR(set_key_row,    0220, NULL, razer_attr_write_set_key_row);
+static DEVICE_ATTR(reset,          0220, NULL, razer_attr_write_reset);
+static DEVICE_ATTR(macro_keys,     0220, NULL, razer_attr_write_macro_keys);
+static DEVICE_ATTR(set_brightness, 0220, NULL, razer_attr_write_set_brightness);
+static DEVICE_ATTR(test,           0220, NULL, razer_attr_write_test);
 
 
 /**
@@ -1406,7 +1114,6 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013) },
     { }
 };
