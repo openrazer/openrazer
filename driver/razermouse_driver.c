@@ -104,7 +104,7 @@ void razer_get_serial(struct usb_device *usb_dev, unsigned char* serial_string)
  * Supported Devices:
  *   Razer Mamba
  */
-int razer_get_battery_level(struct usb_device *usb_dev, unsigned char* serial_string)
+int razer_get_battery_level(struct usb_device *usb_dev)
 {
     struct razer_report response_report;
     struct razer_report request_report;
@@ -149,7 +149,7 @@ int razer_get_battery_level(struct usb_device *usb_dev, unsigned char* serial_st
  * Supported Devices:
  *   Razer Mamba
  */
-int razer_is_charging(struct usb_device *usb_dev, unsigned char* serial_string)
+int razer_is_charging(struct usb_device *usb_dev)
 {
     struct razer_report response_report;
     struct razer_report request_report;
