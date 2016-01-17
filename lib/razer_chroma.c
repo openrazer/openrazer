@@ -1793,7 +1793,7 @@ void razer_convert_ascii_to_pos(unsigned char letter,struct razer_pos *pos)
 
 int razer_device_get_serial(struct razer_chroma_device *device, char* buffer)
 {
-	read_from_device_file(device->serial_filename, buffer, 16);
+	read_from_device_file(device->serial_filename, buffer, 15);
 	
 	return(0);
 }
