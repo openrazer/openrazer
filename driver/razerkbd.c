@@ -156,6 +156,81 @@ int razer_set_pulsate_mode(struct usb_device *usb_dev)
 }
 
 /**
+ * Get the devices serial number
+ *
+ * Makes a request like normal, this must change a variable in the mouse as then we
+ * tell it give us data (same request for get_battery in the mouse driver) and it 
+ * gives us a report.
+ *
+ * Supported Devices:
+ *   Razer Chroma
+ *   Razer BlackWidow Ultimate 2013*
+ * 
+ * *Untested but should work
+ */
+void razer_get_serial(struct usb_device *usb_dev, unsigned char* serial_string)
+{
+	int i = 0;
+    uint report_id = 0x300;
+    uint value = HID_REQ_GET_REPORT;
+    uint index = 0x01;
+    uint size = RAZER_BLACKWIDOW_REPORT_LEN;
+    struct razer_report serial_report;
+    int len;
+    int retval;
+    struct razer_report report;
+
+    memset(&serial_report, 0, sizeof(struct razer_report));
+    razer_prepare_report(&report);
+    
+    report.parameter_bytes_num = 0x16;
+    report.reserved2 = 0x00;
+    report.command = 0x82;
+    report.sub_command = 0x00;
+    report.command_parameters[0] = 0x00;
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_send_report(usb_dev, &report);
+
+    // Now ask for battery level plz
+    len = usb_control_msg(usb_dev, usb_rcvctrlpipe(usb_dev, 0),
+          value,
+          USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN,
+          report_id,
+          index, &serial_report, size, USB_CTRL_SET_TIMEOUT);
+
+    usleep_range(RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US,RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+
+    // Error if report is wrong length
+    if(len != 90)
+    {
+        printk(KERN_WARNING "razerkbd: Unable to get serial. USB Report length: %d\n", len);
+    } else
+    {
+        // Error if report is wrong type
+        if(serial_report.report_start_marker == 0x02 && serial_report.reserved2 == 0x00 &&
+           serial_report.command == 0x82)
+        {
+			unsigned char* pointer = &serial_report.sub_command;
+			for(i = 0; i < 20; ++i)
+			{
+				serial_string[i] = *pointer;
+				++pointer;
+			}
+        } else
+        {
+            printk(KERN_WARNING "razerkbd: Serial Report Incorrect. Num bytes: %d. start: %02x id: %02x num_params: %02x reserved: %02x cmd: %02x subcmd: %02x param1: %02x .\n", len,
+               serial_report.report_start_marker,
+               serial_report.id,
+               serial_report.parameter_bytes_num,
+               serial_report.reserved2,
+               serial_report.command,
+               serial_report.sub_command,
+               serial_report.command_parameters[0]);
+        }
+    }
+}
+
+/**
  * Set game mode on the keyboard
  *
  * Supported by:
@@ -1131,7 +1206,10 @@ static ssize_t razer_attr_read_set_key_row(struct device *dev, struct device_att
  */
 static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_attribute *attr,
                const char *buf, size_t count)       
-{                                   
+{   
+	size_t offset = 0;
+	unsigned char row_index;
+	                                
     struct usb_interface *intf = to_usb_interface(dev->parent);     
     //struct razer_kbd_device *widow = usb_get_intfdata(intf);           
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -1146,14 +1224,14 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
     //unsigned char row_index = (unsigned char)buf[0];
     //razer_set_key_row(usb_dev, row_index, (unsigned char*)buf + 1);
     //return count;
-    size_t offset = 0;
+    
     //while((offset+buf_size) <= count)
     while(offset < count) {
         if((count-offset) < buf_size) {
             printk(KERN_ALERT "Wrong Amount of RGB data provided: %d of %d\n",(int)(count-offset), (int)buf_size);
             return -EINVAL;
         }
-        unsigned char row_index = (unsigned char)buf[offset];
+        row_index = (unsigned char)buf[offset];
         razer_set_key_row(usb_dev, row_index, (unsigned char*)&buf[offset + 1]);
         offset += buf_size;
     }
@@ -1209,6 +1287,31 @@ static ssize_t razer_attr_write_device_type(struct device *dev, struct device_at
     return count;
 }
 
+/**
+ * Read device file "get_serial"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	char serial_string[100] = ""; // Cant be longer than this as report length is 90
+	
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    razer_get_serial(usb_dev, &serial_string[0]);
+    return sprintf(buf, "%s\n", &serial_string[0]);
+}
+
+/**
+ * Write device file "get_serial"
+ *
+ * Does nothing
+ */
+static ssize_t razer_attr_write_get_serial(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return count;
+}
 
 
 
@@ -1239,6 +1342,7 @@ static DEVICE_ATTR(set_key_row,    0664, razer_attr_read_set_key_row, razer_attr
 static DEVICE_ATTR(reset,          0664, razer_attr_read_reset, razer_attr_write_reset);
 static DEVICE_ATTR(macro_keys,     0664, razer_attr_read_macro_keys, razer_attr_write_macro_keys);
 static DEVICE_ATTR(set_brightness, 0664, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
+static DEVICE_ATTR(get_serial,     0664, razer_attr_read_get_serial, razer_attr_write_get_serial);
 static DEVICE_ATTR(test,           0664, razer_attr_read_test, razer_attr_write_test);
 
 
@@ -1295,6 +1399,9 @@ static int razer_kbd_probe(struct hid_device *hdev,
             goto exit_free;
     }
 
+	retval = device_create_file(&hdev->dev, &dev_attr_get_serial);
+    if (retval)
+        goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_device_type);
     if (retval)
         goto exit_free;
@@ -1371,6 +1478,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     }
 
     device_remove_file(&hdev->dev, &dev_attr_mode_game);
+    device_remove_file(&hdev->dev, &dev_attr_get_serial);
     device_remove_file(&hdev->dev, &dev_attr_mode_static);
     device_remove_file(&hdev->dev, &dev_attr_reset);
     device_remove_file(&hdev->dev, &dev_attr_macro_keys);

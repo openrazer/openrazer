@@ -103,6 +103,76 @@ void razer_prepare_report(struct razer_report *report)
    report->reserved2 = 0x03;
 }
 
+/**
+ * Get the devices serial number
+ *
+ * Makes a request like normal, this must change a variable in the mouse as then we
+ * tell it give us data (same request for get_battery) and it gives us a report.
+ *
+ * Supported Devices:
+ *   Razer Mamba
+ */
+void razer_get_serial(struct usb_device *usb_dev, unsigned char* serial_string)
+{
+	int i = 0;
+    uint report_id = 0x300;
+    uint value = HID_REQ_GET_REPORT;
+    uint index = 0x01;
+    uint size = RAZER_REPORT_LEN;
+    struct razer_report serial_report;
+    int len;
+    int retval;
+    struct razer_report report;
+
+    memset(&serial_report, 0, sizeof(struct razer_report));
+    razer_prepare_report(&report);
+    
+    report.parameter_bytes_num = 0x16;
+    report.reserved2 = 0x00;
+    report.command = 0x82;
+    report.sub_command = 0x00;
+    report.command_parameters[0] = 0x00;
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_send_report(usb_dev, &report);
+
+    // Now ask for battery level plz
+    len = usb_control_msg(usb_dev, usb_rcvctrlpipe(usb_dev, 0),
+          value,
+          USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN,
+          report_id,
+          index, &serial_report, size, USB_CTRL_SET_TIMEOUT);
+
+    usleep_range(RAZER_WAIT_MIN_US,RAZER_WAIT_MAX_US);
+
+    // Error if report is wrong length
+    if(len != 90)
+    {
+        printk(KERN_WARNING "razermouse: Unable to get serial. USB Report length: %d\n", len);
+    } else
+    {
+        // Error if report is wrong type
+        if(serial_report.report_start_marker == 0x02 && serial_report.reserved2 == 0x00 &&
+           serial_report.command == 0x82)
+        {
+			unsigned char* pointer = &serial_report.sub_command;
+			for(i = 0; i < 20; ++i)
+			{
+				serial_string[i] = *pointer;
+				++pointer;
+			}
+        } else
+        {
+            printk(KERN_WARNING "razermouse: Serial Report Incorrect. Num bytes: %d. start: %02x id: %02x num_params: %02x reserved: %02x cmd: %02x subcmd: %02x param1: %02x .\n", len,
+               serial_report.report_start_marker,
+               serial_report.id,
+               serial_report.parameter_bytes_num,
+               serial_report.reserved2,
+               serial_report.command,
+               serial_report.sub_command,
+               serial_report.command_parameters[0]);
+        }
+    }
+}
 
 /**
  * Get the battery level
@@ -970,6 +1040,31 @@ static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct d
     return count;
 }
 
+/**
+ * Read device file "get_serial"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	char serial_string[100] = ""; // Cant be longer than this as report length is 90
+	
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    razer_get_serial(usb_dev, &serial_string[0]);
+    return sprintf(buf, "%s\n", &serial_string[0]);
+}
+
+/**
+ * Write device file "get_serial"
+ *
+ * Does nothing
+ */
+static ssize_t razer_attr_write_get_serial(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return count;
+}
 
 
 
@@ -980,21 +1075,20 @@ static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct d
 
 
 
-
-
-static DEVICE_ATTR(mode_static, 0664, razer_attr_read_mode_static, razer_attr_write_mode_static);
-static DEVICE_ATTR(mode_wave, 0664, razer_attr_read_mode_wave, razer_attr_write_mode_wave);
-static DEVICE_ATTR(mode_spectrum, 0664, razer_attr_read_mode_spectrum, razer_attr_write_mode_spectrum);
-static DEVICE_ATTR(mode_reactive, 0664, razer_attr_read_mode_reactive, razer_attr_write_mode_reactive);
-static DEVICE_ATTR(mode_breath, 0664, razer_attr_read_mode_breath, razer_attr_write_mode_breath);
-static DEVICE_ATTR(get_battery, 0664, razer_attr_read_get_battery, razer_attr_write_get_battery);
-static DEVICE_ATTR(is_charging, 0664, razer_attr_read_is_charging, razer_attr_write_is_charging);
-static DEVICE_ATTR(set_wireless_brightness, 0664, razer_attr_read_set_wireless_brightness, razer_attr_write_set_wireless_brightness);
+static DEVICE_ATTR(mode_static,               0664, razer_attr_read_mode_static, razer_attr_write_mode_static);
+static DEVICE_ATTR(mode_wave,                 0664, razer_attr_read_mode_wave, razer_attr_write_mode_wave);
+static DEVICE_ATTR(mode_spectrum,             0664, razer_attr_read_mode_spectrum, razer_attr_write_mode_spectrum);
+static DEVICE_ATTR(mode_reactive,             0664, razer_attr_read_mode_reactive, razer_attr_write_mode_reactive);
+static DEVICE_ATTR(mode_breath,               0664, razer_attr_read_mode_breath, razer_attr_write_mode_breath);
+static DEVICE_ATTR(get_battery,               0664, razer_attr_read_get_battery, razer_attr_write_get_battery);
+static DEVICE_ATTR(get_serial,                0664, razer_attr_read_get_serial, razer_attr_write_get_serial);
+static DEVICE_ATTR(is_charging,               0664, razer_attr_read_is_charging, razer_attr_write_is_charging);
+static DEVICE_ATTR(set_wireless_brightness,   0664, razer_attr_read_set_wireless_brightness, razer_attr_write_set_wireless_brightness);
 static DEVICE_ATTR(set_low_battery_threshold, 0664, razer_attr_read_set_low_battery_threshold, razer_attr_write_set_low_battery_threshold);
-static DEVICE_ATTR(set_idle_time, 0664, razer_attr_read_set_idle_time, razer_attr_write_set_idle_time);
-static DEVICE_ATTR(set_mouse_dpi, 0664, razer_attr_read_set_mouse_dpi, razer_attr_write_set_mouse_dpi);
-static DEVICE_ATTR(set_charging_effect, 0664, razer_attr_read_set_charging_effect, razer_attr_write_set_charging_effect);
-static DEVICE_ATTR(set_charging_colour, 0664, razer_attr_read_set_charging_colour, razer_attr_write_set_charging_colour);
+static DEVICE_ATTR(set_idle_time,             0664, razer_attr_read_set_idle_time, razer_attr_write_set_idle_time);
+static DEVICE_ATTR(set_mouse_dpi,             0664, razer_attr_read_set_mouse_dpi, razer_attr_write_set_mouse_dpi);
+static DEVICE_ATTR(set_charging_effect,       0664, razer_attr_read_set_charging_effect, razer_attr_write_set_charging_effect);
+static DEVICE_ATTR(set_charging_colour,       0664, razer_attr_read_set_charging_colour, razer_attr_write_set_charging_colour);
 
 
 
@@ -1045,6 +1139,9 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     }
 
     retval = device_create_file(&hdev->dev, &dev_attr_get_battery);
+    if (retval)
+        goto exit_free;
+    retval = device_create_file(&hdev->dev, &dev_attr_get_serial);
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_is_charging);
@@ -1123,6 +1220,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
     dev = hid_get_drvdata(hdev);
 
     device_remove_file(&hdev->dev, &dev_attr_get_battery);
+    device_remove_file(&hdev->dev, &dev_attr_get_serial);
     device_remove_file(&hdev->dev, &dev_attr_is_charging);
     device_remove_file(&hdev->dev, &dev_attr_set_wireless_brightness);
     device_remove_file(&hdev->dev, &dev_attr_set_low_battery_threshold);
