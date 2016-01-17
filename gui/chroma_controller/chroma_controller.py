@@ -17,7 +17,7 @@
 # Copyright (C) 2015-2016 Luke Horwell <lukehorwell37+code@gmail.com>
 #               2015-2016 Terry Cain <terry@terrys-home.co.uk>
 
-import os, sys, signal
+import os, sys, signal, json
 from gi.repository import Gtk, Gdk, WebKit
 import razer.daemon_dbus
 import razer.keyboard
@@ -85,6 +85,9 @@ class ChromaController(object):
             self.webkit.execute_script("keyboard_obj.disable_key(5,7)")
             self.webkit.execute_script("keyboard_obj.disable_key(5,12)")
 
+        elif self.current_page == 'preferences':
+            self.preferences.refresh_pref_page(self.webkit);
+
         else:
             print('No post actions necessary.')
 
@@ -112,8 +115,9 @@ class ChromaController(object):
 
         if uri.startswith('web://'):
             frame.stop_loading()
-            web_url = uri[6:]
-            print('fixme:open web browser to URL')
+            web_url = uri[13:]
+            print('Opening web address: "http://' + web_url+ '"')
+            os.system('xdg-open "http://' + web_url + '"')
 
     def process_command(self, command):
         if command == 'quit':
@@ -252,14 +256,26 @@ class ChromaController(object):
                 self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes')\"})")
             self.show_menu('main_menu')
 
+        ## Preferences
         elif command == 'pref-open':
-            self.preferences('load')
             self.show_menu('preferences')
 
-        elif command == 'pref-save':
-            self.preferences('save')
+        elif command.startswith('pref-set?'):
+            # pref-set? <setting> ? <value>
+            setting = command.split('?')[1]
+            value = command.split('?')[2]
+            self.preferences.set_pref(setting, value)
+
+        elif command == 'pref-revert':
+            print('Reverted preferences.')
+            self.preferences.load_pref()
             self.show_menu('main_menu')
 
+        elif command == 'pref-save':
+            self.preferences.save_pref()
+            self.show_menu('main_menu')
+
+        ## Profile Editor / Management
         elif command.startswith('profile-edit'):
             self.open_this_profile = command.split('profile-edit?')[1].replace('%20', ' ')
             if self.open_this_profile != None:
@@ -336,18 +352,16 @@ class ChromaController(object):
 
             self.show_menu('main_menu')
 
+        ## Miscellaneous
+        elif command == 'open-config-folder':
+            os.system('xdg-open "' + SAVE_ROOT + '"')
+
         else:
             print("         ... unimplemented!")
 
     ##################################################
-    # Preferences
+    # Application Initialization
     ##################################################
-    # Load or save preferences?
-    def preferences(self, action):
-
-        # FIXME: Incomplete
-        return
-
     def __init__(self):
         """
         Initialise the class
@@ -377,6 +391,9 @@ class ChromaController(object):
         # Profiles
         self.profiles = ChromaProfiles(self.daemon)
 
+        # Preferences
+        self.preferences = ChromaPreferences()
+
         # "Globals"
         self.kb_layout = razer.keyboard.get_keyboard_layout()
         self.reactive_speed = 1
@@ -384,7 +401,6 @@ class ChromaController(object):
         self.secondary_rgb = razer.keyboard.RGB(0, 0, 255)
         self.current_effect = 'custom'
         self.last_effect = 'unknown'
-
 
         # Create WebKit Container
         self.webkit = WebKit.WebView()
@@ -553,7 +569,74 @@ class ChromaProfiles(object):
 
         return keyboard
 
+class ChromaPreferences(object):
+    #
+    # Documented Settings for JSON
+    #
+    #   live_preview      <true/false>      Activate profiles on keyboard while editing?
+    #   live_switch       <true/false>      Profiles are instantly changed on click?
+    #   activate_on_save  <true/false>      Automatically activate a profile on save?
+    #
 
+    def __init__(self):
+        self.pref_path = os.path.join(SAVE_ROOT, 'preferences.json')
+        self.load_pref();
+
+    def load_pref(self):
+        print('Loading preferences from "' + self.pref_path + "'...")
+        # Does it exist?
+        if not os.path.exists(self.pref_path):
+            self.create_default_config()
+
+        # Load data into memory.
+        try:
+            with open(self.pref_path) as pref_file:
+                self.pref_data = json.load(pref_file)
+            print('Successfully loaded preferences.')
+        except:
+            self.create_default_config();
+
+    def save_pref(self):
+        print('Saving preferences to "' + self.pref_path + "'...")
+        pref_file = open(self.pref_path, "w+")
+        pref_file.write(json.dumps(self.pref_data))
+        pref_file.close()
+
+    def set_pref(self, setting, value):
+        print('Set preference: "' + value + '" to "' + setting + '"')
+        self.pref_data[setting] = value;
+
+    def get_pref(self, setting, default_value=False):
+        print('Read preference: "' + value + '" from "' + setting + '"')
+        try:
+            # Read data from preferences, if it exists.
+            get_data = self.pref_data[setting]
+            return get_data
+        except:
+            # Should it be non-existent, return a fallback option.
+            print("Preference '" + setting + "' doesn't exist. ")
+            self.set_pref(setting, default_value)
+            return default_value
+
+    def refresh_pref_page(self, webkit):
+        # Boolean options
+        for setting in ['live_switch','live_preview','activate_on_save']:
+            if (self.pref_data[setting] == "true"):
+                webkit.execute_script("$('#" + setting + "').prop('checked', true);")
+
+    def create_default_config(self):
+        default_settings = '{\n "live_switch" : "false",\n "live_preview" : "false",\n "activate_on_save" : "false" \n}'
+
+        print('Creating new preferences file...')
+        if os.path.exists(self.pref_path):
+            print('Failed to parse JSON preferences!')
+            os.rename(self.pref_path, self.pref_path+'.bak')
+            print('Successfully backed up problematic preferences JSON file.')
+
+        pref_file = open(self.pref_path, "w")
+        pref_file.write(default_settings)
+        pref_file.close()
+        print('Successfully written default preferences.')
 
 
 if __name__ == "__main__":

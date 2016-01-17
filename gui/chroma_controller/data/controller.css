@@ -79,6 +79,14 @@ hr {
     margin-top: 5px;
 }
 
+.header-options {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: 16px;
+    margin-right: 16px;
+}
+
 /************************
    Content
 *************************/
@@ -144,6 +152,10 @@ a {
 .mode-text {
   color: #06FF00;
   font-weight: bold;
+}
+
+.pref-label {
+  color: #06FF00;
 }
 
 /************************

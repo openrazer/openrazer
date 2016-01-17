@@ -81,6 +81,14 @@ function set_cursor(type) {
     }
 }
 
+/**
+ * Set a preference
+ *
+ */
+function set_pref(setting, element) {
+    state = $(element).is(':checked');
+    cmd('pref-set?' + setting + '?' + state)
+}
 
 /**
  * Run once document has loaded
