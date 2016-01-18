@@ -4,11 +4,11 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-const char *set_key_row_base_fname = "/set_key_row";
+const char *set_led_row_base_fname = "/set_key_row";
 const char *set_custom_mode_base_fname = "/mode_custom";
 char *device_path = NULL;
 
-char *set_key_row_fname = NULL;
+char *set_led_row_fname = NULL;
 char *set_custom_mode_fname = NULL;
 
 #pragma GCC diagnostic push
@@ -25,17 +25,17 @@ int main(int argc,char *argv[])
 	printf("preparing filenames for device path:%s\n",device_path);
 	//opening device driver attribute files
 	set_custom_mode_fname = (char*)malloc(strlen(device_path)+strlen(set_custom_mode_base_fname)+1);
-	set_key_row_fname = (char*)malloc(strlen(device_path)+strlen(set_key_row_base_fname)+1);
+	set_led_row_fname = (char*)malloc(strlen(device_path)+strlen(set_led_row_base_fname)+1);
 	memset((void*)set_custom_mode_fname,0,strlen(device_path)+strlen(set_custom_mode_base_fname)+1);
 	memcpy(set_custom_mode_fname,device_path,strlen(device_path));
 	memcpy(set_custom_mode_fname+strlen(device_path),set_custom_mode_base_fname,strlen(set_custom_mode_base_fname));
-	memset((void*)set_key_row_fname,0,strlen(device_path)+strlen(set_key_row_base_fname)+1);
-	memcpy(set_key_row_fname,device_path,strlen(device_path));
-	memcpy(set_key_row_fname+strlen(device_path),set_key_row_base_fname,strlen(set_key_row_base_fname));
-	FILE *set_key_row = fopen(set_key_row_fname,"w");
+	memset((void*)set_led_row_fname,0,strlen(device_path)+strlen(set_led_row_base_fname)+1);
+	memcpy(set_led_row_fname,device_path,strlen(device_path));
+	memcpy(set_led_row_fname+strlen(device_path),set_led_row_base_fname,strlen(set_led_row_base_fname));
+	FILE *set_led_row = fopen(set_led_row_fname,"w");
 	FILE *set_custom_mode = fopen(set_custom_mode_fname,"w");
-	printf("opening device driver files: [%s,%s]\n",set_custom_mode_fname,set_key_row_fname);
-	if(!set_key_row || !set_custom_mode)
+	printf("opening device driver files: [%s,%s]\n",set_custom_mode_fname,set_led_row_fname);
+	if(!set_led_row || !set_custom_mode)
 	{
 		printf("error opening device driver attribute files.Exiting...\n");
 		exit(1);
@@ -53,14 +53,14 @@ int main(int argc,char *argv[])
 		cols[i] = (unsigned char)(rand()*255); //randomize colors each round
 		else cols[i] = count&0xff;
 	}
-	fwrite(cols,15*3+1,1,set_key_row);
-	fflush(set_key_row);//flush buffers
+	fwrite(cols,15*3+1,1,set_led_row);
+	fflush(set_led_row);//flush buffers
 
 	fwrite("1",1,1,set_custom_mode);//update leds
 	fflush(set_custom_mode);
 	usleep(6000);
 	}
-	fclose(set_key_row);//close attribute files
+	fclose(set_led_row);//close attribute files
 	fclose(set_custom_mode);
 	printf("Raw example finished.\n");
 }

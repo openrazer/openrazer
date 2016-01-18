@@ -230,7 +230,7 @@ int effect_update(struct razer_fx_render_node *render)
 	for(x=0;x<22;x++)
 		for(y=0;y<6;y++)
 		{
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&col,render->opacity);//*render->opacity  //&render->second_input_frame->rows[y].column[x]
+			rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&col,render->opacity);//*render->opacity  //&render->second_input_frame->rows[y]->column[x]
 			render->output_frame->update_mask |= 1<<y;
 		}
 	daemon_set_parameter_float(daemon_effect_get_parameter_by_index(render->effect,1),magnitude);	

@@ -34,6 +34,7 @@ struct razer_parameter
 	unsigned long value;
 	int type;
 	int private;
+	//struct razer_effect *effect;
 };
 
 char *daemon_parameter_to_json(struct razer_parameter *parameter, int final);

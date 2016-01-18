@@ -11,6 +11,7 @@
 typedef int (*razer_effect_open)(struct razer_fx_render_node *render);//called when effect is added to a render node
 typedef int (*razer_effect_close)(struct razer_fx_render_node *render);//called when effect is removed from a render node
 typedef int (*razer_effect_reset)(struct razer_fx_render_node *render);//called every time a effect is called for the first time in a render node(loops trigger too) - a daemon manual reset command can be used too
+typedef int (*razer_effect_parameter_changed)(struct razer_fx_render_node *render,struct razer_parameter *parameter);//called every time a parameter of a render_node is changed/added
 typedef int (*razer_effect_added_to_render_nodes)(struct razer_fx_render_node *render);//called every time a render_node is added to the daemons render_nodes
 typedef int (*razer_effect_update)(struct razer_fx_render_node *render);//called every frame - returns 0 if execution is completed
 typedef int (*razer_effect_input_event)(struct razer_fx_render_node *render,struct razer_chroma_event *event);//handler for key events
@@ -34,6 +35,7 @@ struct razer_effect
 	razer_effect_open open;
 	razer_effect_reset reset;
 	razer_effect_added_to_render_nodes added_to_render_nodes;
+	razer_effect_parameter_changed parameter_changed;
 	razer_effect_close close;
 	razer_effect_update update;
 	razer_effect_input_event input_event;

@@ -15,7 +15,7 @@ int effect_mix_update(struct razer_fx_render_node *render)
 	for(x=0;x<22;x++)
 		for(y=0;y<6;y++)
 		{
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&render->second_input_frame->rows[y].column[x],render->opacity);
+			rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&render->second_input_frame->rows[y]->column[x],render->opacity);
 			render->output_frame->update_mask |= 1<<y;
 		}
 	return(1);
@@ -242,7 +242,7 @@ int effect_glimmer_update(struct razer_fx_render_node *render)
 			float pixel_opacity = render->opacity + ((((float)(random()%1000))/1000.0f)-(render->opacity*0.5f));
 			//float pixel_opacity = ((((float)(random()%1000))/1000.0f));
 
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&render->second_input_frame->rows[y].column[x],pixel_opacity);
+			rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&render->second_input_frame->rows[y]->column[x],pixel_opacity);
 			render->output_frame->update_mask |= 1<<y;
 		}
 	return(1);

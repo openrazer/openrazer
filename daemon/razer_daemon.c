@@ -89,16 +89,17 @@ struct razer_daemon *daemon_open(void)
 	
 	razer_set_input_handler(daemon->chroma,daemon_input_event_handler);
 	daemon->chroma->tag = daemon;
-	daemon->frame_buffer = razer_create_rgb_frame();
+	daemon->frame_buffer = razer_create_rgb_frame(22,6);
+	printf("daemon->fb:%x\n",daemon->frame_buffer);
 	daemon->frame_buffer_linked_uid = 0;
 	daemon->return_render_node = NULL; //TODO remember what i wanted to achieve with this variable ... :-)
 
 	syslog(LOG_DEBUG, "clearing chroma keys");
 	razer_set_custom_mode(daemon->chroma);
 	//razer_clear_all(daemon->chroma->keys);
-	razer_clear_all(daemon->chroma->active_device->keys);
+	razer_clear_all(daemon->chroma->active_device->leds);
 	//razer_update_keys(daemon->chroma,daemon->chroma->keys);
-	razer_update_keys(daemon->chroma,daemon->chroma->active_device->keys);
+	razer_update_leds(daemon->chroma,daemon->chroma->active_device->leds);
 
 	//TODO Move to configuration options (dbus race condition present)
 
@@ -220,7 +221,7 @@ int daemon_update_render_nodes(struct razer_daemon *daemon)
 	}
 		//razer_clear_frame(daemon->render_node->input_frame);
 		//daemon_update_render_node(daemon->render_node);
-	razer_update_frame(daemon->chroma,daemon->frame_buffer);
+	razer_update_leds(daemon->chroma,daemon->frame_buffer);
 	return(1);
 }
 
@@ -602,10 +603,10 @@ int main(int argc,char *argv[])
 		printf("razer_bcd: error initializing daemon\n");
 		return(1);
 	}
-	if(options.mouse_input_file)
-		daemon->chroma->sys_mouse_event_path = options.mouse_input_file;
-	if(options.keyboard_input_file)
-		daemon->chroma->sys_keyboard_event_path = options.keyboard_input_file;
+	//if(options.mouse_input_file)
+	//	daemon->chroma->sys_mouse_event_path = options.mouse_input_file;
+	//if(options.keyboard_input_file)
+	//	daemon->chroma->sys_keyboard_event_path = options.keyboard_input_file;
 
 	daemon_run(daemon);
 	daemon_close(daemon);

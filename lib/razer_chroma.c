@@ -23,12 +23,13 @@ char *razer_brightness_pathname = "/set_brightness";
 char *razer_reset_pathname = "/reset";
 char *razer_temp_clear_row_pathname = "/temp_clear_row";
 char *razer_macro_keys_pathname = "/macro_keys";
-char *razer_update_keys_pathname = "/set_key_row";
+char *razer_update_leds_pathname = "/set_key_row";
+char *razer_serial_pathname = "/get_serial";
 
 void write_to_device_file(char *device_path, char *buffer, int buffer_length)
 {
 	FILE* fp;
-	fp = fopen(device_path, "w");
+	fp = fopen(device_path, "wb");
 	if(fp != NULL) {
 	  fwrite(buffer, sizeof(char), buffer_length, fp);
 	  fclose(fp);
@@ -38,6 +39,40 @@ void write_to_device_file(char *device_path, char *buffer, int buffer_length)
 	}
 }
 
+void read_from_device_file(char *device_path, char *buffer, int buffer_length)
+{
+	FILE* fp;
+	fp = fopen(device_path, "rb");
+	if(fp != NULL) {
+	  fread(buffer, sizeof(char), buffer_length, fp);
+	  fclose(fp);
+	} else
+	{
+	  printf("Failed to read to %s!\n", device_path);
+	}
+}
+
+int razer_open_serial_file(struct razer_chroma_device *device)
+{
+	device->serial_file=fopen(device->serial_filename,"r");
+	#ifdef USE_VERBOSE_DEBUGGING
+		printf("opening serial file:%s\n",device->serial_filename);
+	#endif
+	if(device->serial_file)
+		return(1);
+	else
+		return(0);
+}
+
+void razer_close_serial_file(struct razer_chroma_device *device)
+{
+	#ifdef USE_VERBOSE_DEBUGGING
+		printf("closing serial file:%s\n",device->serial_filename);
+	#endif
+    if(device->serial_file)
+    	fclose(device->serial_file);
+    device->serial_file = NULL;
+}
 
 int razer_open_breath_mode_file(struct razer_chroma_device *device)
 {
@@ -281,26 +316,26 @@ void razer_close_custom_mode_file(struct razer_chroma_device *device)
     device->custom_mode_file = NULL;
 }
 
-int razer_open_update_keys_file(struct razer_chroma_device *device)
+int razer_open_update_leds_file(struct razer_chroma_device *device)
 {
-	device->update_keys_file=fopen(device->update_keys_filename,"wb");
+	device->update_leds_file=fopen(device->update_leds_filename,"wb");
 	#ifdef USE_VERBOSE_DEBUGGING
-		printf("opening update keys file:%s\n",device->update_keys_filename);
+		printf("opening update leds file:%s\n",device->update_leds_filename);
 	#endif
-	if(device->update_keys_file)
+	if(device->update_leds_file)
 		return(1);
 	else
 		return(0);
 }
 
-void razer_close_update_keys_file(struct razer_chroma_device *device)
+void razer_close_update_leds_file(struct razer_chroma_device *device)
 {
 	#ifdef USE_VERBOSE_DEBUGGING
-		printf("closing update keys file:%s\n",device->update_keys_filename);
+		printf("closing update leds file:%s\n",device->update_leds_filename);
 	#endif
-    if(device->update_keys_file)
-    	fclose(device->update_keys_file);
-    device->update_keys_file = NULL;
+    if(device->update_leds_file)
+    	fclose(device->update_leds_file);
+    device->update_leds_file = NULL;
 }
 
 int razer_open_macro_keys_file(struct razer_chroma_device *device)
@@ -330,52 +365,32 @@ void razer_close_macro_keys_file(struct razer_chroma_device *device)
 /*
  input event system specific files
 */
-int razer_open_keyboard_input_file(struct razer_chroma *chroma)
+int razer_open_input_file(struct razer_chroma_input_device *input_device)
 {
-	chroma->keyboard_input_file=open(chroma->sys_keyboard_event_path,O_RDONLY | O_NONBLOCK | O_NOCTTY | O_NDELAY);
-	fcntl(chroma->keyboard_input_file,F_SETFL,0);
+	input_device->input_file=open(input_device->path,O_RDONLY | O_NONBLOCK | O_NOCTTY | O_NDELAY);
+	fcntl(input_device->input_file,F_SETFL,0);
 	#ifdef USE_VERBOSE_DEBUGGING
-		printf("opening keyboard input file:%s\n",chroma->sys_keyboard_event_path);
+		printf("opening input file:%s\n",input_device->path);
 	#endif
-	if(chroma->keyboard_input_file)
+	if(input_device->input_file)
 		return(1);
 	else
 		return(0);
 }
 
-void razer_close_keyboard_input_file(struct razer_chroma *chroma)
+void razer_close_input_file(struct razer_chroma_input_device *input_device)
 {
 	#ifdef USE_VERBOSE_DEBUGGING
-		printf("closing keyboard input file:%s\n",chroma->sys_keyboard_event_path);
+		printf("closing input file:%s\n",input_device->path);
 	#endif
-    if(chroma->keyboard_input_file)
-    	close(chroma->keyboard_input_file);
-    chroma->keyboard_input_file = 0;
+    if(input_device->input_file)
+    	close(input_device->input_file);
+    input_device->input_file = 0;
 }
 
-int razer_open_mouse_input_file(struct razer_chroma *chroma)
-{
-	chroma->mouse_input_file=open(chroma->sys_mouse_event_path,O_RDONLY | O_NONBLOCK | O_NOCTTY | O_NDELAY);
-	fcntl(chroma->mouse_input_file,F_SETFL,0);
-	#ifdef USE_VERBOSE_DEBUGGING
-		printf("opening mouse input file:%s\n",chroma->sys_mouse_event_path);
-	#endif
-	if(chroma->mouse_input_file)
-		return(1);
-	else
-		return(0);
-}
 
-void razer_close_mouse_input_file(struct razer_chroma *chroma)
-{
-	#ifdef USE_VERBOSE_DEBUGGING
-		printf("closing mouse input file:%s\n",chroma->sys_mouse_event_path);
-	#endif
-    if(chroma->mouse_input_file)
-    	close(chroma->mouse_input_file);
-    chroma->mouse_input_file = 0;
-}
 
+/*
 void razer_init_keys(struct razer_keys *keys)
 {
 	memset(keys->heatmap,0,sizeof(long)*22*6);
@@ -387,18 +402,7 @@ void razer_init_keys(struct razer_keys *keys)
 		keys->rows[i].row_index = i;
 	}
 }
-
-void razer_init_frame(struct razer_rgb_frame *frame)
-{
-	memset(frame->rows,0,sizeof(struct razer_rgb_row)*6);
-	frame->update_mask = 63;
-	int i;
-	for(i = 0; i < 6; ++i)
-	{
-		frame->rows[i].row_index = i;
-	}
-}
-
+*/
 
 struct razer_chroma_device *razer_create_device(struct razer_chroma *chroma,char *path)
 {
@@ -416,7 +420,8 @@ struct razer_chroma_device *razer_create_device(struct razer_chroma *chroma,char
 	device->brightness_file = NULL;
 	device->temp_clear_row_file = NULL;
 	device->macro_keys_file = NULL;
-	device->update_keys_file = NULL;
+	device->update_leds_file = NULL;
+	device->serial_file = NULL;
 
 	//get device name
 	char *name_filename = str_CreateEmpty();
@@ -471,6 +476,14 @@ struct razer_chroma_device *razer_create_device(struct razer_chroma *chroma,char
 		printf("found device:%s\n",device->name);
 	#endif
 
+	device->rows_num = 6;
+	device->columns_num = 22;
+	if(!strcmp(device->name,"Razer Firefly"))
+	{
+		device->rows_num = 1;
+		device->columns_num = 15;
+	}
+
 	//create driver attribute path+filename strings
 	device->custom_mode_filename = str_CreateEmpty();
 	device->custom_mode_filename = str_CatFree(device->custom_mode_filename,path);
@@ -509,14 +522,19 @@ struct razer_chroma_device *razer_create_device(struct razer_chroma *chroma,char
 	device->macro_keys_filename = str_CreateEmpty();
 	device->macro_keys_filename = str_CatFree(device->macro_keys_filename,path);
 	device->macro_keys_filename = str_CatFree(device->macro_keys_filename,razer_macro_keys_pathname);
-	device->update_keys_filename = str_CreateEmpty();
-	device->update_keys_filename = str_CatFree(device->update_keys_filename,path);
-	device->update_keys_filename = str_CatFree(device->update_keys_filename,razer_update_keys_pathname);
+	device->update_leds_filename = str_CreateEmpty();
+	device->update_leds_filename = str_CatFree(device->update_leds_filename,path);
+	device->update_leds_filename = str_CatFree(device->update_leds_filename,razer_update_leds_pathname);
+	
+	device->serial_filename = str_CreateEmpty();
+	device->serial_filename = str_CatFree(device->serial_filename,path);
+	device->serial_filename = str_CatFree(device->serial_filename,razer_serial_pathname);
 
 	device->path = str_Copy(path);
 
-	device->keys = (struct razer_keys*)malloc(sizeof(struct razer_keys));
-	razer_init_keys(device->keys);
+	//device->keys = (struct razer_keys*)malloc(sizeof(struct razer_keys));
+	device->leds = razer_create_rgb_frame(device->columns_num,device->rows_num);
+	//razer_init_keys(device->keys);
 
 	return(device);
 }
@@ -567,8 +585,8 @@ int razer_find_devices(struct razer_chroma *chroma)
 
 void razer_close_device(struct razer_chroma_device *device)
 {
-	if(device->update_keys_file)
-		razer_close_update_keys_file(device);
+	if(device->update_leds_file)
+		razer_close_update_leds_file(device);
 	if(device->custom_mode_file)
 		razer_close_custom_mode_file(device);
 	if(device->breath_mode_file)
@@ -593,6 +611,8 @@ void razer_close_device(struct razer_chroma_device *device)
 		razer_close_reset_file(device);
 	if(device->macro_keys_file)
 		razer_close_macro_keys_file(device);
+	if(device->serial_file)
+		razer_close_serial_file(device);
 }
 
 void razer_close_devices(struct razer_chroma *chroma)
@@ -607,13 +627,14 @@ void razer_close_devices(struct razer_chroma *chroma)
 
 void razer_free_device(struct razer_chroma_device *device)
 {
-	free(device->keys);
+	//free(device->keys);
+	razer_free_rgb_frame(device->leds);
 	free(device->path);
 	free(device->name);
 	if(device->custom_mode_filename)
 		free(device->custom_mode_filename);
-	if(device->update_keys_filename)
-		free(device->update_keys_filename);
+	if(device->update_leds_filename)
+		free(device->update_leds_filename);
 	if(device->macro_keys_filename)
 		free(device->macro_keys_filename);
 	if(device->breath_mode_filename)
@@ -636,6 +657,8 @@ void razer_free_device(struct razer_chroma_device *device)
 		free(device->reset_filename);
 	if(device->temp_clear_row_filename)
 		free(device->temp_clear_row_filename);
+	if(device->serial_filename)
+		free(device->serial_filename);
 	free(device);
 }
 
@@ -648,6 +671,260 @@ void razer_free_devices(struct razer_chroma *chroma)
 	}	
 	list_Close(chroma->devices);
 	chroma->devices = NULL;
+}
+
+
+struct razer_chroma_input_device *razer_create_input_device(struct razer_chroma *chroma,char *path,int type)
+{
+	struct razer_chroma_input_device *input_device = (struct razer_chroma_input_device*)malloc(sizeof(struct razer_chroma_input_device));
+	input_device->chroma = chroma;
+	input_device->input_file = 0;
+	input_device->type = type;
+	input_device->path = str_Copy(path);
+	input_device->name = str_Copy(path); //TODO use real name here
+	//get device name
+	/*char *name_filename = str_CreateEmpty();
+	name_filename = str_CatFree(name_filename,path);
+	name_filename = str_CatFree(name_filename,razer_device_type_pathname);
+	FILE *fname = fopen(name_filename,"rb");
+	if(!fname)
+	{
+		#ifdef USE_VERBOSE_DEBUGGING
+			printf("no device_type file found,skipping.\n");
+		#endif
+		free(device);
+		free(name_filename);
+		return(NULL);
+	}
+	fseek(fname,0,SEEK_END);
+	int name_len = ftell(fname);
+	rewind(fname);
+	if(!name_len)
+	{
+		#ifdef USE_VERBOSE_DEBUGGING
+			printf("device_type file empty,skipping.\n");
+		#endif
+		free(device);
+		fclose(fname);
+		free(name_filename);
+		return(NULL);
+	}
+	//device->name = (char*)malloc(name_len+1);
+	//memset(device->name,0,name_len+1);
+	unsigned char buffer[4096];
+	memset(&buffer,0,4096);
+	int fret = fread(buffer,1,4096,fname);
+	//printf("reading name with len:%d\n",name_len);
+	//int fret = fread(device->name,name_len,1,fname);
+	if(!fret)
+	{
+		#ifdef USE_VERBOSE_DEBUGGING
+			printf("device name can't be read,skipping.\n");
+		#endif
+		free(device);
+		fclose(fname);
+		free(name_filename);
+		return(NULL);
+	}
+	fclose(fname);
+	free(name_filename);
+	memset(&buffer[strlen((char*)buffer)-1],0,1); //removing trailing <CR>
+	device->name = str_Copy((char*)&buffer);
+	#ifdef USE_DEBUGGING
+		printf("found device:%s\n",device->name);
+	#endif
+	*/
+	return(input_device);
+}
+
+void razer_fire_input_event(struct razer_chroma *chroma,struct razer_chroma_event *event)
+{
+	if(chroma && event && chroma->input_handler)
+		chroma->input_handler(chroma,event);
+}
+
+void razer_poll_input_device(struct razer_chroma *chroma,struct razer_chroma_input_device *input_device)
+{
+	struct timeval select_tv;
+	struct razer_chroma_event chroma_event;
+	fd_set input_rs;
+	select_tv.tv_sec = 0;
+	select_tv.tv_usec = 0;
+	int r;
+	char buf[2048];
+	if(!input_device->input_file)
+		razer_open_input_file(input_device);
+	if(input_device->input_file)
+	{
+		FD_ZERO(&input_rs);
+		FD_SET(input_device->input_file,&input_rs);
+		r = select(input_device->input_file+1,&input_rs,0,0,&select_tv);
+		if(r && FD_ISSET(input_device->input_file,&input_rs))
+		{
+			int n=2048;
+			n = read(input_device->input_file,buf,2048);
+			if(n<0)
+			{
+				/*if(errno != EAGAIN)
+				{
+					razer_close_input_file(chroma);
+					return;
+				}*/
+			}
+			else if(n==0)
+			{
+				razer_close_input_file(input_device);
+				return;
+			}
+			else				
+			{
+				unsigned int i;
+				unsigned int event_size = sizeof(struct input_event);
+				for(i=0;i<n/event_size;i++)
+				{
+					struct input_event *event = (struct input_event*)(buf+(i*sizeof(struct input_event)));
+					long diff_ms = chroma->update_ms - input_device->last_event_ms;
+					input_device->event_dt = (float)diff_ms / 1000.0f;
+					input_device->last_event_ms = chroma->update_ms;			
+
+					if(input_device->type == RAZER_CHROMA_EVENT_TYPE_KEYBOARD)
+					{
+						chroma_event.type = RAZER_CHROMA_EVENT_TYPE_KEYBOARD;
+						if(event->type==EV_KEY)
+						{
+							int keycode = event->code;
+							if(event->value==1)
+							{
+								razer_copy_pos(&chroma->key_pos,&chroma->last_key_pos);
+								razer_convert_keycode_to_pos(event->code,&chroma->key_pos);							
+								//chroma->keys->heatmap[chroma->key_pos.y][chroma->key_pos.x]+=1;
+								chroma_event.key = "Key Down";
+							}
+							else
+								chroma_event.key = "Key Up";
+							chroma_event.sub_type = event->value;
+							chroma_event.value = keycode;
+						}
+					}
+					else if (input_device->type == RAZER_CHROMA_EVENT_TYPE_MOUSE)
+					{
+						chroma_event.type = RAZER_CHROMA_EVENT_TYPE_MOUSE;
+        				switch(event->type)
+        				{
+        					case EV_MSC:
+        						break;
+        					case EV_SYN:
+        						break;
+        					case EV_KEY:
+        						switch(event->code)
+        						{
+        							case BTN_LEFT:
+										chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_LEFT;
+										break;
+	    							case BTN_MIDDLE:
+										chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_MIDDLE;
+										break;
+	    							case BTN_RIGHT:
+										chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_RIGHT;
+										break;
+	    							case BTN_EXTRA:
+										chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_EXTRA;
+										break;
+									default:
+										#ifdef USE_DEBUGGING
+											printf("uknown button event: type:%d,code:%d,value:%d\n",event->type,event->code,event->value);
+										#endif
+										break;
+        						}
+        						switch(event->value)
+        						{
+        							case 0 :
+										chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_BUTTON_UP;
+										break;
+        							case 1 :
+										chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_BUTTON_DOWN;
+										break;
+        						}
+	       						break;
+							case EV_REL :
+								switch(event->code)
+								{
+									case 0 : 
+										chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_X_AXIS_MOVEMENT;
+										chroma_event.value = event->value;
+										break;
+									case 1 : 
+										chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_Y_AXIS_MOVEMENT;
+										chroma_event.value = event->value;
+										break;
+									case 8 : 
+										chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_WHEEL_MOVEMENT;
+										chroma_event.value = event->value;
+										break;
+									default:
+										#ifdef USE_DEBUGGING
+											printf("uknown relative movement event: type:%d,code:%d,value:%d\n",event->type,event->code,event->value);
+										#endif
+										break;
+								}
+								break;
+							default:
+								#ifdef USE_DEBUGGING
+									printf("uknown event: type:%d,code:%d,value:%d\n",event->type,event->code,event->value);
+								#endif
+								break;
+						}
+
+					}
+					razer_fire_input_event(chroma,&chroma_event);
+				}
+			}
+		}	
+	}
+}
+
+void razer_poll_input_devices(struct razer_chroma *chroma)
+{
+	list_IterationReset(chroma->input_devices);
+	while(list_IterationUnfinished(chroma->input_devices))
+	{
+		struct razer_chroma_input_device *input_device = (struct razer_chroma_input_device*)list_Iterate(chroma->input_devices);
+		razer_poll_input_device(chroma,input_device);
+	}
+}
+
+void razer_close_input_device(struct razer_chroma_input_device *input_device)
+{
+	if(input_device->input_file)
+		razer_close_input_file(input_device);
+}
+
+void razer_close_input_devices(struct razer_chroma *chroma)
+{
+	list_IterationReset(chroma->input_devices);
+	while(list_IterationUnfinished(chroma->input_devices))
+	{
+		struct razer_chroma_input_device *input_device = (struct razer_chroma_input_device*)list_Iterate(chroma->input_devices);
+		razer_close_input_device(input_device);
+	}
+}
+
+void razer_free_input_device(struct razer_chroma_input_device *input_device)
+{
+	free(input_device->path);
+	free(input_device->name);
+	free(input_device);
+}
+
+void razer_free_input_devices(struct razer_chroma *chroma)
+{
+	struct razer_chroma_input_device *input_device = NULL;
+	while((input_device=list_Pop(chroma->input_devices)))
+	{
+		razer_free_input_device(input_device);
+	}	
+	list_Close(chroma->input_devices);
+	chroma->input_devices = NULL;
 }
 
 void razer_set_active_device(struct razer_chroma *chroma,struct razer_chroma_device *device)
@@ -676,10 +953,16 @@ struct razer_chroma *razer_open(void)
 	//chroma->active_device = list_GetTop(chroma->devices);
 
 	syslog(LOG_DEBUG, "activating device");
-	chroma->sys_mouse_event_path = str_Copy(razer_sys_mouse_event_default_path);
-	chroma->sys_keyboard_event_path = str_Copy(razer_sys_keyboard_event_default_path);
-	chroma->keyboard_input_file = 0;
-	chroma->mouse_input_file = 0;
+	//chroma->sys_mouse_event_path = str_Copy(razer_sys_mouse_event_default_path);
+	//chroma->sys_keyboard_event_path = str_Copy(razer_sys_keyboard_event_default_path);
+	chroma->input_devices = list_Create(0,0);
+	struct razer_chroma_input_device *keyboard = razer_create_input_device(chroma,razer_sys_keyboard_event_default_path,RAZER_CHROMA_INPUT_DEVICE_TYPE_KEYBOARD);
+	struct razer_chroma_input_device *mouse = razer_create_input_device(chroma,razer_sys_mouse_event_default_path,RAZER_CHROMA_INPUT_DEVICE_TYPE_MOUSE);
+	list_Push(chroma->input_devices,keyboard);
+	list_Push(chroma->input_devices,mouse);
+
+	//chroma->keyboard_input_file = 0;
+	//chroma->mouse_input_file = 0;
 	chroma->input_handler = NULL;
 
 	chroma->last_key_pos.x = -1;
@@ -696,28 +979,62 @@ void razer_close(struct razer_chroma *chroma)
 	#endif
 	syslog(LOG_DEBUG, "closing chroma library");
 	chroma->input_handler = NULL;
-	free(chroma->sys_mouse_event_path);
-	free(chroma->sys_keyboard_event_path);
-	if(chroma->keyboard_input_file)
-		razer_close_keyboard_input_file(chroma);
-	if(chroma->mouse_input_file)
-		razer_close_mouse_input_file(chroma);
+	//free(chroma->sys_mouse_event_path);
+	//free(chroma->sys_keyboard_event_path);
+	//if(chroma->keyboard_input_file)
+	//	razer_close_keyboard_input_file(chroma);
+	//if(chroma->mouse_input_file)
+	//	razer_close_mouse_input_file(chroma);
 	razer_close_devices(chroma);
 	razer_free_devices(chroma);
+	razer_close_input_devices(chroma);
+	razer_free_input_devices(chroma);
 	free(chroma);
 	syslog(LOG_DEBUG, "closed chroma library");
 }
 
-struct razer_rgb_frame *razer_create_rgb_frame(void)
+
+void razer_init_rgb_frame(struct razer_rgb_frame *frame)
+{
+	frame->update_mask = 0;
+	int i;
+	for(i = 0; i < frame->rows_num; i++)
+	{
+		memset(frame->rows[i]->column,0,(frame->columns_num*sizeof(struct razer_rgb)));
+		frame->rows[i]->row_index = i;
+		frame->rows[i]->columns_num = frame->columns_num;
+		frame->update_mask |= 1<<i;
+	}
+}
+
+struct razer_rgb_frame *razer_create_rgb_frame(int columns_num,int rows_num)
 {
 	struct razer_rgb_frame *frame = (struct razer_rgb_frame*)malloc(sizeof(struct razer_rgb_frame));
-	razer_init_frame(frame);
+	frame->columns_num = columns_num;
+	frame->rows_num = rows_num;
+	struct razer_rgb_row **rows = (struct razer_rgb_row**)malloc(sizeof(struct razer_rgb_row*)*frame->rows_num);
+	int i;
+	for(i = 0;i < frame->rows_num; i++)
+	{
+		struct razer_rgb_row *row = (struct razer_rgb_row*)malloc(sizeof(struct razer_rgb_row));
+		struct razer_rgb *columns = (struct razer_rgb*)malloc(sizeof(struct razer_rgb)*frame->columns_num);		
+		row->column = columns;
+		rows[i] = row;
+	}
+	frame->rows = rows;
+	razer_init_rgb_frame(frame);
 	return(frame);
 }
 
 void razer_free_rgb_frame(struct razer_rgb_frame *frame)
 {
 	//free up memory used by frame
+	int i;
+	for(i = 0;i < frame->rows_num; i++)
+	{
+		free(frame->rows[i]->column);
+	}
+	free(frame->rows);
 	free(frame);
 }
 
@@ -731,10 +1048,10 @@ struct razer_rgb *rgb_create(unsigned char r,unsigned char g,unsigned char b)
 }
 
 
-void release_locks(struct razer_keys_locks *locks)
+void razer_release_locks(struct razer_chroma_device *device)
 {
 	//release all key locks at once
-	memset(locks,0,sizeof(struct razer_keys_locks));
+	memset(device->locks,0,device->rows_num*device->columns_num*sizeof(int));
 }
 
 float hue2rgb(float p,float q,float t)
@@ -1747,7 +2064,6 @@ void razer_convert_ascii_to_pos(unsigned char letter,struct razer_pos *pos)
 	}
 }
 
-
 int razer_device_enable_macro_keys(struct razer_chroma_device *device) //TODO add enable parameter
 {
 	if(!device->macro_keys_file)
@@ -1773,6 +2089,17 @@ int razer_enable_macro_keys(struct razer_chroma *chroma)
 	return(razer_device_enable_macro_keys(chroma->active_device));
 }
 
+int razer_device_get_serial(struct razer_chroma_device *device, char* buffer)
+{
+	read_from_device_file(device->serial_filename, buffer, 15);
+	return(0);
+}
+
+int razer_get_serial(struct razer_chroma *chroma, char* buffer)
+{
+	//getting device serial number
+	return(razer_device_get_serial(chroma->active_device, buffer));
+}
 
 int razer_device_set_custom_mode(struct razer_chroma_device *device)
 {
@@ -2131,73 +2458,72 @@ int razer_temp_clear_row(struct razer_chroma *chroma)
 	return(razer_device_temp_clear_row(chroma->active_device));
 }
 
-int razer_device_set_key_row(struct razer_chroma_device *device,unsigned char row_index,unsigned char num_colors,struct razer_rgb **colors)
+int razer_device_set_led_row(struct razer_chroma_device *device,unsigned char row_index,unsigned char num_colors,struct razer_rgb *colors)
 {
-	if(!device->update_keys_file)
-		razer_open_update_keys_file(device);
-	if(device->update_keys_file)
+	if(!device->update_leds_file)
+		razer_open_update_leds_file(device);
+	if(device->update_leds_file)
 	{
-		if(!fwrite(&row_index,1,1,device->update_keys_file))
+		if(!fwrite(&row_index,1,1,device->update_leds_file))
 		{
 			#ifdef USE_DEBUGGING
-				printf("error writing key row index\n");
+				printf("error writing led row index\n");
 			#endif
 		}
-		if(!fwrite(colors,num_colors*3,1,device->update_keys_file))
+		if(!fwrite(colors,num_colors*3,1,device->update_leds_file))
 		{
 			#ifdef USE_DEBUGGING
-				printf("error writing key row colors:%d\n",num_colors);
+				printf("error writing led row colors:%d\n",num_colors);
 			#endif
 		}
-		fflush(device->update_keys_file);
+		fflush(device->update_leds_file);
 		return(1);
 	}
 	#ifdef USE_DEBUGGING
 	else
-		printf("error setting key row\n");
+		printf("error setting led row\n");
 	#endif
 	return(0);	
 }
 
-int razer_set_key_row(struct razer_chroma *chroma,unsigned char row_index,unsigned char num_colors,struct razer_rgb **colors)
+int razer_set_led_row(struct razer_chroma *chroma,unsigned char row_index,unsigned char num_colors,struct razer_rgb *colors)
 {
-	//setting key row of active device
-	return(razer_device_set_key_row(chroma->active_device,row_index,num_colors,colors));
+	//setting led row of active device
+	return(razer_device_set_led_row(chroma->active_device,row_index,num_colors,colors));
 }
 
-
-int razer_device_set_key_row_buffered(struct razer_chroma_device *device,unsigned char *buffer,int buffer_len)
+int razer_device_set_led_row_buffered(struct razer_chroma_device *device,unsigned char *buffer,int buffer_len)
 {
-	if(!device->update_keys_file)
-		razer_open_update_keys_file(device);
-	if(device->update_keys_file)
+	if(!device->update_leds_file)
+		razer_open_update_leds_file(device);
+	if(device->update_leds_file)
 	{
-		if(!fwrite(buffer,buffer_len,1,device->update_keys_file))
+		if(!fwrite(buffer,buffer_len,1,device->update_leds_file))
 		{
 			#ifdef USE_DEBUGGING
-				printf("error writing key row buffered colors; buffer_len:%d\n",buffer_len);
+				printf("error writing led row buffered colors; buffer_len:%d\n",buffer_len);
 			#endif
 		}
-		fflush(device->update_keys_file);
+		fflush(device->update_leds_file);
 		return(1);
 	}
 	#ifdef USE_DEBUGGING
 	else
-		printf("error setting key row\n");
+		printf("error setting led row\n");
 	#endif
 	return(0);	
 }
 
-int razer_set_key_row_buffered(struct razer_chroma *chroma,unsigned char *buffer,int buffer_len)
+int razer_set_led_row_buffered(struct razer_chroma *chroma,unsigned char *buffer,int buffer_len)
 {
-	//setting key row of active device
-	return(razer_device_set_key_row_buffered(chroma->active_device,buffer,buffer_len));
+	//setting led row of active device
+	return(razer_device_set_led_row_buffered(chroma->active_device,buffer,buffer_len));
 }
 
 
 
 
-
+/*
 int razer_device_update_keys(struct razer_chroma_device *device, struct razer_keys *keys)
 {
 	int i;
@@ -2236,27 +2562,29 @@ int razer_update_keys(struct razer_chroma *chroma, struct razer_keys *keys)
 	//updating keys of active device	
 	return(razer_device_update_keys(chroma->active_device,keys));
 }
+*/
 
-
-int razer_device_update_frame(struct razer_chroma_device *device, struct razer_rgb_frame *frame)
+int razer_device_update_leds(struct razer_chroma_device *device, struct razer_rgb_frame *frame)
 {
 	int i;
 	if(!frame->update_mask)
 		return(1);
-	if(!device->update_keys_file)
-		razer_open_update_keys_file(device);
-	if(device->update_keys_file)
+	if(!device->update_leds_file)
+		razer_open_update_leds_file(device);
+	if(device->update_leds_file)
 	{
-		for(i=0;i<6;i++)
+		for(i=0;i<device->rows_num;i++)
 		{
 			if(frame->update_mask &(1<<i))
-				if(!fwrite((void*)&frame->rows[i],sizeof(struct razer_rgb_row),1,device->update_keys_file))
+				//if(!fwrite((void*)&frame->rows[i],sizeof(struct razer_rgb_row),1,device->update_leds_file))
+				/*if(!fwrite((void*)&frame->rows[i],(sizeof(struct razer_rgb)*frame->columns_num)+1,1,device->update_leds_file))
 				{
 					#ifdef USE_DEBUGGING
 						printf("error writing to set_key_row attribute\n");
 					#endif
 					return(0);
-				}
+				}*/
+				razer_device_set_led_row(device,frame->rows[i]->row_index,frame->rows[i]->columns_num,frame->rows[i]->column);
 		}
 	}
 	else
@@ -2266,134 +2594,265 @@ int razer_device_update_frame(struct razer_chroma_device *device, struct razer_r
 		#endif
 			return(0);
 	}
-	fflush(device->update_keys_file);
+	fflush(device->update_leds_file);
     frame->update_mask=0;
    	return(razer_device_set_custom_mode(device));
 }
 
-int razer_update_frame(struct razer_chroma *chroma, struct razer_rgb_frame *frame)
+int razer_update_leds(struct razer_chroma *chroma, struct razer_rgb_frame *frame)
 {
 	//updating frame of active device	
-	return(razer_device_update_frame(chroma->active_device,frame));
+	return(razer_device_update_leds(chroma->active_device,frame));
 }
-
-
 
 void razer_clear_frame(struct razer_rgb_frame *frame)
 {
 	int i;
-	for(i=0;i<6;i++)
-		memset((void*)((char*)frame->rows+(i*sizeof(struct razer_rgb_row))),0,sizeof(struct razer_rgb_row));
+	for(i=0;i<frame->rows_num;i++)
+		memset((void*)((char*)frame->rows[i]->column+1),0,(sizeof(struct razer_rgb)*frame->columns_num));
 	frame->update_mask = 0;
+}
+
+void razer_copy_row(struct razer_rgb_row *src_row,struct razer_rgb_row *dst_row)
+{
+	int len = dst_row->columns_num;
+	if(src_row->columns_num<len)
+		len = src_row->columns_num;
+	memcpy(dst_row->column,src_row->column,len*sizeof(struct razer_rgb));
+}
+
+//TODO can and should be optimized
+//no use_update_mask or update_mask filled
+//and same dimensions 
+//just copy the whole rows member
+//void razer_copy_rows(struct razer_rgb_row *src_rows,struct razer_rgb_row *dst_rows,int update_mask,int use_update_mask)
+void razer_copy_frame_rows(struct razer_rgb_frame *src_frame,struct razer_rgb_frame *dst_frame,int use_update_mask)
+{
+	int i;
+	int len = dst_frame->rows_num;
+	if(src_frame->rows_num<len)
+		len = src_frame->rows_num;
+	for(i=0;i<len;i++)
+	{
+		if(use_update_mask)
+			if(src_frame->update_mask &(1<<i))
+			{
+				//memcpy((void*)((char*)dst_rows+(i*sizeof(struct razer_rgb_row))),(void*)((char*)src_rows+(i*sizeof(struct razer_rgb_row))),sizeof(struct razer_rgb_row));
+				//memcpy((void*)((char*)dst_rows+(i*sizeof(struct razer_rgb_row))),(void*)((char*)src_rows+(i*sizeof(struct razer_rgb_row))),sizeof(struct razer_rgb_row));
+				razer_copy_row(src_frame->rows[i],dst_frame->rows[i]);
+			}
+	}
 }
 
 void razer_set_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color)
 {
-	if(column_index<0 || column_index>21)
+	if(column_index<0 || column_index>=frame->columns_num)
 		return;
 	int y;
-	for(y=0;y<6;y++)
+	for(y=0;y<frame->rows_num;y++)
 	{
-		frame->rows[y].column[column_index].r = color->r;
-		frame->rows[y].column[column_index].g = color->g;
-		frame->rows[y].column[column_index].b = color->b;
+		frame->rows[y]->column[column_index].r = color->r;
+		frame->rows[y]->column[column_index].g = color->g;
+		frame->rows[y]->column[column_index].b = color->b;
+		frame->update_mask |= 1<<y;
 	}
-	frame->update_mask = 63;
+	//frame->update_mask = 63;
 }
 
 void razer_add_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color)
 {
 	int r,g,b;
-	if(column_index<0 || column_index>21)
+	if(column_index<0 || column_index>=frame->columns_num)
 		return;
 
 	int y;
-	for(y=0;y<6;y++)
+	for(y=0;y<frame->rows_num;y++)
 	{
-		r = frame->rows[y].column[column_index].r+color->r;
-		g = frame->rows[y].column[column_index].g+color->g;
-		b = frame->rows[y].column[column_index].b+color->b;
+		r = frame->rows[y]->column[column_index].r+color->r;
+		g = frame->rows[y]->column[column_index].g+color->g;
+		b = frame->rows[y]->column[column_index].b+color->b;
 		if(r>255)
 			r=255;
 		if(g>255)
 			g=255;
 		if(b>255)
 			b=255;
-		frame->rows[y].column[column_index].r = (unsigned char)r;
-		frame->rows[y].column[column_index].g = (unsigned char)g;
-		frame->rows[y].column[column_index].b = (unsigned char)b;
+		frame->rows[y]->column[column_index].r = (unsigned char)r;
+		frame->rows[y]->column[column_index].g = (unsigned char)g;
+		frame->rows[y]->column[column_index].b = (unsigned char)b;
+		frame->update_mask |= 1<<y;
 	}
-	frame->update_mask = 63;
+	//frame->update_mask = 63;
 }
 
 void razer_sub_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color)
 {
 	int r,g,b;
-	if(column_index<0 || column_index>21)
+	if(column_index<0 || column_index>=frame->columns_num)
 		return;
 	int y;
-	for(y=0;y<6;y++)
+	for(y=0;y<frame->rows_num;y++)
 	{
-		r = frame->rows[y].column[column_index].r-color->r;
-		g = frame->rows[y].column[column_index].g-color->g;
-		b = frame->rows[y].column[column_index].b-color->b;
+		r = frame->rows[y]->column[column_index].r-color->r;
+		g = frame->rows[y]->column[column_index].g-color->g;
+		b = frame->rows[y]->column[column_index].b-color->b;
 		if(r<0)
 			r=0;
 		if(g<0)
 			g=0;
 		if(b<0)
 			b=0;
-		frame->rows[y].column[column_index].r = (unsigned char)r;
-		frame->rows[y].column[column_index].g = (unsigned char)g;
-		frame->rows[y].column[column_index].b = (unsigned char)b;
+		frame->rows[y]->column[column_index].r = (unsigned char)r;
+		frame->rows[y]->column[column_index].g = (unsigned char)g;
+		frame->rows[y]->column[column_index].b = (unsigned char)b;
+		frame->update_mask |= 1<<y;
 	}
-	frame->update_mask = 63;
+	//frame->update_mask = 63;
 }
 
 void razer_mix_frame_column(struct razer_rgb_frame *frame,int column_index,struct razer_rgb *color,float opacity)
 {
-	if(column_index<0 || column_index>21)
+	if(column_index<0 || column_index>frame->columns_num)
 		return;
 	int y;
-	for(y=0;y<6;y++)
+	for(y=0;y<frame->rows_num;y++)
 	{
-		frame->rows[y].column[column_index].r = rgb_clamp((1.0f-opacity)*frame->rows[y].column[column_index].r + color->r*opacity);
-		frame->rows[y].column[column_index].g = rgb_clamp((1.0f-opacity)*frame->rows[y].column[column_index].g + color->g*opacity);
-		frame->rows[y].column[column_index].b = rgb_clamp((1.0f-opacity)*frame->rows[y].column[column_index].b + color->b*opacity);
+		frame->rows[y]->column[column_index].r = rgb_clamp((1.0f-opacity)*frame->rows[y]->column[column_index].r + color->r*opacity);
+		frame->rows[y]->column[column_index].g = rgb_clamp((1.0f-opacity)*frame->rows[y]->column[column_index].g + color->g*opacity);
+		frame->rows[y]->column[column_index].b = rgb_clamp((1.0f-opacity)*frame->rows[y]->column[column_index].b + color->b*opacity);
+		frame->update_mask |= 1<<y;
 	}
-	frame->update_mask = 63;
+	//frame->update_mask = 63;
 }
 
 void razer_mix_frames(struct razer_rgb_frame *dst_frame,struct razer_rgb_frame *src_frame,float opacity)
 {
 	int x,y;
-	for(y=0;y<6;y++)
-		for(x=0;x<22;x++)
+	int w,h;
+	w = dst_frame->columns_num;
+	h = dst_frame->rows_num;
+	if(src_frame->columns_num<w)
+		w = src_frame->columns_num;
+	if(src_frame->rows_num<h)
+		h = src_frame->rows_num;
+
+	for(y=0;y<w;y++)
+		for(x=0;x<h;x++)
 		{
 			//rgb_mix_into(&dst_frame->rows[y].column[x],&dst_frame->rows[y].column[x],&src_frame->rows[y].column[x],opacity);
-			rgb_mix_into(&dst_frame->rows[y].column[x],&src_frame->rows[y].column[x],&dst_frame->rows[y].column[x],opacity);
+			rgb_mix_into(&dst_frame->rows[y]->column[x],&src_frame->rows[y]->column[x],&dst_frame->rows[y]->column[x],opacity);
+			dst_frame->update_mask |= 1<<y;
 		}
-	dst_frame->update_mask = 63;
+	//dst_frame->update_mask = 63;
 }
 
-void razer_copy_rows(struct razer_rgb_row *src_rows,struct razer_rgb_row *dst_rows,int update_mask,int use_update_mask)
+void razer_set_frame_row(struct razer_rgb_frame *frame,int row_index,struct razer_rgb *color)
+{
+	if(row_index<0 || row_index>=frame->rows_num)
+		return;
+	int x;
+	for(x=0;x<frame->columns_num;x++)
+	{
+		frame->rows[row_index]->column[x].r = color->r;
+		frame->rows[row_index]->column[x].g = color->g;
+		frame->rows[row_index]->column[x].b = color->b;
+	}
+	frame->update_mask |= 1<<row_index;
+}
+
+void razer_add_frame_row(struct razer_rgb_frame *frame,int row_index,struct razer_rgb *color)
+{
+	int r,g,b;
+	if(row_index<0 || row_index>=frame->rows_num)
+		return;
+	int x;
+	int columns_num = frame->columns_num;
+	for(x=0;x<columns_num;x++)
+	{
+		r = frame->rows[row_index]->column[x].r+color->r;
+		g = frame->rows[row_index]->column[x].g+color->g;
+		b = frame->rows[row_index]->column[x].b+color->b;
+		if(r>255)
+			r=255;
+		if(g>255)
+			g=255;
+		if(b>255)
+			b=255;
+		frame->rows[row_index]->column[x].r = (unsigned char)r;
+		frame->rows[row_index]->column[x].g = (unsigned char)g;
+		frame->rows[row_index]->column[x].b = (unsigned char)b;
+	}
+	frame->update_mask |= 1<<row_index;
+}
+
+void razer_sub_frame_row(struct razer_rgb_frame *frame,int row_index,struct razer_rgb *color)
+{
+	int r,g,b;
+	if(row_index<0 || row_index>=frame->rows_num)
+		return;
+
+	int x;
+	int columns_num = frame->columns_num;
+	for(x=0;x<columns_num;x++)
+	{
+		r = frame->rows[row_index]->column[x].r+color->r;
+		g = frame->rows[row_index]->column[x].g+color->g;
+		b = frame->rows[row_index]->column[x].b+color->b;
+		if(r>255)
+			r=255;
+		if(g>255)
+			g=255;
+		if(b>255)
+			b=255;
+		frame->rows[row_index]->column[x].r = (unsigned char)r;
+		frame->rows[row_index]->column[x].g = (unsigned char)g;
+		frame->rows[row_index]->column[x].b = (unsigned char)b;
+	}
+	frame->update_mask |= 1<<row_index;
+}
+
+void razer_set_led(struct razer_rgb_frame *frame,int column_index,int row_index,struct razer_rgb *color)
+{
+	if(row_index<0 || row_index>=frame->rows_num)
+		return;
+	if(column_index<0 || column_index>=frame->columns_num)
+		return;
+	frame->rows[row_index]->column[column_index].r = color->r;
+	frame->rows[row_index]->column[column_index].g = color->g;
+	frame->rows[row_index]->column[column_index].b = color->b;
+	frame->update_mask |= 1<<row_index;
+}
+
+void razer_set_led_pos(struct razer_rgb_frame *frame,struct razer_pos *pos,struct razer_rgb *color)
+{
+	int row_index = pos->y;
+	int column_index = pos->x;
+	if(row_index<0 || row_index>=frame->rows_num)
+		return;
+	if(column_index<0 || column_index>=frame->columns_num)
+		return;
+	frame->rows[row_index]->column[column_index].r = color->r;
+	frame->rows[row_index]->column[column_index].g = color->g;
+	frame->rows[row_index]->column[column_index].b = color->b;
+	frame->update_mask |= 1<<row_index;
+}
+
+void razer_clear_all(struct razer_rgb_frame *frame)
+{
+	struct razer_rgb color = {.r=0,.g=0,.b=0};
+	int i;
+	for(i=0;i<frame->rows_num;i++)
+		razer_set_frame_row(frame,i,&color);
+}
+
+void razer_set_all(struct razer_rgb_frame *frame,struct razer_rgb *color)
 {
 	int i;
-	if(use_update_mask)
-	{
-		for(i=0;i<6;i++)
-			if(update_mask &(1<<i))
-			{
-				memcpy((void*)((char*)dst_rows+(i*sizeof(struct razer_rgb_row))),(void*)((char*)src_rows+(i*sizeof(struct razer_rgb_row))),sizeof(struct razer_rgb_row));
-			}
-	}
-	else
-	{
-		memcpy((void*)dst_rows,(void*)src_rows,sizeof(struct razer_rgb_row)*6);
-	}
+	for(i=0;i<frame->rows_num;i++)
+		razer_set_frame_row(frame,i,color);
 }
 
-void set_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color)
+/*void set_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *color)
 {
 	if(column_index<0 || column_index>21)
 		return;
@@ -2455,8 +2914,9 @@ void sub_keys_column(struct razer_keys *keys,int column_index,struct razer_rgb *
 	}
 	keys->update_mask = 63;
 }
+*/
 
-void set_keys_row(struct razer_keys *keys,int row_index,struct razer_rgb *color)
+/*void set_keys_row(struct razer_keys *keys,int row_index,struct razer_rgb *color)
 {
 	if(row_index<0 || row_index>5)
 		return;
@@ -2558,8 +3018,8 @@ void razer_set_all(struct razer_keys *keys,struct razer_rgb *color)
 	int i;
 	for(i=0;i<6;i++)
 		set_keys_row(keys,i,color);
-}
-
+}*/
+/*
 void sub_heatmap(struct razer_keys *keys,int heatmap_reduction_amount)
 {
 	int x,y;
@@ -2571,8 +3031,8 @@ void sub_heatmap(struct razer_keys *keys,int heatmap_reduction_amount)
 		}
 	}
 }
-
-void draw_line(struct razer_keys *keys,struct razer_pos *a,struct razer_pos *b,struct razer_rgb *color)
+*/
+void razer_draw_line(struct razer_rgb_frame *frame,struct razer_pos *a,struct razer_pos *b,struct razer_rgb *color)
 {
 	int dx = abs(b->x-a->x);
 	int dy = -abs(b->y-a->y);
@@ -2590,7 +3050,7 @@ void draw_line(struct razer_keys *keys,struct razer_pos *a,struct razer_pos *b,s
 
 	while(1)
 	{
-		razer_set_key_pos(keys,&pos,color);
+		razer_set_led_pos(frame,&pos,color);
 		if(pos.x == b->x && pos.y == b->y)
 			break;
 		e2 = 2*e;
@@ -2607,21 +3067,21 @@ void draw_line(struct razer_keys *keys,struct razer_pos *a,struct razer_pos *b,s
 	}
 }
 
-void draw_circle(struct razer_keys *keys,struct razer_pos *pos,int radius,struct razer_rgb *color)
+void razer_draw_circle(struct razer_rgb_frame *frame,struct razer_pos *pos,int radius,struct razer_rgb *color)
 {
 	int x = radius;
 	int y= 0;
 	int re = 1-x;
 	while( x>= y)
 	{
-		razer_set_key(keys,x+pos->x, y + pos->y,color);
-		razer_set_key(keys,y+pos->x, x + pos->y,color);
-		razer_set_key(keys,-x+pos->x, y + pos->y,color);
-		razer_set_key(keys,-y+pos->x, x + pos->y,color);
-		razer_set_key(keys,-x+pos->x, -y + pos->y,color);
-		razer_set_key(keys,-y+pos->x, -x + pos->y,color);
-		razer_set_key(keys,x+pos->x, -y + pos->y,color);
-		razer_set_key(keys,y+pos->x, -x + pos->y,color);
+		razer_set_led(frame,x+pos->x, y + pos->y,color);
+		razer_set_led(frame,y+pos->x, x + pos->y,color);
+		razer_set_led(frame,-x+pos->x, y + pos->y,color);
+		razer_set_led(frame,-y+pos->x, x + pos->y,color);
+		razer_set_led(frame,-x+pos->x, -y + pos->y,color);
+		razer_set_led(frame,-y+pos->x, -x + pos->y,color);
+		razer_set_led(frame,x+pos->x, -y + pos->y,color);
+		razer_set_led(frame,y+pos->x, -x + pos->y,color);
 		y++;
 		if(re < 0)
 			re += 2*y+1;
@@ -2633,23 +3093,23 @@ void draw_circle(struct razer_keys *keys,struct razer_pos *pos,int radius,struct
 	}
 }
 
-void draw_ring(struct razer_keys *keys,struct razer_pos *pos,struct razer_rgb *color)
+void razer_draw_ring(struct razer_rgb_frame *frame,struct razer_pos *pos,struct razer_rgb *color)
 {
-	razer_set_key(keys,pos->x+1, pos->y,color);
-	razer_set_key(keys,pos->x-1, pos->y,color);
+	razer_set_led(frame,pos->x+1, pos->y,color);
+	razer_set_led(frame,pos->x-1, pos->y,color);
 	if(pos->y==4 || pos->y==1)
 	{
-		razer_set_key(keys,pos->x-1, pos->y-1,color);
-		razer_set_key(keys,pos->x, pos->y-1,color);
-		razer_set_key(keys,pos->x-1, pos->y+1,color);
-		razer_set_key(keys,pos->x, pos->y+1,color);
+		razer_set_led(frame,pos->x-1, pos->y-1,color);
+		razer_set_led(frame,pos->x, pos->y-1,color);
+		razer_set_led(frame,pos->x-1, pos->y+1,color);
+		razer_set_led(frame,pos->x, pos->y+1,color);
 	}
 	else
 	{
-		razer_set_key(keys,pos->x, pos->y-1,color);
-		razer_set_key(keys,pos->x+1, pos->y-1,color);
-		razer_set_key(keys,pos->x, pos->y+1,color);
-		razer_set_key(keys,pos->x+1, pos->y+1,color);
+		razer_set_led(frame,pos->x, pos->y-1,color);
+		razer_set_led(frame,pos->x+1, pos->y-1,color);
+		razer_set_led(frame,pos->x, pos->y+1,color);
+		razer_set_led(frame,pos->x+1, pos->y+1,color);
 	}
 }
 
@@ -2719,189 +3179,11 @@ void razer_frame_limiter(struct razer_chroma *chroma,int fps)
 
 void razer_update(struct razer_chroma *chroma)
 {
-	struct timeval select_tv;
-	struct razer_chroma_event chroma_event;
-	int keycode = -1;
-	fd_set keyboard_rs;
-	fd_set mouse_rs;
-	select_tv.tv_sec = 0;
-	select_tv.tv_usec = 0;
-	int r;
-	char buf[2048];
-	if(!chroma->keyboard_input_file)
-		razer_open_keyboard_input_file(chroma);
-	if(!chroma->mouse_input_file)
-		razer_open_mouse_input_file(chroma);
 	chroma->update_ms = razer_get_ticks();
 	long diff_ms = chroma->update_ms - chroma->last_update_ms;
 	chroma->update_dt = (float)diff_ms / 1000.0f;
-
-	if(chroma->keyboard_input_file)
-	{
-		FD_ZERO(&keyboard_rs);
-		FD_SET(chroma->keyboard_input_file,&keyboard_rs);
-		r = select(chroma->keyboard_input_file+1,&keyboard_rs,0,0,&select_tv);
-		if(r && FD_ISSET(chroma->keyboard_input_file,&keyboard_rs))
-		{
-			int n=2048;
-			n = read(chroma->keyboard_input_file,buf,2048);
-			if(n<0)
-			{
-				/*if(errno != EAGAIN)
-				{
-					razer_close_input_file(chroma);
-					return;
-				}*/
-			}
-			else if(n==0)
-			{
-				razer_close_keyboard_input_file(chroma);
-				return;
-			}
-			else				
-			{
-				unsigned int i;
-				for(i=0;i<n/sizeof(struct input_event);i++)
-				{
-					struct input_event *event = (struct input_event*)(buf+(i*sizeof(struct input_event)));
-					if(event->type==EV_KEY)
-					{
-						keycode = event->code;
-						if(event->value==1)
-						{
-							razer_copy_pos(&chroma->key_pos,&chroma->last_key_pos);
-							razer_convert_keycode_to_pos(event->code,&chroma->key_pos);							
-							//chroma->keys->heatmap[chroma->key_pos.y][chroma->key_pos.x]+=1;
-							chroma_event.key = "Key Down";
-						}
-						else
-							chroma_event.key = "Key Up";
-						if(chroma->input_handler)
-						{
-							chroma_event.type = RAZER_CHROMA_EVENT_TYPE_KEYBOARD;
-							chroma_event.sub_type = event->value;
-							chroma_event.value = keycode;
-
-							chroma->input_handler(chroma,&chroma_event);
-						}
-						long key_diff_ms = chroma->update_ms - chroma->last_key_event_ms;
-						chroma->key_event_dt = (float)key_diff_ms / 1000.0f;
-						chroma->last_key_event_ms = chroma->update_ms;			
-					}
-				}
-			}
-		}	
-	}
-
-	if(chroma->mouse_input_file)
-	{
-		FD_ZERO(&mouse_rs);
-		FD_SET(chroma->mouse_input_file,&mouse_rs);
-		select_tv.tv_sec = 0;
-		select_tv.tv_usec = 0;
-		r = select(chroma->mouse_input_file+1,&mouse_rs,0,0,&select_tv);
-		if(r && FD_ISSET(chroma->mouse_input_file,&mouse_rs))
-		{
-			int n=2048;
-			n = read(chroma->mouse_input_file,buf,2048);
-			if(n<0)
-			{
-				/*if(errno != EAGAIN)
-				{
-					razer_close_input_file(chroma);
-					return;
-				}*/
-			}
-			else if(n==0)
-			{
-				razer_close_mouse_input_file(chroma);
-				return;
-			}
-			else				
-			{
-				unsigned int i;
-				unsigned int event_size = sizeof(struct input_event);
-				for(i=0;i<n/event_size;i++)
-				{
-					struct input_event *event = (struct input_event*)(buf+(i*sizeof(struct input_event)));
-						if(chroma->input_handler)
-						{
-							chroma_event.type = RAZER_CHROMA_EVENT_TYPE_MOUSE;
-	        				switch(event->type)
-	        				{
-	        					case EV_MSC:
-	        						break;
-	        					case EV_SYN:
-	        						break;
-	        					case EV_KEY:
-	        						switch(event->code)
-	        						{
-	        							case BTN_LEFT:
-											chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_LEFT;
-											break;
-		    							case BTN_MIDDLE:
-											chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_MIDDLE;
-											break;
-		    							case BTN_RIGHT:
-											chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_RIGHT;
-											break;
-		    							case BTN_EXTRA:
-											chroma_event.value = RAZER_CHROMA_EVENT_BUTTON_EXTRA;
-											break;
-										default:
-											#ifdef USE_DEBUGGING
-												printf("uknown button event: type:%d,code:%d,value:%d\n",event->type,event->code,event->value);
-											#endif
-											break;
-	        						}
-	        						switch(event->value)
-	        						{
-	        							case 0 :
-											chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_BUTTON_UP;
-											break;
-	        							case 1 :
-											chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_BUTTON_DOWN;
-											break;
-
-	        						}
-		       						break;
-								case EV_REL :
-									switch(event->code)
-									{
-										case 0 : 
-											chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_X_AXIS_MOVEMENT;
-											chroma_event.value = event->value;
-											break;
-										case 1 : 
-											chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_Y_AXIS_MOVEMENT;
-											chroma_event.value = event->value;
-											break;
-										case 8 : 
-											chroma_event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_WHEEL_MOVEMENT;
-											chroma_event.value = event->value;
-											break;
-										default:
-											#ifdef USE_DEBUGGING
-												printf("uknown relative movement event: type:%d,code:%d,value:%d\n",event->type,event->code,event->value);
-											#endif
-											break;
-									}
-									break;
-								default:
-									#ifdef USE_DEBUGGING
-										printf("uknown event: type:%d,code:%d,value:%d\n",event->type,event->code,event->value);
-									#endif
-									break;
-							}
-							chroma->input_handler(chroma,&chroma_event);
-						}
-						long key_diff_ms = chroma->update_ms - chroma->last_key_event_ms;
-						chroma->key_event_dt = (float)key_diff_ms / 1000.0f;
-						chroma->last_key_event_ms = chroma->update_ms;			
-				}
-			}
-		}	
-	}
+	if(chroma->input_handler)
+		razer_poll_input_devices(chroma);
 }
 
 

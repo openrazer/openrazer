@@ -27,7 +27,7 @@ int effect_update(struct razer_fx_render_node *render)
 				dist = (21.0f / (x-xmax))/21.0f;
 			}
 			rgb_from_hue(dist,0.3f,0.0f,&col);
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&col,render->opacity);//*render->opacity  //&render->second_input_frame->rows[y].column[x]
+			rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&col,render->opacity);//*render->opacity  //&render->second_input_frame->rows[y]->column[x]
 			render->output_frame->update_mask |= 1<<y;
 		}
 	return(1);

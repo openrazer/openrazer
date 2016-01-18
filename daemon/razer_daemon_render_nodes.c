@@ -60,7 +60,7 @@ struct razer_fx_render_node *daemon_create_render_node(struct razer_daemon *daem
 	render_node->opacity = 1.0f;
 	if(input_render_node_uid == -1)
 	{
-		struct razer_rgb_frame *iframe = razer_create_rgb_frame();
+		struct razer_rgb_frame *iframe = razer_create_rgb_frame(22,6);
 		render_node->input_frame = iframe;
 		render_node->input_frame_linked_uid = -1;
 	}
@@ -78,7 +78,7 @@ struct razer_fx_render_node *daemon_create_render_node(struct razer_daemon *daem
 
 	if(second_input_render_node_uid == -1)
 	{
-		struct razer_rgb_frame *siframe = razer_create_rgb_frame();
+		struct razer_rgb_frame *siframe = razer_create_rgb_frame(22,6);
 		render_node->second_input_frame = siframe;
 		render_node->second_input_frame_linked_uid = -1;
 	}
@@ -96,7 +96,7 @@ struct razer_fx_render_node *daemon_create_render_node(struct razer_daemon *daem
 
 	if(output_render_node_uid == -1)
 	{
-		struct razer_rgb_frame *oframe = razer_create_rgb_frame();
+		struct razer_rgb_frame *oframe = razer_create_rgb_frame(22,6);
 		render_node->output_frame = oframe;
 		render_node->output_frame_linked_uid = -1;
 	}
@@ -159,6 +159,18 @@ int daemon_reset_render_node(struct razer_fx_render_node *render_node)
 	int ret = render_node->effect->reset(render_node);
 	return(ret);
 }
+ 
+
+int daemon_render_node_fire_parameter_changed(struct razer_fx_render_node *render_node,struct razer_parameter *parameter)
+{
+	if(!render_node)
+		return(-1);
+	if(!render_node->effect->parameter_changed)
+		return(-1);
+	int ret = render_node->effect->parameter_changed(render_node,parameter);
+	return(ret);
+}
+
 
 void daemon_connect_frame_buffer(struct razer_daemon *daemon,struct razer_fx_render_node *render_node)
 {
@@ -166,7 +178,7 @@ void daemon_connect_frame_buffer(struct razer_daemon *daemon,struct razer_fx_ren
 	if(daemon->frame_buffer_linked_uid != 0) //unlink old render node first
 	{
 		struct razer_fx_render_node *old_rn = daemon_get_render_node(daemon,daemon->frame_buffer_linked_uid);
-		old_rn->output_frame = razer_create_rgb_frame();
+		old_rn->output_frame = razer_create_rgb_frame(22,6);
 		old_rn->output_frame_linked_uid = -1;
 	}
 	if(!render_node)
@@ -183,7 +195,7 @@ void daemon_disconnect_frame_buffer(struct razer_daemon *daemon)
 	if(daemon->frame_buffer_linked_uid != 0) //unlink old render node first
 	{
 		struct razer_fx_render_node *old_rn = daemon_get_render_node(daemon,daemon->frame_buffer_linked_uid);
-		old_rn->output_frame = razer_create_rgb_frame();
+		old_rn->output_frame = razer_create_rgb_frame(22,6);
 		old_rn->output_frame_linked_uid = -1;
 	}
 	//if(render_node->output_frame_linked_uid == -1)
@@ -225,6 +237,7 @@ void daemon_connect_second_input(struct razer_daemon *daemon,struct razer_fx_ren
 
 void daemon_set_default_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node)
 {
+	//setting the default daemon render node to render_node
 	daemon->render_node = render_node;
 }
 

@@ -426,7 +426,7 @@ FX setup scripts, bug fixes, feature requests, etc are also welcome.
  - Deb packaging, dkms support, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
  - GUI Interface for BlackWidow Chroma Keyboards by Luke Horwell (pulled)
  - Ubuntu fixes by Brad Murmz (pulled)
-
+ - Default Keyboard profiles by Mathieu Okuyama (manual merge)
 
 ## Donations (in Euros)
 
