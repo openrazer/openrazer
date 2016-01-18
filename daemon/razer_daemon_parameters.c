@@ -506,6 +506,7 @@ struct razer_parameter *daemon_create_parameter_string(char *key,char *descripti
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_STRING;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -517,6 +518,7 @@ struct razer_parameter *daemon_create_parameter_float(char *key,char *descriptio
 	float *fp = (float*)&(parameter->value);
     *fp = value;
 	parameter->type = RAZER_PARAMETER_TYPE_FLOAT;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -527,6 +529,7 @@ struct razer_parameter *daemon_create_parameter_int(char *key,char *description,
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_INT;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -537,6 +540,7 @@ struct razer_parameter *daemon_create_parameter_uint(char *key,char *description
 	parameter->description = description;
 	parameter->value = value;
 	parameter->type = RAZER_PARAMETER_TYPE_UINT;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -547,6 +551,7 @@ struct razer_parameter *daemon_create_parameter_rgb(char *key,char *description,
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_RGB;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -557,6 +562,7 @@ struct razer_parameter *daemon_create_parameter_pos(char *key,char *description,
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_POS;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -567,6 +573,7 @@ struct razer_parameter *daemon_create_parameter_render_node(char *key,char *desc
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_RENDER_NODE;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -577,6 +584,7 @@ struct razer_parameter *daemon_create_parameter_float_range(char *key,char *desc
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_FLOAT_RANGE;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -587,6 +595,7 @@ struct razer_parameter *daemon_create_parameter_int_range(char *key,char *descri
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_INT_RANGE;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -597,6 +606,7 @@ struct razer_parameter *daemon_create_parameter_uint_range(char *key,char *descr
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_UINT_RANGE;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -607,6 +617,7 @@ struct razer_parameter *daemon_create_parameter_rgb_range(char *key,char *descri
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_RGB_RANGE;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -617,6 +628,7 @@ struct razer_parameter *daemon_create_parameter_pos_range(char *key,char *descri
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_POS_RANGE;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -627,6 +639,7 @@ struct razer_parameter *daemon_create_parameter_float_array(char *key,char *desc
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_FLOAT_ARRAY;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -637,6 +650,7 @@ struct razer_parameter *daemon_create_parameter_int_array(char *key,char *descri
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_INT_ARRAY;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -647,6 +661,7 @@ struct razer_parameter *daemon_create_parameter_uint_array(char *key,char *descr
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_UINT_ARRAY;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -657,6 +672,7 @@ struct razer_parameter *daemon_create_parameter_rgb_array(char *key,char *descri
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_RGB_ARRAY;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 
@@ -667,6 +683,7 @@ struct razer_parameter *daemon_create_parameter_pos_array(char *key,char *descri
 	parameter->description = description;
 	parameter->value = (unsigned long)value;
 	parameter->type = RAZER_PARAMETER_TYPE_POS_ARRAY;
+	//parameter->effect = NULL;
 	return(parameter);
 }
 

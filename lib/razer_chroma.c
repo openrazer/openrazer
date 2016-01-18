@@ -42,7 +42,7 @@ void write_to_device_file(char *device_path, char *buffer, int buffer_length)
 void read_from_device_file(char *device_path, char *buffer, int buffer_length)
 {
 	FILE* fp;
-	fp = fopen(device_path, "r");
+	fp = fopen(device_path, "rb");
 	if(fp != NULL) {
 	  fread(buffer, sizeof(char), buffer_length, fp);
 	  fclose(fp);
