@@ -1,45 +1,23 @@
 /*
  * Copyright (c) 2015 Terry Cain <terry@terrys-home.co.uk>
- */
-
-/*
+ *               2015 Tim Theede <pez2001@voyagerproject.de>
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 2 of the License, or (at your option)
  * any later version.
  */
 
-#ifndef __HID_RAZER_MOUSE_H
-#define __HID_RAZER_MOUSE_H
-
-#ifndef USB_VENDOR_ID_RAZER
-#define USB_VENDOR_ID_RAZER 0x1532
-#endif
-
-#ifndef USB_DEVICE_ID_RAZER_MAMBA
- #define USB_DEVICE_ID_RAZER_MAMBA 0x0045
-#endif
-
-/* Each keyboard report has 90 bytes*/
-#define RAZER_REPORT_LEN 0x5A
+#ifndef DRIVER_RAZERCOMMON_H_
+#define DRIVER_RAZERCOMMON_H_
 
 
+/* Each USB report has 90 bytes*/
+#define RAZER_USB_REPORT_LEN 0x5A
 
-#define RAZER_WAIT_MS 1
-#define RAZER_WAIT_MIN_US 600
-#define RAZER_WAIT_MAX_US 800
 
 struct razer_rgb {
     unsigned char r,g,b;
-};
-
-struct razer_mouse_device {
-    //struct input_dev *dev;
-    struct usb_device *usbdev;
-    struct hid_device *hiddev;
-    unsigned char effect;
-    char name[128];
-    char phys[64];
 };
 
 struct razer_report {
@@ -55,4 +33,21 @@ struct razer_report {
     unsigned char report_end_marker; /*0x0*/
 };
 
-#endif
+
+
+int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint report_index, ulong wait_min, ulong wait_max);
+int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, ulong wait_min, ulong wait_max);
+unsigned char razer_calculate_crc(struct razer_report *report);
+void razer_prepare_report(struct razer_report *report);
+void print_erroneous_report(struct razer_report* report, char* driver_name, char* message);
+
+
+
+
+
+
+
+
+
+
+#endif /* DRIVER_RAZERCOMMON_H_ */
