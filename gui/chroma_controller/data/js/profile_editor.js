@@ -339,12 +339,15 @@ function set_mode(id) {
     if (id == 'set') {
         mode = 'set';
         $('#current_mode').html("<b class='mode-text'>Set</b> - Click on a key to assign a colour here.");
+        set_cursor('#keyboard-div','mode-set')
     } else if (id == 'picker') {
         mode = 'picker';
         $('#current_mode').html("<b class='mode-text'>Picker</b> - Click on a key to grab its colour.");
+        set_cursor('#keyboard-div','mode-picker')
     } else if (id == 'clear') {
         mode = 'clear';
         $('#current_mode').html("<b class='mode-text'>Clear</b> - Click on a key to clear.");
+        set_cursor('#keyboard-div','mode-clear')
     }
 }
 

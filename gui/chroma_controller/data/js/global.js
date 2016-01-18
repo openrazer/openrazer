@@ -69,15 +69,28 @@ function cmd(parameters) {
 
 
 /**
- * Change the cursor of the page.
+ * Change the cursor of a specific element.
  *
+ * @param type {string} Element, or 'html' for whole page.
  * @param type {string} Cursor type
  */
-function set_cursor(type) {
-    if (type == 'normal') {
-        $('html').removeClass('cursor-wait');
-    } else if (type == 'wait') {
-        $('html').addClass('cursor-wait');
+function set_cursor(element, type) {
+
+    // Removes any existing cursors on this element first.
+    $(element).removeClass('cursor-wait');
+    $(element).removeClass('cursor-mode-set');
+    $(element).removeClass('cursor-mode-picker');
+    $(element).removeClass('cursor-mode-clear');
+
+    // Set a new cursor, if applicable.
+    if (type == 'wait') {
+        $(element).addClass('cursor-wait');
+    } else if (type == 'mode-set') {
+        $(element).addClass('cursor-mode-set');
+    } else if (type == 'mode-picker') {
+        $(element).addClass('cursor-mode-picker');
+    } else if (type == 'mode-clear') {
+        $(element).addClass('cursor-mode-clear');
     }
 }
 

@@ -51,8 +51,23 @@ hr {
     color: #484848;
 }
 
+/************************
+   Cursors
+*************************/
 .cursor-wait {
     cursor: wait;
+}
+
+.cursor-mode-set {
+    cursor: url("img/cursors/mode-set.gif"), crosshair;
+}
+
+.cursor-mode-picker {
+    cursor: url("img/cursors/mode-picker.gif"), copy;
+}
+
+.cursor-mode-clear {
+    cursor: url("img/cursors/mode-clear.gif"), not-allowed;
 }
 
 /************************

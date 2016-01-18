@@ -308,11 +308,11 @@ class ChromaController(object):
         elif command.startswith('profile-activate'):
             command = command.replace('%20',' ')
             profile_name = command.split('profile-activate?')[1]
-            self.webkit.execute_script('set_cursor("wait")')
+            self.webkit.execute_script('set_cursor("html","wait")')
             self.profiles.activate_profile_from_file(profile_name)
             self.webkit.execute_script('$("#custom").html("Profile - ' + profile_name + '")')
             self.webkit.execute_script('$("#custom").prop("checked", true)')
-            self.webkit.execute_script('set_cursor("normal")')
+            self.webkit.execute_script('set_cursor("html","normal")')
 
         elif command == 'profile-preview':
             self.profiles.activate_profile_from_memory()
