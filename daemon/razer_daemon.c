@@ -90,7 +90,6 @@ struct razer_daemon *daemon_open(void)
 	razer_set_input_handler(daemon->chroma,daemon_input_event_handler);
 	daemon->chroma->tag = daemon;
 	daemon->frame_buffer = razer_create_rgb_frame(22,6);
-	printf("daemon->fb:%x\n",daemon->frame_buffer);
 	daemon->frame_buffer_linked_uid = 0;
 	daemon->return_render_node = NULL; //TODO remember what i wanted to achieve with this variable ... :-)
 
