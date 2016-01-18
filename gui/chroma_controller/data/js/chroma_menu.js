@@ -65,7 +65,6 @@ function profile_activate() {
     cmd('profile-activate?'+selected_profile);
 }
 
-
 /**
  * Run once document has loaded
  */
@@ -79,6 +78,13 @@ $(document).ready(function () {
             $(this).next().text("Off")
         }
         window.location.href = 'cmd://brightness?' + Math.round($(this).val());
+    });
+
+    // Instant profile activation (if 'live_switch' is enabled in preferences)
+    $('#profiles_list').change(function() {
+        if ( live_switch == true ) {
+            profile_activate()
+        }
     });
 
 });

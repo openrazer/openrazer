@@ -70,6 +70,13 @@ class ChromaController(object):
             if self.multi_device_present:
                 self.webkit.execute_script("$('#multi-device-switcher').show()")
 
+            # Tell JavaScript whether live profile switching is enabled.
+            if self.preferences.get_pref('live_switch') == 'true':
+                self.webkit.execute_script('live_switch = true;')
+                self.webkit.execute_script('$("#profiles-activate").hide();')
+            else:
+                self.webkit.execute_script('live_switch = false;')
+
         elif self.current_page == 'profile_editor':
             self.webkit.execute_script('change_header("Edit ' + self.open_this_profile + '")')
 
@@ -90,6 +97,10 @@ class ChromaController(object):
             # disable space key and FN
             self.webkit.execute_script("keyboard_obj.disable_key(5,7)")
             self.webkit.execute_script("keyboard_obj.disable_key(5,12)")
+
+            # Hide preview button if live previewing is enabled.
+            if self.preferences.get_pref('live_preview') == 'true':
+                self.webkit.execute_script('$("#edit-preview").hide();')
 
         elif self.current_page == 'preferences':
             self.preferences.refresh_pref_page(self.webkit);
@@ -307,6 +318,10 @@ class ChromaController(object):
             # Write to memory
             self.profiles.get_active_profile().set_key_colour(row, col, rgb)
 
+            # Live preview (if 'live_preview' is enabled in preferences)
+            if self.preferences.get_pref('live_preview') == 'true':
+                self.profiles.activate_profile_from_memory()
+
         elif command.startswith('clear-key'):
             command = command.replace('%20',' ')
             row = int(command.split('?')[1])
@@ -354,12 +369,12 @@ class ChromaController(object):
         elif command == 'profile-save':
             profile_name = self.profiles.get_active_profile_name()
             print('Saving profile "{0}" ...'.format(profile_name))
-
             self.profiles.save_profile(profile_name)
-
             print('Saved "{0}".'.format(profile_name))
-
             self.show_menu('chroma_menu')
+
+            if self.preferences.get_pref('activate_on_save') == 'true':
+                self.profiles.activate_profile_from_file(self.profiles.get_active_profile_name())
 
         ## Miscellaneous
         elif command == 'open-config-folder':
@@ -669,11 +684,11 @@ class ChromaPreferences(object):
         self.pref_data[setting] = value;
 
     def get_pref(self, setting, default_value=False):
-        print('Read preference: "' + value + '" from "' + setting + '"')
         try:
             # Read data from preferences, if it exists.
-            get_data = self.pref_data[setting]
-            return get_data
+            value = self.pref_data[setting]
+            return value
+            print('Read preference: "' + value + '" from "' + setting + '"')
         except:
             # Should it be non-existent, return a fallback option.
             print("Preference '" + setting + "' doesn't exist. ")
