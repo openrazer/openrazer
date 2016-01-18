@@ -19,9 +19,14 @@
 /************************
    Global
 *************************/
-/* Uses the RazerF5 font if available on the system. */
+/* Fonts */
+@font-face {
+    font-family: Play;
+    src: url(fonts/Play-Regular.ttf);
+}
+
 html, body {
-    font-family: 'RazerF5', 'Ubuntu', 'DejaVu Sans', sans-serif;
+    font-family: 'Play', 'Ubuntu', 'DejaVu Sans', sans-serif;
     background-color: #222222;
 
     /* Behave more like an application.
@@ -30,7 +35,7 @@ html, body {
 }
 
 h1, h2, h3, h4, h5 {
-    font-family: 'RazerF5', 'Ubuntu Light', 'DejaVu Sans', sans-serif;
+    font-family: 'Play', 'Ubuntu', 'DejaVu Sans', sans-serif;
     font-weight: lighter;
     color: lime;
     margin-top: 16px;
@@ -38,7 +43,7 @@ h1, h2, h3, h4, h5 {
 }
 
 p, a, table, td, tr {
-    font-family: 'RazerF5', 'Ubuntu Light', 'DejaVu Sans', sans-serif;
+    font-family: 'Play', 'Ubuntu', 'DejaVu Sans', sans-serif;
     color: #888;
     font-size: small;
 }
