@@ -29,7 +29,7 @@ char *razer_serial_pathname = "/get_serial";
 void write_to_device_file(char *device_path, char *buffer, int buffer_length)
 {
 	FILE* fp;
-	fp = fopen(device_path, "w");
+	fp = fopen(device_path, "wb");
 	if(fp != NULL) {
 	  fwrite(buffer, sizeof(char), buffer_length, fp);
 	  fclose(fp);

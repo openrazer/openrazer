@@ -159,6 +159,18 @@ int daemon_reset_render_node(struct razer_fx_render_node *render_node)
 	int ret = render_node->effect->reset(render_node);
 	return(ret);
 }
+ 
+
+int daemon_render_node_fire_parameter_changed(struct razer_fx_render_node *render_node,struct razer_parameter *parameter)
+{
+	if(!render_node)
+		return(-1);
+	if(!render_node->effect->parameter_changed)
+		return(-1);
+	int ret = render_node->effect->parameter_changed(render_node,parameter);
+	return(ret);
+}
+
 
 void daemon_connect_frame_buffer(struct razer_daemon *daemon,struct razer_fx_render_node *render_node)
 {

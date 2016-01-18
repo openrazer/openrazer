@@ -124,6 +124,18 @@ void daemon_free_effect(struct razer_effect *effect)
 	free(effect);
 }
 
+/*
+int daemon_effect_fire_parameter_changed(struct razer_effect *effect)
+{
+	if(!effect)
+		return(-1);
+	if(!effect->parameter_changed)
+		return(-1);
+	int ret = effect->parameter_changed(render_node);
+	return(ret);
+}
+*/
+
 int daemon_effect_add_parameter(struct razer_effect *effect,struct razer_parameter *parameter)
 {
 	list_Push(effect->parameters,parameter);

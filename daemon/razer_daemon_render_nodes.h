@@ -38,6 +38,7 @@ struct razer_fx_render_node *daemon_get_render_node(struct razer_daemon *daemon,
 
 //int daemon_reset_render_node(struct razer_daemon *daemon,struct razer_fx_render_node *render_node);
 int daemon_reset_render_node(struct razer_fx_render_node *render_node);
+int daemon_render_node_fire_parameter_changed(struct razer_fx_render_node *render_node,struct razer_parameter *parameter);
 void daemon_connect_frame_buffer(struct razer_daemon *daemon,struct razer_fx_render_node *render_node);
 void daemon_disconnect_frame_buffer(struct razer_daemon *daemon);
 void daemon_connect_input(struct razer_daemon *daemon,struct razer_fx_render_node *render_node,struct razer_fx_render_node *input_node);
