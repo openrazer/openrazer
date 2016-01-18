@@ -462,22 +462,31 @@ class ChromaController(object):
             os.makedirs(SAVE_PROFILES)
             os.makedirs(SAVE_BACKUPS)
 
-        # Set up the daemon
-        self.daemon = razer.daemon_dbus.DaemonInterface()
-
-        # Profiles
-        self.profiles = ChromaProfiles(self.daemon)
-
-        # Preferences
+        # Initialize Preferences
         self.preferences = ChromaPreferences()
 
-        # "Globals"
-        self.kb_layout = razer.keyboard.get_keyboard_layout()
-        self.reactive_speed = 1
-        self.primary_rgb = razer.keyboard.RGB(0, 255, 0)
-        self.secondary_rgb = razer.keyboard.RGB(0, 0, 255)
-        self.current_effect = 'custom'
-        self.last_effect = 'unknown'
+        # Set up the daemon
+        try:
+            # Connect to the DBUS
+            self.daemon = razer.daemon_dbus.DaemonInterface()
+
+            # Profiles
+            self.profiles = ChromaProfiles(self.daemon)
+
+            # Load devices page normally.
+            self.current_page = 'controller_devices'
+
+            # "Globals"
+            self.kb_layout = razer.keyboard.get_keyboard_layout()
+            self.reactive_speed = 1
+            self.primary_rgb = razer.keyboard.RGB(0, 255, 0)
+            self.secondary_rgb = razer.keyboard.RGB(0, 0, 255)
+            self.current_effect = 'custom'
+            self.last_effect = 'unknown'
+
+        except:
+            # Load an error page instead.
+            self.current_page = 'controller_service_error'
 
         # Create WebKit Container
         self.webkit = WebKit.WebView()
@@ -498,12 +507,11 @@ class ChromaController(object):
         # Disable right click context menu
         self.webkit.props.settings.props.enable_default_context_menu = False
 
-        # Load page
-        self.current_page = 'controller_devices'
-        self.webkit.open(os.path.join(LOCATION_DATA, 'controller_devices.html'))
-
         # Post-actions after pages fully load.
         self.webkit.connect('load-finished',self.page_loaded)
+
+        # Load the starting page
+        self.webkit.open(os.path.join(LOCATION_DATA, self.current_page + '.html'))
 
         # Process any commands from the web page.
         self.webkit.connect('navigation-policy-decision-requested', self.process_uri)
