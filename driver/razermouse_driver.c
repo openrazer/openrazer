@@ -44,7 +44,7 @@ MODULE_LICENSE(DRIVER_LICENSE);
  * Send report to the keyboard
  */
 int razer_send_report(struct usb_device *usb_dev,void const *data) {
-    return razer_send_control_msg(usb_dev, data, 0x02, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
+    return razer_send_control_msg(usb_dev, data, 0x00, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
 }
 
 /**
@@ -73,7 +73,7 @@ void razer_get_serial(struct usb_device *usb_dev, unsigned char* serial_string)
     request_report.crc = razer_calculate_crc(&request_report);
 
 
-    retval = razer_get_usb_response(usb_dev, 0x01, &request_report, &response_report, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
+    retval = razer_get_usb_response(usb_dev, 0x00, &request_report, 0x00, &response_report, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
 
     if(retval == 0)
     {
@@ -121,13 +121,13 @@ int razer_get_battery_level(struct usb_device *usb_dev)
     request_report.crc = razer_calculate_crc(&request_report);
 
 
-    retval = razer_get_usb_response(usb_dev, 0x01, &request_report, &response_report, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
+    retval = razer_get_usb_response(usb_dev, 0x00, &request_report, 0x00, &response_report, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
 
     if(retval == 0)
     {
         if(response_report.report_start_marker == 0x02 && response_report.reserved2 == 0x07 && response_report.command == 0x80 && response_report.sub_command == 0x00)
         {
-            battery_level = request_report.command_parameters[0];
+            battery_level = response_report.command_parameters[0];
         } else
         {
             print_erroneous_report(&response_report, "razermouse", "Invalid Report Type");
@@ -166,13 +166,13 @@ int razer_is_charging(struct usb_device *usb_dev)
     request_report.crc = razer_calculate_crc(&request_report);
 
 
-    retval = razer_get_usb_response(usb_dev, 0x01, &request_report, &response_report, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
+    retval = razer_get_usb_response(usb_dev, 0x00, &request_report, 0x00, &response_report, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
 
     if(retval == 0)
     {
         if(response_report.report_start_marker == 0x02 && response_report.reserved2 == 0x07 && response_report.command == 0x84 && response_report.sub_command == 0x00)
         {
-          is_charging = request_report.command_parameters[0];
+          is_charging = response_report.command_parameters[0];
         } else
         {
             print_erroneous_report(&response_report, "razermouse", "Invalid Report Type");

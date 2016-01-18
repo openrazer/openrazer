@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2015 Terry Cain <terry@terrys-home.co.uk>
+ *               2015 Tim Theede <pez2001@voyagerproject.de>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,9 +23,9 @@
 // FIREFLY is 0
 int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint report_index, ulong wait_min, ulong wait_max)
 {
-    uint report_id = 0x300;
-    uint value = HID_REQ_SET_REPORT;
-    uint index = report_index;//URB_CONTROL
+	uint request = HID_REQ_SET_REPORT; // 0x09
+	uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
+    uint value = 0x300;
     uint size = RAZER_USB_REPORT_LEN;
     char *buf;
     int len;
@@ -35,10 +36,13 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
 
     // Send usb control message
     len = usb_control_msg(usb_dev, usb_sndctrlpipe(usb_dev, 0),
-            value,
-            USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT,
-            report_id,
-            index, buf, size, USB_CTRL_SET_TIMEOUT);
+            request,      // Request
+            request_type, // RequestType
+            value,        // Value
+            report_index, // Index
+            buf,          // Data
+            size,         // Length
+            USB_CTRL_SET_TIMEOUT);
 
     // Wait
     usleep_range(wait_min, wait_max);
@@ -104,13 +108,13 @@ void razer_prepare_report(struct razer_report *report)
  *
  * Returns 0 when successful, 1 if the report length is invalid.
  */
-// index is normally 1?
-int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct razer_report* request_report, struct razer_report* response_report, ulong wait_min, ulong wait_max)
+int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, ulong wait_min, ulong wait_max)
 {
-    uint report_id = 0x300;
-    uint value = HID_REQ_GET_REPORT;
-    uint index = report_index;
-    uint size = RAZER_USB_REPORT_LEN;
+	uint request = HID_REQ_GET_REPORT; // 0x01
+	uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN; // 0xA1
+    uint value = 0x300;
+    
+    uint size = RAZER_USB_REPORT_LEN; // 0x90
     int len;
     int retval;
     int result = 0;
@@ -119,14 +123,17 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
 
     // Send the request to the device.
     // TODO look to see if index needs to be different for the request and the response
-    retval = razer_send_control_msg(usb_dev, request_report, index, wait_min, wait_max);
+    retval = razer_send_control_msg(usb_dev, request_report, report_index, wait_min, wait_max);
 
     // Now ask for reponse
     len = usb_control_msg(usb_dev, usb_rcvctrlpipe(usb_dev, 0),
-          value,
-          USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN,
-          report_id,
-          index, response_report, size, USB_CTRL_SET_TIMEOUT);
+          request,         // Request
+          request_type,    // RequestType
+          value,           // Value
+          response_index,  // Index
+          response_report, // Data
+          size, 
+          USB_CTRL_SET_TIMEOUT);
 
     usleep_range(wait_min, wait_max);
 

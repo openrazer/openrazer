@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2015 Terry Cain <terry@terrys-home.co.uk>
+ *               2015 Tim Theede <pez2001@voyagerproject.de>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -35,7 +36,7 @@ struct razer_report {
 
 
 int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint report_index, ulong wait_min, ulong wait_max);
-int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct razer_report* request_report, struct razer_report* response_report, ulong wait_min, ulong wait_max);
+int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, ulong wait_min, ulong wait_max);
 unsigned char razer_calculate_crc(struct razer_report *report);
 void razer_prepare_report(struct razer_report *report);
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message);

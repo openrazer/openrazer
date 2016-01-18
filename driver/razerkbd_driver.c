@@ -118,7 +118,7 @@ void razer_get_serial(struct usb_device *usb_dev, unsigned char* serial_string)
     request_report.crc = razer_calculate_crc(&request_report);
 
 
-    retval = razer_get_usb_response(usb_dev, 0x01, &request_report, &response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+    retval = razer_get_usb_response(usb_dev, 0x01, &request_report, 0x01, &response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
 
     if(retval == 0)
     {
