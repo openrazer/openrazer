@@ -42,7 +42,7 @@ class ChromaController(object):
         for element in ['retry', 'edit-save', 'edit-preview', 'cancel', 'close-window', 'pref-open', 'pref-save']:
             self.webkit.execute_script('$("#' + element + '").hide()')
 
-        if page == 'main_menu':
+        if page == 'chroma_menu':
             self.webkit.open(os.path.join(LOCATION_DATA, 'chroma_menu.html'))
 
         elif page == 'profile_editor':
@@ -51,6 +51,8 @@ class ChromaController(object):
         elif page == 'preferences':
             self.webkit.open(os.path.join(LOCATION_DATA, 'chroma_preferences.html'))
 
+        elif page == 'controller_devices':
+            self.webkit.open(os.path.join(LOCATION_DATA, 'controller_devices.html'))
         else:
             print("Unknown menu '" + page + "'!")
 
@@ -59,10 +61,14 @@ class ChromaController(object):
     ##################################################
     def page_loaded(self, WebView, WebFrame):
         print('Running page post-actions for "' + self.current_page + '"...')
-        if self.current_page == 'main_menu':
+        if self.current_page == 'chroma_menu':
             self.webkit.execute_script('instantProfileSwitch = false;') # Unimplemented instant profile change option.
             self.webkit.execute_script("$('#profiles-activate').show()")
             self.refresh_profiles_list()
+
+            # If there are multiple devices on the system, show the "switch" button.
+            if self.multi_device_present:
+                self.webkit.execute_script("$('#multi-device-switcher').show()")
 
         elif self.current_page == 'profile_editor':
             self.webkit.execute_script('change_header("Edit ' + self.open_this_profile + '")')
@@ -87,6 +93,9 @@ class ChromaController(object):
 
         elif self.current_page == 'preferences':
             self.preferences.refresh_pref_page(self.webkit);
+
+        elif self.current_page == 'controller_devices':
+            self.detect_devices();
 
         else:
             print('No post actions necessary.')
@@ -254,7 +263,7 @@ class ChromaController(object):
                     self.profiles.remove_profile(cancel_args, del_from_fs=False)
 
                 self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes')\"})")
-            self.show_menu('main_menu')
+            self.show_menu('chroma_menu')
 
         ## Preferences
         elif command == 'pref-open':
@@ -269,11 +278,11 @@ class ChromaController(object):
         elif command == 'pref-revert':
             print('Reverted preferences.')
             self.preferences.load_pref()
-            self.show_menu('main_menu')
+            self.show_menu('chroma_menu')
 
         elif command == 'pref-save':
             self.preferences.save_pref()
-            self.show_menu('main_menu')
+            self.show_menu('chroma_menu')
 
         ## Profile Editor / Management
         elif command.startswith('profile-edit'):
@@ -350,14 +359,67 @@ class ChromaController(object):
 
             print('Saved "{0}".'.format(profile_name))
 
-            self.show_menu('main_menu')
+            self.show_menu('chroma_menu')
 
         ## Miscellaneous
         elif command == 'open-config-folder':
             os.system('xdg-open "' + SAVE_ROOT + '"')
 
+        ## Multi-device Management
+        elif command.startswith('set-device?'):
+            serial = command.split('?')[1]
+            self.set_device(serial)
+
+        elif command == 'rescan-devices':
+            self.webkit.execute_script('$("#detected-devices tr").remove();')
+            self.detect_devices()
+
+        elif command == 'change-device':
+            self.show_menu('controller_devices')
+
         else:
             print("         ... unimplemented!")
+
+    ##################################################
+    # Multi-device support
+    ##################################################
+    def detect_devices(self):
+        # FIXME: Only UI frontend implemented.
+        print('fixme:ChromaController.detect_devices')
+
+        # TODO:
+        #   -  Program will detect all connected Razer devices and add them to the 'devices' table using JS function.
+        #   -  If only one device is avaliable (such as only having one Chroma Keyboard), then automatically open that config page.
+
+        # FIXME: Just a placebo...
+        serial = '000'
+        hardware_type = 'blackwidow_chroma'
+        self.multi_device_present = True
+        print('Found "{0}" (S/N: {1}).'.format(hardware_type, serial))
+        self.webkit.execute_script('add_device("' + serial + '", "' + hardware_type + '")')
+
+        # If this is the only Razer device that can be configured, skip the screen.
+        if self.multi_device_present == False:
+            if hardware_type == 'blackwidow_chroma':
+                self.show_menu('chroma_menu')
+
+    def set_device(self, serial):
+        print('fixme:ChromaController.set_device')
+        # TODO:
+        #   -  Program knows that this is the 'active' device for configuration.
+        #   -  Changes the page based on the type of device.
+
+
+        # FIXME: Just a placebo...
+        serial = '000'
+        hardware_type = 'blackwidow_chroma'
+        print('Configuring "{0}" (S/N: {1})".'.format(hardware_type, serial))
+
+        # Open the relevant configuration menu for the selected device.
+        if hardware_type == 'blackwidow_chroma' :
+            self.current_page = 'chroma_menu'
+            self.webkit.open(os.path.join(LOCATION_DATA, 'chroma_menu.html'))
+
 
     ##################################################
     # Application Initialization
@@ -366,7 +428,7 @@ class ChromaController(object):
         """
         Initialise the class
         """
-        w = Gtk.Window(title="Razer BlackWidow Chroma Configuration")
+        w = Gtk.Window(title="Chroma Driver Configuration")
         w.set_wmclass('razer_bcd_utility', 'razer_bcd_utility')
         w.set_position(Gtk.WindowPosition.CENTER)
         w.set_size_request(1000, 600)
@@ -422,8 +484,8 @@ class ChromaController(object):
         self.webkit.props.settings.props.enable_default_context_menu = False
 
         # Load page
-        self.current_page = 'main_menu'
-        self.webkit.open(os.path.join(LOCATION_DATA, 'chroma_menu.html'))
+        self.current_page = 'controller_devices'
+        self.webkit.open(os.path.join(LOCATION_DATA, 'controller_devices.html'))
 
         # Post-actions after pages fully load.
         self.webkit.connect('load-finished',self.page_loaded)
