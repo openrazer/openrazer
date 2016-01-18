@@ -24,6 +24,7 @@ char *razer_reset_pathname = "/reset";
 char *razer_temp_clear_row_pathname = "/temp_clear_row";
 char *razer_macro_keys_pathname = "/macro_keys";
 char *razer_update_keys_pathname = "/set_key_row";
+char *razer_serial_pathname = "/get_serial";
 
 void write_to_device_file(char *device_path, char *buffer, int buffer_length)
 {
@@ -38,6 +39,40 @@ void write_to_device_file(char *device_path, char *buffer, int buffer_length)
 	}
 }
 
+void read_from_device_file(char *device_path, char *buffer, int buffer_length)
+{
+	FILE* fp;
+	fp = fopen(device_path, "r");
+	if(fp != NULL) {
+	  fread(buffer, sizeof(char), buffer_length, fp);
+	  fclose(fp);
+	} else
+	{
+	  printf("Failed to read to %s!\n", device_path);
+	}
+}
+
+int razer_open_serial_file(struct razer_chroma_device *device)
+{
+	device->serial_file=fopen(device->serial_filename,"r");
+	#ifdef USE_VERBOSE_DEBUGGING
+		printf("opening serial file:%s\n",device->serial_filename);
+	#endif
+	if(device->serial_file)
+		return(1);
+	else
+		return(0);
+}
+
+void razer_close_serial_file(struct razer_chroma_device *device)
+{
+	#ifdef USE_VERBOSE_DEBUGGING
+		printf("closing serial file:%s\n",device->serial_filename);
+	#endif
+    if(device->serial_file)
+    	fclose(device->serial_file);
+    device->serial_file = NULL;
+}
 
 int razer_open_breath_mode_file(struct razer_chroma_device *device)
 {
@@ -417,6 +452,7 @@ struct razer_chroma_device *razer_create_device(struct razer_chroma *chroma,char
 	device->temp_clear_row_file = NULL;
 	device->macro_keys_file = NULL;
 	device->update_keys_file = NULL;
+	device->serial_file = NULL;
 
 	//get device name
 	char *name_filename = str_CreateEmpty();
@@ -512,6 +548,10 @@ struct razer_chroma_device *razer_create_device(struct razer_chroma *chroma,char
 	device->update_keys_filename = str_CreateEmpty();
 	device->update_keys_filename = str_CatFree(device->update_keys_filename,path);
 	device->update_keys_filename = str_CatFree(device->update_keys_filename,razer_update_keys_pathname);
+	
+	device->serial_filename = str_CreateEmpty();
+	device->serial_filename = str_CatFree(device->serial_filename,path);
+	device->serial_filename = str_CatFree(device->serial_filename,razer_serial_pathname);
 
 	device->path = str_Copy(path);
 
@@ -593,6 +633,8 @@ void razer_close_device(struct razer_chroma_device *device)
 		razer_close_reset_file(device);
 	if(device->macro_keys_file)
 		razer_close_macro_keys_file(device);
+	if(device->serial_file)
+		razer_close_serial_file(device);
 }
 
 void razer_close_devices(struct razer_chroma *chroma)
@@ -636,6 +678,8 @@ void razer_free_device(struct razer_chroma_device *device)
 		free(device->reset_filename);
 	if(device->temp_clear_row_filename)
 		free(device->temp_clear_row_filename);
+	if(device->serial_filename)
+		free(device->serial_filename);
 	free(device);
 }
 
@@ -1747,6 +1791,12 @@ void razer_convert_ascii_to_pos(unsigned char letter,struct razer_pos *pos)
 	}
 }
 
+int razer_device_get_serial(struct razer_chroma_device *device, char* buffer)
+{
+	read_from_device_file(device->serial_filename, buffer, 15);
+	
+	return(0);
+}
 
 int razer_device_enable_macro_keys(struct razer_chroma_device *device) //TODO add enable parameter
 {
@@ -1771,6 +1821,11 @@ int razer_enable_macro_keys(struct razer_chroma *chroma)
 {
 	//enabling macro keys of active device
 	return(razer_device_enable_macro_keys(chroma->active_device));
+}
+
+int razer_get_serial(struct razer_chroma *chroma, char* buffer)
+{
+	return(razer_device_get_serial(chroma->active_device, buffer));
 }
 
 

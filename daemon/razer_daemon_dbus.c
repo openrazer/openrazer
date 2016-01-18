@@ -159,7 +159,9 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon","raw_keyboard_brightness"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon","set_game_mode"))
-			return(0);
+		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon","serial"))
+		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","none"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","static"))
@@ -220,6 +222,25 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
  		if(!dbus_connection_send(daemon->dbus,reply,&serial))
 			daemon_kill(daemon,"dbus: Out Of Memory!\n");
 		dbus_connection_flush(daemon->dbus);
+	}
+	else if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon", "serial"))
+	{
+		#ifdef USE_DEBUGGING
+			printf("\ndbus: method serial called\n");
+		#endif
+		char* serial_str = (char*)calloc(16, sizeof(char));
+		razer_get_serial(daemon->chroma, &serial_str[0]);
+
+		reply = dbus_message_new_method_return(msg);
+		dbus_message_iter_init_append(reply,&parameters);
+
+		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&serial_str)) 
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+		free(serial_str);
 	}
 	else if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon", "raw_keyboard_brightness"))
 	{
@@ -2149,6 +2170,10 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				</method>\n\
 		        <method name=\"set_game_mode\">\n\
 					<arg direction=\"in\" name=\"enable\" type=\"y\">\n\
+					</arg>\n\
+				</method>\n\
+				<method name=\"serial\">\n\
+					<arg direction=\"out\" name=\"serial_number\" type=\"s\">\n\
 					</arg>\n\
 				</method>\n\
 			</interface>\n\

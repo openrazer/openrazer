@@ -156,6 +156,8 @@ struct razer_chroma_device
 	FILE *reset_file;
 	char *macro_keys_filename;
 	FILE *macro_keys_file;
+	char *serial_filename;
+	FILE *serial_file;
 };
 
 struct razer_chroma
@@ -285,7 +287,8 @@ int razer_device_set_key_row(struct razer_chroma_device *device,unsigned char ro
 int razer_set_key_row(struct razer_chroma *chroma,unsigned char row_index,unsigned char num_colors,struct razer_rgb **colors);
 int razer_device_set_key_row_buffered(struct razer_chroma_device *device,unsigned char *buffer,int buffer_len);
 int razer_set_key_row_buffered(struct razer_chroma *chroma,unsigned char *buffer,int buffer_len);
-
+int razer_get_serial(struct razer_chroma *chroma, char* buffer);
+int razer_device_get_serial(struct razer_chroma_device *device, char* buffer);
 
 
 
@@ -354,6 +357,7 @@ void draw_circle(struct razer_keys *keys,struct razer_pos *pos,int radius,struct
 void draw_ring(struct razer_keys *keys,struct razer_pos *pos,struct razer_rgb *color);
 
 void write_to_device_file(char *device_path, char *buffer, int buffer_length);
+void read_from_device_file(char *device_path, char *buffer, int buffer_length);
 
 //list of last keystrokes
 //time since hit /hitstamps
