@@ -90,13 +90,13 @@ struct razer_rgb_frame
 	int update_mask;
 };
 
-struct razer_matrix
+struct razer_keys
 {
 	struct razer_rgb_row rows[RAZER_ROWS_NUM];
 	int update_mask;
-	//long heatmap[RAZER_ROWS_NUM][RAZER_ROW_LENGTH];
-	//int lockmap[RAZER_ROWS_NUM][RAZER_ROW_LENGTH];//sets to effect id if locked by effect
-	//int pushedmap[RAZER_ROWS_NUM][RAZER_ROW_LENGTH];//all keys pressed will be set 1 (needs razer_update calls to work)
+	long heatmap[RAZER_ROWS_NUM][RAZER_ROW_LENGTH];
+	int lockmap[RAZER_ROWS_NUM][RAZER_ROW_LENGTH];//sets to effect id if locked by effect
+	int pushedmap[RAZER_ROWS_NUM][RAZER_ROW_LENGTH];//all keys pressed will be set 1 (needs razer_update calls to work)
 };
 
 struct razer_keys_locks
