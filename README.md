@@ -6,7 +6,7 @@ Supports:
  * Razer Blackwidow Chroma *(all lighting modes)*
  * Razer Blackwidow Tournament Edition
  * Razer Firefly *(all lighting modes)*
- * Razer Mamba
+ * Razer Mamba *(all lighting modes)*
 
 
 

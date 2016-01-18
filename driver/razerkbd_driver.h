@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2015 Tim Theede <pez2001@voyagerproject.de>
+ *               2015 Terry Cain <terrys-home.co.uk>
  */
 
 /*
@@ -18,10 +19,6 @@
 
 #ifndef USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA
  #define USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA 0x0203
-#endif
-
-#ifndef USB_DEVICE_ID_RAZER_FIREFLY
- #define USB_DEVICE_ID_RAZER_FIREFLY 0x0c00
 #endif
 
 #ifndef USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE
@@ -76,9 +73,7 @@
 
 
 
-struct razer_rgb {
-    unsigned char r,g,b;
-};
+
 
 /*struct razer_row_rgb {
     struct razer_rgb cols[RAZER_BLACKWIDOW_CHROMA_ROW_LEN+1];
@@ -97,18 +92,7 @@ struct razer_kbd_device {
     bool effect_submitted;
 };
 
-struct razer_report {
-    unsigned char report_start_marker; /*0x0*/
-    unsigned char id; /*always 0xFF maybe it's an i2c id or some range*/
-    unsigned char reserved1[3];
-    unsigned char parameter_bytes_num;
-    unsigned char reserved2;/*always 0x03 maybe some command class id*/
-    unsigned char command;
-    unsigned char sub_command;/*named first parameter*/
-    unsigned char command_parameters[90-11];
-    unsigned char crc;/*xor'ed bytes of report*/
-    unsigned char report_end_marker; /*0x0*/
-};
+
 
 
 
