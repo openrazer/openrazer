@@ -78,35 +78,45 @@ class ChromaController(object):
                 self.webkit.execute_script('live_switch = false;')
 
         elif self.current_page == 'profile_editor':
-            self.webkit.execute_script('change_header("Edit ' + self.open_this_profile + '")')
+            js_exec = WebkitJavaScriptExecutor(self.webkit)
+            kb_callback = WebkitJavaScriptExecutor(None, wrapper="keyboard_obj.load(function(){{{0}}});")
 
-            # Initialize keyboard object.
-            self.webkit.execute_script("keyboard_obj.load();")
-            self.webkit.execute_script("keyboard_obj.set_layout(\"kb-" + self.kb_layout + "\")")
+
+            js_exec << 'change_header("Edit ' + self.open_this_profile + '")'
+
+            kb_callback << "keyboard_obj.set_layout(\"kb-" + self.kb_layout + "\")"
 
             # Load profile into keyboard.
             profile_name = self.open_this_profile
             self.profiles.set_active_profile(profile_name)
+            self.profiles.activate_profile_from_memory()
+            self.profiles.get_active_profile().backup_configuration()
+
             for pos_y, row in enumerate(self.profiles.get_profile(profile_name).get_rows_raw()):
                 for pos_x, rgb in enumerate(row):
                     js_string = "keyboard_obj.set_key_colour({0},{1},\"#{2:02X}{3:02X}{4:02X}\")".format(pos_y, pos_x, rgb.red, rgb.green, rgb.blue)
-                    self.webkit.execute_script(js_string)
+                    kb_callback << js_string
 
             # IF BLACKWIDOW ULTIMATE < 2016
             # OR BLACKWIDOW CHROMA
             # disable space key and FN
-            self.webkit.execute_script("keyboard_obj.disable_key(5,7)")
-            self.webkit.execute_script("keyboard_obj.disable_key(5,12)")
-
+            kb_callback << "keyboard_obj.disable_key(5,7)"
+            kb_callback << "keyboard_obj.disable_key(5,12)"
             # Hide preview button if live previewing is enabled.
             if self.preferences.get_pref('live_preview') == 'true':
-                self.webkit.execute_script('$("#edit-preview").hide();')
+                kb_callback << '$("#edit-preview").hide();'
+
+
+            kb_callback << "$(\"#cancel\").attr({onclick: \"cmd('cancel-changes?"+ self.cancel_changes + "?" + profile_name + "')\"})"
+
+            js_exec << kb_callback
+            js_exec.exec()
 
         elif self.current_page == 'preferences':
-            self.preferences.refresh_pref_page(self.webkit);
+            self.preferences.refresh_pref_page(self.webkit)
 
         elif self.current_page == 'controller_devices':
-            self.detect_devices();
+            self.detect_devices()
 
         else:
             print('No post actions necessary.')
@@ -272,6 +282,10 @@ class ChromaController(object):
 
                 if cancel_type == "new-profile":
                     self.profiles.remove_profile(cancel_args, del_from_fs=False)
+                    self.daemon.set_custom_colour(self.old_profile)
+                elif cancel_type == "edit-profile":
+                    self.profiles.get_active_profile().restore_configuration()
+                    self.daemon.set_custom_colour(self.old_profile)
 
                 self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes')\"})")
             self.show_menu('chroma_menu')
@@ -298,7 +312,9 @@ class ChromaController(object):
         ## Profile Editor / Management
         elif command.startswith('profile-edit'):
             self.open_this_profile = command.split('profile-edit?')[1].replace('%20', ' ')
-            if self.open_this_profile != None:
+            self.old_profile = self.profiles.get_active_profile()
+            self.cancel_changes = 'edit-profile'
+            if self.open_this_profile is not None:
                 self.show_menu('profile_editor')
             else:
                 print('Refusing to open empty filename profile.')
@@ -354,17 +370,13 @@ class ChromaController(object):
         elif command.startswith('profile-new'):
             # TODO: Instead of JS-based prompt, use PyGtk or within web page interface?
             profile_name = command.split('?')[1].replace('%20', ' ')
+
+            self.cancel_changes = 'new-profile'
+            self.old_profile = self.profiles.get_active_profile()
+            self.open_this_profile = profile_name
             self.profiles.new_profile(profile_name)
-            # Clear editor
-            self.webkit.execute_script("keyboard_obj.set_layout(\"kb-" + self.kb_layout + "\")")
-            self.webkit.execute_script("keyboard_obj.clear_all_keys()")
-            self.webkit.execute_script("keyboard_obj.disable_key(5,7)")
-            self.webkit.execute_script("keyboard_obj.disable_key(5,12)")
-
-            self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes?new-profile?" + profile_name + "')\"})")
-
-
             self.show_menu('profile_editor')
+
 
         elif command == 'profile-save':
             profile_name = self.profiles.get_active_profile_name()
@@ -407,14 +419,14 @@ class ChromaController(object):
         #   -  If only one device is avaliable (such as only having one Chroma Keyboard), then automatically open that config page.
 
         # FIXME: Just a placebo...
-        serial = '000'
+        serial = self.daemon.get_serial_number()
         hardware_type = 'blackwidow_chroma'
         self.multi_device_present = True
         print('Found "{0}" (S/N: {1}).'.format(hardware_type, serial))
         self.webkit.execute_script('add_device("' + serial + '", "' + hardware_type + '")')
 
         # If this is the only Razer device that can be configured, skip the screen.
-        if self.multi_device_present == False:
+        if not self.multi_device_present:
             if hardware_type == 'blackwidow_chroma':
                 self.show_menu('chroma_menu')
 
@@ -425,8 +437,7 @@ class ChromaController(object):
         #   -  Changes the page based on the type of device.
 
 
-        # FIXME: Just a placebo...
-        serial = '000'
+        serial = self.daemon.get_serial_number()
         hardware_type = 'blackwidow_chroma'
         print('Configuring "{0}" (S/N: {1})".'.format(hardware_type, serial))
 
@@ -478,6 +489,7 @@ class ChromaController(object):
         self.secondary_rgb = razer.keyboard.RGB(0, 0, 255)
         self.current_effect = 'custom'
         self.last_effect = 'unknown'
+        self.open_this_profile = None
 
         # Create WebKit Container
         self.webkit = WebKit.WebView()
@@ -574,12 +586,20 @@ class ChromaProfiles(object):
 
     def get_active_profile(self):
         """
-        Gets active profile
+        Gets active profile, if one isnt active then the first profile is returned. If no
+        profiles are loaded then an empty profile is returned
 
         :return: Keyboard object
         :rtype: razer.keyboard.KeyboardColour
         """
-        return self.profiles[self.active_profile]
+
+        profile = razer.keyboard.KeyboardColour()
+        try:
+            profile = self.profiles[self.active_profile]
+        except KeyError:
+            if len(list(self.profiles.keys())) > 0:
+                profile = self.profiles[list(self.profiles.keys())[0]]
+        return profile
 
     def get_active_profile_name(self):
         """
@@ -633,8 +653,9 @@ class ChromaProfiles(object):
 
     def activate_profile_from_memory(self):
         profile_name = self.get_active_profile_name()
+        keyboard = self.get_active_profile()
+        self.daemon.set_custom_colour(keyboard)
         print("Applying profile '{0}' from memory...".format(profile_name))
-        print('fixme:activate_profile_from_memory')
 
     @staticmethod
     def get_profile_from_file(profile_name):
@@ -714,6 +735,56 @@ class ChromaPreferences(object):
         pref_file.write(default_settings)
         pref_file.close()
         print('Successfully written default preferences.')
+
+
+class WebkitJavaScriptExecutor(object):
+    """
+    Simple class to execute scripts
+    """
+    def __init__(self, webkit, script=None, wrapper=None):
+        if wrapper is not None:
+            self.wrapper = wrapper
+        else:
+            self.wrapper = "$(document).ready(function(){{{0}}});"
+        self.lines = []
+        self.webkit = webkit
+
+        if script is not None:
+            self.add(script)
+
+    def add(self, line):
+        """
+        Adds a line to the collection
+
+        :param line: Line to execute
+        :type line: str
+
+        :return: Returns a copy of the object
+        :rtype: WebkitJavaScriptExecutor
+        """
+        line = str(line)
+
+        if line.endswith(';'):
+            self.lines.append(line)
+        else:
+            self.lines.append(line + ';')
+
+        return self
+
+    def exec(self):
+        payload = str(self)
+        self.webkit.execute_script(payload)
+
+    def __lshift__(self, other):
+        self.add(other)
+
+        return self
+
+    def __str__(self):
+        lines = '\n' + '\n'.join(self.lines) + '\n'
+        result = self.wrapper.format(lines)
+        return result
+
 
 
 if __name__ == "__main__":
