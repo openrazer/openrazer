@@ -22,12 +22,12 @@ void effect(struct razer_chroma *chroma)
 			g = (count-x)*(255/22);
 			b = (count+y)*(255/22);
 
-			chroma->active_device->keys->rows[y].column[x].r = (unsigned char)r;
-			chroma->active_device->keys->rows[y].column[x].g = (unsigned char)g;
-			chroma->active_device->keys->rows[y].column[x].b = (unsigned char)b;
-			chroma->active_device->keys->update_mask |= 1<<y;
+			chroma->active_device->leds->rows[y]->column[x].r = (unsigned char)r;
+			chroma->active_device->leds->rows[y]->column[x].g = (unsigned char)g;
+			chroma->active_device->leds->rows[y]->column[x].b = (unsigned char)b;
+			chroma->active_device->leds->update_mask |= 1<<y;
 		}
-		razer_update_keys(chroma,chroma->active_device->keys);
+		razer_update_leds(chroma,chroma->active_device->leds);
 		count+=count_dir;
 		if(count<=0 || count>=44)
 			count_dir=-count_dir;
@@ -47,8 +47,8 @@ int main(int argc,char *argv[])
 	if(!chroma)
 		exit(1);
 	razer_set_custom_mode(chroma);
-	razer_clear_all(chroma->active_device->keys);
-	razer_update_keys(chroma,chroma->active_device->keys);
+	razer_clear_all(chroma->active_device->leds);
+	razer_update_leds(chroma,chroma->active_device->leds);
 	effect(chroma);
  	razer_close(chroma);
 }

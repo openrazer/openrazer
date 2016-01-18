@@ -13,7 +13,7 @@ int effectmix1_update(struct razer_fx_render_node *render)
 		for(x=0;x<22;x++)
 			for(y=0;y<6;y++)
 			{
-				rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&render->second_input_frame->rows[y].column[x],render->opacity);
+				rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&render->second_input_frame->rows[y]->column[x],render->opacity);
 				render->output_frame->update_mask |= 1<<y;
 			}
 	//}
@@ -38,14 +38,14 @@ int effect1_update(struct razer_fx_render_node *render)
 			color.g = (count-x)*(255/22);
 			color.b = (count+y)*(255/22);
 
-			/*chroma->keys->rows[y].column[x].r = (unsigned char)r;
-			chroma->keys->rows[y].column[x].g = (unsigned char)g;
-			chroma->keys->rows[y].column[x].b = (unsigned char)b;
+			/*chroma->keys->rows[y]->column[x].r = (unsigned char)r;
+			chroma->keys->rows[y]->column[x].g = (unsigned char)g;
+			chroma->keys->rows[y]->column[x].b = (unsigned char)b;
 			chroma->keys->update_mask |= 1<<y;*/
-			/*render->output_frame->rows[y].column[x].r = (unsigned char)r;
-			render->output_frame->rows[y].column[x].g = (unsigned char)g;
-			render->output_frame->rows[y].column[x].b = (unsigned char)b;*/
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&color,render->opacity);
+			/*render->output_frame->rows[y]->column[x].r = (unsigned char)r;
+			render->output_frame->rows[y]->column[x].g = (unsigned char)g;
+			render->output_frame->rows[y]->column[x].b = (unsigned char)b;*/
+			rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&color,render->opacity);
 			render->output_frame->update_mask |= 1<<y;
 		}
 	//razer_update_keys(chroma,chroma->keys);
@@ -80,7 +80,7 @@ int effect2_update(struct razer_fx_render_node *render)
 			color.g = (int)((float)count*((float)base_color->g/100.0f));
 			color.b = (int)((float)count*((float)base_color->b/100.0f));
 
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&color,render->opacity);
+			rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&color,render->opacity);
 			render->output_frame->update_mask |= 1<<y;
 		}
 	count+=dir;
@@ -113,7 +113,7 @@ int effect3_update(struct razer_fx_render_node *render)
 			color.r = (cos((count+((rnd1%4)*90)+y)*s)+sin(count+x)*s)*255;
 			color.g = (cos((count+((rnd2%4)*90)+y)*s)+sin(count+x)*s)*255;
 			color.b = (cos((count+((rnd3%4)*90)+y)*s)+sin(count+x)*s)*255;
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&color,render->opacity);
+			rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&color,render->opacity);
 			render->output_frame->update_mask |= 1<<y;
 		}
 	}
@@ -157,7 +157,7 @@ int effect4_update(struct razer_fx_render_node *render)
 			color.r = (unsigned char)v1-v1*sin(y)+cos(x);
 			color.g = (unsigned char)v2-v2*cos(y)-x;
 			color.b = (unsigned char)v3-v3*sin(x);
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&color,render->opacity);
+			rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&color,render->opacity);
 			render->output_frame->update_mask |= 1<<y;
 		}
 	if((v1+v1_dir*rnd1)>=255 || (v1+v1_dir*rnd1)<=0)
@@ -209,7 +209,7 @@ int effect5_update(struct razer_fx_render_node *render)
 			color.r = (cos((count+((rnd1%4)*90)+y)*s))*255;
 			color.g = (cos((count+((rnd2%4)*90)+y)*s))*255;
 			color.b = (cos((count+((rnd3%4)*90)+y)*s))*255;
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&color,render->opacity);
+			rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&color,render->opacity);
 			render->output_frame->update_mask |= 1<<y;
 		}
 	count+=dir;
@@ -245,7 +245,7 @@ int effect6_update(struct razer_fx_render_node *render)
 			color.r = (count+x)*(255/22);
 			color.g = (count-x)*(255/22);
 			color.b = (count-y)*(255/6);
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&color,render->opacity);
+			rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&color,render->opacity);
 			render->output_frame->update_mask |= 1<<y;
 		}
 		count+=dir;
@@ -391,7 +391,7 @@ int effect_profile_update(struct razer_fx_render_node *render)
 			color.r = (count+x)*(255/22);
 			color.g = (count-x)*(255/22);
 			color.b = (count+y)*(255/22);
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&color,render->opacity);
+			rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&color,render->opacity);
 			render->output_frame->update_mask |= 1<<y;
 		}*/
 	razer_mix_frames(render->output_frame,effect_profile_frame,1.0f-render->opacity);
@@ -498,9 +498,9 @@ void test_effect6(struct razer_keys *keys)
 				break;
 			}
 		}
-		r = keys->rows[y[i]].column[x[i]].r;
-		g = keys->rows[y[i]].column[x[i]].g;
-		b = keys->rows[y[i]].column[x[i]].r;
+		r = keys->rows[y[i]]->column[x[i]].r;
+		g = keys->rows[y[i]]->column[x[i]].g;
+		b = keys->rows[y[i]]->column[x[i]].r;
 		if(dir[i])
 		{
 			if(r<255-vr[i])
@@ -532,9 +532,9 @@ void test_effect6(struct razer_keys *keys)
 				b=0;
 		}
 
-		keys->rows[y[i]].column[x[i]].r = (unsigned char)r;
-		keys->rows[y[i]].column[x[i]].g = (unsigned char)g;
-		keys->rows[y[i]].column[x[i]].b = (unsigned char)b;
+		keys->rows[y[i]]->column[x[i]].r = (unsigned char)r;
+		keys->rows[y[i]]->column[x[i]].g = (unsigned char)g;
+		keys->rows[y[i]]->column[x[i]].b = (unsigned char)b;
 		keys->update_mask |= 1<<y[i];
 	}
 	count--;
@@ -576,9 +576,9 @@ void test_effect3_frame(struct razer_keys *keys)
 			y=5;
 		if(y<0)
 			y=0;
-		keys->rows[y].column[x].r = (unsigned char)r;
-		keys->rows[y].column[x].g = (unsigned char)g;
-		keys->rows[y].column[x].b = (unsigned char)b;
+		keys->rows[y]->column[x].r = (unsigned char)r;
+		keys->rows[y]->column[x].g = (unsigned char)g;
+		keys->rows[y]->column[x].b = (unsigned char)b;
 		keys->update_mask |= 1<<y;
 	}
 	e3_count+=e3_count_dir;
@@ -610,7 +610,7 @@ void test_effect_heatmap_frame(struct razer_keys *keys)
 		for(y=0;y<6;y++)
 		{
 		rgb_from_hue((float)keys->heatmap[y][x]/(float)max_clicks,0.3f,0.0f,&color);
-		rgb_mix(&keys->rows[y].column[x],&color,0.7f);
+		rgb_mix(&keys->rows[y]->column[x],&color,0.7f);
 		}
 	}
 	keys->update_mask = 63;//update all rows
@@ -635,8 +635,8 @@ void test_effect_scroll_frame(struct razer_keys *keys)
 			color.r = scroll_buf[((int)scroll_x+x+((int)scroll_y+y)*scroll_width)*3+0];
 			color.g = scroll_buf[((int)scroll_x+x+((int)scroll_y+y)*scroll_width)*3+1];
 			color.b = scroll_buf[((int)scroll_x+x+((int)scroll_y+y)*scroll_width)*3+2];
-			rgb_mix(&keys->rows[y].column[x],&color,0.9f);
-			//keys->rows[y].column[x].g = color.g;
+			rgb_mix(&keys->rows[y]->column[x],&color,0.9f);
+			//keys->rows[y]->column[x].g = color.g;
 			//keys->update_mask |= 1<<y;
 		}
 	}
@@ -930,7 +930,7 @@ void fx_init(struct razer_daemon *daemon)
 	#endif
 
 
-	effect_profile_frame = razer_create_rgb_frame();
+	effect_profile_frame = razer_create_rgb_frame(22,6);
 	effect_profile = daemon_create_effect();
 	effect_profile->update = effect_profile_update;
 	effect_profile->reset = effect_profile_reset;
