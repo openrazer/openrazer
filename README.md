@@ -3,6 +3,8 @@
 A Collection of Linux drivers for the Razer Chroma devices, providing a daemon and graphical frontends.
 
 Supports:
+ * Razer Blackwidow Ultimate 2013 *(all lighting modes)*
+ * Razer Blackwidow Ultimate 2016 (work in progress)
  * Razer Blackwidow Chroma *(all lighting modes)*
  * Razer Blackwidow Tournament Edition
  * Razer Firefly *(all lighting modes)*
