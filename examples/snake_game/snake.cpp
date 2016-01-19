@@ -95,11 +95,11 @@ class Snake {
 		}
 		void update(void){
 			for (std::list<Cord>::iterator it=cords.begin(); it != cords.end(); ++it){
-				chroma->active_device->keys->rows[(*it).y].column[(*it).x].r = 0x00;
-				chroma->active_device->keys->rows[(*it).y].column[(*it).x].g = 0x00;
-				chroma->active_device->keys->rows[(*it).y].column[(*it).x].b = 0xFF;
+				chroma->active_device->leds->rows[(*it).y]->column[(*it).x].r = 0x00;
+				chroma->active_device->leds->rows[(*it).y]->column[(*it).x].g = 0x00;
+				chroma->active_device->leds->rows[(*it).y]->column[(*it).x].b = 0xFF;
 			}
-			chroma->active_device->keys->update_mask = 0xff;
+			chroma->active_device->leds->update_mask = 0xff;
 		}
 };
 
@@ -110,7 +110,7 @@ void stop(int sig)
 	exit(1);
 }
 
-int input_handler(struct razer_chroma *chroma, struct razer_chroma_event *event)
+int event_handler(struct razer_chroma *chroma, struct razer_chroma_event *event)
 {
 	//printf("input_handler called\n");
 	if(event->type != RAZER_CHROMA_EVENT_TYPE_KEYBOARD || !event->sub_type)
@@ -131,10 +131,10 @@ class Field {
 		
 		for(int x=0;x<22;x++) {
 			for(int y=0;y<6;y++) {
-				chroma->active_device->keys->rows[y].column[x].r = r;
-				chroma->active_device->keys->rows[y].column[x].g = g;
-				chroma->active_device->keys->rows[y].column[x].b = b;
-				chroma->active_device->keys->update_mask |= 1<<y;
+				chroma->active_device->leds->rows[y]->column[x].r = r;
+				chroma->active_device->leds->rows[y]->column[x].g = g;
+				chroma->active_device->leds->rows[y]->column[x].b = b;
+				chroma->active_device->leds->update_mask |= 1<<y;
 			}
 		}
 	}
@@ -173,10 +173,10 @@ class Food {
 			}
 		}
 		void update(void){
-			chroma->active_device->keys->rows[c.y].column[c.x].r = 0xFF;
-			chroma->active_device->keys->rows[c.y].column[c.x].g = 0x00;
-			chroma->active_device->keys->rows[c.y].column[c.x].b = 0x00;
-			chroma->active_device->keys->update_mask = 0xff;
+			chroma->active_device->leds->rows[c.y]->column[c.x].r = 0xFF;
+			chroma->active_device->leds->rows[c.y]->column[c.x].g = 0x00;
+			chroma->active_device->leds->rows[c.y]->column[c.x].b = 0x00;
+			chroma->active_device->leds->update_mask = 0xff;
 		}
 		Cord getPosition(){
 			return c;
@@ -214,7 +214,7 @@ class Game {
 			s.move(d);
 			g.update();
 			s.update();
-			razer_update_keys(chroma,chroma->active_device->keys);
+			razer_update_leds(chroma,chroma->active_device->leds);
 			usleep(400000);
 			Cord sc = s.getFront();
 			Cord fc = g.getPosition();
@@ -240,13 +240,13 @@ int main(int argc,char *argv[])
 	uid_t uid = getuid();
 	if(uid != 0)
 		printf("input example needs root to work correctly.\n");	
-	chroma  = razer_open();
+	chroma  = razer_open(NULL,NULL);
 	if(!chroma)
 		exit(1);
-	razer_set_input_handler(chroma,input_handler);
+	razer_set_event_handler(chroma,event_handler);
 	razer_set_custom_mode(chroma);
-	razer_clear_all(chroma->active_device->keys);
-	razer_update_keys(chroma,chroma->active_device->keys);
+	razer_clear_all(chroma->active_device->leds);
+	razer_update_leds(chroma,chroma->active_device->leds);
 	for(int i=0;i<10;i++)
 		keys_history[i] = -1;
 	signal(SIGINT,stop);

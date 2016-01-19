@@ -3,10 +3,12 @@
 A Collection of Linux drivers for the Razer Chroma devices, providing a daemon and graphical frontends.
 
 Supports:
+ * Razer Blackwidow Ultimate 2013 *(all lighting modes)*
+ * Razer Blackwidow Ultimate 2016 (work in progress)
  * Razer Blackwidow Chroma *(all lighting modes)*
  * Razer Blackwidow Tournament Edition
  * Razer Firefly *(all lighting modes)*
- * Razer Mamba
+ * Razer Mamba *(all lighting modes)*
 
 
 
@@ -426,7 +428,7 @@ FX setup scripts, bug fixes, feature requests, etc are also welcome.
  - Deb packaging, dkms support, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
  - GUI Interface for BlackWidow Chroma Keyboards by Luke Horwell (pulled)
  - Ubuntu fixes by Brad Murmz (pulled)
-
+ - Default Keyboard profiles by Mathieu Okuyama (manual merge)
 
 ## Donations (in Euros)
 

@@ -1,4 +1,5 @@
 KERNELDIR?=/lib/modules/$(shell uname -r)/build
+DESTDIR?=/
 DRIVERDIR:=$(shell pwd)/driver
 MODULEDIR=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
 
@@ -39,6 +40,59 @@ razer_examples:
 
 razer_examples_clean: 
 	make -C examples clean 
+
+fedora_install: all
+    # Install the main binaries
+	make -C lib               fedora_install DESTDIR=$(DESTDIR)
+	make -C daemon            fedora_install DESTDIR=$(DESTDIR)
+	make -C daemon_controller fedora_install DESTDIR=$(DESTDIR)
+	
+	# Install UDEV conf
+	install -v -D install_files/udev/95-razerkbd.rules $(DESTDIR)/etc/udev/rules.d/95-razerkbd.rules
+	
+	# Install DBUS conf
+	install -v -D install_files/dbus/org.voyagerproject.razer.daemon.conf $(DESTDIR)/etc/dbus-1/system.d/org.voyagerproject.razer.daemon.conf
+	
+	# Install bash helper functions
+	install -v -D install_files/share/bash_keyboard_functions.sh $(DESTDIR)/usr/share/razer_bcd/bash_keyboard_functions.sh
+	install -v -D install_files/share/systemd_helpers.sh $(DESTDIR)/usr/share/razer_bcd/systemd_helpers.sh
+	
+	# Copy over systemd config
+	mkdir -p $(DESTDIR)/etc/systemd/system/
+	install -v -D install_files/systemd/razer_bcd.service $(DESTDIR)/usr/lib/systemd/system/razer_bcd.service
+	ln -f -s /usr/lib/systemd/system/razer_bcd.service $(DESTDIR)/etc/systemd/system/razer_bcd.service
+	
+	# Install application entries	
+	install -v -D install_files/desktop/razer_tray_applet.desktop $(DESTDIR)/usr/share/applications/razer_tray_applet.desktop
+	install -v -D install_files/desktop/razer_chroma_controller.desktop $(DESTDIR)/usr/share/applications/razer_chroma_controller.desktop
+	
+	# Install Python3 library
+	install -v -d gui/lib/razer $(DESTDIR)/usr/lib/python3.4/site-packages/razer
+	cp -v -r gui/lib/razer/* $(DESTDIR)/usr/lib/python3.4/site-packages/razer
+	
+	# Install Tray application
+	install -v -d gui/tray_applet $(DESTDIR)/usr/share/razer_tray_applet
+	cp -v -r gui/tray_applet/* $(DESTDIR)/usr/share/razer_tray_applet
+	
+	# Install Chroma App
+	install -v -d gui/chroma_controller $(DESTDIR)/usr/share/razer_chroma_controller
+	cp -v -r gui/chroma_controller/* $(DESTDIR)/usr/share/razer_chroma_controller
+	
+	# Copy razer kernel driver to src
+	install -v -D Makefile $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/Makefile
+	install -v -D install_files/dkms/dkms.conf $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/dkms.conf
+	install -v -d driver $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver
+	cp -v driver/Makefile $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
+	cp -v driver/*.c $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
+	cp -v driver/*.h $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
+	rm -fv $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/*.mod.c
+	
+	# Set up DKMS
+	/usr/lib/dkms/common.postinst razer_chroma_driver 1.0.0 /usr/share/razer_chroma_driver-dkms
+	modprobe razerkbd
+	modprobe razermouse
+
+	
 
 install: all
 	make -C lib install

@@ -1,3 +1,24 @@
+/* 
+ * razer_chroma_drivers - a driver/tools collection for razer chroma devices
+ * (c) 2015 by Tim Theede aka Pez2001 <pez2001@voyagerproject.de> / vp
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ * THIS SOFTWARE IS SUPPLIED AS IT IS WITHOUT ANY WARRANTY!
+ *
+ */
 #include "razer_daemon_controller.h"
 
 
@@ -12,8 +33,9 @@ Commands:\n\
   -p    Pause rendering\n\
   -C    Create rendering node\n\
            1. Parameter: Effect uid - sets effect render node uses\n\
-           2. Parameter: Name - sets the render nodes name\n\
-           3. Parameter: Description - sets the render nodes description\n\
+           2. Parameter: device uid - unique id of device to use\n\
+           3. Parameter: Name - sets the render nodes name\n\
+           4. Parameter: Description - sets the render nodes description\n\
 \n\
            For example: %s -C 1 \"My render node\" \"My description\"\n\
   -l    Load fx library\n\
@@ -35,6 +57,7 @@ Commands:\n\
   -X    Get render nodes list\n\
            Returns: render nodes list as json string\n\
   -R    Get rendering nodes list\n\
+           1. Parameter: device uid - unique id of device to query\n\
            Returns: rendering nodes list as json string\n\
   -U    Get sub nodes list\n\
            1. Parameter: render node uid - render node to get the sub nodes of\n\
@@ -51,7 +74,8 @@ Commands:\n\
            1. Parameter: render node uid - render node to set the time limit\n\
            2. Parameter: time limit value - time span in ms\n\
   -b    Connect frame buffer to render node\n\
-           1. Parameter: render node uid - render node that gets connected to the frame buffer\n\
+           1. Parameter: device uid - unique id of device to query\n\
+           2. Parameter: render node uid - render node that gets connected to the frame buffer\n\
   -s    Add Sub-node to render node\n\
            1. Parameter: render node uid - render node the sub node should be added to\n\
            2. Parameter: sub node uid - sub node that gets added\n\
@@ -294,15 +318,16 @@ int main(int argc,char *argv[])
 			case 'C':
 				{
 					int fx_uid = atoi(argv[optind++]);
+					int device_uid = atoi(argv[optind++]);
 					char *node_name = argv[optind++];
 					char *node_description = argv[optind++];
 					if(verbose)
 					{
 						printf("sending create render node command to daemon.\n");
-						printf("new render node uid: %d.\n",dc_render_node_create(controller,fx_uid,node_name,node_description));
+						printf("new render node uid: %d.\n",dc_render_node_create(controller,fx_uid,device_uid,node_name,node_description));
 					}
 					else
-						printf("%d",dc_render_node_create(controller,fx_uid,node_name,node_description));
+						printf("%d",dc_render_node_create(controller,fx_uid,device_uid,node_name,node_description));
 
 				}
 				break;
@@ -356,17 +381,19 @@ int main(int argc,char *argv[])
 				break;
 			case 'b':
 				{
+					int device_uid = atoi(argv[optind++]);
 					int render_node_uid = atoi(argv[optind]);
 					if(verbose)
-						printf("sending connect frame buffer to render node: %d command to daemon.\n",render_node_uid);
-					dc_frame_buffer_connect(controller,render_node_uid);
+						printf("sending connect frame buffer %d to render node: %d command to daemon.\n",device_uid,render_node_uid);
+					dc_frame_buffer_connect(controller,device_uid,render_node_uid);
 				}
 				break;
 			case 'd':
 				{
+					int device_uid = atoi(argv[optind]);
 					if(verbose)
 						printf("sending disconnect frame buffer command to daemon.\n");
-					dc_frame_buffer_disconnect(controller);
+					dc_frame_buffer_disconnect(controller,device_uid);
 				}
 				break;
 			case 'x':
@@ -397,11 +424,12 @@ int main(int argc,char *argv[])
 				break;
 			case 'R':
 				{
-					char *list = dc_rendering_nodes_list(controller);
+					int device_uid = atoi(argv[optind]);
+					char *list = dc_rendering_nodes_list(controller,device_uid);
 					if(verbose)
 					{	
 						printf("sending get rendering nodes list command to daemon.\n");
-						printf("daemon rendering nodes list:\n%s.\n",list);
+						printf("daemon %d rendering nodes list:\n%s.\n",device_uid,list);
 					}
 					else
 						printf("%s",list);
@@ -458,13 +486,16 @@ int main(int argc,char *argv[])
 				}
 				break;
 			case 'a':
-				if(verbose)
 				{
-					printf("sending get framebuffer connected render node command to daemon.\n");
-					printf("daemon is running node:%d.\n",dc_frame_buffer_get(controller));
+					int device_uid = atoi(argv[optind]);
+					if(verbose)
+					{
+						printf("sending get framebuffer connected render node command to daemon.\n");
+						printf("daemon is running node:%d.\n",dc_frame_buffer_get(controller,device_uid));
+					}
+					else
+						printf("%d",dc_frame_buffer_get(controller,device_uid));
 				}
-				else
-					printf("%d",dc_frame_buffer_get(controller));
 				break;
 			case 'g':
 				if(verbose)

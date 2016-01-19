@@ -1,3 +1,24 @@
+/* 
+ * razer_chroma_drivers - a driver/tools collection for razer chroma devices
+ * (c) 2015 by Tim Theede aka Pez2001 <pez2001@voyagerproject.de> / vp
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ * THIS SOFTWARE IS SUPPLIED AS IT IS WITHOUT ANY WARRANTY!
+ *
+ */
 #ifndef _RAZER_DAEMON_EFFECTS_H_
 #define _RAZER_DAEMON_EFFECTS_H_
 
@@ -11,9 +32,10 @@
 typedef int (*razer_effect_open)(struct razer_fx_render_node *render);//called when effect is added to a render node
 typedef int (*razer_effect_close)(struct razer_fx_render_node *render);//called when effect is removed from a render node
 typedef int (*razer_effect_reset)(struct razer_fx_render_node *render);//called every time a effect is called for the first time in a render node(loops trigger too) - a daemon manual reset command can be used too
+typedef int (*razer_effect_parameter_changed)(struct razer_fx_render_node *render,struct razer_parameter *parameter);//called every time a parameter of a render_node is changed/added
 typedef int (*razer_effect_added_to_render_nodes)(struct razer_fx_render_node *render);//called every time a render_node is added to the daemons render_nodes
 typedef int (*razer_effect_update)(struct razer_fx_render_node *render);//called every frame - returns 0 if execution is completed
-typedef int (*razer_effect_input_event)(struct razer_fx_render_node *render,struct razer_chroma_event *event);//handler for key events
+typedef int (*razer_effect_handle_event)(struct razer_fx_render_node *render,struct razer_chroma_event *event);//handler for key events
 //typedef int (*razer_effect_mouse_event)(struct razer_fx_render_node *render,int rel_x,int rel_y,int buttons_mask);//handler for mouse events
 typedef int (*razer_effect_dbus_event)(struct razer_fx_render_node *render);//handler for dbus events
 
@@ -34,9 +56,10 @@ struct razer_effect
 	razer_effect_open open;
 	razer_effect_reset reset;
 	razer_effect_added_to_render_nodes added_to_render_nodes;
+	razer_effect_parameter_changed parameter_changed;
 	razer_effect_close close;
 	razer_effect_update update;
-	razer_effect_input_event input_event;
+	razer_effect_handle_event handle_event;
 	razer_effect_dbus_event dbus_event;
 	void *tag;
 };

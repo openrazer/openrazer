@@ -62,9 +62,14 @@ cp examples/dynamic ${directory}/usr/share/razer_chroma_controller/
 # Copy razer kernel driver to src
 cp Makefile ${directory}/usr/src/razer_chroma_driver-1.0.0/Makefile
 cp install_files/dkms/dkms.conf ${directory}/usr/src/razer_chroma_driver-1.0.0/dkms.conf
-cp driver/{Makefile,razerkbd.c,razerkbd.h,razermouse.c,razermouse.h} ${directory}/usr/src/razer_chroma_driver-1.0.0/driver
+#cp driver/{Makefile,razerkbd_driver.c,razerkbd_driver.h,razermouse_driver.c,razermouse_driver.h,razerfirefly_driver.c,razerfirefly_driver.h} ${directory}/usr/src/razer_chroma_driver-1.0.0/driver
+cp driver/Makefile ${directory}/usr/src/razer_chroma_driver-1.0.0/driver
+cp driver/*.h ${directory}/usr/src/razer_chroma_driver-1.0.0/driver
+cp driver/*.c ${directory}/usr/src/razer_chroma_driver-1.0.0/driver
+# Remove unwanted sources
+rm ${directory}/usr/src/razer_chroma_driver-1.0.0/driver/*.mod*
 
-rm $TMPDIR/razer-chroma*.deb
+rm -f $TMPDIR/razer-chroma*.deb
 dpkg-deb --build ${directory}
 dpkg-name ${directory}.deb
 

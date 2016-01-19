@@ -1,4 +1,25 @@
-#include "pez2001_mixer.h"
+/* 
+ * razer_chroma_drivers - a driver/tools collection for razer chroma devices
+ * (c) 2015 by Tim Theede aka Pez2001 <pez2001@voyagerproject.de> / vp
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ * THIS SOFTWARE IS SUPPLIED AS IT IS WITHOUT ANY WARRANTY!
+ *
+ */
+ #include "pez2001_mixer.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
@@ -12,10 +33,10 @@ int effect_mix_update(struct razer_fx_render_node *render)
 		printf(" (Mixer::Basic.%d ## opacity:%f / %d,%d)",render->id,render->opacity,render->input_frame_linked_uid,render->second_input_frame_linked_uid);
 	#endif
 	//render->opacity = 0.5f;
-	for(x=0;x<22;x++)
-		for(y=0;y<6;y++)
+	for(x=0;x<render->device->columns_num;x++)
+		for(y=0;y<render->device->rows_num;y++)
 		{
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&render->second_input_frame->rows[y].column[x],render->opacity);
+			rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&render->second_input_frame->rows[y]->column[x],render->opacity);
 			render->output_frame->update_mask |= 1<<y;
 		}
 	return(1);
@@ -45,7 +66,7 @@ int effect_wait_update(struct razer_fx_render_node *render)
 //#pragma GCC diagnostic push
 //#pragma GCC diagnostic ignored "-Wunused-parameter"
 
-int effect_wait_key_input_event(struct razer_fx_render_node *render,struct razer_chroma_event *event)
+int effect_wait_key_event_handler(struct razer_fx_render_node *render,struct razer_chroma_event *event)
 {
 	#ifdef USE_DEBUGGING
 		printf(" (Compute::Wait_event.%d ## )",render->id);
@@ -55,7 +76,7 @@ int effect_wait_key_input_event(struct razer_fx_render_node *render,struct razer
 	return(1);
 }
 
-int effect_wait_mouse_input_event(struct razer_fx_render_node *render,struct razer_chroma_event *event)
+int effect_wait_mouse_event_handler(struct razer_fx_render_node *render,struct razer_chroma_event *event)
 {
 	#ifdef USE_DEBUGGING
 		printf(" (Compute::Wait_event.%d ## )",render->id);
@@ -114,10 +135,11 @@ int effect_transition_update(struct razer_fx_render_node *render)
 struct razer_effect *effect_transition_mouse = NULL;
 struct razer_pos effect_transition_mouse_base_pos = {.x=0,.y=0};
 struct razer_pos effect_transition_mouse_base_range_min = {.x=0,.y=0};
-struct razer_pos effect_transition_mouse_base_range_max = {.x=256,.y=256};
+//struct razer_pos effect_transition_mouse_base_range_max = {.x=256,.y=256};
+struct razer_pos effect_transition_mouse_base_range_max = {.x=1024,.y=1024};
 struct razer_pos_range effect_transition_mouse_base_range;
 
-int effect_transition_mouse_input_event(struct razer_fx_render_node *render,struct razer_chroma_event *event)
+int effect_transition_mouse_event_handler(struct razer_fx_render_node *render,struct razer_chroma_event *event)
 {
 	struct razer_pos_range *range = daemon_get_parameter_pos_range(daemon_effect_get_parameter_by_index(render->effect,0));
 	int dir = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1));
@@ -128,6 +150,9 @@ int effect_transition_mouse_input_event(struct razer_fx_render_node *render,stru
 		int new_x = event->value + pos->x;
 		if(new_x <= range->max->x && new_x >= range->min->x)
 			pos->x = new_x;
+		//#ifdef USE_DEBUGGING
+		//	printf(" (Compute::Mouse Trans.%d ## pos:%d,%d,dir:%d,opacity:%f)",render->id,pos->x,pos->y,dir,opacity);
+		//#endif
 	}
 
 	if(event->type == RAZER_CHROMA_EVENT_TYPE_MOUSE && event->sub_type == RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_Y_AXIS_MOVEMENT)
@@ -135,6 +160,10 @@ int effect_transition_mouse_input_event(struct razer_fx_render_node *render,stru
 		int new_y = event->value + pos->y;
 		if(new_y <= range->max->y && new_y >= range->min->y)
 			pos->y = new_y;
+
+		//#ifdef USE_DEBUGGING
+		//	printf(" (Compute::Mouse Trans.%d ## pos:%d,%d,dir:%d,opacity:%f)",render->id,pos->x,pos->y,dir,opacity);
+		//#endif
 	}
 
 	if(dir == 0)
@@ -142,10 +171,6 @@ int effect_transition_mouse_input_event(struct razer_fx_render_node *render,stru
 	else
 		opacity = (float)pos->x / (float)range->max->x;
 	
-
-	//#ifdef USE_DEBUGGING
-	//	printf(" (Compute::Mouse Trans.%d ## pos:%d,%d,dir:%d,opacity:%f)",render->id,pos->x,pos->y,dir,opacity);
-	//#endif
 
 	if(render->parent) //compute effects should only be added as sub so this should be always fine
 		render->parent->opacity = opacity;
@@ -236,13 +261,13 @@ int effect_glimmer_update(struct razer_fx_render_node *render)
 		printf(" (Mixer::Glimmer.%d ## opacity:%f / %d,%d)",render->id,render->opacity,render->input_frame_linked_uid,render->second_input_frame_linked_uid);
 	#endif
 	//render->opacity = 0.5f;
-	for(x=0;x<22;x++)
-		for(y=0;y<6;y++)
+	for(x=0;x<render->device->columns_num;x++)
+		for(y=0;y<render->device->rows_num;y++)
 		{
 			float pixel_opacity = render->opacity + ((((float)(random()%1000))/1000.0f)-(render->opacity*0.5f));
 			//float pixel_opacity = ((((float)(random()%1000))/1000.0f));
 
-			rgb_mix_into(&render->output_frame->rows[y].column[x],&render->input_frame->rows[y].column[x],&render->second_input_frame->rows[y].column[x],pixel_opacity);
+			rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&render->second_input_frame->rows[y]->column[x],pixel_opacity);
 			render->output_frame->update_mask |= 1<<y;
 		}
 	return(1);
@@ -302,7 +327,7 @@ void fx_init(struct razer_daemon *daemon)
 
 	effect_wait_mouse = daemon_create_effect();
 	//effect_wait->update = effect_wait_update;
-	effect_wait_mouse->input_event = effect_wait_mouse_input_event;
+	effect_wait_mouse->handle_event = effect_wait_mouse_event_handler;
 	effect_wait_mouse->name = "Wait For Mouse Button Up  Compute Node";
 	effect_wait_mouse->description = "Waits for a mouse button and returns 0 ,it does nothing else";
 	effect_wait_mouse->fps = 1;
@@ -314,7 +339,7 @@ void fx_init(struct razer_daemon *daemon)
 	#endif
 
 	effect_wait_key = daemon_create_effect();
-	effect_wait_key->input_event = effect_wait_key_input_event;
+	effect_wait_key->handle_event = effect_wait_key_event_handler;
 	effect_wait_key->name = "Wait For Key Compute Node";
 	effect_wait_key->description = "Waits for a key and returns 0 ,it does nothing else";
 	effect_wait_key->fps = 1;
@@ -362,7 +387,7 @@ void fx_init(struct razer_daemon *daemon)
 
 	effect_transition_mouse = daemon_create_effect();
 	//effect_transition_mouse->update = effect_transition_mouse_update;
-	effect_transition_mouse->input_event = effect_transition_mouse_input_event;
+	effect_transition_mouse->handle_event = effect_transition_mouse_event_handler;
 	effect_transition_mouse->name = "Mouse Position dependant Opacity Transition";
 	effect_transition_mouse->description = "Mouse based compute only effect";
 	effect_transition_mouse->fps = 20;
