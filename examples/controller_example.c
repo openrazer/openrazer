@@ -1,3 +1,24 @@
+/* 
+ * razer_chroma_drivers - a driver/tools collection for razer chroma devices
+ * (c) 2015 by Tim Theede aka Pez2001 <pez2001@voyagerproject.de> / vp
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ * THIS SOFTWARE IS SUPPLIED AS IT IS WITHOUT ANY WARRANTY!
+ *
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -41,35 +62,36 @@ int main(int argc,char *argv[])
 	printf("sending load fx library command to daemon: library to load: \"%s\".\n",mixer_fx_lib);
 	dc_load_fx_lib(controller,mixer_fx_lib);
 
+	int device_uid = 2;
 
 	//creating render nodes from loaded effects (hardcoded uids are used here)
 	int wv_fx_uid = 4;//uid of the wave fx
 	char *wv_node_name = "Wave Effect";
 	char *wv_node_description = "overlay";
 	printf("sending create render node command to daemon.\n");
-	int wv_node_uid = dc_render_node_create(controller,wv_fx_uid,wv_node_name,wv_node_description);
+	int wv_node_uid = dc_render_node_create(controller,wv_fx_uid,device_uid,wv_node_name,wv_node_description);
 	printf("new render node uid (wv): %d.\n",wv_node_uid);
 
-	int lb_fx_uid = 11;//uid of the light_blast fx
+	int lb_fx_uid = 12;//uid of the light_blast fx
 	char *lb_node_name = "Light Blast Effect";
 	char *lb_node_description = "heatmap alike";
 	printf("sending create render node command to daemon.\n");
-	int lb_node_uid = dc_render_node_create(controller,lb_fx_uid,lb_node_name,lb_node_description);
+	int lb_node_uid = dc_render_node_create(controller,lb_fx_uid,device_uid,lb_node_name,lb_node_description);
 	printf("new render node uid (lb): %d.\n",lb_node_uid);
 
-	int mx_fx_uid = 14;//uid of the mixer fx
+	int mx_fx_uid = 16;//uid of the mixer fx
 	//int mx_fx_uid = 19;//uid of the mixer fx
 	char *mx_node_name = "Mixer";
 	char *mx_node_description = "effects mixer";
 	printf("sending create render node command to daemon.\n");
-	int mx_node_uid = dc_render_node_create(controller,mx_fx_uid,mx_node_name,mx_node_description);
+	int mx_node_uid = dc_render_node_create(controller,mx_fx_uid,device_uid,mx_node_name,mx_node_description);
 	printf("new render node uid (mx): %d.\n",mx_node_uid);
 
-	int ms_fx_uid = 20;//uid of the mixer fx
+	int ms_fx_uid = 22;//uid of the mixer fx
 	char *ms_node_name = "Mouse Position based transition";
 	char *ms_node_description = "effects mixer transition";
 	printf("sending create render node command to daemon.\n");
-	int ms_node_uid = dc_render_node_create(controller,ms_fx_uid,ms_node_name,ms_node_description);
+	int ms_node_uid = dc_render_node_create(controller,ms_fx_uid,device_uid,ms_node_name,ms_node_description);
 	printf("new render node uid (ms): %d.\n",ms_node_uid);
 
 
@@ -93,7 +115,7 @@ int main(int argc,char *argv[])
 
 	//connect mixer node to framebuffer (will use fps from effect fps member)
 	printf("sending connect frame buffer to render node: %d command to daemon.\n",mx_node_uid);
-	dc_frame_buffer_connect(controller,mx_node_uid);
+	dc_frame_buffer_connect(controller,device_uid,mx_node_uid);
 
 	//change the fps for fun ;-)
 	int fps = 8;

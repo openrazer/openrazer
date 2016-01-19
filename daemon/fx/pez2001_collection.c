@@ -1,3 +1,24 @@
+/* 
+ * razer_chroma_drivers - a driver/tools collection for razer chroma devices
+ * (c) 2015 by Tim Theede aka Pez2001 <pez2001@voyagerproject.de> / vp
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ * THIS SOFTWARE IS SUPPLIED AS IT IS WITHOUT ANY WARRANTY!
+ *
+ */
 #include "pez2001_collection.h"
 
 #pragma GCC diagnostic push
@@ -10,8 +31,8 @@ int effectmix1_update(struct razer_fx_render_node *render)
 	int x,y;
 	//if(render->second_input_frame && render->input_frame)
 	//{
-		for(x=0;x<22;x++)
-			for(y=0;y<6;y++)
+		for(x=0;x<render->device->columns_num;x++)
+			for(y=0;y<render->device->rows_num;y++)
 			{
 				rgb_mix_into(&render->output_frame->rows[y]->column[x],&render->input_frame->rows[y]->column[x],&render->second_input_frame->rows[y]->column[x],render->opacity);
 				render->output_frame->update_mask |= 1<<y;
@@ -31,8 +52,8 @@ int effect1_update(struct razer_fx_render_node *render)
 	int x,y;
 	int count = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,1));
 	int dir = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,2));
-	for(x=0;x<22;x++)
-		for(y=0;y<6;y++)
+	for(x=0;x<render->device->columns_num;x++)
+		for(y=0;y<render->device->rows_num;y++)
 		{
 			color.r = (count+x)*(255/22);
 			color.g = (count-x)*(255/22);
@@ -73,8 +94,8 @@ int effect2_update(struct razer_fx_render_node *render)
 	#ifdef USE_DEBUGGING
 		printf(" (breath ## breathing color: %d,%d,%d,count:%d,dir:%d)",base_color->r,base_color->g,base_color->b,count,dir);
 	#endif
-	for(x=0;x<22;x++)
-		for(y=0;y<6;y++)
+	for(x=0;x<render->device->columns_num;x++)
+		for(y=0;y<render->device->rows_num;y++)
 		{
 			color.r = (int)((float)count*((float)base_color->r/100.0f));
 			color.g = (int)((float)count*((float)base_color->g/100.0f));
@@ -106,9 +127,9 @@ int effect3_update(struct razer_fx_render_node *render)
 	#ifdef USE_DEBUGGING
 		printf(" (Wave ## count:%d,dir:%d)",count,dir);
 	#endif
-	for(x=0;x<22;x++)
+	for(x=0;x<render->device->columns_num;x++)
 	{
-		for(y=0;y<6;y++)
+		for(y=0;y<render->device->rows_num;y++)
 		{
 			color.r = (cos((count+((rnd1%4)*90)+y)*s)+sin(count+x)*s)*255;
 			color.g = (cos((count+((rnd2%4)*90)+y)*s)+sin(count+x)*s)*255;
@@ -151,8 +172,8 @@ int effect4_update(struct razer_fx_render_node *render)
 	#ifdef USE_DEBUGGING
 		printf(" (Random ## v1:%d,v1dir:%d,v2:%d,v2dir:%d,v3:%d,v3dir:%d)",v1,v1_dir,v2,v2_dir,v3,v3_dir);
 	#endif
-	for(x=0;x<22;x++)
-		for(y=0;y<6;y++)
+	for(x=0;x<render->device->columns_num;x++)
+		for(y=0;y<render->device->rows_num;y++)
 		{
 			color.r = (unsigned char)v1-v1*sin(y)+cos(x);
 			color.g = (unsigned char)v2-v2*cos(y)-x;
@@ -203,8 +224,8 @@ int effect5_update(struct razer_fx_render_node *render)
 	int rnd3 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4));
 	float s = 0.1f;
 	int x,y;
-	for(x=0;x<22;x++)
-		for(y=0;y<6;y++)
+	for(x=0;x<render->device->columns_num;x++)
+		for(y=0;y<render->device->rows_num;y++)
 		{
 			color.r = (cos((count+((rnd1%4)*90)+y)*s))*255;
 			color.g = (cos((count+((rnd2%4)*90)+y)*s))*255;
@@ -239,8 +260,8 @@ int effect6_update(struct razer_fx_render_node *render)
 	int rnd2 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,3));
 	int rnd3 = daemon_get_parameter_int(daemon_effect_get_parameter_by_index(render->effect,4));
 	int x,y;
-	for(x=0;x<22;x++)
-		for(y=0;y<6;y++)
+	for(x=0;x<render->device->columns_num;x++)
+		for(y=0;y<render->device->rows_num;y++)
 		{
 			color.r = (count+x)*(255/22);
 			color.g = (count-x)*(255/22);
@@ -930,7 +951,7 @@ void fx_init(struct razer_daemon *daemon)
 	#endif
 
 
-	effect_profile_frame = razer_create_rgb_frame(22,6);
+	effect_profile_frame = razer_create_rgb_frame(22,6);//TODO
 	effect_profile = daemon_create_effect();
 	effect_profile->update = effect_profile_update;
 	effect_profile->reset = effect_profile_reset;

@@ -1,10 +1,31 @@
+/* 
+ * razer_chroma_drivers - a driver/tools collection for razer chroma devices
+ * (c) 2015 by Tim Theede aka Pez2001 <pez2001@voyagerproject.de> / vp
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ * THIS SOFTWARE IS SUPPLIED AS IT IS WITHOUT ANY WARRANTY!
+ *
+ */
 #include "razer_chroma.h"
 #include <syslog.h>
 
 char *razer_sys_hid_devices_path = "/sys/bus/hid/devices/";
 
 char *razer_sys_keyboard_event_default_path = "/dev/input/by-id/usb-Razer_Razer_BlackWidow_Chroma-event-kbd";
-char *razer_sys_mouse_event_default_path = "/dev/input/event26";
+char *razer_sys_mouse_event_default_path = "/dev/input/event22";
 //char *razer_sys_mouse_event_path = "/dev/input/mouse0";
 //char *razer_sys_mouse_event_path = "/dev/input/mouse2";
 //char *razer_sys_mouse_event_path = "/dev/input/by-id/usb-ROCCAT_ROCCAT_Kone_Pure-event-mouse";
@@ -541,6 +562,10 @@ struct razer_chroma_device *razer_create_device(struct razer_chroma *chroma,char
 
 int razer_find_devices(struct razer_chroma *chroma)
 {
+	struct razer_chroma_event event;
+	event.type = RAZER_CHROMA_EVENT_TYPE_SYSTEM;
+	event.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_SYSTEM_DEVICE_ADD;
+	event.key = "Device Add";
 	chroma->devices = list_Create(0,0);
 
 	DIR *d = opendir(razer_sys_hid_devices_path);
@@ -576,7 +601,11 @@ int razer_find_devices(struct razer_chroma *chroma)
 			struct razer_chroma_device *device = razer_create_device(chroma,device_path);
 			free(device_path);
 			if(device)
+			{
 				list_Push(chroma->devices,device);
+				event.value = (unsigned long long)device;
+				razer_fire_event(chroma,&event);
+			}
 		}
 	}
 	closedir(d);
@@ -737,10 +766,10 @@ struct razer_chroma_input_device *razer_create_input_device(struct razer_chroma 
 	return(input_device);
 }
 
-void razer_fire_input_event(struct razer_chroma *chroma,struct razer_chroma_event *event)
+void razer_fire_event(struct razer_chroma *chroma,struct razer_chroma_event *event)
 {
-	if(chroma && event && chroma->input_handler)
-		chroma->input_handler(chroma,event);
+	if(chroma && event && chroma->event_handler)
+		chroma->event_handler(chroma,event);
 }
 
 void razer_poll_input_device(struct razer_chroma *chroma,struct razer_chroma_input_device *input_device)
@@ -876,7 +905,7 @@ void razer_poll_input_device(struct razer_chroma *chroma,struct razer_chroma_inp
 						}
 
 					}
-					razer_fire_input_event(chroma,&chroma_event);
+					razer_fire_event(chroma,&chroma_event);
 				}
 			}
 		}	
@@ -932,12 +961,20 @@ void razer_set_active_device(struct razer_chroma *chroma,struct razer_chroma_dev
 	chroma->active_device = device;
 }
 
-struct razer_chroma *razer_open(void)
+struct razer_chroma *razer_open(razer_event_handler event_handler,void *tag)
 {
 	struct razer_chroma *chroma =(struct razer_chroma*)malloc(sizeof(struct razer_chroma));
+	chroma->event_handler = event_handler;
+	chroma->tag = tag;
 	#ifdef USE_DEBUGGING
 		printf("opening chroma lib\n");
 	#endif
+	struct razer_chroma_event init;
+	init.type = RAZER_CHROMA_EVENT_TYPE_SYSTEM;
+	init.sub_type = RAZER_CHROMA_EVENT_SUBTYPE_SYSTEM_INIT;
+	init.value = 0;
+	init.key = "System Init";
+	razer_fire_event(chroma,&init);
 	syslog(LOG_DEBUG, "looking for chroma devices");
 	if(!razer_find_devices(chroma))
 	{
@@ -950,7 +987,7 @@ struct razer_chroma *razer_open(void)
 		exit(1);
 	}
 	chroma->active_device = list_GetBottom(chroma->devices);
-	//chroma->active_device = list_GetTop(chroma->devices);
+	chroma->active_device = list_GetTop(chroma->devices);
 
 	syslog(LOG_DEBUG, "activating device");
 	//chroma->sys_mouse_event_path = str_Copy(razer_sys_mouse_event_default_path);
@@ -963,7 +1000,6 @@ struct razer_chroma *razer_open(void)
 
 	//chroma->keyboard_input_file = 0;
 	//chroma->mouse_input_file = 0;
-	chroma->input_handler = NULL;
 
 	chroma->last_key_pos.x = -1;
 	chroma->last_key_pos.y = -1;
@@ -978,7 +1014,7 @@ void razer_close(struct razer_chroma *chroma)
 		printf("closing chroma lib\n");
 	#endif
 	syslog(LOG_DEBUG, "closing chroma library");
-	chroma->input_handler = NULL;
+	chroma->event_handler = NULL;
 	//free(chroma->sys_mouse_event_path);
 	//free(chroma->sys_keyboard_event_path);
 	//if(chroma->keyboard_input_file)
@@ -3140,10 +3176,10 @@ double pos_angle_radians(struct razer_pos *src,struct razer_pos *dst)
 }
 
 
-void razer_set_input_handler(struct razer_chroma *chroma,razer_input_handler handler)
+void razer_set_event_handler(struct razer_chroma *chroma,razer_event_handler handler)
 {
 	//set the input handler callback which will receive events from input devices and dbus functions (TODO)
-	chroma->input_handler = handler;
+	chroma->event_handler = handler;
 }
 
 void razer_copy_pos(struct razer_pos *src, struct razer_pos *dst)
@@ -3182,7 +3218,7 @@ void razer_update(struct razer_chroma *chroma)
 	chroma->update_ms = razer_get_ticks();
 	long diff_ms = chroma->update_ms - chroma->last_update_ms;
 	chroma->update_dt = (float)diff_ms / 1000.0f;
-	if(chroma->input_handler)
+	if(chroma->event_handler)
 		razer_poll_input_devices(chroma);
 }
 

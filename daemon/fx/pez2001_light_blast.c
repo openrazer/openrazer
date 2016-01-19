@@ -1,4 +1,25 @@
-#include "../razer_daemon.h"
+/* 
+ * razer_chroma_drivers - a driver/tools collection for razer chroma devices
+ * (c) 2015 by Tim Theede aka Pez2001 <pez2001@voyagerproject.de> / vp
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ * THIS SOFTWARE IS SUPPLIED AS IT IS WITHOUT ANY WARRANTY!
+ *
+ */
+ #include "../razer_daemon.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
@@ -29,15 +50,17 @@ int effect_update(struct razer_fx_render_node *render)
 			key_pos[i].x = -1;
 			key_pos[i].y = -1;
 		}
+		if(key_pos[i].y>(render->device->rows_num-1))
+			key_pos[i].y = render->device->rows_num -1;
 	}
 	#ifdef USE_DEBUGGING
 		printf(" (Blast.%d ## opacity:%f / %d,%d)",render->id,render->opacity,render->input_frame_linked_uid,render->second_input_frame_linked_uid);
 	#endif
 	//render->opacity = 0.5f;
 	float kdist = 0.0f;
-	for(x=0;x<22;x++)
+	for(x=0;x<render->device->columns_num;x++)
 	{
-		for(y=0;y<6;y++)
+		for(y=0;y<render->device->rows_num;y++)
 		{
 			//float dist = 0.0f;
 			float dist = 0.0f;
@@ -105,7 +128,7 @@ int effect_reset(struct razer_fx_render_node *render)
 }
 
 
-int effect_input_event(struct razer_fx_render_node *render,struct razer_chroma_event *event)
+int effect_event_handler(struct razer_fx_render_node *render,struct razer_chroma_event *event)
 {
 	if(event->type != RAZER_CHROMA_EVENT_TYPE_KEYBOARD)
 		return(1);
@@ -142,7 +165,7 @@ void fx_init(struct razer_daemon *daemon)
 	effect = daemon_create_effect();
 	effect->update = effect_update;
 	effect->reset = effect_reset;
-	effect->input_event = effect_input_event;
+	effect->handle_event = effect_event_handler;
 	effect->name = "Lightblaster";
 	effect->description = "Light field influenced by last keystrokes";
 	effect->fps = 20;

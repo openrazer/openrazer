@@ -1,3 +1,24 @@
+/* 
+ * razer_chroma_drivers - a driver/tools collection for razer chroma devices
+ * (c) 2015 by Tim Theede aka Pez2001 <pez2001@voyagerproject.de> / vp
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ * THIS SOFTWARE IS SUPPLIED AS IT IS WITHOUT ANY WARRANTY!
+ *
+ */
 #include "razer_chroma_controller.h"
 
 #ifdef USE_DBUS
@@ -134,7 +155,7 @@ void dc_pause(struct razer_daemon_controller *controller)
 	dbus_message_unref(msg);
 }
 
-int dc_render_node_create(struct razer_daemon_controller *controller,int effect_uid,char *name,char *description)
+int dc_render_node_create(struct razer_daemon_controller *controller,int effect_uid,int device_uid,char *name,char *description)
 {
 	DBusMessage *msg;
 	DBusMessageIter args;
@@ -143,6 +164,8 @@ int dc_render_node_create(struct razer_daemon_controller *controller,int effect_
 		dc_error_close(controller,"Error creating Message\n");
 	dbus_message_iter_init_append(msg,&args);
 	if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&effect_uid))
+		dc_error_close(controller,"Out of memory!\n"); 
+	if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_INT32,&device_uid))
 		dc_error_close(controller,"Out of memory!\n"); 
 	if(!dbus_message_iter_append_basic(&args,DBUS_TYPE_STRING,&name))
 		dc_error_close(controller,"Out of memory!\n"); 
@@ -192,11 +215,16 @@ void dc_render_node_reset(struct razer_daemon_controller *controller,int render_
 	dbus_message_unref(msg);
 }
 
-void dc_render_node_set(struct razer_daemon_controller *controller,int render_node_uid) 
+void dc_default_render_node_set(struct razer_daemon_controller *controller,int device_uid,int render_node_uid) 
 {
 	DBusMessage *msg;
 	DBusMessageIter args;
-	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon","/","org.voyagerproject.razer.daemon.render_node","set");
+	char *path = str_CreateEmpty();
+	path = str_CatFree(path,"/");
+	char *duid = str_FromLong(device_uid);
+	path = str_CatFree(path,duid);
+	free(duid);
+	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon",path,"org.voyagerproject.razer.daemon.render_node","set");
 	if(!msg)
 		dc_error_close(controller,"Error creating Message\n");
 	dbus_message_iter_init_append(msg,&args);
@@ -208,6 +236,7 @@ void dc_render_node_set(struct razer_daemon_controller *controller,int render_no
 		dc_error_close(controller,"No pending call\n"); 
 	dbus_connection_flush(controller->dbus);
 	dbus_message_unref(msg);
+	free(path);//TODO gets not freed on error
 }
 
 
@@ -1034,11 +1063,16 @@ void dc_render_node_sub_add(struct razer_daemon_controller *controller,int rende
 	free(path);
 }
 
-void dc_frame_buffer_connect(struct razer_daemon_controller *controller,int render_node_uid)
+void dc_frame_buffer_connect(struct razer_daemon_controller *controller,int device_uid,int render_node_uid)
 {
 	DBusMessage *msg;
 	DBusMessageIter args;
-	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon","/","org.voyagerproject.razer.daemon.frame_buffer","connect");
+	char *path = str_CreateEmpty();
+	path = str_CatFree(path,"/");
+	char *duid = str_FromLong(device_uid);
+	path = str_CatFree(path,duid);
+	free(duid);
+	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon",path,"org.voyagerproject.razer.daemon.device.frame_buffer","connect");
 	if(!msg)
 		dc_error_close(controller,"Error creating Message\n");
 	dbus_message_iter_init_append(msg,&args);
@@ -1050,12 +1084,18 @@ void dc_frame_buffer_connect(struct razer_daemon_controller *controller,int rend
 		dc_error_close(controller,"No pending call\n"); 
 	dbus_connection_flush(controller->dbus);
 	dbus_message_unref(msg);
+	free(path);//TODO gets not freed on error
 }
 
-void dc_frame_buffer_disconnect(struct razer_daemon_controller *controller)
+void dc_frame_buffer_disconnect(struct razer_daemon_controller *controller,int device_uid)
 {
 	DBusMessage *msg;
-	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon","/","org.voyagerproject.razer.daemon.frame_buffer","disconnect");
+	char *path = str_CreateEmpty();
+	path = str_CatFree(path,"/");
+	char *duid = str_FromLong(device_uid);
+	path = str_CatFree(path,duid);
+	free(duid);
+	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon",path,"org.voyagerproject.razer.daemondevice.frame_buffer","disconnect");
 	if(!msg)
 		dc_error_close(controller,"Error creating Message\n");
 	if(!dbus_connection_send_with_reply(controller->dbus,msg,&controller->pending,-1))
@@ -1064,6 +1104,7 @@ void dc_frame_buffer_disconnect(struct razer_daemon_controller *controller)
 		dc_error_close(controller,"No pending call\n"); 
 	dbus_connection_flush(controller->dbus);
 	dbus_message_unref(msg);
+	free(path);//TODO gets not freed on error
 }
 
 char *dc_fx_list(struct razer_daemon_controller *controller)
@@ -1144,11 +1185,16 @@ char *dc_render_nodes_list(struct razer_daemon_controller *controller)
 	return(list);
 }
 
-char *dc_rendering_nodes_list(struct razer_daemon_controller *controller)
+char *dc_rendering_nodes_list(struct razer_daemon_controller *controller,int device_uid)
 {
 	DBusMessage *msg;
 	DBusMessageIter args;
-	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon","/","org.voyagerproject.razer.daemon.render_nodes","render_list");
+	char *path = str_CreateEmpty();
+	path = str_CatFree(path,"/");
+	char *duid = str_FromLong(device_uid);
+	path = str_CatFree(path,duid);
+	free(duid);
+	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon","/","org.voyagerproject.razer.daemon.device.render_nodes","render_list");
 	if(!msg)
 		dc_error_close(controller,"Error creating Message\n");
 	if(!dbus_connection_send_with_reply(controller->dbus,msg,&controller->pending,-1))
@@ -1180,6 +1226,7 @@ char *dc_rendering_nodes_list(struct razer_daemon_controller *controller)
 	//printf("fx List: %s\n",list);
 	list = str_Copy(list);
 	dbus_message_unref(msg);   
+	free(path);//TODO gets not freed on error
 	return(list);
 }
 
@@ -1271,8 +1318,6 @@ char *dc_render_node_parameters_list(struct razer_daemon_controller *controller,
 	return(list);
 }
 
-
-
 int dc_is_paused(struct razer_daemon_controller *controller)
 {
 	DBusMessage *msg;
@@ -1353,11 +1398,16 @@ int dc_fps_get(struct razer_daemon_controller *controller)
 	return(fps);
 }
 
-int dc_frame_buffer_get(struct razer_daemon_controller *controller)
+int dc_frame_buffer_get(struct razer_daemon_controller *controller,int device_uid)
 {
 	DBusMessage *msg;
 	DBusMessageIter args;
-	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon","/","org.voyagerproject.razer.daemon.frame_buffer","get");
+	char *path = str_CreateEmpty();
+	path = str_CatFree(path,"/");
+	char *duid = str_FromLong(device_uid);
+	path = str_CatFree(path,duid);
+	free(duid);
+	msg = dbus_message_new_method_call("org.voyagerproject.razer.daemon",path,"org.voyagerproject.razer.daemon.device.frame_buffer","get");
 	if(!msg)
 		dc_error_close(controller,"Error creating Message\n");
 	if(!dbus_connection_send_with_reply(controller->dbus,msg,&controller->pending,-1))
@@ -1381,6 +1431,7 @@ int dc_frame_buffer_get(struct razer_daemon_controller *controller)
 	else
 		dbus_message_iter_get_basic(&args,&uid);
 	dbus_message_unref(msg);   
+	free(path);//TODO gets not freed on error
 	return(uid);
 }
 
@@ -1401,10 +1452,6 @@ void dc_load_fx_lib(struct razer_daemon_controller *controller,char *fx_pathname
 	dbus_connection_flush(controller->dbus);
 	dbus_message_unref(msg);
 }
-
-
-
-
 
 void dc_set_spectrum_mode(struct razer_daemon_controller *controller)
 {
@@ -1569,21 +1616,6 @@ void dc_enable_macro_keys(struct razer_daemon_controller *controller)
 	dbus_connection_flush(controller->dbus);
 	dbus_message_unref(msg);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*
 int dc_create_render_node(struct razer_daemon_controller *controller,int effect_uid,int input_render_node_uid,int second_input_render_node_uid,int output_render_node_uid,char *name,char *description)

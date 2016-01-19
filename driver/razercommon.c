@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2015 Terry Cain <terry@terrys-home.co.uk>
- *               2015 Tim Theede <pez2001@voyagerproject.de>
+ * Copyright (c) 2015 Tim Theede <pez2001@voyagerproject.de>
+ *               2015 Terry Cain <terry@terrys-home.co.uk>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free

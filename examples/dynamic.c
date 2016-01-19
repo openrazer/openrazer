@@ -15,7 +15,7 @@ int main(int argc,char *argv[])
 {
   
   
-  struct razer_chroma *klaw=razer_open();
+  struct razer_chroma *klaw=razer_open(NULL,NULL);
   if(!klaw) {
     printf("failed to initialize!!!\n");
     exit(0);
