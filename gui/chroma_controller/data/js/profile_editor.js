@@ -282,7 +282,7 @@ function Keyboard(keyboard_element_id, keyboard_svg_path) {
     /**
      * Load the keyboard SVG into the keyboard container
      */
-    this.load = function () {
+    this.load = function (callback) {
         snap_object = Snap("#" + keyboard_id);
 
 
@@ -291,6 +291,10 @@ function Keyboard(keyboard_element_id, keyboard_svg_path) {
             snap_object.append(svg_contents);
 
             keyboard_obj.setup();
+
+            if(callback) {
+                callback();
+            }
         });
     }
 }
@@ -359,5 +363,4 @@ $(document).ready(function () {
 
     // Set initial key mode
     set_mode('set');
-
 });
