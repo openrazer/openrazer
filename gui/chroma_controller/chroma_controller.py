@@ -89,7 +89,8 @@ class ChromaController(object):
             # Load profile into keyboard.
             profile_name = self.open_this_profile
             self.profiles.set_active_profile(profile_name)
-            self.profiles.activate_profile_from_memory()
+            if self.preferences.get_pref('live_preview') == 'true':
+                self.profiles.activate_profile_from_memory()
             self.profiles.get_active_profile().backup_configuration()
 
             for pos_y, row in enumerate(self.profiles.get_profile(profile_name).get_rows_raw()):
@@ -282,10 +283,12 @@ class ChromaController(object):
 
                 if cancel_type == "new-profile":
                     self.profiles.remove_profile(cancel_args, del_from_fs=False)
-                    self.daemon.set_custom_colour(self.old_profile)
+                    if self.preferences.get_pref('live_switch') == 'true' or self.preferences.get_pref('live_preview') == 'true':
+                        self.daemon.set_custom_colour(self.old_profile)
                 elif cancel_type == "edit-profile":
                     self.profiles.get_active_profile().restore_configuration()
-                    self.daemon.set_custom_colour(self.old_profile)
+                    if self.preferences.get_pref('live_switch') == 'true' or self.preferences.get_pref('live_preview') == 'true':
+                        self.daemon.set_custom_colour(self.old_profile)
 
                 self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes')\"})")
             self.show_menu('chroma_menu')
@@ -344,6 +347,10 @@ class ChromaController(object):
             col = int(command.split('?')[2])
 
             self.profiles.get_active_profile().reset_key(row, col)
+
+            # Live preview (if 'live_preview' is enabled in preferences)
+            if self.preferences.get_pref('live_preview') == 'true':
+                self.profiles.activate_profile_from_memory()
 
         elif command.startswith('profile-activate'):
             command = command.replace('%20',' ')
@@ -485,7 +492,9 @@ class ChromaController(object):
             self.profiles = ChromaProfiles(self.daemon)
 
             # Load devices page normally.
-            self.current_page = 'controller_devices'
+            #~ self.current_page = 'controller_devices' # TODO: Multi-device not yet supported.
+            self.current_page = 'chroma_menu'
+            self.multi_device_present = False
 
             # "Globals"
             self.kb_layout = razer.keyboard.get_keyboard_layout()

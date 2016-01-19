@@ -16,7 +16,7 @@
                2015-2016 Terry Cain <terry@terrys-home.co.uk>
 
 
- ** Functions that are persistent on all pages.
+ ** Functions here are persistent on all pages.
  */
 
 
