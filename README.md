@@ -4,7 +4,7 @@ A Collection of Linux drivers for the Razer Chroma devices, providing a daemon a
 
 Supports:
  * Razer Blackwidow Ultimate 2013 *(all lighting modes)*
- * Razer Blackwidow Ultimate 2016 (work in progress)
+ * Razer Blackwidow Ultimate 2016 (all bar custom lighting)
  * Razer Blackwidow Chroma *(all lighting modes)*
  * Razer Blackwidow Tournament Edition
  * Razer Firefly *(all lighting modes)*
@@ -220,7 +220,7 @@ The application is at `/usr/share/razer_chroma_controller/chroma_controller.py` 
 ### Bash functions
 
 In the file `/usr/share/razer_bcd/bash_keyboard_functions.sh` there are some functions used before and after the daemon is started/stopped. These functions bind and unbind the chroma to the kernel
-driver. You can source the file and then run `bind_all_chromas`, this will attempt to bind chromas and skip any already binded. There is also a function called `unbind_all_chromas` which as you would
+driver. You can source the file and then run `bind_all`, this will attempt to bind chromas and skip any already binded. There is also a function called `unbind_all` which as you would
 of guessed unbinds all chroma keyboards.
 
 
