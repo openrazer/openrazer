@@ -1,3 +1,24 @@
+/* 
+ * razer_chroma_drivers - a driver/tools collection for razer chroma devices
+ * (c) 2015 by Tim Theede aka Pez2001 <pez2001@voyagerproject.de> / vp
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ * THIS SOFTWARE IS SUPPLIED AS IT IS WITHOUT ANY WARRANTY!
+ *
+ */
 #include "input_example.h"
 
 #define keys_max 10
@@ -25,8 +46,8 @@ void effect(struct razer_chroma *chroma)
 	col.b = 0;
 	while(running)
 	{
-		for(x=0;x<22;x++)
-			for(y=0;y<6;y++)
+		for(x=0;x<chroma->active_device->columns_num;x++)
+			for(y=0;y<chroma->active_device->rows_num;y++)
 			{
 				r = (cos((count+((rnd%4)*90)+y)*s)+sin(count+x)*s)*255;
 				g = (cos((count+((rnd2%4)*90)+y)*s)+sin(count+x)*s)*255;
@@ -70,7 +91,7 @@ void stop(int sig)
 	running = 0;
 }
 
-int input_handler(struct razer_chroma *chroma, struct razer_chroma_event *event)
+int event_handler(struct razer_chroma *chroma, struct razer_chroma_event *event)
 {
 	#ifdef USE_DEBUGGING
 		printf("input_handler called\n");
@@ -88,10 +109,10 @@ int main(int argc,char *argv[])
 	uid_t uid = getuid();
 	if(uid != 0)
 		printf("input example needs root to work correctly.\n");	
-	struct razer_chroma *chroma = razer_open();
+	struct razer_chroma *chroma = razer_open(NULL,NULL);
 	if(!chroma)
 		exit(1);
- 	razer_set_input_handler(chroma,input_handler);
+ 	razer_set_event_handler(chroma,event_handler);
  	razer_set_custom_mode(chroma);
 	razer_clear_all(chroma->active_device->leds);
 	razer_update_leds(chroma,chroma->active_device->leds);

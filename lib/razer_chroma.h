@@ -1,3 +1,24 @@
+/* 
+ * razer_chroma_drivers - a driver/tools collection for razer chroma devices
+ * (c) 2015 by Tim Theede aka Pez2001 <pez2001@voyagerproject.de> / vp
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ * THIS SOFTWARE IS SUPPLIED AS IT IS WITHOUT ANY WARRANTY!
+ *
+ */
 #ifndef _RAZER_CHROMA_H_
 #define _RAZER_CHROMA_H_
 
@@ -124,7 +145,7 @@ struct razer_keys_set
 
 struct razer_chroma;
 struct razer_chroma_event;
-typedef int (*razer_input_handler)(struct razer_chroma *chroma,struct razer_chroma_event *event);
+typedef int (*razer_event_handler)(struct razer_chroma *chroma,struct razer_chroma_event *event);
 
 #define RAZER_CHROMA_DEVICE_TYPE_KEYBOARD 1
 #define RAZER_CHROMA_DEVICE_TYPE_MOUSE 2
@@ -172,6 +193,7 @@ struct razer_chroma_device
 	FILE *macro_keys_file;
 	char *serial_filename;
 	FILE *serial_file;
+	void *tag;
 };
 
 #define RAZER_CHROMA_INPUT_DEVICE_TYPE_KEYBOARD 1
@@ -205,7 +227,7 @@ struct razer_chroma
 	unsigned long last_update_ms;
 	unsigned long update_ms;
 	float update_dt;
-	razer_input_handler input_handler;
+	razer_event_handler event_handler;
 	struct razer_pos last_key_pos;//TODO move to sub struct pointer to pointers
 	struct razer_pos key_pos;//or remove
 	void *tag;
@@ -219,6 +241,11 @@ struct razer_chroma
 #define RAZER_CHROMA_EVENT_TYPE_SYSTEM 5
 #define RAZER_CHROMA_EVENT_TYPE_FX 6
 
+
+#define RAZER_CHROMA_EVENT_SUBTYPE_SYSTEM_DEVICE_ADD 1
+#define RAZER_CHROMA_EVENT_SUBTYPE_SYSTEM_DEVICE_REMOVE 2
+#define RAZER_CHROMA_EVENT_SUBTYPE_SYSTEM_INIT 3
+#define RAZER_CHROMA_EVENT_SUBTYPE_SYSTEM_QUIT 4
 
 #define RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_X_AXIS_MOVEMENT 1
 #define RAZER_CHROMA_EVENT_SUBTYPE_MOUSE_Y_AXIS_MOVEMENT 2
@@ -273,14 +300,15 @@ struct razer_chroma_event
 
 
 
-
-struct razer_chroma *razer_open(void);
+//handler can be NULL
+struct razer_chroma *razer_open(razer_event_handler event_handler,void *tag);
 void razer_close(struct razer_chroma *chroma);
 void razer_set_active_device(struct razer_chroma *chroma,struct razer_chroma_device *device);//easiest way so i dont have to rewrite everything in one shot
 
 void razer_close_device(struct razer_chroma_device *device);
 void razer_close_devices(struct razer_chroma *chroma);
 
+void razer_fire_event(struct razer_chroma *chroma,struct razer_chroma_event *event);
 
 
 int razer_device_enable_macro_keys(struct razer_chroma_device *device);
@@ -324,7 +352,7 @@ int razer_set_led_row_buffered(struct razer_chroma *chroma,unsigned char *buffer
 
 
 void razer_update(struct razer_chroma *chroma);
-void razer_set_input_handler(struct razer_chroma *chroma,razer_input_handler handler);
+void razer_set_event_handler(struct razer_chroma *chroma,razer_event_handler handler);
 unsigned long razer_get_ticks();
 void razer_frame_limiter(struct razer_chroma *chroma,int fps);
 
@@ -334,6 +362,7 @@ void razer_free_rgb_frame(struct razer_rgb_frame *frame);
 
 int razer_set_custom_mode(struct razer_chroma *chroma);
 //int razer_update_keys(struct razer_chroma *chroma,struct razer_keys *keys);
+int razer_device_update_leds(struct razer_chroma_device *device, struct razer_rgb_frame *frame);
 int razer_update_leds(struct razer_chroma *chroma,struct razer_rgb_frame *frame);
 void razer_clear_frame(struct razer_rgb_frame *frame);
 //char *razer_get_device_path();

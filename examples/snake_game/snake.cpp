@@ -110,7 +110,7 @@ void stop(int sig)
 	exit(1);
 }
 
-int input_handler(struct razer_chroma *chroma, struct razer_chroma_event *event)
+int event_handler(struct razer_chroma *chroma, struct razer_chroma_event *event)
 {
 	//printf("input_handler called\n");
 	if(event->type != RAZER_CHROMA_EVENT_TYPE_KEYBOARD || !event->sub_type)
@@ -240,10 +240,10 @@ int main(int argc,char *argv[])
 	uid_t uid = getuid();
 	if(uid != 0)
 		printf("input example needs root to work correctly.\n");	
-	chroma  = razer_open();
+	chroma  = razer_open(NULL,NULL);
 	if(!chroma)
 		exit(1);
-	razer_set_input_handler(chroma,input_handler);
+	razer_set_event_handler(chroma,event_handler);
 	razer_set_custom_mode(chroma);
 	razer_clear_all(chroma->active_device->leds);
 	razer_update_leds(chroma,chroma->active_device->leds);

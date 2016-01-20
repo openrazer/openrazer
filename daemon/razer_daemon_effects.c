@@ -1,4 +1,25 @@
-#include "razer_daemon.h"
+/* 
+ * razer_chroma_drivers - a driver/tools collection for razer chroma devices
+ * (c) 2015 by Tim Theede aka Pez2001 <pez2001@voyagerproject.de> / vp
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ * THIS SOFTWARE IS SUPPLIED AS IT IS WITHOUT ANY WARRANTY!
+ *
+ */
+ #include "razer_daemon.h"
 
 
 char *daemon_effect_to_json(struct razer_effect *effect, int final)
@@ -60,7 +81,7 @@ struct razer_effect *daemon_create_effect_instance(struct razer_daemon *daemon,s
 	instance->close = lib_effect->close;
 	instance->update = lib_effect->update;
 	instance->reset = lib_effect->reset;
-	instance->input_event = lib_effect->input_event;
+	instance->handle_event = lib_effect->handle_event;
 	instance->dbus_event = lib_effect->dbus_event;
 	for(int i=0;i<lib_effect->parameters->num;i++)
 	{
@@ -109,7 +130,7 @@ struct razer_effect *daemon_create_effect(void)
 	effect->open = NULL;
 	effect->close = NULL;
 	effect->update = NULL;
-	effect->input_event = NULL;
+	effect->handle_event = NULL;
 	effect->dbus_event = NULL;
 	effect->fps = 1;
 	effect->input_usage_mask = 0;
