@@ -59,7 +59,7 @@ unbind_keyboard() {
 bind_all_chromas() {
 	exit_number=1
 
-	for device in /sys/bus/hid/devices/*:1532:020[39]*
+	for device in `ls /sys/bus/hid/devices/ | grep -P ".*1532:0(11A|203|209|214).*"`
 	do
 		device_id=$(basename "${device}")
 
@@ -80,7 +80,7 @@ bind_all_chromas() {
 }
 
 unbind_all_chromas() {
-	for device in /sys/bus/hid/drivers/razerkbd/*:1532:020[39]*
+	for device in `ls /sys/bus/hid/drivers/razerkbd/ | grep -P ".*1532:0(11A|203|209|214).*"`
 	do
 		device_id=$(basename "${device}")
 
