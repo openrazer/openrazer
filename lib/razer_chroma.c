@@ -587,7 +587,12 @@ int razer_find_devices(struct razer_chroma *chroma)
 		sscanf(s_device_vendor_id,"%x",&device_vendor_id);
 		sscanf(s_device_product_id,"%x",&device_product_id);
 		sscanf(s_device_hid_id,"%x",&device_hid_id);
-		if(device_vendor_id==RAZER_VENDOR_ID && (device_product_id == RAZER_BLACKWIDOW_CHROMA_PRODUCT_ID || device_product_id == RAZER_BLACKWIDOW_CHROMA_TE_PRODUCT_ID|| device_product_id == RAZER_FIREFLY_PRODUCT_ID))
+		if(device_vendor_id==RAZER_VENDOR_ID &&
+             (device_product_id == RAZER_BLACKWIDOW_CHROMA_PRODUCT_ID || 
+              device_product_id == RAZER_BLACKWIDOW_CHROMA_TE_PRODUCT_ID ||
+              device_product_id == RAZER_BLACKWIDOW_ULTIMATE_2013_PRODUCT_ID ||
+              device_product_id == RAZER_BLACKWIDOW_ULTIMATE_2016_PRODUCT_ID ||
+              device_product_id == RAZER_FIREFLY_PRODUCT_ID))
 		{
 			int base_path_len = strlen(razer_sys_hid_devices_path)+strlen(entry->d_name);
 			char *device_path = (char*)malloc(base_path_len+1);
