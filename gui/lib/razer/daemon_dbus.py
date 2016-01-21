@@ -184,3 +184,15 @@ class DaemonInterface(object):
 
         self.dbus_driver_effect_object.set_key_row(keyboard_payload)
         self.dbus_driver_effect_object.custom()
+
+    def get_serial_number(self):
+        """
+        Gets the serial nubmer from the daemon
+        :return:
+        """
+        if 'serial' in self.dbus_daemon_object.Introspect():
+            serial = self.dbus_daemon_controls.serial()
+        else:
+            serial = 'XXXXXXXXXXXXXXX'
+
+        return serial
