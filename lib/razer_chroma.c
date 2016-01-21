@@ -961,6 +961,11 @@ long razer_get_num_devices(struct razer_chroma *chroma)
 	return list_GetLen(chroma->devices);
 }
 
+void razer_set_active_device_id(struct razer_chroma *chroma,int index)
+{
+	chroma->active_device = list_Get(chroma->devices,index);
+}
+
 void razer_set_active_device(struct razer_chroma *chroma,struct razer_chroma_device *device)
 {
 	chroma->active_device = device;
@@ -1482,7 +1487,7 @@ void razer_convert_keycode_to_pos(int keycode,struct razer_pos *pos)
 		break;
 		default:
 			#ifdef USE_DEBUGGING
-				printf("unknown key:%d\n",keycode);
+				//printf("unknown key:%d\n",keycode);
 			#endif
 		break;
 	}
@@ -1621,7 +1626,7 @@ int razer_get_key_class(int keycode)
 			return(RAZER_KEY_CLASS_LETTERS);
 		default:
 			#ifdef USE_DEBUGGING
-				printf("unknown key:%d\n",keycode);
+				//printf("unknown key:%d\n",keycode);
 			#endif
 			return(RAZER_KEY_CLASS_UNKNOWN);
 	}

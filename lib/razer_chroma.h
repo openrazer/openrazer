@@ -304,6 +304,7 @@ struct razer_chroma_event
 struct razer_chroma *razer_open(razer_event_handler event_handler,void *tag);
 void razer_close(struct razer_chroma *chroma);
 long razer_get_num_devices(struct razer_chroma *chroma);
+void razer_set_active_device_id(struct razer_chroma *chroma,int index);
 void razer_set_active_device(struct razer_chroma *chroma,struct razer_chroma_device *device);//easiest way so i dont have to rewrite everything in one shot
 
 void razer_close_device(struct razer_chroma_device *device);
