@@ -956,6 +956,11 @@ void razer_free_input_devices(struct razer_chroma *chroma)
 	chroma->input_devices = NULL;
 }
 
+long razer_get_num_devices(struct razer_chroma *chroma)
+{
+	return list_GetLen(chroma->devices);
+}
+
 void razer_set_active_device(struct razer_chroma *chroma,struct razer_chroma_device *device)
 {
 	chroma->active_device = device;
