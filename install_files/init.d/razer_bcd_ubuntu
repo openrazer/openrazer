@@ -63,7 +63,7 @@ case "$1" in
 	check_for_old_pid_file
 	log_daemon_msg "Starting $DESC" "$NAME" || true
 
-	bind_all_chromas
+	bind_all
 
 	if start-stop-daemon --start --quiet --oknodo --pidfile /var/run/razer_bcd.pid --exec ${DAEMON} -- ${DAEMON_OPTS}; then
 	    log_end_msg 0 || true
@@ -79,7 +79,7 @@ case "$1" in
 	if start-stop-daemon --stop --quiet --pidfile /var/run/razer_bcd.pid; then
 	    # Unbind the chromas
 	    log_end_msg 0 || true
-	    unbind_all_chromas
+	    unbind_all
 
 	    # Use the function to remove pid
 	    check_for_old_pid_file
