@@ -1492,7 +1492,7 @@ void razer_convert_keycode_to_pos(int keycode,struct razer_pos *pos)
 		break;
 		default:
 			#ifdef USE_DEBUGGING
-				//printf("unknown key:%d\n",keycode);
+				printf("unknown key:%d\n",keycode);
 			#endif
 		break;
 	}
@@ -1631,7 +1631,7 @@ int razer_get_key_class(int keycode)
 			return(RAZER_KEY_CLASS_LETTERS);
 		default:
 			#ifdef USE_DEBUGGING
-				//printf("unknown key:%d\n",keycode);
+				printf("unknown key:%d\n",keycode);
 			#endif
 			return(RAZER_KEY_CLASS_UNKNOWN);
 	}

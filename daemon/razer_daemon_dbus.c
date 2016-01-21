@@ -248,14 +248,6 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			daemon_kill(daemon,"dbus: Out Of Memory!\n");
 		dbus_connection_flush(daemon->dbus);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
 	else if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.devices", "set_active"))
 	{
 		int active=0;
@@ -297,18 +289,6 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			daemon_kill(daemon,"dbus: Out Of Memory!\n");
 		dbus_connection_flush(daemon->dbus);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	else if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon", "serial"))
 	{
 		#ifdef USE_DEBUGGING
