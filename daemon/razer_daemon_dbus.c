@@ -183,6 +183,8 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon","serial"))
 		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon","device_name"))
+		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","none"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","static"))
@@ -307,6 +309,26 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 			daemon_kill(daemon,"dbus: Out Of Memory!\n");
 		dbus_connection_flush(daemon->dbus);
 		free(serial_str);
+	}
+	else if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon", "device_name"))
+	{
+		#ifdef USE_DEBUGGING
+			printf("\ndbus: method device_name called\n");
+		#endif
+		char* name_str = (char*)calloc(64, sizeof(char));
+		razer_get_name(daemon->chroma, &name_str[0]);
+		printf("\n\n\n\nDevice Name: %s\n\n\n\n", name_str);
+
+		reply = dbus_message_new_method_return(msg);
+		dbus_message_iter_init_append(reply,&parameters);
+
+		if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&name_str))
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_uint32_t serial = 0;
+		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+		free(name_str);
 	}
 	else if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon", "raw_keyboard_brightness"))
 	{
@@ -2306,6 +2328,10 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 					<arg direction=\"out\" name=\"serial_number\" type=\"s\">\n\
 					</arg>\n\
 				</method>\n\
+				<method name=\"device_name\">\n\
+					<arg direction=\"out\" name=\"device_name\" type=\"s\">\n\
+					</arg>\n\
+				</method>\n\
 			</interface>\n\
 			<interface name=\"org.voyagerproject.razer.daemon.driver_effect\">\n\
 				<method name=\"none\">\n\
@@ -2515,7 +2541,7 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 					</arg>\n\
 				</method>\n\
 				<method name=\"set_active\">\n\
-					<arg direction=\"in\" name=\"num_devices\" type=\"i\">\n\
+					<arg direction=\"in\" name=\"device_index\" type=\"i\">\n\
 					</arg>\n\
 				</method>\n\
 			</interface>\n\

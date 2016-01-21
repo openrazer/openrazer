@@ -2146,10 +2146,26 @@ int razer_device_get_serial(struct razer_chroma_device *device, char* buffer)
 	return(0);
 }
 
+int razer_device_get_name(struct razer_chroma_device *device, char* buffer)
+{
+	if(device->name != NULL)
+	{
+		strcpy(buffer, device->name);
+	}
+	return(0);
+}
+
+
 int razer_get_serial(struct razer_chroma *chroma, char* buffer)
 {
 	//getting device serial number
 	return(razer_device_get_serial(chroma->active_device, buffer));
+}
+
+int razer_get_name(struct razer_chroma *chroma, char* buffer)
+{
+	//getting device name / type
+	return(razer_device_get_name(chroma->active_device, buffer));
 }
 
 int razer_device_set_custom_mode(struct razer_chroma_device *device)
