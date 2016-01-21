@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<!--
+ Chroma Controller is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Chroma Controller is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Chroma Controller. If not, see <http://www.gnu.org/licenses/>.
+
+ Copyright (C) 2015-2016 Luke Horwell <lukehorwell37+code@gmail.com>
+               2015-2016 Terry Cain <terry@terrys-home.co.uk>
+-->
+<html>
+<head>
+  <link href="controller.css" rel="stylesheet" media="screen">
+  <link href="lib/font-awesome.min.css" rel="stylesheet" media="screen">
+</head>
+<body>
+  <div class="header">
+    <h3 id="page-header"></h3>
+  </div>
+
+  <div class="content" hidden>
+    <!-- Edit Profile Menu -->
+    <div class="menu_area">
+      <div id="edit-panel">
+        <div id="rgb_tmp">
+          <table>
+            <tr>
+                <td>Colour:</td>
+                <td>
+                    <div id="rgb_tmp_preview" class="color-preview" style="background-color:rgba(0,255,0,1)"></div>
+                </td>
+                <td><a class="btn" onclick="cmd('ask-color?rgb_tmp')">Custom...</a></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td colspan="2">
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?255?255')" style="background-color:#FFFFFF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?0?0')" style="background-color:#FF0000"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?165?0')" style="background-color:#FFA500"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?255?0')" style="background-color:#FFFF00"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?0?255?0')" style="background-color:#00FF00"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?0?255?255')" style="background-color:#00FFFF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?0?0?255')" style="background-color:#0000FF"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?128?0?128')" style="background-color:#800080"></a>
+                <a class="color-icon" onclick="cmd('set-color?rgb_tmp?255?0?255')" style="background-color:#FF00FF"></a>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div style="vertical-align:middle;">
+          <br>
+          <div class="left">
+            <p><span id="current_mode"><!-- Changed in JS --></span></p>
+          </div>
+          <div class="right">
+            <span class="right" style="text-align:right">
+              <a class="btn" onclick="set_mode('set')"><span class="fa fa-hand-pointer-o"></span></a>
+              <a class="btn" onclick="set_mode('picker')"><span class="fa fa-eyedropper"></span></a>
+              <a class="btn" onclick="set_mode('clear')"><span class="fa fa-eraser"></span></a>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div id="keyboard-container">
+          <div id="keyboard-div" class="center"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="left"></div>
+    <div class="right">
+      <a class="btn" id="cancel" onclick="cmd('cancel-changes')">Cancel</a>
+      <a class="btn" id="edit-preview" onclick="cmd('profile-preview')">Preview</a>
+      <a class="btn" id="edit-save" onclick="cmd('profile-save')"><span class="fa fa-check"></span> Save</a>
+    </div>
+  </div>
+
+  <script src="lib/jquery-2.1.4.min.js"></script>
+  <script src="lib/snap.svg-min.js"></script>
+  <script src="js/global.js"></script>
+  <script src="js/profile_editor.js"></script>
+</body>
+</html>
