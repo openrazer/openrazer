@@ -54,6 +54,8 @@
 #define RAZER_VENDOR_ID 0x1532
 #define RAZER_BLACKWIDOW_CHROMA_PRODUCT_ID 0x203
 #define RAZER_BLACKWIDOW_CHROMA_TE_PRODUCT_ID 0x209
+#define RAZER_BLACKWIDOW_ULTIMATE_2013_PRODUCT_ID 0x011A
+#define RAZER_BLACKWIDOW_ULTIMATE_2016_PRODUCT_ID 0x0214
 #define RAZER_FIREFLY_PRODUCT_ID 0x0c00
 
 #define RAZER_ROW_LENGTH 22
@@ -303,6 +305,8 @@ struct razer_chroma_event
 //handler can be NULL
 struct razer_chroma *razer_open(razer_event_handler event_handler,void *tag);
 void razer_close(struct razer_chroma *chroma);
+long razer_get_num_devices(struct razer_chroma *chroma);
+void razer_set_active_device_id(struct razer_chroma *chroma,int index);
 void razer_set_active_device(struct razer_chroma *chroma,struct razer_chroma_device *device);//easiest way so i dont have to rewrite everything in one shot
 
 void razer_close_device(struct razer_chroma_device *device);
@@ -345,6 +349,8 @@ int razer_device_set_key_row_buffered(struct razer_chroma_device *device,unsigne
 int razer_set_key_row_buffered(struct razer_chroma *chroma,unsigned char *buffer,int buffer_len);
 int razer_get_serial(struct razer_chroma *chroma, char* buffer);
 int razer_device_get_serial(struct razer_chroma_device *device, char* buffer);
+int razer_get_name(struct razer_chroma *chroma, char* buffer);
+int razer_device_get_name(struct razer_chroma_device *device, char* buffer);
 
 
 

@@ -587,7 +587,12 @@ int razer_find_devices(struct razer_chroma *chroma)
 		sscanf(s_device_vendor_id,"%x",&device_vendor_id);
 		sscanf(s_device_product_id,"%x",&device_product_id);
 		sscanf(s_device_hid_id,"%x",&device_hid_id);
-		if(device_vendor_id==RAZER_VENDOR_ID && (device_product_id == RAZER_BLACKWIDOW_CHROMA_PRODUCT_ID || device_product_id == RAZER_BLACKWIDOW_CHROMA_TE_PRODUCT_ID|| device_product_id == RAZER_FIREFLY_PRODUCT_ID))
+		if(device_vendor_id==RAZER_VENDOR_ID &&
+             (device_product_id == RAZER_BLACKWIDOW_CHROMA_PRODUCT_ID || 
+              device_product_id == RAZER_BLACKWIDOW_CHROMA_TE_PRODUCT_ID ||
+              device_product_id == RAZER_BLACKWIDOW_ULTIMATE_2013_PRODUCT_ID ||
+              device_product_id == RAZER_BLACKWIDOW_ULTIMATE_2016_PRODUCT_ID ||
+              device_product_id == RAZER_FIREFLY_PRODUCT_ID))
 		{
 			int base_path_len = strlen(razer_sys_hid_devices_path)+strlen(entry->d_name);
 			char *device_path = (char*)malloc(base_path_len+1);
@@ -954,6 +959,16 @@ void razer_free_input_devices(struct razer_chroma *chroma)
 	}	
 	list_Close(chroma->input_devices);
 	chroma->input_devices = NULL;
+}
+
+long razer_get_num_devices(struct razer_chroma *chroma)
+{
+	return list_GetLen(chroma->devices);
+}
+
+void razer_set_active_device_id(struct razer_chroma *chroma,int index)
+{
+	chroma->active_device = list_Get(chroma->devices,index);
 }
 
 void razer_set_active_device(struct razer_chroma *chroma,struct razer_chroma_device *device)
@@ -2131,10 +2146,26 @@ int razer_device_get_serial(struct razer_chroma_device *device, char* buffer)
 	return(0);
 }
 
+int razer_device_get_name(struct razer_chroma_device *device, char* buffer)
+{
+	if(device->name != NULL)
+	{
+		strcpy(buffer, device->name);
+	}
+	return(0);
+}
+
+
 int razer_get_serial(struct razer_chroma *chroma, char* buffer)
 {
 	//getting device serial number
 	return(razer_device_get_serial(chroma->active_device, buffer));
+}
+
+int razer_get_name(struct razer_chroma *chroma, char* buffer)
+{
+	//getting device name / type
+	return(razer_device_get_name(chroma->active_device, buffer));
 }
 
 int razer_device_set_custom_mode(struct razer_chroma_device *device)
