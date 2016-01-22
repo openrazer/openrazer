@@ -181,6 +181,8 @@ struct razer_chroma_device
 	FILE *reactive_mode_file;
 	char *spectrum_mode_filename;
 	FILE *spectrum_mode_file;
+	char *starlight_mode_filename;
+	FILE *starlight_mode_file;
 	char *static_mode_filename;
 	FILE *static_mode_file;
 	char *wave_mode_filename;
@@ -333,6 +335,8 @@ int razer_device_set_reactive_mode(struct razer_chroma_device *device,unsigned c
 int razer_set_reactive_mode(struct razer_chroma *chroma,unsigned char speed,struct razer_rgb *color);
 int razer_device_set_spectrum_mode(struct razer_chroma_device *device);
 int razer_set_spectrum_mode(struct razer_chroma *chroma);
+int razer_device_set_starlight_mode(struct razer_chroma_device *device);
+int razer_set_starlight_mode(struct razer_chroma *chroma);
 int razer_device_set_static_mode(struct razer_chroma_device *device,struct razer_rgb *color);
 int razer_set_static_mode(struct razer_chroma *chroma,struct razer_rgb *color);
 int razer_device_set_wave_mode(struct razer_chroma_device *device,unsigned char direction);

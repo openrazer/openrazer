@@ -197,6 +197,8 @@ int daemon_dbus_announce(struct razer_daemon *daemon)
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","spectrum"))
 		return(0);
+	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.driver_effect","starlight"))
+		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.devices","get_number_of_devices"))
 		return(0);
 	if(!daemon_dbus_add_method(daemon,"org.voyagerproject.razer.daemon.devices","set_active"))
@@ -808,6 +810,20 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		*/
 		daemon->is_paused = 1;
 		razer_set_spectrum_mode(daemon->chroma);
+		reply = dbus_message_new_method_return(msg);
+ 		dbus_uint32_t serial = 0;
+ 		if(!dbus_connection_send(daemon->dbus,reply,&serial))
+			daemon_kill(daemon,"dbus: Out Of Memory!\n");
+		dbus_connection_flush(daemon->dbus);
+	}
+	else if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.driver_effect", "starlight"))
+	{
+		#ifdef USE_DEBUGGING
+			printf("\ndbus: method starlight called\n");
+		#endif
+
+		daemon->is_paused = 1;
+		razer_set_starlight_mode(daemon->chroma);
 		reply = dbus_message_new_method_return(msg);
  		dbus_uint32_t serial = 0;
  		if(!dbus_connection_send(daemon->dbus,reply,&serial))
@@ -2339,6 +2355,8 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 				<method name=\"custom\">\n\
 				</method>\n\
 				<method name=\"spectrum\">\n\
+				</method>\n\
+				<method name=\"starlight\">\n\
 				</method>\n\
 				<method name=\"static\">\n\
 					<arg direction=\"in\" name=\"red\" type=\"y\">\n\
