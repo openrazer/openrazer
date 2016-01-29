@@ -10,33 +10,77 @@ class DaemonInterface(object):
     """
     Interface to the daemon via DBUS
     """
+
     def __init__(self):
-      try:
-        # Load up the DBUS
-        system_bus = dbus.SystemBus()
-        self.dbus_daemon_object = system_bus.get_object("org.voyagerproject.razer.daemon", "/")
+        try:
+            # Load up the DBUS
+            system_bus = dbus.SystemBus()
+            self.dbus_daemon_object = system_bus.get_object("org.voyagerproject.razer.daemon", "/")
 
-        # Provides:
-        # breath(byte red, byte green, byte blue)
-        # none()
-        # reactive(byte red, byte green, byte blue)
-        # spectrum()
-        # static(byte red, byte green, byte blue)
-        # wave(byte direction)
-        self.dbus_driver_effect_object = dbus.Interface(self.dbus_daemon_object, "org.voyagerproject.razer.daemon.driver_effect")
+            # Provides:
+            # breath(byte red, byte green, byte blue)
+            # none()
+            # reactive(byte red, byte green, byte blue)
+            # spectrum()
+            # static(byte red, byte green, byte blue)
+            # wave(byte direction)
+            self.dbus_driver_effect_object = dbus.Interface(self.dbus_daemon_object,
+                                                            "org.voyagerproject.razer.daemon.driver_effect")
 
-        # Provides:
-        # enable_macro_keys()
-        # raw_keyboard_brightness(byte brightness)
-        # set_game_mode(byte enable)
-        self.dbus_daemon_controls = dbus.Interface(self.dbus_daemon_object, "org.voyagerproject.razer.daemon")
+            # Provides:
+            # get_number_of_devices() Returns int
+            # set_active(int num_devices) Returns void
+            self.dbus_devices_object = dbus.Interface(self.dbus_daemon_object,
+                                                      "org.voyagerproject.razer.daemon.devices")
 
-        # Output success message
-        print('Successfully connected to dbus service.')
+            # Provides:
+            # enable_macro_keys()
+            # raw_keyboard_brightness(byte brightness)
+            # set_game_mode(byte enable)
+            # serial() Returns string
+            # device_name() Returns string device name
+            self.dbus_daemon_controls = dbus.Interface(self.dbus_daemon_object, "org.voyagerproject.razer.daemon")
 
-      except:
-        print("Failed to connect to the dbus service. Is the razer_bcd service running?")
-        sys.exit(1)
+            # Output success message
+            print('Successfully connected to dbus service.')
+
+        except:
+            print("Failed to connect to the dbus service. Is the razer_bcd service running?")
+            sys.exit(1)
+
+    def enumerate_devices(self):
+        """
+        Get a list of devices, their serial, type and index
+
+        :return: List of dictionary objects
+        :rtype: list of dict
+        """
+        # TODO possible to return an object of the device only containing dbus functions that are relevant
+        # TODO i.e. have a blackwidowchroma class and a mambachroma class with differing methods.
+
+        number_of_devices = self.dbus_devices_object.get_number_of_devices()
+
+        devices = []
+
+        for device_id in range(0, number_of_devices):
+            self.dbus_devices_object.set_active(device_id)
+            print("Device ID {0}".format(device_id))
+
+            device_serial = self.dbus_daemon_controls.serial()
+            device_type = self.dbus_daemon_controls.device_name()
+
+            print("Device Type \"{0}\", Device Serial \"{1}\"".format(device_type, device_serial))
+
+            devices.append({
+                "index": device_id,
+                "type": device_type,
+                "serial": device_serial
+            })
+
+        return devices
+
+
+
 
 
     def set_effect(self, effect_type, p1=None, p2=None, p3=None, p4=None, p5=None, p6=None):
@@ -196,3 +240,7 @@ class DaemonInterface(object):
             serial = 'XXXXXXXXXXXXXXX'
 
         return serial
+
+if __name__ == "__main__":
+    a = DaemonInterface()
+    a.enumerate_devices()

@@ -47,6 +47,7 @@ int razer_send_report(struct usb_device *usb_dev,void const *data) {
     return razer_send_control_msg(usb_dev, data, 0x00, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
 }
 
+
 /**
  * Get the devices serial number
  *
@@ -872,6 +873,22 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
     return sprintf(buf, "%s\n", &serial_string[0]);
 }
 
+/**
+ * Read device file "device_type"
+ *
+ * Returns friendly string of device type
+ */
+static ssize_t razer_attr_read_device_type(struct device *dev, struct device_attribute *attr,
+                char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    //struct razer_kbd_device *widow = usb_get_intfdata(intf);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int write_count = sprintf(buf, "Razer Mamba\n");
+    return write_count;
+}
+
 
 /**
  * Set up the device driver files
@@ -880,6 +897,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
  * Write only is 0220
  * Read and write is 0664
  */
+ static DEVICE_ATTR(device_type,              0444, razer_attr_read_device_type, NULL);
 static DEVICE_ATTR(get_battery,               0444, razer_attr_read_get_battery, NULL);
 static DEVICE_ATTR(get_serial,                0444, razer_attr_read_get_serial,  NULL);
 static DEVICE_ATTR(is_charging,               0444, razer_attr_read_is_charging, NULL);
@@ -938,6 +956,9 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_get_serial);
+    if (retval)
+        goto exit_free;
+    retval = device_create_file(&hdev->dev, &dev_attr_device_type);
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_is_charging);
@@ -1037,6 +1058,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
     device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);
     device_remove_file(&hdev->dev, &dev_attr_mode_reactive);
     device_remove_file(&hdev->dev, &dev_attr_mode_breath);
+    device_remove_file(&hdev->dev, &dev_attr_device_type);
 
 
 
