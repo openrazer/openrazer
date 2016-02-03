@@ -1,14 +1,14 @@
-bind_keyboard() {
+bind_device() {
 	# Check if the device is already binded
-	if [ -e "/sys/bus/hid/drivers/razerkbd/$1" ]; then
+	if [ -e "/sys/bus/hid/drivers/$1/$2" ]; then
 		echo "Device already binded"
 		return 0
 	fi
 
 	# No point unbinding the device if its already unbinded
-	if [ -e "/sys/bus/hid/drivers/hid-generic/$1" ]; then
-		echo "Unbinding device ($1) from hid-generic"
-		echo -n "$1" > /sys/bus/hid/drivers/hid-generic/unbind 2> /dev/null
+	if [ -e "/sys/bus/hid/drivers/hid-generic/$2" ]; then
+		echo "Unbinding device ($2) from hid-generic"
+		echo -n "$2" > /sys/bus/hid/drivers/hid-generic/unbind 2> /dev/null
 		if [ $? -ne 0 ]; then
 			echo "Failed to unbind device"
 			return -1
@@ -16,8 +16,8 @@ bind_keyboard() {
 	fi
 
 	# Bind to razerkbd
-	echo "Binding device ($1) to razerkbd"
-	echo -n "$1" > /sys/bus/hid/drivers/razerkbd/bind 2> /dev/null
+	echo "Binding device ($2) to $1"
+	echo -n "$2" > /sys/bus/hid/drivers/$1/bind 2> /dev/null
 	if [ $? -ne 0 ]; then
 		echo "Failed to bind device"
 		return -1
@@ -27,26 +27,26 @@ bind_keyboard() {
 	return 0
 }
 
-unbind_keyboard() {
+unbind_device() {
 	# Check if the device is already binded
-	if [ -e "/sys/bus/hid/drivers/hid-generic/$1" ]; then
+	if [ -e "/sys/bus/hid/drivers/hid-generic/$2" ]; then
 		echo "Device is not binded to razerkbd"
 		return 0
 	fi
 
 	# No point unbinding the device if its already unbinded
-	if [ -e "/sys/bus/hid/drivers/razerkbd/$1" ]; then
-		echo "Unbinding device ($1) from razerkbd"
-		echo -n "$1" > /sys/bus/hid/drivers/razerkbd/unbind 2> /dev/null
+	if [ -e "/sys/bus/hid/drivers/$1/$2" ]; then
+		echo "Unbinding device ($2) from $1"
+		echo -n "$2" > /sys/bus/hid/drivers/$1/unbind 2> /dev/null
 		if [ $? -ne 0 ]; then
 			echo "Failed to unbind device"
 			return -1
 		fi
 	fi
 
-	# Bind to razerkbd
+	# Bind to hid
 	echo "Binding device ($1) to hid-generic"
-	echo -n "$1" > /sys/bus/hid/drivers/hid-generic/bind 2> /dev/null
+	echo -n "$2" > /sys/bus/hid/drivers/hid-generic/bind 2> /dev/null
 	if [ $? -ne 0 ]; then
 		echo "Failed to bind device"
 		return -1
@@ -56,10 +56,25 @@ unbind_keyboard() {
 	return 0
 }
 
-bind_all_chromas() {
-	exit_number=1
+# Create bind_all
+# Create unbind_all
 
-	for device in /sys/bus/hid/devices/*:1532:020[39]*
+bind_all() {
+	bind_all_device "razerkbd" "011A|0203|0209|0214" "02" "input2"
+	bind_all_device "razermouse" "0045" "00" "input0"
+	bind_all_device "razerfirefly" "0C00" "00" "input0"
+}
+
+unbind_all() {
+	unbind_all_device "razerkbd" "011A|0203|0209|0214"
+	unbind_all_device "razermouse" "0045"
+	unbind_all_device "razerfirefly" "0C00"
+}
+
+bind_all_device() {
+	exit_number=0
+
+	for device in `ls /sys/bus/hid/devices/ | grep -P ".*1532:($2).*"`
 	do
 		device_id=$(basename "${device}")
 
@@ -68,10 +83,10 @@ bind_all_chromas() {
 		phyiscal_device=$(udevadm info "/sys/bus/hid/devices/${device_id}" | grep "HID_PHYS" | sed -n "s/.*HID_PHYS.*\/\(input[0-9]\+\)/\1/p")
 
 		# If its interface 2 then thats the device we want
-		if [ "${usb_interface_num}" = "02" ] || [ "${phyiscal_device}" = "input2" ]; then
-			bind_keyboard "${device_id}"
-			if [ $? -eq 0 ]; then
-				exit_number=0
+		if [ "${usb_interface_num}" = "$3" ] || [ "${phyiscal_device}" = "$4" ]; then
+			bind_device "$1" "${device_id}"
+			if [ $? -ne 0 ]; then
+				exit_number=1
 			fi
 		fi
 	done
@@ -79,11 +94,12 @@ bind_all_chromas() {
 	return ${exit_number}
 }
 
-unbind_all_chromas() {
-	for device in /sys/bus/hid/drivers/razerkbd/*:1532:020[39]*
+
+unbind_all_device() {
+	for device in `ls /sys/bus/hid/drivers/$1/ | grep -P ".*1532:($2).*"`
 	do
 		device_id=$(basename "${device}")
 
-		unbind_keyboard "${device_id}"
+		unbind_device $1 "${device_id}"
 	done
 }

@@ -28,6 +28,9 @@ class KeyDoesNotExistError(Exception):
     """
     pass
 
+class NoBackupError(Exception):
+    pass
+
 class RGB(object):
 
     @staticmethod
@@ -182,7 +185,26 @@ class KeyboardColour(object):
     def __init__(self):
         self.rows = []
 
+        self.backup = None
+
         self.reset_rows()
+
+    def backup_configuration(self):
+        """
+        Backs up the current configuration
+        """
+        self.backup = KeyboardColour()
+        self.backup.get_from_total_binary(self.get_total_binary())
+
+    def restore_configuration(self):
+        """
+        Restores the previous configuration
+        """
+        if self.backup is None:
+            raise NoBackupError()
+
+        self.rows = self.backup.rows
+        self.backup = None
 
     def get_rows_raw(self):
         """
@@ -286,7 +308,7 @@ class KeyboardColour(object):
         Load in a binary blob which is the output from get_total_binary
 
         :param binary_blob: Binary blob
-        :type binary_blob: bytes
+        :type binary_blob: bytearray
         """
         self.reset_rows()
 

@@ -3,7 +3,7 @@
 
 from gi.repository import Gtk, Gdk, AppIndicator3 as appindicator
 import collections
-import sys
+import sys, signal
 
 import razer.daemon_dbus, razer.keyboard
 
@@ -252,10 +252,10 @@ def main():
     """
     Main function
     """
-    try:
-        Gtk.main()
-    except KeyboardInterrupt:
-        pass # Dont error if Ctrl+C'd
+    # Kill the process when CTRL+C'd.
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+    Gtk.main()
     sys.exit(0)
 
 if __name__ == "__main__":

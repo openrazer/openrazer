@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<!--
+ Chroma Controller is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Chroma Controller is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Chroma Controller. If not, see <http://www.gnu.org/licenses/>.
+
+ Copyright (C) 2015-2016 Luke Horwell <lukehorwell37+code@gmail.com>
+-->
+<html>
+<head>
+  <link href="controller.css" rel="stylesheet" media="screen">
+  <link href="lib/font-awesome.min.css" rel="stylesheet" media="screen">
+</head>
+<body>
+  <div class="header">
+    <h3 id="page-header">Preferences</h3>
+  </div>
+
+  <div class="content" hidden>
+    <!-- Preferences Menu -->
+    <div class="menu_area">
+      <p>Change the application preferences for managing your Chroma BlackWidow Keyboard.</p>
+      <br>
+<!--
+      <h3>Application</h3>
+      <table>
+        <tr>
+          <td><label class="pref-label">Language: </label></td>
+          <td>
+            <select id="ui_lang">
+                <option value="en-gb">English (United Kingdom)</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td><label class="pref-label"><input type="checkbox" id="auto_detect" value="none" onclick=""/> Use system settings for keyboard layout.</label></td>
+        </tr>
+      </table>
+      <hr>
+-->
+      <h3>Profiles</h3>
+      <table>
+        <tr>
+          <td><label class="pref-label"><input type="checkbox" id="live_switch" onclick="set_pref('live_switch',this)"/> Enable live switching</label></td>
+          <td><p>Activate profiles instantly as soon as you click on them.</p></td>
+        </tr>
+        <tr>
+          <td><label class="pref-label"><input type="checkbox" id="live_preview" onclick="set_pref('live_preview',this)"/> Enable live preview</label></td>
+          <td><p>While editing, show your changes on the actual keyboard.</p></td>
+        </tr>
+        <tr>
+          <td><label class="pref-label"><input type="checkbox" id="activate_on_save" onclick="set_pref('activate_on_save',this)"/> Always activate profiles after saving.</label></td>
+        </tr>
+      </table>
+      <hr>
+<!--
+      <h3>Tray Applet</h3>
+      <table>
+        <tr>
+          <td>
+            <label class="pref-label">Use a custom icon: </label>
+            <input type="text" name="override-tray-icon"/>
+          </td>
+          <td><p>You can optionally override the default icon by specifying the name of a system icon.
+          Alternately, place your custom file as "tray_icon.png" or "tray_icon.svg" in the configuration folder.</p></td>
+        </tr>
+      </table>
+-->
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="left"></div>
+    <div class="right">
+      <a class="btn" id="pref-revert" onclick="cmd('pref-revert')"><span class="fa fa-repeat"></span> Revert</a>
+      <a class="btn" id="pref-save" onclick="cmd('pref-save')"><span class="fa fa-check"></span> Save</a>
+    </div>
+  </div>
+
+  <script src="lib/jquery-2.1.4.min.js"></script>
+  <script src="js/global.js"></script>
+</body>
+</html>

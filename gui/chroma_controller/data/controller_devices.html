@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!--
+ Chroma Controller is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Chroma Controller is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Chroma Controller. If not, see <http://www.gnu.org/licenses/>.
+
+ Copyright (C) 2015-2016 Luke Horwell <lukehorwell37+code@gmail.com>
+-->
+<html>
+<head>
+  <link href="controller.css" rel="stylesheet" media="screen">
+  <link href="lib/font-awesome.min.css" rel="stylesheet" media="screen">
+</head>
+<body>
+  <div class="header">
+    <h3 id="page-header">Connected Razer Devices</h3>
+  </div>
+
+  <div class="content" hidden>
+
+    <!-- Keyboard Not Detected -->
+    <div class="menu_area">
+      <p>Please select a Razer device to configure.</p>
+      <br>
+      <table id="detected-devices" class="devices center">
+          <!-- Populated in Python -->
+          <!-- Column 1 = Image -->
+          <!-- Column 2 = Hardware Name -->
+          <!-- Column 3 = Configure Button -->
+      </table>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <div class="left"></div>
+    <div class="right">
+      <a class="btn" id="rescan" onclick="cmd('rescan-devices')">Rescan</a>
+      <a class="btn" id="close-window" onclick="cmd('quit')">Close</a>
+    </div>
+  </div>
+
+  <script src="lib/jquery-2.1.4.min.js"></script>
+  <script src="js/global.js"></script>
+  <script src="js/devices.js"></script>
+</body>
+</html>

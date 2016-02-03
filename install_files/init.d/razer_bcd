@@ -37,7 +37,7 @@ case "$1" in
 	#start-stop-daemon --start --quiet \
 	#	--exec $DAEMON -- --pidfile /var/run/$NAME.pid $DAEMON_OPTS
 
-	bind_all_chromas
+	bind_all
 
 	$DAEMON
 	echo "$NAME."
@@ -50,7 +50,7 @@ case "$1" in
 		kill -INT $PID
 	;;esac
 
-	unbind_all_chromas
+	unbind_all
 	echo "$NAME."
 	;;
   #reload)

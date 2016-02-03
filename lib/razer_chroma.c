@@ -38,6 +38,7 @@ char *razer_game_mode_pathname = "/mode_game";
 char *razer_none_mode_pathname = "/mode_none";
 char *razer_reactive_mode_pathname = "/mode_reactive";
 char *razer_spectrum_mode_pathname = "/mode_spectrum";
+char *razer_starlight_mode_pathname = "/mode_starlight";
 char *razer_static_mode_pathname = "/mode_static";
 char *razer_wave_mode_pathname = "/mode_wave";
 char *razer_brightness_pathname = "/set_brightness";
@@ -225,6 +226,28 @@ void razer_close_static_mode_file(struct razer_chroma_device *device)
     if(device->static_mode_file)
     	fclose(device->static_mode_file);
     device->static_mode_file = NULL;
+}
+
+int razer_open_starlight_mode_file(struct razer_chroma_device *device)
+{
+	device->starlight_mode_file=fopen(device->starlight_mode_filename,"wb");
+	#ifdef USE_VERBOSE_DEBUGGING
+		printf("opening starlight mode file:%s\n",device->starlight_mode_filename);
+	#endif
+	if(device->starlight_mode_file)
+		return(1);
+	else
+		return(0);
+}
+
+void razer_close_starlight_mode_file(struct razer_chroma_device *device)
+{
+	#ifdef USE_VERBOSE_DEBUGGING
+		printf("closing starlight mode file:%s\n",device->starlight_mode_filename);
+	#endif
+    if(device->starlight_mode_file)
+    	fclose(device->starlight_mode_file);
+    device->starlight_mode_file = NULL;
 }
 
 int razer_open_wave_mode_file(struct razer_chroma_device *device)
@@ -435,6 +458,7 @@ struct razer_chroma_device *razer_create_device(struct razer_chroma *chroma,char
 	device->none_mode_file = NULL;
 	device->reactive_mode_file = NULL;
 	device->spectrum_mode_file = NULL;
+	device->starlight_mode_file = NULL;
 	device->static_mode_file = NULL;
 	device->wave_mode_file = NULL;
 	device->reset_file = NULL;
@@ -524,6 +548,9 @@ struct razer_chroma_device *razer_create_device(struct razer_chroma *chroma,char
 	device->spectrum_mode_filename = str_CreateEmpty();
 	device->spectrum_mode_filename = str_CatFree(device->spectrum_mode_filename,path);
 	device->spectrum_mode_filename = str_CatFree(device->spectrum_mode_filename,razer_spectrum_mode_pathname);
+	device->starlight_mode_filename = str_CreateEmpty();
+	device->starlight_mode_filename = str_CatFree(device->starlight_mode_filename,path);
+	device->starlight_mode_filename = str_CatFree(device->starlight_mode_filename,razer_starlight_mode_pathname);
 	device->static_mode_filename = str_CreateEmpty();
 	device->static_mode_filename = str_CatFree(device->static_mode_filename,path);
 	device->static_mode_filename = str_CatFree(device->static_mode_filename,razer_static_mode_pathname);
@@ -587,7 +614,12 @@ int razer_find_devices(struct razer_chroma *chroma)
 		sscanf(s_device_vendor_id,"%x",&device_vendor_id);
 		sscanf(s_device_product_id,"%x",&device_product_id);
 		sscanf(s_device_hid_id,"%x",&device_hid_id);
-		if(device_vendor_id==RAZER_VENDOR_ID && (device_product_id == RAZER_BLACKWIDOW_CHROMA_PRODUCT_ID || device_product_id == RAZER_BLACKWIDOW_CHROMA_TE_PRODUCT_ID|| device_product_id == RAZER_FIREFLY_PRODUCT_ID))
+		if(device_vendor_id==RAZER_VENDOR_ID &&
+             (device_product_id == RAZER_BLACKWIDOW_CHROMA_PRODUCT_ID || 
+              device_product_id == RAZER_BLACKWIDOW_CHROMA_TE_PRODUCT_ID ||
+              device_product_id == RAZER_BLACKWIDOW_ULTIMATE_2013_PRODUCT_ID ||
+              device_product_id == RAZER_BLACKWIDOW_ULTIMATE_2016_PRODUCT_ID ||
+              device_product_id == RAZER_FIREFLY_PRODUCT_ID))
 		{
 			int base_path_len = strlen(razer_sys_hid_devices_path)+strlen(entry->d_name);
 			char *device_path = (char*)malloc(base_path_len+1);
@@ -626,6 +658,8 @@ void razer_close_device(struct razer_chroma_device *device)
 		razer_close_none_mode_file(device);
 	if(device->reactive_mode_file)
 		razer_close_reactive_mode_file(device);
+	if(device->starlight_mode_file)
+		razer_close_starlight_mode_file(device);
 	if(device->spectrum_mode_file)
 		razer_close_spectrum_mode_file(device);
 	if(device->static_mode_file)
@@ -674,6 +708,8 @@ void razer_free_device(struct razer_chroma_device *device)
 		free(device->none_mode_filename);
 	if(device->reactive_mode_filename)
 		free(device->reactive_mode_filename);
+	if(device->starlight_mode_filename)
+		free(device->starlight_mode_filename);
 	if(device->spectrum_mode_filename)
 		free(device->spectrum_mode_filename);
 	if(device->static_mode_filename)
@@ -954,6 +990,16 @@ void razer_free_input_devices(struct razer_chroma *chroma)
 	}	
 	list_Close(chroma->input_devices);
 	chroma->input_devices = NULL;
+}
+
+long razer_get_num_devices(struct razer_chroma *chroma)
+{
+	return list_GetLen(chroma->devices);
+}
+
+void razer_set_active_device_id(struct razer_chroma *chroma,int index)
+{
+	chroma->active_device = list_Get(chroma->devices,index);
 }
 
 void razer_set_active_device(struct razer_chroma *chroma,struct razer_chroma_device *device)
@@ -2131,10 +2177,26 @@ int razer_device_get_serial(struct razer_chroma_device *device, char* buffer)
 	return(0);
 }
 
+int razer_device_get_name(struct razer_chroma_device *device, char* buffer)
+{
+	if(device->name != NULL)
+	{
+		strcpy(buffer, device->name);
+	}
+	return(0);
+}
+
+
 int razer_get_serial(struct razer_chroma *chroma, char* buffer)
 {
 	//getting device serial number
 	return(razer_device_get_serial(chroma->active_device, buffer));
+}
+
+int razer_get_name(struct razer_chroma *chroma, char* buffer)
+{
+	//getting device name / type
+	return(razer_device_get_name(chroma->active_device, buffer));
 }
 
 int razer_device_set_custom_mode(struct razer_chroma_device *device)
@@ -2415,6 +2477,31 @@ int razer_set_wave_mode(struct razer_chroma *chroma,unsigned char direction)
 {
 	//setting active device to wave mode
 	return(razer_device_set_wave_mode(chroma->active_device,direction));
+}
+
+int razer_device_set_starlight_mode(struct razer_chroma_device *device)
+{
+	if(!device->starlight_mode_file)
+		razer_open_starlight_mode_file(device);
+	if(device->starlight_mode_file)
+	{
+		if(fwrite("1",1,1,device->wave_mode_file))
+		{
+			fflush(device->wave_mode_file);
+			return(1);
+		}
+	}
+	#ifdef USE_DEBUGGING
+	else
+		printf("error setting mode to starlight\n");
+	#endif
+	return(0);	
+}
+
+int razer_set_starlight_mode(struct razer_chroma *chroma)
+{
+	//setting active device to wave mode
+	return(razer_device_set_starlight_mode(chroma->active_device));
 }
 
 int razer_device_reset(struct razer_chroma_device *device)

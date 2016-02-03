@@ -29,6 +29,10 @@
  #define USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013 0x011A
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016
+ #define USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 0x0214
+#endif
+
 
 
 /* Each keyboard report has 90 bytes*/
@@ -47,6 +51,8 @@
 #define RAZER_BLACKWIDOW_CHROMA_EFFECT_CUSTOM 5 //update profile data 
 #define RAZER_BLACKWIDOW_CHROMA_EFFECT_STATIC 6
 #define RAZER_BLACKWIDOW_CHROMA_EFFECT_CLEAR_ROW 8
+
+#define RAZER_BLACKWIDOW_ULTIMATE_2016_EFFECT_STARLIGHT 0x19
 
 
 #define RAZER_BLACKWIDOW_CHROMA_EFFECT_SET_KEYS 9 //update profile needs to be called after setting keys to reflect changes
@@ -70,15 +76,6 @@
 
 #define RAZER_FIREFLY_WAIT_MIN_US 900
 #define RAZER_FIREFLY_WAIT_MAX_US 1000
-
-
-
-
-
-/*struct razer_row_rgb {
-    struct razer_rgb cols[RAZER_BLACKWIDOW_CHROMA_ROW_LEN+1];
-};
-*/
 
 
 struct razer_kbd_device {
