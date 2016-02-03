@@ -778,6 +778,54 @@ int daemon_dbus_handle_messages(struct razer_daemon *daemon)
 		dbus_connection_flush(daemon->dbus);
 		free(rn_list_json);
 	}
+    else if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.devices", "list")) 
+	{
+		char **path = NULL;
+		int device_uid = 0;
+		dbus_message_get_path_decomposed(msg,&path);
+		#ifdef USE_DEBUGGING
+			printf("\ndbus: method list devices called\n");
+		#endif
+		reply = dbus_message_new_method_return(msg);
+		dbus_message_iter_init_append(reply,&parameters);
+		if(path[0] != NULL)
+			device_uid = atoi(path[0]);
+		struct razer_chroma_device *device = daemon_get_device(daemon,device_uid);
+		if(device)
+		{
+			struct razer_daemon_device_data *device_data = (struct razer_daemon_device_data*)device->tag;
+			char *rn_list_json = str_CreateEmpty();
+			rn_list_json = str_CatFree(rn_list_json,"{\n");
+			rn_list_json = str_CatFree(rn_list_json," \"render_nodes_num\" : ");
+			char *rn_num_string = str_FromLong(list_GetLen(device_data->render_nodes));
+			rn_list_json = str_CatFree(rn_list_json,rn_num_string);
+			rn_list_json = str_CatFree(rn_list_json," ,\n");
+			free(rn_num_string);
+			rn_list_json = str_CatFree(rn_list_json," \"render_nodes_list\": [\n");
+			for(int i=0;i<list_GetLen(device_data->render_nodes);i++)
+			{
+				struct razer_fx_render_node *render_node = list_Get(device_data->render_nodes,i);
+				char *rn_json = daemon_render_node_to_json(render_node);
+				rn_list_json = str_CatFree(rn_list_json,rn_json);
+				free(rn_json);
+			}
+			rn_list_json = str_CatFree(rn_list_json,"]}\n");
+			if(!dbus_message_iter_append_basic(&parameters,DBUS_TYPE_STRING,&rn_list_json)) 
+				daemon_kill(daemon,"dbus: Out Of Memory!\n");
+	 		dbus_uint32_t serial = 0;
+ 			if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+				daemon_kill(daemon,"dbus: Out Of Memory!\n");
+			dbus_connection_flush(daemon->dbus);
+			free(rn_list_json);
+		}
+		else
+		{
+	 		dbus_uint32_t serial = 0;
+ 			if(!dbus_connection_send(daemon->dbus,reply,&serial)) 
+				daemon_kill(daemon,"dbus: Out Of Memory!\n");
+			dbus_connection_flush(daemon->dbus);
+		}
+	}
     else if(dbus_message_is_method_call(msg, "org.voyagerproject.razer.daemon.device.render_nodes", "render_list")) 
 	{
 		char **path = NULL;
