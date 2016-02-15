@@ -21,12 +21,10 @@ import os, sys, signal, json
 from gi.repository import Gtk, Gdk, WebKit
 import razer.daemon_dbus
 import razer.keyboard
+import razer.preferences
+import razer.profiles
 
-# Default Settings & Preferences
-SAVE_ROOT = os.path.expanduser('~') + '/.config/razer_chroma'
-SAVE_PROFILES = SAVE_ROOT + '/profiles'
-SAVE_BACKUPS = SAVE_ROOT + '/backups'
-
+# Where is the application being ran?
 LOCATION_DATA = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data/'))
 
 
@@ -397,7 +395,7 @@ class ChromaController(object):
 
         ## Miscellaneous
         elif command == 'open-config-folder':
-            os.system('xdg-open "' + SAVE_ROOT + '"')
+            os.system('xdg-open "' + self.preferences.SAVE_ROOT + '"')
 
         ## Multi-device Management
         elif command.startswith('set-device?'):
@@ -413,6 +411,7 @@ class ChromaController(object):
 
         else:
             print("         ... unimplemented!")
+
 
     ##################################################
     # Multi-device support
@@ -473,23 +472,16 @@ class ChromaController(object):
             print('Data folder is missing. Exiting.')
             sys.exit(1)
 
-        ## Check we have a folder to save data (eg. profiles)
-        if not os.path.exists(SAVE_ROOT):
-            print('Configuration folder does not exist. Creating',SAVE_ROOT)
-            os.makedirs(SAVE_ROOT)
-            os.makedirs(SAVE_PROFILES)
-            os.makedirs(SAVE_BACKUPS)
-
         # Initialize Preferences
-        self.preferences = ChromaPreferences()
+        self.preferences = razer.preferences.ChromaPreferences()
 
         # Set up the daemon
         try:
             # Connect to the DBUS
             self.daemon = razer.daemon_dbus.DaemonInterface()
 
-            # Profiles
-            self.profiles = ChromaProfiles(self.daemon)
+            # Initalize Profiles
+            self.profiles = razer.profiles.ChromaProfiles(self.daemon)
 
             # Load devices page normally.
             #~ self.current_page = 'controller_devices' # TODO: Multi-device not yet supported.
@@ -505,9 +497,11 @@ class ChromaController(object):
             self.last_effect = 'unknown'
             self.open_this_profile = None
 
-        except:
+        except Exception as e:
             # Load an error page instead.
+            print('There was a problem initializing the application or DBUS.')
             self.current_page = 'controller_service_error'
+            print('Exception: ', e)
 
 
         # Create WebKit Container
@@ -541,218 +535,6 @@ class ChromaController(object):
         # Show the window.
         w.show_all()
         Gtk.main()
-
-class ChromaProfiles(object):
-    def __init__(self, dbus_object):
-        self.profiles = {}
-        self.active_profile = None
-        self.daemon = dbus_object
-
-        self.load_profiles()
-
-    def load_profiles(self):
-        """
-        Load profiles
-        """
-        profiles = os.listdir(SAVE_PROFILES)
-
-        for profile in profiles:
-            keyboard = ChromaProfiles.get_profile_from_file(profile)
-            self.profiles[profile] = keyboard
-
-    def remove_profile(self, profile_name, del_from_fs=True):
-        """
-        Delete profile, from memory and optionally the system.
-
-        :param profile_name: Profile name
-        :type profile_name: str
-
-        :param del_from_fs: Delete from the file system
-        :type del_from_fs: bool
-        """
-        if del_from_fs:
-            current_profile_path = os.path.join(SAVE_PROFILES, profile_name)
-            current_profile_path_backup = os.path.join(SAVE_BACKUPS, profile_name)
-            os.remove(current_profile_path)
-            # print('Deleted profile: {0}'.format(current_profile_path))
-            if os.path.exists(current_profile_path_backup):
-                os.remove(current_profile_path_backup)
-                # print('Deleted backup copy: ' + current_profile_path_backup)
-
-        if profile_name in self.profiles:
-            del self.profiles[profile_name]
-
-    def new_profile(self, profile_name):
-        """
-        Create new profile
-
-        :param profile_name: Profile name
-        :type profile_name: str
-        """
-        self.active_profile = profile_name
-        self.profiles[profile_name] = razer.keyboard.KeyboardColour()
-
-    def set_active_profile(self, profile_name):
-        """
-        Set the active profile name
-
-        :param profile_name: Profile name
-        :type profile_name: str
-        """
-        if profile_name in self.profiles:
-            self.active_profile = profile_name
-
-    def get_active_profile(self):
-        """
-        Gets active profile, if one isnt active then the first profile is returned. If no
-        profiles are loaded then an empty profile is returned
-
-        :return: Keyboard object
-        :rtype: razer.keyboard.KeyboardColour
-        """
-
-        profile = razer.keyboard.KeyboardColour()
-        try:
-            profile = self.profiles[self.active_profile]
-        except KeyError:
-            if len(list(self.profiles.keys())) > 0:
-                profile = self.profiles[list(self.profiles.keys())[0]]
-        return profile
-
-    def get_active_profile_name(self):
-        """
-        Gets active profile
-
-        :return: Profile name
-        :rtype: str
-        """
-        return self.active_profile
-
-    def get_profiles(self):
-        """
-        Get a list of profiles
-
-        :return: List of profiles
-        :rtype: list
-        """
-        return self.profiles.keys()
-
-    def get_profile(self, profile_name):
-        """
-        Get a profile
-
-        :param profile_name: Profile
-        :type profile_name: str
-
-        :return: Keyboard object
-        :rtype: razer.keyboard.KeyboardColour
-        """
-        return self.profiles[profile_name]
-
-    def save_profile(self, profile_name):
-
-        profile_path = os.path.join(SAVE_PROFILES, profile_name)
-
-        # Backup if it's an existing copy, then erase original copy.
-        if os.path.exists(profile_path):
-            os.rename(profile_path, os.path.join(SAVE_BACKUPS, profile_name))
-
-        with open(os.path.join(SAVE_PROFILES, profile_name), 'wb') as profile_file:
-            payload = self.profiles[profile_name].get_total_binary()
-            profile_file.write(payload)
-
-    def activate_profile_from_file(self, profile_name):
-        print("Applying profile '{0}' ... ".format(profile_name), end='')
-        with open(os.path.join(SAVE_PROFILES, profile_name), 'rb') as profile_file:
-            payload = profile_file.read()
-            keyboard = razer.keyboard.KeyboardColour()
-            keyboard.get_from_total_binary(payload)
-            self.daemon.set_custom_colour(keyboard)
-
-    def activate_profile_from_memory(self):
-        profile_name = self.get_active_profile_name()
-        keyboard = self.get_active_profile()
-        self.daemon.set_custom_colour(keyboard)
-        print("Applying profile '{0}' from memory...".format(profile_name))
-
-    @staticmethod
-    def get_profile_from_file(profile_name):
-        keyboard = razer.keyboard.KeyboardColour()
-
-        with open(os.path.join(SAVE_PROFILES, profile_name), 'rb') as profile_file:
-            payload = profile_file.read()
-            keyboard.get_from_total_binary(payload)
-
-        return keyboard
-
-class ChromaPreferences(object):
-    #
-    # Documented Settings for JSON
-    #
-    #   live_preview      <true/false>      Activate profiles on keyboard while editing?
-    #   live_switch       <true/false>      Profiles are instantly changed on click?
-    #   activate_on_save  <true/false>      Automatically activate a profile on save?
-    #
-
-    def __init__(self):
-        self.pref_path = os.path.join(SAVE_ROOT, 'preferences.json')
-        self.load_pref();
-
-    def load_pref(self):
-        print('Loading preferences from "' + self.pref_path + "'...")
-        # Does it exist?
-        if not os.path.exists(self.pref_path):
-            self.create_default_config()
-
-        # Load data into memory.
-        try:
-            with open(self.pref_path) as pref_file:
-                self.pref_data = json.load(pref_file)
-            print('Successfully loaded preferences.')
-        except:
-            self.create_default_config();
-
-    def save_pref(self):
-        print('Saving preferences to "' + self.pref_path + "'...")
-        pref_file = open(self.pref_path, "w+")
-        pref_file.write(json.dumps(self.pref_data))
-        pref_file.close()
-
-    def set_pref(self, setting, value):
-        print('Set preference: "' + value + '" to "' + setting + '"')
-        self.pref_data[setting] = value;
-
-    def get_pref(self, setting, default_value=False):
-        try:
-            # Read data from preferences, if it exists.
-            value = self.pref_data[setting]
-            return value
-            print('Read preference: "' + value + '" from "' + setting + '"')
-        except:
-            # Should it be non-existent, return a fallback option.
-            print("Preference '" + setting + "' doesn't exist. ")
-            self.set_pref(setting, default_value)
-            return default_value
-
-    def refresh_pref_page(self, webkit):
-        # Boolean options
-        for setting in ['live_switch','live_preview','activate_on_save']:
-            if (self.pref_data[setting] == "true"):
-                webkit.execute_script("$('#" + setting + "').prop('checked', true);")
-
-    def create_default_config(self):
-        default_settings = '{\n "live_switch" : "false",\n "live_preview" : "false",\n "activate_on_save" : "false" \n}'
-
-        print('Creating new preferences file...')
-        if os.path.exists(self.pref_path):
-            print('Failed to parse JSON preferences!')
-            os.rename(self.pref_path, self.pref_path+'.bak')
-            print('Successfully backed up problematic preferences JSON file.')
-
-        pref_file = open(self.pref_path, "w")
-        pref_file.write(default_settings)
-        pref_file.close()
-        print('Successfully written default preferences.')
 
 
 class WebkitJavaScriptExecutor(object):
