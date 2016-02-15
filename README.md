@@ -23,7 +23,7 @@ Supports:
         cd razer_blackwidow_chroma_driver
         ./install_driver_debian.sh
 
- 1. Reboot
+ 1. **Reboot**
 
 
 
@@ -57,6 +57,8 @@ You can either install using the above Debian method or with the packaged method
  1. **(Optional)** If you wish, you can clean source directory:
 
         make clean
+ 
+ 1. **Reboot**
 
 Installing the `.deb` file has multiple benefits:
 
