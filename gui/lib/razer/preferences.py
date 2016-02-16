@@ -17,6 +17,8 @@ class ChromaPreferences(object):
     # editor        live_switch         boolean     Send profiles to keyboard as soon as they are selected.
     # editor        activate_on_save    boolean     Send profile to keyboard as soon as it is saved.
     # editor        live_preview        boolean     Update keyboard lights while editing a profile.
+    # tray_applet   icon_type           string      "system", "logo" or "custom".
+    # tray_applet   icon_path           string      ID or pathname for a custom applet icon.
     #
 
     def __init__(self):
@@ -57,6 +59,9 @@ class ChromaPreferences(object):
         pref_file.close()
 
     def set_pref(self, group, setting, value):
+        # Strings with spaces may have HTML codes, eg. %20 for a space.
+        value = value.replace('%20', ' ')
+
         print('Set preference: "' + value + '" to "' + setting + '"')
         try:
             self.pref_data[group][setting] = value;
@@ -73,6 +78,7 @@ class ChromaPreferences(object):
             # Should it be non-existent, return a fallback option.
             print("Preference '" + setting + "' in '" + group + "' doesn't exist.")
             self.set_pref(group, setting, default_value)
+            self.save_pref()
             return default_value
 
     def create_default_config(self):
@@ -80,9 +86,12 @@ class ChromaPreferences(object):
             # Create the groups, then write the default values.
             default_buffer = {}
             default_buffer['chroma_editor'] = {}
+            default_buffer['tray_applet'] = {}
             default_buffer['chroma_editor']['live_switch'] = True
             default_buffer['chroma_editor']['activate_on_save'] = True
             default_buffer['chroma_editor']['live_preview'] = True
+            default_buffer['tray_applet']['icon_type'] = 'system'
+            default_buffer['tray_applet']['icon_path'] = ''
             default_settings = json.dumps(default_buffer)
 
             print('Creating new preferences file...')
@@ -99,12 +108,6 @@ class ChromaPreferences(object):
             # Couldn't create the default configuration.
             print('Failed to write default preferences.')
             print('Exception: ', e)
-
-    def refresh_pref_page(self, webkit):
-        # Boolean options
-        for setting in ['live_switch','live_preview','activate_on_save']:
-            if (self.pref_data['chroma_editor'][setting] == True):
-                webkit.execute_script("$('#" + setting + "').prop('checked', true);")
 
     def clear_config(self):
         print('Deleting configuration folder "' + self.SAVE_ROOT + '"...')

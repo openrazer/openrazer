@@ -116,7 +116,12 @@ class ChromaController(object):
             js_exec.exec()
 
         elif self.current_page == 'preferences':
-            self.preferences.refresh_pref_page(self.webkit)
+            for setting in ['live_switch','live_preview','activate_on_save']:
+                if (self.preferences.pref_data['chroma_editor'][setting] == True):
+                    self.webkit.execute_script("$('#" + setting + "').prop('checked', true);")
+
+            self.webkit.execute_script('$("#tray-'+self.preferences.get_pref('tray_applet', 'icon_type', 'system')+'").prop("checked", true);')
+            self.webkit.execute_script('$("#tray-icon-path").val("' + self.preferences.get_pref('tray_applet', 'icon_path') + '")')
 
         elif self.current_page == 'controller_devices':
             self.detect_devices()

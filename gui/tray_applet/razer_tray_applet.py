@@ -22,10 +22,13 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 gi.require_version('AppIndicator3', '0.1')
 from gi.repository import Gtk, Gdk, AppIndicator3 as appindicator
-import collections
+import collections, os
 import sys, signal
 
-import razer.daemon_dbus, razer.keyboard
+import razer.daemon_dbus
+import razer.keyboard
+import razer.preferences
+import razer.profiles
 
 
 class AppIndicator:
@@ -47,16 +50,48 @@ class AppIndicator:
         return "#{0:02X}{1:02X}{2:02X}".format(*colour)
 
     def __init__(self):
+        # Initialize the DBUS Daemon
         self.daemon = razer.daemon_dbus.DaemonInterface()
-        self.ind = appindicator.Indicator.new("example-simple-client", "/usr/share/razer_tray_applet/tray_icon.png", appindicator.IndicatorCategory.APPLICATION_STATUS)
-        self.ind.set_status (appindicator.IndicatorStatus.ACTIVE)
 
         # Store Colour and active effect
         self.colour = (255, 255, 255)
         self.secondary_colour = (0, 0, 0)
         self.active_effect = None
 
-        # create a menu
+        # Read preferences.
+        self.preferences = razer.preferences.ChromaPreferences()
+
+        # Determine which icon to display.
+        icon_type = self.preferences.get_pref('tray_applet','icon_type','system')
+        icon_fallback = 'ibus-keyboard'
+        if icon_type == 'system' or icon_type == '' or icon_type == None:
+            icon = icon_fallback
+
+        elif icon_type == 'logo':
+            # TODO: Retrieve icon relative to the program.
+            logo_path = '/usr/share/razer_tray_applet/tray_icon.png'
+            if os.path.exists(logo_path):
+                icon = logo_path
+            else:
+                print('Chroma Drivers icon is missing at "' + icon + '"!')
+                icon = icon_fallback
+
+        elif icon_type == 'custom':
+            icon_path = self.preferences.get_pref('tray_applet','icon_path')
+            if not os.path.exists(icon_path):
+                print('Custom icon "' + icon_path + '" could not be found. Using fallback.')
+                icon = icon_fallback
+            else:
+                icon = icon_path
+        else:
+            print('Malformed icon type: "' + icon_type + '"')
+            icon = icon_fallback
+
+        # Create the indicator
+        self.ind = appindicator.Indicator.new("razer-keyboard-indicator", icon, appindicator.IndicatorCategory.APPLICATION_STATUS)
+        self.ind.set_status (appindicator.IndicatorStatus.ACTIVE)
+
+        # Create a menu
         self.menu = Gtk.Menu()
         # Create effects submenu
         effect_item = Gtk.MenuItem("Effects")

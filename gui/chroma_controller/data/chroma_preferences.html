@@ -50,31 +50,40 @@
       <h3>Application Settings</h3>
       <table>
         <tr>
-          <td><label class="pref-label"><input type="checkbox" id="live_switch" onclick="set_pref('chroma_editor','live_switch',this)"/> Enable live switching</label></td>
+          <td><label class="pref-label"><input type="checkbox" id="live_switch" onclick="set_pref_bool('chroma_editor','live_switch',this)"/> Enable live switching</label></td>
           <td><p>Activate profiles instantly as soon as you click on them.</p></td>
         </tr>
         <tr>
-          <td><label class="pref-label"><input type="checkbox" id="live_preview" onclick="set_pref('chroma_editor','live_preview',this)"/> Enable live preview</label></td>
+          <td><label class="pref-label"><input type="checkbox" id="live_preview" onclick="set_pref_bool('chroma_editor','live_preview',this)"/> Enable live preview</label></td>
           <td><p>While editing, show your changes on the actual keyboard.</p></td>
         </tr>
         <tr>
-          <td><label class="pref-label"><input type="checkbox" id="activate_on_save" onclick="set_pref('chroma_editor','activate_on_save',this)"/> Always activate profiles after saving.</label></td>
+          <td><label class="pref-label"><input type="checkbox" id="activate_on_save" onclick="set_pref_bool('chroma_editor','activate_on_save',this)"/> Always activate profiles after saving.</label></td>
         </tr>
       </table>
       <hr>
-<!--
+
       <h3>Tray Applet</h3>
       <table>
+        <tr><td>  <label class="pref-label"><input type="radio" name="tray-icon" id="tray-system"  onclick="set_pref_str('tray_applet','icon_type','system')"/> System Keyboard</label><br>  </td></tr>
+        <tr><td>  <label class="pref-label"><input type="radio" name="tray-icon" id="tray-logo"    onclick="set_pref_str('tray_applet','icon_type','logo')"/> Static Chroma Logo</label><br>  </td></tr>
         <tr>
           <td>
-            <label class="pref-label">Use a custom icon: </label>
-            <input type="text" name="override-tray-icon"/>
+            <label class="pref-label">
+              <input id="tray-custom" type="radio" name="tray-icon" value="custom" onclick="set_pref_str('tray_applet','icon_type','custom')"/>
+              Custom Icon:</label>
+              <!-- Hacky way to ensure the data is always updated to Python, "onchange" doesn't always catch changes. -->
+              <input class="pref-input" type="text" id="tray-icon-path"
+                 onchange="set_pref_str('tray_applet','icon_path', $(this).val())"
+              onmouseover="set_pref_str('tray_applet','icon_path', $(this).val())"
+               onmouseout="set_pref_str('tray_applet','icon_path', $(this).val())"/>
           </td>
-          <td><p>You can optionally override the default icon by specifying the name of a system icon.
-          Alternately, place your custom file as "tray_icon.png" or "tray_icon.svg" in the configuration folder.</p></td>
+          <td><p>Copy and paste the path to the image you'd like to use. You may need to resize your icon smaller.</p></td>
         </tr>
       </table>
--->
+      <p>For changes to take effect, please restart the Tray Applet.</p>
+      <hr>
+
     <h3>Advanced</h3>
     <a class="btn" onclick="cmd('pref-reset-conf')"><span class="fa fa-delete"></span> Reset Preferences</a>
     <a class="btn btn-serious" onclick="reset_all_prompt()"><span class="fa fa-delete"></span> Reset Everything</a>
