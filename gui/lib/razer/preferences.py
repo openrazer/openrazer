@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-import os, json
+import os, json, shutil
 import razer.daemon_dbus
 import razer.keyboard
+
 
 class ChromaPreferences(object):
     ''' Retrieves and set persistant options. '''
@@ -104,3 +105,9 @@ class ChromaPreferences(object):
         for setting in ['live_switch','live_preview','activate_on_save']:
             if (self.pref_data['chroma_editor'][setting] == 'true'):
                 webkit.execute_script("$('#" + setting + "').prop('checked', true);")
+
+    def clear_config(self):
+        print('Deleting configuration folder "' + self.SAVE_ROOT + '"...')
+        shutil.rmtree(self.SAVE_ROOT)
+        print('Successfully deleted configuration.')
+

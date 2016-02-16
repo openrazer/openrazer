@@ -47,7 +47,7 @@
       </table>
       <hr>
 -->
-      <h3>Profiles</h3>
+      <h3>Application Settings</h3>
       <table>
         <tr>
           <td><label class="pref-label"><input type="checkbox" id="live_switch" onclick="set_pref('chroma_editor','live_switch',this)"/> Enable live switching</label></td>
@@ -75,6 +75,9 @@
         </tr>
       </table>
 -->
+    <h3>Advanced</h3>
+    <a class="btn" onclick="cmd('pref-reset-conf')"><span class="fa fa-delete"></span> Reset Preferences</a>
+    <a class="btn btn-serious" onclick="reset_all_prompt()"><span class="fa fa-delete"></span> Reset Everything</a>
     </div>
   </div>
 

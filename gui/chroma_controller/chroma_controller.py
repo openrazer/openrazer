@@ -315,6 +315,19 @@ class ChromaController(object):
             self.preferences.save_pref()
             self.show_menu('chroma_menu')
 
+        elif command == 'pref-reset-conf':
+            print('User requested to reset configuration.')
+            self.preferences.create_default_config()
+            self.preferences.load_pref()
+            print('Configuration successfully reset.')
+            self.show_menu('preferences')
+
+        elif command == 'pref-reset-all':
+            print('User requested to reset everything.')
+            self.preferences.clear_config()
+            print('\nRestarting the application...\n')
+            os.execv(__file__, sys.argv)
+
         ## Profile Editor / Management
         elif command.startswith('profile-edit'):
             self.open_this_profile = command.split('profile-edit?')[1].replace('%20', ' ')

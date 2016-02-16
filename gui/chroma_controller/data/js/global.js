@@ -103,6 +103,12 @@ function set_pref(group, setting, element) {
     cmd('pref-set?' + group + '?' + setting + '?' + state)
 }
 
+function reset_all_prompt() {
+    if ( confirm('Are you sure you wish to erase all configuration and profiles?') == true ) {
+      cmd('pref-reset-all');
+    }
+}
+
 /**
  * Run once document has loaded
  */
