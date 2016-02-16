@@ -67,23 +67,30 @@ class AppIndicator:
         if icon_type == 'system' or icon_type == '' or icon_type == None:
             icon = icon_fallback
 
-        elif icon_type == 'logo':
+        if icon_type == 'logo':
             # TODO: Retrieve icon relative to the program.
             logo_path = '/usr/share/razer_tray_applet/tray_icon.png'
+
+        if icon_type == 'animated':
+            # TODO: Retrieve icon relative to the program.
+            logo_path = '/usr/share/razer_tray_applet/tray_icon_animated.gif'
+
+        if icon_type == 'logo' or icon_type == 'animated':
             if os.path.exists(logo_path):
                 icon = logo_path
             else:
-                print('Chroma Drivers icon is missing at "' + icon + '"!')
+                print('Default tray icon is missing at "' + logo_path + '". Using fallback.')
                 icon = icon_fallback
 
-        elif icon_type == 'custom':
+        if icon_type == 'custom':
             icon_path = self.preferences.get_pref('tray_applet','icon_path')
             if not os.path.exists(icon_path):
                 print('Custom icon "' + icon_path + '" could not be found. Using fallback.')
                 icon = icon_fallback
             else:
                 icon = icon_path
-        else:
+
+        if not icon:
             print('Malformed icon type: "' + icon_type + '"')
             icon = icon_fallback
 
