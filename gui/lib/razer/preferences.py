@@ -7,11 +7,15 @@ import razer.keyboard
 class ChromaPreferences(object):
     ''' Retrieves and set persistant options. '''
     #
-    # Documented Settings for JSON
+    # Default JSON Settings
+    #   See "data/defaults/preferences.json"
     #
-    #   live_preview      <true/false>      Activate profiles on keyboard while editing?
-    #   live_switch       <true/false>      Profiles are instantly changed on click?
-    #   activate_on_save  <true/false>      Automatically activate a profile on save?
+    # Settings Descriptions
+    #
+    # [group]       [setting]           [type]      [description]
+    # editor        live_switch         boolean     Send profiles to keyboard as soon as they are selected.
+    # editor        activate_on_save    boolean     Send profile to keyboard as soon as it is saved.
+    # editor        live_preview        boolean     Update keyboard lights while editing a profile.
     #
 
     def __init__(self):
@@ -51,38 +55,52 @@ class ChromaPreferences(object):
         pref_file.write(json.dumps(self.pref_data))
         pref_file.close()
 
-    def set_pref(self, setting, value):
+    def set_pref(self, group, setting, value):
         print('Set preference: "' + value + '" to "' + setting + '"')
-        self.pref_data[setting] = value;
+        try:
+            self.pref_data[group][setting] = value;
+        except:
+            print('Failed to write setting "' + value + '" for "' + setting + '" in "' + group + '".')
 
-    def get_pref(self, setting, default_value=False):
+    def get_pref(self, group, setting, default_value='false'):
         try:
             # Read data from preferences, if it exists.
-            value = self.pref_data[setting]
+            value = self.pref_data[group][setting]
             return value
             print('Read preference: "' + value + '" from "' + setting + '"')
         except:
             # Should it be non-existent, return a fallback option.
-            print("Preference '" + setting + "' doesn't exist. ")
-            self.set_pref(setting, default_value)
+            print("Preference '" + setting + "' in '" + group + "' doesn't exist.")
+            self.set_pref(group, setting, default_value)
             return default_value
 
     def create_default_config(self):
-        default_settings = '{\n "live_switch" : "false",\n "live_preview" : "false",\n "activate_on_save" : "false" \n}'
+        try:
+            # Create the groups, then write the default values.
+            default_buffer = {}
+            default_buffer['chroma_editor'] = {}
+            default_buffer['chroma_editor']['live_switch'] = True
+            default_buffer['chroma_editor']['activate_on_save'] = True
+            default_buffer['chroma_editor']['live_preview'] = True
+            default_settings = json.dumps(default_buffer)
 
-        print('Creating new preferences file...')
-        if os.path.exists(self.pref_path):
-            print('Failed to parse JSON preferences!')
-            os.rename(self.pref_path, self.pref_path+'.bak')
-            print('Successfully backed up problematic preferences JSON file.')
+            print('Creating new preferences file...')
+            if os.path.exists(self.pref_path):
+                print('Existing preferences file is corrupt or being forced overwritten.')
+                os.rename(self.pref_path, self.pref_path+'.bak')
+                print('Successfully backed up previous preferences JSON file.')
 
-        pref_file = open(self.pref_path, "w")
-        pref_file.write(default_settings)
-        pref_file.close()
-        print('Successfully written default preferences.')
+            pref_file = open(self.pref_path, "w")
+            pref_file.write(default_settings)
+            pref_file.close()
+            print('Successfully written default preferences.')
+        except Exception as e:
+            # Couldn't create the default configuration.
+            print('Failed to write default preferences.')
+            print('Exception: ', e)
 
     def refresh_pref_page(self, webkit):
         # Boolean options
         for setting in ['live_switch','live_preview','activate_on_save']:
-            if (self.pref_data[setting] == "true"):
+            if (self.pref_data['chroma_editor'][setting] == 'true'):
                 webkit.execute_script("$('#" + setting + "').prop('checked', true);")

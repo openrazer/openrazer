@@ -98,9 +98,9 @@ function set_cursor(element, type) {
  * Set a preference
  *
  */
-function set_pref(setting, element) {
+function set_pref(group, setting, element) {
     state = $(element).is(':checked');
-    cmd('pref-set?' + setting + '?' + state)
+    cmd('pref-set?' + group + '?' + setting + '?' + state)
 }
 
 /**
