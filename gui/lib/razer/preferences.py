@@ -103,7 +103,7 @@ class ChromaPreferences(object):
     def refresh_pref_page(self, webkit):
         # Boolean options
         for setting in ['live_switch','live_preview','activate_on_save']:
-            if (self.pref_data['chroma_editor'][setting] == 'true'):
+            if (self.pref_data['chroma_editor'][setting] == True):
                 webkit.execute_script("$('#" + setting + "').prop('checked', true);")
 
     def clear_config(self):

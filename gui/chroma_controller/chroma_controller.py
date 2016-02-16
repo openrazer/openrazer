@@ -73,7 +73,7 @@ class ChromaController(object):
                 self.webkit.execute_script("$('#multi-device-switcher').show()")
 
             # Tell JavaScript whether live profile switching is enabled.
-            if self.preferences.get_pref('chroma_editor', 'live_switch') == 'true':
+            if bool(self.preferences.get_pref('chroma_editor', 'live_switch')) == True:
                 self.webkit.execute_script('live_switch = true;')
                 self.webkit.execute_script('$("#profiles-activate").hide();')
             else:
@@ -91,7 +91,7 @@ class ChromaController(object):
             # Load profile into keyboard.
             profile_name = self.open_this_profile
             self.profiles.set_active_profile(profile_name)
-            if self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
+            if bool(self.preferences.get_pref('chroma_editor', 'live_preview')) == True:
                 self.profiles.activate_profile_from_memory()
             self.profiles.get_active_profile().backup_configuration()
 
@@ -106,7 +106,7 @@ class ChromaController(object):
             kb_callback << "keyboard_obj.disable_key(5,7)"
             kb_callback << "keyboard_obj.disable_key(5,12)"
             # Hide preview button if live previewing is enabled.
-            if self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
+            if bool(self.preferences.get_pref('chroma_editor', 'live_preview')) == True:
                 kb_callback << '$("#edit-preview").hide();'
 
 
@@ -285,11 +285,11 @@ class ChromaController(object):
 
                 if cancel_type == "new-profile":
                     self.profiles.remove_profile(cancel_args, del_from_fs=False)
-                    if self.preferences.get_pref('chroma_editor', 'live_switch') == 'true' or self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
+                    if bool(self.preferences.get_pref('chroma_editor', 'live_switch')) == True or bool(self.preferences.get_pref('chroma_editor', 'live_preview')) == True:
                         self.daemon.set_custom_colour(self.old_profile)
                 elif cancel_type == "edit-profile":
                     self.profiles.get_active_profile().restore_configuration()
-                    if self.preferences.get_pref('chroma_editor', 'live_switch') == 'true' or self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
+                    if bool(self.preferences.get_pref('chroma_editor', 'live_switch')) == True or bool(self.preferences.get_pref('chroma_editor', 'live_preview')) == True:
                         self.daemon.set_custom_colour(self.old_profile)
 
                 self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes')\"})")
@@ -354,7 +354,7 @@ class ChromaController(object):
             self.profiles.get_active_profile().set_key_colour(row, col, rgb)
 
             # Live preview (if 'live_preview' is enabled in preferences)
-            if self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
+            if bool(self.preferences.get_pref('chroma_editor', 'live_preview')) == True:
                 self.profiles.activate_profile_from_memory()
 
         elif command.startswith('clear-key'):
@@ -365,7 +365,7 @@ class ChromaController(object):
             self.profiles.get_active_profile().reset_key(row, col)
 
             # Live preview (if 'live_preview' is enabled in preferences)
-            if self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
+            if bool(self.preferences.get_pref('chroma_editor', 'live_preview')) == True:
                 self.profiles.activate_profile_from_memory()
 
         elif command.startswith('profile-activate'):
@@ -408,7 +408,7 @@ class ChromaController(object):
             print('Saved "{0}".'.format(profile_name))
             self.show_menu('chroma_menu')
 
-            if self.preferences.get_pref('chroma_editor', 'activate_on_save') == 'true':
+            if bool(self.preferences.get_pref('chroma_editor', 'activate_on_save')) == True:
                 self.profiles.activate_profile_from_file(self.profiles.get_active_profile_name())
 
         ## Miscellaneous
