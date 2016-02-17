@@ -58,8 +58,9 @@ class AppIndicator:
         self.secondary_colour = (0, 0, 0)
         self.active_effect = None
 
-        # Read preferences.
+        # Read preferences and profiles.
         self.preferences = razer.preferences.ChromaPreferences()
+        self.profiles = razer.profiles.ChromaProfiles(self.daemon)
 
         # Determine which icon to display.
         icon_type = self.preferences.get_pref('tray_applet','icon_type','system')
@@ -100,27 +101,14 @@ class AppIndicator:
 
         # Create a menu
         self.menu = Gtk.Menu()
-        # Create effects submenu
+
+        # Create effects sub-menu
         effect_item = Gtk.MenuItem("Effects")
         effect_item.show()
         self.effect_menu = Gtk.Menu()
         self.effect_menu.show()
         effect_item.set_submenu(self.effect_menu)
         self.menu.append(effect_item)
-        # Create brightness submenu
-        brightness_item = Gtk.MenuItem("Brightness")
-        brightness_item.show()
-        self.brightness_menu = Gtk.Menu()
-        self.brightness_menu.show()
-        brightness_item.set_submenu(self.brightness_menu)
-        self.menu.append(brightness_item)
-        # Create game mode submenu
-        game_mode_item = Gtk.MenuItem("Game Mode")
-        game_mode_item.show()
-        self.game_mode_menu = Gtk.Menu()
-        self.game_mode_menu.show()
-        game_mode_item.set_submenu(self.game_mode_menu)
-        self.menu.append(game_mode_item)
 
         self.effect_menu_items = collections.OrderedDict()
         self.effect_menu_items["spectrum"] = Gtk.RadioMenuItem(group=None, label="Spectrum Effect")
@@ -137,6 +125,14 @@ class AppIndicator:
             button.show()
             self.effect_menu.append(button)
 
+        # Create brightness sub-menu
+        brightness_item = Gtk.MenuItem("Brightness")
+        brightness_item.show()
+        self.brightness_menu = Gtk.Menu()
+        self.brightness_menu.show()
+        brightness_item.set_submenu(self.brightness_menu)
+        self.menu.append(brightness_item)
+
         self.brightness_menu_items = collections.OrderedDict()
         self.brightness_menu_items[255] = Gtk.RadioMenuItem(group=None, label="Brightness 100%")
         self.brightness_menu_items[192] = Gtk.RadioMenuItem(group=self.brightness_menu_items[255], label="Brightness 75%")
@@ -149,6 +145,14 @@ class AppIndicator:
             button.show()
             self.brightness_menu.append(button)
 
+        # Create game mode sub-menu.
+        game_mode_item = Gtk.MenuItem("Game Mode")
+        game_mode_item.show()
+        self.game_mode_menu = Gtk.Menu()
+        self.game_mode_menu.show()
+        game_mode_item.set_submenu(self.game_mode_menu)
+        self.menu.append(game_mode_item)
+
         enable_game_mode_button = Gtk.MenuItem("Enable Game Mode")
         enable_game_mode_button.connect("activate", self.menuitem_enable_game_mode, True)
         enable_game_mode_button.show()
@@ -158,6 +162,15 @@ class AppIndicator:
         disable_game_mode_button.connect("activate", self.menuitem_enable_game_mode, False)
         disable_game_mode_button.show()
         self.game_mode_menu.append(disable_game_mode_button)
+
+        # Create profiles sub-menu.
+        self.profiles_button = Gtk.MenuItem("Profiles")
+        self.profiles_button.show()
+        self.profiles_menu = Gtk.Menu()
+        self.profiles_menu.show()
+        self.profiles_button.set_submenu(self.profiles_menu)
+        self.menu.append(self.profiles_button)
+        self.refresh_profiles_menu()
 
         sep1 = Gtk.SeparatorMenuItem()
         sep1.show()
@@ -325,6 +338,51 @@ class AppIndicator:
         Opens the Chroma Configuration Tool.
         """
         os.system('/usr/share/razer_chroma_controller/chroma_controller.py')
+
+    def menuitem_set_profile(self, widget, profile_name):
+        self.profiles.activate_profile_from_file(profile_name)
+        self.profile_items['status'].set_label(profile_name)
+
+        # FIXME: Something isn't right here, as it tries to load profile 'status'...
+        # FIXME: Console text doesn't update until quit, previous error holding it up?
+        #
+        #~ Traceback (most recent call last):
+          #~ File "../tray_applet/razer_tray_applet.py", line 343, in menuitem_set_profile
+            #~ self.profiles.activate_profile_from_file(profile_name)
+          #~ File "/usr/lib/python3/dist-packages/razer/profiles.py", line 136, in activate_profile_from_file
+            #~ with open(os.path.join(self.preferences.SAVE_PROFILES, profile_name), 'rb') as profile_file:
+        #~ FileNotFoundError: [Errno 2] No such file or directory: '/home/<user>/.config/razer_chroma/profiles/status'
+
+    def refresh_profiles_menu(self):
+        profile_list = self.profiles.get_profiles()
+
+        # No profiles found.
+        if not profile_list:
+            self.profiles_status = Gtk.MenuItem("No profiles found.")
+            self.profiles_status.show()
+            self.profiles_menu.append(self.profiles_status)
+            self.profiles_status.set_sensitive(False)
+            return
+
+        ## Display current profile in use.
+        self.profile_items = collections.OrderedDict()
+        self.profile_items['status'] = Gtk.RadioMenuItem(group=None, label="None Selected")
+        self.profile_items['status'].show()
+        self.profiles_menu.append(self.profile_items['status'])
+        self.profile_items['status'].set_sensitive(False)
+
+        sep = Gtk.SeparatorMenuItem()
+        sep.show()
+        self.profiles_menu.append(sep)
+
+        # Populate the profiles list.
+        for profile_name in self.profiles.get_profiles():
+            self.profile_items[profile_name] = Gtk.RadioMenuItem(group=self.profile_items['status'], label=profile_name)
+
+        for profile_name, button in self.profile_items.items():
+            button.connect("activate", self.menuitem_set_profile, profile_name)
+            button.show()
+            self.profiles_menu.append(button)
 
 
 def main():

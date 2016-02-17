@@ -14,6 +14,10 @@ class ChromaProfiles(object):
         self.active_profile = None
         self.daemon = dbus_object
 
+        # If for some reason the profiles directory is missing, attempt to create it.
+        if not os.path.exists(self.preferences.SAVE_PROFILES):
+            os.makedirs(self.preferences.SAVE_PROFILES)
+
         self.load_profiles()
 
     def load_profiles(self):
