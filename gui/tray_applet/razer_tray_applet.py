@@ -185,6 +185,18 @@ class AppIndicator:
         sep3.show()
         self.menu.append(sep3)
 
+        if os.path.exists('/usr/share/razer_chroma_controller/chroma_controller.py'):
+            open_config_button = Gtk.MenuItem("Open Configuration Utility")
+            open_config_button.connect("activate", self.menuitem_open_config)
+            open_config_button.show()
+            self.menu.append(open_config_button)
+
+            sep4 = Gtk.SeparatorMenuItem()
+            sep4.show()
+            self.menu.append(sep4)
+        else:
+            print('Chroma Controller GUI not installed. Not integrating to menu.')
+
         quit_button = Gtk.MenuItem("Quit")
         quit_button.connect("activate", self.quit, "quit")
         quit_button.show()
@@ -252,7 +264,6 @@ class AppIndicator:
         """
         self.daemon.marco_keys(True)
 
-
     def menuitem_enable_game_mode(self, widget, enable):
         """
         Enables or disabled Game mode
@@ -308,6 +319,12 @@ class AppIndicator:
                 self.menuitem_keyboard_effect_response(self.effect_menu_items["breath"], 'breath')
 
         color_selection_dlg.destroy()
+
+    def menuitem_open_config(self, widget):
+        """
+        Opens the Chroma Configuration Tool.
+        """
+        os.system('/usr/share/razer_chroma_controller/chroma_controller.py')
 
 
 def main():
