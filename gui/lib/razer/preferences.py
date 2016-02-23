@@ -13,12 +13,19 @@ class ChromaPreferences(object):
     #
     # Settings Descriptions
     #
-    # [group]       [setting]           [type]      [description]
-    # editor        live_switch         boolean     Send profiles to keyboard as soon as they are selected.
-    # editor        activate_on_save    boolean     Send profile to keyboard as soon as it is saved.
-    # editor        live_preview        boolean     Update keyboard lights while editing a profile.
-    # tray_applet   icon_type           string      "system", "logo" or "custom".
-    # tray_applet   icon_path           string      ID or pathname for a custom applet icon.
+    # [group]           [setting]           [type]      [description]
+    # editor            live_switch         boolean     Send profiles to keyboard as soon as they are selected.
+    # editor            activate_on_save    boolean     Send profile to keyboard as soon as it is saved.
+    # editor            live_preview        boolean     Update keyboard lights while editing a profile.
+
+    # tray_applet       icon_type           string      "system", "logo" or "custom".
+    # tray_applet       icon_path           string      ID or pathname for a custom applet icon.
+
+    # startup           enabled             boolean     Automatically set preferences when tray applet starts?
+    # startup           start_effect        string      Automatically set effect to X. ( 'spectrum', 'reactive', etc] or 'disabled' for no change.
+    # startup           start_profile       string      Automatically set to profile X. ('start_effect' must be set to 'profile')
+    # startup           start_brightness    integer     Automatically set brightness to X. Set to '0' for no change.
+    # startup           start_macro         boolean     Automatically activate macro keys.
     #
 
     def __init__(self):
@@ -100,13 +107,18 @@ class ChromaPreferences(object):
         try:
             # Create the groups, then write the default values.
             default_buffer = {}
-            default_buffer['chroma_editor'] = {}
-            default_buffer['tray_applet'] = {}
-            default_buffer['chroma_editor']['live_switch'] = True
-            default_buffer['chroma_editor']['activate_on_save'] = True
-            default_buffer['chroma_editor']['live_preview'] = True
+            for group in ['chroma_editor', 'tray_applet', 'startup']:
+                default_buffer[group] = {}
+            default_buffer['chroma_editor']['live_switch'] = 'true'
+            default_buffer['chroma_editor']['activate_on_save'] = 'true'
+            default_buffer['chroma_editor']['live_preview'] = 'true'
             default_buffer['tray_applet']['icon_type'] = 'system'
             default_buffer['tray_applet']['icon_path'] = ''
+            default_buffer['startup']['enabled'] = 'false'
+            default_buffer['startup']['start_effect'] = 'disabled'
+            default_buffer['startup']['start_profile'] = ''
+            default_buffer['startup']['start_brightness'] = 0
+            default_buffer['startup']['start_macro'] = 'false'
             default_settings = json.dumps(default_buffer)
 
             print('Creating new preferences file...')

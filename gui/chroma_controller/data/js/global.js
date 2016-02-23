@@ -95,22 +95,16 @@ function set_cursor(element, type) {
 }
 
 /**
- * Set a preference
+ * Set/update a preference
  *
  */
-function set_pref_bool(group, setting, element) {
+function set_pref_chkstate(group, setting, element) {
     state = $(element).is(':checked');
     cmd('pref-set?' + group + '?' + setting + '?' + state)
 }
 
 function set_pref_str(group, setting, string) {
     cmd('pref-set?' + group + '?' + setting + '?' + string)
-}
-
-function reset_all_prompt() {
-    if ( confirm('Are you sure you wish to erase all configuration and profiles?') == true ) {
-      cmd('pref-reset-all');
-    }
 }
 
 /**

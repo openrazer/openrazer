@@ -117,12 +117,48 @@ class ChromaController(object):
             js_exec.exec()
 
         elif self.current_page == 'preferences':
+            # Populate start-up profiles list.
+            self.refresh_profiles_list()
+
+            # Set checkboxes
             for setting in ['live_switch','live_preview','activate_on_save']:
-                if (self.preferences.pref_data['chroma_editor'][setting] == True):
+                if (self.preferences.pref_data['chroma_editor'][setting] == 'true'):
                     self.webkit.execute_script("$('#" + setting + "').prop('checked', true);")
 
-            self.webkit.execute_script('$("#tray-'+self.preferences.get_pref('tray_applet', 'icon_type', 'system')+'").prop("checked", true);')
-            self.webkit.execute_script('$("#tray-icon-path").val("' + self.preferences.get_pref('tray_applet', 'icon_path') + '")')
+            # Fetch settings for tray/start-up settings.
+            tray_icon_type = self.preferences.get_pref('tray_applet', 'icon_type', 'system')
+            tray_icon_path = self.preferences.get_pref('tray_applet', 'icon_path', '')
+            start_enabled = self.preferences.get_pref('startup', 'enabled', 'false')
+            start_effect = self.preferences.get_pref('startup', 'start_effect', None)
+            start_profile = self.preferences.get_pref('startup', 'start_profile', None)
+            start_brightness = int(self.preferences.get_pref('startup', 'start_brightness', 0))
+            start_macro = self.preferences.get_pref('startup', 'start_macro', 'false')
+
+            # Set 'values' for textboxes and dropdowns.
+            self.webkit.execute_script('$("#tray-' + tray_icon_type + '").prop("checked", true);')
+            self.webkit.execute_script('$("#tray-icon-path").val("' + tray_icon_path + '")')
+            self.webkit.execute_script("$('#start-effect-dropdown').val('" + start_effect + "');")
+            self.webkit.execute_script("$('#profiles-list').val('" + start_profile + "');")
+            self.webkit.execute_script("$('#start-brightness').val('" + str(start_brightness) + "');")
+
+            if start_macro == 'true':
+                self.webkit.execute_script('$("#start-macro").prop("checked", true);')
+
+            # Hide/Show UI elements
+            if start_enabled == 'true':
+                self.webkit.execute_script('$("#startup-enabled").prop("checked", true);')
+                self.webkit.execute_script('$("#startup-options").show()')
+
+            if start_effect == 'profile':
+                self.webkit.execute_script("$('#start-profile').show()")
+            else:
+                self.webkit.execute_script("$('#start-profile').hide()")
+
+            if start_brightness == 0:
+                self.webkit.execute_script("$('#start-brightness-text').html('No Change');")
+            else:
+                self.webkit.execute_script("$('#start-brightness-text').html('" + str(int((start_brightness * 100) / 255 )) + "%');")
+
 
         elif self.current_page == 'controller_devices':
             self.detect_devices()

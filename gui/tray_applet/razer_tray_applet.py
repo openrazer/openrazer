@@ -218,6 +218,35 @@ class AppIndicator:
         self.menu.show()
         self.ind.set_menu(self.menu)
 
+        # If the user has preferences, set them.
+        self.apply_startup_settings()
+
+    # Shared functions for manipulating the device.
+    def set_profile(self, profile_name):
+        """ Shared function to send the profile to the keyboard """
+        self.profiles.activate_profile_from_file(profile_name)
+        self.profile_items['status'].set_label(profile_name)
+
+    def set_effect(self, effect_type):
+        """ Shared function to set an effect on the device """
+        if effect_type == "breath_r":
+            self.daemon.set_effect('breath', 1)
+        elif effect_type == "breath_s":
+            self.daemon.set_effect('breath', *self.colour)
+        elif effect_type == "breath_d":
+            self.daemon.set_effect('breath', self.colour[0], self.colour[1], self.colour[2], self.secondary_colour[0], self.secondary_colour[1], self.secondary_colour[2])
+        elif effect_type == "none":
+            self.daemon.set_effect('none', 1)
+        elif effect_type == "reactive":
+            self.daemon.set_effect('reactive', 1, *self.colour)
+        elif effect_type == "spectrum":
+            self.daemon.set_effect('spectrum')
+        elif effect_type == "static":
+            self.daemon.set_effect('static', *self.colour)
+        elif effect_type == "wave":
+            self.daemon.set_effect('wave', 1)
+
+    # Tray Applet Responses
     def quit(self, widget, data=None):
         """
         Quits the application
@@ -236,22 +265,7 @@ class AppIndicator:
         """
         self.active_effect = effect_type
         if widget.get_active():
-            if effect_type == "breath_r":
-                self.daemon.set_effect('breath', 1)
-            elif effect_type == "breath_s":
-                self.daemon.set_effect('breath', *self.colour)
-            elif effect_type == "breath_d":
-                self.daemon.set_effect('breath', self.colour[0], self.colour[1], self.colour[2], self.secondary_colour[0], self.secondary_colour[1], self.secondary_colour[2])
-            elif effect_type == "none":
-                self.daemon.set_effect('none', 1)
-            elif effect_type == "reactive":
-                self.daemon.set_effect('reactive', 1, *self.colour)
-            elif effect_type == "spectrum":
-                self.daemon.set_effect('spectrum')
-            elif effect_type == "static":
-                self.daemon.set_effect('static', *self.colour)
-            elif effect_type == "wave":
-                self.daemon.set_effect('wave', 1)
+            self.set_effect(effect_type)
 
     def menuitem_brightness_response(self, widget, brightness):
         """
@@ -317,7 +331,7 @@ class AppIndicator:
                 print("[Change Primary Colour] New: {0}".format(AppIndicator.colour_to_hex(self.colour)))
             else:
                 self.secondary_colour = razer.keyboard.KeyboardColour.gdk_colour_to_rgb(color_rgb)
-                self.secondary_colour_button.set_label("Change Primary Colour... ({0})".format(AppIndicator.colour_to_hex(self.secondary_colour)))
+                self.secondary_colour_button.set_label("Change Secondary Colour... ({0})".format(AppIndicator.colour_to_hex(self.secondary_colour)))
                 print("[Change Secondary Colour] New: {0}".format(AppIndicator.colour_to_hex(self.secondary_colour)))
 
             # If 'static', 'reactive' or 'breath' mode is set, refresh the effect.
@@ -340,8 +354,7 @@ class AppIndicator:
         os.system('/usr/share/razer_chroma_controller/chroma_controller.py')
 
     def menuitem_set_profile(self, widget, profile_name):
-        self.profiles.activate_profile_from_file(profile_name)
-        self.profile_items['status'].set_label(profile_name)
+        self.set_profile(profile_name)
 
         # FIXME: Something isn't right here, as it tries to load profile 'status'...
         # FIXME: Console text doesn't update until quit, previous error holding it up?
@@ -384,6 +397,32 @@ class AppIndicator:
             button.show()
             self.profiles_menu.append(button)
 
+    def apply_startup_settings(self):
+        if bool(self.preferences.get_pref('startup', 'enabled', False)):
+            start_effect = self.preferences.get_pref('startup', 'start_effect', 'disabled')
+            start_profile = self.preferences.get_pref('startup', 'start_profile', None)
+            start_brightness = int(self.preferences.get_pref('startup', 'start_brightness', 0))
+            start_macro = bool(self.preferences.get_pref('startup', 'start_macro', False))
+
+            print('-- Applying start-up settings...')
+
+
+            if not start_effect == 'disabled':
+                if start_effect == 'profile':
+                    self.set_profile(start_profile)
+                else:
+                    self.set_effect(start_effect)
+
+            if not start_brightness == 0:
+                self.daemon.set_brightness(start_brightness)
+
+            if start_macro:
+                self.daemon.marco_keys(True)
+
+            print('-- Start-up settings applied.')
+            return
+        else:
+            return
 
 def main():
     """
