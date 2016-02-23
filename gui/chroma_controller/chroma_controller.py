@@ -63,6 +63,7 @@ class ChromaController(object):
     ##################################################
     def page_loaded(self, WebView, WebFrame):
         print('Running page post-actions for "' + self.current_page + '"...')
+
         if self.current_page == 'chroma_menu':
             self.webkit.execute_script('instantProfileSwitch = false;') # Unimplemented instant profile change option.
             self.webkit.execute_script("$('#profiles-activate').show()")
@@ -73,7 +74,7 @@ class ChromaController(object):
                 self.webkit.execute_script("$('#multi-device-switcher').show()")
 
             # Tell JavaScript whether live profile switching is enabled.
-            if bool(self.preferences.get_pref('chroma_editor', 'live_switch')) == True:
+            if self.preferences.get_pref('chroma_editor', 'live_switch') == 'true':
                 self.webkit.execute_script('live_switch = true;')
                 self.webkit.execute_script('$("#profiles-activate").hide();')
             else:
@@ -91,7 +92,7 @@ class ChromaController(object):
             # Load profile into keyboard.
             profile_name = self.open_this_profile
             self.profiles.set_active_profile(profile_name)
-            if bool(self.preferences.get_pref('chroma_editor', 'live_preview')) == True:
+            if self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
                 self.profiles.activate_profile_from_memory()
             self.profiles.get_active_profile().backup_configuration()
 
@@ -106,7 +107,7 @@ class ChromaController(object):
             kb_callback << "keyboard_obj.disable_key(5,7)"
             kb_callback << "keyboard_obj.disable_key(5,12)"
             # Hide preview button if live previewing is enabled.
-            if bool(self.preferences.get_pref('chroma_editor', 'live_preview')) == True:
+            if self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
                 kb_callback << '$("#edit-preview").hide();'
 
 
@@ -134,10 +135,12 @@ class ChromaController(object):
     # Reusable Page Functions
     ##################################################
     def refresh_profiles_list(self):
-        self.webkit.execute_script('$("#profiles_list").html("")')
-        for profile in self.profiles.get_profiles():
+        self.webkit.execute_script('$("#profiles-list").html("")')
+        profiles = list(self.profiles.get_profiles())
+        profiles.sort()
+        for profile in profiles:
             item = "<option value='"+profile+"'>"+profile+"</option>"
-            self.webkit.execute_script('$("#profiles_list").append("'+item+'")')
+            self.webkit.execute_script('$("#profiles-list").append("'+item+'")')
 
     ##################################################
     # Commands
@@ -290,11 +293,11 @@ class ChromaController(object):
 
                 if cancel_type == "new-profile":
                     self.profiles.remove_profile(cancel_args, del_from_fs=False)
-                    if bool(self.preferences.get_pref('chroma_editor', 'live_switch')) == True or bool(self.preferences.get_pref('chroma_editor', 'live_preview')) == True:
+                    if self.preferences.get_pref('chroma_editor', 'live_switch') == 'true' or self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
                         self.daemon.set_custom_colour(self.old_profile)
                 elif cancel_type == "edit-profile":
                     self.profiles.get_active_profile().restore_configuration()
-                    if bool(self.preferences.get_pref('chroma_editor', 'live_switch')) == True or bool(self.preferences.get_pref('chroma_editor', 'live_preview')) == True:
+                    if self.preferences.get_pref('chroma_editor', 'live_switch') == 'true' or self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
                         self.daemon.set_custom_colour(self.old_profile)
 
                 self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes')\"})")
@@ -359,7 +362,7 @@ class ChromaController(object):
             self.profiles.get_active_profile().set_key_colour(row, col, rgb)
 
             # Live preview (if 'live_preview' is enabled in preferences)
-            if bool(self.preferences.get_pref('chroma_editor', 'live_preview')) == True:
+            if self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
                 self.profiles.activate_profile_from_memory()
 
         elif command.startswith('clear-key'):
@@ -370,7 +373,7 @@ class ChromaController(object):
             self.profiles.get_active_profile().reset_key(row, col)
 
             # Live preview (if 'live_preview' is enabled in preferences)
-            if bool(self.preferences.get_pref('chroma_editor', 'live_preview')) == True:
+            if self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
                 self.profiles.activate_profile_from_memory()
 
         elif command.startswith('profile-activate'):
@@ -413,7 +416,7 @@ class ChromaController(object):
             print('Saved "{0}".'.format(profile_name))
             self.show_menu('chroma_menu')
 
-            if bool(self.preferences.get_pref('chroma_editor', 'activate_on_save')) == True:
+            if self.preferences.get_pref('chroma_editor', 'activate_on_save') == 'true':
                 self.profiles.activate_profile_from_file(self.profiles.get_active_profile_name())
 
         ## Miscellaneous

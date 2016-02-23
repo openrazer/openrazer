@@ -22,6 +22,7 @@ class ChromaPreferences(object):
     #
 
     def __init__(self):
+        """ Initializes the preferences module. """
         # Determine locations for storing data.
         self.SAVE_ROOT = os.path.expanduser('~') + '/.config/razer_chroma'
         self.SAVE_PROFILES = self.SAVE_ROOT + '/profiles'
@@ -39,6 +40,7 @@ class ChromaPreferences(object):
         self.load_pref();
 
     def load_pref(self):
+        """ Loads the preferences file from disk. """
         print('Loading preferences from "' + self.pref_path + "'...")
         # Does it exist?
         if not os.path.exists(self.pref_path):
@@ -53,22 +55,34 @@ class ChromaPreferences(object):
             self.create_default_config();
 
     def save_pref(self):
+        """ Commit the preferences stored in memory to disk. """
         print('Saving preferences to "' + self.pref_path + "'...")
         pref_file = open(self.pref_path, "w+")
         pref_file.write(json.dumps(self.pref_data))
         pref_file.close()
 
     def set_pref(self, group, setting, value):
+        """ Write an option. """
         # Strings with spaces may have HTML codes, eg. %20 for a space.
-        value = value.replace('%20', ' ')
+        if type(value) is str:
+            value = value.replace('%20', ' ')
 
-        print('Set preference: "' + value + '" to "' + setting + '"')
+        print('Set preference: "' + str(value) + '" to "' + setting + '"')
+        # Check the group exists.
+        try:
+            self.pref_data[group]
+        except:
+            print('Failed to write group: ' + group)
+            self.pref_data[group] = {}
+
+        # Write value to group/setting.
         try:
             self.pref_data[group][setting] = value;
         except:
-            print('Failed to write setting "' + value + '" for "' + setting + '" in "' + group + '".')
+            print('Failed to write setting "' + str(value) + '" for "' + setting + '" in "' + group + '".')
 
     def get_pref(self, group, setting, default_value='false'):
+        """ Read an option, optionally specifying a default value if none exists. """
         try:
             # Read data from preferences, if it exists.
             value = self.pref_data[group][setting]
@@ -82,6 +96,7 @@ class ChromaPreferences(object):
             return default_value
 
     def create_default_config(self):
+        """ Generates a default configuration if none exists. """
         try:
             # Create the groups, then write the default values.
             default_buffer = {}
@@ -110,6 +125,7 @@ class ChromaPreferences(object):
             print('Exception: ', e)
 
     def clear_config(self):
+        """ Erases the configuration stored on disk. """
         print('Deleting configuration folder "' + self.SAVE_ROOT + '"...')
         shutil.rmtree(self.SAVE_ROOT)
         print('Successfully deleted configuration.')
