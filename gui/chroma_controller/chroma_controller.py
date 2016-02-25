@@ -80,6 +80,19 @@ class ChromaController(object):
             else:
                 self.webkit.execute_script('live_switch = false;')
 
+            # Set preview colours with ones from memory.
+            p_red = self.primary_rgb_values[0]
+            p_green = self.primary_rgb_values[1]
+            p_blue = self.primary_rgb_values[2]
+
+            s_red = self.secondary_rgb_values[0]
+            s_green = self.secondary_rgb_values[1]
+            s_blue = self.secondary_rgb_values[2]
+
+            self.webkit.execute_script('$("#rgb_primary_preview").css("background-color","rgba(' + str(p_red) + ',' + str(p_green) + ',' + str(p_blue) + ',1.0)")')
+            self.webkit.execute_script('$("#rgb_secondary_preview").css("background-color","rgba(' + str(s_red) + ',' + str(s_green) + ',' + str(s_blue) + ',1.0)")')
+
+
         elif self.current_page == 'profile_editor':
             js_exec = WebkitJavaScriptExecutor(self.webkit)
             kb_callback = WebkitJavaScriptExecutor(None, wrapper="keyboard_obj.load(function(){{{0}}});")
@@ -159,6 +172,17 @@ class ChromaController(object):
             else:
                 self.webkit.execute_script("$('#start-brightness-text').html('" + str(int((start_brightness * 100) / 255 )) + "%');")
 
+            # Get default 'preferred' colours.
+            self.start_p_red =   self.preferences.get_pref('primary_colors', 'red', 0)
+            self.start_p_green = self.preferences.get_pref('primary_colors', 'green', 255)
+            self.start_p_blue =  self.preferences.get_pref('primary_colors', 'blue', 0)
+
+            self.start_s_red =   self.preferences.get_pref('secondary_colors', 'red', 255)
+            self.start_s_green = self.preferences.get_pref('secondary_colors', 'green', 0)
+            self.start_s_blue =  self.preferences.get_pref('secondary_colors', 'blue', 0)
+
+            self.webkit.execute_script('$("#rgb_start_primary_preview").css("background-color","rgba(' + str(self.start_p_red) + ',' + str(self.start_p_green) + ',' + str(self.start_p_blue) + ',1.0)")')
+            self.webkit.execute_script('$("#rgb_start_secondary_preview").css("background-color","rgba(' + str(self.start_s_red) + ',' + str(self.start_s_green) + ',' + str(self.start_s_blue) + ',1.0)")')
 
         elif self.current_page == 'controller_devices':
             self.detect_devices()
@@ -295,32 +319,51 @@ class ChromaController(object):
             colorseldlg.destroy()
 
         elif command.startswith('set-color'):
-            # Expects 4 parameters separated by '?' in order: element, red, green, blue (RGB = 0-255)
+            """ Expects 4 parameters separated by '?' in order: element, red, green, blue (RGB = 0-255) """
+            update_effects = False
             colors = command.split('set-color?')[1]
             element = colors.split('?')[0]
             red = int(colors.split('?')[1])
             green = int(colors.split('?')[2])
             blue = int(colors.split('?')[3])
             print("Set colour of '{0}' to RGB: {1}, {2}, {3}".format(element, red, green, blue))
+
             self.webkit.execute_script('$("#'+element+'_preview").css("background-color","rgba(' + str(red) + ',' + str(green) + ',' + str(blue) + ',1.0)")')
             self.webkit.execute_script('set_mode("set")')
 
             if element == 'rgb_primary':    # Primary effect colour
+                update_effects = True
                 self.primary_rgb.set((red, green, blue))
+                self.primary_rgb_values = [red, green, blue]
+
             elif element == 'rgb_secondary':   # Secondary effect colour (used for Breath mode)
+                update_effects = True
                 self.secondary_rgb.set((red, green, blue))
+                self.secondary_rgb_values = [red, green, blue]
+
             elif element == 'rgb_tmp':      # Temporary colour while editing profiles.
                 rgb_edit_red = red
                 rgb_edit_green = green
                 rgb_edit_blue = blue
 
+            elif element == 'rgb_start_primary':  # Starting primary colour specified in Preferences.
+                self.start_p_red =   red
+                self.start_p_green = green
+                self.start_p_blue =  blue
+
+            elif element == 'rgb_start_secondary':  # Starting secondary colour specified in Preferences.
+                self.start_s_red =   red
+                self.start_s_green = green
+                self.start_s_blue =  blue
+
             # Update static colour effects if currently in use.
-            if self.current_effect == 'static':
-                self.process_command('effect-static')
-            elif self.current_effect == 'breath?colours':
-                self.process_command('effect-breath?0')
-            elif self.current_effect == 'reactive':
-                self.process_command('effect-reactive?auto')
+            if update_effects:
+                if self.current_effect == 'static':
+                    self.process_command('effect-static')
+                elif self.current_effect == 'breath?colours':
+                    self.process_command('effect-breath?0')
+                elif self.current_effect == 'reactive':
+                    self.process_command('effect-reactive?auto')
 
         ## Opening different pages
         elif command.startswith('cancel-changes'):
@@ -356,7 +399,18 @@ class ChromaController(object):
             self.show_menu('chroma_menu')
 
         elif command == 'pref-save':
+            # Saves initial colours.
+            self.preferences.set_pref('primary_colors', 'red', self.start_p_red)
+            self.preferences.set_pref('primary_colors', 'green', self.start_p_green)
+            self.preferences.set_pref('primary_colors', 'blue', self.start_p_blue)
+
+            self.preferences.set_pref('secondary_colors', 'red', self.start_s_red)
+            self.preferences.set_pref('secondary_colors', 'green', self.start_s_green)
+            self.preferences.set_pref('secondary_colors', 'blue', self.start_s_blue)
+
+            # Commits preferences from memory to disk.
             self.preferences.save_pref()
+
             self.show_menu('chroma_menu')
 
         elif command == 'pref-reset-conf':
@@ -542,7 +596,7 @@ class ChromaController(object):
             # Connect to the DBUS
             self.daemon = razer.daemon_dbus.DaemonInterface()
 
-            # Initalize Profiles
+            # Initialize Profiles
             self.profiles = razer.profiles.ChromaProfiles(self.daemon)
 
             # Load devices page normally.
@@ -558,6 +612,20 @@ class ChromaController(object):
             self.current_effect = 'custom'
             self.last_effect = 'unknown'
             self.open_this_profile = None
+
+            # Set preferred colours
+            p_red = self.preferences.get_pref('primary_colors', 'red', 0)
+            p_green = self.preferences.get_pref('primary_colors', 'green', 255)
+            p_blue = self.preferences.get_pref('primary_colors', 'blue', 0)
+            s_red = self.preferences.get_pref('secondary_colors', 'red', 255)
+            s_green = self.preferences.get_pref('secondary_colors', 'green', 0)
+            s_blue = self.preferences.get_pref('secondary_colors', 'blue', 0)
+
+            self.primary_rgb_values = [p_red, p_green, p_blue]
+            self.primary_rgb = razer.keyboard.RGB(p_red, p_green, p_blue)
+
+            self.secondary_rgb_values = [s_red, s_green, s_blue]
+            self.secondary_rgb = razer.keyboard.RGB(s_red, s_green, s_blue)
 
         except Exception as e:
             # Load an error page instead.

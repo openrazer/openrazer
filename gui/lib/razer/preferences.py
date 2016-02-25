@@ -26,6 +26,12 @@ class ChromaPreferences(object):
     # startup           start_profile       string      Automatically set to profile X. ('start_effect' must be set to 'profile')
     # startup           start_brightness    integer     Automatically set brightness to X. Set to '0' for no change.
     # startup           start_macro         boolean     Automatically activate macro keys.
+    # primary_colors    red                 integer     Default primary RED colour.
+    # primary_colors    green               integer     Default primary GREEN colour.
+    # primary_colors    blue                integer     Default primary BLUE colour.
+    # secondary_colors  red                 integer     Default secondary RED colour.
+    # secondary_colors  green               integer     Default secondary GREEN colour.
+    # secondary_colors  blue                integer     Default secondary BLUE colour.
     #
 
     def __init__(self):
@@ -74,7 +80,7 @@ class ChromaPreferences(object):
         if type(value) is str:
             value = value.replace('%20', ' ')
 
-        print('Set preference: "' + str(value) + '" to "' + setting + '"')
+        print('Set preference: "' + str(value) + '" to "' + setting + '" in "' + group + '"')
         # Check the group exists.
         try:
             self.pref_data[group]
@@ -107,7 +113,7 @@ class ChromaPreferences(object):
         try:
             # Create the groups, then write the default values.
             default_buffer = {}
-            for group in ['chroma_editor', 'tray_applet', 'startup']:
+            for group in ['chroma_editor', 'tray_applet', 'startup', 'primary_colors', 'secondary_colors']:
                 default_buffer[group] = {}
             default_buffer['chroma_editor']['live_switch'] = 'true'
             default_buffer['chroma_editor']['activate_on_save'] = 'true'
@@ -119,6 +125,12 @@ class ChromaPreferences(object):
             default_buffer['startup']['start_profile'] = ''
             default_buffer['startup']['start_brightness'] = 0
             default_buffer['startup']['start_macro'] = 'false'
+            default_buffer['primary_colors']['red'] = 0
+            default_buffer['primary_colors']['green'] = 255
+            default_buffer['primary_colors']['blue'] = 0
+            default_buffer['secondary_colors']['red'] = 255
+            default_buffer['secondary_colors']['green'] = 0
+            default_buffer['secondary_colors']['blue'] = 0
             default_settings = json.dumps(default_buffer)
 
             print('Creating new preferences file...')

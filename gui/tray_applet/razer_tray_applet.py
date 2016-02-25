@@ -403,9 +403,23 @@ class AppIndicator:
             start_profile = self.preferences.get_pref('startup', 'start_profile', None)
             start_brightness = int(self.preferences.get_pref('startup', 'start_brightness', 0))
             start_macro = bool(self.preferences.get_pref('startup', 'start_macro', False))
+            start_col1_r = self.preferences.get_pref('primary_colors', 'red', 0)
+            start_col1_g = self.preferences.get_pref('primary_colors', 'green', 255)
+            start_col1_b = self.preferences.get_pref('primary_colors', 'blue', 0)
+            start_col2_r = self.preferences.get_pref('secondary_colors', 'red', 255)
+            start_col2_g = self.preferences.get_pref('secondary_colors', 'green', 0)
+            start_col2_b = self.preferences.get_pref('secondary_colors', 'blue', 0)
 
             print('-- Applying start-up settings...')
 
+            self.colour = (start_col1_r, start_col1_g, start_col1_b)
+            self.secondary_colour = (start_col2_r, start_col2_g, start_col2_b)
+
+            self.primary_colour_button.set_label("Change Primary Colour... ({0})".format(AppIndicator.colour_to_hex(self.colour)))
+            print("[Change Primary Colour] New: {0}".format(AppIndicator.colour_to_hex(self.colour)))
+
+            self.secondary_colour_button.set_label("Change Secondary Colour... ({0})".format(AppIndicator.colour_to_hex(self.secondary_colour)))
+            print("[Change Secondary Colour] New: {0}".format(AppIndicator.colour_to_hex(self.secondary_colour)))
 
             if not start_effect == 'disabled':
                 if start_effect == 'profile':

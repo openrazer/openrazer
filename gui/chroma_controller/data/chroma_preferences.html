@@ -85,6 +85,32 @@
       <p>For changes to take effect, please restart the Tray Applet.</p>
       <hr>
 
+    <h3>Preferred Colours</h3>
+    <table>
+      <tr>
+        <td>
+          <div id="rgb_primary">
+            <table>
+              <tr>
+                <td>Primary Colour: </td>
+                <td><div id="rgb_start_primary_preview" class="color-preview" style="background-color:rgba(0,0,0,1)"></div></td>
+                <td><a class="btn" onclick="cmd('ask-color?rgb_start_primary')">Set...</a></td>
+              </tr>
+            </table>
+          </div>
+          <div id="rgb_primary">
+            <table>
+              <tr>
+                <td>Secondary Colour: </td>
+                <td><div id="rgb_start_secondary_preview" class="color-preview" style="background-color:rgba(0,0,0,1)"></div></td>
+                <td><a class="btn" onclick="cmd('ask-color?rgb_start_secondary')">Set...</a></td>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </table>
+
     <h3>Start-up Settings</h3>
     <p>These settings are applied when the Tray Applet is started, which is presumed to be automatically started when you login.</p>
       <table>
