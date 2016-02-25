@@ -4,6 +4,7 @@ import os, json, shutil
 import razer.daemon_dbus
 import razer.keyboard
 
+module_config_version = 2
 
 class ChromaPreferences(object):
     ''' Retrieves and set persistant options. '''
@@ -67,9 +68,27 @@ class ChromaPreferences(object):
         except:
             self.create_default_config();
 
+        # Check the configuration version and warn if opening an older configuration.
+        try:
+            config_version = int(self.pref_data['config_version'])
+        except:
+            config_version = 0
+
+        if config_version > module_config_version:
+            print('\nWARNING: The preferences file is newer then the module in use. This could cause undesired glitches in applications. Consider updating the Python modules.')
+            print('    Config Version: ' + str(config_version))
+            print('    Module Version: ' + str(module_config_version))
+            print(' ')
+
+        if module_config_version > config_version:
+            config_version = module_config_version
+            print('\nWARNING: This is an older configuration. Some preferences may have been deprecated or changed. Saving will expect future instances to use the new format.\n')
+
+
     def save_pref(self):
         """ Commit the preferences stored in memory to disk. """
         print('Saving preferences to "' + self.pref_path + "'...")
+        self.pref_data['config_version'] = module_config_version
         pref_file = open(self.pref_path, "w+")
         pref_file.write(json.dumps(self.pref_data))
         pref_file.close()
@@ -113,6 +132,7 @@ class ChromaPreferences(object):
         try:
             # Create the groups, then write the default values.
             default_buffer = {}
+            default_buffer['config_version'] = module_config_version
             for group in ['chroma_editor', 'tray_applet', 'startup', 'primary_colors', 'secondary_colors']:
                 default_buffer[group] = {}
             default_buffer['chroma_editor']['live_switch'] = 'true'
