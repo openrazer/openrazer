@@ -1,0 +1,266 @@
+/*
+ *  Designed by @lah7 for the Razer Chroma Linux drivers project.
+ *
+ * Copyright (C) 2016 Luke Horwell
+ * Licensed under CC BY-SA 4.0
+ */
+
+/****************************
+ * Entire Page
+*****************************/
+body {
+  font-family: 'Play', sans-serif;
+  color: #00FF00;
+  position: relative;
+  height: 100%;
+  overflow-y: scroll;
+  background-color: #181818;
+}
+
+h1, h2, h3, h4, h5 {
+  color: #00FF00;
+}
+
+p {
+  color: white;
+}
+
+a {
+  color: lime;
+}
+
+a:hover, a:focus {
+  color: green;
+}
+
+pre, code {
+  background-color: #000;
+  color: #00FF00;
+}
+
+pre {
+  border: 1px solid #181818;
+}
+
+hr {
+  border: 1px solid #404040;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.gray {
+  color: #808080;
+}
+
+/****************************
+ * Header
+*****************************/
+
+/* Header */
+#header {
+  height: 143px;
+  margin-top: 8px;
+  padding-top: 4px;
+  vertical-align: middle;
+  background-image: url('../img/header.jpg');
+  background-repeat: no-repeat;
+  background-size: 100%;
+  -webkit-mask-image: -webkit-gradient(linear, left 80%, left bottom, from(rgba(0,0,0,1)), to(rgba(0,0,0,0)));
+}
+
+#logo {
+  float: left;
+  width: 96px;
+  height: 96px;
+  padding: 8px;
+}
+
+.logo-mini {
+  width: 24px;
+  height: 24px;
+  margin: 2px;
+  margin-right: 8px;
+}
+
+.nav-sticky {
+  position: fixed;
+  top: 0;
+  left: 0;
+  border-bottom: 1px solid #009600;
+}
+
+.nav-top {
+  position: absolute;
+  top: 123px;
+  left: 0;
+  border-bottom: 1px solid #646464;
+}
+
+#nav-menu {
+  height: 54px;
+  width: 100%;
+  background-color: rgba(0,0,0,0.7);
+  color: lime;
+  vertical-align: middle;
+  padding: 8px;
+  z-index: 10;
+}
+
+#mini-logo-text {
+  padding-top: 4px;
+  text-align: left;
+  float: left;
+  font-size: 20px;
+}
+
+/****************************
+ * Sections of the Page Background
+*****************************/
+.section {
+  padding: 16px;
+  background-color: black;
+}
+
+.section-gap {
+  height: 32px;
+  background-color: #181818;
+}
+
+/****************************
+ * Features Grid
+*****************************/
+#features {
+  margin-top: 32px;
+  margin-bottom: 16px;
+}
+
+.features-grid {
+  margin-top: 32px;
+}
+
+.feature {
+  height: 110px;
+  margin-bottom: 40px;
+  vertical-align: middle;
+}
+
+.features-icon span {
+  width: 100px;
+  float: left;
+  padding: 10px;
+  margin-top: 8px;
+  margin-right: 8px;
+  margin-bottom: 32px;
+}
+
+.features-icon img {
+  float: left;
+  width: 100px;
+  height: 100px;
+  padding: 10px;
+  margin-right: 8px;
+  margin-bottom: 32px;
+}
+
+.features-grid p {
+  margin-bottom: 10px;
+}
+
+/****************************
+ * Supported Devices Grid
+*****************************/
+.devices {
+  width: 100%;
+  height: 250px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.device-icon {
+  height: 200px;
+  margin-bottom: 16px;
+}
+
+.device-icon img {
+  width: 170px;
+  height: auto;
+  max-height: 200px;
+}
+
+/****************************
+ * Footer
+*****************************/
+footer {
+  padding: 8px;
+  color: #7F7F7F;
+  font-size: 12px;
+}
+
+/****************************
+ * Custom Buttons Override
+*****************************/
+.nav-pills {
+  float: right;
+  margin-bottom: 8px;
+}
+
+.nav-pills > li > a, .btn {
+  padding: 8px;
+  background-color: #000;
+  color: white;
+  border: 1px solid #404040;
+}
+
+.nav-pills > li > a:hover,
+.nav-tabs > li > a:focus, .btn:hover,
+.btn:focus,
+.nav > li > a:focus,
+.nav > li > a:hover {
+  background-color: #006400;
+  color: white;
+  text-decoration: none;
+}
+
+.nav-pills > li > a:active, .btn:active {
+  background-color: #00FF00;
+  color: black;
+}
+
+.nav-pills > li.active > a,
+.nav-pills > li.active > a:focus,
+.nav-pills > li.active > a:hover {
+  background-color: #00A900;
+  color: white;
+  border: 1px solid #404040;
+}
+
+
+/****************************
+ * Custom Panels Override
+*****************************/
+.panel-default > .panel-heading {
+  background-color: black !important;
+  color: white;
+}
+
+.panel-default {
+  border-color: black;
+  color: white;
+}
+
+.panel-group .panel-heading+.panel-collapse>.list-group, .panel-group .panel-heading+.panel-collapse>.panel-body {
+  border-color: green;
+}
+
+.panel-body {
+  background-color: black;
+}
+
+
+/****************************
+ * Misc.
+*****************************/
+.project-links {
+  text-align: center;
+  padding-bottom: 80px;
+}
