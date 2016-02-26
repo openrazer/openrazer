@@ -1,6 +1,9 @@
 # razer_chroma_drivers
 
-A Collection of Linux drivers for the Razer Chroma devices, providing a daemon and graphical frontends.
+A collection of Linux drivers for the Razer Chroma devices, providing a daemon and graphical frontends.
+
+Website: http://pez2001.github.io/razer_chroma_drivers/
+
 
 Supports:
  * Razer Blackwidow Ultimate 2013 *(all lighting modes)*

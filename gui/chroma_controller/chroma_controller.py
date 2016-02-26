@@ -17,16 +17,18 @@
 # Copyright (C) 2015-2016 Luke Horwell <lukehorwell37+code@gmail.com>
 #               2015-2016 Terry Cain <terry@terrys-home.co.uk>
 
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+gi.require_version('WebKit', '3.0')
 import os, sys, signal, json
 from gi.repository import Gtk, Gdk, WebKit
 import razer.daemon_dbus
 import razer.keyboard
+import razer.preferences
+import razer.profiles
 
-# Default Settings & Preferences
-SAVE_ROOT = os.path.expanduser('~') + '/.config/razer_chroma'
-SAVE_PROFILES = SAVE_ROOT + '/profiles'
-SAVE_BACKUPS = SAVE_ROOT + '/backups'
-
+# Where is the application being ran?
 LOCATION_DATA = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data/'))
 
 
@@ -61,6 +63,7 @@ class ChromaController(object):
     ##################################################
     def page_loaded(self, WebView, WebFrame):
         print('Running page post-actions for "' + self.current_page + '"...')
+
         if self.current_page == 'chroma_menu':
             self.webkit.execute_script('instantProfileSwitch = false;') # Unimplemented instant profile change option.
             self.webkit.execute_script("$('#profiles-activate').show()")
@@ -71,11 +74,24 @@ class ChromaController(object):
                 self.webkit.execute_script("$('#multi-device-switcher').show()")
 
             # Tell JavaScript whether live profile switching is enabled.
-            if self.preferences.get_pref('live_switch') == 'true':
+            if self.preferences.get_pref('chroma_editor', 'live_switch') == 'true':
                 self.webkit.execute_script('live_switch = true;')
                 self.webkit.execute_script('$("#profiles-activate").hide();')
             else:
                 self.webkit.execute_script('live_switch = false;')
+
+            # Set preview colours with ones from memory.
+            p_red = self.primary_rgb_values[0]
+            p_green = self.primary_rgb_values[1]
+            p_blue = self.primary_rgb_values[2]
+
+            s_red = self.secondary_rgb_values[0]
+            s_green = self.secondary_rgb_values[1]
+            s_blue = self.secondary_rgb_values[2]
+
+            self.webkit.execute_script('$("#rgb_primary_preview").css("background-color","rgba(' + str(p_red) + ',' + str(p_green) + ',' + str(p_blue) + ',1.0)")')
+            self.webkit.execute_script('$("#rgb_secondary_preview").css("background-color","rgba(' + str(s_red) + ',' + str(s_green) + ',' + str(s_blue) + ',1.0)")')
+
 
         elif self.current_page == 'profile_editor':
             js_exec = WebkitJavaScriptExecutor(self.webkit)
@@ -89,7 +105,7 @@ class ChromaController(object):
             # Load profile into keyboard.
             profile_name = self.open_this_profile
             self.profiles.set_active_profile(profile_name)
-            if self.preferences.get_pref('live_preview') == 'true':
+            if self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
                 self.profiles.activate_profile_from_memory()
             self.profiles.get_active_profile().backup_configuration()
 
@@ -104,7 +120,7 @@ class ChromaController(object):
             kb_callback << "keyboard_obj.disable_key(5,7)"
             kb_callback << "keyboard_obj.disable_key(5,12)"
             # Hide preview button if live previewing is enabled.
-            if self.preferences.get_pref('live_preview') == 'true':
+            if self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
                 kb_callback << '$("#edit-preview").hide();'
 
 
@@ -114,7 +130,59 @@ class ChromaController(object):
             js_exec.exec()
 
         elif self.current_page == 'preferences':
-            self.preferences.refresh_pref_page(self.webkit)
+            # Populate start-up profiles list.
+            self.refresh_profiles_list()
+
+            # Set checkboxes
+            for setting in ['live_switch','live_preview','activate_on_save']:
+                if (self.preferences.pref_data['chroma_editor'][setting] == 'true'):
+                    self.webkit.execute_script("$('#" + setting + "').prop('checked', true);")
+
+            # Fetch settings for tray/start-up settings.
+            tray_icon_type = self.preferences.get_pref('tray_applet', 'icon_type', 'system')
+            tray_icon_path = self.preferences.get_pref('tray_applet', 'icon_path', '')
+            start_enabled = self.preferences.get_pref('startup', 'enabled', 'false')
+            start_effect = self.preferences.get_pref('startup', 'start_effect', None)
+            start_profile = self.preferences.get_pref('startup', 'start_profile', None)
+            start_brightness = int(self.preferences.get_pref('startup', 'start_brightness', 0))
+            start_macro = self.preferences.get_pref('startup', 'start_macro', 'false')
+
+            # Set 'values' for textboxes and dropdowns.
+            self.webkit.execute_script('$("#tray-' + tray_icon_type + '").prop("checked", true);')
+            self.webkit.execute_script('$("#tray-icon-path").val("' + tray_icon_path + '")')
+            self.webkit.execute_script("$('#start-effect-dropdown').val('" + start_effect + "');")
+            self.webkit.execute_script("$('#profiles-list').val('" + start_profile + "');")
+            self.webkit.execute_script("$('#start-brightness').val('" + str(start_brightness) + "');")
+
+            if start_macro == 'true':
+                self.webkit.execute_script('$("#start-macro").prop("checked", true);')
+
+            # Hide/Show UI elements
+            if start_enabled == 'true':
+                self.webkit.execute_script('$("#startup-enabled").prop("checked", true);')
+                self.webkit.execute_script('$("#startup-options").show()')
+
+            if start_effect == 'profile':
+                self.webkit.execute_script("$('#start-profile').show()")
+            else:
+                self.webkit.execute_script("$('#start-profile').hide()")
+
+            if start_brightness == 0:
+                self.webkit.execute_script("$('#start-brightness-text').html('No Change');")
+            else:
+                self.webkit.execute_script("$('#start-brightness-text').html('" + str(int((start_brightness * 100) / 255 )) + "%');")
+
+            # Get default 'preferred' colours.
+            self.start_p_red =   self.preferences.get_pref('primary_colors', 'red', 0)
+            self.start_p_green = self.preferences.get_pref('primary_colors', 'green', 255)
+            self.start_p_blue =  self.preferences.get_pref('primary_colors', 'blue', 0)
+
+            self.start_s_red =   self.preferences.get_pref('secondary_colors', 'red', 255)
+            self.start_s_green = self.preferences.get_pref('secondary_colors', 'green', 0)
+            self.start_s_blue =  self.preferences.get_pref('secondary_colors', 'blue', 0)
+
+            self.webkit.execute_script('$("#rgb_start_primary_preview").css("background-color","rgba(' + str(self.start_p_red) + ',' + str(self.start_p_green) + ',' + str(self.start_p_blue) + ',1.0)")')
+            self.webkit.execute_script('$("#rgb_start_secondary_preview").css("background-color","rgba(' + str(self.start_s_red) + ',' + str(self.start_s_green) + ',' + str(self.start_s_blue) + ',1.0)")')
 
         elif self.current_page == 'controller_devices':
             self.detect_devices()
@@ -127,10 +195,12 @@ class ChromaController(object):
     # Reusable Page Functions
     ##################################################
     def refresh_profiles_list(self):
-        self.webkit.execute_script('$("#profiles_list").html("")')
-        for profile in self.profiles.get_profiles():
+        self.webkit.execute_script('$("#profiles-list").html("")')
+        profiles = list(self.profiles.get_profiles())
+        profiles.sort()
+        for profile in profiles:
             item = "<option value='"+profile+"'>"+profile+"</option>"
-            self.webkit.execute_script('$("#profiles_list").append("'+item+'")')
+            self.webkit.execute_script('$("#profiles-list").append("'+item+'")')
 
     ##################################################
     # Commands
@@ -249,32 +319,51 @@ class ChromaController(object):
             colorseldlg.destroy()
 
         elif command.startswith('set-color'):
-            # Expects 4 parameters separated by '?' in order: element, red, green, blue (RGB = 0-255)
+            """ Expects 4 parameters separated by '?' in order: element, red, green, blue (RGB = 0-255) """
+            update_effects = False
             colors = command.split('set-color?')[1]
             element = colors.split('?')[0]
             red = int(colors.split('?')[1])
             green = int(colors.split('?')[2])
             blue = int(colors.split('?')[3])
             print("Set colour of '{0}' to RGB: {1}, {2}, {3}".format(element, red, green, blue))
+
             self.webkit.execute_script('$("#'+element+'_preview").css("background-color","rgba(' + str(red) + ',' + str(green) + ',' + str(blue) + ',1.0)")')
             self.webkit.execute_script('set_mode("set")')
 
             if element == 'rgb_primary':    # Primary effect colour
+                update_effects = True
                 self.primary_rgb.set((red, green, blue))
+                self.primary_rgb_values = [red, green, blue]
+
             elif element == 'rgb_secondary':   # Secondary effect colour (used for Breath mode)
+                update_effects = True
                 self.secondary_rgb.set((red, green, blue))
+                self.secondary_rgb_values = [red, green, blue]
+
             elif element == 'rgb_tmp':      # Temporary colour while editing profiles.
                 rgb_edit_red = red
                 rgb_edit_green = green
                 rgb_edit_blue = blue
 
+            elif element == 'rgb_start_primary':  # Starting primary colour specified in Preferences.
+                self.start_p_red =   red
+                self.start_p_green = green
+                self.start_p_blue =  blue
+
+            elif element == 'rgb_start_secondary':  # Starting secondary colour specified in Preferences.
+                self.start_s_red =   red
+                self.start_s_green = green
+                self.start_s_blue =  blue
+
             # Update static colour effects if currently in use.
-            if self.current_effect == 'static':
-                self.process_command('effect-static')
-            elif self.current_effect == 'breath?colours':
-                self.process_command('effect-breath?0')
-            elif self.current_effect == 'reactive':
-                self.process_command('effect-reactive?auto')
+            if update_effects:
+                if self.current_effect == 'static':
+                    self.process_command('effect-static')
+                elif self.current_effect == 'breath?colours':
+                    self.process_command('effect-breath?0')
+                elif self.current_effect == 'reactive':
+                    self.process_command('effect-reactive?auto')
 
         ## Opening different pages
         elif command.startswith('cancel-changes'):
@@ -283,11 +372,11 @@ class ChromaController(object):
 
                 if cancel_type == "new-profile":
                     self.profiles.remove_profile(cancel_args, del_from_fs=False)
-                    if self.preferences.get_pref('live_switch') == 'true' or self.preferences.get_pref('live_preview') == 'true':
+                    if self.preferences.get_pref('chroma_editor', 'live_switch') == 'true' or self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
                         self.daemon.set_custom_colour(self.old_profile)
                 elif cancel_type == "edit-profile":
                     self.profiles.get_active_profile().restore_configuration()
-                    if self.preferences.get_pref('live_switch') == 'true' or self.preferences.get_pref('live_preview') == 'true':
+                    if self.preferences.get_pref('chroma_editor', 'live_switch') == 'true' or self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
                         self.daemon.set_custom_colour(self.old_profile)
 
                 self.webkit.execute_script("$(\"#cancel\").attr({onclick: \"cmd('cancel-changes')\"})")
@@ -298,10 +387,11 @@ class ChromaController(object):
             self.show_menu('preferences')
 
         elif command.startswith('pref-set?'):
-            # pref-set? <setting> ? <value>
-            setting = command.split('?')[1]
-            value = command.split('?')[2]
-            self.preferences.set_pref(setting, value)
+            # pref-set ? <group> ? <setting> ? <value>
+            group = command.split('?')[1]
+            setting = command.split('?')[2]
+            value = command.split('?')[3]
+            self.preferences.set_pref(group, setting, value)
 
         elif command == 'pref-revert':
             print('Reverted preferences.')
@@ -309,8 +399,32 @@ class ChromaController(object):
             self.show_menu('chroma_menu')
 
         elif command == 'pref-save':
+            # Saves initial colours.
+            self.preferences.set_pref('primary_colors', 'red', self.start_p_red)
+            self.preferences.set_pref('primary_colors', 'green', self.start_p_green)
+            self.preferences.set_pref('primary_colors', 'blue', self.start_p_blue)
+
+            self.preferences.set_pref('secondary_colors', 'red', self.start_s_red)
+            self.preferences.set_pref('secondary_colors', 'green', self.start_s_green)
+            self.preferences.set_pref('secondary_colors', 'blue', self.start_s_blue)
+
+            # Commits preferences from memory to disk.
             self.preferences.save_pref()
+
             self.show_menu('chroma_menu')
+
+        elif command == 'pref-reset-conf':
+            print('User requested to reset configuration.')
+            self.preferences.create_default_config()
+            self.preferences.load_pref()
+            print('Configuration successfully reset.')
+            self.show_menu('preferences')
+
+        elif command == 'pref-reset-all':
+            print('User requested to reset everything.')
+            self.preferences.clear_config()
+            print('\nRestarting the application...\n')
+            os.execv(__file__, sys.argv)
 
         ## Profile Editor / Management
         elif command.startswith('profile-edit'):
@@ -338,7 +452,7 @@ class ChromaController(object):
             self.profiles.get_active_profile().set_key_colour(row, col, rgb)
 
             # Live preview (if 'live_preview' is enabled in preferences)
-            if self.preferences.get_pref('live_preview') == 'true':
+            if self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
                 self.profiles.activate_profile_from_memory()
 
         elif command.startswith('clear-key'):
@@ -349,7 +463,7 @@ class ChromaController(object):
             self.profiles.get_active_profile().reset_key(row, col)
 
             # Live preview (if 'live_preview' is enabled in preferences)
-            if self.preferences.get_pref('live_preview') == 'true':
+            if self.preferences.get_pref('chroma_editor', 'live_preview') == 'true':
                 self.profiles.activate_profile_from_memory()
 
         elif command.startswith('profile-activate'):
@@ -392,12 +506,12 @@ class ChromaController(object):
             print('Saved "{0}".'.format(profile_name))
             self.show_menu('chroma_menu')
 
-            if self.preferences.get_pref('activate_on_save') == 'true':
+            if self.preferences.get_pref('chroma_editor', 'activate_on_save') == 'true':
                 self.profiles.activate_profile_from_file(self.profiles.get_active_profile_name())
 
         ## Miscellaneous
         elif command == 'open-config-folder':
-            os.system('xdg-open "' + SAVE_ROOT + '"')
+            os.system('xdg-open "' + self.preferences.SAVE_ROOT + '"')
 
         ## Multi-device Management
         elif command.startswith('set-device?'):
@@ -413,6 +527,7 @@ class ChromaController(object):
 
         else:
             print("         ... unimplemented!")
+
 
     ##################################################
     # Multi-device support
@@ -473,23 +588,16 @@ class ChromaController(object):
             print('Data folder is missing. Exiting.')
             sys.exit(1)
 
-        ## Check we have a folder to save data (eg. profiles)
-        if not os.path.exists(SAVE_ROOT):
-            print('Configuration folder does not exist. Creating',SAVE_ROOT)
-            os.makedirs(SAVE_ROOT)
-            os.makedirs(SAVE_PROFILES)
-            os.makedirs(SAVE_BACKUPS)
-
         # Initialize Preferences
-        self.preferences = ChromaPreferences()
+        self.preferences = razer.preferences.ChromaPreferences()
 
         # Set up the daemon
         try:
             # Connect to the DBUS
             self.daemon = razer.daemon_dbus.DaemonInterface()
 
-            # Profiles
-            self.profiles = ChromaProfiles(self.daemon)
+            # Initialize Profiles
+            self.profiles = razer.profiles.ChromaProfiles(self.daemon)
 
             # Load devices page normally.
             #~ self.current_page = 'controller_devices' # TODO: Multi-device not yet supported.
@@ -505,9 +613,25 @@ class ChromaController(object):
             self.last_effect = 'unknown'
             self.open_this_profile = None
 
-        except:
+            # Set preferred colours
+            p_red = self.preferences.get_pref('primary_colors', 'red', 0)
+            p_green = self.preferences.get_pref('primary_colors', 'green', 255)
+            p_blue = self.preferences.get_pref('primary_colors', 'blue', 0)
+            s_red = self.preferences.get_pref('secondary_colors', 'red', 255)
+            s_green = self.preferences.get_pref('secondary_colors', 'green', 0)
+            s_blue = self.preferences.get_pref('secondary_colors', 'blue', 0)
+
+            self.primary_rgb_values = [p_red, p_green, p_blue]
+            self.primary_rgb = razer.keyboard.RGB(p_red, p_green, p_blue)
+
+            self.secondary_rgb_values = [s_red, s_green, s_blue]
+            self.secondary_rgb = razer.keyboard.RGB(s_red, s_green, s_blue)
+
+        except Exception as e:
             # Load an error page instead.
+            print('There was a problem initializing the application or DBUS.')
             self.current_page = 'controller_service_error'
+            print('Exception: ', e)
 
 
         # Create WebKit Container
@@ -541,218 +665,6 @@ class ChromaController(object):
         # Show the window.
         w.show_all()
         Gtk.main()
-
-class ChromaProfiles(object):
-    def __init__(self, dbus_object):
-        self.profiles = {}
-        self.active_profile = None
-        self.daemon = dbus_object
-
-        self.load_profiles()
-
-    def load_profiles(self):
-        """
-        Load profiles
-        """
-        profiles = os.listdir(SAVE_PROFILES)
-
-        for profile in profiles:
-            keyboard = ChromaProfiles.get_profile_from_file(profile)
-            self.profiles[profile] = keyboard
-
-    def remove_profile(self, profile_name, del_from_fs=True):
-        """
-        Delete profile, from memory and optionally the system.
-
-        :param profile_name: Profile name
-        :type profile_name: str
-
-        :param del_from_fs: Delete from the file system
-        :type del_from_fs: bool
-        """
-        if del_from_fs:
-            current_profile_path = os.path.join(SAVE_PROFILES, profile_name)
-            current_profile_path_backup = os.path.join(SAVE_BACKUPS, profile_name)
-            os.remove(current_profile_path)
-            # print('Deleted profile: {0}'.format(current_profile_path))
-            if os.path.exists(current_profile_path_backup):
-                os.remove(current_profile_path_backup)
-                # print('Deleted backup copy: ' + current_profile_path_backup)
-
-        if profile_name in self.profiles:
-            del self.profiles[profile_name]
-
-    def new_profile(self, profile_name):
-        """
-        Create new profile
-
-        :param profile_name: Profile name
-        :type profile_name: str
-        """
-        self.active_profile = profile_name
-        self.profiles[profile_name] = razer.keyboard.KeyboardColour()
-
-    def set_active_profile(self, profile_name):
-        """
-        Set the active profile name
-
-        :param profile_name: Profile name
-        :type profile_name: str
-        """
-        if profile_name in self.profiles:
-            self.active_profile = profile_name
-
-    def get_active_profile(self):
-        """
-        Gets active profile, if one isnt active then the first profile is returned. If no
-        profiles are loaded then an empty profile is returned
-
-        :return: Keyboard object
-        :rtype: razer.keyboard.KeyboardColour
-        """
-
-        profile = razer.keyboard.KeyboardColour()
-        try:
-            profile = self.profiles[self.active_profile]
-        except KeyError:
-            if len(list(self.profiles.keys())) > 0:
-                profile = self.profiles[list(self.profiles.keys())[0]]
-        return profile
-
-    def get_active_profile_name(self):
-        """
-        Gets active profile
-
-        :return: Profile name
-        :rtype: str
-        """
-        return self.active_profile
-
-    def get_profiles(self):
-        """
-        Get a list of profiles
-
-        :return: List of profiles
-        :rtype: list
-        """
-        return self.profiles.keys()
-
-    def get_profile(self, profile_name):
-        """
-        Get a profile
-
-        :param profile_name: Profile
-        :type profile_name: str
-
-        :return: Keyboard object
-        :rtype: razer.keyboard.KeyboardColour
-        """
-        return self.profiles[profile_name]
-
-    def save_profile(self, profile_name):
-
-        profile_path = os.path.join(SAVE_PROFILES, profile_name)
-
-        # Backup if it's an existing copy, then erase original copy.
-        if os.path.exists(profile_path):
-            os.rename(profile_path, os.path.join(SAVE_BACKUPS, profile_name))
-
-        with open(os.path.join(SAVE_PROFILES, profile_name), 'wb') as profile_file:
-            payload = self.profiles[profile_name].get_total_binary()
-            profile_file.write(payload)
-
-    def activate_profile_from_file(self, profile_name):
-        print("Applying profile '{0}' ... ".format(profile_name), end='')
-        with open(os.path.join(SAVE_PROFILES, profile_name), 'rb') as profile_file:
-            payload = profile_file.read()
-            keyboard = razer.keyboard.KeyboardColour()
-            keyboard.get_from_total_binary(payload)
-            self.daemon.set_custom_colour(keyboard)
-
-    def activate_profile_from_memory(self):
-        profile_name = self.get_active_profile_name()
-        keyboard = self.get_active_profile()
-        self.daemon.set_custom_colour(keyboard)
-        print("Applying profile '{0}' from memory...".format(profile_name))
-
-    @staticmethod
-    def get_profile_from_file(profile_name):
-        keyboard = razer.keyboard.KeyboardColour()
-
-        with open(os.path.join(SAVE_PROFILES, profile_name), 'rb') as profile_file:
-            payload = profile_file.read()
-            keyboard.get_from_total_binary(payload)
-
-        return keyboard
-
-class ChromaPreferences(object):
-    #
-    # Documented Settings for JSON
-    #
-    #   live_preview      <true/false>      Activate profiles on keyboard while editing?
-    #   live_switch       <true/false>      Profiles are instantly changed on click?
-    #   activate_on_save  <true/false>      Automatically activate a profile on save?
-    #
-
-    def __init__(self):
-        self.pref_path = os.path.join(SAVE_ROOT, 'preferences.json')
-        self.load_pref();
-
-    def load_pref(self):
-        print('Loading preferences from "' + self.pref_path + "'...")
-        # Does it exist?
-        if not os.path.exists(self.pref_path):
-            self.create_default_config()
-
-        # Load data into memory.
-        try:
-            with open(self.pref_path) as pref_file:
-                self.pref_data = json.load(pref_file)
-            print('Successfully loaded preferences.')
-        except:
-            self.create_default_config();
-
-    def save_pref(self):
-        print('Saving preferences to "' + self.pref_path + "'...")
-        pref_file = open(self.pref_path, "w+")
-        pref_file.write(json.dumps(self.pref_data))
-        pref_file.close()
-
-    def set_pref(self, setting, value):
-        print('Set preference: "' + value + '" to "' + setting + '"')
-        self.pref_data[setting] = value;
-
-    def get_pref(self, setting, default_value=False):
-        try:
-            # Read data from preferences, if it exists.
-            value = self.pref_data[setting]
-            return value
-            print('Read preference: "' + value + '" from "' + setting + '"')
-        except:
-            # Should it be non-existent, return a fallback option.
-            print("Preference '" + setting + "' doesn't exist. ")
-            self.set_pref(setting, default_value)
-            return default_value
-
-    def refresh_pref_page(self, webkit):
-        # Boolean options
-        for setting in ['live_switch','live_preview','activate_on_save']:
-            if (self.pref_data[setting] == "true"):
-                webkit.execute_script("$('#" + setting + "').prop('checked', true);")
-
-    def create_default_config(self):
-        default_settings = '{\n "live_switch" : "false",\n "live_preview" : "false",\n "activate_on_save" : "false" \n}'
-
-        print('Creating new preferences file...')
-        if os.path.exists(self.pref_path):
-            print('Failed to parse JSON preferences!')
-            os.rename(self.pref_path, self.pref_path+'.bak')
-            print('Successfully backed up problematic preferences JSON file.')
-
-        pref_file = open(self.pref_path, "w")
-        pref_file.write(default_settings)
-        pref_file.close()
-        print('Successfully written default preferences.')
 
 
 class WebkitJavaScriptExecutor(object):

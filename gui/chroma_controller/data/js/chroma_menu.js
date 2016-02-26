@@ -41,7 +41,7 @@ function profile_new() {
  * Edit profile.
  */
 function profile_edit() {
-    var selected_profile = $("#profiles_list option:selected").text();
+    var selected_profile = $("#profiles-list option:selected").text();
     cmd('profile-edit?' + selected_profile);
 }
 
@@ -49,7 +49,7 @@ function profile_edit() {
  * Delete a profile confirmation box
  */
 function profile_del() {
-    var selected_profile = $("#profiles_list option:selected").text();
+    var selected_profile = $("#profiles-list option:selected").text();
 
     var dialog_response = window.confirm("Are you sure you wish to delete '" + selected_profile + "'?");
     if (dialog_response == true) {
@@ -61,7 +61,7 @@ function profile_del() {
  * Activate profile.
  */
 function profile_activate() {
-    var selected_profile = $("#profiles_list option:selected").text();
+    var selected_profile = $("#profiles-list option:selected").text();
     cmd('profile-activate?'+selected_profile);
 }
 
@@ -81,7 +81,7 @@ $(document).ready(function () {
     });
 
     // Instant profile activation (if 'live_switch' is enabled in preferences)
-    $('#profiles_list').change(function() {
+    $('#profiles-list').change(function() {
         if ( live_switch == true ) {
             profile_activate()
         }
