@@ -398,11 +398,11 @@ class AppIndicator:
             self.profiles_menu.append(button)
 
     def apply_startup_settings(self):
-        if bool(self.preferences.get_pref('startup', 'enabled', False)):
+        if self.preferences.get_pref('startup', 'enabled', 'false') == 'true':
             start_effect = self.preferences.get_pref('startup', 'start_effect', 'disabled')
             start_profile = self.preferences.get_pref('startup', 'start_profile', None)
             start_brightness = int(self.preferences.get_pref('startup', 'start_brightness', 0))
-            start_macro = bool(self.preferences.get_pref('startup', 'start_macro', False))
+            start_macro = self.preferences.get_pref('startup', 'start_macro', 'false')
             start_col1_r = self.preferences.get_pref('primary_colors', 'red', 0)
             start_col1_g = self.preferences.get_pref('primary_colors', 'green', 255)
             start_col1_b = self.preferences.get_pref('primary_colors', 'blue', 0)
@@ -430,7 +430,7 @@ class AppIndicator:
             if not start_brightness == 0:
                 self.daemon.set_brightness(start_brightness)
 
-            if start_macro:
+            if start_macro == 'true':
                 self.daemon.marco_keys(True)
 
             print('-- Start-up settings applied.')
