@@ -15,7 +15,7 @@ LD=ld
 LIBDBUS=$(shell pkg-config --libs dbus-1 > /dev/null 2>&1 && echo 0)
 
 ifeq ($(LIBDBUS), 0)
-	LIBS+= `pkg-config --libs dbus-1` 
+	LIBS+= `pkg-config --libs dbus-1`
 	CFLAGS+= `pkg-config --cflags dbus-1` -DUSE_DBUS
 	DEBUG_CFLAGS+= `pkg-config --cflags dbus-1` -DUSE_DBUS
 endif
@@ -72,10 +72,10 @@ endif
 razer_chroma_controller_shared_debug: $(RAZER_CHROMA_CONTROLLER_DEBUG_OBJ)
 	$(CC) -rdynamic -nostdlib -DCREATELIB -shared $(RAZER_CHROMA_CONTROLLER_DEBUG_OBJ) $(LDFLAGS) -o librazer_chroma_controller_debug.so
 
-%.o: %.c 
+%.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-%.do: %.c 
+%.do: %.c
 	$(CC) $(DEBUG_CFLAGS) -c -o $@ $<
 
 install:
@@ -97,16 +97,15 @@ endif
 uninstall:
 	@echo "\n::\033[32m REMOVING librazer_chroma.so\033[0m"
 	@echo "===================================="
-	@rm /usr/lib/librazer_chroma.so
+	@rm -f /usr/lib/librazer_chroma.so
 ifeq ($(LIBDBUS), 0)
 	@echo "\n::\033[32m REMOVING librazer_chroma_controller.so\033[0m"
 	@echo "===================================="
-	@rm /usr/lib/librazer_chroma_controller.so
+	@rm -f /usr/lib/librazer_chroma_controller.so
 endif
 
-clean: 
+clean:
 	rm -f *.do *.o *.a *.so *.da
 
-indent:	
+indent:
 	indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 *.c *.h
-
