@@ -443,13 +443,13 @@ Goal 1 (66/66)  [Completed]:
 
  - Reward:  Sound driven example effect(Spectrum based).
 
-Stretch Goal 1 (155 of 166):
+Stretch Goal 1 (166 of 166):
  
 Buying a Razer Tartarus (also no driver written yet)
 
  - Reward:  Packaging for major distributions (debian based,redhat based,tar balls)
 
-Stretch Goal 2 (155 of 333):
+Stretch Goal 2 (213 of 333):
  Buying a Razer Deathstalker Utimate (no driver too)
  - Reward:  A gtk based GUI (simple , something to build upon further).
 
@@ -463,7 +463,10 @@ Thank you for all donations i really appreciate it!
 
   - Luca Steeb 5
   - Klee Dienes 150
-
+  - Josh Ventura 25
+  - Trace McCabe 25
+  - Anonymous 5
+  - Luis Fernandes 3.5
 
   You can send your donations via PayPal to : feckelburger [at] gmx.net
 
