@@ -8,7 +8,7 @@ LIBDBUS=$(shell pkg-config --libs dbus-1 > /dev/null 2>&1 && echo 0)
 LIBFFTW3=$(shell pkg-config --libs fftw3 > /dev/null 2>&1 && echo 0)
 
 ifeq ($(LIBDBUS), 0)
-	LIBS+= `pkg-config --libs dbus-1` 
+	LIBS+= `pkg-config --libs dbus-1`
 	CFLAGS+= `pkg-config --cflags dbus-1` -DUSE_DBUS
 	DEBUG_CFLAGS+= `pkg-config --cflags dbus-1` -DUSE_DBUS
 endif
@@ -35,13 +35,13 @@ all: daemon_shared daemon_static daemon_debug daemon_fx
 daemon_debug: $(RAZER_CHROMA_DAEMON_DEBUG_OBJ)
 	@echo "\n::\033[32m COMPILING razer_bcd daemon [DEBUG]\033[0m"
 	@echo "======================================"
-	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_DEBUG_OBJ) ../lib/librazer_chroma.da $(LIBS) -o razer_bcd_debug_static 
-	$(CC) -L../lib -rdynamic $(RAZER_CHROMA_DAEMON_DEBUG_OBJ) -lrazer_chroma_debug $(LIBS) -o razer_bcd_debug_shared 
+	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_DEBUG_OBJ) ../lib/librazer_chroma.da $(LIBS) -o razer_bcd_debug_static
+	$(CC) -L../lib -rdynamic $(RAZER_CHROMA_DAEMON_DEBUG_OBJ) -lrazer_chroma_debug $(LIBS) -o razer_bcd_debug_shared
 
 daemon_static: $(RAZER_CHROMA_DAEMON_OBJ)
 	@echo "\n::\033[32m COMPILING razer_bcd daemon\033[0m"
 	@echo "=============================="
-	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_OBJ) ../lib/librazer_chroma.a $(LIBS) -o razer_bcd_static 
+	$(CC) -rdynamic $(RAZER_CHROMA_DAEMON_OBJ) ../lib/librazer_chroma.a $(LIBS) -o razer_bcd_static
 	@strip razer_bcd_static
 
 daemon_shared: $(RAZER_CHROMA_DAEMON_OBJ)
@@ -50,18 +50,18 @@ daemon_shared: $(RAZER_CHROMA_DAEMON_OBJ)
 	$(CC) -L../lib -rdynamic $(RAZER_CHROMA_DAEMON_OBJ) -lrazer_chroma $(LIBS) -o razer_bcd
 	@strip razer_bcd
 
-%.o: %.c 
+%.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-%.do: %.c 
+%.do: %.c
 	$(CC) $(DEBUG_CFLAGS) -c -o $@ $<
 
 
-daemon_fx: 
+daemon_fx:
 	make -C fx all
 
-daemon_fx_clean: 
-	make -C fx clean 
+daemon_fx_clean:
+	make -C fx clean
 
 fedora_install:
 	install -v -D razer_bcd $(DESTDIR)/usr/sbin/razer_bcd
@@ -103,6 +103,5 @@ uninstall:
 clean: daemon_fx_clean
 	rm -f *.do *.da *.o razer_bcd razer_bcd_debug_shared razer_bcd_debug_static razer_bcd_static
 
-indent:	
+indent:
 	indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 *.c *.h
-

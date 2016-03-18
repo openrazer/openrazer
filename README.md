@@ -1,6 +1,9 @@
 # razer_chroma_drivers
 
-A Collection of Linux drivers for the Razer Chroma devices, providing a daemon and graphical frontends.
+A collection of Linux drivers for the Razer Chroma devices, providing a daemon and graphical frontends.
+
+Website: http://pez2001.github.io/razer_chroma_drivers/
+
 
 Supports:
  * Razer Blackwidow Ultimate 2013 *(all lighting modes)*
@@ -23,7 +26,7 @@ Supports:
         cd razer_blackwidow_chroma_driver
         ./install_driver_debian.sh
 
- 1. Reboot
+ 1. **Reboot**
 
 
 
@@ -57,6 +60,8 @@ You can either install using the above Debian method or with the packaged method
  1. **(Optional)** If you wish, you can clean source directory:
 
         make clean
+ 
+ 1. **Reboot**
 
 Installing the `.deb` file has multiple benefits:
 
