@@ -1,84 +1,138 @@
-KERNELDIR?=/lib/modules/$(shell uname -r)/build
+# DESTDIR is used to install into a different root directory
 DESTDIR?=/
-DRIVERDIR:=$(shell pwd)/driver
-MODULEDIR=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
+# Specify the kernel directory to use
+KERNELDIR?=/lib/modules/$(shell uname -r)/build
+# Need the absolute directory do the driver directory to build kernel modules
+DRIVERDIR?=$(shell pwd)/driver
 
-all: librazer_chroma razer_daemon razer_daemon_controller razer_examples razer_drv
+# Where kernel drivers are going to be installed
+MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
 
-# added redirect to remove output of a useless makefile warning
-razer_drv:
-	@echo "\n::\033[32m COMPILING razer kernel modules\033[0m"
+# Python dir
+PYTHONDIR?=/usr/lib/python3.4/site-packages
+
+
+# Driver compilation
+driver:
+	@echo "\n::\033[32m Compiling Razer kernel modules\033[0m"
 	@echo "========================================"
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules > /dev/null 2>&1
 
-razer_drv_verbose:
-	@echo "\n::\033[32m COMPILING razer kernel modules\033[0m"
+driver_verbose:
+	@echo "\n::\033[32m Compiling Razer kernel modules\033[0m"
 	@echo "========================================"
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules
 
+driver_clean:
+	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) clean > /dev/null 2>&1
 
+# Install kernel modules and then update module dependencies
+driver_install:
+	@echo "\n::\033[34m Installing Razer kernel modules\033[0m"
+	@echo "====================================================="
+	@cp -v $(DRIVERDIR)/razerkbd.ko $(DESTDIR)/$(MODULEDIR)
+	@cp -v $(DRIVERDIR)/razermouse.ko $(DESTDIR)/$(MODULEDIR)
+	@cp -v $(DRIVERDIR)/razerfirefly.ko $(DESTDIR)/$(MODULEDIR)
+	@chown -v root:root $(MODULEDIR)/*.ko
+	depmod
+
+# Remove kernel modules
+driver_uninstall:
+	@echo "\n::\033[34m Uninstalling Razer kernel modules\033[0m"
+	@echo "====================================================="
+	@cp -v $(DESTDIR)/$(MODULEDIR)/razerkbd.ko
+	@cp -v $(DESTDIR)/$(MODULEDIR)/razermouse.ko
+	@cp -v $(DESTDIR)/$(MODULEDIR)/razerfirefly.ko
+
+
+# Razer Chroma Library
 librazer_chroma:
-	make -C lib all
+	make --no-print-directory -C lib all
 
 librazer_chroma_clean:
-	make -C lib clean
+	make --no-print-directory -C lib clean
 
-razer_daemon:
-	make -C daemon all
+# Razer Daemon
+daemon:
+	make --no-print-directory -C daemon all
 
-razer_daemon_clean:
-	make -C daemon clean
+daemon_clean:
+	make --no-print-directory -C daemon clean
 
-razer_daemon_controller:
-	make -C daemon_controller all
+# Razer Daemon contoller
+daemon_controller:
+	make --no-print-directory -C daemon_controller all
 
-razer_daemon_controller_clean:
-	make -C daemon_controller clean
+daemon_controller_clean:
+	make --no-print-directory -C daemon_controller clean
 
-razer_examples:
-	make -C examples all
+# Examples
+examples:
+	make --no-print-directory -C examples all
 
-razer_examples_clean:
-	make -C examples clean
+examples_clean:
+	make --no-print-directory -C examples clean
 
-fedora_install: all
-	# Install the main binaries
-	make -C lib               fedora_install DESTDIR=$(DESTDIR)
-	make -C daemon            fedora_install DESTDIR=$(DESTDIR)
-	make -C daemon_controller fedora_install DESTDIR=$(DESTDIR)
 
-	# Install UDEV conf
-	install -v -D install_files/udev/95-razerkbd.rules $(DESTDIR)/etc/udev/rules.d/95-razerkbd.rules
 
-	# Install DBUS conf
-	install -v -D install_files/dbus/org.voyagerproject.razer.daemon.conf $(DESTDIR)/etc/dbus-1/system.d/org.voyagerproject.razer.daemon.conf
+# Python Library
+python_library_install:
+	@echo "\n::\033[34m Installing Razer python library\033[0m"
+	@echo "====================================================="
+	@install -v -d gui/lib/razer $(DESTDIR)/$(PYTHONDIR)/razer
+	@cp -v -r gui/lib/razer/* $(DESTDIR)/$(PYTHONDIR)/razer
 
-	# Install bash helper functions
-	install -v -D install_files/share/bash_keyboard_functions.sh $(DESTDIR)/usr/share/razer_bcd/bash_keyboard_functions.sh
-	install -v -D install_files/share/systemd_helpers.sh $(DESTDIR)/usr/share/razer_bcd/systemd_helpers.sh
+python_library_uninstall:
+	@echo "\n::\033[34m Uninstalling Razer python library\033[0m"
+	@echo "====================================================="
+	rm -rf $(DESTDIR)/$(PYTHONDIR)/razer
 
-	# Copy over systemd config
-	mkdir -p $(DESTDIR)/etc/systemd/system/
-	install -v -D install_files/systemd/razer_bcd.service $(DESTDIR)/usr/lib/systemd/system/razer_bcd.service
-	ln -f -s /usr/lib/systemd/system/razer_bcd.service $(DESTDIR)/etc/systemd/system/razer_bcd.service
+# Python Tray App
+python_tray_app_install:
+	@echo "\n::\033[34m Installing Razer python tray applet\033[0m"
+	@echo "====================================================="
+	@install -v -d gui/tray_applet $(DESTDIR)/usr/share/razer_tray_applet
+	@cp -v -r gui/tray_applet/* $(DESTDIR)/usr/share/razer_tray_applet
 
-	# Install application entries
-	install -v -D install_files/desktop/razer_tray_applet.desktop $(DESTDIR)/usr/share/applications/razer_tray_applet.desktop
-	install -v -D install_files/desktop/razer_chroma_controller.desktop $(DESTDIR)/usr/share/applications/razer_chroma_controller.desktop
+python_tray_app_uninstall:
+	@echo "\n::\033[34m Uninstalling Razer python tray applet\033[0m"
+	@echo "====================================================="
+	rm -rf $(DESTDIR)/usr/share/razer_tray_applet
 
-	# Install Python3 library
-	install -v -d gui/lib/razer $(DESTDIR)/usr/lib/python3.4/site-packages/razer
-	cp -v -r gui/lib/razer/* $(DESTDIR)/usr/lib/python3.4/site-packages/razer
+# Python Chroma App
+python_chroma_app_install:
+	@echo "\n::\033[34m Installing Razer python chroma applet\033[0m"
+	@echo "====================================================="
+	@install -v -d gui/chroma_controller $(DESTDIR)/usr/share/razer_chroma_controller
+	@cp -v -r gui/chroma_controller/* $(DESTDIR)/usr/share/razer_chroma_controller
 
-	# Install Tray application
-	install -v -d gui/tray_applet $(DESTDIR)/usr/share/razer_tray_applet
-	cp -v -r gui/tray_applet/* $(DESTDIR)/usr/share/razer_tray_applet
+python_chroma_app_uninstall:
+	@echo "\n::\033[34m Uninstalling Razer python chroma applet\033[0m"
+	@echo "====================================================="
+	rm -rf $(DESTDIR)/usr/share/razer_chroma_controller
 
-	# Install Chroma App
-	install -v -d gui/chroma_controller $(DESTDIR)/usr/share/razer_chroma_controller
-	cp -v -r gui/chroma_controller/* $(DESTDIR)/usr/share/razer_chroma_controller
+# App desktop files
+desktop_files_install:
+	@echo "\n::\033[34m Installing .desktop files\033[0m"
+	@echo "====================================================="
+	@install -v -D install_files/desktop/razer_tray_applet.desktop $(DESTDIR)/usr/share/applications/razer_tray_applet.desktop
+	@install -v -D install_files/desktop/razer_chroma_controller.desktop $(DESTDIR)/usr/share/applications/razer_chroma_controller.desktop
 
-	# Copy razer kernel driver to src
+desktop_files_uninstall:
+	@echo "\n::\033[34m Uninstalling .desktop files\033[0m"
+	@echo "====================================================="
+	rm -f $(DESTDIR)/usr/share/applications/razer_tray_applet.desktop
+	rm -f $(DESTDIR)/usr/share/applications/razer_chroma_controller.desktop
+
+# Clean target
+clean: librazer_chroma_clean daemon_clean daemon_controller_clean examples_clean driver_clean
+
+# Build all target
+all: librazer_chroma daemon daemon_controller examples driver
+
+setup_dkms: driver
+	@echo "\n::\033[34m Installing DKMS files\033[0m"
+	@echo "====================================================="
 	install -v -D Makefile $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/Makefile
 	install -v -D install_files/dkms/dkms.conf $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/dkms.conf
 	install -v -d driver $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver
@@ -87,63 +141,120 @@ fedora_install: all
 	cp -v driver/*.h $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
 	rm -fv $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/*.mod.c
 
-	# Set up DKMS
-	/usr/lib/dkms/common.postinst razer_chroma_driver 1.0.0 /usr/share/razer_chroma_driver-dkms
-	modprobe razerkbd
-	modprobe razermouse
-
-
-
-install: all
-	make -C lib install
-	make -C daemon install
-	make -C daemon_controller install
-	@echo "\n::\033[32m INSTALLING razer chroma kernel module\033[0m"
+udev_install:
+	@echo "\n::\033[34m Installing Razer udev rules\033[0m"
 	@echo "====================================================="
-	cp $(DRIVERDIR)/razerkbd.ko $(MODULEDIR)
-	chown root:root $(MODULEDIR)/razerkbd.ko
-	depmod
-	@echo "\n::\033[32m INSTALLING razer chroma udev rules\033[0m"
+	install -v -D install_files/udev/95-razerkbd.rules $(DESTDIR)/etc/udev/rules.d/95-razerkbd.rules
+
+udev_uninstall:
+	@echo "\n::\033[34m Uninstalling Razer udev rules\033[0m"
 	@echo "====================================================="
-	cp install_files/udev/95-razerkbd.rules /etc/udev/rules.d
-	chown root:root /etc/udev/rules.d/95-razerkbd.rules
-	@echo "\n::\033[32m INSTALLING razer chroma dbus policy\033[0m"
+	rm -f $(DESTDIR)/etc/udev/rules.d/95-razerkbd.rules
+
+dbus_install:
+	@echo "\n::\033[34m Installing Razer chroma DBus policy\033[0m"
 	@echo "====================================================="
-	cp install_files/dbus/org.voyagerproject.razer.daemon.conf /etc/dbus-1/system.d
-	chown root:root /etc/dbus-1/system.d/org.voyagerproject.razer.daemon.conf
-	@echo "\n::\033[32m INSTALLING razer daemon init.d file\033[0m"
+	install -v -D install_files/dbus/org.voyagerproject.razer.daemon.conf $(DESTDIR)/etc/dbus-1/system.d/org.voyagerproject.razer.daemon.conf
+
+dbus_uninstall:
+	@echo "\n::\033[34m Uninstalling Razer chroma DBus policy\033[0m"
 	@echo "====================================================="
-	cp install_files/init.d/razer_bcd /etc/init.d
-	chown root:root /etc/init.d/razer_bcd
-	cp install_files/share/bash_keyboard_functions.sh /usr/share/razer_bcd/bash_keyboard_functions.sh
-	chown root:root /usr/share/razer_bcd/bash_keyboard_functions.sh
-	ln -fs ../init.d/razer_bcd /etc/rc2.d/S24razer_bcd
-	ln -fs ../init.d/razer_bcd /etc/rc3.d/S24razer_bcd
-	ln -fs ../init.d/razer_bcd /etc/rc4.d/S24razer_bcd
-	ln -fs ../init.d/razer_bcd /etc/rc5.d/S24razer_bcd
+	rm -f $(DESTDIR)/etc/dbus-1/system.d/org.voyagerproject.razer.daemon.conf
 
-	ln -fs ../init.d/razer_bcd /etc/rc0.d/K02razer_bcd
-	ln -fs ../init.d/razer_bcd /etc/rc1.d/K02razer_bcd
-	ln -fs ../init.d/razer_bcd /etc/rc6.d/K02razer_bcd
+rcd_links:
+	mkdir -p $(DESTDIR)/etc/rc0.d $(DESTDIR)/etc/rc1.d $(DESTDIR)/etc/rc2.d $(DESTDIR)/etc/rc3.d $(DESTDIR)/etc/rc4.d $(DESTDIR)/etc/rc5.d $(DESTDIR)/etc/rc6.d
+	ln -fs ../init.d/razer_bcd $(DESTDIR)/etc/rc2.d/S24razer_bcd
+	ln -fs ../init.d/razer_bcd $(DESTDIR)/etc/rc3.d/S24razer_bcd
+	ln -fs ../init.d/razer_bcd $(DESTDIR)/etc/rc4.d/S24razer_bcd
+	ln -fs ../init.d/razer_bcd $(DESTDIR)/etc/rc5.d/S24razer_bcd
+	ln -fs ../init.d/razer_bcd $(DESTDIR)/etc/rc0.d/K02razer_bcd
+	ln -fs ../init.d/razer_bcd $(DESTDIR)/etc/rc1.d/K02razer_bcd
+	ln -fs ../init.d/razer_bcd $(DESTDIR)/etc/rc6.d/K02razer_bcd
 
-uninstall:
-	-make -C lib uninstall
-	-make -C daemon uninstall
-	rm -f /etc/init.d/razer_bcd
-	rm -f /etc/udev/rules.d/95-razerkbd.rules
-	rm -f /etc/rc2.d/S24razer_bcd
-	rm -f /etc/rc3.d/S24razer_bcd
-	rm -f /etc/rc4.d/S24razer_bcd
-	rm -f /etc/rc5.d/S24razer_bcd
-	rm -f /etc/rc0.d/K02razer_bcd
-	rm -f /etc/rc1.d/K02razer_bcd
-	rm -f /etc/rc6.d/K02razer_bcd
-	rm -f /etc/dbus-1/system.d/org.voyagerproject.razer.daemon.conf
-	rm -f /usr/sbin/razer_blackwidow_chroma_activate_driver.sh
+remove_rcd_links:
+	rm -f $(DESTDIR)/etc/rc2.d/S24razer_bcd
+	rm -f $(DESTDIR)/etc/rc3.d/S24razer_bcd
+	rm -f $(DESTDIR)/etc/rc4.d/S24razer_bcd
+	rm -f $(DESTDIR)/etc/rc5.d/S24razer_bcd
+	rm -f $(DESTDIR)/etc/rc0.d/K02razer_bcd
+	rm -f $(DESTDIR)/etc/rc1.d/K02razer_bcd
+	rm -f $(DESTDIR)/etc/rc6.d/K02razer_bcd
+
+# Install for Ubuntu
+ubuntu_install: all desktop_files_install udev_install dbus_install
+	@echo "\n::\033[34m Installing for Ubuntu\033[0m"
+	@echo "====================================================="
+	@make --no-print-directory -C lib install DESTDIR=$(DESTDIR)
+	@make --no-print-directory -C daemon install DESTDIR=$(DESTDIR)
+	@make --no-print-directory -C daemon_controller install DESTDIR=$(DESTDIR)
+	
+	@make --no-print-directory python_library_install PYTHONDIR=/usr/lib/python3/dist-packages
+	@make --no-print-directory python_tray_app_install PYTHONDIR=/usr/lib/python3/dist-packages
+	@make --no-print-directory python_chroma_app_install PYTHONDIR=/usr/lib/python3/dist-packages
+
+# Ubuntu 14.04 uses upstart
+ubuntu_14_04_install ubuntu_14_10_install: ubuntu_install
+	@echo "\n::\033[34m Installing Razer daemon upstart file\033[0m"
+	@echo "====================================================="
+	@install -v -D install_files/init/razer_bcd.conf $(DESTDIR)/etc/init/razer_bcd.conf
+	@install -v -D install_files/init.d/razer_bcd_ubuntu $(DESTDIR)/etc/init.d/razer_bcd
+	@install -v -D install_files/share/bash_keyboard_functions.sh $(DESTDIR)/usr/share/razer_bcd/bash_keyboard_functions.sh
+	
+	@make --no-print-directory rcd_links
+
+# Ubuntu 15.04+ uses systemd
+ubuntu_15_04_install ubuntu_15_10_install ubuntu_16_04_install: ubuntu_install
+	@echo "\n::\033[34m Installing Razer daemon systemd file\033[0m"
+	@echo "====================================================="
+	@install -v -D install_files/systemd/razer_bcd.service $(DESTDIR)/lib/systemd/system/razer_bcd.service
+	@install -v -D install_files/init.d/razer_bcd_ubuntu $(DESTDIR)/etc/init.d/razer_bcd
+	@install -v -D install_files/share/bash_keyboard_functions.sh $(DESTDIR)/usr/share/razer_bcd/bash_keyboard_functions.sh
+	@install -v -D install_files/share/systemd_helpers.sh $(DESTDIR)/usr/share/razer_bcd/systemd_helpers.sh
+	
+	@make --no-print-directory rcd_links
+
+fedora_install:
+	@echo "\n::\033[34m Installing for Fedora 23\033[0m"
+	@echo "====================================================="
+	@make --no-print-directory -C lib install DESTDIR=$(DESTDIR) LIBDIR=/usr/lib64
+	@make --no-print-directory -C daemon install DESTDIR=$(DESTDIR)
+	@make --no-print-directory -C daemon_controller install DESTDIR=$(DESTDIR)
+	
+	@make --no-print-directory python_library_install PYTHONDIR=/usr/lib/python3/dist-packages
+	@make --no-print-directory python_tray_app_install PYTHONDIR=/usr/lib/python3/dist-packages
+	@make --no-print-directory python_chroma_app_install PYTHONDIR=/usr/lib/python3/dist-packages
+	
+	@echo "\n::\033[34m Installing Razer systemd daemon file\033[0m"
+	@echo "====================================================="
+	@install -v -D install_files/systemd/razer_bcd.service $(DESTDIR)/lib/systemd/system/razer_bcd.service
+	@install -v -D install_files/init.d/razer_bcd_ubuntu $(DESTDIR)/etc/init.d/razer_bcd
+	@install -v -D install_files/share/bash_keyboard_functions.sh $(DESTDIR)/usr/share/razer_bcd/bash_keyboard_functions.sh
+	@install -v -D install_files/share/systemd_helpers.sh $(DESTDIR)/usr/share/razer_bcd/systemd_helpers.sh
 
 
-clean: librazer_chroma_clean razer_daemon_clean razer_daemon_controller_clean razer_examples_clean razer_drv_clean
 
-razer_drv_clean:
-	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) clean > /dev/null 2>&1
-	# added redirect to remove output of a useless makefile warning
+install: all driver_install desktop_files_install udev_install dbus_install python_library_install python_tray_app_install python_chroma_app_install 
+	@make --no-print-directory -C lib install DESTDIR=$(DESTDIR)
+	@make --no-print-directory -C daemon install DESTDIR=$(DESTDIR)
+	@make --no-print-directory -C daemon_controller install DESTDIR=$(DESTDIR)
+	
+	@echo "\n::\033[34m Installing Razer daemon init.d file\033[0m"
+	@echo "====================================================="
+	@install -v -D install_files/init.d/razer_bcd $(DESTDIR)/etc/init.d/razer_bcd
+	@install -v -D install_files/share/bash_keyboard_functions.sh $(DESTDIR)/usr/share/razer_bcd/bash_keyboard_functions.sh
+	
+	@make --no-print-directory rcd_links
+
+uninstall: driver_uninstall desktop_files_uninstall udev_uninstall dbus_uninstall python_library_uninstall python_tray_app_uninstall python_chroma_app_uninstall remove_rcd_links
+	@make --no-print-directory -C lib uninstall DESTDIR=$(DESTDIR)
+	@make --no-print-directory -C daemon uninstall DESTDIR=$(DESTDIR)
+	@make --no-print-directory -C daemon_controller uninstall DESTDIR=$(DESTDIR)
+	
+	@rm -f $(DESTDIR)/lib/systemd/system/razer_bcd.service
+	@rm -f $(DESTDIR)/etc/init.d/razer_bcd
+	@rm -f $(DESTDIR)/etc/init/razer_bcd.conf
+	@rm -r $(DESTDIR)/usr/share/razer_bcd/bash_keyboard_functions.sh
+	@rm -f $(DESTDIR)/usr/share/razer_bcd/systemd_helpers.sh
+
+
+.PHONY: driver daemon daemon_controller examples

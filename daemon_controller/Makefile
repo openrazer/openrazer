@@ -58,17 +58,14 @@ daemon_controller_shared: $(RAZER_CHROMA_DAEMON_CONTROLLER_OBJ)
 	$(CC) $(DEBUG_CFLAGS) -c -o $@ $<
 
 install:
-	@echo "\n::\033[32m INSTALLING razer_bcd daemon controller\033[0m"
+	@echo "\n::\033[34m Installing razer_bcd daemon controller\033[0m"
 	@echo "======================================="
-	@cp razer_bcd_controller /usr/sbin
-	
-fedora_install:
-	install -v -D razer_bcd_controller $(DESTDIR)/usr/sbin/razer_bcd_controller
+	@install -v -D razer_bcd_controller $(DESTDIR)/usr/sbin/razer_bcd_controller
 
 uninstall:
-	@echo "\n::\033[32m REMOVING razer_bcd daemon controller\033[0m"
+	@echo "\n::\033[34m Uninstalling razer_bcd daemon controller\033[0m"
 	@echo "====================================="
-	@rm -f /usr/sbin/razer_bcd_controller
+	@rm -f $(DESTDIR)/usr/sbin/razer_bcd_controller
 
 clean: 
 	rm -f *.do *.da *.o razer_bcd_controller razer_bcd_controller_debug_shared razer_bcd_controller_debug_static razer_bcd_controller_static
