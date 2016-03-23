@@ -11,6 +11,8 @@ MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
 # Python dir
 PYTHONDIR?=/usr/lib/python3.4/site-packages
 
+# Build all target
+all: librazer_chroma daemon daemon_controller examples driver
 
 # Driver compilation
 driver:
@@ -133,28 +135,28 @@ all: librazer_chroma daemon daemon_controller examples driver
 setup_dkms: driver
 	@echo "\n::\033[34m Installing DKMS files\033[0m"
 	@echo "====================================================="
-	install -v -D Makefile $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/Makefile
-	install -v -D install_files/dkms/dkms.conf $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/dkms.conf
-	install -v -d driver $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver
-	cp -v driver/Makefile $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
-	cp -v driver/*.c $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
-	cp -v driver/*.h $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
+	install -m 644 -v -D Makefile $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/Makefile
+	install -m 644 -v -D install_files/dkms/dkms.conf $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/dkms.conf
+	install -m 755 -v -d driver $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver
+	install -m 644 -v -D driver/Makefile $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/Makefile
+	install -m 644 -v driver/*.c $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
+	install -m 644 -v driver/*.h $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
 	rm -fv $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/*.mod.c
 
 udev_install:
 	@echo "\n::\033[34m Installing Razer udev rules\033[0m"
 	@echo "====================================================="
-	install -v -D install_files/udev/95-razerkbd.rules $(DESTDIR)/etc/udev/rules.d/95-razerkbd.rules
+	install -m 644 -v -D install_files/udev/95-razerkbd.rules $(DESTDIR)/lib/udev/rules.d/95-razerkbd.rules
 
 udev_uninstall:
 	@echo "\n::\033[34m Uninstalling Razer udev rules\033[0m"
 	@echo "====================================================="
-	rm -f $(DESTDIR)/etc/udev/rules.d/95-razerkbd.rules
+	rm -f $(DESTDIR)/lib/udev/rules.d/95-razerkbd.rules
 
 dbus_install:
 	@echo "\n::\033[34m Installing Razer chroma DBus policy\033[0m"
 	@echo "====================================================="
-	install -v -D install_files/dbus/org.voyagerproject.razer.daemon.conf $(DESTDIR)/etc/dbus-1/system.d/org.voyagerproject.razer.daemon.conf
+	install -m 644 -v -D install_files/dbus/org.voyagerproject.razer.daemon.conf $(DESTDIR)/etc/dbus-1/system.d/org.voyagerproject.razer.daemon.conf
 
 dbus_uninstall:
 	@echo "\n::\033[34m Uninstalling Razer chroma DBus policy\033[0m"
@@ -181,7 +183,7 @@ remove_rcd_links:
 	rm -f $(DESTDIR)/etc/rc6.d/K02razer_bcd
 
 # Install for Ubuntu
-ubuntu_install: all desktop_files_install udev_install dbus_install
+ubuntu_install: all desktop_files_install setup_dkms udev_install dbus_install
 	@echo "\n::\033[34m Installing for Ubuntu\033[0m"
 	@echo "====================================================="
 	@make --no-print-directory -C lib install DESTDIR=$(DESTDIR)
@@ -196,9 +198,9 @@ ubuntu_install: all desktop_files_install udev_install dbus_install
 ubuntu_14_04_install ubuntu_14_10_install: ubuntu_install
 	@echo "\n::\033[34m Installing Razer daemon upstart file\033[0m"
 	@echo "====================================================="
-	@install -v -D install_files/init/razer_bcd.conf $(DESTDIR)/etc/init/razer_bcd.conf
-	@install -v -D install_files/init.d/razer_bcd_ubuntu $(DESTDIR)/etc/init.d/razer_bcd
-	@install -v -D install_files/share/bash_keyboard_functions.sh $(DESTDIR)/usr/share/razer_bcd/bash_keyboard_functions.sh
+	@install -m 644 -v -D install_files/init/razer_bcd.conf $(DESTDIR)/etc/init/razer_bcd.conf
+	@install -m 755 -v -D install_files/init.d/razer_bcd_ubuntu $(DESTDIR)/etc/init.d/razer_bcd
+	@install -m 755 -v -D install_files/share/bash_keyboard_functions.sh $(DESTDIR)/usr/share/razer_bcd/bash_keyboard_functions.sh
 	
 	@make --no-print-directory rcd_links
 

@@ -1,4 +1,4 @@
-LIBS=-lm
+LIBS=-lm -lc
 DESTDIR?=/
 LIBDIR?=/usr/lib
 MAJOR_VERSION=0

@@ -1,5 +1,5 @@
 LIBFFTW3=$(shell pkg-config --libs fftw3 > /dev/null 2>&1 && echo 0)
-LIBS=-lm
+LIBS=-lm -lc
 MAJOR_VERSION=0
 MINOR_VERSION=2
 CSTD=-std=c99
