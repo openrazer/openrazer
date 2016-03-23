@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+if ([ -x "/etc/init.d/razer_bcd" ] || [ -e "/etc/init/razer_bcd" ]) && \
+   [ "$1" = remove ]; then
+	invoke-rc.d razer_bcd stop || true
+fi
+
+exit 0

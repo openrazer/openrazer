@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+BUILD_DIR=$(CURDIR)/build
+DEB_DESTDIR=$(CURDIR)/debian/tmp/
+
+override_dh_auto_install:
+	make ubuntu_14_04_install DESTDIR=$(DEB_DESTDIR)
+
+%:
+	dh $@ --with-python3

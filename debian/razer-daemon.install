@@ -1,0 +1,6 @@
+etc/dbus-1
+etc/init
+etc/init.d
+usr/lib/*.so
+usr/sbin
+usr/share/razer_bcd
