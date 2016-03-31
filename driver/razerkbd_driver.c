@@ -1112,6 +1112,35 @@ static int razer_kbd_probe(struct hid_device *hdev,
         retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
         if (retval)
             goto exit_free;
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    {
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_wave);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_spectrum);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_none);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_reactive);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_breath);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_custom);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_temp_clear_row);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_set_logo);
+        if (retval)
+            goto exit_free;
     } else // Chroma
     {
         retval = device_create_file(&hdev->dev, &dev_attr_mode_wave);
@@ -1159,9 +1188,6 @@ static int razer_kbd_probe(struct hid_device *hdev,
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_set_brightness);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_set_logo);
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_test);
