@@ -33,6 +33,9 @@
  #define USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 0x0214
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_BLADE_STEALTH
+ #define USB_DEVICE_ID_RAZER_BLADE_STEALTH 0x0205
+#endif
 
 
 /* Each keyboard report has 90 bytes*/

@@ -5,7 +5,7 @@ R=`printf '%x' $2`
 G=`printf '%x' $3`
 B=`printf '%x' $4`
 
-RAZER_BLACKWIDOW_CHROMA_DEVICES=`ls /sys/bus/hid/devices/ | grep "1532:020[39]"`
+RAZER_BLACKWIDOW_CHROMA_DEVICES=`ls /sys/bus/hid/devices/ | grep "1532:020[359]"`
 for DEV in $RAZER_BLACKWIDOW_CHROMA_DEVICES
 do 
 	if [ -d "/sys/bus/hid/devices/$DEV/input" ]; then
