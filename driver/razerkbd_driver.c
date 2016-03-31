@@ -553,6 +553,33 @@ int razer_set_brightness(struct usb_device *usb_dev, unsigned char brightness)
 }
 
 /**
+ * Set the logo lighting state (on/off only)
+ *
+ * Supported by:
+ *   Razer Blade Stealth
+ */
+int razer_set_logo(struct usb_device *usb_dev, unsigned char state)
+{
+    int retval = 0;
+    if (state == 0 || state == 1)
+    {
+        struct razer_report report;
+        razer_prepare_report(&report);
+        report.parameter_bytes_num = 0x03;
+        report.command = 0x00;
+        report.sub_command = 0x01;
+        report.command_parameters[0] = 0x04;
+        report.command_parameters[1] = state;
+        report.crc = razer_calculate_crc(&report);
+        retval = razer_send_report(usb_dev, &report);
+    } else
+    {
+        printk(KERN_WARNING "razerkbd: Logo lighting, state must be either 0 or 1. Got: %d", state);
+    }
+    return retval;
+}
+
+/**
  * Enable keyboard macro keys
  *
  * The keycodes for the macro keys are 191-195 for M1-M5.
@@ -817,6 +844,20 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
 }
 
 /**
+ * Write device file "set_logo"
+ *
+ * Sets the logo lighting state to the ASCII number written to this file.
+ */
+static ssize_t razer_attr_write_set_logo(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int state = simple_strtoul(buf, NULL, 10);
+    razer_set_logo(usb_dev, (unsigned char)state);
+    return count;
+}
+
+/**
  * Write device file "mode_reactive"
  *
  * Sets reactive mode when this file is written to. A speed byte and 3 RGB bytes should be written
@@ -1016,6 +1057,7 @@ static DEVICE_ATTR(set_key_row,    0220, NULL, razer_attr_write_set_key_row);
 static DEVICE_ATTR(reset,          0220, NULL, razer_attr_write_reset);
 static DEVICE_ATTR(macro_keys,     0220, NULL, razer_attr_write_macro_keys);
 static DEVICE_ATTR(set_brightness, 0220, NULL, razer_attr_write_set_brightness);
+static DEVICE_ATTR(set_logo,       0220, NULL, razer_attr_write_set_logo);
 static DEVICE_ATTR(test,           0220, NULL, razer_attr_write_test);
 
 
@@ -1119,6 +1161,9 @@ static int razer_kbd_probe(struct hid_device *hdev,
     retval = device_create_file(&hdev->dev, &dev_attr_set_brightness);
     if (retval)
         goto exit_free;
+    retval = device_create_file(&hdev->dev, &dev_attr_set_logo);
+    if (retval)
+        goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_test);
     if (retval)
         goto exit_free;
@@ -1192,6 +1237,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     device_remove_file(&hdev->dev, &dev_attr_reset);
     device_remove_file(&hdev->dev, &dev_attr_macro_keys);
     device_remove_file(&hdev->dev, &dev_attr_set_brightness);
+    device_remove_file(&hdev->dev, &dev_attr_set_logo);
     device_remove_file(&hdev->dev, &dev_attr_test);
     device_remove_file(&hdev->dev, &dev_attr_device_type);
 
