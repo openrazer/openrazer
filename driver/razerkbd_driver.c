@@ -1245,6 +1245,17 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_mode_custom);
         device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);
         device_remove_file(&hdev->dev, &dev_attr_set_key_row);
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    {
+        device_remove_file(&hdev->dev, &dev_attr_mode_wave);
+        device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);
+        device_remove_file(&hdev->dev, &dev_attr_mode_none);
+        device_remove_file(&hdev->dev, &dev_attr_mode_reactive);
+        device_remove_file(&hdev->dev, &dev_attr_mode_breath);
+        device_remove_file(&hdev->dev, &dev_attr_mode_custom);
+        device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);
+        device_remove_file(&hdev->dev, &dev_attr_set_key_row);
+        device_remove_file(&hdev->dev, &dev_attr_set_logo);
     } else // Chroma
     {
         device_remove_file(&hdev->dev, &dev_attr_mode_wave);
@@ -1263,7 +1274,6 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     device_remove_file(&hdev->dev, &dev_attr_reset);
     device_remove_file(&hdev->dev, &dev_attr_macro_keys);
     device_remove_file(&hdev->dev, &dev_attr_set_brightness);
-    device_remove_file(&hdev->dev, &dev_attr_set_logo);
     device_remove_file(&hdev->dev, &dev_attr_test);
     device_remove_file(&hdev->dev, &dev_attr_device_type);
 
