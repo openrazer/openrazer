@@ -350,7 +350,7 @@ int razer_set_custom_mode(struct usb_device *usb_dev)
     report.command = RAZER_BLACKWIDOW_CHROMA_CHANGE_EFFECT; /*change effect command id*/
     report.sub_command = RAZER_BLACKWIDOW_CHROMA_EFFECT_CUSTOM;/*custom mode id*/
     report.command_parameters[0] = 0x01; /*profile index? active ?*/
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
 		report.command_parameters[0] = 0x00; /*profile index? active ?*/
 	}
@@ -486,17 +486,27 @@ int razer_set_key_row(struct usb_device *usb_dev, unsigned char row_index, unsig
     int retval;
     struct razer_report report;
     razer_prepare_report(&report);
-    report.parameter_bytes_num = RAZER_BLACKWIDOW_CHROMA_ROW_LEN * 3 + 4;
+    // Ultimate 2016 and stealth use 0x80
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    {
+        report.id = 0x80;
+    }
+    
+    // Added this to handle variable row lengths
+    unsigned char row_length = RAZER_BLACKWIDOW_CHROMA_ROW_LEN;
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    {
+        row_length = RAZER_STEALTH_ROW_LEN;
+    }
+    
+    report.parameter_bytes_num = row_length * 3 + 4;
     report.command = 0x0B; /*set keys command id*/
     report.sub_command = 0xFF;/*set keys mode id*/
     report.command_parameters[0] = row_index; /*row number*/
     report.command_parameters[1] = 0x00; /*unknown always 0*/
-    report.command_parameters[2] = RAZER_BLACKWIDOW_CHROMA_ROW_LEN - 1; /*number of keys in row always 21*/
+    report.command_parameters[2] = row_length - 1; /*number of keys in row always 21*/
     memcpy(&report.command_parameters[3], row_cols, (report.command_parameters[2]+1)*3);
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
-    {
-        report.id = 0x80;
-    }
+    
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev, &report);
     return retval;
@@ -532,7 +542,7 @@ int razer_reset(struct usb_device *usb_dev)
  *   Razer BlackWidow Chroma
  *   Razer BlackWidow Ultimate 2013
  *   Razer BlackWidow Ultimate 2016
- *   Razer Blade Stealth
+ * 	 Razer Stealth?????
  */
 int razer_set_brightness(struct usb_device *usb_dev, unsigned char brightness)
 {
@@ -542,20 +552,59 @@ int razer_set_brightness(struct usb_device *usb_dev, unsigned char brightness)
     report.parameter_bytes_num = 0x03;
     report.command = 0x03; /*set brightness command id*/
     report.sub_command = 0x01;/*unknown*/
-
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
+    
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH) {
+		report.parameter_bytes_num = 0x02;
+		report.reserved2 = 0x0E;
+		report.command = 0x04;
+		report.sub_command = 0x01;
+		report.command_parameters[0] = brightness;
+		
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
         report.command_parameters[0] = 0x04;/*unknown (not speed)*/
+        report.command_parameters[1] = brightness;
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
         report.command_parameters[0] = 0x05;/*unknown (not speed)*/
+        report.command_parameters[1] = brightness;
     } else {
         printk(KERN_WARNING "razerkbd: Unknown product ID '%d'", usb_dev->descriptor.idProduct);
     }
 
-    report.command_parameters[1] = brightness;
+    
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev, &report);
+    return retval;
+}
+
+/**
+ * Toggle FN key
+ * 
+ * If 0 should mean that the F-keys work as normal F-keys
+ * If 1 should mean that the F-keys act as if the FN key is held
+ *
+ * Supported by:
+ *   Razer Blade Stealth????
+ */
+int razer_set_fn_toggle(struct usb_device *usb_dev, unsigned char state)
+{
+    int retval = 0;
+    if (state == 0 || state == 1)
+    {
+        struct razer_report report;
+        razer_prepare_report(&report);
+        report.parameter_bytes_num = 0x02;
+        report.reserved2 = 0x02;
+        report.command = 0x06;
+        report.sub_command = 0x00;
+        report.command_parameters[0] = state;
+        report.crc = razer_calculate_crc(&report);
+        retval = razer_send_report(usb_dev, &report);
+    } else
+    {
+        printk(KERN_WARNING "razerkbd: Toggle FN, state must be either 0 or 1. Got: %d", state);
+    }
     return retval;
 }
 
@@ -851,6 +900,20 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
 }
 
 /**
+ * Write device file "set_fn_toggle"
+ *
+ * Sets the logo lighting state to the ASCII number written to this file.
+ */
+static ssize_t razer_attr_write_set_fn_toggle(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int state = simple_strtoul(buf, NULL, 10);
+    razer_set_fn_toggle(usb_dev, (unsigned char)state);
+    return count;
+}
+
+/**
  * Write device file "set_logo"
  *
  * Sets the logo lighting state to the ASCII number written to this file.
@@ -1065,6 +1128,7 @@ static DEVICE_ATTR(reset,          0220, NULL, razer_attr_write_reset);
 static DEVICE_ATTR(macro_keys,     0220, NULL, razer_attr_write_macro_keys);
 static DEVICE_ATTR(set_brightness, 0220, NULL, razer_attr_write_set_brightness);
 static DEVICE_ATTR(set_logo,       0220, NULL, razer_attr_write_set_logo);
+static DEVICE_ATTR(set_fn_toggle,       0220, NULL, razer_attr_write_set_fn_toggle);
 static DEVICE_ATTR(test,           0220, NULL, razer_attr_write_test);
 
 
@@ -1152,6 +1216,9 @@ static int razer_kbd_probe(struct hid_device *hdev,
         if (retval)
             goto exit_free;
         retval = device_create_file(&hdev->dev, &dev_attr_set_logo);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_set_fn_toggle);
         if (retval)
             goto exit_free;
     } else // Chroma
@@ -1271,6 +1338,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);
         device_remove_file(&hdev->dev, &dev_attr_set_key_row);
         device_remove_file(&hdev->dev, &dev_attr_set_logo);
+        device_remove_file(&hdev->dev, &dev_attr_set_fn_toggle);
     } else // Chroma
     {
         device_remove_file(&hdev->dev, &dev_attr_mode_wave);
