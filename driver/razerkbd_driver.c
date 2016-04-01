@@ -935,7 +935,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         // Set BlackWidow Ultimate to static colour
         razer_set_static_mode_blackwidow_ultimate(usb_dev);
 
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
         // Set BlackWidow Chroma to static colour
         if(count == 3)
