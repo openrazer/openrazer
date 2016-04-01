@@ -1093,6 +1093,9 @@ static int razer_kbd_probe(struct hid_device *hdev,
         retval = device_create_file(&hdev->dev, &dev_attr_mode_pulsate);
             if (retval)
                 goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_macro_keys);
+        if (retval)
+            goto exit_free;
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
     {
         retval = device_create_file(&hdev->dev, &dev_attr_mode_wave);
@@ -1117,6 +1120,9 @@ static int razer_kbd_probe(struct hid_device *hdev,
         if (retval)
             goto exit_free;
         retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_macro_keys);
         if (retval)
             goto exit_free;
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
@@ -1174,6 +1180,9 @@ static int razer_kbd_probe(struct hid_device *hdev,
         retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
         if (retval)
             goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_macro_keys);
+        if (retval)
+            goto exit_free;
     }
 
     retval = device_create_file(&hdev->dev, &dev_attr_get_serial);
@@ -1189,9 +1198,6 @@ static int razer_kbd_probe(struct hid_device *hdev,
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_reset);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_macro_keys);
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_set_brightness);
@@ -1242,6 +1248,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
         device_remove_file(&hdev->dev, &dev_attr_mode_pulsate);
+        device_remove_file(&hdev->dev, &dev_attr_macro_keys);
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
     {
         device_remove_file(&hdev->dev, &dev_attr_mode_wave);
@@ -1252,6 +1259,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_mode_custom);
         device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);
         device_remove_file(&hdev->dev, &dev_attr_set_key_row);
+        device_remove_file(&hdev->dev, &dev_attr_macro_keys);
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
         device_remove_file(&hdev->dev, &dev_attr_mode_wave);
@@ -1273,13 +1281,13 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_mode_custom);
         device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);
         device_remove_file(&hdev->dev, &dev_attr_set_key_row);
+        device_remove_file(&hdev->dev, &dev_attr_macro_keys);
     }
 
     device_remove_file(&hdev->dev, &dev_attr_mode_game);
     device_remove_file(&hdev->dev, &dev_attr_get_serial);
     device_remove_file(&hdev->dev, &dev_attr_mode_static);
     device_remove_file(&hdev->dev, &dev_attr_reset);
-    device_remove_file(&hdev->dev, &dev_attr_macro_keys);
     device_remove_file(&hdev->dev, &dev_attr_set_brightness);
     device_remove_file(&hdev->dev, &dev_attr_test);
     device_remove_file(&hdev->dev, &dev_attr_device_type);
