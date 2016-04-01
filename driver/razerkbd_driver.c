@@ -194,6 +194,7 @@ int razer_set_starlight_mode(struct usb_device *usb_dev)
  * Supported by:
  *   Razer BlackWidow Chroma
  *   Razer BlackWidow Ultimate 2016
+ *   Razer Blade Stealth
  */
 int razer_set_wave_mode(struct usb_device *usb_dev, unsigned char direction)
 {
@@ -215,6 +216,7 @@ int razer_set_wave_mode(struct usb_device *usb_dev, unsigned char direction)
  * Supported by:
  *   Razer BlackWidow Chroma
  *   Razer BlackWidow Ultimate 2016
+ *   Razer Blade Stealth
  */
 int razer_set_none_mode(struct usb_device *usb_dev)
 {
@@ -240,6 +242,7 @@ int razer_set_none_mode(struct usb_device *usb_dev)
  * Supported by:
  *   Razer BlackWidow Chroma
  *   Razer BlackWidow Ultimate 2016
+ *   Razer Blade Stealth
  */
 int razer_set_reactive_mode(struct usb_device *usb_dev, struct razer_rgb *color, unsigned char speed)
 {
@@ -275,6 +278,7 @@ int razer_set_reactive_mode(struct usb_device *usb_dev, struct razer_rgb *color,
  * Supported by:
  *   Razer BlackWidow Chroma
  *   Razer BlackWidow Ultimate 2016
+ *   Razer Blade Stealth
  */
 int razer_set_breath_mode(struct usb_device *usb_dev, unsigned char breathing_type, struct razer_rgb *color1, struct razer_rgb *color2)
 {
@@ -315,6 +319,7 @@ int razer_set_breath_mode(struct usb_device *usb_dev, unsigned char breathing_ty
  *
  * Supported by:
  *   Razer BlackWidow Chroma
+ *   Razer Blade Stealth
  */
 int razer_set_spectrum_mode(struct usb_device *usb_dev)
 {
@@ -360,6 +365,7 @@ int razer_set_custom_mode(struct usb_device *usb_dev)
  * Supported by:
  *   Razer BlackWidow Chroma
  *   Razer BlackWidow Ultimate 2016
+ *   Razer Blade Stealth
  */
 int razer_set_static_mode(struct usb_device *usb_dev, struct razer_rgb *color)
 {
