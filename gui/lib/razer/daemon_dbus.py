@@ -66,10 +66,12 @@ class DaemonInterface(object):
             self.dbus_devices_object.set_active(device_id)
             print("Device ID {0}".format(device_id))
 
-            device_serial = self.dbus_daemon_controls.serial()
             device_type = self.dbus_daemon_controls.device_name()
+            print("Device Type \"{0}\"".format(device_type))
 
-            print("Device Type \"{0}\", Device Serial \"{1}\"".format(device_type, device_serial))
+            device_serial = self.dbus_daemon_controls.serial()
+
+            print("Device Serial \"{0}\"".format(device_serial))
 
             devices.append({
                 "index": device_id,
