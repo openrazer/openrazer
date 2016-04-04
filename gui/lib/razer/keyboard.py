@@ -358,4 +358,7 @@ def get_keyboard_layout():
         else:
             result = layout + '-' + variant
 
+    # If the user has an international layout variant ignore that part
+    result = result.replace('-altgr-intl', '')
+
     return result
