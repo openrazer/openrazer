@@ -26,6 +26,7 @@
 #include <linux/init.h>
 #include <linux/usb/input.h>
 #include <linux/hid.h>
+#include <linux/dmi.h>
 
 #include "razerkbd_driver.h"
 #include "razercommon.h"
@@ -110,10 +111,8 @@ void razer_get_serial(struct usb_device *usb_dev, unsigned char* serial_string)
     
     if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
-        // Stealth does not have serial
-        for(i = 0; i < 15; ++i) {
-            serial_string[i] = 'X';
-        }
+        // Stealth does not have serial via USB, so get it from DMI table
+        strcpy(serial_string, dmi_get_system_info(DMI_PRODUCT_SERIAL));
     } else
     {
         // Get serial
