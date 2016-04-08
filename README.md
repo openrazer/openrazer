@@ -135,6 +135,7 @@ The application is at `/usr/share/razer_tray_applet/razer_tray_applet.py` and al
 
 
 ## GUI Chroma Controller
+The Chroma Controller needs `gir1.2-webkit-3.0` to be installed to run!
 This is a graphical frontend which interacts with the daemon/driver allowing easy configuration of the keyboard's features,
 including the creation of key profiles.
 
