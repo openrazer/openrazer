@@ -63,42 +63,31 @@ daemon_fx:
 daemon_fx_clean:
 	make -C fx clean
 
-fedora_install:
-	install -v -D razer_bcd $(DESTDIR)/usr/sbin/razer_bcd
-	install -v -D fx/pez2001_collection.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_collection.so
-	install -v -D fx/pez2001_mixer.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_mixer.so
-	install -v -D fx/pez2001_light_blast.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_light_blast.so
-	install -v -D fx/pez2001_progress_bar.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_progress_bar.so
-ifeq ($(LIBFFTW3), 0)
-	install -v -D fx/pez2001_compute_fft.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_compute_fft.so
-endif
-
 install:
-	@echo "\n::\033[32m INSTALLING razer_bcd daemon\033[0m"
+	@echo "\n::\033[34m Installing razer_bcd daemon\033[0m"
 	@echo "======================================"
-	@cp razer_bcd /usr/sbin
-	@echo "\n::\033[32m INSTALLING razer daemon fx files\033[0m"
+	@install -v -D razer_bcd $(DESTDIR)/usr/sbin/razer_bcd
+	@echo "\n::\033[34m Installing razer daemon fx files\033[0m"
 	@echo "====================================================="
-	mkdir -p /usr/share/razer_bcd/fx
-	cp fx/pez2001_collection.so /usr/share/razer_bcd/fx
-	cp fx/pez2001_mixer.so /usr/share/razer_bcd/fx
-	cp fx/pez2001_light_blast.so /usr/share/razer_bcd/fx
-	cp fx/pez2001_progress_bar.so /usr/share/razer_bcd/fx
+	@install -v -D fx/pez2001_collection.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_collection.so
+	@install -v -D fx/pez2001_mixer.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_mixer.so
+	@install -v -D fx/pez2001_light_blast.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_light_blast.so
+	@install -v -D fx/pez2001_progress_bar.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_progress_bar.so
 ifeq ($(LIBFFTW3), 0)
-	cp fx/pez2001_compute_fft.so /usr/share/razer_bcd/fx
+	@install -v -D fx/pez2001_compute_fft.so $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_compute_fft.so
 endif
 
 uninstall:
-	@echo "\n::\033[32m REMOVING razer_bcd daemon\033[0m"
+	@echo "\n::\033[34m Uninstalling razer_bcd daemon\033[0m"
 	@echo "====================================="
-	@rm -f /usr/sbin/razer_bcd
-	@echo "\n::\033[32m REMOVING razer daemon fx files\033[0m"
+	@rm -f $(DESTDIR)/usr/sbin/razer_bcd
+	@echo "\n::\033[34m Uninstalling razer daemon fx files\033[0m"
 	@echo "====================================================="
-	@rm -f /usr/share/razer_bcd/fx/pez2001_collection.so
-	@rm -f /usr/share/razer_bcd/fx/pez2001_mixer.so
-	@rm -f /usr/share/razer_bcd/fx/pez2001_light_blast.so
-	@rm -f /usr/share/razer_bcd/fx/pez2001_progress_bar.so
-	@rm -f /usr/share/razer_bcd/fx/pez2001_compute_fft.so
+	@rm -f $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_collection.so
+	@rm -f $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_mixer.so
+	@rm -f $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_light_blast.so
+	@rm -f $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_progress_bar.so
+	@rm -f $(DESTDIR)/usr/share/razer_bcd/fx/pez2001_compute_fft.so
 
 clean: daemon_fx_clean
 	rm -f *.do *.da *.o razer_bcd razer_bcd_debug_shared razer_bcd_debug_static razer_bcd_static

@@ -1,5 +1,6 @@
-LIBS=-lm
+LIBS=-lm -lc
 DESTDIR?=/
+LIBDIR?=/usr/lib
 MAJOR_VERSION=0
 MINOR_VERSION=3
 CSTD=-std=c99
@@ -78,30 +79,25 @@ razer_chroma_controller_shared_debug: $(RAZER_CHROMA_CONTROLLER_DEBUG_OBJ)
 %.do: %.c
 	$(CC) $(DEBUG_CFLAGS) -c -o $@ $<
 
+# Fedora is in /usr/lib64
 install:
-	@echo "\n::\033[32m INSTALLING librazer_chroma.so\033[0m"
+	@echo "\n::\033[34m Installing librazer_chroma.so\033[0m"
 	@echo "===================================="
-	@cp librazer_chroma.so /usr/lib
+	@install -v -D librazer_chroma.so $(DESTDIR)/$(LIBDIR)/librazer_chroma.so
 ifeq ($(LIBDBUS), 0)
-	@echo "\n::\033[32m INSTALLING librazer_chroma_controller.so\033[0m"
+	@echo "\n::\033[34m Installing librazer_chroma_controller.so\033[0m"
 	@echo "===================================="
-	@cp librazer_chroma_controller.so /usr/lib
-endif
-
-fedora_install:
-	install -v -D librazer_chroma.so $(DESTDIR)/usr/lib64/librazer_chroma.so
-ifeq ($(LIBDBUS), 0)
-	install -v -D librazer_chroma_controller.so $(DESTDIR)/usr/lib64/librazer_chroma_controller.so
+	@install -v -D librazer_chroma_controller.so $(DESTDIR)/$(LIBDIR)/librazer_chroma_controller.so
 endif
 
 uninstall:
-	@echo "\n::\033[32m REMOVING librazer_chroma.so\033[0m"
+	@echo "\n::\033[34m Uninstalling librazer_chroma.so\033[0m"
 	@echo "===================================="
-	@rm -f /usr/lib/librazer_chroma.so
+	@rm -f $(DESTDIR)/$(LIBDIR)/librazer_chroma.so
 ifeq ($(LIBDBUS), 0)
-	@echo "\n::\033[32m REMOVING librazer_chroma_controller.so\033[0m"
+	@echo "\n::\033[32m Uninstalling librazer_chroma_controller.so\033[0m"
 	@echo "===================================="
-	@rm -f /usr/lib/librazer_chroma_controller.so
+	@rm -f $(DESTDIR)/$(LIBDIR)/librazer_chroma_controller.so
 endif
 
 clean:

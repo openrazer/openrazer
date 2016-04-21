@@ -6,5 +6,5 @@ Exec=/usr/share/razer_chroma_controller/chroma_controller.py
 Icon=/usr/share/razer_chroma_controller/data/img/app-icon.svg
 Terminal=false
 Type=Application
-Categories=Keyboard;Razer;Chroma
+Categories=Utility
 OnlyShowIn=Unity;MATE;

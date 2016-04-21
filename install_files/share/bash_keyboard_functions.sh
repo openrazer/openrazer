@@ -1,3 +1,5 @@
+#!/bin/sh
+
 bind_device() {
 	# Check if the device is already binded
 	if [ -e "/sys/bus/hid/drivers/$1/$2" ]; then

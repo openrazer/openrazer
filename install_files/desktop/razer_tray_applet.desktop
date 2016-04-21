@@ -6,5 +6,5 @@ Exec=/usr/share/razer_tray_applet/razer_tray_applet.py
 Icon=/usr/share/razer_tray_applet/tray_icon.png
 Terminal=false
 Type=Application
-Categories=Keyboard;Razer;Chroma
+Categories=Utility;TrayIcon
 OnlyShowIn=Unity;MATE;
