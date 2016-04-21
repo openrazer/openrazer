@@ -26,6 +26,7 @@
 #include <linux/init.h>
 #include <linux/usb/input.h>
 #include <linux/hid.h>
+#include <linux/dmi.h>
 
 #include "razerkbd_driver.h"
 #include "razercommon.h"
@@ -107,36 +108,44 @@ void razer_get_serial(struct usb_device *usb_dev, unsigned char* serial_string)
     struct razer_report request_report;
     int retval;
     int i;
-
-    razer_prepare_report(&request_report);
-
-    request_report.parameter_bytes_num = 0x16;
-    request_report.reserved2 = 0x00;
-    request_report.command = 0x82;
-    request_report.sub_command = 0x00;
-    request_report.command_parameters[0] = 0x00;
-    request_report.crc = razer_calculate_crc(&request_report);
-
-
-    retval = razer_get_usb_response(usb_dev, 0x02, &request_report, 0x02, &response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
-
-    if(retval == 0)
+    
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
-        if(response_report.report_start_marker == 0x02 && response_report.reserved2 == 0x00 && response_report.command == 0x82)
+        // Stealth does not have serial via USB, so get it from DMI table
+        strcpy(serial_string, dmi_get_system_info(DMI_PRODUCT_SERIAL));
+    } else
+    {
+        // Get serial
+        razer_prepare_report(&request_report);
+
+        request_report.parameter_bytes_num = 0x16;
+        request_report.reserved2 = 0x00;
+        request_report.command = 0x82;
+        request_report.sub_command = 0x00;
+        request_report.command_parameters[0] = 0x00;
+        request_report.crc = razer_calculate_crc(&request_report);
+     
+     
+        retval = razer_get_usb_response(usb_dev, 0x02, &request_report, 0x02, &response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+     
+        if(retval == 0)
         {
-            unsigned char* pointer = &response_report.sub_command;
-            for(i = 0; i < 20; ++i)
+            if(response_report.report_start_marker == 0x02 && response_report.reserved2 == 0x00 && response_report.command == 0x82)
             {
-                serial_string[i] = *pointer;
-                ++pointer;
+                unsigned char* pointer = &response_report.sub_command;
+                for(i = 0; i < 20; ++i)
+                {
+                    serial_string[i] = *pointer;
+                    ++pointer;
+                }
+            } else
+            {
+                print_erroneous_report(&response_report, "razerkbd", "Invalid Report Type");
             }
         } else
         {
-            print_erroneous_report(&response_report, "razerkbd", "Invalid Report Type");
+          print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
         }
-    } else
-    {
-      print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
     }
 }
 
@@ -485,6 +494,8 @@ int razer_set_key_row(struct usb_device *usb_dev, unsigned char row_index, unsig
 {
     int retval;
     struct razer_report report;
+    unsigned char row_length = RAZER_BLACKWIDOW_CHROMA_ROW_LEN;
+    
     razer_prepare_report(&report);
     // Ultimate 2016 and stealth use 0x80
     if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
@@ -493,7 +504,6 @@ int razer_set_key_row(struct usb_device *usb_dev, unsigned char row_index, unsig
     }
     
     // Added this to handle variable row lengths
-    unsigned char row_length = RAZER_BLACKWIDOW_CHROMA_ROW_LEN;
     if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
         row_length = RAZER_STEALTH_ROW_LEN;
