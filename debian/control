@@ -34,7 +34,7 @@ Package: razer-tray-app
 Section: misc
 Architecture: all
 Suggests: razer-controller-app
-Depends: python3, python3-razer, python3-gi, gir1.2-appindicator3-0.1
+Depends: python3, python3-razer, razer-daemon, python3-gi, gir1.2-appindicator3-0.1
 Description: Razer Tray Applet
  Simple application that resides in the notification tray used to interface
  with common options on Razer devices
@@ -43,7 +43,7 @@ Package: razer-controller-app
 Section: misc
 Architecture: all
 Suggests: razer-tray-app
-Depends: python3, python3-razer, python3-gi, gir1.2-webkit-3.0
+Depends: python3, python3-razer, razer-daemon, python3-gi, gir1.2-webkit-3.0
 Description: Razer Chroma App
  This application allows you to configure your Razer devices, similar to the
  Razer Synapse application on windows.
