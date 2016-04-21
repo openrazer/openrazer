@@ -1,14 +1,11 @@
 #!/bin/bash
 
-if [ "$1" = "" ] || [ "$2" = "" ] ; then
-    echo "Must provide version then distribution like ./build... \"1.0\" \"14.04\""
+if [ "$1" = "" ] ; then
+    echo "Must provide version then distribution like ./build... \"14.04\""
     exit 1
 fi
 
-VERSION=$1
-ORIG_TAR="razer-${VERSION}.tar.gz"
-
-PACKAGE_VERSION=$2
+PACKAGE_VERSION=$1
 TEMP_DIR=$(mktemp --suffix="_deb_build_tmp" -d)
 ROOT=$(git rev-parse --show-toplevel)
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -22,13 +19,16 @@ fi
 # Go to root of directory
 cd ${ROOT}
 
-# Archive directory
-git archive ${CURRENT_BRANCH} | gzip > ${TEMP_DIR}/${ORIG_TAR}
-
 # Get debian files
 git checkout ${PACKAGE_BRANCH} &>/dev/null
 git archive ${PACKAGE_BRANCH} | gzip > ${TEMP_DIR}/debian_files.tar.gz
+
+# Extract version from changelog
+VERSION=$(tar -xOf ${TEMP_DIR}/debian_files.tar.gz debian/changelog | grep -m 1 -oP '(?<=razer \()[^\-]+')
+ORIG_TAR="razer-${VERSION}.tar.gz"
+
 git checkout ${CURRENT_BRANCH} &>/dev/null
+git archive ${CURRENT_BRANCH} | gzip > ${TEMP_DIR}/${ORIG_TAR}
 
 # Merge the two tar (not tar.gz) files
 cd ${TEMP_DIR}
