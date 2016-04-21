@@ -26,6 +26,7 @@
 #include <linux/init.h>
 #include <linux/usb/input.h>
 #include <linux/hid.h>
+#include <linux/dmi.h>
 
 #include "razerkbd_driver.h"
 #include "razercommon.h"
@@ -107,36 +108,44 @@ void razer_get_serial(struct usb_device *usb_dev, unsigned char* serial_string)
     struct razer_report request_report;
     int retval;
     int i;
-
-    razer_prepare_report(&request_report);
-
-    request_report.parameter_bytes_num = 0x16;
-    request_report.reserved2 = 0x00;
-    request_report.command = 0x82;
-    request_report.sub_command = 0x00;
-    request_report.command_parameters[0] = 0x00;
-    request_report.crc = razer_calculate_crc(&request_report);
-
-
-    retval = razer_get_usb_response(usb_dev, 0x02, &request_report, 0x02, &response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
-
-    if(retval == 0)
+    
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
-        if(response_report.report_start_marker == 0x02 && response_report.reserved2 == 0x00 && response_report.command == 0x82)
+        // Stealth does not have serial via USB, so get it from DMI table
+        strcpy(serial_string, dmi_get_system_info(DMI_PRODUCT_SERIAL));
+    } else
+    {
+        // Get serial
+        razer_prepare_report(&request_report);
+
+        request_report.parameter_bytes_num = 0x16;
+        request_report.reserved2 = 0x00;
+        request_report.command = 0x82;
+        request_report.sub_command = 0x00;
+        request_report.command_parameters[0] = 0x00;
+        request_report.crc = razer_calculate_crc(&request_report);
+     
+     
+        retval = razer_get_usb_response(usb_dev, 0x02, &request_report, 0x02, &response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+     
+        if(retval == 0)
         {
-            unsigned char* pointer = &response_report.sub_command;
-            for(i = 0; i < 20; ++i)
+            if(response_report.report_start_marker == 0x02 && response_report.reserved2 == 0x00 && response_report.command == 0x82)
             {
-                serial_string[i] = *pointer;
-                ++pointer;
+                unsigned char* pointer = &response_report.sub_command;
+                for(i = 0; i < 20; ++i)
+                {
+                    serial_string[i] = *pointer;
+                    ++pointer;
+                }
+            } else
+            {
+                print_erroneous_report(&response_report, "razerkbd", "Invalid Report Type");
             }
         } else
         {
-            print_erroneous_report(&response_report, "razerkbd", "Invalid Report Type");
+          print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
         }
-    } else
-    {
-      print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
     }
 }
 
@@ -194,6 +203,7 @@ int razer_set_starlight_mode(struct usb_device *usb_dev)
  * Supported by:
  *   Razer BlackWidow Chroma
  *   Razer BlackWidow Ultimate 2016
+ *   Razer Blade Stealth
  */
 int razer_set_wave_mode(struct usb_device *usb_dev, unsigned char direction)
 {
@@ -215,6 +225,7 @@ int razer_set_wave_mode(struct usb_device *usb_dev, unsigned char direction)
  * Supported by:
  *   Razer BlackWidow Chroma
  *   Razer BlackWidow Ultimate 2016
+ *   Razer Blade Stealth
  */
 int razer_set_none_mode(struct usb_device *usb_dev)
 {
@@ -240,6 +251,7 @@ int razer_set_none_mode(struct usb_device *usb_dev)
  * Supported by:
  *   Razer BlackWidow Chroma
  *   Razer BlackWidow Ultimate 2016
+ *   Razer Blade Stealth
  */
 int razer_set_reactive_mode(struct usb_device *usb_dev, struct razer_rgb *color, unsigned char speed)
 {
@@ -275,6 +287,7 @@ int razer_set_reactive_mode(struct usb_device *usb_dev, struct razer_rgb *color,
  * Supported by:
  *   Razer BlackWidow Chroma
  *   Razer BlackWidow Ultimate 2016
+ *   Razer Blade Stealth
  */
 int razer_set_breath_mode(struct usb_device *usb_dev, unsigned char breathing_type, struct razer_rgb *color1, struct razer_rgb *color2)
 {
@@ -315,6 +328,7 @@ int razer_set_breath_mode(struct usb_device *usb_dev, unsigned char breathing_ty
  *
  * Supported by:
  *   Razer BlackWidow Chroma
+ *   Razer Blade Stealth
  */
 int razer_set_spectrum_mode(struct usb_device *usb_dev)
 {
@@ -345,7 +359,7 @@ int razer_set_custom_mode(struct usb_device *usb_dev)
     report.command = RAZER_BLACKWIDOW_CHROMA_CHANGE_EFFECT; /*change effect command id*/
     report.sub_command = RAZER_BLACKWIDOW_CHROMA_EFFECT_CUSTOM;/*custom mode id*/
     report.command_parameters[0] = 0x01; /*profile index? active ?*/
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
 		report.command_parameters[0] = 0x00; /*profile index? active ?*/
 	}
@@ -360,6 +374,7 @@ int razer_set_custom_mode(struct usb_device *usb_dev)
  * Supported by:
  *   Razer BlackWidow Chroma
  *   Razer BlackWidow Ultimate 2016
+ *   Razer Blade Stealth
  */
 int razer_set_static_mode(struct usb_device *usb_dev, struct razer_rgb *color)
 {
@@ -479,18 +494,29 @@ int razer_set_key_row(struct usb_device *usb_dev, unsigned char row_index, unsig
 {
     int retval;
     struct razer_report report;
+    unsigned char row_length = RAZER_BLACKWIDOW_CHROMA_ROW_LEN;
+    
     razer_prepare_report(&report);
-    report.parameter_bytes_num = RAZER_BLACKWIDOW_CHROMA_ROW_LEN * 3 + 4;
+    // Ultimate 2016 and stealth use 0x80
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    {
+        report.id = 0x80;
+    }
+    
+    // Added this to handle variable row lengths
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    {
+        row_length = RAZER_STEALTH_ROW_LEN;
+    }
+    
+    report.parameter_bytes_num = row_length * 3 + 4;
     report.command = 0x0B; /*set keys command id*/
     report.sub_command = 0xFF;/*set keys mode id*/
     report.command_parameters[0] = row_index; /*row number*/
     report.command_parameters[1] = 0x00; /*unknown always 0*/
-    report.command_parameters[2] = RAZER_BLACKWIDOW_CHROMA_ROW_LEN - 1; /*number of keys in row always 21*/
+    report.command_parameters[2] = row_length - 1; /*number of keys in row always 21*/
     memcpy(&report.command_parameters[3], row_cols, (report.command_parameters[2]+1)*3);
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
-    {
-        report.id = 0x80;
-    }
+    
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev, &report);
     return retval;
@@ -526,6 +552,7 @@ int razer_reset(struct usb_device *usb_dev)
  *   Razer BlackWidow Chroma
  *   Razer BlackWidow Ultimate 2013
  *   Razer BlackWidow Ultimate 2016
+ * 	 Razer Stealth?????
  */
 int razer_set_brightness(struct usb_device *usb_dev, unsigned char brightness)
 {
@@ -535,20 +562,86 @@ int razer_set_brightness(struct usb_device *usb_dev, unsigned char brightness)
     report.parameter_bytes_num = 0x03;
     report.command = 0x03; /*set brightness command id*/
     report.sub_command = 0x01;/*unknown*/
-
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
+    
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH) {
+		report.parameter_bytes_num = 0x02;
+		report.reserved2 = 0x0E;
+		report.command = 0x04;
+		report.sub_command = 0x01;
+		report.command_parameters[0] = brightness;
+		
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
         report.command_parameters[0] = 0x04;/*unknown (not speed)*/
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
+        report.command_parameters[1] = brightness;
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
         report.command_parameters[0] = 0x05;/*unknown (not speed)*/
+        report.command_parameters[1] = brightness;
     } else {
         printk(KERN_WARNING "razerkbd: Unknown product ID '%d'", usb_dev->descriptor.idProduct);
     }
 
-    report.command_parameters[1] = brightness;
+    
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev, &report);
+    return retval;
+}
+
+/**
+ * Toggle FN key
+ * 
+ * If 0 should mean that the F-keys work as normal F-keys
+ * If 1 should mean that the F-keys act as if the FN key is held
+ *
+ * Supported by:
+ *   Razer Blade Stealth????
+ */
+int razer_set_fn_toggle(struct usb_device *usb_dev, unsigned char state)
+{
+    int retval = 0;
+    if (state == 0 || state == 1)
+    {
+        struct razer_report report;
+        razer_prepare_report(&report);
+        report.parameter_bytes_num = 0x02;
+        report.reserved2 = 0x02;
+        report.command = 0x06;
+        report.sub_command = 0x00;
+        report.command_parameters[0] = state;
+        report.crc = razer_calculate_crc(&report);
+        retval = razer_send_report(usb_dev, &report);
+    } else
+    {
+        printk(KERN_WARNING "razerkbd: Toggle FN, state must be either 0 or 1. Got: %d", state);
+    }
+    return retval;
+}
+
+/**
+ * Set the logo lighting state (on/off only)
+ *
+ * Supported by:
+ *   Razer Blade Stealth
+ */
+int razer_set_logo(struct usb_device *usb_dev, unsigned char state)
+{
+    int retval = 0;
+    if (state == 0 || state == 1)
+    {
+        struct razer_report report;
+        razer_prepare_report(&report);
+        report.parameter_bytes_num = 0x03;
+        report.command = 0x00;
+        report.sub_command = 0x01;
+        report.command_parameters[0] = 0x04;
+        report.command_parameters[1] = state;
+        report.crc = razer_calculate_crc(&report);
+        retval = razer_send_report(usb_dev, &report);
+    } else
+    {
+        printk(KERN_WARNING "razerkbd: Logo lighting, state must be either 0 or 1. Got: %d", state);
+    }
     return retval;
 }
 
@@ -817,6 +910,34 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
 }
 
 /**
+ * Write device file "set_fn_toggle"
+ *
+ * Sets the logo lighting state to the ASCII number written to this file.
+ */
+static ssize_t razer_attr_write_set_fn_toggle(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int state = simple_strtoul(buf, NULL, 10);
+    razer_set_fn_toggle(usb_dev, (unsigned char)state);
+    return count;
+}
+
+/**
+ * Write device file "set_logo"
+ *
+ * Sets the logo lighting state to the ASCII number written to this file.
+ */
+static ssize_t razer_attr_write_set_logo(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int state = simple_strtoul(buf, NULL, 10);
+    razer_set_logo(usb_dev, (unsigned char)state);
+    return count;
+}
+
+/**
  * Write device file "mode_reactive"
  *
  * Sets reactive mode when this file is written to. A speed byte and 3 RGB bytes should be written
@@ -888,7 +1009,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         // Set BlackWidow Ultimate to static colour
         razer_set_static_mode_blackwidow_ultimate(usb_dev);
 
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
         // Set BlackWidow Chroma to static colour
         if(count == 3)
@@ -967,6 +1088,8 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
     {
         write_count = sprintf(buf, "Razer BlackWidow Ultimate 2016\n");
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH) {
+        write_count = sprintf(buf, "Razer Blade Stealth\n");
     } else
     {
         write_count = sprintf(buf, "Unknown Device\n");
@@ -1014,6 +1137,8 @@ static DEVICE_ATTR(set_key_row,    0220, NULL, razer_attr_write_set_key_row);
 static DEVICE_ATTR(reset,          0220, NULL, razer_attr_write_reset);
 static DEVICE_ATTR(macro_keys,     0220, NULL, razer_attr_write_macro_keys);
 static DEVICE_ATTR(set_brightness, 0220, NULL, razer_attr_write_set_brightness);
+static DEVICE_ATTR(set_logo,       0220, NULL, razer_attr_write_set_logo);
+static DEVICE_ATTR(set_fn_toggle,       0220, NULL, razer_attr_write_set_fn_toggle);
 static DEVICE_ATTR(test,           0220, NULL, razer_attr_write_test);
 
 
@@ -1042,6 +1167,9 @@ static int razer_kbd_probe(struct hid_device *hdev,
         retval = device_create_file(&hdev->dev, &dev_attr_mode_pulsate);
             if (retval)
                 goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_macro_keys);
+        if (retval)
+            goto exit_free;
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
     {
         retval = device_create_file(&hdev->dev, &dev_attr_mode_wave);
@@ -1066,6 +1194,41 @@ static int razer_kbd_probe(struct hid_device *hdev,
         if (retval)
             goto exit_free;
         retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_macro_keys);
+        if (retval)
+            goto exit_free;
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    {
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_wave);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_spectrum);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_none);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_reactive);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_breath);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_custom);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_temp_clear_row);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_set_logo);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_set_fn_toggle);
         if (retval)
             goto exit_free;
     } else // Chroma
@@ -1094,6 +1257,9 @@ static int razer_kbd_probe(struct hid_device *hdev,
         retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
         if (retval)
             goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_macro_keys);
+        if (retval)
+            goto exit_free;
     }
 
     retval = device_create_file(&hdev->dev, &dev_attr_get_serial);
@@ -1109,9 +1275,6 @@ static int razer_kbd_probe(struct hid_device *hdev,
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_reset);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_macro_keys);
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_set_brightness);
@@ -1162,6 +1325,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
         device_remove_file(&hdev->dev, &dev_attr_mode_pulsate);
+        device_remove_file(&hdev->dev, &dev_attr_macro_keys);
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
     {
         device_remove_file(&hdev->dev, &dev_attr_mode_wave);
@@ -1172,6 +1336,19 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_mode_custom);
         device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);
         device_remove_file(&hdev->dev, &dev_attr_set_key_row);
+        device_remove_file(&hdev->dev, &dev_attr_macro_keys);
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    {
+        device_remove_file(&hdev->dev, &dev_attr_mode_wave);
+        device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);
+        device_remove_file(&hdev->dev, &dev_attr_mode_none);
+        device_remove_file(&hdev->dev, &dev_attr_mode_reactive);
+        device_remove_file(&hdev->dev, &dev_attr_mode_breath);
+        device_remove_file(&hdev->dev, &dev_attr_mode_custom);
+        device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);
+        device_remove_file(&hdev->dev, &dev_attr_set_key_row);
+        device_remove_file(&hdev->dev, &dev_attr_set_logo);
+        device_remove_file(&hdev->dev, &dev_attr_set_fn_toggle);
     } else // Chroma
     {
         device_remove_file(&hdev->dev, &dev_attr_mode_wave);
@@ -1182,13 +1359,13 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_mode_custom);
         device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);
         device_remove_file(&hdev->dev, &dev_attr_set_key_row);
+        device_remove_file(&hdev->dev, &dev_attr_macro_keys);
     }
 
     device_remove_file(&hdev->dev, &dev_attr_mode_game);
     device_remove_file(&hdev->dev, &dev_attr_get_serial);
     device_remove_file(&hdev->dev, &dev_attr_mode_static);
     device_remove_file(&hdev->dev, &dev_attr_reset);
-    device_remove_file(&hdev->dev, &dev_attr_macro_keys);
     device_remove_file(&hdev->dev, &dev_attr_set_brightness);
     device_remove_file(&hdev->dev, &dev_attr_test);
     device_remove_file(&hdev->dev, &dev_attr_device_type);
@@ -1206,6 +1383,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_STEALTH) },
     { }
 };
 
