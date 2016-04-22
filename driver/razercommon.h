@@ -68,19 +68,6 @@ struct razer_report {
     unsigned char reserved; /*0x0*/
 };
 
-//struct razer_report {
-//    unsigned char report_start_marker; /*0x0*/
-//    unsigned char id; /*always 0xFF maybe it's an i2c id or some range*/
-//    unsigned char reserved1[3];
-//    unsigned char parameter_bytes_num;
-//    unsigned char reserved2;/*always 0x03 maybe some command class id*/
-//    unsigned char command;
-//    unsigned char sub_command;/*named first parameter*/
-//    unsigned char command_parameters[90-11];
-//    unsigned char crc;/*xor'ed bytes of report*/
-//    unsigned char report_end_marker; /*0x0*/
-//};
-
 int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint report_index, ulong wait_min, ulong wait_max);
 int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, ulong wait_min, ulong wait_max);
 unsigned char razer_calculate_crc(struct razer_report *report);
