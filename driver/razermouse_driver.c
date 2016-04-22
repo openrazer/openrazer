@@ -44,8 +44,12 @@ MODULE_LICENSE(DRIVER_LICENSE);
 /**
  * Send report to the keyboard
  */
-int razer_send_report(struct usb_device *usb_dev,void const *data) {
+int razer_set_report(struct usb_device *usb_dev,void const *data) {
     return razer_send_control_msg(usb_dev, data, 0x00, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
+}
+
+int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
+    return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
 }
 
 
@@ -61,26 +65,18 @@ int razer_send_report(struct usb_device *usb_dev,void const *data) {
 void razer_get_serial(struct usb_device *usb_dev, unsigned char* serial_string)
 {
     struct razer_report response_report;
-    struct razer_report request_report;
+    struct razer_report request_report = get_razer_report(0x00, 0x82, 0x16);
     int retval;
     int i;
 
-    razer_prepare_report(&request_report);
-
-    request_report.parameter_bytes_num = 0x16;
-    request_report.reserved2 = 0x00;
-    request_report.command = 0x82;
-    request_report.sub_command = 0x00;
-    request_report.command_parameters[0] = 0x00;
     request_report.crc = razer_calculate_crc(&request_report);
-
-    retval = razer_get_usb_response(usb_dev, 0x00, &request_report, 0x00, &response_report, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
 
     if(retval == 0)
     {
-        if(response_report.report_start_marker == 0x02 && response_report.reserved2 == 0x00 && response_report.command == 0x82)
+        if(response_report.status == 0x02 && response_report.command_class == 0x00 && response_report.command_id.id == 0x82)
         {
-            unsigned char* pointer = &response_report.sub_command;
+            unsigned char* pointer = &response_report.arguments[0];
             for(i = 0; i < 20; ++i)
             {
                 serial_string[i] = *pointer;
@@ -109,26 +105,19 @@ void razer_get_serial(struct usb_device *usb_dev, unsigned char* serial_string)
 int razer_get_battery_level(struct usb_device *usb_dev)
 {
     struct razer_report response_report;
-    struct razer_report request_report;
+    struct razer_report request_report = get_razer_report(0x07, 0x80, 0x02);
     int retval;
     int battery_level = -1;
 
-    razer_prepare_report(&request_report);
-
-    request_report.parameter_bytes_num = 0x02;
-    request_report.reserved2 = 0x07;
-    request_report.command = 0x80;
-    request_report.sub_command = 0x00;
-    request_report.command_parameters[0] = 0x00;
     request_report.crc = razer_calculate_crc(&request_report);
 
-    retval = razer_get_usb_response(usb_dev, 0x00, &request_report, 0x00, &response_report, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
+    retval = razer_get_report(usb_dev,&request_report, &response_report);
 
     if(retval == 0)
     {
-        if(response_report.report_start_marker == 0x02 && response_report.reserved2 == 0x07 && response_report.command == 0x80 && response_report.sub_command == 0x00)
+        if(response_report.status == 0x02 && response_report.command_class == 0x07 && response_report.command_id.id == 0x80 && response_report.arguments[0] == 0x00)
         {
-            battery_level = response_report.command_parameters[0];
+            battery_level = response_report.arguments[1];
         } else
         {
             print_erroneous_report(&response_report, "razermouse", "Invalid Report Type");
@@ -154,26 +143,18 @@ int razer_get_battery_level(struct usb_device *usb_dev)
 int razer_is_charging(struct usb_device *usb_dev)
 {
     struct razer_report response_report;
-    struct razer_report request_report;
+    struct razer_report request_report = get_razer_report(0x07, 0x84, 0x02);
     int retval;
     int is_charging = -1;
 
-    razer_prepare_report(&request_report);
-
-    request_report.parameter_bytes_num = 0x02;
-    request_report.reserved2 = 0x07;
-    request_report.command = 0x84;
-    request_report.sub_command = 0x00;
-    request_report.command_parameters[0] = 0x00;
     request_report.crc = razer_calculate_crc(&request_report);
-
-    retval = razer_get_usb_response(usb_dev, 0x00, &request_report, 0x00, &response_report, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
 
     if(retval == 0)
     {
-        if(response_report.report_start_marker == 0x02 && response_report.reserved2 == 0x07 && response_report.command == 0x84 && response_report.sub_command == 0x00)
+        if(response_report.status == 0x02 && response_report.command_class == 0x07 && response_report.command_id.id == 0x84 && response_report.arguments[0] == 0x00)
         {
-          is_charging = response_report.command_parameters[0];
+          is_charging = response_report.arguments[1];
         } else
         {
             print_erroneous_report(&response_report, "razermouse", "Invalid Report Type");
@@ -198,16 +179,13 @@ int razer_is_charging(struct usb_device *usb_dev)
 int razer_set_key_row(struct usb_device *usb_dev, unsigned char *row_cols) //struct razer_row_rgb *row_cols)
 {
     int retval;
-    struct razer_report report;
-    razer_prepare_report(&report);
-    report.id = 0x80;
-    report.parameter_bytes_num = RAZER_MAMBA_ROW_LEN * 3 + 2;
-    report.command = 0x0C;
-    report.sub_command = 0x00;
-    report.command_parameters[0] = 0x0E;
-    memcpy(&report.command_parameters[1], row_cols, RAZER_MAMBA_ROW_LEN * 3);
+    struct razer_report report = get_razer_report(0x03, 0x0C, RAZER_MAMBA_ROW_LEN * 3 + 2);
+    report.transaction_id.id = 0x80;
+    report.arguments[0] = 0x00;
+    report.arguments[1] = 0x0E;
+    memcpy(&report.arguments[2], row_cols, RAZER_MAMBA_ROW_LEN * 3);
     report.crc = razer_calculate_crc(&report);
-    retval = razer_send_report(usb_dev, &report);
+    retval = razer_set_report(usb_dev, &report);
     return retval;
 }
 
@@ -221,14 +199,11 @@ int razer_set_key_row(struct usb_device *usb_dev, unsigned char *row_cols) //str
 int razer_set_custom_mode(struct usb_device *usb_dev)
 {
     int retval;
-    struct razer_report report;
-    razer_prepare_report(&report);
-    report.id = 0x80;
-    report.parameter_bytes_num = 0x02;
-    report.command = 0x0A;
-    report.sub_command = 0x05;
+    struct razer_report report = get_razer_report(0x03, 0x0A, 0x02);
+    report.transaction_id.id = 0x80;
+    report.arguments[0] = 0x05;
     report.crc = razer_calculate_crc(&report);
-    retval = razer_send_report(usb_dev, &report);
+    retval = razer_set_report(usb_dev, &report);
     return retval;
 }
 
@@ -242,14 +217,11 @@ int razer_set_custom_mode(struct usb_device *usb_dev)
 int razer_set_wave_mode(struct usb_device *usb_dev, unsigned char direction)
 {
     int retval;
-    struct razer_report report;
-    razer_prepare_report(&report);
-    report.parameter_bytes_num = 0x02;
-    report.command = 0x0A;                       /* Change effect command ID */
-    report.sub_command = 0x01;                   /* Wave mode ID */
-    report.command_parameters[0] = direction;    /* Direction 1=Up / 2=Down */
+    struct razer_report report = get_razer_report(0x03, 0x0A, 0x02);
+    report.arguments[0] = 0x01; // Effect ID
+    report.arguments[1] = direction; // Direction
     report.crc = razer_calculate_crc(&report);
-    retval = razer_send_report(usb_dev, &report);
+    retval = razer_set_report(usb_dev, &report);
     return retval;
 }
 
@@ -263,16 +235,13 @@ int razer_set_wave_mode(struct usb_device *usb_dev, unsigned char direction)
 int razer_set_static_mode(struct usb_device *usb_dev, struct razer_rgb *colour)
 {
     int retval;
-    struct razer_report report;
-    razer_prepare_report(&report);
-    report.parameter_bytes_num = 0x04;
-    report.command = 0x0A;                    /* change effect command id */
-    report.sub_command = 0x06;                /* static mode id */
-    report.command_parameters[0] = colour->r; /* rgb color definition */
-    report.command_parameters[1] = colour->g;
-    report.command_parameters[2] = colour->b;
+    struct razer_report report = get_razer_report(0x03, 0x0A, 0x04);
+    report.arguments[0] = 0x06; // Effect ID
+    report.arguments[1] = colour->r; /*rgb color definition*/
+    report.arguments[2] = colour->g;
+    report.arguments[3] = colour->b;
     report.crc = razer_calculate_crc(&report);
-    retval = razer_send_report(usb_dev, &report);
+    retval = razer_set_report(usb_dev, &report);
     return retval;
 }
 
@@ -286,13 +255,10 @@ int razer_set_static_mode(struct usb_device *usb_dev, struct razer_rgb *colour)
 int razer_set_spectrum_mode(struct usb_device *usb_dev)
 {
     int retval;
-    struct razer_report report;
-    razer_prepare_report(&report);
-    report.parameter_bytes_num = 0x02;
-    report.command = 0x0A;                       /* Change effect command ID */
-    report.sub_command = 0x04;                   /* Spectrum mode ID */
+    struct razer_report report = get_razer_report(0x03, 0x0A, 0x01); // Might be size 2, TODO test!
+    report.arguments[0] = 0x04; // Effect ID
     report.crc = razer_calculate_crc(&report);
-    retval = razer_send_report(usb_dev, &report);
+    retval = razer_set_report(usb_dev, &report);
     return retval;
 }
 
@@ -310,7 +276,7 @@ int razer_set_spectrum_mode(struct usb_device *usb_dev)
 int razer_set_reactive_mode(struct usb_device *usb_dev, struct razer_rgb *colour, unsigned char speed)
 {
     int retval = 0;
-    struct razer_report report;
+    struct razer_report report = get_razer_report(0x03, 0x0A, 0x05);
 
     if(speed < 0 || speed > 4)
     {
@@ -318,16 +284,13 @@ int razer_set_reactive_mode(struct usb_device *usb_dev, struct razer_rgb *colour
         speed = 3;
     }
 
-    razer_prepare_report(&report);
-    report.parameter_bytes_num = 0x05;
-    report.command = 0x0A;                    /* change effect command id */
-    report.sub_command = 0x02;                /* reactive mode id */
-    report.command_parameters[0] = speed;     /* identified by Oleg Finkelshteyn */
-    report.command_parameters[1] = colour->r; /* rgb color definition */
-    report.command_parameters[2] = colour->g;
-    report.command_parameters[3] = colour->b;
+    report.arguments[0] = 0x02; // Effect ID
+    report.arguments[1] = speed; // Time
+    report.arguments[2] = colour->r; /*rgb color definition*/
+    report.arguments[3] = colour->g;
+    report.arguments[4] = colour->b;
     report.crc = razer_calculate_crc(&report);
-    retval = razer_send_report(usb_dev, &report);
+    retval = razer_set_report(usb_dev, &report);
 
     return retval;
 }
@@ -348,32 +311,29 @@ int razer_set_reactive_mode(struct usb_device *usb_dev, struct razer_rgb *colour
 int razer_set_breath_mode(struct usb_device *usb_dev, unsigned char breathing_type, struct razer_rgb *color1, struct razer_rgb *color2)
 {
     int retval;
-    struct razer_report report;
-    razer_prepare_report(&report);
-    report.parameter_bytes_num = 0x08;
-    report.command = 0x0A;
-    report.sub_command = 0x03;
+    struct razer_report report = get_razer_report(0x03, 0x0A, 0x08);
+    report.arguments[0] = 0x03; // Effect ID
 
-    report.command_parameters[0] = breathing_type;
+    report.arguments[1] = breathing_type;
 
     if(breathing_type == 1 || breathing_type == 2)
     {
         // Colour 1
-        report.command_parameters[1] = color1->r;
-        report.command_parameters[2] = color1->g;
-        report.command_parameters[3] = color1->b;
+        report.arguments[2] = color1->r;
+        report.arguments[3] = color1->g;
+        report.arguments[4] = color1->b;
     }
 
     if(breathing_type == 2)
     {
         // Colour 2
-        report.command_parameters[4] = color2->r;
-        report.command_parameters[5] = color2->g;
-        report.command_parameters[6] = color2->b;
+        report.arguments[5] = color2->r;
+        report.arguments[6] = color2->g;
+        report.arguments[7] = color2->b;
     }
 
     report.crc = razer_calculate_crc(&report);
-    retval = razer_send_report(usb_dev, &report);
+    retval = razer_set_report(usb_dev, &report);
     return retval;
 }
 
@@ -387,14 +347,10 @@ int razer_set_breath_mode(struct usb_device *usb_dev, unsigned char breathing_ty
 int razer_set_wireless_brightness(struct usb_device *usb_dev, unsigned char brightness)
 {
     int retval;
-    struct razer_report report;
-    razer_prepare_report(&report);
-    report.reserved2 = 0x07;               /* Power management section */
-    report.parameter_bytes_num = 0x01;
-    report.command = 0x02;                 /* Brightness command*/
-    report.sub_command = brightness;       /* Brightness */
+    struct razer_report report = get_razer_report(0x07, 0x02, 0x01);
+    report.arguments[0] = brightness;       /* Brightness */
     report.crc = razer_calculate_crc(&report);
-    retval = razer_send_report(usb_dev, &report);
+    retval = razer_set_report(usb_dev, &report);
     return retval;
 }
 
@@ -412,7 +368,7 @@ int razer_set_wireless_brightness(struct usb_device *usb_dev, unsigned char brig
 int razer_set_low_battery_threshold(struct usb_device *usb_dev, unsigned char threshold)
 {
     int retval;
-    struct razer_report report;
+    struct razer_report report = get_razer_report(0x07, 0x01, 0x01);
 
     if(threshold >= 0x40)
     {
@@ -420,13 +376,9 @@ int razer_set_low_battery_threshold(struct usb_device *usb_dev, unsigned char th
         threshold = 0x3F;
     }
 
-    razer_prepare_report(&report);
-    report.reserved2 = 0x07;               /* Power management section */
-    report.parameter_bytes_num = 0x01;
-    report.command = 0x01;                 /* Low battery threshold command*/
-    report.sub_command = threshold;        /* Threshold */
+    report.arguments[0] = threshold;       /* Brightness */
     report.crc = razer_calculate_crc(&report);
-    retval = razer_send_report(usb_dev, &report);
+    retval = razer_set_report(usb_dev, &report);
     return retval;
 }
 
@@ -442,7 +394,7 @@ int razer_set_low_battery_threshold(struct usb_device *usb_dev, unsigned char th
 int razer_set_idle_time(struct usb_device *usb_dev, unsigned short idle_time)
 {
     int retval;
-    struct razer_report report;
+    struct razer_report report = get_razer_report(0x07, 0x03, 0x02);
     unsigned char part1;
     unsigned char part2;
 
@@ -455,14 +407,10 @@ int razer_set_idle_time(struct usb_device *usb_dev, unsigned short idle_time)
     part1 = (idle_time >> 8) & 0x00FF;
     part2 = idle_time & 0x00FF;
 
-    razer_prepare_report(&report);
-    report.reserved2 = 0x07;               /* Power management section */
-    report.parameter_bytes_num = 0x02;
-    report.command = 0x03;                 /* Mouse idle time command*/
-    report.sub_command = part1;            /* Idle time */
-    report.command_parameters[0] = part2;
+    report.arguments[0] = part1;
+    report.arguments[1] = part2;
     report.crc = razer_calculate_crc(&report);
-    retval = razer_send_report(usb_dev, &report);
+    retval = razer_set_report(usb_dev, &report);
     return retval;
 }
 
@@ -476,7 +424,7 @@ int razer_set_idle_time(struct usb_device *usb_dev, unsigned short idle_time)
 int razer_set_mouse_dpi(struct usb_device *usb_dev, unsigned short dpi_x, unsigned short dpi_y)
 {
     int retval;
-    struct razer_report report;
+    struct razer_report report = get_razer_report(0x04, 0x05, 0x07);
     unsigned char dpi_x_part1;
     unsigned char dpi_x_part2;
     unsigned char dpi_y_part1;
@@ -498,19 +446,15 @@ int razer_set_mouse_dpi(struct usb_device *usb_dev, unsigned short dpi_x, unsign
     dpi_y_part1 = (dpi_y >> 8) & 0x00FF;
     dpi_y_part2 = dpi_y & 0x00FF;
 
-    razer_prepare_report(&report);
-    report.reserved2 = 0x04;               /* DPI section */
-    report.parameter_bytes_num = 0x07;
-    report.command = 0x05;                 /* Mouse idle time command*/
-    report.sub_command = 0x00;             /* Idle time */
-    report.command_parameters[0] = dpi_x_part1;
-    report.command_parameters[1] = dpi_x_part2;
-    report.command_parameters[2] = dpi_y_part1;
-    report.command_parameters[3] = dpi_y_part2;
-    report.command_parameters[4] = 0x00;
-    report.command_parameters[5] = 0x00;
+    report.arguments[0] = 0x00;
+    report.arguments[1] = dpi_x_part1;
+    report.arguments[2] = dpi_x_part2;
+    report.arguments[3] = dpi_y_part1;
+    report.arguments[4] = dpi_y_part2;
+    report.arguments[5] = 0x00;
+    report.arguments[6] = 0x00;
     report.crc = razer_calculate_crc(&report);
-    retval = razer_send_report(usb_dev, &report);
+    retval = razer_set_report(usb_dev, &report);
     return retval;
 }
 
@@ -527,7 +471,7 @@ int razer_set_mouse_dpi(struct usb_device *usb_dev, unsigned short dpi_x, unsign
 int razer_set_charging_effect(struct usb_device *usb_dev, unsigned char charge_type)
 {
     int retval;
-    struct razer_report report;
+    struct razer_report report = get_razer_report(0x03, 0x10, 0x01);
 
     if(charge_type > 1 || charge_type < 0)
     {
@@ -536,13 +480,9 @@ int razer_set_charging_effect(struct usb_device *usb_dev, unsigned char charge_t
         charge_type = 0x01;
     }
 
-    razer_prepare_report(&report);
-    report.reserved2 = 0x03;               /* Effects section */
-    report.parameter_bytes_num = 0x01;
-    report.command = 0x10;                 /* Change charging effect command*/
-    report.sub_command = charge_type;      /* Charging effect */
+    report.arguments[0] = charge_type; // LED Class, profile?
     report.crc = razer_calculate_crc(&report);
-    retval = razer_send_report(usb_dev, &report);
+    retval = razer_set_report(usb_dev, &report);
     return retval;
 }
 
@@ -559,21 +499,17 @@ int razer_set_charging_effect(struct usb_device *usb_dev, unsigned char charge_t
 int razer_set_charging_colour(struct usb_device *usb_dev, struct razer_rgb *colour)
 {
     int retval;
-    struct razer_report report;
+    struct razer_report report = get_razer_report(0x03, 0x01, 0x05);
 
     razer_set_charging_effect(usb_dev, 0x01);
 
-    razer_prepare_report(&report);
-    report.reserved2 = 0x03;                  /* Effects section */
-    report.parameter_bytes_num = 0x05;
-    report.command = 0x01;                    /* Change charging effect command*/
-    report.sub_command = 00;                  /* Charging effect */
-    report.command_parameters[0] = 0x03;      /* Unknown */
-    report.command_parameters[1] = colour->r; /* rgb color definition */
-    report.command_parameters[2] = colour->g;
-    report.command_parameters[3] = colour->b;
+    report.arguments[0] = 0x00; // Charging effect
+    report.arguments[1] = 0x03; // Unknown
+    report.arguments[2] = colour->r;
+    report.arguments[3] = colour->g;
+    report.arguments[4] = colour->b;
     report.crc = razer_calculate_crc(&report);
-    retval = razer_send_report(usb_dev, &report);
+    retval = razer_set_report(usb_dev, &report);
     return retval;
 }
 
