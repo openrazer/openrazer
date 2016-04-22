@@ -71,6 +71,42 @@ int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_re
 
 
 
+
+/**
+ * Get firmware version
+ *
+ * Supported by:
+ *   Razer BlackWidow Chroma
+ *   Razer BlackWidow Ultimate 2013?
+ *   Razer BlackWidow Ultimate 2016?
+ */
+int razer_get_firmware_version(struct usb_device *usb_dev, unsigned char* fw_string)
+{
+    int retval = -1;
+    struct razer_report response_report;
+    struct razer_report request_report = get_razer_report(0x00, 0x81, 0x02);
+    request_report.crc = razer_calculate_crc(&request_report);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+
+    if(retval == 0)
+    {
+        if(response_report.status == 0x02 && response_report.command_class == 0x00 && response_report.command_id.id == 0x81)
+        {
+            sprintf(fw_string, "v%d.%d", response_report.arguments[0], response_report.arguments[1]);
+            retval = response_report.arguments[2];
+        } else
+        {
+            print_erroneous_report(&response_report, "razerkbd", "Invalid Report Type");
+        }
+    } else
+    {
+      print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
+    }
+
+    return retval;
+}
+
 /**
  * Set pulsate effect on the keyboard
  *
@@ -169,6 +205,120 @@ int razer_set_game_mode(struct usb_device *usb_dev, unsigned char enable)
         report.crc = razer_calculate_crc(&report);
         retval = razer_set_report(usb_dev, &report);
     }
+    return retval;
+}
+
+/**
+ * Get game mode on the keyboard
+ *
+ * Supported by:
+ *   Razer BlackWidow Chroma
+ *   Razer BlackWidow Ultimate 2013
+ *   Razer BlackWidow Ultimate 2016
+ */
+int razer_get_game_mode(struct usb_device *usb_dev)
+{
+    int retval = -1;
+    // Class LED Lighting, Command Set state, 3 Bytes of parameters
+    struct razer_report response_report;
+    struct razer_report request_report = get_razer_report(0x03, 0x80, 0x03);
+    request_report.arguments[0] = 0x01; // LED Class, profile 1?
+    request_report.arguments[1] = 0x08; // LED ID, Game mode LED
+    request_report.crc = razer_calculate_crc(&request_report);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+
+    if(retval == 0)
+    {
+        if(response_report.status == 0x02 && response_report.command_class == 0x03 && response_report.command_id.id == 0x80)
+        {
+            retval = response_report.arguments[2];
+        } else
+        {
+            print_erroneous_report(&response_report, "razerkbd", "Invalid Report Type");
+        }
+    } else
+    {
+      print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
+    }
+
+    return retval;
+}
+
+/**
+ * Set macro led on the keyboard
+ *
+ * Supported by:
+ *   Razer BlackWidow Chroma
+ *   Razer BlackWidow Ultimate 2013
+ *   Razer BlackWidow Ultimate 2016
+ */
+int razer_set_macro_led_mode(struct usb_device *usb_dev, unsigned char enable)
+{
+    int retval = 0;
+    if(enable > 2)
+    {
+        printk(KERN_WARNING "razerkbd: Cannot set game mode to %d. Only 1 or 0 allowed.", enable);
+    } else
+    {
+        // Class LED Lighting, Command Set state, 3 Bytes of parameters
+        struct razer_report report = get_razer_report(0x03, 0x00, 0x03);
+        report.arguments[0] = 0x01; // LED Class, profile 1?
+        report.arguments[1] = 0x07; // LED ID, Macro LED
+        report.arguments[2] = enable; // Enable 1/0
+        report.crc = razer_calculate_crc(&report);
+        retval = razer_set_report(usb_dev, &report);
+
+        // Blink macro
+        report = get_razer_report(0x03, 0x02, 0x03);
+        report.arguments[0] = 0x01; // LED Class, profile 1?
+        report.arguments[1] = 0x07; // LED ID, Macro LED
+        report.arguments[2] = 0x00; // Static
+
+        if(enable == 2)
+        {
+          report.arguments[2] = 0x00; // Static
+        }
+        report.crc = razer_calculate_crc(&report);
+        retval = razer_set_report(usb_dev, &report);
+    }
+    return retval;
+}
+
+/**
+ * Get macro on the keyboard
+ *
+ * Supported by:
+ *   Razer BlackWidow Chroma
+ *   Razer BlackWidow Ultimate 2013?
+ *   Razer BlackWidow Ultimate 2016?
+ */
+int razer_get_macro_led_mode(struct usb_device *usb_dev)
+{
+    int retval = -1;
+    // Class LED Lighting, Command Set state, 3 Bytes of parameters
+    struct razer_report response_report;
+    struct razer_report request_report = get_razer_report(0x03, 0x80, 0x03);
+    request_report.arguments[0] = 0x01; // LED Class, profile 1?
+    request_report.arguments[1] = 0x07; // LED ID, Game mode LED
+    request_report.crc = razer_calculate_crc(&request_report);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+
+    if(retval == 0)
+    {
+        if(response_report.status == 0x02 && response_report.command_class == 0x03 && response_report.command_id.id == 0x80)
+        {
+            retval = response_report.arguments[2];
+        } else
+        {
+            print_erroneous_report(&response_report, "razerkbd", "Invalid Report Type");
+        }
+    } else
+    {
+      print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
+    }
+
     return retval;
 }
 
@@ -555,6 +705,63 @@ int razer_set_brightness(struct usb_device *usb_dev, unsigned char brightness)
 }
 
 /**
+ * Get brightness of the keyboard
+ *
+ * Supported by:
+ *   Razer BlackWidow Chroma
+ *   Razer BlackWidow Ultimate 2013
+ *   Razer BlackWidow Ultimate 2016
+ */
+int razer_get_brightness(struct usb_device *usb_dev)
+{
+    int retval = -1;
+    // Class LED Lighting, Command Set state, 3 Bytes of parameters
+    struct razer_report response_report;
+    struct razer_report request_report = get_razer_report(0x03, 0x83, 0x03);
+    request_report.arguments[0] = 0x01; // LED Class, profile 1?
+
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH) {
+        request_report.data_size = 0x02;
+        request_report.command_class = 0x0E;
+        request_report.command_id.id = 0x84;
+
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
+    {
+        request_report.arguments[1] = 0x04;/* LED ID, Logo */
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    {
+        request_report.arguments[1] = 0x05;/* Backlight LED */
+    } else {
+        printk(KERN_WARNING "razerkbd: Unknown product ID '%d'", usb_dev->descriptor.idProduct);
+    }
+
+    request_report.crc = razer_calculate_crc(&request_report);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+
+    if(retval == 0)
+    {
+        if(response_report.status == 0x02 && response_report.command_class == 0x03 && response_report.command_id.id == 0x83) // For others
+        {
+            retval = response_report.arguments[2];
+        } else if(response_report.status == 0x02 && response_report.command_class == 0x0E && response_report.command_id.id == 0x84) // For razer stealth
+        {
+            retval = response_report.arguments[1];
+        } else
+        {
+            print_erroneous_report(&response_report, "razerkbd", "Invalid Report Type");
+            retval = -1;
+        }
+    } else
+    {
+        print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
+        retval = -1;
+    }
+
+    return retval;
+}
+
+/**
  * Toggle FN key
  * 
  * If 0 should mean that the F-keys work as normal F-keys
@@ -632,13 +839,30 @@ int razer_activate_macro_keys(struct usb_device *usb_dev)
  */
 int razer_test(struct usb_device *usb_dev)
 {
-    int retval;
-    struct razer_report report = get_razer_report(0x03, 0x00, 0x03);
-    report.arguments[0] = 0x01; // LED Class, profile 1?
-    report.arguments[1] = 0x07; // LED ID, Game mode LED
-    report.arguments[2] = 0x01; // Enable 1/0
-    report.crc = razer_calculate_crc(&report);
-    retval = razer_set_report(usb_dev, &report);
+    int retval = -1;
+    struct razer_report response_report;
+    struct razer_report request_report = get_razer_report(0x03, 0x82, 0x03);
+    request_report.arguments[0] = 0x01;
+    request_report.arguments[1] = 0x04;
+    request_report.crc = razer_calculate_crc(&request_report);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+
+    if(retval == 0)
+    {
+        if(response_report.status == 0x02 && response_report.command_class == 0x00 && response_report.command_id.id == 0x81)
+        {
+            print_erroneous_report(&response_report, "razerkbd", "Get type");
+            retval = response_report.arguments[2];
+        } else
+        {
+            print_erroneous_report(&response_report, "razerkbd", "Invalid Report Type");
+        }
+    } else
+    {
+      print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
+    }
+
     return retval;
 }
 
@@ -671,6 +895,20 @@ static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     razer_test(usb_dev);
     return count;
+}
+
+/**
+ * Read device file "test"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int test = razer_test(usb_dev);
+    return sprintf(buf, "%d\n", test);
 }
 
 /**
@@ -715,6 +953,25 @@ static ssize_t razer_attr_write_mode_game(struct device *dev, struct device_attr
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     int temp = simple_strtoul(buf, NULL, 10);
     razer_set_game_mode(usb_dev, temp);
+    return count;
+}
+
+/**
+ * Write device file "mode_macro"
+ *
+ * When 1 is written (as a character, 0x31) Game mode will be enabled, if 0 is written (0x30)
+ * then game mode will be disabled
+ *
+ * The reason the keyboard appears as 2 keyboard devices is that one of those devices is used by
+ * game mode as that keyboard device is missing a super key. A hacky and over-the-top way to disable
+ * the super key if you ask me.
+ */
+static ssize_t razer_attr_write_mode_macro(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int temp = simple_strtoul(buf, NULL, 10);
+    razer_set_macro_led_mode(usb_dev, temp);
     return count;
 }
 
@@ -1005,18 +1262,83 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
     return sprintf(buf, "%s\n", &serial_string[0]);
 }
 
+/**
+ * Read device file "game_mode"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_mode_game(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int game_mode = razer_get_game_mode(usb_dev);
+    return sprintf(buf, "%d\n", game_mode);
+}
+
+
+/**
+ * Read device file "macro_mode"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_mode_macro(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int game_mode = razer_get_macro_led_mode(usb_dev);
+    return sprintf(buf, "%d\n", game_mode);
+}
+
+/**
+ * Read device file "macro_mode"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int brightness = razer_get_brightness(usb_dev);
+    return sprintf(buf, "%d\n", brightness);
+}
+
+
+/**
+ * Read device file "get_firmware_version"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    char fw_string[100] = ""; // Cant be longer than this as report length is 90
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    razer_get_firmware_version(usb_dev, &fw_string[0]);
+    return sprintf(buf, "%s\n", &fw_string[0]);
+}
+
 
 /**
  * Set up the device driver files
+
  *
  * Read only is 0444
  * Write only is 0220
  * Read and write is 0664
  */
-static DEVICE_ATTR(device_type,    0444, razer_attr_read_device_type, NULL);
-static DEVICE_ATTR(get_serial,     0444, razer_attr_read_get_serial,  NULL);
+static DEVICE_ATTR(mode_game,      0660, razer_attr_read_mode_game,      razer_attr_write_mode_game);
+static DEVICE_ATTR(mode_macro,     0660, razer_attr_read_mode_macro,     razer_attr_write_mode_macro);
+static DEVICE_ATTR(set_brightness, 0660, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
+
+static DEVICE_ATTR(device_type,          0444, razer_attr_read_device_type,          NULL);
+static DEVICE_ATTR(get_serial,           0444, razer_attr_read_get_serial,           NULL);
+static DEVICE_ATTR(get_firmware_version, 0444, razer_attr_read_get_firmware_version, NULL);
+
 static DEVICE_ATTR(mode_starlight, 0220, NULL, razer_attr_write_mode_starlight);
-static DEVICE_ATTR(mode_game,      0220, NULL, razer_attr_write_mode_game);
 static DEVICE_ATTR(mode_pulsate,   0220, NULL, razer_attr_write_mode_pulsate);
 static DEVICE_ATTR(mode_wave,      0220, NULL, razer_attr_write_mode_wave);
 static DEVICE_ATTR(mode_spectrum,  0220, NULL, razer_attr_write_mode_spectrum);
@@ -1029,10 +1351,10 @@ static DEVICE_ATTR(temp_clear_row, 0220, NULL, razer_attr_write_temp_clear_row);
 static DEVICE_ATTR(set_key_row,    0220, NULL, razer_attr_write_set_key_row);
 static DEVICE_ATTR(reset,          0220, NULL, razer_attr_write_reset);
 static DEVICE_ATTR(macro_keys,     0220, NULL, razer_attr_write_macro_keys);
-static DEVICE_ATTR(set_brightness, 0220, NULL, razer_attr_write_set_brightness);
 static DEVICE_ATTR(set_logo,       0220, NULL, razer_attr_write_set_logo);
-static DEVICE_ATTR(set_fn_toggle,       0220, NULL, razer_attr_write_set_fn_toggle);
-static DEVICE_ATTR(test,           0220, NULL, razer_attr_write_test);
+static DEVICE_ATTR(set_fn_toggle,  0220, NULL, razer_attr_write_set_fn_toggle);
+
+static DEVICE_ATTR(test,           0660, razer_attr_read_test, razer_attr_write_test);
 
 
 /**
@@ -1158,12 +1480,18 @@ static int razer_kbd_probe(struct hid_device *hdev,
     retval = device_create_file(&hdev->dev, &dev_attr_get_serial);
     if (retval)
         goto exit_free;
+    retval = device_create_file(&hdev->dev, &dev_attr_get_firmware_version);
+    if (retval)
+        goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_device_type);
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_mode_game);
     if (retval)
         goto exit_free;
+    retval = device_create_file(&hdev->dev, &dev_attr_mode_macro);
+        if (retval)
+            goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_mode_static);
     if (retval)
         goto exit_free;
@@ -1256,6 +1584,8 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     }
 
     device_remove_file(&hdev->dev, &dev_attr_mode_game);
+    device_remove_file(&hdev->dev, &dev_attr_mode_macro);
+    device_remove_file(&hdev->dev, &dev_attr_get_firmware_version);
     device_remove_file(&hdev->dev, &dev_attr_get_serial);
     device_remove_file(&hdev->dev, &dev_attr_mode_static);
     device_remove_file(&hdev->dev, &dev_attr_reset);

@@ -168,7 +168,7 @@ struct razer_report get_empty_razer_report(void)
  */
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message)
 {
-    printk(KERN_WARNING "%s: %s. Start Marker: %02x id: %02x Num Params: %02x Reserved: %02x Command: %02x Sub Command: %02x Param 1: %02x .\n",
+    printk(KERN_WARNING "%s: %s. Start Marker: %02x id: %02x Num Params: %02x Reserved: %02x Command: %02x Params: %02x%02x%02x%02x%02x%02x .\n",
         driver_name,
         message,
         report->status,
@@ -176,8 +176,7 @@ void print_erroneous_report(struct razer_report* report, char* driver_name, char
         report->data_size,
         report->command_class,
         report->command_id.id,
-        report->arguments[0],
-        report->arguments[1]);
+        report->arguments[0], report->arguments[1], report->arguments[2], report->arguments[3], report->arguments[4], report->arguments[5]);
 }
 
 
