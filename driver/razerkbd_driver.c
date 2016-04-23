@@ -277,7 +277,7 @@ int razer_set_macro_led_mode(struct usb_device *usb_dev, unsigned char enable)
 
         if(enable == 2)
         {
-          report.arguments[2] = 0x00; // Static
+          report.arguments[2] = 0x01; // Blinking
         }
         report.crc = razer_calculate_crc(&report);
         retval = razer_set_report(usb_dev, &report);
