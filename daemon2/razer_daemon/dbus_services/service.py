@@ -9,7 +9,7 @@ __author__ = 'terry'
 
 import dbus
 import dbus.service
-import dbus.decorators
+#import dbus.decorators
 import types
 
 def copy_func(function_reference, name=None):
