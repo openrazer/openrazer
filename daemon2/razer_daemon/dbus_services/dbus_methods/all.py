@@ -28,7 +28,7 @@ def get_device_type(self):
     """
     self.logger.debug("DBus call get_device_type")
 
-    driver_path = self.get_driver_path('get_device_type')
+    driver_path = self.get_driver_path('device_type')
 
     with open(driver_path, 'r') as driver_file:
         return driver_file.read().strip()

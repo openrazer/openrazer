@@ -11,9 +11,11 @@ from gi.repository import GObject
 from dbus.mainloop.glib import DBusGMainLoop
 
 import razer_daemon.hardware
+from razer_daemon.device import DeviceCollection
 from razer_daemon.screensaver_thread import ScreensaverThread
 from razer_daemon.dbus_services.service import DBusService
 
+DEVICE_CHECK_INTERVAL = 5000 # Milliseconds
 
 class Daemon(DBusService):
     """
@@ -61,7 +63,7 @@ class Daemon(DBusService):
         self._screensaver_thread = ScreensaverThread(self, active=True)
         self._screensaver_thread.start()
 
-        self._razer_devices = {}
+        self._razer_devices = DeviceCollection()
         self._load_devices()
 
         # Add DBus methods
@@ -93,23 +95,23 @@ class Daemon(DBusService):
         """
         Suspend all devices
         """
-        for device in self._razer_devices.values():
-            device.suspend_device()
+        for device in self._razer_devices:
+            device.dbus.suspend_device()
 
     def resume_devices(self):
         """
         Resume all devices
         """
-        for device in self._razer_devices.values():
-            device.resume_device()
+        for device in self._razer_devices:
+            device.dbus.resume_device()
 
     def get_serial_list(self):
         """
         Get list of devices serials
         """
-        devices = list(self._razer_devices.keys())
+        serial_list = self._razer_devices.serials()
         self.logger.debug('DBus called get_serial_list')
-        return devices
+        return serial_list
 
     def _load_devices(self):
         """
@@ -120,26 +122,48 @@ class Daemon(DBusService):
         """
         devices = os.listdir('/sys/bus/hid/devices')
         classes = razer_daemon.hardware.get_device_classes()
-        self.logger.debug('Finding devices')
 
         device_number = 0
         for device_class in classes:
             for device_id in devices:
+                if device_id in self._razer_devices:
+                    continue
+
                 if device_class.match(device_id):
                     self.logger.info('Found device.%d: %s', device_number, device_id)
                     device_path = os.path.join('/sys/bus/hid/devices', device_id)
                     razer_device = device_class(device_path, device_number)
                     device_serial = razer_device.get_serial()
-                    self._razer_devices[device_serial] = razer_device
+                    self._razer_devices.add(device_id, device_serial, razer_device)
 
                     device_number += 1
+
+    def _remove_devices(self):
+        """
+        Go through the list of current devices and if they no longer exist then remove them
+        """
+        devices_to_remove = []
+
+        for device in self._razer_devices:
+            device_path = os.path.join('/sys/bus/hid/devices', device.device_id)
+            if not os.path.exists(device_path):
+                # Remove from DBus
+                device.dbus.remove_from_connection()
+                devices_to_remove.append(device.device_id)
+
+        for device_id in devices_to_remove:
+            # Remove device
+            self.logger.warning("Device %s is missing. Removing from DBus", device_id)
+            del self._razer_devices[device_id]
 
     def run(self):
         """
         Run the daemon
         """
-
         self.logger.info('Serving DBus')
+
+        # Counter for managing periodic tasks
+        counter = 0
 
         # Can't just use mainloop.run() as that blocks and
         # then signaling exit doesn't work
@@ -150,12 +174,18 @@ class Daemon(DBusService):
             else:
                 time.sleep(0.001)
 
+            if counter > DEVICE_CHECK_INTERVAL: # Time sleeps 1ms so DEVICE_CHECK_INTERVAL is in milliseconds
+                self._remove_devices()
+                self._load_devices()
+                counter = 0
+            counter += 1
+
     def quit(self, signum, frame):
         """
         Quit by stopping the main loop and screensaver thread
         """
         # pylint: disable=unused-argument
-        self.logger.info('Stopping daemon. ')
+        self.logger.info('Stopping daemon.')
         self._main_loop = None
 
         # Stop screensaver

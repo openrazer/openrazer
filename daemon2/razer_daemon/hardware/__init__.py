@@ -3,6 +3,7 @@ Hardware collection
 """
 
 from razer_daemon.hardware.keyboards import RazerBlackWidow2013
+from razer_daemon.hardware.mouse_mat import RazerFireFly
 
 def get_device_classes():
     """

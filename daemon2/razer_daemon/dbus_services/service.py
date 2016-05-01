@@ -116,7 +116,7 @@ class DBusService(dbus.service.Object):
             self._dbus_class_table[class_key][interface_name] = {function_name: func}
 
         # Add method to class as DBus expects it to be there.
-        setattr(DBusService, function_name, func)
+        setattr(self.__class__, function_name, func)
 
     def del_dbus_method(self, interface_name, function_name):
         """
