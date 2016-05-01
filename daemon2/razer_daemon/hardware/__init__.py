@@ -1,6 +1,7 @@
 import re
 import os
 import types
+import logging
 
 from razer_daemon.dbus_services.service import DBusService
 import razer_daemon.dbus_services.dbus_methods
@@ -13,19 +14,26 @@ class RazerDevice(DBusService):
     USB_VID = None
     USB_PID = None
 
-    def __init__(self, device_path):
+    def __init__(self, device_path, device_number):
         self._device_path = device_path
+        self._device_number = device_number
         self._serial = self.get_serial()
+
+        self.logger = logging.getLogger('razer.device{0}'.format(device_number))
+        self.logger.info("Initialising device.{0} {1}".format(device_number, self.__class__.__name__))
 
         object_path = os.path.join(self.OBJECT_PATH, self._serial)
         DBusService.__init__(self, self.BUS_PATH, object_path)
 
         # Register method to get the devices serial
+        self.logger.debug("Adding getSerial method to DBus")
         self.add_dbus_method('razer.device.misc', 'getSerial', self.get_serial, out_signature='s')
 
         # Set up methods to suspend and restore device operation
         self.suspend_args = {}
+        self.logger.debug("Adding razer.device.misc.suspendDevice method to DBus")
         self.add_dbus_method('razer.device.misc', 'suspendDevice', self.suspend_device)
+        self.logger.debug("Adding razer.device.misc.resumeDevice method to DBus")
         self.add_dbus_method('razer.device.misc', 'resumeDevice', self.resume_device)
 
         # Load additional DBus methods
@@ -70,14 +78,23 @@ class RazerDevice(DBusService):
         for method_name in self.METHODS:
             try:
                 new_function = available_functions[method_name]
+                self.logger.debug("Adding {0}.{1} method to DBus".format(new_function.interface, new_function.name))
                 self.add_dbus_method(new_function.interface, new_function.name, new_function, new_function.in_sig, new_function.out_sig, new_function.byte_arrays)
             except KeyError:
                 pass
 
     def suspend_device(self):
-        raise NotImplementedError()
+        self.logger.info("Suspending {0}".format(self.__class__.__name__))
+        self._suspend_device()
 
     def resume_device(self):
+        self.logger.info("Resuming {0}".format(self.__class__.__name__))
+        self._resume_device()
+
+    def _suspend_device(self):
+        raise NotImplementedError()
+
+    def _resume_device(self):
         raise NotImplementedError()
 
     @classmethod
@@ -105,7 +122,7 @@ class RazerBlackWidow2013(RazerDevice, DBusService):
     METHODS = ['get_firmware', 'get_brightness', 'enable_macro_keys', 'set_brightness', 'get_device_type', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static']
 
-    def suspend_device(self):
+    def _suspend_device(self):
         """
         Suspend the device
 
@@ -115,7 +132,7 @@ class RazerBlackWidow2013(RazerDevice, DBusService):
         self.suspend_args['brightness'] = razer_daemon.dbus_services.dbus_methods.get_brightness(self)
         razer_daemon.dbus_services.dbus_methods.set_brightness(self, 0)
 
-    def resume_device(self):
+    def _resume_device(self):
         """
         Resume the device
 
@@ -130,7 +147,7 @@ def get_device_classes():
     Get a list of hardware classes
 
     :return: List of RazerDevice subclasses
-    :rtype: list of RazerDevice
+    :rtype: list of callable
     """
     classes = []
 

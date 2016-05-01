@@ -11,6 +11,8 @@ def get_firmware(self):
     :return: Get firmware string like v1.1
     :rtype: str
     """
+    self.logger.debug("DBus call get_firmware")
+
     driver_path = self.get_driver_path('get_firmware_version')
 
     with open(driver_path, 'r') as driver_file:
@@ -24,6 +26,8 @@ def get_device_type(self):
     :return: Device string like 'BlackWidow Ultimate 2013'
     :rtype: str
     """
+    self.logger.debug("DBus call get_device_type")
+
     driver_path = self.get_driver_path('get_device_type')
 
     with open(driver_path, 'r') as driver_file:
