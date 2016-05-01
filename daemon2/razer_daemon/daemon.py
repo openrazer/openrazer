@@ -154,7 +154,8 @@ class Daemon(DBusService):
         """
         Quit by stopping the main loop and screensaver thread
         """
-        self.logger.info('Stopping daemon')
+        # pylint: disable=unused-argument
+        self.logger.info('Stopping daemon. ')
         self._main_loop = None
 
         # Stop screensaver

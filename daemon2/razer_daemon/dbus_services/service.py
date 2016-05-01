@@ -3,14 +3,12 @@ Service Object for DBus
 """
 
 # Disable some pylint stuff
-# pylint: disable=no-member,interface-not-implemented
+# pylint: disable=no-member
 
-__author__ = 'terry'
-
+import types
 import dbus
 import dbus.service
-#import dbus.decorators
-import types
+
 
 def copy_func(function_reference, name=None):
     """
