@@ -11,6 +11,8 @@ def get_brightness(self):
     :return: Brightness
     :rtype: float
     """
+    self.logger.debug("DBus call get_brightness")
+
     driver_path = self.get_driver_path('set_brightness')
 
     with open(driver_path, 'r') as driver_file:
@@ -25,6 +27,8 @@ def set_brightness(self, brightness):
     :param brightness: Brightness
     :type brightness: int
     """
+    self.logger.debug("DBus call set_brightness")
+
     driver_path = self.get_driver_path('set_brightness')
 
     brightness = int(round(brightness * (255.0/100.0)))
@@ -41,6 +45,8 @@ def enable_macro_keys(self):
     """
     Make macro keys return keycodes
     """
+    self.logger.debug("DBus call enable_macro_keys")
+
     driver_path = self.get_driver_path('macro_keys')
 
     with open(driver_path, 'w') as driver_file:
@@ -54,6 +60,8 @@ def get_game_mode(self):
     :return: Game mode LED state
     :rtype: bool
     """
+    self.logger.debug("DBus call get_game_mode")
+
     driver_path = self.get_driver_path('mode_game')
 
     with open(driver_path, 'r') as driver_file:
@@ -67,6 +75,8 @@ def set_game_mode(self, enable):
     :param enable: Status of game mode
     :type enable: bool
     """
+    self.logger.debug("DBus call set_game_mode")
+
     driver_path = self.get_driver_path('mode_game')
 
     with open(driver_path, 'w') as driver_file:
@@ -83,6 +93,8 @@ def get_macro_mode(self):
     :return: Status of macro mode
     :rtype: bool
     """
+    self.logger.debug("DBus call get_macro_mode")
+
     driver_path = self.get_driver_path('mode_macro')
 
     with open(driver_path, 'r') as driver_file:
@@ -96,6 +108,8 @@ def set_macro_mode(self, enable):
     :param enable: Status of macro mode
     :type enable: bool
     """
+    self.logger.debug("DBus call set_macro_mode")
+
     driver_path = self.get_driver_path('mode_macro')
 
     with open(driver_path, 'w') as driver_file:
@@ -112,6 +126,8 @@ def get_macro_effect(self):
     :return: Macro LED effect ID
     :rtype: int
     """
+    self.logger.debug("DBus call get_macro_effect")
+
     driver_path = self.get_driver_path('mode_macro_effect')
 
     with open(driver_path, 'r') as driver_file:
@@ -125,6 +141,8 @@ def set_macro_effect(self, effect):
     :param effect: Macro LED effect ID
     :type effect: int
     """
+    self.logger.debug("DBus call set_macro_effect")
+
     driver_path = self.get_driver_path('mode_macro_effect')
 
     with open(driver_path, 'w') as driver_file:
@@ -138,6 +156,8 @@ def set_wave_effect(self, direction):
     :param direction: 1 - left to right, 2 right to left
     :type direction: int
     """
+    self.logger.debug("DBus call set_wave_effect")
+
     driver_path = self.get_driver_path('mode_wave')
 
     if direction not in (1, 2):
@@ -160,6 +180,8 @@ def set_static_effect(self, red, green, blue):
     :param blue: Blue component
     :type blue: int
     """
+    self.logger.debug("DBus call set_static_effect")
+
     driver_path = self.get_driver_path('mode_static')
 
     payload = bytes([red, green, blue])
@@ -172,6 +194,8 @@ def set_spectrum_effect(self):
     """
     Set the device to spectrum mode
     """
+    self.logger.debug("DBus call set_spectrum_effect")
+
     driver_path = self.get_driver_path('mode_spectrum')
 
     with open(driver_path, 'w') as driver_file:
@@ -182,6 +206,8 @@ def set_none_effect(self):
     """
     Set the device to spectrum mode
     """
+    self.logger.debug("DBus call set_none_effect")
+
     driver_path = self.get_driver_path('mode_none')
 
     with open(driver_path, 'w') as driver_file:
@@ -204,6 +230,8 @@ def set_reactive_effect(self, red, green, blue, speed):
     :param speed: Speed
     :type speed: int
     """
+    self.logger.debug("DBus call set_reactive_effect")
+
     driver_path = self.get_driver_path('mode_reactive')
 
     if speed not in (1, 2, 3, 4):
@@ -219,6 +247,8 @@ def set_breath_random_effect(self):
     """
     Set the device to random colour breathing effect
     """
+    self.logger.debug("DBus call set_breath_random_effect")
+
     driver_path = self.get_driver_path('mode_breath')
 
     payload = b'1'
@@ -240,6 +270,8 @@ def set_breath_single_effect(self, red, green, blue):
     :param blue: Blue component
     :type blue: int
     """
+    self.logger.debug("DBus call set_breath_single_effect")
+
     driver_path = self.get_driver_path('mode_breath')
 
     payload = bytes([red, green, blue])
@@ -270,6 +302,8 @@ def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
     :param blue2: Blue component
     :type blue2: int
     """
+    self.logger.debug("DBus call set_breath_dual_effect")
+
     driver_path = self.get_driver_path('mode_breath')
 
     payload = bytes([red1, green1, blue1, red2, green2, blue2])
@@ -282,6 +316,8 @@ def set_custom_effect(self):
     """
     Set the device to use custom LED matrix
     """
+    self.logger.debug("DBus call set_custom_effect")
+
     driver_path = self.get_driver_path('mode_custom')
 
     payload = b'1'
@@ -303,6 +339,8 @@ def set_key_row(self, payload):
     :param payload: Binary payload
     :type payload: bytes
     """
+    self.logger.debug("DBus call set_key_row")
+
     driver_path = self.get_driver_path('set_key_row')
 
     with open(driver_path, 'wb') as driver_file:
@@ -317,6 +355,8 @@ def clear_key_row(self, row_id):
     :param row_id: Row ID
     :type row_id: int
     """
+    self.logger.debug("DBus call clear_key_row")
+
     driver_path = self.get_driver_path('temp_clear_row')
 
     with open(driver_path, 'w') as driver_file:

@@ -11,6 +11,8 @@ def bw_get_effect(self):
     :return: Brightness
     :rtype: int
     """
+    self.logger.debug("DBus call bw_get_effect")
+
     driver_path = self.get_driver_path('mode_pulsate')
 
     with open(driver_path, 'r') as driver_file:
@@ -22,6 +24,8 @@ def bw_set_pulsate(self):
     """
     Set pulsate mode
     """
+    self.logger.debug("DBus call bw_set_pulsate")
+
     driver_path = self.get_driver_path('mode_pulsate')
 
     with open(driver_path, 'w') as driver_file:
@@ -32,6 +36,8 @@ def bw_set_static(self):
     """
     Set static mode
     """
+    self.logger.debug("DBus call bw_set_static")
+
     driver_path = self.get_driver_path('mode_static')
 
     with open(driver_path, 'w') as driver_file:
