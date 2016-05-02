@@ -68,6 +68,41 @@ int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_re
 }
 
 /**
+ * Get firmware version
+ *
+ * Supported by:
+ *   Razer BlackWidow Chroma
+ *   Razer BlackWidow Ultimate 2013?
+ *   Razer BlackWidow Ultimate 2016?
+ */
+int razer_get_firmware_version(struct usb_device *usb_dev, unsigned char* fw_string)
+{
+    int retval = -1;
+    struct razer_report response_report;
+    struct razer_report request_report = get_razer_report(0x00, 0x81, 0x02);
+    request_report.crc = razer_calculate_crc(&request_report);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+
+    if(retval == 0)
+    {
+        if(response_report.status == 0x02 && response_report.command_class == 0x00 && response_report.command_id.id == 0x81)
+        {
+            sprintf(fw_string, "v%d.%d", response_report.arguments[0], response_report.arguments[1]);
+            retval = response_report.arguments[2];
+        } else
+        {
+            print_erroneous_report(&response_report, "razerkbd", "Invalid Report Type");
+        }
+    } else
+    {
+      print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
+    }
+
+    return retval;
+}
+
+/**
  * Get the devices serial number
  *
  * Makes a request like normal, this must change a variable in the mouse as then we
@@ -565,6 +600,21 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
 }
 
 /**
+ * Read device file "get_firmware_version"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    char fw_string[100] = ""; // Cant be longer than this as report length is 90
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    razer_get_firmware_version(usb_dev, &fw_string[0]);
+    return sprintf(buf, "%s\n", &fw_string[0]);
+}
+
+/**
  * Set up the device driver files
  *
  * Read only is 0444
@@ -572,8 +622,11 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
  * Read and write is 0664
  */
 static DEVICE_ATTR(set_brightness, 0664, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
-static DEVICE_ATTR(device_type,    0444, razer_attr_read_device_type,    NULL);
-static DEVICE_ATTR(get_serial,     0444, razer_attr_read_get_serial,     NULL);
+
+static DEVICE_ATTR(get_firmware_version, 0444, razer_attr_read_get_firmware_version, NULL);
+static DEVICE_ATTR(device_type,          0444, razer_attr_read_device_type,          NULL);
+static DEVICE_ATTR(get_serial,           0444, razer_attr_read_get_serial,           NULL);
+
 static DEVICE_ATTR(mode_wave,      0220, NULL, razer_attr_write_mode_wave);
 static DEVICE_ATTR(mode_spectrum,  0220, NULL, razer_attr_write_mode_spectrum);
 static DEVICE_ATTR(mode_none,      0220, NULL, razer_attr_write_mode_none);
@@ -633,6 +686,9 @@ static int razer_firefly_probe(struct hid_device *hdev, const struct hid_device_
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_get_serial);
+    if (retval)
+        goto exit_free;
+    retval = device_create_file(&hdev->dev, &dev_attr_get_firmware_version);
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_device_type);
@@ -695,6 +751,7 @@ static void razer_firefly_disconnect(struct hid_device *hdev)
     device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);
     device_remove_file(&hdev->dev, &dev_attr_set_key_row);
     device_remove_file(&hdev->dev, &dev_attr_get_serial);
+    device_remove_file(&hdev->dev, &dev_attr_get_firmware_version);
     device_remove_file(&hdev->dev, &dev_attr_mode_static);
     device_remove_file(&hdev->dev, &dev_attr_reset);
     device_remove_file(&hdev->dev, &dev_attr_set_brightness);
