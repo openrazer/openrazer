@@ -131,6 +131,41 @@ int razer_set_pulsate_mode(struct usb_device *usb_dev)
 }
 
 /**
+ * Get macro on the keyboard
+ *
+ * Supported by:
+ *   Razer BlackWidow Ultimate 2013?
+ */
+int razer_get_pulsate_mode(struct usb_device *usb_dev)
+{
+    int retval = -1;
+    // Class LED Lighting, Command Set state, 3 Bytes of parameters
+    struct razer_report response_report;
+    struct razer_report request_report = get_razer_report(0x03, 0x82, 0x03);
+    request_report.arguments[0] = 0x01; // LED Class, profile 1?
+    request_report.arguments[1] = 0x04; // LED ID, Logo LED
+    request_report.crc = razer_calculate_crc(&request_report);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+
+    if(retval == 0)
+    {
+        if(response_report.status == 0x02 && response_report.command_class == 0x03 && response_report.command_id.id == 0x82)
+        {
+            retval = response_report.arguments[2];
+        } else
+        {
+            print_erroneous_report(&response_report, "razerkbd", "Invalid Report Type");
+        }
+    } else
+    {
+      print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
+    }
+
+    return retval;
+}
+
+/**
  * Get the devices serial number
  *
  * Makes a request like normal, this must change a variable in the mouse as then we
@@ -1348,6 +1383,19 @@ static ssize_t razer_attr_read_mode_game(struct device *dev, struct device_attri
     return sprintf(buf, "%d\n", game_mode);
 }
 
+/**
+ * Read device file "mode_pulsate"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_mode_pulsate(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int game_mode = razer_get_pulsate_mode(usb_dev);
+    return sprintf(buf, "%d\n", game_mode);
+}
 
 /**
  * Read device file "macro_mode"
@@ -1420,13 +1468,13 @@ static DEVICE_ATTR(mode_game,      0660, razer_attr_read_mode_game,      razer_a
 static DEVICE_ATTR(mode_macro,     0660, razer_attr_read_mode_macro,     razer_attr_write_mode_macro);
 static DEVICE_ATTR(set_brightness, 0660, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
 static DEVICE_ATTR(mode_macro_effect, 0660, razer_attr_read_mode_macro_effect, razer_attr_write_mode_macro_effect);
+static DEVICE_ATTR(mode_pulsate,      0660, razer_attr_read_mode_pulsate, razer_attr_write_mode_pulsate);
 
 static DEVICE_ATTR(device_type,          0444, razer_attr_read_device_type,          NULL);
 static DEVICE_ATTR(get_serial,           0444, razer_attr_read_get_serial,           NULL);
 static DEVICE_ATTR(get_firmware_version, 0444, razer_attr_read_get_firmware_version, NULL);
 
 static DEVICE_ATTR(mode_starlight,    0220, NULL, razer_attr_write_mode_starlight);
-static DEVICE_ATTR(mode_pulsate,      0220, NULL, razer_attr_write_mode_pulsate);
 static DEVICE_ATTR(mode_wave,         0220, NULL, razer_attr_write_mode_wave);
 static DEVICE_ATTR(mode_spectrum,     0220, NULL, razer_attr_write_mode_spectrum);
 static DEVICE_ATTR(mode_none,         0220, NULL, razer_attr_write_mode_none);
