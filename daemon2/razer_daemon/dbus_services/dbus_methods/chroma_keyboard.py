@@ -288,3 +288,36 @@ def set_custom_effect(self):
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
+@endpoint('razer.device.lighting', 'setKeyRow', in_sig='ay', byte_arrays=True)
+def set_key_row(self, payload):
+    """
+    Set the RGB matrix on the device
+
+    Byte array like
+    [1, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00,
+        255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 00, 00]
+
+    First byte is row, on firefly its always 1, on keyboard its 0-5
+    Then its 3byte groups of RGB
+    :param payload: Binary payload
+    :type payload: bytes
+    """
+    driver_path = self.get_driver_path('set_key_row')
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(payload)
+
+# Not sure if works on firefly
+@endpoint('razer.device.lighting', 'clearKeyRow', in_sig='y')
+def clear_key_row(self, row_id):
+    """
+    Clear the RGB matrix on the device
+
+    :param row_id: Row ID
+    :type row_id: int
+    """
+    driver_path = self.get_driver_path('temp_clear_row')
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write(str(int(row_id)))
