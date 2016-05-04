@@ -23,7 +23,7 @@ Supports:
 
  1. Execute installation script:
 
-        cd razer_blackwidow_chroma_driver
+        cd razer_chroma_drivers
         ./install_driver_debian.sh
 
  1. **Reboot**
