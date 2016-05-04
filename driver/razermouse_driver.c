@@ -923,11 +923,20 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
 static ssize_t razer_attr_read_device_type(struct device *dev, struct device_attribute *attr,
                 char *buf)
 {
-    //struct usb_interface *intf = to_usb_interface(dev->parent);
-    //struct razer_kbd_device *widow = usb_get_intfdata(intf);
-    //struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    
+    int write_count = 0;
 
-    int write_count = sprintf(buf, "Razer Mamba\n");
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA)
+    {
+        sprintf(buf, "Razer Mamba\n");
+    } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_ABYSSUS) {
+        sprintf(buf, "Razer Abyssus\n");
+    } else {
+        sprintf(buf, "Unknown\n");
+    }
+
     return write_count;
 }
 
