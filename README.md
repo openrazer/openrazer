@@ -36,7 +36,7 @@ You can either install using the above Debian method or with the packaged method
  1. Download the source code:
 
         git clone --depth=1 https://github.com/pez2001/razer_chroma_drivers.git
-        cd razer_blackwidow_chroma_drive
+        cd cd razer_chroma_drivers
 
  1. Install the packages needed to build the software:
 
