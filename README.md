@@ -103,9 +103,12 @@ On Debian, you can control the driver with `/etc/init.d/razer_bcd `**`ACTION`** 
 
 
  - Install dependencies (libdbus-1-dev,jq)
+ - Build driver etc...
+ 
+        make all
  - Execute install script:
 
-        sudo make -s all install
+        sudo make install
  - Reboot
  
 To uninstall run
