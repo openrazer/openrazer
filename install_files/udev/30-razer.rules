@@ -10,13 +10,17 @@ KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor
 
 KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0c00", ENV{is_razer_firefly}="yes"
 
+SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_kbd}=="yes", ATTRS{bInterfaceNumber}=="02", RUN+="/sbin/modprobe razerkbd"
 SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_kbd}=="yes", ATTRS{bInterfaceNumber}=="02", RUN+="/bin/sh -c '/bin/echo -n $kernel > /sys/bus/hid/drivers/hid-generic/unbind'"
 SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_kbd}=="yes", ATTRS{bInterfaceNumber}=="02", RUN+="/bin/sh -c '/bin/echo -n $kernel > /sys/bus/hid/drivers/razerkbd/bind'"
+SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_kbd}=="yes", ATTRS{bInterfaceNumber}=="02", RUN+="/bin/sh -c '/bin/chgrp -R plugdev /sys/bus/hid/drivers/razerkbd/$kernel/'"
 
+SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_mouse}=="yes", ATTRS{bInterfaceNumber}=="00", RUN+="/sbin/modprobe razermouse"
 SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_mouse}=="yes", ATTRS{bInterfaceNumber}=="00", RUN+="/bin/sh -c '/bin/echo -n $kernel > /sys/bus/hid/drivers/hid-generic/unbind'"
 SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_mouse}=="yes", ATTRS{bInterfaceNumber}=="00", RUN+="/bin/sh -c '/bin/echo -n $kernel > /sys/bus/hid/drivers/razermouse/bind'"
+SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_mouse}=="yes", ATTRS{bInterfaceNumber}=="00", RUN+="/bin/sh -c '/bin/chgrp -R plugdev /sys/bus/hid/drivers/razermouse/$kernel/'"
 
+SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_firefly}=="yes", ATTRS{bInterfaceNumber}=="00", RUN+="/sbin/modprobe razerfirefly"
 SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_firefly}=="yes", ATTRS{bInterfaceNumber}=="00", RUN+="/bin/sh -c '/bin/echo -n $kernel > /sys/bus/hid/drivers/hid-generic/unbind'"
 SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_firefly}=="yes", ATTRS{bInterfaceNumber}=="00", RUN+="/bin/sh -c '/bin/echo -n $kernel > /sys/bus/hid/drivers/razerfirefly/bind'"
-
-
+SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_firefly}=="yes", ATTRS{bInterfaceNumber}=="00", RUN+="/bin/sh -c '/bin/chgrp -R plugdev /sys/bus/hid/drivers/razerfirefly/$kernel/'"

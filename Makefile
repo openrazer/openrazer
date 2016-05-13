@@ -146,12 +146,12 @@ setup_dkms: driver
 udev_install:
 	@echo "\n::\033[34m Installing Razer udev rules\033[0m"
 	@echo "====================================================="
-	install -m 644 -v -D install_files/udev/95-razerkbd.rules $(DESTDIR)/lib/udev/rules.d/95-razerkbd.rules
+	install -m 644 -v -D install_files/udev/30-razer.rules $(DESTDIR)/lib/udev/rules.d/30-razer.rules
 
 udev_uninstall:
 	@echo "\n::\033[34m Uninstalling Razer udev rules\033[0m"
 	@echo "====================================================="
-	rm -f $(DESTDIR)/lib/udev/rules.d/95-razerkbd.rules
+	rm -f $(DESTDIR)/lib/udev/rules.d/30-razer.rules
 
 dbus_install:
 	@echo "\n::\033[34m Installing Razer chroma DBus policy\033[0m"
