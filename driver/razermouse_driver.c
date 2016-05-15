@@ -53,6 +53,42 @@ int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_re
 }
 
 
+
+/**
+ * Get firmware version
+ *
+ * Supported by:
+ *   Razer BlackWidow Chroma
+ *   Razer BlackWidow Ultimate 2013?
+ *   Razer BlackWidow Ultimate 2016?
+ */
+int razer_get_firmware_version(struct usb_device *usb_dev, unsigned char* fw_string)
+{
+    int retval = -1;
+    struct razer_report response_report;
+    struct razer_report request_report = get_razer_report(0x00, 0x81, 0x02);
+    request_report.crc = razer_calculate_crc(&request_report);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+
+    if(retval == 0)
+    {
+        if(response_report.status == 0x02 && response_report.command_class == 0x00 && response_report.command_id.id == 0x81)
+        {
+            sprintf(fw_string, "v%d.%d", response_report.arguments[0], response_report.arguments[1]);
+            retval = response_report.arguments[2];
+        } else
+        {
+            print_erroneous_report(&response_report, "razermouse", "Invalid Report Type");
+        }
+    } else
+    {
+      print_erroneous_report(&response_report, "razermouse", "Invalid Report Length");
+    }
+
+    return retval;
+}
+
 /**
  * Get the devices serial number
  *
@@ -344,7 +380,7 @@ int razer_set_breath_mode(struct usb_device *usb_dev, unsigned char breathing_ty
  * Supported by:
  *   Razer Mamba
  */
-int razer_set_wireless_brightness(struct usb_device *usb_dev, unsigned char brightness)
+int razer_set_brightness(struct usb_device *usb_dev, unsigned char brightness)
 {
     int retval;
     struct razer_report report = get_razer_report(0x07, 0x02, 0x01);
@@ -353,6 +389,52 @@ int razer_set_wireless_brightness(struct usb_device *usb_dev, unsigned char brig
     retval = razer_set_report(usb_dev, &report);
     return retval;
 }
+
+/**
+ * Get brightness of the keyboard
+ *
+ * Supported by:
+ *   Razer Mamba
+ */
+int razer_get_brightness(struct usb_device *usb_dev)
+{
+    int retval = -1;
+    // Class LED Lighting, Command Set state, 3 Bytes of parameters
+    struct razer_report response_report;
+    struct razer_report request_report = get_razer_report(0x07, 0x82, 0x01);
+
+    request_report.crc = razer_calculate_crc(&request_report);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+    
+    // The mamba is wireless so the command might be busy, aka status 0x01
+
+    if(retval == 0)
+    {
+		if(response_report.status == 0x01) {
+			printk(KERN_WARNING "razermouse: Mouse busy\n");
+			retval = -2;			
+		} else if(response_report.status == 0x02 && response_report.command_class == 0x07 && response_report.command_id.id == 0x82) // For others
+        {
+            retval = response_report.arguments[0];
+        } else
+        {
+            print_erroneous_report(&response_report, "razermouse", "Invalid Report Type");
+            retval = -1;
+        }
+    } else
+    {
+        print_erroneous_report(&response_report, "razermouse", "Invalid Report Length");
+        retval = -1;
+    }
+
+    return retval;
+}
+
+
+
+
+
 
 
 /**
@@ -691,13 +773,13 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
  *
  * Sets the brightness to the ASCII number written to this file.
  */
-static ssize_t razer_attr_write_set_wireless_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     int brightness = simple_strtoul(buf, NULL, 10);
-    razer_set_wireless_brightness(usb_dev, (unsigned char)brightness);
+    razer_set_brightness(usb_dev, (unsigned char)brightness);
     return count;
 }
 
@@ -849,6 +931,41 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 }
 
 
+
+/**
+ * Read device file "macro_mode"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int brightness = razer_get_brightness(usb_dev);
+    return sprintf(buf, "%d\n", brightness);
+}
+
+
+
+/**
+ * Read device file "get_firmware_version"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    char fw_string[100] = ""; // Cant be longer than this as report length is 90
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    razer_get_firmware_version(usb_dev, &fw_string[0]);
+    return sprintf(buf, "%s\n", &fw_string[0]);
+}
+
+
+
+
 /**
  * Set up the device driver files
  *
@@ -856,10 +973,13 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
  * Write-only is 0220
  * Read/write is 0664
  */
-static DEVICE_ATTR(device_type,               0444, razer_attr_read_device_type, NULL);
-static DEVICE_ATTR(get_battery,               0444, razer_attr_read_get_battery, NULL);
-static DEVICE_ATTR(get_serial,                0444, razer_attr_read_get_serial,  NULL);
-static DEVICE_ATTR(is_charging,               0444, razer_attr_read_is_charging, NULL);
+static DEVICE_ATTR(set_brightness, 0660, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
+
+static DEVICE_ATTR(get_firmware_version,      0444, razer_attr_read_get_firmware_version, NULL);
+static DEVICE_ATTR(device_type,               0444, razer_attr_read_device_type,          NULL);
+static DEVICE_ATTR(get_battery,               0444, razer_attr_read_get_battery,          NULL);
+static DEVICE_ATTR(get_serial,                0444, razer_attr_read_get_serial,           NULL);
+static DEVICE_ATTR(is_charging,               0444, razer_attr_read_is_charging,          NULL);
 static DEVICE_ATTR(mode_custom,               0220, NULL, razer_attr_write_mode_custom);
 static DEVICE_ATTR(mode_static,               0220, NULL, razer_attr_write_mode_static);
 static DEVICE_ATTR(mode_wave,                 0220, NULL, razer_attr_write_mode_wave);
@@ -867,7 +987,6 @@ static DEVICE_ATTR(mode_spectrum,             0220, NULL, razer_attr_write_mode_
 static DEVICE_ATTR(mode_reactive,             0220, NULL, razer_attr_write_mode_reactive);
 static DEVICE_ATTR(mode_breath,               0220, NULL, razer_attr_write_mode_breath);
 static DEVICE_ATTR(set_key_row,               0220, NULL, razer_attr_write_set_key_row);
-static DEVICE_ATTR(set_wireless_brightness,   0220, NULL, razer_attr_write_set_wireless_brightness);
 static DEVICE_ATTR(set_low_battery_threshold, 0220, NULL, razer_attr_write_set_low_battery_threshold);
 static DEVICE_ATTR(set_idle_time,             0220, NULL, razer_attr_write_set_idle_time);
 static DEVICE_ATTR(set_mouse_dpi,             0220, NULL, razer_attr_write_set_mouse_dpi);
@@ -912,6 +1031,9 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         goto exit;
     }
 
+	retval = device_create_file(&hdev->dev, &dev_attr_get_firmware_version);
+    if (retval)
+        goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_get_battery);
     if (retval)
         goto exit_free;
@@ -927,7 +1049,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
     if (retval)
         goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_set_wireless_brightness);
+    retval = device_create_file(&hdev->dev, &dev_attr_set_brightness);
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_set_low_battery_threshold);
@@ -1000,11 +1122,12 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 
     dev = hid_get_drvdata(hdev);
 
+	device_remove_file(&hdev->dev, &dev_attr_get_firmware_version);
     device_remove_file(&hdev->dev, &dev_attr_get_battery);
     device_remove_file(&hdev->dev, &dev_attr_get_serial);
     device_remove_file(&hdev->dev, &dev_attr_is_charging);
     device_remove_file(&hdev->dev, &dev_attr_set_key_row);
-    device_remove_file(&hdev->dev, &dev_attr_set_wireless_brightness);
+    device_remove_file(&hdev->dev, &dev_attr_set_brightness);
     device_remove_file(&hdev->dev, &dev_attr_set_low_battery_threshold);
     device_remove_file(&hdev->dev, &dev_attr_set_idle_time);
     device_remove_file(&hdev->dev, &dev_attr_set_mouse_dpi);

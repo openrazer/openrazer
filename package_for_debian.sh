@@ -22,7 +22,7 @@ cp install_files/init.d/razer_bcd_debian ${directory}/etc/init.d/razer_bcd
 cp install_files/desktop/razer_tray_applet_autostart.desktop ${directory}/etc/xdg/autostart/razer_tray_applet.desktop
 
 # Copy over udev rule
-cp install_files/udev/30-razer.rules ${directory}/etc/udev/rules.d/30-razer.rules
+cp install_files/udev/99-razer.rules ${directory}/etc/udev/rules.d/99-razer.rules
 
 # Copy over dbus rule
 cp install_files/dbus/org.voyagerproject.razer.daemon.conf ${directory}/etc/dbus-1/system.d/org.voyagerproject.razer.daemon.conf
