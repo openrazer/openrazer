@@ -5,15 +5,16 @@ This class is the main core of the daemon, this serves a basic dbus module to co
 """
 import logging
 import os
-import time
 import signal
+import time
+
+from dbus.mainloop.glib import DBusGMainLoop, threads_init
 from gi.repository import GObject
-from dbus.mainloop.glib import DBusGMainLoop
 
 import razer_daemon.hardware
-from razer_daemon.device import DeviceCollection
-from razer_daemon.screensaver_thread import ScreensaverThread
 from razer_daemon.dbus_services.service import DBusService
+from razer_daemon.device import DeviceCollection
+from razer_daemon.misc.screensaver_thread import ScreensaverThread
 
 DEVICE_CHECK_INTERVAL = 5000 # Milliseconds
 
@@ -34,6 +35,7 @@ class Daemon(DBusService):
 
     def __init__(self, logging_level=logging.WARNING, log_file=None, console_log=True, setup_signals=True):
         # Setup DBus to use gobject main loop
+        threads_init()
         DBusGMainLoop(set_as_default=True)
         DBusService.__init__(self, self.BUS_PATH, '/org/razer')
 
@@ -41,7 +43,7 @@ class Daemon(DBusService):
 
         self.logger = logging.getLogger('razer')
         self.logger.setLevel(logging_level)
-        formatter = logging.Formatter('%(asctime)s | %(name)-20s | %(levelname)-8s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        formatter = logging.Formatter('%(asctime)s | %(name)-30s | %(levelname)-8s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
         # Dont propagate to default logger
         self.logger.propagate = 0
 
@@ -194,11 +196,18 @@ class Daemon(DBusService):
         if self._screensaver_thread.is_alive():
             self.logger.warning('Could not stop the screensaver thread')
 
+        for device in self._razer_devices:
+            device.dbus.close()
+
 
 if __name__ == '__main__':
     # pylint: disable=invalid-name
     daemon = Daemon(logging_level=logging.DEBUG)
-    daemon.run()
+
+    try:
+        daemon.run()
+    except Exception as err:
+        daemon.logger.exception("Caught exception", exc_info=err)
 
 
 

@@ -27,6 +27,8 @@ class RazerDevice(DBusService):
         self._device_number = device_number
         self._serial = self.get_serial()
 
+        self._is_closed = False
+
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
 
@@ -117,6 +119,21 @@ class RazerDevice(DBusService):
         """
         raise NotImplementedError()
 
+    def _close(self):
+        """
+        To be overrided by any subclasses to do cleanup
+        """
+        pass
+
+    def close(self):
+        """
+        Close any resources opened by subclasses
+        """
+        if not self._is_closed:
+            self._close()
+
+            self._is_closed = True
+
     @classmethod
     def match(cls, device_id):
         """
@@ -135,6 +152,9 @@ class RazerDevice(DBusService):
                 return True
 
         return False
+
+    def __del__(self):
+        self.close()
 
 class RazerDeviceBrightnessSuspend(RazerDevice):
     """

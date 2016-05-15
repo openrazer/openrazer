@@ -19,7 +19,7 @@ KEY_MAPPING = {
     # Row 4
     'M4': (4,0), 'LEFTSHIFT': (4,1), 'BACKSLASH': (4,2), 'Z': (4,3), 'X': (4,4), 'C': (4,5), 'V': (4,6), 'B': (4,7), 'N': (4,8), 'M': (4,9), 'COMMA': (4,10), 'PERIOD': (4,11), 'FORWARDSLASH': (4,12), 'RIGHTSHIFT': (4,14), 'UPARROW': (4,16), 'NP1': (4,18), 'NP2': (4,19), 'NP3': (4,20), 'ENTER': (4,21),
     # Row 5
-    'M5': (5,0), 'LEFTCTRL': (5,1), 'SUPER': (5,2), 'LEFTALT': (5,3), 'SPACE': (5,7), 'RIGHTALT': (5,11), 'CTXMENU': (5,13), 'RIGHTCTRL': (5,14), 'LEFTARROW': (5,15), 'DOWNARROW': (5,16), 'RIGHTARROW': (5,17), 'NP0': (5,19), 'NPPERIOD': (5,20)
+    'M5': (5,0), 'LEFTCTRL': (5,1), 'SUPER': (5,2), 'LEFTALT': (5,3), 'SPACE': (5,7), 'RIGHTALT': (5,11), 'FN': (5,12), 'CTXMENU': (5,13), 'RIGHTCTRL': (5,14), 'LEFTARROW': (5,15), 'DOWNARROW': (5,16), 'RIGHTARROW': (5,17), 'NP0': (5,19), 'NPPERIOD': (5,20)
 }
 
 #
@@ -37,7 +37,73 @@ EVENT_MAPPING = {
     96: 'ENTER', 97: 'RIGHTCTRL', 98: 'NPFORWARDSLASH', 99: 'PRTSCR',
     100: 'RIGHTALT', 102: 'HOME', 103: 'UPARROW', 104: 'PAGEUP', 105: 'LEFTARROW', 106: 'RIGHTARROW', 107: 'END', 108: 'DOWNARROW', 109: 'PAGEDOWN', 110: 'INS',
     111: 'DELETE', 119: 'PAUSE',
-    125: 'SUPER', 127: 'CTXMENU'
+    125: 'SUPER', 127: 'CTXMENU',
+    183: 'M1', 184: 'M2', 185: 'M3', 186: 'M4', 187: 'M5',
+    194: 'FN',
+}
+
+XTE_MAPPING = {
+    'ESC': 'Escape',
+    'DASH': '-',
+    'EQUALS': '=',
+    'BACKSPACE': 'BackSpace',
+    'TAB': 'Tab',
+    'LEFTSQUAREBRACKET': ']',
+    'RIGHTSQUAREBRACKET': '[',
+    'RETURN': 'Return',
+    'LEFTCTRL': 'Control_L',
+    'SEMICOLON': ':',
+    'APOSTROPHE': '\'',
+    'BACKTICK': '`',
+    'LEFTSHIFT': 'Shift_L',
+    'POUNDSIGN': '#',
+    'COMMA': ',',
+    'PERIOD': '.',
+    'FORWARDSLASH': '/',
+    'RIGHTSHIFT': 'Shift_R',
+    'NPASTERISK': '*',
+    'LEFTALT': 'Alt_L',
+    'SPACE': '" "',
+    'CAPSLK': None,
+    'NUMLK': None,
+    'SCRLK': None,
+    'NP7': '7',
+    'NP8': '8',
+    'NP9': '9',
+    'NPDASH': '-',
+    'NP4': '4',
+    'NP5': '5',
+    'NP6': '6',
+    'NPPLUS': '+',
+    'NP1': '1',
+    'NP2': '2',
+    'NP3': '3',
+    'NP0': '0',
+    'NPPERIOD': '.',
+    'BACKSLASH': '\\',
+    'ENTER': 'Enter',
+    'RIGHTCTRL': 'Control_r',
+    'NPFORWARDSLASH': '/',
+    'RIGHTALT': 'Alt_R',
+    'HOME': 'Home',
+    'UPARROW': None,
+    'PAGEUP': 'Page_Up',
+    'LEFTARROW': None,
+    'RIGHTARROW': None,
+    'END': 'End',
+    'DOWNARROW': None,
+    'PAGEDOWN': 'Page_Down',
+    'INS': 'Insert',
+    'DELETE': 'Delete',
+    'PAUSE': None,
+    'SUPER': 'Meta_L',
+    'CTXMENU': None,
+    'M1': None,
+    'M2': None,
+    'M3': None,
+    'M4': None,
+    'M5': None,
+    'FN': None,
 }
 
 class KeyDoesNotExistError(Exception):
