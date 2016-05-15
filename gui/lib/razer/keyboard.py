@@ -19,7 +19,25 @@ KEY_MAPPING = {
     # Row 4
     'M4': (4,0), 'LEFTSHIFT': (4,1), 'BACKSLASH': (4,2), 'Z': (4,3), 'X': (4,4), 'C': (4,5), 'V': (4,6), 'B': (4,7), 'N': (4,8), 'M': (4,9), 'COMMA': (4,10), 'PERIOD': (4,11), 'FORWARDSLASH': (4,12), 'RIGHTSHIFT': (4,14), 'UPARROW': (4,16), 'NP1': (4,18), 'NP2': (4,19), 'NP3': (4,20), 'ENTER': (4,21),
     # Row 5
-    'M5': (5,0), 'LEFTCTRL': (5,1), 'SUPER': (5,2), 'LEFTALT': (5,3), 'RIGHTALT': (5,11), 'CTXMENU': (5,13), 'RIGHTCTRL': (5,14), 'LEFTARROW': (5,15), 'DOWNARROW': (5,16), 'RIGHTARROW': (5,17), 'NP0': (5,19), 'NPPERIOD': (5,20)
+    'M5': (5,0), 'LEFTCTRL': (5,1), 'SUPER': (5,2), 'LEFTALT': (5,3), 'SPACE': (5,7), 'RIGHTALT': (5,11), 'CTXMENU': (5,13), 'RIGHTCTRL': (5,14), 'LEFTARROW': (5,15), 'DOWNARROW': (5,16), 'RIGHTARROW': (5,17), 'NP0': (5,19), 'NPPERIOD': (5,20)
+}
+
+#
+EVENT_MAPPING = {
+    1: 'ESC', 2: '1',  3: '2',  4: '3',  5: '4',  6: '5',  7: '6',  8: '7',  9: '8',
+    10: '9', 11: '0', 12: 'DASH', 13: 'EQUALS', 14: 'BACKSPACE', 15: 'TAB', 16: 'Q', 17: 'W', 18: 'E', 19: 'R',
+    20: 'T', 21: 'Y', 22: 'U', 23: 'I', 24: 'O', 25: 'P', 26: 'LEFTSQUAREBRACKET', 27: 'RIGHTSQUAREBRACKET', 28: 'RETURN', 29: 'LEFTCTRL',
+    30: 'A', 31: 'S', 32: 'D', 33: 'F', 34: 'G', 35: 'H', 36: 'J', 37: 'K', 38: 'L', 39: 'SEMICOLON',
+    40: 'APOSTROPHE', 41: 'BACKTICK', 42: 'LEFTSHIFT', 43: 'POUNDSIGN', 44: 'Z', 45: 'X', 46: 'C', 47: 'V', 48: 'B', 49: 'N',
+    50: 'M', 51: 'COMMA', 52: 'PERIOD', 53: 'FORWARDSLASH', 54: 'RIGHTSHIFT', 55: 'NPASTERISK', 56: 'LEFTALT', 57: 'SPACE',
+    58: 'CAPSLK', 59: 'F1',
+    60: 'F2', 61: 'F3', 62: 'F4', 63: 'F5', 64: 'F6', 65: 'F7', 66: 'F8', 67: 'F9', 68: 'F10', 69: 'NUMLK',
+    70: 'SCRLK', 71: 'NP7', 72: 'NP8', 73: 'NP9', 74: 'NPDASH', 75: 'NP4', 76: 'NP5', 77: 'NP6', 78: 'NPPLUS', 79: 'NP1',
+    80: 'NP2', 81: 'NP3', 82: 'NP0', 83: 'NPPERIOD', 86: 'BACKSLASH', 87: 'F11', 88: 'F12',
+    96: 'ENTER', 97: 'RIGHTCTRL', 98: 'NPFORWARDSLASH', 99: 'PRTSCR',
+    100: 'RIGHTALT', 102: 'HOME', 103: 'UPARROW', 104: 'PAGEUP', 105: 'LEFTARROW', 106: 'RIGHTARROW', 107: 'END', 108: 'DOWNARROW', 109: 'PAGEDOWN', 110: 'INS',
+    111: 'DELETE', 119: 'PAUSE',
+    125: 'SUPER', 127: 'CTXMENU'
 }
 
 class KeyDoesNotExistError(Exception):
