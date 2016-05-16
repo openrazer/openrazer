@@ -125,29 +125,12 @@ When you'd like to update when new changes are made to the project, update your 
 
 
 
+## Applications
 
-## GUI Tray Applet
-This is a simple GUI that sits in the notification tray. Clicking on this reveals a context menu allowing you to change some basic features
-of the daemon/driver such as effects, brightness and toggling some functions, including changing the base colour.
-It'll be expanded to allow for custom effect creation eventually.
+The following applications compliment and interact with this driver:
 
-The application is at `/usr/share/razer_tray_applet/razer_tray_applet.py` and also has a `.desktop` entry to start from the Applications menu or at login.
-
-![Screenshot of GUI Tray Applet](gui/screenshot_tray_applet.jpg?raw=true)
-
-
-
-## GUI Chroma Controller
-The Chroma Controller needs `gir1.2-webkit-3.0` to be installed to run!
-This is a graphical frontend which interacts with the daemon/driver allowing easy configuration of the keyboard's features,
-including the creation of key profiles.
-
-Custom animation effects are not yet supported.
-
-The application is at `/usr/share/razer_chroma_controller/chroma_controller.py` and also has a `.desktop` entry, so it appears in the Applications menu.
-
-![Screenshot of GUI Chroma Configuration Utility](gui/screenshot_chroma_controller.jpg?raw=true)
-
+* [Polychromatic Controller](https://github.com/lah7/polychromatic-controller) - a graphical management tool and tray applet to managing Razer peripherals.
+* [MarcoW](https://github.com/igorbb/MacroW) - a simple tool to record and play keyboard macros.
 
 
 ## Command Line Usage
@@ -435,7 +418,7 @@ FX setup scripts, bug fixes, feature requests, etc are also welcome.
    support for the tournament edition(manual merge)
  - Modifications to dynamic example by Stephanie Sunshine (pulled)
  - Deb packaging, dkms support, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
- - GUI Interface for BlackWidow Chroma Keyboards by Luke Horwell (pulled)
+ - GUI Interface for BlackWidow Chroma Keyboards by Luke Horwell [(now migrated as Polychromatic Controller)](https://github.com/lah7/polychromatic-controller)
  - Ubuntu fixes by Brad Murmz (pulled)
  - Default Keyboard profiles by Mathieu Okuyama (manual merge)
 
