@@ -75,6 +75,12 @@ class Daemon(DBusService):
         self.add_dbus_method('razer.devices', 'enableTurnOffOnScreensaver', self.enable_turn_off_on_screensaver)
         self.logger.info("Adding razer.devices.disableTurnOffOnScreensaver method to DBus")
         self.add_dbus_method('razer.devices', 'disableTurnOffOnScreensaver', self.disable_turn_off_on_screensaver)
+        self.logger.info("Adding razer.devices.syncEffects method to DBus")
+        self.add_dbus_method('razer.devices', 'syncEffects', self.sync_effects, in_signature='b')
+
+        # TODO remove
+        self.sync_effects(True)
+        # TODO ======
 
         # Setup quit signals
         if setup_signals:
@@ -114,6 +120,17 @@ class Daemon(DBusService):
         serial_list = self._razer_devices.serials()
         self.logger.debug('DBus called get_serial_list')
         return serial_list
+
+    def sync_effects(self, enabled):
+        """
+        Sync the effects across the devices
+
+        :param enabled: True to sync effects
+        :type enabled: bool
+        """
+        # Todo perhaps move logic to device collection
+        for device in self._razer_devices.devices:
+            device.dbus.effect_sync = enabled
 
     def _load_devices(self):
         """

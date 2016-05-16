@@ -162,11 +162,11 @@ class KeyManager(object):
         self._device_id = device_id
         self._logger = logging.getLogger('razer.device{0}.keymanager'.format(device_id))
         self._parent = parent
+        self._parent.register_observer(self)
 
         self._event_files = event_files
         self._access_lock = threading.Lock()
         self._keywatcher = KeyWatcher(device_id, event_files, self)
-
 
         if len(event_files) > 0:
             self._logger.debug("Starting KeyWatcher")
@@ -185,6 +185,28 @@ class KeyManager(object):
 
         self._threads = set()
         self._clean_counter = 0
+
+        self._temp_key_store_active = False
+
+    @property
+    def temp_key_store_state(self):
+        """
+        Get the state of the temporary key store
+
+        :return: Active state
+        :rtype: bool
+        """
+        return self._temp_key_store_active
+
+    @temp_key_store_state.setter
+    def temp_key_store_state(self, value):
+        """
+        Set the state of the temporary key store
+
+        :param value: Active state
+        :type value: bool
+        """
+        self._temp_key_store_active = value
 
     def key_action(self, event_time, key_id, key_press=True):
         """
@@ -246,14 +268,14 @@ class KeyManager(object):
                 try:
                     # Try and increment key in bucket
                     self._stats[storage_bucket][key_name] += 1
-                    self._logger.debug("Increased key %s", key_name)
+                    # self._logger.debug("Increased key %s", key_name)
                 except KeyError:
                     # Create bucket
                     self._stats[storage_bucket] = dict.fromkeys(KEY_MAPPING, 0)
                     try:
                         # Increment key
                         self._stats[storage_bucket][key_name] += 1
-                        self._logger.debug("Increased key %s", key_name)
+                        # self._logger.debug("Increased key %s", key_name)
                     except KeyError as err:
                         self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
 
@@ -395,13 +417,13 @@ class KeyManager(object):
         macro_list = [macro_dict_to_obj(json_dict) for json_dict in json.loads(macro_json)]
         self._macros[macro_key] = macro_list
 
-
-
     def close(self):
         """
         Cleanup function
         """
         if self._keywatcher.is_alive():
+            self._parent.remove_observer(self)
+
             self._logger.debug("Stopping key manager")
             self._keywatcher.shutdown = True
             self._keywatcher.join(timeout=2)
@@ -410,3 +432,16 @@ class KeyManager(object):
 
     def __del__(self):
         self.close()
+
+    def notify(self, msg):
+        if not isinstance(msg, tuple):
+            self._logger.warning("Got msg that was not a tuple")
+        elif msg[0] == 'effect':
+            # We have a message directed at us
+            # MSG format
+            #  0         1       2             3
+            # ('effect', Device, 'effectName', 'effectparams'...)
+            # Device is the device the msg originated from (could be parent device)
+            if msg[2] != 'setRipple':
+                # If we are not doing ripple effect then disable the storing of keys
+                self.temp_key_store_state = False

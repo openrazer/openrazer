@@ -7,10 +7,13 @@ class Device(object):
     Razer Device (High level not dbus)
     """
     def __init__(self, device_id, device_serial, device_dbus_object):
+        self._parent = None
 
         self._id = device_id
         self._serial = device_serial
         self._dbus = device_dbus_object
+        # Register as parent
+        self._dbus.register_parent(self)
 
     @property
     def device_id(self):
@@ -40,6 +43,34 @@ class Device(object):
         """
         return self._dbus
 
+    def register_parent(self, parent):
+        """
+        Register the parent as an observer to be optionally notified (sends to other devices)
+
+        :param parent: Observer
+        :type parent: object
+        """
+        self._parent = parent
+
+    def notify_parent(self, msg):
+        """
+        Notify observers with msg
+
+        :param msg: Tuple with first element a string
+        :type msg: tuple
+        """
+        self._parent.notify(self, msg)
+
+    def notify_child(self, msg):
+        """
+        Recieve observer messages
+
+        :param msg: Tuple with first element a string
+        :type msg: tuple
+        """
+        # Message from DBus object
+        self._dbus.notify(msg)
+
 class DeviceCollection(object):
     """
     Multimap of devices
@@ -64,6 +95,8 @@ class DeviceCollection(object):
         :type device_dbus: razer_daemon.hardware.device_base.RazerDevice
         """
         device_object = Device(device_id, device_serial, device_dbus)
+        device_object.register_parent(self)
+
         self._id_map[device_id] = device_object
         self._serial_map[device_serial] = device_object
 
@@ -172,3 +205,27 @@ class DeviceCollection(object):
         :rtype: list of Device
         """
         return iter(self._id_map.values())
+
+    @property
+    def devices(self):
+        """
+        Get device list
+
+        :return: List of devices
+        :rtype: list of Device
+        """
+        return list(self._id_map.values())
+
+    def notify(self, active_child, msg):
+        """
+        Send messages between children
+
+        :param active_child: Child sending the message
+        :type active_child: Device
+
+        :param msg: Messgae
+        :type msg: tuple
+        """
+        for child in self._id_map.values():
+            if child is not active_child:
+                child.notify_child(msg)

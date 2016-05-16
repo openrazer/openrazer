@@ -40,6 +40,9 @@ def set_brightness(self, brightness):
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(brightness))
 
+    # Notify others
+    self.send_effect_event('setBrightness', brightness)
+
 @endpoint('razer.device.misc', 'enableMacroKeys')
 def enable_macro_keys(self):
     """
@@ -166,6 +169,9 @@ def set_wave_effect(self, direction):
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(direction))
 
+    # Notify others
+    self.send_effect_event('setWave', direction)
+
 @endpoint('razer.device.lighting', 'setStatic', in_sig='yyy')
 def set_static_effect(self, red, green, blue):
     """
@@ -189,6 +195,9 @@ def set_static_effect(self, red, green, blue):
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
 
+    # Notify others
+    self.send_effect_event('setStatic', red, green, blue)
+
 @endpoint('razer.device.lighting', 'setSpectrum')
 def set_spectrum_effect(self):
     """
@@ -201,6 +210,9 @@ def set_spectrum_effect(self):
     with open(driver_path, 'w') as driver_file:
         driver_file.write('1')
 
+    # Notify others
+    self.send_effect_event('setSpectrum')
+
 @endpoint('razer.device.lighting', 'setNone')
 def set_none_effect(self):
     """
@@ -212,6 +224,9 @@ def set_none_effect(self):
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write('1')
+
+    # Notify others
+    self.send_effect_event('setNone')
 
 @endpoint('razer.device.lighting', 'setReactive', in_sig='yyyy')
 def set_reactive_effect(self, red, green, blue, speed):
@@ -242,6 +257,9 @@ def set_reactive_effect(self, red, green, blue, speed):
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
 
+    # Notify others
+    self.send_effect_event('setReactive', red, green, blue, speed)
+
 @endpoint('razer.device.lighting', 'setBreathRandom')
 def set_breath_random_effect(self):
     """
@@ -255,6 +273,9 @@ def set_breath_random_effect(self):
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
+    # Notify others
+    self.send_effect_event('setBreathRandom')
 
 @endpoint('razer.device.lighting', 'setBreathSingle', in_sig='yyy')
 def set_breath_single_effect(self, red, green, blue):
@@ -278,6 +299,9 @@ def set_breath_single_effect(self, red, green, blue):
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
+    # Notify others
+    self.send_effect_event('setBreathSingle', red, green, blue)
 
 @endpoint('razer.device.lighting', 'setBreathDual', in_sig='yyyyyy')
 def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
@@ -310,6 +334,9 @@ def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
+    # Notify others
+    self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
 
 @endpoint('razer.device.lighting', 'setCustom')
 def set_custom_effect(self):

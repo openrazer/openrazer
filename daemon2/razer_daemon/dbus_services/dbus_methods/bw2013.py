@@ -31,6 +31,9 @@ def bw_set_pulsate(self):
     with open(driver_path, 'w') as driver_file:
         driver_file.write('1')
 
+    # Notify others
+    self.send_effect_event('setPulsate')
+
 @endpoint('razer.device.lighting', 'setStatic')
 def bw_set_static(self):
     """
@@ -42,3 +45,6 @@ def bw_set_static(self):
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write('1')
+
+    # Notify others
+    self.send_effect_event('setStatic')

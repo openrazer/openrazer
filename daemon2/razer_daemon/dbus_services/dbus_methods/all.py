@@ -33,4 +33,9 @@ def get_device_type(self):
     with open(driver_path, 'r') as driver_file:
         return driver_file.read().strip()
 
+# TODO remove
+@endpoint('razer.device.misc', 'notifyMsg', in_sig='s')
+def notify_msg(self, msg):
+    self.logger.debug("DBus call notify_msg")
 
+    self.notify_observers(msg)

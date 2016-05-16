@@ -8,6 +8,7 @@ import logging
 
 from razer_daemon.dbus_services.service import DBusService
 import razer_daemon.dbus_services.dbus_methods
+from razer_daemon.misc import effect_sync
 
 class RazerDevice(DBusService):
     """
@@ -23,9 +24,16 @@ class RazerDevice(DBusService):
     USB_PID = None
 
     def __init__(self, device_path, device_number):
+        self._observer_list = []
+        self._effect_sync_propagate_up = False
+        self._disable_notifications = False
+
+        self._parent = None
         self._device_path = device_path
         self._device_number = device_number
         self._serial = self.get_serial()
+
+        self._effect_sync = effect_sync.EffectSync(self, device_number)
 
         self._is_closed = False
 
@@ -48,6 +56,40 @@ class RazerDevice(DBusService):
 
         # Load additional DBus methods
         self.load_methods()
+
+    def send_effect_event(self, effect_name, *args):
+        payload = ['effect', self, effect_name]
+        payload.extend(args)
+
+        self.notify_observers(tuple(payload))
+
+    @property
+    def effect_sync(self):
+        """
+        Propagate the obsever call upwards, used for syncing effects
+
+        :return: Effects sync flag
+        :rtype: bool
+        """
+        return self._effect_sync_propagate_up
+
+    @effect_sync.setter
+    def effect_sync(self, value):
+        """
+        Setting to true will propagate observer events upwards
+
+        :param value: Effect sync
+        :type value: bool
+        """
+        self._effect_sync_propagate_up = value
+
+    @property
+    def disable_notify(self):
+        return self._disable_notifications
+
+    @disable_notify.setter
+    def disable_notify(self, value):
+        self._disable_notifications = value
 
     def get_driver_path(self, driver_filename):
         """
@@ -123,7 +165,8 @@ class RazerDevice(DBusService):
         """
         To be overrided by any subclasses to do cleanup
         """
-        pass
+        # Clear observer list
+        self._observer_list.clear()
 
     def close(self):
         """
@@ -133,6 +176,65 @@ class RazerDevice(DBusService):
             self._close()
 
             self._is_closed = True
+
+    def register_observer(self, observer):
+        """
+        Observer design pattern, register
+
+        :param observer: Observer
+        :type observer: object
+        """
+        if observer not in self._observer_list:
+            self._observer_list.append(observer)
+
+    def register_parent(self, parent):
+        """
+        Register the parent as an observer to be optionally notified (sends to other devices)
+
+        :param parent: Observer
+        :type parent: object
+        """
+        self._parent = parent
+
+    def remove_observer(self, observer):
+        """
+        Obsever design pattern, remove
+
+        :param observer: Observer
+        :type observer: object
+        """
+        try:
+            self._observer_list.remove(observer)
+        except ValueError:
+            pass
+
+    def notify_observers(self, msg):
+        """
+        Notify observers with msg
+
+        :param msg: Tuple with first element a string
+        :type msg: tuple
+        """
+        if not self._disable_notifications:
+            self.logger.debug("Sending observer message: {0}".format(msg))
+
+            if self._effect_sync_propagate_up and self._parent is not None:
+                self._parent.notify_parent(msg)
+
+            for observer in self._observer_list:
+                observer.notify(msg)
+
+    def notify(self, msg):
+        """
+        Recieve observer messages
+
+        :param msg: Tuple with first element a string
+        :type msg: tuple
+        """
+        self.logger.debug("Got observer message: {0}".format(msg))
+
+        for observer in self._observer_list:
+            observer.notify(msg)
 
     @classmethod
     def match(cls, device_id):
@@ -155,6 +257,9 @@ class RazerDevice(DBusService):
 
     def __del__(self):
         self.close()
+
+    def __repr__(self):
+        return "{0}:{1}".format(self.__class__.__name__, self._serial)
 
 class RazerDeviceBrightnessSuspend(RazerDevice):
     """
