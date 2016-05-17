@@ -81,50 +81,13 @@ examples_clean:
 python_library_install:
 	@echo "\n::\033[34m Installing Razer python library\033[0m"
 	@echo "====================================================="
-	@install -v -d gui/lib/razer $(DESTDIR)/$(PYTHONDIR)/razer
-	@cp -v -r gui/lib/razer/* $(DESTDIR)/$(PYTHONDIR)/razer
+	@install -v -d pylib $(DESTDIR)/$(PYTHONDIR)/razer
+	@cp -v -r pylib/* $(DESTDIR)/$(PYTHONDIR)/razer
 
 python_library_uninstall:
 	@echo "\n::\033[34m Uninstalling Razer python library\033[0m"
 	@echo "====================================================="
 	rm -rf $(DESTDIR)/$(PYTHONDIR)/razer
-
-# Python Tray App
-python_tray_app_install:
-	@echo "\n::\033[34m Installing Razer python tray applet\033[0m"
-	@echo "====================================================="
-	@install -v -d gui/tray_applet $(DESTDIR)/usr/share/razer_tray_applet
-	@cp -v -r gui/tray_applet/* $(DESTDIR)/usr/share/razer_tray_applet
-
-python_tray_app_uninstall:
-	@echo "\n::\033[34m Uninstalling Razer python tray applet\033[0m"
-	@echo "====================================================="
-	rm -rf $(DESTDIR)/usr/share/razer_tray_applet
-
-# Python Chroma App
-python_chroma_app_install:
-	@echo "\n::\033[34m Installing Razer python chroma applet\033[0m"
-	@echo "====================================================="
-	@install -v -d gui/chroma_controller $(DESTDIR)/usr/share/razer_chroma_controller
-	@cp -v -r gui/chroma_controller/* $(DESTDIR)/usr/share/razer_chroma_controller
-
-python_chroma_app_uninstall:
-	@echo "\n::\033[34m Uninstalling Razer python chroma applet\033[0m"
-	@echo "====================================================="
-	rm -rf $(DESTDIR)/usr/share/razer_chroma_controller
-
-# App desktop files
-desktop_files_install:
-	@echo "\n::\033[34m Installing .desktop files\033[0m"
-	@echo "====================================================="
-	@install -v -D install_files/desktop/razer_tray_applet.desktop $(DESTDIR)/usr/share/applications/razer_tray_applet.desktop
-	@install -v -D install_files/desktop/razer_chroma_controller.desktop $(DESTDIR)/usr/share/applications/razer_chroma_controller.desktop
-
-desktop_files_uninstall:
-	@echo "\n::\033[34m Uninstalling .desktop files\033[0m"
-	@echo "====================================================="
-	rm -f $(DESTDIR)/usr/share/applications/razer_tray_applet.desktop
-	rm -f $(DESTDIR)/usr/share/applications/razer_chroma_controller.desktop
 
 # Clean target
 clean: librazer_chroma_clean daemon_clean daemon_controller_clean examples_clean driver_clean
@@ -191,8 +154,6 @@ ubuntu_install: all desktop_files_install setup_dkms udev_install dbus_install
 	@make --no-print-directory -C daemon_controller install DESTDIR=$(DESTDIR)
 	
 	@make --no-print-directory python_library_install PYTHONDIR=/usr/lib/python3/dist-packages
-	@make --no-print-directory python_tray_app_install PYTHONDIR=/usr/lib/python3/dist-packages
-	@make --no-print-directory python_chroma_app_install PYTHONDIR=/usr/lib/python3/dist-packages
 
 # Ubuntu 14.04 uses upstart
 ubuntu_14_04_install ubuntu_14_10_install: ubuntu_install
@@ -223,8 +184,6 @@ fedora_install:
 	@make --no-print-directory -C daemon_controller install DESTDIR=$(DESTDIR)
 	
 	@make --no-print-directory python_library_install PYTHONDIR=/usr/lib/python3/dist-packages
-	@make --no-print-directory python_tray_app_install PYTHONDIR=/usr/lib/python3/dist-packages
-	@make --no-print-directory python_chroma_app_install PYTHONDIR=/usr/lib/python3/dist-packages
 	
 	@echo "\n::\033[34m Installing Razer systemd daemon file\033[0m"
 	@echo "====================================================="
@@ -235,7 +194,7 @@ fedora_install:
 
 
 
-install: all driver_install desktop_files_install udev_install dbus_install python_library_install python_tray_app_install python_chroma_app_install 
+install: all driver_install desktop_files_install udev_install dbus_install python_library_install
 	@make --no-print-directory -C lib install DESTDIR=$(DESTDIR)
 	@make --no-print-directory -C daemon install DESTDIR=$(DESTDIR)
 	@make --no-print-directory -C daemon_controller install DESTDIR=$(DESTDIR)
@@ -247,7 +206,7 @@ install: all driver_install desktop_files_install udev_install dbus_install pyth
 	
 	@make --no-print-directory rcd_links
 
-uninstall: driver_uninstall desktop_files_uninstall udev_uninstall dbus_uninstall python_library_uninstall python_tray_app_uninstall python_chroma_app_uninstall remove_rcd_links
+uninstall: driver_uninstall desktop_files_uninstall udev_uninstall dbus_uninstall python_library_uninstall remove_rcd_links
 	@make --no-print-directory -C lib uninstall DESTDIR=$(DESTDIR)
 	@make --no-print-directory -C daemon uninstall DESTDIR=$(DESTDIR)
 	@make --no-print-directory -C daemon_controller uninstall DESTDIR=$(DESTDIR)
