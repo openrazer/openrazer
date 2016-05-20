@@ -930,11 +930,11 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA)
     {
-        sprintf(buf, "Razer Mamba\n");
+        write_count = sprintf(buf, "Razer Mamba\n");
     } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_ABYSSUS) {
-        sprintf(buf, "Razer Abyssus\n");
+        write_count = sprintf(buf, "Razer Abyssus\n");
     } else {
-        sprintf(buf, "Unknown\n");
+        write_count = sprintf(buf, "Unknown\n");
     }
 
     return write_count;
