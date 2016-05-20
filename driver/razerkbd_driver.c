@@ -1332,26 +1332,35 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     //struct razer_kbd_device *widow = usb_get_intfdata(intf);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
-    int write_count = 0;
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA)
+    char *device_type;
+
+    switch (usb_dev->descriptor.idProduct)
     {
-        write_count = sprintf(buf, "Razer BlackWidow Chroma\n");
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE)
-    {
-        write_count = sprintf(buf, "Razer BlackWidow Chroma Tournament Edition\n");
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
-    {
-        write_count = sprintf(buf, "Razer BlackWidow Ultimate 2013\n");
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
-    {
-        write_count = sprintf(buf, "Razer BlackWidow Ultimate 2016\n");
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH) {
-        write_count = sprintf(buf, "Razer Blade Stealth\n");
-    } else
-    {
-        write_count = sprintf(buf, "Unknown Device\n");
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+            device_type = "Razer BlackWidow Chroma\n";
+            break;
+
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+            device_type = "Razer BlackWidow Chroma Tournament Edition\n";
+            break;
+
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
+            device_type = "Razer BlackWidow Ultimate 2013\n";
+            break;
+
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+            device_type = "Razer BlackWidow Ultimate 2016\n";
+            break;
+
+        case USB_DEVICE_ID_RAZER_BLADE_STEALTH: {
+            device_type = "Razer Blade Stealth\n";
+            break;
+
+        default:
+            device_type = "Unknown Device\n";
     }
-    return write_count;
+
+    return sprintf(buf, device_type);
 }
 
 /**
