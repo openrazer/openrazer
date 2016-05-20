@@ -146,7 +146,7 @@ remove_rcd_links:
 	rm -f $(DESTDIR)/etc/rc6.d/K02razer_bcd
 
 # Install for Ubuntu
-ubuntu_install: all desktop_files_install setup_dkms udev_install dbus_install
+ubuntu_install: all setup_dkms udev_install dbus_install
 	@echo "\n::\033[34m Installing for Ubuntu\033[0m"
 	@echo "====================================================="
 	@make --no-print-directory -C lib install DESTDIR=$(DESTDIR)
@@ -194,7 +194,7 @@ fedora_install:
 
 
 
-install: all driver_install desktop_files_install udev_install dbus_install python_library_install
+install: all driver_install udev_install dbus_install python_library_install
 	@make --no-print-directory -C lib install DESTDIR=$(DESTDIR)
 	@make --no-print-directory -C daemon install DESTDIR=$(DESTDIR)
 	@make --no-print-directory -C daemon_controller install DESTDIR=$(DESTDIR)
@@ -206,7 +206,7 @@ install: all driver_install desktop_files_install udev_install dbus_install pyth
 	
 	@make --no-print-directory rcd_links
 
-uninstall: driver_uninstall desktop_files_uninstall udev_uninstall dbus_uninstall python_library_uninstall remove_rcd_links
+uninstall: driver_uninstall udev_uninstall dbus_uninstall python_library_uninstall remove_rcd_links
 	@make --no-print-directory -C lib uninstall DESTDIR=$(DESTDIR)
 	@make --no-print-directory -C daemon uninstall DESTDIR=$(DESTDIR)
 	@make --no-print-directory -C daemon_controller uninstall DESTDIR=$(DESTDIR)
