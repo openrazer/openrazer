@@ -579,8 +579,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
  */
 static ssize_t razer_attr_read_device_type(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    int write_count = sprintf(buf, "Razer Firefly\n");
-    return write_count;
+    return sprintf(buf, "Razer Firefly\n");
 }
 
 /**
