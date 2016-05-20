@@ -1352,7 +1352,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             device_type = "Razer BlackWidow Ultimate 2016\n";
             break;
 
-        case USB_DEVICE_ID_RAZER_BLADE_STEALTH: {
+        case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
             device_type = "Razer Blade Stealth\n";
             break;
 
