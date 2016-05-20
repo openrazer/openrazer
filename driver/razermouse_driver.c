@@ -926,18 +926,23 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     
-    int write_count = 0;
+    char *device_type;
 
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA)
+    switch (usb_dev->descriptor.idProduct)
     {
-        write_count = sprintf(buf, "Razer Mamba\n");
-    } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_ABYSSUS) {
-        write_count = sprintf(buf, "Razer Abyssus\n");
-    } else {
-        write_count = sprintf(buf, "Unknown\n");
+        case USB_DEVICE_ID_RAZER_MAMBA:
+            device_type = "Razer Mamba\n";
+            break;
+
+        case USB_DEVICE_ID_RAZER_ABYSSUS:
+            device_type = "Razer Abyssus\n";
+            break;
+
+        default:
+            device_type = "Unknown\n";
     }
 
-    return write_count;
+    return sprintf(buf, device_type);
 }
 
 /**
