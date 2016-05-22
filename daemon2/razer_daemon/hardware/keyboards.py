@@ -6,6 +6,7 @@ import re
 
 from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend
 from razer_daemon.misc.key_event_management import KeyManager
+from razer_daemon.misc.ripple_effect import RippleManager
 
 
 class MacroKeyboard(RazerDeviceBrightnessSuspend):
@@ -14,19 +15,12 @@ class MacroKeyboard(RazerDeviceBrightnessSuspend):
 
     Has macro functionality and brightness based suspend
     """
-    EVENT_FILE_REGEX = None
 
     def __init__(self, device_path, device_number):
         super(MacroKeyboard, self).__init__(device_path, device_number)
         # Methods are loaded into DBus by this point
 
-        # Find event files in /dev/input/by-id/ by matching against regex
-        event_files = []
-        for event_file in os.listdir('/dev/input/by-id/'):
-            if self.EVENT_FILE_REGEX.match(event_file) is not None:
-                event_files.append(os.path.join('/dev/input/by-id/', event_file))
-
-        self.key_manager = KeyManager(device_number, event_files, self)
+        self.key_manager = KeyManager(device_number, self.event_files, self)
 
     def _close(self):
         """
@@ -62,4 +56,19 @@ class RazerBlackWidowChroma(MacroKeyboard):
                'set_custom_effect', 'set_key_row', 'enable_macro_keys', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
 
-               'notify_msg']
+               'set_ripple_effect']
+
+    def __init__(self, *args):
+        super(RazerBlackWidowChroma, self).__init__(*args)
+
+        self.ripple_manager = RippleManager(self, self._device_number)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerBlackWidowChroma, self)._close()
+
+        self.ripple_manager.close()
+
+

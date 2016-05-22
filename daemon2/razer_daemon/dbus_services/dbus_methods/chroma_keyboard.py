@@ -343,7 +343,8 @@ def set_custom_effect(self):
     """
     Set the device to use custom LED matrix
     """
-    self.logger.debug("DBus call set_custom_effect")
+    # TODO uncomment
+    # self.logger.debug("DBus call set_custom_effect")
 
     driver_path = self.get_driver_path('mode_custom')
 
@@ -351,6 +352,13 @@ def set_custom_effect(self):
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
+@endpoint('razer.device.lighting', 'setRipple', in_sig='yyyd')
+def set_ripple_effect(self, red, green, blue, refresh_rate):
+    self.logger.debug("DBus call set_ripple_effect")
+
+    # Notify others
+    self.send_effect_event('setRipple', red, green, blue, refresh_rate)
 
 @endpoint('razer.device.lighting', 'setKeyRow', in_sig='ay', byte_arrays=True)
 def set_key_row(self, payload):
@@ -366,7 +374,9 @@ def set_key_row(self, payload):
     :param payload: Binary payload
     :type payload: bytes
     """
-    self.logger.debug("DBus call set_key_row")
+
+    # TODO uncomment
+    # self.logger.debug("DBus call set_key_row")
 
     driver_path = self.get_driver_path('set_key_row')
 

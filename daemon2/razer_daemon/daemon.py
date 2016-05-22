@@ -5,10 +5,12 @@ This class is the main core of the daemon, this serves a basic dbus module to co
 """
 import logging
 import os
+import sys
 import signal
 import time
+import tempfile
 
-from dbus.mainloop.glib import DBusGMainLoop, threads_init
+import dbus.mainloop.glib
 from gi.repository import GObject
 
 import razer_daemon.hardware
@@ -18,7 +20,72 @@ from razer_daemon.misc.screensaver_thread import ScreensaverThread
 
 DEVICE_CHECK_INTERVAL = 5000 # Milliseconds
 
-class Daemon(DBusService):
+def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, pid_file=None):
+
+    if not foreground:
+        # Attempt to double fork
+        try:
+            pid = os.fork()
+            # Returns 0 in the child process, and returns the child's pid in the parent so
+            # by checking if greater than 0 we can close parent
+            if pid > 0:
+                sys.exit(0)
+        except OSError as err:
+            print("Failed first fork. Error: {0}".format(err))
+
+        # Become the process group and session leader
+        os.setsid()
+
+        try:
+            pid = os.fork()
+            # Returns 0 in the child process, and returns the child's pid in the parent so
+            # by checking if greater than 0 we can close parent
+            if pid > 0:
+                sys.exit(0)
+        except OSError as err:
+            print("Failed first fork. Error: {0}".format(err))
+
+        # Set umask to 0
+        os.umask(0)
+
+        # Close stdin, stdout, stderr
+        sys.stdout.flush()
+        sys.stderr.flush()
+        stdin = open('/dev/null', 'r')
+        stdout = open('/dev/null', 'a+')
+        os.dup2(stdin.fileno(), sys.stdin.fileno())
+        os.dup2(stdout.fileno(), sys.stdout.fileno())
+        os.dup2(stdout.fileno(), sys.stderr.fileno())
+
+
+    # Change working directory
+    if run_dir is not None and os.path.exists(run_dir) and os.path.isdir(run_dir):
+        os.chdir(run_dir)
+    else:
+        run_dir = tempfile.mkdtemp(prefix='tmp_', suffix='_razer_daemon')
+        os.chdir(run_dir)
+
+    # Write PID
+    if pid_file is not None:
+        try:
+            with open(pid_file, 'w') as pid_file_obj:
+                pid_file_obj.write(str(os.getpid()))
+        except (OSError, IOError) as err:
+            print("Error: {0}".format(err))
+
+    # Create daemon and run
+    daemon = RazerDaemon(verbose, log_dir, console_log, run_dir, config_file)
+    try:
+        daemon.run()
+    except Exception as err:
+        daemon.logger.exception("Caught exception", exc_info=err)
+
+    # If pid file exists, remove it
+    if pid_file is not None and os.path.exists(pid_file):
+        os.remove(pid_file)
+
+
+class RazerDaemon(DBusService):
     """
     Daemon class
 
@@ -33,10 +100,18 @@ class Daemon(DBusService):
 
     BUS_PATH = 'org.razer'
 
-    def __init__(self, logging_level=logging.WARNING, log_file=None, console_log=True, setup_signals=True):
+    def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None):
+        # Deal with argugments
+        logging_level = logging.INFO
+        if verbose:
+            logging_level = logging.DEBUG
+
+        self._data_dir = run_dir
+        self._config_file = config_file
+
         # Setup DBus to use gobject main loop
-        threads_init()
-        DBusGMainLoop(set_as_default=True)
+        dbus.mainloop.glib.threads_init()
+        dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
         DBusService.__init__(self, self.BUS_PATH, '/org/razer')
 
         self._main_loop = GObject.MainLoop()
@@ -53,6 +128,7 @@ class Daemon(DBusService):
             console_logger.setFormatter(formatter)
             self.logger.addHandler(console_logger)
 
+        log_file = os.path.join(log_dir, 'razer.log')
         if log_file is not None:
             file_logger = logging.FileHandler(log_file)
             file_logger.setLevel(logging_level)
@@ -77,15 +153,16 @@ class Daemon(DBusService):
         self.add_dbus_method('razer.devices', 'disableTurnOffOnScreensaver', self.disable_turn_off_on_screensaver)
         self.logger.info("Adding razer.devices.syncEffects method to DBus")
         self.add_dbus_method('razer.devices', 'syncEffects', self.sync_effects, in_signature='b')
+        self.logger.info("Adding razer.daemon.stop method to DBus")
+        self.add_dbus_method('razer.daemon', 'stop', self.stop)
 
         # TODO remove
         self.sync_effects(True)
         # TODO ======
 
         # Setup quit signals
-        if setup_signals:
-            signal.signal(signal.SIGINT, self.quit)
-            signal.signal(signal.SIGTERM, self.quit)
+        signal.signal(signal.SIGINT, self.quit)
+        signal.signal(signal.SIGTERM, self.quit)
 
     def enable_turn_off_on_screensaver(self):
         """
@@ -199,6 +276,12 @@ class Daemon(DBusService):
                 counter = 0
             counter += 1
 
+    def stop(self):
+        """
+        Wrapper for quit
+        """
+        self.quit(None, None)
+
     def quit(self, signum, frame):
         """
         Quit by stopping the main loop and screensaver thread
@@ -219,12 +302,12 @@ class Daemon(DBusService):
 
 if __name__ == '__main__':
     # pylint: disable=invalid-name
-    daemon = Daemon(logging_level=logging.DEBUG)
+    daemon_obj = RazerDaemon(verbose=True, console_log=True, log_dir='/tmp/razer_daemon/logs', run_dir='/tmp/razer_daemon/home')
 
     try:
-        daemon.run()
-    except Exception as err:
-        daemon.logger.exception("Caught exception", exc_info=err)
+        daemon_obj.run()
+    except Exception as daemon_err:
+        daemon_obj.logger.exception("Caught exception", exc_info=daemon_err)
 
 
 

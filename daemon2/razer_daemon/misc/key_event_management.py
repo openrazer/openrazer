@@ -12,15 +12,12 @@ Each event is in the format of
 * unsigned short code
 * signed int value
 """
-
 import datetime
 import json
 import logging
 import threading
 import select
 import struct
-
-
 
 # pylint: disable=import-error
 from razer.keyboard import KEY_MAPPING, EVENT_MAPPING
@@ -187,6 +184,27 @@ class KeyManager(object):
         self._clean_counter = 0
 
         self._temp_key_store_active = False
+        self._temp_key_store = []
+        self._temp_expire_time = datetime.timedelta(seconds=2)
+
+    @property
+    def temp_key_store(self):
+        # Locking so it doesnt mutate whilst copying
+        self._access_lock.acquire()
+        now = datetime.datetime.now()
+
+        # Remove expired keys from store
+        try:
+            # Get date and if its less than now its expired
+            while self._temp_key_store[0][0] < now:
+                self._temp_key_store.pop(0)
+        except IndexError:
+            pass
+
+        # Creating a copy as then it doesnt mutate whilst iterating
+        result = self._temp_key_store[:]
+        self._access_lock.release()
+        return result
 
     @property
     def temp_key_store_state(self):
@@ -234,6 +252,16 @@ class KeyManager(object):
         # pylint: disable=too-many-branches,too-many-statements
         self._access_lock.acquire()
 
+        now = datetime.datetime.now()
+
+        # Remove expired keys from store
+        try:
+            # Get date and if its less than now its expired
+            while self._temp_key_store[0][0] < now:
+                self._temp_key_store.pop(0)
+        except IndexError:
+            pass
+
         # Clean up any threads
         if self._clean_counter > 20 and len(self._threads) > 0:
             self._clean_counter = 0
@@ -278,6 +306,9 @@ class KeyManager(object):
                         # self._logger.debug("Increased key %s", key_name)
                     except KeyError as err:
                         self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
+
+                if self._temp_key_store_active:
+                    self._temp_key_store.append((now + self._temp_expire_time, KEY_MAPPING[key_name]))
 
                 # Logic for treating FN as a modifier
                 if key_name == 'FN':
@@ -444,4 +475,5 @@ class KeyManager(object):
             # Device is the device the msg originated from (could be parent device)
             if msg[2] != 'setRipple':
                 # If we are not doing ripple effect then disable the storing of keys
-                self.temp_key_store_state = False
+                #self.temp_key_store_state = False
+                pass

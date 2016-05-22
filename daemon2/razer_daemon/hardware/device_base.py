@@ -20,6 +20,8 @@ class RazerDevice(DBusService):
     OBJECT_PATH = '/org/razer/device/'
     METHODS = []
 
+    EVENT_FILE_REGEX = None
+
     USB_VID = None
     USB_PID = None
 
@@ -39,6 +41,12 @@ class RazerDevice(DBusService):
 
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
+
+        # Find event files in /dev/input/by-id/ by matching against regex
+        self.event_files = []
+        for event_file in os.listdir('/dev/input/by-id/'):
+            if self.EVENT_FILE_REGEX is not None and self.EVENT_FILE_REGEX.match(event_file) is not None:
+                self.event_files.append(os.path.join('/dev/input/by-id/', event_file))
 
         object_path = os.path.join(self.OBJECT_PATH, self._serial)
         DBusService.__init__(self, self.BUS_PATH, object_path)
@@ -275,7 +283,11 @@ class RazerDeviceBrightnessSuspend(RazerDevice):
         """
         self.suspend_args.clear()
         self.suspend_args['brightness'] = razer_daemon.dbus_services.dbus_methods.get_brightness(self)
+
+        # Todo make it context?
+        self.disable_notify = True
         razer_daemon.dbus_services.dbus_methods.set_brightness(self, 0)
+        self.disable_notify = False
 
     def _resume_device(self):
         """
@@ -284,4 +296,7 @@ class RazerDeviceBrightnessSuspend(RazerDevice):
         Get the last known brightness and then set the brightness
         """
         brightness = self.suspend_args.get('brightness', 100)
+
+        self.disable_notify = True
         razer_daemon.dbus_services.dbus_methods.set_brightness(self, brightness)
+        self.disable_notify = False

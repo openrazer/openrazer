@@ -1,0 +1,7 @@
+RAZER_USER=razer
+RAZER_GROUP=razer
+
+RAZER_STATE_DIR=/var/run/razer
+RAZER_LOG_DIR=/var/log/razer
+RAZER_CONF=/etc/razer.conf
+RAZER_OPTS=-v
