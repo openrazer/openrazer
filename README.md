@@ -4,17 +4,18 @@ A collection of Linux drivers for the Razer devices, providing kernel drivers, D
 
 Website: [Here](http://pez2001.github.io/razer_chroma_drivers/)
 
-Keyboard Support:
+## Support
+### Keyboard Support:
  * Razer Blackwidow Ultimate 2013 *(all lighting modes)*
  * Razer Blackwidow Chroma *(all lighting modes)*
  * Razer Blackwidow Chroma Tournament Edition *(all lighting modes)*
  * Razer Blade Stealth *(all lighting modes)*
  * Razer Blackwidow Ultimate 2016 (all bar custom lighting)
 
-Mousemat Support:
+### Mousemat Support:
  * Razer Firefly *(all lighting modes)*
 
-Mouse Support:
+### Mouse Support:
  * Razer Mamba *(all lighting modes)*
  * Razer Abyssus (all modes bar the refresh rate)
 
