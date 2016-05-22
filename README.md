@@ -4,6 +4,8 @@ A collection of Linux drivers for the Razer devices, providing kernel drivers, D
 
 Website: [Here](http://pez2001.github.io/razer_chroma_drivers/)
 
+**Before raising an issue** saying something doesn't work, read [this](https://github.com/pez2001/razer_chroma_drivers/wiki/Troubleshooting) Wiki page, try not to create new issues if one exists, reopen it.
+
 ## Support
 ### Keyboard Support:
  * Razer Blackwidow Ultimate 2013 *(all lighting modes)*
