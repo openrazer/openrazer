@@ -1,129 +1,28 @@
-# razer_chroma_drivers
+# Razer Drivers
 
-A collection of Linux drivers for the Razer Chroma devices, providing a daemon and graphical frontends.
+A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
 
-Website: http://pez2001.github.io/razer_chroma_drivers/
+Website: [Here](http://pez2001.github.io/razer_chroma_drivers/)
 
+**Before raising an issue** saying something doesn't work, read [this](https://github.com/pez2001/razer_chroma_drivers/wiki/Troubleshooting) Wiki page, try not to create new issues if one exists, reopen it.
 
-Supports:
+## Support
+### Keyboard Support:
  * Razer Blackwidow Ultimate 2013 *(all lighting modes)*
- * Razer Blackwidow Ultimate 2016 (all bar custom lighting)
  * Razer Blackwidow Chroma *(all lighting modes)*
- * Razer Blackwidow Tournament Edition
+ * Razer Blackwidow Chroma Tournament Edition *(all lighting modes)*
+ * Razer Blade Stealth *(all lighting modes)*
+ * Razer Blackwidow Ultimate 2016 (all bar custom lighting)
+
+### Mousemat Support:
  * Razer Firefly *(all lighting modes)*
+
+### Mouse Support:
  * Razer Mamba *(all lighting modes)*
+ * Razer Abyssus (all modes bar the refresh rate)
 
-
-
-## Installation for Debian based distros
-
- 1. Download the source code:
-
-        git clone --depth=1 https://github.com/pez2001/razer_chroma_drivers.git
-
- 1. Execute installation script:
-
-        cd razer_chroma_drivers
-        ./install_driver_debian.sh
-
- 1. **Reboot**
-
-
-
-## Installation for Debian/Ubuntu based distros (creating a .deb package)
-You can either install using the above Debian method or with the packaged method, which provides some benefits.
-
- 1. Download the source code:
-
-        git clone --depth=1 https://github.com/pez2001/razer_chroma_drivers.git
-        cd razer_chroma_drivers
-
- 1. Install the packages needed to build the software:
-
-        sudo apt-get install -y dpkg-dev libdbus-1-dev jq libsdl2-dev libsdl2-image-dev libfftw3-dev
-
- 1. Build the software and driver:
-
-        make
-
- 1. Build the package:
-
-        ./package_for_ubuntu.sh
-        OR
-        ./package_for_debian.sh
-
- 1. The command above will output something like `dpkg-name: info: moved 'tmp.3PnAtckx3o.deb' to '/tmp/razer-chroma-driver_1.0.0_amd64.deb'`.
-    To install the newly created package:
-
-        sudo dpkg -i /tmp/razer-chroma-driver_1.0.0_amd64.deb
-
- 1. **(Optional)** If you wish, you can clean source directory:
-
-        make clean
- 
- 1. **Reboot**
-
-Installing the `.deb` file has multiple benefits:
-
-  * Keeps track of all the installed files.
-  * Simplifies the removal of the driver and daemon later.
-  * Registers with DKMS (Dynamic Kernel Module Support) - this recompiles the driver whenever a new kernel is installed.
-
-For **upstart** distros (such as Ubuntu 14.10 and prior), an upstart style init script is provided.
-There is log file for upstart jobs under `/var/log/upstart` so you can view startup issues with `tail /var/log/upstart/razer_bcd.log`.
-
-For **systemd** distros (such as Debian as well as Ubuntu 15.04 and later), a script is also provided.
-
-To remove the driver/daemon:
-
-        sudo dpkg -r razer-chroma-driver
-
-
-### Managing the Service
-To manage upstart jobs:
-
-        sudo status razer_bcd
-        sudo start razer_bcd
-        sudo stop razer_bcd
-        sudo restart razer_bcd
-
-On Ubuntu, you can use `sudo service razer_bcd `**`ACTION`** where **`ACTION`** is `start|stop|status|restart`
-
-On Debian, you can control the driver with `/etc/init.d/razer_bcd `**`ACTION`** or using `systemctl` which is the preferred method (providing systemd is installed).
-
-        sudo systemctl status razer_bcd
-        sudo systemctl start razer_bcd
-        sudo systemctl stop razer_bcd
-        sudo systemctl restart razer_bcd
-
-
-
-
-## Installation from source
-
-
- - Install dependencies (libdbus-1-dev,jq)
- - Build driver etc...
- 
-        make all
- - Execute install script:
-
-        sudo make install
- - Reboot
- 
-To uninstall run
-
-        sudo make uninstall
-
-
-
-## Updating the driver
-When you'd like to update when new changes are made to the project, update your copy of the repository and follow the installation procedures again.
-
-    cd /path/to/razer_blackwidow_chroma_driver
-    git pull
-
-
+## Installation
+[Here](https://github.com/pez2001/razer_chroma_drivers/wiki/Installation) is a page documenting the installation and uninstallation procedures.
 
 ## Applications
 
@@ -249,15 +148,6 @@ of guessed unbinds all chroma keyboards.
  - **Libraries :** Beta
  - **Installer :** Beta
  - **Packages :** Beta
- - **GUI - Tray Applet :** Alpha
- - **GUI - Chroma Controller :** Alpha
-
-
-
-
-
-
-
 
 ## First Steps Tutorial
 
@@ -404,20 +294,17 @@ FX setup scripts, bug fixes, feature requests, etc are also welcome.
 
 
 ## Additional Credits
-
-
  - Various installation and makefile related fixes by Jordan King (manual merge)
  - Ubuntu file permission fixes by Carsten Teibes (pulled)
  - Debugging help of Mosie1 with Linux Mint script bugs (testing)
  - Example Effect  : Dynamic by TheKiwi5000 (pulled)
  - Snake Example by James Shawver (pulled and edited slightly)
- - Identifying of missing speed parameter 
-   for the reactive mode by Oleg Finkelshteyn (implemented by maintainer)
+ - Identifying of missing speed parameter for the reactive mode by Oleg Finkelshteyn (implemented by maintainer)
    discoverying of a previous unknown reactive+wave mode.
    (call reactive script & wave script with none as parameter)
    support for the tournament edition(manual merge)
  - Modifications to dynamic example by Stephanie Sunshine (pulled)
- - Deb packaging, dkms support, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
+ - Mamba Driver, Device quering functionality in the kernel, Deb packaging, DKMS support, shell scripting additions and ubuntu fixes by Terry Cain (pulled)
  - GUI Interface for BlackWidow Chroma Keyboards by Luke Horwell [(now migrated as Polychromatic Controller)](https://github.com/lah7/polychromatic-controller)
  - Ubuntu fixes by Brad Murmz (pulled)
  - Default Keyboard profiles by Mathieu Okuyama (manual merge)
@@ -456,6 +343,8 @@ Thank you for all donations i really appreciate it!
   - Luis Fernandes 3.5
 
   You can send your donations via PayPal to : feckelburger [at] gmx.net
+  
+  You can also send PayPal donations to terry@terrys-home.co.uk if you want :wink:
 
 -----
 
