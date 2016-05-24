@@ -19,9 +19,6 @@ mkdir -p ${directory}/usr/{bin,lib/python3/dist-packages/,sbin,share/razer_bcd/f
 cp install_files/init/razer_bcd.conf ${directory}/etc/init/razer_bcd.conf
 cp install_files/init.d/razer_bcd_ubuntu ${directory}/etc/init.d/razer_bcd
 
-# Copy over systemd script
-cp install_files/systemd/razer_bcd.service ${directory}/lib/systemd/system/razer_bcd.service
-
 # Copy over udev rule
 cp install_files/udev/95-razerkbd.rules ${directory}/etc/udev/rules.d/95-razerkbd.rules
 
