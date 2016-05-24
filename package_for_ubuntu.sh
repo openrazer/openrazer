@@ -41,7 +41,7 @@ cp daemon/fx/pez2001_progress_bar.so ${directory}/usr/share/razer_bcd/fx
 cp daemon_controller/razer_bcd_controller ${directory}/usr/bin/razer_bcd_controller
 
 # Copy Python3 libraries into the python path
-cp -r pylib ${directory}/usr/lib/python3/dist-packages/razer
+cp -r pylib/razer ${directory}/usr/lib/python3/dist-packages/razer
 
 # Copy razer kernel driver to src
 cp Makefile ${directory}/usr/src/razer_chroma_driver-1.0.0/Makefile

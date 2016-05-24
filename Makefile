@@ -81,8 +81,8 @@ examples_clean:
 python_library_install:
 	@echo "\n::\033[34m Installing Razer python library\033[0m"
 	@echo "====================================================="
-	@install -v -d pylib $(DESTDIR)/$(PYTHONDIR)/razer
-	@cp -v -r pylib/* $(DESTDIR)/$(PYTHONDIR)/razer
+	@install -v -d pylib/razer $(DESTDIR)/$(PYTHONDIR)/razer
+	@cp -v -r pylib/razer/* $(DESTDIR)/$(PYTHONDIR)/razer
 
 python_library_uninstall:
 	@echo "\n::\033[34m Uninstalling Razer python library\033[0m"

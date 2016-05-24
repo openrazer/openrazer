@@ -932,30 +932,12 @@ int razer_activate_macro_keys(struct usb_device *usb_dev)
  */
 int razer_test(struct usb_device *usb_dev)
 {
-    int retval = -1;
-    struct razer_report response_report;
-    struct razer_report request_report = get_razer_report(0x03, 0x82, 0x03);
-    request_report.arguments[0] = 0x01;
-    request_report.arguments[1] = 0x04;
-    request_report.crc = razer_calculate_crc(&request_report);
-
-    retval = razer_get_report(usb_dev, &request_report, &response_report);
-
-    if(retval == 0)
-    {
-        if(response_report.status == 0x02 && response_report.command_class == 0x00 && response_report.command_id.id == 0x81)
-        {
-            print_erroneous_report(&response_report, "razerkbd", "Get type");
-            retval = response_report.arguments[2];
-        } else
-        {
-            print_erroneous_report(&response_report, "razerkbd", "Invalid Report Type");
-        }
-    } else
-    {
-      print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
-    }
-
+    int retval;
+    struct razer_report report = get_razer_report(0x00, 0x04, 0x02); // Device Mode
+    report.arguments[0] = 0x03; // Unknown
+    report.arguments[1] = 0x00; // Parm 0x00
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_set_report(usb_dev, &report);
     return retval;
 }
 
