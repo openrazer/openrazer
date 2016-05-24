@@ -68,7 +68,7 @@ bind_all() {
 }
 
 unbind_all() {
-	unbind_all_device "razerkbd" "011A|011B|010D|203|0205|0209|0214"
+	unbind_all_device "razerkbd" "011A|011B|010D|0203|0205|0209|0214"
 	unbind_all_device "razermouse" "0045|0046"
 	unbind_all_device "razerfirefly" "0C00"
 }
