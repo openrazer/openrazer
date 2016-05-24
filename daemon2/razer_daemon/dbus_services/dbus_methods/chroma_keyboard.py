@@ -355,13 +355,34 @@ def set_custom_effect(self):
 
 @endpoint('razer.device.lighting', 'setRipple', in_sig='yyyd')
 def set_ripple_effect(self, red, green, blue, refresh_rate):
+    """
+    Set the daemon to serve a ripple effect of the specified colour
+
+    :param red: Red component
+    :type red: int
+
+    :param green: Green component
+    :type green: int
+
+    :param blue: Blue component
+    :type blue: int
+
+    :param refresh_rate: Refresh rate
+    :type refresh_rate: int
+    """
     self.logger.debug("DBus call set_ripple_effect")
 
     # Notify others
     self.send_effect_event('setRipple', red, green, blue, refresh_rate)
 
 @endpoint('razer.device.lighting', 'setRippleRandomColour', in_sig='d')
-def set_ripple_effect(self, refresh_rate):
+def set_ripple_effect_random_colour(self, refresh_rate):
+    """
+    Set the daemon to serve a ripple effect of random colours
+
+    :param refresh_rate: Refresh rate
+    :type refresh_rate: int
+    """
     self.logger.debug("DBus call set_ripple_effect")
 
     # Notify others

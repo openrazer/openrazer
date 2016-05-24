@@ -26,6 +26,7 @@ class RazerDevice(DBusService):
     USB_PID = None
 
     def __init__(self, device_path, device_number):
+        # pylint: disable=too-many-instance-attributes
         self._observer_list = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
@@ -66,6 +67,15 @@ class RazerDevice(DBusService):
         self.load_methods()
 
     def send_effect_event(self, effect_name, *args):
+        """
+        Send effect event
+
+        :param effect_name: Effect name
+        :type effect_name: str
+
+        :param args: Effect arguments
+        :type args: list
+        """
         payload = ['effect', self, effect_name]
         payload.extend(args)
 
@@ -93,10 +103,22 @@ class RazerDevice(DBusService):
 
     @property
     def disable_notify(self):
+        """
+        Disable notifications flag
+
+        :return: Flag
+        :rtype: bool
+        """
         return self._disable_notifications
 
     @disable_notify.setter
     def disable_notify(self, value):
+        """
+        Set the disable notifications flag
+
+        :param value: Disable
+        :type value: bool
+        """
         self._disable_notifications = value
 
     def get_driver_path(self, driver_filename):
@@ -224,7 +246,7 @@ class RazerDevice(DBusService):
         :type msg: tuple
         """
         if not self._disable_notifications:
-            self.logger.debug("Sending observer message: {0}".format(msg))
+            self.logger.debug("Sending observer message: %s", str(msg))
 
             if self._effect_sync_propagate_up and self._parent is not None:
                 self._parent.notify_parent(msg)
@@ -239,7 +261,7 @@ class RazerDevice(DBusService):
         :param msg: Tuple with first element a string
         :type msg: tuple
         """
-        self.logger.debug("Got observer message: {0}".format(msg))
+        self.logger.debug("Got observer message: %s", str(msg))
 
         for observer in self._observer_list:
             observer.notify(msg)

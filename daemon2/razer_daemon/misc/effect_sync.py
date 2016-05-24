@@ -5,6 +5,9 @@ import inspect
 import logging
 
 class EffectSync(object):
+    """
+    Class which deals with receiving effect events from other devices
+    """
     def __init__(self, parent, device_number):
         self._logger = logging.getLogger('razer.device{0}.effect_sync'.format(device_number))
         self._parent = parent
@@ -14,6 +17,12 @@ class EffectSync(object):
         self._parent.remove_observer(self)
 
     def notify(self, msg):
+        """
+        Receive notificatons from the device (we only care about effects)
+
+        :param msg: Notification
+        :type msg: tuple
+        """
         if not isinstance(msg, tuple):
             self._logger.warning("Got msg that was not a tuple")
         elif msg[0] == 'effect':
@@ -27,6 +36,15 @@ class EffectSync(object):
                 self.run_effect(msg[2], *msg[3:])
 
     def run_effect(self, effect_name, *args):
+        """
+        Run the specified effect with the given arguments
+
+        :param effect_name: Name of the effect
+        :type effect_name: str
+
+        :param args: Arguments for the specified effect
+        :type args: list
+        """
         # Disable notifications
         self._parent.disable_notify = True
 
@@ -57,7 +75,12 @@ class EffectSync(object):
                     effect_func = getattr(self._parent, 'setBreathSingle', None)
                     if effect_func is not None:
                         effect_func(0x00, 0xFF, 0x00) # Green
-                # TODO add setPulsate -> setBreathSingle if poss
+                if effect_name in ('setBreathSingle', 'setBreathRandom', 'setBreathDual'):
+                    # Chroma -> BW?
+                    effect_func = getattr(self._parent, 'setPulsate', None)
+                    if effect_func is not None:
+                        effect_func() # Pulsate
+
         except Exception as err:
             self._logger.exception("Caught exception trying to sync effects.", exc_info=err)
 

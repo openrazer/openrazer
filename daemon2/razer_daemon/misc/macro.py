@@ -7,8 +7,11 @@ Launching programs etc...
 import logging
 import threading
 import subprocess
+
+# pylint: disable=import-error
 from razer.keyboard import XTE_MAPPING
 
+# This determins if the macro keys are executed with their natural spacing
 XTE_SLEEP = False
 
 class MacroObject(object):

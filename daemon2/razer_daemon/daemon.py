@@ -21,6 +21,30 @@ from razer_daemon.misc.screensaver_thread import ScreensaverThread
 DEVICE_CHECK_INTERVAL = 5000 # Milliseconds
 
 def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, pid_file=None):
+    """
+    Performs double fork behaviour of daemons
+
+    :param foreground: Run in foreground (don't fork)
+    :type foreground: bool
+
+    :param verbose: Verbose mode
+    :type verbose: bool
+
+    :param log_dir: Log directory
+    :type log_dir: str
+
+    :param console_log: Log to console
+    :type console_log: bool
+
+    :param run_dir: Run/Home directory
+    :type run_dir: str
+
+    :param config_file: Config filepath
+    :type config_file: str
+
+    :param pid_file: PID filepath (wont create a file if None)
+    :type pid_file: str or None
+    """
 
     if not foreground:
         # Attempt to double fork

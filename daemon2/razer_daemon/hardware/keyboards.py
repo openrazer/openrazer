@@ -1,7 +1,6 @@
 """
 Keyboards class
 """
-import os
 import re
 
 from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend

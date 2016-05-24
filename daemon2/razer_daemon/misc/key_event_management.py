@@ -36,12 +36,12 @@ EPOLL_TIMEOUT = 0.01
 EVIOCGRAB = 0x40044590
 
 COLOUR_CHOICES = (
-    (255, 0,   0),   # Red
-    (255, 255, 0),   # Yellow
-    (0,   255, 0),   # Green
-    (0,   255, 255), # Cyan
-    (0,   0,   255), # Blue
-    (255, 0,   255), # Magenta
+    (255, 0, 0), # Red
+    (0, 255, 0), # Green
+    (0, 0, 255), # Blue
+    (255, 255, 0), # Yellow
+    (0, 255, 255), # Cyan
+    (255, 0, 255), # Magenta
 )
 
 MEDIA_KEY_MAP = {
@@ -264,6 +264,12 @@ class KeyManager(object):
 
     @property
     def temp_key_store(self):
+        """
+        Get the temporary key store
+
+        :return: List of keys
+        :rtype: list
+        """
         # Locking so it doesnt mutate whilst copying
         self._access_lock.acquire()
         now = datetime.datetime.now()
@@ -521,6 +527,12 @@ class KeyManager(object):
         self._threads.add(macro_thread)
 
     def play_media_key(self, media_key):
+        """
+        Execute a media keys function
+
+        :param media_key: Media key name
+        :type media_key: str
+        """
         media_key_thread = MediaKeyPress(media_key)
         media_key_thread.start()
         self._threads.add(media_key_thread)
@@ -582,6 +594,12 @@ class KeyManager(object):
         self.close()
 
     def notify(self, msg):
+        """
+        Receive notificatons from the device (we only care about effects)
+
+        :param msg: Notification
+        :type msg: tuple
+        """
         if not isinstance(msg, tuple):
             self._logger.warning("Got msg that was not a tuple")
         elif msg[0] == 'effect':
@@ -595,8 +613,10 @@ class KeyManager(object):
                 #self.temp_key_store_state = False
                 pass
 
-
 class MediaKeyPress(threading.Thread):
+    """
+    Class to run xdotool to execute media/volume keypresses
+    """
     def __init__(self, media_key):
         super(MediaKeyPress, self).__init__()
         self._media_key = MEDIA_KEY_MAP[media_key]

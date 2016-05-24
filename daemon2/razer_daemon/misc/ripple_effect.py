@@ -1,13 +1,21 @@
+"""
+Contains the functions and classes to perform ripple effects
+"""
 import datetime
 import logging
 import threading
 import time
 import math
 
-
+# pylint: disable=import-error
 from razer.keyboard import KeyboardColour
 
 class RippleEffectThread(threading.Thread):
+    """
+    Ripple thread.
+
+    This thread contains the run loop which performs all the circle calculations and generating of the binary payload
+    """
     def __init__(self, parent, device_number):
         super(RippleEffectThread, self).__init__()
 
@@ -24,15 +32,36 @@ class RippleEffectThread(threading.Thread):
 
     @property
     def shutdown(self):
+        """
+        Get the shutdown flag
+        """
         return self._shutdown
     @shutdown.setter
     def shutdown(self, value):
+        """
+        Set the shutdown flag
+
+        :param value: Shutdown
+        :type value: bool
+        """
         self._shutdown = value
     @property
     def active(self):
+        """
+        Get if the thread is active
+
+        :return: Active
+        :rtype: bool
+        """
         return self._active
     @property
     def key_list(self):
+        """
+        Get key list
+
+        :return: Key list
+        :rtype: list
+        """
         return self._parent.key_list
 
     def enable(self, colour, refresh_rate):
@@ -63,6 +92,7 @@ class RippleEffectThread(threading.Thread):
         """
         Event loop
         """
+        # pylint: disable=too-many-nested-blocks,too-many-branches
         expire_diff = datetime.timedelta(seconds=2)
 
         # TODO time execution and then sleep for _refresh_rate - time_taken
@@ -85,8 +115,8 @@ class RippleEffectThread(threading.Thread):
                         colour = self._colour
                     radiuses.append((key_row, key_col, now_diff.total_seconds() * 12, colour))
 
-                for row in range(0,7):
-                    for col in range(0,22):
+                for row in range(0, 7):
+                    for col in range(0, 22):
                         if row == 0 and col == 20:
                             continue
                         if row == 6:
@@ -94,14 +124,14 @@ class RippleEffectThread(threading.Thread):
                                 continue
                             else:
                                 # To account for logo placement
-                                for cy, cx, rad, colour in radiuses:
-                                    radius = math.sqrt(math.pow(cy-row, 2) + math.pow(cx-col, 2))
+                                for cirlce_centre_row, circle_centre_col, rad, colour in radiuses:
+                                    radius = math.sqrt(math.pow(cirlce_centre_row-row, 2) + math.pow(circle_centre_col-col, 2))
                                     if rad >= radius >= rad-1:
                                         self._kerboard_grid.set_key_colour(0, 20, colour)
                                         break
                         else:
-                            for cy, cx, rad, colour in radiuses:
-                                radius = math.sqrt(math.pow(cy-row, 2) + math.pow(cx-col, 2))
+                            for cirlce_centre_row, circle_centre_col, rad, colour in radiuses:
+                                radius = math.sqrt(math.pow(cirlce_centre_row-row, 2) + math.pow(circle_centre_col-col, 2))
                                 if rad >= radius >= rad-1:
                                     self._kerboard_grid.set_key_colour(row, col, colour)
                                     break
@@ -114,6 +144,9 @@ class RippleEffectThread(threading.Thread):
             time.sleep(self._refresh_rate)
 
 class RippleManager(object):
+    """
+    Class which manages the overall process of performing a ripple effect
+    """
     def __init__(self, parent, device_number):
         self._logger = logging.getLogger('razer.device{0}.ripplemanager'.format(device_number))
         self._parent = parent
@@ -126,6 +159,12 @@ class RippleManager(object):
 
     @property
     def key_list(self):
+        """
+        Get the list of keys from the key manager
+
+        :return: List of tuples (expire_time, (key_row, key_col), random_colour)
+        :rtype: list of tuple
+        """
         result = []
         if hasattr(self._parent, 'key_manager'):
             result = self._parent.key_manager.temp_key_store
@@ -133,12 +172,27 @@ class RippleManager(object):
         return result
 
     def set_rgb_matrix(self, payload):
+        """
+        Set the LED matrix on the keyboard
+
+        :param payload: Binary payload
+        :type payload: bytes
+        """
         self._parent.setKeyRow(payload)
 
     def refresh_keyboard(self):
+        """
+        Refresh the keyboard
+        """
         self._parent.setCustom()
 
     def notify(self, msg):
+        """
+        Receive notificatons from the device (we only care about effects)
+
+        :param msg: Notification
+        :type msg: tuple
+        """
         if not isinstance(msg, tuple):
             self._logger.warning("Got msg that was not a tuple")
         elif msg[0] == 'effect':
@@ -158,6 +212,9 @@ class RippleManager(object):
                 self._parent.key_manager.temp_key_store_state = False
 
     def close(self):
+        """
+        Close the manager, stop ripple thread
+        """
         if not self._is_closed:
             self._logger.debug("Closing Ripple Manager")
             self._is_closed = True
