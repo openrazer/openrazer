@@ -8,6 +8,8 @@ Website: [Here](http://pez2001.github.io/razer_chroma_drivers/)
 
 ## Support
 ### Keyboard Support:
+ * Razer Blackwidow Classic *(all lighting modes)*
+ * Razer Blackwidow Ultimate 2012 *(all lighting modes)*
  * Razer Blackwidow Ultimate 2013 *(all lighting modes)*
  * Razer Blackwidow Chroma *(all lighting modes)*
  * Razer Blackwidow Chroma Tournament Edition *(all lighting modes)*

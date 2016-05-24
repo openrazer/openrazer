@@ -780,7 +780,9 @@ int razer_set_brightness(struct usb_device *usb_dev, unsigned char brightness)
         report.command_id.id = 0x04;
         report.arguments[1] = brightness;
 
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012 ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
         report.arguments[1] = 0x04;/* LED ID, Logo */
         report.arguments[2] = brightness;
@@ -818,7 +820,9 @@ int razer_get_brightness(struct usb_device *usb_dev)
         request_report.command_class = 0x0E;
         request_report.command_id.id = 0x84;
 
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012 ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
         request_report.arguments[1] = 0x04;/* LED ID, Logo */
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
@@ -1243,7 +1247,9 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL ||
+       usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012 ||
+       usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
         // Set BlackWidow Ultimate to static colour
         razer_set_static_mode_blackwidow_ultimate(usb_dev);
@@ -1318,12 +1324,12 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     switch (usb_dev->descriptor.idProduct)
     {
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
-            device_type = "Razer BlackWidow Chroma\n";
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
+            device_type = "Razer BlackWidow Original\n";
             break;
 
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
-            device_type = "Razer BlackWidow Chroma Tournament Edition\n";
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
+            device_type = "Razer BlackWidow Ultimate 2012\n";
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
@@ -1336,6 +1342,14 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
             device_type = "Razer Blade Stealth\n";
+            break;
+
+		case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+            device_type = "Razer BlackWidow Chroma\n";
+            break;
+
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+            device_type = "Razer BlackWidow Chroma Tournament Edition\n";
             break;
 
         default:
@@ -1503,11 +1517,13 @@ static int razer_kbd_probe(struct hid_device *hdev,
         goto exit;
     }
 
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL ||
+       usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012 ||
+       usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
         retval = device_create_file(&hdev->dev, &dev_attr_mode_pulsate);
-            if (retval)
-                goto exit_free;
+        if (retval)
+            goto exit_free;
         retval = device_create_file(&hdev->dev, &dev_attr_macro_keys);
         if (retval)
             goto exit_free;
@@ -1672,7 +1688,9 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 
     dev = hid_get_drvdata(hdev);
 
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL ||
+       usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012 ||
+       usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
         device_remove_file(&hdev->dev, &dev_attr_mode_pulsate);
         device_remove_file(&hdev->dev, &dev_attr_macro_keys);
@@ -1732,11 +1750,13 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
  * Device ID mapping table
  */
 static const struct hid_device_id razer_devices[] = {
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_STEALTH) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE) },
     { }
 };
 
