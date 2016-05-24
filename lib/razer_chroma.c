@@ -617,6 +617,8 @@ int razer_find_devices(struct razer_chroma *chroma)
 		if(device_vendor_id==RAZER_VENDOR_ID &&
              (device_product_id == RAZER_BLACKWIDOW_CHROMA_PRODUCT_ID || 
               device_product_id == RAZER_BLACKWIDOW_CHROMA_TE_PRODUCT_ID ||
+              device_product_id == RAZER_BLACKWIDOW_OLD_PRODUCT_ID ||
+              device_product_id == RAZER_BLACKWIDOW_ULTIMATE_2012_PRODUCT_ID ||
               device_product_id == RAZER_BLACKWIDOW_ULTIMATE_2013_PRODUCT_ID ||
               device_product_id == RAZER_BLACKWIDOW_ULTIMATE_2016_PRODUCT_ID ||
               device_product_id == RAZER_FIREFLY_PRODUCT_ID ||

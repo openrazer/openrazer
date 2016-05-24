@@ -62,13 +62,13 @@ unbind_device() {
 # Create unbind_all
 
 bind_all() {
-	bind_all_device "razerkbd" "011A|0203|0205|0209|0214" "02" "input2"
+	bind_all_device "razerkbd" "011A|011B|010D|0203|0205|0209|0214" "02" "input2"
 	bind_all_device "razermouse" "0045|0046" "00" "input0"
 	bind_all_device "razerfirefly" "0C00" "00" "input0"
 }
 
 unbind_all() {
-	unbind_all_device "razerkbd" "011A|0203|0205|0209|0214"
+	unbind_all_device "razerkbd" "011A|011B|010D|203|0205|0209|0214"
 	unbind_all_device "razermouse" "0045|0046"
 	unbind_all_device "razerfirefly" "0C00"
 }
