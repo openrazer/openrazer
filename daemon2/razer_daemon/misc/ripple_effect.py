@@ -39,13 +39,17 @@ class RippleEffectThread(threading.Thread):
         """
         Enable the ripple effect
 
+        If the colour tuple contains None then it will set the ripple to random colours
         :param colour: Colour tuple like (0, 255, 255)
         :type colour: tuple
 
         :param refresh_rate: Refresh rate in seconds
         :type refresh_rate: float
         """
-        self._colour = colour
+        if colour[0] is None:
+            self._colour = None
+        else:
+            self._colour = colour
         self._refresh_rate = refresh_rate
         self._active = True
 
@@ -71,13 +75,15 @@ class RippleEffectThread(threading.Thread):
 
                 radiuses = []
 
-                for expire_time, (key_row, key_col) in self.key_list:
+                for expire_time, (key_row, key_col), colour in self.key_list:
                     event_time = expire_time - expire_diff
 
                     now_diff = now - event_time
 
                     # Current radius is based off a time metric
-                    radiuses.append((key_row, key_col, now_diff.total_seconds() * 12))
+                    if self._colour is not None:
+                        colour = self._colour
+                    radiuses.append((key_row, key_col, now_diff.total_seconds() * 12, colour))
 
                 for row in range(0,7):
                     for col in range(0,22):
@@ -88,16 +94,16 @@ class RippleEffectThread(threading.Thread):
                                 continue
                             else:
                                 # To account for logo placement
-                                for cy, cx, rad in radiuses:
+                                for cy, cx, rad, colour in radiuses:
                                     radius = math.sqrt(math.pow(cy-row, 2) + math.pow(cx-col, 2))
                                     if rad >= radius >= rad-1:
-                                        self._kerboard_grid.set_key_colour(0, 20, self._colour)
+                                        self._kerboard_grid.set_key_colour(0, 20, colour)
                                         break
                         else:
-                            for cy, cx, rad in radiuses:
+                            for cy, cx, rad, colour in radiuses:
                                 radius = math.sqrt(math.pow(cy-row, 2) + math.pow(cx-col, 2))
                                 if rad >= radius >= rad-1:
-                                    self._kerboard_grid.set_key_colour(row, col, self._colour)
+                                    self._kerboard_grid.set_key_colour(row, col, colour)
                                     break
 
                 payload = self._kerboard_grid.get_total_binary()
@@ -106,8 +112,6 @@ class RippleEffectThread(threading.Thread):
                 self._parent.refresh_keyboard()
 
             time.sleep(self._refresh_rate)
-
-
 
 class RippleManager(object):
     def __init__(self, parent, device_number):

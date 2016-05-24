@@ -13,11 +13,16 @@ Each event is in the format of
 * signed int value
 """
 import datetime
+import fcntl
 import json
 import logging
+import os
+import time
 import threading
+import random
 import select
 import struct
+import subprocess
 
 # pylint: disable=import-error
 from razer.keyboard import KEY_MAPPING, EVENT_MAPPING
@@ -27,6 +32,46 @@ EVENT_FORMAT = '@llHHI'
 EVENT_SIZE = struct.calcsize(EVENT_FORMAT)
 
 EPOLL_TIMEOUT = 0.01
+
+EVIOCGRAB = 0x40044590
+
+COLOUR_CHOICES = (
+    (255, 0,   0),   # Red
+    (255, 255, 0),   # Yellow
+    (0,   255, 0),   # Green
+    (0,   255, 255), # Cyan
+    (0,   0,   255), # Blue
+    (255, 0,   255), # Magenta
+)
+
+MEDIA_KEY_MAP = {
+    'vol_mute': 'XF86AudioMute',
+    'vol_up': 'XF86AudioRaiseVolume',
+    'vol_down': 'XF86AudioLowerVolume',
+    'media_play': 'XF86AudioPlay',
+    'media_prev': 'XF86AudioPrev',
+    'media_next': 'XF86AudioNext'
+}
+
+
+def random_colour_picker(last_choice, iterable):
+    """
+    Chose a random choice but not the last one
+
+    :param last_choice: Last choice
+    :type last_choice: object
+
+    :param iterable: Iterable object
+    :type iterable: iterable
+
+    :return: Choice
+    :rtype: object
+    """
+    result = random.choice(iterable)
+    while result == last_choice:
+        result = random.choice(iterable)
+    return result
+
 
 class KeyWatcher(threading.Thread):
     """
@@ -76,14 +121,18 @@ class KeyWatcher(threading.Thread):
         self._shutdown = False
         self._parent = parent
 
+        self.open_event_files = [open(event_file, 'rb') for event_file in self._event_files]
+        # Set open files to non blocking mode
+        for event_file in self.open_event_files:
+            flags = fcntl.fcntl(event_file.fileno(), fcntl.F_GETFL)
+            fcntl.fcntl(event_file.fileno(), fcntl.F_SETFL, flags | os.O_NONBLOCK)
+
     def run(self):
         """
         Main event loop
         """
-        # Open all event files
-        open_event_files = [open(event_file, 'rb') for event_file in self._event_files]
         # Create dict of Event File Descriptor: Event File Object
-        event_file_map = {event_file.fileno(): event_file for event_file in open_event_files}
+        event_file_map = {event_file.fileno(): event_file for event_file in self.open_event_files}
 
         # Create epoll object
         poll_object = select.epoll()
@@ -94,24 +143,45 @@ class KeyWatcher(threading.Thread):
 
         # Loop
         while not self._shutdown:
-            events = poll_object.poll(EPOLL_TIMEOUT)
+            # epoll is nice but it wasn't getting events properly :(
+            # events = poll_object.poll(EPOLL_TIMEOUT)
+            #
+            # if len(events) != 0:
+            #     # pylint: disable=unused-variable
+            #     for event_fd, mask in events:
+            #         key_data = event_file_map[event_fd].read(EVENT_SIZE)
+            #
+            #         date, key_action, key_code = self.parse_event_record(key_data)
+            #
+            #         # Skip if date, key_action and key_code is none as thats a spacer record
+            #         if date is None:
+            #             continue
+            #
+            #         # Now if key is pressed then we record
+            #         if key_action == 'press':
+            #             self._parent.key_action(date, key_code, True)
+            #         elif key_action == 'release':
+            #             self._parent.key_action(date, key_code, False)
 
-            if len(events) != 0:
-                # pylint: disable=unused-variable
-                for event_fd, mask in events:
-                    key_data = event_file_map[event_fd].read(EVENT_SIZE)
+            for event_file in self.open_event_files:
+                key_data = event_file.read(EVENT_SIZE)
 
-                    date, key_action, key_code = self.parse_event_record(key_data)
+                if key_data is None:
+                    continue
 
-                    # Skip if date, key_action and key_code is none as thats a spacer record
-                    if date is None:
-                        continue
+                date, key_action, key_code = self.parse_event_record(key_data)
 
-                    # Now if key is pressed then we record
-                    if key_action == 'press':
-                        self._parent.key_action(date, key_code, True)
-                    elif key_action == 'release':
-                        self._parent.key_action(date, key_code, False)
+                # Skip if date, key_action and key_code is none as thats a spacer record
+                if date is None:
+                    continue
+
+                # Now if key is pressed then we record
+                if key_action == 'press':
+                    self._parent.key_action(date, key_code, True)
+                elif key_action == 'release':
+                    self._parent.key_action(date, key_code, False)
+
+            time.sleep(EPOLL_TIMEOUT)
 
 
         # Unbind files and close them
@@ -164,6 +234,7 @@ class KeyManager(object):
         self._event_files = event_files
         self._access_lock = threading.Lock()
         self._keywatcher = KeyWatcher(device_id, event_files, self)
+        self._open_event_files = self._keywatcher.open_event_files
 
         if len(event_files) > 0:
             self._logger.debug("Starting KeyWatcher")
@@ -186,6 +257,10 @@ class KeyManager(object):
         self._temp_key_store_active = False
         self._temp_key_store = []
         self._temp_expire_time = datetime.timedelta(seconds=2)
+
+        self._last_colour_choice = None
+
+        self._event_files_locked = False
 
     @property
     def temp_key_store(self):
@@ -225,6 +300,17 @@ class KeyManager(object):
         :type value: bool
         """
         self._temp_key_store_active = value
+
+    def grab_event_files(self, grab):
+        """
+        Grab the event files exclusively
+
+        :param grab: True to grab, False to release
+        :type grab: bool
+        """
+        for event_file in self._open_event_files:
+            fcntl.ioctl(event_file.fileno(), EVIOCGRAB, int(grab))
+        self._event_files_locked = grab
 
     def key_action(self, event_time, key_id, key_press=True):
         """
@@ -277,6 +363,9 @@ class KeyManager(object):
                 if key_name == 'FN':
                     self._fn_down = False
 
+                    if self._event_files_locked:
+                        self.grab_event_files(False)
+
                 # Add key release events to the macro chain if recording
                 elif self._recording_macro and not self._fn_down:
                     # Skip as dont care about releasing macro bind key
@@ -308,12 +397,35 @@ class KeyManager(object):
                         self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
 
                 if self._temp_key_store_active:
-                    self._temp_key_store.append((now + self._temp_expire_time, KEY_MAPPING[key_name]))
+                    colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
+                    self._last_colour_choice = colour
+                    self._temp_key_store.append((now + self._temp_expire_time, KEY_MAPPING[key_name], colour))
 
                 # Logic for treating FN as a modifier
                 if key_name == 'FN':
                     self._fn_down = True
 
+                    # Grab the file so no FN+Keys are leaked
+                    if not self._event_files_locked:
+                        self.grab_event_files(True)
+                # Mute logic (as macro_keys disables all FN+Keys)
+                elif self._fn_down and key_name == 'F1':
+                    self.play_media_key('vol_mute')
+                # Volume down logic
+                elif self._fn_down and key_name == 'F2':
+                    self.play_media_key('vol_down')
+                # Volume up logic
+                elif self._fn_down and key_name == 'F3':
+                    self.play_media_key('vol_up')
+                # Media previous logic
+                elif self._fn_down and key_name == 'F5':
+                    self.play_media_key('media_prev')
+                # Media play/pause logic
+                elif self._fn_down and key_name == 'F6':
+                    self.play_media_key('media_play')
+                # Media next logic
+                elif self._fn_down and key_name == 'F7':
+                    self.play_media_key('media_next')
                 # Macro FN+F9 logic
                 elif self._fn_down and key_name == 'F9':
                     self._logger.info("Got macro combo")
@@ -408,6 +520,11 @@ class KeyManager(object):
         macro_thread.start()
         self._threads.add(macro_thread)
 
+    def play_media_key(self, media_key):
+        media_key_thread = MediaKeyPress(media_key)
+        media_key_thread.start()
+        self._threads.add(media_key_thread)
+
     # Methods to be used with DBus
     def dbus_delete_macro(self, key_name):
         """
@@ -477,3 +594,30 @@ class KeyManager(object):
                 # If we are not doing ripple effect then disable the storing of keys
                 #self.temp_key_store_state = False
                 pass
+
+
+class MediaKeyPress(threading.Thread):
+    def __init__(self, media_key):
+        super(MediaKeyPress, self).__init__()
+        self._media_key = MEDIA_KEY_MAP[media_key]
+
+    def run(self):
+        proc = subprocess.Popen(['xdotool', 'key', self._media_key], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        proc.communicate()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

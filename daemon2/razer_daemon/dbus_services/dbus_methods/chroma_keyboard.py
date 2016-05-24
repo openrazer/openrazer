@@ -360,6 +360,13 @@ def set_ripple_effect(self, red, green, blue, refresh_rate):
     # Notify others
     self.send_effect_event('setRipple', red, green, blue, refresh_rate)
 
+@endpoint('razer.device.lighting', 'setRippleRandomColour', in_sig='d')
+def set_ripple_effect(self, refresh_rate):
+    self.logger.debug("DBus call set_ripple_effect")
+
+    # Notify others
+    self.send_effect_event('setRipple', None, None, None, refresh_rate)
+
 @endpoint('razer.device.lighting', 'setKeyRow', in_sig='ay', byte_arrays=True)
 def set_key_row(self, payload):
     """
