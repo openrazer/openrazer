@@ -1,6 +1,4 @@
-etc/dbus-1
-etc/init
-etc/init.d
-usr/lib/*.so
-usr/sbin
-usr/share/razer_bcd
+usr/lib/python3/dist-packages/razer_daemon
+usr/sbin/razer-service
+usr/share/razer-service
+usr/share/upstart/sessions/razer-service.conf

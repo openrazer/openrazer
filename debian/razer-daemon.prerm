@@ -1,9 +1,7 @@
 #!/bin/sh
 set -e
 
-if ([ -x "/etc/init.d/razer_bcd" ] || [ -e "/etc/init/razer_bcd" ]) && \
-   [ "$1" = remove ]; then
-	invoke-rc.d razer_bcd stop || true
-fi
+# Remove the __pycache__
+find /usr/lib/python3/dist-packages/razer_daemon -name '__pycache__' | xargs rm -rf
 
 exit 0
