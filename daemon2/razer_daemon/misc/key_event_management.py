@@ -450,14 +450,15 @@ class KeyManager(object):
                         self.add_kb_macro()
                         self._recording_macro = False
                         self._parent.setMacroMode(False)
-
                 # Sets up game mode as when enabling macro keys it stops the key working
                 elif self._fn_down and key_name == 'F10':
                     self._logger.info("Got game mode combo")
 
                     game_mode = self._parent.getGameMode()
                     self._parent.setGameMode(not game_mode)
-
+                # Sleep logic
+                elif self._fn_down and key_name == 'PAUSE':
+                    self.play_media_key('sleep')
                 # Recording all keypress events
                 elif self._recording_macro:
                     if self._current_macro_bind_key is None:
@@ -619,11 +620,17 @@ class MediaKeyPress(threading.Thread):
     """
     def __init__(self, media_key):
         super(MediaKeyPress, self).__init__()
-        self._media_key = MEDIA_KEY_MAP[media_key]
+        if media_key == 'sleep':
+            self._media_key = media_key
+        else:
+            self._media_key = MEDIA_KEY_MAP[media_key]
 
     def run(self):
-        proc = subprocess.Popen(['xdotool', 'key', self._media_key], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        proc.communicate()
+        if self._media_key == 'sleep':
+            subprocess.call(['dbus-send','--system','--print-reply','--dest=org.freedesktop.login1','/org/freedesktop/login1','org.freedesktop.login1.Manager.Suspend','boolean:true'])
+        else:
+            proc = subprocess.Popen(['xdotool', 'key', self._media_key], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            proc.communicate()
 
 
 
