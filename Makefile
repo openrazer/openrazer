@@ -12,7 +12,7 @@ MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
 PYTHONDIR?=/usr/lib/python3/dist-packages
 
 # Build all target
-all: librazer_chroma daemon daemon_controller examples driver
+all: driver
 
 # Driver compilation
 driver:
