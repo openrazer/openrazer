@@ -31,6 +31,7 @@ Description: Razer python library
  Contains common functions for interacting with the Razer daemon.
 
 Package: razer-doc
+Section: doc
 Architecture: all
 Description: documentation and examples for the razer tools
  Scripts on how to interact with the daemon and the driver.
