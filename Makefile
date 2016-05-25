@@ -9,7 +9,7 @@ DRIVERDIR?=$(shell pwd)/driver
 MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
 
 # Python dir
-PYTHONDIR?=/usr/lib/python3.4/site-packages
+PYTHONDIR?=/usr/lib/python3/dist-packages
 
 # Build all target
 all: librazer_chroma daemon daemon_controller examples driver
