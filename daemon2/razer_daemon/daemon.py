@@ -3,7 +3,9 @@ Daemon class
 
 This class is the main core of the daemon, this serves a basic dbus module to control the main bit of the daemon
 """
+import configparser
 import logging
+import logging.handlers
 import os
 import sys
 import signal
@@ -125,13 +127,10 @@ class RazerDaemon(DBusService):
     BUS_PATH = 'org.razer'
 
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None):
-        # Deal with argugments
-        logging_level = logging.INFO
-        if verbose:
-            logging_level = logging.DEBUG
-
         self._data_dir = run_dir
         self._config_file = config_file
+        self._config = configparser.ConfigParser()
+        self.read_config(config_file)
 
         # Setup DBus to use gobject main loop
         dbus.mainloop.glib.threads_init()
@@ -139,6 +138,11 @@ class RazerDaemon(DBusService):
         DBusService.__init__(self, self.BUS_PATH, '/org/razer')
 
         self._main_loop = GObject.MainLoop()
+
+        # Logging
+        logging_level = logging.INFO
+        if verbose or self._config.getboolean('General', 'verbose_logging'):
+            logging_level = logging.DEBUG
 
         self.logger = logging.getLogger('razer')
         self.logger.setLevel(logging_level)
@@ -152,9 +156,9 @@ class RazerDaemon(DBusService):
             console_logger.setFormatter(formatter)
             self.logger.addHandler(console_logger)
 
-        log_file = os.path.join(log_dir, 'razer.log')
-        if log_file is not None:
-            file_logger = logging.FileHandler(log_file)
+        if log_dir is not None:
+            log_file = os.path.join(log_dir, 'razer.log')
+            file_logger = logging.handlers.RotatingFileHandler(log_file, maxBytes=16777216, backupCount=10) # 16MiB
             file_logger.setLevel(logging_level)
             file_logger.setFormatter(formatter)
             self.logger.addHandler(file_logger)
@@ -162,7 +166,7 @@ class RazerDaemon(DBusService):
         self.logger.info("Initialising Daemon. Pid: %d", os.getpid())
 
         # Setup screensaver thread
-        self._screensaver_thread = ScreensaverThread(self, active=True)
+        self._screensaver_thread = ScreensaverThread(self, active=self._config.getboolean('Startup', 'devices_off_on_screensaver'))
         self._screensaver_thread.start()
 
         self._razer_devices = DeviceCollection()
@@ -181,12 +185,29 @@ class RazerDaemon(DBusService):
         self.add_dbus_method('razer.daemon', 'stop', self.stop)
 
         # TODO remove
-        self.sync_effects(True)
+        self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
         # TODO ======
 
         # Setup quit signals
         signal.signal(signal.SIGINT, self.quit)
         signal.signal(signal.SIGTERM, self.quit)
+
+    def read_config(self, config_file):
+        """
+        Read in the config file and set the defaults
+
+        :param config_file: Config file
+        :type config_file: str or None
+        """
+        if config_file is not None and os.path.exists(config_file):
+            self._config.read(config_file)
+
+        self._config['DEFAULT'] = {
+            'verbose_logging': True,
+            'sync_effects_enabled': True,
+            'devices_off_on_screensaver': True,
+            'key_statistics': False,
+        }
 
     def enable_turn_off_on_screensaver(self):
         """
@@ -252,7 +273,7 @@ class RazerDaemon(DBusService):
                 if device_class.match(device_id):
                     self.logger.info('Found device.%d: %s', device_number, device_id)
                     device_path = os.path.join('/sys/bus/hid/devices', device_id)
-                    razer_device = device_class(device_path, device_number)
+                    razer_device = device_class(device_path, device_number, self._config)
                     device_serial = razer_device.get_serial()
                     self._razer_devices.add(device_id, device_serial, razer_device)
 

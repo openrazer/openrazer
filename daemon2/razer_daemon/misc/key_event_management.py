@@ -242,6 +242,7 @@ class KeyManager(object):
         else:
             self._logger.warning("No event files for KeyWatcher")
 
+        self._record_stats = parent.config.get('Statistics', 'key_statistics')
         self._stats = {}
 
         self._fn_down = False
@@ -261,6 +262,8 @@ class KeyManager(object):
         self._last_colour_choice = None
 
         self._event_files_locked = False
+
+    #TODO add property for enabling key stats?
 
     @property
     def temp_key_store(self):
@@ -627,7 +630,8 @@ class MediaKeyPress(threading.Thread):
 
     def run(self):
         if self._media_key == 'sleep':
-            subprocess.call(['dbus-send','--system','--print-reply','--dest=org.freedesktop.login1','/org/freedesktop/login1','org.freedesktop.login1.Manager.Suspend','boolean:true'])
+            subprocess.call(['dbus-send', '--system', '--print-reply', '--dest=org.freedesktop.login1',
+                             '/org/freedesktop/login1', 'org.freedesktop.login1.Manager.Suspend', 'boolean:true'])
         else:
             proc = subprocess.Popen(['xdotool', 'key', self._media_key], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             proc.communicate()

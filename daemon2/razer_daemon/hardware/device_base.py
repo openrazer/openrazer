@@ -10,6 +10,7 @@ from razer_daemon.dbus_services.service import DBusService
 import razer_daemon.dbus_services.dbus_methods
 from razer_daemon.misc import effect_sync
 
+# pylint: disable=too-many-instance-attributes
 class RazerDevice(DBusService):
     """
     Base class
@@ -25,16 +26,17 @@ class RazerDevice(DBusService):
     USB_VID = None
     USB_PID = None
 
-    def __init__(self, device_path, device_number):
-        # pylint: disable=too-many-instance-attributes
+    def __init__(self, device_path, device_number, config):
+
         self._observer_list = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
 
+        self.config = config
         self._parent = None
         self._device_path = device_path
         self._device_number = device_number
-        self._serial = self.get_serial()
+        self.serial = self.get_serial()
 
         self._effect_sync = effect_sync.EffectSync(self, device_number)
 
@@ -49,7 +51,7 @@ class RazerDevice(DBusService):
             if self.EVENT_FILE_REGEX is not None and self.EVENT_FILE_REGEX.match(event_file) is not None:
                 self.event_files.append(os.path.join('/dev/input/by-id/', event_file))
 
-        object_path = os.path.join(self.OBJECT_PATH, self._serial)
+        object_path = os.path.join(self.OBJECT_PATH, self.serial)
         DBusService.__init__(self, self.BUS_PATH, object_path)
 
         # Register method to get the devices serial
@@ -289,7 +291,7 @@ class RazerDevice(DBusService):
         self.close()
 
     def __repr__(self):
-        return "{0}:{1}".format(self.__class__.__name__, self._serial)
+        return "{0}:{1}".format(self.__class__.__name__, self.serial)
 
 class RazerDeviceBrightnessSuspend(RazerDevice):
     """

@@ -15,11 +15,11 @@ class MacroKeyboard(RazerDeviceBrightnessSuspend):
     Has macro functionality and brightness based suspend
     """
 
-    def __init__(self, device_path, device_number):
-        super(MacroKeyboard, self).__init__(device_path, device_number)
+    def __init__(self, *args):
+        super(MacroKeyboard, self).__init__(*args)
         # Methods are loaded into DBus by this point
 
-        self.key_manager = KeyManager(device_number, self.event_files, self)
+        self.key_manager = KeyManager(self._device_number, self.event_files, self)
 
     def _close(self):
         """
