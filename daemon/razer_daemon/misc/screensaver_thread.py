@@ -5,6 +5,7 @@ import logging
 import threading
 import time
 import dbus
+import dbus.exceptions
 
 
 class ScreensaverThread(threading.Thread):
@@ -26,16 +27,18 @@ class ScreensaverThread(threading.Thread):
         self._dbus_interface = None
         self._parent = parent
 
-        self.load_dbus()
-
     def load_dbus(self):
         """
         Setup the connection to DBUS
         """
-        self.logger.info("Initialising DBus Objects")
-        session_bus = dbus.SessionBus()
-        unity_object = session_bus.get_object('com.canonical.Unity', '/org/gnome/ScreenSaver')
-        self._dbus_interface = dbus.Interface(unity_object, 'org.gnome.ScreenSaver')
+        self.logger.info("Initialising DBus screensaver object")
+        try:
+            session_bus = dbus.SessionBus()
+            unity_object = session_bus.get_object('com.canonical.Unity', '/org/gnome/ScreenSaver')
+            self._dbus_interface = dbus.Interface(unity_object, 'org.gnome.ScreenSaver')
+        except dbus.exceptions.DBusException as err:
+            self.logger.exception("Caught exception whilst trying to get screensaver DBus", exc_info=err)
+            self._dbus_interface = None
 
     @property
     def active(self):
@@ -82,24 +85,30 @@ class ScreensaverThread(threading.Thread):
         """
         suspended = False
 
+        if self._dbus_interface is None:
+            # Sleep for a while as it takes time for screensaver to start
+            time.sleep(2)
+            self.load_dbus()
+
         while not self._shutdown:
             if self._active:
                 try:
                     if self._dbus_interface is None:
                         self.load_dbus()
-                    screensaver_active = self._dbus_interface.GetActive()
-                    if screensaver_active:
-                        # Screensaver is active
-
-                        if not suspended:
-                            suspended = True
-                            self.logger.info("Suspend screensaver")
-                            self._parent.suspend_devices()
                     else:
-                        if suspended:
-                            suspended = False
-                            self.logger.info("Resume screensaver")
-                            self._parent.resume_devices()
+                        screensaver_active = self._dbus_interface.GetActive()
+                        if screensaver_active:
+                            # Screensaver is active
+
+                            if not suspended:
+                                suspended = True
+                                self.logger.info("Suspend screensaver")
+                                self._parent.suspend_devices()
+                        else:
+                            if suspended:
+                                suspended = False
+                                self.logger.info("Resume screensaver")
+                                self._parent.resume_devices()
                     # pylint: disable=broad-except
                 except Exception as err:
                     self.logger.exception("Caught exception in run loop", exc_info=err)
