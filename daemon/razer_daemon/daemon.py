@@ -199,8 +199,9 @@ class RazerDaemon(DBusService):
         :param config_file: Config file
         :type config_file: str or None
         """
-        if config_file is not None and os.path.exists(config_file):
-            self._config.read(config_file)
+        # Generate sections as trying to access a value even if a default exists will die if the section does not
+        for section in ('General', 'Startup', 'Statistics'):
+            self._config[section] = {}
 
         self._config['DEFAULT'] = {
             'verbose_logging': True,
@@ -208,6 +209,11 @@ class RazerDaemon(DBusService):
             'devices_off_on_screensaver': True,
             'key_statistics': False,
         }
+
+        if config_file is not None and os.path.exists(config_file):
+            self._config.read(config_file)
+
+
 
     def enable_turn_off_on_screensaver(self):
         """

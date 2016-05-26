@@ -16,7 +16,7 @@ LOG_PATH = os.path.join(BASE_PATH, 'logs')
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-v', '--verbose', action='store_true', help='Don\'t fork and enable verbose logging')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose logging')
 
     parser.add_argument('-F', '--foreground', action='store_true', help='Don\'t fork stay in the foreground')
 
