@@ -12,6 +12,14 @@
 #ifndef DRIVER_RAZERCOMMON_H_
 #define DRIVER_RAZERCOMMON_H_
 
+// Macro to create device files
+#define CREATE_DEVICE_FILE(dev, type) \
+do { \
+    if(device_create_file(dev, type)) { \
+        goto exit_free; \
+    } \
+} while (0)
+
 
 /* Each USB report has 90 bytes*/
 #define RAZER_USB_REPORT_LEN 0x5A

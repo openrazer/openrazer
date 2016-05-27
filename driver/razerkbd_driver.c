@@ -1505,7 +1505,7 @@ static DEVICE_ATTR(test,              0660, razer_attr_read_test, razer_attr_wri
 static int razer_kbd_probe(struct hid_device *hdev,
              const struct hid_device_id *id)
 {
-    int retval;
+    int retval = 0;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_kbd_device *dev = NULL;
@@ -1521,145 +1521,81 @@ static int razer_kbd_probe(struct hid_device *hdev,
        usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012 ||
        usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_pulsate);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_macro_keys);
-        if (retval)
-            goto exit_free;
+		// Razer BlackWidow, BlackWidow 2012, BlackWidow 2013
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_pulsate);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_keys);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_game);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro_effect);
+        
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
     {
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_wave);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_starlight);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_none);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_reactive);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_breath);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_custom);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_temp_clear_row);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_macro_keys);
-        if (retval)
-            goto exit_free;
+		// Razer BlackWidow 2016
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_wave);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_starlight);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_reactive);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_custom);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_temp_clear_row);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key_row);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_keys);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_game);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro_effect);
+        
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_wave);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_spectrum);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_none);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_reactive);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_breath);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_custom);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_temp_clear_row);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_set_logo);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_set_fn_toggle);
-        if (retval)
-            goto exit_free;
+		// Razer Stealth (Laptop)
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_wave);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_spectrum);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_reactive);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_custom);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_temp_clear_row);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key_row);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_game);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_logo);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_fn_toggle);
     } else // Chroma
     {
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_wave);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_spectrum);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_none);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_reactive);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_breath);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_mode_custom);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_temp_clear_row);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
-        if (retval)
-            goto exit_free;
-        retval = device_create_file(&hdev->dev, &dev_attr_macro_keys);
-        if (retval)
-            goto exit_free;
+		// Razer BlackWidow Chroma, BlackWidow Chroma TE
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_wave);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_spectrum);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_reactive);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_custom);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_temp_clear_row);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key_row);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_keys);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_game);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro_effect);
     }
 
-    retval = device_create_file(&hdev->dev, &dev_attr_get_serial);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_get_firmware_version);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_device_type);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_game);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_macro);
-        if (retval)
-            goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_macro_effect);
-        if (retval)
-            goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_static);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_reset);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_set_brightness);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_test);
-    if (retval)
-        goto exit_free;
+	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_brightness);
+
+	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);
+	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_firmware_version);
+	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_serial);
+	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_reset);
+
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);
 
     hid_set_drvdata(hdev, dev);
 
-
-    retval = hid_parse(hdev);
-    if(retval)    {
+    if(hid_parse(hdev)) {
         hid_err(hdev, "parse failed\n");
        goto exit_free;
     }
-    retval = hid_hw_start(hdev, HID_CONNECT_DEFAULT);
-    if (retval) {
+
+    if (hid_hw_start(hdev, HID_CONNECT_DEFAULT)) {
         hid_err(hdev, "hw start failed\n");
        goto exit_free;
     }
@@ -1692,54 +1628,75 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
        usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012 ||
        usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
-        device_remove_file(&hdev->dev, &dev_attr_mode_pulsate);
-        device_remove_file(&hdev->dev, &dev_attr_macro_keys);
+		// Razer BlackWidow, BlackWidow 2012, BlackWidow 2013
+        device_remove_file(&hdev->dev, &dev_attr_mode_pulsate);         // Pulsate effect, like breathing
+        device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
+        device_remove_file(&hdev->dev, &dev_attr_macro_keys);           // Enable macro keys
+        device_remove_file(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
+        device_remove_file(&hdev->dev, &dev_attr_mode_macro);           // Enable macro LED
+        device_remove_file(&hdev->dev, &dev_attr_mode_macro_effect);    // Change macro LED effect (static, flashing)
+        
+        
+        
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016)
     {
-        device_remove_file(&hdev->dev, &dev_attr_mode_wave);
-        device_remove_file(&hdev->dev, &dev_attr_mode_starlight);
-        device_remove_file(&hdev->dev, &dev_attr_mode_none);
-        device_remove_file(&hdev->dev, &dev_attr_mode_reactive);
-        device_remove_file(&hdev->dev, &dev_attr_mode_breath);
-        device_remove_file(&hdev->dev, &dev_attr_mode_custom);
-        device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);
-        device_remove_file(&hdev->dev, &dev_attr_set_key_row);
-        device_remove_file(&hdev->dev, &dev_attr_macro_keys);
+		// Razer BlackWidow 2016
+        device_remove_file(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_starlight);       // Starlight effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_none);            // No effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_reactive);        // Reactive effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
+        device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);       // Clear row
+        device_remove_file(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
+        device_remove_file(&hdev->dev, &dev_attr_macro_keys);           // Enable macro keys
+        device_remove_file(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
+        device_remove_file(&hdev->dev, &dev_attr_mode_macro);           // Enable macro LED
+        device_remove_file(&hdev->dev, &dev_attr_mode_macro_effect);    // Change macro LED effect (static, flashing)
+        
+        
     } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
-        device_remove_file(&hdev->dev, &dev_attr_mode_wave);
-        device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);
-        device_remove_file(&hdev->dev, &dev_attr_mode_none);
-        device_remove_file(&hdev->dev, &dev_attr_mode_reactive);
-        device_remove_file(&hdev->dev, &dev_attr_mode_breath);
-        device_remove_file(&hdev->dev, &dev_attr_mode_custom);
-        device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);
-        device_remove_file(&hdev->dev, &dev_attr_set_key_row);
-        device_remove_file(&hdev->dev, &dev_attr_set_logo);
-        device_remove_file(&hdev->dev, &dev_attr_set_fn_toggle);
-    } else // Chroma
+		// Razer Stealth (Laptop)
+        device_remove_file(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_none);            // No effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_reactive);        // Reactive effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
+        device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);       // Clear row
+        device_remove_file(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
+        device_remove_file(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
+        device_remove_file(&hdev->dev, &dev_attr_set_logo);             // Enable/Disable the logo
+        device_remove_file(&hdev->dev, &dev_attr_set_fn_toggle);        // Sets wether FN is requires for F-Keys
+    } else
     {
-        device_remove_file(&hdev->dev, &dev_attr_mode_wave);
-        device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);
-        device_remove_file(&hdev->dev, &dev_attr_mode_none);
-        device_remove_file(&hdev->dev, &dev_attr_mode_reactive);
-        device_remove_file(&hdev->dev, &dev_attr_mode_breath);
-        device_remove_file(&hdev->dev, &dev_attr_mode_custom);
-        device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);
-        device_remove_file(&hdev->dev, &dev_attr_set_key_row);
-        device_remove_file(&hdev->dev, &dev_attr_macro_keys);
+		// Razer BlackWidow Chroma, BlackWidow Chroma TE
+        device_remove_file(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_none);            // No effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_reactive);        // Reactive effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
+        device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);       // Clear row
+        device_remove_file(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
+        device_remove_file(&hdev->dev, &dev_attr_macro_keys);           // Enable macro keys
+        device_remove_file(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
+        device_remove_file(&hdev->dev, &dev_attr_mode_macro);           // Enable macro LED
+        device_remove_file(&hdev->dev, &dev_attr_mode_macro_effect);    // Change macro LED effect (static, flashing)
     }
-
-    device_remove_file(&hdev->dev, &dev_attr_mode_game);
-    device_remove_file(&hdev->dev, &dev_attr_mode_macro);
-    device_remove_file(&hdev->dev, &dev_attr_mode_macro_effect);
-    device_remove_file(&hdev->dev, &dev_attr_get_firmware_version);
-    device_remove_file(&hdev->dev, &dev_attr_get_serial);
-    device_remove_file(&hdev->dev, &dev_attr_mode_static);
-    device_remove_file(&hdev->dev, &dev_attr_reset);
-    device_remove_file(&hdev->dev, &dev_attr_set_brightness);
-    device_remove_file(&hdev->dev, &dev_attr_test);
-    device_remove_file(&hdev->dev, &dev_attr_device_type);
+    
+    device_remove_file(&hdev->dev, &dev_attr_set_brightness);           // Gets and sets the brightness
+    
+    device_remove_file(&hdev->dev, &dev_attr_device_type);              // Get string of device type
+    device_remove_file(&hdev->dev, &dev_attr_get_firmware_version);     // Get the firmware version
+    device_remove_file(&hdev->dev, &dev_attr_get_serial);               // Get serial nubmer
+    device_remove_file(&hdev->dev, &dev_attr_reset);                    // TODO REMOVE Reset command
+    
+    device_remove_file(&hdev->dev, &dev_attr_test);                     // Misc test function
 
     hid_hw_stop(hdev);
     kfree(dev);
@@ -1755,6 +1712,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_STEALTH) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE) },
     { }
