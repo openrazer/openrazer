@@ -786,7 +786,10 @@ int razer_set_brightness(struct usb_device *usb_dev, unsigned char brightness)
     {
         report.arguments[1] = 0x04;/* LED ID, Logo */
         report.arguments[2] = brightness;
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || 
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || 
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_TARTARUS_CHROMA)
     {
         report.arguments[1] = 0x05;/* Backlight LED */
         report.arguments[2] = brightness;
@@ -825,7 +828,10 @@ int razer_get_brightness(struct usb_device *usb_dev)
               usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
         request_report.arguments[1] = 0x04;/* LED ID, Logo */
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || 
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || 
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_TARTARUS_CHROMA)
     {
         request_report.arguments[1] = 0x05;/* Backlight LED */
     } else {
@@ -934,12 +940,14 @@ int razer_activate_macro_keys(struct usb_device *usb_dev)
 /**
  * Not sure what this does.
  */
-int razer_test(struct usb_device *usb_dev)
-{
+int razer_test(struct usb_device *usb_dev, int temp)
+{   //Status  ID  Packet Num  Size  Class Command  Params
+	//00      ff  0000        03    03    00       010c00                     | Set LED State     | LED Class (0x01) | Keymap Red LED (0x0C)   | Off (0x00)
     int retval;
-    struct razer_report report = get_razer_report(0x00, 0x04, 0x02); // Device Mode
-    report.arguments[0] = 0x03; // Unknown
-    report.arguments[1] = 0x00; // Parm 0x00
+    struct razer_report report = get_razer_report(0x03, 0x00, 0x03); // Set LED State
+    report.arguments[0] = 0x01; // Class ID / Profile
+    report.arguments[1] = 0x0C; // Red LED
+    report.arguments[1] = temp; // Enable
     report.crc = razer_calculate_crc(&report);
     retval = razer_set_report(usb_dev, &report);
     return retval;
@@ -972,7 +980,8 @@ static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    razer_test(usb_dev);
+    int temp = simple_strtoul(buf, NULL, 10);
+    razer_test(usb_dev, temp);
     return count;
 }
 
@@ -986,8 +995,8 @@ static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute 
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
-    int test = razer_test(usb_dev);
-    return sprintf(buf, "%d\n", test);
+    //int test = razer_test(usb_dev);
+    return sprintf(buf, "%d\n", 0);
 }
 
 /**
@@ -1254,7 +1263,10 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         // Set BlackWidow Ultimate to static colour
         razer_set_static_mode_blackwidow_ultimate(usb_dev);
 
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || 
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || 
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_TARTARUS_CHROMA)
     {
         // Set BlackWidow Chroma to static colour
         if(count == 3)
@@ -1342,6 +1354,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
             device_type = "Razer Blade Stealth\n";
+            break;
+        
+        case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
+            device_type = "Razer Tartarus Chroma\n";
             break;
 
 		case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
@@ -1561,6 +1577,14 @@ static int razer_kbd_probe(struct hid_device *hdev,
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_game);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_logo);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_fn_toggle);
+        
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_TARTARUS_CHROMA)
+    {
+		// Razer Tartarus
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_spectrum);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);
+        
     } else // Chroma
     {
 		// Razer BlackWidow Chroma, BlackWidow Chroma TE
@@ -1671,6 +1695,15 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
         device_remove_file(&hdev->dev, &dev_attr_set_logo);             // Enable/Disable the logo
         device_remove_file(&hdev->dev, &dev_attr_set_fn_toggle);        // Sets wether FN is requires for F-Keys
+        
+        
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_TARTARUS_CHROMA) {
+		// Razer Tartarus Chroma
+		device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
+		device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
+		device_remove_file(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
+		
+		
     } else
     {
 		// Razer BlackWidow Chroma, BlackWidow Chroma TE
