@@ -181,7 +181,7 @@ class DeviceCollection(object):
             self._id_map.pop(key, None)
             self._serial_map.pop(serial, None)
         elif key in self._serial_map:
-            device_id = self._id_map[key].device_id
+            device_id = self._serial_map[key].device_id
             self._id_map.pop(device_id, None)
             self._serial_map.pop(key, None)
 
