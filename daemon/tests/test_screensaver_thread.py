@@ -27,6 +27,10 @@ def get_dbus_session(*args):
     dbus_session_mock.get_object.return_value = 'screensaver_object'
     return dbus_session_mock
 
+def get_dbus_session_exception(*args):
+    # Setup dbus mock
+    raise razer_daemon.misc.screensaver_thread.dbus.exceptions.DBusException
+
 def get_dbus_interface(*args):
     # Setup dbus interface mock
     dbus_interface = unittest.mock.MagicMock()
@@ -71,14 +75,23 @@ class ScreensaverThreadTest(unittest.TestCase):
 
         self.assertTrue(isinstance(self.screensaver._dbus_interface, unittest.mock.MagicMock))
 
-    @unittest.mock.patch('razer_daemon.misc.screensaver_thread.dbus.SessionBus', get_dbus_session)
-    @unittest.mock.patch('razer_daemon.misc.screensaver_thread.dbus.Interface', get_dbus_interface_exception)
+    @unittest.mock.patch('razer_daemon.misc.screensaver_thread.dbus.SessionBus', get_dbus_session_exception)
+    @unittest.mock.patch('razer_daemon.misc.screensaver_thread.dbus.Interface', get_dbus_interface)
     def test_load_dbus_exception(self):
         # Exception should be caught
         self.screensaver.load_dbus()
 
         self.assertIsNone(self.screensaver._dbus_interface)
         self.assertTrue(self.screensaver.logger.exception.called)
+
+    @unittest.mock.patch('razer_daemon.misc.screensaver_thread.dbus.SessionBus', get_dbus_session)
+    @unittest.mock.patch('razer_daemon.misc.screensaver_thread.dbus.Interface', get_dbus_interface_exception)
+    def test_load_dbus_no_screensaver(self):
+        # Exception should be caught
+        self.screensaver.load_dbus()
+
+        self.assertIsNone(self.screensaver._dbus_interface)
+        self.assertTrue(self.screensaver.logger.warning.called)
 
     @unittest.mock.patch('razer_daemon.misc.screensaver_thread.time.sleep', get_dbus_session)
     @unittest.mock.patch('razer_daemon.misc.screensaver_thread.dbus.SessionBus', get_dbus_session)

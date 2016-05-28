@@ -7,6 +7,11 @@ import time
 import dbus
 import dbus.exceptions
 
+DBUS_OPTIONS = (
+    ('com.canonical.Unity', '/org/gnome/ScreenSaver', 'org.gnome.ScreenSaver'),
+    ('org.mate.ScreenSaver', '/org/mate/ScreenSaver', 'org.mate.ScreenSaver'),
+)
+
 
 class ScreensaverThread(threading.Thread):
     """
@@ -32,10 +37,21 @@ class ScreensaverThread(threading.Thread):
         Setup the connection to DBUS
         """
         self.logger.info("Initialising DBus screensaver object")
+
         try:
             session_bus = dbus.SessionBus()
-            unity_object = session_bus.get_object('com.canonical.Unity', '/org/gnome/ScreenSaver')
-            self._dbus_interface = dbus.Interface(unity_object, 'org.gnome.ScreenSaver')
+
+            for bus_name, object_path, interface_name in DBUS_OPTIONS:
+                try:
+                    screensaver_object = session_bus.get_object(bus_name, object_path)
+                    self._dbus_interface = dbus.Interface(screensaver_object, interface_name)
+                    break
+                except dbus.exceptions.DBusException:
+                    pass
+            else:
+                self.logger.warning("Could not find screensaver DBus")
+                self._dbus_interface = None
+
         except dbus.exceptions.DBusException as err:
             self.logger.exception("Caught exception whilst trying to get screensaver DBus", exc_info=err)
             self._dbus_interface = None
