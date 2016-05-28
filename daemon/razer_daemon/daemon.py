@@ -13,7 +13,10 @@ import time
 import tempfile
 
 import dbus.mainloop.glib
-from gi.repository import GObject
+import gi
+gi.require_version('Gdk', '3.0')
+import gi.repository
+
 
 import razer_daemon.hardware
 from razer_daemon.dbus_services.service import DBusService
@@ -137,7 +140,7 @@ class RazerDaemon(DBusService):
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
         DBusService.__init__(self, self.BUS_PATH, '/org/razer')
 
-        self._main_loop = GObject.MainLoop()
+        self._main_loop = gi.repository.GObject.MainLoop()
 
         # Logging
         logging_level = logging.INFO
@@ -267,7 +270,10 @@ class RazerDaemon(DBusService):
         Loops through the available hardware classes, loops through
         each device in the system and adds it if needs be.
         """
-        devices = os.listdir('/sys/bus/hid/devices')
+        try:
+            devices = os.listdir('/sys/bus/hid/devices')
+        except FileNotFoundError:
+            devices = []
         classes = razer_daemon.hardware.get_device_classes()
 
         device_number = 0
