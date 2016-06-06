@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import dbus
-import sys
-
 import razer.keyboard
 
 
@@ -45,8 +43,7 @@ class DaemonInterface(object):
             print('Successfully connected to dbus service.')
 
         except:
-            print("Failed to connect to the dbus service. Is the razer_bcd service running?")
-            sys.exit(1)
+            raise ValueError('Failed to connect to the dbus service. Is the razer_bcd service running?')
 
     def enumerate_devices(self):
         """
