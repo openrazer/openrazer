@@ -6,6 +6,6 @@ Priority: extra
 Maintainer: Terry Cain <terry@terrys-home.co.uk>
 Homepage: https://github.com/pez2001/razer_blackwidow_chroma_driver
 Architecture: amd64
-Depends: dkms (>= 2.2.0.3-2), g++ (>= 4:4.9.2-2), build-essential (>= 11.7), libdbus-1-dev (>= 1.8.20-0+deb8u1), jq (>= 1.4-2.1), libsdl2-dev (>= 2.0.2+dfsg1-6), libsdl2-image-dev (>= 2.0.0+dfsg-3+b4), libfftw3-3 (>= 3.3.4-2)
+Depends: dkms, g++, build-essential, libdbus-1-dev, jq, libsdl2-dev, libsdl2-image-dev, libfftw3-3
 Description: Razer Chroma Keyboard Driver
  A daemon and helper utility are also provided.
