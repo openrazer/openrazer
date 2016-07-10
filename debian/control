@@ -18,7 +18,7 @@ Description: Razer device drivers
 Package: razer-daemon
 Section: misc
 Architecture: amd64
-Depends: razer-kernel-modules-dkms, python3, python3-dbus, python3-gi, python3-razer
+Depends: razer-kernel-modules-dkms, python3, python3-dbus, python3-gi, python3-razer, xautomation, xdotool
 Description: Razer device daemon
  This package contains the daemon which is used to interface with the driver
 

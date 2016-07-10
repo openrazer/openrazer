@@ -1,4 +1,3 @@
 usr/lib/python3/dist-packages/razer_daemon
 usr/sbin/razer-service
 usr/share/razer-service
-usr/share/upstart/sessions/razer-service.conf
