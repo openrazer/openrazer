@@ -35,9 +35,9 @@
 /*
  * Version Information
  */
-#define DRIVER_VERSION "0.2"
+#define DRIVER_VERSION "1.0"
 #define DRIVER_AUTHOR "Tim Theede <pez2001@voyagerproject.de>"
-#define DRIVER_DESC "USB HID Razer BlackWidow Chroma"
+#define DRIVER_DESC "Razer Keyboard Device Driver"
 #define DRIVER_LICENSE "GPL v2"
 
 MODULE_AUTHOR(DRIVER_AUTHOR);
