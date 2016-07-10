@@ -267,7 +267,10 @@ class RazerDaemon(DBusService):
         Loops through the available hardware classes, loops through
         each device in the system and adds it if needs be.
         """
-        devices = os.listdir('/sys/bus/hid/devices')
+        try:
+            devices = os.listdir('/sys/bus/hid/devices')
+        except FileNotFoundError:
+            devices = []
         classes = razer_daemon.hardware.get_device_classes()
 
         device_number = 0
