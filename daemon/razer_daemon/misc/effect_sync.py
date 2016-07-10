@@ -14,6 +14,9 @@ class EffectSync(object):
         self._parent.register_observer(self)
 
     def __del__(self):
+        self.close()
+
+    def close(self):
         self._parent.remove_observer(self)
 
     def notify(self, msg):
