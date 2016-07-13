@@ -3,7 +3,7 @@ BlackWidow Ultimate 2013 effects
 """
 from razer_daemon.dbus_services import endpoint
 
-@endpoint('razer.device.lighting', 'getEffect', out_sig='y')
+@endpoint('razer.device.lighting.bw2013', 'getEffect', out_sig='y')
 def bw_get_effect(self):
     """
     Get current effect
@@ -19,7 +19,7 @@ def bw_get_effect(self):
         brightness = int(driver_file.read().strip())
         return brightness
 
-@endpoint('razer.device.lighting', 'setPulsate')
+@endpoint('razer.device.lighting.bw2013', 'setPulsate')
 def bw_set_pulsate(self):
     """
     Set pulsate mode
@@ -34,7 +34,7 @@ def bw_set_pulsate(self):
     # Notify others
     self.send_effect_event('setPulsate')
 
-@endpoint('razer.device.lighting', 'setStatic')
+@endpoint('razer.device.lighting.bw2013', 'setStatic')
 def bw_set_static(self):
     """
     Set static mode

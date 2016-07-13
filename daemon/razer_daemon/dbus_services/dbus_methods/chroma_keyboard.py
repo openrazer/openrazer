@@ -3,7 +3,7 @@ BlackWidow Chroma Effects
 """
 from razer_daemon.dbus_services import endpoint
 
-@endpoint('razer.device.misc', 'getBrightness', out_sig='d')
+@endpoint('razer.device.lighting.brightness', 'getBrightness', out_sig='d')
 def get_brightness(self):
     """
     Get the device's brightness
@@ -19,7 +19,7 @@ def get_brightness(self):
         brightness = float(driver_file.read()) * (100.0/255.0)
         return round(brightness, 2)
 
-@endpoint('razer.device.misc', 'setBrightness', in_sig='d')
+@endpoint('razer.device.lighting.brightness', 'setBrightness', in_sig='d')
 def set_brightness(self, brightness):
     """
     Set the device's brightness
@@ -43,19 +43,7 @@ def set_brightness(self, brightness):
     # Notify others
     self.send_effect_event('setBrightness', brightness)
 
-@endpoint('razer.device.misc', 'enableMacroKeys')
-def enable_macro_keys(self):
-    """
-    Make macro keys return keycodes
-    """
-    self.logger.debug("DBus call enable_macro_keys")
-
-    driver_path = self.get_driver_path('macro_keys')
-
-    with open(driver_path, 'w') as driver_file:
-        return driver_file.write('1')
-
-@endpoint('razer.device.misc', 'getGameMode', out_sig='b')
+@endpoint('razer.device.led.gamemode', 'getGameMode', out_sig='b')
 def get_game_mode(self):
     """
     Get game mode LED state
@@ -70,7 +58,7 @@ def get_game_mode(self):
     with open(driver_path, 'r') as driver_file:
         return driver_file.read().strip() == '1'
 
-@endpoint('razer.device.misc', 'setGameMode', in_sig='b')
+@endpoint('razer.device.led.gamemode', 'setGameMode', in_sig='b')
 def set_game_mode(self, enable):
     """
     Set game mode LED state
@@ -88,7 +76,8 @@ def set_game_mode(self, enable):
         else:
             driver_file.write('0')
 
-@endpoint('razer.device.misc', 'getMacroMode', out_sig='b')
+
+@endpoint('razer.device.led.macromode', 'getMacroMode', out_sig='b')
 def get_macro_mode(self):
     """
     Get macro mode LED state
@@ -103,7 +92,7 @@ def get_macro_mode(self):
     with open(driver_path, 'r') as driver_file:
         return driver_file.read().strip() == '1'
 
-@endpoint('razer.device.misc', 'setMacroMode', in_sig='b')
+@endpoint('razer.device.led.macromode', 'setMacroMode', in_sig='b')
 def set_macro_mode(self, enable):
     """
     Set macro mode LED state
@@ -121,7 +110,7 @@ def set_macro_mode(self, enable):
         else:
             driver_file.write('0')
 
-@endpoint('razer.device.misc', 'getMacroEffect', out_sig='i')
+@endpoint('razer.device.led.macromode', 'getMacroEffect', out_sig='i')
 def get_macro_effect(self):
     """
     Get the effect on the macro LED
@@ -136,7 +125,7 @@ def get_macro_effect(self):
     with open(driver_path, 'r') as driver_file:
         return int(driver_file.read().strip())
 
-@endpoint('razer.device.misc', 'setMacroEffect', in_sig='y')
+@endpoint('razer.device.led.macromode', 'setMacroEffect', in_sig='y')
 def set_macro_effect(self, effect):
     """
     Set the effect on the macro LED
@@ -151,7 +140,10 @@ def set_macro_effect(self, effect):
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(int(effect)))
 
-@endpoint('razer.device.lighting', 'setWave', in_sig='i')
+
+
+
+@endpoint('razer.device.lighting.chroma', 'setWave', in_sig='i')
 def set_wave_effect(self, direction):
     """
     Set the wave effect on the device
@@ -172,7 +164,7 @@ def set_wave_effect(self, direction):
     # Notify others
     self.send_effect_event('setWave', direction)
 
-@endpoint('razer.device.lighting', 'setStatic', in_sig='yyy')
+@endpoint('razer.device.lighting.chroma', 'setStatic', in_sig='yyy')
 def set_static_effect(self, red, green, blue):
     """
     Set the device to static colour
@@ -198,7 +190,7 @@ def set_static_effect(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
-@endpoint('razer.device.lighting', 'setSpectrum')
+@endpoint('razer.device.lighting.chroma', 'setSpectrum')
 def set_spectrum_effect(self):
     """
     Set the device to spectrum mode
@@ -213,7 +205,7 @@ def set_spectrum_effect(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
-@endpoint('razer.device.lighting', 'setNone')
+@endpoint('razer.device.lighting.chroma', 'setNone')
 def set_none_effect(self):
     """
     Set the device to spectrum mode
@@ -228,7 +220,7 @@ def set_none_effect(self):
     # Notify others
     self.send_effect_event('setNone')
 
-@endpoint('razer.device.lighting', 'setReactive', in_sig='yyyy')
+@endpoint('razer.device.lighting.chroma', 'setReactive', in_sig='yyyy')
 def set_reactive_effect(self, red, green, blue, speed):
     """
     Set the device to reactive effect
@@ -260,7 +252,7 @@ def set_reactive_effect(self, red, green, blue, speed):
     # Notify others
     self.send_effect_event('setReactive', red, green, blue, speed)
 
-@endpoint('razer.device.lighting', 'setBreathRandom')
+@endpoint('razer.device.lighting.chroma', 'setBreathRandom')
 def set_breath_random_effect(self):
     """
     Set the device to random colour breathing effect
@@ -277,7 +269,7 @@ def set_breath_random_effect(self):
     # Notify others
     self.send_effect_event('setBreathRandom')
 
-@endpoint('razer.device.lighting', 'setBreathSingle', in_sig='yyy')
+@endpoint('razer.device.lighting.chroma', 'setBreathSingle', in_sig='yyy')
 def set_breath_single_effect(self, red, green, blue):
     """
     Set the device to single colour breathing effect
@@ -303,7 +295,7 @@ def set_breath_single_effect(self, red, green, blue):
     # Notify others
     self.send_effect_event('setBreathSingle', red, green, blue)
 
-@endpoint('razer.device.lighting', 'setBreathDual', in_sig='yyyyyy')
+@endpoint('razer.device.lighting.chroma', 'setBreathDual', in_sig='yyyyyy')
 def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
     """
     Set the device to dual colour breathing effect
@@ -338,7 +330,7 @@ def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
     # Notify others
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
 
-@endpoint('razer.device.lighting', 'setCustom')
+@endpoint('razer.device.lighting.chroma', 'setCustom')
 def set_custom_effect(self):
     """
     Set the device to use custom LED matrix
@@ -353,42 +345,7 @@ def set_custom_effect(self):
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
 
-@endpoint('razer.device.lighting', 'setRipple', in_sig='yyyd')
-def set_ripple_effect(self, red, green, blue, refresh_rate):
-    """
-    Set the daemon to serve a ripple effect of the specified colour
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
-
-    :param refresh_rate: Refresh rate
-    :type refresh_rate: int
-    """
-    self.logger.debug("DBus call set_ripple_effect")
-
-    # Notify others
-    self.send_effect_event('setRipple', red, green, blue, refresh_rate)
-
-@endpoint('razer.device.lighting', 'setRippleRandomColour', in_sig='d')
-def set_ripple_effect_random_colour(self, refresh_rate):
-    """
-    Set the daemon to serve a ripple effect of random colours
-
-    :param refresh_rate: Refresh rate
-    :type refresh_rate: int
-    """
-    self.logger.debug("DBus call set_ripple_effect")
-
-    # Notify others
-    self.send_effect_event('setRipple', None, None, None, refresh_rate)
-
-@endpoint('razer.device.lighting', 'setKeyRow', in_sig='ay', byte_arrays=True)
+@endpoint('razer.device.lighting.chroma', 'setKeyRow', in_sig='ay', byte_arrays=True)
 def set_key_row(self, payload):
     """
     Set the RGB matrix on the device
@@ -412,7 +369,7 @@ def set_key_row(self, payload):
         driver_file.write(payload)
 
 # Not sure if works on firefly
-@endpoint('razer.device.lighting', 'clearKeyRow', in_sig='y')
+@endpoint('razer.device.lighting.chroma', 'clearKeyRow', in_sig='y')
 def clear_key_row(self, row_id):
     """
     Clear the RGB matrix on the device
@@ -426,3 +383,41 @@ def clear_key_row(self, row_id):
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(int(row_id)))
+
+
+
+@endpoint('razer.device.lighting.custom', 'setRipple', in_sig='yyyd')
+def set_ripple_effect(self, red, green, blue, refresh_rate):
+    """
+    Set the daemon to serve a ripple effect of the specified colour
+
+    :param red: Red component
+    :type red: int
+
+    :param green: Green component
+    :type green: int
+
+    :param blue: Blue component
+    :type blue: int
+
+    :param refresh_rate: Refresh rate
+    :type refresh_rate: int
+    """
+    self.logger.debug("DBus call set_ripple_effect")
+
+    # Notify others
+    self.send_effect_event('setRipple', red, green, blue, refresh_rate)
+
+@endpoint('razer.device.lighting.custom', 'setRippleRandomColour', in_sig='d')
+def set_ripple_effect_random_colour(self, refresh_rate):
+    """
+    Set the daemon to serve a ripple effect of random colours
+
+    :param refresh_rate: Refresh rate
+    :type refresh_rate: int
+    """
+    self.logger.debug("DBus call set_ripple_effect")
+
+    # Notify others
+    self.send_effect_event('setRipple', None, None, None, refresh_rate)
+

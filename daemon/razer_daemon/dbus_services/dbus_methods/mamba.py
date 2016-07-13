@@ -22,7 +22,6 @@ def get_battery(self):
         battery_100 = (battery_255 / 255) * 100
         return battery_100
 
-
 @endpoint('razer.device.power', 'isCharging', out_sig='b')
 def is_charging(self):
     """
@@ -34,49 +33,6 @@ def is_charging(self):
 
     with open(driver_path, 'r') as driver_file:
         return bool(int(driver_file.read().strip()))
-
-@endpoint('razer.device.power', 'setChargeEffect', in_sig='y')
-def set_charge_effect(self, charge_effect):
-    """
-    Set the charging effect.
-
-    If 0x00 then it will use the current mouse's effect
-    If 0x01 it will use the charge colour
-
-    :param charge_effect: Charge effect
-    :type charge_effect: int
-    :return:
-    """
-    self.logger.debug("DBus call set_charge_effect")
-
-    driver_path = self.get_driver_path('set_charging_effect')
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(bytes([charge_effect]))
-
-@endpoint('razer.device.power', 'setChargeColour', in_sig='yyy')
-def set_charge_colour(self, red, green, blue):
-    """
-    Set the charge colour
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
-    """
-    self.logger.debug("DBus call set_charge_colour")
-
-    driver_path = self.get_driver_path('set_charging_colour')
-
-    payload = bytes([red, green, blue])
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
-
 
 @endpoint('razer.device.power', 'setIdleTime', in_sig='q')
 def set_idle_time(self, idle_time):
@@ -109,6 +65,48 @@ def set_low_battery_threshold(self, threshold):
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(threshold))
+
+@endpoint('razer.device.lighting.power', 'setChargeEffect', in_sig='y')
+def set_charge_effect(self, charge_effect):
+    """
+    Set the charging effect.
+
+    If 0x00 then it will use the current mouse's effect
+    If 0x01 it will use the charge colour
+
+    :param charge_effect: Charge effect
+    :type charge_effect: int
+    :return:
+    """
+    self.logger.debug("DBus call set_charge_effect")
+
+    driver_path = self.get_driver_path('set_charging_effect')
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(bytes([charge_effect]))
+
+@endpoint('razer.device.lighting.power', 'setChargeColour', in_sig='yyy')
+def set_charge_colour(self, red, green, blue):
+    """
+    Set the charge colour
+
+    :param red: Red component
+    :type red: int
+
+    :param green: Green component
+    :type green: int
+
+    :param blue: Blue component
+    :type blue: int
+    """
+    self.logger.debug("DBus call set_charge_colour")
+
+    driver_path = self.get_driver_path('set_charging_colour')
+
+    payload = bytes([red, green, blue])
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(payload)
 
 @endpoint('razer.device.dpi', 'setDPI', in_sig='qq')
 def set_dpi_xy(self, dpi_x, dpi_y):
