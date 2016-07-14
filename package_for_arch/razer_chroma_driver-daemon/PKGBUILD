@@ -27,5 +27,5 @@ package() {
   cp $srcdir/$pkgname/resources/razer.conf $pkgdir/usr/share/razer-service/razer.conf.example
   
   gzip -c $srcdir/$pkgname/daemon/resources/man/razer.conf.5 > $pkgdir/usr/share/man/man5/razer.conf.5.gz
-  gzip -c $srcdir/$pkgname/daemon/resources/man/razer-service.8 > $pkgdir/usr/share/man/man5/razer-service.8.gz
+  gzip -c $srcdir/$pkgname/daemon/resources/man/razer-service.8 > $pkgdir/usr/share/man/man8/razer-service.8.gz
 }
