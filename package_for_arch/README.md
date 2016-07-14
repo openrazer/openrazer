@@ -1,24 +1,64 @@
 #Installing `razer_chroma_driver` on Arch Linux
 
-**Notice #1: don't run these commands directly as root. Run them as a normal user, with sudo privileges, and just put your password in whenever it's prompted**
+*This tutorial is pretty basic. If you're an advanced user, just skip it. You have to compile the packages using the provided PKGBUILDs, and install them in order: dkms, daemon, python*
 
-**Notice #2: this PKGBUILD is kinda incomplete. It only installs the driver (the dkms kernel module) but it leaves behind the daemon and python library. This is a temporary issue and will be solved in the close future.**
+##0. Getting started
 
 - Clone this repo:
 
-		git clone git://github.com/terrycain/razer_drivers.git
+		$ git clone git://github.com/terrycain/razer_drivers.git
 
-- Get into the *package_for_arch* folder:
+- Get into the **package_for_arch** folder:
 
-		cd razer_drivers/package_for_arch
+		$ cd razer_drivers/package_for_arch
+
+##1. Installing the driver
+
+- Get into the **razer_chroma_driver-dkms** folder:
+
+		$ cd razer_chroma_driver-dkms
 
 - Create the Arch package:
 
-		makepkg -s
+		$ makepkg -s
 
-- Install the newly made package:
+- Install the driver package you just compiled:
 
-		sudo pacman -U *.pkg.tar
+		$ sudo pacman -U *.pkg.tar
+
+- Get back to the previous folder:
+
+		$ cd ..
+
+##2. Installing the daemon
+
+- Get into the **razer_chroma_driver-daemon** folder:
+
+		$ cd razer_chroma_driver-daemon
+
+- Create the Arch package:
+
+		$ makepkg -s
+
+- Install the daemon package you just compiled:
+
+		$ sudo pacman -U *.pkg.tar
+
+##3. Installing the python library
+
+- Get into the **razer_chroma_driver-python** folder:
+
+		$ cd razer_chroma_driver-python
+
+- Create the Arch package:
+
+		$ makepkg -s
+
+- Install the daemon package you just compiled:
+
+		$ sudo pacman -U *.pkg.tar
+
+##4. Finishing up
 
 - Reboot your PC.
 

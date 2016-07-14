@@ -17,6 +17,7 @@ source=("${_pkgbase}::git+git://github.com/terrycain/razer_drivers#branch=daemon
 md5sums=('SKIP')
 
 package() {
+  #part1: dkms driver
   mkdir -p $pkgdir/usr/share
   mkdir -p $pkgdir/usr/src/$_pkgbase-$pkgver
   mkdir -p $pkgdir/usr/lib/udev/rules.d
@@ -25,6 +26,7 @@ package() {
   cp $srcdir/$_pkgbase/Makefile $pkgdir/usr/src/$_pkgbase-$pkgver
   cp $srcdir/$_pkgbase/install_files/dkms/dkms.conf $pkgdir/usr/src/$_pkgbase-$pkgver
   
+  #part2: udev rules
   cp $srcdir/$_pkgbase/install_files/udev/99-razer.rules $pkgdir/usr/lib/udev/rules.d
   cp $srcdir/$_pkgbase/install_files/udev/razer_mount $pkgdir/usr/lib/udev
 }
