@@ -1,0 +1,17 @@
+post_install() {
+	dkms install razer_chroma_driver/${1%%-*}
+	udevadm control --reload-rules
+}
+
+pre_upgrade() {
+    pre_remove ${2%%-*}
+}
+
+post_upgrade() {
+    post_install ${1%%-*}
+}
+
+pre_remove() {
+    dkms remove razer_chroma_driver/${1%%-*} --all
+    udevadm control --reload-rules
+}
