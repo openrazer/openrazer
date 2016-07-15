@@ -20,7 +20,7 @@ package() {
   mkdir -p $pkgdir/usr/share/man/man5
   mkdir -p $pkgdir/usr/share/man/man8
   mkdir -p $pkgdir/usr/lib/python3.5/site-packages
-  mkdir -p $pkgdir/usr/sbin
+  mkdir -p $pkgdir/usr/bin
 
   cp -r $srcdir/$pkgname/daemon/razer_daemon $pkgdir/usr/lib/python3.5/site-packages/
   cp $srcdir/$pkgname/daemon/run_razer_daemon.py $pkgdir/usr/sbin/razer-service
