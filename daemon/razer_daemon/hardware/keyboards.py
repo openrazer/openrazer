@@ -71,3 +71,29 @@ class RazerBlackWidowChroma(MacroKeyboard):
         self.ripple_manager.close()
 
 
+class RazerBlackWidowChromaTournamentEdition(MacroKeyboard):
+    """
+    Class for the BlackWidow Chroma
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Tournament_Edition_Chroma(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0209
+    METHODS = ['get_firmware', 'get_device_type', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'enable_macro_keys', 'get_game_mode', 'set_game_mode',
+
+               'set_ripple_effect']
+
+    def __init__(self, *args):
+        super(RazerBlackWidowChromaTournamentEdition, self).__init__(*args)
+
+        self.ripple_manager = RippleManager(self, self._device_number)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerBlackWidowChromaTournamentEdition, self)._close()
+
+        self.ripple_manager.close()

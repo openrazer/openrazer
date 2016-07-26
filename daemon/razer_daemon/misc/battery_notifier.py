@@ -62,6 +62,12 @@ class BatteryNotifier(threading.Thread):
             self._last_notify_time = now
 
             battery_level = self._get_battery_func()
+
+            # Sometimes on wifi dont get batt
+            if battery_level == -1.0:
+                time.sleep(0.2)
+                battery_level = self._get_battery_func()
+
             if battery_level < 10.0:
                 self._notification.update(summary="{0} Battery at {1:.1f}%".format(self._device_name, battery_level), message='Please charge your device', icon='notification-battery-low')
             else:

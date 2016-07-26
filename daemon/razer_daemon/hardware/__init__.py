@@ -2,7 +2,7 @@
 Hardware collection
 """
 
-from razer_daemon.hardware.keyboards import RazerBlackWidow2013, RazerBlackWidowChroma
+from razer_daemon.hardware.keyboards import RazerBlackWidow2013, RazerBlackWidowChroma, RazerBlackWidowChromaTournamentEdition
 from razer_daemon.hardware.mouse_mat import RazerFireFly
 from razer_daemon.hardware.mouse import RazerMambaChromaWireless
 
