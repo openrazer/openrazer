@@ -1,5 +1,15 @@
 post_install() {
 	dkms install razer_chroma_driver/${1%%-*}
+	if ! getent group plugdev
+	then
+		sudo groupadd --system plugdev
+	fi
+	echo -e "\e[31m********************************************"
+	echo -e "\e[31m* To complete installation, please run:    *"
+	echo -e "\e[31m* # sudo gpasswd -a <yourUsername> plugdev *"
+	echo -e "\e[31m********************************************"
+	echo -e -n "\e[39m"
+	sleep 5
 	udevadm control --reload-rules
 }
 
