@@ -25,7 +25,7 @@ def gen_row(row_num):
     for i in range(0, 22):
         for j in range(0, 22):
             if j == i:
-                result += b'\xFF\x00\x00'
+                result += b'\x00\xFF\x00'
             else:
                 result += b'\x00\x00\x00'
         yield result

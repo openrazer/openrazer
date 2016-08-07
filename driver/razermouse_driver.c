@@ -31,9 +31,9 @@
 /*
  * Version Information
  */
-#define DRIVER_VERSION "0.1"
+#define DRIVER_VERSION "1.0"
 #define DRIVER_AUTHOR "Terry Cain <terry@terrys-home.co.uk>"
-#define DRIVER_DESC "USB HID Razer Mouse"
+#define DRIVER_DESC "Razer Mouse Device Driver"
 #define DRIVER_LICENSE "GPL v2"
 
 MODULE_AUTHOR(DRIVER_AUTHOR);

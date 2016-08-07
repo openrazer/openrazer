@@ -24,6 +24,13 @@ Website: [Here](http://pez2001.github.io/razer_chroma_drivers/)
  * Razer Abyssus (all modes bar the refresh rate)
 
 ## Installation
+
+###Arch Linux
+
+[Arch Linux installation guide](https://github.com/terrycain/razer_drivers/tree/daemonV2/package_for_arch) 
+
+###Other distributions
+
 [Here](https://github.com/pez2001/razer_chroma_drivers/wiki/Installation) is a page documenting the installation and uninstallation procedures.
 
 ## Applications
