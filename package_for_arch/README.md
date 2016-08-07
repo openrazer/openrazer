@@ -8,10 +8,6 @@
 
 		$ git clone git://github.com/terrycain/razer_drivers.git
 
-- Switch to the **daemonV2** branch:
-
-		$ git checkout daemonV2
-
 - Get into the **package_for_arch** folder:
 
 		$ cd razer_drivers/package_for_arch
