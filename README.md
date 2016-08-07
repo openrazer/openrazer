@@ -27,7 +27,7 @@ Website: [Here](http://pez2001.github.io/razer_chroma_drivers/)
 
 ###Arch Linux
 
-[Arch Linux installation guide](https://github.com/terrycain/razer_drivers/tree/daemonV2/package_for_arch) 
+[Arch Linux installation guide](https://github.com/terrycain/razer_drivers/blob/master/package_for_arch/README.md) 
 
 ###Other distributions
 
