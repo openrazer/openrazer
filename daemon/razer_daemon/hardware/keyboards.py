@@ -39,7 +39,7 @@ class RazerBlackWidow2013(MacroKeyboard):
 
     USB_VID = 0x1532
     USB_PID = 0x011A
-    METHODS = ['get_firmware', 'get_brightness', 'enable_macro_keys', 'set_brightness', 'get_device_type', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
+    METHODS = ['get_firmware', 'get_brightness', 'enable_macro_keys', 'set_brightness', 'get_device_name', 'get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
 class RazerBlackWidowChroma(MacroKeyboard):
@@ -50,7 +50,7 @@ class RazerBlackWidowChroma(MacroKeyboard):
 
     USB_VID = 0x1532
     USB_PID = 0x0203
-    METHODS = ['get_firmware', 'get_device_type', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_firmware', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'enable_macro_keys', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
@@ -79,7 +79,7 @@ class RazerBlackWidowChromaTournamentEdition(MacroKeyboard):
 
     USB_VID = 0x1532
     USB_PID = 0x0209
-    METHODS = ['get_firmware', 'get_device_type', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_firmware', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'enable_macro_keys', 'get_game_mode', 'set_game_mode',
 
