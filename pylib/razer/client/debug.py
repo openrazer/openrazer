@@ -61,21 +61,52 @@ def print_attrs(obj, recurse_to=None, indent=0):
 
     print(obj.__class__.__name__)
     if len(props) > 0:
-        print2("  properties:")
-        for prop in props:
+        if len(funcs) + len(fields) == 0:
+            print2(" └ properties:")
+            pipe = ' '
+        else:
+            print2(" ├ properties:")
+            pipe = '│'
+
+        for index, prop in enumerate(props, start=1):
             if prop in recurse_to:
-                print_attrs(getattr(obj, prop), recurse_to=(recurse_to - set(prop)), indent=indent + 4)
+                if len(props) != index:
+                    print((" " * indent) + ' {0}  ├- {1} - '.format(pipe, prop), end='')
+                    print_attrs(getattr(obj, prop), recurse_to=(recurse_to - set(prop)), indent=indent + 7)
+                else:
+                    print((" " * indent) + ' {0}  └- {1} - '.format(pipe, prop), end='')
+                    print_attrs(getattr(obj, prop), recurse_to=(recurse_to - set(prop)), indent=indent + 7)
             else:
-                print2('    {0}'.format(prop))
+                if len(props) != index:
+                    print2(' {0}  ├- {1}'.format(pipe, prop))
+                else:
+                    print2(' {0}  └- {1}'.format(pipe, prop))
     if len(funcs) > 0:
-        print2("  methods:")
-        for func in funcs:
-            print2('    {0}'.format(func))
-    if len(fields) > 0:
-        print2("  fields:")
-        for field in fields:
-            if field in recurse_to:
-                print((" " * indent) + '    {0} - '.format(field), end='')
-                print_attrs(getattr(obj, field), recurse_to=(recurse_to - set(field)), indent=indent + 4)
+        if len(fields) == 0:
+            print2(" └ methods:")
+            pipe = ' '
+        else:
+            print2(" ├ methods:")
+            pipe = '│'
+
+        for index, func in enumerate(funcs, start=1):
+            if len(funcs) != index:
+                print2(' {0}  ├- {1}'.format(pipe, func))
             else:
-                print2('    {0}'.format(field))
+                print2(' {0}  └-{1}'.format(pipe, func))
+    if len(fields) > 0:
+        print2(" └ fields:")
+
+        for index, field in enumerate(fields, start=1):
+            if field in recurse_to:
+                if len(fields) != index:
+                    print((" " * indent) + '    ├- {0} - '.format(field), end='')
+                    print_attrs(getattr(obj, field), recurse_to=(recurse_to - set(field)), indent=indent + 7)
+                else:
+                    print((" " * indent) + '    └- {0} - '.format(field), end='')
+                    print_attrs(getattr(obj, field), recurse_to=(recurse_to - set(field)), indent=indent + 7)
+            else:
+                if len(fields) != index:
+                    print2('    ├- {0}'.format(field))
+                else:
+                    print2('    └- {0}'.format(field))
