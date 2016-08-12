@@ -367,9 +367,9 @@ int razer_set_reactive_mode(struct usb_device *usb_dev, struct razer_rgb *colour
     int retval = 0;
     struct razer_report report = get_razer_report(0x03, 0x0A, 0x05);
 
-    if(speed < 0 || speed > 4)
+    if(speed < 0 || speed > 5)
     {
-        printk(KERN_WARNING "razerkbd: Reactive mode, Speed must be within 1-3. Got: %d. Defaulting to long\n", speed);
+        printk(KERN_WARNING "razerkbd: Reactive mode, Speed must be within 1-4. Got: %d. Defaulting to long\n", speed);
         speed = 3;
     }
 

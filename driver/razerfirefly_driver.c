@@ -178,7 +178,7 @@ int razer_set_none_mode(struct usb_device *usb_dev)
 int razer_set_reactive_mode(struct usb_device *usb_dev, struct razer_rgb *color, unsigned char speed)
 {
     int retval = 0;
-    if(speed > 0 && speed < 4)
+    if(speed > 0 && speed < 5)
     {
         struct razer_report report = get_razer_report(0x03, 0x0A, 0x05);
         report.arguments[0] = 0x02; // Effect ID
@@ -190,7 +190,7 @@ int razer_set_reactive_mode(struct usb_device *usb_dev, struct razer_rgb *color,
         retval = razer_set_report(usb_dev, &report);
     } else
     {
-        printk(KERN_WARNING "razerfirefly: Reactive mode, Speed must be within 1-3. Got: %d", speed);
+        printk(KERN_WARNING "razerfirefly: Reactive mode, Speed must be within 1-4. Got: %d", speed);
     }
     return retval;
 }
