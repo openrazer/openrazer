@@ -14,7 +14,7 @@ class DeviceManager(object):
         # Get interface for devices methods
         self._dbus_devices = _dbus.Interface(self._dbus, "razer.devices")
 
-        self._device_serials = [serial for serial in self._dbus_devices.getDevices() if len(serial) > 0]
+        self._device_serials = self._dbus_devices.getDevices()
         self._devices = None
 
     def stop_daemon(self):
@@ -23,7 +23,7 @@ class DeviceManager(object):
         """
         self._dbus_daemon.stop()
 
-    def turn_off_on_screensaver(self, enable):
+    def turn_off_on_screensaver(self, enable:bool):
         """
         Set wether or not to turn off the devices when screensaver is active
 
@@ -31,26 +31,30 @@ class DeviceManager(object):
         When the screensaver is inactive the devices' brightness will be restored
         :param enable: True to enable screensaver disable
         :type enable: bool
+
+        :raises ValueError: If enable isnt a bool
         """
-        # TODO typecheck enable
+        if not isinstance(enable, bool):
+            raise ValueError("Enable must be a boolean")
+
         if enable:
             self._dbus_devices.enableTurnOffOnScreensaver()
         else:
             self._dbus_devices.disableTurnOffOnScreensaver()
 
-    def sync_effects(self, sync):
+    def sync_effects(self, sync:bool):
         """
         Enable or disable the syncing of effects between devices
 
         :param sync: Sync effects
         :type sync: bool
+
+        :raises ValueError: If sync isnt a bool
         """
-        # TODO typecheck sync
-        # We do if sync as then it doenst matter if some idiot doesn't pass in a bool
-        if sync:
-            self._dbus_devices.syncEffects(True)
-        else:
-            self._dbus_devices.syncEffects(False)
+        if not isinstance(sync, bool):
+            raise ValueError("Sync must be a boolean")
+
+        self._dbus_devices.syncEffects(sync)
 
     def _get_devices(self):
         """
@@ -65,7 +69,7 @@ class DeviceManager(object):
             self._devices.append(device)
 
     @property
-    def devices(self):
+    def devices(self) -> list:
         """
         Gets devices
 
@@ -78,10 +82,21 @@ class DeviceManager(object):
         return self._devices
 
 
+
 if __name__ == '__main__':
+    from razer.client.debug import print_attrs
+    # #DodgyHackToPrintVarStructure
     # TODO remove on debug complete
     a = DeviceManager()
     devices = a.devices
 
+    kbd = None
+    for device in devices:
+        if device.serial.startswith('IO'):
+            kbd = device
 
-    print(devices)
+    if kbd is not None:
+        print_attrs(kbd, recurse_to=['fx'])
+
+    print()
+    print("Devices: {0}".format(devices))

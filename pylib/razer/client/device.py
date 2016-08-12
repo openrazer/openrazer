@@ -1,19 +1,19 @@
 import dbus as _dbus
 from razer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFactory as __BaseDeviceFactory
 from razer.client.devices.firefly import RazerFirefly as __RazerFirefly
-from razer.client.devices.keyboard import RazerKeyboard as __RazerKeyboard
+from razer.client.devices.keyboard import RazerKeyboardFactory as __RazerKeyboardFactory
 
 
 DEVICE_MAP ={
     'firefly': __RazerFirefly,
-    'keyboard': __RazerKeyboard,
+    'keyboard': __RazerKeyboardFactory,
     'default': __RazerDevice
 }
 
 
 class RazerDeviceFactory(__BaseDeviceFactory):
     @staticmethod
-    def get_device(serial, daemon_dbus=None):
+    def get_device(serial, vid_pid=None, daemon_dbus=None):
         """
         Factory for turning a serial into a class
 
@@ -24,6 +24,9 @@ class RazerDeviceFactory(__BaseDeviceFactory):
         to a raw RazerDevice.
         :param serial: Device serial
         :type serial: str
+
+        :param vid_pid: Device VID, PID
+        :type vid_pid: list of int
 
         :param daemon_dbus: Daemon DBus object
         :type daemon_dbus: object or None
@@ -38,19 +41,20 @@ class RazerDeviceFactory(__BaseDeviceFactory):
         device_dbus = _dbus.Interface(daemon_dbus, "razer.device.misc")
 
         device_type = device_dbus.getDeviceType()
+        device_vid_pid = device_dbus.getVidPid()
 
         if device_type in DEVICE_MAP:
             # Have device mapping
             device_class = DEVICE_MAP[device_type]
             if hasattr(device_class, 'get_device'):
                 # DeviceFactory
-                device = device_class.get_device(serial, daemon_dbus=daemon_dbus)
+                device = device_class.get_device(serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
             else:
                 # DeviceClass
-                device = device_class(serial, daemon_dbus=daemon_dbus)
+                device = device_class(serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
         else:
             # No mapping, default to RazerDevice
-            device = DEVICE_MAP['default'](serial, daemon_dbus=daemon_dbus)
+            device = DEVICE_MAP['default'](serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
 
         return device
 

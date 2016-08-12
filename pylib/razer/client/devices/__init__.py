@@ -1,8 +1,11 @@
 import dbus as _dbus
+from razer.client.fx import RazerFX as _RazerFX
 
 
 class RazerDevice(object):
-    def __init__(self, serial, daemon_dbus=None):
+    _FX = _RazerFX
+
+    def __init__(self, serial, vid_pid=None, daemon_dbus=None):
         # Load up the DBus
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
@@ -17,6 +20,11 @@ class RazerDevice(object):
         self._name = self._dbus_interfaces['device'].getDeviceName()
         self._type = self._dbus_interfaces['device'].getDeviceType()
         self._fw = self._dbus_interfaces['device'].getFirmware()
+        if vid_pid is None:
+            self._vid, self._pid = self._dbus_interfaces['device'].getVidPid()
+        else:
+            self._vid, self._pid = vid_pid
+
         self._serial = serial
 
         default_capabilities = {
@@ -26,10 +34,27 @@ class RazerDevice(object):
             'serial': True,
             'brightness': True,
 
+            # Default device is a chroma so lighting capabilities
+            'lighting_breath_single': True,
+            'lighting_breath_dual': True,
+            'lighting_breath_random': True,
+            'lighting_wave': True,
+            'lighting_reactive': True,
+            'lighting_nano': True,
+            'lighting_spectrum': True,
+            'lighting_static': True,
+
+            'lighting_pulsate': False
         }
         self._update_capabilities(default_capabilities)
 
-    def _update_capabilities(self, capabilities):
+        # Setup FX
+        if self._FX is None:
+            self.fx = None
+        else:
+            self.fx = self._FX(serial, capabilities=self._capabilities, daemon_dbus=daemon_dbus)
+
+    def _update_capabilities(self, capabilities:dict):
         """
         Update capabilities
 
@@ -44,8 +69,7 @@ class RazerDevice(object):
         else:
             self._capabilities = capabilities
 
-
-    def has(self, capability):
+    def has(self, capability:str) -> bool:
         """
         Convenience function to check capability
 
@@ -59,7 +83,7 @@ class RazerDevice(object):
         return self._capabilities.get(capability, False)
 
     @property
-    def name(self):
+    def name(self) -> str:
         """
         Device name
 
@@ -69,7 +93,7 @@ class RazerDevice(object):
         return self._name
 
     @property
-    def type(self):
+    def type(self) -> str:
         """
         Get device type
 
@@ -79,7 +103,7 @@ class RazerDevice(object):
         return self._type
 
     @property
-    def firmware_version(self):
+    def firmware_version(self) -> str:
         """
         Device's firmware version
 
@@ -89,7 +113,7 @@ class RazerDevice(object):
         return self._fw
 
     @property
-    def serial(self):
+    def serial(self) -> str:
         """
         Device's serial
 
@@ -99,7 +123,7 @@ class RazerDevice(object):
         return self._serial
 
     @property
-    def brightness(self):
+    def brightness(self) -> float:
         """
         Get device brightness
 
@@ -109,7 +133,7 @@ class RazerDevice(object):
         return self._dbus_interfaces['brightness'].getBrightness()
 
     @brightness.setter
-    def brightness(self, value):
+    def brightness(self, value:float):
         """
         Set device brightness
 
@@ -127,7 +151,7 @@ class RazerDevice(object):
         self._dbus_interfaces['brightness'].setBrightness(value)
 
     @property
-    def capabilities(self):
+    def capabilities(self) -> dict:
         """
         Device capabilities
 
@@ -144,5 +168,5 @@ class RazerDevice(object):
 
 class BaseDeviceFactory(object):
     @staticmethod
-    def get_device(serial, daemon_dbus=None):
+    def get_device(serial:str, daemon_dbus=None) -> RazerDevice:
         raise NotImplementedError()
