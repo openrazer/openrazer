@@ -286,7 +286,19 @@ class RazerDaemon(DBusService):
                     self.logger.info('Found device.%d: %s', device_number, device_id)
                     device_path = os.path.join('/sys/bus/hid/devices', device_id)
                     razer_device = device_class(device_path, device_number, self._config)
-                    device_serial = razer_device.get_serial()
+
+                    # Wireless devices sometimes dont listen
+                    count = 0
+                    while count < 3:
+                        # Loop to get serial, exit early if it gets one
+                        device_serial = razer_device.get_serial()
+                        if len(device_serial) > 0:
+                            break
+                        count += 1
+                    else:
+                        logging.warning("Could not get serial for device {0}. Skipping".format(device_id))
+                        continue
+
                     self._razer_devices.add(device_id, device_serial, razer_device)
 
                     device_number += 1

@@ -64,6 +64,8 @@ class RazerDevice(DBusService):
         self.add_dbus_method('razer.device.misc', 'suspendDevice', self.suspend_device)
         self.logger.debug("Adding razer.device.misc.resumeDevice method to DBus")
         self.add_dbus_method('razer.device.misc', 'resumeDevice', self.resume_device)
+        self.logger.debug("Adding razer.device.misc.getVidPid method to DBus")
+        self.add_dbus_method('razer.device.misc', 'getVidPid', self.get_vid_pid, out_signature='ai')
 
         # Load additional DBus methods
         self.load_methods()
@@ -145,6 +147,16 @@ class RazerDevice(DBusService):
         serial_path = os.path.join(self._device_path, 'get_serial')
         with open(serial_path, 'r') as serial_file:
             return serial_file.read().strip()
+
+    def get_vid_pid(self):
+        """
+        Get the usb VID PID
+
+        :return: List of VID PID
+        :rtype: list of int
+        """
+        result = [self.USB_VID, self.USB_PID]
+        return result
 
     def load_methods(self):
         """
