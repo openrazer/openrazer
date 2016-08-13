@@ -66,3 +66,23 @@ def get_device_type_firefly(self):
     """
     self.logger.debug("DBus call get_device_type")
     return 'firefly'
+
+
+@endpoint('razer.device.misc', 'hasMatrix', out_sig='b')
+def has_matrix(self):
+    """
+    If the device has an LED matrix
+    """
+    self.logger.debug("DBus call has_matrix")
+
+    return self.HAS_MATRIX
+
+@endpoint('razer.device.misc', 'getMatrixDimensions', out_sig='ai')
+def get_matrix_dims(self):
+    """
+    If the device has an LED matrix
+    """
+    self.logger.debug("DBus call has_matrix")
+
+    return list(self.MATRIX_DIMS)
+

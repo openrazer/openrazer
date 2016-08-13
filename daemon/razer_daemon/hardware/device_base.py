@@ -25,6 +25,8 @@ class RazerDevice(DBusService):
 
     USB_VID = None
     USB_PID = None
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]
 
     def __init__(self, device_path, device_number, config):
 
