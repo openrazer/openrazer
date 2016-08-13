@@ -786,7 +786,10 @@ int razer_set_brightness(struct usb_device *usb_dev, unsigned char brightness)
     {
         report.arguments[1] = 0x04;/* LED ID, Logo */
         report.arguments[2] = brightness;
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
         report.arguments[1] = 0x05;/* Backlight LED */
         report.arguments[2] = brightness;
@@ -825,7 +828,10 @@ int razer_get_brightness(struct usb_device *usb_dev)
               usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013)
     {
         request_report.arguments[1] = 0x04;/* LED ID, Logo */
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
         request_report.arguments[1] = 0x05;/* Backlight LED */
     } else {

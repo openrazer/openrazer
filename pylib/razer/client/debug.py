@@ -93,7 +93,7 @@ def print_attrs(obj, recurse_to=None, indent=0):
             if len(funcs) != index:
                 print2(' {0}  ├- {1}'.format(pipe, func))
             else:
-                print2(' {0}  └-{1}'.format(pipe, func))
+                print2(' {0}  └- {1}'.format(pipe, func))
     if len(fields) > 0:
         print2(" └ fields:")
 
