@@ -11,7 +11,7 @@ license=('GPLv3')
 depends=('razer_chroma_driver-dkms' 'libdbus')
 makedepends=('git')
 install=${pkgname}.install
-source=("${pkgname}::git+git://github.com/terrycain/razer_drivers")
+source=("${pkgname}::git+git://github.com/terrycain/razer_drivers#branch=feature_pythonlib")
 md5sums=('SKIP')
 
 package() {
