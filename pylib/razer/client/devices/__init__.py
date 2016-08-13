@@ -48,11 +48,15 @@ class RazerDevice(object):
         }
         self._update_capabilities(default_capabilities)
 
+        # Get if the device has an LED Matrix
+        self._capabilities['lighting_led_matrix'] = self._dbus_interfaces['device'].hasMatrix()
+        self._matrix_dimensions = self._dbus_interfaces['device'].getMatrixDimensions()
+
         # Setup FX
         if self._FX is None:
             self.fx = None
         else:
-            self.fx = self._FX(serial, capabilities=self._capabilities, daemon_dbus=daemon_dbus)
+            self.fx = self._FX(serial, capabilities=self._capabilities, daemon_dbus=daemon_dbus, matrix_dims=self._matrix_dimensions)
 
     def _update_capabilities(self, capabilities:dict):
         """

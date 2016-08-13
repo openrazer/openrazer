@@ -144,27 +144,9 @@ class RazerChromaTournamentEditionKeyboard(RazerKeyboard):
         super(RazerChromaTournamentEditionKeyboard, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
 
 
-
-
-
-# For the RazerBlackwidowOriginal, Ultimate2012, Ultimate2013
-class RazerKeyboardNoRipple(RazerKeyboard):
-    def __init__(self, serial, vid_pid=None, daemon_dbus=None):
-        default_capabilities = {
-            'lighting_ripple': False,
-        }
-        self._update_capabilities(default_capabilities)
-
-        super(RazerKeyboardNoRipple, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
-
-
 DEVICE_PID_MAP = {
     0x0205: RazerBladeStealthKeyboard,
     0x0209: RazerChromaTournamentEditionKeyboard,
-
-    0x011B: RazerKeyboardNoRipple, # Orignal
-    0x010D: RazerKeyboardNoRipple, # Ultimate 2012
-    0x011A: RazerKeyboardNoRipple, # Ultimate 2013
 }
 
 class RazerKeyboardFactory(__BaseDeviceFactory):

@@ -1,3 +1,4 @@
+import numpy as _np
 import dbus as _dbus
 from razer.client.constants import WAVE_LEFT, WAVE_RIGHT, REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS, REACTIVE_2000MS
 
@@ -21,9 +22,7 @@ def clamp_ubyte(value):
 
 # Default Chroma lighting
 class RazerFX(object):
-    # TODO custom effect activation, set_key_row, rippleSingle, rippleRandom
-
-    def __init__(self, serial:str, capabilities:dict, daemon_dbus=None):
+    def __init__(self, serial:str, capabilities:dict, daemon_dbus=None, matrix_dims=(-1, -1)):
         self._capabilities = capabilities
 
         if daemon_dbus is None:
@@ -32,7 +31,14 @@ class RazerFX(object):
 
         self._lighting_dbus = _dbus.Interface(daemon_dbus, "razer.device.lighting.chroma")
 
-        if self.has('ripple'):
+        # all() part basically checks that all dimensions are present (-1 is bad)
+        if self.has('led_matrix') and all([dim>=1 for dim in matrix_dims]):
+            self.advanced = RazerAdvancedFX(serial, capabilities, daemon_dbus=daemon_dbus, matrix_dims=matrix_dims)
+        else:
+            self.advanced = None
+
+        # Only keyboards will have ripple set
+        if self.has('led_matrix') and self.has('ripple'):
             self._custom_lighting_dbus = _dbus.Interface(daemon_dbus, "razer.device.lighting.custom")
         else:
             self._custom_lighting_dbus = None
@@ -277,7 +283,28 @@ class RazerFX(object):
             return True
         return False
 
-    def ripple(self, red:int, green:int, blue:int, refreshrate:float):
+    def ripple(self, red:int, green:int, blue:int, refreshrate:float) -> bool:
+        """
+        Set the Ripple Effect.
+
+        The refresh rate should be set to about 0.05 for a decent effect
+        :param red: Red RGB component
+        :rtype red: int
+
+        :param green: Green RGB component
+        :type green: int
+
+        :param blue: Blue RGB component
+        :type blue: int
+
+        :param refreshrate: Effect refresh rate
+        :type refreshrate: float
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If arguemnts are invalid
+        """
         if not isinstance(refreshrate, float):
             raise ValueError("Refresh rate is not a float")
         if not isinstance(red, int):
@@ -298,6 +325,18 @@ class RazerFX(object):
         return False
 
     def ripple_random(self, refreshrate:float):
+        """
+        Set the Ripple Effect with random colours
+
+        The refresh rate should be set to about 0.05 for a decent effect
+        :param refreshrate: Effect refresh rate
+        :type refreshrate: float
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If arguemnts are invalid
+        """
         if not isinstance(refreshrate, float):
             raise ValueError("Refresh rate is not a float")
 
@@ -308,3 +347,149 @@ class RazerFX(object):
         return False
 
 
+class RazerAdvancedFX(object):
+    def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, matrix_dims=(-1, -1)):
+        # Only init'd when theres a matrix
+        self._capabilities = capabilities
+
+        if not all([dim>=1 for dim in matrix_dims]):
+            raise ValueError("Matrix dimenions cannot contain -1")
+
+        if daemon_dbus is None:
+            session_bus = _dbus.SessionBus()
+            daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
+
+        self._lighting_dbus = _dbus.Interface(daemon_dbus, "razer.device.lighting.chroma")
+
+        self.matrix = Frame(matrix_dims)
+
+    def draw(self):
+        """
+        Draw whats in the current frame buffer
+        """
+        self._lighting_dbus.setKeyRow(bytes(self.matrix))
+
+        self._lighting_dbus.setCustom()
+
+
+class Frame(object):
+    def __init__(self, dimensions):
+        self._rows, self._cols = dimensions
+        self._components = 3
+
+        self._matrix = None
+        self.reset()
+
+    # Index with row, col OR y, x
+    def __getitem__(self, key:tuple) -> tuple:
+        """
+        Method to allow a slice to get an RGB tuple
+
+        :param key: Key, must be y,x tuple
+        :type key: tuple
+
+        :return: RGB tuple
+        :rtype: tuple
+
+        :raises AssertionError: If key is invalid
+        """
+        assert isinstance(key, tuple), "Key is not a tuple"
+        assert 0 <= key[0] < self._rows, "Row out of bounds"
+        assert 0 <= key[1] < self._cols, "Column out of bounds"
+
+        return tuple(self._matrix[:, key[0], key[1]])
+
+    # Index with row, col OR y, x
+    def __setitem__(self, key:tuple, rgb:tuple):
+        """
+        Method to allow a slice to set an RGB tuple
+
+        :param key: Key, must be y,x tuple
+        :type key: tuple
+
+        :param rgb: RGB tuple
+        :type rgb: tuple
+
+        :raises AssertionError: If key is invalid
+        """
+        assert isinstance(key, tuple), "Key is not a tuple"
+        assert 0 <= key[0] < self._rows, "Row out of bounds"
+        assert 0 <= key[1] < self._cols, "Column out of bounds"
+        assert isinstance(rgb, (list, tuple)) and len(rgb) == 3, "Value must be a tuple,list of 3 RGB components"
+
+        self._matrix[:, key[0], key[1]] = rgb
+
+    def __bytes__(self) -> bytes:
+        """
+        When bytes() is ran on the class will return a binary capable of being sent to the driver
+
+        :return: Driver binary payload
+        :rtype: bytes
+        """
+        return b''.join([self.row_binary(row_id) for row_id in range(0, self._rows)])
+
+    def reset(self):
+        """
+        Init/Clear the matrix
+        """
+        if self._matrix is None:
+            self._matrix = _np.zeros((self._components, self._rows, self._cols), 'uint8')
+        else:
+            self._matrix.fill(0)
+
+    def set(self, y:int, x:int, rgb:tuple):
+        """
+        Method to allow a slice to set an RGB tuple
+
+        :param y: Row
+        :type y: int
+
+        :param x: Column
+        :type x: int
+
+        :param rgb: RGB tuple
+        :type rgb: tuple
+
+        :raises AssertionError: If key is invalid
+        """
+        self.__setitem__((y, x), rgb)
+
+    def get(self, y:int, x:int) -> list:
+        """
+        Method to allow a slice to get an RGB tuple
+
+        :param y: Row
+        :type y: int
+
+        :param x: Column
+        :type x: int
+
+        :return rgb: RGB tuple
+        :return rgb: tuple
+
+        :raises AssertionError: If key is invalid
+        """
+        return self.__getitem__((y, x))
+
+    def row_binary(self, row_id:int) -> bytes:
+        """
+        Get binary payload for 1 row which is compatible with the driver
+
+        :param row_id: Row ID
+        :type row_id: int
+
+        :return: Binary payload
+        :rtype: bytes
+        """
+        assert 0 <= row_id < self._rows, "Row out of bounds"
+
+        return row_id.to_bytes(1, byteorder='big') + self._matrix[:,row_id].tobytes(order='F')
+
+    def to_binary(self):
+        """
+        Get the whole binary for the keyboard to be sent to the driver.
+
+        :return: Driver binary payload
+        :rtype: bytes
+        """
+        return bytes(self)
