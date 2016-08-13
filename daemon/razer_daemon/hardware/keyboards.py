@@ -42,6 +42,7 @@ class RazerBlackWidow2013(MacroKeyboard):
     METHODS = ['get_firmware', 'get_brightness', 'enable_macro_keys', 'set_brightness', 'get_device_name', 'get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
+
 class RazerBlackWidowChroma(MacroKeyboard):
     """
     Class for the BlackWidow Chroma
@@ -55,7 +56,7 @@ class RazerBlackWidowChroma(MacroKeyboard):
                'set_custom_effect', 'set_key_row', 'enable_macro_keys', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
 
-               'set_ripple_effect']
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     def __init__(self, *args):
         super(RazerBlackWidowChroma, self).__init__(*args)
@@ -83,7 +84,7 @@ class RazerBlackWidowChromaTournamentEdition(MacroKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'enable_macro_keys', 'get_game_mode', 'set_game_mode',
 
-               'set_ripple_effect']
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     def __init__(self, *args):
         super(RazerBlackWidowChromaTournamentEdition, self).__init__(*args)

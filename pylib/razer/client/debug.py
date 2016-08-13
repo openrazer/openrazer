@@ -100,13 +100,13 @@ def print_attrs(obj, recurse_to=None, indent=0):
         for index, field in enumerate(fields, start=1):
             if field in recurse_to:
                 if len(fields) != index:
-                    print((" " * indent) + '    ├- {0} - '.format(field), end='')
-                    print_attrs(getattr(obj, field), recurse_to=(recurse_to - set(field)), indent=indent + 7)
+                    print((" " * indent) + '   ├- {0} - '.format(field), end='')
+                    print_attrs(getattr(obj, field), recurse_to=(recurse_to - set(field)), indent=indent + 6)
                 else:
-                    print((" " * indent) + '    └- {0} - '.format(field), end='')
-                    print_attrs(getattr(obj, field), recurse_to=(recurse_to - set(field)), indent=indent + 7)
+                    print((" " * indent) + '   └- {0} - '.format(field), end='')
+                    print_attrs(getattr(obj, field), recurse_to=(recurse_to - set(field)), indent=indent + 6)
             else:
                 if len(fields) != index:
-                    print2('    ├- {0}'.format(field))
+                    print2('   ├- {0}'.format(field))
                 else:
-                    print2('    └- {0}'.format(field))
+                    print2('   └- {0}'.format(field))

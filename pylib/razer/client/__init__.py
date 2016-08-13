@@ -100,9 +100,19 @@ if __name__ == '__main__':
             mouse = device
 
     if kbd is not None:
-        print_attrs(kbd, recurse_to=['fx'])
-    if mouse is not None:
-        mouse.brightness = 100.0
+        print_attrs(kbd, recurse_to=['fx', 'macro'])
+
+        # new_macro = [kbd.macro.create_url_macro_item("https://hackaday.com")]
+        # kbd.macro.add_macro('M2', new_macro)
+        #kbd.macro.del_macro('M2')
+        #kbd.fx.static(255, 00, 255)
+
+        #macros = kbd.macro.get_macros()
+
+        print()
+
+    # if mouse is not None:
+    #     mouse.brightness = 100.0
 
     print()
     print("Devices: {0}".format(devices))

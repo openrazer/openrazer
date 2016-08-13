@@ -73,6 +73,7 @@ class MacroKey(MacroObject):
         """
         return XTE_MAPPING.get(self.key_id, self.key_id)
 
+# If it only opens a new tab in chroma - https://askubuntu.com/questions/540939/xdg-open-only-opens-a-new-tab-in-a-new-chromium-window-despite-passing-it-a-url
 class MacroURL(MacroObject):
     """
     Is an object of a key event used in macros

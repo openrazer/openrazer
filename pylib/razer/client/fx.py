@@ -32,6 +32,11 @@ class RazerFX(object):
 
         self._lighting_dbus = _dbus.Interface(daemon_dbus, "razer.device.lighting.chroma")
 
+        if self.has('ripple'):
+            self._custom_lighting_dbus = _dbus.Interface(daemon_dbus, "razer.device.lighting.custom")
+        else:
+            self._custom_lighting_dbus = None
+
     def has(self, capability:str) -> bool:
         """
         Convenience function to check capability
@@ -271,4 +276,35 @@ class RazerFX(object):
 
             return True
         return False
+
+    def ripple(self, red:int, green:int, blue:int, refreshrate:float):
+        if not isinstance(refreshrate, float):
+            raise ValueError("Refresh rate is not a float")
+        if not isinstance(red, int):
+            raise ValueError("Red is not an integer")
+        if not isinstance(green, int):
+            raise ValueError("Green is not an integer")
+        if not isinstance(blue, int):
+            raise ValueError("Blue is not an integer")
+
+        if self.has('ripple'):
+            red = clamp_ubyte(red)
+            green = clamp_ubyte(green)
+            blue = clamp_ubyte(blue)
+
+            self._custom_lighting_dbus.setRipple(red, green, blue, refreshrate)
+
+            return True
+        return False
+
+    def ripple_random(self, refreshrate:float):
+        if not isinstance(refreshrate, float):
+            raise ValueError("Refresh rate is not a float")
+
+        if self.has('ripple'):
+            self._custom_lighting_dbus.setRippleRandomColour(refreshrate)
+
+            return True
+        return False
+
 

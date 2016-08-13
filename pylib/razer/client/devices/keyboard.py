@@ -2,15 +2,21 @@ import dbus as _dbus
 
 from razer.client.constants import MACRO_LED_STATIC, MACRO_LED_BLINK
 from razer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFactory as __BaseDeviceFactory
+from razer.client.macro import RazerMacro as _RazerMacro
 
 
 class RazerKeyboard(__RazerDevice):
-    # TODO Macros
+    _MACRO_CLASS = _RazerMacro
+
     def __init__(self, serial, vid_pid=None, daemon_dbus=None):
         default_capabilities = {
             'game_mode_led': True,
             'macro_mode_led': True,
             'macro_mode_led_effect': True,
+            'macro_logic': True,
+
+            # Keyboard specific lighting
+            'lighting_ripple': True
         }
         self._update_capabilities(default_capabilities)
 
@@ -23,6 +29,15 @@ class RazerKeyboard(__RazerDevice):
 
         if self.has('macro_mode_led'):
             self._dbus_interfaces['macro_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.macromode")
+
+        if self.has('macro_logic'):
+            if self._MACRO_CLASS is not None:
+                self.macro = self._MACRO_CLASS(serial, daemon_dbus=daemon_dbus)
+            else:
+                self._capabilities['macro_logic'] = False
+                self.macro = None
+        else:
+            self.macro = None
 
     @property
     def game_mode_led(self) -> bool:
@@ -129,9 +144,27 @@ class RazerChromaTournamentEditionKeyboard(RazerKeyboard):
         super(RazerChromaTournamentEditionKeyboard, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
 
 
+
+
+
+# For the RazerBlackwidowOriginal, Ultimate2012, Ultimate2013
+class RazerKeyboardNoRipple(RazerKeyboard):
+    def __init__(self, serial, vid_pid=None, daemon_dbus=None):
+        default_capabilities = {
+            'lighting_ripple': False,
+        }
+        self._update_capabilities(default_capabilities)
+
+        super(RazerKeyboardNoRipple, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
+
+
 DEVICE_PID_MAP = {
     0x0205: RazerBladeStealthKeyboard,
     0x0209: RazerChromaTournamentEditionKeyboard,
+
+    0x011B: RazerKeyboardNoRipple, # Orignal
+    0x010D: RazerKeyboardNoRipple, # Ultimate 2012
+    0x011A: RazerKeyboardNoRipple, # Ultimate 2013
 }
 
 class RazerKeyboardFactory(__BaseDeviceFactory):
