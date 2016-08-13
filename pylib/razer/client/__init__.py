@@ -92,12 +92,17 @@ if __name__ == '__main__':
     devices = a.devices
 
     kbd = None
+    mouse = None
     for device in devices:
-        if device.serial.startswith('IO'):
+        if device.type == 'keyboard':
             kbd = device
+        elif device.type == 'mouse':
+            mouse = device
 
     if kbd is not None:
         print_attrs(kbd, recurse_to=['fx'])
+    if mouse is not None:
+        mouse.brightness = 100.0
 
     print()
     print("Devices: {0}".format(devices))

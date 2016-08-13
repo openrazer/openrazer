@@ -142,6 +142,9 @@ class RazerDevice(object):
 
         :raises ValueError: When brightness is not a float or not in range 0.0->100.0
         """
+        if isinstance(value, int):
+            value = float(value)
+
         if not isinstance(value, float):
             raise ValueError("Brightness must be a float")
 
