@@ -363,13 +363,21 @@ class RazerAdvancedFX(object):
 
         self.matrix = Frame(matrix_dims)
 
+    def _draw(self, ba):
+        self._lighting_dbus.setKeyRow(ba)
+
+        self._lighting_dbus.setCustom()
+
     def draw(self):
         """
         Draw whats in the current frame buffer
         """
-        self._lighting_dbus.setKeyRow(bytes(self.matrix))
+        self._draw(bytes(self.matrix))
 
-        self._lighting_dbus.setCustom()
+    def draw_fb_or(self):
+        self._draw(bytes(self.matrix.draw_with_fb_or()))
+
+
 
 
 class Frame(object):
@@ -378,6 +386,7 @@ class Frame(object):
         self._components = 3
 
         self._matrix = None
+        self._fb1 = None
         self.reset()
 
     # Index with row, col OR y, x
@@ -434,6 +443,7 @@ class Frame(object):
         """
         if self._matrix is None:
             self._matrix = _np.zeros((self._components, self._rows, self._cols), 'uint8')
+            self._fb1 = _np.copy(self._matrix)
         else:
             self._matrix.fill(0)
 
@@ -492,4 +502,15 @@ class Frame(object):
         :return: Driver binary payload
         :rtype: bytes
         """
+        return bytes(self)
+
+    # Simple FB
+    def to_framebuffer(self):
+        self._fb1 = _np.copy(self._matrix)
+    def to_framebuffer_or(self):
+        self._fb1 = _np.bitwise_or(self._fb1, self._matrix)
+
+
+    def draw_with_fb_or(self):
+        self._matrix = _np.bitwise_or(self._fb1, self._matrix)
         return bytes(self)

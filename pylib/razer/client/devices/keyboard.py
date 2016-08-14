@@ -103,7 +103,7 @@ class RazerKeyboard(__RazerDevice):
         :rtype: int
         """
         if self.has('macro_mode_led_effect'):
-            return self._dbus_interfaces['macro_mode_led'].getMacroMode()
+            return self._dbus_interfaces['macro_mode_led'].getMacroEffect()
         else:
             return False
 

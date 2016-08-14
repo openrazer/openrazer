@@ -3,11 +3,18 @@ from razer.client.device import RazerDeviceFactory as _RazerDeviceFactory
 from razer.client import constants
 
 
+class DaemonNotFound(Exception):
+    pass
+
+
 class DeviceManager(object):
     def __init__(self):
         # Load up the DBus
         session_bus = _dbus.SessionBus()
-        self._dbus = session_bus.get_object("org.razer", "/org/razer")
+        try:
+            self._dbus = session_bus.get_object("org.razer", "/org/razer")
+        except _dbus.DBusException:
+            raise DaemonNotFound("Could not connect to daemon")
 
         # Get interface for daemon methods
         self._dbus_daemon = _dbus.Interface(self._dbus, "razer.daemon")

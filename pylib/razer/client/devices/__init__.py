@@ -40,7 +40,7 @@ class RazerDevice(object):
             'lighting_breath_random': True,
             'lighting_wave': True,
             'lighting_reactive': True,
-            'lighting_nano': True,
+            'lighting_none': True,
             'lighting_spectrum': True,
             'lighting_static': True,
 
@@ -48,8 +48,8 @@ class RazerDevice(object):
         }
         self._update_capabilities(default_capabilities)
 
-        # Get if the device has an LED Matrix
-        self._capabilities['lighting_led_matrix'] = self._dbus_interfaces['device'].hasMatrix()
+        # Get if the device has an LED Matrix, == True as its a DBus boolean otherwise, so for consistency sake we coerce it into a native bool
+        self._capabilities['lighting_led_matrix'] = self._dbus_interfaces['device'].hasMatrix() == True
         self._matrix_dimensions = self._dbus_interfaces['device'].getMatrixDimensions()
 
         # Setup FX
