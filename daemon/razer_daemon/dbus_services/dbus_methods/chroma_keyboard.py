@@ -76,7 +76,6 @@ def set_game_mode(self, enable):
         else:
             driver_file.write('0')
 
-
 @endpoint('razer.device.led.macromode', 'getMacroMode', out_sig='b')
 def get_macro_mode(self):
     """
@@ -141,8 +140,6 @@ def set_macro_effect(self, effect):
         driver_file.write(str(int(effect)))
 
 
-
-
 @endpoint('razer.device.lighting.chroma', 'setWave', in_sig='i')
 def set_wave_effect(self, direction):
     """
@@ -153,6 +150,9 @@ def set_wave_effect(self, direction):
     """
     self.logger.debug("DBus call set_wave_effect")
 
+    # Notify others
+    self.send_effect_event('setWave', direction)
+
     driver_path = self.get_driver_path('mode_wave')
 
     if direction not in (1, 2):
@@ -160,9 +160,6 @@ def set_wave_effect(self, direction):
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(direction))
-
-    # Notify others
-    self.send_effect_event('setWave', direction)
 
 @endpoint('razer.device.lighting.chroma', 'setStatic', in_sig='yyy')
 def set_static_effect(self, red, green, blue):
@@ -180,15 +177,15 @@ def set_static_effect(self, red, green, blue):
     """
     self.logger.debug("DBus call set_static_effect")
 
+    # Notify others
+    self.send_effect_event('setStatic', red, green, blue)
+
     driver_path = self.get_driver_path('mode_static')
 
     payload = bytes([red, green, blue])
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
-
-    # Notify others
-    self.send_effect_event('setStatic', red, green, blue)
 
 @endpoint('razer.device.lighting.chroma', 'setSpectrum')
 def set_spectrum_effect(self):
@@ -197,13 +194,13 @@ def set_spectrum_effect(self):
     """
     self.logger.debug("DBus call set_spectrum_effect")
 
+    # Notify others
+    self.send_effect_event('setSpectrum')
+
     driver_path = self.get_driver_path('mode_spectrum')
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write('1')
-
-    # Notify others
-    self.send_effect_event('setSpectrum')
 
 @endpoint('razer.device.lighting.chroma', 'setNone')
 def set_none_effect(self):
@@ -212,13 +209,13 @@ def set_none_effect(self):
     """
     self.logger.debug("DBus call set_none_effect")
 
+    # Notify others
+    self.send_effect_event('setNone')
+
     driver_path = self.get_driver_path('mode_none')
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write('1')
-
-    # Notify others
-    self.send_effect_event('setNone')
 
 @endpoint('razer.device.lighting.chroma', 'setReactive', in_sig='yyyy')
 def set_reactive_effect(self, red, green, blue, speed):
@@ -241,6 +238,9 @@ def set_reactive_effect(self, red, green, blue, speed):
 
     driver_path = self.get_driver_path('mode_reactive')
 
+    # Notify others
+    self.send_effect_event('setReactive', red, green, blue, speed)
+
     if speed not in (1, 2, 3, 4):
         speed = 4
 
@@ -249,9 +249,6 @@ def set_reactive_effect(self, red, green, blue, speed):
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
 
-    # Notify others
-    self.send_effect_event('setReactive', red, green, blue, speed)
-
 @endpoint('razer.device.lighting.chroma', 'setBreathRandom')
 def set_breath_random_effect(self):
     """
@@ -259,15 +256,15 @@ def set_breath_random_effect(self):
     """
     self.logger.debug("DBus call set_breath_random_effect")
 
+    # Notify others
+    self.send_effect_event('setBreathRandom')
+
     driver_path = self.get_driver_path('mode_breath')
 
     payload = b'1'
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
-
-    # Notify others
-    self.send_effect_event('setBreathRandom')
 
 @endpoint('razer.device.lighting.chroma', 'setBreathSingle', in_sig='yyy')
 def set_breath_single_effect(self, red, green, blue):
@@ -285,15 +282,15 @@ def set_breath_single_effect(self, red, green, blue):
     """
     self.logger.debug("DBus call set_breath_single_effect")
 
+    # Notify others
+    self.send_effect_event('setBreathSingle', red, green, blue)
+
     driver_path = self.get_driver_path('mode_breath')
 
     payload = bytes([red, green, blue])
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
-
-    # Notify others
-    self.send_effect_event('setBreathSingle', red, green, blue)
 
 @endpoint('razer.device.lighting.chroma', 'setBreathDual', in_sig='yyyyyy')
 def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
@@ -320,15 +317,15 @@ def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
     """
     self.logger.debug("DBus call set_breath_dual_effect")
 
+    # Notify others
+    self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
+
     driver_path = self.get_driver_path('mode_breath')
 
     payload = bytes([red1, green1, blue1, red2, green2, blue2])
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
-
-    # Notify others
-    self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
 
 @endpoint('razer.device.lighting.chroma', 'setCustom')
 def set_custom_effect(self):
