@@ -35,9 +35,9 @@
 /*
  * Version Information
  */
-#define DRIVER_VERSION "0.2"
+#define DRIVER_VERSION "1.0"
 #define DRIVER_AUTHOR "Tim Theede <pez2001@voyagerproject.de>"
-#define DRIVER_DESC "USB HID Razer BlackWidow Chroma"
+#define DRIVER_DESC "Razer Keyboard Device Driver"
 #define DRIVER_LICENSE "GPL v2"
 
 MODULE_AUTHOR(DRIVER_AUTHOR);
@@ -1254,7 +1254,10 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         // Set BlackWidow Ultimate to static colour
         razer_set_static_mode_blackwidow_ultimate(usb_dev);
 
-    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 || usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 ||
+              usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH)
     {
         // Set BlackWidow Chroma to static colour
         if(count == 3)
