@@ -1360,6 +1360,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
             device_type = "Razer BlackWidow Chroma Tournament Edition\n";
             break;
+        
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_X:
+			device_type = "Razer BlackWidow X Chroma\n";
+            break;
 
         default:
             device_type = "Unknown Device\n";
@@ -1478,11 +1482,11 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
  * Write only is 0220
  * Read and write is 0664
  */
-static DEVICE_ATTR(mode_game,      0660, razer_attr_read_mode_game,      razer_attr_write_mode_game);
-static DEVICE_ATTR(mode_macro,     0660, razer_attr_read_mode_macro,     razer_attr_write_mode_macro);
-static DEVICE_ATTR(set_brightness, 0660, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
+static DEVICE_ATTR(mode_game,         0660, razer_attr_read_mode_game,         razer_attr_write_mode_game);
+static DEVICE_ATTR(mode_macro,        0660, razer_attr_read_mode_macro,        razer_attr_write_mode_macro);
+static DEVICE_ATTR(set_brightness,    0660, razer_attr_read_set_brightness,    razer_attr_write_set_brightness);
 static DEVICE_ATTR(mode_macro_effect, 0660, razer_attr_read_mode_macro_effect, razer_attr_write_mode_macro_effect);
-static DEVICE_ATTR(mode_pulsate,      0660, razer_attr_read_mode_pulsate, razer_attr_write_mode_pulsate);
+static DEVICE_ATTR(mode_pulsate,      0660, razer_attr_read_mode_pulsate,      razer_attr_write_mode_pulsate);
 
 static DEVICE_ATTR(device_type,          0444, razer_attr_read_device_type,          NULL);
 static DEVICE_ATTR(get_serial,           0444, razer_attr_read_get_serial,           NULL);
@@ -1640,12 +1644,6 @@ static int razer_kbd_probe(struct hid_device *hdev,
     retval = device_create_file(&hdev->dev, &dev_attr_mode_game);
     if (retval)
         goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_macro);
-        if (retval)
-            goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_macro_effect);
-        if (retval)
-            goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_mode_static);
     if (retval)
         goto exit_free;
@@ -1658,6 +1656,16 @@ static int razer_kbd_probe(struct hid_device *hdev,
     retval = device_create_file(&hdev->dev, &dev_attr_test);
     if (retval)
         goto exit_free;
+    
+    if(usb_dev->descriptor.idProduct != USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_X)
+    {
+		retval = device_create_file(&hdev->dev, &dev_attr_mode_macro);
+        if (retval)
+            goto exit_free;
+		retval = device_create_file(&hdev->dev, &dev_attr_mode_macro_effect);
+        if (retval)
+            goto exit_free;
+	}
 
     hid_set_drvdata(hdev, dev);
 
@@ -1740,8 +1748,6 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     }
 
     device_remove_file(&hdev->dev, &dev_attr_mode_game);
-    device_remove_file(&hdev->dev, &dev_attr_mode_macro);
-    device_remove_file(&hdev->dev, &dev_attr_mode_macro_effect);
     device_remove_file(&hdev->dev, &dev_attr_get_firmware_version);
     device_remove_file(&hdev->dev, &dev_attr_get_serial);
     device_remove_file(&hdev->dev, &dev_attr_mode_static);
@@ -1749,6 +1755,12 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     device_remove_file(&hdev->dev, &dev_attr_set_brightness);
     device_remove_file(&hdev->dev, &dev_attr_test);
     device_remove_file(&hdev->dev, &dev_attr_device_type);
+    
+    if(usb_dev->descriptor.idProduct != USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_X)
+    {
+		device_remove_file(&hdev->dev, &dev_attr_mode_macro);
+		device_remove_file(&hdev->dev, &dev_attr_mode_macro_effect);
+	}
 
     hid_hw_stop(hdev);
     kfree(dev);
@@ -1765,6 +1777,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_STEALTH) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_X) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE) },
     { }
 };
