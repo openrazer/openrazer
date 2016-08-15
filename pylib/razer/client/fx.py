@@ -138,7 +138,7 @@ class RazerFX(object):
             return True
         return False
 
-    def reactive(self, time:int, red:int, green:int, blue:int) -> bool:
+    def reactive(self, red:int, green:int, blue:int, time:int) -> bool:
         """
         Reactive effect
 
@@ -173,7 +173,7 @@ class RazerFX(object):
             green = clamp_ubyte(green)
             blue = clamp_ubyte(blue)
 
-            self._lighting_dbus.setReactive(time, red, green, blue)
+            self._lighting_dbus.setReactive(red, green, blue, time)
 
             return True
         return False
@@ -376,8 +376,6 @@ class RazerAdvancedFX(object):
 
     def draw_fb_or(self):
         self._draw(bytes(self.matrix.draw_with_fb_or()))
-
-
 
 
 class Frame(object):
