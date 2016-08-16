@@ -110,7 +110,7 @@ class RazerBlackWidowChromaX(MacroKeyboard):
     """
     Class for the BlackWidow Chroma
     """
-    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Chroma(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_X_Chroma(-if01)?-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x0203
