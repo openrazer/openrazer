@@ -75,10 +75,7 @@ python_library_uninstall:
 # Clean target
 clean: driver_clean
 
-# Build all target
-all: driver
-
-setup_dkms: driver
+setup_dkms:
 	@echo "\n::\033[34m Installing DKMS files\033[0m"
 	@echo "====================================================="
 	install -m 644 -v -D Makefile $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/Makefile
