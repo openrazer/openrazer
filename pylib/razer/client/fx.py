@@ -1,12 +1,14 @@
 import numpy as _np
 import dbus as _dbus
-from razer.client.constants import WAVE_LEFT, WAVE_RIGHT, REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS, REACTIVE_2000MS
+#from razer.client.constants import WAVE_LEFT, WAVE_RIGHT, REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS, REACTIVE_2000MS
+from razer.client import constants as c
 
-
+#TODO logging.debug if value out of range v1.1
 def clamp_ubyte(value):
     """
     Clamp a value to 0->255
 
+    Aka -3453
     :param value: Integer
     :type value: int
 
@@ -94,7 +96,7 @@ class RazerFX(object):
 
         :raises ValueError: If direction is invalid
         """
-        if direction not in (WAVE_LEFT, WAVE_RIGHT):
+        if direction not in (c.WAVE_LEFT, c.WAVE_RIGHT):
             raise ValueError("Direction must be WAVE_RIGHT (0x01) or WAVE_LEFT (0x02)")
 
         if self.has('wave'):
@@ -159,7 +161,7 @@ class RazerFX(object):
 
         :raises ValueError: If parameters are invalid
         """
-        if time not in (REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS, REACTIVE_2000MS):
+        if time not in (c.REACTIVE_500MS, c.REACTIVE_1000MS, c.REACTIVE_1500MS, c.REACTIVE_2000MS):
             raise ValueError("Time not one of REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS or REACTIVE_2000MS")
         if not isinstance(red, int):
             raise ValueError("Red is not an integer")
@@ -283,7 +285,7 @@ class RazerFX(object):
             return True
         return False
 
-    def ripple(self, red:int, green:int, blue:int, refreshrate:float) -> bool:
+    def ripple(self, red:int, green:int, blue:int, refreshrate:float=c.RIPPLE_REFRESH_RATE) -> bool:
         """
         Set the Ripple Effect.
 
@@ -324,7 +326,7 @@ class RazerFX(object):
             return True
         return False
 
-    def ripple_random(self, refreshrate:float):
+    def ripple_random(self, refreshrate:float=c.RIPPLE_REFRESH_RATE):
         """
         Set the Ripple Effect with random colours
 
@@ -379,6 +381,9 @@ class RazerAdvancedFX(object):
 
 
 class Frame(object):
+    """
+    Class to represent the RGB matrix of the keyboard. So to animate you'd use multiple frames
+    """
     def __init__(self, dimensions):
         self._rows, self._cols = dimensions
         self._components = 3

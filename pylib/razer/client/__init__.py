@@ -23,7 +23,11 @@ class DeviceManager(object):
         self._dbus_devices = _dbus.Interface(self._dbus, "razer.devices")
 
         self._device_serials = self._dbus_devices.getDevices()
-        self._devices = None
+        self._devices = []
+
+        for serial in self._device_serials:
+            device = _RazerDeviceFactory.get_device(serial)
+            self._devices.append(device)
 
     def stop_daemon(self):
         """
@@ -50,10 +54,12 @@ class DeviceManager(object):
         else:
             self._dbus_devices.disableTurnOffOnScreensaver()
 
+    # TODO convert to property
     def sync_effects(self, sync:bool):
         """
         Enable or disable the syncing of effects between devices
 
+        If sync is enabled, whenever an effect is set then it will be set on all other devices if the effect is available or a similar effect if it is not.
         :param sync: Sync effects
         :type sync: bool
 
@@ -64,18 +70,6 @@ class DeviceManager(object):
 
         self._dbus_devices.syncEffects(sync)
 
-    def _get_devices(self):
-        """
-        Gets devices classes
-
-        Goes through each device serial and gets the corrosponding device class and caches it.
-        """
-        self._devices = []
-
-        for serial in self._device_serials:
-            device = _RazerDeviceFactory.get_device(serial)
-            self._devices.append(device)
-
     @property
     def devices(self) -> list:
         """
@@ -84,8 +78,6 @@ class DeviceManager(object):
         :return: List of devices
         :rtype: list of razer.clent.devices.RazerDevice
         """
-        if self._devices is None:
-            self._get_devices()
 
         return self._devices
 

@@ -7,11 +7,13 @@ import configparser
 import logging
 import logging.handlers
 import os
+import subprocess
 import sys
 import signal
 import time
 import tempfile
 
+import setproctitle
 import dbus.mainloop.glib
 import gi
 gi.require_version('Gdk', '3.0')
@@ -130,6 +132,19 @@ class RazerDaemon(DBusService):
     BUS_PATH = 'org.razer'
 
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None):
+
+        # Check if process exists
+        exit_code = subprocess.call(['pgrep', 'razerdaemon'], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+
+        if exit_code == 0:
+            print("Daemon already exists. Please stop that one.", file=sys.stderr)
+            exit(-1)
+
+        setproctitle.setproctitle('razerdaemon')
+
+        if not os.path.exists(run_dir):
+            os.mkdir(run_dir, mode=0o750)
+
         self._data_dir = run_dir
         self._config_file = config_file
         self._config = configparser.ConfigParser()
@@ -160,6 +175,8 @@ class RazerDaemon(DBusService):
             self.logger.addHandler(console_logger)
 
         if log_dir is not None:
+            if not os.path.exists(log_dir):
+                os.mkdir(log_dir, mode=0o750)
             log_file = os.path.join(log_dir, 'razer.log')
             file_logger = logging.handlers.RotatingFileHandler(log_file, maxBytes=16777216, backupCount=10) # 16MiB
             file_logger.setLevel(logging_level)
