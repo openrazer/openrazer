@@ -333,7 +333,6 @@ int razer_set_macro_led_effect(struct usb_device *usb_dev, unsigned char enable)
     }
     return retval;
 }
-
 /**
  * Get macro on the keyboard
  *
@@ -370,6 +369,94 @@ int razer_get_macro_led_mode(struct usb_device *usb_dev)
 
     return retval;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Get status/macroprofile LED
+ *
+ * Supported by:
+ *   Razer Tartarus Chroma
+ */
+int razer_get_tartarus_status_led(struct usb_device *usb_dev, unsigned char led) {
+	int retval = -1;
+    // Class LED Lighting, Command Set state, 3 Bytes of parameters
+    struct razer_report response_report;
+    struct razer_report request_report = get_razer_report(0x03, 0x80, 0x03);
+    request_report.arguments[0] = 0x01;
+    request_report.arguments[1] = led; // LED ID: Red (0x0C), Green (0x0D) or Blue (0x0D) keymap LED
+    request_report.crc = razer_calculate_crc(&request_report);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+
+    if(retval == 0)
+    {
+        if(response_report.status == 0x02 && response_report.command_class == 0x03 && response_report.command_id.id == 0x80)
+        {
+            retval = response_report.arguments[2];
+        } else
+        {
+            print_erroneous_report(&response_report, "razerkbd", "Invalid Report Type");
+        }
+    } else
+    {
+      print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
+    }
+
+    return retval;
+}
+
+/**
+ * Set status/macroprofile LED
+ *
+ * Supported by:
+ *   Razer Tartarus Chroma
+ */
+int razer_set_tartarus_status_led(struct usb_device *usb_dev, unsigned char led, unsigned char enable)
+{
+    int retval = 0;
+    if(enable > 1)
+    {
+        printk(KERN_WARNING "razerkbd: Cannot set status/macroprofile mode to %d. Only 1 or 0 allowed.", enable);
+    } else
+    {
+        // Class LED Lighting, Command Set state, 3 Bytes of parameters
+        struct razer_report report = get_razer_report(0x03, 0x00, 0x03);
+        report.arguments[0] = 0x01;
+        report.arguments[1] = led; // LED ID: Red (0x0C), Green (0x0D) or Blue (0x0D) keymap LED
+        report.arguments[2] = enable; // Enable 1/0
+        report.crc = razer_calculate_crc(&report);
+        retval = razer_set_report(usb_dev, &report);
+    }
+    return retval;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -971,6 +1058,137 @@ static int razer_raw_event(struct hid_device *hdev,
     return 0;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Read device file "profile_led_red"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_tartarus_profile_led_red(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int brightness = razer_get_tartarus_status_led(usb_dev, 0x0C);
+    return sprintf(buf, "%d\n", brightness);
+}
+/**
+ * Read device file "profile_led_green"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_tartarus_profile_led_green(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int brightness = razer_get_tartarus_status_led(usb_dev, 0x0D);
+    return sprintf(buf, "%d\n", brightness);
+}
+/**
+ * Read device file "profile_led_blue"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_tartarus_profile_led_blue(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int brightness = razer_get_tartarus_status_led(usb_dev, 0x0E);
+    return sprintf(buf, "%d\n", brightness);
+}
+
+
+/**
+ * Write device file "profile_led_red"
+ */
+static ssize_t razer_attr_write_tartarus_profile_led_red(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int temp = simple_strtoul(buf, NULL, 10);
+    if(temp == 1) {
+		razer_set_tartarus_status_led(usb_dev, 0x0C, 0x01);
+	} else {
+		razer_set_tartarus_status_led(usb_dev, 0x0C, 0x00);
+	} 
+
+    return count;
+}
+/**
+ * Write device file "profile_led_green"
+ */
+static ssize_t razer_attr_write_tartarus_profile_led_green(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int temp = simple_strtoul(buf, NULL, 10);
+    if(temp == 1) {
+		razer_set_tartarus_status_led(usb_dev, 0x0D, 0x01);
+	} else {
+		razer_set_tartarus_status_led(usb_dev, 0x0D, 0x00);
+	} 
+    return count;
+}
+/**
+ * Write device file "profile_led_blue"
+ */
+static ssize_t razer_attr_write_tartarus_profile_led_blue(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int temp = simple_strtoul(buf, NULL, 10);
+    if(temp == 1) {
+		razer_set_tartarus_status_led(usb_dev, 0x0E, 0x01);
+	} else {
+		razer_set_tartarus_status_led(usb_dev, 0x0E, 0x00);
+	} 
+    return count;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Write device file "test"
  *
@@ -992,8 +1210,8 @@ static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute
  */
 static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    //struct usb_interface *intf = to_usb_interface(dev->parent);
+    //struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     //int test = razer_test(usb_dev);
     return sprintf(buf, "%d\n", 0);
@@ -1325,8 +1543,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
  *
  * Returns friendly string of device type
  */
-static ssize_t razer_attr_read_device_type(struct device *dev, struct device_attribute *attr,
-                char *buf)
+static ssize_t razer_attr_read_device_type(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     //struct razer_kbd_device *widow = usb_get_intfdata(intf);
@@ -1460,7 +1677,6 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
     return sprintf(buf, "%d\n", brightness);
 }
 
-
 /**
  * Read device file "get_firmware_version"
  *
@@ -1477,6 +1693,7 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
 }
 
 
+
 /**
  * Set up the device driver files
 
@@ -1491,9 +1708,14 @@ static DEVICE_ATTR(set_brightness, 0660, razer_attr_read_set_brightness, razer_a
 static DEVICE_ATTR(mode_macro_effect, 0660, razer_attr_read_mode_macro_effect, razer_attr_write_mode_macro_effect);
 static DEVICE_ATTR(mode_pulsate,      0660, razer_attr_read_mode_pulsate, razer_attr_write_mode_pulsate);
 
-static DEVICE_ATTR(device_type,          0444, razer_attr_read_device_type,          NULL);
-static DEVICE_ATTR(get_serial,           0444, razer_attr_read_get_serial,           NULL);
-static DEVICE_ATTR(get_firmware_version, 0444, razer_attr_read_get_firmware_version, NULL);
+static DEVICE_ATTR(profile_led_red, 0660, razer_attr_read_tartarus_profile_led_red, razer_attr_write_tartarus_profile_led_red);
+static DEVICE_ATTR(profile_led_green, 0660, razer_attr_read_tartarus_profile_led_green, razer_attr_write_tartarus_profile_led_green);
+static DEVICE_ATTR(profile_led_blue, 0660, razer_attr_read_tartarus_profile_led_blue, razer_attr_write_tartarus_profile_led_blue);
+
+
+static DEVICE_ATTR(device_type,          0440, razer_attr_read_device_type,          NULL);
+static DEVICE_ATTR(get_serial,           0440, razer_attr_read_get_serial,           NULL);
+static DEVICE_ATTR(get_firmware_version, 0440, razer_attr_read_get_firmware_version, NULL);
 
 static DEVICE_ATTR(mode_starlight,    0220, NULL, razer_attr_write_mode_starlight);
 static DEVICE_ATTR(mode_wave,         0220, NULL, razer_attr_write_mode_wave);
@@ -1584,6 +1806,9 @@ static int razer_kbd_probe(struct hid_device *hdev,
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_spectrum);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_green);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);
         
     } else // Chroma
     {
@@ -1702,8 +1927,9 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 		device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
 		device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
 		device_remove_file(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
-		
-		
+		device_remove_file(&hdev->dev, &dev_attr_profile_led_red);      // Profile/Macro LED Red
+        device_remove_file(&hdev->dev, &dev_attr_profile_led_green);    // Profile/Macro LED Green
+        device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);     // Profile/Macro LED Blue
     } else
     {
 		// Razer BlackWidow Chroma, BlackWidow Chroma TE
