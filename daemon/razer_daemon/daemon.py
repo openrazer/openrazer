@@ -142,8 +142,16 @@ class RazerDaemon(DBusService):
 
         setproctitle.setproctitle('razerdaemon')
 
-        if not os.path.exists(run_dir):
-            os.mkdir(run_dir, mode=0o750)
+        # Expanding ~ as python doesnt do it by default, also creating dirs if needed
+        if log_dir is not None:
+            log_dir = os.path.expanduser(log_dir)
+            os.makedirs(log_dir, mode=0o750, exist_ok=True)
+        if run_dir is not None:
+            run_dir = os.path.expanduser(run_dir)
+            os.makedirs(run_dir, mode=0o750, exist_ok=True)
+        if config_file is not None:
+            config_file = os.path.expanduser(config_file)
+            os.makedirs(os.path.dirname(config_file), mode=0o750, exist_ok=True)
 
         self._data_dir = run_dir
         self._config_file = config_file
@@ -175,8 +183,6 @@ class RazerDaemon(DBusService):
             self.logger.addHandler(console_logger)
 
         if log_dir is not None:
-            if not os.path.exists(log_dir):
-                os.mkdir(log_dir, mode=0o750)
             log_file = os.path.join(log_dir, 'razer.log')
             file_logger = logging.handlers.RotatingFileHandler(log_file, maxBytes=16777216, backupCount=10) # 16MiB
             file_logger.setLevel(logging_level)
