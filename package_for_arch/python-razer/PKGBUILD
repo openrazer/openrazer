@@ -4,7 +4,7 @@
 pkgname=python-razer
 pkgver=1.0.0
 pkgrel=2
-pkgdesc="A python library for controlling the razer_chroma_driver daemon"
+pkgdesc="A python library for controlling razer-daemon"
 arch=('any')
 url="https://github.com/terrycain/razer_drivers"
 license=('GPLv3')
