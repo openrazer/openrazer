@@ -2,7 +2,7 @@
 
 A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
 
-Website: [Here](http://pez2001.github.io/razer_chroma_drivers/)
+Website: [Here](https://terrycain.github.io/razer_drivers/)
 
 **Before raising an issue** saying something doesn't work, read [this](https://github.com/pez2001/razer_chroma_drivers/wiki/Troubleshooting) Wiki page, try not to create new issues if one exists, reopen it.
 
@@ -26,6 +26,8 @@ Website: [Here](http://pez2001.github.io/razer_chroma_drivers/)
 
 ### Misc Peripheral Support
  * Razer Tartarus *(full support)*
+
+---
 
 ## Daemon Support
 I've created a daemon that lives in userspace which allows one to easily interact with the driver. It abstracts away some of the logic and also (will eventually) allow you to build
