@@ -4,7 +4,7 @@
 pkgname=razer-daemon
 pkgver=1.0.0
 pkgrel=2
-pkgdesc="A daemon for controlling razer_chroma_driver"
+pkgdesc="A daemon for controlling razer-driver"
 arch=('any')
 url="https://github.com/terrycain/razer_drivers"
 license=('GPLv3')
