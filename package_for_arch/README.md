@@ -1,4 +1,4 @@
-# Installing `razer_chroma_driver` on Arch Linux
+# Installing `razer_drivers` on Arch Linux
 
 *This tutorial is pretty basic. If you're an advanced user, just skip it. You have to compile the packages using the provided PKGBUILDs, and install them in order: dkms, daemon, python*
 
