@@ -13,17 +13,25 @@ Website: [Here](http://pez2001.github.io/razer_chroma_drivers/)
  * Razer Blackwidow Ultimate 2013 *(all lighting modes)*
  * Razer Blackwidow Chroma *(all lighting modes)*
  * Razer Blackwidow Chroma Tournament Edition *(all lighting modes)*
+ * Razer Blackwidow X Chroma *(probably all lighting modes)*
  * Razer Blade Stealth *(all lighting modes)*
- * Razer Blackwidow Ultimate 2016 (all bar custom lighting)
+ * Razer Blackwidow Ultimate 2016 *(all lighting modes)*
 
 ### Mousemat Support:
  * Razer Firefly *(all lighting modes)*
 
 ### Mouse Support:
  * Razer Mamba *(all lighting modes)*
- * Razer Abyssus (all modes bar the refresh rate)
+ * Razer Abyssus *(all lighting modes)*
 
 ## Installation
+
+###Arch Linux
+
+[Arch Linux installation guide](https://github.com/terrycain/razer_drivers/blob/master/package_for_arch/README.md) 
+
+###Other distributions
+
 [Here](https://github.com/pez2001/razer_chroma_drivers/wiki/Installation) is a page documenting the installation and uninstallation procedures.
 
 ## Applications
@@ -31,7 +39,7 @@ Website: [Here](http://pez2001.github.io/razer_chroma_drivers/)
 The following applications compliment and interact with this driver:
 
 * [Polychromatic Controller](https://github.com/lah7/polychromatic-controller) - a graphical management tool and tray applet to managing Razer peripherals.
-* [MarcoW](https://github.com/igorbb/MacroW) - a simple tool to record and play keyboard macros.
+* [MacroW](https://github.com/igorbb/MacroW) - a simple tool to record and play keyboard macros.
 
 
 ## Command Line Usage

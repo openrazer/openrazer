@@ -1,0 +1,42 @@
+.TH "RAZER.CONF" 5 "2016-05-26" "razer.conf" "File Formats Manual"
+
+.SH "NAME"
+razer.conf \- configuration file for the Razer Service
+
+.SH "DESCRIPTION"
+.PP
+\fB$HOME\fI/.razer-service/razer.conf\fR configures some startup and runtime options of the \fBrazer-service\fR(8). \fBrazer-service\fR(8) is able to use configuration files specified in non-standard locations by providing the \fI--config\fR argument.
+.PP
+The configuration file is formatted like a .INI file and is parsed by Python's ConfigParser so as long as that module can read the file all is good.
+
+.SH "GENERAL SECTION"
+.PP
+The first section in the configuration file is a \fB[General]\fR section. This section contains miscellaneous options.
+
+.TP
+\fBverbose_logging\fR \fIbool\fR
+This flag specifies if the daemon is to output detailed logging information. This value acts the same as if \fB-v\fR or \fB--verbose\fR was passed at the command line.
+
+.SH "STARTUP SECTION"
+.PP
+The \fB[Startup]\fR section in the configuration file contains values to be used during startup, for example it can decide if syncing effects will be active when started.
+
+.TP
+\fBsync_effects_enabled\fR \fIbool\fR
+This flag specifies if the effects syncing logic is active when the daemon is started, not having to wait for the user to activate them.
+
+.TP
+\fBdevices_off_on_screensaver\fR \fIbool\fR
+This flag specifies if the functionality to turn off razer devices when the screensaver is activated is active when the daemon starts.
+
+.SH "STATISTICS SECTION"
+.PP
+The \fB[Statistics]\fR section in the configuration file contains options to control how and when statistics will be collected.
+
+.TP
+\fBkey_statistics\fR \fIbool\fR
+This flag specifies if the daemon is to collect key statistics. Currently this is only collecting the key count per hour per key.
+
+.SH "SEE ALSO"
+.BR razer-service (8),
+.BR https://github.com/terrycain/razer_drivers

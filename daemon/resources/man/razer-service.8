@@ -1,0 +1,49 @@
+.TH "RAZER-SERVICE" 8 "2016-05-26" "Razer Service" "razer-service"
+
+.SH "NAME"
+razer-service \- Razer Service to manage razer devices in userspace
+
+.SH "SYNOPSIS"
+.PP
+\fBrazer-service\fR [ \fB-v\fR | \fB--Bverbose\fR ] [ \fB-F\fR | \fB--foreground\fR ] [\fB--config\fR=\fIconfig_file\fR ] [ \fB--run-dir\fR=\fIrun_directory\fR ] [ \fB--log-dir\fR=\fIlog_directory\fR ] [ \fB--pid-file\fR=\fIpid_file\fR ]
+
+.SH "SUMMARY"
+.PP
+razer-service is a userspace service which is designed to be an intermediary between userspace programs and the razer drivers. It will provide some higher level functions to allow similar operation to the windows Razer Synapse program. This service is designed to be started by upstart as a session service.
+.PP
+The service has the functionality to sync effects between mulitple devices, perform on-the-fly macro recording and playback and reimplements the
+FN+Keys logic so they work when \fBmacro_keys\fB are enabled. The service can also perform various ripple effects, it can turn off the devices when the
+screensaver is active and also optionally store key metrics to provide usage heatmaps
+
+.SH "DOCUMENTATION"
+.PP
+The full and most up-to-date documentation can be found on our GitHub repository here
+https://github.com/terrycain/razer_drivers .
+
+.SH "OPTIONS"
+.TP
+\fB-v\fR, \fB--verbose\fR
+Enable logging of DEBUG messages to the log file and screen if running in foreground mode.
+.TP
+\fB-F\fR, \fB--foreground\fR
+Run the dameon in the foreground and don't fork. This also enables sending the logging output to the screen as well as the log file.
+.TP
+\fB--config\fR=\fIconfig_file\fR
+Specifies the location of the config file. If this is not provided it will default to \fB$HOME\fR/.razer-service/razer.conf and create it if needed from the example config.
+.TP
+\fB--run-dir\fR=\fIrun_directory\fR
+Tells the daemon what directory is its run directory, the directory it will change to once started. It will default to \fB$HOME\fR/.razer-service/
+.TP
+\fB--log-dir\fR=\fIlog_directory\fR
+This argument decides where the log directory will be, the daemon itself will handle log rotation as it's a user session service. The daemon will default to \fB$HOME\fR/.razer-service/logs for its log directory.
+.TP
+\fB--pid-file\fR=\fIpid_file\fR
+If provided the daemon will store its PID file in the location provided in this argument. Its not needed when used with Upstart as that will track its PID even when double forked.
+
+.SH "BUGS"
+.PP
+This daemon makes use of the EVIOCGRAB ioctl which will get exclusive access of the keyboard's event files in /dev/input. Whilst the service has exclusive access to the event files other programs will not receive any key presses, this is required to make FN act like a modifier. Using \fBmacro_keys\fR is considered experimental as whilst it works it is still largely untested. If FN is held the service will grab the file and then release it when FN is released, there is a race condition where if FN is held and another key presses immediatly after the keypress event will leak to the system and programs will see its being held and not released (and spam the key).
+
+.SH "SEE ALSO"
+.BR razer.conf (5),
+.BR https://github.com/terrycain/razer_drivers

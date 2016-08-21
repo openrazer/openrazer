@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Razer Service
+Comment=DBus daemon to abstract away from the driver and to provide more logic and integration with userspace stuffs.
+Keywords=razer;keyboard;chroma;
+NoDisplay=false
+Exec=/usr/sbin/razer-service --foreground --verbose --run-dir ~/.razer_daemon/data --log-dir ~/.razer_daemon/logs --pid-file ~/.razer_daemon/daemon.pid
+Icon=/usr/share/pixmaps/python3.xpm
+Terminal=false
+Type=Application
+X-GNOME-Autostart-Phase=Applications
+X-GNOME-AutoRestart=false
+X-GNOME-UsesNotifications=true

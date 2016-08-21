@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# Exit on error
+set -e
+
+DRIVER=$1
+DEVICE_ID=$2
+UDEV_LOG=/tmp/razer_udev.log
+
+if [ ! -e $UDEV_LOG ] ; then
+	touch $UDEV_LOG
+fi
+
+echo "Driver $DRIVER" >> $UDEV_LOG
+echo "Device_ID $DEVICE_ID" >> $UDEV_LOG
+
+if [ ! -d /sys/bus/hid/drivers/$DRIVER ] ; then
+	echo "Modprobing $DRIVER" >> $UDEV_LOG
+	modprobe $DRIVER
+	sleep 0.05
+	echo "Modprobed $DRIVER" >> $UDEV_LOG
+fi
+
+if [ -d /sys/bus/hid/drivers/hid-generic/$DEVICE_ID ] ; then
+	# Unbind from hid
+	echo "Unbinding $DEVICE_ID from hid-generic" >> $UDEV_LOG
+	echo -n $DEVICE_ID > /sys/bus/hid/drivers/hid-generic/unbind
+	echo "Binding $DEVICE_ID to $DRIVER" >> $UDEV_LOG
+	echo -n $DEVICE_ID > /sys/bus/hid/drivers/$DRIVER/bind
+	sleep 0.1
+	echo "Finished binding $DEVICE_ID" >> $UDEV_LOG
+fi
+
+if [ -d /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID ] ; then
+	echo "Changing group /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/" >> $UDEV_LOG
+	chgrp -R plugdev /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/
+	echo "Changed group /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/" >> $UDEV_LOG
+	ls -l /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/  >> $UDEV_LOG
+fi
+
