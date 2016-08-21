@@ -1082,7 +1082,7 @@ static ssize_t razer_attr_read_tartarus_profile_led_red(struct device *dev, stru
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
-    int brightness = razer_get_tartarus_status_led(usb_dev, 0x0C);
+    int brightness = razer_get_tartarus_status_led(usb_dev, 0x0E);
     return sprintf(buf, "%d\n", brightness);
 }
 /**
@@ -1095,7 +1095,7 @@ static ssize_t razer_attr_read_tartarus_profile_led_green(struct device *dev, st
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
-    int brightness = razer_get_tartarus_status_led(usb_dev, 0x0D);
+    int brightness = razer_get_tartarus_status_led(usb_dev, 0x0C);
     return sprintf(buf, "%d\n", brightness);
 }
 /**
@@ -1108,7 +1108,7 @@ static ssize_t razer_attr_read_tartarus_profile_led_blue(struct device *dev, str
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
-    int brightness = razer_get_tartarus_status_led(usb_dev, 0x0E);
+    int brightness = razer_get_tartarus_status_led(usb_dev, 0x0D);
     return sprintf(buf, "%d\n", brightness);
 }
 
@@ -1122,9 +1122,9 @@ static ssize_t razer_attr_write_tartarus_profile_led_red(struct device *dev, str
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     int temp = simple_strtoul(buf, NULL, 10);
     if(temp == 1) {
-		razer_set_tartarus_status_led(usb_dev, 0x0C, 0x01);
+		razer_set_tartarus_status_led(usb_dev, 0x0E, 0x01);
 	} else {
-		razer_set_tartarus_status_led(usb_dev, 0x0C, 0x00);
+		razer_set_tartarus_status_led(usb_dev, 0x0E, 0x00);
 	} 
 
     return count;
@@ -1138,9 +1138,9 @@ static ssize_t razer_attr_write_tartarus_profile_led_green(struct device *dev, s
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     int temp = simple_strtoul(buf, NULL, 10);
     if(temp == 1) {
-		razer_set_tartarus_status_led(usb_dev, 0x0D, 0x01);
+		razer_set_tartarus_status_led(usb_dev, 0x0C, 0x01);
 	} else {
-		razer_set_tartarus_status_led(usb_dev, 0x0D, 0x00);
+		razer_set_tartarus_status_led(usb_dev, 0x0C, 0x00);
 	} 
     return count;
 }
@@ -1153,9 +1153,9 @@ static ssize_t razer_attr_write_tartarus_profile_led_blue(struct device *dev, st
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     int temp = simple_strtoul(buf, NULL, 10);
     if(temp == 1) {
-		razer_set_tartarus_status_led(usb_dev, 0x0E, 0x01);
+		razer_set_tartarus_status_led(usb_dev, 0x0D, 0x01);
 	} else {
-		razer_set_tartarus_status_led(usb_dev, 0x0E, 0x00);
+		razer_set_tartarus_status_led(usb_dev, 0x0D, 0x00);
 	} 
     return count;
 }
