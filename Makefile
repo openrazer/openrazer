@@ -44,9 +44,9 @@ driver_install:
 driver_uninstall:
 	@echo "\n::\033[34m Uninstalling Razer kernel modules\033[0m"
 	@echo "====================================================="
-	@cp -v $(DESTDIR)/$(MODULEDIR)/razerkbd.ko
-	@cp -v $(DESTDIR)/$(MODULEDIR)/razermouse.ko
-	@cp -v $(DESTDIR)/$(MODULEDIR)/razerfirefly.ko
+	@rm -fv $(DESTDIR)/$(MODULEDIR)/razerkbd.ko
+	@rm -fv $(DESTDIR)/$(MODULEDIR)/razermouse.ko
+	@rm -fv $(DESTDIR)/$(MODULEDIR)/razerfirefly.ko
 
 
 # Razer Daemon
@@ -54,11 +54,14 @@ daemon_install:
 	@echo "\n::\033[34m Installing Razer Daemon\033[0m"
 	@echo "====================================================="
 	make --no-print-directory -C daemon install
+	@mkdir -p $(DESTDIR)/etc/xdg/autostart
+	@cp -v ./install_files/desktop/razer-service.desktop $(DESTDIR)/etc/xdg/autostart/razer-service.desktop
 
 daemon_uninstall:
 	@echo "\n::\033[34m Uninstalling Razer Daemon\033[0m"
 	@echo "====================================================="
 	make --no-print-directory -C daemon uninstall
+	@rm -fv $(DESTDIR)/etc/xdg/autostart/razer-service.desktop
 
 
 # Python Library
