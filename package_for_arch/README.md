@@ -1,8 +1,8 @@
-#Installing `razer_chroma_driver` on Arch Linux
+# Installing `razer_drivers` on Arch Linux
 
 *This tutorial is pretty basic. If you're an advanced user, just skip it. You have to compile the packages using the provided PKGBUILDs, and install them in order: dkms, daemon, python*
 
-##0. Getting started
+## 0. Getting started
 
 - Clone this repo:
 
@@ -12,11 +12,11 @@
 
 		$ cd razer_drivers/package_for_arch
 
-##1. Installing the driver
+## 1. Installing the driver
 
-- Get into the **razer_chroma_driver-dkms** folder:
+- Get into the **razer-driver-dkms** folder:
 
-		$ cd razer_chroma_driver-dkms
+		$ cd razer-driver-dkms
 
 - Create the Arch package:
 
@@ -30,11 +30,11 @@
 
 		$ cd ..
 
-##2. Installing the daemon
+## 2. Installing the daemon
 
-- Get into the **razer_chroma_driver-daemon** folder:
+- Get into the **razer-driver-daemon** folder:
 
-		$ cd razer_chroma_driver-daemon
+		$ cd razer-driver-daemon
 
 - Create the Arch package:
 
@@ -44,17 +44,21 @@
 
 		$ sudo pacman -U *.pkg.tar
 
+- Get back to the previous folder:
+
+		$ cd ..
+
 ##3. Installing the python library
 
-- Get into the **razer_chroma_driver-python** folder:
+- Get into the **python-razer** folder:
 
-		$ cd razer_chroma_driver-python
+		$ cd python-razer
 
 - Create the Arch package:
 
 		$ makepkg -s
 
-- Install the daemon package you just compiled:
+- Install the python library package you just compiled:
 
 		$ sudo pacman -U *.pkg.tar
 
@@ -64,4 +68,4 @@
 
 You may need to manually bind your Razer device to the driver, if that's your case, please follow this simple tutorial:
 
-###[Setting up the keyboard driver](https://github.com/pez2001/razer_chroma_drivers/wiki/Setting-up-the-keyboard-driver)
+### [Setting up the keyboard driver](https://github.com/pez2001/razer_chroma_drivers/wiki/Setting-up-the-keyboard-driver)

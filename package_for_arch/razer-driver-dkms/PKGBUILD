@@ -1,15 +1,15 @@
 # Maintainer: Gabriele Musco <emaildigabry@gmail.com>
 # Upstream URL: https://github.com/terrycain/razer_drivers
 
-_pkgbase=razer_chroma_driver
-pkgname=razer_chroma_driver-dkms
+_pkgbase=razer-driver
+pkgname=razer-driver-dkms
 pkgver=1.0.0
-pkgrel=1
-pkgdesc="An entirely open source driver, daemon and service for managing your Razer peripherals on GNU/Linux systems. (DKMS)"
+pkgrel=2
+pkgdesc="An entirely open source driver for managing Razer peripherals on Linux. (DKMS)"
 arch=('x86_64')
 url="https://github.com/terrycain/razer_drivers"
 license=('GPLv3')
-depends=('dkms' 'libdbus' 'python' 'jq' 'udev')
+depends=('dkms' 'udev')
 makedepends=('git' 'make')
 conflicts=("${_pkgbase}")
 install=${pkgname}.install

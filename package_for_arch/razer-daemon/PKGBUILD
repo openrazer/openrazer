@@ -1,15 +1,16 @@
 # Maintainer: Gabriele Musco <emaildigabry@gmail.com>
 # Upstream URL: https://github.com/terrycain/razer_drivers
 
-pkgname=razer_chroma_driver-daemon
+pkgname=razer-daemon
 pkgver=1.0.0
-pkgrel=1
-pkgdesc="A daemon for controlling razer_chroma_driver"
+pkgrel=2
+pkgdesc="A daemon for controlling razer-driver"
 arch=('any')
 url="https://github.com/terrycain/razer_drivers"
 license=('GPLv3')
-depends=('razer_chroma_driver-dkms' 'libdbus')
+depends=('razer-driver-dkms' 'python' 'python-dbus' 'python-gobject' 'python-setproctitle' 'xautomation' 'xdotool' 'libdbus')
 makedepends=('git')
+optdepends=('python-razer: python library for controlling the daemon')
 install=${pkgname}.install
 source=("${pkgname}::git+git://github.com/terrycain/razer_drivers")
 md5sums=('SKIP')
