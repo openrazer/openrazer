@@ -22,10 +22,13 @@ package() {
   mkdir -p $pkgdir/usr/share/man/man8
   mkdir -p $pkgdir/usr/lib/python3.5/site-packages
   mkdir -p $pkgdir/usr/bin
+  mkdir -p $pkgdir/etc/xdg/autostart
 
   cp -r $srcdir/$pkgname/daemon/razer_daemon $pkgdir/usr/lib/python3.5/site-packages/
   cp $srcdir/$pkgname/daemon/run_razer_daemon.py $pkgdir/usr/bin/razer-service
   cp $srcdir/$pkgname/daemon/resources/razer.conf $pkgdir/usr/share/razer-service/razer.conf.example
+
+  cp -v $srcdir/$pkgname/install_files/desktop/razer-service.desktop $pkgdir/etc/xdg/autostart/razer-service.desktop
   
   gzip -c $srcdir/$pkgname/daemon/resources/man/razer.conf.5 > $pkgdir/usr/share/man/man5/razer.conf.5.gz
   gzip -c $srcdir/$pkgname/daemon/resources/man/razer-service.8 > $pkgdir/usr/share/man/man8/razer-service.8.gz

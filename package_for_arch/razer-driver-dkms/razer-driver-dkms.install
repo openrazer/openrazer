@@ -1,5 +1,5 @@
 post_install() {
-	dkms install razer_chroma_driver/${1%%-*}
+	dkms install razer-driver/${1%%-*}
 	if ! getent group plugdev
 	then
 		sudo groupadd --system plugdev
@@ -22,6 +22,6 @@ post_upgrade() {
 }
 
 pre_remove() {
-    dkms remove razer_chroma_driver/${1%%-*} --all
+    dkms remove razer-driver/${1%%-*} --all
     udevadm control --reload-rules
 }
