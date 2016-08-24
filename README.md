@@ -2,7 +2,7 @@
 
 A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
 
-Website: [Here](https://terrycain.github.io/razer_drivers/)
+Website: [Here](https://terrycain.github.io/razer-drivers/)
 
 **Before raising an issue** saying something doesn't work, read [this](https://github.com/pez2001/razer_chroma_drivers/wiki/Troubleshooting) Wiki page, try not to create new issues if one exists, reopen it.
 
