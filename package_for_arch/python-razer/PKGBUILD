@@ -12,7 +12,7 @@ depends=('razer-daemon' 'python' 'python-dbus' 'python-numpy')
 makedepends=('git')
 optdepends=('razercommander-git: gtk frontend for razer-drivers')
 install=${pkgname}.install
-source=("${pkgname}::git+git://github.com/terrycain/razer_drivers")
+source=("${pkgname}::git+git://github.com/terrycain/razer_drivers.git#tag=v$pkgver")
 md5sums=('SKIP')
 
 package() {

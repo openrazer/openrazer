@@ -12,7 +12,7 @@ depends=('razer-driver-dkms' 'python' 'python-dbus' 'python-gobject' 'python-set
 makedepends=('git')
 optdepends=('python-razer: python library for controlling the daemon')
 install=${pkgname}.install
-source=("${pkgname}::git+git://github.com/terrycain/razer_drivers")
+source=("${pkgname}::git+git://github.com/terrycain/razer_drivers.git#tag=v$pkgver")
 md5sums=('SKIP')
 
 package() {

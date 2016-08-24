@@ -13,7 +13,7 @@ depends=('dkms' 'udev')
 makedepends=('git' 'make')
 conflicts=("${_pkgbase}")
 install=${pkgname}.install
-source=("${_pkgbase}::git+git://github.com/terrycain/razer_drivers")
+source=("${_pkgbase}::git+git://github.com/terrycain/razer_drivers.git#tag=v$pkgver")
 md5sums=('SKIP')
 
 package() {
