@@ -263,3 +263,16 @@ footer {
   text-align: center;
   padding-bottom: 80px;
 }
+
+/****************************
+ * Apps bullet list
+*****************************/
+.apps {
+  left: 18px;
+  position: relative;
+}
+
+.apps > li > a > img {
+  width: 24px;
+  height: 24px;
+}
