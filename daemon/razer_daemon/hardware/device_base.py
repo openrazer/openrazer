@@ -148,7 +148,16 @@ class RazerDevice(DBusService):
         """
         serial_path = os.path.join(self._device_path, 'get_serial')
         with open(serial_path, 'r') as serial_file:
-            return serial_file.read().strip()
+            count = 0
+            serial = serial_file.read().strip()
+            while len(serial) == 0:
+                if count >= 3:
+                    break
+                serial = serial_file.read().strip()
+
+                count += 1
+
+            return serial
 
     def get_vid_pid(self):
         """
