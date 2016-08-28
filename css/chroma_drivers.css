@@ -177,7 +177,7 @@ hr {
 
 .device-icon {
   height: 200px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .device-icon img {
@@ -262,4 +262,17 @@ footer {
 .project-links {
   text-align: center;
   padding-bottom: 80px;
+}
+
+/****************************
+ * Apps bullet list
+*****************************/
+.apps {
+  left: 18px;
+  position: relative;
+}
+
+.apps > li > a > img {
+  width: 24px;
+  height: 24px;
 }

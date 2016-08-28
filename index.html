@@ -3,7 +3,7 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Razer 'Chroma' Linux drivers : featuring a daemon and graphical applications.">
+    <meta name="description" content="Razer Drivers for Linux: allowing full control of your keyboard, mice and mousemat.">
 
     <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" media="screen" href="font-awesome/font-awesome.min.css">
@@ -11,13 +11,13 @@
     <link rel="shortcut icon" href="img/favicon.ico">
 
     <!--
-        Designed by @lah7 for the Razer Chroma Linux drivers project.
+        Designed by @lah7 for the Razer Linux drivers project.
 
         Copyright (C) 2016 Luke Horwell
         Licensed under CC BY-SA 4.0
     -->
 
-    <title>Chroma Linux Drivers</title>
+    <title>Razer Drivers for Linux Project</title>
   </head>
 
   <body data-spy="scroll" data-target="#navbar" data-offset="50">
@@ -26,7 +26,7 @@
     <div id="nav-menu" class="col-fluid nav-top">
       <div class="col-lg-2"></div>
       <div class="col-lg-8">
-        <p hidden id="mini-logo-text"><img class="logo-mini" src="img/logo.png"/>Chroma Linux Drivers</p>
+        <p hidden id="mini-logo-text"><img class="logo-mini" src="img/logo.png"/>Razer Drivers for Linux</p>
         <nav id="navbar">
           <ul class="nav nav-pills" role="tablist">
             <li><a href="#features"><span class="fa fa-star"></span>&nbsp; Features</a></li>
@@ -47,8 +47,8 @@
         <!-- Header -->
         <div id="header">
           <img id="logo" src="img/logo.png"/>
-          <h2>Chroma Linux Drivers</h2>
-          <h5>For Razer peripherals.</h5>
+          <h2>Razer Drivers for Linux</h2>
+          <h5>Where snakes meet penguin.</h5>
         </div>
 
         <!-- Main Content -->
@@ -60,13 +60,13 @@
 
           <div class="section">
             <h3>Features</h3>
-            <p>An entirely open source driver, daemon and service for managing your Razer peripherals on GNU/Linux systems.</p>
+            <p>An entirely open source driver and user-space daemon that allows you to manage your Razer peripherals on GNU/Linux.</p>
             <div class="row-fluid">
               <div class="row features-grid">
                 <div class="col-md-4 col-sm-6 feature">
                   <div class="features-icon"><span class="fa fa-gears fa-5x fa-va"></span></div>
                   <h4>Daemon</h4>
-                  <p>Runs a background service that interfaces with your device.</p>
+                  <p>A lightweight service that runs in the background to interact with your Razer devices.</p>
                 </div>
                 <div class="col-md-4 col-sm-6 feature">
                   <div class="features-icon"><span class="fa fa-linux fa-5x fa-va"></span></div>
@@ -76,13 +76,25 @@
                 <div class="col-md-4 col-sm-6 feature">
                   <div class="features-icon"><span class="fa fa-keyboard-o fa-5x fa-va"></span></div>
                   <h4>Fully Featured</h4>
-                  <p>Supports macros on-the-fly<b>*</b>, effects, lighting and game mode.</p>
-                  <small><b>* Not yet available until the new daemon.</b></small>
+                  <p>Supports macros on-the-fly, lighting effects, colours and enabling game mode.</p>
                 </div>
                 <div class="col-md-4 col-sm-6 feature">
-                  <div class="features-icon"><img src="img/chroma.png"/></div>
-                  <h4>Customizable</h4>
-                  <p>Applications that complement the driver, such as creating key light profiles with <a href="https://github.com/lah7/polychromatic" target="_blank">Polychromatic</a>.</p>
+                  <div class="features-icon"><span class="fa fa-laptop fa-5x fa-va"></span></div>
+                  <h4>Applications</h4>
+                  <p>
+                    Offering front-ends and utilities.
+                    <ul class="apps">
+                      <li>
+                        <a href="https://github.com/lah7/polychromatic" target="_blank">Polychromatic</a>
+                      </li>
+                      <li>
+                        <a href="https://github.com/GabMus/razerCommander" target="_blank">razerCommander</a>
+                      </li>
+                      <li>
+                        <a href="https://github.com/terrycain/razer-drivers#applications" target="_blank">And more...</a>
+                      </li>
+                    </ul>
+                  </p>
                 </div>
                 <div class="col-md-4 col-sm-6 feature">
                   <div class="features-icon"><img src="img/multi-distro.png"/></div>
@@ -90,9 +102,9 @@
                   <p>Works on distributions based on Debian, Ubuntu, Arch, openSUSE and Fedora.</p>
                 </div>
                 <div class="col-md-4 col-sm-6 feature">
-                  <div class="features-icon"><span class="fa fa-file-text-o fa-5x fa-va"></span></div>
-                  <h4>Scriptable & More!</h4>
-                  <p>You could even play <a href="https://github.com/pez2001/razer_chroma_drivers/tree/master/examples/snake_game">game of snake</a> on your keyboard!</p>
+                  <div class="features-icon"><span class="fa fa-code fa-5x fa-va"></span></div>
+                  <h4>Scriptable API</h4>
+                  <p>Control your device and create just about any effect you want in Python.</p>
                 </div>
               </div>
             </div>
@@ -104,10 +116,10 @@
 
           <div class="section">
             <h3>Devices List</h3>
-            <p>Originally written for the BlackWidow Chroma, the project is now compatible with a wide range of Razer's peripherals.</p>
+            <p>Originally written for the BlackWidow Chroma, the driver is now compatible with a wide range of Razer's peripherals.</p>
 
             <hr>
-            <h4><span class="fa fa-check"></span>&nbsp; Supported</h4>
+            <h4><span class="fa fa-check"></span>&nbsp; Supported Keyboards & Keypads</h4>
             <br>
             <div class="row-fluid">
               <div class="row devices">
@@ -124,6 +136,12 @@
                   </a>
                 </div>
                 <div class="col-md-3 col-sm-4 device-icon">
+                  <a href="http://www.razerzone.com/gb-en/store/razer-blackwidow-x-chroma" target="_blank">
+                    <img src="http://assets.razerzone.com/eeimages/products/24325/razer-blackwidow-x-chroma-redo-4.png">
+                    <h5>BlackWidow X Chroma</h5>
+                  </a>
+                </div>
+                <div class="col-md-3 col-sm-4 device-icon">
                   <a href="http://www.razerzone.com/gb-en/store/razer-blackwidow-ultimate-classic" target="_blank">
                     <img src="http://assets.razerzone.com/eeimages/products/22212/razer-blackwidow-ultimate-classic-gallery-1__store_gallery.png">
                     <h5>BlackWidow Ultimate 2012 (Classic)</h5>
@@ -133,6 +151,12 @@
                   <a href="http://www.razerzone.com/gb-en/store/razer-blackwidow-ultimate-2014" target="_blank">
                     <img src="http://assets.razerzone.com/eeimages/products/17561/razer-blackwidow-ultimate-category-image.jpg">
                     <h5>BlackWidow Ultimate 2013</h5>
+                  </a>
+                </div>
+                <div class="col-md-3 col-sm-4 device-icon">
+                  <a href="http://www.razerzone.com/gb-en/store/razer-blackwidow-ultimate-2016" target="_blank">
+                    <img src="http://assets.razerzone.com/eeimages/products/22916/razer-blackwidow-cat.jpg">
+                    <h5>BlackWidow Ultimate 2016</h5>
                   </a>
                 </div>
                 <div class="col-md-3 col-sm-4 device-icon">
@@ -148,6 +172,20 @@
                   </a>
                 </div>
                 <div class="col-md-3 col-sm-4 device-icon">
+                  <a href="http://www.razerzone.com/gb-en/store/razer-tartarus-chroma" target="_blank">
+                    <img src="http://assets.razerzone.com/eeimages/products/22356/razer-tartarus-chroma-01-02__store_gallery.png">
+                    <h5>Razer Tartarus Chroma</h5>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+            <h4><span class="fa fa-check"></span>&nbsp; Supported Mice & Mousemats</h4>
+            <br>
+            <div class="row-fluid">
+              <div class="row devices">
+                <div class="col-md-3 col-sm-4 device-icon">
                   <a href="http://www.razerzone.com/gb-en/store/razer-firefly" target="_blank">
                     <img src="http://assets.razerzone.com/eeimages/products/21936/rzr-firefly-cat-01.jpg">
                     <h5>BlackWidow Firefly</h5>
@@ -160,6 +198,20 @@
                   </a>
                 </div>
                 <div class="col-md-3 col-sm-4 device-icon">
+                  <a href="http://www.razerzone.com/gb-en/store/razer-abyssus" target="_blank">
+                    <img src="http://assets.razerzone.com/eeimages/products/17026/abyssus2014_gallery_4__store_gallery.png">
+                    <h5>Razer Abyssus</h5>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+            <h4><span class="fa fa-check"></span>&nbsp; Other devices that work</h4>
+            <br>
+            <div class="row-fluid">
+              <div class="row devices">
+                <div class="col-md-3 col-sm-4 device-icon">
                   <br>
                   <a href="http://www.razerzone.com/gb-en/store/razer-blade-fullhd-2015" target="_blank">
                     <img src="http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-qhd.png">
@@ -169,6 +221,8 @@
                 </div>
               </div>
             </div>
+
+<!--
             <hr>
             <h4><span class="fa fa-clock-o"></span>&nbsp; Partially Supported</h4>
             <br>
@@ -181,16 +235,17 @@
                   </a>
                   <p><small>Missing custom lighting</small></p>
                 </div>
-                <div class="col-md-3 col-sm-4 device-icon">
-                  <a href="http://www.razerzone.com/gb-en/store/razer-abyssus" target="_blank">
-                    <img src="http://assets.razerzone.com/eeimages/products/17026/abyssus2014_gallery_4__store_gallery.png">
-                    <h5>Razer Abyssus</h5>
-                  </a>
-                  <p><small>Missing refresh rate</small></p>
-                </div>
               </div>
             </div>
-            <p class="gray"><b>Not listed?</b> Other devices may work, or require some modifications to the driver.</p>
+            <br>
+-->
+            <p class="gray">
+              <b>Not listed?</b> Other devices may work, or require some modifications to the driver.
+            </p>
+            <p class="gray">
+              <b>Daemon Support</b> - <a href="https://github.com/terrycain/razer-drivers#daemon-support">
+                Check whether your device</a> runs under the daemon, as not every device has been mapped yet.
+              Simply <a href="https://github.com/terrycain/razer-drivers/issues">raise an issue</a> if it isn't.</p>
           </div>
 
           <!---------------------------------------------------------->
@@ -199,140 +254,119 @@
 
           <div class="section">
             <h3>Download</h3>
-            <p>After installing the driver, you must restart the computer for the installation to complete.</p>
-            <p><b><span class="fa fa-warning"></span> Packages are not available yet, but they are planned to be built in future.</b></p>
             <hr>
             <div class="panel-group" id="distros">
+
               <div class="panel panel-default">
                 <div class="panel-heading">
                   <h4 class="panel-title">
                     <a data-toggle="collapse" data-parent="#distros" href="#ubuntu">
-                      <img src="img/distros/ubuntu.png" width="24px" height="24px"/> + <img src="img/distros/debian.png" width="24px" height="24px"/>
-                      &nbsp; Ubuntu and Debian</a>
+                      <img src="img/distros/ubuntu.png" width="24px" height="24px"/>
+                      &nbsp; Ubuntu / Linux Mint</a>
                     </a>
                   </h4>
                 </div>
                 <div id="ubuntu" class="panel-collapse collapse">
                   <div class="panel-body">
-                    <!-- Ubuntu Packages -->
-                    <p>Sorry, no packages exist for Ubuntu or Debian at this time.</p>
-<!--
-                    <h4><span class="fa fa-folder"></span>&nbsp; Packages</h4>
-                    <table class="table">
-                      <tr>
-                        <th>Release</th>
-                        <th>Architecture</th>
-                        <th>Release</th>
-                        <th>Download</th>
-                        <th>Release Notes</th>
-                        <th>MD5 Checksum</th>
-                      </tr>
-                      <tr>
-                        <th>Ubuntu 15.10</th>
-                        <td>amd64</td>
-                        <td>Stable</td>
-                        <td><a href="#">razer-linux-drivers-ubuntu-15.10-20150105-stable-i386.deb</a></td>
-                        <td><a href="#">View</a></td>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <th rowspan=2>Ubuntu 15.10</th>
-                        <td>amd64</td>
-                        <td>Testing</td>
-                        <td><a href="#"><span class="fa fa-cube"></span> Latest Version</a></td>
-                        <td><a href="#"><span class="fa fa-sticky-note"></span> View</a></td>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <td>i386</td>
-                        <td>Testing</td>
-                        <td><a href="#"><span class="fa fa-cube"></span> Latest Version</a></td>
-                        <td><a href="#"><span class="fa fa-sticky-note"></span> View</a></td>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <th>Ubuntu 15.10</th>
-                        <td>i386</td>
-                        <td>Stable</td>
-                        <td><a href="#"><span class="fa fa-cube"></span> Latest Version</a></td>
-                        <td><a href="#"><span class="fa fa-sticky-note"></span> View</a></td>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <th>Ubuntu 14.04</th>
-                        <td>amd64</td>
-                        <td>Stable</td>
-                        <td><a href="#"><span class="fa fa-cube"></span> Latest Version</a></td>
-                        <td><a href="#"><span class="fa fa-sticky-note"></span> View</a></td>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <th>Ubuntu 14.04</th>
-                        <td>amd64</td>
-                        <td>Testing</td>
-                        <td><a href="#"><span class="fa fa-cube"></span> Latest Version</a></td>
-                        <td><a href="#"><span class="fa fa-sticky-note"></span> View</a></td>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <th>Ubuntu 14.04</th>
-                        <td>i386</td>
-                        <td>Stable</td>
-                        <td><a href="#"><span class="fa fa-cube"></span> Latest Version</a></td>
-                        <td><a href="#"><span class="fa fa-sticky-note"></span> View</a></td>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <th>Ubuntu 14.04</th>
-                        <td>i386</td>
-                        <td>Testing</td>
-                        <td><a href="#"><span class="fa fa-cube"></span> Latest Version</a></td>
-                        <td><a href="#"><span class="fa fa-sticky-note"></span> View</a></td>
-                        <td>0</td>
-                      </tr>
-                    </table>
--->
+                    <h4><span class="fa fa-cube"></span>&nbsp; From the PPA</h4>
+                    <p>This also allows the drivers to stay up-to-date when new versions are released. From the terminal:</p>
+                    <pre><code><span class="fa fa-dollar"></span> sudo add-apt-repository ppa:terrz/razerutils</code>
+<code><span class="fa fa-dollar"></span> sudo apt update</code>
+<code><span class="fa fa-dollar"></span> sudo apt install python3-razer razer-kernel-modules-dkms razer-daemon razer-doc</code></pre>
 
-                    <!-- Debian-based Packaging -->
-                    <br>
-                    <h4><span class="fa fa-cube"></span>&nbsp; Creating a package from source</h4>
-                    <p>1. Download the source code:</p>
-                    <pre><code><span class="fa fa-dollar"></span> git clone --depth=1 https://github.com/pez2001/razer_chroma_drivers.git</code></pre>
-                    <pre><code><span class="fa fa-dollar"></span> cd razer_chroma_drivers</code></pre>
-
-                    <p>2. Install the packages needed to build the software.</p>
-                    <pre><code><span class="fa fa-dollar"></span> sudo apt-get install -y dpkg-dev libdbus-1-dev jq libsdl2-dev libsdl2-image-dev libfftw3-dev libfftw3-3</code></pre>
-
-                    <p>3. Build the software and driver.</p>
-                    <pre><code><span class="fa fa-dollar"></span> make</code></pre>
-
-                    <p>4. Build the package.</p>
-                    <pre><img src="img/distros/ubuntu.png" width="24px" height="24px"/>  <code><span class="fa fa-dollar"></span> ./package_for_ubuntu.sh</code></pre>
-                    <pre><img src="img/distros/debian.png" width="24px" height="24px"/>  <code><span class="fa fa-dollar"></span> ./package_for_debian.sh</code></pre>
-
-                    <p>The command above will output something like:
-                    <code>dpkg-name: info: moved 'tmp.3PnAtckx3o.deb' to '/tmp/razer-chroma-driver_1.0.0_amd64.deb'</code>.</p>
-
-                    <p>5. Install the newly created package:</p>
-                    <pre><code><span class="fa fa-dollar"></span> sudo dpkg -i /tmp/razer-chroma-driver*.deb</code></pre>
-
-                    <p>6. <span class="fa fa-power-off"></span> Reboot the system or use this command to activate the driver:</p>
+                    <p>After installing the driver, you should <u>restart the computer</u> or probe it from the terminal:</p>
                     <pre><code><span class="fa fa-dollar"></span> sudo modprobe razerkbd</code></pre>
 
-                    <br>
-
-                    <!-- Debian-based Installation -->
-                    <h4><span class="fa fa-code"></span>&nbsp; Installing from source</h4>
-                    <p>This installs the components required to get the driver running. GUI applications will need to be manually installed.</p>
-                    <pre><code><span class="fa fa-dollar"></span> git clone --depth=1 https://github.com/pez2001/razer_chroma_drivers.git</code></pre>
-                    <pre><code><span class="fa fa-dollar"></span> cd razer_blackwidow_chroma_driver</code></pre>
-                    <pre><code><span class="fa fa-dollar"></span> ./install_driver_debian.sh</code></pre>
-                    <p>These steps will need to repeated when the repository is updated.</p>
-
+                    <p>This PPA supports these versions:</p>
+                    <ul>
+                      <li>Ubuntu 14.04 "Trusty" and Linux Mint 17</li>
+                      <li>Ubuntu 16.04 "Xenial" and Linux Mint 18</li>
+                      <li>Ubuntu 16.10 "Yakkety"</li>
+                    </ul>
                     <hr>
                   </div>
                 </div>
               </div>
+
+<!--
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#distros" href="#debian">
+                      <img src="img/distros/debian.png" width="24px" height="24px"/>
+                      &nbsp; Debian</a>
+                    </a>
+                  </h4>
+                </div>
+                <div id="ubuntu" class="panel-collapse collapse">
+                  <div class="panel-body">
+                    (Not available)
+                  </div>
+                </div>
+              </div>
+-->
+
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#distros" href="#arch">
+                      <img src="img/distros/arch.png" width="24px" height="24px"/>
+                      &nbsp; Arch Linux</a>
+                    </a>
+                  </h4>
+                </div>
+                <div id="arch" class="panel-collapse collapse">
+                  <div class="panel-body">
+                    <h4><span class="fa fa-code"></span>&nbsp; Step-by-Step Instructions</h4>
+                    <p>First, clone the repository:</p>
+                    <pre><code><span class="fa fa-dollar"></span> git clone git://github.com/terrycain/razer-drivers.git</code>
+<code><span class="fa fa-dollar"></span> cd razer-drivers/package_for_arch</code></pre>
+
+                    <p>Install the driver:</p>
+                    <pre><code><span class="fa fa-dollar"></span> cd razer-driver-dkms</code>
+<code><span class="fa fa-dollar"></span> makepkg -s</code>
+<code><span class="fa fa-dollar"></span> sudo pacman -U *.pkg.tar</code>
+<code><span class="fa fa-dollar"></span> cd ..</code></pre>
+
+                    <p>Install the daemon:</p>
+                    <pre><code><span class="fa fa-dollar"></span> cd razer-driver-daemon</code>
+<code><span class="fa fa-dollar"></span> makepkg -s</code>
+<code><span class="fa fa-dollar"></span> sudo pacman -U *.pkg.tar</code>
+<code><span class="fa fa-dollar"></span> cd ..</code></pre>
+
+                    <p>Install the Python library:</p>
+                    <pre><code><span class="fa fa-dollar"></span> cd python-razer</code>
+<code><span class="fa fa-dollar"></span> makepkg -s</code>
+<code><span class="fa fa-dollar"></span> sudo pacman -U *.pkg.tar</code>
+<code><span class="fa fa-dollar"></span> cd ..</code></pre>
+
+                    <p>Now restart your computer. You may need to manually bind your Razer device to the driver,
+                    in which case, please see <a href="https://github.com/pez2001/razer_chroma_drivers/wiki/Setting-up-the-keyboard-driver">Setting up the keyboard driver</a>.</p>
+
+                    <p>For more information, see this <a href="https://github.com/terrycain/razer-drivers/blob/master/package_for_arch/README.md">README file</a>.</p>
+                  </div>
+                </div>
+              </div>
+
+<!--
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#distros" href="#debian">
+                      <img src="img/distros/debian.png" width="24px" height="24px"/>
+                      &nbsp; Debian</a>
+                    </a>
+                  </h4>
+                </div>
+                <div id="ubuntu" class="panel-collapse collapse">
+                  <div class="panel-body">
+                    (Not available)
+                  </div>
+                </div>
+              </div>
+-->
+
+<!--
               <div class="panel panel-default">
                 <div class="panel-heading">
                   <h4 class="panel-title">
@@ -343,14 +377,12 @@
                 </div>
                 <div id="fedora" class="panel-collapse collapse">
                   <div class="panel-body">
-                    <!-- Fedora Packages -->
-                    <h4><span class="fa fa-folder"></span>&nbsp; Packages</h4>
-                    <p>Sorry, no packages exist for Fedora at this time.</p>
-                    <p>See "Other Distributions" below for installation instructions.</p>
-                    <hr>
-                  </div>
+                    (Not available)
                 </div>
               </div>
+-->
+
+<!--
               <div class="panel panel-default">
                 <div class="panel-heading">
                   <h4 class="panel-title">
@@ -361,14 +393,12 @@
                 </div>
                 <div id="opensuse" class="panel-collapse collapse">
                   <div class="panel-body">
-                    <!-- openSUSE Packages -->
-                    <h4><span class="fa fa-folder"></span>&nbsp; Packages</h4>
-                    <p>Sorry, no packages exist for openSUSE at this time.</p>
-                    <p>See "Other Distributions" below for installation instructions.</p>
-                    <hr>
+                    (Not available)
                   </div>
                 </div>
               </div>
+-->
+
               <div class="panel panel-default">
                 <div class="panel-heading">
                   <h4 class="panel-title">
@@ -378,20 +408,54 @@
                 <div id="other" class="panel-collapse collapse">
                   <div class="panel-body">
                     <!-- Compiling for any other distro -->
-                    <p>1. Install dependencies from your distribution:
+                    <p>1. Install the dependencies, these may vary based on your distribution:
                       <ul>
-                        <li>libdbus-1-dev</li>
-                        <li>jq</li>
-                        <li>git</li>
-                        <li>make</li>
-                        <li>python3</li>
-                        <li>python-appindicator</li>
+                        <li>
+                          <h5>Build Dependencies</h5>
+                          <ul>
+                            <li>git</li>
+                            <li>make</li>
+                            <li>libdbus-1-dev</li>
+                            <li>libsdl2-dev</li>
+                            <li>libsdl2-image-dev</li>
+                            <li>libfftw3-dev</li>
+                            <li>jq</li>
+                          </ul>
+                        </li>
+                        <li>
+                          <h5>Kernel Modules and DKMS</h5>
+                          <ul>
+                            <li>dkms</li>
+                            <li>udev</li>
+                          </ul>
+                        </li>
+                        <li>
+                          <h5>Python Daemon</h5>
+                          <ul>
+                            <li>python3</li>
+                            <li>python3-dbus</li>
+                            <li>python3-gi</li>
+                            <li>python3-setproctitle</li>
+                            <li>python3-notify2</li>
+                            <li>xautomation</li>
+                            <li>xdotool</li>
+                          </ul>
+                        </li>
+                        <li>
+                          <h5>Python Library</h5>
+                          <ul>
+                            <li>python3</li>
+                            <li>python3-dbus</li>
+                            <li>python3-gi</li>
+                            <li>python3-numpy</li>
+                          </ul>
+                        </li>
                       </ul>
                     </p>
 
                     <p>2. Obtain a copy of the source code:</p>
-                    <pre><code><span class="fa fa-dollar"></span> git clone --depth=1 https://github.com/pez2001/razer_chroma_drivers.git</code></pre>
-                    <pre><code><span class="fa fa-dollar"></span> cd razer_chroma_drivers</code></pre>
+                    <pre><code><span class="fa fa-dollar"></span> git clone --depth=1 https://github.com/terrycain/razer-drivers.git</code>
+<code><span class="fa fa-dollar"></span> cd razer-drivers</code></pre>
 
                     <p>3. Build and execute the installation script:</p>
                     <pre><code><span class="fa fa-dollar"></span> sudo make -s all install</code></pre>
@@ -399,22 +463,25 @@
                     <p>4. Once installed, reboot the system.</p>
 
                     <br>
-                    <p>To use the latest changes from the repository, you will need to repeat the process:</p>
-                    <pre><code><span class="fa fa-dollar"></span> cd /path/to/razer_blackwidow_drivers/</code></pre>
-                    <pre><code><span class="fa fa-dollar"></span> git pull</code></pre>
+                    <p><span class="fa fa-refresh"></span> To manually get the latest driver, you will need to repeat the process:</p>
+                    <pre><code><span class="fa fa-dollar"></span> cd /path/to/razer-drivers/</code>
+<code><span class="fa fa-dollar"></span> git pull --rebase</code>
+<code><span class="fa fa-dollar"></span> sudo make -s all install</code></pre>
 
                     <br>
                     <p><span class="fa fa-trash"></span> If at a later date you would like to remove the drivers, run:</p>
-                    <pre><code><span class="fa fa-dollar"></span> cd /path/to/razer_blackwidow_drivers/</code></pre>
-                    <pre><code><span class="fa fa-dollar"></span> sudo make uninstall</code></pre>
+                    <pre><code><span class="fa fa-dollar"></span> cd /path/to/razer-drivers/</code>
+<code><span class="fa fa-dollar"></span> sudo make uninstall</code></pre>
                   </div>
                 </div>
               </div>
               <br>
-              <a class="btn" target="_blank" href="https://github.com/pez2001/razer_chroma_drivers/releases"><span class="fa fa-list"></span>&nbsp; View all releases</a>
-              <a class="btn" target="_blank" href="https://github.com/pez2001/razer_chroma_drivers/blob/master/README.md"><span class="fa fa-file-text-o"></span>&nbsp; View README</a>
-              <a class="btn" href="https://github.com/pez2001/razer_chroma_drivers/tarball/master"><span class="fa fa-download"></span>&nbsp; Source (tar.gz)</a>
-              <a class="btn" href="https://github.com/pez2001/razer_chroma_drivers/zipball/master"><span class="fa fa-download"></span>&nbsp; Source (.zip)</a>
+              <a class="btn" target="_blank" href="https://github.com/terrycain/razer-drivers/releases"><span class="fa fa-cube"></span>&nbsp; View all releases</a>
+              <a class="btn" target="_blank" href="https://github.com/terrycain/razer-drivers/blob/master/README.md"><span class="fa fa-file-text-o"></span>&nbsp; View README</a>
+              <a class="btn" href="https://github.com/terrycain/razer-drivers/tarball/master"><span class="fa fa-download"></span>&nbsp; Source (tar.gz)</a>
+              <a class="btn" href="https://github.com/terrycain/razer-drivers/zipball/master"><span class="fa fa-download"></span>&nbsp; Source (.zip)</a>
+              <br><br>
+              <p class="gray"><b>Don't see your distro?</b> Packages for other distributions are planned.</p>
             </div>
           </div>
 
@@ -426,19 +493,19 @@
             <h3>Project</h3>
             <div class="project-links">
               <div class="col-sm-2">
-                  <a target="_blank" href="https://github.com/pez2001/razer_chroma_drivers"><span class="fa fa-3x fa-github"></span><br> GitHub</a>
+                  <a target="_blank" href="https://github.com/terrycain/razer-drivers"><span class="fa fa-3x fa-github"></span><br> GitHub</a>
               </div>
               <div class="col-sm-2">
-                  <a target="_blank" href="https://github.com/pez2001/razer_chroma_drivers/issues"><span class="fa fa-3x fa-exclamation-circle"></span><br> Issues</a>
+                  <a target="_blank" href="https://github.com/terrycain/razer-drivers/issues"><span class="fa fa-3x fa-exclamation-circle"></span><br> Issues</a>
               </div>
               <div class="col-sm-2">
-                  <a target="_blank" href="https://github.com/pez2001/razer_chroma_drivers/wiki/Troubleshooting"><span class="fa fa-3x fa-question-circle"></span><br> Troubleshooting</a>
+                  <a target="_blank" href="https://github.com/terrycain/razer-drivers/wiki/Troubleshooting"><span class="fa fa-3x fa-question-circle"></span><br> Troubleshooting</a>
               </div>
               <div class="col-sm-2">
-                  <a target="_blank" href="https://github.com/pez2001/razer_chroma_drivers/wiki"><span class="fa fa-3x fa-book"></span><br> Wiki</a>
+                  <a target="_blank" href="https://github.com/terrycain/razer-drivers/wiki"><span class="fa fa-3x fa-book"></span><br> Documentation</a>
               </div>
               <div class="col-sm-2">
-                  <a target="_blank" href="https://github.com/pez2001/razer_chroma_drivers/graphs/contributors"><span class="fa fa-3x fa-users"></span><br> Contributors</a>
+                  <a target="_blank" href="https://github.com/terrycain/razer-drivers/graphs/contributors"><span class="fa fa-3x fa-users"></span><br> Contributors</a>
               </div>
             </div>
           </div>
@@ -454,7 +521,7 @@
             <p>These drivers are not official, endorsed or associated with <a target="_blank" href="http://www.razerzone.com/">Razer Inc.</a> in any way.</p>
             <p>This project is made possible by <a target="_blank" href="https://github.com/pez2001">pez2001</a> and
             <a target="_blank" href="https://github.com/terrycain">terrycain</a>,
-            plus the work of many <a target="_blank" href="https://github.com/pez2001/razer_chroma_drivers/graphs/contributors">contributors</a>.
+            plus the work of many <a target="_blank" href="https://github.com/terrycain/razer-drivers/graphs/contributors">contributors</a>.
             Website designed by <a target="_blank" href="https://github.com/lah7">lah7</a>.</p>
           </footer>
       </div>
