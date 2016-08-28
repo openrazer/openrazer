@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: razer
-Source: https://github.com/pez2001/razer_chroma_drivers
+Source: https://github.com/terrycain/razer-drivers
 
 Files: *
 Copyright: 2015-2016 Terry Cain <terry@terrys-home.co.uk>
