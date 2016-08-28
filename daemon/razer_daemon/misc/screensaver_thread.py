@@ -32,6 +32,8 @@ class ScreensaverThread(threading.Thread):
         self._dbus_interface = None
         self._parent = parent
 
+        self._try_count = 0
+
     def load_dbus(self):
         """
         Setup the connection to DBUS
@@ -50,11 +52,16 @@ class ScreensaverThread(threading.Thread):
                     pass
             else:
                 self.logger.warning("Could not find screensaver DBus")
+                self._try_count += 1
                 self._dbus_interface = None
 
         except dbus.exceptions.DBusException as err:
             self.logger.exception("Caught exception whilst trying to get screensaver DBus", exc_info=err)
+            self._try_count += 1
             self._dbus_interface = None
+
+        if self._try_count >= 3:
+            self.logger.warning("Giving up on screensaver")
 
     @property
     def active(self):
@@ -107,7 +114,7 @@ class ScreensaverThread(threading.Thread):
             self.load_dbus()
 
         while not self._shutdown:
-            if self._active:
+            if self._active and self._try_count < 3:
                 try:
                     if self._dbus_interface is None:
                         self.load_dbus()
@@ -129,6 +136,7 @@ class ScreensaverThread(threading.Thread):
                 except Exception as err:
                     self.logger.exception("Caught exception in run loop", exc_info=err)
                     self._dbus_interface = None
+
 
             # Sleep
             time.sleep(0.1)

@@ -2,13 +2,13 @@
 # Upstream URL: https://github.com/terrycain/razer_drivers
 
 pkgname=razer-daemon
-pkgver=1.0.0
+pkgver=1.0.2
 pkgrel=2
 pkgdesc="A daemon for controlling razer-driver"
 arch=('any')
 url="https://github.com/terrycain/razer_drivers"
 license=('GPLv3')
-depends=('razer-driver-dkms' 'python' 'python-dbus' 'python-gobject' 'python-setproctitle' 'xautomation' 'xdotool' 'libdbus')
+depends=('razer-driver-dkms' 'python' 'python-dbus' 'python-gobject' 'python-setproctitle' 'xautomation' 'xdotool' 'libdbus' 'python-notify2')
 makedepends=('git')
 optdepends=('python-razer: python library for controlling the daemon')
 install=${pkgname}.install

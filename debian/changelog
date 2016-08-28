@@ -1,12 +1,29 @@
+razer (1.0.2-0ubuntu1) trusty; urgency=low
+
+  * Fixed daemon bug when using reactive effects
+  * Fixed daemon bug whilst getting serial
+  * Set Logo to use CC BY-SA
+  * Fixed GTK warning in keyboard.py
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sun, 28 Aug 2016 23:11:00 +0000
+
 razer (1.0-0ubuntu1) trusty; urgency=low
 
-  * Initial release of the driver, daemon and python library.
-    Currently supports the following keyboards: Blackwidow Classic/Ultimate 2012/Ultimate 2013/Ultimate 2016/Chroma/Chroma TE/X Chroma and Blade Stealth
-    Currently supports the following mice: Mamba Chroma (Wireless only)/Abyssus
-    Currently supports the following misc peripherals: Firefly/Tartarus
+  * Initial release of the driver, daemon and Python library.
+  * Support added:
+      * Keyboards
+        * Blackwidow Classic
+        * Ultimate 2012
+        * Ultimate 2013
+        * Ultimate 2016
+        * Chroma (Regular/TE/X)
+        * Blade Stealth
+      * Mice
+        * Mamba Chroma (Wireless only)
+        * Abyssus
+      * Peripherals
+        * Firefly
+        * Tartarus
+  * Autostart at login.
 
-  * Daemon currently starts at login and presents endpoints in DBus which is interacted with the python library. The daemon implements the Ripple effect found on synapse along with a custom
-    multicolored ripple effect. The daemon syncs effects across multiple devices as well as turns off the brightness when the computer is on screensaver.
-    Daemon supports the following devices: Ultimate 2013/Chroma/Chroma TE/X Chroma/Firefly/Mamba (Wireless)
-      
  -- Terry Cain <terry@terrys-home.co.uk>  Sat, 19 Mar 2016 09:41:19 +0000

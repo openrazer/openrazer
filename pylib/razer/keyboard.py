@@ -2,6 +2,8 @@
 Module to handle custom colours
 """
 
+import gi
+gi.require_version('Gdk', '3.0')
 from gi.repository import Gdk
 import struct
 import subprocess
