@@ -1,3 +1,12 @@
+razer (1.0.2-0ubuntu1) trusty; urgency=low
+
+  * Fixed daemon bug when using reactive effects
+  * Fixed daemon bug whilst getting serial
+  * Set Logo to use CC BY-SA
+  * Fixed GTK warning in keyboard.py
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sun, 28 Aug 2016 23:11:00 +0000
+
 razer (1.0-0ubuntu1) trusty; urgency=low
 
   * Initial release of the driver, daemon and Python library.
@@ -7,7 +16,7 @@ razer (1.0-0ubuntu1) trusty; urgency=low
         * Ultimate 2012
         * Ultimate 2013
         * Ultimate 2016
-        * Chroma (TE/X)
+        * Chroma (Regular/TE/X)
         * Blade Stealth
       * Mice
         * Mamba Chroma (Wireless only)
