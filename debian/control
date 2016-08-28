@@ -17,7 +17,7 @@ Vcs-Browser: https://github.com/terrycain/razer-drivers/
 
 Package: razer-kernel-modules-dkms
 Section: kernel
-Architecture: amd64
+Architecture: amd64 i386
 Depends: dkms,
          udev,
          ${misc:Depends}
@@ -27,7 +27,7 @@ Description: Razer Peripheral Drivers
 
 Package: razer-daemon
 Section: misc
-Architecture: amd64
+Architecture: amd64 i386
 Depends: razer-kernel-modules-dkms,
          python3,
          python3-dbus,
