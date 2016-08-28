@@ -4,7 +4,7 @@ A collection of Linux drivers for the Razer devices, providing kernel drivers, D
 
 Website: [Here](https://terrycain.github.io/razer-drivers/)
 
-**Before raising an issue** saying something doesn't work, read [this](https://github.com/pez2001/razer_chroma_drivers/wiki/Troubleshooting) Wiki page, try not to create new issues if one exists, reopen it.
+**Before raising an issue** saying something doesn't work, read [this](https://github.com/terrycain/razer-drivers/wiki/Troubleshooting) Wiki page, try not to create new issues if one exists, reopen it.
 
 ## Driver Support
 ### Keyboard Support:
@@ -54,7 +54,7 @@ by the daemon. If your device is supported by the driver but not by the daemon t
 
 ###Other distributions
 
-[Here](https://github.com/pez2001/razer_chroma_drivers/wiki/Installation) is a page documenting the installation and uninstallation procedures.
+[Here](https://github.com/terrycain/razer-drivers/wiki/Installation) is a page documenting the installation and uninstallation procedures.
 
 ## Applications
 
@@ -75,7 +75,7 @@ The following applications compliment and interact with this driver:
 
 Some guys have already donated to the cause. ;-) Feel free.
 The parent of the fork had a list of what would be done if money was donated. I don't need the money (though you can never have enough right ;-) ), but obviously its a great motivator.
-If you want you device and your not willing to get one to me then if your willing to follow [this](https://github.com/pez2001/razer_chroma_drivers/wiki/Reverse-Engineering-USB-Protocol) then support can be added.
+If you want you device and your not willing to get one to me then if your willing to follow [this](https://github.com/terrycain/razer-drivers/wiki/Reverse-Engineering-USB-Protocol) then support can be added.
 
 ---
 
