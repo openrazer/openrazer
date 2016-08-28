@@ -999,14 +999,16 @@ int razer_activate_macro_keys(struct usb_device *usb_dev)
  */
 int razer_test(struct usb_device *usb_dev, int temp)
 {   //Status  ID  Packet Num  Size  Class Command  Params
-    //00      ff  0000        03    03    00       010c00                     | Set LED State     | LED Class (0x01) | Keymap Red LED (0x0C)   | Off (0x00)
+    
     int retval;
-    struct razer_report report = get_razer_report(0x03, 0x00, 0x03); // Set LED State
-    report.arguments[0] = 0x01; // Class ID / Profile
-    report.arguments[1] = 0x0C; // Red LED
-    report.arguments[1] = temp; // Enable
+    struct razer_report report = get_razer_report(0x00, 0x04, 0x02); // Device Mode
+    report.arguments[0] = 0x03; // Unknown
+    report.arguments[1] = 0x00; // Parm 0x00
     report.crc = razer_calculate_crc(&report);
     retval = razer_set_report(usb_dev, &report);
+    
+    printk(KERN_WARNING "razerkbd: Test mode");
+    
     return retval;
 }
 
