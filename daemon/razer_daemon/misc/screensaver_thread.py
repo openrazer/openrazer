@@ -60,6 +60,9 @@ class ScreensaverThread(threading.Thread):
             self._try_count += 1
             self._dbus_interface = None
 
+        if self._try_count >= 3:
+            self.logger.warning("Giving up on screensaver")
+
     @property
     def active(self):
         """
@@ -111,7 +114,7 @@ class ScreensaverThread(threading.Thread):
             self.load_dbus()
 
         while not self._shutdown:
-            if self._active and self._try_count <= 3:
+            if self._active and self._try_count < 3:
                 try:
                     if self._dbus_interface is None:
                         self.load_dbus()
@@ -133,6 +136,7 @@ class ScreensaverThread(threading.Thread):
                 except Exception as err:
                     self.logger.exception("Caught exception in run loop", exc_info=err)
                     self._dbus_interface = None
+
 
             # Sleep
             time.sleep(0.1)
