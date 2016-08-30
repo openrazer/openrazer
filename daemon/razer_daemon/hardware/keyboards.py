@@ -38,7 +38,7 @@ class RazerTartarus(RazerDeviceBrightnessSuspend):
         Has macro functionality and brightness based suspend
         """
 
-    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow_Ultimate_2013(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Tartarus_Chroma(-if01)?-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x0208
