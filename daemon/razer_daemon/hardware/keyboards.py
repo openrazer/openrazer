@@ -4,7 +4,7 @@ Keyboards class
 import re
 
 from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend
-from razer_daemon.misc.key_event_management import KeyManager
+from razer_daemon.misc.key_event_management import KeyboardKeyManager, TartarusKeyManager
 from razer_daemon.misc.ripple_effect import RippleManager
 
 
@@ -19,7 +19,7 @@ class MacroKeyboard(RazerDeviceBrightnessSuspend):
         super(MacroKeyboard, self).__init__(*args)
         # Methods are loaded into DBus by this point
 
-        self.key_manager = KeyManager(self._device_number, self.event_files, self)
+        self.key_manager = KeyboardKeyManager(self._device_number, self.event_files, self)
 
     def _close(self):
         """
@@ -27,7 +27,40 @@ class MacroKeyboard(RazerDeviceBrightnessSuspend):
         """
         super(MacroKeyboard, self)._close()
 
-        # TODO look into saving in /var/run maybe
+        # TODO look into saving stats in /var/run maybe
+        self.key_manager.close()
+
+
+class RazerTartarus(RazerDeviceBrightnessSuspend):
+    """
+        Keyboard class
+
+        Has macro functionality and brightness based suspend
+        """
+
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow_Ultimate_2013(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0208
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]  # 6 Rows, 22 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_tartarus', 'set_breath_random_effect', 'set_breath_single_effect',
+               'set_breath_dual_effect', 'set_static_effect', 'set_spectrum_effect', 'tartaris_get_profile_led_red', 'tartaris_set_profile_led_red', 'tartaris_get_profile_led_green',
+               'tartaris_set_profile_led_green', 'tartaris_get_profile_led_blue', 'tartaris_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro']
+
+    def __init__(self, *args):
+        super(RazerTartarus, self).__init__(*args)
+        # Methods are loaded into DBus by this point
+
+        self.key_manager = TartarusKeyManager(self._device_number, self.event_files, self)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerTartarus, self)._close()
+
+        # TODO look into saving stats in /var/run maybe
         self.key_manager.close()
 
 

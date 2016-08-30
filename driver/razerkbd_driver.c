@@ -1739,6 +1739,7 @@ static int razer_kbd_probe(struct hid_device *hdev,
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_spectrum);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_green);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);
@@ -1860,6 +1861,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
         device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
         device_remove_file(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
+        device_remove_file(&hdev->dev, &dev_attr_mode_none);            // No effect
         device_remove_file(&hdev->dev, &dev_attr_profile_led_red);      // Profile/Macro LED Red
         device_remove_file(&hdev->dev, &dev_attr_profile_led_green);    // Profile/Macro LED Green
         device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);     // Profile/Macro LED Blue
