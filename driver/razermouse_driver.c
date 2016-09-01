@@ -1024,8 +1024,8 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     switch (usb_dev->descriptor.idProduct)
     {
-        case USB_DEVICE_ID_RAZER_MAMBA:
-            device_type = "Razer Mamba\n";
+        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+            device_type = "Razer Mamba (Wireless)\n";
             break;
 
         case USB_DEVICE_ID_RAZER_ABYSSUS:
@@ -1147,7 +1147,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     if (retval)
         goto exit_free;
     
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA)
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_WIRELESS)
     {
         retval = device_create_file(&hdev->dev, &dev_attr_get_battery);
         if (retval)
@@ -1242,7 +1242,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 
     device_remove_file(&hdev->dev, &dev_attr_device_type);
 
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA)
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_WIRELESS)
     {
         device_remove_file(&hdev->dev, &dev_attr_get_battery);
         device_remove_file(&hdev->dev, &dev_attr_get_serial);
@@ -1275,7 +1275,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
  * Device ID mapping table
  */
 static const struct hid_device_id razer_devices[] = {
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS) },
     { }
 };
