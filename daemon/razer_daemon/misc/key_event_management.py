@@ -676,6 +676,7 @@ class TartarusKeyManager(KeyboardKeyManager):
 
         try:
             # Convert event ID to key name
+
             key_name = TARTARUS_EVENT_MAPPING[key_id]
             # Key press
 
@@ -704,7 +705,8 @@ class TartarusKeyManager(KeyboardKeyManager):
             self._logger.info("Got Key: {0}".format(key_name))
 
         except KeyError as err:
-            self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
+            self._logger.error("Could not convert key id {0} to a corrosponding name".format(key_id))
+            ##self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
 
         self._access_lock.release()
 
