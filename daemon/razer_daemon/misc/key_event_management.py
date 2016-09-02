@@ -17,15 +17,15 @@ import fcntl
 import json
 import logging
 import os
-import time
-import threading
 import random
 import select
 import struct
 import subprocess
+import threading
+import time
 
 # pylint: disable=import-error
-from razer.keyboard import KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING
+from razer_daemon.keyboard import KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING
 from .macro import MacroKey, MacroRunner, macro_dict_to_obj
 
 EVENT_FORMAT = '@llHHI'

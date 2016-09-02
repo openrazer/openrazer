@@ -5,11 +5,11 @@ Has objects representing key events
 Launching programs etc...
 """
 import logging
-import threading
 import subprocess
+import threading
 
 # pylint: disable=import-error
-from razer.keyboard import XTE_MAPPING
+from razer_daemon.keyboard import XTE_MAPPING
 
 # This determins if the macro keys are executed with their natural spacing
 XTE_SLEEP = False

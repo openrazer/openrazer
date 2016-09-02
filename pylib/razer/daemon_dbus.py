@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 import dbus
-import razer.keyboard
+
+import razer_daemon.keyboard
 
 
 class DaemonInterface(object):
@@ -221,7 +222,7 @@ class DaemonInterface(object):
         :param keyboard_object: Keyboard object
         :type keyboard_object: razer.keyboard.KeyboardColour
         """
-        assert type(keyboard_object) is razer.keyboard.KeyboardColour, "keyboard_object is not a KeyboardColour object"
+        assert type(keyboard_object) is razer_daemon.keyboard.KeyboardColour, "keyboard_object is not a KeyboardColour object"
 
         keyboard_payload = keyboard_object.get_total_binary()
 
