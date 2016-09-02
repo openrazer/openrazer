@@ -25,7 +25,7 @@ import threading
 import time
 
 # pylint: disable=import-error
-from razer_daemon.keyboard import KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING
+from razer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING
 from .macro import MacroKey, MacroRunner, macro_dict_to_obj
 
 EVENT_FORMAT = '@llHHI'
@@ -689,7 +689,7 @@ class TartarusKeyManager(KeyboardKeyManager):
                 # self._logger.debug("Increased key %s", key_name)
             except KeyError:
                 # Create bucket
-                self._stats[storage_bucket] = dict.fromkeys(KEY_MAPPING, 0)
+                self._stats[storage_bucket] = dict.fromkeys(TARTARUS_KEY_MAPPING, 0)
                 try:
                     # Increment key
                     self._stats[storage_bucket][key_name] += 1
@@ -700,7 +700,7 @@ class TartarusKeyManager(KeyboardKeyManager):
             if self._temp_key_store_active:
                 colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
                 self._last_colour_choice = colour
-                self._temp_key_store.append((now + self._temp_expire_time, KEY_MAPPING[key_name], colour))
+                self._temp_key_store.append((now + self._temp_expire_time, TARTARUS_KEY_MAPPING[key_name], colour))
 
             self._logger.info("Got Key: {0}".format(key_name))
 
