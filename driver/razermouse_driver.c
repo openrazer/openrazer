@@ -1242,6 +1242,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 
     dev = hid_get_drvdata(hdev);
 
+	device_remove_file(&hdev->dev, &dev_attr_get_firmware_version);
     device_remove_file(&hdev->dev, &dev_attr_device_type);
 
     if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_WIRELESS)
