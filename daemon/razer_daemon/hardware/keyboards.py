@@ -154,7 +154,7 @@ class RazerBladeStealth(MacroKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     def __init__(self, *args):
-        super(RazerBlackWidowChroma, self).__init__(*args)
+        super(RazerBladeStealth, self).__init__(*args)
 
         self.ripple_manager = RippleManager(self, self._device_number)
 
