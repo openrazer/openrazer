@@ -485,7 +485,6 @@ class KeyboardKeyManager(object):
                 else:
                     # If key has a macro, play it
                     if key_name in self._macros:
-                        self._logger.info("Running Macro %s:%s", key_name, str(self._macros[key_name]))
                         self.play_macro(key_name)
 
         except KeyError as err:
@@ -534,6 +533,7 @@ class KeyboardKeyManager(object):
         :param macro_key: Macro Key
         :type macro_key: str
         """
+        self._logger.info("Running Macro %s:%s", macro_key, str(self._macros[macro_key]))
         macro_thread = MacroRunner(self._device_id, macro_key, self._macros[macro_key])
         macro_thread.start()
         self._threads.add(macro_thread)
@@ -566,6 +566,12 @@ class KeyboardKeyManager(object):
         """
         Get macros in JSON format
 
+        Returns a JSON blob of all active macros in the format of
+        {BIND_KEY: [MACRO_DICT...]}
+
+        MACRO_DICT is a dict representation of an action that can be performed. The dict will have a
+        type key which determins what type of action it will perform.
+        For example there are key press macros, URL opening macros, Script running macros etc...
         :return: JSON of macros
         :rtype: str
         """
@@ -580,13 +586,14 @@ class KeyboardKeyManager(object):
         """
         Add macro from JSON
 
+        The macro_json will be a list of macro objects which is then converted into JSON
         :param macro_key: Macro bind key
         :type macro_key: str
 
         :param macro_json: Macro JSON
         :type macro_json: str
         """
-        macro_list = [macro_dict_to_obj(json_dict) for json_dict in json.loads(macro_json)]
+        macro_list = [macro_dict_to_obj(macro_object_dict) for macro_object_dict in json.loads(macro_json)]
         self._macros[macro_key] = macro_list
 
     def close(self):
@@ -702,11 +709,13 @@ class TartarusKeyManager(KeyboardKeyManager):
                 self._last_colour_choice = colour
                 self._temp_key_store.append((now + self._temp_expire_time, TARTARUS_KEY_MAPPING[key_name], colour))
 
-            self._logger.info("Got Key: {0}".format(key_name))
+            #self._logger.debug("Got Key: {0}".format(key_name))
+
+            if key_name in self._macros:
+                self.play_macro(key_name)
 
         except KeyError as err:
-            self._logger.error("Could not convert key id {0} to a corrosponding name".format(key_id))
-            ##self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
+            self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
 
         self._access_lock.release()
 
