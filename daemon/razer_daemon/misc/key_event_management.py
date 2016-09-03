@@ -475,9 +475,15 @@ class KeyboardKeyManager(object):
                     if self._current_macro_bind_key is None:
                         self._current_macro_bind_key = key_name
                         self._parent.setMacroEffect(0x00)
-                    # Don't want no recursion
+                    # Don't want no recursion, cancel macro
                     elif self._current_macro_bind_key == key_name:
                         self._logger.warning("Skipping macro assignment as would cause recursion")
+                        self._recording_macro = False
+                        self._parent.setMacroMode(False)
+                    elif key_name not in ('M1', 'M2', 'M3', 'M4', 'M5'):
+                        self._logger.warning("Macros are only for M1-M5 for now.")
+                        self._recording_macro = False
+                        self._parent.setMacroMode(False)
                     # Anything else just record it
                     else:
                         self._current_macro_combo.append((event_time, key_name, 'DOWN'))

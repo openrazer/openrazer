@@ -34,9 +34,7 @@ class RazerDevice(object):
 
         self._serial = serial
 
-        pprint(self._available_features)
-
-        default_capabilities = {
+        self._capabilities = {
             'name': True,
             'type': True,
             'firmware_version': True,
@@ -58,7 +56,6 @@ class RazerDevice(object):
             # Get if the device has an LED Matrix, == True as its a DBus boolean otherwise, so for consistency sake we coerce it into a native bool
             'lighting_led_matrix': self._dbus_interfaces['device'].hasMatrix() == True
         }
-        self._update_capabilities(default_capabilities)
 
         self._matrix_dimensions = self._dbus_interfaces['device'].getMatrixDimensions()
 
@@ -93,27 +90,11 @@ class RazerDevice(object):
 
         return interfaces
 
-    def _has_feature(self, object_path, method_name=None):
+    def _has_feature(self, object_path:str, method_name:str=None) -> bool:
         if method_name is None:
             return object_path in self._available_features
         else:
             return object_path in self._available_features and method_name in self._available_features[object_path]
-
-
-    def _update_capabilities(self, capabilities:dict):
-        """
-        Update capabilities
-
-        This cheap hack updates the capabilities dict with defaults if keys dont exist
-        :param capabilities: Capabilities dict
-        :type capabilities: dict
-        """
-        if hasattr(self, '_capabilities'):
-            for capability, enabled in capabilities.items():
-                if capability not in self._capabilities:
-                    self._capabilities[capability] = enabled
-        else:
-            self._capabilities = capabilities
 
     def has(self, capability:str) -> bool:
         """
