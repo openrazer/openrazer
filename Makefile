@@ -28,7 +28,7 @@ driver_verbose:
 driver_clean:
 	@echo "\n::\033[32m Cleaning Razer kernel modules\033[0m"
 	@echo "========================================"
-	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) clean > /dev/null 2>&1
+	make -C "$(KERNELDIR)" SUBDIRS="$(DRIVERDIR)" clean > /dev/null 2>&1
 
 # Install kernel modules and then update module dependencies
 driver_install:
