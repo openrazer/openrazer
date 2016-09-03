@@ -21,7 +21,9 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
  * Razer Firefly *(full support)*
 
 ### Mouse Support:
+ * Razer Mamba (Wired) *(work in progress)*
  * Razer Mamba (Wireless) *(full support)*
+ * Razer Mamba TE *(work in progress)*
  * Razer Abyssus *(full support)*
 
 ### Misc Peripheral Support
@@ -39,6 +41,7 @@ by the daemon. If your device is supported by the driver but not by the daemon t
  * Razer Blackwidow Chroma
  * Razer Blackwidow Chroma Tournament Edition
  * Razer Blackwidow X Chroma
+ * Razer Blade Stealth
 
 ### Mousemat Support:
  * Razer Firefly
