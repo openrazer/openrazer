@@ -1,3 +1,11 @@
+razer (1.0.6-0ubuntu1) trusty; urgency=low
+
+  * Made a change to Makefile that might make LaunchTurd happier
+  * Added Tartarus support in driver and daemon
+  * Added Mamba Chroma TE and Mamba Choma Wired to driver
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sun, 04 Sep 2016 11:55:00 +0000
+
 razer (1.0.5-0ubuntu1) trusty; urgency=low
 
   * Fixed some blade stealth daemon stuff
