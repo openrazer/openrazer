@@ -82,45 +82,44 @@ class DeviceManager(object):
         return self._devices
 
 
-
-if __name__ == '__main__':
-    from razer.client.debug import print_attrs
-    # #DodgyHackToPrintVarStructure
-    # TODO remove on debug complete
-    a = DeviceManager()
-    devices = a.devices
-
-    kbd = None
-    mouse = None
-    for device in devices:
-        if device.type == 'keyboard':
-            kbd = device
-        elif device.type == 'mouse':
-            mouse = device
-
-    if kbd is not None:
-        print_attrs(kbd, recurse_to=['fx', 'macro', 'advanced'])
-
-        # new_macro = [kbd.macro.create_url_macro_item("https://hackaday.com")]
-        # kbd.macro.add_macro('M2', new_macro)
-        #kbd.macro.del_macro('M2')
-        kbd.fx.static(255, 00, 255)
-
-        # macros = kbd.macro.get_macros()
-
-        #                      y, x       r, g, b
-        # kbd.fx.advanced.matrix[1, 1] = (255, 0, 255)
-        # kbd.fx.advanced.matrix[1, 2] = (0, 255, 255)
-        # kbd.fx.advanced.matrix[1, 3] = (255, 255, 0)
-        # kbd.fx.advanced.draw()
-
-
-
-
-        print()
-
-    # if mouse is not None:
-    #     mouse.brightness = 100.0
-
-    print()
-    print("Devices: {0}".format(devices))
+# if __name__ == '__main__':
+#     from razer.client.debug import print_attrs
+#     # #DodgyHackToPrintVarStructure
+#     # TODO remove on debug complete
+#     a = DeviceManager()
+#     devices = a.devices
+#
+#     kbd = None
+#     mouse = None
+#     for device in devices:
+#         if device.type == 'keyboard':
+#             kbd = device
+#         elif device.type == 'mouse':
+#             mouse = device
+#
+#     if kbd is not None:
+#         print_attrs(kbd, recurse_to=['fx', 'macro', 'advanced'])
+#
+#         # new_macro = [kbd.macro.create_url_macro_item("https://hackaday.com")]
+#         # kbd.macro.add_macro('M2', new_macro)
+#         #kbd.macro.del_macro('M2')
+#         kbd.fx.static(255, 00, 255)
+#
+#         # macros = kbd.macro.get_macros()
+#
+#         #                      y, x       r, g, b
+#         # kbd.fx.advanced.matrix[1, 1] = (255, 0, 255)
+#         # kbd.fx.advanced.matrix[1, 2] = (0, 255, 255)
+#         # kbd.fx.advanced.matrix[1, 3] = (255, 255, 0)
+#         # kbd.fx.advanced.draw()
+#
+#
+#
+#
+#         print()
+#
+#     # if mouse is not None:
+#     #     mouse.brightness = 100.0
+#
+#     print()
+#     print("Devices: {0}".format(devices))

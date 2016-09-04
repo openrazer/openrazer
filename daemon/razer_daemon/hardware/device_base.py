@@ -292,12 +292,15 @@ class RazerDevice(DBusService):
             observer.notify(msg)
 
     @classmethod
-    def match(cls, device_id):
+    def match(cls, device_id, dev_path):
         """
         Match against the device ID
 
         :param device_id: Device ID like 0000:0000:0000.0000
         :type device_id: str
+
+        :param dev_path: Device path. Normally '/sys/bus/hid/devices'
+        :type dev_path: str
 
         :return: True if its the correct device ID
         :rtype: bool
@@ -305,7 +308,7 @@ class RazerDevice(DBusService):
         pattern = r'^[0-9A-F]{4}:' + '{0:04X}'.format(cls.USB_VID) +':' + '{0:04X}'.format(cls.USB_PID) + r'\.[0-9A-F]{4}$'
 
         if re.match(pattern, device_id) is not None:
-            if 'device_type' in  os.listdir(os.path.join('/sys/bus/hid/devices', device_id)):
+            if 'device_type' in  os.listdir(os.path.join(dev_path, device_id)):
                 return True
 
         return False
