@@ -1,4 +1,5 @@
 import dbus
+
 from razer.inteface.device import Device
 
 DAEMON_BUS_NAME = 'org.razer'

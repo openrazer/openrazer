@@ -5,6 +5,7 @@ import re
 import os
 import types
 import logging
+import time
 
 from razer_daemon.dbus_services.service import DBusService
 import razer_daemon.dbus_services.dbus_methods
@@ -156,6 +157,7 @@ class RazerDevice(DBusService):
                 serial = serial_file.read().strip()
 
                 count += 1
+                time.sleep(0.1)
 
             return serial
 
