@@ -12,8 +12,6 @@ class RazerKeyboard(__RazerDevice):
         super(RazerKeyboard, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
 
         # Capabilities
-        self._capabilities['lighting_ripple'] = self._has_feature('razer.device.lighting.custom', 'setRipple') # Thinking of extending custom to do more hence the key check
-
         self._capabilities['game_mode_led'] = self._has_feature('razer.device.led.gamemode')
         self._capabilities['macro_mode_led'] = self._has_feature('razer.device.led.macromode', 'setMacroMode')
         self._capabilities['macro_mode_led_effect'] = self._has_feature('razer.device.led.macromode', 'setMacroEffect')

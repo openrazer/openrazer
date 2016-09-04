@@ -50,6 +50,7 @@ class RazerDevice(object):
             'lighting_none': self._has_feature('razer.device.lighting.chroma', 'setNone'),
             'lighting_spectrum': self._has_feature('razer.device.lighting.chroma', 'setSpectrum'),
             'lighting_static': self._has_feature('razer.device.lighting.chroma', 'setStatic'),
+            'lighting_ripple': self._has_feature('razer.device.lighting.custom', 'setRipple'),  # Thinking of extending custom to do more hence the key check
 
             'lighting_pulsate': self._has_feature('razer.device.lighting.chroma', 'setPulsate'),
 
