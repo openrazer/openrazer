@@ -105,6 +105,9 @@ class DeviceManager(object):
 #         #kbd.macro.del_macro('M2')
 #         kbd.fx.static(255, 00, 255)
 #
+#         script_macro = kbd.macro.create_script_macro_item("~/test.sh")
+#         kbd.macro.add_macro('M1', script_macro)
+#
 #         # macros = kbd.macro.get_macros()
 #
 #         #                      y, x       r, g, b

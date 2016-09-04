@@ -9,19 +9,15 @@ class RazerKeyboard(__RazerDevice):
     _MACRO_CLASS = _RazerMacro
 
     def __init__(self, serial, vid_pid=None, daemon_dbus=None):
-        default_capabilities = {
-            'game_mode_led': True,
-            'macro_mode_led': True,
-            'macro_mode_led_effect': True,
-            'macro_logic': True,
-
-            # Keyboard specific lighting
-            'lighting_ripple': True
-        }
-        self._update_capabilities(default_capabilities)
-
-        # Go get base stuff
         super(RazerKeyboard, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
+
+        # Capabilities
+        self._capabilities['lighting_ripple'] = self._has_feature('razer.device.lighting.custom', 'setRipple') # Thinking of extending custom to do more hence the key check
+
+        self._capabilities['game_mode_led'] = self._has_feature('razer.device.led.gamemode')
+        self._capabilities['macro_mode_led'] = self._has_feature('razer.device.led.macromode', 'setMacroMode')
+        self._capabilities['macro_mode_led_effect'] = self._has_feature('razer.device.led.macromode', 'setMacroEffect')
+        self._capabilities['macro_logic'] = self._has_feature('razer.device.macro')
 
         # Setup base stuff if need be
         if self.has('game_mode_led'):
@@ -132,21 +128,10 @@ class RazerBladeStealthKeyboard(RazerKeyboard):
         # Go get base stuff
         super(RazerBladeStealthKeyboard, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
 
-class RazerChromaTournamentEditionKeyboard(RazerKeyboard):
-    def __init__(self, serial, vid_pid=None, daemon_dbus=None):
-        default_capabilities = {
-            'game_mode_led': True,
-            'macro_mode_led': False,
-            'macro_mode_led_effect': False,
-        }
-        self._update_capabilities(default_capabilities)
-
-        super(RazerChromaTournamentEditionKeyboard, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
 
 
 DEVICE_PID_MAP = {
     0x0205: RazerBladeStealthKeyboard,
-    0x0209: RazerChromaTournamentEditionKeyboard,
 }
 
 class RazerKeyboardFactory(__BaseDeviceFactory):
