@@ -49,11 +49,14 @@ by the daemon. If your device is supported by the driver but not by the daemon t
 ### Mouse Support:
  * Razer Mamba (Wireless)
 
+### Misc Peripheral Support
+ * Razer Tartarus
+
 ## Installation
 
 ### Arch Linux
 
-[Arch Linux installation guide](https://github.com/terrycain/razer_drivers/blob/master/package_for_arch/README.md) 
+Install `razer-driver-meta` from AUR, or install the three packages `razer-driver-dkms`, `razer-daemon` and `python-razer` singularly from AUR.
 
 ### Ubuntu Linux
 We have a PPA here - `https://launchpad.net/~terrz/+archive/ubuntu/razerutils`

@@ -67,6 +67,17 @@ def get_device_type_firefly(self):
     self.logger.debug("DBus call get_device_type")
     return 'firefly'
 
+@endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
+def get_device_type_tartarus(self):
+    """
+    Get the device's type
+
+    :return:'tartarus'
+    :rtype: str
+    """
+    self.logger.debug("DBus call get_device_type")
+    return 'tartarus'
+
 
 @endpoint('razer.device.misc', 'hasMatrix', out_sig='b')
 def has_matrix(self):
