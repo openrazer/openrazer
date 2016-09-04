@@ -46,10 +46,13 @@ class RazerMacro(object):
         :type bind_key: str
 
         :param macro_object_sequence: List of macro objects
-        :type macro_object_sequence: list or tuple
+        :type macro_object_sequence: list or tuple or __daemon_macro.MacroObject
         """
         if bind_key not in keyboard.KEY_MAPPING:
             raise ValueError("Key {0} is not in razer.keyboard.KEY_MAPPING".format(bind_key))
+
+        if isinstance(macro_object_sequence, _daemon_macro.MacroObject):
+            macro_object_sequence = [macro_object_sequence]
         if not isinstance(macro_object_sequence, (tuple, list)):
             raise ValueError("macro_object_sequence is not iterable")
 
@@ -81,3 +84,69 @@ class RazerMacro(object):
         :rtype: _daemon_macro.MacroURL
         """
         return _daemon_macro.MacroURL(url)
+
+    @staticmethod
+    def create_script_macro_item(script_path:str, script_args:str=None) -> _daemon_macro.MacroScript:
+        """
+        Create a macro object that runs a script
+
+        The arguments to the script should be a string containing all the arguments, if any values contain spaces they should be quoted accordingly
+        :param script_path: Script filepath, includes script name
+        :type script_path: str
+
+        :param script_args: Script arguments
+        :type script_args: str or None
+
+        :return: Macro object
+        :rtype: _daemon_macro.MacroScript
+        """
+        return _daemon_macro.MacroScript(script_path, script_args)
+
+    @staticmethod
+    def create_keypress_up_macro_item(key_name:str, pre_pause:int=0) -> _daemon_macro.MacroKey:
+        """
+        Create a macro action that consists of a key release event
+
+        :param key_name: Key Name, compatible with XTE
+        :type key_name: str
+
+        :param pre_pause: Optional delay before key is actioned (if turned on in daemon)
+        :type pre_pause: int
+
+        :return: Macro Key
+        :rtype: _daemon_macro.MacroKey
+        """
+        return _daemon_macro.MacroKey(key_name, pre_pause, 'UP')
+
+    @staticmethod
+    def create_keypress_down_macro_item(key_name: str, pre_pause:int=0) -> _daemon_macro.MacroKey:
+        """
+        Create a macro action that consists of a key press event
+
+        :param key_name: Key Name, compatible with XTE
+        :type key_name: str
+
+        :param pre_pause: Optional delay before key is actioned (if turned on in daemon)
+        :type pre_pause: int
+
+        :return: Macro Key
+        :rtype: _daemon_macro.MacroKey
+        """
+        return _daemon_macro.MacroKey(key_name, pre_pause, 'DOWN')
+
+    @classmethod
+    def create_keypress_macro_item(cls, key_name: str, pre_pause:int=0) -> list:
+        """
+        Create a macro action that consists of a key press and release event
+
+        The pre_pause delay will be applied to both key events
+        :param key_name: Key Name, compatible with XTE
+        :type key_name: str
+
+        :param pre_pause: Optional delay before key is actioned (if turned on in daemon)
+        :type pre_pause: int
+
+        :return: Macro Key
+        :rtype: list of _daemon_macro.MacroKey
+        """
+        return [cls.create_keypress_down_macro_item(key_name, pre_pause), cls.create_keypress_up_macro_item(key_name, pre_pause)]

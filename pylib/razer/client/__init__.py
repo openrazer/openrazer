@@ -104,7 +104,10 @@ if __name__ == '__main__':
         # new_macro = [kbd.macro.create_url_macro_item("https://hackaday.com")]
         # kbd.macro.add_macro('M2', new_macro)
         #kbd.macro.del_macro('M2')
-        kbd.fx.static(255, 00, 255)
+        #kbd.fx.static(255, 00, 255)
+
+        script_macro = kbd.macro.create_script_macro_item("~/test.sh")
+        kbd.macro.add_macro('M1', script_macro)
 
         # macros = kbd.macro.get_macros()
 

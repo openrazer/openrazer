@@ -458,7 +458,12 @@ class KeyboardKeyManager(object):
 
                     else:
                         # Finish recording macro
-                        self.add_kb_macro()
+                        if self._current_macro_bind_key is not None:
+                            if len(self._current_macro_combo) > 0:
+                                self.add_kb_macro()
+                            else:
+                                # Clear macro
+                                self.dbus_delete_macro(self._current_macro_bind_key)
                         self._recording_macro = False
                         self._parent.setMacroMode(False)
                 # Sets up game mode as when enabling macro keys it stops the key working

@@ -93,11 +93,42 @@ class MacroURL(MacroObject):
             'url': self.url,
         }
 
-    def open_url(self):
+    def execute(self):
         """
         Open URL in the browser
         """
         proc = subprocess.Popen(['xdg-open', self.url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        proc.communicate()
+
+class MacroScript(MacroObject):
+    """
+    Is an object of a key event used in macros
+    """
+    def __init__(self, script, args=None):
+        self.script = script
+        if isinstance(args, str):
+            self.args = ' ' + args
+        else:
+            self.args = ''
+
+    def __repr__(self):
+        return '{0}'.format(self.script)
+
+    def __str__(self):
+        return 'MacroScript|{0}'.format(self.script)
+
+    def to_dict(self):
+        return {
+            'type': 'MacroScript',
+            'script': self.script,
+            'args': self.args
+        }
+
+    def execute(self):
+        """
+        Run script
+        """
+        proc = subprocess.Popen(self.script + self.args, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         proc.communicate()
 
 class MacroRunner(threading.Thread):
@@ -143,6 +174,7 @@ class MacroRunner(threading.Thread):
         Main thread function
         """
 
+        # TODO move the xte-munging to the init
         xte = ''
 
         for event in self._macro_data:
@@ -155,8 +187,8 @@ class MacroRunner(threading.Thread):
                     xte = ''
 
                 # Now run everything else (this just allows for less calls to xte
-                if isinstance(event, MacroURL):
-                    event.open_url()
+                if not isinstance(event, MacroKey):
+                    event.execute()
 
         if xte != '':
             proc = subprocess.Popen(['xte'], stdin=subprocess.PIPE)
@@ -182,6 +214,8 @@ def macro_dict_to_obj(macro_dict):
         result = MacroKey.from_dict(macro_dict)
     elif macro_dict['type'] == 'MacroURL':
         result = MacroURL.from_dict(macro_dict)
+    elif macro_dict['type'] == 'MacroScript':
+        result = MacroScript.from_dict(macro_dict)
     else:
         raise ValueError("unknown type")
 
