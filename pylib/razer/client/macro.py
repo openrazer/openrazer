@@ -7,10 +7,15 @@ from razer_daemon import keyboard
 
 
 class RazerMacro(object):
-    def __init__(self, serial:str, daemon_dbus=None):
+    def __init__(self, serial:str, daemon_dbus=None, capabilities=None):
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
+
+        if capabilities is None:
+            self._capabilities = {}
+        else:
+            self._capabilities = capabilities
 
         self._macro_dbus = _dbus.Interface(daemon_dbus, "razer.device.macro")
 
@@ -71,6 +76,17 @@ class RazerMacro(object):
             raise ValueError("Key {0} is not in razer.keyboard.KEY_MAPPING".format(bind_key))
         else:
             self._macro_dbus.deleteMacro(bind_key)
+
+    @property
+    def mode_modifier(self):
+        if 'macro_tartarus_mode_modifier' in self._capabilities:
+            return self._macro_dbus.getModeModifier()
+        return False
+
+    @mode_modifier.setter
+    def mode_modifier(self, value):
+        if 'macro_tartarus_mode_modifier' in self._capabilities and isinstance(value, bool):
+            self._macro_dbus.getModeModifier(value)
 
     @staticmethod
     def create_url_macro_item(url:str) -> _daemon_macro.MacroURL:

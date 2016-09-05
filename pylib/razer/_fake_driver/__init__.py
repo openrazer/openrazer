@@ -24,6 +24,8 @@ class FakeDevice(object):
         else:
             raise ValueError('Invalid config line "{0}"'.format(line))
 
+        orig_perm = chmod
+
         if chmod == 'r':
             chmod = 0o660
         elif chmod == 'w':
@@ -31,7 +33,7 @@ class FakeDevice(object):
         else:
             chmod = 0o660
 
-        return chmod, name, default
+        return chmod, name, default, orig_perm
 
     @staticmethod
     def create_endpoint(path, chmod, default=None):
@@ -50,6 +52,7 @@ class FakeDevice(object):
         if spec_name not in SPECS:
             raise ValueError("Spec {0} not in SPECS".format(spec_name))
 
+        self.spec_name = spec_name
         self._config = configparser.ConfigParser()
         self._config.read(SPECS[spec_name])
         self._serial = serial
@@ -57,7 +60,7 @@ class FakeDevice(object):
         self._tmp_dir = os.path.join(tmp_dir, self._config.get('device', 'dir_name'))
         os.makedirs(self._tmp_dir, exist_ok=True)
 
-        self._endpoints = {}
+        self.endpoints = {}
         self.create_endpoints()
 
         if serial is not None:
@@ -68,16 +71,16 @@ class FakeDevice(object):
 
     def create_endpoints(self):
         for endpoint_line in self._config.get('device', 'files').splitlines():
-            chmod, name, default = self.parse_endpoint_line(endpoint_line)
+            chmod, name, default, orig_perm = self.parse_endpoint_line(endpoint_line)
             path = self._get_endpoint_path(name)
 
             if name == 'get_serial' and self._serial is not None:
                 default = self._serial
-            self._endpoints[name] = (chmod, default)
+            self.endpoints[name] = (chmod, default, orig_perm)
             self.create_endpoint(path, chmod, default)
 
     def get(self, endpoint, binary=False):
-        if endpoint not in self._endpoints:
+        if endpoint not in self.endpoints:
             raise ValueError("Endpoint {0} does not exist".format(endpoint))
 
         path = self._get_endpoint_path(endpoint)
@@ -93,7 +96,7 @@ class FakeDevice(object):
         return result
 
     def set(self, endpoint, value, binary=False):
-        if endpoint not in self._endpoints:
+        if endpoint not in self.endpoints:
             raise ValueError("Endpoint {0} does not exist".format(endpoint))
 
         path = self._get_endpoint_path(endpoint)
@@ -113,7 +116,7 @@ class FakeDevice(object):
     def close(self):
         if os.path.exists(self._tmp_dir):
             # Allow deletion
-            for endpoint in self._endpoints:
+            for endpoint in self.endpoints:
                 path = os.path.join(self._tmp_dir, endpoint)
                 os.chmod(path, 0o660)
 

@@ -647,6 +647,8 @@ class TartarusKeyManager(KeyboardKeyManager):
     def __init__(self, device_id, event_files, parent, use_epoll=True):
         super(TartarusKeyManager, self).__init__(device_id, event_files, parent, use_epoll)
 
+        self._mode_modifier = False
+
     def key_action(self, event_time, key_id, key_press=True):
         """
         Process a key press event
@@ -729,6 +731,14 @@ class TartarusKeyManager(KeyboardKeyManager):
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
 
         self._access_lock.release()
+
+    @property
+    def mode_modifier(self):
+        return self._mode_modifier
+    @mode_modifier.setter
+    def mode_modifier(self, value):
+        self._mode_modifier = True if value else False
+
 
 class MediaKeyPress(threading.Thread):
     """

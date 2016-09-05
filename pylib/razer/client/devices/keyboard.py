@@ -16,6 +16,7 @@ class RazerKeyboard(__RazerDevice):
         self._capabilities['macro_mode_led'] = self._has_feature('razer.device.led.macromode', 'setMacroMode')
         self._capabilities['macro_mode_led_effect'] = self._has_feature('razer.device.led.macromode', 'setMacroEffect')
         self._capabilities['macro_logic'] = self._has_feature('razer.device.macro')
+        self._capabilities['macro_tartarus_mode_modifier'] = self._has_feature('razer.device.macro', 'setModeModifier')
 
         # Setup base stuff if need be
         if self.has('game_mode_led'):
@@ -26,7 +27,7 @@ class RazerKeyboard(__RazerDevice):
 
         if self.has('macro_logic'):
             if self._MACRO_CLASS is not None:
-                self.macro = self._MACRO_CLASS(serial, daemon_dbus=daemon_dbus)
+                self.macro = self._MACRO_CLASS(serial, daemon_dbus=daemon_dbus, capabilities=self._capabilities)
             else:
                 self._capabilities['macro_logic'] = False
                 self.macro = None
