@@ -39,6 +39,13 @@ class FakeDevicePrompt(cmd.Cmd):
             else:
                 print("  {0:->2}-  {1}".format(permission, endpoint))
 
+        print()
+        print('Event files')
+        print('-----------')
+        for event_id, event_value in sorted(self._device.events.items(), key=lambda x: x[0]):
+            print("  {0: >2}   {1}".format(event_id, event_value[0]))
+
+
     def do_ls(self, arg):
         """List available device files"""
         self.do_list(arg)
@@ -93,6 +100,23 @@ class FakeDevicePrompt(cmd.Cmd):
             completions = [item for item in self._write if item.startswith(text)]
 
         return completions
+
+    def do_event(self, arg):
+        """Emit an event, format: EVENT_ID KEY_ID STATE
+
+        Where state in 'up' 'down' and 'repeat'"""
+
+        event_file, key_id, value = arg.split(' ')
+
+        if event_file not in self._device.events:
+            print("Event ID {0} is invalid".format(event_file))
+        else:
+            try:
+                bytes_written = self._device.emit_kb_event(event_file, int(key_id), value)
+                print("Wrote {0} bytes to {1}".format(bytes_written, self._device.events[event_file][0]))
+            except ValueError as err:
+                print("Caught exception: {0}".format(err))
+
 
 
 

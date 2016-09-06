@@ -23,6 +23,7 @@ import struct
 import subprocess
 import threading
 import time
+import bisect
 
 # pylint: disable=import-error
 from razer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING
@@ -232,12 +233,13 @@ class KeyboardKeyManager(object):
     get round to making the effect.
     """
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, device_id, event_files, parent, use_epoll=False):
+    def __init__(self, device_id, event_files, parent, use_epoll=False, testing=False):
 
         self._device_id = device_id
         self._logger = logging.getLogger('razer.device{0}.keymanager'.format(device_id))
         self._parent = parent
         self._parent.register_observer(self)
+        self._testing = testing
 
         self._event_files = event_files
         self._access_lock = threading.Lock()
@@ -325,8 +327,9 @@ class KeyboardKeyManager(object):
         :param grab: True to grab, False to release
         :type grab: bool
         """
-        for event_file in self._open_event_files:
-            fcntl.ioctl(event_file.fileno(), EVIOCGRAB, int(grab))
+        if not self._testing:
+            for event_file in self._open_event_files:
+                fcntl.ioctl(event_file.fileno(), EVIOCGRAB, int(grab))
         self._event_files_locked = grab
 
     def key_action(self, event_time, key_id, key_press=True):
@@ -644,10 +647,12 @@ class KeyboardKeyManager(object):
                 pass
 
 class TartarusKeyManager(KeyboardKeyManager):
-    def __init__(self, device_id, event_files, parent, use_epoll=True):
-        super(TartarusKeyManager, self).__init__(device_id, event_files, parent, use_epoll)
+    def __init__(self, device_id, event_files, parent, use_epoll=True, testing=False):
+        super(TartarusKeyManager, self).__init__(device_id, event_files, parent, use_epoll, testing=testing)
 
         self._mode_modifier = False
+        self._mode_modifier_combo = []
+        self._mode_modifier_key_down = False
 
     def key_action(self, event_time, key_id, key_press=True):
         """
@@ -722,7 +727,31 @@ class TartarusKeyManager(KeyboardKeyManager):
                 self._last_colour_choice = colour
                 self._temp_key_store.append((now + self._temp_expire_time, TARTARUS_KEY_MAPPING[key_name], colour))
 
-            #self._logger.debug("Got Key: {0}".format(key_name))
+            # if self._testing:
+            if key_press:
+                self._logger.debug("Got Key: {0} Down".format(key_name))
+            else:
+                self._logger.debug("Got Key: {0} Up".format(key_name))
+
+            # Logic for mode switch modifier
+            if self._mode_modifier:
+                if key_name == 'MODE_SWITCH' and key_press:
+                    # Start the macro string
+                    self._mode_modifier_key_down = True
+                    self._mode_modifier_combo.clear()
+
+                elif key_name == 'MODE_SWITCH' and not key_press:
+                    # Release mode_switch
+                    self._mode_modifier_key_down = False
+
+                elif key_press and self._mode_modifier_key_down:
+                    # Any keys pressed whilst mode_switch is down
+                    bisect.insort(self._mode_modifier_combo, key_name)
+
+                    # Override keyname so it now equals a macro
+                    key_name = '+'.join(self._mode_modifier_combo)
+
+            self._logger.debug("Macro String: {0}".format(key_name))
 
             if key_name in self._macros:
                 self.play_macro(key_name)

@@ -29,13 +29,14 @@ class RazerDevice(DBusService):
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]
 
-    def __init__(self, device_path, device_number, config):
+    def __init__(self, device_path, device_number, config, testing=False):
 
         self._observer_list = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
 
         self.config = config
+        self._testing = testing
         self._parent = None
         self._device_path = device_path
         self._device_number = device_number
@@ -50,9 +51,15 @@ class RazerDevice(DBusService):
 
         # Find event files in /dev/input/by-id/ by matching against regex
         self.event_files = []
-        for event_file in os.listdir('/dev/input/by-id/'):
+
+        if self._testing:
+            search_dir = os.path.join(device_path, 'input')
+        else:
+            search_dir = '/dev/input/by-id/'
+
+        for event_file in os.listdir(search_dir):
             if self.EVENT_FILE_REGEX is not None and self.EVENT_FILE_REGEX.match(event_file) is not None:
-                self.event_files.append(os.path.join('/dev/input/by-id/', event_file))
+                self.event_files.append(os.path.join(search_dir, event_file))
 
         object_path = os.path.join(self.OBJECT_PATH, self.serial)
         DBusService.__init__(self, self.BUS_PATH, object_path)

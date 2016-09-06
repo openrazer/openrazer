@@ -320,7 +320,7 @@ class RazerDaemon(DBusService):
                 if device_class.match(device_id, dev_path=dev_path):  # Check it matches sys/ ID format and has device_type file
                     self.logger.info('Found device.%d: %s', device_number, device_id)
                     device_path = os.path.join(dev_path, device_id)
-                    razer_device = device_class(device_path, device_number, self._config)
+                    razer_device = device_class(device_path, device_number, self._config, testing=self._test_dir is not None)
 
                     # Wireless devices sometimes dont listen
                     count = 0

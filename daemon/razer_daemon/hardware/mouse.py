@@ -18,8 +18,8 @@ class RazerMambaChromaWireless(RazerDeviceBrightnessSuspend):
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_charge_effect', 'set_charge_colour', 'set_idle_time', 'set_low_battery_threshold', 'set_dpi_xy']
 
-    def __init__(self, *args):
-        super(RazerMambaChromaWireless, self).__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super(RazerMambaChromaWireless, self).__init__(*args, **kwargs)
 
         self._battery_manager = BatteryManager(self, self._device_number, 'Razer Mamba')
 
