@@ -23,7 +23,6 @@ import struct
 import subprocess
 import threading
 import time
-import bisect
 
 # pylint: disable=import-error
 from razer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING
@@ -746,7 +745,7 @@ class TartarusKeyManager(KeyboardKeyManager):
 
                 elif key_press and self._mode_modifier_key_down:
                     # Any keys pressed whilst mode_switch is down
-                    bisect.insort(self._mode_modifier_combo, key_name)
+                    self._mode_modifier_combo.append(key_name)
 
                     # Override keyname so it now equals a macro
                     key_name = '+'.join(self._mode_modifier_combo)
