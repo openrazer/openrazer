@@ -53,9 +53,6 @@ class RazerMacro(object):
         :param macro_object_sequence: List of macro objects
         :type macro_object_sequence: list or tuple or __daemon_macro.MacroObject
         """
-        if bind_key not in keyboard.KEY_MAPPING:
-            raise ValueError("Key {0} is not in razer.keyboard.KEY_MAPPING".format(bind_key))
-
         if isinstance(macro_object_sequence, _daemon_macro.MacroObject):
             macro_object_sequence = [macro_object_sequence]
         if not isinstance(macro_object_sequence, (tuple, list)):

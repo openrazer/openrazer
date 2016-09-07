@@ -738,6 +738,7 @@ class TartarusKeyManager(KeyboardKeyManager):
                     # Start the macro string
                     self._mode_modifier_key_down = True
                     self._mode_modifier_combo.clear()
+                    self._mode_modifier_combo.append('MODE')
 
                 elif key_name == 'MODE_SWITCH' and not key_press:
                     # Release mode_switch
