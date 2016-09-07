@@ -7,6 +7,7 @@ from razer.client.devices.keyboard import RazerKeyboardFactory as __RazerKeyboar
 DEVICE_MAP ={
     'firefly': __RazerFirefly,
     'keyboard': __RazerKeyboardFactory,
+    'tartarus': __RazerKeyboardFactory,
     'default': __RazerDevice
 }
 
