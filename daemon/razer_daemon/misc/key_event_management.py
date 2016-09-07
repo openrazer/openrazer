@@ -646,17 +646,12 @@ class KeyboardKeyManager(object):
                 pass
 
 class TartarusKeyManager(KeyboardKeyManager):
-<<<<<<< HEAD
-    def __init__(self, device_id, event_files, parent, use_epoll=True):
-        super(TartarusKeyManager, self).__init__(device_id, event_files, parent, use_epoll)
-=======
     def __init__(self, device_id, event_files, parent, use_epoll=True, testing=False):
         super(TartarusKeyManager, self).__init__(device_id, event_files, parent, use_epoll, testing=testing)
 
         self._mode_modifier = False
         self._mode_modifier_combo = []
         self._mode_modifier_key_down = False
->>>>>>> master
 
     def key_action(self, event_time, key_id, key_press=True):
         """
@@ -731,16 +726,6 @@ class TartarusKeyManager(KeyboardKeyManager):
                 self._last_colour_choice = colour
                 self._temp_key_store.append((now + self._temp_expire_time, TARTARUS_KEY_MAPPING[key_name], colour))
 
-<<<<<<< HEAD
-            self._logger.info("Got Key: {0}".format(key_name))
-
-        except KeyError as err:
-            self._logger.error("Could not convert key id {0} to a corrosponding name".format(key_id))
-            ##self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
-
-        self._access_lock.release()
-
-=======
             # if self._testing:
             if key_press:
                 self._logger.debug("Got Key: {0} Down".format(key_name))
@@ -783,8 +768,6 @@ class TartarusKeyManager(KeyboardKeyManager):
     def mode_modifier(self, value):
         self._mode_modifier = True if value else False
 
-
->>>>>>> master
 class MediaKeyPress(threading.Thread):
     """
     Class to run xdotool to execute media/volume keypresses
