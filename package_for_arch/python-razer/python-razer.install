@@ -1,3 +1,0 @@
-pre_remove() {
-  find /usr/lib/python3/dist-packages/razer/ -name '__pycache__' | xargs rm -rf
-}

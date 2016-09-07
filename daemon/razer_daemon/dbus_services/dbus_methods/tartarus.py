@@ -101,3 +101,27 @@ def tartarus_set_profile_led_blue(self, enable):
             driver_file.write('1')
         else:
             driver_file.write('0')
+
+@endpoint('razer.device.macro', 'getModeModifier', out_sig='b')
+def tartarus_get_mode_modifier(self):
+    """
+    Get if the mode key is a modifier
+
+    :return: State
+    :rtype: bool
+    """
+    self.logger.debug("DBus call tartarus_get_mode_modifier")
+
+    return self.key_manager.mode_modifier
+
+@endpoint('razer.device.macro', 'setModeModifier', in_sig='b')
+def tartarus_set_mode_modifier(self, modifier):
+    """
+    Set if the mode key is a modifier
+
+    :param modifier: State
+    :type modifier: bool
+    """
+    self.logger.debug("DBus call tartarus_set_mode_modifier")
+
+    self.key_manager.mode_modifier = modifier

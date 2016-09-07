@@ -1,3 +1,9 @@
+razer (1.0.7-0ubuntu1) trusty; urgency=low
+
+  * Added macro functionality for Tartarus
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Wed, 07 Sep 2016 22:09:00 +0000
+
 razer (1.0.6-0ubuntu1) trusty; urgency=low
 
   * Made a change to Makefile that might make LaunchTurd happier

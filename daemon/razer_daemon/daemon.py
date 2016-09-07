@@ -19,6 +19,7 @@ import gi
 gi.require_version('Gdk', '3.0')
 import gi.repository
 
+import time
 
 import razer_daemon.hardware
 from razer_daemon.dbus_services.service import DBusService
@@ -27,7 +28,7 @@ from razer_daemon.misc.screensaver_thread import ScreensaverThread
 
 DEVICE_CHECK_INTERVAL = 5000 # Milliseconds
 
-def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, pid_file=None):
+def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, pid_file=None, test_dir=None):
     """
     Performs double fork behaviour of daemons
 
@@ -51,6 +52,9 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
 
     :param pid_file: PID filepath (wont create a file if None)
     :type pid_file: str or None
+
+    :param test_dir: Test directory
+    :type test_dir: str or None
     """
 
     if not foreground:
@@ -60,24 +64,25 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
             # Returns 0 in the child process, and returns the child's pid in the parent so
             # by checking if greater than 0 we can close parent
             if pid > 0:
+                time.sleep(0.1) # For some reason in IDE it wouldnt double fork without sleep
                 sys.exit(0)
         except OSError as err:
             print("Failed first fork. Error: {0}".format(err))
 
         # Become the process group and session leader
+        os.chdir("/")
         os.setsid()
+        os.umask(0)
 
         try:
             pid = os.fork()
             # Returns 0 in the child process, and returns the child's pid in the parent so
             # by checking if greater than 0 we can close parent
             if pid > 0:
+                time.sleep(0.1)
                 sys.exit(0)
         except OSError as err:
             print("Failed first fork. Error: {0}".format(err))
-
-        # Set umask to 0
-        os.umask(0)
 
         # Close stdin, stdout, stderr
         sys.stdout.flush()
@@ -105,7 +110,7 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
             print("Error: {0}".format(err))
 
     # Create daemon and run
-    daemon = RazerDaemon(verbose, log_dir, console_log, run_dir, config_file)
+    daemon = RazerDaemon(verbose, log_dir, console_log, run_dir, config_file, test_dir=test_dir)
     try:
         daemon.run()
     except Exception as err:
@@ -131,7 +136,7 @@ class RazerDaemon(DBusService):
 
     BUS_PATH = 'org.razer'
 
-    def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None):
+    def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
 
         # Check if process exists
         exit_code = subprocess.call(['pgrep', 'razerdaemon'], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
@@ -153,6 +158,7 @@ class RazerDaemon(DBusService):
             config_file = os.path.expanduser(config_file)
             os.makedirs(os.path.dirname(config_file), mode=0o750, exist_ok=True)
 
+        self._test_dir = test_dir
         self._data_dir = run_dir
         self._config_file = config_file
         self._config = configparser.ConfigParser()
@@ -239,8 +245,6 @@ class RazerDaemon(DBusService):
         if config_file is not None and os.path.exists(config_file):
             self._config.read(config_file)
 
-
-
     def enable_turn_off_on_screensaver(self):
         """
         Enable the turning off of devices when the screensaver is active
@@ -293,10 +297,18 @@ class RazerDaemon(DBusService):
         Loops through the available hardware classes, loops through
         each device in the system and adds it if needs be.
         """
-        try:
-            devices = os.listdir('/sys/bus/hid/devices')
-        except FileNotFoundError:
-            devices = []
+        if self._test_dir is not None:
+            devices = os.listdir(self._test_dir)
+            dev_path = self._test_dir
+        else:
+            try:
+                devices = os.listdir('/sys/bus/hid/devices')
+            except FileNotFoundError:
+                devices = []
+            finally:
+                dev_path = '/sys/bus/hid/devices'
+
+
         classes = razer_daemon.hardware.get_device_classes()
 
         device_number = 0
@@ -305,10 +317,10 @@ class RazerDaemon(DBusService):
                 if device_id in self._razer_devices:
                     continue
 
-                if device_class.match(device_id):
+                if device_class.match(device_id, dev_path=dev_path):  # Check it matches sys/ ID format and has device_type file
                     self.logger.info('Found device.%d: %s', device_number, device_id)
-                    device_path = os.path.join('/sys/bus/hid/devices', device_id)
-                    razer_device = device_class(device_path, device_number, self._config)
+                    device_path = os.path.join(dev_path, device_id)
+                    razer_device = device_class(device_path, device_number, self._config, testing=self._test_dir is not None)
 
                     # Wireless devices sometimes dont listen
                     count = 0
@@ -333,7 +345,11 @@ class RazerDaemon(DBusService):
         devices_to_remove = []
 
         for device in self._razer_devices:
-            device_path = os.path.join('/sys/bus/hid/devices', device.device_id)
+            if self._test_dir is not None:
+                device_path = os.path.join(self._test_dir, device.device_id)
+            else:
+                device_path = os.path.join('/sys/bus/hid/devices', device.device_id)
+
             if not os.path.exists(device_path):
                 # Remove from DBus
                 device.dbus.remove_from_connection()

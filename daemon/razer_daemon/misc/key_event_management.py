@@ -232,12 +232,13 @@ class KeyboardKeyManager(object):
     get round to making the effect.
     """
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, device_id, event_files, parent, use_epoll=False):
+    def __init__(self, device_id, event_files, parent, use_epoll=False, testing=False):
 
         self._device_id = device_id
         self._logger = logging.getLogger('razer.device{0}.keymanager'.format(device_id))
         self._parent = parent
         self._parent.register_observer(self)
+        self._testing = testing
 
         self._event_files = event_files
         self._access_lock = threading.Lock()
@@ -325,8 +326,9 @@ class KeyboardKeyManager(object):
         :param grab: True to grab, False to release
         :type grab: bool
         """
-        for event_file in self._open_event_files:
-            fcntl.ioctl(event_file.fileno(), EVIOCGRAB, int(grab))
+        if not self._testing:
+            for event_file in self._open_event_files:
+                fcntl.ioctl(event_file.fileno(), EVIOCGRAB, int(grab))
         self._event_files_locked = grab
 
     def key_action(self, event_time, key_id, key_press=True):
@@ -458,7 +460,12 @@ class KeyboardKeyManager(object):
 
                     else:
                         # Finish recording macro
-                        self.add_kb_macro()
+                        if self._current_macro_bind_key is not None:
+                            if len(self._current_macro_combo) > 0:
+                                self.add_kb_macro()
+                            else:
+                                # Clear macro
+                                self.dbus_delete_macro(self._current_macro_bind_key)
                         self._recording_macro = False
                         self._parent.setMacroMode(False)
                 # Sets up game mode as when enabling macro keys it stops the key working
@@ -475,9 +482,15 @@ class KeyboardKeyManager(object):
                     if self._current_macro_bind_key is None:
                         self._current_macro_bind_key = key_name
                         self._parent.setMacroEffect(0x00)
-                    # Don't want no recursion
+                    # Don't want no recursion, cancel macro
                     elif self._current_macro_bind_key == key_name:
                         self._logger.warning("Skipping macro assignment as would cause recursion")
+                        self._recording_macro = False
+                        self._parent.setMacroMode(False)
+                    elif key_name not in ('M1', 'M2', 'M3', 'M4', 'M5'):
+                        self._logger.warning("Macros are only for M1-M5 for now.")
+                        self._recording_macro = False
+                        self._parent.setMacroMode(False)
                     # Anything else just record it
                     else:
                         self._current_macro_combo.append((event_time, key_name, 'DOWN'))
@@ -485,7 +498,6 @@ class KeyboardKeyManager(object):
                 else:
                     # If key has a macro, play it
                     if key_name in self._macros:
-                        self._logger.info("Running Macro %s:%s", key_name, str(self._macros[key_name]))
                         self.play_macro(key_name)
 
         except KeyError as err:
@@ -534,6 +546,7 @@ class KeyboardKeyManager(object):
         :param macro_key: Macro Key
         :type macro_key: str
         """
+        self._logger.info("Running Macro %s:%s", macro_key, str(self._macros[macro_key]))
         macro_thread = MacroRunner(self._device_id, macro_key, self._macros[macro_key])
         macro_thread.start()
         self._threads.add(macro_thread)
@@ -566,6 +579,12 @@ class KeyboardKeyManager(object):
         """
         Get macros in JSON format
 
+        Returns a JSON blob of all active macros in the format of
+        {BIND_KEY: [MACRO_DICT...]}
+
+        MACRO_DICT is a dict representation of an action that can be performed. The dict will have a
+        type key which determins what type of action it will perform.
+        For example there are key press macros, URL opening macros, Script running macros etc...
         :return: JSON of macros
         :rtype: str
         """
@@ -580,13 +599,14 @@ class KeyboardKeyManager(object):
         """
         Add macro from JSON
 
+        The macro_json will be a list of macro objects which is then converted into JSON
         :param macro_key: Macro bind key
         :type macro_key: str
 
         :param macro_json: Macro JSON
         :type macro_json: str
         """
-        macro_list = [macro_dict_to_obj(json_dict) for json_dict in json.loads(macro_json)]
+        macro_list = [macro_dict_to_obj(macro_object_dict) for macro_object_dict in json.loads(macro_json)]
         self._macros[macro_key] = macro_list
 
     def close(self):
@@ -626,8 +646,17 @@ class KeyboardKeyManager(object):
                 pass
 
 class TartarusKeyManager(KeyboardKeyManager):
+<<<<<<< HEAD
     def __init__(self, device_id, event_files, parent, use_epoll=True):
         super(TartarusKeyManager, self).__init__(device_id, event_files, parent, use_epoll)
+=======
+    def __init__(self, device_id, event_files, parent, use_epoll=True, testing=False):
+        super(TartarusKeyManager, self).__init__(device_id, event_files, parent, use_epoll, testing=testing)
+
+        self._mode_modifier = False
+        self._mode_modifier_combo = []
+        self._mode_modifier_key_down = False
+>>>>>>> master
 
     def key_action(self, event_time, key_id, key_press=True):
         """
@@ -702,6 +731,7 @@ class TartarusKeyManager(KeyboardKeyManager):
                 self._last_colour_choice = colour
                 self._temp_key_store.append((now + self._temp_expire_time, TARTARUS_KEY_MAPPING[key_name], colour))
 
+<<<<<<< HEAD
             self._logger.info("Got Key: {0}".format(key_name))
 
         except KeyError as err:
@@ -710,6 +740,51 @@ class TartarusKeyManager(KeyboardKeyManager):
 
         self._access_lock.release()
 
+=======
+            # if self._testing:
+            if key_press:
+                self._logger.debug("Got Key: {0} Down".format(key_name))
+            else:
+                self._logger.debug("Got Key: {0} Up".format(key_name))
+
+            # Logic for mode switch modifier
+            if self._mode_modifier:
+                if key_name == 'MODE_SWITCH' and key_press:
+                    # Start the macro string
+                    self._mode_modifier_key_down = True
+                    self._mode_modifier_combo.clear()
+                    self._mode_modifier_combo.append('MODE')
+
+                elif key_name == 'MODE_SWITCH' and not key_press:
+                    # Release mode_switch
+                    self._mode_modifier_key_down = False
+
+                elif key_press and self._mode_modifier_key_down:
+                    # Any keys pressed whilst mode_switch is down
+                    self._mode_modifier_combo.append(key_name)
+
+                    # Override keyname so it now equals a macro
+                    key_name = '+'.join(self._mode_modifier_combo)
+
+            self._logger.debug("Macro String: {0}".format(key_name))
+
+            if key_name in self._macros:
+                self.play_macro(key_name)
+
+        except KeyError as err:
+            self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
+
+        self._access_lock.release()
+
+    @property
+    def mode_modifier(self):
+        return self._mode_modifier
+    @mode_modifier.setter
+    def mode_modifier(self, value):
+        self._mode_modifier = True if value else False
+
+
+>>>>>>> master
 class MediaKeyPress(threading.Thread):
     """
     Class to run xdotool to execute media/volume keypresses
