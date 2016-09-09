@@ -1,3 +1,6 @@
+"""
+Contains functionality specific to keyboard-like devices
+"""
 import dbus as _dbus
 
 from razer.client.constants import MACRO_LED_STATIC, MACRO_LED_BLINK

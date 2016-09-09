@@ -55,7 +55,7 @@ class FakeDevice(object):
             touch(path)
         os.chmod(path, chmod)
 
-    def __init__(self, spec_name, serial=None, tmp_dir='/tmp'):
+    def __init__(self, spec_name, serial=None, tmp_dir=os.environ.get('TMPDIR', '/tmp')):
 
         if spec_name not in SPECS:
             raise ValueError("Spec {0} not in SPECS".format(spec_name))
@@ -84,6 +84,9 @@ class FakeDevice(object):
         return os.path.join(self._tmp_dir, 'input', event)
 
     def create_events(self):
+        """
+        Goes through event files and creates them as needed
+        """
         event_files = self._config.get('device', 'event')
         if event_files is None:
             event_files = []
@@ -113,6 +116,18 @@ class FakeDevice(object):
             self.create_endpoint(path, chmod, default)
 
     def get(self, endpoint, binary=False):
+        """
+        Gets a value from a given endpoint
+
+        :param endpoint: Endpoint to read from
+        :type endpoint: str
+
+        :param binary: Is binary data being read
+        :type binary: bool
+
+        :return: Result
+        :rtype: str or bytes
+        """
         if endpoint not in self.endpoints:
             raise ValueError("Endpoint {0} does not exist".format(endpoint))
 
