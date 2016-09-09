@@ -1,3 +1,12 @@
+razer (1.0.8-0ubuntu1) trusty; urgency=low
+
+  * Added BlackWidow Ultimate 2016 support to daemon
+  * Cleaned up daemon/pylib a bit
+  * Added in some newlines before EOF
+  * Made random ripple depend on its own method in pylib
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Fri, 09 Sep 2016 23:11:00 +0000
+
 razer (1.0.7-0ubuntu2) trusty; urgency=low
 
   * Fixed typo in pylib
