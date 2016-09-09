@@ -136,6 +136,7 @@ class ScreensaverThread(threading.Thread):
                 except Exception as err:
                     self.logger.exception("Caught exception in run loop", exc_info=err)
                     self._dbus_interface = None
+                    self._try_count = 4
 
 
             # Sleep

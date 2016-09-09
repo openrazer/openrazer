@@ -198,3 +198,34 @@ class RazerBladeStealth(MacroKeyboard):
         super(RazerBladeStealth, self)._close()
 
         self.ripple_manager.close()
+
+
+class RazerBlackWidow2016(MacroKeyboard):
+    """
+    Class for the BlackWidow Chroma
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Ultimate_2016(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0214
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'enable_macro_keys', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro', 'bw2016_set_starlight_effect',
+
+               'set_ripple_effect']
+
+    def __init__(self, *args, **kwargs):
+        super(RazerBlackWidow2016, self).__init__(*args, **kwargs)
+
+        self.ripple_manager = RippleManager(self, self._device_number)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerBlackWidow2016, self)._close()
+
+        self.ripple_manager.close()

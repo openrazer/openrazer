@@ -13,6 +13,10 @@ DEVICE_MAP ={
 
 
 class RazerDeviceFactory(__BaseDeviceFactory):
+    """
+    Simple factory to return an object for a given device
+
+    """
     @staticmethod
     def get_device(serial, vid_pid=None, daemon_dbus=None):
         """

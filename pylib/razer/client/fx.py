@@ -342,7 +342,7 @@ class RazerFX(object):
         if not isinstance(refreshrate, float):
             raise ValueError("Refresh rate is not a float")
 
-        if self.has('ripple'):
+        if self.has('ripple_random'):
             self._custom_lighting_dbus.setRippleRandomColour(refreshrate)
 
             return True

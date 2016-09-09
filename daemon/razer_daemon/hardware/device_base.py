@@ -31,6 +31,9 @@ class RazerDevice(DBusService):
 
     def __init__(self, device_path, device_number, config, testing=False):
 
+        self.logger = logging.getLogger('razer.device{0}'.format(device_number))
+        self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
+
         self._observer_list = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
@@ -46,8 +49,7 @@ class RazerDevice(DBusService):
 
         self._is_closed = False
 
-        self.logger = logging.getLogger('razer.device{0}'.format(device_number))
-        self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
+
 
         # Find event files in /dev/input/by-id/ by matching against regex
         self.event_files = []
@@ -160,6 +162,7 @@ class RazerDevice(DBusService):
             serial = serial_file.read().strip()
             while len(serial) == 0:
                 if count >= 3:
+                    self.logger.critical("Could not get serial")
                     break
                 serial = serial_file.read().strip()
 

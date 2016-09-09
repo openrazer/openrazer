@@ -1,3 +1,5 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fd36d0d76e9842c4a7d67118bd01b275)](https://www.codacy.com/app/terry_5/razer-drivers?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=terrycain/razer-drivers&amp;utm_campaign=Badge_Grade)
+
 # Razer Drivers
 
 A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
@@ -38,6 +40,7 @@ by the daemon. If your device is supported by the driver but not by the daemon t
 
 ### Keyboard Support:
  * Razer Blackwidow Ultimate 2013
+ * Razer Blackwidow Ultimate 2016
  * Razer Blackwidow Chroma
  * Razer Blackwidow Chroma Tournament Edition
  * Razer Blackwidow X Chroma

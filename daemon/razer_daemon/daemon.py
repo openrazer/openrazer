@@ -12,14 +12,11 @@ import sys
 import signal
 import time
 import tempfile
-
 import setproctitle
 import dbus.mainloop.glib
 import gi
 gi.require_version('Gdk', '3.0')
 import gi.repository
-
-import time
 
 import razer_daemon.hardware
 from razer_daemon.dbus_services.service import DBusService
@@ -406,16 +403,3 @@ class RazerDaemon(DBusService):
 
         for device in self._razer_devices:
             device.dbus.close()
-
-
-if __name__ == '__main__':
-    # pylint: disable=invalid-name
-    daemon_obj = RazerDaemon(verbose=True, console_log=True, log_dir='/tmp/razer_daemon/logs', run_dir='/tmp/razer_daemon/home')
-
-    try:
-        daemon_obj.run()
-    except Exception as daemon_err:
-        daemon_obj.logger.exception("Caught exception", exc_info=daemon_err)
-
-
-

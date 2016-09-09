@@ -753,7 +753,7 @@ class TartarusKeyManager(KeyboardKeyManager):
 
             self._logger.debug("Macro String: {0}".format(key_name))
 
-            if key_name in self._macros:
+            if key_name in self._macros and key_press:
                 self.play_macro(key_name)
 
         except KeyError as err:
@@ -763,9 +763,21 @@ class TartarusKeyManager(KeyboardKeyManager):
 
     @property
     def mode_modifier(self):
+        """
+        Get if the MODE_SWTICH key is to act as a modifier
+
+        :return: True if a modifier, false if not
+        :rtype: bool
+        """
         return self._mode_modifier
     @mode_modifier.setter
     def mode_modifier(self, value):
+        """
+        Set MODE_SWITCH modifier state
+
+        :param value: Modifier state
+        :type value: bool
+        """
         self._mode_modifier = True if value else False
 
 class MediaKeyPress(threading.Thread):
