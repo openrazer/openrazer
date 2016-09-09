@@ -753,7 +753,7 @@ class TartarusKeyManager(KeyboardKeyManager):
 
             self._logger.debug("Macro String: {0}".format(key_name))
 
-            if key_name in self._macros:
+            if key_name in self._macros and key_press:
                 self.play_macro(key_name)
 
         except KeyError as err:
@@ -779,7 +779,6 @@ class TartarusKeyManager(KeyboardKeyManager):
         :type value: bool
         """
         self._mode_modifier = True if value else False
-
 
 class MediaKeyPress(threading.Thread):
     """

@@ -168,7 +168,7 @@ class FakeDevice(object):
             value = 0x00
 
         event_binary = struct.pack(EVENT_FORMAT, self._tick, 0, EV_KEY, key_code, value)
-        pipe_name, pipe_fd = self.events[file_id]
+        pipe_fd = self.events[file_id][1]
         os.write(pipe_fd, event_binary)
 
         return len(event_binary)

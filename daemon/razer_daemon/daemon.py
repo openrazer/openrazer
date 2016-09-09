@@ -12,14 +12,11 @@ import sys
 import signal
 import time
 import tempfile
-
 import setproctitle
 import dbus.mainloop.glib
 import gi
 gi.require_version('Gdk', '3.0')
 import gi.repository
-
-import time
 
 import razer_daemon.hardware
 from razer_daemon.dbus_services.service import DBusService

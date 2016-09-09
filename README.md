@@ -40,6 +40,7 @@ by the daemon. If your device is supported by the driver but not by the daemon t
 
 ### Keyboard Support:
  * Razer Blackwidow Ultimate 2013
+ * Razer Blackwidow Ultimate 2016
  * Razer Blackwidow Chroma
  * Razer Blackwidow Chroma Tournament Edition
  * Razer Blackwidow X Chroma
