@@ -51,7 +51,7 @@ def bw_set_static(self):
 
 
 @endpoint('razer.device.lighting.bw2016', 'setStarlight')
-def bw2016_set_pulsate(self):
+def bw2016_set_starlight(self):
     """
     Set pulsate mode
     """
