@@ -162,7 +162,6 @@ class RazerDevice(DBusService):
             serial = serial_file.read().strip()
             while len(serial) == 0:
                 if count >= 3:
-                    self.logger.critical("Could not get serial")
                     break
                 serial = serial_file.read().strip()
 
