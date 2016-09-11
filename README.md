@@ -37,7 +37,7 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 ### Peripherals
 | Device          | Driver | Daemon |
 | --------------- | ------ | ------ |
-| Razer Tartarus  | ✔ |  |
+| Razer Tartarus  | ✔ | ✔ |
 
 ### Daemon Support
 I've created a daemon that lives in userspace which allows one to easily interact with the driver. It abstracts away some of the logic and also (will eventually) allow you to build
