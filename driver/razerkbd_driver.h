@@ -106,13 +106,18 @@ struct razer_kbd_device {
     //struct input_dev *dev;
     struct usb_device *usbdev;
     struct hid_device *hiddev;
-    unsigned char effect;
+    unsigned int fn_on;
     char name[128];
     char phys[64];
     //struct razer_row_rgb matrix[RAZER_BLACKWIDOW_CHROMA_ROWS_NUM];
-    bool effect_submitted;
+    //bool effect_submitted;
 };
 
+struct razer_key_translation {
+	u16 from;
+	u16 to;
+	u8 flags;
+};
 
 
 

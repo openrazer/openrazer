@@ -464,10 +464,10 @@ int razer_get_brightness(struct usb_device *usb_dev)
 
     if(retval == 0)
     {
-		if(response_report.status == 0x01) {
-			printk(KERN_WARNING "razermouse: Mouse busy\n");
-			retval = -2;			
-		} else if(response_report.status == 0x02 && response_report.command_class == 0x07 && response_report.command_id.id == 0x82) // For others
+        if(response_report.status == 0x01) {
+            printk(KERN_WARNING "razermouse: Mouse busy\n");
+            retval = -2;            
+        } else if(response_report.status == 0x02 && response_report.command_class == 0x07 && response_report.command_id.id == 0x82) // For others
         {
             retval = response_report.arguments[0];
         } else
@@ -1140,7 +1140,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     }
 
     
-	retval = device_create_file(&hdev->dev, &dev_attr_get_firmware_version);
+    retval = device_create_file(&hdev->dev, &dev_attr_get_firmware_version);
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_device_type);

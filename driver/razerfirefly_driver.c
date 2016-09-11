@@ -709,12 +709,12 @@ static int razer_firefly_probe(struct hid_device *hdev, const struct hid_device_
     retval = hid_parse(hdev);
     if(retval)    {
         hid_err(hdev, "parse failed\n");
-       goto exit_free;
+        goto exit_free;
     }
     retval = hid_hw_start(hdev, HID_CONNECT_DEFAULT);
     if (retval) {
         hid_err(hdev, "hw start failed\n");
-       goto exit_free;
+        goto exit_free;
     }
 
 
