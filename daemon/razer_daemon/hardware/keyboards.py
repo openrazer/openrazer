@@ -19,7 +19,7 @@ class MacroKeyboard(RazerDeviceBrightnessSuspend):
         super(MacroKeyboard, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
-        self.key_manager = KeyboardKeyManager(self._device_number, self.event_files, self, self._testing)
+        self.key_manager = KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
 
     def _close(self):
         """
