@@ -1,7 +1,7 @@
 """
 Mouse class
 """
-from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend
+from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend, RazerDevice
 from razer_daemon.misc.battery_notifier import BatteryManager
 
 
@@ -62,3 +62,23 @@ class RazerMambaChromaTE(RazerDeviceBrightnessSuspend):
 
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaTE, self).__init__(*args, **kwargs)
+
+class RazerAbyssus(RazerDevice):
+    """
+    Class for the Razer Abyssus
+    """
+
+    USB_VID = 0x1532
+    USB_PID = 0x0042
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active']
+
+    def __init__(self, *args, **kwargs):
+        super(RazerAbyssus, self).__init__(*args, **kwargs)
+
+    def _resume_device(self):
+        self.logger.debug("Abyssus doesnt have suspend/resume")
+
+    def _suspend_device(self):
+        self.logger.debug("Abyssus doesnt have suspend/resume")
