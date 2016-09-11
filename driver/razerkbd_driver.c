@@ -1727,7 +1727,7 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     if (usage->code == RAZER_FN_KEY) {
         asc->fn_on = !!value;
         
-        input_event(field->hidinput->input, usage->type, usage->code, value);
+        // input_event(field->hidinput->input, usage->type, usage->code, value);
         return 1;
     }
     
