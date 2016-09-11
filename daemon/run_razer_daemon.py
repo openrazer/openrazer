@@ -25,6 +25,8 @@ def parse_args():
     parser.add_argument('--log-dir', type=str, help='Location of the log directory', default=LOG_PATH)
     parser.add_argument('--pid-file', type=str, help='Location of the pid file')
 
+    parser.add_argument('--test-dir', type=str, help='Directory containing test driver structure')
+
     return parser.parse_args()
 
 def run():
@@ -40,7 +42,8 @@ def run():
     daemon_args = {
         'verbose': args.verbose,
         'foreground': args.foreground,
-        'log_dir': args.log_dir
+        'log_dir': args.log_dir,
+        'test_dir': args.test_dir
     }
 
     if args.foreground:

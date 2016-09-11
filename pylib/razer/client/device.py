@@ -7,11 +7,16 @@ from razer.client.devices.keyboard import RazerKeyboardFactory as __RazerKeyboar
 DEVICE_MAP ={
     'firefly': __RazerFirefly,
     'keyboard': __RazerKeyboardFactory,
+    'tartarus': __RazerKeyboardFactory,
     'default': __RazerDevice
 }
 
 
 class RazerDeviceFactory(__BaseDeviceFactory):
+    """
+    Simple factory to return an object for a given device
+
+    """
     @staticmethod
     def get_device(serial, vid_pid=None, daemon_dbus=None):
         """

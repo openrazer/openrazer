@@ -1,10 +1,12 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fd36d0d76e9842c4a7d67118bd01b275)](https://www.codacy.com/app/terry_5/razer-drivers?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=terrycain/razer-drivers&amp;utm_campaign=Badge_Grade)
+
 # Razer Drivers
 
 A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
 
-Website: [Here](https://terrycain.github.io/razer_drivers/)
+Website: [Here](https://terrycain.github.io/razer-drivers/)
 
-**Before raising an issue** saying something doesn't work, read [this](https://github.com/pez2001/razer_chroma_drivers/wiki/Troubleshooting) Wiki page, try not to create new issues if one exists, reopen it.
+**Before raising an issue** saying something doesn't work, read [this](https://github.com/terrycain/razer-drivers/wiki/Troubleshooting) Wiki page, try not to create new issues if one exists, reopen it.
 
 ## Driver Support
 ### Keyboard Support:
@@ -21,7 +23,9 @@ Website: [Here](https://terrycain.github.io/razer_drivers/)
  * Razer Firefly *(full support)*
 
 ### Mouse Support:
+ * Razer Mamba (Wired) *(work in progress)*
  * Razer Mamba (Wireless) *(full support)*
+ * Razer Mamba TE *(work in progress)*
  * Razer Abyssus *(full support)*
 
 ### Misc Peripheral Support
@@ -36,9 +40,11 @@ by the daemon. If your device is supported by the driver but not by the daemon t
 
 ### Keyboard Support:
  * Razer Blackwidow Ultimate 2013
+ * Razer Blackwidow Ultimate 2016
  * Razer Blackwidow Chroma
  * Razer Blackwidow Chroma Tournament Edition
  * Razer Blackwidow X Chroma
+ * Razer Blade Stealth
 
 ### Mousemat Support:
  * Razer Firefly
@@ -46,15 +52,22 @@ by the daemon. If your device is supported by the driver but not by the daemon t
 ### Mouse Support:
  * Razer Mamba (Wireless)
 
+### Misc Peripheral Support
+ * Razer Tartarus
+
 ## Installation
 
-###Arch Linux
+### Arch Linux
 
-[Arch Linux installation guide](https://github.com/terrycain/razer_drivers/blob/master/package_for_arch/README.md) 
+Install `razer-driver-meta` from AUR, or install the three packages `razer-driver-dkms`, `razer-daemon` and `python-razer` singularly from AUR.
 
-###Other distributions
+### Ubuntu Linux
+We have a PPA here - `https://launchpad.net/~terrz/+archive/ubuntu/razerutils`
 
-[Here](https://github.com/pez2001/razer_chroma_drivers/wiki/Installation) is a page documenting the installation and uninstallation procedures.
+
+### Other distributions
+
+[Here](https://github.com/terrycain/razer-drivers/wiki/Installation) is a page documenting the installation and uninstallation procedures.
 
 ## Applications
 
@@ -75,7 +88,7 @@ The following applications compliment and interact with this driver:
 
 Some guys have already donated to the cause. ;-) Feel free.
 The parent of the fork had a list of what would be done if money was donated. I don't need the money (though you can never have enough right ;-) ), but obviously its a great motivator.
-If you want you device and your not willing to get one to me then if your willing to follow [this](https://github.com/pez2001/razer_chroma_drivers/wiki/Reverse-Engineering-USB-Protocol) then support can be added.
+If you want you device and your not willing to get one to me then if your willing to follow [this](https://github.com/terrycain/razer-drivers/wiki/Reverse-Engineering-USB-Protocol) then support can be added.
 
 ---
 

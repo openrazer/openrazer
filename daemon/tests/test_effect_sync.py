@@ -56,10 +56,6 @@ class DummyHardwareBlackWidowChroma(DummyHardwareDevice):
     def setBreathSingle(self, red, green, blue):
         self.effect_call = ('setBreathSingle', red, green, blue)
 
-
-
-
-
 class EffectSyncTest(unittest.TestCase):
     @unittest.mock.patch('razer_daemon.misc.effect_sync.logging.getLogger', logger_mock)
     def setUp(self):

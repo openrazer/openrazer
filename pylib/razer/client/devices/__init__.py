@@ -1,8 +1,15 @@
 import dbus as _dbus
 from razer.client.fx import RazerFX as _RazerFX
+from xml.etree import ElementTree as _ET
+
+
+from pprint import pprint
 
 
 class RazerDevice(object):
+    """
+    Raw razer base device
+    """
     _FX = _RazerFX
 
     def __init__(self, serial, vid_pid=None, daemon_dbus=None):
@@ -12,6 +19,9 @@ class RazerDevice(object):
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
 
         self._dbus = daemon_dbus
+
+        self._available_features = self._get_available_features()
+
         self._dbus_interfaces = {
             'device': _dbus.Interface(self._dbus, "razer.device.misc"),
             'brightness': _dbus.Interface(self._dbus, "razer.device.lighting.brightness")
@@ -27,29 +37,31 @@ class RazerDevice(object):
 
         self._serial = serial
 
-        default_capabilities = {
+        self._capabilities = {
             'name': True,
             'type': True,
             'firmware_version': True,
             'serial': True,
-            'brightness': True,
+            'brightness': self._has_feature('razer.device.lighting.brightness'),
 
             # Default device is a chroma so lighting capabilities
-            'lighting_breath_single': True,
-            'lighting_breath_dual': True,
-            'lighting_breath_random': True,
-            'lighting_wave': True,
-            'lighting_reactive': True,
-            'lighting_none': True,
-            'lighting_spectrum': True,
-            'lighting_static': True,
+            'lighting_breath_single': self._has_feature('razer.device.lighting.chroma', 'setBreathSingle'),
+            'lighting_breath_dual': self._has_feature('razer.device.lighting.chroma', 'setBreathDual'),
+            'lighting_breath_random': self._has_feature('razer.device.lighting.chroma', 'setBreathRandom'),
+            'lighting_wave': self._has_feature('razer.device.lighting.chroma', 'setWave'),
+            'lighting_reactive': self._has_feature('razer.device.lighting.chroma', 'setReactive'),
+            'lighting_none': self._has_feature('razer.device.lighting.chroma', 'setNone'),
+            'lighting_spectrum': self._has_feature('razer.device.lighting.chroma', 'setSpectrum'),
+            'lighting_static': self._has_feature('razer.device.lighting.chroma', 'setStatic'),
+            'lighting_ripple': self._has_feature('razer.device.lighting.custom', 'setRipple'),  # Thinking of extending custom to do more hence the key check
+            'lighting_ripple_random': self._has_feature('razer.device.lighting.custom', 'setRippleRandomColour'),
 
-            'lighting_pulsate': False
+            'lighting_pulsate': self._has_feature('razer.device.lighting.chroma', 'setPulsate'),
+
+            # Get if the device has an LED Matrix, == True as its a DBus boolean otherwise, so for consistency sake we coerce it into a native bool
+            'lighting_led_matrix': self._dbus_interfaces['device'].hasMatrix() == True
         }
-        self._update_capabilities(default_capabilities)
 
-        # Get if the device has an LED Matrix, == True as its a DBus boolean otherwise, so for consistency sake we coerce it into a native bool
-        self._capabilities['lighting_led_matrix'] = self._dbus_interfaces['device'].hasMatrix() == True
         self._matrix_dimensions = self._dbus_interfaces['device'].getMatrixDimensions()
 
         # Setup FX
@@ -58,20 +70,36 @@ class RazerDevice(object):
         else:
             self.fx = self._FX(serial, capabilities=self._capabilities, daemon_dbus=daemon_dbus, matrix_dims=self._matrix_dimensions)
 
-    def _update_capabilities(self, capabilities:dict):
-        """
-        Update capabilities
+    def _get_available_features(self):
+        introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')
+        xml_spec = introspect_interface.Introspect()
+        root = _ET.fromstring(xml_spec)
 
-        This cheap hack updates the capabilities dict with defaults if keys dont exist
-        :param capabilities: Capabilities dict
-        :type capabilities: dict
-        """
-        if hasattr(self, '_capabilities'):
-            for capability, enabled in capabilities.items():
-                if capability not in self._capabilities:
-                    self._capabilities[capability] = enabled
+        interfaces = {}
+
+        for child in root:
+
+            if child.tag != 'interface' or child.attrib.get('name') == 'org.freedesktop.DBus.Introspectable':
+                continue
+
+            current_interface = child.attrib['name']
+            current_interface_methods = []
+
+            for method in child:
+                if method.tag != 'method':
+                    continue
+
+                current_interface_methods.append(method.attrib.get('name'))
+
+            interfaces[current_interface] = current_interface_methods
+
+        return interfaces
+
+    def _has_feature(self, object_path:str, method_name:str=None) -> bool:
+        if method_name is None:
+            return object_path in self._available_features
         else:
-            self._capabilities = capabilities
+            return object_path in self._available_features and method_name in self._available_features[object_path]
 
     def has(self, capability:str) -> bool:
         """

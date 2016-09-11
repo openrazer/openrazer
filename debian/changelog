@@ -1,12 +1,78 @@
+razer (1.0.8-0ubuntu1) trusty; urgency=low
+
+  * Added BlackWidow Ultimate 2016 support to daemon
+  * Cleaned up daemon/pylib a bit
+  * Added in some newlines before EOF
+  * Made random ripple depend on its own method in pylib
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Fri, 09 Sep 2016 23:11:00 +0000
+
+razer (1.0.7-0ubuntu2) trusty; urgency=low
+
+  * Fixed typo in pylib
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Wed, 07 Sep 2016 22:56:00 +0000
+
+razer (1.0.7-0ubuntu1) trusty; urgency=low
+
+  * Added macro functionality for Tartarus
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Wed, 07 Sep 2016 22:09:00 +0000
+
+razer (1.0.6-0ubuntu1) trusty; urgency=low
+
+  * Made a change to Makefile that might make LaunchTurd happier
+  * Added Tartarus support in driver and daemon
+  * Added Mamba Chroma TE and Mamba Choma Wired to driver
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sun, 04 Sep 2016 11:55:00 +0000
+
+razer (1.0.5-0ubuntu1) trusty; urgency=low
+
+  * Fixed some blade stealth daemon stuff
+  * Updated readme
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Thu, 01 Sep 2016 20:43:00 +0000
+
+razer (1.0.4-0ubuntu1) trusty; urgency=low
+
+  * Fixed typo
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Thu, 01 Sep 2016 20:43:00 +0000
+
+razer (1.0.3-0ubuntu1) trusty; urgency=low
+
+  * Moved keyboard.py to daemon
+  * Added blade stealth to daemon
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Wed, 31 Aug 2016 20:07:00 +0000
+
+razer (1.0.2-0ubuntu1) trusty; urgency=low
+
+  * Fixed daemon bug when using reactive effects
+  * Fixed daemon bug whilst getting serial
+  * Set Logo to use CC BY-SA
+  * Fixed GTK warning in keyboard.py
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sun, 28 Aug 2016 23:11:00 +0000
+
 razer (1.0-0ubuntu1) trusty; urgency=low
 
-  * Initial release of the driver, daemon and python library.
-    Currently supports the following keyboards: Blackwidow Classic/Ultimate 2012/Ultimate 2013/Ultimate 2016/Chroma/Chroma TE/X Chroma and Blade Stealth
-    Currently supports the following mice: Mamba Chroma (Wireless only)/Abyssus
-    Currently supports the following misc peripherals: Firefly/Tartarus
+  * Initial release of the driver, daemon and Python library.
+  * Support added:
+      * Keyboards
+        * Blackwidow Classic
+        * Ultimate 2012
+        * Ultimate 2013
+        * Ultimate 2016
+        * Chroma (Regular/TE/X)
+        * Blade Stealth
+      * Mice
+        * Mamba Chroma (Wireless only)
+        * Abyssus
+      * Peripherals
+        * Firefly
+        * Tartarus
+  * Autostart at login.
 
-  * Daemon currently starts at login and presents endpoints in DBus which is interacted with the python library. The daemon implements the Ripple effect found on synapse along with a custom
-    multicolored ripple effect. The daemon syncs effects across multiple devices as well as turns off the brightness when the computer is on screensaver.
-    Daemon supports the following devices: Ultimate 2013/Chroma/Chroma TE/X Chroma/Firefly/Mamba (Wireless)
-      
  -- Terry Cain <terry@terrys-home.co.uk>  Sat, 19 Mar 2016 09:41:19 +0000

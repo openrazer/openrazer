@@ -244,7 +244,7 @@ def set_reactive_effect(self, red, green, blue, speed):
     if speed not in (1, 2, 3, 4):
         speed = 4
 
-    payload = bytes([red, green, blue, speed])
+    payload = bytes([speed, red, green, blue])
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)

@@ -5,6 +5,7 @@ import re
 import os
 import types
 import logging
+import time
 
 from razer_daemon.dbus_services.service import DBusService
 import razer_daemon.dbus_services.dbus_methods
@@ -28,13 +29,17 @@ class RazerDevice(DBusService):
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]
 
-    def __init__(self, device_path, device_number, config):
+    def __init__(self, device_path, device_number, config, testing=False):
+
+        self.logger = logging.getLogger('razer.device{0}'.format(device_number))
+        self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
 
         self._observer_list = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
 
         self.config = config
+        self._testing = testing
         self._parent = None
         self._device_path = device_path
         self._device_number = device_number
@@ -44,14 +49,19 @@ class RazerDevice(DBusService):
 
         self._is_closed = False
 
-        self.logger = logging.getLogger('razer.device{0}'.format(device_number))
-        self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
+
 
         # Find event files in /dev/input/by-id/ by matching against regex
         self.event_files = []
-        for event_file in os.listdir('/dev/input/by-id/'):
+
+        if self._testing:
+            search_dir = os.path.join(device_path, 'input')
+        else:
+            search_dir = '/dev/input/by-id/'
+
+        for event_file in os.listdir(search_dir):
             if self.EVENT_FILE_REGEX is not None and self.EVENT_FILE_REGEX.match(event_file) is not None:
-                self.event_files.append(os.path.join('/dev/input/by-id/', event_file))
+                self.event_files.append(os.path.join(search_dir, event_file))
 
         object_path = os.path.join(self.OBJECT_PATH, self.serial)
         DBusService.__init__(self, self.BUS_PATH, object_path)
@@ -148,7 +158,17 @@ class RazerDevice(DBusService):
         """
         serial_path = os.path.join(self._device_path, 'get_serial')
         with open(serial_path, 'r') as serial_file:
-            return serial_file.read().strip()
+            count = 0
+            serial = serial_file.read().strip()
+            while len(serial) == 0:
+                if count >= 3:
+                    break
+                serial = serial_file.read().strip()
+
+                count += 1
+                time.sleep(0.1)
+
+            return serial
 
     def get_vid_pid(self):
         """
@@ -283,12 +303,15 @@ class RazerDevice(DBusService):
             observer.notify(msg)
 
     @classmethod
-    def match(cls, device_id):
+    def match(cls, device_id, dev_path):
         """
         Match against the device ID
 
         :param device_id: Device ID like 0000:0000:0000.0000
         :type device_id: str
+
+        :param dev_path: Device path. Normally '/sys/bus/hid/devices'
+        :type dev_path: str
 
         :return: True if its the correct device ID
         :rtype: bool
@@ -296,7 +319,7 @@ class RazerDevice(DBusService):
         pattern = r'^[0-9A-F]{4}:' + '{0:04X}'.format(cls.USB_VID) +':' + '{0:04X}'.format(cls.USB_PID) + r'\.[0-9A-F]{4}$'
 
         if re.match(pattern, device_id) is not None:
-            if 'device_type' in  os.listdir(os.path.join('/sys/bus/hid/devices', device_id)):
+            if 'device_type' in  os.listdir(os.path.join(dev_path, device_id)):
                 return True
 
         return False

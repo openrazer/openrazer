@@ -3,12 +3,12 @@ Contains the functions and classes to perform ripple effects
 """
 import datetime
 import logging
+import math
 import threading
 import time
-import math
 
 # pylint: disable=import-error
-from razer.keyboard import KeyboardColour
+from razer_daemon.keyboard import KeyboardColour
 
 class RippleEffectThread(threading.Thread):
     """
@@ -22,7 +22,7 @@ class RippleEffectThread(threading.Thread):
         self._logger = logging.getLogger('razer.device{0}.ripplethread'.format(device_number))
         self._parent = parent
 
-        self._colour = (255, 0, 255)
+        self._colour = (0, 255, 0)
         self._refresh_rate = 0.100
 
         self._shutdown = False
