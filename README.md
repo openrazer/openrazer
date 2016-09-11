@@ -8,52 +8,43 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 
 **Before raising an issue** saying something doesn't work, read [this](https://github.com/terrycain/razer-drivers/wiki/Troubleshooting) Wiki page, try not to create new issues if one exists, reopen it.
 
-## Driver Support
-### Keyboard Support:
- * Razer Blackwidow Classic *(full support)*
- * Razer Blackwidow Ultimate 2012 *(full support)*
- * Razer Blackwidow Ultimate 2013 *(full support)*
- * Razer Blackwidow Chroma *(full support)*
- * Razer Blackwidow Chroma Tournament Edition *(full support)*
- * Razer Blackwidow X Chroma *(probably full support)*
- * Razer Blade Stealth *(full support)*
- * Razer Blackwidow Ultimate 2016 *(full support)*
+## Device Support
+### Keyboards
+| Device                                      | Driver | Daemon |
+| ------------------------------------------- | ------ | ------ |
+| Razer BlackWidow Classic                    | ✔ |    |
+| Razer BlackWidow Ultimate 2012              | ✔ |    |
+| Razer BlackWidow Ultimate 2013              | ✔ | ✔ |
+| Razer BlackWidow Ultimate 2016              | ✔ |    |
+| Razer BlackWidow Chroma                     | ✔ | ✔ |
+| Razer BlackWidow Chroma Tournament Edition  | ✔ | ✔ |
+| Razer BlackWidow X Chroma                   | ✔ | ✔ |
+| Razer Blade Stealth                         | ✔ | ✔ |
 
-### Mousemat Support:
- * Razer Firefly *(full support)*
+### Mouse
+| Device                          | Driver | Daemon |
+| ------------------------------- | ------ | ------ |
+| Razer Mamba (Wireless)          | ✔ | ✔ ||
+| Razer Mamba (Wired)             | ✔ | **[In Progress](https://github.com/terrycain/razer-drivers/issues/44)** |
+| Razer Mamba Tournament Edition  | ✔ | **[In Progress](https://github.com/terrycain/razer-drivers/issues/44)** |
+| Razer Abyssus 2014              | ✔ | **[In Progress](https://github.com/terrycain/razer-drivers/issues/44)** |
 
-### Mouse Support:
- * Razer Mamba (Wired) *(work in progress)*
- * Razer Mamba (Wireless) *(full support)*
- * Razer Mamba TE *(work in progress)*
- * Razer Abyssus *(full support)*
+### Mousemats
+| Device        | Driver | Daemon |
+| ------------- | ------ | ------ |
+| Razer Firefly | ✔ | ✔ |
 
-### Misc Peripheral Support
- * Razer Tartarus *(full support)*
+### Peripherals
+| Device          | Driver | Daemon |
+| --------------- | ------ | ------ |
+| Razer Tartarus  | ✔ |  |
 
----
-
-## Daemon Support
+### Daemon Support
 I've created a daemon that lives in userspace which allows one to easily interact with the driver. It abstracts away some of the logic and also (will eventually) allow you to build
 custom effects, though it does do mulitcoloured ripples :). As every device is slightly different I've maintained a mapping between devices supported by the driver and devices supported
-by the daemon. If your device is supported by the driver but not by the daemon then raise an issue.
+by the daemon. If your device is supported by the driver but not by the daemon then [raise an issue](https://github.com/terrycain/razer-drivers/issues/new).
 
-### Keyboard Support:
- * Razer Blackwidow Ultimate 2013
- * Razer Blackwidow Ultimate 2016
- * Razer Blackwidow Chroma
- * Razer Blackwidow Chroma Tournament Edition
- * Razer Blackwidow X Chroma
- * Razer Blade Stealth
-
-### Mousemat Support:
- * Razer Firefly
-
-### Mouse Support:
- * Razer Mamba (Wireless)
-
-### Misc Peripheral Support
- * Razer Tartarus
+---
 
 ## Installation
 
@@ -64,6 +55,11 @@ Install `razer-driver-meta` from AUR, or install the three packages `razer-drive
 ### Ubuntu Linux
 We have a PPA here - `https://launchpad.net/~terrz/+archive/ubuntu/razerutils`
 
+```
+sudo add-apt-repository ppa:terrz/razerutils
+sudo apt update
+sudo apt install python3-razer razer-kernel-modules-dkms razer-daemon razer-doc
+```
 
 ### Other distributions
 
