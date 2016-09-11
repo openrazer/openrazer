@@ -64,6 +64,11 @@ Install `razer-driver-meta` from AUR, or install the three packages `razer-drive
 ### Ubuntu Linux
 We have a PPA here - `https://launchpad.net/~terrz/+archive/ubuntu/razerutils`
 
+```
+sudo add-apt-repository ppa:terrz/razerutils
+sudo apt update
+sudo apt install python3-razer razer-kernel-modules-dkms razer-daemon razer-doc
+```
 
 ### Other distributions
 
