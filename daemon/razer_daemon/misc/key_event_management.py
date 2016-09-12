@@ -32,6 +32,7 @@ EVENT_FORMAT = '@llHHI'
 EVENT_SIZE = struct.calcsize(EVENT_FORMAT)
 
 EPOLL_TIMEOUT = 0.01
+SPIN_SLEEP = 0.01
 
 EVIOCGRAB = 0x40044590
 
@@ -142,7 +143,7 @@ class KeyWatcher(threading.Thread):
             else:
                 self._poll_read()
 
-            time.sleep(EPOLL_TIMEOUT)
+            time.sleep(SPIN_SLEEP)
 
 
         # Unbind files and close them

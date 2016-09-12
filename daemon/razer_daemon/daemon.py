@@ -373,7 +373,7 @@ class RazerDaemon(DBusService):
             if main_loop_context.pending():
                 main_loop_context.iteration()
             else:
-                time.sleep(0.001)
+                time.sleep(0.05)
 
             if counter > DEVICE_CHECK_INTERVAL: # Time sleeps 1ms so DEVICE_CHECK_INTERVAL is in milliseconds
                 self._remove_devices()
