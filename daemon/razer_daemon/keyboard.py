@@ -21,7 +21,10 @@ KEY_MAPPING = {
     # Row 4
     'M4': (4,0), 'LEFTSHIFT': (4,1), 'BACKSLASH': (4,2), 'Z': (4,3), 'X': (4,4), 'C': (4,5), 'V': (4,6), 'B': (4,7), 'N': (4,8), 'M': (4,9), 'COMMA': (4,10), 'PERIOD': (4,11), 'FORWARDSLASH': (4,12), 'JP2': (4,13), 'RIGHTSHIFT': (4,14), 'UPARROW': (4,16), 'NP1': (4,18), 'NP2': (4,19), 'NP3': (4,20), 'ENTER': (4,21),
     # Row 5
-    'M5': (5,0), 'LEFTCTRL': (5,1), 'SUPER': (5,2), 'LEFTALT': (5,3), 'SPACE': (5,7), 'RIGHTALT': (5,11), 'FN': (5,12), 'CTXMENU': (5,13), 'RIGHTCTRL': (5,14), 'LEFTARROW': (5,15), 'DOWNARROW': (5,16), 'RIGHTARROW': (5,17), 'NP0': (5,19), 'NPPERIOD': (5,20)
+    'M5': (5,0), 'LEFTCTRL': (5,1), 'SUPER': (5,2), 'LEFTALT': (5,3), 'SPACE': (5,7), 'RIGHTALT': (5,11), 'FN': (5,12), 'CTXMENU': (5,13), 'RIGHTCTRL': (5,14), 'LEFTARROW': (5,15), 'DOWNARROW': (5,16), 'RIGHTARROW': (5,17), 'NP0': (5,19), 'NPPERIOD': (5,20),
+
+    # Additional mappings
+    'MACROMODE' : (0,11), 'GAMEMODE' : (0,12),
 }
 
 
@@ -77,7 +80,7 @@ EVENT_MAPPING = {
     100: 'RIGHTALT', 102: 'HOME', 103: 'UPARROW', 104: 'PAGEUP', 105: 'LEFTARROW', 106: 'RIGHTARROW', 107: 'END', 108: 'DOWNARROW', 109: 'PAGEDOWN', 110: 'INS',
     111: 'DELETE', 119: 'PAUSE',
     125: 'SUPER', 127: 'CTXMENU',
-    183: 'M1', 184: 'M2', 185: 'M3', 186: 'M4', 187: 'M5',
+    183: 'M1', 184: 'M2', 185: 'M3', 186: 'M4', 187: 'M5', 188: 'MACROMODE', 189: 'GAMEMODE',
     194: 'FN',
 }
 
@@ -168,6 +171,8 @@ XTE_MAPPING = {
     'M4': 'XF86Launch7',
     'M5': 'XF86Launch8',
     'FN': None,
+    'GAMEMODE': None,
+    'MACROMODE': None,
 }
 
 class KeyDoesNotExistError(Exception):

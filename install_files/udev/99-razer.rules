@@ -15,7 +15,7 @@ KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor
 
 KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0c00", ENV{is_razer_firefly}="yes"
 
-SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_kbd}=="yes", ATTRS{bInterfaceNumber}=="02", RUN+="razer_mount razerkbd $kernel"
+SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_kbd}=="yes", RUN+="razer_mount razerkbd $kernel"
 
 SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_mouse}=="yes", ATTRS{bInterfaceNumber}=="00", RUN+="razer_mount razermouse $kernel"
 
