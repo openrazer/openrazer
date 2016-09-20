@@ -140,6 +140,6 @@ class ScreensaverThread(threading.Thread):
 
 
             # Sleep
-            time.sleep(0.1)
+            time.sleep(0.2)
 
         self.logger.info("Screensaver Thread finished")

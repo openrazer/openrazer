@@ -94,7 +94,7 @@ class BatteryManager(object):
     Class which manages the overall process of notifing battery levels
     """
     def __init__(self, parent, device_number, device_name):
-        self._logger = logging.getLogger('razer.device{0}.ripplemanager'.format(device_number))
+        self._logger = logging.getLogger('razer.device{0}.batterymanager'.format(device_number))
         self._parent = parent
 
         self._battery_thread = BatteryNotifier(parent, device_number, device_name)

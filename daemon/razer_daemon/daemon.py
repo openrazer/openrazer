@@ -3,6 +3,8 @@ Daemon class
 
 This class is the main core of the daemon, this serves a basic dbus module to control the main bit of the daemon
 """
+__version__ = '1.0.9'
+
 import configparser
 import logging
 import logging.handlers
@@ -192,7 +194,7 @@ class RazerDaemon(DBusService):
             file_logger.setFormatter(formatter)
             self.logger.addHandler(file_logger)
 
-        self.logger.info("Initialising Daemon. Pid: %d", os.getpid())
+        self.logger.info("Initialising Daemon (v%s). Pid: %d", __version__, os.getpid())
 
         # Setup screensaver thread
         self._screensaver_thread = ScreensaverThread(self, active=self._config.getboolean('Startup', 'devices_off_on_screensaver'))
@@ -210,6 +212,8 @@ class RazerDaemon(DBusService):
         self.add_dbus_method('razer.devices', 'disableTurnOffOnScreensaver', self.disable_turn_off_on_screensaver)
         self.logger.info("Adding razer.devices.syncEffects method to DBus")
         self.add_dbus_method('razer.devices', 'syncEffects', self.sync_effects, in_signature='b')
+        self.logger.info("Adding razer.daemon.version method to DBus")
+        self.add_dbus_method('razer.daemon', 'version', self.version, out_signature='s')
         self.logger.info("Adding razer.daemon.stop method to DBus")
         self.add_dbus_method('razer.daemon', 'stop', self.stop)
 
@@ -253,6 +257,15 @@ class RazerDaemon(DBusService):
         Disable the turning off of devices when the screensaver is active
         """
         self._screensaver_thread.active = False
+
+    def version(self):
+        """
+        Get the daemon version
+
+        :return: Version string
+        :rtype: str
+        """
+        return __version__
 
     def suspend_devices(self):
         """
@@ -373,7 +386,7 @@ class RazerDaemon(DBusService):
             if main_loop_context.pending():
                 main_loop_context.iteration()
             else:
-                time.sleep(0.001)
+                time.sleep(0.05)
 
             if counter > DEVICE_CHECK_INTERVAL: # Time sleeps 1ms so DEVICE_CHECK_INTERVAL is in milliseconds
                 self._remove_devices()

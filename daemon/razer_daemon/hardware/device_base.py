@@ -27,6 +27,7 @@ class RazerDevice(DBusService):
     USB_VID = None
     USB_PID = None
     HAS_MATRIX = False
+    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [-1, -1]
 
     def __init__(self, device_path, device_number, config, testing=False):
@@ -78,6 +79,10 @@ class RazerDevice(DBusService):
         self.add_dbus_method('razer.device.misc', 'resumeDevice', self.resume_device)
         self.logger.debug("Adding razer.device.misc.getVidPid method to DBus")
         self.add_dbus_method('razer.device.misc', 'getVidPid', self.get_vid_pid, out_signature='ai')
+        self.logger.debug("Adding razer.device.misc.version method to DBus")
+        self.add_dbus_method('razer.device.misc', 'version', razer_daemon.dbus_services.dbus_methods.version, out_signature='s')
+        self.logger.debug("Adding razer.device.misc.hasDedicatedMacroKeys method to DBus")
+        self.add_dbus_method('razer.device.misc', 'hasDedicatedMacroKeys', self.dedicated_macro_keys, out_signature='b')
 
         # Load additional DBus methods
         self.load_methods()
@@ -96,6 +101,15 @@ class RazerDevice(DBusService):
         payload.extend(args)
 
         self.notify_observers(tuple(payload))
+
+    def dedicated_macro_keys(self):
+        """
+        Returns if the device has dedicated macro keys
+
+        :return: Macro keys
+        :rtype: bool
+        """
+        return self.DEDICATED_MACRO_KEYS
 
     @property
     def effect_sync(self):
@@ -162,7 +176,6 @@ class RazerDevice(DBusService):
             serial = serial_file.read().strip()
             while len(serial) == 0:
                 if count >= 3:
-                    self.logger.critical("Could not get serial")
                     break
                 serial = serial_file.read().strip()
 

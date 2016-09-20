@@ -32,6 +32,7 @@ EVENT_FORMAT = '@llHHI'
 EVENT_SIZE = struct.calcsize(EVENT_FORMAT)
 
 EPOLL_TIMEOUT = 0.01
+SPIN_SLEEP = 0.01
 
 EVIOCGRAB = 0x40044590
 
@@ -43,15 +44,6 @@ COLOUR_CHOICES = (
     (0, 255, 255), # Cyan
     (255, 0, 255), # Magenta
 )
-
-MEDIA_KEY_MAP = {
-    'vol_mute': 'XF86AudioMute',
-    'vol_up': 'XF86AudioRaiseVolume',
-    'vol_down': 'XF86AudioLowerVolume',
-    'media_play': 'XF86AudioPlay',
-    'media_prev': 'XF86AudioPrev',
-    'media_next': 'XF86AudioNext'
-}
 
 
 def random_colour_picker(last_choice, iterable):
@@ -124,9 +116,10 @@ class KeyWatcher(threading.Thread):
 
         self.open_event_files = [open(event_file, 'rb') for event_file in self._event_files]
         # Set open files to non blocking mode
-        for event_file in self.open_event_files:
-            flags = fcntl.fcntl(event_file.fileno(), fcntl.F_GETFL)
-            fcntl.fcntl(event_file.fileno(), fcntl.F_SETFL, flags | os.O_NONBLOCK)
+        if not use_epoll:
+            for event_file in self.open_event_files:
+                flags = fcntl.fcntl(event_file.fileno(), fcntl.F_GETFL)
+                fcntl.fcntl(event_file.fileno(), fcntl.F_SETFL, flags | os.O_NONBLOCK)
 
     def run(self):
         """
@@ -150,7 +143,7 @@ class KeyWatcher(threading.Thread):
             else:
                 self._poll_read()
 
-            time.sleep(EPOLL_TIMEOUT)
+            time.sleep(SPIN_SLEEP)
 
 
         # Unbind files and close them
@@ -254,7 +247,6 @@ class KeyboardKeyManager(object):
         self._record_stats = parent.config.get('Statistics', 'key_statistics')
         self._stats = {}
 
-        self._fn_down = False
         self._recording_macro = False
         self._macros = {}
 
@@ -355,7 +347,6 @@ class KeyboardKeyManager(object):
         """
         # Disable pylints complaining for this part, #PerformanceOverNeatness
         # pylint: disable=too-many-branches,too-many-statements
-        self._access_lock.acquire()
 
         now = datetime.datetime.now()
 
@@ -376,23 +367,14 @@ class KeyboardKeyManager(object):
             # Convert event ID to key name
             key_name = EVENT_MAPPING[key_id]
 
+            #self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
+
             # Key release
             if not key_press:
-                # Logic for treating FN as a modifier
-                if key_name == 'FN':
-                    self._fn_down = False
-
-                    if self._event_files_locked:
-                        self.grab_event_files(False)
-
-                # Add key release events to the macro chain if recording
-                elif self._recording_macro and not self._fn_down:
+                if self._recording_macro:
                     # Skip as dont care about releasing macro bind key
-                    if self._current_macro_bind_key == key_name:
-                        pass
-
-                    # Record key release events
-                    else:
+                    if key_name not in (self._current_macro_bind_key, 'MACROMODE'):
+                        # Record key release events
                         self._current_macro_combo.append((event_time, key_name, 'UP'))
 
             else:
@@ -420,33 +402,8 @@ class KeyboardKeyManager(object):
                     self._last_colour_choice = colour
                     self._temp_key_store.append((now + self._temp_expire_time, KEY_MAPPING[key_name], colour))
 
-                # Logic for treating FN as a modifier
-                if key_name == 'FN':
-                    self._fn_down = True
-
-                    # Grab the file so no FN+Keys are leaked
-                    if not self._event_files_locked:
-                        self.grab_event_files(True)
-                # Mute logic (as macro_keys disables all FN+Keys)
-                elif self._fn_down and key_name == 'F1':
-                    self.play_media_key('vol_mute')
-                # Volume down logic
-                elif self._fn_down and key_name == 'F2':
-                    self.play_media_key('vol_down')
-                # Volume up logic
-                elif self._fn_down and key_name == 'F3':
-                    self.play_media_key('vol_up')
-                # Media previous logic
-                elif self._fn_down and key_name == 'F5':
-                    self.play_media_key('media_prev')
-                # Media play/pause logic
-                elif self._fn_down and key_name == 'F6':
-                    self.play_media_key('media_play')
-                # Media next logic
-                elif self._fn_down and key_name == 'F7':
-                    self.play_media_key('media_next')
                 # Macro FN+F9 logic
-                elif self._fn_down and key_name == 'F9':
+                if key_name == 'MACROMODE':
                     self._logger.info("Got macro combo")
 
                     if not self._recording_macro:
@@ -459,6 +416,7 @@ class KeyboardKeyManager(object):
                         self._parent.setMacroMode(True)
 
                     else:
+                        self._logger.debug("Finished recording macro")
                         # Finish recording macro
                         if self._current_macro_bind_key is not None:
                             if len(self._current_macro_combo) > 0:
@@ -469,26 +427,25 @@ class KeyboardKeyManager(object):
                         self._recording_macro = False
                         self._parent.setMacroMode(False)
                 # Sets up game mode as when enabling macro keys it stops the key working
-                elif self._fn_down and key_name == 'F10':
+                elif key_name == 'GAMEMODE':
                     self._logger.info("Got game mode combo")
 
                     game_mode = self._parent.getGameMode()
                     self._parent.setGameMode(not game_mode)
-                # Sleep logic
-                elif self._fn_down and key_name == 'PAUSE':
-                    self.play_media_key('sleep')
-                # Recording all keypress events
                 elif self._recording_macro:
+
                     if self._current_macro_bind_key is None:
-                        self._current_macro_bind_key = key_name
-                        self._parent.setMacroEffect(0x00)
-                    # Don't want no recursion, cancel macro
-                    elif self._current_macro_bind_key == key_name:
+                        # Restrict macro bind keys to M1-M5
+                        if key_name not in ('M1', 'M2', 'M3', 'M4', 'M5'):
+                            self._logger.warning("Macros are only for M1-M5 for now.")
+                            self._recording_macro = False
+                            self._parent.setMacroMode(False)
+                        else:
+                            self._current_macro_bind_key = key_name
+                            self._parent.setMacroEffect(0x00)
+                    # Don't want no recursion, cancel macro, dont let one call macro in a macro
+                    elif key_name == self._current_macro_bind_key:
                         self._logger.warning("Skipping macro assignment as would cause recursion")
-                        self._recording_macro = False
-                        self._parent.setMacroMode(False)
-                    elif key_name not in ('M1', 'M2', 'M3', 'M4', 'M5'):
-                        self._logger.warning("Macros are only for M1-M5 for now.")
                         self._recording_macro = False
                         self._parent.setMacroMode(False)
                     # Anything else just record it
@@ -503,7 +460,6 @@ class KeyboardKeyManager(object):
         except KeyError as err:
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
 
-        self._access_lock.release()
 
     def add_kb_macro(self):
         """

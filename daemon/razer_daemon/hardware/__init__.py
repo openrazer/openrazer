@@ -4,7 +4,7 @@ Hardware collection
 
 from razer_daemon.hardware.keyboards import RazerBlackWidow2013, RazerBlackWidowChroma, RazerBlackWidowChromaTournamentEdition, RazerBladeStealth, RazerTartarus, RazerBlackWidow2016
 from razer_daemon.hardware.mouse_mat import RazerFireFly
-from razer_daemon.hardware.mouse import RazerMambaChromaWireless
+from razer_daemon.hardware.mouse import RazerMambaChromaWireless, RazerAbyssus, RazerMambaChromaTE, RazerMambaChromaWired
 
 def get_device_classes():
     """

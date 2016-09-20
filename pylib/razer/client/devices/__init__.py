@@ -30,6 +30,9 @@ class RazerDevice(object):
         self._name = self._dbus_interfaces['device'].getDeviceName()
         self._type = self._dbus_interfaces['device'].getDeviceType()
         self._fw = self._dbus_interfaces['device'].getFirmware()
+        self._drv_version = self._dbus_interfaces['device'].version()
+        self._has_dedicated_macro = None
+
         if vid_pid is None:
             self._vid, self._pid = self._dbus_interfaces['device'].getVidPid()
         else:
@@ -145,6 +148,16 @@ class RazerDevice(object):
         return self._fw
 
     @property
+    def driver_version(self) -> str:
+        """
+        Device's driver version
+
+        :return: Driver Version
+        :rtype: str
+        """
+        return self._drv_version
+
+    @property
     def serial(self) -> str:
         """
         Device's serial
@@ -194,6 +207,19 @@ class RazerDevice(object):
         :rtype: dict
         """
         return self._capabilities
+
+    @property
+    def dedicated_macro(self) -> bool:
+        """
+        Device has dedicated macro keys
+
+        :return: If the device has macro keys
+        :rtype: bool
+        """
+        if self._has_dedicated_macro is None:
+            self._has_dedicated_macro = self._dbus_interfaces['device'].hasDedicatedMacroKeys()
+
+        return self._has_dedicated_macro
 
     def __str__(self):
         return self._name

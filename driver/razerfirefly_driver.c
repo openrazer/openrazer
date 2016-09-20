@@ -614,6 +614,16 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
 }
 
 /**
+ * Read device file "version"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_version(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return sprintf(buf, "%s\n", VERSION);
+}
+
+/**
  * Set up the device driver files
  *
  * Read only is 0444
@@ -622,9 +632,10 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
  */
 static DEVICE_ATTR(set_brightness, 0664, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
 
-static DEVICE_ATTR(get_firmware_version, 0444, razer_attr_read_get_firmware_version, NULL);
-static DEVICE_ATTR(device_type,          0444, razer_attr_read_device_type,          NULL);
-static DEVICE_ATTR(get_serial,           0444, razer_attr_read_get_serial,           NULL);
+static DEVICE_ATTR(get_firmware_version, 0440, razer_attr_read_get_firmware_version, NULL);
+static DEVICE_ATTR(device_type,          0440, razer_attr_read_device_type,          NULL);
+static DEVICE_ATTR(get_serial,           0440, razer_attr_read_get_serial,           NULL);
+static DEVICE_ATTR(version,              0440, razer_attr_read_version,              NULL);
 
 static DEVICE_ATTR(mode_wave,      0220, NULL, razer_attr_write_mode_wave);
 static DEVICE_ATTR(mode_spectrum,  0220, NULL, razer_attr_write_mode_spectrum);
@@ -646,7 +657,7 @@ static DEVICE_ATTR(reset,          0220, NULL, razer_attr_write_reset);
  */
 static int razer_firefly_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
-    int retval;
+    int retval = 0;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_firefly_device *dev = NULL;
@@ -659,47 +670,24 @@ static int razer_firefly_probe(struct hid_device *hdev, const struct hid_device_
     }
 
     dev->brightness = -1;
+    
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
 
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_wave);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_spectrum);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_none);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_reactive);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_breath);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_custom);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_temp_clear_row);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_get_serial);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_get_firmware_version);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_device_type);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_static);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_reset);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_set_brightness);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_wave);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_spectrum);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_reactive);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_custom);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_temp_clear_row);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key_row);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_serial);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_firmware_version);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_reset);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_brightness);
+    
     if (retval)
         goto exit_free;
 
@@ -709,12 +697,12 @@ static int razer_firefly_probe(struct hid_device *hdev, const struct hid_device_
     retval = hid_parse(hdev);
     if(retval)    {
         hid_err(hdev, "parse failed\n");
-       goto exit_free;
+        goto exit_free;
     }
     retval = hid_hw_start(hdev, HID_CONNECT_DEFAULT);
     if (retval) {
         hid_err(hdev, "hw start failed\n");
-       goto exit_free;
+        goto exit_free;
     }
 
 
@@ -740,6 +728,8 @@ static void razer_firefly_disconnect(struct hid_device *hdev)
     //struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     dev = hid_get_drvdata(hdev);
+    
+    device_remove_file(&hdev->dev, &dev_attr_version);
 
     device_remove_file(&hdev->dev, &dev_attr_mode_wave);
     device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);

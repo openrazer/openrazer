@@ -2,6 +2,8 @@ import dbus as _dbus
 from razer.client.device import RazerDeviceFactory as _RazerDeviceFactory
 from razer.client import constants
 
+__version__ = '1.0.9'
+
 
 class DaemonNotFound(Exception):
     pass
@@ -24,6 +26,8 @@ class DeviceManager(object):
 
         self._device_serials = self._dbus_devices.getDevices()
         self._devices = []
+
+        self._daemon_version = self._dbus_daemon.version()
 
         for serial in self._device_serials:
             device = _RazerDeviceFactory.get_device(serial)
@@ -81,6 +85,25 @@ class DeviceManager(object):
 
         return self._devices
 
+    @property
+    def version(self) -> str:
+        """
+        Returns the Python library version
+
+        :return: Version tuple
+        :rtype: str
+        """
+        return __version__
+
+    @property
+    def daemon_version(self):
+        """
+        Returns the daemon version
+
+        :return: Daemon version
+        :rtype: str
+        """
+        return self._daemon_version
 
 # if __name__ == '__main__':
 #     from razer.client.debug import print_attrs

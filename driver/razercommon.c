@@ -23,8 +23,8 @@
  */
 int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint report_index, ulong wait_min, ulong wait_max)
 {
-	uint request = HID_REQ_SET_REPORT; // 0x09
-	uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
+    uint request = HID_REQ_SET_REPORT; // 0x09
+    uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
     uint value = 0x300;
     uint size = RAZER_USB_REPORT_LEN;
     char *buf;
