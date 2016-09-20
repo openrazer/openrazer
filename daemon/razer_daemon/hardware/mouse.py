@@ -58,7 +58,7 @@ class RazerMambaChromaTE(RazerDeviceBrightnessSuspend):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
-               'set_dpi_xy', 'get_logo_active', 'set_logo_active']
+               'set_dpi_xy', 'set_te_logo']
 
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaTE, self).__init__(*args, **kwargs)

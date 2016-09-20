@@ -128,7 +128,7 @@ def set_dpi_xy(self, dpi_x, dpi_y):
         driver_file.write(dpi_bytes)
 
 
-@endpoint('razer.device.lighting.logo', 'getLogoActive', out_sig='y')
+@endpoint('razer.device.lighting.logo', 'getLogoActive', out_sig='b')
 def get_logo_active(self):
     """
     Get if the logo is light up
@@ -144,7 +144,7 @@ def get_logo_active(self):
         active = int(driver_file.read().strip())
         return active == 1
 
-@endpoint('razer.device.lighting.logo', 'setLogoActive', in_sig='y')
+@endpoint('razer.device.lighting.logo', 'setLogoActive', in_sig='b')
 def set_logo_active(self, active):
     """
     Get if the logo is light up
@@ -161,3 +161,20 @@ def set_logo_active(self, active):
             driver_file.write('1')
         else:
             driver_file.write('0')
+
+@endpoint('razer.device.lighting.logo', 'setLogo', in_sig='yyy')
+def set_te_logo(self, red, green, blue):
+    """
+    Set the red green blue of logo
+
+    :param red: Red component
+    :type red: int
+    """
+    self.logger.debug("DBus call set_logo_active")
+
+    driver_path = self.get_driver_path('mode_logo')
+
+    payload = bytes([red, green, blue])
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(payload)

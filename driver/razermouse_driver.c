@@ -215,15 +215,48 @@ int razer_is_charging(struct usb_device *usb_dev)
 int razer_set_key_row(struct usb_device *usb_dev, unsigned char *row_cols) //struct razer_row_rgb *row_cols)
 {
     int retval;
-    struct razer_report report = get_razer_report(0x03, 0x0C, RAZER_MAMBA_ROW_LEN * 3 + 2);
+    size_t row_len = RAZER_MAMBA_ROW_LEN;
+    unsigned char end = RAZER_MAMBA_ROW_LEN;
+    struct razer_report report;
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) {
+		// TE has extra LED for Logo
+		row_len = RAZER_MAMBA_TE_ROW_LEN;
+		end = RAZER_MAMBA_TE_ROW_LEN;
+	}
+	row_len *= 3;
+	
+	report = get_razer_report(0x03, 0x0C, row_len + 2);
+    
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) {
+		// Needs to be routed through wireless dock
+		report.transaction_id.id = 0x80;
+	}    
+    
+    report.arguments[0] = 0x00; // Start
+    report.arguments[1] = end; // End, probs need tuneing for mambate
+    memcpy(&report.arguments[2], row_cols, RAZER_MAMBA_ROW_LEN * 3);
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_set_report(usb_dev, &report);
+    return retval;
+}
+
+/**
+ * Set individual LED in matrix
+ */
+int razer_set_individual_key(struct usb_device *usb_dev, unsigned char key_column, struct razer_rgb *colour)
+{
+    int retval;
+    struct razer_report report = get_razer_report(0x03, 0x0C, 5); // start + end + rgb
     
     if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) {
 		report.transaction_id.id = 0x80;
 	}    
     
-    report.arguments[0] = 0x00;
-    report.arguments[1] = 0x0E;
-    memcpy(&report.arguments[2], row_cols, RAZER_MAMBA_ROW_LEN * 3);
+    report.arguments[0] = key_column; // Start
+    report.arguments[1] = key_column; // End
+    report.arguments[2] = colour->r;
+    report.arguments[3] = colour->g;
+    report.arguments[4] = colour->b;
     report.crc = razer_calculate_crc(&report);
     retval = razer_set_report(usb_dev, &report);
     return retval;
@@ -444,8 +477,18 @@ int razer_set_breath_mode(struct usb_device *usb_dev, unsigned char breathing_ty
 int razer_set_brightness(struct usb_device *usb_dev, unsigned char brightness)
 {
     int retval;
-    struct razer_report report = get_razer_report(0x07, 0x02, 0x01);
-    report.arguments[0] = brightness;       /* Brightness */
+    struct razer_report report = get_razer_report(0x03, 0x03, 0x03);
+    
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) {
+		// This has to go through the wireless dock
+		report = get_razer_report(0x07, 0x02, 0x01);
+		report.arguments[0] = brightness;       /* Brightness */
+	} else {
+		report.arguments[0] = 0x01;       /* LED Class */
+		report.arguments[1] = 0x05;       /* LED ID Backlight */
+		report.arguments[2] = brightness;       /* Brightness */
+	}
+        
     report.crc = razer_calculate_crc(&report);
     retval = razer_set_report(usb_dev, &report);
     return retval;
@@ -667,7 +710,13 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
     size_t offset = 0;
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    size_t buf_size = RAZER_MAMBA_ROW_LEN * 3;
+    size_t buf_size = RAZER_MAMBA_ROW_LEN;
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) {
+		// TE has extra LED for Logo
+		buf_size = RAZER_MAMBA_TE_ROW_LEN;
+	}
+    
+    buf_size *= 3;
 
     if(count < buf_size) {
         printk(KERN_ALERT "Wrong Amount of RGB data provided: %d of %d\n",(int)(count-offset), (int)buf_size);
@@ -738,12 +787,24 @@ static ssize_t razer_attr_write_mode_logo(struct device *dev, struct device_attr
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    int temp = simple_strtoul(buf, NULL, 10);
+    int temp;
+    
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) {
+		
+		if(count == 3)
+        {
+            razer_set_individual_key(usb_dev, 0x0E, (struct razer_rgb*)&buf[0]);
+        }
+		
+	} else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_ABYSSUS) {
+    
+		temp = simple_strtoul(buf, NULL, 10);
 
-    if(temp == 1 || temp == 0)
-    {
-        razer_set_logo_mode(usb_dev, temp);
-    }
+		if(temp == 1 || temp == 0)
+		{
+			razer_set_logo_mode(usb_dev, temp);
+		}
+	}
 
     return count;
 }
