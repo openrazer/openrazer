@@ -32,6 +32,10 @@
  #define USB_DEVICE_ID_RAZER_ABYSSUS 0x0042
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_IMPERATOR // 2012
+ #define USB_DEVICE_ID_RAZER_IMPERATOR 0x002F
+#endif
+
 /* Each keyboard report has 90 bytes*/
 #define RAZER_REPORT_LEN 0x5A
 #define RAZER_MAMBA_ROW_LEN 15

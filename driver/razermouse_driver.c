@@ -263,22 +263,78 @@ int razer_set_individual_key(struct usb_device *usb_dev, unsigned char key_colum
 }
 
 /**
- * Set the logo on the mouse
+ * Set the logo LED on the mouse
  *
  * Supported by:
  *   Razer Abyssus
+ *   Razer Imperator
  */
 int razer_set_logo_mode(struct usb_device *usb_dev, unsigned char enable)
 {
     int retval;
     struct razer_report report = get_razer_report(0x03, 0x00, 0x03);
-    report.arguments[0] = 0x01; // Class id, Storage?
-    report.arguments[1] = 0x04; // LED id, Logo
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = LOGO_LED;
     report.arguments[2] = enable;
     report.crc = razer_calculate_crc(&report);
     retval = razer_set_report(usb_dev, &report);
     return retval;
 }
+
+/**
+ * Set the scroll LED on the mouse
+ *
+ * Supported by:
+ *   Razer Imperator
+ */
+int razer_set_scroll_mode(struct usb_device *usb_dev, unsigned char enable)
+{
+    int retval;
+    struct razer_report report = get_razer_report(0x03, 0x00, 0x03);
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = SCROLL_WHEEL_LED;
+    report.arguments[2] = enable;
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_set_report(usb_dev, &report);
+    return retval;
+}
+
+
+/**
+ * Get macro on the keyboard
+ *
+ * Supported by:
+ *   Razer Imperiator
+ */
+int razer_get_scroll_mode(struct usb_device *usb_dev)
+{
+    int retval = -1;
+    // Class LED Lighting, Command Set state, 3 Bytes of parameters
+    struct razer_report response_report;
+    struct razer_report request_report = get_razer_report(0x03, 0x80, 0x03);
+    request_report.arguments[0] = VARSTORE;
+    request_report.arguments[1] = SCROLL_WHEEL_LED;
+    request_report.crc = razer_calculate_crc(&request_report);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+
+    if(retval == 0)
+    {
+        if(response_report.status == 0x02 && response_report.command_class == 0x03 && response_report.command_id.id == 0x80)
+        {
+            retval = response_report.arguments[2];
+        } else
+        {
+            print_erroneous_report(&response_report, "razermouse", "Invalid Report Type");
+        }
+    } else
+    {
+      print_erroneous_report(&response_report, "razermouse", "Invalid Report Length");
+    }
+
+    return retval;
+}
+
 
 /**
  * Get macro on the keyboard
@@ -541,6 +597,91 @@ int razer_get_brightness(struct usb_device *usb_dev)
 
 
 
+
+/**
+ * Set the mouse poll rate
+ *
+ * Supported by:
+ *   Razer Imperator
+ */
+int razer_set_poll_rate(struct usb_device *usb_dev, unsigned char poll_rate)
+{
+    int retval;
+    struct razer_report report = get_razer_report(0x00, 0x05, 0x01);
+    unsigned char rate = 0x02;
+    
+    if (poll_rate == 1000) {
+		rate = 0x01;
+	} else if (poll_rate == 128 ) {
+		rate = 0x08;
+	}
+    
+    
+    report.arguments[0] = rate;
+        
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_set_report(usb_dev, &report);
+    return retval;
+}
+
+/**
+ * Get brightness of the keyboard
+ *
+ * Supported by:
+ *   Razer Imperator
+ */
+int razer_get_poll_rate(struct usb_device *usb_dev)
+{
+    int retval = -1;
+    // Class LED Lighting, Command Set state, 3 Bytes of parameters
+    struct razer_report response_report;
+    struct razer_report request_report = get_razer_report(0x00, 0x85, 0x01);
+
+    request_report.crc = razer_calculate_crc(&request_report);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+    
+    // The mamba is wireless so the command might be busy, aka status 0x01
+
+    if(retval == 0)
+    {
+        if(response_report.status == 0x01) {
+            printk(KERN_WARNING "razermouse: Mouse busy\n");
+            retval = -2;            
+        } else if(response_report.status == 0x02 && response_report.command_class == 0x00 && response_report.command_id.id == 0x85) // For others
+        {
+            retval = response_report.arguments[0];
+        } else
+        {
+            print_erroneous_report(&response_report, "razermouse", "Invalid Report Type");
+            retval = -1;
+        }
+    } else
+    {
+        print_erroneous_report(&response_report, "razermouse", "Invalid Report Length");
+        retval = -1;
+    }
+
+    return retval;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Set the battery low blink threshold
  *
@@ -632,7 +773,11 @@ int razer_set_mouse_dpi(struct usb_device *usb_dev, unsigned short dpi_x, unsign
     dpi_y_part1 = (dpi_y >> 8) & 0x00FF;
     dpi_y_part2 = dpi_y & 0x00FF;
 
-    report.arguments[0] = 0x00;
+	if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_IMPERATOR) {
+		report.arguments[0] = 0x01;
+	} else {
+		report.arguments[0] = 0x00;
+	}
     report.arguments[1] = dpi_x_part1;
     report.arguments[2] = dpi_x_part2;
     report.arguments[3] = dpi_y_part1;
@@ -782,6 +927,12 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
  * Write device file "mode_logo"
  *
  * When 1 is written the logo lights up, 0 and its turns off
+ * 
+ * Support:
+ *   Razer Abyssus
+ *   Razer Imperator
+ * 
+ *   Razer Mamaba (uses individual led matrix command)
  */
 static ssize_t razer_attr_write_mode_logo(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
@@ -796,7 +947,8 @@ static ssize_t razer_attr_write_mode_logo(struct device *dev, struct device_attr
             razer_set_individual_key(usb_dev, 0x0E, (struct razer_rgb*)&buf[0]);
         }
 		
-	} else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_ABYSSUS) {
+	} else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_ABYSSUS || 
+	           usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_IMPERATOR) {
     
 		temp = simple_strtoul(buf, NULL, 10);
 
@@ -813,6 +965,10 @@ static ssize_t razer_attr_write_mode_logo(struct device *dev, struct device_attr
  * Read device file "mode_logo"
  *
  * Returns a string
+ * 
+ * Support:
+ *   Razer Abyssus
+ *   Razer Imperator
  */
 static ssize_t razer_attr_read_mode_logo(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -822,6 +978,90 @@ static ssize_t razer_attr_read_mode_logo(struct device *dev, struct device_attri
     int logo_mode = razer_get_logo_mode(usb_dev);
     return sprintf(buf, "%d\n", logo_mode);
 }
+
+
+
+
+
+
+
+/**
+ * Write device file "mode_scroll"
+ *
+ * When 1 is written the scroll lights up, 0 and its turns off
+ * 
+ * Support:
+ *   Razer Imperator
+ */
+static ssize_t razer_attr_write_mode_scroll(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int temp = simple_strtoul(buf, NULL, 10);
+
+	if(temp == 1 || temp == 0)
+	{
+		razer_set_scroll_mode(usb_dev, temp);
+	}
+
+    return count;
+}
+
+/**
+ * Read device file "mode_scroll"
+ *
+ * Returns a string
+ * 
+ * Support:
+ *   Razer Imperator
+ */
+static ssize_t razer_attr_read_mode_scroll(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int scroll_mode = razer_get_scroll_mode(usb_dev);
+    return sprintf(buf, "%d\n", scroll_mode);
+}
+
+
+
+
+
+
+
+
+/**
+ * Write device file "poll_rate"
+ *
+ * Sets the poll rate
+ */
+static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int poll_rate = simple_strtoul(buf, NULL, 10);
+    razer_set_poll_rate(usb_dev, (unsigned char)poll_rate);
+    return count;
+}
+
+/**
+ * Read device file "poll_rate"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int poll_rate = razer_get_poll_rate(usb_dev);
+    return sprintf(buf, "%d\n", poll_rate);
+}
+
+
+
 
 
 
@@ -1108,6 +1348,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         case USB_DEVICE_ID_RAZER_ABYSSUS:
             device_type = "Razer Abyssus\n";
             break;
+        
+        case USB_DEVICE_ID_RAZER_IMPERATOR:
+            device_type = "Razer Imperator\n";
+            break;
 
         default:
             device_type = "Unknown\n";
@@ -1156,8 +1400,10 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
  * Write-only is 0220
  * Read/write is 0664
  */
-static DEVICE_ATTR(mode_logo,                 0660, razer_attr_read_mode_logo, razer_attr_write_mode_logo);
-static DEVICE_ATTR(set_brightness, 0660, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
+static DEVICE_ATTR(mode_logo,                 0660, razer_attr_read_mode_logo,      razer_attr_write_mode_logo);
+static DEVICE_ATTR(mode_scroll,               0660, razer_attr_read_mode_scroll,    razer_attr_write_mode_scroll);
+static DEVICE_ATTR(poll_rate,                 0660, razer_attr_read_poll_rate,      razer_attr_write_poll_rate);
+static DEVICE_ATTR(set_brightness,            0660, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
 
 static DEVICE_ATTR(get_firmware_version,      0444, razer_attr_read_get_firmware_version, NULL);
 static DEVICE_ATTR(device_type,               0444, razer_attr_read_device_type,          NULL);
@@ -1264,7 +1510,12 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_logo);
     } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_ABYSSUS) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_logo);
-    }
+    } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_IMPERATOR) {
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_logo);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_scroll);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_mouse_dpi);
+	}
 
     hid_set_drvdata(hdev, dev);
 
@@ -1350,7 +1601,12 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_mode_logo);
     } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_ABYSSUS) {
         device_remove_file(&hdev->dev, &dev_attr_mode_logo);
-    }
+    } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_IMPERATOR) {
+		device_remove_file(&hdev->dev, &dev_attr_mode_logo);
+		device_remove_file(&hdev->dev, &dev_attr_mode_scroll);
+		device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+		device_remove_file(&hdev->dev, &dev_attr_set_mouse_dpi);
+	}
     
 
     hid_hw_stop(hdev);
@@ -1367,6 +1623,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_IMPERATOR) },
     { }
 };
 

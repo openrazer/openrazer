@@ -24,6 +24,17 @@ do { \
 /* Each USB report has 90 bytes*/
 #define RAZER_USB_REPORT_LEN 0x5A
 
+// LED STORATE Options
+#define NOSTORE          0x00
+#define VARSTORE         0x01
+
+// LED definitions
+#define SCROLL_WHEEL_LED 0x01
+#define LOGO_LED         0x04
+#define BACKLIGHT_LED    0x05
+#define MACRO_LED        0x07
+#define GAME_LED         0x08
+
 struct razer_report;
 
 struct razer_rgb {
