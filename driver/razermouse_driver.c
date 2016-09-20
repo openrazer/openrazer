@@ -1510,7 +1510,9 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_logo);
     } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_ABYSSUS) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_logo);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_serial);
     } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_IMPERATOR) {
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_serial);
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_logo);
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_scroll);
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
@@ -1601,7 +1603,9 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_mode_logo);
     } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_ABYSSUS) {
         device_remove_file(&hdev->dev, &dev_attr_mode_logo);
+        device_remove_file(&hdev->dev, &dev_attr_get_serial);
     } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_IMPERATOR) {
+		device_remove_file(&hdev->dev, &dev_attr_get_serial);
 		device_remove_file(&hdev->dev, &dev_attr_mode_logo);
 		device_remove_file(&hdev->dev, &dev_attr_mode_scroll);
 		device_remove_file(&hdev->dev, &dev_attr_poll_rate);
