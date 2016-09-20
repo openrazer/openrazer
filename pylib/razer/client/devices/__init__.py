@@ -30,6 +30,7 @@ class RazerDevice(object):
         self._name = self._dbus_interfaces['device'].getDeviceName()
         self._type = self._dbus_interfaces['device'].getDeviceType()
         self._fw = self._dbus_interfaces['device'].getFirmware()
+        self._drv_version = self._dbus_interfaces['device'].version()
         if vid_pid is None:
             self._vid, self._pid = self._dbus_interfaces['device'].getVidPid()
         else:
@@ -143,6 +144,16 @@ class RazerDevice(object):
         :rtype: str
         """
         return self._fw
+
+    @property
+    def driver_version(self) -> str:
+        """
+        Device's driver version
+
+        :return: Driver Version
+        :rtype: str
+        """
+        return self._drv_version
 
     @property
     def serial(self) -> str:

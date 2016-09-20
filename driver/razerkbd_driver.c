@@ -1668,6 +1668,15 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
     return sprintf(buf, "%s\n", &fw_string[0]);
 }
 
+/**
+ * Read device file "version"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_version(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return sprintf(buf, "%s\n", VERSION);
+}
 
 
 /**
@@ -1692,6 +1701,7 @@ static DEVICE_ATTR(profile_led_blue,  0660, razer_attr_read_tartarus_profile_led
 static DEVICE_ATTR(device_type,          0440, razer_attr_read_device_type,          NULL);
 static DEVICE_ATTR(get_serial,           0440, razer_attr_read_get_serial,           NULL);
 static DEVICE_ATTR(get_firmware_version, 0440, razer_attr_read_get_firmware_version, NULL);
+static DEVICE_ATTR(version,              0440, razer_attr_read_version,              NULL);
 
 static DEVICE_ATTR(mode_starlight,    0220, NULL, razer_attr_write_mode_starlight);
 static DEVICE_ATTR(mode_wave,         0220, NULL, razer_attr_write_mode_wave);
@@ -1774,6 +1784,8 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
     
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE)
     {
+		
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
 
         // If the currently bound device is the control (mouse) interface
 
@@ -1900,6 +1912,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE)
     {
         // If the currently bound device is the control (mouse) interface
+        device_remove_file(&hdev->dev, &dev_attr_version);
 
         if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL ||
 		   usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012 ||

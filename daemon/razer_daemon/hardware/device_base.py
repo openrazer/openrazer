@@ -78,6 +78,8 @@ class RazerDevice(DBusService):
         self.add_dbus_method('razer.device.misc', 'resumeDevice', self.resume_device)
         self.logger.debug("Adding razer.device.misc.getVidPid method to DBus")
         self.add_dbus_method('razer.device.misc', 'getVidPid', self.get_vid_pid, out_signature='ai')
+        self.logger.debug("Adding razer.device.misc.version method to DBus")
+        self.add_dbus_method('razer.device.misc', 'version', razer_daemon.dbus_services.dbus_methods.version, out_signature='s')
 
         # Load additional DBus methods
         self.load_methods()

@@ -1089,20 +1089,32 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
 
 
 /**
+ * Read device file "version"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_version(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return sprintf(buf, "%s\n", VERSION);
+}
+
+
+/**
  * Set up the device driver files
  *
  * Read-only is  0444
  * Write-only is 0220
  * Read/write is 0664
  */
-static DEVICE_ATTR(mode_logo,                 0660, razer_attr_read_mode_logo, razer_attr_write_mode_logo);
+static DEVICE_ATTR(mode_logo,      0660, razer_attr_read_mode_logo,      razer_attr_write_mode_logo);
 static DEVICE_ATTR(set_brightness, 0660, razer_attr_read_set_brightness, razer_attr_write_set_brightness);
 
-static DEVICE_ATTR(get_firmware_version,      0444, razer_attr_read_get_firmware_version, NULL);
-static DEVICE_ATTR(device_type,               0444, razer_attr_read_device_type,          NULL);
-static DEVICE_ATTR(get_battery,               0444, razer_attr_read_get_battery,          NULL);
-static DEVICE_ATTR(get_serial,                0444, razer_attr_read_get_serial,           NULL);
-static DEVICE_ATTR(is_charging,               0444, razer_attr_read_is_charging,          NULL);
+static DEVICE_ATTR(get_firmware_version, 0444, razer_attr_read_get_firmware_version, NULL);
+static DEVICE_ATTR(device_type,          0444, razer_attr_read_device_type,          NULL);
+static DEVICE_ATTR(get_battery,          0444, razer_attr_read_get_battery,          NULL);
+static DEVICE_ATTR(get_serial,           0444, razer_attr_read_get_serial,           NULL);
+static DEVICE_ATTR(is_charging,          0444, razer_attr_read_is_charging,          NULL);
+static DEVICE_ATTR(version,              0440, razer_attr_read_version,              NULL);
 
 static DEVICE_ATTR(mode_custom,               0220, NULL, razer_attr_write_mode_custom);
 static DEVICE_ATTR(mode_static,               0220, NULL, razer_attr_write_mode_static);
@@ -1154,6 +1166,8 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         retval = -ENOMEM;
         goto exit;
     }
+    
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
 
 	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_firmware_version);
     CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);
@@ -1240,6 +1254,8 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     dev = hid_get_drvdata(hdev);
+    
+    device_remove_file(&hdev->dev, &dev_attr_version);
 
 	device_remove_file(&hdev->dev, &dev_attr_get_firmware_version);
     device_remove_file(&hdev->dev, &dev_attr_device_type);
