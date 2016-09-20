@@ -72,10 +72,31 @@ class RazerAbyssus(RazerDevice):
     USB_PID = 0x0042
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active']
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active']
 
     def __init__(self, *args, **kwargs):
         super(RazerAbyssus, self).__init__(*args, **kwargs)
+
+    def _resume_device(self):
+        self.logger.debug("Abyssus doesnt have suspend/resume")
+
+    def _suspend_device(self):
+        self.logger.debug("Abyssus doesnt have suspend/resume")
+
+class RazerImperiator(RazerDevice):
+    """
+    Class for the Razer Imperiator 2012
+    """
+
+    USB_VID = 0x1532
+    USB_PID = 0x002F
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active', 'set_dpi_xy',
+               'set_poll_rate', 'set_scroll_active', 'get_scroll_active']
+
+    def __init__(self, *args, **kwargs):
+        super(RazerImperiator, self).__init__(*args, **kwargs)
 
     def _resume_device(self):
         self.logger.debug("Abyssus doesnt have suspend/resume")
