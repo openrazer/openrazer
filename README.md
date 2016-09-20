@@ -28,6 +28,7 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | Razer Mamba (Wired)             |   ✔    |   ✔    |
 | Razer Mamba Tournament Edition  |   ✔    |   ✔    |
 | Razer Abyssus 2014              |   ✔    |   ✔    |
+| Razer Imperiator 2012           |   ✔    |   ✔    |
 
 ### Mousemats
 | Device        | Driver | Daemon |

@@ -127,8 +127,25 @@ def set_dpi_xy(self, dpi_x, dpi_y):
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(dpi_bytes)
 
+@endpoint('razer.device.misc', 'setPollRate', in_sig='q')
+def set_poll_rate(self, rate):
+    """
+    Set the DPI on the mouse, Takes in 4 bytes big-endian
 
-@endpoint('razer.device.lighting.logo', 'getLogoActive', out_sig='y')
+    :param rate: Poll rate
+    :type rate: int
+    """
+    self.logger.debug("DBus call set_poll_rate")
+
+    if rate in (1000, 500, 128):
+        driver_path = self.get_driver_path('poll_rate')
+
+        with open(driver_path, 'w') as driver_file:
+            driver_file.write(str(rate))
+    else:
+        self.logger.error("Poll rate %d is invalid", rate)
+
+@endpoint('razer.device.lighting.logo', 'getLogoActive', out_sig='b')
 def get_logo_active(self):
     """
     Get if the logo is light up
@@ -144,7 +161,7 @@ def get_logo_active(self):
         active = int(driver_file.read().strip())
         return active == 1
 
-@endpoint('razer.device.lighting.logo', 'setLogoActive', in_sig='y')
+@endpoint('razer.device.lighting.logo', 'setLogoActive', in_sig='b')
 def set_logo_active(self, active):
     """
     Get if the logo is light up
@@ -161,3 +178,58 @@ def set_logo_active(self, active):
             driver_file.write('1')
         else:
             driver_file.write('0')
+
+@endpoint('razer.device.lighting.logo', 'setLogo', in_sig='yyy')
+def set_te_logo(self, red, green, blue):
+    """
+    Set the red green blue of logo
+
+    :param red: Red component
+    :type red: int
+    """
+    self.logger.debug("DBus call set_logo_active")
+
+    driver_path = self.get_driver_path('mode_logo')
+
+    payload = bytes([red, green, blue])
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(payload)
+
+
+@endpoint('razer.device.lighting.scroll', 'getScrollActive', out_sig='b')
+def get_scroll_active(self):
+    """
+    Get if the scroll is light up
+
+    :return: Active
+    :rtype: bool
+    """
+    self.logger.debug("DBus call get_scroll_active")
+
+    driver_path = self.get_driver_path('mode_scroll')
+
+    with open(driver_path, 'r') as driver_file:
+        active = int(driver_file.read().strip())
+        return active == 1
+
+@endpoint('razer.device.lighting.scroll', 'setScrollActive', in_sig='b')
+def set_scroll_active(self, active):
+    """
+    Get if the scroll is light up
+
+    :param active: Is active
+    :type active: bool
+    """
+    self.logger.debug("DBus call set_scroll_active")
+
+    driver_path = self.get_driver_path('mode_scroll')
+
+    with open(driver_path, 'w') as driver_file:
+        if active:
+            driver_file.write('1')
+        else:
+            driver_file.write('0')
+
+
+
