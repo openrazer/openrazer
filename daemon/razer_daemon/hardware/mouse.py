@@ -99,7 +99,7 @@ class RazerImperiator(RazerDevice):
         super(RazerImperiator, self).__init__(*args, **kwargs)
 
     def _resume_device(self):
-        self.logger.debug("Abyssus doesnt have suspend/resume")
+        self.logger.debug("Imperiator doesnt have suspend/resume")
 
     def _suspend_device(self):
-        self.logger.debug("Abyssus doesnt have suspend/resume")
+        self.logger.debug("Imperiator doesnt have suspend/resume")
