@@ -29,6 +29,7 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | Razer Mamba Tournament Edition  |   ✔    |   ✔    |
 | Razer Abyssus 2014              |   ✔    |   ✔    |
 | Razer Imperiator 2012           |   ✔    |   ✔    |
+| Razer Orochi (Wired)            |   ✔    |   ✔    |
 
 ### Mousemats
 | Device        | Driver | Daemon |

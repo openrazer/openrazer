@@ -103,3 +103,15 @@ class RazerImperiator(RazerDevice):
 
     def _suspend_device(self):
         self.logger.debug("Imperiator doesnt have suspend/resume")
+
+class RazerOrochiWired(RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Mamba Chroma (Wireless)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0048
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness',
+               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
+               'set_breath_single_effect', 'set_breath_dual_effect', 'set_idle_time', 'set_low_battery_threshold', 'set_dpi_xy', 'set_scroll_active', 'get_scroll_active']

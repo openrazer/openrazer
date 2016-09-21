@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2015 Tim Theede <pez2001@voyagerproject.de>
  *               2015 Terry Cain <terry@terrys-home.co.uk>
- *               
+ *
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -12,7 +12,7 @@
 #ifndef DRIVER_RAZERCOMMON_H_
 #define DRIVER_RAZERCOMMON_H_
 
-#define VERSION "1.0.9"
+#define VERSION "1.0.10"
 
 // Macro to create device files
 #define CREATE_DEVICE_FILE(dev, type) \
