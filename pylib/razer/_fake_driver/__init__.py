@@ -87,7 +87,7 @@ class FakeDevice(object):
         """
         Goes through event files and creates them as needed
         """
-        event_files = self._config.get('device', 'event')
+        event_files = self._config.get('device', 'event', fallback=None)
         if event_files is None:
             event_files = []
         else:
@@ -172,11 +172,6 @@ class FakeDevice(object):
         os.write(pipe_fd, event_binary)
 
         return len(event_binary)
-
-
-
-    def __del__(self):
-        self.close()
 
     def close(self):
         if os.path.exists(self._tmp_dir):

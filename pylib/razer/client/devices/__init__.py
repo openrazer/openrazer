@@ -30,7 +30,7 @@ class RazerDevice(object):
         self._name = self._dbus_interfaces['device'].getDeviceName()
         self._type = self._dbus_interfaces['device'].getDeviceType()
         self._fw = self._dbus_interfaces['device'].getFirmware()
-        self._drv_version = self._dbus_interfaces['device'].version()
+        self._drv_version = self._dbus_interfaces['device'].getDriverVersion()
         self._has_dedicated_macro = None
 
         if vid_pid is None:
@@ -62,7 +62,15 @@ class RazerDevice(object):
             'lighting_pulsate': self._has_feature('razer.device.lighting.chroma', 'setPulsate'),
 
             # Get if the device has an LED Matrix, == True as its a DBus boolean otherwise, so for consistency sake we coerce it into a native bool
-            'lighting_led_matrix': self._dbus_interfaces['device'].hasMatrix() == True
+            'lighting_led_matrix': self._dbus_interfaces['device'].hasMatrix() == True,
+
+            # Mouse lighting attrs
+            'lighting_logo': self._has_feature('razer.device.lighting.logo'), # Just says we have logo, not which type (one is on/off (abyssus), one is rgb (mamba te))
+            'lighting_logo_abyssus': self._has_feature('razer.device.lighting.logo', ['getLogoActive', 'setLogoActive']),
+            'lighting_logo_te': self._has_feature('razer.device.lighting.logo', 'setLogo'),
+
+            'lighting_scroll': self._has_feature('razer.device.lighting.scroll', ['getScrollActive', 'setScrollActive']),
+
         }
 
         self._matrix_dimensions = self._dbus_interfaces['device'].getMatrixDimensions()
@@ -98,11 +106,30 @@ class RazerDevice(object):
 
         return interfaces
 
-    def _has_feature(self, object_path:str, method_name:str=None) -> bool:
+    def _has_feature(self, object_path:str, method_name=None) -> bool:
+        """
+        Checks to see if the device has said DBus method
+
+        :param object_path: Object path
+        :type object_path: str
+
+        :param method_name: Method name, or list of methods
+        :type method_name: str or list
+
+        :return: True if method/s exist
+        :rtype: bool
+        """
         if method_name is None:
             return object_path in self._available_features
-        else:
+        elif isinstance(method_name, str):
             return object_path in self._available_features and method_name in self._available_features[object_path]
+        elif isinstance(method_name, list):
+            result = True
+            for method in method_name:
+                result &= object_path in self._available_features and method in self._available_features[object_path]
+            return result
+        else:
+            return False
 
     def has(self, capability:str) -> bool:
         """
