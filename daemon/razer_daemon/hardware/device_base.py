@@ -60,9 +60,10 @@ class RazerDevice(DBusService):
         else:
             search_dir = '/dev/input/by-id/'
 
-        for event_file in os.listdir(search_dir):
-            if self.EVENT_FILE_REGEX is not None and self.EVENT_FILE_REGEX.match(event_file) is not None:
-                self.event_files.append(os.path.join(search_dir, event_file))
+        if os.path.exists(search_dir):
+            for event_file in os.listdir(search_dir):
+                if self.EVENT_FILE_REGEX is not None and self.EVENT_FILE_REGEX.match(event_file) is not None:
+                    self.event_files.append(os.path.join(search_dir, event_file))
 
         object_path = os.path.join(self.OBJECT_PATH, self.serial)
         DBusService.__init__(self, self.BUS_PATH, object_path)
@@ -73,6 +74,7 @@ class RazerDevice(DBusService):
 
         # Set up methods to suspend and restore device operation
         self.suspend_args = {}
+        self.method_args = {}
         self.logger.debug("Adding razer.device.misc.suspendDevice method to DBus")
         self.add_dbus_method('razer.device.misc', 'suspendDevice', self.suspend_device)
         self.logger.debug("Adding razer.device.misc.resumeDevice method to DBus")
@@ -80,7 +82,7 @@ class RazerDevice(DBusService):
         self.logger.debug("Adding razer.device.misc.getVidPid method to DBus")
         self.add_dbus_method('razer.device.misc', 'getVidPid', self.get_vid_pid, out_signature='ai')
         self.logger.debug("Adding razer.device.misc.version method to DBus")
-        self.add_dbus_method('razer.device.misc', 'version', razer_daemon.dbus_services.dbus_methods.version, out_signature='s')
+        self.add_dbus_method('razer.device.misc', 'getDriverVersion', razer_daemon.dbus_services.dbus_methods.version, out_signature='s')
         self.logger.debug("Adding razer.device.misc.hasDedicatedMacroKeys method to DBus")
         self.add_dbus_method('razer.device.misc', 'hasDedicatedMacroKeys', self.dedicated_macro_keys, out_signature='b')
 

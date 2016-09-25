@@ -15,36 +15,77 @@ import razer._fake_driver as fake_driver
 
 class FakeDevicePrompt(cmd.Cmd):
 
-    def __init__(self, device, *args, **kwargs):
+    def __init__(self, device_map, *args, **kwargs):
         super(FakeDevicePrompt, self).__init__(*args, **kwargs)
 
-        self._device = device
+        self._device_map = device_map
+        self._current_device = None
 
         self._ep = {}
-        for endpoint, details in self._device.endpoints.items():
-            self._ep[endpoint] = details[2]
+        self._read = []
+        self._write = []
 
-        self._read = [endpoint for endpoint, perm in self._ep.items() if perm in ('r', 'rw')]
-        self._write = [endpoint for endpoint, perm in self._ep.items() if perm in ('w', 'rw')]
+        # If only 1 device, auto use that
+        if len(self._device_map) == 1:
+            self._change_device(self._device_map.keys()[0])
+        else:
+            self._change_device(None)
 
-        self.prompt = self._device.spec_name + "> "
+    def _change_device(self, device_name=None):
+        if device_name is not None:
+            self._current_device = device_name
+            self.prompt = self._current_device + "> "
+
+            for endpoint, details in self._device_map[self._current_device].endpoints.items():
+                self._ep[endpoint] = details[2]
+
+            self._read = [endpoint for endpoint, perm in self._ep.items() if perm in ('r', 'rw')]
+            self._write = [endpoint for endpoint, perm in self._ep.items() if perm in ('w', 'rw')]
+        else:
+            self._current_device = None
+            self.prompt = "> "
+
+    def do_dev(self, arg):
+        """
+        Change current device
+        """
+        if arg in self._device_map:
+            if arg is None or len(arg) == 0:
+                print('Need to specify a device name. One of: {0}'.format(','.join(self._device_map.keys())))
+            else:
+                self._change_device(arg)
+        else:
+            print('Invalid device name: {0}'.format(arg))
+
+    def complete_dev(self, text, line, begidx, endidx):
+        if not text:
+            completions = list(self._device_map.keys())
+        else:
+            completions = [item for item in list(self._device_map.keys()) if item.startswith(text)]
+
+        return completions
 
     def do_list(self, arg):
         """List available device files"""
-        print('Device files')
-        print('------------')
-        for endpoint, permission in self._ep.items():
-            if permission in ('r', 'rw'):
-                print("  {0:-<2}-  {1}".format(permission, endpoint))
-            else:
-                print("  {0:->2}-  {1}".format(permission, endpoint))
+        if self._current_device is not None:
+            print('Device files')
+            print('------------')
+            for endpoint, permission in self._ep.items():
+                if permission in ('r', 'rw'):
+                    print("  {0:-<2}-  {1}".format(permission, endpoint))
+                else:
+                    print("  {0:->2}-  {1}".format(permission, endpoint))
 
-        print()
-        print('Event files')
-        print('-----------')
-        for event_id, event_value in sorted(self._device.events.items(), key=lambda x: x[0]):
-            print("  {0: >2}   {1}".format(event_id, event_value[0]))
-
+            print()
+            print('Event files')
+            print('-----------')
+            for event_id, event_value in sorted(self._device_map[self._current_device].events.items(), key=lambda x: x[0]):
+                print("  {0: >2}   {1}".format(event_id, event_value[0]))
+        else:
+            print('Devices')
+            print('-------')
+            for device in list(self._device_map.keys()):
+                print('  {0}'.format(device))
 
     def do_ls(self, arg):
         """List available device files"""
@@ -52,14 +93,15 @@ class FakeDevicePrompt(cmd.Cmd):
 
     def do_read(self, arg, binary=False):
         """Read ASCII from given device file"""
-        if arg in self._ep and self._ep[arg] in ('r', 'rw'):
-            result = self._device.get(arg, binary=binary)
+        if self._current_device is not None:
+            if arg in self._ep and self._ep[arg] in ('r', 'rw'):
+                result = self._device_map[self._current_device].get(arg, binary=binary)
 
-            print(result)
-        elif arg in self._ep:
-            print('Device endpoint not readable')
-        else:
-            print("Device endpoint not found")
+                print(result)
+            elif arg in self._ep:
+                print('Device endpoint not readable')
+            else:
+                print("Device endpoint not found")
 
     def do_binary_read(self, arg):
         """Read binary from given device file"""
@@ -77,21 +119,22 @@ class FakeDevicePrompt(cmd.Cmd):
 
     def do_write(self, arg):
         """Write ASCII to device file. DEVICE_FILE DATA"""
-        try:
-            device_file, data = arg.split(' ', 1)
+        if self._current_device is not None:
+            try:
+                device_file, data = arg.split(' ', 1)
 
-            if device_file in self._ep and self._ep[device_file] in ('w', 'rw'):
-                if len(data) > 0:
-                    self._device.set(device_file, data)
+                if device_file in self._ep and self._ep[device_file] in ('w', 'rw'):
+                    if len(data) > 0:
+                        self._device_map[self._current_device].set(device_file, data)
 
-                    print("{0}: {1}".format(device_file, self._device.get(device_file)))
-            elif device_file in self._ep:
-                print('Device endpoint not writable')
-            else:
-                print("Device endpoint not found")
+                        print("{0}: {1}".format(device_file, self._device_map[self._current_device].get(device_file)))
+                elif device_file in self._ep:
+                    print('Device endpoint not writable')
+                else:
+                    print("Device endpoint not found")
 
-        except ValueError:
-            print("Must specify a device enpoint then a space then data to write")
+            except ValueError:
+                print("Must specify a device enpoint then a space then data to write")
 
     def complete_write(self, text, line, begidx, endidx):
         if not text:
@@ -104,29 +147,31 @@ class FakeDevicePrompt(cmd.Cmd):
     def do_event(self, arg):
         """Emit an event, format: EVENT_ID KEY_ID STATE
 
-        Where state in 'up' 'down' and 'repeat'"""
+        Where state in 'up' 'down' and 'repeat'
+        """
+        if self._current_device is not None:
+            event_file, key_id, value = arg.split(' ')
 
-        event_file, key_id, value = arg.split(' ')
-
-        if event_file not in self._device.events:
-            print("Event ID {0} is invalid".format(event_file))
-        else:
-            try:
-                bytes_written = self._device.emit_kb_event(event_file, int(key_id), value)
-                print("Wrote {0} bytes to {1}".format(bytes_written, self._device.events[event_file][0]))
-            except ValueError as err:
-                print("Caught exception: {0}".format(err))
-
-
-
+            if event_file not in self._device_map[self._current_device].events:
+                print("Event ID {0} is invalid".format(event_file))
+            else:
+                try:
+                    bytes_written = self._device_map[self._current_device].emit_kb_event(event_file, int(key_id), value)
+                    print("Wrote {0} bytes to {1}".format(bytes_written, self._device_map[self._current_device].events[event_file][0]))
+                except ValueError as err:
+                    print("Caught exception: {0}".format(err))
 
     def do_exit(self, arg):
         """Exit"""
-        return True
+        if self._current_device is not None:
+            self._change_device(None)
+            return False
+        else:
+            return True
 
     def do_EOF(self, arg):
         """Press Ctrl+D to exit"""
-        return True
+        self.do_exit(arg)
 
 
 def create_envionment(device_name, destination):
@@ -140,9 +185,11 @@ def create_envionment(device_name, destination):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('device', metavar='DEVICE', help='Device config name')
+    parser.add_argument('device', metavar='DEVICE', nargs='+', help='Device config name')
     parser.add_argument('--dest', metavar='DESTDIR', required=False, default=None, help='Directory to create driver files in. If omitted then a tmp directory is used')
     parser.add_argument('--non-interactive', dest='interactive', action='store_false', help='Dont display prompt, just hang until killed')
+    parser.add_argument('--clear-dest', action='store_true', help='Clear the destination folder if it exists before starting')
+    parser.add_argument('--create-only', action='store_true', help='Create the target structure and then exit')
 
     return parser.parse_args()
 
@@ -154,23 +201,33 @@ def run():
     else:
         destination = args.dest
 
-    device = create_envionment(args.device, destination)
+        if args.clear_dest and os.path.exists(destination):
+            shutil.rmtree(destination, ignore_errors=True)
 
-    # Register cleanup
-    if args.dest is None:
-        atexit.register(lambda: shutil.rmtree(destination, ignore_errors=True))
-    else:
-        atexit.register(device.close)
+    device_map = {}
+    for device in args.device:
+        # Device name: FakeDriver
+        device_map[device] = create_envionment(device, destination)
 
-    print("Device test directory: {0}".format(destination))
+    if not args.create_only:
 
-    try:
-        if not args.interactive:
-            input()
+        # Register cleanup
+        if args.dest is None:
+            atexit.register(lambda: shutil.rmtree(destination, ignore_errors=True))
         else:
-            FakeDevicePrompt(device).cmdloop()
-    except KeyboardInterrupt:
-        pass
+            for device in device_map.values():
+                # device = FakeDriver
+                atexit.register(device.close)
+
+        print("Device test directory: {0}".format(destination))
+
+        try:
+            if not args.interactive:
+                input()
+            else:
+                FakeDevicePrompt(device_map).cmdloop()
+        except KeyboardInterrupt:
+            pass
 
 
 

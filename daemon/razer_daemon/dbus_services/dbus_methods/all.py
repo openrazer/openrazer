@@ -1,9 +1,10 @@
 """
 DBus methods available for all devices.
 """
+import os
 from razer_daemon.dbus_services import endpoint
 
-@endpoint('razer.device.misc', 'version', out_sig='s')
+@endpoint('razer.device.misc', 'getDriverVersion', out_sig='s')
 def version(self):
     """
     Get the devices driver version
@@ -13,13 +14,21 @@ def version(self):
     """
     self.logger.debug("DBus call version")
 
+    #Caching
+    if 'driver_version' in self.method_args:
+        return self.method_args['driver_version']
+
     driver_path = self.get_driver_path('version')
 
-    try:
+    driver_version = '0.0.0'
+
+    if os.path.exists(driver_path):
+        # Check it exists, as people might not have reloaded driver
         with open(driver_path, 'r') as driver_file:
-            return driver_file.read().strip()
-    except (IOError, OSError):
-        return '0.0.0'
+            driver_version = driver_file.read().strip()
+
+    self.method_args['driver_version'] = driver_version
+    return driver_version
 
 @endpoint('razer.device.misc', 'getFirmware', out_sig='s')
 def get_firmware(self):

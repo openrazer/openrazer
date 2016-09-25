@@ -232,4 +232,33 @@ def set_scroll_active(self, active):
             driver_file.write('0')
 
 
+@endpoint('razer.device.lighting.chroma', 'setKey', in_sig='yyyyy')
+def set_key_mice(self, row_id, col_id, red, green, blue):
+    """
+    Set the RGB of a single LED in the matrix
 
+    First byte is row, then column, then its 3byte of RGB
+    :param row_id: LED Row
+    :type row_id: int
+
+    :param col_id: LED Column
+    :type col_id: int
+
+    :param red: Red component
+    :type red: int
+
+    :param blue: Blue component
+    :type blue: int
+
+    :param green: Green component
+    :type green: int
+    """
+
+    # TODO uncomment
+    # self.logger.debug("DBus call set_key_row")
+
+    driver_path = self.get_driver_path('set_key')
+    payload = bytes((col_id, red, green, blue))
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(payload)

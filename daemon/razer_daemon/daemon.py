@@ -322,8 +322,8 @@ class RazerDaemon(DBusService):
         classes = razer_daemon.hardware.get_device_classes()
 
         device_number = 0
-        for device_class in classes:
-            for device_id in devices:
+        for device_id in devices:
+            for device_class in classes:
                 if device_id in self._razer_devices:
                     continue
 

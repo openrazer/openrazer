@@ -23,29 +23,16 @@ def clamp_ubyte(value):
 
 
 # Default Chroma lighting
-class RazerFX(object):
-    def __init__(self, serial:str, capabilities:dict, daemon_dbus=None, matrix_dims=(-1, -1)):
+class BaseRazerFX(object):
+    def __init__(self, serial: str, capabilities: dict, daemon_dbus=None):
         self._capabilities = capabilities
 
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
+        self._dbus = daemon_dbus
 
-        self._lighting_dbus = _dbus.Interface(daemon_dbus, "razer.device.lighting.chroma")
-
-        # all() part basically checks that all dimensions are present (-1 is bad)
-        if self.has('led_matrix') and all([dim>=1 for dim in matrix_dims]):
-            self.advanced = RazerAdvancedFX(serial, capabilities, daemon_dbus=daemon_dbus, matrix_dims=matrix_dims)
-        else:
-            self.advanced = None
-
-        # Only keyboards will have ripple set
-        if self.has('led_matrix') and self.has('ripple'):
-            self._custom_lighting_dbus = _dbus.Interface(daemon_dbus, "razer.device.lighting.custom")
-        else:
-            self._custom_lighting_dbus = None
-
-    def has(self, capability:str) -> bool:
+    def has(self, capability: str) -> bool:
         """
         Convenience function to check capability
 
@@ -57,6 +44,27 @@ class RazerFX(object):
         :rtype: bool
         """
         return self._capabilities.get('lighting_' + capability, False)
+
+
+class RazerFX(BaseRazerFX):
+    def __init__(self, serial:str, capabilities:dict, daemon_dbus=None, matrix_dims=(-1, -1)):
+        super(RazerFX, self).__init__(serial, capabilities, daemon_dbus)
+
+        self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.chroma")
+
+        # all() part basically checks that all dimensions are present (-1 is bad)
+        if self.has('led_matrix') and all([dim>=1 for dim in matrix_dims]):
+            self.advanced = RazerAdvancedFX(serial, capabilities, daemon_dbus=self._dbus, matrix_dims=matrix_dims)
+        else:
+            self.advanced = None
+
+        # Only keyboards will have ripple set
+        if self.has('led_matrix') and self.has('ripple'):
+            self._custom_lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.custom")
+        else:
+            self._custom_lighting_dbus = None
+
+        self.misc = MiscLighting(serial, capabilities, self._dbus)
 
     def none(self) -> bool:
         """
@@ -349,8 +357,10 @@ class RazerFX(object):
         return False
 
 
-class RazerAdvancedFX(object):
-    def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, matrix_dims=(-1, -1)):
+class RazerAdvancedFX(BaseRazerFX):
+    def __init__(self, serial: str, capabilities:dict, daemon_dbus=None, matrix_dims=(-1, -1)):
+        super(RazerAdvancedFX, self).__init__(serial, capabilities, daemon_dbus)
+
         # Only init'd when theres a matrix
         self._capabilities = capabilities
 
@@ -361,6 +371,7 @@ class RazerAdvancedFX(object):
             session_bus = _dbus.SessionBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
 
+        self._matrix_dims = matrix_dims
         self._lighting_dbus = _dbus.Interface(daemon_dbus, "razer.device.lighting.chroma")
 
         self.matrix = Frame(matrix_dims)
@@ -378,6 +389,71 @@ class RazerAdvancedFX(object):
 
     def draw_fb_or(self):
         self._draw(bytes(self.matrix.draw_with_fb_or()))
+
+    def set_key(self, column_id, rgb, row_id=0): # Not needed on mice
+        if self.has('led_single'):
+            if isinstance(rgb, (tuple, list)) and len(rgb) == 3 and all([isinstance(component, int) for component in rgb]):
+                if row_id < self._matrix_dims[0] and column_id < self._matrix_dims[1]:
+                    self._lighting_dbus.setKey(row_id, column_id, [clamp_ubyte(component) for component in rgb])
+                else:
+                    raise ValueError("Row or column out of bounds. Max dimentions are: {0},{1}".format(*self._matrix_dims))
+            else:
+                raise ValueError("RGB must be an RGB tuple")
+
+
+class MiscLighting(BaseRazerFX):
+    def __init__(self, serial: str, capabilities:dict, daemon_dbus=None):
+        super(MiscLighting, self).__init__(serial, capabilities, daemon_dbus)
+
+        self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.logo")
+
+    @property
+    def logo(self):
+        if self.has('logo') and self.has('logo_abyssus'):
+            # Te cant get logo status as its part of LED matrix
+
+            # getLogoActive is for abyssus, using bool() to convert from DBus bool to native (looks nicer when debugging as DBus bool overrides __str__)
+            return bool(self._lighting_dbus.getLogoActive())
+
+        return False
+
+    @logo.setter
+    def logo(self, value):
+        if self.has('logo'):
+            if self.has('logo_abyssus'):
+                # Takes single boolean value
+                if isinstance(value, bool):
+                    self._lighting_dbus.setLogoActive(value)
+                else:
+                    raise ValueError("Logo value for the Abyssus must be a boolean")
+            elif self.has('logo_te'):
+                # Is an RGB but will handle if True is passed in
+                if isinstance(value, bool):
+                    self._lighting_dbus.setLogo(255, 255, 255)
+                elif isinstance(value, (tuple, list)) and len(value) == 3 and all([isinstance(component, int) for component in value]):
+                    # Looks like an RGB, now just make sure all components are 0->255
+                    self._lighting_dbus.setLogo([clamp_ubyte(component) for component in value])
+                else:
+                    raise ValueError("Logo value for the Mamba TE must be an RGB tuple")
+            else:
+                raise NotImplementedError("Has logo but dont know the device")
+        # Else do nothing
+
+    @property
+    def scroll_wheel(self):
+        if self.has('scroll'):
+            return bool(self._lighting_dbus.getScrollActive())
+
+        return False
+
+    @scroll_wheel.setter
+    def scroll_wheel(self, value):
+        if self.has('scroll'):
+            if isinstance(value, bool):
+                self._lighting_dbus.setScrollActive(value)
+            else:
+                raise ValueError("Scroll value must be a boolean")
+
 
 
 class Frame(object):

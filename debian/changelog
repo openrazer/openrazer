@@ -1,3 +1,19 @@
+razer (1.0.11-0ubuntu1) trusty; urgency=low
+
+  * Minor daemon logic improvements
+  * Renamed some daemon methods and added in rudimentary caching for teh lulz
+  * Added capability for Mamba devices to change the colour of individual LEDs
+  * Bug fixes for daemon in test mode
+  * Fixed mouse driver for Mamba devices as I broke custom mode when I added Mamba TE support
+  * Fixed typo in udev rules
+  * Fixed bug in device simulator and added more configs
+  * Added multi-device simulation support and can change device contexts in the interactive mode
+  * Removed test code from pylib
+  * Cleaned up FX in pylib and added support for dealing with logo and scroll wheel LEDs
+  * Fixed bug in pylib for Blade Stealth users
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Wed, 21 Sep 2016 16:56:00 +0000
+
 razer (1.0.10-0ubuntu1) trusty; urgency=low
 
   * Added Razer Orochi (Wired)

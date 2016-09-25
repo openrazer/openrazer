@@ -118,22 +118,8 @@ class RazerKeyboard(__RazerDevice):
             self._dbus_interfaces['macro_mode_led'].setMacroEffect(value)
 
 
-class RazerBladeStealthKeyboard(RazerKeyboard):
-    def __init__(self, serial, vid_pid=None, daemon_dbus=None):
-        default_capabilities = {
-            'game_mode_led': True,
-            'macro_mode_led': False,
-            'macro_mode_led_effect': False,
-        }
-        self._update_capabilities(default_capabilities)
-
-        # Go get base stuff
-        super(RazerBladeStealthKeyboard, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
-
-
-
 DEVICE_PID_MAP = {
-    0x0205: RazerBladeStealthKeyboard,
+    
 }
 
 class RazerKeyboardFactory(__BaseDeviceFactory):
