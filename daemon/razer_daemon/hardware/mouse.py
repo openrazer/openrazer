@@ -15,7 +15,7 @@ class RazerMambaChromaWireless(RazerDeviceBrightnessSuspend):
     MATRIX_DIMS = [1, 15]  # 1 Row, 15 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'get_battery', 'is_charging', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
-               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
+               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'set_key_mice',
                'set_charge_effect', 'set_charge_colour', 'set_idle_time', 'set_low_battery_threshold', 'set_dpi_xy']
 
     def __init__(self, *args, **kwargs):
@@ -41,7 +41,7 @@ class RazerMambaChromaWired(RazerDeviceBrightnessSuspend):
     MATRIX_DIMS = [1, 15]  # 1 Row, 15 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
-               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
+               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'set_key_mice',
                'set_dpi_xy']
 
     def __init__(self, *args, **kwargs):
@@ -54,10 +54,10 @@ class RazerMambaChromaTE(RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0046
     HAS_MATRIX = True
-    MATRIX_DIMS = [1, 15]  # 1 Row, 15 Cols
+    MATRIX_DIMS = [1, 16]  # 1 Row, 16 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
-               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
+               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'set_key_mice',
                'set_dpi_xy', 'set_te_logo']
 
     def __init__(self, *args, **kwargs):

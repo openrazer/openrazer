@@ -63,6 +63,7 @@ class RazerDevice(object):
 
             # Get if the device has an LED Matrix, == True as its a DBus boolean otherwise, so for consistency sake we coerce it into a native bool
             'lighting_led_matrix': self._dbus_interfaces['device'].hasMatrix() == True,
+            'lighting_led_single': self._has_feature('razer.device.lighting.chroma', 'setKey'),
 
             # Mouse lighting attrs
             'lighting_logo': self._has_feature('razer.device.lighting.logo'), # Just says we have logo, not which type (one is on/off (abyssus), one is rgb (mamba te))

@@ -205,7 +205,7 @@ int razer_is_charging(struct usb_device *usb_dev)
 
 
 /**
- * Set row colour on the keyboard
+ * Set row colour on the mouse
  *
  * This sets the colour of the LED segments on the mouse. Takes in an array of RGB bytes.
  *
@@ -215,26 +215,27 @@ int razer_is_charging(struct usb_device *usb_dev)
 int razer_set_key_row(struct usb_device *usb_dev, unsigned char *row_cols) //struct razer_row_rgb *row_cols)
 {
     int retval;
-    size_t row_len = RAZER_MAMBA_ROW_LEN;
-    unsigned char end = RAZER_MAMBA_ROW_LEN;
     struct razer_report report;
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) {
-        // TE has extra LED for Logo
-        row_len = RAZER_MAMBA_TE_ROW_LEN;
-        end = RAZER_MAMBA_TE_ROW_LEN;
-    }
-    row_len *= 3;
+    unsigned char row_length = RAZER_MAMBA_ROW_LEN;
+    // Setting the row length if its different
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) {
+		row_length = RAZER_MAMBA_TE_ROW_LEN;
+	}
     
-    report = get_razer_report(0x03, 0x0C, row_len + 2);
+    // Create the report based on the row length
+    // Row consists of: Start Index, End Index, RGB, RGB...
+    report = get_razer_report(0x03, 0x0C, 2 + (row_length * 3));
     
+    // Route to the wireless dock
     if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) {
-        // Needs to be routed through wireless dock
         report.transaction_id.id = 0x80;
     }    
     
     report.arguments[0] = 0x00; // Start
-    report.arguments[1] = end; // End, probs need tuneing for mambate
-    memcpy(&report.arguments[2], row_cols, RAZER_MAMBA_ROW_LEN * 3);
+    report.arguments[1] = row_length - 1;
+    
+    // Copy the RGB bytes
+    memcpy(&report.arguments[2], row_cols, row_length * 3);
     report.crc = razer_calculate_crc(&report);
     retval = razer_set_report(usb_dev, &report);
     return retval;
@@ -245,20 +246,33 @@ int razer_set_key_row(struct usb_device *usb_dev, unsigned char *row_cols) //str
  */
 int razer_set_individual_key(struct usb_device *usb_dev, unsigned char key_column, struct razer_rgb *colour)
 {
-    int retval;
+    int retval = 0;
+    unsigned char index = 2 + (key_column * 3);
     struct razer_report report = get_razer_report(0x03, 0x0C, 5); // start + end + rgb
-    
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) {
-        report.transaction_id.id = 0x80;
-    }    
-    
-    report.arguments[0] = key_column; // Start
-    report.arguments[1] = key_column; // End
-    report.arguments[2] = colour->r;
-    report.arguments[3] = colour->g;
-    report.arguments[4] = colour->b;
-    report.crc = razer_calculate_crc(&report);
-    retval = razer_set_report(usb_dev, &report);
+    unsigned char row_length = RAZER_MAMBA_ROW_LEN;
+    // Setting the row length if its different
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) {
+		row_length = RAZER_MAMBA_TE_ROW_LEN;
+	}
+	
+	if (key_column < row_length) {
+		printk(KERN_ALERT "Individual Col: %d\n", key_column);
+		
+		if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) {
+			report.transaction_id.id = 0x80;
+		}
+		
+		report.arguments[0] = key_column; // Start
+		report.arguments[1] = key_column; // End
+		
+		// Start at given index and continue
+		report.arguments[index++] = colour->r;
+		report.arguments[index++] = colour->g;
+		report.arguments[index] = colour->b;
+		report.crc = razer_calculate_crc(&report);
+		retval = razer_set_report(usb_dev, &report);
+	}
+	
     return retval;
 }
 
@@ -613,13 +627,6 @@ int razer_get_brightness(struct usb_device *usb_dev)
     return retval;
 }
 
-
-
-
-
-
-
-
 /**
  * Set the mouse poll rate
  *
@@ -686,23 +693,6 @@ int razer_get_poll_rate(struct usb_device *usb_dev)
 
     return retval;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * Set the battery low blink threshold
@@ -905,22 +895,43 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
  */
 static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    size_t offset = 0;
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    size_t buf_size = RAZER_MAMBA_ROW_LEN;
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) {
-        // TE has extra LED for Logo
-        buf_size = RAZER_MAMBA_TE_ROW_LEN;
-    }
-    
-    buf_size *= 3;
+    size_t row_length = RAZER_MAMBA_ROW_LEN;
+    // Setting the row length if its different
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) {
+		row_length = RAZER_MAMBA_TE_ROW_LEN;
+	}
 
-    if(count < buf_size) {
-        printk(KERN_ALERT "Wrong Amount of RGB data provided: %d of %d\n",(int)(count-offset), (int)buf_size);
+    if(count < row_length) {
+        printk(KERN_ALERT "Wrong Amount of RGB data provided: %d of %d\n",(int)count, (int)row_length);
         return -EINVAL;
     }
     razer_set_key_row(usb_dev, (unsigned char*)&buf[0]);
+    return count;
+}
+
+/**
+ * Write device file "set_key_row"
+ *
+ * Writes the colour segments on the mouse.
+ */
+static ssize_t razer_attr_write_set_key(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    size_t row_length = RAZER_MAMBA_ROW_LEN;
+    // Setting the row length if its different
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) {
+		row_length = RAZER_MAMBA_TE_ROW_LEN;
+	}
+
+    if((unsigned char)buf[0] >= row_length) {
+        printk(KERN_ALERT "Cannot select index greater than max row length\n");
+        return -EINVAL;
+    }
+    
+    razer_set_individual_key(usb_dev, (unsigned char)buf[0], (struct razer_rgb*)&buf[1]);
     return count;
 }
 
@@ -971,11 +982,6 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
     return count;
 }
 
-
-
-
-
-
 /**
  * Write device file "mode_logo"
  *
@@ -990,14 +996,15 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
 static ssize_t razer_attr_write_mode_logo(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct usb_device *usb_dev = interface_to_usbdev(intf); 
     int temp;
     
     if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) {
         
         if(count == 3)
         {
-            razer_set_individual_key(usb_dev, 0x0E, (struct razer_rgb*)&buf[0]);
+            razer_set_individual_key(usb_dev, 14, (struct razer_rgb*)&buf[0]);
+            razer_set_custom_mode(usb_dev);
         }
         
     } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_ABYSSUS || 
@@ -1027,16 +1034,16 @@ static ssize_t razer_attr_read_mode_logo(struct device *dev, struct device_attri
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int logo_mode = 0;
 
-    int logo_mode = razer_get_logo_mode(usb_dev);
+	if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_ABYSSUS || 
+        usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_IMPERATOR) {
+    
+        logo_mode = razer_get_logo_mode(usb_dev);
+    }
+    
     return sprintf(buf, "%d\n", logo_mode);
 }
-
-
-
-
-
-
 
 /**
  * Write device file "mode_scroll"
@@ -1077,13 +1084,6 @@ static ssize_t razer_attr_read_mode_scroll(struct device *dev, struct device_att
     return sprintf(buf, "%d\n", scroll_mode);
 }
 
-
-
-
-
-
-
-
 /**
  * Write device file "poll_rate"
  *
@@ -1113,14 +1113,6 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     return sprintf(buf, "%d\n", poll_rate);
 }
 
-
-
-
-
-
-
-
-
 /**
  * Write device file "mode_wave"
  *
@@ -1141,7 +1133,6 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
     return count;
 }
 
-
 /**
  * Write device file "mode_static"
  *
@@ -1160,7 +1151,6 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     return count;
 }
 
-
 /**
  * Write device file "mode_spectrum"
  *
@@ -1173,7 +1163,6 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
     razer_set_spectrum_mode(usb_dev);
     return count;
 }
-
 
 /**
  * Write device file "mode_reactive"
@@ -1194,7 +1183,6 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
     }
     return count;
 }
-
 
 /**
  * Write device file "mode_breath"
@@ -1224,7 +1212,6 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
     return count;
 }
 
-
 /**
  * Write device file "set_wireless_brightness"
  *
@@ -1239,7 +1226,6 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
     razer_set_brightness(usb_dev, (unsigned char)brightness);
     return count;
 }
-
 
 /**
  * Write device file "set_low_battery_threshold"
@@ -1256,7 +1242,6 @@ static ssize_t razer_attr_write_set_low_battery_threshold(struct device *dev, st
     return count;
 }
 
-
 /**
  * Write device file "set_idle_time"
  *
@@ -1271,7 +1256,6 @@ static ssize_t razer_attr_write_set_idle_time(struct device *dev, struct device_
     razer_set_idle_time(usb_dev, idle_time);
     return count;
 }
-
 
 /**
  * Write device file "set_mouse_dpi"
@@ -1307,7 +1291,6 @@ static ssize_t razer_attr_write_set_mouse_dpi(struct device *dev, struct device_
     return count;
 }
 
-
 /**
  * Write device file "set_charging_effect"
  *
@@ -1328,7 +1311,6 @@ static ssize_t razer_attr_write_set_charging_effect(struct device *dev, struct d
     }
     return count;
 }
-
 
 /**
  * Write device file "set_charging_colour"
@@ -1353,7 +1335,6 @@ static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct d
     return count;
 }
 
-
 /**
  * Read device file "get_serial"
  *
@@ -1369,7 +1350,6 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
     razer_get_serial(usb_dev, &serial_string[0]);
     return sprintf(buf, "%s\n", &serial_string[0]);
 }
-
 
 /**
  * Read device file "device_type"
@@ -1417,7 +1397,6 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     return sprintf(buf, device_type);
 }
 
-
 /**
  * Read device file "macro_mode"
  *
@@ -1431,8 +1410,6 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
     int brightness = razer_get_brightness(usb_dev);
     return sprintf(buf, "%d\n", brightness);
 }
-
-
 
 /**
  * Read device file "get_firmware_version"
@@ -1449,7 +1426,6 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
     return sprintf(buf, "%s\n", &fw_string[0]);
 }
 
-
 /**
  * Read device file "version"
  *
@@ -1458,6 +1434,30 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
 static ssize_t razer_attr_read_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
     return sprintf(buf, "%s\n", VERSION);
+}
+
+
+/**
+ * Write device file "test"
+ *
+ * Writes the colour segments on the mouse.
+ */
+static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_rgb rgb_element;
+    rgb_element.r = 0x00;
+    rgb_element.g = 0xFF;
+    rgb_element.b = 0x00;
+
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) {
+		razer_set_individual_key(usb_dev, 14, &rgb_element);
+		
+		razer_set_custom_mode(usb_dev);		
+	}
+
+    return count;
 }
 
 
@@ -1488,11 +1488,13 @@ static DEVICE_ATTR(mode_spectrum,             0220, NULL, razer_attr_write_mode_
 static DEVICE_ATTR(mode_reactive,             0220, NULL, razer_attr_write_mode_reactive);
 static DEVICE_ATTR(mode_breath,               0220, NULL, razer_attr_write_mode_breath);
 static DEVICE_ATTR(set_key_row,               0220, NULL, razer_attr_write_set_key_row);
+static DEVICE_ATTR(set_key,                   0220, NULL, razer_attr_write_set_key);
 static DEVICE_ATTR(set_low_battery_threshold, 0220, NULL, razer_attr_write_set_low_battery_threshold);
 static DEVICE_ATTR(set_idle_time,             0220, NULL, razer_attr_write_set_idle_time);
 static DEVICE_ATTR(set_mouse_dpi,             0220, NULL, razer_attr_write_set_mouse_dpi);
 static DEVICE_ATTR(set_charging_effect,       0220, NULL, razer_attr_write_set_charging_effect);
 static DEVICE_ATTR(set_charging_colour,       0220, NULL, razer_attr_write_set_charging_colour);
+static DEVICE_ATTR(test,                      0220, NULL, razer_attr_write_test);
 
 
 /**
@@ -1526,6 +1528,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     struct razer_mouse_device *dev = NULL;
 
     dev = kzalloc(sizeof(struct razer_mouse_device), GFP_KERNEL);
+    
     if(dev == NULL) {
         dev_err(&intf->dev, "out of memory\n");
         retval = -ENOMEM;
@@ -1543,6 +1546,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_serial);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_is_charging);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key_row);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_brightness);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_low_battery_threshold);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_idle_time);
@@ -1556,10 +1560,12 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_reactive);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);
     } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_WIRED)
     {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_serial);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key_row);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_brightness);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_mouse_dpi);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_custom);
@@ -1573,6 +1579,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_serial);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key_row);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_brightness);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_mouse_dpi);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_custom);
@@ -1654,6 +1661,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_get_serial);
         device_remove_file(&hdev->dev, &dev_attr_is_charging);
         device_remove_file(&hdev->dev, &dev_attr_set_key_row);
+        device_remove_file(&hdev->dev, &dev_attr_set_key);
         device_remove_file(&hdev->dev, &dev_attr_set_brightness);
         device_remove_file(&hdev->dev, &dev_attr_set_low_battery_threshold);
         device_remove_file(&hdev->dev, &dev_attr_set_idle_time);
@@ -1667,10 +1675,12 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_mode_reactive);
         device_remove_file(&hdev->dev, &dev_attr_mode_breath);
         device_remove_file(&hdev->dev, &dev_attr_mode_none);
+        device_remove_file(&hdev->dev, &dev_attr_test);
     } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_WIRED)
     {
         device_remove_file(&hdev->dev, &dev_attr_get_serial);
         device_remove_file(&hdev->dev, &dev_attr_set_key_row);
+        device_remove_file(&hdev->dev, &dev_attr_set_key);
         device_remove_file(&hdev->dev, &dev_attr_set_brightness);
         device_remove_file(&hdev->dev, &dev_attr_set_mouse_dpi);
         device_remove_file(&hdev->dev, &dev_attr_mode_custom);
@@ -1684,6 +1694,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
     {
         device_remove_file(&hdev->dev, &dev_attr_get_serial);
         device_remove_file(&hdev->dev, &dev_attr_set_key_row);
+        device_remove_file(&hdev->dev, &dev_attr_set_key);
         device_remove_file(&hdev->dev, &dev_attr_set_brightness);
         device_remove_file(&hdev->dev, &dev_attr_set_mouse_dpi);
         device_remove_file(&hdev->dev, &dev_attr_mode_custom);

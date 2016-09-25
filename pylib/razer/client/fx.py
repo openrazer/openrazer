@@ -371,6 +371,7 @@ class RazerAdvancedFX(BaseRazerFX):
             session_bus = _dbus.SessionBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
 
+        self._matrix_dims = matrix_dims
         self._lighting_dbus = _dbus.Interface(daemon_dbus, "razer.device.lighting.chroma")
 
         self.matrix = Frame(matrix_dims)
@@ -388,6 +389,16 @@ class RazerAdvancedFX(BaseRazerFX):
 
     def draw_fb_or(self):
         self._draw(bytes(self.matrix.draw_with_fb_or()))
+
+    def set_key(self, column_id, rgb, row_id=0): # Not needed on mice
+        if self.has('led_single'):
+            if isinstance(rgb, (tuple, list)) and len(rgb) == 3 and all([isinstance(component, int) for component in rgb]):
+                if row_id < self._matrix_dims[0] and column_id < self._matrix_dims[1]:
+                    self._lighting_dbus.setKey(row_id, column_id, [clamp_ubyte(component) for component in rgb])
+                else:
+                    raise ValueError("Row or column out of bounds. Max dimentions are: {0},{1}".format(*self._matrix_dims))
+            else:
+                raise ValueError("RGB must be an RGB tuple")
 
 
 class MiscLighting(BaseRazerFX):
