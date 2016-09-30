@@ -1,11 +1,11 @@
 """
 Mouse class
 """
-from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend, RazerDevice
-from razer_daemon.misc.battery_notifier import BatteryManager
+from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice
+from razer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 
 
-class RazerMambaChromaWireless(RazerDeviceBrightnessSuspend):
+class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Mamba Chroma (Wireless)
     """
@@ -21,7 +21,7 @@ class RazerMambaChromaWireless(RazerDeviceBrightnessSuspend):
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaWireless, self).__init__(*args, **kwargs)
 
-        self._battery_manager = BatteryManager(self, self._device_number, 'Razer Mamba')
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
 
     def _close(self):
         """
@@ -31,7 +31,7 @@ class RazerMambaChromaWireless(RazerDeviceBrightnessSuspend):
 
         self._battery_manager.close()
 
-class RazerMambaChromaWired(RazerDeviceBrightnessSuspend):
+class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Mamba Chroma (Wired)
     """
@@ -47,7 +47,7 @@ class RazerMambaChromaWired(RazerDeviceBrightnessSuspend):
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaWired, self).__init__(*args, **kwargs)
 
-class RazerMambaChromaTE(RazerDeviceBrightnessSuspend):
+class RazerMambaChromaTE(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Mamba Chroma (Wired)
     """
@@ -63,7 +63,7 @@ class RazerMambaChromaTE(RazerDeviceBrightnessSuspend):
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaTE, self).__init__(*args, **kwargs)
 
-class RazerAbyssus(RazerDevice):
+class RazerAbyssus(__RazerDevice):
     """
     Class for the Razer Abyssus
     """
@@ -83,7 +83,7 @@ class RazerAbyssus(RazerDevice):
     def _suspend_device(self):
         self.logger.debug("Abyssus doesnt have suspend/resume")
 
-class RazerImperiator(RazerDevice):
+class RazerImperiator(__RazerDevice):
     """
     Class for the Razer Imperiator 2012
     """
@@ -104,7 +104,7 @@ class RazerImperiator(RazerDevice):
     def _suspend_device(self):
         self.logger.debug("Imperiator doesnt have suspend/resume")
 
-class RazerOrochiWired(RazerDeviceBrightnessSuspend):
+class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Mamba Chroma (Wireless)
     """

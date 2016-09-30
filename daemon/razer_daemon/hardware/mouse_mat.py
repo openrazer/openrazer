@@ -1,10 +1,10 @@
 """
 Mousemat class
 """
-from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend
+from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend
 
 
-class RazerFireFly(RazerDeviceBrightnessSuspend):
+class RazerFireFly(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Firefly 2013
     """

@@ -1,10 +1,15 @@
 """
 Hardware collection
 """
+import os
+from razer_daemon.hardware.device_base import RazerDevice
 
-from razer_daemon.hardware.keyboards import RazerBlackWidow2013, RazerBlackWidowChroma, RazerBlackWidowChromaTournamentEdition, RazerBladeStealth, RazerTartarus, RazerBlackWidow2016
-from razer_daemon.hardware.mouse_mat import RazerFireFly
-from razer_daemon.hardware.mouse import RazerMambaChromaWireless, RazerAbyssus, RazerMambaChromaTE, RazerMambaChromaWired, RazerImperiator, RazerOrochiWired
+# Hack to get a list of hardware modules to import
+HARDWARE_MODULES = ['razer_daemon.hardware.' + os.path.splitext(hw_file)[0] for hw_file in os.listdir(os.path.dirname(__file__)) if hw_file not in ('device_base.py', '__init__.py')]
+
+# List of classes to exclude from the class finding
+EXCLUDED_CLASSES = ('RazerDevice', 'RazerDeviceBrightnessSuspend')
+
 
 def get_device_classes():
     """
@@ -15,13 +20,15 @@ def get_device_classes():
     """
     classes = []
 
-    for class_name, class_object in globals().items():
-        if class_name.startswith('__') or class_name in ('RazerDevice', 'DBusService'):
-            continue
+    for hw_module in HARDWARE_MODULES:
+        imported_module = __import__(hw_module, globals=globals(), locals=locals(), fromlist=['*'], level=0)
 
-        if isinstance(class_object, type):
-            classes.append(class_object)
+        for class_name, class_instance in imported_module.__dict__.items():
+            if class_name in EXCLUDED_CLASSES or class_name.startswith('_') or not isinstance(class_instance, type):
+                continue
 
-    return classes
+            classes.append(class_instance)
+
+    return sorted(classes, key=lambda cls: cls.__name__)
 
 

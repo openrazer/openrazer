@@ -39,7 +39,7 @@ class Device(object):
         Device's DBus object
 
         :return: DBus Object
-        :rtype: razer_daemon.hardware.device_base.RazerDevice
+        :rtype: razer_daemon.hardware.device_base.__RazerDevice
         """
         return self._dbus
 
@@ -92,7 +92,7 @@ class DeviceCollection(object):
         :type device_serial: str
 
         :param device_dbus: Device's DBus object
-        :type device_dbus: razer_daemon.hardware.device_base.RazerDevice
+        :type device_dbus: razer_daemon.hardware.device_base.__RazerDevice
         """
         device_object = Device(device_id, device_serial, device_dbus)
         device_object.register_parent(self)
