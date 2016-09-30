@@ -1,3 +1,15 @@
+razer (1.0.13-0ubuntu1) trusty; urgency=low
+
+  * Fixed potential GObject import issues in daemon
+  * Changed daemon process name from razerdaemon -> razer-service
+  * Added hardware device class debug output for debugging
+  * Refactored hardware device class autoimporting so that I no longer forget to import things
+  * Fixed typo in BlackWidow X Chroma USB PID in the daemon as the class wasn't being used.
+  * General renaming of imports in hardware class files so the imports are not picked up by the autoimporter
+  * Added BlackWidow X Chroma Tournament Edition
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Fri, 30 Sep 2016 23:32:00 +0000
+
 razer (1.0.12-0ubuntu1) trusty; urgency=low
 
   * Fixed typo where BlackWidow Chroma TE DBus doesnt get macro methods

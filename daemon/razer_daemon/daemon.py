@@ -19,6 +19,7 @@ import dbus.mainloop.glib
 import gi
 gi.require_version('Gdk', '3.0')
 import gi.repository
+from gi.repository import GObject
 
 import razer_daemon.hardware
 from razer_daemon.dbus_services.service import DBusService
@@ -138,13 +139,13 @@ class RazerDaemon(DBusService):
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
 
         # Check if process exists
-        exit_code = subprocess.call(['pgrep', 'razerdaemon'], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        exit_code = subprocess.call(['pgrep', 'razer-service'], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
         if exit_code == 0:
             print("Daemon already exists. Please stop that one.", file=sys.stderr)
             exit(-1)
 
-        setproctitle.setproctitle('razerdaemon')
+        setproctitle.setproctitle('razer-service')
 
         # Expanding ~ as python doesnt do it by default, also creating dirs if needed
         if log_dir is not None:
@@ -168,7 +169,7 @@ class RazerDaemon(DBusService):
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
         DBusService.__init__(self, self.BUS_PATH, '/org/razer')
 
-        self._main_loop = gi.repository.GObject.MainLoop()
+        self._main_loop = GObject.MainLoop()
 
         # Logging
         logging_level = logging.INFO
@@ -318,8 +319,15 @@ class RazerDaemon(DBusService):
             finally:
                 dev_path = '/sys/bus/hid/devices'
 
-
         classes = razer_daemon.hardware.get_device_classes()
+
+        # Just some pretty output
+        max_name_len = max([len(cls.__name__) for cls in classes]) + 2
+        for cls in classes:
+            format_str = 'Loaded device specification: {0:-<' + str(max_name_len) + '} ({1:04x}:{2:04X})'
+
+            self.logger.debug(format_str.format(cls.__name__ + ' ', cls.USB_VID, cls.USB_PID))
+
 
         device_number = 0
         for device_id in devices:
