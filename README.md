@@ -10,16 +10,17 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 
 ## Device Support
 ### Keyboards
-| Device                                      | Driver | Daemon |
-| ------------------------------------------- | ------ | ------ |
-| Razer BlackWidow Classic                    |   ✔    |        |
-| Razer BlackWidow Ultimate 2012              |   ✔    |        |
-| Razer BlackWidow Ultimate 2013              |   ✔    |   ✔    |
-| Razer BlackWidow Ultimate 2016              |   ✔    |   ✔    |
-| Razer BlackWidow Chroma                     |   ✔    |   ✔    |
-| Razer BlackWidow Chroma Tournament Edition  |   ✔    |   ✔    |
-| Razer BlackWidow X Chroma                   |   ✔    |   ✔    |
-| Razer Blade Stealth                         |   ✔    |   ✔    |
+| Device                                        | Driver | Daemon |
+| --------------------------------------------- | ------ | ------ |
+| Razer BlackWidow Classic                      |   ✔    |        |
+| Razer BlackWidow Ultimate 2012                |   ✔    |        |
+| Razer BlackWidow Ultimate 2013                |   ✔    |   ✔    |
+| Razer BlackWidow Ultimate 2016                |   ✔    |   ✔    |
+| Razer BlackWidow Chroma                       |   ✔    |   ✔    |
+| Razer BlackWidow Chroma Tournament Edition    |   ✔    |   ✔    |
+| Razer BlackWidow X Chroma                     |   ✔    |   ✔    |
+| Razer BlackWidow X Chroma Tournament Edition  |   ✔    |   ✔    |
+| Razer Blade Stealth                           |   ✔    |   ✔    |
 
 ### Mouse
 | Device                          | Driver | Daemon |
