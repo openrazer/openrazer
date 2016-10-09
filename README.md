@@ -17,9 +17,9 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | Razer BlackWidow Ultimate 2013                |   ✔    |   ✔    |
 | Razer BlackWidow Ultimate 2016                |   ✔    |   ✔    |
 | Razer BlackWidow Chroma                       |   ✔    |   ✔    |
-| Razer BlackWidow Chroma Tournament Edition    |   ✔    |   ✔    |
+| Razer BlackWidow Tournament Edition Chroma    |   ✔    |   ✔    |
 | Razer BlackWidow X Chroma                     |   ✔    |   ✔    |
-| Razer BlackWidow X Chroma Tournament Edition  |   ✔    |   ✔    |
+| Razer BlackWidow X Tournament Edition Chroma  |   ✔    |   ✔    |
 | Razer Blade Stealth                           |   ✔    |   ✔    |
 | Razer Blade Stealth (Late 2016)               |   ✔    |   ✔    |
 
@@ -30,7 +30,7 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | Razer Mamba (Wired)             |   ✔    |   ✔    |
 | Razer Mamba Tournament Edition  |   ✔    |   ✔    |
 | Razer Abyssus 2014              |   ✔    |   ✔    |
-| Razer Imperiator 2012           |   ✔    |   ✔    |
+| Razer Imperator 2012            |   ✔    |   ✔    |
 | Razer Orochi (Wired)            |   ✔    |   ✔    |
 
 ### Mousemats
