@@ -1980,7 +1980,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 			device_remove_file(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
 			device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);       // Clear row
 			device_remove_file(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
-			device_remove_file(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
+			//device_remove_file(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
 			device_remove_file(&hdev->dev, &dev_attr_set_logo);             // Enable/Disable the logo
 			device_remove_file(&hdev->dev, &dev_attr_set_fn_toggle);        // Sets wether FN is requires for F-Keys
 			
