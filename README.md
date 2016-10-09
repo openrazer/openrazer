@@ -21,6 +21,7 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | Razer BlackWidow X Chroma                     |   ✔    |   ✔    |
 | Razer BlackWidow X Chroma Tournament Edition  |   ✔    |   ✔    |
 | Razer Blade Stealth                           |   ✔    |   ✔    |
+| Razer Blade Stealth (Late 2016)               |   ✔    |   ✔    |
 
 ### Mouse
 | Device                          | Driver | Daemon |
