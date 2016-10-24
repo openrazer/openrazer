@@ -1,3 +1,9 @@
+razer (1.0.14-0ubuntu1) trusty; urgency=low
+
+  * Added support for yet another Razer laptop
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Mon, 24 Sep 2016 20:30:00 +0000
+
 razer (1.0.13-0ubuntu1) trusty; urgency=low
 
   * Fixed potential GObject import issues in daemon
