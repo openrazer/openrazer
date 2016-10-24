@@ -1,3 +1,9 @@
+razer (1.0.17-0ubuntu1) trusty; urgency=low
+
+  * Possible Fix for uname -r kernel mismatch when building on launchpad
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Mon, 24 Sep 2016 22:52:00 +0000
+
 razer (1.0.16-0ubuntu1) trusty; urgency=low
 
   * Launchpad Hack 3
