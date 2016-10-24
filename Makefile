@@ -12,7 +12,7 @@ MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
 PYTHONDIR?=/usr/lib/python3/dist-packages
 
 # Build all target
-all: driver
+all: driver_verbose
 
 # Driver compilation
 driver:
