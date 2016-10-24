@@ -11,8 +11,12 @@ MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
 # Python dir
 PYTHONDIR?=/usr/lib/python3/dist-packages
 
+
+
 # Build all target
-all: driver_verbose
+all: driver
+
+lp_all: lp_driver
 
 # Driver compilation
 driver:
@@ -29,9 +33,6 @@ driver_clean:
 	@echo "\n::\033[32m Cleaning Razer kernel modules\033[0m"
 	@echo "========================================"
 	make -C "$(KERNELDIR)" SUBDIRS="$(DRIVERDIR)" clean
-
-dummy_clean:
-	@echo "Dummy clean"
 
 # Install kernel modules and then update module dependencies
 driver_install:
@@ -50,6 +51,20 @@ driver_uninstall:
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razerkbd.ko
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razermouse.ko
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razerfirefly.ko
+
+
+# Launchpad hacks
+lp_driver:
+	@echo "\n::\033[32m Compiling Razer kernel modules (Launchpad)\033[0m"
+	@echo "========================================"
+	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+generic' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
+	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules > /dev/null 2>&1
+
+lp_driver_clean:
+	@echo "\n::\033[32m Cleaning Razer kernel modules (Launchpad)\033[0m"
+	@echo "========================================"
+	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+generic' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
+	make -C "$(KERNELDIR)" SUBDIRS="$(DRIVERDIR)" clean
 
 
 # Razer Daemon

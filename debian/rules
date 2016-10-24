@@ -13,5 +13,11 @@ DEB_DESTDIR=$(CURDIR)/debian/tmp/
 override_dh_auto_install:
 	make ubuntu_install DESTDIR=$(DEB_DESTDIR)
 
+override_dh_auto_build:
+	dh_auto_build -- lp_all
+
+override_dh_auto_clean:
+	$(MAKE) lp_driver_clean
+
 %:
 	dh $@ --with-python3
