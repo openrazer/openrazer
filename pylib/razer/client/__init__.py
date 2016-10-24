@@ -2,7 +2,7 @@ import dbus as _dbus
 from razer.client.device import RazerDeviceFactory as _RazerDeviceFactory
 from razer.client import constants
 
-__version__ = '1.0.14'
+__version__ = '1.0.15'
 
 
 class DaemonNotFound(Exception):

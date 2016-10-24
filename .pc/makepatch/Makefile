@@ -28,10 +28,7 @@ driver_verbose:
 driver_clean:
 	@echo "\n::\033[32m Cleaning Razer kernel modules\033[0m"
 	@echo "========================================"
-	make -C "$(KERNELDIR)" SUBDIRS="$(DRIVERDIR)" clean
-
-dummy_clean:
-	@echo "Dummy clean"
+	make -C "$(KERNELDIR)" SUBDIRS="$(DRIVERDIR)" clean > /dev/null 2>&1
 
 # Install kernel modules and then update module dependencies
 driver_install:
@@ -79,7 +76,7 @@ python_library_uninstall:
 	@make --no-print-directory -C pylib uninstall
 
 # Clean target
-clean: dummy_clean
+clean: driver_clean
 
 setup_dkms:
 	@echo "\n::\033[34m Installing DKMS files\033[0m"

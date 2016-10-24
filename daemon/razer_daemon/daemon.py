@@ -3,7 +3,7 @@ Daemon class
 
 This class is the main core of the daemon, this serves a basic dbus module to control the main bit of the daemon
 """
-__version__ = '1.0.14'
+__version__ = '1.0.15'
 
 import configparser
 import logging

@@ -1,3 +1,15 @@
+razer (1.0.15-0ubuntu1) trusty; urgency=low
+
+  * Launchpad Hack 2
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Mon, 24 Sep 2016 20:30:00 +0000
+
+razer (1.0.14-0ubuntu2) trusty; urgency=low
+
+  * Launchpad Hack
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Mon, 24 Sep 2016 20:30:00 +0000
+
 razer (1.0.14-0ubuntu1) trusty; urgency=low
 
   * Added support for yet another Razer laptop
