@@ -8,7 +8,6 @@ import time
 import notify2
 
 
-# TODO add python3-notify2 to dependencies
 # TODO https://askubuntu.com/questions/110969/notify-send-ignores-timeout
 INTERVAL_FREQ = 60 * 10
 NOTIFY_TIMEOUT = 4000

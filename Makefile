@@ -75,6 +75,13 @@ daemon_install:
 	@mkdir -p $(DESTDIR)/etc/xdg/autostart
 	@cp -v ./install_files/desktop/razer-service.desktop $(DESTDIR)/etc/xdg/autostart/razer-service.desktop
 
+fedora_daemon_install:
+	@echo "\n::\033[34m Installing Razer Daemon (Fedora)\033[0m"
+	@echo "====================================================="
+	make --no-print-directory -C daemon fedora_install
+	@mkdir -p $(DESTDIR)/etc/xdg/autostart
+	@cp -v ./install_files/desktop/razer-service.desktop $(DESTDIR)/etc/xdg/autostart/razer-service.desktop
+
 daemon_uninstall:
 	@echo "\n::\033[34m Uninstalling Razer Daemon\033[0m"
 	@echo "====================================================="
@@ -107,6 +114,11 @@ setup_dkms:
 	install -m 644 -v driver/*.h $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
 	rm -fv $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/*.mod.c
 
+remove_dkms:
+    @echo "\n::\033[34m Removing DKMS files\033[0m"
+	@echo "====================================================="
+	rm -rf $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0
+
 udev_install:
 	@echo "\n::\033[34m Installing Razer udev rules\033[0m"
 	@echo "====================================================="
@@ -118,16 +130,35 @@ udev_uninstall:
 	@echo "====================================================="
 	rm -f $(DESTDIR)/lib/udev/rules.d/99-razer.rules
 
-
 # Install for Ubuntu
 ubuntu_install: setup_dkms udev_install daemon_install python_library_install
 	@echo "\n::\033[34m Installing for Ubuntu\033[0m"
 	@echo "====================================================="
 
-fedora_install:
-	@echo "\n::\033[31m NOT SUPPORTED YET\033[0m"
+fedora_install: setup_dkms udev_install
+	@echo "\n::\033[34m Installing for Fedora\033[0m"
 	@echo "====================================================="
+	$(eval PYTHONDIR:=/usr/lib/python3.5/site-packages)
+	@make fedora_daemon_install DESTDIR=$(DESTDIR) PYTHONDIR=$(PYTHONDIR)
+	@make python_library_install DESTDIR=$(DESTDIR) PYTHONDIR=$(PYTHONDIR)
 
+fedora_uninstall: remove_dkms udev_uninstall
+	@echo "\n::\033[34m Installing for Fedora\033[0m"
+	@echo "====================================================="
+	$(eval PYTHONDIR:=/usr/lib/python3.5/site-packages)
+	@make daemon_uninstall DESTDIR=$(DESTDIR)
+	@make python_library_uninstall DESTDIR=$(DESTDIR) PYTHONDIR=$(PYTHONDIR)
+
+fedora_package:
+	$(eval RZRTMPDIR:=$(shell mktemp -d))
+	$(eval VERSION:=$(shell cat debian/changelog | grep -Po '([0-9]+\.?)+' | head -1))
+	@make fedora_install DESTDIR:=$(RZRTMPDIR)
+	@echo "\n::\033[34m Making fedora package\033[0m"
+	@echo "====================================================="
+	fpm -s dir -t rpm -d dkms -d udev -n razer-kernel-modules-dkms -v $(VERSION) -a all --after-install install_files/fedora_package_scripts/razer-kernel-modules-dkms.postinst --before-remove install_files/fedora_package_scripts/razer-kernel-modules-dkms.prerm -m "Terry Cain <terry+razer@terrys-home.co.uk>" --url "https://github.com/terrycain/razer-drivers" --description "Razer Driver DKMS package"  -C $(RZRTMPDIR) lib usr/src
+	fpm -s dir -t rpm -d razer-kernel-modules-dkms -d python3 -d python3-dbus -d python3-gobject -d python3-setproctitle -d xautomation -d xdotool -n razer-daemon -v $(VERSION) -a all --before-remove install_files/fedora_package_scripts/razer-daemon.prerm -m "Terry Cain <terry+razer@terrys-home.co.uk>" --url "https://github.com/terrycain/razer-drivers" --description "Razer Service package"  -C $(RZRTMPDIR) usr/lib/python3.5/site-packages/razer_daemon usr/sbin/razer-service etc/xdg/autostart usr/share/razer-service usr/share/man
+	fpm -s dir -t rpm -d python3 -d python3-dbus -d python3-gobject -d python3-numpy -n python3-razer -v $(VERSION) -a all --before-remove install_files/fedora_package_scripts/python3-razer.prerm -m "Terry Cain <terry+razer@terrys-home.co.uk>" --url "https://github.com/terrycain/razer-drivers" --description "Razer Python library"  -C $(RZRTMPDIR) usr/lib/python3.5/site-packages/razer usr/sbin/razer-service
+	rm -rf $(RZRTMPDIR)
 
 
 install: all driver_install udev_install python_library_install

@@ -13,4 +13,3 @@ case "$1" in
     ;;
 esac
 # End automatically added section
-
