@@ -43,6 +43,17 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | --------------- | ----------- | ------ | ------ |
 | Razer Tartarus  |  1532:0208  |   ✔     |   ✔     |
 
+
+#### Determining the Device ID
+Razer's devices use a VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:
+
+    lsusb | grep '1532:'
+
+This will output something similar to this:
+
+    Bus 003 Device 005: ID 1532:0203 Razer USA, Ltd
+
+
 ### Daemon Support
 I've created a daemon that lives in userspace which allows one to easily interact with the driver. It abstracts away some of the logic and also (will eventually) allow you to build
 custom effects, though it does do mulitcoloured ripples :). As every device is slightly different I've maintained a mapping between devices supported by the driver and devices supported
