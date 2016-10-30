@@ -10,38 +10,49 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 
 ## Device Support
 ### Keyboards
-| Device                                        | Driver | Daemon |
-| --------------------------------------------- | ------ | ------ |
-| Razer BlackWidow Classic                      |   ✔    |        |
-| Razer BlackWidow Ultimate 2012                |   ✔    |        |
-| Razer BlackWidow Ultimate 2013                |   ✔    |   ✔    |
-| Razer BlackWidow Ultimate 2016                |   ✔    |   ✔    |
-| Razer BlackWidow Chroma                       |   ✔    |   ✔    |
-| Razer BlackWidow Tournament Edition Chroma    |   ✔    |   ✔    |
-| Razer BlackWidow X Chroma                     |   ✔    |   ✔    |
-| Razer BlackWidow X Tournament Edition Chroma  |   ✔    |   ✔    |
-| Razer Blade Stealth                           |   ✔    |   ✔    |
-| Razer Blade Stealth (Late 2016)               |   ✔    |   ✔    |
+| Device                                        | USB VID:PID | Driver | Daemon |
+| --------------------------------------------- | ----------- | ------ | ------ |
+| Razer BlackWidow Classic                      |  1532:011B  |   ✔     |        |
+| Razer BlackWidow Ultimate 2012                |  1532:010D  |   ✔     |        |
+| Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔     |   ✔    |
+| Razer BlackWidow Ultimate 2016                |  1532:0214  |   ✔     |   ✔    |
+| Razer BlackWidow Chroma                       |  1532:0203  |   ✔     |   ✔    |
+| Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔     |   ✔    |
+| Razer BlackWidow X Chroma                     |  1532:0216  |   ✔     |   ✔    |
+| Razer BlackWidow X Tournament Edition Chroma  |  1532:021A  |   ✔     |   ✔    |
+| Razer Blade Stealth                           |  1532:0205  |   ✔     |   ✔    |
+| Razer Blade Stealth (Late 2016)               |  1532:0220  |   ✔     |   ✔    |
 
 ### Mouse
-| Device                          | Driver | Daemon |
-| ------------------------------- | ------ | ------ |
-| Razer Mamba (Wireless)          |   ✔    |   ✔    |
-| Razer Mamba (Wired)             |   ✔    |   ✔    |
-| Razer Mamba Tournament Edition  |   ✔    |   ✔    |
-| Razer Abyssus 2014              |   ✔    |   ✔    |
-| Razer Imperator 2012            |   ✔    |   ✔    |
-| Razer Orochi (Wired)            |   ✔    |   ✔    |
+| Device                          | USB VID:PID | Driver | Daemon |
+| ------------------------------- | ----------- | ------ | ------ |
+| Razer Mamba (Wireless)          |  1532:0045  |   ✔     |   ✔    |
+| Razer Mamba (Wired)             |  1532:0044  |   ✔     |   ✔    |
+| Razer Mamba Tournament Edition  |  1532:0046  |   ✔     |   ✔    |
+| Razer Abyssus 2014              |  1532:0042  |   ✔     |   ✔    |
+| Razer Imperator 2012            |  1532:002F  |   ✔     |   ✔    |
+| Razer Orochi (Wired)            |  1532:0048  |   ✔     |   ✔    |
 
 ### Mousemats
-| Device        | Driver | Daemon |
-| ------------- | ------ | ------ |
-| Razer Firefly |   ✔    |   ✔    |
+| Device        | USB VID:PID | Driver | Daemon |
+| ------------- | ----------- | ------ | ------ |
+| Razer Firefly |  1532:0C00  |   ✔     |   ✔     |
 
 ### Peripherals
-| Device          | Driver | Daemon |
-| --------------- | ------ | ------ |
-| Razer Tartarus  |   ✔    |   ✔    |
+| Device          | USB VID:PID | Driver | Daemon |
+| --------------- | ----------- | ------ | ------ |
+| Razer Tartarus  |  1532:0208  |   ✔     |   ✔     |
+
+
+#### Determining the Device ID
+Razer's devices use a VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:
+
+    lsusb | grep '1532:'
+
+This will output something similar to this:
+
+    Bus 003 Device 005: ID 1532:0203 Razer USA, Ltd
+
 
 ### Daemon Support
 I've created a daemon that lives in userspace which allows one to easily interact with the driver. It abstracts away some of the logic and also (will eventually) allow you to build

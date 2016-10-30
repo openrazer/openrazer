@@ -26,7 +26,8 @@ from razer_daemon.dbus_services.service import DBusService
 from razer_daemon.device import DeviceCollection
 from razer_daemon.misc.screensaver_thread import ScreensaverThread
 
-DEVICE_CHECK_INTERVAL = 5000 # Milliseconds
+DAEMON_LOOP_INTERVAL = 0.05
+DEVICE_CHECK_INTERVAL = 200  # Interval seconds to check devices / DAEMON_LOOP_INTERVAL
 
 def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, pid_file=None, test_dir=None):
     """
@@ -394,9 +395,9 @@ class RazerDaemon(DBusService):
             if main_loop_context.pending():
                 main_loop_context.iteration()
             else:
-                time.sleep(0.05)
+                time.sleep(DAEMON_LOOP_INTERVAL)
 
-            if counter > DEVICE_CHECK_INTERVAL: # Time sleeps 1ms so DEVICE_CHECK_INTERVAL is in milliseconds
+            if counter > DEVICE_CHECK_INTERVAL:  # Time sleeps 1ms so DEVICE_CHECK_INTERVAL is in milliseconds
                 self._remove_devices()
                 self._load_devices()
                 counter = 0
