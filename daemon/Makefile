@@ -1,5 +1,5 @@
 DESTDIR?=/
-PYTHONDIR?=/usr/lib/python3/dist-packages
+PYTHONDIR?=$(shell python3 -c 'import sys; print(sys.path[-1])')
 
 purge_pycache:
 	@find -name '__pycache__' | xargs rm -rf
