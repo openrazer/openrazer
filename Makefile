@@ -9,7 +9,7 @@ DRIVERDIR?=$(shell pwd)/driver
 MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
 
 # Python dir
-PYTHONDIR?=/usr/lib/python3/dist-packages
+PYTHONDIR?=$(shell python3 -c 'import sys; print(sys.path[-1])')
 
 
 
