@@ -26,16 +26,34 @@ do { \
 /* Each USB report has 90 bytes*/
 #define RAZER_USB_REPORT_LEN 0x5A
 
-// LED STORATE Options
-#define NOSTORE          0x00
-#define VARSTORE         0x01
+// LED STORAGE Options
+#define NOSTORE              0x00
+#define VARSTORE             0x01
 
 // LED definitions
-#define SCROLL_WHEEL_LED 0x01
-#define LOGO_LED         0x04
-#define BACKLIGHT_LED    0x05
-#define MACRO_LED        0x07
-#define GAME_LED         0x08
+#define SCROLL_WHEEL_LED     0x01
+#define LOGO_LED             0x04
+#define BACKLIGHT_LED        0x05
+#define MACRO_LED            0x07
+#define GAME_LED             0x08
+
+// LED Effect definitions
+#define LED_STATIC           0x00
+#define LED_BLINKING         0x01
+#define LED_PULSATING        0x02
+#define LED_SPECTRUM_CYCLING 0x04
+
+// Packet Statuses
+#define STATUS_CMD_NEW           0x00
+#define STATUS_CMD_BUSY          0x01
+#define STATUS_CMD_SUCCESS       0x02
+#define STATUS_CMD_FAILURE       0x03
+#define STATUS_CMD_TIMEOUT       0x04
+#define STATUS_CMD_NOT_SUPPORTED 0x05
+
+// Nicety definitions
+#define ON                   0x01
+#define OFF                  0x00
 
 struct razer_report;
 
@@ -95,5 +113,15 @@ unsigned char razer_calculate_crc(struct razer_report *report);
 struct razer_report get_razer_report(unsigned char command_class, unsigned char command_id, unsigned char data_size);
 struct razer_report get_empty_razer_report(void);
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message);
+
+// New functions
+struct razer_report razer_get_led_state(unsigned char store, unsigned char led_id);
+struct razer_report razer_set_led_state(unsigned char store, unsigned char led_id, unsigned char led_state);
+struct razer_report razer_get_led_rgb(unsigned char store, unsigned char led_id);
+struct razer_report razer_set_led_rgb(unsigned char store, unsigned char led_id, struct razer_rgb* rgb);
+struct razer_report razer_get_led_effect(unsigned char store, unsigned char led_id);
+struct razer_report razer_set_led_effect(unsigned char store, unsigned char led_id, unsigned char led_effect);
+struct razer_report razer_get_led_brightness(unsigned char store, unsigned char led_id);
+struct razer_report razer_set_led_brightness(unsigned char store, unsigned char led_id, unsigned char led_brightness);
 
 #endif /* DRIVER_RAZERCOMMON_H_ */

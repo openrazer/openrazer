@@ -40,6 +40,11 @@
  #define USB_DEVICE_ID_RAZER_OROCHI_CHROMA 0x0048
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA
+ #define USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA 0x0043
+#endif
+
+
 /* Each keyboard report has 90 bytes*/
 #define RAZER_REPORT_LEN 0x5A
 

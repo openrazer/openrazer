@@ -55,6 +55,198 @@ int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_re
 
 
 /**
+ * New functions (am gearing up towards a rewrite)
+ */
+int get_led_brightness(struct usb_device *usb_dev, unsigned char led_id, unsigned char *brightness)
+{
+    int retval = -1;
+    // Class LED Lighting, Command Set state, 3 Bytes of parameters
+    struct razer_report response_report;
+    struct razer_report request_report = razer_get_led_brightness(VARSTORE, led_id);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+    
+    if(retval == 0)
+    {
+		if(response_report.status == STATUS_CMD_SUCCESS)
+		{
+			*brightness = response_report.arguments[2];
+		} else if(response_report.status == STATUS_CMD_BUSY) {
+            printk(KERN_WARNING "razermouse: Mouse busy\n");
+		} else if(response_report.status == STATUS_CMD_FAILURE) {
+            print_erroneous_report(&response_report, "razermouse", "Command Failure");
+		} else if(response_report.status == STATUS_CMD_TIMEOUT) {
+            printk(KERN_WARNING "razermouse: Mouse timeout\n");
+		} else if(response_report.status == STATUS_CMD_NOT_SUPPORTED) {
+            print_erroneous_report(&response_report, "razermouse", "Command Not Supported");
+		}
+		
+        retval = response_report.status;
+    } else
+    {
+        print_erroneous_report(&response_report, "razermouse", "Invalid Report Length");
+        retval = -1;
+    }
+
+    return retval;
+}
+int set_led_brightness(struct usb_device *usb_dev, unsigned char led_id, unsigned char brightness)
+{
+    int retval;
+    struct razer_report report = razer_set_led_brightness(VARSTORE, led_id, brightness);
+
+    retval = razer_set_report(usb_dev, &report);
+    return retval;
+}
+
+int get_led_state(struct usb_device *usb_dev, unsigned char led_id, unsigned char* enabled)
+{
+    int retval = -1;
+    // Class LED Lighting, Command Set state, 3 Bytes of parameters
+    struct razer_report response_report;
+    struct razer_report request_report = razer_get_led_state(VARSTORE, led_id);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+    
+    if(retval == 0)
+    {
+		if(response_report.status == STATUS_CMD_SUCCESS)
+		{
+			*enabled = response_report.arguments[2];
+		} else if(response_report.status == STATUS_CMD_BUSY) {
+            printk(KERN_WARNING "razermouse: Mouse busy\n");
+		} else if(response_report.status == STATUS_CMD_FAILURE) {
+            print_erroneous_report(&response_report, "razermouse", "Command Failure");
+		} else if(response_report.status == STATUS_CMD_TIMEOUT) {
+            printk(KERN_WARNING "razermouse: Mouse timeout\n");
+		} else if(response_report.status == STATUS_CMD_NOT_SUPPORTED) {
+            print_erroneous_report(&response_report, "razermouse", "Command Not Supported");
+		}
+		
+        retval = response_report.status;
+    } else
+    {
+        print_erroneous_report(&response_report, "razermouse", "Invalid Report Length");
+        retval = -1;
+    }
+
+    return retval;
+}
+int set_led_state(struct usb_device *usb_dev, unsigned char led_id, unsigned char enabled)
+{
+    int retval;
+    struct razer_report report = razer_set_led_brightness(VARSTORE, led_id, enabled);
+
+    retval = razer_set_report(usb_dev, &report);
+    return retval;
+}
+
+int get_led_rgb(struct usb_device *usb_dev, unsigned char led_id, struct razer_rgb* rgb)
+{
+    int retval = -1;
+    // Class LED Lighting, Command Set state, 3 Bytes of parameters
+    struct razer_report response_report;
+    struct razer_report request_report = razer_get_led_rgb(VARSTORE, led_id);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+    
+    if(retval == 0)
+    {
+		if(response_report.status == STATUS_CMD_SUCCESS)
+		{
+			rgb->r = response_report.arguments[2];
+			rgb->g = response_report.arguments[3];
+			rgb->b = response_report.arguments[4];
+		} else if(response_report.status == STATUS_CMD_BUSY) {
+            printk(KERN_WARNING "razermouse: Mouse busy\n");
+		} else if(response_report.status == STATUS_CMD_FAILURE) {
+            print_erroneous_report(&response_report, "razermouse", "Command Failure");
+		} else if(response_report.status == STATUS_CMD_TIMEOUT) {
+            printk(KERN_WARNING "razermouse: Mouse timeout\n");
+		} else if(response_report.status == STATUS_CMD_NOT_SUPPORTED) {
+            print_erroneous_report(&response_report, "razermouse", "Command Not Supported");
+		}
+		
+        retval = response_report.status;
+    } else
+    {
+        print_erroneous_report(&response_report, "razermouse", "Invalid Report Length");
+        retval = -1;
+    }
+
+    return retval;
+}
+int set_led_rgb(struct usb_device *usb_dev, unsigned char led_id, struct razer_rgb* rgb)
+{
+    int retval;
+    struct razer_report report = razer_set_led_rgb(VARSTORE, led_id, rgb);
+
+    retval = razer_set_report(usb_dev, &report);
+    return retval;
+}
+
+int get_led_effect(struct usb_device *usb_dev, unsigned char led_id, unsigned char* effect)
+{
+    int retval = -1;
+    // Class LED Lighting, Command Set state, 3 Bytes of parameters
+    struct razer_report response_report;
+    struct razer_report request_report = razer_get_led_effect(VARSTORE, led_id);
+
+    retval = razer_get_report(usb_dev, &request_report, &response_report);
+    
+    if(retval == 0)
+    {
+		if(response_report.status == STATUS_CMD_SUCCESS)
+		{
+			*effect = response_report.arguments[2];
+		} else if(response_report.status == STATUS_CMD_BUSY) {
+            printk(KERN_WARNING "razermouse: Mouse busy\n");
+		} else if(response_report.status == STATUS_CMD_FAILURE) {
+            print_erroneous_report(&response_report, "razermouse", "Command Failure");
+		} else if(response_report.status == STATUS_CMD_TIMEOUT) {
+            printk(KERN_WARNING "razermouse: Mouse timeout\n");
+		} else if(response_report.status == STATUS_CMD_NOT_SUPPORTED) {
+            print_erroneous_report(&response_report, "razermouse", "Command Not Supported");
+		}
+		
+        retval = response_report.status;
+    } else
+    {
+        print_erroneous_report(&response_report, "razermouse", "Invalid Report Length");
+        retval = -1;
+    }
+
+    return retval;
+}
+int set_led_effect(struct usb_device *usb_dev, unsigned char led_id, unsigned char effect)
+{
+    int retval;
+    struct razer_report report = razer_set_led_effect(VARSTORE, led_id, effect);
+
+    retval = razer_set_report(usb_dev, &report);
+    return retval;
+}
+
+
+
+
+/**
+ * New functions end
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
  * Get firmware version
  *
  * Supported by:
@@ -286,11 +478,7 @@ int razer_set_individual_key(struct usb_device *usb_dev, unsigned char key_colum
 int razer_set_logo_mode(struct usb_device *usb_dev, unsigned char enable)
 {
     int retval;
-    struct razer_report report = get_razer_report(0x03, 0x00, 0x03);
-    report.arguments[0] = VARSTORE;
-    report.arguments[1] = LOGO_LED;
-    report.arguments[2] = enable;
-    report.crc = razer_calculate_crc(&report);
+    struct razer_report report = razer_set_led_state(VARSTORE, LOGO_LED, enable);
     retval = razer_set_report(usb_dev, &report);
     return retval;
 }
@@ -304,11 +492,7 @@ int razer_set_logo_mode(struct usb_device *usb_dev, unsigned char enable)
 int razer_set_scroll_mode(struct usb_device *usb_dev, unsigned char enable)
 {
     int retval;
-    struct razer_report report = get_razer_report(0x03, 0x00, 0x03);
-    report.arguments[0] = VARSTORE;
-    report.arguments[1] = SCROLL_WHEEL_LED;
-    report.arguments[2] = enable;
-    report.crc = razer_calculate_crc(&report);
+    struct razer_report report = razer_set_led_state(VARSTORE, SCROLL_WHEEL_LED, enable);
     retval = razer_set_report(usb_dev, &report);
     return retval;
 }
@@ -325,10 +509,7 @@ int razer_get_scroll_mode(struct usb_device *usb_dev)
     int retval = -1;
     // Class LED Lighting, Command Set state, 3 Bytes of parameters
     struct razer_report response_report;
-    struct razer_report request_report = get_razer_report(0x03, 0x80, 0x03);
-    request_report.arguments[0] = VARSTORE;
-    request_report.arguments[1] = SCROLL_WHEEL_LED;
-    request_report.crc = razer_calculate_crc(&request_report);
+    struct razer_report request_report = razer_get_led_state(VARSTORE, SCROLL_WHEEL_LED);
 
     retval = razer_get_report(usb_dev, &request_report, &response_report);
 
@@ -361,10 +542,7 @@ int razer_get_logo_mode(struct usb_device *usb_dev)
     int retval = -1;
     // Class LED Lighting, Command Set state, 3 Bytes of parameters
     struct razer_report response_report;
-    struct razer_report request_report = get_razer_report(0x03, 0x80, 0x03);
-    request_report.arguments[0] = 0x01; // LED Class, profile 1?
-    request_report.arguments[1] = 0x04; // LED ID, Logo LED
-    request_report.crc = razer_calculate_crc(&request_report);
+    struct razer_report request_report = razer_get_led_state(VARSTORE, LOGO_LED);
 
     retval = razer_get_report(usb_dev, &request_report, &response_report);
 
@@ -1390,6 +1568,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             device_type = "Razer Orochi (Wired)\n";
             break;
 
+        case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+            device_type = "Razer DeathAdder Chroma\n";
+            break;
+
         default:
             device_type = "Unknown\n";
     }
@@ -1461,6 +1643,304 @@ static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute
 }
 
 
+
+
+
+
+
+
+/**
+ * New functions
+ */
+
+/**
+ * Read device file "scroll_led_brightness"
+ */
+static ssize_t razer_attr_read_scroll_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    unsigned char* brightness = NULL;
+    int retval = get_led_brightness(usb_dev, SCROLL_WHEEL_LED, brightness);
+   
+    if (retval != STATUS_CMD_SUCCESS) {
+		*brightness = 0x00;
+	}
+	return sprintf(buf, "%u\n", *brightness);
+}
+/**
+ * Write device file "scroll_led_brightness"
+ */
+static ssize_t razer_attr_write_scroll_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int brightness = simple_strtoul(buf, NULL, 10);
+    set_led_brightness(usb_dev, SCROLL_WHEEL_LED, (unsigned char)brightness);
+    return count;
+}
+/**
+ * Read device file "logo_led_brightness"
+ */
+static ssize_t razer_attr_read_logo_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    unsigned char* brightness = NULL;
+    int retval = get_led_brightness(usb_dev, LOGO_LED, brightness);
+   
+    if (retval != STATUS_CMD_SUCCESS) {
+		*brightness = 0x00;
+	}
+	return sprintf(buf, "%u\n", *brightness);
+}
+/**
+ * Write device file "scroll_led_brightness"
+ */
+static ssize_t razer_attr_write_logo_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    int brightness = simple_strtoul(buf, NULL, 10);
+    set_led_brightness(usb_dev, LOGO_LED, (unsigned char)brightness);
+    return count;
+}
+/**
+ * Write device file "scroll_led_state"
+ */
+static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    if(count == 1)
+    {
+		if (buf[0] == 0x00)
+		{
+			set_led_state(usb_dev, SCROLL_WHEEL_LED, OFF);
+		} else {
+			// So whatever they put it'll always be a valid answer
+			set_led_state(usb_dev, SCROLL_WHEEL_LED, ON);
+		}
+    }
+
+    return count;
+}
+/**
+ * Read device file "scroll_led_state"
+ */
+static ssize_t razer_attr_read_scroll_led_state(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    unsigned char* enabled = NULL;
+    int retval = get_led_state(usb_dev, LOGO_LED, enabled);
+   
+    if (retval != STATUS_CMD_SUCCESS) {
+		*enabled = 0x00;
+	}
+	return sprintf(buf, "%u\n", *enabled);
+}
+/**
+ * Write device file "logo_led_state"
+ */
+static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    if(count == 1)
+    {
+		if (buf[0] == 0x00)
+		{
+			set_led_state(usb_dev, LOGO_LED, OFF);
+		} else {
+			// So whatever they put it'll always be a valid answer
+			set_led_state(usb_dev, LOGO_LED, ON);
+		}
+    }
+
+    return count;
+}
+/**
+ * Read device file "logo_led_state"
+ */
+static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    unsigned char* enabled = NULL;
+    int retval = get_led_state(usb_dev, LOGO_LED, enabled);
+   
+    if (retval != STATUS_CMD_SUCCESS) {
+		*enabled = 0x00;
+	}
+	return sprintf(buf, "%u\n", *enabled);
+}
+/**
+ * Write device file "scroll_led_rgb"
+ */
+static ssize_t razer_attr_write_scroll_led_rgb(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    if(count == 3)
+    {
+        set_led_rgb(usb_dev, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
+    }
+
+    return count;
+}
+/**
+ * Read device file "scroll_led_rgb"
+ */
+static ssize_t razer_attr_read_scroll_led_rgb(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_rgb rgb;
+    int retval = get_led_rgb(usb_dev, SCROLL_WHEEL_LED, &rgb);
+   
+    if (retval != STATUS_CMD_SUCCESS) {
+		rgb.r = 0x00;
+		rgb.g = 0x00;
+		rgb.b = 0x00;
+	}
+	return sprintf(buf, "%u%u%u\n", rgb.r, rgb.g, rgb.b);
+}
+/**
+ * Write device file "logo_led_rgb"
+ */
+static ssize_t razer_attr_write_logo_led_rgb(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    if(count == 3)
+    {
+        set_led_rgb(usb_dev, LOGO_LED, (struct razer_rgb*)&buf[0]);
+    }
+
+    return count;
+}
+/**
+ * Read device file "logo_led_rgb"
+ */
+static ssize_t razer_attr_read_logo_led_rgb(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_rgb rgb;
+    int retval = get_led_rgb(usb_dev, LOGO_LED, &rgb);
+   
+    if (retval != STATUS_CMD_SUCCESS) {
+		rgb.r = 0x00;
+		rgb.g = 0x00;
+		rgb.b = 0x00;
+	}
+	return sprintf(buf, "%u%u%u\n", rgb.r, rgb.g, rgb.b);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Write device file "scroll_led_effect"
+ */
+static ssize_t razer_attr_write_scroll_led_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    if(count == 1)
+    {
+		set_led_effect(usb_dev, SCROLL_WHEEL_LED, buf[0]);
+    }
+
+    return count;
+}
+/**
+ * Read device file "scroll_led_effect"
+ */
+static ssize_t razer_attr_read_scroll_led_effect(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    unsigned char* enabled = NULL;
+    int retval = get_led_effect(usb_dev, LOGO_LED, enabled);
+   
+    if (retval != STATUS_CMD_SUCCESS) {
+		*enabled = 0x00;
+	}
+	return sprintf(buf, "%u\n", *enabled);
+}
+/**
+ * Write device file "logo_led_effect"
+ */
+static ssize_t razer_attr_write_logo_led_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    if(count == 1)
+    {
+		set_led_effect(usb_dev, LOGO_LED, OFF);
+    }
+
+    return count;
+}
+/**
+ * Read device file "logo_led_effect"
+ */
+static ssize_t razer_attr_read_logo_led_effect(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    unsigned char* enabled = NULL;
+    int retval = get_led_effect(usb_dev, LOGO_LED, enabled);
+   
+    if (retval != STATUS_CMD_SUCCESS) {
+		*enabled = 0x00;
+	}
+	return sprintf(buf, "%u\n", *enabled);
+}
+
+
+/**
+ * New functions end
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Set up the device driver files
  *
@@ -1496,6 +1976,23 @@ static DEVICE_ATTR(set_charging_effect,       0220, NULL, razer_attr_write_set_c
 static DEVICE_ATTR(set_charging_colour,       0220, NULL, razer_attr_write_set_charging_colour);
 static DEVICE_ATTR(test,                      0220, NULL, razer_attr_write_test);
 
+/**
+ * New functions
+ */
+static DEVICE_ATTR(scroll_led_brightness, 0660, razer_attr_read_scroll_led_brightness, razer_attr_write_scroll_led_brightness); 
+static DEVICE_ATTR(scroll_led_state,      0660, razer_attr_read_scroll_led_state,      razer_attr_write_scroll_led_state); 
+static DEVICE_ATTR(scroll_led_rgb,        0660, razer_attr_read_scroll_led_rgb,        razer_attr_write_scroll_led_rgb);
+static DEVICE_ATTR(scroll_led_effect,     0660, razer_attr_read_scroll_led_effect,     razer_attr_write_scroll_led_effect);
+
+
+static DEVICE_ATTR(logo_led_brightness,   0660, razer_attr_read_logo_led_brightness,   razer_attr_write_logo_led_brightness); 
+static DEVICE_ATTR(logo_led_state,        0660, razer_attr_read_logo_led_state,        razer_attr_write_logo_led_state); 
+static DEVICE_ATTR(logo_led_rgb,          0660, razer_attr_read_logo_led_rgb,          razer_attr_write_logo_led_rgb);
+static DEVICE_ATTR(logo_led_effect,       0660, razer_attr_read_logo_led_effect,       razer_attr_write_logo_led_effect);
+/**
+ * New functions end
+ */
+ 
 
 /**
  * Get raw event from the keyboard
@@ -1574,7 +2071,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_spectrum);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_reactive);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);  
     } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED)
     {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_serial);
@@ -1612,6 +2109,20 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_low_battery_threshold);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_idle_time);
+
+    } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA) {
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_serial);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_scroll);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_mouse_dpi);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_rgb);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_effect);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_rgb);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_effect);
     }
 
     hid_set_drvdata(hdev, dev);
@@ -1727,6 +2238,19 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_mode_breath);
         device_remove_file(&hdev->dev, &dev_attr_set_low_battery_threshold);
         device_remove_file(&hdev->dev, &dev_attr_set_idle_time);
+    } else if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA) {
+        device_remove_file(&hdev->dev, &dev_attr_get_serial);
+        device_remove_file(&hdev->dev, &dev_attr_mode_scroll);
+        device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+        device_remove_file(&hdev->dev, &dev_attr_set_mouse_dpi);
+        device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
+        device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
+        device_remove_file(&hdev->dev, &dev_attr_scroll_led_rgb);
+        device_remove_file(&hdev->dev, &dev_attr_scroll_led_effect);
+        device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
+        device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
+        device_remove_file(&hdev->dev, &dev_attr_logo_led_rgb);
+        device_remove_file(&hdev->dev, &dev_attr_logo_led_effect);
     }
     
 
@@ -1746,6 +2270,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_IMPERATOR) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA) },
     { }
 };
 
