@@ -94,7 +94,7 @@ python_library_uninstall:
 	@make --no-print-directory -C pylib uninstall
 
 # Clean target
-clean: dummy_clean
+clean: driver_clean
 
 setup_dkms:
 	@echo "\n::\033[34m Installing DKMS files\033[0m"
