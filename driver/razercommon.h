@@ -12,6 +12,11 @@
 #ifndef DRIVER_RAZERCOMMON_H_
 #define DRIVER_RAZERCOMMON_H_
 
+
+#include <linux/usb/input.h>
+
+
+
 #define VERSION "1.0.17"
 
 // Macro to create device files
@@ -26,7 +31,11 @@ do { \
 /* Each USB report has 90 bytes*/
 #define RAZER_USB_REPORT_LEN 0x5A
 
-// LED STORATE Options
+// LED STATE
+#define OFF 0x00
+#define ON  0x01
+
+// LED STORAGE Options
 #define NOSTORE          0x00
 #define VARSTORE         0x01
 
@@ -36,6 +45,13 @@ do { \
 #define BACKLIGHT_LED    0x05
 #define MACRO_LED        0x07
 #define GAME_LED         0x08
+
+// Report Responses
+#define RAZER_CMD_BUSY          0x01
+#define RAZER_CMD_SUCCESSFUL    0x02
+#define RAZER_CMD_FAILURE       0x03
+#define RAZER_CMD_TIMEOUT       0x04
+#define RAZER_CMD_NOT_SUPPORTED 0x05
 
 struct razer_report;
 
@@ -89,11 +105,13 @@ struct razer_report {
     unsigned char reserved; /*0x0*/
 };
 
-int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint report_index, ulong wait_min, ulong wait_max);
-int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, ulong wait_min, ulong wait_max);
+int razer_send_control_msg(struct usb_device *usb_dev,void const *data, unsigned int report_index, unsigned long wait_min, unsigned long wait_max);
+int razer_get_usb_response(struct usb_device *usb_dev, unsigned int report_index, struct razer_report* request_report, unsigned int response_index, struct razer_report* response_report, unsigned long wait_min, unsigned long wait_max);
 unsigned char razer_calculate_crc(struct razer_report *report);
 struct razer_report get_razer_report(unsigned char command_class, unsigned char command_id, unsigned char data_size);
 struct razer_report get_empty_razer_report(void);
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message);
 
+// Convenience functions
+unsigned int clamp_u8(unsigned int value, unsigned int min, unsigned int max);
 #endif /* DRIVER_RAZERCOMMON_H_ */

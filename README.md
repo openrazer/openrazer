@@ -12,36 +12,37 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 ### Keyboards
 | Device                                        | USB VID:PID | Driver | Daemon |
 | --------------------------------------------- | ----------- | ------ | ------ |
-| Razer BlackWidow Classic                      |  1532:011B  |   ✔     |        |
-| Razer BlackWidow Ultimate 2012                |  1532:010D  |   ✔     |        |
-| Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔     |   ✔    |
-| Razer BlackWidow Ultimate 2016                |  1532:0214  |   ✔     |   ✔    |
-| Razer BlackWidow Chroma                       |  1532:0203  |   ✔     |   ✔    |
-| Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔     |   ✔    |
-| Razer BlackWidow X Chroma                     |  1532:0216  |   ✔     |   ✔    |
-| Razer BlackWidow X Tournament Edition Chroma  |  1532:021A  |   ✔     |   ✔    |
-| Razer Blade Stealth                           |  1532:0205  |   ✔     |   ✔    |
-| Razer Blade Stealth (Late 2016)               |  1532:0220  |   ✔     |   ✔    |
+| Razer BlackWidow Ultimate 2012                |  1532:010D  |   ✔    |        |
+| Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔    |   ✔    |
+| Razer BlackWidow Classic                      |  1532:011B  |   ✔    |        |
+| Razer BlackWidow Chroma                       |  1532:0203  |   ✔    |   ✔    |
+| Razer Blade Stealth                           |  1532:0205  |   ✔    |   ✔    |
+| Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔    |   ✔    |
+| Razer BlackWidow Ultimate 2016                |  1532:0214  |   ✔    |   ✔    |
+| Razer BlackWidow X Chroma                     |  1532:0216  |   ✔    |   ✔    |
+| Razer BlackWidow X Tournament Edition Chroma  |  1532:021A  |   ✔    |   ✔    |
+| Razer Ornata Chroma                           |  1532:021e  |        |        |
+| Razer Blade Stealth (Late 2016)               |  1532:0220  |   ✔    |   ✔    |
 
 ### Mouse
 | Device                          | USB VID:PID | Driver | Daemon |
 | ------------------------------- | ----------- | ------ | ------ |
-| Razer Mamba (Wireless)          |  1532:0045  |   ✔     |   ✔    |
-| Razer Mamba (Wired)             |  1532:0044  |   ✔     |   ✔    |
-| Razer Mamba Tournament Edition  |  1532:0046  |   ✔     |   ✔    |
-| Razer Abyssus 2014              |  1532:0042  |   ✔     |   ✔    |
-| Razer Imperator 2012            |  1532:002F  |   ✔     |   ✔    |
-| Razer Orochi (Wired)            |  1532:0048  |   ✔     |   ✔    |
+| Razer Mamba (Wireless)          |  1532:0045  |   ✔    |   ✔    |
+| Razer Mamba (Wired)             |  1532:0044  |   ✔    |   ✔    |
+| Razer Mamba Tournament Edition  |  1532:0046  |   ✔    |   ✔    |
+| Razer Abyssus 2014              |  1532:0042  |   ✔    |   ✔    |
+| Razer Imperator 2012            |  1532:002F  |   ✔    |   ✔    |
+| Razer Orochi (Wired)            |  1532:0048  |   ✔    |   ✔    |
 
 ### Mousemats
 | Device        | USB VID:PID | Driver | Daemon |
 | ------------- | ----------- | ------ | ------ |
-| Razer Firefly |  1532:0C00  |   ✔     |   ✔     |
+| Razer Firefly |  1532:0C00  |   ✔    |   ✔     |
 
 ### Peripherals
 | Device          | USB VID:PID | Driver | Daemon |
 | --------------- | ----------- | ------ | ------ |
-| Razer Tartarus  |  1532:0208  |   ✔     |   ✔     |
+| Razer Tartarus  |  1532:0208  |   ✔    |   ✔     |
 
 
 #### Determining the Device ID

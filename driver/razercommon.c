@@ -11,8 +11,8 @@
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/init.h>
-#include <linux/usb/input.h>
 #include <linux/hid.h>
+
 
 #include "razercommon.h"
 
@@ -179,8 +179,17 @@ void print_erroneous_report(struct razer_report* report, char* driver_name, char
         report->arguments[0], report->arguments[1], report->arguments[2], report->arguments[3], report->arguments[4], report->arguments[5]);
 }
 
-
-
+/**
+ * Clamp a value to a min,max
+ */
+unsigned int clamp_u8(unsigned int value, unsigned int min, unsigned int max)
+{
+	if(value > max)
+		return max;
+	if(value < min)
+		return min;
+	return value;
+}
 
 
 

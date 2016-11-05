@@ -30,6 +30,7 @@
 
 #include "razerkbd_driver.h"
 #include "razercommon.h"
+#include "razerchromacommon.h"
 
 
 /*
@@ -106,6 +107,41 @@ int razer_set_report(struct usb_device *usb_dev,void const *data) {
 
 int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
     return razer_get_usb_response(usb_dev, 0x02, request_report, 0x02, response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+}
+
+/**
+ *  New function to send to device, get response, and actually check the response
+ */
+void razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
+{
+	int retval = -1;
+    struct razer_report response_report;
+    
+    request_report->crc = razer_calculate_crc(request_report);
+
+    retval = razer_get_report(usb_dev, request_report, &response_report);
+
+    if(retval == 0)
+    {
+		// Check the packet number, class and command are the same
+		if(response_report.remaining_packets != request_report->remaining_packets ||
+		   response_report.command_class != request_report->command_class ||
+		   response_report.command_id.id != request_report->command_id.id)
+		{
+			print_erroneous_report(&response_report, "razerkbd", "Response doesnt match request");
+		} else if (response_report.status == RAZER_CMD_BUSY) {
+			print_erroneous_report(&response_report, "razerkbd", "Device is busy");
+		} else if (response_report.status == RAZER_CMD_FAILURE) {
+			print_erroneous_report(&response_report, "razerkbd", "Command failed");
+		} else if (response_report.status == RAZER_CMD_NOT_SUPPORTED) {
+			print_erroneous_report(&response_report, "razerkbd", "Command not supported");
+		} else if (response_report.status == RAZER_CMD_TIMEOUT) {
+			print_erroneous_report(&response_report, "razerkbd", "Command timed out");
+		} 
+    } else
+    {
+      print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
+    }
 }
 
 
@@ -1251,7 +1287,22 @@ static ssize_t razer_attr_write_mode_macro(struct device *dev, struct device_att
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     int temp = simple_strtoul(buf, NULL, 10);
-    razer_set_macro_led_mode(usb_dev, temp);
+    struct razer_report report;
+    
+    switch(usb_dev->descriptor.idProduct)
+    {
+        case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+			report = razer_chroma_standard_set_led_state(NOSTORE, MACRO_LED, (unsigned char)temp);
+			report.transaction_id.id = 0x3F;
+			break;
+
+
+		default:
+			report = razer_chroma_standard_set_led_state(VARSTORE, MACRO_LED, (unsigned char)temp);
+			break;
+	}
+    razer_send_payload(usb_dev, &report);
+    
     return count;
 }
 
@@ -1265,7 +1316,22 @@ static ssize_t razer_attr_write_mode_macro_effect(struct device *dev, struct dev
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     int temp = simple_strtoul(buf, NULL, 10);
-    razer_set_macro_led_effect(usb_dev, temp);
+    struct razer_report report;
+    
+    switch(usb_dev->descriptor.idProduct)
+    {
+        case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+			report = razer_chroma_standard_set_led_effect(NOSTORE, MACRO_LED, (unsigned char)temp);
+			report.transaction_id.id = 0x3F;
+			break;
+
+
+		default:
+			report = razer_chroma_standard_set_led_effect(VARSTORE, MACRO_LED, (unsigned char)temp);
+			break;
+	}
+    razer_send_payload(usb_dev, &report);
+
     return count;
 }
 
@@ -1293,7 +1359,19 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     int temp = simple_strtoul(buf, NULL, 10);
-    razer_set_wave_mode(usb_dev, temp);
+    struct razer_report report;
+    
+    switch(usb_dev->descriptor.idProduct)
+    {
+        case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+			report = razer_chroma_extended_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, (unsigned char)temp);
+			razer_send_payload(usb_dev, &report);
+			break;
+
+
+		default:
+			razer_set_wave_mode(usb_dev, temp);
+	}
     return count;
 }
 
@@ -1307,7 +1385,21 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    razer_set_spectrum_mode(usb_dev);
+    struct razer_report report;
+    
+    switch(usb_dev->descriptor.idProduct)
+    {
+        case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+			report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, BACKLIGHT_LED);
+			razer_send_payload(usb_dev, &report);
+			break;
+
+
+		default:
+			razer_set_spectrum_mode(usb_dev);
+			break;
+	}
+    
     return count;
 }
 
@@ -1321,7 +1413,33 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    razer_set_starlight_mode(usb_dev);
+    struct razer_report report;
+    
+    switch(usb_dev->descriptor.idProduct)
+    {
+        case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+			if(count == 7) {
+				report = razer_chroma_extended_matrix_effect_starlight_dual(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
+				razer_send_payload(usb_dev, &report);
+			} else if(count == 4) {
+				report = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1]);
+				razer_send_payload(usb_dev, &report);
+			} else if(count == 1) {
+				report = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
+				razer_send_payload(usb_dev, &report);
+			} else {
+				printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+			}
+			break;
+
+
+		default:
+			razer_set_starlight_mode(usb_dev);
+			break;
+	}
+    
+    
+    
     return count;
 }
 
@@ -1335,7 +1453,21 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    razer_set_none_mode(usb_dev);
+    struct razer_report report;
+    
+    switch(usb_dev->descriptor.idProduct)
+    {
+        case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+			report = razer_chroma_extended_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
+			razer_send_payload(usb_dev, &report);
+			break;
+
+
+		default:
+			razer_set_none_mode(usb_dev);
+			break;
+	}
+    
     return count;
 }
 
@@ -1390,11 +1522,27 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report;
+    
     if(count == 4)
     {
-        unsigned char speed = (unsigned char)buf[0];
-        razer_set_reactive_mode(usb_dev, (struct razer_rgb*)&buf[1], speed);
-    }
+		unsigned char speed = (unsigned char)buf[0];
+		
+		switch(usb_dev->descriptor.idProduct)
+		{
+			case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+				report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+				razer_send_payload(usb_dev, &report);
+				break;
+
+
+			default:
+				razer_set_reactive_mode(usb_dev, (struct razer_rgb*)&buf[1], speed);
+				break;
+		}   
+    } else {
+		printk(KERN_WARNING "razerkbd: Reactive only accepts Speed, RGB (4byte)");
+	}
     return count;
 }
 
@@ -1405,23 +1553,56 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-
+	struct razer_report report;
     const char *alt_buf[6] = { 0 };
-
-    switch(count) {
-        case 3: // Single colour mode
-            razer_set_breath_mode(usb_dev, 0x01, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&alt_buf[3]);
-            break;
-        
-        case 6: // Dual colour mode
-            razer_set_breath_mode(usb_dev, 0x02, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
-            break;
-        
-        default: // "Random" colour mode
-            razer_set_breath_mode(usb_dev, 0x03, (struct razer_rgb*)&alt_buf[0], (struct razer_rgb*)&alt_buf[3]);
-            break;
-    }
     
+    
+    switch(usb_dev->descriptor.idProduct)
+    {
+        case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+			switch(count) {
+				case 3: // Single colour mode
+					report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+					razer_send_payload(usb_dev, &report);
+					break;
+				
+				case 6: // Dual colour mode
+					report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+					razer_send_payload(usb_dev, &report);
+					break;
+
+				case 1: // "Random" colour mode
+					report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
+					razer_send_payload(usb_dev, &report);
+					break;
+				
+				default:
+					printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)");
+					break;
+			}
+			break;
+
+
+		default:
+			switch(count) {
+				case 3: // Single colour mode
+					razer_set_breath_mode(usb_dev, 0x01, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&alt_buf[3]);
+					break;
+				
+				case 6: // Dual colour mode
+					razer_set_breath_mode(usb_dev, 0x02, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+					break;
+				
+				default: // "Random" colour mode
+					razer_set_breath_mode(usb_dev, 0x03, (struct razer_rgb*)&alt_buf[0], (struct razer_rgb*)&alt_buf[3]);
+					break;
+				// TODO move default to case 1:. Then default: printk(warning). Also remove pointless buffer
+			}
+			break;
+	}
+    
+    
+
     return count;
 }
 
@@ -1448,6 +1629,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report;
 
     switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
@@ -1467,11 +1649,26 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
             if(count == 3)
             {
                 razer_set_static_mode(usb_dev, (struct razer_rgb*)&buf[0]);
-            }
+            } else {
+				printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)");
+			}
             break;
+        
+        
+        case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+			if(count == 3)
+            {
+				report = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+				razer_send_payload(usb_dev, &report);
+			} else {
+				printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)");
+			}
+			
+			break;
         
         default:
             printk(KERN_WARNING "razerkbd: Cannot set static mode for this device");
+            break;
         
     }
 
@@ -1753,16 +1950,14 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
         return 0;
     }
     
-    if (usage->code == RAZER_FN_KEY) {
-        asc->fn_on = !!value;
-        
-        // input_event(field->hidinput->input, usage->type, usage->code, value);
-        return 1;
-    }
-    
     // Do translation, currently translation is only when FN is pressed
     if (asc->fn_on) {
+		printk(KERN_WARNING "razerkbd: Input event. FN KEY + Key\n");
         // Look at https://github.com/torvalds/linux/blob/master/drivers/hid/hid-apple.c#L206 for reversing the FN keys, though blade does that in h/w
+        
+        if(usage->code == 62) {
+			printk(KERN_WARNING "razerkbd: Input event. FN KEY + F4\n");
+		}
         
         translation = find_translation(chroma_keys, usage->code);
         
@@ -1776,9 +1971,80 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
             return 1;
         }
     }
+
+    return 0;
+}
+
+/**
+ * Raw event function
+ * 
+ * Bastard function. Could most probably be done a load better.
+ * Basically it shifts all of the key's in the 04... event to the right 1, and then sets the first 2 bytes to 0x0100. This then allows the keys to be processed with the above normal event function
+ * Converts M1-M5 into F13-F17. It also blanks out FN keypresses so it acts more like the modifier it should be.
+ * 
+ * 04012000000000000000 FN is pressed, M1 pressed
+ * 04010000000000000000 M1 is released
+ * goes to
+ * 01000068000000000000 FN is pressed (blanked), M1 pressed (converted to F13)
+ * 01000000000000000000 M1 is released
+ * 
+ * HID Usage Table http://www.freebsddiary.org/APC/usb_hid_usages.php
+ */
+static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
+{
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct razer_kbd_device *asc = hid_get_drvdata(hdev);
     
-    
-    
+    // The event were looking for is 16 bytes long and starts with 0x04
+    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04)
+    {
+        // Convert 04... to 0100...
+        int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
+        u8 cur_value = 0x00;
+        int found_fn = 0x00;
+        
+        while(--index > 0)
+        {
+			cur_value = data[index];
+			if(cur_value == 0x00) { // Skip 0x00
+				continue;
+			}
+			
+			switch(cur_value) {
+				case 0x01: // FN
+					//cur_value = 0x73; // F24
+					cur_value = 0x00;
+					found_fn = 0x01;
+					break;
+				case 0x20: // M1
+					cur_value = 0x68; // F13
+					break;
+				case 0x21: // M2
+					cur_value = 0x69; // F14
+					break;
+				case 0x22: // M3
+					cur_value = 0x6A; // F15
+					break;
+				case 0x23: // M4
+					cur_value = 0x6B; // F16
+					break;
+				case 0x24: // M5
+					cur_value = 0x6C; // F17
+					break;
+			}
+			
+			data[index+1] = cur_value;
+		}
+        
+        asc->fn_on = !!found_fn;
+        
+        data[0] = 0x01;
+        data[1] = 0x00;
+       
+		// Some reason just by editing data, it generates a normal event above. (Could quite possibly work like that, no clue)
+        //hid_report_raw_event(hdev, HID_INPUT_REPORT, data, size, 0);        
+        return 1;
+    }
 
     return 0;
 }
@@ -1870,8 +2136,24 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);     // Profile/Macro LED Blue
                 break;
             
+            case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_starlight);       // Starlight effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);            // No effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_reactive);        // Reactive effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);          // Static effect
+                //CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
+                //CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_temp_clear_row);       // Clear row
+                //CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_keys);           // Enable macro keys
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro);           // Enable macro LED
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro_effect);    // Change macro LED effect (static, flashing)
+				break;
             
-            default:
+            default: // BlackWidow Chroma...
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);            // No effect
@@ -1994,8 +2276,24 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);     // Profile/Macro LED Blue
                 break;
             
+            case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+				device_remove_file(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
+                device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
+                device_remove_file(&hdev->dev, &dev_attr_mode_starlight);       // Starlight effect
+                device_remove_file(&hdev->dev, &dev_attr_mode_none);            // No effect
+                device_remove_file(&hdev->dev, &dev_attr_mode_reactive);        // Reactive effect
+                device_remove_file(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
+                device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
+                //device_remove_file(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
+                //device_remove_file(&hdev->dev, &dev_attr_temp_clear_row);       // Clear row
+                //device_remove_file(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
+                device_remove_file(&hdev->dev, &dev_attr_macro_keys);           // Enable macro keys
+                device_remove_file(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
+                device_remove_file(&hdev->dev, &dev_attr_mode_macro);           // Enable macro LED
+                device_remove_file(&hdev->dev, &dev_attr_mode_macro_effect);    // Change macro LED effect (static, flashing)
+                break;
             
-            default:
+            default: // BlackWidow Chroma...
                 device_remove_file(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
                 device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
                 device_remove_file(&hdev->dev, &dev_attr_mode_none);            // No effect
@@ -2050,6 +2348,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORNATA_CHROMA) },
     { }
 };
 
@@ -2065,6 +2364,7 @@ static struct hid_driver razer_kbd_driver = {
     .remove = razer_kbd_disconnect,
     .input_mapping = razer_input_mapping,
     .event = razer_event,
+    .raw_event = razer_raw_event,
 };
 
 module_hid_driver(razer_kbd_driver);
