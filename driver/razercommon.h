@@ -40,11 +40,14 @@ do { \
 #define VARSTORE         0x01
 
 // LED definitions
-#define SCROLL_WHEEL_LED 0x01
-#define LOGO_LED         0x04
-#define BACKLIGHT_LED    0x05
-#define MACRO_LED        0x07
-#define GAME_LED         0x08
+#define SCROLL_WHEEL_LED  0x01
+#define LOGO_LED          0x04
+#define BACKLIGHT_LED     0x05
+#define MACRO_LED         0x07
+#define GAME_LED          0x08
+#define RED_PROFILE_LED   0x0E
+#define GREEN_PROFILE_LED 0x0C
+#define BLUE_PROFILE_LED  0x0D
 
 // Report Responses
 #define RAZER_CMD_BUSY          0x01
