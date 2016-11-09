@@ -125,7 +125,6 @@ struct razer_kbd_device {
     char phys[64];
     //struct razer_row_rgb matrix[RAZER_BLACKWIDOW_CHROMA_ROWS_NUM];
     //bool effect_submitted;
-    
 };
 
 struct razer_key_translation {

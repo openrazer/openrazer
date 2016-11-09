@@ -114,7 +114,7 @@ int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_re
 }
 
 /**
- *  New function to send to device, get response, and actually check the response
+ * Function to send to device, get response, and actually check the response
  */
 struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
@@ -166,129 +166,6 @@ void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsig
 	
 	razer_send_payload(usb_dev, &report);
 }
- 
-
-/**
- *  End New functions
- */
-
-/**
- * Set row colour on the keyboard
- *
- * This sets the colour of a row on the keyboard. Takes in an array of RGB bytes.
- * The mappings below are correct for the BlackWidow Chroma. The BlackWidow Ultimate 2016
- * contains LEDs under the spacebar and the FN key so there will be changes once I get the
- * hardware.
- *
- * Row 0:
- *  0      Unused
- *  1      ESC
- *  2      Unused
- *  3-14   F1-F12
- *  15-17  PrtScr, ScrLk, Pause
- *  18-19  Unused
- *  20     Razer Logo
- *  21     Unused
- *
- * Row 1:
- *  0-21   M1 -> NP Minus
- *
- * Row 2:
- *  0-13   M2 -> Right Square Bracket ]
- *  14 Unused
- *  15-21 Delete -> NP Plus
- *
- * Row 3:
- *  0-14   M3 -> Return
- *  15-17  Unused
- *  18-20  NP4 -> NP6
- *
- * Row 4:
- *  0-12   M4 -> Forward Slash /
- *  13     Unused
- *  14     Right Shift
- *  15     Unused
- *  16     Up Arrow Key
- *  17     Unused
- *  18-21  NP1 -> NP Enter
- *
- * Row 5:
- *  0-3    M5 -> Alt
- *  4-10   Unused
- *  11     Alt GR
- *  12     Unused
- *  13-17  Context Menu Key -> Right Arrow Key
- *  18     Unused
- *  19-20  NP0 -> NP.
- *  21     Unused
- *
- * Supported by:
- *   Razer BlackWidow Chroma
- *   Razer BlackWidow Ultimate 2016 (Not working :( )
- */
-int razer_set_key_row(struct usb_device *usb_dev, unsigned char row_index, unsigned char *row_cols) //struct razer_row_rgb *row_cols)
-{
-    int retval;
-    struct razer_report report = get_razer_report(0x03, 0x0B, 0x46);
-    unsigned char row_length = RAZER_BLACKWIDOW_CHROMA_ROW_LEN;
-
-    // Ultimate 2016 and stealth use 0x80
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016 ||
-       usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH ||
-       usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016)
-    {
-        report.transaction_id.id = 0x80;
-    }
-
-    // Added this to handle variable row lengths
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH ||
-       usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016)
-    {
-        row_length = RAZER_STEALTH_ROW_LEN;
-    }
-
-    report.data_size = row_length * 3 + 4;
-
-    report.arguments[0] = 0xFF;/* Frame ID */
-    report.arguments[1] = row_index; /* Row */
-    report.arguments[2] = 0x00; /* Start Index 0-21*/
-    report.arguments[3] = row_length - 1; /* End Index 0-21 (calculated to end of row)*/
-    memcpy(&report.arguments[4], row_cols, (report.arguments[3]+1)*3);
-
-    report.crc = razer_calculate_crc(&report);
-    retval = razer_set_report(usb_dev, &report);
-    return retval;
-}
-
-/**
- * Write device file "set_key_row"
- *
- * Writes the colour rows on the keyboard. Takes in all the colours for the keyboard
- */
-static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    size_t offset = 0;
-    unsigned char row_index;
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    size_t buf_size = RAZER_BLACKWIDOW_CHROMA_ROW_LEN * 3 + 1;
-
-    while(offset < count) {
-        if((count-offset) < buf_size) {
-            printk(KERN_ALERT "Wrong Amount of RGB data provided: %d of %d\n",(int)(count-offset), (int)buf_size);
-            return -EINVAL;
-        }
-        row_index = (unsigned char)buf[offset];
-        razer_set_key_row(usb_dev, row_index, (unsigned char*)&buf[offset + 1]);
-        offset += buf_size;
-    }
-    return count;
-}
-
-
-/*
- * New Functions
- */
 
 /**
  * Write device file "mode_game"
@@ -1142,7 +1019,78 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     return sprintf(buf, "%d:%d\n", response.arguments[0], response.arguments[1]);
 }
 
+/**
+ * Write device file "matrix_custom_frame"
+ * 
+ * Format
+ * ROW_ID START_COL STOP_COL RGB...
+ */
+static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report;
+    size_t offset = 0;
+    unsigned char row_id;
+    unsigned char start_col;
+    unsigned char stop_col;
+    unsigned char row_length;
+    
+    //printk(KERN_ALERT "razerkbd: Total count: %d\n", (unsigned char)count);
+        
+    if(count < 4) {
+		printk(KERN_ALERT "razerkbd: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB...\n");
+        return -EINVAL;
+	}
 
+    
+    while(offset < count)
+    {
+		row_id = buf[offset++];
+		start_col = buf[offset++];
+		stop_col = buf[offset++];
+		row_length = ((stop_col+1) - start_col) * 3;
+		
+		// printk(KERN_ALERT "razerkbd: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
+		
+		if(start_col > stop_col)
+		{
+			printk(KERN_ALERT "razerkbd: Start column is greater than end column\n");
+			break;
+		}
+		
+		if(offset + row_length > count)
+		{
+			printk(KERN_ALERT "razerkbd: Not enough RGB to fill row\n");
+			break;
+		}
+		
+		// Offset now at beginning of RGB data
+		switch(usb_dev->descriptor.idProduct)
+		{
+			case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+				report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+				break;
+			
+			case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016: 
+			case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
+			case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+				report.transaction_id.id = 0x80; // Fall into the 2016/blade/blade2016 to set device id		
+			default:
+				report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+				break;
+		}
+		razer_send_payload(usb_dev, &report);
+		
+		// *3 as its 3 bytes per col (RGB)
+		offset += row_length;
+		
+		return count;
+	}
+
+
+    return count;
+}
 
 /**
  * Set up the device driver files
@@ -1154,47 +1102,37 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
  */
  
 // TODO device_mode endpoint
-static DEVICE_ATTR(mode_game,            0660, razer_attr_read_mode_game,                  razer_attr_write_mode_game);
-static DEVICE_ATTR(mode_macro,           0660, razer_attr_read_mode_macro,                 razer_attr_write_mode_macro);
-static DEVICE_ATTR(mode_macro_effect,    0660, razer_attr_read_mode_macro_effect,          razer_attr_write_mode_macro_effect);
-static DEVICE_ATTR(mode_pulsate,         0660, razer_attr_read_mode_pulsate,               razer_attr_write_mode_pulsate);
-static DEVICE_ATTR(profile_led_red,      0660, razer_attr_read_tartarus_profile_led_red,   razer_attr_write_tartarus_profile_led_red);
-static DEVICE_ATTR(profile_led_green,    0660, razer_attr_read_tartarus_profile_led_green, razer_attr_write_tartarus_profile_led_green);
-static DEVICE_ATTR(profile_led_blue,     0660, razer_attr_read_tartarus_profile_led_blue,  razer_attr_write_tartarus_profile_led_blue);
-static DEVICE_ATTR(set_brightness,       0660, razer_attr_read_set_brightness,             razer_attr_write_set_brightness);
-static DEVICE_ATTR(device_mode,          0660, razer_attr_read_device_mode,                razer_attr_write_device_mode);
-static DEVICE_ATTR(test,                 0660, razer_attr_read_test,                       razer_attr_write_test);
+static DEVICE_ATTR(game_led_state,          0660, razer_attr_read_mode_game,                  razer_attr_write_mode_game);
+static DEVICE_ATTR(macro_led_state,         0660, razer_attr_read_mode_macro,                 razer_attr_write_mode_macro);
+static DEVICE_ATTR(macro_led_effect,        0660, razer_attr_read_mode_macro_effect,          razer_attr_write_mode_macro_effect);
+static DEVICE_ATTR(matrix_effect_pulsate,   0660, razer_attr_read_mode_pulsate,               razer_attr_write_mode_pulsate);
+static DEVICE_ATTR(profile_led_red,         0660, razer_attr_read_tartarus_profile_led_red,   razer_attr_write_tartarus_profile_led_red);
+static DEVICE_ATTR(profile_led_green,       0660, razer_attr_read_tartarus_profile_led_green, razer_attr_write_tartarus_profile_led_green);
+static DEVICE_ATTR(profile_led_blue,        0660, razer_attr_read_tartarus_profile_led_blue,  razer_attr_write_tartarus_profile_led_blue);
+static DEVICE_ATTR(matrix_brightness,       0660, razer_attr_read_set_brightness,             razer_attr_write_set_brightness);
+static DEVICE_ATTR(device_mode,             0660, razer_attr_read_device_mode,                razer_attr_write_device_mode);
+static DEVICE_ATTR(test,                    0660, razer_attr_read_test,                       razer_attr_write_test);
+                                            
+static DEVICE_ATTR(device_type,             0440, razer_attr_read_device_type,                NULL);
+static DEVICE_ATTR(version,                 0440, razer_attr_read_version,                    NULL);
+static DEVICE_ATTR(device_serial,           0440, razer_attr_read_get_serial,                 NULL);
+static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_get_firmware_version,       NULL);
+                                          
+static DEVICE_ATTR(matrix_effect_none,      0220, NULL,                                       razer_attr_write_mode_none);
+static DEVICE_ATTR(matrix_effect_wave,      0220, NULL,                                       razer_attr_write_mode_wave);
+static DEVICE_ATTR(matrix_effect_spectrum,  0220, NULL,                                       razer_attr_write_mode_spectrum);
+static DEVICE_ATTR(matrix_effect_reactive,  0220, NULL,                                       razer_attr_write_mode_reactive);
+static DEVICE_ATTR(matrix_effect_static,    0220, NULL,                                       razer_attr_write_mode_static);
+static DEVICE_ATTR(matrix_effect_starlight, 0220, NULL,                                       razer_attr_write_mode_starlight);
+static DEVICE_ATTR(matrix_effect_breath,    0220, NULL,                                       razer_attr_write_mode_breath);
+static DEVICE_ATTR(logo_led_state,          0220, NULL,                                       razer_attr_write_set_logo);
+static DEVICE_ATTR(matrix_effect_custom,    0220, NULL,                                       razer_attr_write_mode_custom);
+static DEVICE_ATTR(fn_toggle,               0220, NULL,                                       razer_attr_write_set_fn_toggle);
+static DEVICE_ATTR(matrix_custom_frame,     0220, NULL,                                       razer_attr_write_matrix_custom_frame);
 
-static DEVICE_ATTR(device_type,          0440, razer_attr_read_device_type,                NULL);
-static DEVICE_ATTR(version,              0440, razer_attr_read_version,                    NULL);
-static DEVICE_ATTR(get_serial,           0440, razer_attr_read_get_serial,                 NULL);
-static DEVICE_ATTR(get_firmware_version, 0440, razer_attr_read_get_firmware_version,       NULL);
-
-static DEVICE_ATTR(mode_none,            0220, NULL,                                       razer_attr_write_mode_none);
-static DEVICE_ATTR(mode_wave,            0220, NULL,                                       razer_attr_write_mode_wave);
-static DEVICE_ATTR(mode_spectrum,        0220, NULL,                                       razer_attr_write_mode_spectrum);
-static DEVICE_ATTR(mode_reactive,        0220, NULL,                                       razer_attr_write_mode_reactive);
-static DEVICE_ATTR(mode_static,          0220, NULL,                                       razer_attr_write_mode_static);
-static DEVICE_ATTR(mode_starlight,       0220, NULL,                                       razer_attr_write_mode_starlight);
-static DEVICE_ATTR(mode_breath,          0220, NULL,                                       razer_attr_write_mode_breath);
-static DEVICE_ATTR(set_logo,             0220, NULL,                                       razer_attr_write_set_logo);
-static DEVICE_ATTR(mode_custom,          0220, NULL,                                       razer_attr_write_mode_custom);
-static DEVICE_ATTR(set_fn_toggle,        0220, NULL,                                       razer_attr_write_set_fn_toggle);
-
-
-
-
-
-
-
-
-static DEVICE_ATTR(set_key_row,       0220, NULL, razer_attr_write_set_key_row); // TODO add extended
-
-                                      
-
-
-
-
+/**
+ * Deal with FN toggle
+ */
 static int razer_event(struct hid_device *hdev, struct hid_field *field, struct hid_usage *usage, __s32 value)
 {
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
@@ -1323,93 +1261,93 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
     {
         // If the currently bound device is the control (mouse) interface
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_firmware_version);     // Get the firmware version
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_get_serial);               // Get serial nubmer
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_brightness);           // Gets and sets the brightness
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);              // Get string of device type
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);              // Get device mode
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);                      // Get the firmware version
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);                         // Get serial nubmer
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);                     // Gets and sets the brightness
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);                                  // Test mode
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
         
         switch(usb_dev->descriptor.idProduct) {
             
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_pulsate);         // Pulsate effect, like breathing
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);          // Static effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro);           // Enable macro LED
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro_effect);    // Change macro LED effect (static, flashing)
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_pulsate);         // Pulsate effect, like breathing
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
                 break;
             
             
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_starlight);       // Starlight effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);            // No effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_reactive);        // Reactive effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);          // Static effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro);           // Enable macro LED
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro_effect);    // Change macro LED effect (static, flashing)
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
                 break;
             
             
             case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
             case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);            // No effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_reactive);        // Reactive effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);          // Static effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_logo);             // Enable/Disable the logo
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_fn_toggle);        // Sets wether FN is requires for F-Keys
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
                 break;
                 
                 
             case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);          // Static effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);            // No effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);      // Profile/Macro LED Red
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_green);    // Profile/Macro LED Green
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);     // Profile/Macro LED Blue
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
                 break;
             
             case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
-				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_starlight);       // Starlight effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);            // No effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_reactive);        // Reactive effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);          // Static effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
-                //CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro);           // Enable macro LED
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro_effect);    // Change macro LED effect (static, flashing)
+				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
 				break;
             
             default: // BlackWidow Chroma...
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_none);            // No effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_reactive);        // Reactive effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_static);          // Static effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro);           // Enable macro LED
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mode_macro_effect);    // Change macro LED effect (static, flashing)
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
                 break;
         }
         
@@ -1458,93 +1396,93 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     {
         // If the currently bound device is the control (mouse) interface
         device_remove_file(&hdev->dev, &dev_attr_version);
-        device_remove_file(&hdev->dev, &dev_attr_get_firmware_version);     // Get the firmware version
-        device_remove_file(&hdev->dev, &dev_attr_get_serial);               // Get serial nubmer
-        device_remove_file(&hdev->dev, &dev_attr_set_brightness);           // Gets and sets the brightness
-        device_remove_file(&hdev->dev, &dev_attr_test);
-        device_remove_file(&hdev->dev, &dev_attr_device_type);              // Get string of device type
-        device_remove_file(&hdev->dev, &dev_attr_device_mode);              // Get device mode
+        device_remove_file(&hdev->dev, &dev_attr_firmware_version);                      // Get the firmware version
+        device_remove_file(&hdev->dev, &dev_attr_device_serial);                         // Get serial nubmer
+        device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);                     // Gets and sets the brightness
+        device_remove_file(&hdev->dev, &dev_attr_test);                                  // Test mode
+        device_remove_file(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
+        device_remove_file(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
         
         switch(usb_dev->descriptor.idProduct) {
             
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
-                device_remove_file(&hdev->dev, &dev_attr_mode_pulsate);         // Pulsate effect, like breathing
-                device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
-                device_remove_file(&hdev->dev, &dev_attr_mode_macro);           // Enable macro LED
-                device_remove_file(&hdev->dev, &dev_attr_mode_macro_effect);    // Change macro LED effect (static, flashing)
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_pulsate);         // Pulsate effect, like breathing
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                device_remove_file(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
+                device_remove_file(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
+                device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
                 break;
             
             
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
-                device_remove_file(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_starlight);       // Starlight effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_none);            // No effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_reactive);        // Reactive effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
-                device_remove_file(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
-                device_remove_file(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
-                device_remove_file(&hdev->dev, &dev_attr_mode_macro);           // Enable macro LED
-                device_remove_file(&hdev->dev, &dev_attr_mode_macro_effect);    // Change macro LED effect (static, flashing)
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+                device_remove_file(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
+                device_remove_file(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
+                device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
                 break;
             
             
             case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
             case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
-                device_remove_file(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_none);            // No effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_reactive);        // Reactive effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
-                device_remove_file(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
-                device_remove_file(&hdev->dev, &dev_attr_set_logo);             // Enable/Disable the logo
-                device_remove_file(&hdev->dev, &dev_attr_set_fn_toggle);        // Sets wether FN is requires for F-Keys
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+                device_remove_file(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
+                device_remove_file(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
                 break;
                 
                 
             case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
-                device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_none);            // No effect
-                device_remove_file(&hdev->dev, &dev_attr_profile_led_red);      // Profile/Macro LED Red
-                device_remove_file(&hdev->dev, &dev_attr_profile_led_green);    // Profile/Macro LED Green
-                device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);     // Profile/Macro LED Blue
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
                 break;
             
             case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
-				device_remove_file(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_starlight);       // Starlight effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_none);            // No effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_reactive);        // Reactive effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
-                //device_remove_file(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
-                device_remove_file(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
-                device_remove_file(&hdev->dev, &dev_attr_mode_macro);           // Enable macro LED
-                device_remove_file(&hdev->dev, &dev_attr_mode_macro_effect);    // Change macro LED effect (static, flashing)
-                break;
+				device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+                device_remove_file(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
+                device_remove_file(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
+                device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
+				break;
             
             default: // BlackWidow Chroma...
-                device_remove_file(&hdev->dev, &dev_attr_mode_wave);            // Wave effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);        // Spectrum effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_none);            // No effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_reactive);        // Reactive effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_breath);          // Breathing effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_static);          // Static effect
-                device_remove_file(&hdev->dev, &dev_attr_mode_custom);          // Custom effect
-                device_remove_file(&hdev->dev, &dev_attr_set_key_row);          // Set LED matrix
-                device_remove_file(&hdev->dev, &dev_attr_mode_game);            // Enable game mode & LED
-                device_remove_file(&hdev->dev, &dev_attr_mode_macro);           // Enable macro LED
-                device_remove_file(&hdev->dev, &dev_attr_mode_macro_effect);    // Change macro LED effect (static, flashing)
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+                device_remove_file(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
+                device_remove_file(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
+                device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
                 break;
         }
     }

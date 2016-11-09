@@ -333,6 +333,74 @@ struct razer_report razer_chroma_standard_matrix_effect_custom_frame(void)
 	return report;
 }
 
+/**
+ * Set the RGB or a row
+ * 
+ * Start and stop columns are inclusive
+ * 
+ * This sets the colour of a row on the keyboard. Takes in an array of RGB bytes.
+ * The mappings below are correct for the BlackWidow Chroma. The BlackWidow Ultimate 2016
+ * contains LEDs under the spacebar and the FN key so there will be changes once I get the
+ * hardware.
+ *
+ * Row 0:
+ *  0      Unused
+ *  1      ESC
+ *  2      Unused
+ *  3-14   F1-F12
+ *  15-17  PrtScr, ScrLk, Pause
+ *  18-19  Unused
+ *  20     Razer Logo
+ *  21     Unused
+ *
+ * Row 1:
+ *  0-21   M1 -> NP Minus
+ *
+ * Row 2:
+ *  0-13   M2 -> Right Square Bracket ]
+ *  14 Unused
+ *  15-21 Delete -> NP Plus
+ *
+ * Row 3:
+ *  0-14   M3 -> Return
+ *  15-17  Unused
+ *  18-20  NP4 -> NP6
+ *
+ * Row 4:
+ *  0-12   M4 -> Forward Slash /
+ *  13     Unused
+ *  14     Right Shift
+ *  15     Unused
+ *  16     Up Arrow Key
+ *  17     Unused
+ *  18-21  NP1 -> NP Enter
+ *
+ * Row 5:
+ *  0-3    M5 -> Alt
+ *  4-10   Unused
+ *  11     Alt GR
+ *  12     Unused
+ *  13-17  Context Menu Key -> Right Arrow Key
+ *  18     Unused
+ *  19-20  NP0 -> NP.
+ *  21     Unused
+ */
+struct razer_report razer_chroma_standard_matrix_set_custom_frame(unsigned char row_index, unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data)
+{
+	size_t row_length = (size_t) (((stop_col + 1) - start_col) * 3);
+	struct razer_report report = get_razer_report(0x03, 0x0B, 0x46); // In theory should be able to leave data size at max as we have start/stop
+	
+	// printk(KERN_ALERT "razerkbd: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_index, start_col, stop_col, (unsigned char)row_length);
+	
+	report.arguments[0] = 0xFF; // Frame ID
+	report.arguments[1] = row_index;
+	report.arguments[2] = start_col;
+	report.arguments[3] = stop_col;
+    memcpy(&report.arguments[4], rgb_data, row_length);
+    
+    return report;
+}
+
 
 /*
  * Extended Matrix Effects
@@ -562,6 +630,29 @@ struct razer_report razer_chroma_extended_matrix_brightness(unsigned char variab
 	
 	return report;
 } // TODO does it have an 0x84? to check brightness
+
+/**
+ * Set the RGB or a row
+ * 
+ * Start and stop columns are inclusive
+ */
+struct razer_report razer_chroma_extended_matrix_set_custom_frame(unsigned char row_index, unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data)
+{
+	size_t row_length = (size_t) (((stop_col + 1) - start_col) * 3);
+	struct razer_report report = get_razer_report(0x0F, 0x03, 0x47);
+	report.transaction_id.id = 0x3F;
+	
+	// printk(KERN_ALERT "razerkbd: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_index, start_col, stop_col, (unsigned char)row_length);
+
+	report.arguments[2] = row_index;
+	report.arguments[3] = start_col;
+	report.arguments[4] = stop_col;
+    memcpy(&report.arguments[5], rgb_data, row_length);
+    
+    return report;
+}
+
+
 
 
 /*
