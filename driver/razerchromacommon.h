@@ -74,5 +74,7 @@ struct razer_report razer_chroma_misc_fn_key_toggle(unsigned char state);
 struct razer_report razer_chroma_misc_set_blade_brightness(unsigned char brightness);
 struct razer_report razer_chroma_misc_get_blade_brightness(void);
 
+struct razer_report razer_chroma_misc_firefly_set_custom_frame(unsigned char *rgb_data);
+
 
 #endif

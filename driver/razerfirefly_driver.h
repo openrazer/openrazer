@@ -50,8 +50,6 @@ struct razer_firefly_device {
     unsigned char effect;
     char name[128];
     char phys[64];
-    bool effect_submitted;
-    int brightness;
 };
 
 

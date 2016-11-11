@@ -638,8 +638,9 @@ struct razer_report razer_chroma_extended_matrix_brightness(unsigned char variab
  */
 struct razer_report razer_chroma_extended_matrix_set_custom_frame(unsigned char row_index, unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data)
 {
-	size_t row_length = (size_t) (((stop_col + 1) - start_col) * 3);
 	struct razer_report report = get_razer_report(0x0F, 0x03, 0x47);
+	size_t row_length = (size_t) (((stop_col + 1) - start_col) * 3);
+	
 	report.transaction_id.id = 0x3F;
 	
 	// printk(KERN_ALERT "razerkbd: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_index, start_col, stop_col, (unsigned char)row_length);
@@ -702,6 +703,17 @@ struct razer_report razer_chroma_misc_get_blade_brightness(void)
     return report;
 }
 
+/**
+ * Sets custom frame for the firefly
+ */
+struct razer_report razer_chroma_misc_firefly_set_custom_frame(unsigned char *rgb_data) // TODO recheck custom frame hex
+{
+    struct razer_report report = get_razer_report(0x03, 0x0C, 0x32);
+    report.arguments[0] = 0x00;
+    report.arguments[1] = 0x0E;
 
+    memcpy(&report.arguments[2], rgb_data, 0x2D);
 
+    return report;
+}
 

@@ -52,9 +52,11 @@ MODULE_LICENSE(DRIVER_LICENSE);
 // F21 is used for touchpad disable, F22,F32 is touchpad enable
 #define RAZER_BRIGHTNESS_UP 194 // 194 = KEY_F24
 
-
 #define KEY_FLAG_BLOCK 0b00000001
 
+/**
+ * List of keys to swap
+ */
 static const struct razer_key_translation chroma_keys[] = {
     { KEY_F1,    KEY_MUTE },
     { KEY_F2,    KEY_VOLUMEDOWN },
@@ -76,6 +78,9 @@ static const struct razer_key_translation chroma_keys[] = {
     { }
 };
 
+/**
+ * Essentially search through the struct array above.
+ */ 
 static const struct razer_key_translation *find_translation(const struct razer_key_translation *key_table, u16 from) {
     const struct razer_key_translation *result;
     
@@ -88,27 +93,9 @@ static const struct razer_key_translation *find_translation(const struct razer_k
     return NULL;
 }
 
-
-/*
-
-    TODO:
-
-        restore store rgb profile (helpful for event-animations etc)
-        #coloritup update
-
-    future todos:
-
-        read keystroke stats etc.
-
-*/
-
 /**
  * Send report to the keyboard
  */
-int razer_set_report(struct usb_device *usb_dev,void const *data) {
-    return razer_send_control_msg(usb_dev, data, 0x02, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
-}
-
 int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
     return razer_get_usb_response(usb_dev, 0x02, request_report, 0x02, response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
 }
@@ -802,8 +789,6 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 			}
 			break;
 	}
-    
-    
 
     return count;
 }
@@ -1084,8 +1069,6 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 		
 		// *3 as its 3 bytes per col (RGB)
 		offset += row_length;
-		
-		return count;
 	}
 
 
