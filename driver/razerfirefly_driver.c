@@ -71,19 +71,19 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
 		   response_report.command_class != request_report->command_class ||
 		   response_report.command_id.id != request_report->command_id.id)
 		{
-			print_erroneous_report(&response_report, "razerkbd", "Response doesnt match request");
+			print_erroneous_report(&response_report, "razerfirefly", "Response doesnt match request");
 		} else if (response_report.status == RAZER_CMD_BUSY) {
-			print_erroneous_report(&response_report, "razerkbd", "Device is busy");
+			print_erroneous_report(&response_report, "razerfirefly", "Device is busy");
 		} else if (response_report.status == RAZER_CMD_FAILURE) {
-			print_erroneous_report(&response_report, "razerkbd", "Command failed");
+			print_erroneous_report(&response_report, "razerfirefly", "Command failed");
 		} else if (response_report.status == RAZER_CMD_NOT_SUPPORTED) {
-			print_erroneous_report(&response_report, "razerkbd", "Command not supported");
+			print_erroneous_report(&response_report, "razerfirefly", "Command not supported");
 		} else if (response_report.status == RAZER_CMD_TIMEOUT) {
-			print_erroneous_report(&response_report, "razerkbd", "Command timed out");
+			print_erroneous_report(&response_report, "razerfirefly", "Command timed out");
 		} 
     } else
     {
-      print_erroneous_report(&response_report, "razerkbd", "Invalid Report Length");
+      print_erroneous_report(&response_report, "razerfirefly", "Invalid Report Length");
     }
     
     return response_report;
@@ -292,7 +292,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report = razer_chroma_standard_matrix_effect_custom_frame();
+    struct razer_report report = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
     razer_send_payload(usb_dev, &report);
     return count;
 }
@@ -313,7 +313,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 		report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
 		razer_send_payload(usb_dev, &report);
 	} else {
-		printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)");
+		printk(KERN_WARNING "razerfirefly: Static mode only accepts RGB (3byte)");
 	}
 
     return count;
@@ -323,6 +323,9 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
  * Write device file "set_key_row"
  *
  * Writes the colour to the LEDs of the firefly
+ * 
+ * Start is 0x00
+ * Stop is 0x0E
  */
 static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
@@ -335,10 +338,10 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
     unsigned char stop_col;
     unsigned char row_length;
     
-    //printk(KERN_ALERT "razerkbd: Total count: %d\n", (unsigned char)count);
+    //printk(KERN_ALERT "razerfirefly: Total count: %d\n", (unsigned char)count);
         
     if(count < 4) {
-		printk(KERN_ALERT "razerkbd: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB...\n");
+		printk(KERN_ALERT "razerfirefly: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB...\n");
         return -EINVAL;
 	}
 
@@ -350,21 +353,27 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 		stop_col = buf[offset++];
 		row_length = ((stop_col+1) - start_col) * 3;
 		
-		// printk(KERN_ALERT "razerkbd: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
+		// printk(KERN_ALERT "razerfirefly: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
+		
+		if(row_id != 0)
+		{
+			printk(KERN_ALERT "razerfirefly: Row ID must be 0\n");
+			break;
+		}
 		
 		if(start_col > stop_col)
 		{
-			printk(KERN_ALERT "razerkbd: Start column is greater than end column\n");
+			printk(KERN_ALERT "razerfirefly: Start column is greater than end column\n");
 			break;
 		}
 		
 		if(offset + row_length > count)
 		{
-			printk(KERN_ALERT "razerkbd: Not enough RGB to fill row\n");
+			printk(KERN_ALERT "razerfirefly: Not enough RGB to fill row\n");
 			break;
 		}
 		
-		report = razer_chroma_misc_firefly_set_custom_frame((unsigned char*)&buf[offset]);
+		report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
 		razer_send_payload(usb_dev, &report);
 		
 		// *3 as its 3 bytes per col (RGB)

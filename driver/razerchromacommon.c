@@ -95,6 +95,37 @@ struct razer_report razer_chroma_standard_get_led_state(unsigned char variable_s
 	return report;
 }
 
+
+/**
+ * Set LED RGB parameters
+ */
+struct razer_report razer_chroma_standard_set_led_rgb(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1)
+{
+	struct razer_report report = get_razer_report(0x03, 0x01, 0x05);
+	report.arguments[0] = variable_storage;
+	report.arguments[1] = led_id;
+	report.arguments[2] = rgb1->r;
+	report.arguments[3] = rgb1->g;
+	report.arguments[4] = rgb1->b;
+	
+	return report;
+}
+
+/**
+ * Get LED RGB parameters
+ */
+struct razer_report razer_chroma_standard_get_led_rgb(unsigned char variable_storage, unsigned char led_id)
+{
+	struct razer_report report = get_razer_report(0x03, 0x81, 0x05);
+	report.arguments[0] = variable_storage;
+	report.arguments[1] = led_id;
+	return report;
+}
+
+
+
+
+
 /**
  * Set the effect of an LED on the device
  * 
@@ -167,6 +198,7 @@ struct razer_report razer_chroma_standard_get_led_brightness(unsigned char varia
  * Standard Matrix Effects Functions
  */
  
+// TODO remove varstore and led_id
 /**
  * Set the effect of the LED matrix to None
  * 
@@ -189,7 +221,7 @@ struct razer_report razer_chroma_standard_matrix_effect_none(unsigned char varia
  */
 struct razer_report razer_chroma_standard_matrix_effect_wave(unsigned char variable_storage, unsigned char led_id, unsigned char wave_direction)
 {
-	struct razer_report report = get_razer_report(0x03, 0x0A, 0x01);
+	struct razer_report report = get_razer_report(0x03, 0x0A, 0x02);
     report.arguments[0] = 0x01; // Effect ID
     report.arguments[0] = clamp_u8(wave_direction, 0x01, 0x02);
     
@@ -218,7 +250,7 @@ struct razer_report razer_chroma_standard_matrix_effect_spectrum(unsigned char v
  */
 struct razer_report razer_chroma_standard_matrix_effect_reactive(unsigned char variable_storage, unsigned char led_id, unsigned char speed, struct razer_rgb *rgb1)
 {
-	struct razer_report report = get_razer_report(0x03, 0x0A, 0x01);
+	struct razer_report report = get_razer_report(0x03, 0x0A, 0x05);
 	report.arguments[0] = 0x02; // Effect ID
 	report.arguments[1] = clamp_u8(speed, 0x01, 0x04); // Time
 	report.arguments[2] = rgb1->r; /*rgb color definition*/
@@ -236,7 +268,7 @@ struct razer_report razer_chroma_standard_matrix_effect_reactive(unsigned char v
  */
 struct razer_report razer_chroma_standard_matrix_effect_static(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1)
 {
-	struct razer_report report = get_razer_report(0x03, 0x0A, 0x01);
+	struct razer_report report = get_razer_report(0x03, 0x0A, 0x04);
     report.arguments[0] = 0x06; // Effect ID
     report.arguments[1] = rgb1->r; /*rgb color definition*/
     report.arguments[2] = rgb1->g;
@@ -323,11 +355,11 @@ struct razer_report razer_chroma_standard_matrix_effect_breathing_dual(unsigned 
  * 
  * Apparently Ultimate2016, Stealth and Stealth2016 need frame id to be 0x00, I dont think its needed (depending on set_custom_frame)
  */
-struct razer_report razer_chroma_standard_matrix_effect_custom_frame(void)
+struct razer_report razer_chroma_standard_matrix_effect_custom_frame(unsigned char variable_storage)
 {
 	struct razer_report report = get_razer_report(0x03, 0x0A, 0x02);
     report.arguments[0] = 0x05; // Effect ID
-    report.arguments[1] = 0x01; // Data frame ID
+    report.arguments[1] = variable_storage; // Data frame ID
     // report.arguments[1] = 0x01; // Data frame ID
 	
 	return report;
@@ -706,14 +738,188 @@ struct razer_report razer_chroma_misc_get_blade_brightness(void)
 /**
  * Sets custom frame for the firefly
  */
-struct razer_report razer_chroma_misc_firefly_set_custom_frame(unsigned char *rgb_data) // TODO recheck custom frame hex
+struct razer_report razer_chroma_misc_one_row_set_custom_frame(unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data) // TODO recheck custom frame hex
 {
     struct razer_report report = get_razer_report(0x03, 0x0C, 0x32);
-    report.arguments[0] = 0x00;
-    report.arguments[1] = 0x0E;
+    size_t row_length = (size_t) (((stop_col + 1) - start_col) * 3);
+    
+    report.arguments[0] = start_col;
+    report.arguments[1] = stop_col;
 
-    memcpy(&report.arguments[2], rgb_data, 0x2D);
+    memcpy(&report.arguments[2], rgb_data, row_length);
 
     return report;
 }
+
+/**
+ * Gets battery level
+ * 
+ * 0->255 is in arg[1]
+ */
+struct razer_report razer_chroma_misc_get_battery_level(void)
+{
+	return get_razer_report(0x07, 0x80, 0x02);
+}
+
+/**
+ * Gets charging status
+ * 
+ * 0->1 is in arg[1]
+ */
+struct razer_report razer_chroma_misc_get_charging_status(void)
+{
+	return get_razer_report(0x07, 0x84, 0x02);
+}
+
+/**
+ * Set the charging effect, think if I remember correctly, its either static colour, or "whatever the mouse was last on"
+ */ 
+struct razer_report razer_chroma_misc_set_dock_charge_type(unsigned char charge_type)
+{
+	struct razer_report report = get_razer_report(0x03, 0x10, 0x01);
+    report.arguments[0] = clamp_u8(charge_type, 0x00, 0x01);
+
+    return report;
+}
+
+/**
+ * Get the polling rate from the device
+ * 
+ * Identifier is in arg[0]
+ * 
+ * 0x01 = 1000Hz
+ * 0x02 =  500Hz
+ * 0x08 =  128Hz
+ */
+struct razer_report razer_chroma_misc_get_polling_rate(void)
+{
+	return get_razer_report(0x00, 0x85, 0x01);
+}
+
+/**
+ * Set the polling rate of the device
+ * 
+ * 0x01 = 1000Hz
+ * 0x02 =  500Hz
+ * 0x08 =  128Hz
+ */
+struct razer_report razer_chroma_misc_set_polling_rate(unsigned short polling_rate)
+{
+	struct razer_report report = get_razer_report(0x00, 0x05, 0x01);
+	
+	switch(polling_rate)
+	{
+		case 1000:
+			report.arguments[0] = 0x01;
+			break;
+		case  500:
+			report.arguments[0] = 0x02;
+			break;
+		case  128:
+			report.arguments[0] = 0x08;
+			break;
+		default: // 500Hz
+			report.arguments[0] = 0x02;
+			break;
+	}
+	
+	return report;
+}
+
+/**
+ * Get brightness of charging dock
+ */
+struct razer_report razer_chroma_misc_get_dock_brightness(void)
+{
+	return get_razer_report(0x07, 0x82, 0x01);
+	
+}
+
+/**
+ * Set brightness of charging dock
+ */
+struct razer_report razer_chroma_misc_set_dock_brightness(unsigned char brightness)
+{
+	struct razer_report report = get_razer_report(0x07, 0x02, 0x01);
+	report.arguments[0] = brightness;
+	
+	return report;
+}
+
+/**
+ * Set the DPI of the device
+ */
+struct razer_report razer_chroma_misc_set_dpi_xy(unsigned char variable_storage, unsigned short dpi_x,unsigned short dpi_y)
+{
+	struct razer_report report = get_razer_report(0x04, 0x05, 0x07);
+	
+	// Keep the DPI within bounds
+	dpi_x = clamp_u16(dpi_x, 128, 1600);
+	dpi_y = clamp_u16(dpi_y, 128, 1600);
+	
+	report.arguments[0] = VARSTORE;
+	
+	report.arguments[1] = (dpi_x >> 8) & 0x00FF;
+    report.arguments[2] = dpi_x & 0x00FF;
+    report.arguments[3] = (dpi_y >> 8) & 0x00FF;
+    report.arguments[4] = dpi_y & 0x00FF;
+    report.arguments[5] = 0x00;
+    report.arguments[6] = 0x00;
+    
+    return report;
+}
+
+/**
+ * Set device idle time
+ * 
+ * Device will go into powersave after this time.
+ * 
+ * Idle time is in seconds, must be between 60sec-900sec
+ */
+struct razer_report razer_chroma_misc_set_idle_time(unsigned short idle_time)
+{
+	struct razer_report report = get_razer_report(0x07, 0x03, 0x02);
+	
+	// Keep the idle time within bounds
+	idle_time = clamp_u16(idle_time, 60, 900);
+	
+	report.arguments[0] = (idle_time >> 8) & 0x00FF;
+	report.arguments[1] = idle_time & 0x00FF;
+    
+    return report;
+}
+
+/**
+ * Set low battery threshold
+ * 
+ * 0x3F = 25%
+ * 0x26 = 15%
+ * 0x0C =  5%
+ */
+struct razer_report razer_chroma_misc_set_low_battery_threshold(unsigned char battery_threshold)
+{
+	struct razer_report report = get_razer_report(0x07, 0x01, 0x01);
+	
+	// Keep the idle time within bounds
+	battery_threshold = clamp_u8(battery_threshold, 0x0C, 0x3F);
+	
+	report.arguments[0] = battery_threshold;
+    
+    return report;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -184,7 +184,7 @@ void print_erroneous_report(struct razer_report* report, char* driver_name, char
 /**
  * Clamp a value to a min,max
  */
-unsigned int clamp_u8(unsigned int value, unsigned int min, unsigned int max)
+unsigned char clamp_u8(unsigned char value, unsigned char min, unsigned char max)
 {
 	if(value > max)
 		return max;
@@ -192,7 +192,14 @@ unsigned int clamp_u8(unsigned int value, unsigned int min, unsigned int max)
 		return min;
 	return value;
 }
-
+unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned short max)
+{
+	if(value > max)
+		return max;
+	if(value < min)
+		return min;
+	return value;
+}
 
 
 

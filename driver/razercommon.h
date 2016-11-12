@@ -41,6 +41,7 @@ do { \
 
 // LED definitions
 #define SCROLL_WHEEL_LED  0x01
+#define BATTERY_LED       0x03
 #define LOGO_LED          0x04
 #define BACKLIGHT_LED     0x05
 #define MACRO_LED         0x07
@@ -116,5 +117,6 @@ struct razer_report get_empty_razer_report(void);
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message);
 
 // Convenience functions
-unsigned int clamp_u8(unsigned int value, unsigned int min, unsigned int max);
+unsigned char clamp_u8(unsigned char value, unsigned char min, unsigned char max);
+unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned short max);
 #endif /* DRIVER_RAZERCOMMON_H_ */
