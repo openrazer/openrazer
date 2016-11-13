@@ -203,7 +203,7 @@ class RazerDaemon(DBusService):
         self._screensaver_thread.start()
 
         self._razer_devices = DeviceCollection()
-        self._load_devices()
+        self._load_devices(first_run=True)
 
         # Add DBus methods
         self.logger.info("Adding razer.devices.getDevices method to DBus")
@@ -302,7 +302,7 @@ class RazerDaemon(DBusService):
         for device in self._razer_devices.devices:
             device.dbus.effect_sync = enabled
 
-    def _load_devices(self):
+    def _load_devices(self, first_run=False):
         """
         Go through supported devices and load them
 
@@ -322,13 +322,13 @@ class RazerDaemon(DBusService):
 
         classes = razer_daemon.hardware.get_device_classes()
 
-        # Just some pretty output
-        max_name_len = max([len(cls.__name__) for cls in classes]) + 2
-        for cls in classes:
-            format_str = 'Loaded device specification: {0:-<' + str(max_name_len) + '} ({1:04x}:{2:04X})'
+        if first_run:
+            # Just some pretty output
+            max_name_len = max([len(cls.__name__) for cls in classes]) + 2
+            for cls in classes:
+                format_str = 'Loaded device specification: {0:-<' + str(max_name_len) + '} ({1:04x}:{2:04X})'
 
-            self.logger.debug(format_str.format(cls.__name__ + ' ', cls.USB_VID, cls.USB_PID))
-
+                self.logger.debug(format_str.format(cls.__name__ + ' ', cls.USB_VID, cls.USB_PID))
 
         device_number = 0
         for device_id in devices:

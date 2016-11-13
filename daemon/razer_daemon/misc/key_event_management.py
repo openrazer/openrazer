@@ -37,12 +37,12 @@ SPIN_SLEEP = 0.01
 EVIOCGRAB = 0x40044590
 
 COLOUR_CHOICES = (
-    (255, 0, 0), # Red
-    (0, 255, 0), # Green
-    (0, 0, 255), # Blue
-    (255, 255, 0), # Yellow
-    (0, 255, 255), # Cyan
-    (255, 0, 255), # Magenta
+    (255, 0, 0),    # Red
+    (0, 255, 0),    # Green
+    (0, 0, 255),    # Blue
+    (255, 255, 0),  # Yellow
+    (0, 255, 255),  # Cyan
+    (255, 0, 255),  # Magenta
 )
 
 
@@ -145,7 +145,6 @@ class KeyWatcher(threading.Thread):
 
             time.sleep(SPIN_SLEEP)
 
-
         # Unbind files and close them
         for event_fd, event_file in event_file_map.items():
             poll_object.unregister(event_fd)
@@ -168,10 +167,7 @@ class KeyWatcher(threading.Thread):
                     continue
 
                 # Now if key is pressed then we record
-                if key_action == 'press':
-                    self._parent.key_action(date, key_code, True)
-                elif key_action == 'release':
-                    self._parent.key_action(date, key_code, False)
+                self._parent.key_action(date, key_code, key_action)
 
     def _poll_read(self):
         for event_file in self.open_event_files:
@@ -187,10 +183,7 @@ class KeyWatcher(threading.Thread):
                 continue
 
             # Now if key is pressed then we record
-            if key_action == 'press':
-                self._parent.key_action(date, key_code, True)
-            elif key_action == 'release':
-                self._parent.key_action(date, key_code, False)
+            self._parent.key_action(date, key_code, key_action)
 
     @property
     def shutdown(self):
@@ -323,7 +316,7 @@ class KeyboardKeyManager(object):
                 fcntl.ioctl(event_file.fileno(), EVIOCGRAB, int(grab))
         self._event_files_locked = grab
 
-    def key_action(self, event_time, key_id, key_press=True):
+    def key_action(self, event_time, key_id, key_press='press'):
         """
         Process a key press event
 
@@ -342,11 +335,19 @@ class KeyboardKeyManager(object):
         :param key_id: Key Event ID
         :type key_id: int
 
-        :param key_press: If true then its a press, else its a release
+        :param key_press: Can either be press, release, autorepeat
         :type key_press: bool
         """
         # Disable pylints complaining for this part, #PerformanceOverNeatness
         # pylint: disable=too-many-branches,too-many-statements
+
+        if key_press == 'autorepeat': # TODO not done right yet
+           # If its brightness then convert autorepeat to key presses
+           if key_id in (190, 194):
+               key_press = 'press'
+           else:
+               # Quit out early
+               return
 
         now = datetime.datetime.now()
 
@@ -370,7 +371,7 @@ class KeyboardKeyManager(object):
             #self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
 
             # Key release
-            if not key_press:
+            if key_press == 'release':
                 if self._recording_macro:
                     # Skip as dont care about releasing macro bind key
                     if key_name not in (self._current_macro_bind_key, 'MACROMODE'):
@@ -432,6 +433,35 @@ class KeyboardKeyManager(object):
 
                     game_mode = self._parent.getGameMode()
                     self._parent.setGameMode(not game_mode)
+
+                # Brightness logic
+                elif key_name == 'BRIGHTNESSDOWN':
+                    # Get brightness value
+                    current_brightness = self._parent.method_args.get('brightness', None)
+                    if current_brightness is None:
+                        current_brightness = self._parent.getBrightness()
+
+                    if current_brightness > 0:
+                        current_brightness -= 20
+                        if current_brightness < 0:
+                            current_brightness = 0
+
+                        self._parent.setBrightness(current_brightness)
+                        #self._parent.method_args['brightness'] = current_brightness
+                elif key_name == 'BRIGHTNESSUP':
+                    # Get brightness value
+                    current_brightness = self._parent.method_args.get('brightness', None)
+                    if current_brightness is None:
+                        current_brightness = self._parent.getBrightness()
+
+                    if current_brightness < 100:
+                        current_brightness += 20
+                        if current_brightness > 100:
+                            current_brightness = 100
+
+                        self._parent.setBrightness(current_brightness)
+                        #self._parent.method_args['brightness'] = current_brightness
+
                 elif self._recording_macro:
 
                     if self._current_macro_bind_key is None:

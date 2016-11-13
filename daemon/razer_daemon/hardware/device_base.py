@@ -77,6 +77,11 @@ class RazerDevice(DBusService):
         self.method_args = {}
         self.logger.debug("Adding razer.device.misc.suspendDevice method to DBus")
         self.add_dbus_method('razer.device.misc', 'suspendDevice', self.suspend_device)
+
+        self.logger.debug("Adding razer.device.misc.getDeviceMode method to DBus")
+        self.add_dbus_method('razer.device.misc', 'getDeviceMode', self.get_device_mode, out_signature='s')
+        self.logger.debug("Adding razer.device.misc.setDeviceMode method to DBus")
+        self.add_dbus_method('razer.device.misc', 'setDeviceMode', self.set_device_mode, in_signature='yy')
         self.logger.debug("Adding razer.device.misc.resumeDevice method to DBus")
         self.add_dbus_method('razer.device.misc', 'resumeDevice', self.resume_device)
         self.logger.debug("Adding razer.device.misc.getVidPid method to DBus")
@@ -172,7 +177,7 @@ class RazerDevice(DBusService):
         :return: String of the serial number
         :rtype: str
         """
-        serial_path = os.path.join(self._device_path, 'get_serial')
+        serial_path = os.path.join(self._device_path, 'device_serial')
         with open(serial_path, 'r') as serial_file:
             count = 0
             serial = serial_file.read().strip()
@@ -185,6 +190,48 @@ class RazerDevice(DBusService):
                 time.sleep(0.1)
 
             return serial
+
+    def get_device_mode(self):
+        """
+        Get device mode
+
+        :return: String of device mode and arg seperated by colon, e.g. 0:0 or 3:0
+        :rtype: str
+        """
+        device_mode_path = os.path.join(self._device_path, 'device_mode')
+        with open(device_mode_path, 'r') as mode_file:
+            count = 0
+            mode = mode_file.read().strip()
+            while len(mode) == 0:
+                if count >= 3:
+                    break
+                mode = mode_file.read().strip()
+
+                count += 1
+                time.sleep(0.1)
+
+            return mode
+
+    def set_device_mode(self, mode_id, param):
+        """
+        Set device mode
+
+        :param mode_id: Device mode ID
+        :type mode_id: int
+
+        :param param: Device mode parameter
+        :type param: int
+        """
+        device_mode_path = os.path.join(self._device_path, 'device_mode')
+        with open(device_mode_path, 'wb') as mode_file:
+
+            # Do some validation (even though its in the driver)
+            if mode_id not in (0, 3):
+                mode_id = 0
+            if param != 0:
+                param = 0
+
+            mode_file.write(bytes([mode_id, param]))
 
     def get_vid_pid(self):
         """
