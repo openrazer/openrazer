@@ -156,7 +156,7 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report = razer_chroma_standard_get_serial();
+    struct razer_report report = razer_chroma_standard_get_firmware_version();
     struct razer_report response_report = razer_send_payload(usb_dev, &report);
     
     return sprintf(buf, "v%d.%d", response_report.arguments[0], response_report.arguments[1]);
@@ -714,15 +714,15 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
     unsigned char row_length;
     
     //printk(KERN_ALERT "razermouse: Total count: %d\n", (unsigned char)count);
-        
-    if(count < 4) {
-		printk(KERN_ALERT "razermouse: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB...\n");
-        return -EINVAL;
-	}
-
-    
+  
     while(offset < count)
     {
+		if(offset + 3 > count)
+		{
+			printk(KERN_ALERT "razermouse: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
+			break;
+		}
+		
 		row_id = buf[offset++];
 		start_col = buf[offset++];
 		stop_col = buf[offset++];

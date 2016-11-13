@@ -122,6 +122,7 @@ struct razer_kbd_device {
     unsigned int fn_on;
     char name[128];
     char phys[64];
+    DECLARE_BITMAP(pressed_fn, KEY_CNT);
 };
 
 struct razer_key_translation {

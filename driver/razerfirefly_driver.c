@@ -134,7 +134,7 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report = razer_chroma_standard_get_serial();
+    struct razer_report report = razer_chroma_standard_get_firmware_version();
     struct razer_report response_report = razer_send_payload(usb_dev, &report);
     
     return sprintf(buf, "v%d.%d", response_report.arguments[0], response_report.arguments[1]);
@@ -339,15 +339,15 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
     unsigned char row_length;
     
     //printk(KERN_ALERT "razerfirefly: Total count: %d\n", (unsigned char)count);
-        
-    if(count < 4) {
-		printk(KERN_ALERT "razerfirefly: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB...\n");
-        return -EINVAL;
-	}
-
-    
+   
     while(offset < count)
     {
+		if(offset + 3 > count)
+		{
+			printk(KERN_ALERT "razerfirefly: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
+			break;
+		}
+		
 		row_id = buf[offset++];
 		start_col = buf[offset++];
 		stop_col = buf[offset++];
@@ -384,6 +384,41 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
     return count;   
 }
 
+/**
+ * Write device file "device_mode"
+ */
+static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report;
+    
+    if(count == 2)
+    {
+		report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
+		razer_send_payload(usb_dev, &report);
+	} else {
+		printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.");
+	}
+
+    return count;
+}
+
+/**
+ * Read device file "device_mode"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = razer_chroma_standard_get_device_mode();
+    struct razer_report response = razer_send_payload(usb_dev, &report);
+    
+    return sprintf(buf, "%d:%d\n", response.arguments[0], response.arguments[1]);
+}
+
 
 
 
@@ -394,20 +429,20 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
  * Write only is 0220
  * Read and write is 0664
  */
-static DEVICE_ATTR(matrix_brightness,       0664, razer_attr_read_set_brightness,       razer_attr_write_set_brightness);
 static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_get_firmware_version, NULL);
 static DEVICE_ATTR(device_type,             0440, razer_attr_read_device_type,          NULL);
 static DEVICE_ATTR(device_serial,           0440, razer_attr_read_get_serial,           NULL);
+static DEVICE_ATTR(device_mode,             0660, razer_attr_read_device_mode,          razer_attr_write_device_mode);
 static DEVICE_ATTR(version,                 0440, razer_attr_read_version,              NULL);
-
-static DEVICE_ATTR(matrix_effect_none,      0220, NULL, razer_attr_write_mode_none);
-static DEVICE_ATTR(matrix_effect_wave,      0220, NULL, razer_attr_write_mode_wave);
-static DEVICE_ATTR(matrix_effect_spectrum,  0220, NULL, razer_attr_write_mode_spectrum);
-static DEVICE_ATTR(matrix_effect_reactive,  0220, NULL, razer_attr_write_mode_reactive);
-static DEVICE_ATTR(matrix_effect_breath,    0220, NULL, razer_attr_write_mode_breath);
-static DEVICE_ATTR(matrix_effect_custom,    0220, NULL, razer_attr_write_mode_custom);
-static DEVICE_ATTR(matrix_effect_static,    0220, NULL, razer_attr_write_mode_static);
-static DEVICE_ATTR(matrix_custom_frame,     0220, NULL, razer_attr_write_set_key_row);
+static DEVICE_ATTR(matrix_brightness,       0664, razer_attr_read_set_brightness,       razer_attr_write_set_brightness);
+static DEVICE_ATTR(matrix_effect_none,      0220, NULL,                                 razer_attr_write_mode_none);
+static DEVICE_ATTR(matrix_effect_wave,      0220, NULL,                                 razer_attr_write_mode_wave);
+static DEVICE_ATTR(matrix_effect_spectrum,  0220, NULL,                                 razer_attr_write_mode_spectrum);
+static DEVICE_ATTR(matrix_effect_reactive,  0220, NULL,                                 razer_attr_write_mode_reactive);
+static DEVICE_ATTR(matrix_effect_breath,    0220, NULL,                                 razer_attr_write_mode_breath);
+static DEVICE_ATTR(matrix_effect_custom,    0220, NULL,                                 razer_attr_write_mode_custom);
+static DEVICE_ATTR(matrix_effect_static,    0220, NULL,                                 razer_attr_write_mode_static);
+static DEVICE_ATTR(matrix_custom_frame,     0220, NULL,                                 razer_attr_write_set_key_row);
 
 
 
@@ -444,6 +479,7 @@ static int razer_firefly_probe(struct hid_device *hdev, const struct hid_device_
     CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);
     CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
     CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);
     
     if (retval)
         goto exit_free;
@@ -496,6 +532,7 @@ static void razer_firefly_disconnect(struct hid_device *hdev)
     device_remove_file(&hdev->dev, &dev_attr_device_type);
     device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
     device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+    device_remove_file(&hdev->dev, &dev_attr_device_mode);
 
     hid_hw_stop(hdev);
     kfree(dev);

@@ -49,8 +49,9 @@ MODULE_LICENSE(DRIVER_LICENSE);
 #define RAZER_MACRO_KEY 188 // 188 = KEY_F18
 #define RAZER_GAME_KEY 189 // 189 = KEY_F19
 #define RAZER_BRIGHTNESS_DOWN 190 // 190 = KEY_F20
-// F21 is used for touchpad disable, F22,F32 is touchpad enable
+// F21 is used for touchpad disable, F22,F23 is touchpad enable
 #define RAZER_BRIGHTNESS_UP 194 // 194 = KEY_F24
+#define RAZER_FN 195
 
 #define KEY_FLAG_BLOCK 0b00000001
 
@@ -508,7 +509,7 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report = razer_chroma_standard_get_serial();
+    struct razer_report report = razer_chroma_standard_get_firmware_version();
     struct razer_report response_report = razer_send_payload(usb_dev, &report);
     
     return sprintf(buf, "v%d.%d", response_report.arguments[0], response_report.arguments[1]);
@@ -647,7 +648,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013: // Doesn't need any parameters as can only do one type of static
 			report = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, 0x00);
             razer_send_payload(usb_dev, &report);
             break;
@@ -725,7 +726,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
 			break;
 
 
-		default:
+		default: // BW2016 can do normal starlight
 			report = razer_chroma_standard_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, 0x01, &rgb1);
 			razer_send_payload(usb_dev, &report);
 			break;
@@ -1023,14 +1024,14 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
     
     //printk(KERN_ALERT "razerkbd: Total count: %d\n", (unsigned char)count);
         
-    if(count < 4) {
-		printk(KERN_ALERT "razerkbd: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB...\n");
-        return -EINVAL;
-	}
-
-    
     while(offset < count)
     {
+		if(offset + 3 > count)
+		{
+			printk(KERN_ALERT "razerkbd: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
+			break;
+		}
+		
 		row_id = buf[offset++];
 		start_col = buf[offset++];
 		stop_col = buf[offset++];
@@ -1126,6 +1127,7 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct razer_kbd_device *asc = hid_get_drvdata(hdev);
     const struct razer_key_translation *translation;
+    int do_translate = 0;
 
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE)
     {
@@ -1133,22 +1135,31 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
         return 0;
     }
     
-    // Do translation, currently translation is only when FN is pressed
-    if (asc->fn_on) {
-        // Look at https://github.com/torvalds/linux/blob/master/drivers/hid/hid-apple.c#L206 for reversing the FN keys, though blade does that in h/w
-        
-        translation = find_translation(chroma_keys, usage->code);
-        
-        if (translation) {
-            // translate != NULL, aka a translation is found
-            
-            if (!(translation->flags & KEY_FLAG_BLOCK)) {
-                input_event(field->hidinput->input, usage->type, translation->to, value);
-            }
-            
-            return 1;
-        }
-    }
+    translation = find_translation(chroma_keys, usage->code);
+    
+    if(translation)
+    {
+		if(test_bit(usage->code, asc->pressed_fn))
+		{
+			do_translate = 1;
+		} else {
+			do_translate = asc->fn_on;
+		}
+		
+		if(do_translate)
+		{
+			if(value)
+			{
+				set_bit(usage->code, asc->pressed_fn);
+			} else {
+				clear_bit(usage->code, asc->pressed_fn);
+			}
+			
+			input_event(field->hidinput->input, usage->type, translation->to, value);
+			return 1;
+		}
+	}
+    
 
     return 0;
 }
