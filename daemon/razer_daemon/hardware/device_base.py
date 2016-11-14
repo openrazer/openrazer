@@ -30,6 +30,8 @@ class RazerDevice(DBusService):
     DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [-1, -1]
 
+    WAVE_DIRS = (1, 2)
+
     def __init__(self, device_path, device_number, config, testing=False):
 
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))

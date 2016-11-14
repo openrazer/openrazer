@@ -168,8 +168,8 @@ def set_wave_effect(self, direction):
 
     driver_path = self.get_driver_path('matrix_effect_wave')
 
-    if direction not in (1, 2):
-        direction = 1
+    if direction not in self.WAVE_DIRS:
+        direction = self.WAVE_DIRS[0]
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(direction))
@@ -425,7 +425,7 @@ def set_ripple_effect_random_colour(self, refresh_rate):
     self.send_effect_event('setRipple', None, None, None, refresh_rate)
 
 
-@endpoint('razer.device.lighting.chroma', 'setStarlightRandom')
+@endpoint('razer.device.lighting.chroma', 'setStarlightRandom', in_sig='y')
 def set_starlight_random_effect(self, speed):
     """
     Set startlight random mode
@@ -441,7 +441,7 @@ def set_starlight_random_effect(self, speed):
     self.send_effect_event('setStarlightRandom')
 
 
-@endpoint('razer.device.lighting.chroma', 'setStarlightSingle')
+@endpoint('razer.device.lighting.chroma', 'setStarlightSingle', in_sig='yyyy')
 def set_starlight_single_effect(self, speed, red, green, blue):
     """
     Set starlight mode
@@ -457,7 +457,7 @@ def set_starlight_single_effect(self, speed, red, green, blue):
     self.send_effect_event('setStarlightSingle', speed, red, green, blue)
 
 
-@endpoint('razer.device.lighting.chroma', 'setStarlightDual')
+@endpoint('razer.device.lighting.chroma', 'setStarlightDual', in_sig='yyyyyyy')
 def set_starlight_dual_effect(self, speed, red1, green1, blue1, red2, green2, blue2):
     """
     Set starlight dual mode
