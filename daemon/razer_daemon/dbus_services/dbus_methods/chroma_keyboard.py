@@ -424,3 +424,50 @@ def set_ripple_effect_random_colour(self, refresh_rate):
     # Notify others
     self.send_effect_event('setRipple', None, None, None, refresh_rate)
 
+
+@endpoint('razer.device.lighting.chroma', 'setStarlightRandom')
+def set_starlight_random_effect(self, speed):
+    """
+    Set startlight random mode
+    """
+    self.logger.debug("DBus call set_starlight_random")
+
+    driver_path = self.get_driver_path('matrix_effect_starlight')
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(bytes([speed]))
+
+    # Notify others
+    self.send_effect_event('setStarlightRandom')
+
+
+@endpoint('razer.device.lighting.chroma', 'setStarlightSingle')
+def set_starlight_single_effect(self, speed, red, green, blue):
+    """
+    Set starlight mode
+    """
+    self.logger.debug("DBus call set_starlight_single")
+
+    driver_path = self.get_driver_path('matrix_effect_starlight')
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(bytes([speed, red, green, blue]))
+
+    # Notify others
+    self.send_effect_event('setStarlightSingle', speed, red, green, blue)
+
+
+@endpoint('razer.device.lighting.chroma', 'setStarlightDual')
+def set_starlight_dual_effect(self, speed, red1, green1, blue1, red2, green2, blue2):
+    """
+    Set starlight dual mode
+    """
+    self.logger.debug("DBus call set_starlight_dual")
+
+    driver_path = self.get_driver_path('matrix_effect_starlight')
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(bytes([speed, red1, green1, blue1, red2, green2, blue2]))
+
+    # Notify others
+    self.send_effect_event('setStarlightDual', speed, red1, green1, blue1)

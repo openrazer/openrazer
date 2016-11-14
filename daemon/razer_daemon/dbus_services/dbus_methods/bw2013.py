@@ -52,17 +52,4 @@ def bw_set_static(self):
     self.send_effect_event('setStatic')
 
 
-@endpoint('razer.device.lighting.bw2016', 'setStarlight')
-def bw2016_set_starlight_effect(self):
-    """
-    Set pulsate mode
-    """
-    self.logger.debug("DBus call bw2016_set_starlight")
 
-    driver_path = self.get_driver_path('matrix_effect_starlight')
-
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write('1')
-
-    # Notify others
-    self.send_effect_event('setStarlight')
