@@ -11,8 +11,8 @@
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/init.h>
-#include <linux/usb/input.h>
 #include <linux/hid.h>
+
 
 #include "razercommon.h"
 
@@ -168,7 +168,7 @@ struct razer_report get_empty_razer_report(void)
  */
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message)
 {
-    printk(KERN_WARNING "%s: %s. Start Marker: %02x id: %02x Num Params: %02x Reserved: %02x Command: %02x Params: %02x%02x%02x%02x%02x%02x .\n",
+    printk(KERN_WARNING "%s: %s. Start Marker: %02x id: %02x Num Params: %02x Reserved: %02x Command: %02x Params: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x .\n",
         driver_name,
         message,
         report->status,
@@ -176,120 +176,32 @@ void print_erroneous_report(struct razer_report* report, char* driver_name, char
         report->data_size,
         report->command_class,
         report->command_id.id,
-        report->arguments[0], report->arguments[1], report->arguments[2], report->arguments[3], report->arguments[4], report->arguments[5]);
-}
-
-
-// THESE FUNCTIONS ARE NOT FOR MATRIX EFFECTS
-/**
- * Get the state of an LED
- */
-struct razer_report razer_get_led_state(unsigned char store, unsigned char led_id)
-{
-	struct razer_report report = get_razer_report(0x03, 0x80, 0x03);
-	report.arguments[0] = store;
-	report.arguments[1] = led_id;
-	report.crc = razer_calculate_crc(&report);
-	
-	return report;
+        report->arguments[0], report->arguments[1], report->arguments[2], report->arguments[3], report->arguments[4], report->arguments[5],
+        report->arguments[6], report->arguments[7], report->arguments[8], report->arguments[9], report->arguments[10], report->arguments[11], 
+        report->arguments[12], report->arguments[13], report->arguments[14], report->arguments[15]);
 }
 
 /**
- * Set the state of an LED
+ * Clamp a value to a min,max
  */
-struct razer_report razer_set_led_state(unsigned char store, unsigned char led_id, unsigned char led_state)
+unsigned char clamp_u8(unsigned char value, unsigned char min, unsigned char max)
 {
-	struct razer_report report = get_razer_report(0x03, 0x00, 0x03);
-	report.arguments[0] = store;
-	report.arguments[1] = led_id;
-	report.arguments[2] = led_state;
-	report.crc = razer_calculate_crc(&report);
-	
-	return report;
+	if(value > max)
+		return max;
+	if(value < min)
+		return min;
+	return value;
+}
+unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned short max)
+{
+	if(value > max)
+		return max;
+	if(value < min)
+		return min;
+	return value;
 }
 
-/**
- * Get the colour of an LED
- */
-struct razer_report razer_get_led_rgb(unsigned char store, unsigned char led_id)
-{
-	struct razer_report report = get_razer_report(0x03, 0x81, 0x05);
-	report.arguments[0] = store;
-	report.arguments[1] = led_id;
-	report.crc = razer_calculate_crc(&report);
-	
-	return report;
-}
 
-/**
- * Set the colour of an LED
- */
-struct razer_report razer_set_led_rgb(unsigned char store, unsigned char led_id, struct razer_rgb* rgb)
-{
-	struct razer_report report = get_razer_report(0x03, 0x01, 0x05);
-	report.arguments[0] = store;
-	report.arguments[1] = led_id;
-	report.arguments[2] = rgb->r; /*rgb color definition*/
-    report.arguments[3] = rgb->g;
-    report.arguments[4] = rgb->b;
-	report.crc = razer_calculate_crc(&report);
-	
-	return report;
-}
-
-/**
- * Get the effect if an LED
- */
-struct razer_report razer_get_led_effect(unsigned char store, unsigned char led_id)
-{
-	struct razer_report report = get_razer_report(0x03, 0x82, 0x03);
-	report.arguments[0] = store;
-	report.arguments[1] = led_id;
-	report.crc = razer_calculate_crc(&report);
-	
-	return report;
-}
-
-/**
- * Set the effect of an LED
- */
-struct razer_report razer_set_led_effect(unsigned char store, unsigned char led_id, unsigned char led_effect)
-{
-	struct razer_report report = get_razer_report(0x03, 0x02, 0x03);
-	report.arguments[0] = store;
-	report.arguments[1] = led_id;
-	report.arguments[2] = led_effect;
-	report.crc = razer_calculate_crc(&report);
-	
-	return report;
-}
-
-/**
- * Get the brightness of an LED
- */
-struct razer_report razer_get_led_brightness(unsigned char store, unsigned char led_id)
-{
-	struct razer_report report = get_razer_report(0x03, 0x83, 0x03);
-	report.arguments[0] = store;
-	report.arguments[1] = led_id;
-	report.crc = razer_calculate_crc(&report);
-	
-	return report;
-}
-
-/**
- * Set the brightness of an LED
- */
-struct razer_report razer_set_led_brightness(unsigned char store, unsigned char led_id, unsigned char led_brightness)
-{
-	struct razer_report report = get_razer_report(0x03, 0x03, 0x03);
-	report.arguments[0] = store;
-	report.arguments[1] = led_id;
-	report.arguments[2] = led_brightness;
-	report.crc = razer_calculate_crc(&report);
-	
-	return report;
-}
 
 
 

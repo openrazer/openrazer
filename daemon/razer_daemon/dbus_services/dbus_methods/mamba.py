@@ -5,6 +5,7 @@ import math
 import struct
 from razer_daemon.dbus_services import endpoint
 
+
 @endpoint('razer.device.power', 'getBattery', out_sig='d')
 def get_battery(self):
     """
@@ -12,7 +13,7 @@ def get_battery(self):
     """
     self.logger.debug("DBus call get_battery")
 
-    driver_path = self.get_driver_path('get_battery')
+    driver_path = self.get_driver_path('charge_level')
 
     with open(driver_path, 'r') as driver_file:
         battery_255 = float(driver_file.read().strip())
@@ -22,6 +23,7 @@ def get_battery(self):
         battery_100 = (battery_255 / 255) * 100
         return battery_100
 
+
 @endpoint('razer.device.power', 'isCharging', out_sig='b')
 def is_charging(self):
     """
@@ -29,10 +31,11 @@ def is_charging(self):
     """
     self.logger.debug("DBus call is_charging")
 
-    driver_path = self.get_driver_path('is_charging')
+    driver_path = self.get_driver_path('charge_status')
 
     with open(driver_path, 'r') as driver_file:
         return bool(int(driver_file.read().strip()))
+
 
 @endpoint('razer.device.power', 'setIdleTime', in_sig='q')
 def set_idle_time(self, idle_time):
@@ -44,10 +47,11 @@ def set_idle_time(self, idle_time):
     """
     self.logger.debug("DBus call set_idle_time")
 
-    driver_path = self.get_driver_path('set_idle_time')
+    driver_path = self.get_driver_path('device_idle_time')
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(idle_time))
+
 
 @endpoint('razer.device.power', 'setLowBatteryThreshold', in_sig='y')
 def set_low_battery_threshold(self, threshold):
@@ -59,12 +63,13 @@ def set_low_battery_threshold(self, threshold):
     """
     self.logger.debug("DBus call set_low_battery_threshold")
 
-    driver_path = self.get_driver_path('set_idle_time')
+    driver_path = self.get_driver_path('charge_low_threshold')
 
     threshold = math.floor((threshold/100) * 255)
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(threshold))
+
 
 @endpoint('razer.device.lighting.power', 'setChargeEffect', in_sig='y')
 def set_charge_effect(self, charge_effect):
@@ -80,10 +85,11 @@ def set_charge_effect(self, charge_effect):
     """
     self.logger.debug("DBus call set_charge_effect")
 
-    driver_path = self.get_driver_path('set_charging_effect')
+    driver_path = self.get_driver_path('charge_effect')
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(bytes([charge_effect]))
+
 
 @endpoint('razer.device.lighting.power', 'setChargeColour', in_sig='yyy')
 def set_charge_colour(self, red, green, blue):
@@ -101,12 +107,13 @@ def set_charge_colour(self, red, green, blue):
     """
     self.logger.debug("DBus call set_charge_colour")
 
-    driver_path = self.get_driver_path('set_charging_colour')
+    driver_path = self.get_driver_path('charge_colour')
 
     payload = bytes([red, green, blue])
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
 
 @endpoint('razer.device.dpi', 'setDPI', in_sig='qq')
 def set_dpi_xy(self, dpi_x, dpi_y):
@@ -120,12 +127,13 @@ def set_dpi_xy(self, dpi_x, dpi_y):
     """
     self.logger.debug("DBus call set_dpi_both")
 
-    driver_path = self.get_driver_path('set_mouse_dpi')
+    driver_path = self.get_driver_path('dpi')
 
     dpi_bytes = struct.pack('>HH', dpi_x, dpi_y)
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(dpi_bytes)
+
 
 @endpoint('razer.device.misc', 'setPollRate', in_sig='q')
 def set_poll_rate(self, rate):
@@ -145,6 +153,7 @@ def set_poll_rate(self, rate):
     else:
         self.logger.error("Poll rate %d is invalid", rate)
 
+
 @endpoint('razer.device.lighting.logo', 'getLogoActive', out_sig='b')
 def get_logo_active(self):
     """
@@ -155,11 +164,12 @@ def get_logo_active(self):
     """
     self.logger.debug("DBus call get_logo_active")
 
-    driver_path = self.get_driver_path('mode_logo')
+    driver_path = self.get_driver_path('logo_led_state')
 
     with open(driver_path, 'r') as driver_file:
         active = int(driver_file.read().strip())
         return active == 1
+
 
 @endpoint('razer.device.lighting.logo', 'setLogoActive', in_sig='b')
 def set_logo_active(self, active):
@@ -171,30 +181,13 @@ def set_logo_active(self, active):
     """
     self.logger.debug("DBus call set_logo_active")
 
-    driver_path = self.get_driver_path('mode_logo')
+    driver_path = self.get_driver_path('logo_led_state')
 
     with open(driver_path, 'w') as driver_file:
         if active:
             driver_file.write('1')
         else:
             driver_file.write('0')
-
-@endpoint('razer.device.lighting.logo', 'setLogo', in_sig='yyy')
-def set_te_logo(self, red, green, blue):
-    """
-    Set the red green blue of logo
-
-    :param red: Red component
-    :type red: int
-    """
-    self.logger.debug("DBus call set_logo_active")
-
-    driver_path = self.get_driver_path('mode_logo')
-
-    payload = bytes([red, green, blue])
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
 
 
 @endpoint('razer.device.lighting.scroll', 'getScrollActive', out_sig='b')
@@ -207,11 +200,12 @@ def get_scroll_active(self):
     """
     self.logger.debug("DBus call get_scroll_active")
 
-    driver_path = self.get_driver_path('mode_scroll')
+    driver_path = self.get_driver_path('scroll_led_state')
 
     with open(driver_path, 'r') as driver_file:
         active = int(driver_file.read().strip())
         return active == 1
+
 
 @endpoint('razer.device.lighting.scroll', 'setScrollActive', in_sig='b')
 def set_scroll_active(self, active):
@@ -223,7 +217,7 @@ def set_scroll_active(self, active):
     """
     self.logger.debug("DBus call set_scroll_active")
 
-    driver_path = self.get_driver_path('mode_scroll')
+    driver_path = self.get_driver_path('scroll_led_state')
 
     with open(driver_path, 'w') as driver_file:
         if active:
@@ -231,34 +225,3 @@ def set_scroll_active(self, active):
         else:
             driver_file.write('0')
 
-
-@endpoint('razer.device.lighting.chroma', 'setKey', in_sig='yyyyy')
-def set_key_mice(self, row_id, col_id, red, green, blue):
-    """
-    Set the RGB of a single LED in the matrix
-
-    First byte is row, then column, then its 3byte of RGB
-    :param row_id: LED Row
-    :type row_id: int
-
-    :param col_id: LED Column
-    :type col_id: int
-
-    :param red: Red component
-    :type red: int
-
-    :param blue: Blue component
-    :type blue: int
-
-    :param green: Green component
-    :type green: int
-    """
-
-    # TODO uncomment
-    # self.logger.debug("DBus call set_key_row")
-
-    driver_path = self.get_driver_path('set_key')
-    payload = bytes((col_id, red, green, blue))
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)

@@ -21,13 +21,6 @@ class RazerMacro(object):
 
         self._macro_enabled = False
 
-    def enable_macros(self):
-        """
-        Enable macro keys in the driver
-        """
-        if not self._macro_enabled:
-            self._macro_dbus.enableMacroKeys()
-
     def get_macros(self) -> dict:
         json_payload = self._macro_dbus.getMacros()
         macro_structure = _json.loads(json_payload)

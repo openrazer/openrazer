@@ -30,6 +30,7 @@ def version(self):
     self.method_args['driver_version'] = driver_version
     return driver_version
 
+
 @endpoint('razer.device.misc', 'getFirmware', out_sig='s')
 def get_firmware(self):
     """
@@ -40,10 +41,11 @@ def get_firmware(self):
     """
     self.logger.debug("DBus call get_firmware")
 
-    driver_path = self.get_driver_path('get_firmware_version')
+    driver_path = self.get_driver_path('firmware_version')
 
     with open(driver_path, 'r') as driver_file:
         return driver_file.read().strip()
+
 
 @endpoint('razer.device.misc', 'getDeviceName', out_sig='s')
 def get_device_name(self):
@@ -60,6 +62,7 @@ def get_device_name(self):
     with open(driver_path, 'r') as driver_file:
         return driver_file.read().strip()
 
+
 # Functions to define a hardware class
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
 def get_device_type_keyboard(self):
@@ -72,6 +75,7 @@ def get_device_type_keyboard(self):
     self.logger.debug("DBus call get_device_type")
     return 'keyboard'
 
+
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
 def get_device_type_mouse(self):
     """
@@ -83,6 +87,7 @@ def get_device_type_mouse(self):
     self.logger.debug("DBus call get_device_type")
     return 'mouse'
 
+
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
 def get_device_type_firefly(self):
     """
@@ -93,6 +98,7 @@ def get_device_type_firefly(self):
     """
     self.logger.debug("DBus call get_device_type")
     return 'firefly'
+
 
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
 def get_device_type_tartarus(self):
@@ -114,6 +120,7 @@ def has_matrix(self):
     self.logger.debug("DBus call has_matrix")
 
     return self.HAS_MATRIX
+
 
 @endpoint('razer.device.misc', 'getMatrixDimensions', out_sig='ai')
 def get_matrix_dims(self):
