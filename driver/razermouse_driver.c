@@ -461,84 +461,6 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     return count;
 }
 
-/**
- * Read device file "mode_logo"
- *
- * Returns a string
- * 
- * Support:
- *   Razer Abyssus
- *   Razer Imperator
- */
-static ssize_t razer_attr_read_mode_logo(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-	struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, LOGO_LED);
-    struct razer_report response = razer_send_payload(usb_dev, &report);
-
-    return sprintf(buf, "%d\n", response.arguments[2]);
-}
-
-/**
- * Write device file "mode_logo"
- *
- * When 1 is written the logo lights up, 0 and its turns off
- * 
- * Support:
- *   Razer Abyssus
- *   Razer Imperator
- */
-static ssize_t razer_attr_write_mode_logo(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf); 
-    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report report = razer_chroma_standard_set_led_state(VARSTORE, LOGO_LED, enabled);
-    
-    razer_send_payload(usb_dev, &report);
-
-    return count;
-}
-
-/**
- * Write device file "mode_scroll"
- *
- * When 1 is written the scroll lights up, 0 and its turns off
- * 
- * Support:
- *   Razer Imperator
- */
-static ssize_t razer_attr_write_mode_scroll(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report report = razer_chroma_standard_set_led_state(VARSTORE, SCROLL_WHEEL_LED, enabled);
-    
-    razer_send_payload(usb_dev, &report);
-
-    return count;
-}
-
-/**
- * Read device file "mode_scroll"
- *
- * Returns a string
- * 
- * Support:
- *   Razer Imperator
- */
-static ssize_t razer_attr_read_mode_scroll(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-	struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, SCROLL_WHEEL_LED);
-    struct razer_report response = razer_send_payload(usb_dev, &report);
-
-    return sprintf(buf, "%d\n", response.arguments[2]);
-}
-
 // TODO will probs need to split this off to be matrix_brightess and scroll_led_brightness when DA Chroma comes
 /**
  * Write device file "set_wireless_brightness"
@@ -796,17 +718,6 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     return sprintf(buf, "%d:%d\n", response.arguments[0], response.arguments[1]);
 }
 
-
-
-
-
-
-
-
-/**
- * New functions
- */
-
 /**
  * Read device file "scroll_led_brightness"
  */
@@ -862,7 +773,6 @@ static ssize_t razer_attr_write_logo_led_brightness(struct device *dev, struct d
     
     return count;
 }
-
 
 /**
  * Write device file "scroll_led_state"
@@ -922,22 +832,6 @@ static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_
     return sprintf(buf, "%d\n", response.arguments[2]);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * Write device file "scroll_led_rgb"
  */
@@ -957,6 +851,7 @@ static ssize_t razer_attr_write_scroll_led_rgb(struct device *dev, struct device
 
     return count;
 }
+
 /**
  * Read device file "scroll_led_rgb"
  */
@@ -970,6 +865,7 @@ static ssize_t razer_attr_read_scroll_led_rgb(struct device *dev, struct device_
 
     return sprintf(buf, "%u%u%u\n", response.arguments[2], response.arguments[3], response.arguments[4]);
 }
+
 /**
  * Write device file "logo_led_rgb"
  */
@@ -989,6 +885,7 @@ static ssize_t razer_attr_write_logo_led_rgb(struct device *dev, struct device_a
 
     return count;
 }
+
 /**
  * Read device file "logo_led_rgb"
  */
@@ -1002,22 +899,6 @@ static ssize_t razer_attr_read_logo_led_rgb(struct device *dev, struct device_at
 
     return sprintf(buf, "%u%u%u\n", response.arguments[2], response.arguments[3], response.arguments[4]);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * Write device file "scroll_led_effect"
@@ -1033,6 +914,7 @@ static ssize_t razer_attr_write_scroll_led_effect(struct device *dev, struct dev
 
     return count;
 }
+
 /**
  * Read device file "scroll_led_effect"
  */
@@ -1045,6 +927,7 @@ static ssize_t razer_attr_read_scroll_led_effect(struct device *dev, struct devi
 
     return sprintf(buf, "%d\n", response.arguments[2]);
 }
+
 /**
  * Write device file "logo_led_effect"
  */
@@ -1059,6 +942,7 @@ static ssize_t razer_attr_write_logo_led_effect(struct device *dev, struct devic
 
     return count;
 }
+
 /**
  * Read device file "logo_led_effect"
  */
@@ -1071,26 +955,6 @@ static ssize_t razer_attr_read_logo_led_effect(struct device *dev, struct device
 
     return sprintf(buf, "%d\n", response.arguments[2]);
 }
-
-
-/**
- * New functions end
- */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * Set up the device driver files
@@ -1129,11 +993,6 @@ static DEVICE_ATTR(matrix_effect_wave,        0220, NULL,                       
 static DEVICE_ATTR(matrix_effect_spectrum,    0220, NULL,                                 razer_attr_write_mode_spectrum);   // Matrix
 static DEVICE_ATTR(matrix_effect_reactive,    0220, NULL,                                 razer_attr_write_mode_reactive);   // Matrix
 static DEVICE_ATTR(matrix_effect_breath,      0220, NULL,                                 razer_attr_write_mode_breath);   // Matrix
-
-static DEVICE_ATTR(logo_led_state,            0660, razer_attr_read_mode_logo,            razer_attr_write_mode_logo);
-static DEVICE_ATTR(scroll_led_state,          0660, razer_attr_read_mode_scroll,          razer_attr_write_mode_scroll);
-
-
 
 /**
  * New functions
@@ -1256,6 +1115,20 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
 			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
 			break;
+		
+		case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);
+			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);			
+			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
+			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_rgb);
+			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_effect);
+			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
+			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
+			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_rgb);
+			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_effect);
+			break;
     }
 
     hid_set_drvdata(hdev, dev);
@@ -1372,6 +1245,20 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 			device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);
 			device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
 			device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
+			break;
+		
+		case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+			device_remove_file(&hdev->dev, &dev_attr_device_serial);
+			device_remove_file(&hdev->dev, &dev_attr_dpi);			
+			device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+			device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
+			device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
+			device_remove_file(&hdev->dev, &dev_attr_scroll_led_rgb);
+			device_remove_file(&hdev->dev, &dev_attr_scroll_led_effect);
+			device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
+			device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
+			device_remove_file(&hdev->dev, &dev_attr_logo_led_rgb);
+			device_remove_file(&hdev->dev, &dev_attr_logo_led_effect);
 			break;
     }
     
