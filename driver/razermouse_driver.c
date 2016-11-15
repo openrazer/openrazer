@@ -1117,7 +1117,6 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 			break;
 		
 		case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
-			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);
 			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);			
 			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
 			CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
@@ -1248,7 +1247,6 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 			break;
 		
 		case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
-			device_remove_file(&hdev->dev, &dev_attr_device_serial);
 			device_remove_file(&hdev->dev, &dev_attr_dpi);			
 			device_remove_file(&hdev->dev, &dev_attr_poll_rate);
 			device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
