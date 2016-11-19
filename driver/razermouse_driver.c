@@ -726,6 +726,7 @@ static ssize_t razer_attr_read_scroll_led_brightness(struct device *dev, struct 
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 	struct razer_report report = razer_chroma_standard_get_led_brightness(VARSTORE, SCROLL_WHEEL_LED);
+	report.transaction_id.id = 0x3F;
     struct razer_report response = razer_send_payload(usb_dev, &report);
 
     return sprintf(buf, "%d\n", response.arguments[2]);
@@ -740,6 +741,7 @@ static ssize_t razer_attr_write_scroll_led_brightness(struct device *dev, struct
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_standard_set_led_brightness(VARSTORE, SCROLL_WHEEL_LED, brightness);
+    report.transaction_id.id = 0x3F;
     
     razer_send_payload(usb_dev, &report);
     
@@ -754,6 +756,7 @@ static ssize_t razer_attr_read_logo_led_brightness(struct device *dev, struct de
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 	struct razer_report report = razer_chroma_standard_get_led_brightness(VARSTORE, LOGO_LED);
+	report.transaction_id.id = 0x3F;
     struct razer_report response = razer_send_payload(usb_dev, &report);
 
     return sprintf(buf, "%d\n", response.arguments[2]);
@@ -768,6 +771,7 @@ static ssize_t razer_attr_write_logo_led_brightness(struct device *dev, struct d
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_standard_set_led_brightness(VARSTORE, LOGO_LED, brightness);
+    report.transaction_id.id = 0x3F;
     
     razer_send_payload(usb_dev, &report);
     
@@ -783,6 +787,7 @@ static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct devi
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);    
     struct razer_report report = razer_chroma_standard_set_led_state(VARSTORE, SCROLL_WHEEL_LED, enabled);
+    report.transaction_id.id = 0x3F;
 
     razer_send_payload(usb_dev, &report);
 
@@ -797,6 +802,7 @@ static ssize_t razer_attr_read_scroll_led_state(struct device *dev, struct devic
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, SCROLL_WHEEL_LED);
+    report.transaction_id.id = 0x3F;
     struct razer_report response;
 
     response = razer_send_payload(usb_dev, &report);
@@ -812,6 +818,7 @@ static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);    
     struct razer_report report = razer_chroma_standard_set_led_state(VARSTORE, LOGO_LED, enabled);
+    report.transaction_id.id = 0x3F;
 
     razer_send_payload(usb_dev, &report);
 
@@ -826,6 +833,7 @@ static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, LOGO_LED);
+    report.transaction_id.id = 0x3F;
     struct razer_report response;
 
     response = razer_send_payload(usb_dev, &report);
@@ -844,6 +852,7 @@ static ssize_t razer_attr_write_scroll_led_rgb(struct device *dev, struct device
     if(count == 3)
     {
         report = razer_chroma_standard_set_led_rgb(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
+        report.transaction_id.id = 0x3F;
         razer_send_payload(usb_dev, &report);
     } else {
 		printk(KERN_WARNING "razermouse: Scroll wheel LED mode only accepts RGB (3byte)");
@@ -860,6 +869,7 @@ static ssize_t razer_attr_read_scroll_led_rgb(struct device *dev, struct device_
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_led_rgb(VARSTORE, SCROLL_WHEEL_LED);
+    report.transaction_id.id = 0x3F;
 	struct razer_report response = razer_send_payload(usb_dev, &report);
 
 
@@ -878,6 +888,7 @@ static ssize_t razer_attr_write_logo_led_rgb(struct device *dev, struct device_a
     if(count == 3)
     {
         report = razer_chroma_standard_set_led_rgb(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
+        report.transaction_id.id = 0x3F;
         razer_send_payload(usb_dev, &report);
     } else {
 		printk(KERN_WARNING "razermouse: Scroll wheel LED mode only accepts RGB (3byte)");
@@ -894,6 +905,7 @@ static ssize_t razer_attr_read_logo_led_rgb(struct device *dev, struct device_at
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_led_rgb(VARSTORE, LOGO_LED);
+    report.transaction_id.id = 0x3F;
 	struct razer_report response = razer_send_payload(usb_dev, &report);
 
 
@@ -909,6 +921,7 @@ static ssize_t razer_attr_write_scroll_led_effect(struct device *dev, struct dev
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char effect = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_standard_set_led_effect(VARSTORE, SCROLL_WHEEL_LED, effect);
+    report.transaction_id.id = 0x3F;
     
     razer_send_payload(usb_dev, &report);
 
@@ -923,6 +936,7 @@ static ssize_t razer_attr_read_scroll_led_effect(struct device *dev, struct devi
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 	struct razer_report report = razer_chroma_standard_get_led_effect(VARSTORE, SCROLL_WHEEL_LED);
+	report.transaction_id.id = 0x3F;
     struct razer_report response = razer_send_payload(usb_dev, &report);
 
     return sprintf(buf, "%d\n", response.arguments[2]);
@@ -937,6 +951,7 @@ static ssize_t razer_attr_write_logo_led_effect(struct device *dev, struct devic
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char effect = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, effect);
+    report.transaction_id.id = 0x3F;
     
     razer_send_payload(usb_dev, &report);
 
@@ -951,6 +966,7 @@ static ssize_t razer_attr_read_logo_led_effect(struct device *dev, struct device
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 	struct razer_report report = razer_chroma_standard_get_led_effect(VARSTORE, SCROLL_WHEEL_LED);
+	report.transaction_id.id = 0x3F;
     struct razer_report response = razer_send_payload(usb_dev, &report);
 
     return sprintf(buf, "%d\n", response.arguments[2]);
