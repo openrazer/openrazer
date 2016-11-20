@@ -33,7 +33,7 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | Razer Abyssus 2014              |  1532:0042  |   ✔     |   ✔    |
 | Razer Imperator 2012            |  1532:002F  |   ✔     |   ✔    |
 | Razer Orochi (Wired)            |  1532:0048  |   ✔     |   ✔    |
-| Razer DeathAdder Chroma         |  1532:0043  |   ✔     |        |
+| Razer DeathAdder Chroma         |  1532:0043  |   ✔     |   ✔    |
 
 ### Mousemats
 | Device        | USB VID:PID | Driver | Daemon |
