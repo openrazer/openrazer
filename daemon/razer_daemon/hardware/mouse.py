@@ -116,7 +116,7 @@ class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_idle_time', 'set_low_battery_threshold', 'set_dpi_xy', 'set_scroll_active', 'get_scroll_active']
 
-class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
+class RazerDeathadderChroma(__RazerDevice):
     """
     Class for the Razer Deathadder Chroma
     """
