@@ -27,7 +27,7 @@ class FakeDevicePrompt(cmd.Cmd):
 
         # If only 1 device, auto use that
         if len(self._device_map) == 1:
-            self._change_device(self._device_map.keys()[0])
+            self._change_device(list(self._device_map.keys())[0])
         else:
             self._change_device(None)
 
@@ -39,7 +39,7 @@ class FakeDevicePrompt(cmd.Cmd):
             for endpoint, details in self._device_map[self._current_device].endpoints.items():
                 self._ep[endpoint] = details[2]
 
-            self._read = [endpoint for endpoint, perm in self._ep.items() if perm in ('r', 'rw')]
+            self._read = [endpoint for endpoint, perm in self._ep.items()]
             self._write = [endpoint for endpoint, perm in self._ep.items() if perm in ('w', 'rw')]
         else:
             self._current_device = None
