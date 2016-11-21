@@ -150,7 +150,7 @@ struct razer_report razer_chroma_standard_set_led_effect(unsigned char variable_
  */
 struct razer_report razer_chroma_standard_get_led_effect(unsigned char variable_storage, unsigned char led_id)
 {
-	struct razer_report report = get_razer_report(0x03, 0x02, 0x03);
+	struct razer_report report = get_razer_report(0x03, 0x82, 0x03);
 	report.arguments[0] = variable_storage;
 	report.arguments[1] = led_id;
 		

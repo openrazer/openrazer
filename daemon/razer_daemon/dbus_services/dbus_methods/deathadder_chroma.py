@@ -208,7 +208,7 @@ def set_logo_spectrum(self):
     effect_driver_path = self.get_driver_path('logo_led_effect')
 
     with open(effect_driver_path, 'w') as effect_driver_file:
-        effect_driver_file.write('2')
+        effect_driver_file.write('4')
 
 
 @endpoint('razer.device.lighting.scroll', 'getScrollActive', out_sig='b')
@@ -418,4 +418,4 @@ def set_scroll_spectrum(self):
     effect_driver_path = self.get_driver_path('scroll_led_effect')
 
     with open(effect_driver_path, 'w') as effect_driver_file:
-        effect_driver_file.write('2')
+        effect_driver_file.write('4')

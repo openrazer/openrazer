@@ -139,6 +139,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
             device_type = "Razer Orochi (Wired)\n";
             break;
+            
+        case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+            device_type = "Razer DeathAdder Chroma\n";
+            break;
 
         default:
             device_type = "Unknown\n";
