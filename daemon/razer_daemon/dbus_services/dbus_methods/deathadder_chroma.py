@@ -128,8 +128,8 @@ def set_logo_static(self, red, green, blue):
         effect_driver_file.write('0')
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoPulsate', in_sig='yyy')
-def set_logo_pulsate(self, red, green, blue):
+@endpoint('razer.device.lighting.logo', 'setLogoBlinking', in_sig='yyy')
+def set_logo_blinking(self, red, green, blue):
     """
     Set the device to pulsate
 
@@ -142,10 +142,10 @@ def set_logo_pulsate(self, red, green, blue):
     :param blue: Blue component
     :type blue: int
     """
-    self.logger.debug("DBus call set_static_effect")
+    self.logger.debug("DBus call set_logo_blinking")
 
     # Notify others
-    self.send_effect_event('setPulsate', red, green, blue)
+    self.send_effect_event('setLogoBlinking', red, green, blue)
 
     rgb_driver_path = self.get_driver_path('logo_led_rgb')
     effect_driver_path = self.get_driver_path('logo_led_effect')
@@ -157,8 +157,8 @@ def set_logo_pulsate(self, red, green, blue):
         effect_driver_file.write('1')
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoBreathingSingle', in_sig='yyy')
-def set_logo_breathing(self, red, green, blue):
+@endpoint('razer.device.lighting.logo', 'setLogoPulsate', in_sig='yyy')
+def set_logo_pulsing(self, red, green, blue):
     """
     Set the device to pulsate
 
@@ -171,10 +171,10 @@ def set_logo_breathing(self, red, green, blue):
     :param blue: Blue component
     :type blue: int
     """
-    self.logger.debug("DBus call set_static_effect")
+    self.logger.debug("DBus call set_logo_pulsing")
 
     # Notify others
-    self.send_effect_event('setBreathSingle', red, green, blue)
+    self.send_effect_event('setPulsate', red, green, blue)
 
     rgb_driver_path = self.get_driver_path('logo_led_rgb')
     effect_driver_path = self.get_driver_path('logo_led_effect')
@@ -200,7 +200,7 @@ def set_logo_spectrum(self):
     :param blue: Blue component
     :type blue: int
     """
-    self.logger.debug("DBus call set_static_effect")
+    self.logger.debug("DBus call set_logo_spectrum")
 
     # Notify others
     self.send_effect_event('setSpectrum')
@@ -323,7 +323,7 @@ def set_scroll_static(self, red, green, blue):
     :param blue: Blue component
     :type blue: int
     """
-    self.logger.debug("DBus call set_static_effect")
+    self.logger.debug("DBus call set_scroll_static")
 
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
@@ -338,7 +338,7 @@ def set_scroll_static(self, red, green, blue):
         effect_driver_file.write('0')
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollPulsate', in_sig='yyy')
+@endpoint('razer.device.lighting.scroll', 'setScrollBlinking', in_sig='yyy')
 def set_scroll_pulsate(self, red, green, blue):
     """
     Set the device to pulsate
@@ -352,7 +352,7 @@ def set_scroll_pulsate(self, red, green, blue):
     :param blue: Blue component
     :type blue: int
     """
-    self.logger.debug("DBus call set_static_effect")
+    self.logger.debug("DBus call set_scroll_pulsate")
 
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
@@ -367,7 +367,7 @@ def set_scroll_pulsate(self, red, green, blue):
         effect_driver_file.write('1')
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollBreathingSingle', in_sig='yyy')
+@endpoint('razer.device.lighting.scroll', 'setScrollPulsate', in_sig='yyy')
 def set_scroll_breathing(self, red, green, blue):
     """
     Set the device to pulsate
@@ -381,10 +381,10 @@ def set_scroll_breathing(self, red, green, blue):
     :param blue: Blue component
     :type blue: int
     """
-    self.logger.debug("DBus call set_static_effect")
+    self.logger.debug("DBus call set_scroll_breathing")
 
     # Notify others
-    self.send_effect_event('setBreathSingle', red, green, blue)
+    self.send_effect_event('setPulsate', red, green, blue)
 
     rgb_driver_path = self.get_driver_path('scroll_led_rgb')
     effect_driver_path = self.get_driver_path('scroll_led_effect')
@@ -410,7 +410,7 @@ def set_scroll_spectrum(self):
     :param blue: Blue component
     :type blue: int
     """
-    self.logger.debug("DBus call set_static_effect")
+    self.logger.debug("DBus call set_scroll_spectrum")
 
     # Notify others
     self.send_effect_event('setSpectrum')

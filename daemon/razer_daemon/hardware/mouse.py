@@ -132,10 +132,9 @@ class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse',
-               'set_logo_active', 'get_logo_active', 'get_logo_effect', 'get_logo_brightness', 'set_logo_brightness', 'set_logo_static', 'set_logo_pulsate', 'set_logo_breathing', 'set_logo_spectrum',
-               'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_pulsate', 'set_scroll_breathing', 'set_scroll_spectrum',
-               'set_dpi_xy', 'set_poll_rate'
-               ]
+               'set_logo_active', 'get_logo_active', 'get_logo_effect', 'get_logo_brightness', 'set_logo_brightness', 'set_logo_static', 'set_logo_pulsate', 'set_logo_blinking', 'set_logo_spectrum',
+               'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_pulsate', 'set_scroll_blinking', 'set_scroll_spectrum',
+               'set_dpi_xy', 'set_poll_rate']
 
     def __init__(self, *args, **kwargs):
         super(RazerDeathadderChroma, self).__init__(*args, **kwargs)
