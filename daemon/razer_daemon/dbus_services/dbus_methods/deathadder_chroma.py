@@ -158,7 +158,7 @@ def set_logo_blinking(self, red, green, blue):
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoPulsate', in_sig='yyy')
-def set_logo_pulsing(self, red, green, blue):
+def set_logo_pulsate(self, red, green, blue):
     """
     Set the device to pulsate
 
@@ -339,7 +339,7 @@ def set_scroll_static(self, red, green, blue):
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollBlinking', in_sig='yyy')
-def set_scroll_pulsate(self, red, green, blue):
+def set_scroll_blinking(self, red, green, blue):
     """
     Set the device to pulsate
 
@@ -368,7 +368,7 @@ def set_scroll_pulsate(self, red, green, blue):
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollPulsate', in_sig='yyy')
-def set_scroll_breathing(self, red, green, blue):
+def set_scroll_pulsate(self, red, green, blue):
     """
     Set the device to pulsate
 

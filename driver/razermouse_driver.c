@@ -975,7 +975,7 @@ static ssize_t razer_attr_read_logo_led_effect(struct device *dev, struct device
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report = razer_chroma_standard_get_led_effect(VARSTORE, SCROLL_WHEEL_LED);
+    struct razer_report report = razer_chroma_standard_get_led_effect(VARSTORE, LOGO_LED);
     struct razer_report response;
     
     report.transaction_id.id = 0x3F;
