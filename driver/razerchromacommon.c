@@ -189,11 +189,6 @@ struct razer_report razer_chroma_standard_get_led_brightness(unsigned char varia
 }
 
 
-
-
-
-
-
 /*
  * Standard Matrix Effects Functions
  */

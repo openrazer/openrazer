@@ -74,6 +74,9 @@
     #define USB_DEVICE_ID_RAZER_BLADE_QHD 0x020F
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_ANANSI
+    #define USB_DEVICE_ID_RAZER_ANANSI 0x010F
+#endif
 
 
 /* Each keyboard report has 90 bytes*/
