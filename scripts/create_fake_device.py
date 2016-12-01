@@ -123,13 +123,11 @@ class FakeDevicePrompt(cmd.Cmd):
             try:
                 device_file, data = arg.split(' ', 1)
 
-                if device_file in self._ep and self._ep[device_file] in ('w', 'rw'):
+                if device_file in self._ep:
                     if len(data) > 0:
                         self._device_map[self._current_device].set(device_file, data)
 
                         print("{0}: {1}".format(device_file, self._device_map[self._current_device].get(device_file)))
-                elif device_file in self._ep:
-                    print('Device endpoint not writable')
                 else:
                     print("Device endpoint not found")
 
