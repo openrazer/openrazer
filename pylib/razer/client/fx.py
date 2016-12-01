@@ -401,59 +401,141 @@ class RazerAdvancedFX(BaseRazerFX):
                 raise ValueError("RGB must be an RGB tuple")
 
 
+class SingleLed(BaseRazerFX):
+    def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, led_name='logo'):
+        super(SingleLed, self).__init__(serial, capabilities, daemon_dbus)
+
+        self._led_name = led_name
+        self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.{0}".format(led_name))
+
+    def _shas(self, item):
+        return self.has('{0}_{1}'.format(self._led_name, item))
+
+    def _getattr(self, name):
+        attr = name.replace('#', self._led_name.title())
+        return getattr(self._lighting_dbus, attr, None)
+
+    @property
+    def active(self) -> bool:
+        func = self._getattr('get#Active')
+        if func is not None:
+            return func()
+        else:
+            return False
+
+    @active.setter
+    def active(self, value: bool):
+        func = self._getattr('set#Active')
+        if func is not None:
+            if value:
+                func(True)
+            else:
+                func(False)
+
+    @property
+    def brightness(self):
+        if self._shas('brightness'):
+            return self._getattr('get#Brightness')()
+        return 0.0
+
+    @brightness.setter
+    def brightness(self, brightness: float):
+        if self._shas('brightness'):
+            if not isinstance(brightness, (float, int)):
+                raise ValueError("Brightness is not a float")
+
+            if brightness > 100:
+                brightness = 100.0
+            elif brightness < 0:
+                brightness = 0.0
+
+            self._getattr('set#Brightness')(brightness)
+
+    def blinking(self, red: int, green: int, blue: int) -> bool:
+        if not isinstance(red, int):
+            raise ValueError("Red is not an integer")
+        if not isinstance(green, int):
+            raise ValueError("Green is not an integer")
+        if not isinstance(blue, int):
+            raise ValueError("Blue is not an integer")
+
+        if self._shas('blinking'):
+            red = clamp_ubyte(red)
+            green = clamp_ubyte(green)
+            blue = clamp_ubyte(blue)
+
+            self._getattr('set#Blinking')(red, green, blue)
+
+            return True
+        return False
+
+    def pulsate(self, red: int, green: int, blue: int) -> bool:
+        if not isinstance(red, int):
+            raise ValueError("Red is not an integer")
+        if not isinstance(green, int):
+            raise ValueError("Green is not an integer")
+        if not isinstance(blue, int):
+            raise ValueError("Blue is not an integer")
+
+        if self._shas('pulsate'):
+            red = clamp_ubyte(red)
+            green = clamp_ubyte(green)
+            blue = clamp_ubyte(blue)
+
+            self._getattr('set#Pulsate')(red, green, blue)
+
+            return True
+        return False
+
+    def static(self, red: int, green: int, blue: int) -> bool:
+        if not isinstance(red, int):
+            raise ValueError("Red is not an integer")
+        if not isinstance(green, int):
+            raise ValueError("Green is not an integer")
+        if not isinstance(blue, int):
+            raise ValueError("Blue is not an integer")
+
+        if self._shas('static'):
+            red = clamp_ubyte(red)
+            green = clamp_ubyte(green)
+            blue = clamp_ubyte(blue)
+
+            self._getattr('set#Static')(red, green, blue)
+
+            return True
+        return False
+
+    def spectrum(self) -> bool:
+        if self._shas('spectrum'):
+            self._getattr('set#Spectrum')()
+
+            return True
+        return False
+
+
 class MiscLighting(BaseRazerFX):
     def __init__(self, serial: str, capabilities:dict, daemon_dbus=None):
         super(MiscLighting, self).__init__(serial, capabilities, daemon_dbus)
 
         self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.logo")
 
+        if self.has('logo'):
+            self._logo = SingleLed(serial, capabilities, daemon_dbus, 'logo')
+        else:
+            self._logo = None
+
+        if self.has('scroll'):
+            self._scroll = SingleLed(serial, capabilities, daemon_dbus, 'scroll')
+        else:
+            self._scroll = None
+
     @property
     def logo(self):
-        if self.has('logo') and self.has('logo_abyssus'):
-            # Te cant get logo status as its part of LED matrix
-
-            # getLogoActive is for abyssus, using bool() to convert from DBus bool to native (looks nicer when debugging as DBus bool overrides __str__)
-            return bool(self._lighting_dbus.getLogoActive())
-
-        return False
-
-    @logo.setter
-    def logo(self, value):
-        if self.has('logo'):
-            if self.has('logo_abyssus'):
-                # Takes single boolean value
-                if isinstance(value, bool):
-                    self._lighting_dbus.setLogoActive(value)
-                else:
-                    raise ValueError("Logo value for the Abyssus must be a boolean")
-            elif self.has('logo_te'):
-                # Is an RGB but will handle if True is passed in
-                if isinstance(value, bool):
-                    self._lighting_dbus.setLogo(255, 255, 255)
-                elif isinstance(value, (tuple, list)) and len(value) == 3 and all([isinstance(component, int) for component in value]):
-                    # Looks like an RGB, now just make sure all components are 0->255
-                    self._lighting_dbus.setLogo([clamp_ubyte(component) for component in value])
-                else:
-                    raise ValueError("Logo value for the Mamba TE must be an RGB tuple")
-            else:
-                raise NotImplementedError("Has logo but dont know the device")
-        # Else do nothing
+        return self._logo
 
     @property
     def scroll_wheel(self):
-        if self.has('scroll'):
-            return bool(self._lighting_dbus.getScrollActive())
-
-        return False
-
-    @scroll_wheel.setter
-    def scroll_wheel(self, value):
-        if self.has('scroll'):
-            if isinstance(value, bool):
-                self._lighting_dbus.setScrollActive(value)
-            else:
-                raise ValueError("Scroll value must be a boolean")
-
+        return self._scroll
 
 
 class Frame(object):

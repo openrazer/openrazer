@@ -94,7 +94,7 @@ class FakeDevicePrompt(cmd.Cmd):
     def do_read(self, arg, binary=False):
         """Read ASCII from given device file"""
         if self._current_device is not None:
-            if arg in self._ep and self._ep[arg] in ('r', 'rw'):
+            if arg in self._ep:
                 result = self._device_map[self._current_device].get(arg, binary=binary)
 
                 print(result)

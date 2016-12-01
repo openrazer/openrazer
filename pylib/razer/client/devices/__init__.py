@@ -66,11 +66,19 @@ class RazerDevice(object):
             'lighting_led_single': self._has_feature('razer.device.lighting.chroma', 'setKey'),
 
             # Mouse lighting attrs
-            'lighting_logo': self._has_feature('razer.device.lighting.logo'), # Just says we have logo, not which type (one is on/off (abyssus), one is rgb (mamba te))
-            'lighting_logo_abyssus': self._has_feature('razer.device.lighting.logo', ['getLogoActive', 'setLogoActive']),
-            'lighting_logo_te': self._has_feature('razer.device.lighting.logo', 'setLogo'),
+            'lighting_logo': self._has_feature('razer.device.lighting.logo', 'setLogoActive'),
+            'lighting_logo_blinking': self._has_feature('razer.device.lighting.logo', 'setLogoBlinking'),
+            'lighting_logo_brightness': self._has_feature('razer.device.lighting.logo', 'setLogoBrightness'),
+            'lighting_logo_pulsate': self._has_feature('razer.device.lighting.logo', 'setLogoPulsate'),
+            'lighting_logo_spectrum': self._has_feature('razer.device.lighting.logo', 'setLogoSpectrum'),
+            'lighting_logo_static': self._has_feature('razer.device.lighting.logo', 'setLogoStatic'),
 
-            'lighting_scroll': self._has_feature('razer.device.lighting.scroll', ['getScrollActive', 'setScrollActive']),
+            'lighting_scroll': self._has_feature('razer.device.lighting.scroll', 'setScrollActive'),
+            'lighting_scroll_blinking': self._has_feature('razer.device.lighting.scroll', 'setScrollBlinking'),
+            'lighting_scroll_brightness': self._has_feature('razer.device.lighting.scroll', 'setScrollBrightness'),
+            'lighting_scroll_pulsate': self._has_feature('razer.device.lighting.scroll', 'setScrollPulsate'),
+            'lighting_scroll_spectrum': self._has_feature('razer.device.lighting.scroll', 'setScrollSpectrum'),
+            'lighting_scroll_static': self._has_feature('razer.device.lighting.scroll', 'setScrollStatic'),
 
         }
 
