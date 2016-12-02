@@ -12,12 +12,10 @@
 #ifndef DRIVER_RAZERCOMMON_H_
 #define DRIVER_RAZERCOMMON_H_
 
-
 #include <linux/usb/input.h>
 
+#define VERSION "1.1.0"
 
-
-#define VERSION "1.0.17"
 
 // Macro to create device files
 #define CREATE_DEVICE_FILE(dev, type) \
