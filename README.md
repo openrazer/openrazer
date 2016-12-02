@@ -84,7 +84,7 @@ sudo apt install python3-razer razer-kernel-modules-dkms razer-daemon razer-doc
 
 ## Applications
 
-The following applications compliment and interact with this driver:
+The following applications complement and interact with this driver:
 
 * [Polychromatic Controller](https://github.com/lah7/polychromatic-controller) - a graphical management tool and tray applet to managing Razer peripherals.
 * [MacroW](https://github.com/igorbb/MacroW) - a simple tool to record and play keyboard macros. (though the dameon does on the fly recording ;) )

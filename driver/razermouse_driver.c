@@ -125,15 +125,15 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             break;
         
         case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
-            device_type = "Razer Mamba TE\n";
+            device_type = "Razer Mamba Tournament Edition\n";
             break;
 
         case USB_DEVICE_ID_RAZER_ABYSSUS:
-            device_type = "Razer Abyssus\n";
+            device_type = "Razer Abyssus 2014\n";
             break;
         
         case USB_DEVICE_ID_RAZER_IMPERATOR:
-            device_type = "Razer Imperator\n";
+            device_type = "Razer Imperator 2012\n";
             break;
         
         case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
@@ -145,7 +145,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             break;
 
         default:
-            device_type = "Unknown\n";
+            device_type = "Unknown Device\n";
     }
 
     return sprintf(buf, device_type);
