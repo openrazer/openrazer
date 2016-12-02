@@ -654,7 +654,10 @@ class Frame(object):
         """
         assert 0 <= row_id < self._rows, "Row out of bounds"
 
-        return row_id.to_bytes(1, byteorder='big') + self._matrix[:,row_id].tobytes(order='F')
+        start = 0
+        end = self._cols - 1
+
+        return row_id.to_bytes(1, byteorder='big') + start.to_bytes(1, byteorder='big') + end.to_bytes(1, byteorder='big') + self._matrix[:,row_id].tobytes(order='F')
 
     def to_binary(self):
         """
@@ -668,9 +671,9 @@ class Frame(object):
     # Simple FB
     def to_framebuffer(self):
         self._fb1 = _np.copy(self._matrix)
+
     def to_framebuffer_or(self):
         self._fb1 = _np.bitwise_or(self._fb1, self._matrix)
-
 
     def draw_with_fb_or(self):
         self._matrix = _np.bitwise_or(self._fb1, self._matrix)

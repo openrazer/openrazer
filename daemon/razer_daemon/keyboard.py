@@ -175,14 +175,17 @@ XTE_MAPPING = {
     'MACROMODE': None,
 }
 
+
 class KeyDoesNotExistError(Exception):
     """
     Simple custom error
     """
     pass
 
+
 class NoBackupError(Exception):
     pass
+
 
 class RGB(object):
 
@@ -307,6 +310,7 @@ class RGB(object):
         :rtype: str
         """
         return "RGB Object (#{0:02X}{1:02X}{2:02X})".format(self._red, self._green, self._blue)
+
 
 class KeyboardColour(object):
     """
