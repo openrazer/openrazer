@@ -66,6 +66,10 @@
     #define USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016 0x0220
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_BLADE_QHD
+    #define USB_DEVICE_ID_RAZER_BLADE_QHD 0x020F
+#endif
+
 
 
 /* Each keyboard report has 90 bytes*/
