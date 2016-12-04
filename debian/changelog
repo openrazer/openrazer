@@ -1,3 +1,9 @@
+razer (1.1.1-0ubuntu1) trusty; urgency=low
+
+  * Fixed merge bug
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sun, 4 Dec 2016 09:54:00 +0000
+
 razer (1.1.0-0ubuntu1) trusty; urgency=low
 
   * Added support for Razer DeathAdder Chroma
