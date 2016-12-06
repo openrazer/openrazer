@@ -275,6 +275,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             device_type = "Razer Blade Stealth (Late 2016)\n";
             break;
         
+        case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+            device_type = "Razer Blade Pro (Late 2016)\n";
+            break;
+ 
         case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
             device_type = "Razer Tartarus Chroma\n";
             break;
@@ -486,6 +490,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
     {
 		case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
 		case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+		case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
 			strcpy(&serial_string[0], dmi_get_system_info(DMI_PRODUCT_SERIAL));
 			break;
 		
@@ -660,6 +665,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+        case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
         case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
             if(count == 3)
             {
@@ -888,6 +894,7 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
     switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+        case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
             report = razer_chroma_misc_set_blade_brightness(brightness);
             break;
 
@@ -936,6 +943,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
     switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+        case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
             report = razer_chroma_misc_get_blade_brightness();
             break;
         
@@ -957,6 +965,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
 	switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+        case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
             brightness = response.arguments[1];
             break;
         
@@ -1061,7 +1070,8 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 			case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016: 
 			case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
 			case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
-				report.transaction_id.id = 0x80; // Fall into the 2016/blade/blade2016 to set device id		
+			case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+				report.transaction_id.id = 0x80; // Fall into the 2016/blade/blade2016 to set device id
 			default:
 				report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
 				break;
@@ -1308,8 +1318,20 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
                 break;
-                
-                
+
+            case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
+                break;
+
             case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
@@ -1432,6 +1454,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             
             case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
             case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+            case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
                 device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
                 device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
                 device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
@@ -1501,6 +1524,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_STEALTH) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE) },

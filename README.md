@@ -25,6 +25,7 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | Razer BlackWidow Chroma                       |  1532:0203  |   ✔    |   ✔    |
 | Razer Blade Stealth                           |  1532:0205  |   ✔    |   ✔    |
 | Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔    |   ✔    |
+| Razer Blade Pro (Late 2016)                   |  1532:0210  |   ✔    |   ✔    |
 | Razer BlackWidow Ultimate 2016                |  1532:0214  |   ✔    |   ✔    |
 | Razer BlackWidow X Chroma                     |  1532:0216  |   ✔    |   ✔    |
 | Razer BlackWidow X Tournament Edition Chroma  |  1532:021A  |   ✔    |   ✔    |
