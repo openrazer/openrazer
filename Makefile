@@ -133,7 +133,7 @@ fedora_install:
 install: all driver_install udev_install python_library_install
 	@make --no-print-directory -C daemon install DESTDIR=$(DESTDIR)
 
-uninstall: driver_uninstall udev_uninstall python_library_uninstall remove_rcd_links
+uninstall: driver_uninstall udev_uninstall python_library_uninstall
 	@make --no-print-directory -C daemon uninstall DESTDIR=$(DESTDIR)
 
 
