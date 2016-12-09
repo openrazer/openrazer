@@ -81,8 +81,11 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
     int len;
     int retval;
     int result = 0;
+    char *buf;
 
-    memset(response_report, 0, sizeof(struct razer_report));
+    buf = kzalloc(sizeof(struct razer_report), GFP_KERNEL);
+    if (buf == NULL)
+        return -ENOMEM;
 
     // Send the request to the device.
     // TODO look to see if index needs to be different for the request and the response
@@ -94,11 +97,14 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
           request_type,    // RequestType
           value,           // Value
           response_index,  // Index
-          response_report, // Data
+          buf,             // Data
           size, 
           USB_CTRL_SET_TIMEOUT);
 
     usleep_range(wait_min, wait_max);
+
+    memcpy(response_report, buf, sizeof(struct razer_report));
+    kfree(buf);
 
     // Error if report is wrong length
     if(len != 90)
