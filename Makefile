@@ -111,7 +111,6 @@ udev_install:
 	@echo -e "\n::\033[34m Installing Razer udev rules\033[0m"
 	@echo "====================================================="
 	install -m 644 -v -D install_files/udev/99-razer.rules $(DESTDIR)/lib/udev/rules.d/99-razer.rules
-	install -m 755 -v -D install_files/udev/razer_mount $(DESTDIR)/lib/udev/razer_mount
 
 udev_uninstall:
 	@echo -e "\n::\033[34m Uninstalling Razer udev rules\033[0m"
