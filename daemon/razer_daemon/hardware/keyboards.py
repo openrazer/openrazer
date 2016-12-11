@@ -178,6 +178,36 @@ class RazerBlackWidowXChroma(_MacroKeyboard):
 
         self.ripple_manager.close()
 
+class RazerBlackWidowXUltimate(_MacroKeyboard):
+    """
+    Class for the BlackWidow Ultimate
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_X_Ultimate(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0217
+    HAS_MATRIX = True
+    DEDICATED_MACRO_KEYS = False
+    MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro', 'set_starlight_random_effect',
+
+               'set_ripple_effect']
+
+    def __init__(self, *args, **kwargs):
+        super(RazerBlackWidowXUltimate, self).__init__(*args, **kwargs)
+
+        self.ripple_manager = _RippleManager(self, self._device_number)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerBlackWidowXUltimate, self)._close()
+
+        self.ripple_manager.close()
 
 class RazerBlackWidowXChromaTournamentEdition(_MacroKeyboard):
     """
