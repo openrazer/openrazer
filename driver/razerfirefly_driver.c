@@ -60,9 +60,9 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
 	int retval = -1;
     struct razer_report response_report;
     
-    request_report->crc = razer_calculate_crc(request_report);
+	request_report->crc = razer_calculate_crc(request_report);
 
-    retval = razer_get_report(usb_dev, request_report, &response_report);
+	retval = razer_get_report(usb_dev, request_report, &response_report);
 
     if(retval == 0)
     {
@@ -485,8 +485,8 @@ static int razer_firefly_probe(struct hid_device *hdev, const struct hid_device_
         goto exit_free;
 
     hid_set_drvdata(hdev, dev);
-
-
+	
+	
     retval = hid_parse(hdev);
     if(retval)    {
         hid_err(hdev, "parse failed\n");
@@ -497,8 +497,8 @@ static int razer_firefly_probe(struct hid_device *hdev, const struct hid_device_
         hid_err(hdev, "hw start failed\n");
         goto exit_free;
     }
-
-
+	
+	
     usb_disable_autosuspend(usb_dev);
     return 0;
 exit:
