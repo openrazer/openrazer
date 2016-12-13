@@ -27,9 +27,11 @@ class RippleEffect():
     This class contains the run loop which performs all the
     circle calculations and generating of the binary payload
     """
-    def __init__(self, parent, device_number):
+    def __init__(self, parent, device_number, height, width):
         self._logger = logging.getLogger('razer.device{0}.rippleeffect'.format(device_number))
         self._parent = parent
+        self._height = height
+        self._width = width
 
         self._colour = (0, 255, 0)
         self._refresh_rate = 0.100
@@ -37,7 +39,7 @@ class RippleEffect():
         self._shutdown = False
         self._active = False
 
-        self._keyboard_grid = KeyboardColour()
+        self._keyboard_grid = KeyboardColour(width, height)
         self._interactive = asyncio.Event()
 
     async def interaction(self):
@@ -103,8 +105,8 @@ class RippleEffect():
                         colour = self._colour
                     radiuses.append((key_row, key_col, now_diff.total_seconds() * 12, colour))
 
-                for row in range(0, 7):
-                    for col in range(0, 22):
+                for row in range(0, self._height):
+                    for col in range(0, self._width):
                         if row == 0 and col == 20:
                             continue
                         if row == 6:
@@ -144,7 +146,9 @@ class RippleManager(object):
         self._last_colour_choice = None
         self._is_closed = False
 
-        self._ripple_effect = RippleEffect(self, device_number)
+        dims = self._parent.MATRIX_DIMS
+
+        self._ripple_effect = RippleEffect(self, device_number, dims[0], dims[1])
 
         self._key_list = []
 

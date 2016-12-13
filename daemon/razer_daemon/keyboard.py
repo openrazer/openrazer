@@ -339,7 +339,10 @@ class KeyboardColour(object):
 
         return red, green, blue
 
-    def __init__(self):
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
         self.rows = []
 
         self.backup = None
@@ -378,9 +381,9 @@ class KeyboardColour(object):
         """
         self.rows.clear()
 
-        for row in range(0, 6):
-            # Create 22 rgb values
-            self.rows.append([RGB() for _ in range(0,22)])
+        for row in range(0, self.height):
+            # Create rgb values
+            self.rows.append([RGB() for _ in range(0, self.width)])
 
     def set_key_colour(self, row, col, colour):
         """
@@ -451,12 +454,12 @@ class KeyboardColour(object):
         """
         Gets the binary payload for the whole keyboard
 
-        :return: Byte string of 6*67 bytes, (Row ID byte then 22 RGB bytes) * 6
+        :return: Byte string of height*67 bytes, (Row ID byte then width RGB bytes) * 6
         :rtype: bytearray
         """
         payload = b''
 
-        for row in range(0,6):
+        for row in range(0, self.height):
             payload += self.get_row_binary(row)
 
         return payload
@@ -470,14 +473,16 @@ class KeyboardColour(object):
         """
         self.reset_rows()
 
-        for row_id in range (0, 6):
+        sz = self.rows * 3
+
+        for row_id in range (0, self.height):
             binary_blob = binary_blob[1:] # Skip first byte
 
-            for col_id, binary_rgb in enumerate([binary_blob[i:i+3] for i in range(0, 66, 3)]):
+            for col_id, binary_rgb in enumerate([binary_blob[i:i+3] for i in range(0, sz, 3)]):
                 rgb = struct.unpack('=BBB', binary_rgb)
                 self.rows[row_id][col_id].set(rgb)
 
-            binary_blob = binary_blob[66:] # Skip the current row
+            binary_blob = binary_blob[sz:] # Skip the current row
 
 
 def get_keyboard_layout():
