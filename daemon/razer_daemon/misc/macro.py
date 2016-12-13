@@ -4,9 +4,9 @@ Macro stuff
 Has objects representing key events
 Launching programs etc...
 """
+import asyncio
 import logging
 import subprocess
-import threading
 
 # pylint: disable=import-error
 from razer_daemon.keyboard import XTE_MAPPING
@@ -93,12 +93,13 @@ class MacroURL(MacroObject):
             'url': self.url,
         }
 
-    def execute(self):
+    async def execute(self):
         """
         Open URL in the browser
         """
-        proc = subprocess.Popen(['xdg-open', self.url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        proc.communicate()
+        proc = await asyncio.create_subprocess_exec(['xdg-open', self.url],
+                stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
+        await proc.communicate()
 
 class MacroScript(MacroObject):
     """
@@ -124,14 +125,15 @@ class MacroScript(MacroObject):
             'args': self.args
         }
 
-    def execute(self):
+    async def execute(self):
         """
         Run script
         """
-        proc = subprocess.Popen(self.script + self.args, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        proc.communicate()
+        proc = await asyncio.create_subprocess_exec(self.script + self.args,
+                shell=True, stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
+        await proc.communicate()
 
-class MacroRunner(threading.Thread):
+class MacroRunner():
     """
     Thread to run macros
     """
@@ -169,7 +171,7 @@ class MacroRunner(threading.Thread):
 
         return cmd
 
-    def run(self):
+    async def run(self):
         """
         Main thread function
         """
@@ -182,8 +184,8 @@ class MacroRunner(threading.Thread):
                 xte += self.xte_line(event)
             else:
                 if xte != '':
-                    proc = subprocess.Popen(['xte'], stdin=subprocess.PIPE)
-                    proc.communicate(input=xte.encode('ascii'))
+                    proc = await asyncio.create_subprocess_exec(['xte'], stdin=asyncio.subprocess.PIPE)
+                    await proc.communicate(input=xte.encode('ascii'))
                     xte = ''
 
                 # Now run everything else (this just allows for less calls to xte
@@ -191,8 +193,8 @@ class MacroRunner(threading.Thread):
                     event.execute()
 
         if xte != '':
-            proc = subprocess.Popen(['xte'], stdin=subprocess.PIPE)
-            proc.communicate(input=xte.encode('ascii'))
+            proc = await asyncio.create_subprocess_exec(['xte'], stdin=asyncio.subprocess.PIPE)
+            await proc.communicate(input=xte.encode('ascii'))
 
         self._logger.debug("Finished running macro %s", self._macro_bind)
 

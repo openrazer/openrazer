@@ -5,6 +5,7 @@ This class is the main core of the daemon, this serves a basic dbus module to co
 """
 __version__ = '1.1.2'
 
+import asyncio
 import configparser
 import logging
 import logging.handlers
@@ -16,16 +17,13 @@ import time
 import tempfile
 import setproctitle
 import dbus.mainloop.glib
-import gi
-gi.require_version('Gdk', '3.0')
-import gi.repository
-from gi.repository import GObject, GLib
 from pyudev import Context, Monitor, MonitorObserver
+from gbulb import glib_events
 
 import razer_daemon.hardware
 from razer_daemon.dbus_services.service import DBusService
 from razer_daemon.device import DeviceCollection
-from razer_daemon.misc.screensaver_thread import ScreensaverThread
+from razer_daemon.misc.screensaver_handler import ScreensaverHandler
 
 def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, pid_file=None, test_dir=None):
     """
@@ -166,13 +164,13 @@ class RazerDaemon(DBusService):
         self._config = configparser.ConfigParser()
         self.read_config(config_file)
 
+        # Use Gbulb for the main loop
+        asyncio.set_event_loop_policy(glib_events.GLibEventLoopPolicy())
+
         # Setup DBus to use gobject main loop
         dbus.mainloop.glib.threads_init()
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
         DBusService.__init__(self, self.BUS_PATH, '/org/razer')
-
-        self._init_signals()
-        self._main_loop = GObject.MainLoop()
 
         # Listen for input events from udev
         self._udev_context = Context()
@@ -206,12 +204,11 @@ class RazerDaemon(DBusService):
 
         self.logger.info("Initialising Daemon (v%s). Pid: %d", __version__, os.getpid())
 
-        # Setup screensaver thread
-        self._screensaver_thread = ScreensaverThread(self, active=self._config.getboolean('Startup', 'devices_off_on_screensaver'))
-        self._screensaver_thread.start()
-
         self._razer_devices = DeviceCollection()
         self._load_devices(first_run=True)
+
+        # Watch for screenserver changes
+        self._screensaver_handler = ScreensaverHandler(self, watch_enabled=self._config.getboolean('Startup', 'devices_off_on_screensaver'))
 
         # Add DBus methods
         self.logger.info("Adding razer.devices.getDevices method to DBus")
@@ -230,49 +227,6 @@ class RazerDaemon(DBusService):
         # TODO remove
         self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
         # TODO ======
-
-    def _init_signals(self):
-        """
-        Heinous hack to properly handle signals on the mainloop. Necessary
-        if we want to use the mainloop run() functionality.
-        """
-        def signal_action(signum):
-            """
-            Action to take when a signal is trapped
-            """
-            self.quit(signum)
-
-        def idle_handler():
-            """
-            GLib idle handler to propagate signals
-            """
-            GLib.idle_add(signal_action, priority=GLib.PRIORITY_HIGH)
-
-        def handler(*args):
-            """
-            Unix signal handler
-            """
-            signal_action(args[0])
-
-        def install_glib_handler(sig):
-            """
-            Choose a compatible method and install the handler
-            """
-            unix_signal_add = None
-
-            if hasattr(GLib, "unix_signal_add"):
-                unix_signal_add = GLib.unix_signal_add
-            elif hasattr(GLib, "unix_signal_add_full"):
-                unix_signal_add = GLib.unix_signal_add_full
-
-            if unix_signal_add:
-                unix_signal_add(GLib.PRIORITY_HIGH, sig, handler, sig)
-            else:
-                print("Can't install GLib signal handler!")
-
-        for sig in signal.SIGINT, signal.SIGTERM, signal.SIGHUP:
-            signal.signal(sig, idle_handler)
-            GLib.idle_add(install_glib_handler, sig, priority=GLib.PRIORITY_HIGH)
 
     def read_config(self, config_file):
         """
@@ -299,13 +253,13 @@ class RazerDaemon(DBusService):
         """
         Enable the turning off of devices when the screensaver is active
         """
-        self._screensaver_thread.active = True
+        self._screensaver_handler.watch_enabled = True
 
     def disable_turn_off_on_screensaver(self):
         """
         Disable the turning off of devices when the screensaver is active
         """
-        self._screensaver_thread.active = False
+        self._screensaver_handler.watch_enabled = False
 
     def version(self):
         """
@@ -424,11 +378,14 @@ class RazerDaemon(DBusService):
         # Start listening for device changes
         self._udev_observer.start()
 
-        # Start the mainloop
-        try:
-            self._main_loop.run()
-        except KeyboardInterrupt:
-            self.logger.debug('Shutting down')
+        # Event loop
+        loop = asyncio.get_event_loop()
+
+        # Install signal handlers for clean shutdown
+        for sig in signal.SIGINT, signal.SIGTERM, signal.SIGHUP:
+            loop.add_signal_handler(sig, self.quit)
+
+        loop.run_forever()
 
     def stop(self):
         """
@@ -436,26 +393,18 @@ class RazerDaemon(DBusService):
         """
         self.quit(None)
 
-    def quit(self, signum):
+    def quit(self, *args):
         """
-        Quit by stopping the main loop, observer, and screensaver thread
+        Quit by stopping the main loop and observer
         """
         # pylint: disable=unused-argument
-        if signum is None:
-            self.logger.info('Stopping daemon.')
-        else:
-            self.logger.info('Stopping daemon on signal %d', signum)
 
-        self._main_loop.quit()
+        self.logger.warning('Shutting down..')
+
+        asyncio.get_event_loop().stop()
 
         # Stop udev monitor
         self._udev_observer.send_stop()
-
-        # Stop screensaver
-        self._screensaver_thread.shutdown = True
-        self._screensaver_thread.join(timeout=2)
-        if self._screensaver_thread.is_alive():
-            self.logger.warning('Could not stop the screensaver thread')
 
         for device in self._razer_devices:
             device.dbus.close()
