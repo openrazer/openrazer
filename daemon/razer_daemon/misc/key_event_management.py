@@ -101,18 +101,22 @@ class KeyWatcher():
 
     async def _event_callback(self, device):
         async for event in device.async_read_loop():
-            if len(self._key_actions) == 0:
-                continue
+            try:
+                if len(self._key_actions) == 0:
+                    continue
 
-            date, action, keycode = self.parse_event_record(evdev.categorize(event))
+                date, action, keycode = self.parse_event_record(evdev.categorize(event))
 
-            # Skip if date, key_action and key_code is none as thats a spacer record
-            if date is None:
-                continue
+                # Skip if date, key_action and key_code is none as thats a spacer record
+                if date is None:
+                    continue
 
-            # Call all actions for the keypress
-            for key_action in self._key_actions:
-                await key_action(date, keycode, action)
+                # Call all actions for the keypress
+                for key_action in self._key_actions:
+                    await key_action(date, keycode, action)
+            except (OSError, IOError) as err:
+                self._logger.error("Error from event device: %s", err)
+                return
 
 
 class KeyboardKeyManager(object):
