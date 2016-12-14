@@ -153,6 +153,9 @@ class KeyboardKeyManager(object):
 
         self._event_files_locked = False
 
+        self._key_mapping = KEY_MAPPING
+        self._event_mapping = EVENT_MAPPING
+
         if len(event_files) > 0:
             self._logger.debug("Starting KeyWatcher")
         else:
@@ -165,11 +168,27 @@ class KeyboardKeyManager(object):
 
     @property
     def key_mapping(self):
-        return KEY_MAPPING
+        return self._key_mapping
+
+    @key_mapping.setter
+    def key_mapping(self, mapping):
+        self._key_mapping = mapping
 
     @property
     def event_mapping(self):
-        return EVENT_MAPPING
+        return self._event_mapping
+
+    @event_mapping.setter
+    def event_mapping(self, mapping):
+        self._event_mapping = mapping
+
+    def map_event(self, keycode):
+        result = None
+        if self.event_mapping is None:
+            result = evdev.ecodes.KEY[keycode][4:]
+        else:
+            result = self.event_mapping[keycode]
+        return result
 
     def add_key_action(self, action):
         self._keywatcher.add_key_action(action)
@@ -214,7 +233,7 @@ class KeyboardKeyManager(object):
 
         try:
             # Convert event ID to key name
-            key_name = self.event_mapping[key_id]
+            key_name = self.map_event(key_id)
 
             #self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
 
@@ -458,14 +477,8 @@ class TartarusKeyManager(KeyboardKeyManager):
         self._mode_modifier = False
         self._mode_modifier_combo = []
         self._mode_modifier_key_down = False
-
-    @property
-    def key_mapping(self):
-        return TARTARUS_KEY_MAPPING
-
-    @property
-    def event_mapping(self):
-        return TARTARUS_EVENT_MAPPING
+        self._key_mapping = TARTARUS_KEY_MAPPING
+        self._event_mapping = TARTARUS_EVENT_MAPPING
 
     async def key_action(self, event_time, key_id, key_press='press'):
         """
@@ -496,7 +509,7 @@ class TartarusKeyManager(KeyboardKeyManager):
         try:
             # Convert event ID to key name
 
-            key_name = self.event_mapping[key_id]
+            key_name = self.map_event(key_id)
             # Key press
 
             # This is the key for storing stats, by generating hour timestamps it will bucket data nicely.

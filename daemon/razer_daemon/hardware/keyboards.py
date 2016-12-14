@@ -6,6 +6,7 @@ import re
 from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
 from razer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, TartarusKeyManager as _TartarusKeyManager
 from razer_daemon.misc.ripple_effect import RippleManager as _RippleManager
+from razer_daemon.keyboard import BLADE_PRO_KEY_MAPPING
 
 
 class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
@@ -293,6 +294,8 @@ class RazerBladeProLate2016(_MacroKeyboard):
         super(RazerBladeProLate2016, self).__init__(*args, **kwargs)
 
         self.ripple_manager = _RippleManager(self, self._device_number)
+        self.key_manager.key_mapping = BLADE_PRO_KEY_MAPPING
+        self.key_manager.event_mapping = None
 
     def _close(self):
         """

@@ -8,7 +8,6 @@ from gi.repository import Gdk
 import struct
 import subprocess
 
-
 KEY_MAPPING = {
     # Row 0
     'ESC': (0, 1), 'F1': (0, 3), 'F2': (0, 4), 'F3': (0, 5), 'F4': (0, 6), 'F5': (0, 7), 'F6': (0, 8), 'F7': (0, 9), 'F8': (0, 10), 'F9': (0, 11), 'F10': (0, 12), 'F11': (0, 13), 'F12': (0, 14), 'PRTSCR': (0, 15), 'SCRLK': (0, 16), 'PAUSE': (0, 17), 'LOGO': (0, 20), 'JP1': (0, 21),
@@ -62,6 +61,25 @@ TARTARUS_KEY_MAPPING = {
     'DOWN': (2, 6),
     'MODE_SWITCH': (2, 7)
 
+}
+
+# This uses evdev native mappings!
+BLADE_PRO_KEY_MAPPING = {
+    # Row 0
+    'ESC': (0, 0), 'F1': (0, 1), 'F2': (0, 2), 'F3': (0, 3), 'F4': (0, 4), 'F5': (0, 5), 'F6': (0, 6), 'F7': (0, 7), 'F8': (0, 8), 'F9': (0, 9), 'F10': (0, 10), 'F11': (0, 11), 'F12': (0, 12), 'INSERT': (0, 15), 'DELETE': (0, 16), 'PREVIOUSSONG': (0, 17), 'NEXTSONG': (0, 18), 'PLAYPAUSE': (0, 23), 'MUTE': (0, 24),
+    # Row 1
+    'GRAVE': (1, 1), '1': (1, 2), '2': (1, 3), '3': (1, 4), '4':(1, 5), '5': (1, 6), '6': (1, 7), '7': (1, 8), '8': (1, 9), '9': (1, 10), '0': (1, 11), 'MINUS': (1, 12), 'EQUAL': (1, 13), 'BACKSPACE': (1, 16),
+    # Row 2
+    'TAB': (2, 1), 'Q': (2, 4), 'W': (2, 5), 'E': (2, 6), 'R': (2, 7), 'T': (2, 8), 'Y': (2, 9), 'U': (2, 10), 'I': (2, 11), 'O': (2, 12), 'P': (2, 13), 'LEFTBRACE': (2, 14), 'RIGHTBRACE': (2, 15), 'BACKSLASH': (2, 16),
+    # Row 3
+    'CAPSLOCK': (3, 1), 'A': (3, 4), 'S': (3, 5), 'D': (3, 6), 'F': (3, 7), 'G': (3, 8), 'H': (3, 9), 'J': (3, 10), 'K': (3, 11), 'L': (3, 12), 'SEMICOLON': (3, 13), 'APOSTROPHE': (3, 14), 'ENTER': (3, 16),
+    # Row 4
+    'LEFTSHIFT': (4, 1), 'Z': (4, 4), 'X': (4, 5), 'C': (4, 6), 'V': (4, 7), 'B': (4, 8), 'N': (4, 9), 'M': (4, 10), 'COMMA': (4, 11), 'DOT': (4, 12), 'SLASH': (4, 13), 'UP': (4, 14), 'RIGHTSHIFT': (4, 16),
+    # Row 5
+    'LEFTCTRL': (5, 1), 'LEFTMETA': (5, 4), 'LEFTALT': (5, 5), 'SPACE': (5, 8), 'RIGHTALT': (5, 11), 'RIGHTCTRL': (5, 12), 'LEFT': (5, 13), 'DOWN': (5, 14), 'RIGHT': (5, 15),
+
+    # Additional mappings
+    #'MACROMODE': (0, 11), 'GAMEMODE': (0, 12), 'MUTE': (0, 3), 'VOL_DOWN': (0, 4), 'VOL_UP': (0, 5), 'MEDIA_BACK': (0, 7), 'MEDIA_PLAY': (0, 8), 'MEDIA_FORWARD': (0, 9), 'BRIGHTNESSDOWN': (0, 13), 'BRIGHTNESSUP': (0, 14)
 }
 
 #
