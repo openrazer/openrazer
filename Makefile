@@ -6,7 +6,7 @@ KERNELDIR?=/lib/modules/$(shell uname -r)/build
 DRIVERDIR?=$(shell pwd)/driver
 
 # Where kernel drivers are going to be installed
-MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
+MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/hid
 
 # Python dir
 PYTHONDIR?=$(shell python3 -c 'import sys; print(sys.path[-1])')
@@ -111,7 +111,6 @@ udev_install:
 	@echo -e "\n::\033[34m Installing Razer udev rules\033[0m"
 	@echo "====================================================="
 	install -m 644 -v -D install_files/udev/99-razer.rules $(DESTDIR)/lib/udev/rules.d/99-razer.rules
-	install -m 755 -v -D install_files/udev/razer_mount $(DESTDIR)/lib/udev/razer_mount
 
 udev_uninstall:
 	@echo -e "\n::\033[34m Uninstalling Razer udev rules\033[0m"
