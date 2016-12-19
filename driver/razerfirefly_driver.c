@@ -466,20 +466,25 @@ static int razer_firefly_probe(struct hid_device *hdev, const struct hid_device_
         goto exit;
     }
     
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
-	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);
+    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE)
+    {
+    
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);
+    
+	}
     
     if (retval)
         goto exit_free;
@@ -519,20 +524,25 @@ static void razer_firefly_disconnect(struct hid_device *hdev)
 
     dev = hid_get_drvdata(hdev);
     
-    device_remove_file(&hdev->dev, &dev_attr_version);
-	device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
-    device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
-    device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
-    device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
-    device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);
-    device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);
-    device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
-    device_remove_file(&hdev->dev, &dev_attr_device_serial);
-    device_remove_file(&hdev->dev, &dev_attr_firmware_version);
-    device_remove_file(&hdev->dev, &dev_attr_device_type);
-    device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
-    device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
-    device_remove_file(&hdev->dev, &dev_attr_device_mode);
+    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE)
+    {
+    
+		device_remove_file(&hdev->dev, &dev_attr_version);
+		device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
+		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
+		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);
+		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);
+		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
+		device_remove_file(&hdev->dev, &dev_attr_device_serial);
+		device_remove_file(&hdev->dev, &dev_attr_firmware_version);
+		device_remove_file(&hdev->dev, &dev_attr_device_type);
+		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
+		device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+		device_remove_file(&hdev->dev, &dev_attr_device_mode);
+
+	}
 
     hid_hw_stop(hdev);
     kfree(dev);

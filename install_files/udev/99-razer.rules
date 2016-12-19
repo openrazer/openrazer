@@ -26,11 +26,6 @@ SUBSYSTEM=="input|hid", GROUP:="plugdev"
 SUBSYSTEM!="hid", GOTO="razer_end"
 
 # Rebind if needed
-DRIVER=="hid-generic", \
-    RUN+="/bin/sh -c 'echo $kernel > /sys/bus/hid/drivers/hid-generic/unbind'", \
-    RUN+="/bin/sh -c 'echo $kernel > /sys/bus/hid/drivers/$env{RAZER_DRIVER}/bind'"
-
-# Set permissions on the real driver
-RUN+="/bin/sh -c 'chgrp plugdev /sys/bus/hid/drivers/$env{RAZER_DRIVER}/$kernel/*'"
+SUBSYSTEM=="hid", RUN+="razer_mount $env{RAZER_DRIVER} $kernel"
 
 LABEL="razer_end"

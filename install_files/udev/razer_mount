@@ -1,0 +1,60 @@
+#!/bin/sh
+
+# Exit on error
+set -e
+
+PATH='/sbin:/bin:/usr/sbin:/usr/bin'
+
+if [ -x /usr/bin/logger ]; then
+    LOGGER=/usr/bin/logger
+elif [ -x /bin/logger ]; then
+    LOGGER=/bin/logger
+else
+    unset LOGGER
+fi
+
+# for diagnostics
+if [ -t 1 -a -z "$LOGGER" ] || [ ! -e '/dev/log' ]; then
+    mesg() {
+        echo "$@" >&2
+    }
+elif [ -t 1 ]; then
+    mesg() {
+        echo "$@"
+        $LOGGER -t "${0##*/}[$$]" "$@"
+    }
+else
+    mesg() {
+        $LOGGER -t "${0##*/}[$$]" "$@"
+    }
+fi
+
+DRIVER=$1
+DEVICE_ID=$2
+
+mesg "Driver $DRIVER"
+mesg "Device_ID $DEVICE_ID"
+
+if [ ! -d /sys/bus/hid/drivers/"$DRIVER" ] ; then
+	mesg "Modprobing $DRIVER"
+	modprobe "$DRIVER"
+	sleep 0.05
+	mesg "Modprobed $DRIVER"
+fi
+
+if [ -d /sys/bus/hid/drivers/hid-generic/"$DEVICE_ID" ] ; then
+	# Unbind from hid
+	mesg "Unbinding $DEVICE_ID from hid-generic"
+	printf '%s' "$DEVICE_ID" > /sys/bus/hid/drivers/hid-generic/unbind
+	mesg "Binding $DEVICE_ID to $DRIVER"
+	printf '%s' "$DEVICE_ID" > /sys/bus/hid/drivers/"$DRIVER"/bind
+	sleep 0.1
+	mesg "Finished binding $DEVICE_ID"
+fi
+
+if [ -d /sys/bus/hid/drivers/"$DRIVER"/"$DEVICE_ID" ] ; then
+	mesg "Changing group /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/"
+	chgrp -R plugdev /sys/bus/hid/drivers/"$DRIVER"/"$DEVICE_ID"/
+	mesg "Changed group /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/"
+fi
+
