@@ -3,7 +3,7 @@ Daemon class
 
 This class is the main core of the daemon, this serves a basic dbus module to control the main bit of the daemon
 """
-__version__ = '1.1.0'
+__version__ = '1.1.2'
 
 import configparser
 import logging
@@ -19,15 +19,13 @@ import dbus.mainloop.glib
 import gi
 gi.require_version('Gdk', '3.0')
 import gi.repository
-from gi.repository import GObject
+from gi.repository import GObject, GLib
+from pyudev import Context, Monitor, MonitorObserver
 
 import razer_daemon.hardware
 from razer_daemon.dbus_services.service import DBusService
 from razer_daemon.device import DeviceCollection
 from razer_daemon.misc.screensaver_thread import ScreensaverThread
-
-DAEMON_LOOP_INTERVAL = 0.05
-DEVICE_CHECK_INTERVAL = 200  # Interval seconds to check devices / DAEMON_LOOP_INTERVAL
 
 def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, pid_file=None, test_dir=None):
     """
@@ -112,8 +110,11 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
 
     # Create daemon and run
     daemon = RazerDaemon(verbose, log_dir, console_log, run_dir, config_file, test_dir=test_dir)
+
     try:
         daemon.run()
+    except KeyboardInterrupt:
+        daemon.logger.debug("Exited on user request")
     except Exception as err:
         daemon.logger.exception("Caught exception", exc_info=err)
 
@@ -170,7 +171,14 @@ class RazerDaemon(DBusService):
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
         DBusService.__init__(self, self.BUS_PATH, '/org/razer')
 
+        self._init_signals()
         self._main_loop = GObject.MainLoop()
+
+        # Listen for input events from udev
+        self._udev_context = Context()
+        udev_monitor = Monitor.from_netlink(self._udev_context)
+        udev_monitor.filter_by(subsystem='input')
+        self._udev_observer = MonitorObserver(udev_monitor, callback=self._udev_input_event, name='device-monitor')
 
         # Logging
         logging_level = logging.INFO
@@ -223,9 +231,48 @@ class RazerDaemon(DBusService):
         self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
         # TODO ======
 
-        # Setup quit signals
-        signal.signal(signal.SIGINT, self.quit)
-        signal.signal(signal.SIGTERM, self.quit)
+    def _init_signals(self):
+        """
+        Heinous hack to properly handle signals on the mainloop. Necessary
+        if we want to use the mainloop run() functionality.
+        """
+        def signal_action(signum):
+            """
+            Action to take when a signal is trapped
+            """
+            self.quit(signum)
+
+        def idle_handler():
+            """
+            GLib idle handler to propagate signals
+            """
+            GLib.idle_add(signal_action, priority=GLib.PRIORITY_HIGH)
+
+        def handler(*args):
+            """
+            Unix signal handler
+            """
+            signal_action(args[0])
+
+        def install_glib_handler(sig):
+            """
+            Choose a compatible method and install the handler
+            """
+            unix_signal_add = None
+
+            if hasattr(GLib, "unix_signal_add"):
+                unix_signal_add = GLib.unix_signal_add
+            elif hasattr(GLib, "unix_signal_add_full"):
+                unix_signal_add = GLib.unix_signal_add_full
+
+            if unix_signal_add:
+                unix_signal_add(GLib.PRIORITY_HIGH, sig, handler, sig)
+            else:
+                print("Can't install GLib signal handler!")
+
+        for sig in signal.SIGINT, signal.SIGTERM, signal.SIGHUP:
+            signal.signal(sig, idle_handler)
+            GLib.idle_add(install_glib_handler, sig, priority=GLib.PRIORITY_HIGH)
 
     def read_config(self, config_file):
         """
@@ -309,17 +356,6 @@ class RazerDaemon(DBusService):
         Loops through the available hardware classes, loops through
         each device in the system and adds it if needs be.
         """
-        if self._test_dir is not None:
-            devices = os.listdir(self._test_dir)
-            dev_path = self._test_dir
-        else:
-            try:
-                devices = os.listdir('/sys/bus/hid/devices')
-            except FileNotFoundError:
-                devices = []
-            finally:
-                dev_path = '/sys/bus/hid/devices'
-
         classes = razer_daemon.hardware.get_device_classes()
 
         if first_run:
@@ -330,16 +366,16 @@ class RazerDaemon(DBusService):
 
                 self.logger.debug(format_str.format(cls.__name__ + ' ', cls.USB_VID, cls.USB_PID))
 
-        device_number = 0
-        for device_id in devices:
+        for device in self._udev_context.list_devices(subsystem='hid'):
+            device_number = 0
+
             for device_class in classes:
-                if device_id in self._razer_devices:
+                if device.sys_name in self._razer_devices:
                     continue
 
-                if device_class.match(device_id, dev_path=dev_path):  # Check it matches sys/ ID format and has device_type file
-                    self.logger.info('Found device.%d: %s', device_number, device_id)
-                    device_path = os.path.join(dev_path, device_id)
-                    razer_device = device_class(device_path, device_number, self._config, testing=self._test_dir is not None)
+                if device_class.match(device.sys_name, device.parent.sys_path):  # Check it matches sys/ ID format and has device_type file
+                    self.logger.info('Found device.%d: %s', device_number, device.sys_name)
+                    razer_device = device_class(device.sys_path, device_number, self._config, testing=self._test_dir is not None)
 
                     # Wireless devices sometimes dont listen
                     count = 0
@@ -350,10 +386,10 @@ class RazerDaemon(DBusService):
                             break
                         count += 1
                     else:
-                        logging.warning("Could not get serial for device {0}. Skipping".format(device_id))
+                        logging.warning("Could not get serial for device {0}. Skipping".format(device.sys_name))
                         continue
 
-                    self._razer_devices.add(device_id, device_serial, razer_device)
+                    self._razer_devices.add(device.sys_name, device_serial, razer_device)
 
                     device_number += 1
 
@@ -361,23 +397,23 @@ class RazerDaemon(DBusService):
         """
         Go through the list of current devices and if they no longer exist then remove them
         """
-        devices_to_remove = []
-
-        for device in self._razer_devices:
+        hid_devices = [dev.sys_name for dev in self._udev_context.list_devices(subsystem='hid')]
+        devices_to_remove = [dev for dev in self._razer_devices if dev not in hid_devices]
+        for device in devices_to_remove:
             if self._test_dir is not None:
-                device_path = os.path.join(self._test_dir, device.device_id)
-            else:
-                device_path = os.path.join('/sys/bus/hid/devices', device.device_id)
-
-            if not os.path.exists(device_path):
                 # Remove from DBus
                 device.dbus.remove_from_connection()
-                devices_to_remove.append(device.device_id)
 
-        for device_id in devices_to_remove:
             # Remove device
-            self.logger.warning("Device %s is missing. Removing from DBus", device_id)
-            del self._razer_devices[device_id]
+            self.logger.warning("Device %s is missing. Removing from DBus", device.device_id)
+            del self._razer_devices[device.device_id]
+
+    def _udev_input_event(self, device):
+        self.logger.debug('Device event [%s]: %s', device.action, device.device_path)
+        if device.action == 'add':
+            self._load_devices()
+        elif device.action == 'remove':
+            self._remove_devices()
 
     def run(self):
         """
@@ -385,37 +421,35 @@ class RazerDaemon(DBusService):
         """
         self.logger.info('Serving DBus')
 
-        # Counter for managing periodic tasks
-        counter = 0
+        # Start listening for device changes
+        self._udev_observer.start()
 
-        # Can't just use mainloop.run() as that blocks and
-        # then signaling exit doesn't work
-        main_loop_context = self._main_loop.get_context()
-        while self._main_loop is not None:
-            if main_loop_context.pending():
-                main_loop_context.iteration()
-            else:
-                time.sleep(DAEMON_LOOP_INTERVAL)
-
-            if counter > DEVICE_CHECK_INTERVAL:  # Time sleeps 1ms so DEVICE_CHECK_INTERVAL is in milliseconds
-                self._remove_devices()
-                self._load_devices()
-                counter = 0
-            counter += 1
+        # Start the mainloop
+        try:
+            self._main_loop.run()
+        except KeyboardInterrupt:
+            self.logger.debug('Shutting down')
 
     def stop(self):
         """
         Wrapper for quit
         """
-        self.quit(None, None)
+        self.quit(None)
 
-    def quit(self, signum, frame):
+    def quit(self, signum):
         """
-        Quit by stopping the main loop and screensaver thread
+        Quit by stopping the main loop, observer, and screensaver thread
         """
         # pylint: disable=unused-argument
-        self.logger.info('Stopping daemon.')
-        self._main_loop = None
+        if signum is None:
+            self.logger.info('Stopping daemon.')
+        else:
+            self.logger.info('Stopping daemon on signal %d', signum)
+
+        self._main_loop.quit()
+
+        # Stop udev monitor
+        self._udev_observer.send_stop()
 
         # Stop screensaver
         self._screensaver_thread.shutdown = True

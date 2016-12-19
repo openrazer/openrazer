@@ -6,7 +6,7 @@ KERNELDIR?=/lib/modules/$(shell uname -r)/build
 DRIVERDIR?=$(shell pwd)/driver
 
 # Where kernel drivers are going to be installed
-MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/usb/misc
+MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/hid
 
 # Python dir
 PYTHONDIR?=$(shell python3 -c 'import sys; print(sys.path[-1])')
@@ -116,7 +116,7 @@ udev_install:
 udev_uninstall:
 	@echo -e "\n::\033[34m Uninstalling Razer udev rules\033[0m"
 	@echo "====================================================="
-	rm -f $(DESTDIR)/lib/udev/rules.d/99-razer.rules
+	rm -f $(DESTDIR)/lib/udev/rules.d/99-razer.rules $(DESTDIR)/lib/udev/razer_mount
 
 
 # Install for Ubuntu
@@ -133,7 +133,7 @@ fedora_install:
 install: all driver_install udev_install python_library_install
 	@make --no-print-directory -C daemon install DESTDIR=$(DESTDIR)
 
-uninstall: driver_uninstall udev_uninstall python_library_uninstall remove_rcd_links
+uninstall: driver_uninstall udev_uninstall python_library_uninstall
 	@make --no-print-directory -C daemon uninstall DESTDIR=$(DESTDIR)
 
 

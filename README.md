@@ -1,5 +1,12 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/fd36d0d76e9842c4a7d67118bd01b275)](https://www.codacy.com/app/terry_5/razer-drivers?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=terrycain/razer-drivers&amp;utm_campaign=Badge_Grade)
 
+-------------------
+
+### No device found
+Those of you on Ubuntu 16.10, some of you on 16.04 and at least some arch users might notice that even though your device is listed as supported it doesnt appear on any of the supporting applications. Udev is not playing ball. Look at [this](https://github.com/terrycain/razer-drivers/issues/67#issuecomment-260419314) comment and run it. Am currently working on a little service that should bind devices and set up the permissions like udev would.
+
+---------------------
+
 # Razer Drivers
 
 A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
@@ -18,6 +25,7 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | Razer BlackWidow Chroma                       |  1532:0203  |   ✔    |   ✔    |
 | Razer Blade Stealth                           |  1532:0205  |   ✔    |   ✔    |
 | Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔    |   ✔    |
+| Razer Blade Pro (Late 2016)                   |  1532:0210  |   ✔    |   ✔    |
 | Razer BlackWidow Ultimate 2016                |  1532:0214  |   ✔    |   ✔    |
 | Razer BlackWidow X Chroma                     |  1532:0216  |   ✔    |   ✔    |
 | Razer BlackWidow X Tournament Edition Chroma  |  1532:021A  |   ✔    |   ✔    |
