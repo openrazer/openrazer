@@ -1,29 +1,31 @@
-# This seems to work
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="011b", ENV{is_razer_kbd}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="010d", ENV{is_razer_kbd}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="011a", ENV{is_razer_kbd}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0203", ENV{is_razer_kbd}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0205", ENV{is_razer_kbd}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0208", ENV{is_razer_kbd}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0209", ENV{is_razer_kbd}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0214", ENV{is_razer_kbd}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0216", ENV{is_razer_kbd}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="021a", ENV{is_razer_kbd}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0220", ENV{is_razer_kbd}="yes"
+ACTION!="add", GOTO="razer_end"
+SUBSYSTEMS=="usb|input|hid", ATTRS{idVendor}=="1532", GOTO="razer_vendor"
+GOTO="razer_end"
 
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0042", ENV{is_razer_mouse}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0044", ENV{is_razer_mouse}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0045", ENV{is_razer_mouse}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0046", ENV{is_razer_mouse}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0048", ENV{is_razer_mouse}="yes"
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="002f", ENV{is_razer_mouse}="yes"
+LABEL="razer_vendor"
 
-KERNEL=="????:????:????.????", DRIVERS=="usb", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0c00", ENV{is_razer_firefly}="yes"
+# Keyboards
+ATTRS{idProduct}=="010d|011b|011a|0203|0205|0208|0209|0210|0214|0216|021a|021e|0220", \
+    ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerkbd"
 
-SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_kbd}=="yes", RUN+="razer_mount razerkbd $kernel"
+# Mice
+ATTRS{idProduct}=="002f|0042|0043|0044|0045|0046|0048", \
+    ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razermouse"
 
-SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_mouse}=="yes", ATTRS{bInterfaceNumber}=="00", RUN+="razer_mount razermouse $kernel"
+# Firefly
+ATTRS{idProduct}=="0c00", \
+    ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerfirefly"
 
-SUBSYSTEM=="hid", DRIVER=="hid-generic", ENV{is_razer_firefly}=="yes", ATTRS{bInterfaceNumber}=="00", RUN+="razer_mount razerfirefly $kernel"
+# Get out if no match
+ENV{ID_RAZER_CHROMA}!="1", GOTO="razer_end"
 
-KERNEL=="event[0-9]*", GROUP:="plugdev"
+# Set permissions if this is an input node
+SUBSYSTEM=="input|hid", GROUP:="plugdev"
+
+# We're done unless it's the hid node
+SUBSYSTEM!="hid", GOTO="razer_end"
+
+# Rebind if needed
+SUBSYSTEM=="hid", RUN+="razer_mount $env{RAZER_DRIVER} $kernel"
+
+LABEL="razer_end"

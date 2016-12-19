@@ -3,6 +3,7 @@ BlackWidow Chroma Effects
 """
 from razer_daemon.dbus_services import endpoint
 
+
 @endpoint('razer.device.lighting.brightness', 'getBrightness', out_sig='d')
 def get_brightness(self):
     """
@@ -13,11 +14,15 @@ def get_brightness(self):
     """
     self.logger.debug("DBus call get_brightness")
 
-    driver_path = self.get_driver_path('set_brightness')
+    driver_path = self.get_driver_path('matrix_brightness')
 
     with open(driver_path, 'r') as driver_file:
-        brightness = float(driver_file.read()) * (100.0/255.0)
-        return round(brightness, 2)
+        brightness = round(float(driver_file.read()) * (100.0/255.0), 2)
+
+        self.method_args['brightness'] = brightness
+
+        return brightness
+
 
 @endpoint('razer.device.lighting.brightness', 'setBrightness', in_sig='d')
 def set_brightness(self, brightness):
@@ -29,7 +34,9 @@ def set_brightness(self, brightness):
     """
     self.logger.debug("DBus call set_brightness")
 
-    driver_path = self.get_driver_path('set_brightness')
+    driver_path = self.get_driver_path('matrix_brightness')
+
+    self.method_args['brightness'] = brightness
 
     brightness = int(round(brightness * (255.0/100.0)))
     if brightness > 255:
@@ -43,6 +50,7 @@ def set_brightness(self, brightness):
     # Notify others
     self.send_effect_event('setBrightness', brightness)
 
+
 @endpoint('razer.device.led.gamemode', 'getGameMode', out_sig='b')
 def get_game_mode(self):
     """
@@ -53,10 +61,11 @@ def get_game_mode(self):
     """
     self.logger.debug("DBus call get_game_mode")
 
-    driver_path = self.get_driver_path('mode_game')
+    driver_path = self.get_driver_path('game_led_state')
 
     with open(driver_path, 'r') as driver_file:
         return driver_file.read().strip() == '1'
+
 
 @endpoint('razer.device.led.gamemode', 'setGameMode', in_sig='b')
 def set_game_mode(self, enable):
@@ -68,13 +77,14 @@ def set_game_mode(self, enable):
     """
     self.logger.debug("DBus call set_game_mode")
 
-    driver_path = self.get_driver_path('mode_game')
+    driver_path = self.get_driver_path('game_led_state')
 
     with open(driver_path, 'w') as driver_file:
         if enable:
             driver_file.write('1')
         else:
             driver_file.write('0')
+
 
 @endpoint('razer.device.led.macromode', 'getMacroMode', out_sig='b')
 def get_macro_mode(self):
@@ -86,10 +96,11 @@ def get_macro_mode(self):
     """
     self.logger.debug("DBus call get_macro_mode")
 
-    driver_path = self.get_driver_path('mode_macro')
+    driver_path = self.get_driver_path('macro_led_state')
 
     with open(driver_path, 'r') as driver_file:
         return driver_file.read().strip() == '1'
+
 
 @endpoint('razer.device.led.macromode', 'setMacroMode', in_sig='b')
 def set_macro_mode(self, enable):
@@ -101,13 +112,14 @@ def set_macro_mode(self, enable):
     """
     self.logger.debug("DBus call set_macro_mode")
 
-    driver_path = self.get_driver_path('mode_macro')
+    driver_path = self.get_driver_path('macro_led_state')
 
     with open(driver_path, 'w') as driver_file:
         if enable:
             driver_file.write('1')
         else:
             driver_file.write('0')
+
 
 @endpoint('razer.device.led.macromode', 'getMacroEffect', out_sig='i')
 def get_macro_effect(self):
@@ -119,10 +131,11 @@ def get_macro_effect(self):
     """
     self.logger.debug("DBus call get_macro_effect")
 
-    driver_path = self.get_driver_path('mode_macro_effect')
+    driver_path = self.get_driver_path('macro_led_effect')
 
     with open(driver_path, 'r') as driver_file:
         return int(driver_file.read().strip())
+
 
 @endpoint('razer.device.led.macromode', 'setMacroEffect', in_sig='y')
 def set_macro_effect(self, effect):
@@ -134,7 +147,7 @@ def set_macro_effect(self, effect):
     """
     self.logger.debug("DBus call set_macro_effect")
 
-    driver_path = self.get_driver_path('mode_macro_effect')
+    driver_path = self.get_driver_path('macro_led_effect')
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(int(effect)))
@@ -153,13 +166,14 @@ def set_wave_effect(self, direction):
     # Notify others
     self.send_effect_event('setWave', direction)
 
-    driver_path = self.get_driver_path('mode_wave')
+    driver_path = self.get_driver_path('matrix_effect_wave')
 
-    if direction not in (1, 2):
-        direction = 1
+    if direction not in self.WAVE_DIRS:
+        direction = self.WAVE_DIRS[0]
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(direction))
+
 
 @endpoint('razer.device.lighting.chroma', 'setStatic', in_sig='yyy')
 def set_static_effect(self, red, green, blue):
@@ -180,12 +194,13 @@ def set_static_effect(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
-    driver_path = self.get_driver_path('mode_static')
+    driver_path = self.get_driver_path('matrix_effect_static')
 
     payload = bytes([red, green, blue])
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
 
 @endpoint('razer.device.lighting.chroma', 'setSpectrum')
 def set_spectrum_effect(self):
@@ -197,10 +212,11 @@ def set_spectrum_effect(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
-    driver_path = self.get_driver_path('mode_spectrum')
+    driver_path = self.get_driver_path('matrix_effect_spectrum')
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write('1')
+
 
 @endpoint('razer.device.lighting.chroma', 'setNone')
 def set_none_effect(self):
@@ -212,10 +228,11 @@ def set_none_effect(self):
     # Notify others
     self.send_effect_event('setNone')
 
-    driver_path = self.get_driver_path('mode_none')
+    driver_path = self.get_driver_path('matrix_effect_none')
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write('1')
+
 
 @endpoint('razer.device.lighting.chroma', 'setReactive', in_sig='yyyy')
 def set_reactive_effect(self, red, green, blue, speed):
@@ -236,7 +253,7 @@ def set_reactive_effect(self, red, green, blue, speed):
     """
     self.logger.debug("DBus call set_reactive_effect")
 
-    driver_path = self.get_driver_path('mode_reactive')
+    driver_path = self.get_driver_path('matrix_effect_reactive')
 
     # Notify others
     self.send_effect_event('setReactive', red, green, blue, speed)
@@ -249,6 +266,7 @@ def set_reactive_effect(self, red, green, blue, speed):
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
 
+
 @endpoint('razer.device.lighting.chroma', 'setBreathRandom')
 def set_breath_random_effect(self):
     """
@@ -259,12 +277,13 @@ def set_breath_random_effect(self):
     # Notify others
     self.send_effect_event('setBreathRandom')
 
-    driver_path = self.get_driver_path('mode_breath')
+    driver_path = self.get_driver_path('matrix_effect_breath')
 
     payload = b'1'
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
 
 @endpoint('razer.device.lighting.chroma', 'setBreathSingle', in_sig='yyy')
 def set_breath_single_effect(self, red, green, blue):
@@ -285,12 +304,13 @@ def set_breath_single_effect(self, red, green, blue):
     # Notify others
     self.send_effect_event('setBreathSingle', red, green, blue)
 
-    driver_path = self.get_driver_path('mode_breath')
+    driver_path = self.get_driver_path('matrix_effect_breath')
 
     payload = bytes([red, green, blue])
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
 
 @endpoint('razer.device.lighting.chroma', 'setBreathDual', in_sig='yyyyyy')
 def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
@@ -320,12 +340,13 @@ def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
     # Notify others
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
 
-    driver_path = self.get_driver_path('mode_breath')
+    driver_path = self.get_driver_path('matrix_effect_breath')
 
     payload = bytes([red1, green1, blue1, red2, green2, blue2])
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
 
 @endpoint('razer.device.lighting.chroma', 'setCustom')
 def set_custom_effect(self):
@@ -335,12 +356,13 @@ def set_custom_effect(self):
     # TODO uncomment
     # self.logger.debug("DBus call set_custom_effect")
 
-    driver_path = self.get_driver_path('mode_custom')
+    driver_path = self.get_driver_path('matrix_effect_custom')
 
     payload = b'1'
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
 
 @endpoint('razer.device.lighting.chroma', 'setKeyRow', in_sig='ay', byte_arrays=True)
 def set_key_row(self, payload):
@@ -360,27 +382,10 @@ def set_key_row(self, payload):
     # TODO uncomment
     # self.logger.debug("DBus call set_key_row")
 
-    driver_path = self.get_driver_path('set_key_row')
+    driver_path = self.get_driver_path('matrix_custom_frame')
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
-
-# Not sure if works on firefly
-@endpoint('razer.device.lighting.chroma', 'clearKeyRow', in_sig='y')
-def clear_key_row(self, row_id):
-    """
-    Clear the RGB matrix on the device
-
-    :param row_id: Row ID
-    :type row_id: int
-    """
-    self.logger.debug("DBus call clear_key_row")
-
-    driver_path = self.get_driver_path('temp_clear_row')
-
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write(str(int(row_id)))
-
 
 
 @endpoint('razer.device.lighting.custom', 'setRipple', in_sig='yyyd')
@@ -405,6 +410,7 @@ def set_ripple_effect(self, red, green, blue, refresh_rate):
     # Notify others
     self.send_effect_event('setRipple', red, green, blue, refresh_rate)
 
+
 @endpoint('razer.device.lighting.custom', 'setRippleRandomColour', in_sig='d')
 def set_ripple_effect_random_colour(self, refresh_rate):
     """
@@ -418,3 +424,50 @@ def set_ripple_effect_random_colour(self, refresh_rate):
     # Notify others
     self.send_effect_event('setRipple', None, None, None, refresh_rate)
 
+
+@endpoint('razer.device.lighting.chroma', 'setStarlightRandom', in_sig='y')
+def set_starlight_random_effect(self, speed):
+    """
+    Set startlight random mode
+    """
+    self.logger.debug("DBus call set_starlight_random")
+
+    driver_path = self.get_driver_path('matrix_effect_starlight')
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(bytes([speed]))
+
+    # Notify others
+    self.send_effect_event('setStarlightRandom')
+
+
+@endpoint('razer.device.lighting.chroma', 'setStarlightSingle', in_sig='yyyy')
+def set_starlight_single_effect(self, speed, red, green, blue):
+    """
+    Set starlight mode
+    """
+    self.logger.debug("DBus call set_starlight_single")
+
+    driver_path = self.get_driver_path('matrix_effect_starlight')
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(bytes([speed, red, green, blue]))
+
+    # Notify others
+    self.send_effect_event('setStarlightSingle', speed, red, green, blue)
+
+
+@endpoint('razer.device.lighting.chroma', 'setStarlightDual', in_sig='yyyyyyy')
+def set_starlight_dual_effect(self, speed, red1, green1, blue1, red2, green2, blue2):
+    """
+    Set starlight dual mode
+    """
+    self.logger.debug("DBus call set_starlight_dual")
+
+    driver_path = self.get_driver_path('matrix_effect_starlight')
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(bytes([speed, red1, green1, blue1, red2, green2, blue2]))
+
+    # Notify others
+    self.send_effect_event('setStarlightDual', speed, red1, green1, blue1)

@@ -11,8 +11,8 @@
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/init.h>
-#include <linux/usb/input.h>
 #include <linux/hid.h>
+
 
 #include "razercommon.h"
 
@@ -81,8 +81,11 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
     int len;
     int retval;
     int result = 0;
+    char *buf;
 
-    memset(response_report, 0, sizeof(struct razer_report));
+    buf = kzalloc(sizeof(struct razer_report), GFP_KERNEL);
+    if (buf == NULL)
+        return -ENOMEM;
 
     // Send the request to the device.
     // TODO look to see if index needs to be different for the request and the response
@@ -94,11 +97,14 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
           request_type,    // RequestType
           value,           // Value
           response_index,  // Index
-          response_report, // Data
+          buf,             // Data
           size, 
           USB_CTRL_SET_TIMEOUT);
 
     usleep_range(wait_min, wait_max);
+
+    memcpy(response_report, buf, sizeof(struct razer_report));
+    kfree(buf);
 
     // Error if report is wrong length
     if(len != 90)
@@ -168,7 +174,7 @@ struct razer_report get_empty_razer_report(void)
  */
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message)
 {
-    printk(KERN_WARNING "%s: %s. Start Marker: %02x id: %02x Num Params: %02x Reserved: %02x Command: %02x Params: %02x%02x%02x%02x%02x%02x .\n",
+    printk(KERN_WARNING "%s: %s. Start Marker: %02x id: %02x Num Params: %02x Reserved: %02x Command: %02x Params: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x .\n",
         driver_name,
         message,
         report->status,
@@ -176,11 +182,30 @@ void print_erroneous_report(struct razer_report* report, char* driver_name, char
         report->data_size,
         report->command_class,
         report->command_id.id,
-        report->arguments[0], report->arguments[1], report->arguments[2], report->arguments[3], report->arguments[4], report->arguments[5]);
+        report->arguments[0], report->arguments[1], report->arguments[2], report->arguments[3], report->arguments[4], report->arguments[5],
+        report->arguments[6], report->arguments[7], report->arguments[8], report->arguments[9], report->arguments[10], report->arguments[11], 
+        report->arguments[12], report->arguments[13], report->arguments[14], report->arguments[15]);
 }
 
-
-
+/**
+ * Clamp a value to a min,max
+ */
+unsigned char clamp_u8(unsigned char value, unsigned char min, unsigned char max)
+{
+	if(value > max)
+		return max;
+	if(value < min)
+		return min;
+	return value;
+}
+unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned short max)
+{
+	if(value > max)
+		return max;
+	if(value < min)
+		return min;
+	return value;
+}
 
 
 

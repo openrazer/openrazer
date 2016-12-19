@@ -4,8 +4,8 @@ Simple program to walk through each key, illuminating it red so I can see
 what element in the 22 RGB list each key referrs to.
 """
 
-colour_file = '/sys/bus/hid/drivers/razerkbd/0003:1532:0203.0003/set_key_row'
-custom_mode = '/sys/bus/hid/drivers/razerkbd/0003:1532:0203.0003/mode_custom'
+colour_file = '/sys/bus/hid/drivers/razerkbd/0003:1532:021E.0014/matrix_custom_frame'
+custom_mode = '/sys/bus/hid/drivers/razerkbd/0003:1532:021E.0014/matrix_effect_custom'
 
 
 def clear_row(row_num):
@@ -20,7 +20,7 @@ def clear_row(row_num):
 
 def gen_row(row_num):
 
-    result = bytes([row_num]) # Results in b'\x00', b'\x01' ...
+    result = bytes([row_num, 0, 0x15]) # Results in b'\x00', b'\x01' ...
 
     for i in range(0, 22):
         for j in range(0, 22):

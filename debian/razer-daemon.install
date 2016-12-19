@@ -1,4 +1,4 @@
 usr/lib/python3/dist-packages/razer_daemon
-usr/sbin/razer-service
+usr/bin/razer-service
 usr/share/razer-service
 etc/xdg/autostart

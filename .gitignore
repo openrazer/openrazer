@@ -30,6 +30,18 @@
 *.x86_64
 *.hex
 
+# kdevelop files
+.kdev4/*
+*.kdev4
+
+# vim temp files
+*.un~
+*~
+*.swp
+
+# clion files
+cmake-build-debug/*
+
 # Cached/Pre-compiled Python files
 *.pyc
 __pycache__

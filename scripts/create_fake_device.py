@@ -27,7 +27,7 @@ class FakeDevicePrompt(cmd.Cmd):
 
         # If only 1 device, auto use that
         if len(self._device_map) == 1:
-            self._change_device(self._device_map.keys()[0])
+            self._change_device(list(self._device_map.keys())[0])
         else:
             self._change_device(None)
 
@@ -39,7 +39,7 @@ class FakeDevicePrompt(cmd.Cmd):
             for endpoint, details in self._device_map[self._current_device].endpoints.items():
                 self._ep[endpoint] = details[2]
 
-            self._read = [endpoint for endpoint, perm in self._ep.items() if perm in ('r', 'rw')]
+            self._read = [endpoint for endpoint, perm in self._ep.items()]
             self._write = [endpoint for endpoint, perm in self._ep.items() if perm in ('w', 'rw')]
         else:
             self._current_device = None
@@ -94,7 +94,7 @@ class FakeDevicePrompt(cmd.Cmd):
     def do_read(self, arg, binary=False):
         """Read ASCII from given device file"""
         if self._current_device is not None:
-            if arg in self._ep and self._ep[arg] in ('r', 'rw'):
+            if arg in self._ep:
                 result = self._device_map[self._current_device].get(arg, binary=binary)
 
                 print(result)
@@ -123,13 +123,11 @@ class FakeDevicePrompt(cmd.Cmd):
             try:
                 device_file, data = arg.split(' ', 1)
 
-                if device_file in self._ep and self._ep[device_file] in ('w', 'rw'):
+                if device_file in self._ep:
                     if len(data) > 0:
                         self._device_map[self._current_device].set(device_file, data)
 
                         print("{0}: {1}".format(device_file, self._device_map[self._current_device].get(device_file)))
-                elif device_file in self._ep:
-                    print('Device endpoint not writable')
                 else:
                     print("Device endpoint not found")
 

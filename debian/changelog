@@ -1,3 +1,22 @@
+razer (1.1.2-0ubuntu1) trusty; urgency=low
+
+  * Fucking launchpad
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sun, 4 Dec 2016 10:09:00 +0000
+
+razer (1.1.1-0ubuntu1) trusty; urgency=low
+
+  * Fixed merge bug
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sun, 4 Dec 2016 09:54:00 +0000
+
+razer (1.1.0-0ubuntu1) trusty; urgency=low
+
+  * Added support for Razer DeathAdder Chroma
+  * Fixed bug in pylib
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Fri, 2 Dec 2016 23:02:00 +0000
+
 razer (1.0.17-0ubuntu1) trusty; urgency=low
 
   * Possible Fix for uname -r kernel mismatch when building on launchpad

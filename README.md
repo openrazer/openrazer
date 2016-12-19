@@ -1,5 +1,12 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/fd36d0d76e9842c4a7d67118bd01b275)](https://www.codacy.com/app/terry_5/razer-drivers?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=terrycain/razer-drivers&amp;utm_campaign=Badge_Grade)
 
+-------------------
+
+### No device found
+Those of you on Ubuntu 16.10, some of you on 16.04 and at least some arch users might notice that even though your device is listed as supported it doesnt appear on any of the supporting applications. Udev is not playing ball. Look at [this](https://github.com/terrycain/razer-drivers/issues/67#issuecomment-260419314) comment and run it. Am currently working on a little service that should bind devices and set up the permissions like udev would.
+
+---------------------
+
 # Razer Drivers
 
 A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
@@ -10,38 +17,52 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 
 ## Device Support
 ### Keyboards
-| Device                                        | Driver | Daemon |
-| --------------------------------------------- | ------ | ------ |
-| Razer BlackWidow Classic                      |   ✔    |        |
-| Razer BlackWidow Ultimate 2012                |   ✔    |        |
-| Razer BlackWidow Ultimate 2013                |   ✔    |   ✔    |
-| Razer BlackWidow Ultimate 2016                |   ✔    |   ✔    |
-| Razer BlackWidow Chroma                       |   ✔    |   ✔    |
-| Razer BlackWidow Tournament Edition Chroma    |   ✔    |   ✔    |
-| Razer BlackWidow X Chroma                     |   ✔    |   ✔    |
-| Razer BlackWidow X Tournament Edition Chroma  |   ✔    |   ✔    |
-| Razer Blade Stealth                           |   ✔    |   ✔    |
-| Razer Blade Stealth (Late 2016)               |   ✔    |   ✔    |
+| Device                                        | USB VID:PID | Driver | Daemon |
+| --------------------------------------------- | ----------- | ------ | ------ |
+| Razer BlackWidow Ultimate 2012                |  1532:010D  |   ✔    |        |
+| Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔    |   ✔    |
+| Razer BlackWidow Classic                      |  1532:011B  |   ✔    |        |
+| Razer BlackWidow Chroma                       |  1532:0203  |   ✔    |   ✔    |
+| Razer Blade Stealth                           |  1532:0205  |   ✔    |   ✔    |
+| Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔    |   ✔    |
+| Razer Blade Pro (Late 2016)                   |  1532:0210  |   ✔    |   ✔    |
+| Razer BlackWidow Ultimate 2016                |  1532:0214  |   ✔    |   ✔    |
+| Razer BlackWidow X Chroma                     |  1532:0216  |   ✔    |   ✔    |
+| Razer BlackWidow X Tournament Edition Chroma  |  1532:021A  |   ✔    |   ✔    |
+| Razer Ornata Chroma                           |  1532:021e  |   ✔    |   ✔    |
+| Razer Blade Stealth (Late 2016)               |  1532:0220  |   ✔    |   ✔    |
 
 ### Mouse
-| Device                          | Driver | Daemon |
-| ------------------------------- | ------ | ------ |
-| Razer Mamba (Wireless)          |   ✔    |   ✔    |
-| Razer Mamba (Wired)             |   ✔    |   ✔    |
-| Razer Mamba Tournament Edition  |   ✔    |   ✔    |
-| Razer Abyssus 2014              |   ✔    |   ✔    |
-| Razer Imperator 2012            |   ✔    |   ✔    |
-| Razer Orochi (Wired)            |   ✔    |   ✔    |
+| Device                          | USB VID:PID | Driver | Daemon |
+| ------------------------------- | ----------- | ------ | ------ |
+| Razer Mamba (Wireless)          |  1532:0045  |   ✔     |   ✔    |
+| Razer Mamba (Wired)             |  1532:0044  |   ✔     |   ✔    |
+| Razer Mamba Tournament Edition  |  1532:0046  |   ✔     |   ✔    |
+| Razer Abyssus 2014              |  1532:0042  |   ✔     |   ✔    |
+| Razer Imperator 2012            |  1532:002F  |   ✔     |   ✔    |
+| Razer Orochi (Wired)            |  1532:0048  |   ✔     |   ✔    |
+| Razer DeathAdder Chroma         |  1532:0043  |   ✔     |   ✔    |
 
 ### Mousemats
-| Device        | Driver | Daemon |
-| ------------- | ------ | ------ |
-| Razer Firefly |   ✔    |   ✔    |
+| Device        | USB VID:PID | Driver | Daemon |
+| ------------- | ----------- | ------ | ------ |
+| Razer Firefly |  1532:0C00  |   ✔    |   ✔     |
 
 ### Peripherals
-| Device          | Driver | Daemon |
-| --------------- | ------ | ------ |
-| Razer Tartarus  |   ✔    |   ✔    |
+| Device          | USB VID:PID | Driver | Daemon |
+| --------------- | ----------- | ------ | ------ |
+| Razer Tartarus  |  1532:0208  |   ✔    |   ✔     |
+
+
+#### Determining the Device ID
+Razer's devices use a VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:
+
+    lsusb | grep '1532:'
+
+This will output something similar to this:
+
+    Bus 003 Device 005: ID 1532:0203 Razer USA, Ltd
+
 
 ### Daemon Support
 I've created a daemon that lives in userspace which allows one to easily interact with the driver. It abstracts away some of the logic and also (will eventually) allow you to build
@@ -71,7 +92,7 @@ sudo apt install python3-razer razer-kernel-modules-dkms razer-daemon razer-doc
 
 ## Applications
 
-The following applications compliment and interact with this driver:
+The following applications complement and interact with this driver:
 
 * [Polychromatic Controller](https://github.com/lah7/polychromatic-controller) - a graphical management tool and tray applet to managing Razer peripherals.
 * [MacroW](https://github.com/igorbb/MacroW) - a simple tool to record and play keyboard macros. (though the dameon does on the fly recording ;) )
