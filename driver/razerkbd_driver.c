@@ -132,8 +132,8 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
 		   response_report.command_id.id != request_report->command_id.id)
 		{
 			print_erroneous_report(&response_report, "razerkbd", "Response doesnt match request");
-		} else if (response_report.status == RAZER_CMD_BUSY) {
-			print_erroneous_report(&response_report, "razerkbd", "Device is busy");
+//		} else if (response_report.status == RAZER_CMD_BUSY) {
+//			print_erroneous_report(&response_report, "razerkbd", "Device is busy");
 		} else if (response_report.status == RAZER_CMD_FAILURE) {
 			print_erroneous_report(&response_report, "razerkbd", "Command failed");
 		} else if (response_report.status == RAZER_CMD_NOT_SUPPORTED) {
