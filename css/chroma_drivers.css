@@ -190,6 +190,11 @@ hr {
   max-height: 200px;
 }
 
+.partial-support,
+.partial-support > a > h5 {
+  color: yellow;
+}
+
 /****************************
  * Footer
 *****************************/
