@@ -185,8 +185,8 @@ hr {
 }
 
 .device-icon img {
-  width: 170px;
-  height: auto;
+  height: 140px;
+  width: auto;
   max-height: 200px;
 }
 
