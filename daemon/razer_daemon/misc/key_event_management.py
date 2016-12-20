@@ -12,197 +12,112 @@ Each event is in the format of
 * unsigned short code
 * signed int value
 """
+import asyncio
 import datetime
-import fcntl
 import json
 import logging
-import os
-import random
-import select
-import struct
-import subprocess
-import threading
-import time
+
+import evdev
 
 # pylint: disable=import-error
 from razer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING
 from .macro import MacroKey, MacroRunner, macro_dict_to_obj
 
-EVENT_FORMAT = '@llHHI'
-EVENT_SIZE = struct.calcsize(EVENT_FORMAT)
 
-EPOLL_TIMEOUT = 0.01
-SPIN_SLEEP = 0.01
-
-EVIOCGRAB = 0x40044590
-
-COLOUR_CHOICES = (
-    (255, 0, 0),    # Red
-    (0, 255, 0),    # Green
-    (0, 0, 255),    # Blue
-    (255, 255, 0),  # Yellow
-    (0, 255, 255),  # Cyan
-    (255, 0, 255),  # Magenta
-)
-
-
-def random_colour_picker(last_choice, iterable):
+class KeyWatcher():
     """
-    Chose a random choice but not the last one
-
-    :param last_choice: Last choice
-    :type last_choice: object
-
-    :param iterable: Iterable object
-    :type iterable: iterable
-
-    :return: Choice
-    :rtype: object
-    """
-    result = random.choice(iterable)
-    while result == last_choice:
-        result = random.choice(iterable)
-    return result
-
-
-class KeyWatcher(threading.Thread):
-    """
-    Thread to watch keyboard event files and return keypresses
+    Task to watch keyboard event files and return keypresses
     """
     @staticmethod
-    def parse_event_record(data):
+    def parse_event_record(ev):
         """
         Parse Input event record
 
-        :param data: Binary data
-        :type data: bytes
+        :param event: evdev event
+        :type event: evdev.events.KeyEvent
 
-        :return: Tuple of event time, key_action, key_code
+        :return: Tuple of event time, action, key_code
         :rtype: tuple
         """
-        # Event Seconds, Event Microseconds, Event Type, Event Code, Event Value
-        ev_sec, ev_usec, ev_type, ev_code, ev_value = struct.unpack(EVENT_FORMAT, data)
-
-        if ev_type != 0x01: # input-event-codes.h EV_KEY 0x01
+        if not isinstance(ev, evdev.KeyEvent):
             return None, None, None
 
-        if ev_value == 0:
-            key_action = 'release'
-        elif ev_value == 1:
-            key_action = 'press'
-        elif ev_value == 2:
-            key_action = 'autorepeat'
+        if ev.keystate == ev.key_up:
+            action = 'release'
+        elif ev.keystate == ev.key_down:
+            action = 'press'
+        elif ev.keystate == ev.key_hold:
+            action = 'autorepeat'
         else:
-            key_action = 'unknown'
+            action = 'unknown'
 
-        seconds = ev_sec + (ev_usec * 0.000001)
+        seconds = ev.event.sec + (ev.event.usec * 0.000001)
         date = datetime.datetime.fromtimestamp(seconds)
 
-        result = (date, key_action, ev_code)
-
-        if ev_type == ev_code == ev_value == 0:
-            return None, None, None
+        result = (date, action, ev.scancode)
 
         return result
 
-    def __init__(self, device_id, event_files, parent, use_epoll=True):
+    def __init__(self, device_id, event_files, parent, testing=False):
         super(KeyWatcher, self).__init__()
 
         self._logger = logging.getLogger('razer.device{0}.keywatcher'.format(device_id))
         self._event_files = event_files
-        self._shutdown = False
-        self._use_epoll = use_epoll
         self._parent = parent
+        self._testing = testing
 
-        self.open_event_files = [open(event_file, 'rb') for event_file in self._event_files]
-        # Set open files to non blocking mode
-        if not use_epoll:
-            for event_file in self.open_event_files:
-                flags = fcntl.fcntl(event_file.fileno(), fcntl.F_GETFL)
-                fcntl.fcntl(event_file.fileno(), fcntl.F_SETFL, flags | os.O_NONBLOCK)
+        self._event_devices_locked = False
+        self._key_actions = []
 
-    def run(self):
+        self._event_devices = [evdev.InputDevice(event_file) for event_file in self._event_files]
+        for device in self._event_devices:
+            asyncio.ensure_future(self._event_callback(device))
+
+    def add_key_action(self, key_action):
+        if key_action not in self._key_actions:
+            self._key_actions.append(key_action)
+
+    def remove_key_action(self, key_action):
+        if key_action in self._key_actions:
+            self._key_actions.remove(key_action)
+
+    def grab_event_devices(self, grab):
         """
-        Main event loop
+        Grab the event files exclusively
+
+        :param grab: True to grab, False to release
+        :type grab: bool
         """
-        # Create dict of Event File Descriptor: Event File Object
-        event_file_map = {event_file.fileno(): event_file for event_file in self.open_event_files}
+        if self._event_devices_locked == grab:
+            return
 
-        # Create epoll object
-        poll_object = select.epoll()
+        if not self._testing:
+            for event_device in self._event_devices:
+                if grab is True:
+                    event_device.grab()
+                else:
+                    event_device.ungrab()
+        self._event_devices_locked = grab
 
-        # Register files with select
-        for event_fd in event_file_map.keys():
-            poll_object.register(event_fd, select.EPOLLIN | select.EPOLLPRI)
+    async def _event_callback(self, device):
+        async for event in device.async_read_loop():
+            try:
+                if len(self._key_actions) == 0:
+                    continue
 
-        # Loop
-        while not self._shutdown:
-            # epoll is nice but it wasn't getting events properly :(
-            if self._use_epoll:
-                self._poll_epoll(poll_object, event_file_map)
-            else:
-                self._poll_read()
-
-            time.sleep(SPIN_SLEEP)
-
-        # Unbind files and close them
-        for event_fd, event_file in event_file_map.items():
-            poll_object.unregister(event_fd)
-            event_file.close()
-
-        poll_object.close()
-
-    def _poll_epoll(self, poll_object, event_file_map):
-        events = poll_object.poll(EPOLL_TIMEOUT)
-
-        if len(events) != 0:
-            # pylint: disable=unused-variable
-            for event_fd, mask in events:
-                key_data = event_file_map[event_fd].read(EVENT_SIZE)
-
-                date, key_action, key_code = self.parse_event_record(key_data)
+                date, action, keycode = self.parse_event_record(evdev.categorize(event))
 
                 # Skip if date, key_action and key_code is none as thats a spacer record
                 if date is None:
                     continue
 
-                # Now if key is pressed then we record
-                self._parent.key_action(date, key_code, key_action)
+                # Call all actions for the keypress
+                for key_action in self._key_actions:
+                    await key_action(date, keycode, action)
+            except (OSError, IOError) as err:
+                self._logger.error("Error from event device: %s", err)
+                return
 
-    def _poll_read(self):
-        for event_file in self.open_event_files:
-            key_data = event_file.read(EVENT_SIZE)
-
-            if key_data is None:
-                continue
-
-            date, key_action, key_code = self.parse_event_record(key_data)
-
-            # Skip if date, key_action and key_code is none as thats a spacer record
-            if date is None:
-                continue
-
-            # Now if key is pressed then we record
-            self._parent.key_action(date, key_code, key_action)
-
-    @property
-    def shutdown(self):
-        """
-        Thread shutdown condition
-
-        :return: Shutdown condition
-        :rtype: bool
-        """
-        return self._shutdown
-    @shutdown.setter
-    def shutdown(self, value):
-        """
-        Set thread shutdown condition
-
-        :param value: Boolean, normally only True would be used
-        :type value: str
-        """
-        self._shutdown = value
 
 class KeyboardKeyManager(object):
     """
@@ -218,7 +133,7 @@ class KeyboardKeyManager(object):
     get round to making the effect.
     """
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, device_id, event_files, parent, use_epoll=False, testing=False):
+    def __init__(self, device_id, event_files, parent, testing=False):
 
         self._device_id = device_id
         self._logger = logging.getLogger('razer.device{0}.keymanager'.format(device_id))
@@ -227,15 +142,7 @@ class KeyboardKeyManager(object):
         self._testing = testing
 
         self._event_files = event_files
-        self._access_lock = threading.Lock()
-        self._keywatcher = KeyWatcher(device_id, event_files, self, use_epoll=use_epoll)
-        self._open_event_files = self._keywatcher.open_event_files
-
-        if len(event_files) > 0:
-            self._logger.debug("Starting KeyWatcher")
-            self._keywatcher.start()
-        else:
-            self._logger.warning("No event files for KeyWatcher")
+        self._keywatcher = KeyWatcher(device_id, event_files, self, testing)
 
         self._record_stats = parent.config.get('Statistics', 'key_statistics')
         self._stats = {}
@@ -246,77 +153,54 @@ class KeyboardKeyManager(object):
         self._current_macro_bind_key = None
         self._current_macro_combo = []
 
-        self._threads = set()
         self._clean_counter = 0
-
-        self._temp_key_store_active = False
-        self._temp_key_store = []
-        self._temp_expire_time = datetime.timedelta(seconds=2)
-
-        self._last_colour_choice = None
 
         self._event_files_locked = False
 
+        self._key_mapping = KEY_MAPPING
+        self._event_mapping = EVENT_MAPPING
+
+        if len(event_files) > 0:
+            self._logger.debug("Starting KeyWatcher")
+        else:
+            self._logger.warning("No event files for KeyWatcher")
+
+        self.add_key_action(self.key_action)
+
     #TODO add property for enabling key stats?
 
+
     @property
-    def temp_key_store(self):
-        """
-        Get the temporary key store
+    def key_mapping(self):
+        return self._key_mapping
 
-        :return: List of keys
-        :rtype: list
-        """
-        # Locking so it doesnt mutate whilst copying
-        self._access_lock.acquire()
-        now = datetime.datetime.now()
+    @key_mapping.setter
+    def key_mapping(self, mapping):
+        self._key_mapping = mapping
 
-        # Remove expired keys from store
-        try:
-            # Get date and if its less than now its expired
-            while self._temp_key_store[0][0] < now:
-                self._temp_key_store.pop(0)
-        except IndexError:
-            pass
+    @property
+    def event_mapping(self):
+        return self._event_mapping
 
-        # Creating a copy as then it doesnt mutate whilst iterating
-        result = self._temp_key_store[:]
-        self._access_lock.release()
+    @event_mapping.setter
+    def event_mapping(self, mapping):
+        self._event_mapping = mapping
+
+    def map_event(self, keycode):
+        result = None
+        if self.event_mapping is None:
+            result = evdev.ecodes.KEY[keycode][4:]
+        else:
+            result = self.event_mapping[keycode]
         return result
 
-    @property
-    def temp_key_store_state(self):
-        """
-        Get the state of the temporary key store
+    def add_key_action(self, action):
+        self._keywatcher.add_key_action(action)
 
-        :return: Active state
-        :rtype: bool
-        """
-        return self._temp_key_store_active
+    def remove_key_action(self, action):
+        self._keywatcher.remove_key_action(action)
 
-    @temp_key_store_state.setter
-    def temp_key_store_state(self, value):
-        """
-        Set the state of the temporary key store
-
-        :param value: Active state
-        :type value: bool
-        """
-        self._temp_key_store_active = value
-
-    def grab_event_files(self, grab):
-        """
-        Grab the event files exclusively
-
-        :param grab: True to grab, False to release
-        :type grab: bool
-        """
-        if not self._testing:
-            for event_file in self._open_event_files:
-                fcntl.ioctl(event_file.fileno(), EVIOCGRAB, int(grab))
-        self._event_files_locked = grab
-
-    def key_action(self, event_time, key_id, key_press='press'):
+    async def key_action(self, event_time, key_id, key_press='press'):
         """
         Process a key press event
 
@@ -342,31 +226,18 @@ class KeyboardKeyManager(object):
         # pylint: disable=too-many-branches,too-many-statements
 
         if key_press == 'autorepeat': # TODO not done right yet
-           # If its brightness then convert autorepeat to key presses
-           if key_id in (190, 194):
-               key_press = 'press'
-           else:
-               # Quit out early
-               return
+            # If its brightness then convert autorepeat to key presses
+            if key_id in (190, 194):
+                key_press = 'press'
+            else:
+                # Quit out early
+                return
 
         now = datetime.datetime.now()
 
-        # Remove expired keys from store
-        try:
-            # Get date and if its less than now its expired
-            while self._temp_key_store[0][0] < now:
-                self._temp_key_store.pop(0)
-        except IndexError:
-            pass
-
-        # Clean up any threads
-        if self._clean_counter > 20 and len(self._threads) > 0:
-            self._clean_counter = 0
-            self.clean_macro_threads()
-
         try:
             # Convert event ID to key name
-            key_name = EVENT_MAPPING[key_id]
+            key_name = self.map_event(key_id)
 
             #self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
 
@@ -390,18 +261,13 @@ class KeyboardKeyManager(object):
                     # self._logger.debug("Increased key %s", key_name)
                 except KeyError:
                     # Create bucket
-                    self._stats[storage_bucket] = dict.fromkeys(KEY_MAPPING, 0)
+                    self._stats[storage_bucket] = dict.fromkeys(self.key_mapping, 0)
                     try:
                         # Increment key
                         self._stats[storage_bucket][key_name] += 1
                         # self._logger.debug("Increased key %s", key_name)
                     except KeyError as err:
                         self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
-
-                if self._temp_key_store_active:
-                    colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
-                    self._last_colour_choice = colour
-                    self._temp_key_store.append((now + self._temp_expire_time, KEY_MAPPING[key_name], colour))
 
                 # Macro FN+F9 logic
                 if key_name == 'MACROMODE':
@@ -485,7 +351,7 @@ class KeyboardKeyManager(object):
                 else:
                     # If key has a macro, play it
                     if key_name in self._macros:
-                        self.play_macro(key_name)
+                        await self.play_macro(key_name)
 
         except KeyError as err:
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
@@ -507,46 +373,27 @@ class KeyboardKeyManager(object):
 
         self._macros[self._current_macro_bind_key] = new_macro
 
-    def clean_macro_threads(self):
-        """
-        Threadless-threadpool
-
-        Goes though the threads (macro play jobs) and removed the threads if they have finished.
-        #SetMagic
-        """
-        self._logger.debug("Cleaning up macro threads")
-        to_remove = set()
-
-        for macro_thread in self._threads:
-            macro_thread.join(timeout=0.05)
-            if not macro_thread.is_alive():
-                to_remove.add(macro_thread)
-
-        self._threads -= to_remove
-
-    def play_macro(self, macro_key):
+    async def play_macro(self, macro_key):
         """
         Play macro for a given key
 
-        Launches a thread and adds it to the pool
         :param macro_key: Macro Key
         :type macro_key: str
         """
         self._logger.info("Running Macro %s:%s", macro_key, str(self._macros[macro_key]))
-        macro_thread = MacroRunner(self._device_id, macro_key, self._macros[macro_key])
-        macro_thread.start()
-        self._threads.add(macro_thread)
+        macro = MacroRunner(self._device_id, macro_key, self._macros[macro_key])
+        task = asyncio.ensure_future(macro.run())
+        await task
 
-    def play_media_key(self, media_key):
+    async def play_media_key(self, media_key):
         """
         Execute a media keys function
 
         :param media_key: Media key name
         :type media_key: str
         """
-        media_key_thread = MediaKeyPress(media_key)
-        media_key_thread.start()
-        self._threads.add(media_key_thread)
+        media_key = MediaKeyPress(media_key)
+        await media_key.run()
 
     # Methods to be used with DBus
     def dbus_delete_macro(self, key_name):
@@ -599,14 +446,9 @@ class KeyboardKeyManager(object):
         """
         Cleanup function
         """
-        if self._keywatcher.is_alive():
-            self._parent.remove_observer(self)
+        self._parent.remove_observer(self)
 
-            self._logger.debug("Stopping key manager")
-            self._keywatcher.shutdown = True
-            self._keywatcher.join(timeout=2)
-            if self._keywatcher.is_alive():
-                self._logger.error("Could not stop KeyWatcher thread")
+        self._logger.debug("Stopping key manager")
 
     def __del__(self):
         self.close()
@@ -631,15 +473,18 @@ class KeyboardKeyManager(object):
                 #self.temp_key_store_state = False
                 pass
 
+
 class TartarusKeyManager(KeyboardKeyManager):
-    def __init__(self, device_id, event_files, parent, use_epoll=True, testing=False):
-        super(TartarusKeyManager, self).__init__(device_id, event_files, parent, use_epoll, testing=testing)
+    def __init__(self, device_id, event_files, parent, testing=False):
+        super(TartarusKeyManager, self).__init__(device_id, event_files, parent, testing=testing)
 
         self._mode_modifier = False
         self._mode_modifier_combo = []
         self._mode_modifier_key_down = False
+        self._key_mapping = TARTARUS_KEY_MAPPING
+        self._event_mapping = TARTARUS_EVENT_MAPPING
 
-    def key_action(self, event_time, key_id, key_press=True):
+    async def key_action(self, event_time, key_id, key_press='press'):
         """
         Process a key press event
 
@@ -663,31 +508,12 @@ class TartarusKeyManager(KeyboardKeyManager):
         """
         # Disable pylints complaining for this part, #PerformanceOverNeatness
         # pylint: disable=too-many-branches,too-many-statements
-        self._access_lock.acquire()
-
-        if not self._event_files_locked:
-            self.grab_event_files(True)
-
-
-        now = datetime.datetime.now()
-
-        # Remove expired keys from store
-        try:
-            # Get date and if its less than now its expired
-            while self._temp_key_store[0][0] < now:
-                self._temp_key_store.pop(0)
-        except IndexError:
-            pass
-
-        # Clean up any threads
-        if self._clean_counter > 20 and len(self._threads) > 0:
-            self._clean_counter = 0
-            self.clean_macro_threads()
+        self._keywatcher.grab_event_devices(True)
 
         try:
             # Convert event ID to key name
 
-            key_name = TARTARUS_EVENT_MAPPING[key_id]
+            key_name = self.map_event(key_id)
             # Key press
 
             # This is the key for storing stats, by generating hour timestamps it will bucket data nicely.
@@ -699,7 +525,7 @@ class TartarusKeyManager(KeyboardKeyManager):
                 # self._logger.debug("Increased key %s", key_name)
             except KeyError:
                 # Create bucket
-                self._stats[storage_bucket] = dict.fromkeys(TARTARUS_KEY_MAPPING, 0)
+                self._stats[storage_bucket] = dict.fromkeys(self.key_mapping, 0)
                 try:
                     # Increment key
                     self._stats[storage_bucket][key_name] += 1
@@ -707,16 +533,11 @@ class TartarusKeyManager(KeyboardKeyManager):
                 except KeyError as err:
                     self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
 
-            if self._temp_key_store_active:
-                colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
-                self._last_colour_choice = colour
-                self._temp_key_store.append((now + self._temp_expire_time, TARTARUS_KEY_MAPPING[key_name], colour))
-
             # if self._testing:
             if key_press:
-                self._logger.debug("Got Key: {0} Down".format(key_name))
+                self._logger.debug("Got Key: %s Down", key_name)
             else:
-                self._logger.debug("Got Key: {0} Up".format(key_name))
+                self._logger.debug("Got Key: %s Up", key_name)
 
             # Logic for mode switch modifier
             if self._mode_modifier:
@@ -737,15 +558,13 @@ class TartarusKeyManager(KeyboardKeyManager):
                     # Override keyname so it now equals a macro
                     key_name = '+'.join(self._mode_modifier_combo)
 
-            self._logger.debug("Macro String: {0}".format(key_name))
+            self._logger.debug("Macro String: %s", key_name)
 
             if key_name in self._macros and key_press:
                 self.play_macro(key_name)
 
         except KeyError as err:
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
-
-        self._access_lock.release()
 
     @property
     def mode_modifier(self):
@@ -766,38 +585,23 @@ class TartarusKeyManager(KeyboardKeyManager):
         """
         self._mode_modifier = True if value else False
 
-class MediaKeyPress(threading.Thread):
+class MediaKeyPress():
     """
     Class to run xdotool to execute media/volume keypresses
     """
     def __init__(self, media_key):
-        super(MediaKeyPress, self).__init__()
         if media_key == 'sleep':
             self._media_key = media_key
-        else:
-            self._media_key = MEDIA_KEY_MAP[media_key]
+        #else:
+        #    self._media_key = MEDIA_KEY_MAP[media_key]
 
-    def run(self):
+    async def run(self):
         if self._media_key == 'sleep':
-            subprocess.call(['dbus-send', '--system', '--print-reply', '--dest=org.freedesktop.login1',
-                             '/org/freedesktop/login1', 'org.freedesktop.login1.Manager.Suspend', 'boolean:true'])
+            task = await asyncio.create_subprocess_exec(['dbus-send', '--system', '--print-reply',
+                    '--dest=org.freedesktop.login1', '/org/freedesktop/login1',
+                    'org.freedesktop.login1.Manager.Suspend', 'boolean:true'])
+            await task.wait()
         else:
-            proc = subprocess.Popen(['xdotool', 'key', self._media_key], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            proc.communicate()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            task = await asyncio.create_subprocess_exec(['xdotool', 'key', self._media_key],
+                    stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
+            await task.communicate()
