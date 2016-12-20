@@ -99,6 +99,7 @@ static bool is_blade_laptop(struct usb_device *usb_dev) {
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+        case USB_DEVICE_ID_RAZER_BLADE_QHD:
             return true;
 	}
 	return false;
@@ -131,8 +132,8 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
 		   response_report.command_id.id != request_report->command_id.id)
 		{
 			print_erroneous_report(&response_report, "razerkbd", "Response doesnt match request");
-		} else if (response_report.status == RAZER_CMD_BUSY) {
-			print_erroneous_report(&response_report, "razerkbd", "Device is busy");
+//		} else if (response_report.status == RAZER_CMD_BUSY) {
+//			print_erroneous_report(&response_report, "razerkbd", "Device is busy");
 		} else if (response_report.status == RAZER_CMD_FAILURE) {
 			print_erroneous_report(&response_report, "razerkbd", "Command failed");
 		} else if (response_report.status == RAZER_CMD_NOT_SUPPORTED) {
@@ -287,6 +288,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
             device_type = "Razer Blade Stealth (Late 2016)\n";
+            break;
+        
+        case USB_DEVICE_ID_RAZER_BLADE_QHD:
+            device_type = "Razer Blade Stealth (QHD)\n";
             break;
         
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
@@ -673,6 +678,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+        case USB_DEVICE_ID_RAZER_BLADE_QHD:
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
         case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
             if(count == 3)
@@ -1070,6 +1076,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 			case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016: 
 			case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
 			case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+			case USB_DEVICE_ID_RAZER_BLADE_QHD:
 			case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
 				report.transaction_id.id = 0x80; // Fall into the 2016/blade/blade2016 to set device id
 			default:
@@ -1334,6 +1341,20 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
                 break;
 
+            case USB_DEVICE_ID_RAZER_BLADE_QHD:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
+                break;
+
             case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
@@ -1484,6 +1505,19 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
                 break;
 
+            case USB_DEVICE_ID_RAZER_BLADE_QHD:
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+                device_remove_file(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
+                device_remove_file(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
+                break;
 
             case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
                 device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
@@ -1554,6 +1588,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_STEALTH) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_QHD) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA) },
