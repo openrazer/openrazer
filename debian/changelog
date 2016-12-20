@@ -1,3 +1,12 @@
+razer (1.1.3-0ubuntu1) trusty; urgency=low
+
+  * Added some more razer laptop support
+  * Udev possibly fixed. cyanogen revamped the udev rules and mount script :)
+  * cyanogen also make some much welcome changes to the daemon.
+  * Possibly more stuff, I cba to look.
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Tue, 20 Dec 2016 22:20:00 +0000
+
 razer (1.1.2-0ubuntu1) trusty; urgency=low
 
   * Fucking launchpad
