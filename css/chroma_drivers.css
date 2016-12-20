@@ -180,6 +180,10 @@ hr {
   margin-bottom: 8px;
 }
 
+.device-icon:hover > a {
+  text-decoration: none;
+}
+
 .device-icon img {
   width: 170px;
   height: auto;
