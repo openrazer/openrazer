@@ -20,6 +20,7 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | Device                                        | USB VID:PID | Driver | Daemon | Misc |
 | --------------------------------------------- | ----------- | ------ | ------ | ---- |
 | Razer BlackWidow Ultimate 2012                |  1532:010D  |   ✔    |        |      |
+| Razer Anansi																	|  1532:010F  |   ✔    |   ✔    |      |
 | Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔    |   ✔    |      |
 | Razer BlackWidow Classic                      |  1532:011B  |   ✔    |        |      |
 | Razer BlackWidow Chroma                       |  1532:0203  |   ✔    |   ✔    |      |

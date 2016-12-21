@@ -31,7 +31,6 @@
 #include "razerkbd_driver.h"
 #include "razercommon.h"
 #include "razerchromacommon.h"
-#include "razeranansicommon.h"
 
 /*
  * Version Information
@@ -354,7 +353,7 @@ static ssize_t razer_attr_write_mode_macro_effect(struct device *dev, struct dev
 		    report = razer_chroma_standard_set_led_effect(NOSTORE, MACRO_LED, enabled);
 		    razer_send_payload(usb_dev, &report);
 		    
-		    report = razer_anansi_enable_macro_flash();
+		    report = razer_chroma_standard_set_led_blinking(NOSTORE, MACRO_LED);
 		    break;
 		default:
 			report = razer_chroma_standard_set_led_effect(VARSTORE, MACRO_LED, enabled);
@@ -559,13 +558,6 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
 
 	    case USB_DEVICE_ID_RAZER_ANANSI:
 		    report = razer_chroma_standard_set_led_state(VARSTORE, BACKLIGHT_LED, OFF);
-		    razer_send_payload(usb_dev, &report);
-
-		    report = razer_chroma_standard_set_led_state(VARSTORE, GAME_LED, OFF);
-		    razer_send_payload(usb_dev, &report);
-
-		    report = razer_chroma_standard_set_led_state(NOSTORE, MACRO_LED, OFF);
-
 		    break;
 		default:
 			report = razer_chroma_standard_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
@@ -639,7 +631,7 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
 }
 
 /**
- * Write device file "mode_reactive"?
+ * Write device file "mode_reactive"
  *
  * Sets reactive mode when this file is written to. A speed byte and 3 RGB bytes should be written
  */
@@ -950,7 +942,6 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
 			report = razer_chroma_standard_set_led_brightness(VARSTORE, LOGO_LED, brightness);
             break;
         
-	    case USB_DEVICE_ID_RAZER_ANANSI:
         default:
             if (is_blade_laptop(usb_dev)) {
                 report = razer_chroma_misc_set_blade_brightness(brightness);
@@ -985,19 +976,12 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
     
     
     switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
-        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
-            report = razer_chroma_misc_get_blade_brightness();
-            break;
-        
-        
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
 			report = razer_chroma_standard_get_led_brightness(VARSTORE, LOGO_LED);
             break;
     
-        case USB_DEVICE_ID_RAZER_ANANSI:
         default:
             if (is_blade_laptop(usb_dev)) {
                 report = razer_chroma_misc_get_blade_brightness();
@@ -1141,7 +1125,6 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
  * Write only is 0220
  * Read and write is 0664
  */
-
 // TODO device_mode endpoint
 static DEVICE_ATTR(game_led_state,          0660, razer_attr_read_mode_game,                  razer_attr_write_mode_game);
 static DEVICE_ATTR(macro_led_state,         0660, razer_attr_read_mode_macro,                 razer_attr_write_mode_macro);

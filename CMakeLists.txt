@@ -7,8 +7,7 @@ set(SOURCES
         driver/razerkbd_driver.c
         driver/razercommon.c
         driver/razerchromacommon.c
-        driver/razeranansicommon.c
-)
+        )
 
 set(HEADERS
         driver/razermouse_driver.h
@@ -16,8 +15,7 @@ set(HEADERS
         driver/razerkbd_driver.h
         driver/razercommon.h
         driver/razerchromacommon.h
-        driver/razeranansicommon.h
-)
+        )
 
 set(TARGET_VARS
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
