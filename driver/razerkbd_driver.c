@@ -1078,12 +1078,15 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 				report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
 				break;
 			
+            case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+                report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
+                break;
+
 			case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016: 
 			case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
 			case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
 			case USB_DEVICE_ID_RAZER_BLADE_QHD:
 			case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
-            case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
 				report.transaction_id.id = 0x80; // Fall into the 2016/blade/blade2016 to set device id
 			default:
 				report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
