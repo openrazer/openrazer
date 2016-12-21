@@ -306,6 +306,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             device_type = "Razer BlackWidow Chroma\n";
             break;
 
+        case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+            device_type = "Razer DeathStalker Chroma\n";
+            break;
+
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
             device_type = "Razer BlackWidow Chroma Tournament Edition\n";
             break;
@@ -672,6 +676,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
             break;
             
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+        case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
@@ -1078,6 +1083,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 			case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
 			case USB_DEVICE_ID_RAZER_BLADE_QHD:
 			case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+            case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
 				report.transaction_id.id = 0x80; // Fall into the 2016/blade/blade2016 to set device id
 			default:
 				report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
@@ -1592,6 +1598,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE) },
