@@ -20,6 +20,8 @@ struct razer_report razer_chroma_standard_get_firmware_version(void);
 struct razer_report razer_chroma_standard_set_led_state(unsigned char variable_storage, unsigned char led_id, unsigned char led_state);
 struct razer_report razer_chroma_standard_get_led_state(unsigned char variable_storage, unsigned char led_id);
 
+struct razer_report razer_chroma_standard_set_led_blinking(unsigned char variable_storage, unsigned char led_id);
+
 struct razer_report razer_chroma_standard_set_led_rgb(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1);
 struct razer_report razer_chroma_standard_get_led_rgb(unsigned char variable_storage, unsigned char led_id);
 

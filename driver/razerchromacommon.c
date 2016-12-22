@@ -83,6 +83,17 @@ struct razer_report razer_chroma_standard_set_led_state(unsigned char variable_s
 	return report;
 }
 
+struct razer_report razer_chroma_standard_set_led_blinking(unsigned char variable_storage, unsigned char led_id)
+{
+	struct razer_report report = get_razer_report(0x03, 0x04, 0x04);
+	report.arguments[0] = variable_storage;
+	report.arguments[1] = led_id;
+	report.arguments[2] = 0x05;
+	report.arguments[3] = 0x05;
+	
+	return report;
+}
+
 /**
  * Get the state of an LED on the device
  */
@@ -187,11 +198,6 @@ struct razer_report razer_chroma_standard_get_led_brightness(unsigned char varia
     
     return report;
 }
-
-
-
-
-
 
 
 /*

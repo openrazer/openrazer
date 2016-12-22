@@ -10,7 +10,7 @@ import dbus.exceptions
 DBUS_OPTIONS = (
     ('org.freedesktop.ScreenSaver', '/org/freedesktop/ScreenSaver', 'org.freedesktop.ScreenSaver'),
     ('com.canonical.Unity', '/org/gnome/ScreenSaver', 'org.gnome.ScreenSaver'),
-    ('org.mate.ScreenSaver', '/org/mate/ScreenSaver', 'org.mate.ScreenSaver'),
+    ('org.mate.ScreenSaver', '/org/mate/ScreenSaver', 'org.mate.ScreenSaver')
 )
 
 

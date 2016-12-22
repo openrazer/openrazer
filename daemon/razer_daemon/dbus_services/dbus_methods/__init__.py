@@ -10,4 +10,3 @@ from razer_daemon.dbus_services.dbus_methods.mamba import *
 from razer_daemon.dbus_services.dbus_methods.macro import *
 from razer_daemon.dbus_services.dbus_methods.tartarus import *
 from razer_daemon.dbus_services.dbus_methods.deathadder_chroma import *
-
