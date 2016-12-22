@@ -185,9 +185,10 @@ hr {
 }
 
 .device-icon img {
-  height: 140px;
-  width: auto;
+  height: auto;
+  width: 140px;
   max-height: 200px;
+  max-width: 200px;
 }
 
 .partial-support,
