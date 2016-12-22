@@ -386,7 +386,16 @@ static ssize_t razer_attr_write_mode_pulsate(struct device *dev, struct device_a
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, 0x02);
+    struct razer_report report = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x02);
+    
+    switch(usb_dev->descriptor.idProduct)
+    {
+		case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
+			report = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, 0x02);
+			break;
+	}  
     
     razer_send_payload(usb_dev, &report);
 
@@ -410,6 +419,8 @@ static ssize_t razer_attr_read_mode_pulsate(struct device *dev, struct device_at
 
 /**
  * Read device file "profile_led_red"
+ * 
+ * Actually a Yellow LED
  *
  * Returns a string
  */
@@ -668,8 +679,8 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     struct razer_report report;
 
     switch(usb_dev->descriptor.idProduct) {
-		case USB_DEVICE_ID_RAZER_ORBWEAVER: // TODO=============================================================================================================== CHECK
-			report = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, 0x00);
+		case USB_DEVICE_ID_RAZER_ORBWEAVER:
+			report = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x00);
             razer_send_payload(usb_dev, &report);
             break;
 		
@@ -899,18 +910,6 @@ static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute
     return count;
 }
 
-static ssize_t razer_attr_write_test2(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-	struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
-	
-	report = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x02);
-            razer_send_payload(usb_dev, &report);
-	
-    return count;
-}
-
 /**
  * Read device file "test"
  *
@@ -939,7 +938,6 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
 			break;
 
 
-        case USB_DEVICE_ID_RAZER_ORBWEAVER:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
@@ -981,7 +979,6 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
 
 
     switch(usb_dev->descriptor.idProduct) {
-		case USB_DEVICE_ID_RAZER_ORBWEAVER:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
@@ -1143,7 +1140,6 @@ static DEVICE_ATTR(profile_led_blue,        0660, razer_attr_read_tartarus_profi
 
 
 static DEVICE_ATTR(test,                    0660, razer_attr_read_test,                       razer_attr_write_test);
-static DEVICE_ATTR(test2,                    0660, razer_attr_read_test,                       razer_attr_write_test2);
 static DEVICE_ATTR(version,                 0440, razer_attr_read_version,                    NULL);
 static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_get_firmware_version,       NULL);
 static DEVICE_ATTR(fn_toggle,               0220, NULL,                                       razer_attr_write_set_fn_toggle);
@@ -1416,7 +1412,6 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
-                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test2);
                 break;
             
             case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
@@ -1590,7 +1585,6 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
                 device_remove_file(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
                 device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
-                device_remove_file(&hdev->dev, &dev_attr_test2);
                 break;
             
             case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
