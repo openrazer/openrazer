@@ -274,6 +274,12 @@ footer {
   padding-bottom: 80px;
 }
 
+.danger > h5 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  color: red;
+}
+
 /****************************
  * Apps bullet list
 *****************************/
