@@ -29,6 +29,7 @@ def parse_args():
 
     return parser.parse_args()
 
+
 def run():
     args = parse_args()
 
@@ -37,7 +38,6 @@ def run():
         os.mkdir(LOG_PATH)
         os.mkdir(os.path.join(BASE_PATH, 'data'))
         shutil.copy(EXAMPLE_CONF, CONF_PATH)
-
 
     daemon_args = {
         'verbose': args.verbose,

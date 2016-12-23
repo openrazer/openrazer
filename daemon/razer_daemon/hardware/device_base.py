@@ -375,7 +375,7 @@ class RazerDevice(DBusService):
         :param device_id: Device ID like 0000:0000:0000.0000
         :type device_id: str
 
-        :param dev_path: Device path. Normally '/sys/bus/hid/devices'
+        :param dev_path: Device path. Normally '/sys/bus/hid/devices/0000:0000:0000.0000'
         :type dev_path: str
 
         :return: True if its the correct device ID
@@ -384,7 +384,7 @@ class RazerDevice(DBusService):
         pattern = r'^[0-9A-F]{4}:' + '{0:04X}'.format(cls.USB_VID) +':' + '{0:04X}'.format(cls.USB_PID) + r'\.[0-9A-F]{4}$'
 
         if re.match(pattern, device_id) is not None:
-            if 'device_type' in  os.listdir(os.path.join(dev_path, device_id)):
+            if 'device_type' in os.listdir(dev_path):
                 return True
 
         return False
