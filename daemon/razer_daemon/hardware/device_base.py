@@ -390,7 +390,10 @@ class RazerDevice(DBusService):
         return False
 
     def __del__(self):
-        self.close()
+        try:
+            self._close()
+        except Exception as ex:
+            logging.getLogger('razer.device').error("Closing device: %s", ex)
 
     def __repr__(self):
         return "{0}:{1}".format(self.__class__.__name__, self.serial)

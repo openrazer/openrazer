@@ -6,6 +6,7 @@ import re
 from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
 from razer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, TartarusKeyManager as _TartarusKeyManager
 from razer_daemon.misc.ripple_effect import RippleManager as _RippleManager
+from razer_daemon.keyboard import BLADE_PRO_KEY_MAPPING
 
 
 class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
@@ -19,7 +20,7 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         super(_MacroKeyboard, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
-        self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
+        self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, testing=self._testing)
 
         self.logger.info('Putting device into driver mode. Daemon will handle special functionality')
         self.set_device_mode(0x03, 0x00)  # Driver mode
@@ -127,7 +128,7 @@ class RazerBlackWidowChromaTournamentEdition(_MacroKeyboard):
     HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix',  'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macros', 'delete_macro', 'add_macro',
 
@@ -283,7 +284,7 @@ class RazerBladeProLate2016(_MacroKeyboard):
     USB_PID = 0x0210
     HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = False
-    MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
+    MATRIX_DIMS = [6, 25]  # 6 Rows, 25 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
@@ -293,6 +294,8 @@ class RazerBladeProLate2016(_MacroKeyboard):
         super(RazerBladeProLate2016, self).__init__(*args, **kwargs)
 
         self.ripple_manager = _RippleManager(self, self._device_number)
+        self.key_manager.key_mapping = BLADE_PRO_KEY_MAPPING
+        self.key_manager.event_mapping = None
 
     def _close(self):
         """
