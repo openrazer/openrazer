@@ -23,7 +23,6 @@ import evdev
 from razer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING
 from .macro import MacroKey, MacroRunner, macro_dict_to_obj
 
-
 class KeyWatcher():
     """
     Task to watch keyboard event files and return keypresses
@@ -584,6 +583,7 @@ class TartarusKeyManager(KeyboardKeyManager):
         :type value: bool
         """
         self._mode_modifier = True if value else False
+
 
 class MediaKeyPress():
     """
