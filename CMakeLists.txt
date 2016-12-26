@@ -121,11 +121,6 @@ add_custom_target(ubuntu-install
         ${TARGET_VARS}
 )
 
-add_custom_target(fedora-install
-        COMMAND make fedora_install
-        ${TARGET_VARS}
-)
-
 add_custom_target(Install # install is reserved
         COMMAND make install
         ${TARGET_VARS}
