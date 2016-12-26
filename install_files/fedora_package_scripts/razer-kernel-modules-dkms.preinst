@@ -1,6 +1,0 @@
-#!/bin/sh
-set -e
-
-if [ ! $(getent group plugdev) ]; then
-    groupadd --system plugdev
-fi
