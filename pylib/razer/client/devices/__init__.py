@@ -47,6 +47,8 @@ class RazerDevice(object):
             'serial': True,
             'brightness': self._has_feature('razer.device.lighting.brightness'),
 
+            'macro_logic': self._has_feature('razer.device.macro'),
+
             # Default device is a chroma so lighting capabilities
             'lighting_breath_single': self._has_feature('razer.device.lighting.chroma', 'setBreathSingle'),
             'lighting_breath_dual': self._has_feature('razer.device.lighting.chroma', 'setBreathDual'),
@@ -133,7 +135,7 @@ class RazerDevice(object):
         :type object_path: str
 
         :param method_name: Method name, or list of methods
-        :type method_name: str or list
+        :type method_name: str or list or tuple
 
         :return: True if method/s exist
         :rtype: bool
@@ -142,7 +144,7 @@ class RazerDevice(object):
             return object_path in self._available_features
         elif isinstance(method_name, str):
             return object_path in self._available_features and method_name in self._available_features[object_path]
-        elif isinstance(method_name, list):
+        elif isinstance(method_name, (list, tuple)):
             result = True
             for method in method_name:
                 result &= object_path in self._available_features and method in self._available_features[object_path]

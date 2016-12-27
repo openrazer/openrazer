@@ -656,7 +656,7 @@ struct razer_report razer_chroma_extended_matrix_effect_custom_frame(void)
  * Set the device brightness
  * 
  * Status Trans Packet Proto DataSize Class CMD Args
- * ??
+ * 00     3f    0000   00    03       0f    04  0104b7
  */
 struct razer_report razer_chroma_extended_matrix_brightness(unsigned char variable_storage, unsigned char led_id, unsigned char brightness)
 {
@@ -668,7 +668,24 @@ struct razer_report razer_chroma_extended_matrix_brightness(unsigned char variab
 	report.arguments[2] = brightness;
 	
 	return report;
-} // TODO does it have an 0x84? to check brightness
+}
+
+/**
+ * Get the device brightness
+ * 
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     3f    0000   00    03       0f    84  0104
+ */
+struct razer_report razer_chroma_extended_matrix_get_brightness(unsigned char variable_storage, unsigned char led_id)
+{
+	struct razer_report report = get_razer_report(0x0F, 0x84, 0x03);
+	report.transaction_id.id = 0x3F;
+	
+	report.arguments[0] = variable_storage;
+	report.arguments[1] = led_id;
+	
+	return report;
+}
 
 /**
  * Set the RGB or a row
@@ -997,6 +1014,18 @@ struct razer_report razer_chroma_misc_set_dpi_xy(unsigned char variable_storage,
     report.arguments[4] = dpi_y & 0x00FF;
     report.arguments[5] = 0x00;
     report.arguments[6] = 0x00;
+    
+    return report;
+}
+
+/**
+ * Get the DPI of the device
+ */
+struct razer_report razer_chroma_misc_get_dpi_xy(unsigned char variable_storage)
+{
+	struct razer_report report = get_razer_report(0x04, 0x85, 0x07);
+	
+	report.arguments[0] = VARSTORE;
     
     return report;
 }

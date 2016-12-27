@@ -48,6 +48,9 @@
  #define USB_DEVICE_ID_RAZER_NAGA_HEX_V2 0x0050
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_DEATHADDER_ELITE
+ #define USB_DEVICE_ID_RAZER_DEATHADDER_ELITE 0x005C
+#endif
 
 
 /* Each keyboard report has 90 bytes*/

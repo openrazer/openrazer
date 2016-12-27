@@ -19,7 +19,7 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'get_battery', 'is_charging', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
-               'set_charge_effect', 'set_charge_colour', 'set_idle_time', 'set_low_battery_threshold', 'set_dpi_xy']
+               'set_charge_effect', 'set_charge_colour', 'set_idle_time', 'set_low_battery_threshold', 'get_dpi_xy', 'set_dpi_xy']
 
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaWireless, self).__init__(*args, **kwargs)
@@ -46,7 +46,7 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
-               'set_dpi_xy']
+               'get_dpi_xy', 'set_dpi_xy']
 
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaWired, self).__init__(*args, **kwargs)
@@ -63,7 +63,7 @@ class RazerMambaChromaTE(__RazerDeviceBrightnessSuspend):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
-               'set_dpi_xy']
+               'get_dpi_xy', 'set_dpi_xy']
 
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaTE, self).__init__(*args, **kwargs)
@@ -99,8 +99,8 @@ class RazerImperiator(__RazerDevice):
     USB_PID = 0x002F
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active', 'set_dpi_xy',
-               'set_poll_rate', 'set_scroll_active', 'get_scroll_active']
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active', 'get_dpi_xy', 'set_dpi_xy',
+               'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active']
 
     def __init__(self, *args, **kwargs):
         super(RazerImperiator, self).__init__(*args, **kwargs)
@@ -122,7 +122,7 @@ class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
-               'set_breath_single_effect', 'set_breath_dual_effect', 'set_idle_time', 'set_low_battery_threshold', 'set_dpi_xy', 'set_scroll_active', 'get_scroll_active']
+               'set_breath_single_effect', 'set_breath_dual_effect', 'set_idle_time', 'set_low_battery_threshold', 'get_dpi_xy', 'set_dpi_xy', 'set_scroll_active', 'get_scroll_active']
 
 
 class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
@@ -136,7 +136,7 @@ class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse',
                'set_logo_active', 'get_logo_active', 'get_logo_effect', 'get_logo_brightness', 'set_logo_brightness', 'set_logo_static', 'set_logo_pulsate', 'set_logo_blinking', 'set_logo_spectrum',
                'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_pulsate', 'set_scroll_blinking', 'set_scroll_spectrum',
-               'set_dpi_xy', 'set_poll_rate']
+               'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
     def __init__(self, *args, **kwargs):
         super(RazerDeathadderChroma, self).__init__(*args, **kwargs)
@@ -187,8 +187,9 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0050
     HAS_MATRIX = False
+    DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_dpi_xy', 'set_poll_rate',
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Thumbgrid is technically backlight ID
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect','set_breath_single_effect', 'set_breath_dual_effect',
@@ -242,4 +243,54 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
         _da_set_logo_brightness(self, logo_brightness)
         _da_set_scroll_brightness(self, scroll_brightness)
         _set_backlight_brightness(self, backlight_brightness)
+        self.disable_notify = False
+
+
+class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Deathadder Chroma
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_DeathAdder_Elite-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x005c
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
+               # Logo
+               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               # Scroll wheel
+               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2']
+
+    def __init__(self, *args, **kwargs):
+        super(RazerDeathadderElite, self).__init__(*args, **kwargs)
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        _da_set_scroll_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
+        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        _da_set_scroll_brightness(self, scroll_brightness)
         self.disable_notify = False
