@@ -222,7 +222,7 @@ class KeyboardKeyManager(object):
     EVENT_MAP = EVENT_MAPPING
 
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, device_id, event_files, parent, use_epoll=False, testing=False):
+    def __init__(self, device_id, event_files, parent, use_epoll=False, testing=False, should_grab_event_files=False):
 
         self._device_id = device_id
         self._logger = logging.getLogger('razer.device{0}.keymanager'.format(device_id))
@@ -259,7 +259,12 @@ class KeyboardKeyManager(object):
 
         self._last_colour_choice = None
 
+        self._should_grab_event_files = should_grab_event_files
         self._event_files_locked = False
+
+        if self._should_grab_event_files:
+            self.grab_event_files(True)
+
 
     #TODO add property for enabling key stats?
 
@@ -345,6 +350,10 @@ class KeyboardKeyManager(object):
         # Disable pylints complaining for this part, #PerformanceOverNeatness
         # pylint: disable=too-many-branches,too-many-statements
 
+        # Get event files if they arnt locked #nasty hack
+        if not self._event_files_locked and self._should_grab_event_files:
+            self.grab_event_files(True)
+
         if key_press == 'autorepeat': # TODO not done right yet
            # If its brightness then convert autorepeat to key presses
            if key_id in (190, 194):
@@ -372,7 +381,7 @@ class KeyboardKeyManager(object):
             # Convert event ID to key name
             key_name = self.EVENT_MAP[key_id]
 
-            #self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
+            self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
 
             # Key release
             if key_press == 'release':

@@ -195,14 +195,22 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
                # Logo
                'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
                # Scroll wheel
-               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2'
-               ]
+               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               # #Macros
+               'get_macros', 'delete_macro', 'add_macro']
 
     def __init__(self, *args, **kwargs):
         super(RazerNagaHexV2, self).__init__(*args, **kwargs)
 
-        self.key_manager = _NagaHexV2KeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
+        self.key_manager = _NagaHexV2KeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing, should_grab_event_files=True)
 
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerNagaHexV2, self)._close()
+
+        self.key_manager.close()
 
     def _suspend_device(self):
         """
