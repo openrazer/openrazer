@@ -66,19 +66,29 @@ class RazerDevice(object):
             'lighting_led_single': self._has_feature('razer.device.lighting.chroma', 'setKey'),
 
             # Mouse lighting attrs
-            'lighting_logo': self._has_feature('razer.device.lighting.logo', 'setLogoActive'),
+            'lighting_logo': self._has_feature('razer.device.lighting.logo'),
             'lighting_logo_blinking': self._has_feature('razer.device.lighting.logo', 'setLogoBlinking'),
             'lighting_logo_brightness': self._has_feature('razer.device.lighting.logo', 'setLogoBrightness'),
             'lighting_logo_pulsate': self._has_feature('razer.device.lighting.logo', 'setLogoPulsate'),
             'lighting_logo_spectrum': self._has_feature('razer.device.lighting.logo', 'setLogoSpectrum'),
             'lighting_logo_static': self._has_feature('razer.device.lighting.logo', 'setLogoStatic'),
+            'lighting_logo_none': self._has_feature('razer.device.lighting.logo', 'setLogoNone'),
+            'lighting_logo_reactive': self._has_feature('razer.device.lighting.logo', 'setLogoReactive'),
+            'lighting_logo_breath_single': self._has_feature('razer.device.lighting.logo', 'setLogoBreathSingle'),
+            'lighting_logo_breath_dual': self._has_feature('razer.device.lighting.logo', 'setLogoBreathDual'),
+            'lighting_logo_breath_random': self._has_feature('razer.device.lighting.logo', 'setLogoBreathRandom'),
 
-            'lighting_scroll': self._has_feature('razer.device.lighting.scroll', 'setScrollActive'),
+            'lighting_scroll': self._has_feature('razer.device.lighting.scroll'),
             'lighting_scroll_blinking': self._has_feature('razer.device.lighting.scroll', 'setScrollBlinking'),
             'lighting_scroll_brightness': self._has_feature('razer.device.lighting.scroll', 'setScrollBrightness'),
             'lighting_scroll_pulsate': self._has_feature('razer.device.lighting.scroll', 'setScrollPulsate'),
             'lighting_scroll_spectrum': self._has_feature('razer.device.lighting.scroll', 'setScrollSpectrum'),
             'lighting_scroll_static': self._has_feature('razer.device.lighting.scroll', 'setScrollStatic'),
+            'lighting_scroll_none': self._has_feature('razer.device.lighting.scroll', 'setScrollNone'),
+            'lighting_scroll_reactive': self._has_feature('razer.device.lighting.scroll', 'setScrollReactive'),
+            'lighting_scroll_breath_single': self._has_feature('razer.device.lighting.scroll', 'setScrollBreathSingle'),
+            'lighting_scroll_breath_dual': self._has_feature('razer.device.lighting.scroll', 'setScrollBreathDual'),
+            'lighting_scroll_breath_random': self._has_feature('razer.device.lighting.scroll', 'setScrollBreathRandom'),
 
         }
 

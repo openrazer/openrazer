@@ -48,13 +48,15 @@ class ScreensaverThread(threading.Thread):
                 try:
                     screensaver_object = session_bus.get_object(bus_name, object_path)
                     self._dbus_interface = dbus.Interface(screensaver_object, interface_name)
+                    self._dbus_interface.GetActive()
                     break
                 except dbus.exceptions.DBusException:
+                    # Skip over exceptions as we only care if we find a valid endpoint.
                     pass
             else:
                 self.logger.warning("Could not find screensaver DBus")
-                self._try_count += 1
                 self._dbus_interface = None
+                self._try_count = 5
 
         except dbus.exceptions.DBusException as err:
             self.logger.exception("Caught exception whilst trying to get screensaver DBus", exc_info=err)

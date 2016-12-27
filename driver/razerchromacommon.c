@@ -693,6 +693,129 @@ struct razer_report razer_chroma_extended_matrix_set_custom_frame(unsigned char 
     return report;
 }
 
+/*
+ * Extended Matrix Effects (Mouse)
+ */
+/**
+ * Sets up the extended matrix effect payload for mouse devices
+ */
+struct razer_report razer_chroma_mouse_extended_matrix_effect_base(unsigned char arg_size, unsigned char variable_storage, unsigned char led_id, unsigned char effect_id)
+{
+	struct razer_report report = get_razer_report(0x03, 0x0D, arg_size);
+	report.transaction_id.id = 0x3F;
+	
+	report.arguments[0] = variable_storage;
+	report.arguments[1] = led_id;
+	report.arguments[2] = effect_id; // Effect ID
+	
+	return report;
+}
+
+/**
+ * Set the device to "None" effect
+ * 
+ * Status Trans Packet Proto DataSize Class CMD Args
+ *  * 00     3f    0000   00    03       03    0d  010100 | SET Extended Matrix Effect (VARSTORE, LOGO_LED, OFF)
+ */
+struct razer_report razer_chroma_mouse_extended_matrix_effect_none(unsigned char variable_storage, unsigned char led_id)
+{
+	return razer_chroma_mouse_extended_matrix_effect_base(0x03, variable_storage, led_id, 0x00);
+}
+
+/**
+ * Set the device to "Static" effect
+ * 
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     3f    0000   00    06       03    0d  010106 00ff00 | SET Extended Matrix Effect (VARSTORE, SCROLL_WHEEL, STATIC, RGB)
+ */
+struct razer_report razer_chroma_mouse_extended_matrix_effect_static(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb)
+{
+	struct razer_report report = razer_chroma_mouse_extended_matrix_effect_base(0x06, variable_storage, led_id, 0x06);
+	
+	report.arguments[3] = rgb->r;
+	report.arguments[4] = rgb->g;
+	report.arguments[5] = rgb->b;
+	return report;
+}
+ 
+/**
+ * Set the device to "Spectrum" effect
+ * 
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     3f    0000   00    03       03    0d  010104 | SET Extended Matrix Effect (VARSTORE, LOGO_LED, SPECTRUM)
+ */
+struct razer_report razer_chroma_mouse_extended_matrix_effect_spectrum(unsigned char variable_storage, unsigned char led_id)
+{
+	return razer_chroma_mouse_extended_matrix_effect_base(0x03, variable_storage, led_id, 0x04);
+}
+
+/**
+ * Set the device to "Reactive" effect
+ * 
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     3f    0000   00    07       03    0d  010102 0300ff00            | SET Extended Matrix Effect (VARSTORE, SCROLL_WHEEL,  REACTIVE, TIME, RGB)
+ * 00     3f    0000   00    07       03    0d  010102 0200ff00            | SET Extended Matrix Effect (VARSTORE, SCROLL_WHEEL,  REACTIVE, TIME, RGB)
+ * 00     3f    0000   00    07       03    0d  010102 0100ff00            | SET Extended Matrix Effect (VARSTORE, SCROLL_WHEEL,  REACTIVE, TIME, RGB)
+ */
+struct razer_report razer_chroma_mouse_extended_matrix_effect_reactive(unsigned char variable_storage, unsigned char led_id, unsigned char speed, struct razer_rgb *rgb)
+{
+	struct razer_report report = razer_chroma_mouse_extended_matrix_effect_base(0x07, variable_storage, led_id, 0x02);
+	
+	speed = clamp_u8(speed, 0x01, 0x04);
+	
+	report.arguments[3] = speed;
+	report.arguments[4] = rgb->r;
+	report.arguments[5] = rgb->g;
+	report.arguments[6] = rgb->b;
+	
+	return report;
+}
+
+/**
+ * Set the device to "Breathing" effect
+ * 
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     3f    0000   00    0a       03    0d  010103 0100ff00000000      | SET Extended Matrix Effect (VARSTORE, SCROLL_WHEEL, BREATHING, single, RGB, RGB-none)
+ * 00     3f    0000   00    0a       03    0d  010103 0200ff00ff0000      | SET Extended Matrix Effect (VARSTORE, SCROLL_WHEEL, BREATHING, dual, RGB, RGB)
+ * 00     3f    0000   00    0a       03    0d  010103 03000000000000      | SET Extended Matrix Effect (VARSTORE, SCROLL_WHEEL, BREATHING, random, RGB-none, RGB-none)
+ */
+struct razer_report razer_chroma_mouse_extended_matrix_effect_breathing_random(unsigned char variable_storage, unsigned char led_id)
+{
+	struct razer_report report = razer_chroma_mouse_extended_matrix_effect_base(0x0A, variable_storage, led_id, 0x03);
+	
+	report.arguments[3] = 0x03;
+	
+	return report;
+}
+struct razer_report razer_chroma_mouse_extended_matrix_effect_breathing_single(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1)
+{
+	struct razer_report report = razer_chroma_mouse_extended_matrix_effect_base(0x0A, variable_storage, led_id, 0x03);
+	
+	report.arguments[3] = 0x01;
+	
+	report.arguments[4] = rgb1->r;
+	report.arguments[5] = rgb1->g;
+	report.arguments[6] = rgb1->b;
+	
+	return report;
+}
+struct razer_report razer_chroma_mouse_extended_matrix_effect_breathing_dual(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1, struct razer_rgb *rgb2)
+{
+	struct razer_report report = razer_chroma_mouse_extended_matrix_effect_base(0x0A, variable_storage, led_id, 0x03);
+	
+	report.arguments[3] = 0x02;
+	
+	report.arguments[4] = rgb1->r;
+	report.arguments[5] = rgb1->g;
+	report.arguments[6] = rgb1->b;
+	
+	report.arguments[7] = rgb2->r;
+	report.arguments[8] = rgb2->g;
+	report.arguments[9] = rgb2->b;
+	
+	return report;
+}
+
 
 
 

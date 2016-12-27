@@ -25,7 +25,7 @@ import threading
 import time
 
 # pylint: disable=import-error
-from razer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING
+from razer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING
 from .macro import MacroKey, MacroRunner, macro_dict_to_obj
 
 EVENT_FORMAT = '@llHHI'
@@ -204,6 +204,7 @@ class KeyWatcher(threading.Thread):
         """
         self._shutdown = value
 
+
 class KeyboardKeyManager(object):
     """
     Key management class.
@@ -217,6 +218,9 @@ class KeyboardKeyManager(object):
     It will be used to store keypresses in a list (for at most 2 seconds) if enabled for the ripple effect, when I
     get round to making the effect.
     """
+    KEY_MAP = KEY_MAPPING
+    EVENT_MAP = EVENT_MAPPING
+
     # pylint: disable=too-many-instance-attributes
     def __init__(self, device_id, event_files, parent, use_epoll=False, testing=False):
 
@@ -366,7 +370,7 @@ class KeyboardKeyManager(object):
 
         try:
             # Convert event ID to key name
-            key_name = EVENT_MAPPING[key_id]
+            key_name = self.EVENT_MAP[key_id]
 
             #self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
 
@@ -390,7 +394,7 @@ class KeyboardKeyManager(object):
                     # self._logger.debug("Increased key %s", key_name)
                 except KeyError:
                     # Create bucket
-                    self._stats[storage_bucket] = dict.fromkeys(KEY_MAPPING, 0)
+                    self._stats[storage_bucket] = dict.fromkeys(self.KEY_MAP, 0)
                     try:
                         # Increment key
                         self._stats[storage_bucket][key_name] += 1
@@ -401,7 +405,7 @@ class KeyboardKeyManager(object):
                 if self._temp_key_store_active:
                     colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
                     self._last_colour_choice = colour
-                    self._temp_key_store.append((now + self._temp_expire_time, KEY_MAPPING[key_name], colour))
+                    self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_name], colour))
 
                 # Macro FN+F9 logic
                 if key_name == 'MACROMODE':
@@ -631,6 +635,12 @@ class KeyboardKeyManager(object):
                 #self.temp_key_store_state = False
                 pass
 
+
+class NagaHexV2KeyManager(KeyboardKeyManager):
+    KEY_MAP = NAGA_HEX_V2_KEY_MAPPING
+    EVENT_MAP = NAGA_HEX_V2_EVENT_MAPPING
+
+
 class TartarusKeyManager(KeyboardKeyManager):
     def __init__(self, device_id, event_files, parent, use_epoll=True, testing=False):
         super(TartarusKeyManager, self).__init__(device_id, event_files, parent, use_epoll, testing=testing)
@@ -765,6 +775,7 @@ class TartarusKeyManager(KeyboardKeyManager):
         :type value: bool
         """
         self._mode_modifier = True if value else False
+
 
 class MediaKeyPress(threading.Thread):
     """
