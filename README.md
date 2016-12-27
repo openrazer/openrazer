@@ -44,6 +44,7 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | Razer Imperator 2012            |  1532:002F  |   ✔    |   ✔    |
 | Razer Orochi (Wired)            |  1532:0048  |   ✔    |   ✔    |
 | Razer DeathAdder Chroma         |  1532:0043  |   ✔    |   ✔    |
+| Razer Naga Hex V2               |  1532:0050  |   ✔    |   ✔    |
 
 ### Mousemats
 | Device        | USB VID:PID | Driver | Daemon |

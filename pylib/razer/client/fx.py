@@ -505,6 +505,13 @@ class SingleLed(BaseRazerFX):
             return True
         return False
 
+    def none(self) -> bool:
+        if self._shas('none'):
+            self._getattr('set#None')()
+
+            return True
+        return False
+
     def spectrum(self) -> bool:
         if self._shas('spectrum'):
             self._getattr('set#Spectrum')()
