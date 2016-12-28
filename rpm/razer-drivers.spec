@@ -53,6 +53,7 @@ Requires: python3-dbus
 %endif
 Requires: python3-gobject
 Requires: python3-setproctitle
+Requires: python3-pyudev
 Requires: xautomation
 Requires: xdotool
 %description -n razer-daemon
