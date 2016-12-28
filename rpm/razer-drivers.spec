@@ -11,8 +11,7 @@ Summary: Razer drivers for Linux
 License: GPL-2.0
 URL: https://github.com/terrycain/razer-drivers
 
-#Source0: https://github.com/terrycain/razer-drivers/archive/v%{version}.tar.gz
-Source0: https://github.com/z3ntu/razer-drivers/archive/1e166f580959af766d4376e40f0c708fa461b137.tar.gz
+Source0: https://github.com/terrycain/razer-drivers/archive/v%{version}.tar.gz
 BuildArch: noarch
 
 %description
@@ -76,8 +75,7 @@ Long description
 
 
 %prep
-# autosetup -n razer-drivers-%{version}
-%autosetup -n razer-drivers-1e166f580959af766d4376e40f0c708fa461b137
+%autosetup -n razer-drivers-%{version}
 
 %build
 # noop
@@ -90,8 +88,6 @@ rm -rf $RPM_BUILD_ROOT
 # python_library_install -> python3-razer
 make DESTDIR=$RPM_BUILD_ROOT setup_dkms udev_install daemon_install python_library_install
 mv $RPM_BUILD_ROOT/lib/udev $RPM_BUILD_ROOT/usr/lib/udev
-# Soon not neccessary anymore :)
-rm -rf $RPM_BUILD_ROOT/%{_datadir}/upstart/
 
 
 %clean
@@ -137,7 +133,7 @@ fi
 # A bit hacky but it works
 %{_udevrulesdir}/../razer_mount
 %{_udevrulesdir}/99-razer.rules
-%{_usrsrc}/razer_chroma_driver-1.0.0/
+%{_usrsrc}/%{dkms_name}-%{dkms_version}/
 
 %files -n razer-daemon
 %{_sysconfdir}/xdg/autostart/razer-service.desktop
