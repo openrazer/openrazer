@@ -505,12 +505,165 @@ class SingleLed(BaseRazerFX):
             return True
         return False
 
+    def none(self) -> bool:
+        if self._shas('none'):
+            self._getattr('set#None')()
+
+            return True
+        return False
+
     def spectrum(self) -> bool:
         if self._shas('spectrum'):
             self._getattr('set#Spectrum')()
 
             return True
         return False
+
+    def reactive(self, red:int, green:int, blue:int, time:int) -> bool:
+        """
+        Reactive effect
+
+        :param time: Reactive speed. One of REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS or REACTIVE_2000MS
+        :param time: int
+
+        :param red: Red component. Must be 0->255
+        :type red: int
+
+        :param green: Green component. Must be 0->255
+        :type green: int
+
+        :param blue: Blue component. Must be 0->255
+        :type blue: int
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If parameters are invalid
+        """
+        if time not in (c.REACTIVE_500MS, c.REACTIVE_1000MS, c.REACTIVE_1500MS, c.REACTIVE_2000MS):
+            raise ValueError("Time not one of REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS or REACTIVE_2000MS")
+        if not isinstance(red, int):
+            raise ValueError("Red is not an integer")
+        if not isinstance(green, int):
+            raise ValueError("Green is not an integer")
+        if not isinstance(blue, int):
+            raise ValueError("Blue is not an integer")
+
+        if self._shas('reactive'):
+            red = clamp_ubyte(red)
+            green = clamp_ubyte(green)
+            blue = clamp_ubyte(blue)
+
+            self._getattr('set#Reactive')(red, green, blue, time)
+
+            return True
+        return False
+
+    def breath_single(self, red:int, green:int, blue:int) -> bool:
+        """
+        Breath effect - single colour
+
+        :param red: Red component. Must be 0->255
+        :type red: int
+
+        :param green: Green component. Must be 0->255
+        :type green: int
+
+        :param blue: Blue component. Must be 0->255
+        :type blue: int
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If parameters are invalid
+        """
+        if not isinstance(red, int):
+            raise ValueError("Red is not an integer")
+        if not isinstance(green, int):
+            raise ValueError("Green is not an integer")
+        if not isinstance(blue, int):
+            raise ValueError("Blue is not an integer")
+
+        if self._shas('breath_single'):
+            red = clamp_ubyte(red)
+            green = clamp_ubyte(green)
+            blue = clamp_ubyte(blue)
+
+            self._getattr('set#BreathSingle')(red, green, blue)
+
+            return True
+        return False
+
+    # TODO Change to tuple of rgb
+    def breath_dual(self, red:int, green:int, blue:int, red2:int, green2:int, blue2:int) -> bool:
+        """
+        Breath effect - single colour
+
+        :param red: First red component. Must be 0->255
+        :type red: int
+
+        :param green: First green component. Must be 0->255
+        :type green: int
+
+        :param blue: First blue component. Must be 0->255
+        :type blue: int
+
+        :param red2: Second red component. Must be 0->255
+        :type red2: int
+
+        :param green2: Second green component. Must be 0->255
+        :type green2: int
+
+        :param blue2: Second blue component. Must be 0->255
+        :type blue2: int
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If parameters are invalid
+        """
+        if not isinstance(red, int):
+            raise ValueError("Primary red is not an integer")
+        if not isinstance(green, int):
+            raise ValueError("Primary green is not an integer")
+        if not isinstance(blue, int):
+            raise ValueError("Primary blue is not an integer")
+        if not isinstance(red2, int):
+            raise ValueError("Secondary red is not an integer")
+        if not isinstance(green2, int):
+            raise ValueError("Secondary green is not an integer")
+        if not isinstance(blue2, int):
+            raise ValueError("Secondary blue is not an integer")
+
+        if self._shas('breath_dual'):
+            red = clamp_ubyte(red)
+            green = clamp_ubyte(green)
+            blue = clamp_ubyte(blue)
+            red2 = clamp_ubyte(red2)
+            green2 = clamp_ubyte(green2)
+            blue2 = clamp_ubyte(blue2)
+
+            self._getattr('set#BreathDual')(red, green, blue, red2, green2, blue2)
+
+            return True
+        return False
+
+    def breath_random(self) -> bool:
+        """
+        Breath effect - random colours
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        if self._shas('breath_random'):
+            self._getattr('set#BreathRandom')()
+
+            return True
+        return False
+
 
 
 class MiscLighting(BaseRazerFX):

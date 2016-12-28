@@ -155,7 +155,7 @@ fedora_package:
 	@make fedora_install DESTDIR:=$(RZRTMPDIR)
 	@echo -e "\n::\033[34m Making fedora package\033[0m"
 	@echo "====================================================="
-	mkdir dist
+	mkdir -p dist
 	fpm --force -s dir -t rpm -d kernel-devel -d dkms -d udev -n razer-kernel-modules-dkms -v $(VERSION) -p dist/ -a all --before-install install_files/fedora_package_scripts/razer-kernel-modules-dkms.preinst --after-install install_files/fedora_package_scripts/razer-kernel-modules-dkms.postinst --before-remove install_files/fedora_package_scripts/razer-kernel-modules-dkms.prerm -m "Terry Cain <terry+razer@terrys-home.co.uk>" --url "https://github.com/terrycain/razer-drivers" --description "Razer Driver DKMS package"  -C $(RZRTMPDIR) lib usr/src
 	fpm --force -s dir -t rpm -d razer-kernel-modules-dkms -d python3 -d python3-dbus -d python3-gobject -d python3-setproctitle -d xautomation -d xdotool -n razer-daemon -p dist/ -v $(VERSION) -a all --before-remove install_files/fedora_package_scripts/razer-daemon.prerm -m "Terry Cain <terry+razer@terrys-home.co.uk>" --url "https://github.com/terrycain/razer-drivers" --description "Razer Service package"  -C $(RZRTMPDIR) usr/lib/python3.5/site-packages/razer_daemon usr/bin/razer-service etc/xdg/autostart usr/share/razer-service usr/share/man
 	fpm --force -s dir -t rpm -d python3 -d python3-dbus -d python3-gobject -d python3-numpy -n python3-razer -p dist/ -v $(VERSION) -a all --before-remove install_files/fedora_package_scripts/python3-razer.prerm -m "Terry Cain <terry+razer@terrys-home.co.uk>" --url "https://github.com/terrycain/razer-drivers" --description "Razer Python library"  -C $(RZRTMPDIR) usr/lib/python3.5/site-packages/razer usr/bin/razer-service

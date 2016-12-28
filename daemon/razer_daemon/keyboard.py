@@ -64,6 +64,21 @@ TARTARUS_KEY_MAPPING = {
 
 }
 
+# Naga hex buttons are normal 1-7 keys
+#      0 1 2 3 4
+#   --------------
+# 0 |    1   2
+# 1 |  4       3
+# 2 |    5   7
+# 3 |      6
+NAGA_HEX_V2_KEY_MAPPING = {
+    '1': (0, 1), '2': (0, 3),
+    '4': (1, 0), '3': (1, 4),
+    '5': (2, 1), '7': (2, 3),
+    '6': (3, 2)
+}
+
+
 #
 EVENT_MAPPING = {
     1: 'ESC', 2: '1',  3: '2',  4: '3',  5: '4',  6: '5',  7: '6',  8: '7',  9: '8',
@@ -106,6 +121,10 @@ TARTARUS_EVENT_MAPPING = {
     105: 'LEFT',
     106: 'RIGHT',
     108: 'DOWN',
+}
+
+NAGA_HEX_V2_EVENT_MAPPING = {
+    2: '1',  3: '2',  4: '3',  5: '4',  6: '5',  7: '6',  8: '7'
 }
 
 XTE_MAPPING = {

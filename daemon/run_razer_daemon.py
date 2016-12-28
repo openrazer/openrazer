@@ -3,6 +3,7 @@
 import argparse
 import os
 import shutil
+import sys
 from razer_daemon.daemon import daemonize
 
 SHARE_DIR = '/usr/share/razer-service'
@@ -36,7 +37,10 @@ def run():
         os.mkdir(BASE_PATH)
         os.mkdir(LOG_PATH)
         os.mkdir(os.path.join(BASE_PATH, 'data'))
-        shutil.copy(EXAMPLE_CONF, CONF_PATH)
+        if os.path.exists(EXAMPLE_CONF):
+            shutil.copy(EXAMPLE_CONF, CONF_PATH)
+        else:
+            print('Cant find "{0}"'.format(EXAMPLE_CONF), file=sys.stderr)
 
 
     daemon_args = {

@@ -398,3 +398,27 @@ class RazerOrnataChroma(_MacroKeyboard):
         super(RazerOrnataChroma, self)._close()
 
         self.ripple_manager.close()
+
+
+class RazerAnansi(_MacroKeyboard):
+
+    """
+    Class for the Anansi
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Anansi(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x010f
+    HAS_MATRIX = False
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [-1, -1]
+    METHODS = ['get_firmware', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness',
+               'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode', 'get_macro_effect',
+               'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro', 'set_static_effect',
+               'set_spectrum_effect', 'has_matrix', 'get_matrix_dims', 'set_none_effect']
+
+    def __init__(self, *args, **kwargs):
+        super(RazerAnansi, self).__init__(*args, **kwargs)
+
+    def _close(self):
+        super(RazerAnansi, self)._close()
