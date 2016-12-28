@@ -14,6 +14,10 @@ URL: https://github.com/terrycain/razer-drivers
 Source0: https://github.com/terrycain/razer-drivers/archive/v%{version}.tar.gz
 BuildArch: noarch
 
+Requires: razer-kernel-modules-dkms
+Requires: razer-daemon
+Requires: python3-razer
+
 %description
 Razer Driver DKMS package
 
@@ -41,7 +45,7 @@ BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 Requires: razer-kernel-modules-dkms
 Requires: python3
-# Thanks openeuse for this great package name...
+# Thanks OpenSUSE for this great package name...
 %if 0%{?suse_version}
 Requires: dbus-1-python3
 %else
@@ -126,6 +130,9 @@ if [ "$1" == 0 ]; then
     dkms remove -m $DKMS_NAME -v $DKMS_VERSION --all
   fi
 fi
+
+%files
+# meta package is empty
 
 
 %files -n razer-kernel-modules-dkms
