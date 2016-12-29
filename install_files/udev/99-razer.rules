@@ -17,7 +17,7 @@ ATTRS{idProduct}=="0c00", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerfirefly"
 
 # Kraken V2
-ATTRS{idProduct}=="0510", \
+ATTRS{idProduct}=="0504|0510", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerkraken"
 
 # Get out if no match
