@@ -11,10 +11,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  *
- * Should you need to contact me, the author, you can do so either by
- * e-mail - mail your message to <terry@terrys-home.co.uk>
+ * Should you need to contact me, the author, you can do so by
+ * e-mail - mail your message to Terry Cain <terry@terrys-home.co.uk>
  */
 
 
