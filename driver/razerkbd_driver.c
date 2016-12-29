@@ -724,11 +724,11 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
                 razer_send_payload(usb_dev, &report);
             }
             else
-                printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)");
+                printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
             break;
             
         default:
-            printk(KERN_WARNING "razerkbd: Cannot set static mode for this device");
+            printk(KERN_WARNING "razerkbd: Cannot set static mode for this device\n");
             break;
         
     }

@@ -113,6 +113,12 @@ struct razer_report {
     unsigned char reserved; /*0x0*/
 };
 
+struct razer_key_translation {
+	u16 from;
+	u16 to;
+	u8 flags;
+};
+
 int razer_send_control_msg(struct usb_device *usb_dev,void const *data, unsigned int report_index, unsigned long wait_min, unsigned long wait_max);
 int razer_get_usb_response(struct usb_device *usb_dev, unsigned int report_index, struct razer_report* request_report, unsigned int response_index, struct razer_report* response_report, unsigned long wait_min, unsigned long wait_max);
 unsigned char razer_calculate_crc(struct razer_report *report);

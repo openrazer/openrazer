@@ -136,14 +136,6 @@ struct razer_kbd_device {
     DECLARE_BITMAP(pressed_fn, KEY_CNT);
 };
 
-struct razer_key_translation {
-	u16 from;
-	u16 to;
-	u8 flags;
-};
-
-
-
 
 
 #endif

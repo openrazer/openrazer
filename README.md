@@ -52,7 +52,12 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | ------------- | ----------- | ------ | ------ |
 | Razer Firefly |  1532:0C00  |   ✔    |   ✔    |
 
-### Peripherals
+### Headsets
+| Device               | USB VID:PID | Driver | Daemon |
+| -------------------- | ----------- | ------ | ------ |
+| Razer Kraken 7.1 V2  |  1532:0510  |   ✔    |   ✔    |
+
+### Gamepads
 | Device          | USB VID:PID | Driver | Daemon |
 | --------------- | ----------- | ------ | ------ |
 | Razer Tartarus  |  1532:0208  |   ✔    |   ✔    |
