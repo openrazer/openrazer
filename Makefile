@@ -122,16 +122,27 @@ remove_dkms:
 udev_install:
 	@echo -e "\n::\033[34m Installing Razer udev rules\033[0m"
 	@echo "====================================================="
+	install -m 644 -v -D install_files/udev/99-razer.rules $(DESTDIR)/usr/lib/udev/rules.d/99-razer.rules
+	install -m 755 -v -D install_files/udev/razer_mount $(DESTDIR)/usr/lib/udev/razer_mount
+
+udev_uninstall:
+	@echo -e "\n::\033[34m Uninstalling Razer udev rules\033[0m"
+	@echo "====================================================="
+	rm -f $(DESTDIR)/usr/lib/udev/rules.d/99-razer.rules $(DESTDIR)/usr/lib/udev/razer_mount
+
+ubuntu_udev_install:
+	@echo -e "\n::\033[34m Installing Razer udev rules\033[0m"
+	@echo "====================================================="
 	install -m 644 -v -D install_files/udev/99-razer.rules $(DESTDIR)/lib/udev/rules.d/99-razer.rules
 	install -m 755 -v -D install_files/udev/razer_mount $(DESTDIR)/lib/udev/razer_mount
 
-udev_uninstall:
+ubuntu_udev_uninstall:
 	@echo -e "\n::\033[34m Uninstalling Razer udev rules\033[0m"
 	@echo "====================================================="
 	rm -f $(DESTDIR)/lib/udev/rules.d/99-razer.rules $(DESTDIR)/lib/udev/razer_mount
 
 # Install for Ubuntu
-ubuntu_install: setup_dkms udev_install daemon_install python_library_install
+ubuntu_install: setup_dkms ubuntu_udev_install daemon_install python_library_install
 	@echo -e "\n::\033[34m Installing for Ubuntu\033[0m"
 	@echo "====================================================="
 
