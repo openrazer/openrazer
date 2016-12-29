@@ -277,6 +277,77 @@ class RazerFX(BaseRazerFX):
             return True
         return False
 
+    def breath_triple(self, red: int, green: int, blue: int, red2: int, green2: int, blue2: int, red3: int, green3: int, blue3: int) -> bool:
+        """
+        Breath effect - single colour
+
+        :param red: First red component. Must be 0->255
+        :type red: int
+
+        :param green: First green component. Must be 0->255
+        :type green: int
+
+        :param blue: First blue component. Must be 0->255
+        :type blue: int
+
+        :param red2: Second red component. Must be 0->255
+        :type red2: int
+
+        :param green2: Second green component. Must be 0->255
+        :type green2: int
+
+        :param blue2: Second blue component. Must be 0->255
+        :type blue2: int
+
+        :param red3: Second red component. Must be 0->255
+        :type red3: int
+
+        :param green3: Second green component. Must be 0->255
+        :type green3: int
+
+        :param blue3: Second blue component. Must be 0->255
+        :type blue3: int
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If parameters are invalid
+        """
+        if not isinstance(red, int):
+            raise ValueError("Primary red is not an integer")
+        if not isinstance(green, int):
+            raise ValueError("Primary green is not an integer")
+        if not isinstance(blue, int):
+            raise ValueError("Primary blue is not an integer")
+        if not isinstance(red2, int):
+            raise ValueError("Secondary red is not an integer")
+        if not isinstance(green2, int):
+            raise ValueError("Secondary green is not an integer")
+        if not isinstance(blue2, int):
+            raise ValueError("Secondary blue is not an integer")
+        if not isinstance(red3, int):
+            raise ValueError("Tertiary red is not an integer")
+        if not isinstance(green3, int):
+            raise ValueError("Tertiary green is not an integer")
+        if not isinstance(blue3, int):
+            raise ValueError("Tertiary blue is not an integer")
+
+        if self.has('breath_triple'):
+            red = clamp_ubyte(red)
+            green = clamp_ubyte(green)
+            blue = clamp_ubyte(blue)
+            red2 = clamp_ubyte(red2)
+            green2 = clamp_ubyte(green2)
+            blue2 = clamp_ubyte(blue2)
+            red3 = clamp_ubyte(red3)
+            green3 = clamp_ubyte(green3)
+            blue3 = clamp_ubyte(blue3)
+
+            self._lighting_dbus.setBreathTriple(red, green, blue, red2, green2, blue2, red3, green3, blue3)
+
+            return True
+        return False
+
     def breath_random(self) -> bool:
         """
         Breath effect - random colours

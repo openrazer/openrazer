@@ -52,6 +52,7 @@ class RazerDevice(object):
             # Default device is a chroma so lighting capabilities
             'lighting_breath_single': self._has_feature('razer.device.lighting.chroma', 'setBreathSingle'),
             'lighting_breath_dual': self._has_feature('razer.device.lighting.chroma', 'setBreathDual'),
+            'lighting_breath_triple': self._has_feature('razer.device.lighting.chroma', 'setBreathTriple'),
             'lighting_breath_random': self._has_feature('razer.device.lighting.chroma', 'setBreathRandom'),
             'lighting_wave': self._has_feature('razer.device.lighting.chroma', 'setWave'),
             'lighting_reactive': self._has_feature('razer.device.lighting.chroma', 'setReactive'),
