@@ -514,24 +514,15 @@
                 </div>
                 <div id="fedora" class="panel-collapse collapse">
                   <div class="panel-body">
-                    <h4><span class="fa fa-cube"></span>&nbsp;RPM Installation</h4>
-                    <div class="danger">
-                      <h5><span class="fa fa-warning"></span> Caution! These packages are experimental!</h5>
-                    </div>
-                    <p>1. Visit the <a href="https://github.com/terrycain/razer-drivers/releases" target="_blank">Releases page</a> and download the following RPM packages:</p>
-                    <ul>
-                      <li><code><b>python3-razer</b>-x.x.x.noarch.rpm</code></li>
-                      <li><code><b>razer-daemon</b>-x.x.x.noarch.rpm</code></li>
-                      <li><code><b>razer-kernel-modules-dkms</b>-x.x.x.noarch.rpm</code></li>
-                    </ul>
-                    <p>2. Install the packages on your system with your package manager or via the terminal:</p>
-                    <pre><code><span class="fa fa-dollar"></span> sudo yum localinstall *.rpm</code></pre>
-                    <p>3. Restart your computer.</p>
+                    <h4><span class="fa fa-cube"></span>&nbsp;From the RPM Repository</h4>
+                    <p>1. Open the terminal and type these commands:</p>
+                    <pre><code><span class="fa fa-dollar"></span> sudo dnf config-manager --add-repo http://download.opensuse.org/repositories/home:z3ntu/Fedora_25/home:z3ntu.repo</code>
+<code><span class="fa fa-dollar"></span> sudo dnf install razer-drivers kernel-devel</code></pre>
+                    <p>2. Once installation finishes, restart your computer.</p>
                   </div>
                 </div>
               </div>
 
-<!--
               <div class="panel panel-default">
                 <div class="panel-heading">
                   <h4 class="panel-title">
@@ -542,11 +533,12 @@
                 </div>
                 <div id="opensuse" class="panel-collapse collapse">
                   <div class="panel-body">
-                    (Not available)
+                    <h4><span class="fa fa-cube"></span> OpenSUSE Build System</h4>
+                    <p>Instructions and a one-click install are <a href="https://software.opensuse.org/download.html?project=home%3Az3ntu&package=razer-drivers" target="_blank">available here.</a></p>
+                    <p>After the drivers are installed, please restart the computer.</p>
                   </div>
                 </div>
               </div>
--->
 
               <div class="panel panel-default">
                 <div class="panel-heading">
