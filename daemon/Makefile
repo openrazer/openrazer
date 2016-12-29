@@ -3,7 +3,7 @@ DESTDIR?=/
 purge_pycache:
 	@find -name '__pycache__' | xargs rm -rf
 
-install: purge_pycache
+install: purge_pycache manpages
 	python3 setup.py install --root=$(DESTDIR)
 	@install -m 644 -D -v resources/razer.conf $(DESTDIR)/usr/share/razer-service/razer.conf.example
 	@install -m 755 -D -v run_razer_daemon.py $(DESTDIR)/usr/bin/razer-service
