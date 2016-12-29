@@ -75,6 +75,15 @@ daemon_install:
 	@mkdir -p $(DESTDIR)/etc/xdg/autostart
 	@cp -v ./install_files/desktop/razer-service.desktop $(DESTDIR)/etc/xdg/autostart/razer-service.desktop
 
+ubuntu_daemon_install:
+	@echo -e "\n::\033[34m Installing Razer Daemon\033[0m"
+	@echo "====================================================="
+	make --no-print-directory -C daemon ubuntu_install
+	@mkdir -p $(DESTDIR)/etc/xdg/autostart
+	@cp -v ./install_files/desktop/razer-service.desktop $(DESTDIR)/etc/xdg/autostart/razer-service.desktop
+
+
+
 daemon_uninstall:
 	@echo -e "\n::\033[34m Uninstalling Razer Daemon\033[0m"
 	@echo "====================================================="
@@ -87,6 +96,11 @@ python_library_install:
 	@echo -e "\n::\033[34m Installing Razer python library\033[0m"
 	@echo "====================================================="
 	@make --no-print-directory -C pylib install
+
+ubuntu_python_library_install:
+	@echo -e "\n::\033[34m Installing Razer python library\033[0m"
+	@echo "====================================================="
+	@make --no-print-directory -C pylib ubuntu_install
 
 python_library_uninstall:
 	@echo -e "\n::\033[34m Uninstalling Razer python library\033[0m"
@@ -136,9 +150,11 @@ ubuntu_udev_uninstall:
 	rm -f $(DESTDIR)/lib/udev/rules.d/99-razer.rules $(DESTDIR)/lib/udev/razer_mount
 
 # Install for Ubuntu
-ubuntu_install: setup_dkms ubuntu_udev_install daemon_install python_library_install
+ubuntu_install: setup_dkms ubuntu_udev_install ubuntu_daemon_install ubuntu_python_library_install
 	@echo -e "\n::\033[34m Installing for Ubuntu\033[0m"
 	@echo "====================================================="
+	mv $(DESTDIR)/usr/lib/python3.* $(DESTDIR)/usr/lib/python3
+	mv $(DESTDIR)/usr/lib/python3/site-packages $(DESTDIR)/usr/lib/python3/dist-packages
 
 install: all driver_install udev_install python_library_install
 	@make --no-print-directory -C daemon install DESTDIR=$(DESTDIR)

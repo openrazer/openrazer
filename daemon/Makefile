@@ -4,9 +4,15 @@ purge_pycache:
 	@find -name '__pycache__' | xargs rm -rf
 
 install: purge_pycache manpages
-	python3 setup.py install --root=$(DESTDIR)
+	python3 setup.py install --prefix=/usr --root=$(DESTDIR)
 	@install -m 644 -D -v resources/razer.conf $(DESTDIR)/usr/share/razer-service/razer.conf.example
 	@install -m 755 -D -v run_razer_daemon.py $(DESTDIR)/usr/bin/razer-service
+
+ubuntu_install: purge_pycache manpages
+	python3 setup.py install --prefix=/usr --root=$(DESTDIR) --no-compile
+	@install -m 644 -D -v resources/razer.conf $(DESTDIR)/usr/share/razer-service/razer.conf.example
+	@install -m 755 -D -v run_razer_daemon.py $(DESTDIR)/usr/bin/razer-service
+
 
 manpages:
 	@install -m 644 -D -v resources/man/razer.conf.5 $(DESTDIR)/usr/share/man/man5/razer.conf.5
