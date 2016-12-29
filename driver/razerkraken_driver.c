@@ -24,6 +24,7 @@
 #include <linux/init.h>
 #include <linux/usb/input.h>
 #include <linux/hid.h>
+#include <linux/random.h>
 
 #include "razerkraken_driver.h"
 #include "razercommon.h"
@@ -245,7 +246,7 @@ static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute
  */
 static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "\n");
+	return sprintf(buf, "\n");
 }
 
 /**
@@ -599,6 +600,7 @@ static DEVICE_ATTR(matrix_effect_breath,    0660, razer_attr_read_mode_breath,  
 
 void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf) {
 	struct usb_device *usb_dev = interface_to_usbdev(intf);
+	unsigned int rand_serial = 0;
 	
 	// Initialise mutex
     mutex_init(&dev->lock);
@@ -618,6 +620,10 @@ void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *in
 			case USB_DEVICE_ID_RAZER_KRAKEN:
 				dev->led_mode_address = RAINIE_SET_LED_ADDRESS;
 				dev->breathing_address[0] = RAINIE_BREATHING1_ADDRESS_START;
+				
+				// Get a "random" integer
+				get_random_bytes(&rand_serial, sizeof(unsigned int));
+				sprintf(&dev->serial[0], "HN%015u", rand_serial);
 				break;
 	}
 }
