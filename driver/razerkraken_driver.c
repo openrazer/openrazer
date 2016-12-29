@@ -738,6 +738,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
  * Device ID mapping table
  */
 static const struct hid_device_id razer_devices[] = {
+	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_V2) },
     { }
 };
