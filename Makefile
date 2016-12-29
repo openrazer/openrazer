@@ -142,7 +142,7 @@ ubuntu_udev_uninstall:
 	rm -f $(DESTDIR)/lib/udev/rules.d/99-razer.rules $(DESTDIR)/lib/udev/razer_mount
 
 # Install for Ubuntu
-ubuntu_install: setup_dkms udev_install daemon_install python_library_install
+ubuntu_install: setup_dkms ubuntu_udev_install daemon_install python_library_install
 	@echo -e "\n::\033[34m Installing for Ubuntu\033[0m"
 	@echo "====================================================="
 
