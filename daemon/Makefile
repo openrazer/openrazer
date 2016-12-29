@@ -18,7 +18,7 @@ manpages_uninstall:
 	@rm -f $(DESTDIR)/usr/share/man/man5/razer.conf.5.gz
 	@rm -f $(DESTDIR)/usr/share/man/man8/razer-service.8.gz
 
-uninstall:
+uninstall: manpages_uninstall
 	$(eval DAEMONPATH := $(shell find $(DESTDIR)/usr/lib/python3* -maxdepth 2 -name "razer_daemon"))
 	$(eval EGGPATH := $(shell readlink -f $(DAEMONPATH)-*.egg-info/)) # shows an error when it's not already installed (maybe use some if condition)
 	@rm -rf -v $(DAEMONPATH)
