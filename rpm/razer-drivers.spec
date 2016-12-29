@@ -92,7 +92,6 @@ rm -rf $RPM_BUILD_ROOT
 # daemon_install -> razer_daemon
 # python_library_install -> python3-razer
 make DESTDIR=$RPM_BUILD_ROOT setup_dkms udev_install daemon_install python_library_install
-mv $RPM_BUILD_ROOT/lib/udev $RPM_BUILD_ROOT/usr/lib/udev
 
 
 %clean
@@ -149,6 +148,8 @@ fi
 %{python3_sitelib}/razer_daemon/
 %{python3_sitelib}/razer_daemon-*.egg-info/
 %{_datadir}/razer-service/
+%{_mandir}/man5/razer.conf.5.gz
+%{_mandir}/man8/razer-service.8.gz
 
 %files -n python3-razer
 %{python3_sitelib}/razer/
