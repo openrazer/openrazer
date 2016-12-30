@@ -27,10 +27,10 @@ class RazerDevice(object):
             'brightness': _dbus.Interface(self._dbus, "razer.device.lighting.brightness")
         }
 
-        self._name = self._dbus_interfaces['device'].getDeviceName()
-        self._type = self._dbus_interfaces['device'].getDeviceType()
-        self._fw = self._dbus_interfaces['device'].getFirmware()
-        self._drv_version = self._dbus_interfaces['device'].getDriverVersion()
+        self._name = str(self._dbus_interfaces['device'].getDeviceName())
+        self._type = str(self._dbus_interfaces['device'].getDeviceType())
+        self._fw = str(self._dbus_interfaces['device'].getFirmware())
+        self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
         self._has_dedicated_macro = None
 
         if vid_pid is None:

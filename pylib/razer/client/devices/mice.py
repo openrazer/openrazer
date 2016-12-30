@@ -22,8 +22,8 @@ class RazerMouse(__RazerDevice):
         """
         Get mouse DPI
 
-        Will return a tuple, with the first arg being if the request was successful.
-        :return: DPI (True, 500, 500)
+        Will return a tuple
+        :return: DPI (500, 500)
         :rtype: tuple
 
         :raises NotImplementedError: If function is not supported
@@ -31,7 +31,7 @@ class RazerMouse(__RazerDevice):
         if self.has('dpi'):
             dpi_x, dpi_y = self._dbus_interfaces['dpi'].getDPI()
             # Converting to integers to remove the dbus types
-            return True, int(dpi_x), int(dpi_y)
+            return int(dpi_x), int(dpi_y)
         else:
             raise NotImplementedError()
 

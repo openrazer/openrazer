@@ -506,7 +506,7 @@ class SingleLed(BaseRazerFX):
     @property
     def brightness(self):
         if self._shas('brightness'):
-            return self._getattr('get#Brightness')()
+            return float(self._getattr('get#Brightness')())
         return 0.0
 
     @brightness.setter

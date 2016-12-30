@@ -29,6 +29,7 @@ class RazerDeviceFactory(__BaseDeviceFactory):
         if there is only one model (like Firefly) or a factory for the keyboards (so we can differentiate between
         old blackwidows and chromas). If the device is not in the device mapping then the factory will default
         to a raw RazerDevice.
+        
         :param serial: Device serial
         :type serial: str
 
