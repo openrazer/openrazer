@@ -12,8 +12,8 @@ Contents:
    :maxdepth: 2
 
    intro.rst
-   examples.rst
-   inner_workings.rst
+   device_manager.rst
+   device.rst
 
 
 

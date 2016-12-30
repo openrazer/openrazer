@@ -96,6 +96,11 @@ xdg_uninstall:
 install-systemd:
 	@make --no-print-directory -C daemon install-systemd
 
+python_library_docs:
+	@echo -e "\n::\033[34m Creating Python Library docs\033[0m"
+	@echo "====================================================="
+	@make --no-print-directory -C pylib docs
+
 # Clean target
 clean: driver_clean
 

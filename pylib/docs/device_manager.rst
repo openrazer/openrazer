@@ -2,8 +2,8 @@
    :language: py
 
 
-Pylib Examples
-==============
+DeviceManager Class
+===================
 
 Ok first things first. The `DeviceManager` is the start of any interaction with the `razer-daemon` or Razer device.
 
@@ -40,30 +40,3 @@ Now for a few examples:
    >>> dev_manager.devices
    [<RazerMouse PM1640H04410109>, <RazerDevice HN1644D04700103>]
 
-
-
-
-l
-
-l
-
-l
-
-l
-
-l
-
-l
-
-l
-
-l
-
-l
-
-l
-
-
-
-.. autoclass:: razer.client.devices.RazerDevice
-   :members:

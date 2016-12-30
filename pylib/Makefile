@@ -14,3 +14,7 @@ uninstall:
 	$(eval EGGPATH := $(shell readlink -f $(DAEMONPATH)-*.egg-info/)) # shows an error when it's not already installed (maybe use some if condition)
 	@rm -v -rf $(DAEMONPATH)
 	@rm -v -rf $(EGGPATH)
+
+docs:
+	@echo "Making pylib docs"
+	@make --no-print-directory -C docs html
