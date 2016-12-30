@@ -10,6 +10,9 @@ class DaemonNotFound(Exception):
 
 
 class DeviceManager(object):
+    """
+    DeviceManager Class
+    """
     def __init__(self):
         # Load up the DBus
         session_bus = _dbus.SessionBus()
@@ -35,15 +38,15 @@ class DeviceManager(object):
 
     def stop_daemon(self):
         """
-        Stop Daemon
+        Stops the Daemon via a DBus call
         """
         self._dbus_daemon.stop()
 
-    def turn_off_on_screensaver(self, enable:bool):
+    def turn_off_on_screensaver(self, enable):
         """
-        Set wether or not to turn off the devices when screensaver is active
+        Enable or Disable the logic to turn off the devices whilst the screensaver is active
 
-        If True then when the screensaver is active the devices' brightness will be set to 0.
+        If True, when the screensaver is active the devices' brightness will be set to 0.
         When the screensaver is inactive the devices' brightness will be restored
         :param enable: True to enable screensaver disable
         :type enable: bool
@@ -58,12 +61,12 @@ class DeviceManager(object):
         else:
             self._dbus_devices.disableTurnOffOnScreensaver()
 
-    # TODO convert to property
-    def sync_effects(self, sync:bool):
+    def sync_effects(self, sync):
         """
         Enable or disable the syncing of effects between devices
 
         If sync is enabled, whenever an effect is set then it will be set on all other devices if the effect is available or a similar effect if it is not.
+
         :param sync: Sync effects
         :type sync: bool
 
@@ -75,22 +78,22 @@ class DeviceManager(object):
         self._dbus_devices.syncEffects(sync)
 
     @property
-    def devices(self) -> list:
+    def devices(self):
         """
-        Gets devices
+        A list of Razer devices
 
         :return: List of devices
-        :rtype: list of razer.clent.devices.RazerDevice
+        :rtype: list[razer.client.devices.RazerDevice]
         """
 
         return self._devices
 
     @property
-    def version(self) -> str:
+    def version(self):
         """
-        Returns the Python library version
+        Python library version
 
-        :return: Version tuple
+        :return: Version
         :rtype: str
         """
         return __version__
@@ -98,12 +101,12 @@ class DeviceManager(object):
     @property
     def daemon_version(self):
         """
-        Returns the daemon version
+        Daemon version
 
         :return: Daemon version
         :rtype: str
         """
-        return self._daemon_version
+        return str(self._daemon_version)
 
 
 if __name__ == '__main__':
