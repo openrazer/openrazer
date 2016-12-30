@@ -38,7 +38,7 @@ Now for a few examples:
 
    >>> # List devices
    >>> dev_manager.devices
-   [<device HNXXXX>, <device LDOOOL>]
+   [<RazerMouse PM1640H04410109>, <RazerDevice HN1644D04700103>]
 
 
 
