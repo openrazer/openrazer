@@ -3,13 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Razer Drivers's documentation!
-=========================================
+Razer drivers pylib docs!
+=========================
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
+
+   intro.rst
+   examples.rst
+   inner_workings.rst
 
 
 
