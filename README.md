@@ -58,11 +58,11 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | Razer Kraken 7.1 Chroma  |  1532:0504  |   ✔    |   ✔    |
 | Razer Kraken 7.1 V2      |  1532:0510  |   ✔    |   ✔    |
 
-### Gamepads
-| Device          | USB VID:PID | Driver | Daemon |
-| --------------- | ----------- | ------ | ------ |
-| Razer Tartarus  |  1532:0208  |   ✔    |   ✔    |
-
+### Misc
+| Device                  | USB VID:PID | Driver | Daemon |
+| ----------------------- | ----------- | ------ | ------ |
+| Razer Chroma Mug Holder |  1532:0F07  |   ✔    |   ✔    |
+| Razer Tartarus          |  1532:0208  |   ✔    |   ✔    |
 
 #### Determining the Device ID
 Razer's devices use a VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:

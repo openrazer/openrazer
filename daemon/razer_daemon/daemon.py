@@ -366,8 +366,9 @@ class RazerDaemon(DBusService):
 
                 self.logger.debug(format_str.format(cls.__name__ + ' ', cls.USB_VID, cls.USB_PID))
 
+        device_number = 0
         for device in self._udev_context.list_devices(subsystem='hid'):
-            device_number = 0
+
 
             for device_class in classes:
                 if device.sys_name in self._razer_devices:

@@ -202,6 +202,33 @@ def set_static_effect(self, red, green, blue):
         driver_file.write(payload)
 
 
+@endpoint('razer.device.lighting.chroma', 'setBlinking', in_sig='yyy')
+def set_blinking_effect(self, red, green, blue):
+    """
+    Set the device to static colour
+
+    :param red: Red component
+    :type red: int
+
+    :param green: Green component
+    :type green: int
+
+    :param blue: Blue component
+    :type blue: int
+    """
+    self.logger.debug("DBus call set_blinking_effect")
+
+    # Notify others
+    self.send_effect_event('setBlinking', red, green, blue)
+
+    driver_path = self.get_driver_path('matrix_effect_blinking')
+
+    payload = bytes([red, green, blue])
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(payload)
+
+
 @endpoint('razer.device.lighting.chroma', 'setSpectrum')
 def set_spectrum_effect(self):
     """
