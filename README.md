@@ -20,6 +20,7 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | Device                                        | USB VID:PID | Driver | Daemon | Misc |
 | --------------------------------------------- | ----------- | ------ | ------ | ---- |
 | Razer BlackWidow Ultimate 2012                |  1532:010D  |   ✔    |        |      |
+| Razer Anansi																	|  1532:010F  |   ✔    |   ✔    |      |
 | Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔    |   ✔    |      |
 | Razer BlackWidow Classic                      |  1532:011B  |   ✔    |        |      |
 | Razer BlackWidow Chroma                       |  1532:0203  |   ✔    |   ✔    |      |
@@ -43,17 +44,25 @@ Website: [Here](https://terrycain.github.io/razer-drivers/)
 | Razer Imperator 2012            |  1532:002F  |   ✔    |   ✔    |
 | Razer Orochi (Wired)            |  1532:0048  |   ✔    |   ✔    |
 | Razer DeathAdder Chroma         |  1532:0043  |   ✔    |   ✔    |
+| Razer Naga Hex V2               |  1532:0050  |   ✔    |   ✔    |
+| Razer DeathAdder Elite          |  1532:005c  |   ✔    |   ✔    |
 
 ### Mousemats
 | Device        | USB VID:PID | Driver | Daemon |
 | ------------- | ----------- | ------ | ------ |
 | Razer Firefly |  1532:0C00  |   ✔    |   ✔    |
 
-### Peripherals
-| Device          | USB VID:PID | Driver | Daemon |
-| --------------- | ----------- | ------ | ------ |
-| Razer Tartarus  |  1532:0208  |   ✔    |   ✔    |
+### Headsets
+| Device                   | USB VID:PID | Driver | Daemon |
+| ------------------------ | ----------- | ------ | ------ |
+| Razer Kraken 7.1 Chroma  |  1532:0504  |   ✔    |   ✔    |
+| Razer Kraken 7.1 V2      |  1532:0510  |   ✔    |   ✔    |
 
+### Misc
+| Device                  | USB VID:PID | Driver | Daemon |
+| ----------------------- | ----------- | ------ | ------ |
+| Razer Chroma Mug Holder |  1532:0F07  |   ✔    |   ✔    |
+| Razer Tartarus          |  1532:0208  |   ✔    |   ✔    |
 
 #### Determining the Device ID
 Razer's devices use a VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:

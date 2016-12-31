@@ -3,7 +3,7 @@ Daemon class
 
 This class is the main core of the daemon, this serves a basic dbus module to control the main bit of the daemon
 """
-__version__ = '1.1.3'
+__version__ = '1.1.5'
 
 import configparser
 import logging
@@ -366,8 +366,9 @@ class RazerDaemon(DBusService):
 
                 self.logger.debug(format_str.format(cls.__name__ + ' ', cls.USB_VID, cls.USB_PID))
 
+        device_number = 0
         for device in self._udev_context.list_devices(subsystem='hid'):
-            device_number = 0
+
 
             for device_class in classes:
                 if device.sys_name in self._razer_devices:

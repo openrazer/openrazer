@@ -5,10 +5,14 @@ import logging
 import threading
 import datetime
 import time
-import notify2
+
+try:
+    import notify2
+except ImportError:
+    notify2 = None
 
 
-# TODO add python3-notify2 to dependencies
+
 # TODO https://askubuntu.com/questions/110969/notify-send-ignores-timeout
 INTERVAL_FREQ = 60 * 10
 NOTIFY_TIMEOUT = 4000
@@ -21,7 +25,8 @@ class BatteryNotifier(threading.Thread):
     def __init__(self, parent, device_id, device_name):
         super(BatteryNotifier, self).__init__()
 
-        notify2.init('razer_daemon')
+        if notify2 is not None:
+            notify2.init('razer_daemon')
 
         self._logger = logging.getLogger('razer.device{0}.batterynotifier'.format(device_id))
 
@@ -31,8 +36,9 @@ class BatteryNotifier(threading.Thread):
         # Could save reference to parent but only need battery level function
         self._get_battery_func = parent.getBattery
 
-        self._notification = notify2.Notification(summary="{0}")
-        self._notification.set_timeout(NOTIFY_TIMEOUT)
+        if notify2 is not None:
+            self._notification = notify2.Notification(summary="{0}")
+            self._notification.set_timeout(NOTIFY_TIMEOUT)
 
         self._last_notify_time = datetime.datetime(1970, 1, 1)
 
@@ -69,12 +75,16 @@ class BatteryNotifier(threading.Thread):
                 battery_level = self._get_battery_func()
 
             if battery_level < 10.0:
-                self._notification.update(summary="{0} Battery at {1:.1f}%".format(self._device_name, battery_level), message='Please charge your device', icon='notification-battery-low')
+                if notify2 is not None:
+                    self._notification.update(summary="{0} Battery at {1:.1f}%".format(self._device_name, battery_level), message='Please charge your device', icon='notification-battery-low')
+                    self._notification.show()
             else:
-                self._notification.update(summary="{0} Battery at {1:.1f}%".format(self._device_name, battery_level))
+                if notify2 is not None:
+                    self._notification.update(summary="{0} Battery at {1:.1f}%".format(self._device_name, battery_level))
+                    self._notification.show()
 
-            self._notification.show()
-
+            if notify2 is None:
+                self._logger.debug("{0} Battery at {1:.1f}%".format(self._device_name, battery_level))
 
     def run(self):
         """
@@ -85,7 +95,6 @@ class BatteryNotifier(threading.Thread):
             self.notify_battery()
 
             time.sleep(0.1)
-
 
         self._logger.debug("Shutting down battery notifier")
 
@@ -101,7 +110,6 @@ class BatteryManager(object):
         self._battery_thread.start()
 
         self._is_closed = False
-
 
     def close(self):
         """

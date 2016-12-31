@@ -1,3 +1,27 @@
+razer (1.1.5-0ubuntu1) xenial; urgency=low
+
+  * Big changes to overall build structure to facilitate proper RPM specfile building
+  * Added Device - Razer Anansi
+  * Added Device - Razer Naga Hex V2
+  * Added Device - Razer DeathAdder Elite
+  * Added Device - Razer Kraken 7.1 Chroma
+  * Added Device - Razer Kraken 7.1 V2
+  * Added Device - Razer Chroma Mug Holder
+  * Added setup.py for daemon and pylib
+  * Added ability to read DPI
+  * Added Mouse class in pylib
+  * Removed unused build dependancies
+  * Fixed bug with man pages in makefile
+  * Fixed bug if daemon example config didn't exist
+  * Fixed bug where daemon device numbering was broken by PR #109
+  * Fixed bug where daemon mouse notify thread would die if notify2 wasn't installed
+  * Fixed bug where screensaver thread would spam exceptions and not try the next DBus option as it found an unimplemented option
+  * Fixed bug where razer_bcd was left in prerm script
+  * Fixed bug where razer_mount was not executable, breaks arch builds
+  * Fixed bugs in DeviceManager, unencapsulating dbus types, some docstring fixes
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Fri, 30 Dec 2016 22:15:00 +0000
+
 razer (1.1.3-0ubuntu1) trusty; urgency=low
 
   * Added some more razer laptop support
