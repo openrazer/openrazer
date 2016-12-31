@@ -242,6 +242,18 @@
                     <h5>DeathAdder Chroma</h5>
                   </a>
                 </div>
+                <div class="col-md-3 col-sm-4 device-icon">
+                  <a href="http://www.razerzone.com/store/razer-deathadder-elite" target="_blank">
+                    <img src="https://assets.razerzone.com/eeimages/products/25919/daelite_gallery03__store_gallery.png">
+                    <h5>DeathAdder Elite</h5>
+                  </a>
+                </div>
+                <div class="col-md-3 col-sm-4 device-icon">
+                  <a href="http://www.razerzone.com/store/razer-naga-hex-v2" target="_blank">
+                    <img src="https://assets.razerzone.com/eeimages/products/25031/nagahexv2-gallery-6__store_gallery.png">
+                    <h5>Naga Hex v2</h5>
+                  </a>
+                </div>
               </div>
             </div>
 
@@ -270,6 +282,20 @@
                     <h5><br>Blade Stealth</h5>
                   </a>
                 </div>
+                <div class="col-md-3 col-sm-4 device-icon">
+                  <br>
+                  <a href="http://www.razerzone.com/store/razer-kraken-71-chroma" target="_blank">
+                    <img src="https://assets.razerzone.com/eeimages/products/17519/800x800-green2__store_gallery.jpg" style="width: 100px; height: auto;">
+                    <h5><br>Kraken 7.1 Chroma</h5>
+                  </a>
+                </div>
+                <div class="col-md-3 col-sm-4 device-icon">
+                  <br>
+                  <a href="http://www.razerzone.com/store/razer-kraken-71-v2" target="_blank">
+                    <img src="https://assets.razerzone.com/eeimages/products/26005/kraken71v2_gallery03-v2__store_gallery.png" style="width: 200px; height: auto;">
+                    <h5><br>Kraken 7.1 V2</h5>
+                  </a>
+                </div>
               </div>
             </div>
 
@@ -285,15 +311,6 @@
                     <img src="https://assets.razerzone.com/eeimages/products/24363/razer-blackwidow-x-ultimate-redo-3__store_gallery.png">
                     <br><br>
                     <h5>BlackWidow X Ultimate</h5>
-                  </a>
-                </div>
-                <div class="col-md-3 col-sm-4 device-icon partial-support">
-                  <br>
-                  <a href="https://github.com/terrycain/razer-drivers/issues/106" target="_blank">
-                    <!-- http://www.razerzone.com/store/razer-naga-hex-v2 -->
-                    <img src="https://assets.razerzone.com/eeimages/products/25031/nagahexv2-gallery-6__store_gallery.png">
-                    <br><br>
-                    <h5>Naga Hex v2</h5>
                   </a>
                 </div>
                 <div class="col-md-3 col-sm-4 device-icon partial-support">
@@ -435,36 +452,13 @@
                 <div id="arch" class="panel-collapse collapse">
                   <div class="panel-body">
                     <h4><span class="fa fa-cube"></span>&nbsp;From AUR</h4>
-                    <p>Install <code>razer-driver-meta</code> from AUR, or install the three packages
-                    <code>razer-driver-dkms</code>, <code>razer-daemon</code> and <code>python-razer</code> singularly from AUR.</p>
+                    <p>Install <a href="https://aur.archlinux.org/packages/razer-driver-meta/" target="_blank">razer-driver-meta</a> from AUR,
+                    or install the three packages
+                    <a href="https://aur.archlinux.org/packages/razer-driver-dkms/" target="_blank">razer-driver-dkms</a>,
+                    <a href="https://aur.archlinux.org/packages/razer-daemon/" target="_blank">razer-daemon</a>
+                    and <a href="https://aur.archlinux.org/packages/python-razer/" target="_blank">python-razer</a> singularly from AUR.</p>
 
-                    <br>
-                    <h4><span class="fa fa-code"></span>&nbsp; Manual Installation</h4>
-                    <p>Alternately, follow these step-by-step instructions.</p>
-                    <p>First, clone the repository:</p>
-                    <pre><code><span class="fa fa-dollar"></span> git clone git://github.com/terrycain/razer-drivers.git</code>
-<code><span class="fa fa-dollar"></span> cd razer-drivers/package_for_arch</code></pre>
-
-                    <p>Install the driver:</p>
-                    <pre><code><span class="fa fa-dollar"></span> cd razer-driver-dkms</code>
-<code><span class="fa fa-dollar"></span> makepkg -s</code>
-<code><span class="fa fa-dollar"></span> sudo pacman -U *.pkg.tar</code>
-<code><span class="fa fa-dollar"></span> cd ..</code></pre>
-
-                    <p>Install the daemon:</p>
-                    <pre><code><span class="fa fa-dollar"></span> cd razer-driver-daemon</code>
-<code><span class="fa fa-dollar"></span> makepkg -s</code>
-<code><span class="fa fa-dollar"></span> sudo pacman -U *.pkg.tar</code>
-<code><span class="fa fa-dollar"></span> cd ..</code></pre>
-
-                    <p>Install the Python library:</p>
-                    <pre><code><span class="fa fa-dollar"></span> cd python-razer</code>
-<code><span class="fa fa-dollar"></span> makepkg -s</code>
-<code><span class="fa fa-dollar"></span> sudo pacman -U *.pkg.tar</code>
-<code><span class="fa fa-dollar"></span> cd ..</code></pre>
-
-                    <p>Now restart your computer. You may need to manually bind your Razer device to the driver,
-                    in which case, please see <a href="https://github.com/terrycain/razer-drivers/wiki/Setting-up-the-keyboard-driver">Setting up the keyboard driver</a>.</p>
+                    <p>After installation, restart your computer so the devices can bind to the driver.</p>
                   </div>
                 </div>
               </div>
@@ -497,24 +491,21 @@
                 </div>
                 <div id="fedora" class="panel-collapse collapse">
                   <div class="panel-body">
-                    <h4><span class="fa fa-cube"></span>&nbsp;RPM Installation</h4>
+                    <h4><span class="fa fa-cube"></span>&nbsp;From the RPM Repository</h4>
+                    <p>1. Open the terminal and type these commands:</p>
+                    <pre><code><span class="fa fa-dollar"></span> sudo dnf config-manager --add-repo http://download.opensuse.org/repositories/home:z3ntu/Fedora_25/home:z3ntu.repo</code>
+<code><span class="fa fa-dollar"></span> sudo dnf install razer-drivers kernel-devel</code></pre>
                     <div class="danger">
-                      <h5><span class="fa fa-warning"></span> Caution! These packages are experimental!</h5>
+                      <h5><span class="fa fa-warning"></span>
+                      <a href="https://bugzilla.redhat.com/show_bug.cgi?id=1228897" target="_blank" style="color:red"><u>Due to this bug</u></a>,
+                      <code style="color:red">kernel-devel</code> needs to be installed in addition.
+                      </h5>
                     </div>
-                    <p>1. Visit the <a href="https://github.com/terrycain/razer-drivers/releases" target="_blank">Releases page</a> and download the following RPM packages:</p>
-                    <ul>
-                      <li><code><b>python3-razer</b>-x.x.x.noarch.rpm</code></li>
-                      <li><code><b>razer-daemon</b>-x.x.x.noarch.rpm</code></li>
-                      <li><code><b>razer-kernel-modules-dkms</b>-x.x.x.noarch.rpm</code></li>
-                    </ul>
-                    <p>2. Install the packages on your system with your package manager or via the terminal:</p>
-                    <pre><code><span class="fa fa-dollar"></span> sudo yum localinstall *.rpm</code></pre>
-                    <p>3. Restart your computer.</p>
+                    <p>2. Once installation finishes, restart your computer.</p>
                   </div>
                 </div>
               </div>
 
-<!--
               <div class="panel panel-default">
                 <div class="panel-heading">
                   <h4 class="panel-title">
@@ -525,11 +516,12 @@
                 </div>
                 <div id="opensuse" class="panel-collapse collapse">
                   <div class="panel-body">
-                    (Not available)
+                    <h4><span class="fa fa-cube"></span> OpenSUSE Build System</h4>
+                    <p>Instructions and a one-click install are <a href="https://software.opensuse.org/download.html?project=home%3Az3ntu&package=razer-drivers" target="_blank">available here.</a></p>
+                    <p>After the drivers are installed, please restart the computer.</p>
                   </div>
                 </div>
               </div>
--->
 
               <div class="panel panel-default">
                 <div class="panel-heading">
