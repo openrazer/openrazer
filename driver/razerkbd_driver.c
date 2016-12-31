@@ -303,6 +303,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             device_type = "Razer BlackWidow Chroma\n";
             break;
 
+        case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+            device_type = "Razer DeathStalker Chroma\n";
+            break;
+
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
             device_type = "Razer BlackWidow Chroma Tournament Edition\n";
             break;
@@ -682,6 +686,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
             break;
             
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+        case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
@@ -1095,7 +1100,11 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 				report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
 				break;
 			
-			case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+                        case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+                                report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
+                                break;
+
+			case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016: 
 			case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
 			case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
 			case USB_DEVICE_ID_RAZER_BLADE_QHD:
@@ -1400,7 +1409,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
                 break;
             
             case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
-				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
@@ -1412,7 +1421,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
-				break;
+                break;
 			case USB_DEVICE_ID_RAZER_ANANSI:
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
@@ -1421,6 +1430,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
 				break;
+                        case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
 			default: // BlackWidow Chroma...
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
@@ -1594,6 +1604,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 				device_remove_file(&hdev->dev, &dev_attr_macro_led_state);
 				device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);
 				break;
+                        case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
 			default: // BlackWidow Chroma...
 				device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
 				device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
@@ -1629,6 +1640,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE) },
