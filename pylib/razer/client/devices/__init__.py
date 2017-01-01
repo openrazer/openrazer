@@ -50,6 +50,7 @@ class RazerDevice(object):
             'macro_logic': self._has_feature('razer.device.macro'),
 
             # Default device is a chroma so lighting capabilities
+            'lighting': self._has_feature('razer.device.lighting.chroma'),
             'lighting_breath_single': self._has_feature('razer.device.lighting.chroma', 'setBreathSingle'),
             'lighting_breath_dual': self._has_feature('razer.device.lighting.chroma', 'setBreathDual'),
             'lighting_breath_triple': self._has_feature('razer.device.lighting.chroma', 'setBreathTriple'),
