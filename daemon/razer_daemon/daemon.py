@@ -366,17 +366,31 @@ class RazerDaemon(DBusService):
 
                 self.logger.debug(format_str.format(cls.__name__ + ' ', cls.USB_VID, cls.USB_PID))
 
-        device_number = 0
-        for device in self._udev_context.list_devices(subsystem='hid'):
+        if self._test_dir is not None:
+            device_list = os.listdir(self._test_dir)
+            test_mode = True
+        else:
+            device_list = self._udev_context.list_devices(subsystem='hid')
+            test_mode = False
 
+        device_number = 0
+        for device in device_list:
 
             for device_class in classes:
-                if device.sys_name in self._razer_devices:
+                # Interoperability between generic list of 0000:0000:0000.0000 and pyudev
+                if test_mode:
+                    sys_name = device
+                    sys_path = os.path.join(self._test_dir, device)
+                else:
+                    sys_name = device.sys_name
+                    sys_path = device.sys_path
+
+                if sys_name in self._razer_devices:
                     continue
 
-                if device_class.match(device.sys_name, device.parent.sys_path):  # Check it matches sys/ ID format and has device_type file
-                    self.logger.info('Found device.%d: %s', device_number, device.sys_name)
-                    razer_device = device_class(device.sys_path, device_number, self._config, testing=self._test_dir is not None)
+                if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
+                    self.logger.info('Found device.%d: %s', device_number, sys_name)
+                    razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None)
 
                     # Wireless devices sometimes dont listen
                     count = 0
@@ -387,10 +401,10 @@ class RazerDaemon(DBusService):
                             break
                         count += 1
                     else:
-                        logging.warning("Could not get serial for device {0}. Skipping".format(device.sys_name))
+                        logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
                         continue
 
-                    self._razer_devices.add(device.sys_name, device_serial, razer_device)
+                    self._razer_devices.add(sys_name, device_serial, razer_device)
 
                     device_number += 1
 
