@@ -28,7 +28,7 @@ class RazerKraken(__RazerDevice):
         super(RazerKraken, self).__init__(*args, **kwargs)
 
     def _close(self):
-        super(RazerKrakenV2, self)._close()
+        super(RazerKraken, self)._close()
 
     @staticmethod
     def decode_bitfield(bitfield):
@@ -40,7 +40,6 @@ class RazerKraken(__RazerDevice):
             'breathing2': (bitfield & 0x10) == 0x10,
             'breathing3': (bitfield & 0x20) == 0x20,
         }
-
 
     def _suspend_device(self):
         """
@@ -119,7 +118,6 @@ class RazerKrakenV2(__RazerDevice):
             'breathing2': (bitfield & 0x10) == 0x10,
             'breathing3': (bitfield & 0x20) == 0x20,
         }
-
 
     def _suspend_device(self):
         """
