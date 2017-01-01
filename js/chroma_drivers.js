@@ -39,3 +39,10 @@ $("#navbar a").on('click', function(event){
     window.location.hash = hash;
   });
 });
+
+// Auto-open OS installation instructions if specified with hash.
+if (window.location.hash) {
+    var hash = window.location.hash.substring(1);
+    $('#' + hash).collapse('show');
+    $('body').animate({ scrollTop: $('#'+hash).position().top - 32 });
+}
