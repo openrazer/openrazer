@@ -1,7 +1,7 @@
 /*
  *  Designed by @lah7 for the Razer Chroma Linux drivers project.
  *
- * Copyright (C) 2016 Luke Horwell
+ * Copyright (C) 2016-2017 Luke Horwell (lah7)
  * Licensed under CC BY-SA 4.0
  */
 
