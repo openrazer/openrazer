@@ -41,7 +41,7 @@ driver_install:
 	@cp -v $(DRIVERDIR)/razerkbd.ko $(DESTDIR)/$(MODULEDIR)
 	@cp -v $(DRIVERDIR)/razermouse.ko $(DESTDIR)/$(MODULEDIR)
 	@cp -v $(DRIVERDIR)/razerfirefly.ko $(DESTDIR)/$(MODULEDIR)
-	@chown -v root:root $(MODULEDIR)/*.ko
+	@chown -v root:root $(DESTDIR)/$(MODULEDIR)/*.ko
 	depmod
 
 # Remove kernel modules
