@@ -38,11 +38,15 @@ driver_clean:
 driver_install:
 	@echo -e "\n::\033[34m Installing Razer kernel modules\033[0m"
 	@echo "====================================================="
-	@cp -v $(DRIVERDIR)/razerkbd.ko $(DESTDIR)/$(MODULEDIR)
-	@cp -v $(DRIVERDIR)/razermouse.ko $(DESTDIR)/$(MODULEDIR)
-	@cp -v $(DRIVERDIR)/razerfirefly.ko $(DESTDIR)/$(MODULEDIR)
+	@cp -v $(DRIVERDIR)/*.ko $(DESTDIR)/$(MODULEDIR)
 	@chown -v root:root $(DESTDIR)/$(MODULEDIR)/*.ko
 	depmod
+
+# Just use for packaging razer-drivers, not for installing manually
+driver_install_packaging:
+	@echo -e "\n::\033[34m Installing Razer kernel modules\033[0m"
+	@echo "====================================================="
+	@cp -v $(DRIVERDIR)/*.ko $(DESTDIR)/$(MODULEDIR)
 
 # Remove kernel modules
 driver_uninstall:
