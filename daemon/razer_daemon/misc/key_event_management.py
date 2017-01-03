@@ -381,7 +381,7 @@ class KeyboardKeyManager(object):
             # Convert event ID to key name
             key_name = self.EVENT_MAP[key_id]
 
-            self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
+            # self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
 
             # Key release
             if key_press == 'release':

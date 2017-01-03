@@ -177,7 +177,7 @@ class RazerDaemon(DBusService):
         # Listen for input events from udev
         self._udev_context = Context()
         udev_monitor = Monitor.from_netlink(self._udev_context)
-        udev_monitor.filter_by(subsystem='input')
+        udev_monitor.filter_by(subsystem='hid')
         self._udev_observer = MonitorObserver(udev_monitor, callback=self._udev_input_event, name='device-monitor')
 
         # Logging
@@ -203,6 +203,9 @@ class RazerDaemon(DBusService):
             file_logger.setLevel(logging_level)
             file_logger.setFormatter(formatter)
             self.logger.addHandler(file_logger)
+
+        # Load Classes
+        self._device_classes = razer_daemon.hardware.get_device_classes()
 
         self.logger.info("Initialising Daemon (v%s). Pid: %d", __version__, os.getpid())
 
@@ -356,12 +359,10 @@ class RazerDaemon(DBusService):
         Loops through the available hardware classes, loops through
         each device in the system and adds it if needs be.
         """
-        classes = razer_daemon.hardware.get_device_classes()
-
         if first_run:
             # Just some pretty output
-            max_name_len = max([len(cls.__name__) for cls in classes]) + 2
-            for cls in classes:
+            max_name_len = max([len(cls.__name__) for cls in self._device_classes]) + 2
+            for cls in self._device_classes:
                 format_str = 'Loaded device specification: {0:-<' + str(max_name_len) + '} ({1:04x}:{2:04X})'
 
                 self.logger.debug(format_str.format(cls.__name__ + ' ', cls.USB_VID, cls.USB_PID))
@@ -376,7 +377,7 @@ class RazerDaemon(DBusService):
         device_number = 0
         for device in device_list:
 
-            for device_class in classes:
+            for device_class in self._device_classes:
                 # Interoperability between generic list of 0000:0000:0000.0000 and pyudev
                 if test_mode:
                     sys_name = device
@@ -399,6 +400,7 @@ class RazerDaemon(DBusService):
                         device_serial = razer_device.get_serial()
                         if len(device_serial) > 0:
                             break
+                        time.sleep(0.1)
                         count += 1
                     else:
                         logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
@@ -408,27 +410,72 @@ class RazerDaemon(DBusService):
 
                     device_number += 1
 
-    def _remove_devices(self):
+    def _add_device(self, device):
         """
-        Go through the list of current devices and if they no longer exist then remove them
-        """
-        hid_devices = [dev.sys_name for dev in self._udev_context.list_devices(subsystem='hid')]
-        devices_to_remove = [dev for dev in self._razer_devices if dev not in hid_devices]
-        for device in devices_to_remove:
-            if self._test_dir is not None:
-                # Remove from DBus
-                device.dbus.remove_from_connection()
+        Add device event from udev
 
-            # Remove device
-            self.logger.warning("Device %s is missing. Removing from DBus", device.device_id)
+        :param device: Udev Device
+        :type device: pyudev.device._device.Device
+        """
+        device_number = len(self._razer_devices)
+        for device_class in self._device_classes:
+            sys_name = device.sys_name
+            sys_path = device.sys_path
+
+            if sys_name in self._razer_devices:
+                continue
+
+            if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
+                self.logger.info('Found valid device.%d: %s', device_number, sys_name)
+                razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None)
+
+                # Its a udev event so currently the device hasn't been chmodded yet
+                time.sleep(0.2)
+
+                # Wireless devices sometimes dont listen
+                device_serial = razer_device.get_serial()
+
+                if len(device_serial) > 0:
+                    # Add Device
+                    self._razer_devices.add(sys_name, device_serial, razer_device)
+                else:
+                    logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
+
+    def _remove_device(self, device):
+        """
+        Remove device event from udev
+
+        :param device: Udev Device
+        :type device: pyudev.device._device.Device
+        """
+        device_id = device.sys_name
+
+        try:
+            device = self._razer_devices[device_id]
+
+            device.dbus.close()
+            device.dbus.remove_from_connection()
+            self.logger.warning("Removing %s", device_id)
+
+            # Delete device
             del self._razer_devices[device.device_id]
 
+        except IndexError:  # Why didnt i set it up as KeyError
+            # It will return "extra" events for the additional usb interfaces bound to the driver
+            pass
+
     def _udev_input_event(self, device):
+        """
+        Function called by the Udev monitor (#observerPattern)
+
+        :param device: Udev device
+        :type device: pyudev.device._device.Device
+        """
         self.logger.debug('Device event [%s]: %s', device.action, device.device_path)
         if device.action == 'add':
-            self._load_devices()
+            self._add_device(device)
         elif device.action == 'remove':
-            self._remove_devices()
+            self._remove_device(device)
 
     def run(self):
         """

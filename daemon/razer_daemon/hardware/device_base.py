@@ -183,10 +183,15 @@ class RazerDevice(DBusService):
         with open(serial_path, 'r') as serial_file:
             count = 0
             serial = serial_file.read().strip()
+
             while len(serial) == 0:
                 if count >= 3:
                     break
-                serial = serial_file.read().strip()
+
+                try:
+                    serial = serial_file.read().strip()
+                except (PermissionError, OSError):
+                    serial = ''
 
                 count += 1
                 time.sleep(0.1)

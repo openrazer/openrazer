@@ -2,6 +2,7 @@
 Class to hold a device and collections of them
 """
 
+
 class Device(object):
     """
     Razer Device (High level not dbus)
@@ -70,6 +71,7 @@ class Device(object):
         """
         # Message from DBus object
         self._dbus.notify(msg)
+
 
 class DeviceCollection(object):
     """
@@ -149,6 +151,15 @@ class DeviceCollection(object):
         :rtype: list of str
         """
         return list(self._serial_map.keys())
+
+    def __len__(self):
+        """
+        Get length of collection
+
+        :return: Length
+        :rtype: int
+        """
+        return len(self._id_map)
 
     def __getitem__(self, item):
         """
