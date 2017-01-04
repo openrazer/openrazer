@@ -123,6 +123,9 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
         os.remove(pid_file)
 
 
+import dbus.service
+
+
 class RazerDaemon(DBusService):
     """
     Daemon class
@@ -220,11 +223,13 @@ class RazerDaemon(DBusService):
         self.logger.info("Adding razer.devices.getDevices method to DBus")
         self.add_dbus_method('razer.devices', 'getDevices', self.get_serial_list, out_signature='as')
         self.logger.info("Adding razer.devices.enableTurnOffOnScreensaver method to DBus")
-        self.add_dbus_method('razer.devices', 'enableTurnOffOnScreensaver', self.enable_turn_off_on_screensaver)
-        self.logger.info("Adding razer.devices.disableTurnOffOnScreensaver method to DBus")
-        self.add_dbus_method('razer.devices', 'disableTurnOffOnScreensaver', self.disable_turn_off_on_screensaver)
+        self.add_dbus_method('razer.devices', 'enableTurnOffOnScreensaver', self.enable_turn_off_on_screensaver, in_signature='b')
+        self.logger.info("Adding razer.devices.syncEffects method to DBus")
+        self.add_dbus_method('razer.devices', 'getOffOnScreensaver', self.get_off_on_screensaver, out_signature='b')
         self.logger.info("Adding razer.devices.syncEffects method to DBus")
         self.add_dbus_method('razer.devices', 'syncEffects', self.sync_effects, in_signature='b')
+        self.logger.info("Adding razer.devices.syncEffects method to DBus")
+        self.add_dbus_method('razer.devices', 'getSyncEffects', self.get_sync_effects, out_signature='b')
         self.logger.info("Adding razer.daemon.version method to DBus")
         self.add_dbus_method('razer.daemon', 'version', self.version, out_signature='s')
         self.logger.info("Adding razer.daemon.stop method to DBus")
@@ -233,6 +238,14 @@ class RazerDaemon(DBusService):
         # TODO remove
         self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
         # TODO ======
+
+    @dbus.service.signal('razer.devices')
+    def device_removed(self):
+        self.logger.debug("Emitted Devivce Remove Signal")
+
+    @dbus.service.signal('razer.devices')
+    def device_added(self):
+        self.logger.debug("Emitted Devivce Added Signal")
 
     def _init_signals(self):
         """
@@ -298,17 +311,20 @@ class RazerDaemon(DBusService):
         if config_file is not None and os.path.exists(config_file):
             self._config.read(config_file)
 
-    def enable_turn_off_on_screensaver(self):
+    def get_off_on_screensaver(self):
+        """
+        Returns if turn off on screensaver
+
+        :return: Result
+        :rtype: bool
+        """
+        return self._screensaver_thread.active
+
+    def enable_turn_off_on_screensaver(self, enable):
         """
         Enable the turning off of devices when the screensaver is active
         """
-        self._screensaver_thread.active = True
-
-    def disable_turn_off_on_screensaver(self):
-        """
-        Disable the turning off of devices when the screensaver is active
-        """
-        self._screensaver_thread.active = False
+        self._screensaver_thread.active = enable
 
     def version(self):
         """
@@ -351,6 +367,20 @@ class RazerDaemon(DBusService):
         # Todo perhaps move logic to device collection
         for device in self._razer_devices.devices:
             device.dbus.effect_sync = enabled
+
+    def get_sync_effects(self):
+        """
+        Sync the effects across the devices
+
+        :return: True if any devices sync effects
+        :rtype: bool
+        """
+        result = False
+
+        for device in self._razer_devices.devices:
+            result |= device.dbus.effect_sync
+
+        return result
 
     def _load_devices(self, first_run=False):
         """
@@ -438,6 +468,7 @@ class RazerDaemon(DBusService):
                 if len(device_serial) > 0:
                     # Add Device
                     self._razer_devices.add(sys_name, device_serial, razer_device)
+                    self.device_added()
                 else:
                     logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
 
@@ -459,6 +490,7 @@ class RazerDaemon(DBusService):
 
             # Delete device
             del self._razer_devices[device.device_id]
+            self.device_removed()
 
         except IndexError:  # Why didnt i set it up as KeyError
             # It will return "extra" events for the additional usb interfaces bound to the driver
