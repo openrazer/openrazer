@@ -241,11 +241,11 @@ class RazerDaemon(DBusService):
 
     @dbus.service.signal('razer.devices')
     def device_removed(self):
-        self.logger.debug("Emitted Devivce Remove Signal")
+        self.logger.debug("Emitted Device Remove Signal")
 
     @dbus.service.signal('razer.devices')
     def device_added(self):
-        self.logger.debug("Emitted Devivce Added Signal")
+        self.logger.debug("Emitted Device Added Signal")
 
     def _init_signals(self):
         """
