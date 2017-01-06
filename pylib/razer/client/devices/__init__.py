@@ -71,6 +71,7 @@ class RazerDevice(object):
 
             # Mouse lighting attrs
             'lighting_logo': self._has_feature('razer.device.lighting.logo'),
+            'lighting_logo_active': self._has_feature('razer.device.lighting.logo', 'setLogoActive'),
             'lighting_logo_blinking': self._has_feature('razer.device.lighting.logo', 'setLogoBlinking'),
             'lighting_logo_brightness': self._has_feature('razer.device.lighting.logo', 'setLogoBrightness'),
             'lighting_logo_pulsate': self._has_feature('razer.device.lighting.logo', 'setLogoPulsate'),
@@ -83,6 +84,7 @@ class RazerDevice(object):
             'lighting_logo_breath_random': self._has_feature('razer.device.lighting.logo', 'setLogoBreathRandom'),
 
             'lighting_scroll': self._has_feature('razer.device.lighting.scroll'),
+            'lighting_scroll_active': self._has_feature('razer.device.lighting.scroll', 'setScrollActive'),
             'lighting_scroll_blinking': self._has_feature('razer.device.lighting.scroll', 'setScrollBlinking'),
             'lighting_scroll_brightness': self._has_feature('razer.device.lighting.scroll', 'setScrollBrightness'),
             'lighting_scroll_pulsate': self._has_feature('razer.device.lighting.scroll', 'setScrollPulsate'),
