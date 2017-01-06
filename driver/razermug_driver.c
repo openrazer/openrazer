@@ -218,6 +218,20 @@ static ssize_t razer_attr_write_mode_blinking(struct device *dev, struct device_
 }
 
 /**
+ * Write device file "mode_custom"
+ *
+ * Sets the firefly to custom mode whenever the file is written to
+ */
+static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
+    razer_send_payload(usb_dev, &report);
+    return count;
+}
+
+/**
  * Write device file "mode_static"
  *
  * Static effect mode is activated whenever the file is written to with 3 bytes
@@ -292,6 +306,71 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 	mutex_unlock(&device->lock);
 
     return count;
+}
+
+/**
+ * Write device file "set_key_row"
+ *
+ * Writes the colour to the LEDs of the mug
+ * 
+ * Start is 0x00
+ * Stop is 0x0E
+ */
+static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+	struct razer_report report;
+    size_t offset = 0;
+    unsigned char row_id;
+    unsigned char start_col;
+    unsigned char stop_col;
+    unsigned char row_length;
+    
+    //printk(KERN_ALERT "razerfirefly: Total count: %d\n", (unsigned char)count);
+   
+    while(offset < count)
+    {
+		if(offset + 3 > count)
+		{
+			printk(KERN_ALERT "razermug: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
+			break;
+		}
+		
+		row_id = buf[offset++];
+		start_col = buf[offset++];
+		stop_col = buf[offset++];
+		row_length = ((stop_col+1) - start_col) * 3;
+		
+		// printk(KERN_ALERT "razermug: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
+		
+		if(row_id != 0)
+		{
+			printk(KERN_ALERT "razermug: Row ID must be 0\n");
+			break;
+		}
+		
+		if(start_col > stop_col)
+		{
+			printk(KERN_ALERT "razermug: Start column is greater than end column\n");
+			break;
+		}
+		
+		if(offset + row_length > count)
+		{
+			printk(KERN_ALERT "razermug: Not enough RGB to fill row\n");
+			break;
+		}
+		
+		report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
+		razer_send_payload(usb_dev, &report);
+		
+		// *3 as its 3 bytes per col (RGB)
+		offset += row_length;
+	}
+
+
+    return count;   
 }
 
 /**
@@ -455,9 +534,11 @@ static DEVICE_ATTR(matrix_effect_none,      0220, NULL,                         
 static DEVICE_ATTR(matrix_effect_spectrum,  0220, NULL,                                       razer_attr_write_mode_spectrum);
 static DEVICE_ATTR(matrix_effect_static,    0220, NULL,                                       razer_attr_write_mode_static);
 static DEVICE_ATTR(matrix_effect_breath,    0220, NULL,                                       razer_attr_write_mode_breath);
+static DEVICE_ATTR(matrix_effect_custom,    0220, NULL,                                       razer_attr_write_mode_custom);
 static DEVICE_ATTR(matrix_effect_wave,      0220, NULL,                                       razer_attr_write_mode_wave);
 static DEVICE_ATTR(matrix_effect_blinking,  0220, NULL,                                       razer_attr_write_mode_blinking);
 static DEVICE_ATTR(matrix_brightness,       0660, razer_attr_read_set_brightness,             razer_attr_write_set_brightness);
+static DEVICE_ATTR(matrix_custom_frame,     0220, NULL,                                       razer_attr_write_set_key_row);
 
 static DEVICE_ATTR(is_mug_present,          0440, razer_attr_read_get_cup_state,              NULL);
 
@@ -552,10 +633,12 @@ static int razer_mug_probe(struct hid_device *hdev, const struct hid_device_id *
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);                      // Get string of device fw version
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_is_mug_present);                        // Is cup present
         
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);                       // Custom effect frame
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);       		     // No effect
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);   		     // Spectrum effect
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);     		     // Static effect
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);     		     // Breathing effect
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);	                     // Custom effect
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);     		         // Wave effect
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_blinking);     		     // Blinking effect
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);     		         // Brightness
@@ -606,10 +689,12 @@ static void razer_mug_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_firmware_version);                      // Get string of device fw version
         device_remove_file(&hdev->dev, &dev_attr_is_mug_present);                        // Is cup present
         
+		device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);                   // Custom effect frame
 		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);                    // No effect
 		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);                // Spectrum effect
 		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);                  // Static effect
 		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);                  // Breathing effect
+		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);                  // Custom effect
 		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);                    // Wave effect
 		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_blinking);     		     // Blinking effect
 		device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);     		         // Brightness
