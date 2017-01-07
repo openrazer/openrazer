@@ -16,6 +16,7 @@ import time
 import tempfile
 import setproctitle
 import dbus.mainloop.glib
+import dbus.service
 import gi
 gi.require_version('Gdk', '3.0')
 import gi.repository
@@ -121,9 +122,6 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
     # If pid file exists, remove it
     if pid_file is not None and os.path.exists(pid_file):
         os.remove(pid_file)
-
-
-import dbus.service
 
 
 class RazerDaemon(DBusService):

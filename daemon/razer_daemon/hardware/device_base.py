@@ -386,7 +386,7 @@ class RazerDevice(DBusService):
         :return: True if its the correct device ID
         :rtype: bool
         """
-        pattern = r'^[0-9A-F]{4}:' + '{0:04X}'.format(cls.USB_VID) + ':' + '{0:04X}'.format(cls.USB_PID) + r'\.[0-9A-F]{4}$'
+        pattern = r'^[0-9A-F]{4}:' + '{0:04x}'.format(cls.USB_VID) + ':' + '{0:04x}'.format(cls.USB_PID) + r'\.[0-9A-F]{4}$'
 
         if re.match(pattern, device_id) is not None:
             if 'device_type' in os.listdir(dev_path):
