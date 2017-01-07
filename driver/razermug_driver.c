@@ -318,6 +318,9 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
  * 
  * Start is 0x00
  * Stop is 0x0E
+ * 
+ * As you go from 0x00 -> 0x0E the leds light up in a clockwise direction.
+ * 0x01,0x03,0x05,0x07,0x09,0x0B,0x0D Are NOT connected
  */
 static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
