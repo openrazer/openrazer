@@ -98,7 +98,8 @@ class RazerDevice(object):
 
         }
 
-        self._matrix_dimensions = self._dbus_interfaces['device'].getMatrixDimensions()
+        # Nasty hack to convert dbus.Int32 into native
+        self._matrix_dimensions = tuple([int(dim) for dim in self._dbus_interfaces['device'].getMatrixDimensions()])
 
         # Setup FX
         if self._FX is None:
