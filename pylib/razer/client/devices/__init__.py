@@ -1,3 +1,4 @@
+import json
 import dbus as _dbus
 from razer.client.fx import RazerFX as _RazerFX
 from xml.etree import ElementTree as _ET
@@ -32,6 +33,7 @@ class RazerDevice(object):
         self._fw = str(self._dbus_interfaces['device'].getFirmware())
         self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
         self._has_dedicated_macro = None
+        self._urls = None
 
         if vid_pid is None:
             self._vid, self._pid = self._dbus_interfaces['device'].getVidPid()
@@ -273,6 +275,13 @@ class RazerDevice(object):
             self._has_dedicated_macro = self._dbus_interfaces['device'].hasDedicatedMacroKeys()
 
         return self._has_dedicated_macro
+
+    @property
+    def razer_urls(self) -> dict:
+        if self._urls is None:
+            self._urls = json.loads(str(self._dbus_interfaces['device'].getRazerUrls()))
+
+        return self._urls
 
     def __str__(self):
         return self._name

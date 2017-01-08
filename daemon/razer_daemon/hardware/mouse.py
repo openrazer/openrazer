@@ -21,6 +21,13 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_charge_effect', 'set_charge_colour', 'set_idle_time', 'set_low_battery_threshold', 'get_dpi_xy', 'set_dpi_xy']
 
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
+        "top_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-03.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-01.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-04.png"
+    }
+
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaWireless, self).__init__(*args, **kwargs)
 
@@ -48,6 +55,13 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'get_dpi_xy', 'set_dpi_xy']
 
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
+        "top_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-03.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-01.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-04.png"
+    }
+
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaWired, self).__init__(*args, **kwargs)
 
@@ -65,6 +79,13 @@ class RazerMambaChromaTE(__RazerDeviceBrightnessSuspend):
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'get_dpi_xy', 'set_dpi_xy']
 
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/gb-en/store/razer-mamba-tournament-edition",
+        "top_img": "http://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-1.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-2.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-5__store_gallery.png"
+    }
+
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaTE, self).__init__(*args, **kwargs)
 
@@ -79,6 +100,13 @@ class RazerAbyssus(__RazerDevice):
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active']
+
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/gb-en/store/razer-abyssus",
+        "top_img": "http://assets.razerzone.com/eeimages/products/17026/abyssus2014_gallery_1.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/17026/abyssus2014_gallery_4.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/17079/abyssus2014_gallery_3_2__store_gallery.png"
+    }
 
     def __init__(self, *args, **kwargs):
         super(RazerAbyssus, self).__init__(*args, **kwargs)
@@ -102,6 +130,13 @@ class RazerImperiator(__RazerDevice):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active', 'get_dpi_xy', 'set_dpi_xy',
                'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active']
 
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/gaming-mice/razer-imperator/",
+        "top_img": "http://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-5.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-2.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-4.png"
+    }
+
     def __init__(self, *args, **kwargs):
         super(RazerImperiator, self).__init__(*args, **kwargs)
 
@@ -124,6 +159,13 @@ class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_idle_time', 'set_low_battery_threshold', 'get_dpi_xy', 'set_dpi_xy', 'set_scroll_active', 'get_scroll_active']
 
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/gb-en/store/razer-orochi",
+        "top_img": "http://assets.razerzone.com/eeimages/products/22770/razer-orochi-05-01.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/22770/razer-orochi-07-01.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/22770/razer-orochi-08-01.png"
+    }
+
 
 class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
     """
@@ -138,6 +180,13 @@ class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
                'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_pulsate', 'set_scroll_blinking', 'set_scroll_spectrum',
                'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/gb-en/store/razer-deathadder-chroma",
+        "top_img": "http://assets.razerzone.com/eeimages/products/17531/deathadder_chroma_gallery_2.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/17963/deathadder_chroma_gallery_5.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/17963/deathadder_chroma_gallery_4.png"
+    }
+
     def __init__(self, *args, **kwargs):
         super(RazerDeathadderChroma, self).__init__(*args, **kwargs)
 
@@ -146,7 +195,6 @@ class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
         _da_set_scroll_brightness(self, 100)
         _da_set_logo_active(self, True)
         _da_set_scroll_active(self, True)
-
 
     def _suspend_device(self):
         """
@@ -199,6 +247,13 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
                'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
                # #Macros
                'get_macros', 'delete_macro', 'add_macro']
+
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/store/razer-naga-hex-v2",
+        "top_img": "http://assets.razerzone.com/eeimages/products/25031/nagahexv2-gallery-2.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/25031/nagahexv2-gallery-6.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/25031/nagahexv2-gallery-3.png"
+    }
 
     def __init__(self, *args, **kwargs):
         super(RazerNagaHexV2, self).__init__(*args, **kwargs)
@@ -262,6 +317,13 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
                'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
                # Scroll wheel
                'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2']
+
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/gb-en/store/razer-deathadder-elite",
+        "top_img": "http://assets.razerzone.com/eeimages/products/25919/daelite_gallery01.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/25919/daelite_gallery03.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/25919/daelite_gallery02.png"
+    }
 
     def __init__(self, *args, **kwargs):
         super(RazerDeathadderElite, self).__init__(*args, **kwargs)

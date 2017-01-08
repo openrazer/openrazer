@@ -24,6 +24,13 @@ class RazerKraken(__RazerDevice):
                'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_single_effect',
                'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken']
 
+    RAZER_URLS = {
+        "store": "http://web.archive.org/web/20160826002356/http://www.razerzone.com/gaming-audio/razer-kraken-71-chroma",
+        "top_img": "https://assets.razerzone.com/eeimages/products/17519/02.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/17519/03.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/17519/01.png"
+    }
+
     def __init__(self, *args, **kwargs):
         super(RazerKraken, self).__init__(*args, **kwargs)
 
@@ -101,6 +108,13 @@ class RazerKrakenV2(__RazerDevice):
     METHODS = ['get_firmware', 'get_device_name', 'get_device_type_headset', 'has_matrix', 'get_matrix_dims',
                'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_single_effect', 'set_breath_dual_effect', 'set_breath_triple_effect',
                'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken']
+
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/gaming-audio/razer-kraken-71-v2",
+        "top_img": "http://assets.razerzone.com/eeimages/products/26005/kraken71v2_gallery03-v2.png",
+        "side_img": None,
+        "perspective_img": None
+    }
 
     def __init__(self, *args, **kwargs):
         super(RazerKrakenV2, self).__init__(*args, **kwargs)
