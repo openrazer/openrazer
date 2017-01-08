@@ -23,7 +23,8 @@ import evdev
 from razer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING
 from .macro import MacroKey, MacroRunner, macro_dict_to_obj
 
-class KeyWatcher():
+
+class KeyWatcher(object):
     """
     Task to watch keyboard event files and return keypresses
     """
@@ -98,8 +99,9 @@ class KeyWatcher():
                     event_device.ungrab()
         self._event_devices_locked = grab
 
-    async def _event_callback(self, device):
-        async for event in device.async_read_loop():
+    @asyncio.coroutine
+    def _event_callback(self, device):
+        for event in device.async_read_loop():
             try:
                 if len(self._key_actions) == 0:
                     continue
@@ -112,7 +114,7 @@ class KeyWatcher():
 
                 # Call all actions for the keypress
                 for key_action in self._key_actions:
-                    await key_action(date, keycode, action)
+                    yield from key_action(date, keycode, action)
             except (OSError, IOError) as err:
                 self._logger.error("Error from event device: %s", err)
                 return
@@ -199,7 +201,8 @@ class KeyboardKeyManager(object):
     def remove_key_action(self, action):
         self._keywatcher.remove_key_action(action)
 
-    async def key_action(self, event_time, key_id, key_press='press'):
+    @asyncio.coroutine
+    def key_action(self, event_time, key_id, key_press='press'):
         """
         Process a key press event
 
@@ -350,7 +353,7 @@ class KeyboardKeyManager(object):
                 else:
                     # If key has a macro, play it
                     if key_name in self._macros:
-                        await self.play_macro(key_name)
+                        yield from self.play_macro(key_name)
 
         except KeyError as err:
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
@@ -372,7 +375,8 @@ class KeyboardKeyManager(object):
 
         self._macros[self._current_macro_bind_key] = new_macro
 
-    async def play_macro(self, macro_key):
+    @asyncio.coroutine
+    def play_macro(self, macro_key):
         """
         Play macro for a given key
 
@@ -382,9 +386,10 @@ class KeyboardKeyManager(object):
         self._logger.info("Running Macro %s:%s", macro_key, str(self._macros[macro_key]))
         macro = MacroRunner(self._device_id, macro_key, self._macros[macro_key])
         task = asyncio.ensure_future(macro.run())
-        await task
+        yield from task
 
-    async def play_media_key(self, media_key):
+    @asyncio.coroutine
+    def play_media_key(self, media_key):
         """
         Execute a media keys function
 
@@ -392,7 +397,7 @@ class KeyboardKeyManager(object):
         :type media_key: str
         """
         media_key = MediaKeyPress(media_key)
-        await media_key.run()
+        yield from media_key.run()
 
     # Methods to be used with DBus
     def dbus_delete_macro(self, key_name):
@@ -483,7 +488,8 @@ class TartarusKeyManager(KeyboardKeyManager):
         self._key_mapping = TARTARUS_KEY_MAPPING
         self._event_mapping = TARTARUS_EVENT_MAPPING
 
-    async def key_action(self, event_time, key_id, key_press='press'):
+    @asyncio.coroutine
+    def key_action(self, event_time, key_id, key_press='press'):
         """
         Process a key press event
 
@@ -595,13 +601,14 @@ class MediaKeyPress():
         #else:
         #    self._media_key = MEDIA_KEY_MAP[media_key]
 
-    async def run(self):
+    @asyncio.coroutine
+    def run(self):
         if self._media_key == 'sleep':
-            task = await asyncio.create_subprocess_exec(['dbus-send', '--system', '--print-reply',
+            task = yield from asyncio.create_subprocess_exec(['dbus-send', '--system', '--print-reply',
                     '--dest=org.freedesktop.login1', '/org/freedesktop/login1',
                     'org.freedesktop.login1.Manager.Suspend', 'boolean:true'])
-            await task.wait()
+            yield from task.wait()
         else:
-            task = await asyncio.create_subprocess_exec(['xdotool', 'key', self._media_key],
+            task = yield from asyncio.create_subprocess_exec(['xdotool', 'key', self._media_key],
                     stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
-            await task.communicate()
+            yield from task.communicate()

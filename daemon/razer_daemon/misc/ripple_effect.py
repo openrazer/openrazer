@@ -42,7 +42,8 @@ class RippleEffect():
         self._keyboard_grid = KeyboardColour(width, height)
         self._interactive = asyncio.Event()
 
-    async def interaction(self):
+    @asyncio.coroutine
+    def interaction(self):
         self._interactive.set()
 
     @property
@@ -76,9 +77,10 @@ class RippleEffect():
         self._active = True
         asyncio.ensure_future(self._start())
 
-    async def _start(self):
+    @asyncio.coroutine
+    def _start(self):
         while self._active:
-            await self._interactive.wait()
+            yield from self._interactive.wait()
 
             # Recheck
             if not self._active:
@@ -131,7 +133,7 @@ class RippleEffect():
                 self._parent.set_rgb_matrix(payload)
                 self._parent.refresh_keyboard()
 
-                await asyncio.sleep(self._refresh_rate)
+                yield from asyncio.sleep(self._refresh_rate)
             self._interactive.clear()
 
 class RippleManager(object):
@@ -170,7 +172,8 @@ class RippleManager(object):
             result = random.choice(iterable)
         return result
 
-    async def key_action(self, event_time, key_id, key_press='press'):
+    @asyncio.coroutine
+    def key_action(self, event_time, key_id, key_press='press'):
         now = datetime.datetime.now()
 
         self._expire_keys(now)
@@ -183,7 +186,7 @@ class RippleManager(object):
         self._last_colour_choice = colour
         self._key_list.append((now + self._key_expire_time, self.key_mapping[key_name], colour))
 
-        await self._ripple_effect.interaction()
+        yield from self._ripple_effect.interaction()
 
     def _expire_keys(self, time=None):
         """

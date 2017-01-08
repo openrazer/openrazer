@@ -93,13 +93,14 @@ class MacroURL(MacroObject):
             'url': self.url,
         }
 
-    async def execute(self):
+    @asyncio.coroutine
+    def execute(self):
         """
         Open URL in the browser
         """
-        proc = await asyncio.create_subprocess_exec(['xdg-open', self.url],
+        proc = yield from asyncio.create_subprocess_exec(['xdg-open', self.url],
                 stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
-        await proc.communicate()
+        yield from proc.communicate()
 
 class MacroScript(MacroObject):
     """
@@ -125,13 +126,14 @@ class MacroScript(MacroObject):
             'args': self.args
         }
 
-    async def execute(self):
+    @asyncio.coroutine
+    def execute(self):
         """
         Run script
         """
-        proc = await asyncio.create_subprocess_exec(self.script + self.args,
+        proc = yield from asyncio.create_subprocess_exec(self.script + self.args,
                 shell=True, stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
-        await proc.communicate()
+        yield from proc.communicate()
 
 class MacroRunner():
     """
@@ -171,7 +173,8 @@ class MacroRunner():
 
         return cmd
 
-    async def run(self):
+    @asyncio.coroutine
+    def run(self):
         """
         Main thread function
         """
@@ -184,8 +187,8 @@ class MacroRunner():
                 xte += self.xte_line(event)
             else:
                 if xte != '':
-                    proc = await asyncio.create_subprocess_exec(['xte'], stdin=asyncio.subprocess.PIPE)
-                    await proc.communicate(input=xte.encode('ascii'))
+                    proc = yield from asyncio.create_subprocess_exec(['xte'], stdin=asyncio.subprocess.PIPE)
+                    yield from proc.communicate(input=xte.encode('ascii'))
                     xte = ''
 
                 # Now run everything else (this just allows for less calls to xte
@@ -193,8 +196,8 @@ class MacroRunner():
                     event.execute()
 
         if xte != '':
-            proc = await asyncio.create_subprocess_exec(['xte'], stdin=asyncio.subprocess.PIPE)
-            await proc.communicate(input=xte.encode('ascii'))
+            proc = yield from asyncio.create_subprocess_exec(['xte'], stdin=asyncio.subprocess.PIPE)
+            yield from proc.communicate(input=xte.encode('ascii'))
 
         self._logger.debug("Finished running macro %s", self._macro_bind)
 
