@@ -294,3 +294,20 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
         _da_set_logo_brightness(self, logo_brightness)
         _da_set_scroll_brightness(self, scroll_brightness)
         self.disable_notify = False
+
+
+class RazerDiamondbackChroma(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Mamba Chroma (Wired)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x004C
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 19]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
+               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
+               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
+               'get_dpi_xy', 'set_dpi_xy']
+
+    def __init__(self, *args, **kwargs):
+        super(RazerDiamondbackChroma, self).__init__(*args, **kwargs)

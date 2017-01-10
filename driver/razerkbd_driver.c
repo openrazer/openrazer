@@ -1100,9 +1100,9 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 				report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
 				break;
 			
-                        case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
-                                report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
-                                break;
+			case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+				report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
+				break;
 
 			case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016: 
 			case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
@@ -1430,7 +1430,8 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
 				break;
-                        case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+            
+            case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
 			default: // BlackWidow Chroma...
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
@@ -1604,7 +1605,8 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 				device_remove_file(&hdev->dev, &dev_attr_macro_led_state);
 				device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);
 				break;
-                        case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+            
+            case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
 			default: // BlackWidow Chroma...
 				device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
 				device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
