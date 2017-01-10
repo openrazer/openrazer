@@ -1769,6 +1769,17 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
                 break;
                 
+            case USB_DEVICE_ID_RAZER_OUROBOROS:
+				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+				break;
+                
             case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
@@ -1943,6 +1954,18 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_dpi);
                 break;
                 
+            case USB_DEVICE_ID_RAZER_OUROBOROS:
+				device_remove_file(&hdev->dev, &dev_attr_dpi);
+				device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
+                device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
+				device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
+				device_remove_file(&hdev->dev, &dev_attr_charge_level);
+                device_remove_file(&hdev->dev, &dev_attr_charge_status);
+                device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+				break;
+                
+                
             case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
                 device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
                 device_remove_file(&hdev->dev, &dev_attr_poll_rate);
@@ -1989,6 +2012,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_IMPERATOR) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OUROBOROS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX_V2) },

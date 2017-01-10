@@ -147,6 +147,56 @@ class RazerImperiator(__RazerDevice):
         self.logger.debug("Imperiator doesnt have suspend/resume")
 
 
+class RazerOuroboros(__RazerDevice):
+    """
+    Class for the Razer Imperiator 2012
+    """
+
+    USB_VID = 0x1532
+    USB_PID = 0x0032
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy',
+               'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active', 'get_scroll_brightness', 'set_scroll_brightness',
+               'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold']
+
+    RAZER_URLS = {
+        "store": None,
+        "top_img": None,
+        "side_img": None,
+        "perspective_img": None
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerOuroboros, self).__init__(*args, **kwargs)
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = _da_get_scroll_brightness(self)
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_scroll_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        scroll_brightness = self.suspend_args.get('brightness', 100)[0]
+
+        self.disable_notify = True
+        _da_set_scroll_brightness(self, scroll_brightness)
+        self.disable_notify = False
+
+
 class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Mamba Chroma (Wireless)

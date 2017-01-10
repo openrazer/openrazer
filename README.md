@@ -37,13 +37,14 @@ A collection of Linux drivers for the Razer devices, providing kernel drivers, D
 ### Mouse
 | Device                          | USB VID:PID | Driver | Daemon |
 | ------------------------------- | ----------- | ------ | ------ |
-| Razer Mamba (Wireless)          |  1532:0045  |   ✔    |   ✔    |
-| Razer Mamba (Wired)             |  1532:0044  |   ✔    |   ✔    |
-| Razer Mamba Tournament Edition  |  1532:0046  |   ✔    |   ✔    |
-| Razer Abyssus 2014              |  1532:0042  |   ✔    |   ✔    |
 | Razer Imperator 2012            |  1532:002F  |   ✔    |   ✔    |
-| Razer Orochi (Wired)            |  1532:0048  |   ✔    |   ✔    |
+| Razer Ouroboros 2012            |  1532:0032  |   ✔    |   ✔    |
+| Razer Abyssus 2014              |  1532:0042  |   ✔    |   ✔    |
 | Razer DeathAdder Chroma         |  1532:0043  |   ✔    |   ✔    |
+| Razer Mamba (Wired)             |  1532:0044  |   ✔    |   ✔    |
+| Razer Mamba (Wireless)          |  1532:0045  |   ✔    |   ✔    |
+| Razer Mamba Tournament Edition  |  1532:0046  |   ✔    |   ✔    |
+| Razer Orochi (Wired)            |  1532:0048  |   ✔    |   ✔    |
 | Razer Naga Hex V2               |  1532:0050  |   ✔    |   ✔    |
 | Razer DeathAdder Elite          |  1532:005c  |   ✔    |   ✔    |
 
