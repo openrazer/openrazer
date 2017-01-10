@@ -5,10 +5,159 @@ import datetime
 import logging
 import math
 import threading
+import multiprocessing
 import time
+import os
+
+import asyncio
+import evdev
 
 # pylint: disable=import-error
 from openrazer_daemon.keyboard import KeyboardColour
+import numpy as _np
+
+
+class Frame(object):
+    """
+    Class to represent the RGB matrix of the keyboard. So to animate you'd use multiple frames
+    """
+    def __init__(self, dimensions):
+        self._rows, self._cols = dimensions
+        self._components = 3
+
+        self._matrix = None
+        self._fb1 = None
+        self.reset()
+
+    # Index with row, col OR y, x
+    def __getitem__(self, key:tuple) -> tuple:
+        """
+        Method to allow a slice to get an RGB tuple
+
+        :param key: Key, must be y,x tuple
+        :type key: tuple
+
+        :return: RGB tuple
+        :rtype: tuple
+
+        :raises AssertionError: If key is invalid
+        """
+        assert isinstance(key, tuple), "Key is not a tuple"
+        assert 0 <= key[0] < self._rows, "Row out of bounds"
+        assert 0 <= key[1] < self._cols, "Column out of bounds"
+
+        return tuple(self._matrix[:, key[0], key[1]])
+
+    # Index with row, col OR y, x
+    def __setitem__(self, key:tuple, rgb:tuple):
+        """
+        Method to allow a slice to set an RGB tuple
+
+        :param key: Key, must be y,x tuple
+        :type key: tuple
+
+        :param rgb: RGB tuple
+        :type rgb: tuple
+
+        :raises AssertionError: If key is invalid
+        """
+        assert isinstance(key, tuple), "Key is not a tuple"
+        assert 0 <= key[0] < self._rows, "Row out of bounds"
+        assert 0 <= key[1] < self._cols, "Column out of bounds"
+        assert isinstance(rgb, (list, tuple)) and len(rgb) == 3, "Value must be a tuple,list of 3 RGB components"
+
+        self._matrix[:, key[0], key[1]] = rgb
+
+    def __bytes__(self) -> bytes:
+        """
+        When bytes() is ran on the class will return a binary capable of being sent to the driver
+
+        :return: Driver binary payload
+        :rtype: bytes
+        """
+        return b''.join([self.row_binary(row_id) for row_id in range(0, self._rows)])
+
+    def reset(self):
+        """
+        Init/Clear the matrix
+        """
+        if self._matrix is None:
+            self._matrix = _np.zeros((self._components, self._rows, self._cols), 'uint8')
+            self._fb1 = _np.copy(self._matrix)
+        else:
+            self._matrix.fill(0)
+
+    def set(self, y:int, x:int, rgb:tuple):
+        """
+        Method to allow a slice to set an RGB tuple
+
+        :param y: Row
+        :type y: int
+
+        :param x: Column
+        :type x: int
+
+        :param rgb: RGB tuple
+        :type rgb: tuple
+
+        :raises AssertionError: If key is invalid
+        """
+        self.__setitem__((y, x), rgb)
+
+    def get(self, y:int, x:int) -> list:
+        """
+        Method to allow a slice to get an RGB tuple
+
+        :param y: Row
+        :type y: int
+
+        :param x: Column
+        :type x: int
+
+        :return rgb: RGB tuple
+        :return rgb: tuple
+
+        :raises AssertionError: If key is invalid
+        """
+        return self.__getitem__((y, x))
+
+    def row_binary(self, row_id:int) -> bytes:
+        """
+        Get binary payload for 1 row which is compatible with the driver
+
+        :param row_id: Row ID
+        :type row_id: int
+
+        :return: Binary payload
+        :rtype: bytes
+        """
+        assert 0 <= row_id < self._rows, "Row out of bounds"
+
+        start = 0
+        end = self._cols - 1
+
+        return row_id.to_bytes(1, byteorder='big') + start.to_bytes(1, byteorder='big') + end.to_bytes(1, byteorder='big') + self._matrix[:,row_id].tobytes(order='F')
+
+    def to_binary(self):
+        """
+        Get the whole binary for the keyboard to be sent to the driver.
+
+        :return: Driver binary payload
+        :rtype: bytes
+        """
+        return bytes(self)
+
+    # Simple FB
+    def to_framebuffer(self):
+        self._fb1 = _np.copy(self._matrix)
+
+    def to_framebuffer_or(self):
+        self._fb1 = _np.bitwise_or(self._fb1, self._matrix)
+
+    def draw_with_fb_or(self):
+        self._matrix = _np.bitwise_or(self._fb1, self._matrix)
+        return bytes(self)
+
 
 class RippleEffectThread(threading.Thread):
     """
@@ -36,6 +185,7 @@ class RippleEffectThread(threading.Thread):
         Get the shutdown flag
         """
         return self._shutdown
+
     @shutdown.setter
     def shutdown(self, value):
         """
@@ -45,6 +195,7 @@ class RippleEffectThread(threading.Thread):
         :type value: bool
         """
         self._shutdown = value
+
     @property
     def active(self):
         """
@@ -54,6 +205,7 @@ class RippleEffectThread(threading.Thread):
         :rtype: bool
         """
         return self._active
+
     @property
     def key_list(self):
         """
@@ -143,6 +295,76 @@ class RippleEffectThread(threading.Thread):
 
             time.sleep(self._refresh_rate)
 
+
+class RippleEffectProcess(multiprocessing.Process):
+    def __init__(self, device_number, dimensions, device_base, event_files):
+        super(RippleEffectProcess, self).__init__()
+
+        self._logger = logging.getLogger('razer.device{0}.ripplethread'.format(device_number))
+
+        self._event_files = event_files
+
+        # (Rows, Cols)
+        self._dims = dimensions
+
+        self._rgb_file = os.path.join(device_base, 'matrix_custom_frame')
+        self._custom_file = os.path.join(device_base, 'matrix_effect_custom')
+
+        self.stop = False
+
+        self.key_events = []
+
+    @asyncio.coroutine
+    def _event_callback(self, device):
+        while True:
+            events = yield from device.async_read()
+            for event in events:
+                self.key_events.append(event)
+
+    @asyncio.coroutine
+    def _run_loop(self):
+        count = 0
+
+        while True:
+            print("Count = {0}, Len = {1}".format(count, len(self.key_events)))
+            yield from asyncio.sleep(0.1)
+            count += 1
+
+    def run(self):
+        for device_path in self._event_files:
+            dev = evdev.InputDevice(device_path)
+            asyncio.ensure_future(self._event_callback(dev))
+
+        asyncio.ensure_future(self._run_loop())
+
+        loop = asyncio.get_event_loop()
+        loop.run_forever()
+
+        # matrix = Frame(self._dims)
+        #
+        # rgb_file = open(self._rgb_file, 'wb', 0)
+        # custom_file = open(self._custom_file, 'wb', 0)
+
+        # while True:
+        #     for row in range(0, self._dims[0]):
+        #         for col in range(0, self._dims[1]):
+        #             matrix[row, col] = (0, 255, 0)
+        #
+        #             binary = matrix.to_binary()
+        #
+        #             rgb_file.write(binary)
+        #             #rgb_file.flush()
+        #             custom_file.write(b'1')
+        #             #custom_file.flush()
+        #
+        #
+        #             time.sleep(0.1)
+        #     matrix.reset()
+
+
+
+
+
 class RippleManager(object):
     """
     Class which manages the overall process of performing a ripple effect
@@ -156,6 +378,7 @@ class RippleManager(object):
 
         self._ripple_thread = RippleEffectThread(self, device_number)
         self._ripple_thread.start()
+
 
     @property
     def key_list(self):
@@ -226,3 +449,15 @@ class RippleManager(object):
 
     def __del__(self):
         self.close()
+
+
+
+if __name__ == '__main__':
+    a = RippleEffectProcess(str(0), (6, 22), '/sys/bus/hid/drivers/razerkbd/0003:1532:0203.000A', ('/dev/input/by-id/usb-Razer_Razer_BlackWidow_Chroma-if01-event-kbd', '/dev/input/by-id/usb-Razer_Razer_BlackWidow_Chroma-event-kbd'))
+    a.start()
+
+    time.sleep(30)
+
+    a.terminate()
+    time.sleep(1)
+    print(a.is_alive())
