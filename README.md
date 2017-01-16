@@ -24,7 +24,7 @@ A collection of Linux drivers for the Razer devices, providing kernel drivers, D
 | Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔    |   ✔    |      |
 | Razer BlackWidow Classic                      |  1532:011B  |   ✔    |   ✔    |      |
 | Razer BlackWidow Chroma                       |  1532:0203  |   ✔    |   ✔    |      |
-| Razer DeathStalker Chroma                     |  1532:0204  |   ✔    |   ✔    | Daemon currently untested |
+| Razer DeathStalker Chroma                     |  1532:0204  |   ✔    |   ✔    |      |
 | Razer Blade Stealth                           |  1532:0205  |   ✔    |   ✔    |      |
 | Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔    |   ✔    |      |
 | Razer Blade QHD                               |  1532:020F  |   ✔    |   ✔    | Individual Key lighting not working yet |
