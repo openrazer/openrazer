@@ -933,14 +933,7 @@ static ssize_t razer_attr_write_set_fn_toggle(struct device *dev, struct device_
  */
 static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-	struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
-	
-	report = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x00);
-            razer_send_payload(usb_dev, &report);
-	
-    return count;
+	return count;
 }
 
 /**

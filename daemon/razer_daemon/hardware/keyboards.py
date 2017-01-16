@@ -4,7 +4,7 @@ Keyboards class
 import re
 
 from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
-from razer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _TartarusKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
+from razer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
 from razer_daemon.misc.ripple_effect import RippleManager as _RippleManager
 
 
@@ -64,7 +64,7 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
         super(RazerTartarus, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
-        self.key_manager = _TartarusKeyManager(self._device_number, self.event_files, self, testing=self._testing)
+        self.key_manager = _GamepadKeyManager(self._device_number, self.event_files, self, testing=self._testing)
 
     def _close(self):
         """

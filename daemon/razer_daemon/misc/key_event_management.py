@@ -645,17 +645,15 @@ class KeyboardKeyManager(object):
                 pass
 
 
-class GamepadKeyManager(KeyboardKeyManager):
-    GAMEPAD_EVENT_MAPPING = TARTARUS_EVENT_MAPPING
-    GAMEPAD_KEY_MAPPING = TARTARUS_KEY_MAPPING
-
-
 class NagaHexV2KeyManager(KeyboardKeyManager):
     KEY_MAP = NAGA_HEX_V2_KEY_MAPPING
     EVENT_MAP = NAGA_HEX_V2_EVENT_MAPPING
 
 
-class TartarusKeyManager(KeyboardKeyManager):
+class GamepadKeyManager(KeyboardKeyManager):
+    GAMEPAD_EVENT_MAPPING = TARTARUS_EVENT_MAPPING
+    GAMEPAD_KEY_MAPPING = TARTARUS_KEY_MAPPING
+
     def __init__(self, device_id, event_files, parent, use_epoll=True, testing=False):
         super(GamepadKeyManager, self).__init__(device_id, event_files, parent, use_epoll, testing=testing)
 
@@ -780,6 +778,7 @@ class TartarusKeyManager(KeyboardKeyManager):
         :rtype: bool
         """
         return self._mode_modifier
+
     @mode_modifier.setter
     def mode_modifier(self, value):
         """
@@ -790,9 +789,11 @@ class TartarusKeyManager(KeyboardKeyManager):
         """
         self._mode_modifier = True if value else False
 
+
 class OrbweaverKeyManager(GamepadKeyManager):
     GAMEPAD_EVENT_MAPPING = ORBWEAVER_EVENT_MAPPING
     GAMEPAD_KEY_MAPPING = ORBWEAVER_KEY_MAPPING
+
 
 class MediaKeyPress(threading.Thread):
     """
