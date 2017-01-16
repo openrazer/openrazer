@@ -9,7 +9,21 @@ whereami=$(dirname "$0")
 device_cfg_files=$(ls "$whereami/../pylib/razer/_fake_driver/"*.cfg)
 config_dir="/tmp/daemon_config/"
 test_dir="/tmp/daemon_test"
-terminal_cmd="x-terminal-emulator -e"
+
+# Check if x-terminal-emulatr exists (only on Debian & derivatives)
+command -v x-terminal-emulator >/dev/null 2>&1
+if [ $? == 0 ]; then
+    terminal_cmd="x-terminal-emulator -e"
+else
+    command -v xterm >/dev/null 2>&1
+    if [ $? != 0 ]; then
+        text="Neither x-terminal-emulator nor xterm was found in \$PATH. Exiting."
+        echo $text
+        zenity --error --text="$text"
+        exit 1
+    fi
+    terminal_cmd="xterm -e"
+fi
 
 devices=""
 for cfg in $device_cfg_files; do

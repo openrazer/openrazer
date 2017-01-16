@@ -152,6 +152,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             device_type = "Razer DeathAdder Elite\n";
             break;
 
+        case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
+            device_type = "Razer Diamondback Chroma\n";
+            break;
+
         default:
             device_type = "Unknown Device\n";
     }
@@ -1795,6 +1799,21 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_rgb);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_effect);
                 break;
+
+            case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+                break;
+
         }
     
     }
@@ -1969,6 +1988,20 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_logo_led_rgb);
                 device_remove_file(&hdev->dev, &dev_attr_logo_led_effect);
                 break;
+
+            case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
+                device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
+                device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+                device_remove_file(&hdev->dev, &dev_attr_dpi);
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);
+                device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+                break;
         }
     
     }
@@ -1993,6 +2026,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ELITE) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA) },
     { }
 };
 
