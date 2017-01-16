@@ -55,7 +55,7 @@ def run():
 
     byte_string = struct.pack(">HH", dpi_x, dpi_y)
 
-    set_mouse_dpi_filepath = os.path.join(mouse_dir, "set_mouse_dpi")
+    set_mouse_dpi_filepath = os.path.join(mouse_dir, "dpi")
     with open(set_mouse_dpi_filepath, 'wb') as set_mouse_dpi_file:
         set_mouse_dpi_file.write(byte_string)
     print("Done")
