@@ -31,6 +31,7 @@ A collection of Linux drivers for the Razer devices, providing kernel drivers, D
 | Razer Blade Pro (Late 2016)                   |  1532:0210  |   ✔    |   ✔    |      |
 | Razer BlackWidow Ultimate 2016                |  1532:0214  |   ✔    |   ✔    |      |
 | Razer BlackWidow X Chroma                     |  1532:0216  |   ✔    |   ✔    |      |
+| Razee BlackWidow X Ultimate                   |  1532:0217  |   ✔    |   ✔    |      |
 | Razer BlackWidow X Tournament Edition Chroma  |  1532:021A  |   ✔    |   ✔    |      |
 | Razer Ornata Chroma                           |  1532:021E  |   ✔    |   ✔    |      |
 | Razer Blade Stealth (Late 2016)               |  1532:0220  |   ✔    |   ✔    |      |
