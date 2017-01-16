@@ -2,7 +2,7 @@ import dbus as _dbus
 from razer.client.device import RazerDeviceFactory as _RazerDeviceFactory
 from razer.client import constants
 
-__version__ = '1.1.3'
+__version__ = '1.1.6'
 
 
 class DaemonNotFound(Exception):
@@ -10,6 +10,9 @@ class DaemonNotFound(Exception):
 
 
 class DeviceManager(object):
+    """
+    DeviceManager Class
+    """
     def __init__(self):
         # Load up the DBus
         session_bus = _dbus.SessionBus()
@@ -35,15 +38,20 @@ class DeviceManager(object):
 
     def stop_daemon(self):
         """
-        Stop Daemon
+        Stops the Daemon via a DBus call
         """
         self._dbus_daemon.stop()
 
-    def turn_off_on_screensaver(self, enable:bool):
-        """
-        Set wether or not to turn off the devices when screensaver is active
+    @property
+    def turn_off_on_screensaver(self):
+        return self._dbus_devices.getOffOnScreensaver()
 
-        If True then when the screensaver is active the devices' brightness will be set to 0.
+    @turn_off_on_screensaver.setter
+    def turn_off_on_screensaver(self, enable):
+        """
+        Enable or Disable the logic to turn off the devices whilst the screensaver is active
+
+        If True, when the screensaver is active the devices' brightness will be set to 0.
         When the screensaver is inactive the devices' brightness will be restored
         :param enable: True to enable screensaver disable
         :type enable: bool
@@ -53,17 +61,19 @@ class DeviceManager(object):
         if not isinstance(enable, bool):
             raise ValueError("Enable must be a boolean")
 
-        if enable:
-            self._dbus_devices.enableTurnOffOnScreensaver()
-        else:
-            self._dbus_devices.disableTurnOffOnScreensaver()
+        self._dbus_devices.enableTurnOffOnScreensaver(enable)
 
-    # TODO convert to property
-    def sync_effects(self, sync:bool):
+    @property
+    def sync_effects(self):
+        return self._dbus_devices.getSyncEffects()
+
+    @sync_effects.setter
+    def sync_effects(self, sync):
         """
         Enable or disable the syncing of effects between devices
 
         If sync is enabled, whenever an effect is set then it will be set on all other devices if the effect is available or a similar effect if it is not.
+
         :param sync: Sync effects
         :type sync: bool
 
@@ -75,22 +85,22 @@ class DeviceManager(object):
         self._dbus_devices.syncEffects(sync)
 
     @property
-    def devices(self) -> list:
+    def devices(self):
         """
-        Gets devices
+        A list of Razer devices
 
         :return: List of devices
-        :rtype: list of razer.clent.devices.RazerDevice
+        :rtype: list[razer.client.devices.RazerDevice]
         """
 
         return self._devices
 
     @property
-    def version(self) -> str:
+    def version(self):
         """
-        Returns the Python library version
+        Python library version
 
-        :return: Version tuple
+        :return: Version
         :rtype: str
         """
         return __version__
@@ -98,10 +108,18 @@ class DeviceManager(object):
     @property
     def daemon_version(self):
         """
-        Returns the daemon version
+        Daemon version
 
         :return: Daemon version
         :rtype: str
         """
-        return self._daemon_version
+        return str(self._daemon_version)
 
+
+if __name__ == '__main__':
+    a = DeviceManager()
+    b = a.devices[0]
+
+
+
+    print()

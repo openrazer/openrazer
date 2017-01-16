@@ -7,7 +7,7 @@ set(SOURCES
         driver/razerkbd_driver.c
         driver/razercommon.c
         driver/razerchromacommon.c
-)
+        )
 
 set(HEADERS
         driver/razermouse_driver.h
@@ -15,10 +15,11 @@ set(HEADERS
         driver/razerkbd_driver.h
         driver/razercommon.h
         driver/razerchromacommon.h
-)
+        )
 
 set(TARGET_VARS
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        SOURCES ${HEADERS} ${SOURCES}
 )
 
 execute_process(COMMAND uname -r
@@ -117,11 +118,6 @@ add_custom_target(udev-uninstall
 # Install for Ubuntu
 add_custom_target(ubuntu-install
         COMMAND make ubuntu_install
-        ${TARGET_VARS}
-)
-
-add_custom_target(fedora-install
-        COMMAND make fedora_install
         ${TARGET_VARS}
 )
 

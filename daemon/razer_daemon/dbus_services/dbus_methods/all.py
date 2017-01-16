@@ -4,6 +4,7 @@ DBus methods available for all devices.
 import os
 from razer_daemon.dbus_services import endpoint
 
+
 @endpoint('razer.device.misc', 'getDriverVersion', out_sig='s')
 def version(self):
     """
@@ -111,7 +112,6 @@ def get_device_type_tartarus(self):
     self.logger.debug("DBus call get_device_type")
     return 'tartarus'
 
-
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
 def get_device_type_orbweaver(self):
     """
@@ -122,6 +122,29 @@ def get_device_type_orbweaver(self):
     """
     self.logger.debug("DBus call get_device_type")
     return 'orbweaver'
+
+@endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
+def get_device_type_headset(self):
+    """
+    Get the device's type
+
+    :return:'tartarus'
+    :rtype: str
+    """
+    self.logger.debug("DBus call get_device_type")
+    return 'headset'
+
+
+@endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
+def get_device_type_mug(self):
+    """
+    Get the device's type
+
+    :return:'tartarus'
+    :rtype: str
+    """
+    self.logger.debug("DBus call get_device_type")
+    return 'mug'
 
 
 @endpoint('razer.device.misc', 'hasMatrix', out_sig='b')

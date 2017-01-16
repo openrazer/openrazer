@@ -1,3 +1,4 @@
+import json
 import dbus as _dbus
 from razer.client.fx import RazerFX as _RazerFX
 from xml.etree import ElementTree as _ET
@@ -27,11 +28,12 @@ class RazerDevice(object):
             'brightness': _dbus.Interface(self._dbus, "razer.device.lighting.brightness")
         }
 
-        self._name = self._dbus_interfaces['device'].getDeviceName()
-        self._type = self._dbus_interfaces['device'].getDeviceType()
-        self._fw = self._dbus_interfaces['device'].getFirmware()
-        self._drv_version = self._dbus_interfaces['device'].getDriverVersion()
+        self._name = str(self._dbus_interfaces['device'].getDeviceName())
+        self._type = str(self._dbus_interfaces['device'].getDeviceType())
+        self._fw = str(self._dbus_interfaces['device'].getFirmware())
+        self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
         self._has_dedicated_macro = None
+        self._urls = None
 
         if vid_pid is None:
             self._vid, self._pid = self._dbus_interfaces['device'].getVidPid()
@@ -47,9 +49,13 @@ class RazerDevice(object):
             'serial': True,
             'brightness': self._has_feature('razer.device.lighting.brightness'),
 
+            'macro_logic': self._has_feature('razer.device.macro'),
+
             # Default device is a chroma so lighting capabilities
+            'lighting': self._has_feature('razer.device.lighting.chroma'),
             'lighting_breath_single': self._has_feature('razer.device.lighting.chroma', 'setBreathSingle'),
             'lighting_breath_dual': self._has_feature('razer.device.lighting.chroma', 'setBreathDual'),
+            'lighting_breath_triple': self._has_feature('razer.device.lighting.chroma', 'setBreathTriple'),
             'lighting_breath_random': self._has_feature('razer.device.lighting.chroma', 'setBreathRandom'),
             'lighting_wave': self._has_feature('razer.device.lighting.chroma', 'setWave'),
             'lighting_reactive': self._has_feature('razer.device.lighting.chroma', 'setReactive'),
@@ -66,23 +72,36 @@ class RazerDevice(object):
             'lighting_led_single': self._has_feature('razer.device.lighting.chroma', 'setKey'),
 
             # Mouse lighting attrs
-            'lighting_logo': self._has_feature('razer.device.lighting.logo', 'setLogoActive'),
+            'lighting_logo': self._has_feature('razer.device.lighting.logo'),
+            'lighting_logo_active': self._has_feature('razer.device.lighting.logo', 'setLogoActive'),
             'lighting_logo_blinking': self._has_feature('razer.device.lighting.logo', 'setLogoBlinking'),
             'lighting_logo_brightness': self._has_feature('razer.device.lighting.logo', 'setLogoBrightness'),
             'lighting_logo_pulsate': self._has_feature('razer.device.lighting.logo', 'setLogoPulsate'),
             'lighting_logo_spectrum': self._has_feature('razer.device.lighting.logo', 'setLogoSpectrum'),
             'lighting_logo_static': self._has_feature('razer.device.lighting.logo', 'setLogoStatic'),
+            'lighting_logo_none': self._has_feature('razer.device.lighting.logo', 'setLogoNone'),
+            'lighting_logo_reactive': self._has_feature('razer.device.lighting.logo', 'setLogoReactive'),
+            'lighting_logo_breath_single': self._has_feature('razer.device.lighting.logo', 'setLogoBreathSingle'),
+            'lighting_logo_breath_dual': self._has_feature('razer.device.lighting.logo', 'setLogoBreathDual'),
+            'lighting_logo_breath_random': self._has_feature('razer.device.lighting.logo', 'setLogoBreathRandom'),
 
-            'lighting_scroll': self._has_feature('razer.device.lighting.scroll', 'setScrollActive'),
+            'lighting_scroll': self._has_feature('razer.device.lighting.scroll'),
+            'lighting_scroll_active': self._has_feature('razer.device.lighting.scroll', 'setScrollActive'),
             'lighting_scroll_blinking': self._has_feature('razer.device.lighting.scroll', 'setScrollBlinking'),
             'lighting_scroll_brightness': self._has_feature('razer.device.lighting.scroll', 'setScrollBrightness'),
             'lighting_scroll_pulsate': self._has_feature('razer.device.lighting.scroll', 'setScrollPulsate'),
             'lighting_scroll_spectrum': self._has_feature('razer.device.lighting.scroll', 'setScrollSpectrum'),
             'lighting_scroll_static': self._has_feature('razer.device.lighting.scroll', 'setScrollStatic'),
+            'lighting_scroll_none': self._has_feature('razer.device.lighting.scroll', 'setScrollNone'),
+            'lighting_scroll_reactive': self._has_feature('razer.device.lighting.scroll', 'setScrollReactive'),
+            'lighting_scroll_breath_single': self._has_feature('razer.device.lighting.scroll', 'setScrollBreathSingle'),
+            'lighting_scroll_breath_dual': self._has_feature('razer.device.lighting.scroll', 'setScrollBreathDual'),
+            'lighting_scroll_breath_random': self._has_feature('razer.device.lighting.scroll', 'setScrollBreathRandom'),
 
         }
 
-        self._matrix_dimensions = self._dbus_interfaces['device'].getMatrixDimensions()
+        # Nasty hack to convert dbus.Int32 into native
+        self._matrix_dimensions = tuple([int(dim) for dim in self._dbus_interfaces['device'].getMatrixDimensions()])
 
         # Setup FX
         if self._FX is None:
@@ -123,7 +142,7 @@ class RazerDevice(object):
         :type object_path: str
 
         :param method_name: Method name, or list of methods
-        :type method_name: str or list
+        :type method_name: str or list or tuple
 
         :return: True if method/s exist
         :rtype: bool
@@ -132,7 +151,7 @@ class RazerDevice(object):
             return object_path in self._available_features
         elif isinstance(method_name, str):
             return object_path in self._available_features and method_name in self._available_features[object_path]
-        elif isinstance(method_name, list):
+        elif isinstance(method_name, (list, tuple)):
             result = True
             for method in method_name:
                 result &= object_path in self._available_features and method in self._available_features[object_path]
@@ -256,6 +275,13 @@ class RazerDevice(object):
             self._has_dedicated_macro = self._dbus_interfaces['device'].hasDedicatedMacroKeys()
 
         return self._has_dedicated_macro
+
+    @property
+    def razer_urls(self) -> dict:
+        if self._urls is None:
+            self._urls = json.loads(str(self._dbus_interfaces['device'].getRazerUrls()))
+
+        return self._urls
 
     def __str__(self):
         return self._name

@@ -1,3 +1,5 @@
+pylib/docs/_build
+
 # Object files
 *.o
 *.do

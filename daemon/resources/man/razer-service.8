@@ -9,7 +9,7 @@ razer-service \- Razer Service to manage razer devices in userspace
 
 .SH "SUMMARY"
 .PP
-razer-service is a userspace service which is designed to be an intermediary between userspace programs and the razer drivers. It will provide some higher level functions to allow similar operation to the windows Razer Synapse program. This service is designed to be started by upstart as a session service.
+razer-service is a userspace service which is designed to be an intermediary between userspace programs and the razer drivers. It will provide some higher level functions to allow similar operation to the windows Razer Synapse program. This service is designed to be started by xdg-autostart as a session service.
 .PP
 The service has the functionality to sync effects between multiple devices, perform on-the-fly macro recording and playback and reimplements the
 FN+Keys logic so they work when \fBmacro_keys\fB are enabled. The service can also perform various ripple effects, it can turn off the devices when the

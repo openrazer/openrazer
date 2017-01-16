@@ -202,6 +202,33 @@ def set_static_effect(self, red, green, blue):
         driver_file.write(payload)
 
 
+@endpoint('razer.device.lighting.chroma', 'setBlinking', in_sig='yyy')
+def set_blinking_effect(self, red, green, blue):
+    """
+    Set the device to static colour
+
+    :param red: Red component
+    :type red: int
+
+    :param green: Green component
+    :type green: int
+
+    :param blue: Blue component
+    :type blue: int
+    """
+    self.logger.debug("DBus call set_blinking_effect")
+
+    # Notify others
+    self.send_effect_event('setBlinking', red, green, blue)
+
+    driver_path = self.get_driver_path('matrix_effect_blinking')
+
+    payload = bytes([red, green, blue])
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(payload)
+
+
 @endpoint('razer.device.lighting.chroma', 'setSpectrum')
 def set_spectrum_effect(self):
     """
@@ -311,6 +338,50 @@ def set_breath_single_effect(self, red, green, blue):
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
 
+
+@endpoint('razer.device.lighting.chroma', 'setBreathTriple', in_sig='yyyyyyyyy')
+def set_breath_triple_effect(self, red1, green1, blue1, red2, green2, blue2, red3, green3, blue3):
+    """
+    Set the device to dual colour breathing effect
+
+    :param red1: Red component
+    :type red1: int
+
+    :param green1: Green component
+    :type green1: int
+
+    :param blue1: Blue component
+    :type blue1: int
+
+    :param red2: Red component
+    :type red2: int
+
+    :param green2: Green component
+    :type green2: int
+
+    :param blue2: Blue component
+    :type blue2: int
+
+    :param red3: Red component
+    :type red3: int
+
+    :param green3: Green component
+    :type green3: int
+
+    :param blue3: Blue component
+    :type blue3: int
+    """
+    self.logger.debug("DBus call set_breath_dual_effect")
+
+    # Notify others
+    self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2, red3, green3, blue3)
+
+    driver_path = self.get_driver_path('matrix_effect_breath')
+
+    payload = bytes([red1, green1, blue1, red2, green2, blue2, red3, green3, blue3])
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(payload)
 
 @endpoint('razer.device.lighting.chroma', 'setBreathDual', in_sig='yyyyyy')
 def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):

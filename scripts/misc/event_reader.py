@@ -51,7 +51,8 @@ def run():
     if args.tartarus:
         mapping = TARTARUS_EVENT_MAPPING
     else:
-        mapping = EVENT_MAPPING
+        #mapping = EVENT_MAPPING
+        mapping = {}
 
     print('Starting. Press keys', file=sys.stderr)
 
