@@ -447,6 +447,26 @@ class RazerAdvancedFX(BaseRazerFX):
 
         self.matrix = Frame(matrix_dims)
 
+    @property
+    def cols(self):
+        """
+        Number of columns in matrix
+
+        :return: Columns
+        :rtype: int
+        """
+        return self._matrix_dims[1]
+
+    @property
+    def rows(self):
+        """
+        Number of rows in matrix
+
+        :return: Rows
+        :rtype: int
+        """
+        return self._matrix_dims[0]
+
     def _draw(self, ba):
         self._lighting_dbus.setKeyRow(ba)
 

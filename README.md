@@ -11,7 +11,7 @@ Those of you on Ubuntu 16.10, some of you on 16.04 and at least some arch users 
 
 A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
 
-Website: [Here](https://terrycain.github.io/razer-drivers/)
+[See the website](https://terrycain.github.io/razer-drivers/)
 
 **Before raising an issue** saying something doesn't work, read [this](https://github.com/terrycain/razer-drivers/wiki/Troubleshooting) Wiki page, try not to create new issues if one exists, reopen it.
 
@@ -85,28 +85,20 @@ by the daemon. If your device is supported by the driver but not by the daemon t
 
 ## Installation
 
-### Arch Linux
+Packages are available for these distributions:
 
-Install `razer-driver-meta` from AUR, or install the three packages `razer-driver-dkms`, `razer-daemon` and `python-razer` singularly from AUR.
+* [Ubuntu / Linux Mint](https://terrycain.github.io/razer-drivers/#ubuntu)
+* [Arch](https://terrycain.github.io/razer-drivers/#arch)
+* [Fedora](https://terrycain.github.io/razer-drivers/#fedora)
+* [OpenSUSE](https://terrycain.github.io/razer-drivers/#opensuse)
 
-### Ubuntu Linux
-We have a PPA here - `https://launchpad.net/~terrz/+archive/ubuntu/razerutils`
-
-```
-sudo add-apt-repository ppa:terrz/razerutils
-sudo apt update
-sudo apt install python3-razer razer-kernel-modules-dkms razer-daemon razer-doc
-```
-
-### Other distributions
-
-[Here](https://github.com/terrycain/razer-drivers/wiki/Installation) is a page documenting the installation and uninstallation procedures.
+Other distributions can manually install [using these instructions.](https://terrycain.github.io/razer-drivers/#other)
 
 ## Applications
 
 The following applications complement and interact with this driver:
 
-* [Polychromatic Controller](https://github.com/lah7/polychromatic-controller) - a graphical management tool and tray applet to managing Razer peripherals.
+* [Polychromatic](https://github.com/lah7/polychromatic) - a graphical management tool and tray applet to managing Razer peripherals.
 * [MacroW](https://github.com/igorbb/MacroW) - a simple tool to record and play keyboard macros. (though the dameon does on the fly recording ;) )
 * [RazerCommander](https://github.com/GabMus/razerCommander) - Simple GUI written in Gtk3
 
