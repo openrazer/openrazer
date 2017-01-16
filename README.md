@@ -24,6 +24,7 @@ A collection of Linux drivers for the Razer devices, providing kernel drivers, D
 | Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔    |   ✔    |      |
 | Razer BlackWidow Classic                      |  1532:011B  |   ✔    |   ✔    |      |
 | Razer BlackWidow Chroma                       |  1532:0203  |   ✔    |   ✔    |      |
+| Razer DeathStalker Chroma                     |  1532:0204  |   ✔    |   ✔    |      |
 | Razer Blade Stealth                           |  1532:0205  |   ✔    |   ✔    |      |
 | Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔    |   ✔    |      |
 | Razer Blade QHD                               |  1532:020F  |   ✔    |   ✔    | Individual Key lighting not working yet |
@@ -45,6 +46,7 @@ A collection of Linux drivers for the Razer devices, providing kernel drivers, D
 | Razer Mamba (Wireless)          |  1532:0045  |   ✔    |   ✔    |
 | Razer Mamba Tournament Edition  |  1532:0046  |   ✔    |   ✔    |
 | Razer Orochi (Wired)            |  1532:0048  |   ✔    |   ✔    |
+| Razer Diamondback Chroma        |  1532:004C  |   ✔    |   ✔    |
 | Razer Naga Hex V2               |  1532:0050  |   ✔    |   ✔    |
 | Razer DeathAdder Elite          |  1532:005c  |   ✔    |   ✔    |
 

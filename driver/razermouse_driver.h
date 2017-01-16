@@ -56,12 +56,17 @@
  #define USB_DEVICE_ID_RAZER_DEATHADDER_ELITE 0x005C
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA
+ #define USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA 0x004C
+#endif
+
 
 /* Each keyboard report has 90 bytes*/
 #define RAZER_REPORT_LEN 0x5A
 
-#define RAZER_MAMBA_ROW_LEN 15     // 0 => 14
-#define RAZER_MAMBA_TE_ROW_LEN 16  // 0 => 15
+#define RAZER_MAMBA_ROW_LEN 15          // 0 => 14
+#define RAZER_MAMBA_TE_ROW_LEN 16       // 0 => 15
+#define RAZER_DIAMONDBACK_ROW_LEN 21    // 0 => 20
 
 #define RAZER_MOUSE_WAIT_MIN_US 600
 #define RAZER_MOUSE_WAIT_MAX_US 800
