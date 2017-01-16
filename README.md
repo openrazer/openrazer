@@ -66,7 +66,8 @@ A collection of Linux drivers for the Razer devices, providing kernel drivers, D
 | Device                  | USB VID:PID | Driver | Daemon |
 | ----------------------- | ----------- | ------ | ------ |
 | Razer Chroma Mug Holder |  1532:0F07  |   ✔    |   ✔    |
-| Razer Tartarus          |  1532:0208  |   ✔    |   ✔    |
+| Razer Tartarus Chroma   |  1532:0208  |   ✔    |   ✔    |
+| Razer Orbweaver         |  1532:0113  |   ✔    |   ✔    |
 
 #### Determining the Device ID
 Razer's devices use a VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:
