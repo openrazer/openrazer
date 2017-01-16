@@ -8,6 +8,7 @@ from razer_daemon.dbus_services.dbus_methods.deathadder_chroma import get_logo_b
 from razer_daemon.dbus_services.dbus_methods.chroma_keyboard import get_brightness as _get_backlight_brightness, set_brightness as _set_backlight_brightness
 from razer_daemon.misc.key_event_management import NagaHexV2KeyManager as _NagaHexV2KeyManager
 
+
 class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Mamba Chroma (Wireless)
@@ -284,9 +285,9 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x0050
-    HAS_MATRIX = False
+    HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = True
-    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    MATRIX_DIMS = [1, 3]  # 1 Row, 15 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Thumbgrid is technically backlight ID
@@ -296,7 +297,9 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
                # Scroll wheel
                'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
                # #Macros
-               'get_macros', 'delete_macro', 'add_macro']
+               'get_macros', 'delete_macro', 'add_macro',
+               # Can set Logo, Scroll and thumbgrid with custom
+               'set_custom_effect', 'set_key_row']
 
     RAZER_URLS = {
         "store": "http://www.razerzone.com/store/razer-naga-hex-v2",
@@ -359,14 +362,16 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x005c
-    HAS_MATRIX = False
-    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 2]  # 1 Row, 15 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Logo
                'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
                # Scroll wheel
-               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2']
+               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               # Can set LOGO and Scrol with custom
+               'set_custom_effect', 'set_key_row']
 
     RAZER_URLS = {
         "store": "http://www.razerzone.com/gb-en/store/razer-deathadder-elite",
