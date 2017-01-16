@@ -42,6 +42,11 @@ class DeviceManager(object):
         """
         self._dbus_daemon.stop()
 
+    @property
+    def turn_off_on_screensaver(self):
+        return self._dbus_devices.getOffOnScreensaver()
+
+    @turn_off_on_screensaver.setter
     def turn_off_on_screensaver(self, enable):
         """
         Enable or Disable the logic to turn off the devices whilst the screensaver is active
@@ -56,11 +61,13 @@ class DeviceManager(object):
         if not isinstance(enable, bool):
             raise ValueError("Enable must be a boolean")
 
-        if enable:
-            self._dbus_devices.enableTurnOffOnScreensaver()
-        else:
-            self._dbus_devices.disableTurnOffOnScreensaver()
+        self._dbus_devices.enableTurnOffOnScreensaver(enable)
 
+    @property
+    def sync_effects(self):
+        return self._dbus_devices.getSyncEffects()
+
+    @sync_effects.setter
     def sync_effects(self, sync):
         """
         Enable or disable the syncing of effects between devices

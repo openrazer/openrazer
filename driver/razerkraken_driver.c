@@ -215,7 +215,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     switch (device->usb_pid)
     {
 		case USB_DEVICE_ID_RAZER_KRAKEN:
-            device_type = "Razer Kraken 7.1 (Rainie)\n";
+            device_type = "Razer Kraken 7.1 Chroma (Rainie)\n";
             break;
 		
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
@@ -574,7 +574,23 @@ static ssize_t razer_attr_read_matrix_current_effect(struct device *dev, struct 
     return sprintf(buf, "%02x\n", current_effect);
 }
 
+/**
+ * Write device file "device_mode"
+ */
+static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return count;
+}
 
+/**
+ * Read device file "device_mode"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "0:0\n");
+}
 
 
 /**
@@ -590,6 +606,7 @@ static DEVICE_ATTR(test,                    0660, razer_attr_read_test,         
 static DEVICE_ATTR(version,                 0440, razer_attr_read_version,                    NULL);
 static DEVICE_ATTR(device_type,             0440, razer_attr_read_device_type,                NULL);
 static DEVICE_ATTR(device_serial,           0440, razer_attr_read_get_serial,                 NULL);
+static DEVICE_ATTR(device_mode,             0660, razer_attr_read_device_mode,                razer_attr_write_device_mode);
 static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_get_firmware_version,       NULL);
 
 static DEVICE_ATTR(matrix_current_effect,	0440, razer_attr_read_matrix_current_effect,      NULL);
@@ -654,6 +671,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);                         // Get string of device serial
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);                      // Get string of device fw version
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
         
         switch(dev->usb_pid) {
 			case USB_DEVICE_ID_RAZER_KRAKEN:
@@ -705,6 +723,7 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
         device_remove_file(&hdev->dev, &dev_attr_device_serial);                         // Get string of device serial
         device_remove_file(&hdev->dev, &dev_attr_firmware_version);                      // Get string of device fw version
+        device_remove_file(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
         
         switch(dev->usb_pid) {
 			case USB_DEVICE_ID_RAZER_KRAKEN:

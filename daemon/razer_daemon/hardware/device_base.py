@@ -6,6 +6,7 @@ import os
 import types
 import logging
 import time
+import json
 
 from razer_daemon.dbus_services.service import DBusService
 import razer_daemon.dbus_services.dbus_methods
@@ -31,6 +32,13 @@ class RazerDevice(DBusService):
     MATRIX_DIMS = [-1, -1]
 
     WAVE_DIRS = (1, 2)
+
+    RAZER_URLS = {
+        "store": None,
+        "top_img": None,
+        "side_img": None,
+        "perspective_img": None
+    }
 
     def __init__(self, device_path, device_number, config, testing=False):
 
@@ -82,6 +90,8 @@ class RazerDevice(DBusService):
 
         self.logger.debug("Adding razer.device.misc.getDeviceMode method to DBus")
         self.add_dbus_method('razer.device.misc', 'getDeviceMode', self.get_device_mode, out_signature='s')
+        self.logger.debug("Adding razer.device.misc.getRazerUrls method to DBus")
+        self.add_dbus_method('razer.device.misc', 'getRazerUrls', self.get_image_json, out_signature='s')
         self.logger.debug("Adding razer.device.misc.setDeviceMode method to DBus")
         self.add_dbus_method('razer.device.misc', 'setDeviceMode', self.set_device_mode, in_signature='yy')
         self.logger.debug("Adding razer.device.misc.resumeDevice method to DBus")
@@ -183,10 +193,15 @@ class RazerDevice(DBusService):
         with open(serial_path, 'r') as serial_file:
             count = 0
             serial = serial_file.read().strip()
+
             while len(serial) == 0:
                 if count >= 3:
                     break
-                serial = serial_file.read().strip()
+
+                try:
+                    serial = serial_file.read().strip()
+                except (PermissionError, OSError):
+                    serial = ''
 
                 count += 1
                 time.sleep(0.1)
@@ -244,6 +259,9 @@ class RazerDevice(DBusService):
         """
         result = [self.USB_VID, self.USB_PID]
         return result
+
+    def get_image_json(self):
+        return json.dumps(self.RAZER_URLS)
 
     def load_methods(self):
         """
@@ -381,10 +399,10 @@ class RazerDevice(DBusService):
         :return: True if its the correct device ID
         :rtype: bool
         """
-        pattern = r'^[0-9A-F]{4}:' + '{0:04X}'.format(cls.USB_VID) +':' + '{0:04X}'.format(cls.USB_PID) + r'\.[0-9A-F]{4}$'
+        pattern = r'^[0-9A-F]{4}:' + '{0:04X}'.format(cls.USB_VID) + ':' + '{0:04X}'.format(cls.USB_PID) + r'\.[0-9A-F]{4}$'
 
         if re.match(pattern, device_id) is not None:
-            if 'device_type' in  os.listdir(os.path.join(dev_path, device_id)):
+            if 'device_type' in os.listdir(dev_path):
                 return True
 
         return False

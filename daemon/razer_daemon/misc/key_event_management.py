@@ -381,7 +381,7 @@ class KeyboardKeyManager(object):
             # Convert event ID to key name
             key_name = self.EVENT_MAP[key_id]
 
-            self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
+            # self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
 
             # Key release
             if key_press == 'release':
@@ -732,10 +732,10 @@ class TartarusKeyManager(KeyboardKeyManager):
                 self._temp_key_store.append((now + self._temp_expire_time, TARTARUS_KEY_MAPPING[key_name], colour))
 
             # if self._testing:
-            if key_press:
-                self._logger.debug("Got Key: {0} Down".format(key_name))
-            else:
-                self._logger.debug("Got Key: {0} Up".format(key_name))
+            #if key_press:
+                #self._logger.debug("Got Key: {0} Down".format(key_name))
+            #else:
+                #self._logger.debug("Got Key: {0} Up".format(key_name))
 
             # Logic for mode switch modifier
             if self._mode_modifier:

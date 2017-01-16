@@ -1,3 +1,23 @@
+razer (1.1.6-0ubuntu1) xenial; urgency=low
+
+  * Fixed bug in Makefile where drivers wernt being copied over
+  * Added Device - Razer DeathStalker Chroma
+  * Added Device - Razer BlackWidow X Ultimate
+  * Added Device - Razer Ouroboros 2012
+  * Added Device - Razer DeathAdder Chroma
+  * Added Device - Razer Diamonback Chroma
+  * Added device add and device remove signals to the daemon
+  * Overhaul'd the daemons device add/remove logic so that it actually works now, and works well
+  * Added dict's to devices so that the python library can get links to Razer Store and device images
+  * Added Razer BlackWidow 2012 and BlackWidow Classic to daemon
+  * Fixed matrix limits on firefly and mug
+  * Commented out evil log line that spams
+  * Fixed package dependancy issue when on KDE
+  * Fixed case issue in udev rules
+  * Added config for kraken v1/2 and mug for device emulation
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Mon, 16 Jan 2017 21:11:00 +0000
+
 razer (1.1.5-0ubuntu1) xenial; urgency=low
 
   * Big changes to overall build structure to facilitate proper RPM specfile building
