@@ -239,9 +239,22 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
     
-    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) {
-        report.transaction_id.id = 0x80;
-    }
+    switch (usb_dev->descriptor.idProduct) {
+		case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+			report = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
+			report.transaction_id.id = 0x3f;
+			break;
+
+		case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+			report = razer_chroma_extended_matrix_effect_custom_frame();
+			report.transaction_id.id = 0x3f;
+			break;
+
+		case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+			report = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
+			report.transaction_id.id = 0x80;
+			break;
+	}
     
     razer_send_payload(usb_dev, &report);
     
@@ -845,7 +858,23 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
         }
         
         // Offset now at beginning of RGB data
-        report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
+        switch(usb_dev->descriptor.idProduct)
+		{
+			case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+				report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+				report.transaction_id.id = 0x3f;
+				break;
+
+			case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+				report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+				report.transaction_id.id = 0x3f;
+				break;
+
+			case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+				report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+				report.transaction_id.id = 0x80;
+				break;
+		}
         razer_send_payload(usb_dev, &report);
         
         // *3 as its 3 bytes per col (RGB)
@@ -1695,6 +1724,8 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
                 break;
 
             case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1718,6 +1749,8 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
                 break;
             
             case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
@@ -1738,6 +1771,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
                 break;
+                
 
             case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
@@ -1895,6 +1929,8 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
                 device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
                 device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
+                device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
                 break;
             
             case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1918,6 +1954,8 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
                 device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
                 device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
+                device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
                 break;
             
             case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
