@@ -31,7 +31,7 @@ Depends: razer-kernel-modules-dkms,
          python3-pyudev,
          python3-setproctitle,
          python3-notify2,
-         gir1.2-gtk3.0,
+         gir1.2-gtk-3.0,
          xautomation,
          xdotool
 Recommends: python3-razer
