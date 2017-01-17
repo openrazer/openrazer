@@ -1,3 +1,11 @@
+razer (1.1.7-0ubuntu1) xenial; urgency=low
+
+  * Added Device - Razer Orbweaver
+  * Fixed error in dependancy name
+  * Fixed error from merging
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Tue, 17 Jan 2017 19:29:00 +0000
+
 razer (1.1.6-0ubuntu1) xenial; urgency=low
 
   * Fixed bug in Makefile where drivers wernt being copied over

@@ -263,6 +263,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     switch (usb_dev->descriptor.idProduct)
     {
+		case USB_DEVICE_ID_RAZER_ORBWEAVER:
+			device_type = "Razer Orbweaver\n";
+            break;
+		
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
             device_type = "Razer BlackWidow Classic\n";
             break;
@@ -394,7 +398,16 @@ static ssize_t razer_attr_write_mode_pulsate(struct device *dev, struct device_a
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, ON);
+    struct razer_report report = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x02);
+    
+    switch(usb_dev->descriptor.idProduct)
+    {
+		case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
+			report = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, 0x02);
+			break;
+	}  
     
     razer_send_payload(usb_dev, &report);
 
@@ -418,6 +431,8 @@ static ssize_t razer_attr_read_mode_pulsate(struct device *dev, struct device_at
 
 /**
  * Read device file "profile_led_red"
+ * 
+ * Actually a Yellow LED
  *
  * Returns a string
  */
@@ -682,6 +697,11 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     struct razer_report report;
 	
     switch(usb_dev->descriptor.idProduct) {
+		case USB_DEVICE_ID_RAZER_ORBWEAVER:
+			report = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x00);
+            razer_send_payload(usb_dev, &report);
+            break;
+		
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013: // Doesn't need any parameters as can only do one type of static
@@ -913,7 +933,7 @@ static ssize_t razer_attr_write_set_fn_toggle(struct device *dev, struct device_
  */
 static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return count;
+	return count;
 }
 
 /**
@@ -1414,6 +1434,15 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
                 break;
             
+            case USB_DEVICE_ID_RAZER_ORBWEAVER:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+	            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_pulsate);         // Pulsate effect, like breathing
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
+                break;
+            
             case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
@@ -1599,6 +1628,15 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
                 break;
             
+            case USB_DEVICE_ID_RAZER_ORBWEAVER:
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+	            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_pulsate);         // Pulsate effect, like breathing
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
+                break;
+            
             case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
 				device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
 				device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
@@ -1662,6 +1700,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
  * Device ID mapping table
  */
 static const struct hid_device_id razer_devices[] = {
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORBWEAVER) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013) },

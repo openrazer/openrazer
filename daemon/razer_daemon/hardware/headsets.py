@@ -4,9 +4,8 @@ Keyboards class
 import re
 
 from razer_daemon.hardware.device_base import RazerDevice as __RazerDevice
-from razer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, TartarusKeyManager as _TartarusKeyManager
-
 from razer_daemon.dbus_services.dbus_methods import kraken as _dbus_kraken, chroma_keyboard as _dbus_chroma
+
 
 class RazerKraken(__RazerDevice):
 
