@@ -687,12 +687,33 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
     struct razer_report report;
     unsigned short dpi_x;
     unsigned short dpi_y;
+    unsigned char dpi_x_byte;
+	unsigned char dpi_y_byte;
     unsigned char varstore;
     
             
     // So far I think imperator uses varstore
     switch(usb_dev->descriptor.idProduct)
     {
+		// Damn naga hex only uses 1 byte per x, y dpi
+		case USB_DEVICE_ID_RAZER_NAGA_HEX:
+			if(count == 1) {
+				dpi_x_byte = buf[0];
+				dpi_y_byte = buf[0];
+			} else if (count == 2) {
+				dpi_x_byte = buf[0];
+				dpi_y_byte = buf[1];
+			} else {
+				printk(KERN_WARNING "razermouse: DPI requires 1 byte or 2 bytes\n");
+				return count;
+			}
+			
+			report = razer_chroma_misc_set_dpi_xy_byte(dpi_x, dpi_y);
+			razer_send_payload(usb_dev, &report);
+			return count;
+			
+			break;
+		
         case USB_DEVICE_ID_RAZER_IMPERATOR:
             varstore = VARSTORE;
             break;
@@ -750,6 +771,10 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
     // So far I think imperator uses varstore
     switch(usb_dev->descriptor.idProduct)
     {
+		case USB_DEVICE_ID_RAZER_NAGA_HEX:
+		    report = razer_chroma_misc_get_dpi_xy_byte();
+            break;
+		
         case USB_DEVICE_ID_RAZER_IMPERATOR:
             report = razer_chroma_misc_get_dpi_xy(VARSTORE);
             break;
@@ -766,8 +791,14 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
 
     response = razer_send_payload(usb_dev, &report);
     
-    dpi_x = (response.arguments[1] << 8) | (response.arguments[2] & 0xFF); // Apparently the char buffer is rubbish, as buf[1] somehow can equal FFFFFF80????
-    dpi_y = (response.arguments[3] << 8) | (response.arguments[4] & 0xFF);
+    // Byte, Byte for DPI not Short, Short
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_NAGA_HEX) {
+		dpi_x = response.arguments[0];
+		dpi_y = response.arguments[1];
+	} else {
+        dpi_x = (response.arguments[1] << 8) | (response.arguments[2] & 0xFF); // Apparently the char buffer is rubbish, as buf[1] somehow can equal FFFFFF80????
+        dpi_y = (response.arguments[3] << 8) | (response.arguments[4] & 0xFF);
+	}
 
     return sprintf(buf, "%u:%u\n", dpi_x, dpi_y);
 }
@@ -1835,6 +1866,13 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
                 break;
+                
+            case USB_DEVICE_ID_RAZER_NAGA_HEX:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
+                break;
             
             case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);            
@@ -2041,6 +2079,13 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
                 break;
             
+            case USB_DEVICE_ID_RAZER_NAGA_HEX:
+                device_remove_file(&hdev->dev, &dev_attr_dpi);
+                device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
+                device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
+                break;
+            
             case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
                 device_remove_file(&hdev->dev, &dev_attr_dpi);            
                 device_remove_file(&hdev->dev, &dev_attr_poll_rate);
@@ -2082,6 +2127,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
  * Device ID mapping table
  */
 static const struct hid_device_id razer_devices[] = {
+	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) },
