@@ -574,7 +574,7 @@ class RazerOrnata(_MacroKeyboard):
     MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_single_effect'
-               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode', 'set_breath_single_effect',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
                'set_starlight_single_effect', 'set_ripple_effect', 'set_ripple_effect_random_colour']
 
