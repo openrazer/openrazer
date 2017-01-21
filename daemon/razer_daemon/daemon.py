@@ -398,7 +398,7 @@ class RazerDaemon(DBusService):
             device_list = os.listdir(self._test_dir)
             test_mode = True
         else:
-            device_list = self._udev_context.list_devices(subsystem='hid')
+            device_list = list(self._udev_context.list_devices(subsystem='hid'))
             test_mode = False
 
         device_number = 0
@@ -418,7 +418,16 @@ class RazerDaemon(DBusService):
 
                 if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
                     self.logger.info('Found device.%d: %s', device_number, sys_name)
-                    razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None)
+
+                    # TODO add testdir support
+                    # Basically find the other usb interfaces
+                    device_match = sys_name.split('.')[0]
+                    additional_interfaces = []
+                    for alt_device in device_list:
+                        if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
+                            additional_interfaces.append(alt_device.sys_path)
+
+                    razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
 
                     # Wireless devices sometimes dont listen
                     count = 0
@@ -541,12 +550,6 @@ class RazerDaemon(DBusService):
 
         # Stop udev monitor
         self._udev_observer.send_stop()
-
-        # Stop screensaver
-        self._screensaver_thread.shutdown = True
-        self._screensaver_thread.join(timeout=2)
-        if self._screensaver_thread.is_alive():
-            self.logger.warning('Could not stop the screensaver thread')
 
         for device in self._razer_devices:
             device.dbus.close()
