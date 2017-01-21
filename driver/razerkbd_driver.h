@@ -146,6 +146,9 @@ struct razer_kbd_device {
     char name[128];
     char phys[64];
     DECLARE_BITMAP(pressed_fn, KEY_CNT);
+    
+    unsigned char block_keys[3];
+    unsigned char left_alt_on;
 };
 
 

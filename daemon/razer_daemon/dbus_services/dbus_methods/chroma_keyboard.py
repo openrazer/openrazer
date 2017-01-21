@@ -1,6 +1,7 @@
 """
 BlackWidow Chroma Effects
 """
+import os
 from razer_daemon.dbus_services import endpoint
 
 
@@ -78,6 +79,20 @@ def set_game_mode(self, enable):
     self.logger.debug("DBus call set_game_mode")
 
     driver_path = self.get_driver_path('game_led_state')
+
+    for kb_int in self.additional_interfaces:
+        super_file = os.path.join(kb_int, 'key_super')
+        alt_tab = os.path.join(kb_int, 'key_alt_tab')
+        alt_f4 = os.path.join(kb_int, 'key_alt_f4')
+
+        if enable:
+            open(super_file, 'wb').write(b'\x01')
+            open(alt_tab, 'wb').write(b'\x01')
+            open(alt_f4, 'wb').write(b'\x01')
+        else:
+            open(super_file, 'wb').write(b'\x00')
+            open(alt_tab, 'wb').write(b'\x00')
+            open(alt_f4, 'wb').write(b'\x00')
 
     with open(driver_path, 'w') as driver_file:
         if enable:
