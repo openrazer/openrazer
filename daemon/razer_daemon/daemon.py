@@ -26,7 +26,8 @@ from pyudev import Context, Monitor, MonitorObserver
 import razer_daemon.hardware
 from razer_daemon.dbus_services.service import DBusService
 from razer_daemon.device import DeviceCollection
-from razer_daemon.misc.screensaver_thread import ScreensaverThread
+from razer_daemon.misc.screensaver_monitor import ScreensaverMonitor
+
 
 def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, pid_file=None, test_dir=None):
     """
@@ -210,9 +211,7 @@ class RazerDaemon(DBusService):
 
         self.logger.info("Initialising Daemon (v%s). Pid: %d", __version__, os.getpid())
 
-        # Setup screensaver thread
-        self._screensaver_thread = ScreensaverThread(self, active=self._config.getboolean('Startup', 'devices_off_on_screensaver'))
-        self._screensaver_thread.start()
+        self._screensaver_monitor = ScreensaverMonitor(self)
 
         self._razer_devices = DeviceCollection()
         self._load_devices(first_run=True)
@@ -316,13 +315,13 @@ class RazerDaemon(DBusService):
         :return: Result
         :rtype: bool
         """
-        return self._screensaver_thread.active
+        return self._screensaver_monitor.monitoring
 
     def enable_turn_off_on_screensaver(self, enable):
         """
         Enable the turning off of devices when the screensaver is active
         """
-        self._screensaver_thread.active = enable
+        self._screensaver_monitor.monitoring = enable
 
     def version(self):
         """
