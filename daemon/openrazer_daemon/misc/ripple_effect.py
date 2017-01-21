@@ -719,7 +719,6 @@ class RippleEffect(BaseEffect):
         try:
             key_row, key_col = KEY_MAPPING[EVENT_MAPPING[key_code]]
             self.key_events.append((key_time, key_row, key_col))
-            #self._logger.debug("Appending key to list")
         except KeyError:
             pass
 
@@ -730,50 +729,31 @@ class RippleEffect(BaseEffect):
         :param matrix: Matrix object
         :type matrix: Frame
         """
-
         now = time.time()
-
-        #self._logger.debug("1")
 
         expire = now - self.expire_time
 
-        #self._logger.debug("2")
-
         while len(self.key_events) > 0 and self.key_events[0][0] < expire:
             self.key_events.pop(0)
-            #self._logger.debug("2.1")
-
-        #self._logger.debug("3")
 
         # List of radii
         radiuses = []
 
-        #self._logger.debug("4")
-
         for event_time, key_row, key_col in self.key_events:
-            #self._logger.debug("4.1")
             now_diff = now - event_time
-
-            #self._logger.debug("4.2")
 
             # Current radius is based off a time metric
             colour = (0, 255, 0)
             radiuses.append((key_row, key_col, now_diff * 12, colour))
 
-            #self._logger.debug("4.3")
-
-        #self._logger.debug("5")
         # 1 extra row to do the logo led
         if len(self.key_events) > 0:
             for row in range(0, matrix.rows + 1):
                 for col in range(0, matrix.cols):
 
-                    #self._logger.debug("5.1")
-
                     if row == 0 and col == 20:
                         continue
                     if row == 6:
-                        #self._logger.debug("5.2.1")
 
                         if col != 11:
                             continue
@@ -785,8 +765,6 @@ class RippleEffect(BaseEffect):
                                     matrix[0, 20] = colour
                                     break
                     else:
-                        #self._logger.debug("5.2.1")
-
                         for cirlce_centre_row, circle_centre_col, rad, colour in radiuses:
                             radius = math.sqrt(math.pow(cirlce_centre_row - row, 2) + math.pow(circle_centre_col - col, 2))
                             if rad >= radius >= rad - 1:
