@@ -5,7 +5,7 @@ import re
 
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
 from openrazer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
-from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
+from openrazer_daemon.misc.ripple_effect import CustomEffectManager as _CustomEffectManager
 
 
 class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
@@ -338,9 +338,7 @@ class RazerBlackWidowChroma(_MacroKeyboard):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
-
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blackwidow-chroma-v1",
@@ -352,7 +350,7 @@ class RazerBlackWidowChroma(_MacroKeyboard):
     def __init__(self, *args, **kwargs):
         super(RazerBlackWidowChroma, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
+        self.custom_effect_manager = _CustomEffectManager(self._device_number, self.MATRIX_DIMS, self._device_path, self.event_files, parent=self)
 
     def _close(self):
         """
@@ -360,7 +358,7 @@ class RazerBlackWidowChroma(_MacroKeyboard):
         """
         super(RazerBlackWidowChroma, self)._close()
 
-        self.ripple_manager.close()
+        self.custom_effect_manager.close()
 
 
 class RazerBlackWidowChromaV2(_MacroKeyboard):
