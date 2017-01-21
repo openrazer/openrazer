@@ -25,7 +25,7 @@ import threading
 import time
 
 # pylint: disable=import-error
-from razer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING
+from razer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_EVENT_MAPPING, ORBWEAVER_KEY_MAPPING
 from .macro import MacroKey, MacroRunner, macro_dict_to_obj
 
 EVENT_FORMAT = '@llHHI'
@@ -650,9 +650,12 @@ class NagaHexV2KeyManager(KeyboardKeyManager):
     EVENT_MAP = NAGA_HEX_V2_EVENT_MAPPING
 
 
-class TartarusKeyManager(KeyboardKeyManager):
+class GamepadKeyManager(KeyboardKeyManager):
+    GAMEPAD_EVENT_MAPPING = TARTARUS_EVENT_MAPPING
+    GAMEPAD_KEY_MAPPING = TARTARUS_KEY_MAPPING
+
     def __init__(self, device_id, event_files, parent, use_epoll=True, testing=False):
-        super(TartarusKeyManager, self).__init__(device_id, event_files, parent, use_epoll, testing=testing)
+        super(GamepadKeyManager, self).__init__(device_id, event_files, parent, use_epoll, testing=testing)
 
         self._mode_modifier = False
         self._mode_modifier_combo = []
@@ -706,7 +709,7 @@ class TartarusKeyManager(KeyboardKeyManager):
         try:
             # Convert event ID to key name
 
-            key_name = TARTARUS_EVENT_MAPPING[key_id]
+            key_name = self.GAMEPAD_EVENT_MAPPING[key_id]
             # Key press
 
             # This is the key for storing stats, by generating hour timestamps it will bucket data nicely.
@@ -718,7 +721,7 @@ class TartarusKeyManager(KeyboardKeyManager):
                 # self._logger.debug("Increased key %s", key_name)
             except KeyError:
                 # Create bucket
-                self._stats[storage_bucket] = dict.fromkeys(TARTARUS_KEY_MAPPING, 0)
+                self._stats[storage_bucket] = dict.fromkeys(self.GAMEPAD_KEY_MAPPING, 0)
                 try:
                     # Increment key
                     self._stats[storage_bucket][key_name] += 1
@@ -729,7 +732,7 @@ class TartarusKeyManager(KeyboardKeyManager):
             if self._temp_key_store_active:
                 colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
                 self._last_colour_choice = colour
-                self._temp_key_store.append((now + self._temp_expire_time, TARTARUS_KEY_MAPPING[key_name], colour))
+                self._temp_key_store.append((now + self._temp_expire_time, self.GAMEPAD_KEY_MAPPING[key_name], colour))
 
             # if self._testing:
             #if key_press:
@@ -775,6 +778,7 @@ class TartarusKeyManager(KeyboardKeyManager):
         :rtype: bool
         """
         return self._mode_modifier
+
     @mode_modifier.setter
     def mode_modifier(self, value):
         """
@@ -784,6 +788,11 @@ class TartarusKeyManager(KeyboardKeyManager):
         :type value: bool
         """
         self._mode_modifier = True if value else False
+
+
+class OrbweaverKeyManager(GamepadKeyManager):
+    GAMEPAD_EVENT_MAPPING = ORBWEAVER_EVENT_MAPPING
+    GAMEPAD_KEY_MAPPING = ORBWEAVER_KEY_MAPPING
 
 
 class MediaKeyPress(threading.Thread):

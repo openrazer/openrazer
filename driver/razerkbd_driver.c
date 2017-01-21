@@ -264,6 +264,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     switch (usb_dev->descriptor.idProduct)
     {
+		case USB_DEVICE_ID_RAZER_ORBWEAVER:
+			device_type = "Razer Orbweaver\n";
+            break;
+		
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
             device_type = "Razer BlackWidow Classic\n";
             break;
@@ -401,7 +405,16 @@ static ssize_t razer_attr_write_mode_pulsate(struct device *dev, struct device_a
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, ON);
+    struct razer_report report = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x02);
+    
+    switch(usb_dev->descriptor.idProduct)
+    {
+		case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
+			report = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, 0x02);
+			break;
+	}  
     
     razer_send_payload(usb_dev, &report);
 
@@ -425,6 +438,8 @@ static ssize_t razer_attr_read_mode_pulsate(struct device *dev, struct device_at
 
 /**
  * Read device file "profile_led_red"
+ * 
+ * Actually a Yellow LED
  *
  * Returns a string
  */
@@ -693,6 +708,11 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     struct razer_report report;
 	
     switch(usb_dev->descriptor.idProduct) {
+		case USB_DEVICE_ID_RAZER_ORBWEAVER:
+			report = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x00);
+            razer_send_payload(usb_dev, &report);
+            break;
+		
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013: // Doesn't need any parameters as can only do one type of static
@@ -949,7 +969,7 @@ static ssize_t razer_attr_write_set_fn_toggle(struct device *dev, struct device_
  */
 static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return count;
+	return count;
 }
 
 /**
@@ -1166,6 +1186,70 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 	return count;
 }
 
+
+
+static ssize_t razer_attr_write_key_super(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+    if (count >= 1) {
+		device->block_keys[0] = buf[0];
+	}
+    
+    return count;
+}
+
+static ssize_t razer_attr_read_key_super(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+	buf[0] = device->block_keys[0];
+	
+	return 1;
+}
+
+
+static ssize_t razer_attr_write_key_alt_tab(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+    if (count >= 1) {
+		printk(KERN_WARNING "razerkbd: Settings block_keys[1] to %u\n", buf[0]);
+		device->block_keys[1] = buf[0];
+	}
+    
+    return count;
+}
+
+static ssize_t razer_attr_read_key_alt_tab(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+	buf[0] = device->block_keys[1];
+	
+	return 1;
+}
+
+static ssize_t razer_attr_write_key_alt_f4(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+    if (count >= 1) {
+		device->block_keys[2] = buf[0];
+	}
+    
+    return count;
+}
+
+static ssize_t razer_attr_read_key_alt_f4(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+	buf[0] = device->block_keys[2];
+	
+	return 1;
+}
+
 /**
  * Set up the device driver files
 
@@ -1206,6 +1290,11 @@ static DEVICE_ATTR(matrix_effect_custom,    0220, NULL,                         
 static DEVICE_ATTR(matrix_custom_frame,     0220, NULL,                                       razer_attr_write_matrix_custom_frame);
 
 
+static DEVICE_ATTR(key_super,               0660, razer_attr_read_key_super,                  razer_attr_write_key_super);
+static DEVICE_ATTR(key_alt_tab,             0660, razer_attr_read_key_alt_tab,                razer_attr_write_key_alt_tab);
+static DEVICE_ATTR(key_alt_f4,              0660, razer_attr_read_key_alt_f4,                 razer_attr_write_key_alt_f4);
+
+
 
 
 /**
@@ -1231,6 +1320,26 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
         // Skip this if its control (mouse) interface
         return 0;
     }
+    
+    // Block win key
+    if(asc->block_keys[0] && (usage->code == KEY_LEFTMETA || usage->code == KEY_RIGHTMETA)) {
+		return 1;
+	}
+	
+	// Store Alt state
+	if(usage->code == KEY_LEFTALT) {
+		asc->left_alt_on = value;
+	}
+	// Block Alt-Tab
+	if(asc->block_keys[1] && asc->left_alt_on && usage->code == KEY_TAB) {
+		return 1;
+	}
+	// Block Alt-F4
+	if(asc->block_keys[2] && asc->left_alt_on && usage->code == KEY_F4) {
+		return 1;
+	}
+	
+	
     
     translation = find_translation(chroma_keys, usage->code);
     
@@ -1462,6 +1571,14 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
+
+            case USB_DEVICE_ID_RAZER_ORBWEAVER:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_pulsate);         // Pulsate effect, like breathing
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
                 break;
             
             case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
@@ -1519,9 +1636,16 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 		// Set device to regular mode, not driver mode
 		// When the daemon discovers the device it will instruct it to enter driver mode
 		razer_set_device_mode(usb_dev, 0x00, 0x00);
+	} else if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD) {
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_super);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_tab);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_f4);
 	}
 	
+	
+	
 	hid_set_drvdata(hdev, dev);
+	dev_set_drvdata(&hdev->dev, dev);
 	
 	if(hid_parse(hdev)) {
 		hid_err(hdev, "parse failed\n");
@@ -1559,7 +1683,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 
     dev = hid_get_drvdata(hdev);
 
-    // Other interfaces are actual key-emitting devices
+    // Other interfaces are actual key-emitting devices    
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE)
     {
         // If the currently bound device is the control (mouse) interface
@@ -1650,6 +1774,15 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
                 break;
             
+            case USB_DEVICE_ID_RAZER_ORBWEAVER:
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+	            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_pulsate);         // Pulsate effect, like breathing
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
+                break;
+            
             case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
             	device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
 				device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
@@ -1716,6 +1849,10 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 				device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
 				break;
 		}
+	} else if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD) {
+		device_remove_file(&hdev->dev, &dev_attr_key_super);
+		device_remove_file(&hdev->dev, &dev_attr_key_alt_tab);
+		device_remove_file(&hdev->dev, &dev_attr_key_alt_f4);
 	}
 	
 	hid_hw_stop(hdev);
@@ -1727,6 +1864,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
  * Device ID mapping table
  */
 static const struct hid_device_id razer_devices[] = {
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORBWEAVER) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013) },

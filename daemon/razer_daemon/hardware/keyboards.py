@@ -4,7 +4,7 @@ Keyboards class
 import re
 
 from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
-from razer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, TartarusKeyManager as _TartarusKeyManager
+from razer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
 from razer_daemon.misc.ripple_effect import RippleManager as _RippleManager
 
 
@@ -64,13 +64,49 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
         super(RazerTartarus, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
-        self.key_manager = _TartarusKeyManager(self._device_number, self.event_files, self, testing=self._testing)
+        self.key_manager = _GamepadKeyManager(self._device_number, self.event_files, self, testing=self._testing)
 
     def _close(self):
         """
         Close the key manager
         """
         super(RazerTartarus, self)._close()
+
+        # TODO look into saving stats in /var/run maybe
+        self.key_manager.close()
+
+
+class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
+    """
+        Keyboard class
+
+        Has macro functionality and brightness based suspend
+        """
+
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Orbweaver(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0113
+    HAS_MATRIX = False
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [-1, -1]  # 6 Rows, 22 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_orbweaver',
+               'tartarus_get_profile_led_red', 'tartarus_set_profile_led_red', 'tartarus_get_profile_led_green', 'tartarus_set_profile_led_green', 'tartarus_get_profile_led_blue', 'tartarus_set_profile_led_blue',
+               'get_macros', 'delete_macro', 'add_macro', 'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier',
+
+               'bw_set_pulsate', 'bw_set_static']
+
+    def __init__(self, *args, **kwargs):
+        super(RazerOrbweaver, self).__init__(*args, **kwargs)
+        # Methods are loaded into DBus by this point
+
+        self.key_manager = _OrbweaverKeyManager(self._device_number, self.event_files, self, testing=self._testing)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerOrbweaver, self)._close()
 
         # TODO look into saving stats in /var/run maybe
         self.key_manager.close()
@@ -130,7 +166,7 @@ class RazerBlackWidow2013(_MacroKeyboard):
     USB_PID = 0x011A
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = True
-    MATRIX_DIMS = [6, 22] # 6 Rows, 22 Cols
+    MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 

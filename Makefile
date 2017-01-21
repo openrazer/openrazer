@@ -22,11 +22,6 @@ lp_all: lp_driver
 driver:
 	@echo -e "\n::\033[32m Compiling Razer kernel modules\033[0m"
 	@echo "========================================"
-	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules > /dev/null 2>&1
-
-driver_verbose:
-	@echo -e "\n::\033[32m Compiling Razer kernel modules\033[0m"
-	@echo "========================================"
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules
 
 driver_clean:

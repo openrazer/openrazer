@@ -40,7 +40,7 @@ class RazerDevice(DBusService):
         "perspective_img": None
     }
 
-    def __init__(self, device_path, device_number, config, testing=False):
+    def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None):
 
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
@@ -48,6 +48,9 @@ class RazerDevice(DBusService):
         self._observer_list = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
+        self.additional_interfaces = []
+        if additional_interfaces is not None:
+            self.additional_interfaces.extend(additional_interfaces)
 
         self.config = config
         self._testing = testing
@@ -59,8 +62,6 @@ class RazerDevice(DBusService):
         self._effect_sync = effect_sync.EffectSync(self, device_number)
 
         self._is_closed = False
-
-
 
         # Find event files in /dev/input/by-id/ by matching against regex
         self.event_files = []
@@ -393,7 +394,7 @@ class RazerDevice(DBusService):
         :param device_id: Device ID like 0000:0000:0000.0000
         :type device_id: str
 
-        :param dev_path: Device path. Normally '/sys/bus/hid/devices'
+        :param dev_path: Device path. Normally '/sys/bus/hid/devices/0000:0000:0000.0000'
         :type dev_path: str
 
         :return: True if its the correct device ID
@@ -412,6 +413,7 @@ class RazerDevice(DBusService):
 
     def __repr__(self):
         return "{0}:{1}".format(self.__class__.__name__, self.serial)
+
 
 class RazerDeviceBrightnessSuspend(RazerDevice):
     """

@@ -26,6 +26,10 @@
     #define USB_DEVICE_ID_RAZER_ANANSI 0x010F
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_ORBWEAVER
+    #define USB_DEVICE_ID_RAZER_ORBWEAVER 0x0113
+#endif
+
 #ifndef USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013
     #define USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013 0x011A
 #endif
@@ -146,6 +150,9 @@ struct razer_kbd_device {
     char name[128];
     char phys[64];
     DECLARE_BITMAP(pressed_fn, KEY_CNT);
+    
+    unsigned char block_keys[3];
+    unsigned char left_alt_on;
 };
 
 

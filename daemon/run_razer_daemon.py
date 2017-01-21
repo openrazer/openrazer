@@ -30,6 +30,7 @@ def parse_args():
 
     return parser.parse_args()
 
+
 def run():
     args = parse_args()
 
@@ -41,7 +42,6 @@ def run():
             shutil.copy(EXAMPLE_CONF, CONF_PATH)
         else:
             print('Cant find "{0}"'.format(EXAMPLE_CONF), file=sys.stderr)
-
 
     daemon_args = {
         'verbose': args.verbose,

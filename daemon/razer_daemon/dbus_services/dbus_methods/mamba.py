@@ -163,7 +163,7 @@ def set_poll_rate(self, rate):
     """
     self.logger.debug("DBus call set_poll_rate")
 
-    if rate in (1000, 500, 128):
+    if rate in (1000, 500, 125):
         driver_path = self.get_driver_path('poll_rate')
 
         with open(driver_path, 'w') as driver_file:

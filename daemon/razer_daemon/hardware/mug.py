@@ -4,10 +4,9 @@ Mug class
 import re
 
 from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
-from razer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, TartarusKeyManager as _TartarusKeyManager
+
 
 class RazerChromaMugHolder(_RazerDeviceBrightnessSuspend):
-
     """
     Class for the Kraken
     """
