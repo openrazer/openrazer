@@ -966,7 +966,9 @@ class CustomEffectManager(DBusService):
         :param msg: Message
         :type msg: ???
         """
-        msg_type, origin, args = msg
+        msg_type = msg[0]
+        # origin = msg[1]
+        # args = msg[2:]
 
         if msg_type == 'effect':
             self.stop_effect()
