@@ -3,7 +3,9 @@
 import argparse
 import os
 import shutil
+import signal
 import sys
+
 from razer_daemon.daemon import daemonize
 from subprocess import check_output
 from time import sleep
@@ -36,17 +38,21 @@ def parse_args():
     return parser.parse_args()
 
 
-def stop_daemon(quit_if_not_running=True):
+def stop_daemon():
     try:
         pid = int(check_output(["pidof", "-s", "razer-service"]))
         print("Stopping razer-service... (PID {0})".format(str(pid)))
-        os.kill(pid, 15)
-        return
-    except:
+        os.kill(pid, signal.SIGTERM)
+        sleep(3)
+
+        # Give it time to stop
+        pid = check_output(["pidof", "-s", "razer-service"])
+        if len(pid) > 0:
+            os.kill(int(pid), signal.SIGKILL)
+            sleep(3)
+
+    except Exception:
         print("No razer-service currently running.")
-        if quit_if_not_running:
-            exit(1)
-        return
 
 
 def run():
@@ -62,13 +68,11 @@ def run():
             print('Cant find "{0}"'.format(EXAMPLE_CONF), file=sys.stderr)
 
     if args.stop:
-        stop_daemon(True)
-        exit(0)
+        stop_daemon()
+        sys.exit(0)
 
     if args.respawn:
-        stop_daemon(False)
-        print("Waiting 3 seconds for daemon to stop...")
-        sleep(3)
+        stop_daemon()
 
     daemon_args = {
         'verbose': args.verbose,
