@@ -876,6 +876,10 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 				report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
 				report.transaction_id.id = 0x80;
 				break;
+			
+			case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+				report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
+				break;
 		}
         razer_send_payload(usb_dev, &report);
         
