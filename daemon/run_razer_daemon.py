@@ -5,6 +5,8 @@ import os
 import shutil
 import sys
 from razer_daemon.daemon import daemonize
+from subprocess import check_output
+from time import sleep
 
 SHARE_DIR = '/usr/share/razer-service'
 EXAMPLE_CONF = os.path.join(SHARE_DIR, 'razer.conf.example')
@@ -21,6 +23,9 @@ def parse_args():
 
     parser.add_argument('-F', '--foreground', action='store_true', help='Don\'t fork stay in the foreground')
 
+    parser.add_argument('-r', '--respawn', action='store_true', help='Stop any existing daemon first, if one is running.')
+    parser.add_argument('-s', '--stop', action='store_true', help='Gracefully stop the existing daemon.')
+
     parser.add_argument('--config', type=str, help='Location of the config file', default=CONF_PATH)
     parser.add_argument('--run-dir', type=str, help='Location of the data directory', default=BASE_PATH)
     parser.add_argument('--log-dir', type=str, help='Location of the log directory', default=LOG_PATH)
@@ -29,6 +34,19 @@ def parse_args():
     parser.add_argument('--test-dir', type=str, help='Directory containing test driver structure')
 
     return parser.parse_args()
+
+
+def stop_daemon(quit_if_not_running=True):
+    try:
+        pid = int(check_output(["pidof", "-s", "razer-service"]))
+        print("Stopping razer-service... (PID {0})".format(str(pid)))
+        os.kill(pid, 15)
+        return
+    except:
+        print("No razer-service currently running.")
+        if quit_if_not_running:
+            exit(1)
+        return
 
 
 def run():
@@ -42,6 +60,15 @@ def run():
             shutil.copy(EXAMPLE_CONF, CONF_PATH)
         else:
             print('Cant find "{0}"'.format(EXAMPLE_CONF), file=sys.stderr)
+
+    if args.stop:
+        stop_daemon(True)
+        exit(0)
+
+    if args.respawn:
+        stop_daemon(False)
+        print("Waiting 3 seconds for daemon to stop...")
+        sleep(3)
 
     daemon_args = {
         'verbose': args.verbose,
