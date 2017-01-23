@@ -14,6 +14,7 @@ Contents:
    intro.rst
    device_manager.rst
    device.rst
+   fx.rst
 
 
 

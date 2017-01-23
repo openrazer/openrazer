@@ -8,6 +8,8 @@ from openrazer.client.macro import RazerMacro as _RazerMacro
 class RazerDevice(object):
     """
     Raw razer base device
+
+    :ivar fx: FX object: :class:`razer.client.fx.RazerFX`
     """
     _FX = _RazerFX
     _MACRO_CLASS = _RazerMacro
@@ -340,6 +342,12 @@ class RazerDevice(object):
 
     @property
     def razer_urls(self) -> dict:
+        """
+        Dictionary of orientations to image URLs
+
+        :return: URL Dict
+        :rtype: dict
+        """
         if self._urls is None:
             self._urls = json.loads(str(self._dbus_interfaces['device'].getRazerUrls()))
 
