@@ -423,9 +423,10 @@ class RazerDaemon(DBusService):
                     # Basically find the other usb interfaces
                     device_match = sys_name.split('.')[0]
                     additional_interfaces = []
-                    for alt_device in device_list:
-                        if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
-                            additional_interfaces.append(alt_device.sys_path)
+                    if not test_mode:
+                        for alt_device in device_list:
+                            if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
+                                additional_interfaces.append(alt_device.sys_path)
 
                     razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
 
