@@ -24,6 +24,10 @@ ATTRS{idProduct}=="0504|0510", \
 ATTRS{idProduct}=="0f07", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razermug"
 
+# Core
+ATTRS{idProduct}=="0215", \
+    ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razercore"
+
 # Get out if no match
 ENV{ID_RAZER_CHROMA}!="1", GOTO="razer_end"
 
