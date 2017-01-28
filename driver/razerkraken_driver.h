@@ -37,6 +37,7 @@ struct razer_kraken_device {
     
     // Will be set with the correct address for setting LED mode for each device
     unsigned short led_mode_address;
+    unsigned short custom_address;
     unsigned short breathing_address[3];
     
     char serial[23];
@@ -137,6 +138,9 @@ union razer_kraken_effect_byte {
 
 #define KYLIE_SET_LED_ADDRESS 0x172D
 #define RAINIE_SET_LED_ADDRESS 0x1008
+
+#define KYLIE_CUSTOM_ADDRESS_START 0x1189
+#define RAINIE_CUSTOM_ADDRESS_START 0x1189
 
 #define KYLIE_BREATHING1_ADDRESS_START 0x1741
 #define RAINIE_BREATHING1_ADDRESS_START 0x15DE
