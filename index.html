@@ -537,6 +537,27 @@
               <div class="panel panel-default">
                 <div class="panel-heading">
                   <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#distros" href="#gentoo">
+                      <img src="img/distros/gentoo.png" width="24px" height="24px"/>&nbsp; Gentoo
+                    </a>
+                  </h4>
+                </div>
+                <div id="gentoo" class="panel-collapse collapse">
+                  <div class="panel-body">
+                    <h4><span class="fa fa-cube"></span> Gentoo ebuild</h4>
+                    <p>Packages for Gentoo are provided by <a href="https://github.com/vifino/vifino-overlay">vifino</a>'s personal overlay.
+                    <p>1. Add the overlay to your system:</p>
+                    <pre><code><span class="fa fa-dollar"></span> sudo layman -f -o https://github.com/vifino/vifino-overlay/raw/master/vifino-overlay.xml -a vifino-overlay</code></pre>
+                    <p>2. Install the drivers package - this installs all the components -- driver and daemon.</p>
+                    <pre><code><span class="fa fa-dollar"></span> emerge razer-drivers</code></pre>
+                    <p>3. Restart your computer to ensure the driver is binded.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
                     <a data-toggle="collapse" data-parent="#distros" href="#other"><img src="img/distros/linux.png" width="24px" height="24px"/>&nbsp; Other Distributions</a>
                   </h4>
                 </div>
