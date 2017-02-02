@@ -712,7 +712,7 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
 				return count;
 			}
 			
-			report = razer_chroma_misc_set_dpi_xy_byte(dpi_x, dpi_y);
+			report = razer_chroma_misc_set_dpi_xy_byte(dpi_x_byte, dpi_y_byte);
 			razer_send_payload(usb_dev, &report);
 			return count;
 			
