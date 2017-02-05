@@ -144,7 +144,29 @@ class RazerBlackWidowClassic(_MacroKeyboard):
     USB_PID = 0x011B
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = True
-    MATRIX_DIMS = [6, 22] # 6 Rows, 22 Cols
+    MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
+
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-old",
+        "top_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-01.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-02.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-04.png"
+    }
+
+
+class RazerBlackWidowClassicAlternate(_MacroKeyboard):
+    """
+    Class for the BlackWidow Ultimate 2013
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x010E
+    HAS_MATRIX = False
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 

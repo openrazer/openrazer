@@ -17,6 +17,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Device                                        | USB VID:PID | Driver | Daemon | Misc |
 | --------------------------------------------- | ----------- | ------ | ------ | ---- |
 | Razer BlackWidow Ultimate 2012                |  1532:010D  |   ✔    |   ✔    |      |
+| Razer BlackWidow Classic (Alternate)          |  1532:010E  |   ✔    |   ✔    | Mostly untested |
 | Razer Anansi                                  |  1532:010F  |   ✔    |   ✔    |      |
 | Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔    |   ✔    |      |
 | Razer BlackWidow Classic                      |  1532:011B  |   ✔    |   ✔    |      |

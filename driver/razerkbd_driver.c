@@ -273,7 +273,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL_ALT:
-            device_type = "Razer BlackWidow Classic (Alternate PID?)\n";
+            device_type = "Razer BlackWidow Classic (Alternate)\n";
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
@@ -414,6 +414,7 @@ static ssize_t razer_attr_write_mode_pulsate(struct device *dev, struct device_a
     switch(usb_dev->descriptor.idProduct)
     {
 		case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
+		case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL_ALT:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
 			report = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, 0x02);
