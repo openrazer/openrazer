@@ -938,7 +938,7 @@ struct razer_report razer_chroma_misc_set_dock_charge_type(unsigned char charge_
  * 
  * 0x01 = 1000Hz
  * 0x02 =  500Hz
- * 0x08 =  128Hz
+ * 0x08 =  125Hz
  */
 struct razer_report razer_chroma_misc_get_polling_rate(void)
 {
@@ -950,7 +950,7 @@ struct razer_report razer_chroma_misc_get_polling_rate(void)
  * 
  * 0x01 = 1000Hz
  * 0x02 =  500Hz
- * 0x08 =  128Hz
+ * 0x08 =  125Hz
  */
 struct razer_report razer_chroma_misc_set_polling_rate(unsigned short polling_rate)
 {
@@ -964,7 +964,7 @@ struct razer_report razer_chroma_misc_set_polling_rate(unsigned short polling_ra
         case  500:
             report.arguments[0] = 0x02;
             break;
-        case  128:
+        case  125:
             report.arguments[0] = 0x08;
             break;
         default: // 500Hz

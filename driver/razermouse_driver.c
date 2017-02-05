@@ -591,6 +591,8 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+        case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
             report.transaction_id.id = 0x3f;
             break;
     }
@@ -905,9 +907,14 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 				report.transaction_id.id = 0x3f;
 				break;
 
+			case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
 			case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
 				report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
 				report.transaction_id.id = 0x80;
+				break;
+			
+			case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+				report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
 				break;
 		}
         razer_send_payload(usb_dev, &report);
@@ -1789,6 +1796,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
                 break;
             
             case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_effect);
@@ -1809,6 +1817,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
                 
 
             case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
@@ -2001,6 +2010,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
                 break;
             
             case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+                device_remove_file(&hdev->dev, &dev_attr_poll_rate);
                 device_remove_file(&hdev->dev, &dev_attr_charge_level);
                 device_remove_file(&hdev->dev, &dev_attr_charge_status);
                 device_remove_file(&hdev->dev, &dev_attr_charge_effect);
@@ -2020,6 +2030,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
                 break;
 
             case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+                device_remove_file(&hdev->dev, &dev_attr_poll_rate);
                 device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
                 device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
                 device_remove_file(&hdev->dev, &dev_attr_dpi);

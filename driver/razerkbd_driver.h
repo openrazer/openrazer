@@ -86,6 +86,10 @@
     #define USB_DEVICE_ID_RAZER_ORNATA_CHROMA 0x021e
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_ORNATA
+    #define USB_DEVICE_ID_RAZER_ORNATA 0x021f
+#endif
+
 #ifndef USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016
     #define USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016 0x0220
 #endif
@@ -146,6 +150,9 @@ struct razer_kbd_device {
     char name[128];
     char phys[64];
     DECLARE_BITMAP(pressed_fn, KEY_CNT);
+    
+    unsigned char block_keys[3];
+    unsigned char left_alt_on;
 };
 
 

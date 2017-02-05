@@ -31,6 +31,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer BlackWidow X Ultimate                   |  1532:0217  |   ✔    |   ✔    |      |
 | Razer BlackWidow X Tournament Edition Chroma  |  1532:021A  |   ✔    |   ✔    |      |
 | Razer Ornata Chroma                           |  1532:021E  |   ✔    |   ✔    |      |
+| Razer Ornata                                  |  1532:021F  |   ✔    |   ✔    |      |
 | Razer Blade Stealth (Late 2016)               |  1532:0220  |   ✔    |   ✔    |      |
 
 ### Mouse
@@ -66,6 +67,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Chroma Mug Holder |  1532:0F07  |   ✔    |   ✔    |
 | Razer Tartarus Chroma   |  1532:0208  |   ✔    |   ✔    |
 | Razer Orbweaver         |  1532:0113  |   ✔    |   ✔    |
+| Razer Core              |  1532:0215  |   ✔    |   ✔    |
 
 #### Determining the Device ID
 Razer's devices use a VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:

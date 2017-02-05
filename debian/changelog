@@ -1,3 +1,15 @@
+razer (1.1.8-0ubuntu1) xenial; urgency=low
+
+  * Removed driver_verbose make target and made the driver target be verbose
+  * Added Device - Razer Ornata
+  * Replaced screensaver thread with some logic to monitor DBus signals
+  * Daemon now assignes the other interfaces of the device to the main device object
+  * Fixed typo in Ornata Chroma daemon entry
+  * Added poll rate to Mamba Chroma
+  * Driver now has capability to block SuperKey, Alt+Tab, Alt+F4 for Game Mode
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sat, 21 Jan 2017 21:56:00 +0000
+
 razer (1.1.7-0ubuntu1) xenial; urgency=low
 
   * Added Device - Razer Orbweaver
