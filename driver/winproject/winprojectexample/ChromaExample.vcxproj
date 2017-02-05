@@ -111,13 +111,6 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="linux\hid.h" />
-    <ClInclude Include="linux\init.h" />
-    <ClInclude Include="linux\kernel.h" />
-    <ClInclude Include="linux\module.h" />
-    <ClInclude Include="lusb0_usb.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
