@@ -21,6 +21,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Anansi                                  |  1532:010F  |   ✔    |   ✔    |      |
 | Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔    |   ✔    |      |
 | Razer BlackWidow Classic                      |  1532:011B  |   ✔    |   ✔    |      |
+| Razer DeathStalker Expert                     |  1532:0202  |   ✔    |   ✔    | Untested |
 | Razer BlackWidow Chroma                       |  1532:0203  |   ✔    |   ✔    |      |
 | Razer DeathStalker Chroma                     |  1532:0204  |   ✔    |   ✔    |      |
 | Razer Blade Stealth                           |  1532:0205  |   ✔    |   ✔    |      |
