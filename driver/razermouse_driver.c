@@ -914,6 +914,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 				break;
 			
 			case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+			case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
 				report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
 				break;
 		}
