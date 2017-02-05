@@ -272,6 +272,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             device_type = "Razer BlackWidow Classic\n";
             break;
 
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL_ALT:
+            device_type = "Razer BlackWidow Classic (Alternate PID?)\n";
+            break;
+
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
             device_type = "Razer BlackWidow Ultimate 2012\n";
             break;
@@ -714,6 +718,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
             break;
 		
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL_ALT:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013: // Doesn't need any parameters as can only do one type of static
 			report = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, 0x00);
@@ -1002,6 +1007,7 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
 
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL_ALT:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
 			report = razer_chroma_standard_set_led_brightness(VARSTORE, LOGO_LED, brightness);
@@ -1040,6 +1046,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
 		    break;
 		
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL_ALT:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
 			report = razer_chroma_standard_get_led_brightness(VARSTORE, LOGO_LED);
@@ -1483,6 +1490,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         switch(usb_dev->descriptor.idProduct) {
             
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
+            case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL_ALT:
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_pulsate);         // Pulsate effect, like breathing
@@ -1698,6 +1706,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         switch(usb_dev->descriptor.idProduct) {
             
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL:
+            case USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL_ALT:
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
             case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
                 device_remove_file(&hdev->dev, &dev_attr_matrix_effect_pulsate);         // Pulsate effect, like breathing
@@ -1866,6 +1875,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORBWEAVER) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL_ALT) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016) },
