@@ -292,6 +292,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
                
             case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
                 report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+                report.transaction_id.id = 0xff;
                 break;
             
             default:
