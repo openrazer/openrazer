@@ -317,6 +317,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 		rgb_report.arguments[0] = buf[0];
 		rgb_report.arguments[1] = buf[1];
 		rgb_report.arguments[2] = buf[2];
+		
         if(count == 4) {
             rgb_report.arguments[3] = buf[3];
         }
@@ -332,8 +333,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 		razer_kraken_send_control_msg(device->usb_dev, &effect_report, 0);
 		mutex_unlock(&device->lock);
 	
-    }
-    else {
+    } else {
 		printk(KERN_WARNING "razerkraken: Static mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
 	}
 
@@ -357,13 +357,14 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
 		rgb_report.arguments[0] = buf[0];
 		rgb_report.arguments[1] = buf[1];
 		rgb_report.arguments[2] = buf[2];
+		
         if(count == 4) {
             rgb_report.arguments[3] = buf[3];
         }
 		
 		// ON/Static
 		effect_byte.bits.on_off_static = 1;
-		effect_report.arguments[0] = 1;//effect_byte.value;
+		effect_report.arguments[0] = 1; //effect_byte.value;
 		
 		// Lock sending of the 2 commands
 		mutex_lock(&device->lock);
@@ -372,9 +373,8 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
 		razer_kraken_send_control_msg(device->usb_dev, &effect_report, 1);
 		mutex_unlock(&device->lock);
 	
-    }
-    else {
-		printk(KERN_WARNING "razerkraken: Static mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
+    } else {
+		printk(KERN_WARNING "razerkraken: Custom mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
 	}
 
     return count;
