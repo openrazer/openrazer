@@ -1,3 +1,5 @@
+Changes that are from the Linux driver via WIN32 and WIN64 defines
+
 (1) Update (literal array terminator):
 ```
 // C2059: syntax error: '}'
