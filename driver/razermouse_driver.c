@@ -148,7 +148,11 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             device_type = "Razer Ouroboros\n";
             break;
         
-        case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+        case USB_DEVICE_ID_RAZER_OROCHI_2013:
+            device_type = "Razer Orochi 2013\n";
+            break;
+
+		case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
             device_type = "Razer Orochi (Wired)\n";
             break;
             
@@ -156,7 +160,15 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             device_type = "Razer DeathAdder Chroma\n";
             break;
         
-        case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+        case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRED:
+            device_type = "Razer Naga Epic (Wired)\n";
+            break;
+        
+        case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRELESS:
+            device_type = "Razer Naga Epic (Wireless)\n";
+            break;
+        
+		case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
             device_type = "Razer Naga Hex V2\n";
             break;
         
@@ -625,6 +637,7 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
             report = razer_chroma_misc_set_dock_brightness(brightness);
             break;
         
+        case USB_DEVICE_ID_RAZER_OROCHI_2013:
         case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
             // Orochi sets brightness of scroll wheel apparently
             report = razer_chroma_standard_set_led_brightness(VARSTORE, SCROLL_WHEEL_LED, brightness);
@@ -664,6 +677,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
             brightness_index = 0x00;
             break;
         
+        case USB_DEVICE_ID_RAZER_OROCHI_2013:
         case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
             // Orochi sets brightness of scroll wheel apparently
             report = razer_chroma_standard_get_led_brightness(VARSTORE, SCROLL_WHEEL_LED);
@@ -1085,7 +1099,7 @@ static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct devi
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);    
-    struct razer_report report = razer_chroma_standard_set_led_state(VARSTORE, LOGO_LED, enabled);
+    struct razer_report report = razer_chroma_standard_set_led_state(VARSTORE, SCROLL_WHEEL_LED, enabled);
     report.transaction_id.id = 0x3F;
 
     razer_send_payload(usb_dev, &report);
@@ -1410,6 +1424,7 @@ static ssize_t razer_attr_write_scroll_mode_static(struct device *dev, struct de
         
         switch(usb_dev->descriptor.idProduct) {
             case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+			case USB_DEVICE_ID_RAZER_OROCHI_2013:
                 report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
                 break;
 
@@ -1748,6 +1763,18 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
                 break;
 
+            case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRED:
+            case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRELESS:
+				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);            
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_rgb);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_effect);
+                break;
+
+                break;
+
             case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
@@ -1842,6 +1869,9 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+				break;
+                
+            case USB_DEVICE_ID_RAZER_OROCHI_2013:
 				break;
                 
             case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
@@ -1955,6 +1985,16 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
                 break;
             
+            case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRED:
+            case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRELESS:
+                device_remove_file(&hdev->dev, &dev_attr_dpi);            
+                device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_rgb);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_effect);
+                break;
+
             case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
                 device_remove_file(&hdev->dev, &dev_attr_poll_rate);
                 device_remove_file(&hdev->dev, &dev_attr_dpi);
@@ -2051,6 +2091,9 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 				break;
                 
                 
+            case USB_DEVICE_ID_RAZER_OROCHI_2013:
+				break;
+                
             case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
                 device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
                 device_remove_file(&hdev->dev, &dev_attr_poll_rate);
@@ -2113,7 +2156,10 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_IMPERATOR) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OUROBOROS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_2013) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRED) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ELITE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA) },

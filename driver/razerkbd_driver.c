@@ -309,6 +309,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             device_type = "Razer Blade Stealth\n";
             break;
 
+        case USB_DEVICE_ID_RAZER_BLADE_2015:
+            device_type = "Razer Blade 14 2015\n";
+            break;
+
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
             device_type = "Razer Blade Stealth (Late 2016)\n";
             break;
@@ -331,6 +335,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
             device_type = "Razer DeathStalker Chroma\n";
+            break;
+
+		case USB_DEVICE_ID_RAZER_DEATHSTALKER_ULTIMATE:
+            device_type = "Razer DeathStalker Ultimate\n";
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
@@ -384,6 +392,8 @@ static ssize_t razer_attr_write_mode_macro_effect(struct device *dev, struct dev
 			break;
 
 	    case USB_DEVICE_ID_RAZER_ANANSI:
+        case USB_DEVICE_ID_RAZER_DEATHSTALKER_ULTIMATE:
+									   
 		    report = razer_chroma_standard_set_led_effect(NOSTORE, MACRO_LED, enabled);
 		    razer_send_payload(usb_dev, &report);
 		    
@@ -603,6 +613,7 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
 			break;
 
 	    case USB_DEVICE_ID_RAZER_ANANSI:
+        case USB_DEVICE_ID_RAZER_DEATHSTALKER_ULTIMATE:
 		    report = razer_chroma_standard_set_led_state(VARSTORE, BACKLIGHT_LED, OFF);
 		    break;
 		default:
@@ -665,6 +676,7 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
 			break;
 
 	    case USB_DEVICE_ID_RAZER_ANANSI:
+        case USB_DEVICE_ID_RAZER_DEATHSTALKER_ULTIMATE:
 		    report = razer_chroma_standard_set_led_state(VARSTORE, BACKLIGHT_LED, ON);
 		    razer_send_payload(usb_dev, &report);
 		    report = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, LED_SPECTRUM_CYCLING);
@@ -771,6 +783,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 			
 			break;
         case USB_DEVICE_ID_RAZER_ANANSI:
+        case USB_DEVICE_ID_RAZER_DEATHSTALKER_ULTIMATE:
             if(count == 3)
             {
 	            report = razer_chroma_standard_set_led_state(VARSTORE, BACKLIGHT_LED, ON);
@@ -1625,6 +1638,15 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
 				break;
+
+			case USB_DEVICE_ID_RAZER_DEATHSTALKER_ULTIMATE:
+				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
+				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_led_state);
+				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_state);
+				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);
+				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+				break;
             
             case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
   				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
@@ -1639,6 +1661,9 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
 				break;
             
+            case USB_DEVICE_ID_RAZER_BLADE_2015:
+				break;
+
 			default: // BlackWidow Chroma...
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
 				CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
@@ -1843,6 +1868,15 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 				device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);
 				break;
             
+			case USB_DEVICE_ID_RAZER_DEATHSTALKER_ULTIMATE:
+				device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
+				device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+				device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+				device_remove_file(&hdev->dev, &dev_attr_game_led_state);
+				device_remove_file(&hdev->dev, &dev_attr_macro_led_state);
+				device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);
+				break;
+            
             case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
   				device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
 				device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
@@ -1868,6 +1902,9 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 				device_remove_file(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
 				device_remove_file(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
 				device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
+				break;
+
+			case USB_DEVICE_ID_RAZER_BLADE_2015:
 				break;
 		}
 	} else if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD) {
@@ -1898,12 +1935,14 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_ULTIMATE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORNATA_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORNATA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ANANSI) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_2015) },
 // C2059: syntax error: '}'
 #if defined(WIN32) || defined(_WIN64)
     { 0 }
