@@ -1,7 +1,7 @@
 #ifndef MODULE_H_
 #define MODULE_H_
 
-#include "lusb0_usb.h"
+#include "..\..\lusb0_usb.h"
 
 struct device_attribute {
 	const char              *name;

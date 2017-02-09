@@ -3,7 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChromaExampleDLL", "winprojectexampledll\ChromaExampleDLL.vcxproj", "{720FE38F-432B-422C-AC23-00855B10313F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5D63D1FD-5530-4FA9-9B76-014C4235A690} = {5D63D1FD-5530-4FA9-9B76-014C4235A690}
+	EndProjectSection
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChromaDLL", "ChromaDLL.vcxproj", "{5D63D1FD-5530-4FA9-9B76-014C4235A690}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChromaExampleNoDLL", "winprojectexamplenodll\ChromaExampleNoDLL.vcxproj", "{72A1DC9D-32A9-423C-9638-EE544FE573BB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +28,22 @@ Global
 		{5D63D1FD-5530-4FA9-9B76-014C4235A690}.Release|x64.Build.0 = Release|x64
 		{5D63D1FD-5530-4FA9-9B76-014C4235A690}.Release|x86.ActiveCfg = Release|Win32
 		{5D63D1FD-5530-4FA9-9B76-014C4235A690}.Release|x86.Build.0 = Release|Win32
+		{720FE38F-432B-422C-AC23-00855B10313F}.Debug|x64.ActiveCfg = Debug|x64
+		{720FE38F-432B-422C-AC23-00855B10313F}.Debug|x64.Build.0 = Debug|x64
+		{720FE38F-432B-422C-AC23-00855B10313F}.Debug|x86.ActiveCfg = Debug|Win32
+		{720FE38F-432B-422C-AC23-00855B10313F}.Debug|x86.Build.0 = Debug|Win32
+		{720FE38F-432B-422C-AC23-00855B10313F}.Release|x64.ActiveCfg = Release|x64
+		{720FE38F-432B-422C-AC23-00855B10313F}.Release|x64.Build.0 = Release|x64
+		{720FE38F-432B-422C-AC23-00855B10313F}.Release|x86.ActiveCfg = Release|Win32
+		{720FE38F-432B-422C-AC23-00855B10313F}.Release|x86.Build.0 = Release|Win32
+		{72A1DC9D-32A9-423C-9638-EE544FE573BB}.Debug|x64.ActiveCfg = Debug|x64
+		{72A1DC9D-32A9-423C-9638-EE544FE573BB}.Debug|x64.Build.0 = Debug|x64
+		{72A1DC9D-32A9-423C-9638-EE544FE573BB}.Debug|x86.ActiveCfg = Debug|Win32
+		{72A1DC9D-32A9-423C-9638-EE544FE573BB}.Debug|x86.Build.0 = Debug|Win32
+		{72A1DC9D-32A9-423C-9638-EE544FE573BB}.Release|x64.ActiveCfg = Release|x64
+		{72A1DC9D-32A9-423C-9638-EE544FE573BB}.Release|x64.Build.0 = Release|x64
+		{72A1DC9D-32A9-423C-9638-EE544FE573BB}.Release|x86.ActiveCfg = Release|Win32
+		{72A1DC9D-32A9-423C-9638-EE544FE573BB}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
