@@ -479,9 +479,9 @@ int main(int argc, char **argv) {
 		return 0;
 
 	// map DLL calls
-	typedef long(*INITRAZERDRIVER)(struct hid_device** hdev);
+	typedef unsigned int(*INITRAZERDRIVER)(struct hid_device** hdev);
 	
-	INITRAZERDRIVER init_razer_kbd_driver = init_razer_kbd_driver = reinterpret_cast<INITRAZERDRIVER>(GetProcAddress(chromaLinuxModule, "init_razer_kbd_driver"));
+	INITRAZERDRIVER init_razer_kbd_driver = reinterpret_cast<INITRAZERDRIVER>(GetProcAddress(chromaLinuxModule, "init_razer_kbd_driver"));
 	struct device_attribute devkbd_attr_matrix_effect_custom = *(struct device_attribute*)reinterpret_cast<void*>(GetProcAddress(chromaLinuxModule, "devkbd_attr_matrix_effect_custom"));
 	struct device_attribute devkbd_attr_matrix_custom_frame = *(struct device_attribute*)reinterpret_cast<void*>(GetProcAddress(chromaLinuxModule, "devkbd_attr_matrix_custom_frame"));
 	struct device_attribute devkbd_attr_matrix_brightness = *(struct device_attribute*)reinterpret_cast<void*>(GetProcAddress(chromaLinuxModule, "devkbd_attr_matrix_brightness"));
@@ -755,6 +755,7 @@ int main(int argc, char **argv) {
 		for (struct device* device : deviceKeyboards) 
 			switch (device->parent->descriptor.idProduct) {
 				case USB_DEVICE_ID_RAZER_BLADE_2015:
+				case USB_DEVICE_ID_RAZER_DEATHSTALKER_ULTIMATE:
 					break;
 				default:
 					devkbd_attr_matrix_effect_reactive.store(device, NULL, testReactive[i], 4);
@@ -764,6 +765,7 @@ int main(int argc, char **argv) {
 			switch (device->parent->descriptor.idProduct) {
 				case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRED:
 				case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRELESS:
+				case USB_DEVICE_ID_RAZER_OROCHI_2013:
 					break;
 				case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
 					devmouse_attr_logo_matrix_effect_reactive.store(device, NULL, testReactive[i], 4);
