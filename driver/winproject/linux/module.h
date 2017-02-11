@@ -80,6 +80,11 @@ inline void device_remove_file(struct device *device, struct device_attribute *e
 
 #define MODULE_DEVICE_TABLE(type, name)
 
+/*typedef struct hid_device_array_tag {
+	unsigned int count;
+	struct hid_device* hdev[];
+} hid_device_array;*/
+
 #define module_hid_driver(hdr) \
 DLL_INTERNAL unsigned int init_##hdr## (struct hid_device** hdevo) {	\
 	unsigned int numHdevs = 0; \
