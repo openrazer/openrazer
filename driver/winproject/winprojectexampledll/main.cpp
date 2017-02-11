@@ -283,6 +283,7 @@ module_hid_driverh(razer_core_driver);
 #define USB_DEVICE_ID_RAZER_DEATHSTALKER_ULTIMATE 0x0114
 #define USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA 0x0204
 #define USB_DEVICE_ID_RAZER_BLADE_STEALTH 0x0205
+#define USB_DEVICE_ID_RAZER_BLADE_2015 0x011D
 #define USB_DEVICE_ID_RAZER_TARTARUS_CHROMA 0x0208
 #define USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE 0x0209
 #define USB_DEVICE_ID_RAZER_BLADE_QHD 0x020F
@@ -425,6 +426,7 @@ static void colorize(std::set<struct device*> devices, unsigned int maxRow, unsi
 			case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRED:
 			case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRELESS:
 			case USB_DEVICE_ID_RAZER_OROCHI_2013:
+			case USB_DEVICE_ID_RAZER_BLADE_2015:
 				break;
 			default:
 				for (unsigned int row = 0; row < maxRow; row++) {
@@ -602,7 +604,13 @@ int main(int argc, char **argv) {
 	printf("\n");
 
 	for (struct device* device : deviceKeyboards) 
-		staticEffect(device, RGB(0xFF,0xFF,0xFF), devkbd_attr_matrix_effect_static);
+		switch (device->parent->descriptor.idProduct) {
+			case USB_DEVICE_ID_RAZER_BLADE_2015:
+				break;
+			default:
+				staticEffect(device, RGB(0xFF,0xFF,0xFF), devkbd_attr_matrix_effect_static);
+				break;
+		}
 	for (struct device* device : deviceMice)
 		switch (device->parent->descriptor.idProduct) {
 			case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
@@ -668,7 +676,13 @@ int main(int argc, char **argv) {
 	printf("\n");
 
 	for (struct device* device : deviceKeyboards) 
-		devkbd_attr_matrix_effect_none.store(device, NULL, 0, 0);
+		switch (device->parent->descriptor.idProduct) {
+			case USB_DEVICE_ID_RAZER_BLADE_2015:
+				break;
+			default:
+				devkbd_attr_matrix_effect_none.store(device, NULL, 0, 0);
+				break;
+		}
 	for (struct device* device : deviceMice)
 		switch (device->parent->descriptor.idProduct) {
 			case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRED:
@@ -701,7 +715,13 @@ int main(int argc, char **argv) {
 	printf("\n");
 
 	for (struct device* device : deviceKeyboards) 
-		devkbd_attr_matrix_effect_spectrum.store(device, NULL, 0, 0);
+		switch (device->parent->descriptor.idProduct) {
+			case USB_DEVICE_ID_RAZER_BLADE_2015:
+				break;
+			default:
+				devkbd_attr_matrix_effect_spectrum.store(device, NULL, 0, 0);
+				break;
+		}
 	for (struct device* device : deviceMice) 
 		switch (device->parent->descriptor.idProduct) {
 			case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRED:
@@ -733,7 +753,13 @@ int main(int argc, char **argv) {
 
 	for (int i = 0; i < _countof(testReactive); i++) {
 		for (struct device* device : deviceKeyboards) 
-			devkbd_attr_matrix_effect_reactive.store(device, NULL, testReactive[i], 4);
+			switch (device->parent->descriptor.idProduct) {
+				case USB_DEVICE_ID_RAZER_BLADE_2015:
+					break;
+				default:
+					devkbd_attr_matrix_effect_reactive.store(device, NULL, testReactive[i], 4);
+					break;
+			}
 		for (struct device* device : deviceMice) 
 			switch (device->parent->descriptor.idProduct) {
 				case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRED:
@@ -763,7 +789,13 @@ int main(int argc, char **argv) {
 
 	for (int i = 0; i < _countof(testColor); i++) {
 		for (struct device* device : deviceKeyboards) 
-			staticEffect(device, testColor[i], devkbd_attr_matrix_effect_static);
+			switch (device->parent->descriptor.idProduct) {
+				case USB_DEVICE_ID_RAZER_BLADE_2015:
+					break;
+				default:
+					staticEffect(device, testColor[i], devkbd_attr_matrix_effect_static);
+					break;
+			}
 		for (struct device* device : deviceMice) 
 			switch (device->parent->descriptor.idProduct) {
 				case USB_DEVICE_ID_RAZER_NAGA_EPIC_WIRED:
