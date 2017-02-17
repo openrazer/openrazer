@@ -293,7 +293,7 @@ struct razer_report razer_chroma_standard_matrix_effect_starlight_single(unsigne
 {
     struct razer_report report = get_razer_report(0x03, 0x0A, 0x01);
     
-    speed = clamp_u8(speed, 0x01, 0x01); // For now only seen 
+    speed = clamp_u8(speed, 0x01, 0x03); // For now only seen 
     
     report.arguments[0] = 0x19; // Effect ID
     report.arguments[1] = 0x01; // Type one color
@@ -307,6 +307,47 @@ struct razer_report razer_chroma_standard_matrix_effect_starlight_single(unsigne
     report.arguments[6] = 0x00; // Red 2
     report.arguments[7] = 0x00; // Green 2
     report.arguments[8] = 0x00; // Blue 2
+    
+    return report;
+}
+
+/**
+ * Set the effect of the LED matrix to Starlight
+ * 
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * ? TODO fill this
+ */
+struct razer_report razer_chroma_standard_matrix_effect_starlight_dual(unsigned char variable_storage, unsigned char led_id, unsigned char speed, struct razer_rgb *rgb1, struct razer_rgb *rgb2)
+{
+    struct razer_report report = get_razer_report(0x03, 0x0A, 0x01);
+    
+    speed = clamp_u8(speed, 0x01, 0x03); // For now only seen 
+    
+    report.arguments[0] = 0x19; // Effect ID
+    report.arguments[1] = 0x02; // Type two color
+    report.arguments[2] = speed; // Speed
+
+    report.arguments[3] = rgb1->r; // Red 1
+    report.arguments[4] = rgb1->g; // Green 1
+    report.arguments[5] = rgb1->b; // Blue 1
+
+    // For now havent seen any chroma using this, seen the extended version
+    report.arguments[6] = rgb2->r; // Red 2
+    report.arguments[7] = rgb2->g; // Green 2
+    report.arguments[8] = rgb2->b; // Blue 2
+    
+    return report;
+}
+
+struct razer_report razer_chroma_standard_matrix_effect_starlight_random(unsigned char variable_storage, unsigned char led_id, unsigned char speed)
+{
+    struct razer_report report = get_razer_report(0x03, 0x0A, 0x01);
+    
+    speed = clamp_u8(speed, 0x01, 0x03); // For now only seen 
+    
+    report.arguments[0] = 0x19; // Effect ID
+    report.arguments[1] = 0x03; // Type random color
+    report.arguments[2] = speed; // Speed
     
     return report;
 }
