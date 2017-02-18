@@ -37,10 +37,8 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
 
 class RazerTartarus(_RazerDeviceBrightnessSuspend):
     """
-        Keyboard class
-
-        Has macro functionality and brightness based suspend
-        """
+    Class for the Tartarus
+    """
 
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Tartarus_Chroma(-if01)?-event-kbd')
 
@@ -54,7 +52,7 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
                'tartarus_set_profile_led_green', 'tartarus_get_profile_led_blue', 'tartarus_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-tartarus-chroma",
+        "store": "https://www.razerzone.com/store/razer-tartarus-chroma",
         "top_img": "http://assets.razerzone.com/eeimages/products/22356/razer-tartarus-chroma-01-02.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/22356/razer-tartarus-chroma-02.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/22356/razer-tartarus-chroma-03.png"
@@ -78,10 +76,8 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
 
 class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
     """
-        Keyboard class
-
-        Has macro functionality and brightness based suspend
-        """
+    Class for the Orbweaver
+    """
 
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Orbweaver(-if01)?-event-kbd')
 
@@ -95,6 +91,13 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
                'get_macros', 'delete_macro', 'add_macro', 'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier',
 
                'bw_set_pulsate', 'bw_set_static']
+
+    RAZER_URLS = {
+        "store": "https://www.razerzone.com/store/razer-orbweaver-2012",
+        "top_img": "https://assets.razerzone.com/eeimages/products/7305/razer-orbweaver-latest-04.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/7305/razer-orbweaver-latest-02.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/7305/razer-orbweaver-latest-03.png"
+    }
 
     def __init__(self, *args, **kwargs):
         super(RazerOrbweaver, self).__init__(*args, **kwargs)
@@ -114,7 +117,7 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
 
 class RazerBlackWidow2012(_MacroKeyboard):
     """
-    Class for the BlackWidow Ultimate 2013
+    Class for the BlackWidow Ultimate 2012
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow_Ultimate_2012(-if01)?-event-kbd')
 
@@ -127,7 +130,7 @@ class RazerBlackWidow2012(_MacroKeyboard):
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-ultimate-classic",
+        "store": "https://www.razerzone.com/store/razer-blackwidow-ultimate-classic",
         "top_img": "http://assets.razerzone.com/eeimages/products/22212/razer-blackwidow-ultimate-classic-gallery-4.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/22212/razer-blackwidow-ultimate-classic-gallery-1.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/22212/razer-blackwidow-ultimate-classic-gallery-2.png"
@@ -136,7 +139,7 @@ class RazerBlackWidow2012(_MacroKeyboard):
 
 class RazerBlackWidowClassic(_MacroKeyboard):
     """
-    Class for the BlackWidow Ultimate 2013
+    Class for the BlackWidow
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow(-if01)?-event-kbd')
 
@@ -149,7 +152,7 @@ class RazerBlackWidowClassic(_MacroKeyboard):
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-old",
+        "store": "http://www.razerzone.com/store/razer-blackwidow-old", # URL is dead
         "top_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-01.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-02.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-04.png"
@@ -171,7 +174,7 @@ class RazerBlackWidowClassicAlternate(_MacroKeyboard):
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-old",
+        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-old", # URL is dead
         "top_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-01.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-02.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-04.png"
@@ -193,7 +196,7 @@ class RazerBlackWidow2013(_MacroKeyboard):
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-ultimate-2014",
+        "store": "https://www.razerzone.com/store/razer-blackwidow-ultimate-2014",
         "top_img": "http://assets.razerzone.com/eeimages/products/17561/razer-blackwidow-ultimate-gallery-02.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/17561/razer-blackwidow-ultimate-gallery-01.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/17561/razer-blackwidow-ultimate-gallery-04.png"
@@ -219,7 +222,7 @@ class RazerBlackWidowChroma(_MacroKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-chroma",
+        "store": "https://www.razerzone.com/store/razer-blackwidow-chroma-v1",
         "top_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-01.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-02.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-04.png"
@@ -241,7 +244,7 @@ class RazerBlackWidowChroma(_MacroKeyboard):
 
 class RazerBlackWidowChromaTournamentEdition(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the BlackWidow Tournament Edition Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Tournament_Edition_Chroma(-if01)?-event-kbd')
 
@@ -257,7 +260,7 @@ class RazerBlackWidowChromaTournamentEdition(_MacroKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-x-tournament-edition-chroma",
+        "store": "https://www.razerzone.com/store/razer-blackwidow-tournament-edition-chroma",
         "top_img": "http://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-01.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-03.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-04.png"
@@ -279,7 +282,7 @@ class RazerBlackWidowChromaTournamentEdition(_MacroKeyboard):
 
 class RazerBlackWidowXChroma(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the BlackWidow X Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_X_Chroma(-if01)?-event-kbd')
 
@@ -296,7 +299,7 @@ class RazerBlackWidowXChroma(_MacroKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-x-chroma",
+        "store": "https://www.razerzone.com/store/razer-blackwidow-x-chroma",
         "top_img": "http://assets.razerzone.com/eeimages/products/24325/razer-blackwidow-x-chroma-redo-1.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/24325/razer-blackwidow-x-chroma-redo-3.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/24325/razer-blackwidow-x-chroma-redo-4.png"
@@ -318,7 +321,7 @@ class RazerBlackWidowXChroma(_MacroKeyboard):
 
 class RazerBlackWidowXChromaTournamentEdition(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the BlackWidow X Chroma Tournament Edition
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_X_Tournament_Edition_Chroma(-if01)?-event-kbd')
 
@@ -335,7 +338,7 @@ class RazerBlackWidowXChromaTournamentEdition(_MacroKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-x-tournament-edition-chroma",
+        "store": "https://www.razerzone.com/store/razer-blackwidow-x-tournament-edition-chroma",
         "top_img": "http://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-01.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-03.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-04.png"
@@ -357,7 +360,7 @@ class RazerBlackWidowXChromaTournamentEdition(_MacroKeyboard):
 
 class RazerBladeStealth(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the Blade Stealth
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade_Stealth(-if01)?-event-kbd')
 
@@ -373,7 +376,7 @@ class RazerBladeStealth(_MacroKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blade-stealth",
+        "store": "https://www.razerzone.com/store/razer-blade-stealth",
         "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2__store_gallery.png"
@@ -395,7 +398,7 @@ class RazerBladeStealth(_MacroKeyboard):
 
 class RazerBladeStealthLate2016(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the Blade Stealth Late 2016
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade_Stealth(-if01)?-event-kbd')
 
@@ -411,7 +414,7 @@ class RazerBladeStealthLate2016(_MacroKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blade-stealth",
+        "store": "https://www.razerzone.com/store/razer-blade-stealth",
         "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2__store_gallery.png"
@@ -433,7 +436,7 @@ class RazerBladeStealthLate2016(_MacroKeyboard):
 
 class RazerBladeProLate2016(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the Blade Pro Late 2016
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade_Pro(-if01)?-event-kbd')
 
@@ -448,7 +451,7 @@ class RazerBladeProLate2016(_MacroKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blade-stealth",
+        "store": "https://www.razerzone.com/store/razer-blade-pro",
         "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2__store_gallery.png"
@@ -470,7 +473,7 @@ class RazerBladeProLate2016(_MacroKeyboard):
 
 class RazerBladeQHD(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the Blade QHD
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
 
@@ -487,7 +490,7 @@ class RazerBladeQHD(_MacroKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blade-stealth",
+        "store": "https://www.razerzone.com/store/razer-blade",
         "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2__store_gallery.png"
@@ -509,7 +512,7 @@ class RazerBladeQHD(_MacroKeyboard):
 
 class RazerBlackWidow2016(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the BlackWidow Ultimate 2016
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Ultimate_2016(-if01)?-event-kbd')
 
@@ -526,7 +529,7 @@ class RazerBlackWidow2016(_MacroKeyboard):
                'set_ripple_effect']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-ultimate-2016",
+        "store": "https://www.razerzone.com/store/razer-blackwidow-ultimate-2016",
         "top_img": "http://assets.razerzone.com/eeimages/products/22916/razer-blackwidow-gallery-01.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/22916/razer-blackwidow-gallery-07.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/22916/razer-blackwidow-gallery-02.png"
@@ -548,7 +551,7 @@ class RazerBlackWidow2016(_MacroKeyboard):
 
 class RazerBlackWidowXUltimate(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the BlackWidow X Ultimate
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_X_Ultimate(-if01)?-event-kbd')
 
@@ -563,6 +566,13 @@ class RazerBlackWidowXUltimate(_MacroKeyboard):
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro', 'set_starlight_random_effect',
 
                'set_ripple_effect']
+
+    RAZER_URLS = {
+        "store": "https://www.razerzone.com/store/razer-blackwidow-x-ultimate",
+        "top_img": "https://assets.razerzone.com/eeimages/products/24363/razer-blackwidow-x-ultimate-redo-1.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/24363/razer-blackwidow-x-ultimate-redo-3.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/24363/razer-blackwidow-x-ultimate-redo-4.png"
+    }
 
     def __init__(self, *args, **kwargs):
         super(RazerBlackWidowXUltimate, self).__init__(*args, **kwargs)
@@ -580,7 +590,7 @@ class RazerBlackWidowXUltimate(_MacroKeyboard):
 
 class RazerOrnataChroma(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the Ornata Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*Ornata_Chroma(-if01)?-event-kbd')
 
@@ -598,7 +608,7 @@ class RazerOrnataChroma(_MacroKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gaming-keyboards-keypads/razer-ornata-chroma",
+        "store": "https://www.razerzone.com/store/razer-ornata-chroma",
         "top_img": "http://assets.razerzone.com/eeimages/products/25713/razer-ornata-chroma-gallery-05.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/25713/razer-ornata-chroma-gallery-07.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/25713/razer-ornata-chroma-gallery-08.png"
@@ -620,7 +630,7 @@ class RazerOrnataChroma(_MacroKeyboard):
 
 class RazerOrnata(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the Ornata
     """
     EVENT_FILE_REGEX = re.compile(r'.*Ornata(-if01)?-event-kbd')
 
@@ -637,10 +647,10 @@ class RazerOrnata(_MacroKeyboard):
                'set_starlight_single_effect', 'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
+        "store": "https://www.razerzone.com/store/razer-ornata",
+        "top_img": "https://assets.razerzone.com/eeimages/products/25675/razer_ornata_001.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/25675/razer_ornata_003.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/25675/razer_ornata_004.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -658,7 +668,6 @@ class RazerOrnata(_MacroKeyboard):
 
 
 class RazerAnansi(_MacroKeyboard):
-
     """
     Class for the Anansi
     """
@@ -675,10 +684,10 @@ class RazerAnansi(_MacroKeyboard):
                'set_spectrum_effect', 'has_matrix', 'get_matrix_dims', 'set_none_effect']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-anansi",
-        "top_img": "https://assets.razerzone.com/eeimages/products/58/razer-anansi-gallery-5__store_gallery.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/58/razer-anansi-gallery-4__store_gallery.png",
-        "perspective_img": "https://assets.razerzone.com/eeimages/products/58/razer-anansi-gallery-1__store_gallery.png"
+        "store": "https://www.razerzone.com/store/razer-anansi",
+        "top_img": "https://assets.razerzone.com/eeimages/products/58/razer-anansi-gallery-5.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/58/razer-anansi-gallery-3.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/58/razer-anansi-gallery-2.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -690,7 +699,7 @@ class RazerAnansi(_MacroKeyboard):
 
 class RazerDeathStalkerChroma(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the DeathStalker Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*DeathStalker_Chroma(-if01)?-event-kbd')
 
@@ -703,6 +712,13 @@ class RazerDeathStalkerChroma(_MacroKeyboard):
                'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro']
+
+    RAZER_URLS = {
+        "store": "https://www.razerzone.com/gb-en/store/razer-deathstalker-chroma",
+        "top_img": "https://assets.razerzone.com/eeimages/products/22563/rzr_deathstalker_chroma_05.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/22563/rzr_deathstalker_chroma_03.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/22563/rzr_deathstalker_chroma_02.png"
+    }
 
     def __init__(self, *args, **kwargs):
         super(RazerDeathStalkerChroma, self).__init__(*args, **kwargs)
