@@ -2138,6 +2138,14 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
     dev_info(&intf->dev, "Razer Device disconnected\n");
 }
 
+static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
+{
+	if(size >= 4) {
+		printk(KERN_WARNING "razermouse_test: %02x%02x%02x%02x", data[0], data[1], data[2], data[3]);
+	}
+	return 0;
+}
+
 
 /**
  * Device ID mapping table
@@ -2169,6 +2177,7 @@ static struct hid_driver razer_mouse_driver = {
     .id_table  = razer_devices,
     .probe     = razer_mouse_probe,
     .remove    = razer_mouse_disconnect,
+    .raw_event     = razer_raw_event,
 };
 
 module_hid_driver(razer_mouse_driver);
