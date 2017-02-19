@@ -14,7 +14,7 @@ def get_macros(self):
     """
     self.logger.debug("DBus call get_macros")
 
-    return self.key_manager.dbus_get_macros()
+    return self.macro_service.dbus_get_macros()
 
 
 @endpoint('razer.device.macro', 'deleteMacro', in_sig='s')
@@ -27,7 +27,7 @@ def delete_macro(self, macro_key):
     """
     self.logger.debug("DBus call delete_macro")
 
-    self.key_manager.dbus_delete_macro(macro_key)
+    self.macro_service.dbus_delete_macro(macro_key)
 
 
 @endpoint('razer.device.macro', 'addMacro', in_sig='ss')
@@ -44,4 +44,4 @@ def add_macro(self, macro_bind_key, macro_json):
     """
     self.logger.debug("DBus call add_macro")
 
-    self.key_manager.dbus_add_macro(macro_bind_key, macro_json)
+    self.macro_service.dbus_add_macro(macro_bind_key, macro_json)

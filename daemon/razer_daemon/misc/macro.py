@@ -40,6 +40,7 @@ class MacroObject(object):
         del values_dict['type']
         return cls(**values_dict)
 
+
 class MacroKey(MacroObject):
     """
     Is an object of a key event used in macros
@@ -100,6 +101,7 @@ class MacroURL(MacroObject):
         proc = subprocess.Popen(['xdg-open', self.url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         proc.communicate()
 
+
 class MacroScript(MacroObject):
     """
     Is an object of a key event used in macros
@@ -130,6 +132,7 @@ class MacroScript(MacroObject):
         """
         proc = subprocess.Popen(self.script + self.args, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         proc.communicate()
+
 
 class MacroRunner(threading.Thread):
     """
@@ -195,6 +198,7 @@ class MacroRunner(threading.Thread):
             proc.communicate(input=xte.encode('ascii'))
 
         self._logger.debug("Finished running macro %s", self._macro_bind)
+
 
 def macro_dict_to_obj(macro_dict):
     """

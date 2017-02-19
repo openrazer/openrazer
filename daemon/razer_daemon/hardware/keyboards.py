@@ -4,7 +4,7 @@ Keyboards class
 import re
 
 from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
-from razer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
+from razer_daemon.misc.key_event_management import GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager, KeyboardMacroV2 as _KeyboardMacroV2
 from razer_daemon.misc.ripple_effect import RippleManager as _RippleManager
 
 
@@ -19,7 +19,8 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         super(_MacroKeyboard, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
-        self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
+        self.macro_service = _KeyboardMacroV2(self._device_number, self.event_files, self.config, self)
+        self.macro_service.start()
 
         self.logger.info('Putting device into driver mode. Daemon will handle special functionality')
         self.set_device_mode(0x03, 0x00)  # Driver mode
@@ -29,10 +30,12 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         Close the key manager
         """
         super(_MacroKeyboard, self)._close()
+
         self.set_device_mode(0x00, 0x00)  # Device mode
 
         # TODO look into saving stats in /var/run maybe
-        self.key_manager.close()
+        self.macro_stuff.terminate()
+        #self.key_manager.close()
 
 
 class RazerTartarus(_RazerDeviceBrightnessSuspend):

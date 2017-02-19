@@ -96,7 +96,9 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
 
 
     # Change working directory
-    if run_dir is not None and os.path.exists(run_dir) and os.path.isdir(run_dir):
+    if run_dir is not None:
+        if not os.path.exists(run_dir):
+            os.makedirs(run_dir)
         os.chdir(run_dir)
     else:
         run_dir = tempfile.mkdtemp(prefix='tmp_', suffix='_razer_daemon')
@@ -167,6 +169,7 @@ class RazerDaemon(DBusService):
         self._config_file = config_file
         self._config = configparser.ConfigParser()
         self.read_config(config_file)
+        self._config['General']['DataDir'] = self._data_dir
 
         # Setup DBus to use gobject main loop
         dbus.mainloop.glib.threads_init()
