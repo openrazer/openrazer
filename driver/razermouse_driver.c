@@ -116,6 +116,14 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     switch (usb_dev->descriptor.idProduct)
     {
+		case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+            device_type = "Razer Mamba 2012 (Wired)\n";
+            break;
+        
+        case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+            device_type = "Razer Mamba 2012 (Wireless)\n";
+            break;
+		
         case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
             device_type = "Razer Mamba (Wired)\n";
             break;
@@ -1796,6 +1804,20 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
                 break;
             
+            case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+            case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_rgb);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_effect);
+                break;
+            
             case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
@@ -2010,6 +2032,20 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
                 break;
             
+            case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+                device_remove_file(&hdev->dev, &dev_attr_charge_level);
+                device_remove_file(&hdev->dev, &dev_attr_charge_status);
+            case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+                device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+                device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
+                device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
+                device_remove_file(&hdev->dev, &dev_attr_dpi);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_rgb);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_effect);
+                break;
+            
             case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
                 device_remove_file(&hdev->dev, &dev_attr_poll_rate);
                 device_remove_file(&hdev->dev, &dev_attr_charge_level);
@@ -2144,6 +2180,8 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
  */
 static const struct hid_device_id razer_devices[] = {
 	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX) },
+	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED) },
+	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) },
