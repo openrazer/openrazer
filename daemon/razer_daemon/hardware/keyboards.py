@@ -239,6 +239,46 @@ class RazerBlackWidowChroma(_MacroKeyboard):
         self.ripple_manager.close()
 
 
+class RazerBlackWidowChromaV2(_MacroKeyboard):
+    """
+    Class for the BlackWidow Chroma
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Chroma_V2(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0221
+    HAS_MATRIX = True
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
+
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-chroma",
+        "top_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-01.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-02.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-04.png"
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerBlackWidowChromaV2, self).__init__(*args, **kwargs)
+
+        self.ripple_manager = _RippleManager(self, self._device_number)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerBlackWidowChromaV2, self)._close()
+
+        self.ripple_manager.close()
+
+
+
 class RazerBlackWidowChromaTournamentEdition(_MacroKeyboard):
     """
     Class for the BlackWidow Chroma
