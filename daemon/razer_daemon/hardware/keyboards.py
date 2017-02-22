@@ -4,7 +4,8 @@ Keyboards class
 import re
 
 from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
-from razer_daemon.misc.key_event_management import GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager, KeyboardMacroV2 as _KeyboardMacroV2
+#from razer_daemon.misc.key_event_management import GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager, KeyboardMacroV2 as _KeyboardMacroV2
+from razer_daemon.misc.macro import KeyboardMacroV2 as _KeyboardMacroV2
 from razer_daemon.misc.ripple_effect import RippleManager as _RippleManager
 
 
@@ -34,7 +35,7 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         self.set_device_mode(0x00, 0x00)  # Device mode
 
         # TODO look into saving stats in /var/run maybe
-        self.macro_stuff.terminate()
+        self.macro_service.terminate()
         #self.key_manager.close()
 
 
@@ -103,7 +104,7 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
         super(RazerOrbweaver, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
-        self.key_manager = _OrbweaverKeyManager(self._device_number, self.event_files, self, testing=self._testing)
+        #self.key_manager = _OrbweaverKeyManager(self._device_number, self.event_files, self, testing=self._testing)
 
     def _close(self):
         """
@@ -112,7 +113,7 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
         super(RazerOrbweaver, self)._close()
 
         # TODO look into saving stats in /var/run maybe
-        self.key_manager.close()
+        #self.key_manager.close()
 
 
 class RazerBlackWidow2012(_MacroKeyboard):

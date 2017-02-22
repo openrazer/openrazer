@@ -12,6 +12,7 @@ import os
 import json
 import selectors
 import evdev
+import time
 
 # pylint: disable=import-error
 from razer_daemon.keyboard import XTE_MAPPING
@@ -126,6 +127,8 @@ class KeyboardMacroV2(multiprocessing.Process):
         self._macro_sets = []
         self._macros = {}
 
+        self.uinput = evdev.UInput()
+
         self._load_macros()
 
     @classmethod
@@ -173,7 +176,7 @@ class KeyboardMacroV2(multiprocessing.Process):
             for macro_set in self._macro_sets:
                 tmp = {}
                 for macro_key, macro_obj_list in macro_set.items():
-                    tmp[macro_key] = [macro_obj.to_dict() for macro_obj in macro_obj_list]
+                    tmp[macro_key] = macro_obj_to_dict(macro_obj_list)
                 macro_list.append(tmp)
 
             self._macro_sets = json.dump(macro_list, open_fp)
@@ -190,7 +193,7 @@ class KeyboardMacroV2(multiprocessing.Process):
                     for macro_set in macro_list:
                         current_set = {}
                         for macro_bind, macro_list in macro_set.items():
-                            current_set[int(macro_bind)] = [macro_dict_to_obj(macro_dict) for macro_dict in macro_list]
+                            current_set[int(macro_bind)] = macro_dict_to_obj(macro_list)
                             loaded_macros += 1
                         self._macro_sets.append(current_set)
 
@@ -379,15 +382,8 @@ class KeyboardMacroV2(multiprocessing.Process):
             self._parent.setBrightness(current_brightness)
 
     def _add_otf_macro(self):
-        new_macro = []
-
-        start_time = self._current_macro_combo[0][0]
-        for event_time, key_code, state in self._current_macro_combo:
-            delay = event_time - start_time
-            start_time = event_time
-            new_macro.append(MacroKey(self._convert_keycode_to_key(key_code), delay, self._state_to_string(state)))
-
-        self._macros[self._current_macro_bind] = new_macro
+        # Macros can be a sequence of macros
+        self._macros[self._current_macro_bind] = [MacroKeyString(self._current_macro_combo)]
         self._persist_macros()
 
     def play_macro(self, macro_key):
@@ -399,10 +395,13 @@ class KeyboardMacroV2(multiprocessing.Process):
         :type macro_key: int
         """
         self._logger.debug("Running macro - " + str(self._macros[macro_key]))
-        macro_obj = MacroRunner(self._device_number, macro_key, self._macros[macro_key])
-        macro_obj.daemon = True
-        macro_obj.start()
-        #macro_obj.join()
+        #macro_obj = MacroRunner(self._device_number, macro_key, self._macros[macro_key])
+        #macro_obj.daemon = True
+        #macro_obj.start()
+        for macro_obj in self._macros[macro_key]:
+            macro_obj.exec(uinput=self.uinput)
+
+        # macro_obj.join()
 
     def run(self):
         self._logger.debug('Started Macro thread')
@@ -462,16 +461,6 @@ class KeyboardMacroV2(multiprocessing.Process):
         self._macros[int(macro_key)] = macro_list
 
 
-
-
-
-
-
-
-
-# This determins if the macro keys are executed with their natural spacing
-XTE_SLEEP = False
-
 class MacroObject(object):
     """
     Macro base object
@@ -483,6 +472,9 @@ class MacroObject(object):
         :return: Dictionary
         :rtype: dict
         """
+        raise NotImplementedError()
+
+    def exec(self, **kwargs):
         raise NotImplementedError()
 
     @classmethod
@@ -499,38 +491,44 @@ class MacroObject(object):
         return cls(**values_dict)
 
 
-class MacroKey(MacroObject):
-    """
-    Is an object of a key event used in macros
-    """
-    def __init__(self, key_id, pre_pause, state):
-        self.key_id = key_id
-        self.pre_pause = pre_pause
-        self.state = state
+class MacroKeyString(MacroObject):
+    def __init__(self, key_list):
+        """
+        Runs a list of keys
+
+        :param key_list: Is a list of lists. Each element should be (event_time, key_code, up/down)
+        :type key_list: list or tuple
+        """
+        self.macro_string = []
+
+        # Basically just normalise the time so event 1 is 0, event 2 is the time since event 1, etc...
+        start_time = key_list[0][0]
+        for key_code, event_time, state in key_list:
+            delay = event_time - start_time
+            start_time = event_time
+
+            self.macro_string.append((key_code, delay, state))
 
     def __repr__(self):
-        return '{0} {1}'.format(self.key_id, self.state)
-
-    def __str__(self):
-        return 'MacroKey|{0}|{1}|{2}'.format(self.key_id, self.pre_pause, self.state)
+        return '<MacroString ({0})>'.format(len(self.macro_string))
 
     def to_dict(self):
         return {
-            'type': 'MacroKey',
-            'key_id': self.key_id,
-            'pre_pause': self.pre_pause,
-            'state': self.state
+            'type': 'MacroKeyString',
+            'key_list': self.macro_string
         }
 
-    @property
-    def xte_key(self):
+    def exec(self, uinput=None, **kwargs):
         """
-        Convert key to XTE compatible name
+        Loop over keys, send to UInput
+        """
+        if uinput is None:
+            uinput = evdev.UInput()
 
-        :return: XTE Name
-        :rtype: str
-        """
-        return XTE_MAPPING.get(self.key_id, self.key_id)
+        for keycode, event_time, state in self.macro_string:
+            uinput.write(evdev.ecodes.EV_KEY, keycode, state)
+        uinput.syn()
+
 
 # If it only opens a new tab in chroma - https://askubuntu.com/questions/540939/xdg-open-only-opens-a-new-tab-in-a-new-chromium-window-despite-passing-it-a-url
 class MacroURL(MacroObject):
@@ -541,10 +539,7 @@ class MacroURL(MacroObject):
         self.url = url
 
     def __repr__(self):
-        return '{0}'.format(self.url)
-
-    def __str__(self):
-        return 'MacroURL|{0}'.format(self.url)
+        return '<MacroURL {0}>'.format(self.url)
 
     def to_dict(self):
         return {
@@ -552,7 +547,7 @@ class MacroURL(MacroObject):
             'url': self.url,
         }
 
-    def execute(self):
+    def exec(self):
         """
         Open URL in the browser
         """
@@ -572,10 +567,7 @@ class MacroScript(MacroObject):
             self.args = ''
 
     def __repr__(self):
-        return '{0}'.format(self.script)
-
-    def __str__(self):
-        return 'MacroScript|{0}'.format(self.script)
+        return '<MacroScript {0}>'.format(self.script)
 
     def to_dict(self):
         return {
@@ -584,7 +576,7 @@ class MacroScript(MacroObject):
             'args': self.args
         }
 
-    def execute(self):
+    def exec(self):
         """
         Run script
         """
@@ -592,78 +584,12 @@ class MacroScript(MacroObject):
         proc.communicate()
 
 
-class MacroRunner(threading.Thread):
-    """
-    Thread to run macros
-    """
-    def __init__(self, device_id, macro_bind, macro_data):
-        super(MacroRunner, self).__init__()
-
-        self._logger = logging.getLogger('razer.device{0}.macro{1}'.format(device_id, macro_bind))
-        self._macro_data = macro_data
-        self._macro_bind = macro_bind
-
-    @staticmethod
-    def xte_line(key_event):
-        """
-        Generate a line to be fet into XTE
-
-        :param key_event: Key event object
-        :type key_event: MacroKey
-
-        :return: String XTE script
-        :rtype: str
-        """
-        # Save key here to prevent 5odd dictionary lookups
-        key = key_event.xte_key
-
-        cmd = ''
-
-        if key is not None:
-            if XTE_SLEEP:
-                cmd += 'usleep {0}\n'.format(key_event.pre_pause)
-
-            if key_event.state == 'UP':
-                cmd += 'keyup {0}\n'.format(key)
-            else:
-                cmd += 'keydown {0}\n'.format(key)
-
-        return cmd
-
-    def run(self):
-        """
-        Main thread function
-        """
-
-        # TODO move the xte-munging to the init
-        xte = ''
-
-        for event in self._macro_data:
-            if isinstance(event, MacroKey):
-                xte += self.xte_line(event)
-            else:
-                if xte != '':
-                    proc = subprocess.Popen(['xte'], stdin=subprocess.PIPE)
-                    proc.communicate(input=xte.encode('ascii'))
-                    xte = ''
-
-                # Now run everything else (this just allows for less calls to xte
-                if not isinstance(event, MacroKey):
-                    event.execute()
-
-        if xte != '':
-            proc = subprocess.Popen(['xte'], stdin=subprocess.PIPE)
-            proc.communicate(input=xte.encode('ascii'))
-
-        self._logger.debug("Finished running macro %s", self._macro_bind)
-
-
 def macro_dict_to_obj(macro_dict):
     """
     Converts a macro string to its relevant object
 
     :param macro_dict: Macro string
-    :type macro_dict: dict
+    :type macro_dict: dict or list or tuple
 
     :return: Macro Object
     :rtype: object
@@ -672,13 +598,22 @@ def macro_dict_to_obj(macro_dict):
     """
 
     # pylint: disable=redefined-variable-type
-    if macro_dict['type'] == 'MacroKey':
-        result = MacroKey.from_dict(macro_dict)
+    if isinstance(macro_dict, (tuple, list)):
+        return [macro_dict_to_obj(item) for item in macro_dict]
+    if macro_dict['type'] == 'MacroKeyString':
+        return MacroKeyString.from_dict(macro_dict)
     elif macro_dict['type'] == 'MacroURL':
-        result = MacroURL.from_dict(macro_dict)
+        return MacroURL.from_dict(macro_dict)
     elif macro_dict['type'] == 'MacroScript':
-        result = MacroScript.from_dict(macro_dict)
+        return MacroScript.from_dict(macro_dict)
     else:
-        raise ValueError("unknown type")
+        raise ValueError("unknown type {0}".format(type(macro_dict)))
 
-    return result
+
+def macro_obj_to_dict(macro_list):
+    if isinstance(macro_list, (tuple, list)):
+        return [macro_obj_to_dict(item) for item in macro_list]
+    elif isinstance(macro_list, MacroObject):
+        return macro_list.to_dict()
+    else:
+        raise ValueError("Unknown type {0}".format(type(macro_list)))
