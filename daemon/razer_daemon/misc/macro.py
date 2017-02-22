@@ -316,7 +316,7 @@ class KeyboardMacroV2(multiprocessing.Process):
 
             else:
                 # Anything else, record it
-                self._current_macro_combo.append((timestamp, key_code, self.KEY_DOWN))
+                self._current_macro_combo.append((key_code, timestamp, self.KEY_DOWN))
 
         else:
             # If key is a macro, play it
@@ -353,7 +353,7 @@ class KeyboardMacroV2(multiprocessing.Process):
         if self._recording_macro and key_code not in (self._current_macro_bind, self.MACROMODE_KEY):
             # Am recording macro, key is not macrokey or the key the macro is bound to
             # Store said key event
-            self._current_macro_combo.append((timestamp, key_code, self.KEY_UP))
+            self._current_macro_combo.append((key_code, timestamp, self.KEY_UP))
 
     def _brightness_down(self):
         self._logger.debug("Triggering brightness down")
