@@ -1,3 +1,5 @@
+KERNEL==”uinput”, GROUP=”plugdev”, MODE:=”0660″
+
 ACTION!="add", GOTO="razer_end"
 SUBSYSTEMS=="usb|input|hid", ATTRS{idVendor}=="1532", GOTO="razer_vendor"
 GOTO="razer_end"
