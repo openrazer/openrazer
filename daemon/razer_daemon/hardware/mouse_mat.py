@@ -6,7 +6,7 @@ from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __
 
 class RazerFireFly(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Firefly 2013
+    Class for the Razer Firefly (2013)
     """
     USB_VID = 0x1532
     USB_PID = 0x0C00

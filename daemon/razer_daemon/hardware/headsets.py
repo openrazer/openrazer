@@ -1,5 +1,5 @@
 """
-Keyboards class
+Headsets class
 """
 import re
 
@@ -8,9 +8,8 @@ from razer_daemon.dbus_services.dbus_methods import kraken as _dbus_kraken, chro
 
 
 class RazerKraken(__RazerDevice):
-
     """
-    Class for the Kraken
+    Class for the Razer Kraken 7.1 Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Kraken_7\.1_Chroma-event-if03')
 
@@ -93,9 +92,8 @@ class RazerKraken(__RazerDevice):
 
 
 class RazerKrakenV2(__RazerDevice):
-
     """
-    Class for the Kraken V2
+    Class for the Razer Kraken 7.1 V2
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Kraken_7\.1_V2_0+-event-if03')
 

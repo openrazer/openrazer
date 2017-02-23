@@ -1,5 +1,5 @@
 """
-Mousemat class
+Core class
 """
 from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend
 
@@ -15,9 +15,9 @@ class RazerCore(__RazerDeviceBrightnessSuspend):
 
     RAZER_URLS = {
         "store": None,
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
+        "top_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-6.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-2.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-3.png"
     }
 
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
