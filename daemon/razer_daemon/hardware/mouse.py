@@ -72,7 +72,7 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
 
 class RazerMambaChromaTE(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Mamba Chroma (Wired)
+    Class for the Razer Mamba Tournament Edition
     """
     USB_VID = 0x1532
     USB_PID = 0x0046
@@ -87,7 +87,7 @@ class RazerMambaChromaTE(__RazerDeviceBrightnessSuspend):
         "store": "http://www.razerzone.com/gb-en/store/razer-mamba-tournament-edition",
         "top_img": "http://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-1.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-2.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-5__store_gallery.png"
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-5.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -98,7 +98,6 @@ class RazerAbyssus(__RazerDevice):
     """
     Class for the Razer Abyssus
     """
-
     USB_VID = 0x1532
     USB_PID = 0x0042
     HAS_MATRIX = False
@@ -109,7 +108,7 @@ class RazerAbyssus(__RazerDevice):
         "store": "http://www.razerzone.com/gb-en/store/razer-abyssus",
         "top_img": "http://assets.razerzone.com/eeimages/products/17026/abyssus2014_gallery_1.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/17026/abyssus2014_gallery_4.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/17079/abyssus2014_gallery_3_2__store_gallery.png"
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/17079/abyssus2014_gallery_3_2.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -124,9 +123,8 @@ class RazerAbyssus(__RazerDevice):
 
 class RazerImperiator(__RazerDevice):
     """
-    Class for the Razer Imperiator 2012
+    Class for the Razer Imperator 2012
     """
-
     USB_VID = 0x1532
     USB_PID = 0x002F
     HAS_MATRIX = False
@@ -135,7 +133,7 @@ class RazerImperiator(__RazerDevice):
                'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gaming-mice/razer-imperator/",
+        "store": "http://www.razerzone.com/gaming-mice/razer-imperator",
         "top_img": "http://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-5.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-2.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-4.png"
@@ -153,9 +151,8 @@ class RazerImperiator(__RazerDevice):
 
 class RazerOuroboros(__RazerDevice):
     """
-    Class for the Razer Imperiator 2012
+    Class for the Razer Ouroboros
     """
-
     USB_VID = 0x1532
     USB_PID = 0x0032
     HAS_MATRIX = False
@@ -165,9 +162,9 @@ class RazerOuroboros(__RazerDevice):
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold']
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": None,
-        "side_img": None,
+        "store": "https://www.razerzone.com/store/razer-ouroboros",
+        "top_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-1.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-2.png",
         "perspective_img": None
     }
 
@@ -203,7 +200,7 @@ class RazerOuroboros(__RazerDevice):
 
 class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Mamba Chroma (Wireless)
+    Class for the Razer Orochi (Wired)
     """
     USB_VID = 0x1532
     USB_PID = 0x0048
@@ -223,7 +220,7 @@ class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
 
 class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Deathadder Chroma
+    Class for the Razer DeathAdder Chroma
     """
     USB_VID = 0x1532
     USB_PID = 0x0043
@@ -282,7 +279,7 @@ class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
 
 class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Deathadder Chroma
+    Class for the Razer Naga Hex V2
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Naga_Hex_V2-if0(1|2)-event-kbd')
 
@@ -359,7 +356,7 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
 
 class RazerNagaHex(__RazerDevice):
     """
-    Class for the Razer Deathadder Chroma
+    Class for the Razer Naga Hex
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Naga_Hex-if01-event-kbd')
 
@@ -373,9 +370,9 @@ class RazerNagaHex(__RazerDevice):
 
     RAZER_URLS = {
         "store": None,
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
+        "top_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-6.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-5.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-1.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -419,7 +416,7 @@ class RazerNagaHex(__RazerDevice):
 
 class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Deathadder Chroma
+    Class for the Razer DeathAdder Elite
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_DeathAdder_Elite-if0(1|2)-event-kbd')
 
@@ -478,7 +475,7 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
 
 class RazerDiamondbackChroma(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Mamba Chroma (Wired)
+    Class for the Razer Diamondback
     """
     USB_VID = 0x1532
     USB_PID = 0x004C
