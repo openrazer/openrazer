@@ -8,7 +8,7 @@ from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _R
 
 class RazerChromaMugHolder(_RazerDeviceBrightnessSuspend):
     """
-    Class for the Kraken
+    Class for the Razer Chroma Mug Holder
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Chroma_Mug_Holder-if0(1|2)-event-kbd')
 

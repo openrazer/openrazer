@@ -37,9 +37,8 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
 
 class RazerTartarus(_RazerDeviceBrightnessSuspend):
     """
-    Class for the Tartarus
+    Class for the Razer Tartarus Chroma
     """
-
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Tartarus_Chroma(-if01)?-event-kbd')
 
     USB_VID = 0x1532
@@ -76,9 +75,8 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
 
 class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
     """
-    Class for the Orbweaver
+    Class for the Razer Orbweaver
     """
-
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Orbweaver(-if01)?-event-kbd')
 
     USB_VID = 0x1532
@@ -117,7 +115,7 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
 
 class RazerBlackWidow2012(_MacroKeyboard):
     """
-    Class for the BlackWidow Ultimate 2012
+    Class for the Razer BlackWidow Ultimate 2012
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow_Ultimate_2012(-if01)?-event-kbd')
 
@@ -139,7 +137,7 @@ class RazerBlackWidow2012(_MacroKeyboard):
 
 class RazerBlackWidowClassic(_MacroKeyboard):
     """
-    Class for the BlackWidow
+    Class for the Razer BlackWidow (Classic)
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow(-if01)?-event-kbd')
 
@@ -161,7 +159,7 @@ class RazerBlackWidowClassic(_MacroKeyboard):
 
 class RazerBlackWidowClassicAlternate(_MacroKeyboard):
     """
-    Class for the BlackWidow Ultimate 2013
+    Class for the Razer BlackWidow (Classic)
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow(-if01)?-event-kbd')
 
@@ -183,7 +181,7 @@ class RazerBlackWidowClassicAlternate(_MacroKeyboard):
 
 class RazerBlackWidow2013(_MacroKeyboard):
     """
-    Class for the BlackWidow Ultimate 2013
+    Class for the Razer BlackWidow Ultimate 2013
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow_Ultimate_2013(-if01)?-event-kbd')
 
@@ -205,7 +203,7 @@ class RazerBlackWidow2013(_MacroKeyboard):
 
 class RazerBlackWidowChroma(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the Razer BlackWidow Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Chroma(-if01)?-event-kbd')
 
@@ -244,7 +242,7 @@ class RazerBlackWidowChroma(_MacroKeyboard):
 
 class RazerBlackWidowChromaV2(_MacroKeyboard):
     """
-    Class for the BlackWidow Chroma
+    Class for the BlackWidow Chroma V2
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Chroma_V2(-if01)?-event-kbd')
 
@@ -261,10 +259,10 @@ class RazerBlackWidowChromaV2(_MacroKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-chroma",
-        "top_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-01.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-02.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-04.png"
+        "store": "https://www.razerzone.com/store/razer-blackwidow-chroma-v2",
+        "top_img": "https://assets.razerzone.com/eeimages/products/26600/razer-blackwidow-chroma-v2-gallery-01-wristrest.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/26600/razer-blackwidow-chroma-v2-gallery-02-wristrest-green.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/26600/razer-blackwidow-chroma-v2-gallery-03-wristrest.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -284,7 +282,7 @@ class RazerBlackWidowChromaV2(_MacroKeyboard):
 
 class RazerBlackWidowChromaTournamentEdition(_MacroKeyboard):
     """
-    Class for the BlackWidow Tournament Edition Chroma
+    Class for the Razer BlackWidow Tournament Edition Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Tournament_Edition_Chroma(-if01)?-event-kbd')
 
@@ -322,7 +320,7 @@ class RazerBlackWidowChromaTournamentEdition(_MacroKeyboard):
 
 class RazerBlackWidowXChroma(_MacroKeyboard):
     """
-    Class for the BlackWidow X Chroma
+    Class for the Razer BlackWidow X Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_X_Chroma(-if01)?-event-kbd')
 
@@ -361,7 +359,7 @@ class RazerBlackWidowXChroma(_MacroKeyboard):
 
 class RazerBlackWidowXChromaTournamentEdition(_MacroKeyboard):
     """
-    Class for the BlackWidow X Chroma Tournament Edition
+    Class for the Razer BlackWidow X Tournament Edition Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_X_Tournament_Edition_Chroma(-if01)?-event-kbd')
 
@@ -400,7 +398,7 @@ class RazerBlackWidowXChromaTournamentEdition(_MacroKeyboard):
 
 class RazerBladeStealth(_MacroKeyboard):
     """
-    Class for the Blade Stealth
+    Class for the Razer Blade Stealth
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade_Stealth(-if01)?-event-kbd')
 
@@ -419,7 +417,7 @@ class RazerBladeStealth(_MacroKeyboard):
         "store": "https://www.razerzone.com/store/razer-blade-stealth",
         "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2__store_gallery.png"
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -438,7 +436,7 @@ class RazerBladeStealth(_MacroKeyboard):
 
 class RazerBladeStealthLate2016(_MacroKeyboard):
     """
-    Class for the Blade Stealth Late 2016
+    Class for the Razer Blade Stealth (Late 2016)
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade_Stealth(-if01)?-event-kbd')
 
@@ -457,7 +455,7 @@ class RazerBladeStealthLate2016(_MacroKeyboard):
         "store": "https://www.razerzone.com/store/razer-blade-stealth",
         "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2__store_gallery.png"
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -476,7 +474,7 @@ class RazerBladeStealthLate2016(_MacroKeyboard):
 
 class RazerBladeProLate2016(_MacroKeyboard):
     """
-    Class for the Blade Pro Late 2016
+    Class for the Razer Blade Pro (Late 2016)
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade_Pro(-if01)?-event-kbd')
 
@@ -494,7 +492,7 @@ class RazerBladeProLate2016(_MacroKeyboard):
         "store": "https://www.razerzone.com/store/razer-blade-pro",
         "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2__store_gallery.png"
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -513,7 +511,7 @@ class RazerBladeProLate2016(_MacroKeyboard):
 
 class RazerBladeQHD(_MacroKeyboard):
     """
-    Class for the Blade QHD
+    Class for the Razer Blade (QHD)
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
 
@@ -533,7 +531,7 @@ class RazerBladeQHD(_MacroKeyboard):
         "store": "https://www.razerzone.com/store/razer-blade",
         "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2__store_gallery.png"
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -552,7 +550,7 @@ class RazerBladeQHD(_MacroKeyboard):
 
 class RazerBlackWidow2016(_MacroKeyboard):
     """
-    Class for the BlackWidow Ultimate 2016
+    Class for the Razer BlackWidow Ultimate 2016
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Ultimate_2016(-if01)?-event-kbd')
 
@@ -591,7 +589,7 @@ class RazerBlackWidow2016(_MacroKeyboard):
 
 class RazerBlackWidowXUltimate(_MacroKeyboard):
     """
-    Class for the BlackWidow X Ultimate
+    Class for the Razer BlackWidow X Ultimate
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_X_Ultimate(-if01)?-event-kbd')
 
@@ -630,7 +628,7 @@ class RazerBlackWidowXUltimate(_MacroKeyboard):
 
 class RazerOrnataChroma(_MacroKeyboard):
     """
-    Class for the Ornata Chroma
+    Class for the Razer Ornata Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*Ornata_Chroma(-if01)?-event-kbd')
 
@@ -670,7 +668,7 @@ class RazerOrnataChroma(_MacroKeyboard):
 
 class RazerOrnata(_MacroKeyboard):
     """
-    Class for the Ornata
+    Class for the Razer Ornata
     """
     EVENT_FILE_REGEX = re.compile(r'.*Ornata(-if01)?-event-kbd')
 
@@ -709,7 +707,7 @@ class RazerOrnata(_MacroKeyboard):
 
 class RazerAnansi(_MacroKeyboard):
     """
-    Class for the Anansi
+    Class for the Razer Anansi
     """
     EVENT_FILE_REGEX = re.compile(r'.*Anansi(-if01)?-event-kbd')
 
@@ -739,7 +737,7 @@ class RazerAnansi(_MacroKeyboard):
 
 class RazerDeathStalkerChroma(_MacroKeyboard):
     """
-    Class for the DeathStalker Chroma
+    Class for the Razer DeathStalker Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*DeathStalker_Chroma(-if01)?-event-kbd')
 
