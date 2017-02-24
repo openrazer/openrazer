@@ -160,7 +160,7 @@ inline void openChromaDevice(struct hid_device** hdev, unsigned int* numHdev, st
 				unsigned int vid = hdr.id_table[i].vendor;
 				unsigned int pid = hdr.id_table[i].product;
 				if (dev->descriptor.idVendor == vid && dev->descriptor.idProduct == pid) {
-					struct usb_dev_handle* udev;
+					struct usb_dev_handle* udev = 0;
 					if (udev = usb_open(dev)) {
 						struct usb_config_descriptor* config_descriptor;
 						if (dev->descriptor.bNumConfigurations && (config_descriptor = &dev->config[0])) {
@@ -181,36 +181,6 @@ inline void openChromaDevice(struct hid_device** hdev, unsigned int* numHdev, st
 										h2.status = 1;
 										h2.driver = &hdr;
 										dev->dev = udev; // use this for the handle
-										/*
-										h2.driver = (struct hid_driver*)malloc(sizeof(struct hid_driver));
-										h2.driver->name = hdr.name;
-										struct hid_device_id id;
-										id.vendor = vid;
-										id.product = pid;
-										h2.driver->id_table = &id;
-										*/
-										/*
-										h2.driver->probe = razer_probe;
-										h2.ll_driver = (struct hid_ll_driver*)malloc(sizeof(struct hid_ll_driver));
-										h2.ll_driver->parse = ll_parse;
-										h2.ll_driver->start = ll_start;
-										h2.ll_driver->stop = ll_stop;
-
-
-										//hdev->driver->probe(hdev, id);
-										*/
-
-
-										/*
-										config_descriptor->interface[intfIndex].cur_altsetting = (struct usb_cur_altsetting*)malloc(sizeof(struct usb_cur_altsetting));
-										config_descriptor->interface[intfIndex].cur_altsetting->desc = config_descriptor->interface[intfIndex].altsetting[0];
-										if (strcmp(h2.driver->name, "razerkbd")==0)
-											config_descriptor->interface[intfIndex].cur_altsetting->desc.bInterfaceProtocol = USB_INTERFACE_PROTOCOL_MOUSE;
-										h2.driver->probe(&h2, &hdr.id_table[i]);
-										*/
-
-
-
 										(*hdev)[*numHdev] = h2;
 										(*numHdev)++;
 									} else {

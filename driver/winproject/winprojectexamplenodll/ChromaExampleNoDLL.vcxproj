@@ -135,7 +135,6 @@
     <ClCompile Include="..\..\razermug_driver.c" />
     <ClCompile Include="..\razerinit.c" />
     <ClCompile Include="..\winprojectexampledll\main.cpp" />
-    <ClCompile Include="UsbDevice.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\razerchromacommon.h" />
@@ -148,15 +147,6 @@
     <ClInclude Include="..\..\razermug_driver.h" />
     <ClInclude Include="..\razerinit.h" />
     <ClInclude Include="defines.h" />
-    <ClInclude Include="linux\dmi.h" />
-    <ClInclude Include="linux\hid.h" />
-    <ClInclude Include="linux\init.h" />
-    <ClInclude Include="linux\kernel.h" />
-    <ClInclude Include="linux\module.h" />
-    <ClInclude Include="linux\random.h" />
-    <ClInclude Include="linux\slab.h" />
-    <ClInclude Include="linux\usb\input.h" />
-    <ClInclude Include="UsbDevice.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

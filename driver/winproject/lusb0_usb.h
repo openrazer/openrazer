@@ -143,18 +143,17 @@ struct usb_interface_descriptor
 
 #define USB_MAXALTSETTING	128	/* Hard limit */
 
-struct usb_cur_altsetting // added for Linux compatibility
+struct usb_host_interface // added for Linux compatibility
 {
 	struct usb_interface_descriptor desc;
 };
 
-struct usb_interface
-{
+struct usb_interface {
     struct usb_interface_descriptor *altsetting;
 
     int num_altsetting;
 	struct usb_device* dev; // added for Linux compatibility
-	struct usb_cur_altsetting *cur_altsetting; // added for Linux compatibility
+	struct usb_host_interface *cur_altsetting; // added for Linux compatibility
 };
 
 /* Configuration descriptor information.. */
