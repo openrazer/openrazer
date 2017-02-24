@@ -7,48 +7,6 @@
 #include <defines.h>
 #include <linux/module.h>
 #include <linux/hid.h>
-//#include "UsbDevice.h"
-/*
-inline void openChromaDevice(struct hid_device** hdev, unsigned int* numHdev, struct hid_driver hdr) {
-			for (unsigned int  i = 0; hdr.id_table[i].vendor != 0; i++) {
-				unsigned int vid = hdr.id_table[i].vendor;
-				unsigned int pid = hdr.id_table[i].product;
-				HANDLE udev;
-				if (udev = call_UsbDevice_OpenDevice(vid, pid, 0)) {
-					struct usb_config_descriptor* config_descriptor;
-					for (int intfIndex = 0; intfIndex < config_descriptor->bNumInterfaces; intfIndex++) {
-						if (config_descriptor->interface[intfIndex].num_altsetting) {
-							struct usb_interface_descriptor* intf = &config_descriptor->interface[intfIndex].altsetting[0];
-							if (intf->bInterfaceNumber == 0 && intf->bAlternateSetting == 0) {
-								printf("device %04X:%04X opened!\n", vid, pid);
-								struct hid_device* h = (struct hid_device*)realloc(*hdev, (*numHdev+1) * sizeof(struct hid_device));
-								if (!h) {
-									printf("out of memory\n");
-									return;
-								}
-								(*hdev) = h;
-								struct hid_device h2;
-								//h2.dev.parent = dev;
-								h2.dev.parent = (struct usb_device*)udev; // use this for the handle
-								h2.dev.init_name = hdr.name;
-								h2.status = 1;
-								h2.driver = &hdr;
-								//dev->dev = udev; // use this for the handle
-								(*hdev)[*numHdev] = h2;
-								(*numHdev)++;
-							} else {
-								//usb_close(udev);
-							}
-						} else {
-							//usb_close(udev);
-						}
-					}
-				}
-				if (!numHdev)
-					printf("device %04X:%04X NOT opened!\n", vid, pid);
-			}
-}
-*/
 
 #ifdef DLL_INTERNAL
 // Hack to turn Linux device macros into API calls
