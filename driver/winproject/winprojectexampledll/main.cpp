@@ -18,7 +18,6 @@
 unsigned int init_##hdr## (struct hid_device** hdevo);
 
 extern "C" {
-#include "winproject\razerinit.h"
 #include "razerchromacommon.h"
 #include "razerkbd_driver.h"
 #undef DEVICE_ATTR
@@ -404,29 +403,14 @@ static void colorize(std::set<struct device*> devices, unsigned int maxRow, unsi
 	delete[] buf;
 }
 
+static void close(struct device* dev) {
+	struct usb_interface *intf = to_usb_interface(dev->parent);
+	struct usb_device *usb_dev = interface_to_usbdev(intf);
+	printf("close %04X\n", dev->parent->descriptor.idProduct);
+	//TODO:cleanup malloc memory, move this function into DLL
+}
+
 int main(int argc, char **argv) {
-	/*
-	UsbDevice usb;
-	usb.OpenDevice(0x1038, 0x1600, 0x0000);
-    usb.OpenDevice(0x1770, 0xFF00, 0);
-
-    usb.OpenDevice(0x1532, 0x0C00, 0);
-    usb.OpenDevice(0x1532, 0x005C, 0);
-    usb.OpenDevice(0x1532, 0x0210, 0);
-	
-    usb.OpenDevice(0x1532, 0x0C00, 1);
-    usb.OpenDevice(0x1532, 0x005C, 1);
-    usb.OpenDevice(0x1532, 0x0210, 1);
-
-    usb.OpenDevice(0x1532, 0x0C00, 2);
-    usb.OpenDevice(0x1532, 0x005C, 2);
-    usb.OpenDevice(0x1532, 0x0210, 2);
-
-    usb.OpenDevice(0x1532, 0x0C00, 3);
-    usb.OpenDevice(0x1532, 0x005C, 3);
-    usb.OpenDevice(0x1532, 0x0210, 3);
-	*/
-
 #ifndef DLL_INTERNAL
 	printf("Press enter to load DLL...");
 	getc(stdin);
@@ -503,20 +487,11 @@ int main(int argc, char **argv) {
 	struct device_attribute devcore_attr_matrix_effect_static = *(struct device_attribute*)reinterpret_cast<void*>(GetProcAddress(chromaLinuxModule, "devcore_attr_matrix_effect_static"));
 	struct device_attribute devcore_attr_matrix_effect_spectrum = *(struct device_attribute*)reinterpret_cast<void*>(GetProcAddress(chromaLinuxModule, "devcore_attr_matrix_effect_spectrum"));
 	struct device_attribute devcore_attr_matrix_effect_reactive = *(struct device_attribute*)reinterpret_cast<void*>(GetProcAddress(chromaLinuxModule, "devcore_attr_matrix_effect_reactive"));
-
-	typedef void(*CLOSE)(struct device* dev);
-	CLOSE close = reinterpret_cast<CLOSE>(GetProcAddress(chromaLinuxModule , "close"));
-
-	typedef void(*INIT)(void);
-	INIT init = reinterpret_cast<INIT>(GetProcAddress(chromaLinuxModule, "init"));
 #endif
 
 	printf("Press enter to init usb and devices...");
 	getc(stdin);
 	printf("\n");
-
-	// call init stuff
-	init();
 
 	struct hid_device* hdev;
 	unsigned int num;
@@ -805,12 +780,12 @@ int main(int argc, char **argv) {
 	getc(stdin);
 	printf("\n");
 
-	for (struct device* device : deviceKeyboards) close(device);
-	for (struct device* device : deviceMice) close(device);
-	for (struct device* device : deviceFireflies) close(device);
-	for (struct device* device : deviceMugs) close(device);
-	for (struct device* device : deviceCores) close(device);
-	for (struct device* device : deviceKrakens) close(device);
+	for (struct device* dev : deviceKeyboards) close(dev);
+	for (struct device* dev : deviceMice) close(dev);
+	for (struct device* dev : deviceFireflies) close(dev);
+	for (struct device* dev : deviceMugs) close(dev);
+	for (struct device* dev : deviceCores) close(dev);
+	for (struct device* dev : deviceKrakens) close(dev);
 
 	return 0;
 }

@@ -1,6 +1,13 @@
 #ifndef HID_H_
 #define HID_H_
 
+#include <SetupAPI.h>
+#include <cfgmgr32.h>
+#include <Winusb.h>
+
+#pragma comment(lib, "setupapi.lib")
+#pragma comment(lib, "Winusb.lib")
+
 #define HID_STAT_ADDED					1
 #define HID_STAT_PARSED					2
 
@@ -15,6 +22,8 @@
 
 #define USB_INTERFACE_PROTOCOL_KEYBOARD 1
 #define USB_INTERFACE_PROTOCOL_MOUSE    2
+
+static const GUID GUID_DEVINTERFACE = { 0xDEE824EF, 0x729B, 0x4A0E, 0x9C, 0x14, 0xB7, 0x11, 0x7D, 0x33, 0xA8, 0x17 };
 
 struct hid_input {
 	struct input_dev *input;
@@ -90,11 +99,11 @@ inline int ll_parse(struct hid_device *hdev) {
 }
 
 inline void dev_err(struct usb_device** dev, const char* msg) {
-	printf("dev_err device=%s msg=%s", (*dev)->filename, msg);
+//	printf("dev_err device=%s msg=%s", (*dev)->filename, msg);
 }
 
 inline void dev_info(struct usb_device** dev, const char* msg) {
-	printf("dev_info device=%s msg=%s", (*dev)->filename, msg);
+//	printf("dev_info device=%s msg=%s", (*dev)->filename, msg);
 }
 
 inline void *dev_get_drvdata(const struct device *dev) {
@@ -153,52 +162,92 @@ inline void hid_err(struct hid_device *hdev, const char* msg, ...) {
 	va_end(args);
 }
 
+
 inline void openChromaDevice(struct hid_device** hdev, unsigned int* numHdev, struct hid_driver hdr) {
-	for (struct usb_bus* bus = usb_get_busses(); bus; bus = bus->next) {
-		for (struct usb_device* dev = bus->devices; dev; dev = dev->next) {
-			for (unsigned int  i = 0; hdr.id_table[i].vendor != 0; i++) {
-				unsigned int vid = hdr.id_table[i].vendor;
-				unsigned int pid = hdr.id_table[i].product;
-				if (dev->descriptor.idVendor == vid && dev->descriptor.idProduct == pid) {
-					struct usb_dev_handle* udev = 0;
-					if (udev = usb_open(dev)) {
-						struct usb_config_descriptor* config_descriptor;
-						if (dev->descriptor.bNumConfigurations && (config_descriptor = &dev->config[0])) {
-							for (int intfIndex = 0; intfIndex < config_descriptor->bNumInterfaces; intfIndex++) {
-								if (config_descriptor->interface[intfIndex].num_altsetting) {
-									struct usb_interface_descriptor* intf = &config_descriptor->interface[intfIndex].altsetting[0];
-									if (intf->bInterfaceNumber == 0 && intf->bAlternateSetting == 0) {
-										printf("device %04X:%04X opened!\n", vid, pid);
-										struct hid_device* h = (struct hid_device*)realloc(*hdev, (*numHdev+1) * sizeof(struct hid_device));
-										if (!h) {
-											printf("out of memory\n");
-											return;
-										}
-										(*hdev) = h;
-										struct hid_device h2;
-										h2.dev.parent = dev;
-										h2.dev.init_name = hdr.name;
-										h2.status = 1;
-										h2.driver = &hdr;
-										dev->dev = udev; // use this for the handle
-										(*hdev)[*numHdev] = h2;
-										(*numHdev)++;
-									} else {
-										usb_close(udev);
-									}
-								} else {
-									usb_close(udev);
-								}
-							}
-						} else {
-							usb_close(udev);
-						}
-					}
-				}
-				if (!numHdev)
-					printf("device %04X:%04X NOT opened!\n", vid, pid);
+	HDEVINFO hDevInfo = SetupDiGetClassDevs(&GUID_DEVINTERFACE, 0, 0, DIGCF_DEVICEINTERFACE);
+    if (hDevInfo == INVALID_HANDLE_VALUE) {
+		printf("SetupDiGetClassDevs failed\n");
+		return;
+	}
+
+	for (unsigned int  i = 0; hdr.id_table[i].vendor != 0; i++) {
+		SP_DEVINFO_DATA deviceData = { 0 };
+		deviceData.cbSize = sizeof(SP_DEVINFO_DATA);
+
+		for (unsigned int j = 0; SetupDiEnumDeviceInfo(hDevInfo, j, &deviceData); ++j) {
+			char deviceID[MAX_DEVICE_ID_LEN];
+			if (CM_Get_Device_ID(deviceData.DevInst, deviceID, MAX_DEVICE_ID_LEN, 0))
+				continue;
+
+			char* vid = strstr(deviceID, "VID_");
+			if (!vid || hdr.id_table[i].vendor != strtoul(vid+4, NULL, 16))
+				continue;
+
+			char* pid = strstr(deviceID, "PID_");
+			if (!pid || hdr.id_table[i].product != strtoul(pid+4, NULL, 16))
+				continue;
+
+			/*char* mi = strstr(deviceID, "MI_");
+			if (mi) {
+				printf("vid found (%s)\n", vid+4);
+				printf("pid found (%s)\n", pid+4);
+				printf("mi found (%s)\n", mi+3);
+			}*/
+
+			SP_INTERFACE_DEVICE_DATA interfaceData = { 0 };
+			interfaceData.cbSize = sizeof(SP_INTERFACE_DEVICE_DATA);
+			if (!SetupDiEnumDeviceInterfaces(hDevInfo, &deviceData, &GUID_DEVINTERFACE, 0, &interfaceData))
+				continue;
+
+			DWORD dwRequiredSize = 0;
+			SetupDiGetDeviceInterfaceDetail(hDevInfo, &interfaceData, 0, 0, &dwRequiredSize, 0);
+			SP_INTERFACE_DEVICE_DETAIL_DATA* pData = (SP_INTERFACE_DEVICE_DETAIL_DATA*)malloc(dwRequiredSize);
+			pData->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
+			if (!SetupDiGetDeviceInterfaceDetail(hDevInfo, &interfaceData, pData, dwRequiredSize, 0, 0)) {
+				free(pData);
+				continue;
 			}
+
+			HANDLE hDevice = CreateFile(pData->DevicePath
+				, GENERIC_READ | GENERIC_WRITE
+				, FILE_SHARE_READ | FILE_SHARE_WRITE
+				, 0
+				, OPEN_EXISTING
+				, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED
+				, 0);
+			if (hDevice == INVALID_HANDLE_VALUE) {
+				free(pData);
+				continue;
+			}
+
+			WINUSB_INTERFACE_HANDLE hWinUSBHandle;
+			if (!WinUsb_Initialize(hDevice, &hWinUSBHandle))
+				continue;
+
+			SetupDiDestroyDeviceInfoList(hDevInfo);
+
+			printf("CM_Get_Device_ID (%s)\n", deviceID);
+			printf("device %04X:%04X opened!\n", hdr.id_table[i].vendor, hdr.id_table[i].product);
+
+			*hdev = (struct hid_device*)realloc(*hdev, (*numHdev+1) * sizeof(struct hid_device));
+			if (!*hdev) {
+				printf("out of memory\n");
+				continue;
+			}
+
+			(*hdev)[*numHdev].dev.parent = (struct usb_device*)malloc(sizeof(struct usb_device));
+			(*hdev)[*numHdev].dev.parent->descriptor.idVendor = hdr.id_table[i].vendor;
+			(*hdev)[*numHdev].dev.parent->descriptor.idProduct = hdr.id_table[i].product;
+			(*hdev)[*numHdev].dev.parent->filename;
+			(*hdev)[*numHdev].dev.parent->dev = hWinUSBHandle; // use this for the handle
+			(*hdev)[*numHdev].dev.init_name = hdr.name;
+			(*hdev)[*numHdev].status = 1;
+			(*hdev)[*numHdev].driver = &hdr;
+
+			(*numHdev)++;
 		}
+		if (!numHdev)
+			printf("device %04X:%04X NOT opened!\n", hdr.id_table[i].vendor, hdr.id_table[i].product);
 	}
 }
 

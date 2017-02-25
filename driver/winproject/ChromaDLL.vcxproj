@@ -93,7 +93,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>libusb32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(ProjectDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
@@ -111,7 +111,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libusb32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -119,7 +119,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libusb64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(ProjectDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
@@ -128,12 +128,11 @@
       <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libusb64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="razerinit.c" />
     <ClCompile Include="..\razerchromacommon.c" />
     <ClCompile Include="..\razercommon.c" />
     <ClCompile Include="..\razercore_driver.c" />
@@ -144,7 +143,14 @@
     <ClCompile Include="..\razermug_driver.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lusb0_usb.h" />
+    <ClInclude Include="linux\dmi.h" />
+    <ClInclude Include="linux\hid.h" />
+    <ClInclude Include="linux\init.h" />
+    <ClInclude Include="linux\kernel.h" />
+    <ClInclude Include="linux\module.h" />
+    <ClInclude Include="linux\random.h" />
+    <ClInclude Include="linux\slab.h" />
+    <ClInclude Include="linux\usb\input.h" />
     <ClInclude Include="..\razerchromacommon.h" />
     <ClInclude Include="..\razercommon.h" />
     <ClInclude Include="..\razercore_driver.h" />

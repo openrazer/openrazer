@@ -1,8 +1,8 @@
 #ifndef MODULE_H_
 #define MODULE_H_
 
-#include "lusb0_usb.h"
 #include <stdio.h>
+#include <Winusb.h>
 
 #define MODULE_AUTHOR( __Declaration__ )
 #define MODULE_DESCRIPTION( __Declaration__ )
@@ -13,24 +13,61 @@
 #define USB_DIR_OUT                     0
 #define USB_DIR_IN                      0x80
 
+#define USB_TYPE_CLASS			(0x01 << 5)
+#define USB_RECIP_INTERFACE	0x01
+
 #define usb_sndctrlpipe(u,d) 0
 #define usb_rcvctrlpipe(u,d) 0
 
-inline int usb_control_msg1(
+#define PATH_MAX 512
+
+struct usb_interface_descriptor {
+    unsigned char  bInterfaceProtocol;
+};
+
+struct usb_host_interface {
+	struct usb_interface_descriptor desc;
+};
+
+struct usb_interface {
+    int num_altsetting;
+	struct usb_device* dev;
+	struct usb_host_interface *cur_altsetting;
+};
+
+struct usb_device_descriptor {
+    unsigned short idVendor;
+    unsigned short idProduct;
+};
+
+struct usb_device {
+    char filename[PATH_MAX];
+	void *dev;
+    struct usb_device_descriptor descriptor;
+};
+
+inline int usb_control_msg(
 	struct usb_device *usb_dev
 	, int usb_pipe
 	, unsigned int request
 	, unsigned int request_type
 	, unsigned int value
 	, unsigned int report_index
-	, char* buf, unsigned int size
-	, unsigned int timeout) {
-	return usb_control_msg((struct usb_dev_handle*)usb_dev->dev
-		, request_type, request
-		, value, report_index
-		, buf, size, timeout);
+	, unsigned char* buf, unsigned int size
+	, unsigned int timeout)
+{
+	WINUSB_SETUP_PACKET packet;
+	packet.RequestType = request_type;
+	packet.Request = request;
+	packet.Value = value;
+	packet.Index = report_index; 
+	packet.Length = size;
+	ULONG cbSent = 0;
+	if (!WinUsb_ControlTransfer(usb_dev->dev, packet, buf, size, &cbSent, 0))
+		printf("\tfailed\tWinUsb_ControlTransfer\n\n");
+
+	return cbSent;
 }
-#define usb_control_msg usb_control_msg1 
 
 inline struct usb_interface *to_usb_interface(struct usb_device *parent) {
 //	parent->config->interface->dev = parent;
@@ -48,7 +85,7 @@ inline void usb_disable_autosuspend(struct usb_device *usb_dev) {
 }
 
 struct device_attribute {
-	const char              *name;
+	const char* name;
 	ssize_t(*show)(struct device *dev, struct device_attribute *attr, char *buf);
 	ssize_t(*store)(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 };
