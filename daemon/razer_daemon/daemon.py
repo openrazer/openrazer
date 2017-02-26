@@ -83,7 +83,7 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
                 time.sleep(0.1)
                 sys.exit(0)
         except OSError as err:
-            print("Failed first fork. Error: {0}".format(err))
+            print("Failed second fork. Error: {0}".format(err))
 
         # Close stdin, stdout, stderr
         sys.stdout.flush()

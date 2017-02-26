@@ -17,6 +17,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Device                                        | USB VID:PID | Driver | Daemon | Misc |
 | --------------------------------------------- | ----------- | ------ | ------ | ---- |
 | Razer BlackWidow Ultimate 2012                |  1532:010D  |   ✔    |   ✔    |      |
+| Razer BlackWidow Classic (Alternate)          |  1532:010E  |   ✔    |   ✔    | Mostly untested |
 | Razer Anansi                                  |  1532:010F  |   ✔    |   ✔    |      |
 | Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔    |   ✔    |      |
 | Razer BlackWidow Classic                      |  1532:011B  |   ✔    |   ✔    |      |
@@ -33,12 +34,14 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Ornata Chroma                           |  1532:021E  |   ✔    |   ✔    |      |
 | Razer Ornata                                  |  1532:021F  |   ✔    |   ✔    |      |
 | Razer Blade Stealth (Late 2016)               |  1532:0220  |   ✔    |   ✔    |      |
+| Razer BlackWidow Chroma V2                    |  1532:0221  |   ✔    |   ✔    | Needs Testing |
 
 ### Mouse
 | Device                          | USB VID:PID | Driver | Daemon |
 | ------------------------------- | ----------- | ------ | ------ |
 | Razer Imperator 2012            |  1532:002F  |   ✔    |   ✔    |
 | Razer Ouroboros 2012            |  1532:0032  |   ✔    |   ✔    |
+| Razer Naga Hex                  |  1532:0041  |   ✔    |   ✔    |
 | Razer Abyssus 2014              |  1532:0042  |   ✔    |   ✔    |
 | Razer DeathAdder Chroma         |  1532:0043  |   ✔    |   ✔    |
 | Razer Mamba (Wired)             |  1532:0044  |   ✔    |   ✔    |
@@ -100,6 +103,7 @@ Packages are available for these distributions:
 * [Arch](https://terrycain.github.io/razer-drivers/#arch)
 * [Fedora](https://terrycain.github.io/razer-drivers/#fedora)
 * [OpenSUSE](https://terrycain.github.io/razer-drivers/#opensuse)
+* [Gentoo](https://terrycain.github.io/razer-drivers/#gentoo)
 
 Other distributions can manually install [using these instructions.](https://terrycain.github.io/razer-drivers/#other)
 
