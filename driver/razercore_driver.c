@@ -391,7 +391,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 			break;
 		}
 		
-		report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+		report = razer_chroma_standard_matrix_set_custom_frame(0, row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
 		
 		mutex_lock(&device->lock);
 		razer_send_payload(device->usb_dev, &report);

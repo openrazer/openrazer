@@ -898,7 +898,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
         switch(usb_dev->descriptor.idProduct)
 		{
 			case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-				report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+				report = razer_chroma_standard_matrix_set_custom_frame(0, row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
 				report.transaction_id.id = 0x3f;
 				break;
 
@@ -909,7 +909,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 
 			case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
 			case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
-				report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+				report = razer_chroma_standard_matrix_set_custom_frame(1, row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
 				report.transaction_id.id = 0x80;
 				break;
 			
