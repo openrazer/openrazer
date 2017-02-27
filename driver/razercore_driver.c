@@ -391,7 +391,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 			break;
 		}
 		
-		report = razer_chroma_standard_matrix_set_custom_frame(0, row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+		report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
 		
 		mutex_lock(&device->lock);
 		razer_send_payload(device->usb_dev, &report);
@@ -512,8 +512,9 @@ static int razer_core_probe(struct hid_device *hdev, const struct hid_device_id 
     CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
     CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);
     
-    if (retval)
+    if (retval) {
         goto exit_free;
+    }
 
 	dev_set_drvdata(&hdev->dev, dev);
     hid_set_drvdata(hdev, dev);

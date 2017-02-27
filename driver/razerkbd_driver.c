@@ -1254,7 +1254,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 				break;
 				
 			case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
-				report = razer_chroma_standard_matrix_set_custom_frame(0, row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+				report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
 				report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
 				break;
 
@@ -1266,7 +1266,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 			case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
 				report.transaction_id.id = 0x80; // Fall into the 2016/blade/blade2016 to set device id
 			default:
-				report = razer_chroma_standard_matrix_set_custom_frame(0, row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+				report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
 				break;
 		}
 		razer_send_payload(usb_dev, &report);
