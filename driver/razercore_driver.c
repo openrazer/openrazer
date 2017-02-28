@@ -524,8 +524,9 @@ static int razer_core_probe(struct hid_device *hdev, const struct hid_device_id 
     CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
     CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);
     
-    if (retval)
+    if (retval) {
         goto exit_free;
+    }
 
 	dev_set_drvdata(&hdev->dev, dev);
     hid_set_drvdata(hdev, dev);
