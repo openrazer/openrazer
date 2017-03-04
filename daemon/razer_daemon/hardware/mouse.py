@@ -36,6 +36,7 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
         super(RazerMambaChromaWireless, self).__init__(*args, **kwargs)
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
+        self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
 
     def _close(self):
         """
@@ -68,6 +69,8 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
 
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaWired, self).__init__(*args, **kwargs)
+
+        print()
 
 
 class RazerMambaChromaTE(__RazerDeviceBrightnessSuspend):
