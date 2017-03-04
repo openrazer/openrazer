@@ -17,27 +17,27 @@ def get_macros(self):
     return self.macro_service.dbus_get_macros()
 
 
-@endpoint('razer.device.macro', 'deleteMacro', in_sig='s')
+@endpoint('razer.device.macro', 'deleteMacro', in_sig='y')
 def delete_macro(self, macro_key):
     """
     Delete macro from key
 
     :param macro_key: Macro key to delete bound macro from
-    :type macro_key: str
+    :type macro_key: int
     """
     self.logger.debug("DBus call delete_macro")
 
     self.macro_service.dbus_delete_macro(macro_key)
 
 
-@endpoint('razer.device.macro', 'addMacro', in_sig='ss')
+@endpoint('razer.device.macro', 'addMacro', in_sig='ys')
 def add_macro(self, macro_bind_key, macro_json):
     """
     Add macro to key
 
     The macro_json should be JSON form of a list of dictionaries
     :param macro_bind_key: Macro key to delete bound macro from
-    :type macro_bind_key: str
+    :type macro_bind_key: int
 
     :param macro_json: JSON list
     :type macro_json: str

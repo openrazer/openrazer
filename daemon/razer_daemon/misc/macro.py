@@ -15,7 +15,6 @@ import evdev
 import time
 
 # pylint: disable=import-error
-from razer_daemon.keyboard import XTE_MAPPING
 import razer_daemon.misc.key_mapping as razer_key_mapping
 
 
@@ -122,8 +121,6 @@ class KeyboardMacroV2(multiprocessing.Process):
         self._current_macro_bind = None
         self._current_macro_combo = []
 
-        self._keymaps = razer_key_mapping.KeymapManager(self._device_number)
-
         self._macro_sets = []
         self._macros = {}
 
@@ -139,36 +136,6 @@ class KeyboardMacroV2(multiprocessing.Process):
             return 'UP'
         else:
             return 'AUTOREPEAT'
-
-    def _convert_keycode_to_keysym(self, keycode):
-        """
-        Converts a keycode to a keysym
-
-        :param keycode: Keycode
-        :type keycode: int
-
-        :return: Keysym
-        :rtype: str
-
-        :raises KeyError: If no keymaps are loaded
-        :raises ValueError: If no keycode -> keysym is found
-        """
-        return self._keymaps.keycode_to_keysym(keycode)
-
-    def _convert_keysym_to_keycode(self, keysym):
-        """
-        Converts a keysym to a keycode
-
-        :param keysym: keysym
-        :type keysym: str
-
-        :return: keycode
-        :rtype: int
-
-        :raises KeyError: If no keymaps are loaded
-        :raises ValueError: If no keysym -> keycode is found
-        """
-        return self._keymaps.keysym_to_keycode(keysym)
 
     def _persist_macros(self):
         with open(self._macro_file, 'w') as open_fp:
@@ -395,9 +362,6 @@ class KeyboardMacroV2(multiprocessing.Process):
         :type macro_key: int
         """
         self._logger.debug("Running macro - " + str(self._macros[macro_key]))
-        #macro_obj = MacroRunner(self._device_number, macro_key, self._macros[macro_key])
-        #macro_obj.daemon = True
-        #macro_obj.start()
         for macro_obj in self._macros[macro_key]:
             macro_obj.exec(uinput=self.uinput)
 
@@ -407,19 +371,13 @@ class KeyboardMacroV2(multiprocessing.Process):
         self._logger.debug('Started Macro thread')
         self._key_event_callback()
 
-    # TODO check recordign macros store keycodes, ------------------------------------------------------->
-    # Then on send to client it does keycode -> keysym
-    # Then on receive it does keysym <- keycode
-
-
-
     # DBus methods
     def dbus_delete_macro(self, key_code):
         """
         Delete a macro from a key
 
-        :param key_name: Key Name
-        :type key_name: str
+        :param key_code: Key Name
+        :type key_code: int
         """
         try:
             del self._macros[key_code]
@@ -440,9 +398,8 @@ class KeyboardMacroV2(multiprocessing.Process):
         :rtype: str
         """
         result_dict = {}
-        for macro_key, macro_combo in self._macros.items():
-            str_combo = [value.to_dict() for value in macro_combo]
-            result_dict[str(macro_key)] = str_combo
+        for macro_key, macro_list in self._macros.items():
+            result_dict[str(macro_key)] = macro_obj_to_dict(macro_list)
 
         return json.dumps(result_dict)
 
@@ -452,13 +409,16 @@ class KeyboardMacroV2(multiprocessing.Process):
 
         The macro_json will be a list of macro objects which is then converted into JSON
         :param macro_key: Macro bind key
-        :type macro_key: str
+        :type macro_key: int
 
         :param macro_json: Macro JSON
         :type macro_json: str
         """
-        macro_list = [macro_dict_to_obj(macro_object_dict) for macro_object_dict in json.loads(macro_json)]
-        self._macros[int(macro_key)] = macro_list
+        try:
+            macro_list = macro_dict_to_obj(json.loads(macro_json))
+            self._macros[macro_key] = macro_list
+        except Exception as err:
+            self._logger.error("Failed to load macro {0}. Got {1}".format(macro_key, err))
 
 
 class MacroObject(object):
