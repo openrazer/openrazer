@@ -1,5 +1,5 @@
 """
-Keyboards class
+Headsets class
 """
 import re
 
@@ -8,9 +8,8 @@ from razer_daemon.dbus_services.dbus_methods import kraken as _dbus_kraken, chro
 
 
 class RazerKraken(__RazerDevice):
-
     """
-    Class for the Kraken
+    Class for the Razer Kraken 7.1 Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Kraken_7\.1_Chroma-event-if03')
 
@@ -21,7 +20,7 @@ class RazerKraken(__RazerDevice):
     MATRIX_DIMS = [-1, -1]
     METHODS = ['get_firmware', 'get_device_name', 'get_device_type_headset', 'has_matrix', 'get_matrix_dims',
                'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_single_effect',
-               'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken']
+               'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken', 'set_custom_kraken']
 
     RAZER_URLS = {
         "store": "http://web.archive.org/web/20160826002356/http://www.razerzone.com/gaming-audio/razer-kraken-71-chroma",
@@ -93,9 +92,8 @@ class RazerKraken(__RazerDevice):
 
 
 class RazerKrakenV2(__RazerDevice):
-
     """
-    Class for the Kraken V2
+    Class for the Razer Kraken 7.1 V2
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Kraken_7\.1_V2_0+-event-if03')
 
@@ -106,7 +104,7 @@ class RazerKrakenV2(__RazerDevice):
     MATRIX_DIMS = [-1, -1]
     METHODS = ['get_firmware', 'get_device_name', 'get_device_type_headset', 'has_matrix', 'get_matrix_dims',
                'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_single_effect', 'set_breath_dual_effect', 'set_breath_triple_effect',
-               'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken']
+               'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken', 'set_custom_kraken']
 
     RAZER_URLS = {
         "store": "http://www.razerzone.com/gaming-audio/razer-kraken-71-v2",
