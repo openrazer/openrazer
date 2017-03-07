@@ -719,7 +719,7 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
 			return count;
 			
 			break;
-  
+		
         case USB_DEVICE_ID_RAZER_IMPERATOR:
             varstore = VARSTORE;
             break;
@@ -778,9 +778,9 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
     switch(usb_dev->descriptor.idProduct)
     {
 		case USB_DEVICE_ID_RAZER_NAGA_HEX:
-            report = razer_chroma_misc_get_dpi_xy_byte();
+		    report = razer_chroma_misc_get_dpi_xy_byte();
             break;
-
+		
         case USB_DEVICE_ID_RAZER_IMPERATOR:
             report = razer_chroma_misc_get_dpi_xy(VARSTORE);
             break;
@@ -2181,4 +2181,3 @@ static struct hid_driver razer_mouse_driver = {
 };
 
 module_hid_driver(razer_mouse_driver);
-            
