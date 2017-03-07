@@ -859,3 +859,4 @@ static struct hid_driver razer_kraken_driver = {
 
 module_hid_driver(razer_kraken_driver);
 
+
