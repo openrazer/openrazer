@@ -45,22 +45,14 @@ MODULE_LICENSE(DRIVER_LICENSE);
 /**
  * Send report to the mouse
  */
-//LNK2005 already defined in razer*_driver.obj
-#if defined(WIN32) || defined(_WIN64)
-static
-#endif
-int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
+static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
     return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, 600, 800);
 }
 
 /**
  * Function to send to device, get response, and actually check the response
  */
-//LNK2005 already defined in razer*_driver.obj
-#if defined(WIN32) || defined(_WIN64)
-static
-#endif
-struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
+static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
     int retval = -1;
     struct razer_report response_report;
@@ -97,11 +89,7 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
 /**
  * Device mode function
  */
-//LNK2005 already defined in razer*_driver.obj
-#if defined(WIN32) || defined(_WIN64)
-static
-#endif
-void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsigned char param)
+static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsigned char param)
 {
     struct razer_report report = razer_chroma_standard_set_device_mode(mode, param);
     report.transaction_id.id = 0x3F;
