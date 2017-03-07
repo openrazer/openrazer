@@ -25,6 +25,8 @@ class BatteryNotifier(threading.Thread):
     def __init__(self, parent, device_id, device_name):
         super(BatteryNotifier, self).__init__()
 
+        self.event = threading.Event()
+
         if notify2 is not None:
             notify2.init('razer_daemon')
 
@@ -41,7 +43,6 @@ class BatteryNotifier(threading.Thread):
             self._notification.set_timeout(NOTIFY_TIMEOUT)
 
         self._last_notify_time = datetime.datetime(1970, 1, 1)
-
 
     @property
     def shutdown(self):
@@ -92,11 +93,13 @@ class BatteryNotifier(threading.Thread):
         """
 
         while not self._shutdown:
-            self.notify_battery()
+            if self.event.is_set():
+                self.notify_battery()
 
             time.sleep(0.1)
 
         self._logger.debug("Shutting down battery notifier")
+
 
 class BatteryManager(object):
     """
@@ -126,3 +129,14 @@ class BatteryManager(object):
 
     def __del__(self):
         self.close()
+
+    @property
+    def active(self):
+        return self._battery_thread.event.is_set()
+
+    @active.setter
+    def active(self, value):
+        if value:
+            self._battery_thread.event.set()
+        else:
+            self._battery_thread.event.clear()

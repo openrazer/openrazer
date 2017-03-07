@@ -3,7 +3,7 @@ Daemon class
 
 This class is the main core of the daemon, this serves a basic dbus module to control the main bit of the daemon
 """
-__version__ = '1.1.8'
+__version__ = '1.1.9'
 
 import configparser
 import logging
@@ -22,6 +22,8 @@ gi.require_version('Gdk', '3.0')
 import gi.repository
 from gi.repository import GObject, GLib
 from pyudev import Context, Monitor, MonitorObserver
+import grp
+import getpass
 
 import razer_daemon.hardware
 from razer_daemon.dbus_services.service import DBusService
@@ -210,6 +212,16 @@ class RazerDaemon(DBusService):
         self._device_classes = razer_daemon.hardware.get_device_classes()
 
         self.logger.info("Initialising Daemon (v%s). Pid: %d", __version__, os.getpid())
+
+        # Check for plugdev group
+        try:
+            plugdev_group = grp.getgrnam('plugdev')
+
+            if getpass.getuser() not in plugdev_group.gr_mem:
+                self.logger.critical("User is not a member of the plugdev group")
+                sys.exit(1)
+        except KeyError:
+            self.logger.warning("Could not check if user is a member of the plugdev group. Continuing...")
 
         self._screensaver_monitor = ScreensaverMonitor(self)
 
@@ -427,6 +439,15 @@ class RazerDaemon(DBusService):
                         for alt_device in device_list:
                             if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
                                 additional_interfaces.append(alt_device.sys_path)
+
+                    # Checking permissions
+                    test_file = os.path.join(sys_path, 'device_type')
+                    file_group_id = os.stat(test_file).st_gid
+                    file_group_name = grp.getgrgid(file_group_id)[0]
+
+                    if os.getgid() != file_group_id and file_group_name != 'plugdev':
+                        self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
+                        break
 
                     razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
 
