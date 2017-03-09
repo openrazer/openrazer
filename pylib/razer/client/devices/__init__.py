@@ -289,6 +289,7 @@ class RazerDevice(object):
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self._serial)
 
+
 class BaseDeviceFactory(object):
     @staticmethod
     def get_device(serial:str, daemon_dbus=None) -> RazerDevice:
