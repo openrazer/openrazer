@@ -6,108 +6,21 @@ Launching programs etc...
 """
 import logging
 import subprocess
-import threading
 import multiprocessing
 import os
 import json
 import selectors
 import evdev
-import time
-
 # pylint: disable=import-error
-import razer_daemon.misc.key_mapping as razer_key_mapping
 
 
-class KeyboardMacroV2(multiprocessing.Process):
-    """
-    TODO
-     * Handle Fn+F9 for on the fly macro'ing
-     * Persist macros
-
-     * Handle storing key metrics for heatmap
-
-
-    Run loop
-      keyname = lookup(keycode)
-
-      on key_release:
-        handle_modifiers(keyname)
-
-        if recording_macro:
-          if keyname not int (current_macro_bind_key, macromode_key):
-            add_to_current_macro(key_event_time, keyname, 'release')
-
-      on key_press:
-        handle_modifiers(keyname)
-
-        if keyname == gamemode_key:
-          gamemode_current = get_game_mode_state()
-          set_game_mode_state(!gamemode_current)
-
-        elif keyname == brightness_down_key:
-          kb_brightness_down()
-
-        elif keyname == brightness_up_key:
-          kb_brightness_up()
-
-        elif keyname == macromode_key:
-          if not recording_macro:
-            recording_macro = True
-            current_macro_bind_key = None
-            current_macro_combo = []
-
-            set_macro_effect(blinking)
-            set_macro_led(True)
-
-          else:
-            logger.debug('finished recording macro')
-            if current_macro_bind_key is not None:
-              if len(current_macro_combo) > 0:
-                add_kb_macro()
-              else:
-                delete_macro(current_macro_bind_key)
-
-            recording_macro = False
-            set_macro_mode(False)
-
-        elif recording_macro == True:
-          if current_macro_bind_key is None:
-            if keyname not in (M1-M5):
-              logger.warning("Macros are only for M1-M5 for now.")
-              recording_macro = False
-              set_macro_led(False)
-
-            else:
-              current_macro_bind_key == keyname
-              set_macro_effect(static)
-
-          elif keyname == current_macro_bind_key:
-            warning("Skipping macro assignment as would cause recursion")
-            recording_macro = False
-            set_macro_led(False)
-
-          else:
-            current_macro_combo.append(key_time, keyname, 'press')
-
-        else:
-          if keyname in macro_list:
-            play_macro(keyname)
-
-
-    """
-
+class MacroV2Base(multiprocessing.Process):
     KEY_UP = 0
     KEY_DOWN = 1
     KEY_AUTOREPEAT = 2
 
-    MACROMODE_KEY = 188  # EVENT_MAPPING.get('MACROMODE')
-    GAMEMODE_KEY = 189  # EVENT_MAPPING.get('GAMEMODE')
-    BRIGHTNESS_DOWN_KEY = 190  # EVENT_MAPPING.get('BRIGHTNESSDOWN')
-    BRIGHTNESS_UP_KEY = 194  # EVENT_MAPPING.get('BRIGHTNESSUP')
-    BRIGHTNESS_DELTA = 10  # Speed at which brightness changes
-
-    def __init__(self, device_number, event_files, config, parent):
-        super(KeyboardMacroV2, self).__init__()
+    def __init__(self, device_number, event_files, config, parent, grab_event_files=False):
+        super(MacroV2Base, self).__init__()
 
         self._config = config
         self._macro_file = os.path.join(self._config['General']['DataDir'], 'macros.json')
@@ -115,11 +28,7 @@ class KeyboardMacroV2(multiprocessing.Process):
         self._logger = logging.getLogger('razer.device{0}.macroV2'.format(device_number))
         self._event_files = event_files
         self._parent = parent
-
-        # State variables
-        self._recording_macro = False
-        self._current_macro_bind = None
-        self._current_macro_combo = []
+        self._grab_event_files = grab_event_files
 
         self._macro_sets = []
         self._macros = {}
@@ -136,17 +45,6 @@ class KeyboardMacroV2(multiprocessing.Process):
             return 'UP'
         else:
             return 'AUTOREPEAT'
-
-    def _persist_macros(self):
-        with open(self._macro_file, 'w') as open_fp:
-            macro_list = []
-            for macro_set in self._macro_sets:
-                tmp = {}
-                for macro_key, macro_obj_list in macro_set.items():
-                    tmp[macro_key] = macro_obj_to_dict(macro_obj_list)
-                macro_list.append(tmp)
-
-            self._macro_sets = json.dump(macro_list, open_fp)
 
     def _load_macros(self):
         if os.path.exists(self._macro_file):
@@ -180,6 +78,17 @@ class KeyboardMacroV2(multiprocessing.Process):
             self._macro_sets.append(macro_set)
             self._macros = macro_set
 
+    def _persist_macros(self):
+        with open(self._macro_file, 'w') as open_fp:
+            macro_list = []
+            for macro_set in self._macro_sets:
+                tmp = {}
+                for macro_key, macro_obj_list in macro_set.items():
+                    tmp[macro_key] = macro_obj_to_dict(macro_obj_list)
+                macro_list.append(tmp)
+
+            self._macro_sets = json.dump(macro_list, open_fp)
+
     def _key_event_callback(self):
         """
         Uses the high-level selectors library to basically run select() on the device's event files.
@@ -190,6 +99,8 @@ class KeyboardMacroV2(multiprocessing.Process):
 
         for device_path in self._event_files:
             dev = evdev.InputDevice(device_path)
+            if self._grab_event_files:
+                dev.grab()
             selector.register(dev, selectors.EVENT_READ)
 
         while True:
@@ -208,7 +119,131 @@ class KeyboardMacroV2(multiprocessing.Process):
                                 # self._logger.debug('Key {0} autorepeat'.format(event.code))
                                 self._key_autorepeat(event.timestamp(), event.code)
             except TypeError:
-                break
+                break        #self.key_manager.close()
+
+    def _key_press(self, timestamp, key_code):
+        """
+        Triggered on key press
+
+        :param timestamp: Key Event Timestamp
+        :type timestamp: time.time
+
+        :param key_code: Key Code
+        :type key_code: int
+        """
+        raise NotImplementedError()
+
+    def _key_autorepeat(self, timestamp, key_code):
+        """
+        Triggered on key autorepeat
+
+        :param timestamp: Key Event Timestamp
+        :type timestamp: time.time
+
+        :param key_code: Key Code
+        :type key_code: int
+        """
+        raise NotImplementedError()
+
+    def _key_release(self, timestamp, key_code):
+        """
+        Triggered on key release
+
+        :param timestamp: Key Event Timestamp
+        :type timestamp: time.time
+
+        :param key_code: Key Code
+        :type key_code: int
+        """
+        raise NotImplementedError()
+
+    def run(self):
+        self._logger.debug('Started Macro thread')
+        self._key_event_callback()
+
+    def play_macro(self, macro_key):
+        """
+        Play macro for a given key
+
+        Launches a thread and adds it to the pool
+        :param macro_key: Macro Key
+        :type macro_key: int
+        """
+        self._logger.debug("Running macro - " + str(self._macros[macro_key]))
+        for macro_obj in self._macros[macro_key]:
+            macro_obj.exec(uinput=self.uinput)
+
+        # macro_obj.join()
+
+    # DBus methods
+    def dbus_delete_macro(self, key_code):
+        """
+        Delete a macro from a key
+
+        :param key_code: Key Name
+        :type key_code: int
+        """
+        try:
+            del self._macros[key_code]
+        except KeyError:
+            pass
+
+    def dbus_get_macros(self):
+        """
+        Get macros in JSON format
+
+        Returns a JSON blob of all active macros in the format of
+        {BIND_KEY: [MACRO_DICT...]}
+
+        MACRO_DICT is a dict representation of an action that can be performed. The dict will have a
+        type key which determins what type of action it will perform.
+        For example there are key press macros, URL opening macros, Script running macros etc...
+        :return: JSON of macros
+        :rtype: str
+        """
+        result_dict = {}
+        for macro_key, macro_list in self._macros.items():
+            result_dict[str(macro_key)] = macro_obj_to_dict(macro_list)
+
+        return json.dumps(result_dict)
+
+    def dbus_add_macro(self, macro_key, macro_json):
+        """
+        Add macro from JSON
+
+        The macro_json will be a list of macro objects which is then converted into JSON
+        :param macro_key: Macro bind key
+        :type macro_key: int
+
+        :param macro_json: Macro JSON
+        :type macro_json: str
+        """
+        try:
+            macro_list = macro_dict_to_obj(json.loads(macro_json))
+            self._macros[macro_key] = macro_list
+        except Exception as err:
+            self._logger.error("Failed to load macro {0}. Got {1}".format(macro_key, err))
+
+
+class KeyboardMacroV2(MacroV2Base):
+    """
+    TODO
+     * Handle storing key metrics for heatmap
+    """
+
+    MACROMODE_KEY = 188  # EVENT_MAPPING.get('MACROMODE')
+    GAMEMODE_KEY = 189  # EVENT_MAPPING.get('GAMEMODE')
+    BRIGHTNESS_DOWN_KEY = 190  # EVENT_MAPPING.get('BRIGHTNESSDOWN')
+    BRIGHTNESS_UP_KEY = 194  # EVENT_MAPPING.get('BRIGHTNESSUP')
+    BRIGHTNESS_DELTA = 10  # Speed at which brightness changes
+
+    def __init__(self, device_number, event_files, config, parent, grab_event_files=False):
+        super(KeyboardMacroV2, self).__init__(device_number, event_files, config, parent, grab_event_files)
+
+        # State variables
+        self._recording_macro = False
+        self._current_macro_bind = None
+        self._current_macro_combo = []
 
     def _key_press(self, timestamp, key_code):
         """
@@ -353,72 +388,53 @@ class KeyboardMacroV2(multiprocessing.Process):
         self._macros[self._current_macro_bind] = [MacroKeyString(self._current_macro_combo)]
         self._persist_macros()
 
-    def play_macro(self, macro_key):
+
+class NagaMacroV2(MacroV2Base):
+    def __init__(self, device_number, event_files, config, parent, grab_event_files=False):
+        super(NagaMacroV2, self).__init__(device_number, event_files, config, parent, grab_event_files)
+
+    def _key_press(self, timestamp, key_code):
         """
-        Play macro for a given key
+        Triggered on key press
 
-        Launches a thread and adds it to the pool
-        :param macro_key: Macro Key
-        :type macro_key: int
-        """
-        self._logger.debug("Running macro - " + str(self._macros[macro_key]))
-        for macro_obj in self._macros[macro_key]:
-            macro_obj.exec(uinput=self.uinput)
+        :param timestamp: Key Event Timestamp
+        :type timestamp: time.time
 
-        # macro_obj.join()
-
-    def run(self):
-        self._logger.debug('Started Macro thread')
-        self._key_event_callback()
-
-    # DBus methods
-    def dbus_delete_macro(self, key_code):
-        """
-        Delete a macro from a key
-
-        :param key_code: Key Name
+        :param key_code: Key Code
         :type key_code: int
         """
-        try:
-            del self._macros[key_code]
-        except KeyError:
-            pass
+        if key_code in self._macros:
+            self._logger.debug("Play macro {0}: {1}".format(key_code, self._macros[key_code]))
+            self.play_macro(key_code)
 
-    def dbus_get_macros(self):
+    def _key_autorepeat(self, timestamp, key_code):
         """
-        Get macros in JSON format
+        Triggered on key autorepeat
 
-        Returns a JSON blob of all active macros in the format of
-        {BIND_KEY: [MACRO_DICT...]}
+        :param timestamp: Key Event Timestamp
+        :type timestamp: time.time
 
-        MACRO_DICT is a dict representation of an action that can be performed. The dict will have a
-        type key which determins what type of action it will perform.
-        For example there are key press macros, URL opening macros, Script running macros etc...
-        :return: JSON of macros
-        :rtype: str
+        :param key_code: Key Code
+        :type key_code: int
         """
-        result_dict = {}
-        for macro_key, macro_list in self._macros.items():
-            result_dict[str(macro_key)] = macro_obj_to_dict(macro_list)
+        pass
 
-        return json.dumps(result_dict)
-
-    def dbus_add_macro(self, macro_key, macro_json):
+    def _key_release(self, timestamp, key_code):
         """
-        Add macro from JSON
+        Triggered on key release
 
-        The macro_json will be a list of macro objects which is then converted into JSON
-        :param macro_key: Macro bind key
-        :type macro_key: int
+        :param timestamp: Key Event Timestamp
+        :type timestamp: time.time
 
-        :param macro_json: Macro JSON
-        :type macro_json: str
+        :param key_code: Key Code
+        :type key_code: int
         """
-        try:
-            macro_list = macro_dict_to_obj(json.loads(macro_json))
-            self._macros[macro_key] = macro_list
-        except Exception as err:
-            self._logger.error("Failed to load macro {0}. Got {1}".format(macro_key, err))
+        pass
+
+
+
+
+
 
 
 class MacroObject(object):

@@ -9,7 +9,7 @@ from razer_daemon.dbus_services.dbus_methods.deathadder_chroma import get_logo_b
     get_scroll_brightness as _da_get_scroll_brightness, set_scroll_brightness as _da_set_scroll_brightness, set_logo_active as _da_set_logo_active, \
     set_scroll_active as _da_set_scroll_active, get_scroll_active as _da_get_scroll_active, get_logo_active as _da_get_logo_active
 from razer_daemon.dbus_services.dbus_methods.chroma_keyboard import get_brightness as _get_backlight_brightness, set_brightness as _set_backlight_brightness
-#from razer_daemon.misc.key_event_management import NagaHexV2KeyManager as _NagaHexV2KeyManager
+from razer_daemon.misc.macro import NagaMacroV2 as _NagaMacroV2
 
 
 class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
@@ -69,8 +69,6 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
 
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaWired, self).__init__(*args, **kwargs)
-
-        print()
 
 
 class RazerMambaChromaTE(__RazerDeviceBrightnessSuspend):
@@ -314,7 +312,8 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
     def __init__(self, *args, **kwargs):
         super(RazerNagaHexV2, self).__init__(*args, **kwargs)
 
-        #self.key_manager = _NagaHexV2KeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing, should_grab_event_files=True)
+        self.macro_service = _NagaMacroV2(self._device_number, self.event_files, self.config, self, grab_event_files=True)
+        self.macro_service.start()
 
     def _close(self):
         """
@@ -322,7 +321,7 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
         """
         super(RazerNagaHexV2, self)._close()
 
-        #self.key_manager.close()
+        self.macro_service.terminate()
 
     def _suspend_device(self):
         """
