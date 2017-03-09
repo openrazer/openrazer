@@ -103,6 +103,7 @@ Packages are available for these distributions:
 * [Arch](https://terrycain.github.io/razer-drivers/#arch)
 * [Fedora](https://terrycain.github.io/razer-drivers/#fedora)
 * [OpenSUSE](https://terrycain.github.io/razer-drivers/#opensuse)
+* [Gentoo](https://terrycain.github.io/razer-drivers/#gentoo)
 
 Other distributions can manually install [using these instructions.](https://terrycain.github.io/razer-drivers/#other)
 
