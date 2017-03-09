@@ -41,6 +41,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | ------------------------------- | ----------- | ------ | ------ |
 | Razer Imperator 2012            |  1532:002F  |   ✔    |   ✔    |
 | Razer Ouroboros 2012            |  1532:0032  |   ✔    |   ✔    |
+| Razer Taipan                    |  1532:0034  |   ✔    |   ✔    |
 | Razer Naga Hex                  |  1532:0041  |   ✔    |   ✔    |
 | Razer Abyssus 2014              |  1532:0042  |   ✔    |   ✔    |
 | Razer DeathAdder Chroma         |  1532:0043  |   ✔    |   ✔    |
