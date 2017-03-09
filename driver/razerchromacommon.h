@@ -96,6 +96,7 @@ struct razer_report razer_chroma_misc_set_blade_brightness(unsigned char brightn
 struct razer_report razer_chroma_misc_get_blade_brightness(void);
 
 struct razer_report razer_chroma_misc_one_row_set_custom_frame(unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data);
+struct razer_report razer_chroma_misc_matrix_reactive_trigger(void);
 
 struct razer_report razer_chroma_misc_get_battery_level(void);
 struct razer_report razer_chroma_misc_get_charging_status(void);

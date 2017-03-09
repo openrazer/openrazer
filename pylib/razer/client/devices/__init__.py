@@ -4,9 +4,6 @@ from razer.client.fx import RazerFX as _RazerFX
 from xml.etree import ElementTree as _ET
 
 
-from pprint import pprint
-
-
 class RazerDevice(object):
     """
     Raw razer base device
