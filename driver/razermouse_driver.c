@@ -1726,6 +1726,53 @@ static DEVICE_ATTR(logo_matrix_effect_none,        0220, NULL,                  
 
 
 
+/**
+ * Raw event function
+ */
+static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
+{
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    
+    // The event were looking for is 16 bytes long and starts with 0x04
+    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04)
+    {
+        // Convert 04... to 0100...
+        int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
+        u8 cur_value = 0x00;
+        
+        while(--index > 0)
+        {
+			cur_value = data[index];
+			if(cur_value == 0x00) { // Skip 0x00
+				continue;
+			}
+			
+			switch(cur_value) {
+				case 0x20: // DPI Up
+					cur_value = 0x68; // F13
+					break;
+				case 0x21: // DPI Down
+					cur_value = 0x69; // F14
+					break;
+				case 0x22: // Wheel Left
+					cur_value = 0x6A; // F15
+					break;
+				case 0x23: // Wheel Right
+					cur_value = 0x6B; // F16
+					break;
+			}
+			
+			data[index+1] = cur_value;
+		}
+		
+		
+		data[0] = 0x01;
+		data[1] = 0x00;
+		return 1;
+	}
+	
+	return 0;
+}
 
 /**
  * Probe method is ran whenever a device is binded to the driver
@@ -2176,6 +2223,8 @@ static struct hid_driver razer_mouse_driver = {
     .id_table  = razer_devices,
     .probe     = razer_mouse_probe,
     .remove    = razer_mouse_disconnect,
+
+    .raw_event = razer_raw_event,
 };
 
 module_hid_driver(razer_mouse_driver);
