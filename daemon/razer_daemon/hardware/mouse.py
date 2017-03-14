@@ -167,8 +167,8 @@ class RazerOuroboros(__RazerDevice):
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-ouroboros",
         "top_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-1.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-2.png",
-        "perspective_img": None
+        "side_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-5.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-2.png"
     }
 
     def __init__(self, *args, **kwargs):
