@@ -35,6 +35,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Ornata                                  |  1532:021F  |   ✔    |   ✔    |      |
 | Razer Blade Stealth (Late 2016)               |  1532:0220  |   ✔    |   ✔    |      |
 | Razer BlackWidow Chroma V2                    |  1532:0221  |   ✔    |   ✔    | Needs Testing |
+| Razer Blade (Late 2016)                       |  1532:0224  |   ✔    |   ✔    | Needs Testing |
 
 ### Mouse
 | Device                          | USB VID:PID | Driver | Daemon |
