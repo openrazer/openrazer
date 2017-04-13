@@ -283,7 +283,6 @@ class RazerBlackWidowChromaV2(_MacroKeyboard):
         self.ripple_manager.close()
 
 
-
 class RazerBlackWidowChromaTournamentEdition(_MacroKeyboard):
     """
     Class for the Razer BlackWidow Tournament Edition Chroma
@@ -448,7 +447,7 @@ class RazerBladeStealthLate2016(_MacroKeyboard):
     USB_PID = 0x0220
     HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = False
-    MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
+    MATRIX_DIMS = [6, 16]  # 6 Rows, 22 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row',
@@ -523,7 +522,7 @@ class RazerBladeQHD(_MacroKeyboard):
     USB_PID = 0x020F
     HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = False
-    MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
+    MATRIX_DIMS = [6, 16]  # 6 Rows, 22 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
