@@ -106,14 +106,14 @@ static bool is_blade_laptop(struct usb_device *usb_dev) {
 /**
  * Send report to the keyboard
  */
-static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
+int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
     return razer_get_usb_response(usb_dev, 0x02, request_report, 0x02, response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
 }
 
 /**
  * Function to send to device, get response, and actually check the response
  */
-static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
+struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
 	int retval = -1;
     struct razer_report response_report;
@@ -2044,7 +2044,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ANANSI) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_LATE_2016) },
-    { 0 }
+    { }
 };
 
 MODULE_DEVICE_TABLE(hid, razer_devices);
