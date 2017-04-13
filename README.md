@@ -25,7 +25,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer DeathStalker Chroma                     |  1532:0204  |   ✔    |   ✔    |      |
 | Razer Blade Stealth                           |  1532:0205  |   ✔    |   ✔    |      |
 | Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔    |   ✔    |      |
-| Razer Blade QHD                               |  1532:020F  |   ✔    |   ✔    | Individual Key lighting not working yet |
+| Razer Blade QHD                               |  1532:020F  |   ✔    |   ✔    |      |
 | Razer Blade Pro (Late 2016)                   |  1532:0210  |   ✔    |   ✔    |      |
 | Razer BlackWidow Ultimate 2016                |  1532:0214  |   ✔    |   ✔    |      |
 | Razer BlackWidow X Chroma                     |  1532:0216  |   ✔    |   ✔    |      |

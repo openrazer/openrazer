@@ -57,13 +57,13 @@ driver_uninstall:
 lp_driver:
 	@echo -e "\n::\033[32m Compiling Razer kernel modules (Launchpad)\033[0m"
 	@echo "========================================"
-	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+generic' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
+	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+(generic|amd64)' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules > /dev/null 2>&1
 
 lp_driver_clean:
 	@echo -e "\n::\033[32m Cleaning Razer kernel modules (Launchpad)\033[0m"
 	@echo "========================================"
-	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+generic' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
+	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+(generic|amd64)' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
 	make -C "$(KERNELDIR)" SUBDIRS="$(DRIVERDIR)" clean
 
 

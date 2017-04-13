@@ -167,8 +167,8 @@ class RazerOuroboros(__RazerDevice):
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-ouroboros",
         "top_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-1.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-2.png",
-        "perspective_img": None
+        "side_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-5.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-2.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -432,10 +432,10 @@ class RazerTaipan(__RazerDevice):
                'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active']
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-6.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-5.png",
-        "perspective_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-1.png"
+        "store": "https://www.razerzone.com/store/razer-taipan",
+        "top_img": "https://assets.razerzone.com/eeimages/products/293/razer-taipan-gallery-2-black__store_gallery.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/293/razer-taipan-gallery-3-black__store_gallery.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/293/razer-taipan-gallery-4-black__store_gallery.png"
     }
 
     def __init__(self, *args, **kwargs):
