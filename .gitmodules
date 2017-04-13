@@ -1,0 +1,3 @@
+[submodule "razer-drivers-win32"]
+	path = razer-drivers-win32
+	url = https://github.com/rsandoz/razer-drivers-win32

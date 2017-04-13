@@ -45,14 +45,14 @@ MODULE_LICENSE(DRIVER_LICENSE);
 /**
  * Send report to the mouse
  */
-int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
+static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
     return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, 600, 800);
 }
 
 /**
  * Function to send to device, get response, and actually check the response
  */
-struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
+static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
     int retval = -1;
     struct razer_report response_report;
@@ -89,7 +89,7 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
 /**
  * Device mode function
  */
-void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsigned char param)
+static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsigned char param)
 {
     struct razer_report report = razer_chroma_standard_set_device_mode(mode, param);
     report.transaction_id.id = 0x3F;
@@ -532,6 +532,10 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
  * Read and write is 0664
  */
 
+#if defined(WIN32) || defined(_WIN64)
+#undef DEVICE_ATTR
+#define DEVICE_ATTR(_name, _mode, _show, _store) DEVICE_ATTR1(mug, _name, _mode, _show, _store)
+#endif
 static DEVICE_ATTR(test,                    0660, razer_attr_read_test,                       razer_attr_write_test);
 static DEVICE_ATTR(version,                 0440, razer_attr_read_version,                    NULL);
 static DEVICE_ATTR(device_type,             0440, razer_attr_read_device_type,                NULL);
@@ -746,7 +750,12 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
  */
 static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_MUG) },
+// C2059: syntax error: '}'
+#if defined(WIN32) || defined(_WIN64)
+    { 0 }
+#else
     { }
+#endif
 };
 
 MODULE_DEVICE_TABLE(hid, razer_devices);

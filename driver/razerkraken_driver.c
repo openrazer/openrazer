@@ -512,7 +512,14 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 static ssize_t razer_attr_read_mode_breath(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	struct razer_kraken_device *device = dev_get_drvdata(dev);
+//C2440 'type cast': cannot convert from 'unsigned char' to 'razer_kraken_effect_byte'
+#if defined(WIN32) || defined(_WIN64)
+	unsigned char effect_byte1 = get_current_effect(dev);
+	union razer_kraken_effect_byte effect_byte;
+	memcpy(&effect_byte, &effect_byte1, sizeof(unsigned char));
+#else
 	union razer_kraken_effect_byte effect_byte = (union razer_kraken_effect_byte)get_current_effect(dev);
+#endif
 	unsigned char num_colours = 1;
 	
 	if(effect_byte.bits.two_colour_breathing == 1) {
@@ -657,6 +664,10 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
  * Read and write is 0664
  */
 
+#if defined(WIN32) || defined(_WIN64)
+#undef DEVICE_ATTR
+#define DEVICE_ATTR(_name, _mode, _show, _store) DEVICE_ATTR1(kraken, _name, _mode, _show, _store)
+#endif
 static DEVICE_ATTR(test,                    0660, razer_attr_read_test,                       razer_attr_write_test);
 static DEVICE_ATTR(version,                 0440, razer_attr_read_version,                    NULL);
 static DEVICE_ATTR(device_type,             0440, razer_attr_read_device_type,                NULL);
@@ -825,7 +836,12 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 static const struct hid_device_id razer_devices[] = {
 	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_V2) },
+// C2059: syntax error: '}'
+#if defined(WIN32) || defined(_WIN64)
+    { 0 }
+#else
     { }
+#endif
 };
 
 MODULE_DEVICE_TABLE(hid, razer_devices);

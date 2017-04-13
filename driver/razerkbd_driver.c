@@ -73,7 +73,12 @@ static const struct razer_key_translation chroma_keys[] = {
     
     // Custom bind
     { KEY_KPENTER, KEY_CALC },
+// C2059: syntax error: '}'
+#if defined(WIN32) || defined(_WIN64)
+    { 0 }
+#else
     { }
+#endif
 };
 
 /**
@@ -105,14 +110,14 @@ static bool is_blade_laptop(struct usb_device *usb_dev) {
 /**
  * Send report to the keyboard
  */
-int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
+static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
     return razer_get_usb_response(usb_dev, 0x02, request_report, 0x02, response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
 }
 
 /**
  * Function to send to device, get response, and actually check the response
  */
-struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
+static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
 	int retval = -1;
     struct razer_report response_report;
@@ -149,7 +154,7 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
 /**
  * Device mode function
  */
-void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsigned char param)
+static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsigned char param)
 {
 	struct razer_report report = razer_chroma_standard_set_device_mode(mode, param);
 
@@ -1352,6 +1357,10 @@ static ssize_t razer_attr_read_key_alt_f4(struct device *dev, struct device_attr
  * Read and write is 0664
  */
 // TODO device_mode endpoint
+#if defined(WIN32) || defined(_WIN64)
+#undef DEVICE_ATTR
+#define DEVICE_ATTR(_name, _mode, _show, _store) DEVICE_ATTR1(kbd, _name, _mode, _show, _store)
+#endif
 static DEVICE_ATTR(game_led_state,          0660, razer_attr_read_mode_game,                  razer_attr_write_mode_game);
 static DEVICE_ATTR(macro_led_state,         0660, razer_attr_read_mode_macro,                 razer_attr_write_mode_macro);
 static DEVICE_ATTR(macro_led_effect,        0660, razer_attr_read_mode_macro_effect,          razer_attr_write_mode_macro_effect);
@@ -2010,7 +2019,12 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORNATA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ANANSI) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2) },
+// C2059: syntax error: '}'
+#if defined(WIN32) || defined(_WIN64)
+    { 0 }
+#else
     { }
+#endif
 };
 
 MODULE_DEVICE_TABLE(hid, razer_devices);
