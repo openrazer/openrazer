@@ -549,7 +549,6 @@ class RazerBladeLate2016(_MacroKeyboard):
         self.ripple_manager.close()
 
 
-
 class RazerBladeQHD(_MacroKeyboard):
     """
     Class for the Razer Blade (QHD)
