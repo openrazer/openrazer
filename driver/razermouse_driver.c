@@ -1825,6 +1825,8 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         goto exit;
     }
     
+    razer_mouse_init(dev, intf, hdev);
+    
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE)
     {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
