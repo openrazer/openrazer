@@ -18,6 +18,19 @@ class RazerMouse(__RazerDevice):
             self._dbus_interfaces['dpi'] = _dbus.Interface(self._dbus, "razer.device.dpi")
 
     @property
+    def max_dpi(self) -> int:
+        """
+        Gets max DPI
+
+        :return: Max DPI, if device does not have DPI it'll return None
+        :rtype: int or None
+        """
+        if self.has('dpi'):
+            return int(self._dbus_interfaces['dpi'].maxDPI())
+        else:
+            return None
+
+    @property
     def dpi(self) -> tuple:
         """
         Get mouse DPI
