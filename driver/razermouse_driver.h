@@ -16,12 +16,24 @@
 #define USB_VENDOR_ID_RAZER 0x1532
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED
+ #define USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED 0x0024
+#endif
+
+#ifndef USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS
+ #define USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS 0x0025
+#endif
+
 #ifndef USB_DEVICE_ID_RAZER_IMPERATOR // 2012
  #define USB_DEVICE_ID_RAZER_IMPERATOR 0x002F
 #endif
 
 #ifndef USB_DEVICE_ID_RAZER_OUROBOROS // 2012
  #define USB_DEVICE_ID_RAZER_OUROBOROS 0x0032
+#endif
+
+#ifndef USB_DEVICE_ID_RAZER_TAIPAN // 2016?
+ #define USB_DEVICE_ID_RAZER_TAIPAN 0x0034
 #endif
 
 #ifndef USB_DEVICE_ID_RAZER_NAGA_HEX
@@ -83,6 +95,15 @@ struct razer_mouse_device {
     unsigned char effect;
     char name[128];
     char phys[64];
+    
+    struct usb_device *usb_dev;
+    struct mutex lock;
+    unsigned char usb_interface_protocol;
+    
+    unsigned short usb_vid;
+    unsigned short usb_pid;
+    
+    char serial[23];
 };
 
 // Mamba Key Location

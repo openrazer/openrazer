@@ -249,6 +249,21 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
 }
 
 /**
+ * Write device file "matrix_reactive_trigger"
+ *
+ * It triggers the mouse pad when written to
+ */
+static ssize_t razer_attr_write_mode_reactive_trigger(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = razer_chroma_misc_matrix_reactive_trigger();
+	razer_send_payload(usb_dev, &report);
+	
+    return count;
+}
+
+/**
  * Write device file "mode_breath"
  */
 static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -441,6 +456,7 @@ static DEVICE_ATTR(matrix_effect_breath,    0220, NULL,                         
 static DEVICE_ATTR(matrix_effect_custom,    0220, NULL,                                 razer_attr_write_mode_custom);
 static DEVICE_ATTR(matrix_effect_static,    0220, NULL,                                 razer_attr_write_mode_static);
 static DEVICE_ATTR(matrix_custom_frame,     0220, NULL,                                 razer_attr_write_set_key_row);
+static DEVICE_ATTR(matrix_reactive_trigger,  0220, NULL,                                 razer_attr_write_mode_reactive_trigger);
 
 
 
@@ -469,6 +485,7 @@ static int razer_firefly_probe(struct hid_device *hdev, const struct hid_device_
     
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
+		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_reactive_trigger);
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
@@ -527,6 +544,7 @@ static void razer_firefly_disconnect(struct hid_device *hdev)
     
 		device_remove_file(&hdev->dev, &dev_attr_version);
 		device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
+		device_remove_file(&hdev->dev, &dev_attr_matrix_reactive_trigger);
 		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
 		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
 		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);

@@ -942,6 +942,21 @@ struct razer_report razer_chroma_misc_one_row_set_custom_frame(unsigned char sta
 }
 
 /**
+ * Trigger reactive on Firefly
+ */
+struct razer_report razer_chroma_misc_matrix_reactive_trigger(void)
+{
+    struct razer_report report = get_razer_report(0x03, 0x0A, 0x05);
+    report.arguments[0] = 0x02; // Effect ID
+    report.arguments[1] = 0; // this speed triggers reactive
+    report.arguments[2] = 0;
+    report.arguments[3] = 0;
+    report.arguments[4] = 0;
+    
+    return report;
+}
+
+/**
  * Gets battery level
  * 
  * 0->255 is in arg[1]

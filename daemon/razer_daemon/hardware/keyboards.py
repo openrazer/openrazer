@@ -29,7 +29,52 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         Close the key manager
         """
         super(_MacroKeyboard, self)._close()
-        self.set_device_mode(0x00, 0x00)  # Device mode
+
+        try:
+            self.set_device_mode(0x00, 0x00)  # Device mode
+        except FileNotFoundError:  # Could be called when daemon is stopping or device is removed.
+            pass
+
+        # TODO look into saving stats in /var/run maybe
+        self.key_manager.close()
+
+
+class RazerNostromo(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Tartarus Chroma
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Nostromo-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0111
+    HAS_MATRIX = False
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [-1, -1]  # 6 Rows, 22 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keypad',
+               'tartarus_get_profile_led_red', 'tartarus_set_profile_led_red', 'tartarus_get_profile_led_green', 'tartarus_set_profile_led_green', 'tartarus_get_profile_led_blue', 'tartarus_set_profile_led_blue',
+               'get_macros', 'delete_macro', 'add_macro',
+
+               # ?
+               'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier']
+
+    RAZER_URLS = {
+        "store": None,
+        "top_img": None,
+        "side_img": None,
+        "perspective_img": None
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerNostromo, self).__init__(*args, **kwargs)
+        # Methods are loaded into DBus by this point
+
+        self.key_manager = _GamepadKeyManager(self._device_number, self.event_files, self, testing=self._testing)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerNostromo, self)._close()
 
         # TODO look into saving stats in /var/run maybe
         self.key_manager.close()
@@ -279,7 +324,6 @@ class RazerBlackWidowChromaV2(_MacroKeyboard):
         self.ripple_manager.close()
 
 
-
 class RazerBlackWidowChromaTournamentEdition(_MacroKeyboard):
     """
     Class for the Razer BlackWidow Tournament Edition Chroma
@@ -444,7 +488,7 @@ class RazerBladeStealthLate2016(_MacroKeyboard):
     USB_PID = 0x0220
     HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = False
-    MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
+    MATRIX_DIMS = [6, 16]  # 6 Rows, 22 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row',
@@ -509,6 +553,43 @@ class RazerBladeProLate2016(_MacroKeyboard):
         self.ripple_manager.close()
 
 
+class RazerBladeLate2016(_MacroKeyboard):
+    """
+    Class for the Razer Blade Pro (Late 2016)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0224
+    HAS_MATRIX = True
+    DEDICATED_MACRO_KEYS = False
+    MATRIX_DIMS = [6, 15]  # 6 Rows, 22 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
+
+    RAZER_URLS = {
+        "store": "https://www.razerzone.com/store/razer-blade-pro",
+        "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2.png"
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerBladeLate2016, self).__init__(*args, **kwargs)
+
+        self.ripple_manager = _RippleManager(self, self._device_number)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerBladeLate2016, self)._close()
+
+        self.ripple_manager.close()
+
+
 class RazerBladeQHD(_MacroKeyboard):
     """
     Class for the Razer Blade (QHD)
@@ -519,7 +600,7 @@ class RazerBladeQHD(_MacroKeyboard):
     USB_PID = 0x020F
     HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = False
-    MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
+    MATRIX_DIMS = [6, 16]  # 6 Rows, 22 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',

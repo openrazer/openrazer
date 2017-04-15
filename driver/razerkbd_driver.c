@@ -97,6 +97,7 @@ static bool is_blade_laptop(struct usb_device *usb_dev) {
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
         case USB_DEVICE_ID_RAZER_BLADE_QHD:
+        case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
             return true;
 	}
 	return false;
@@ -105,14 +106,14 @@ static bool is_blade_laptop(struct usb_device *usb_dev) {
 /**
  * Send report to the keyboard
  */
-int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
-    return razer_get_usb_response(usb_dev, 0x02, request_report, 0x02, response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
+    return razer_get_usb_response(usb_dev, 0x01, request_report, 0x01, response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
 }
 
 /**
  * Function to send to device, get response, and actually check the response
  */
-struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
+static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
 	int retval = -1;
     struct razer_report response_report;
@@ -264,6 +265,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     switch (usb_dev->descriptor.idProduct)
     {
+		case USB_DEVICE_ID_RAZER_NOSTROMO:
+		    device_type = "Razer Nostromo\n";
+            break;
+		
 		case USB_DEVICE_ID_RAZER_ORBWEAVER:
 			device_type = "Razer Orbweaver\n";
             break;
@@ -306,6 +311,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
             device_type = "Razer Blade Pro (Late 2016)\n";
+            break;
+        
+        case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+            device_type = "Razer Blade (Late 2016)\n";
             break;
  
         case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
@@ -756,6 +765,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
         case USB_DEVICE_ID_RAZER_BLADE_QHD:
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+        case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
         case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
             if(count == 3)
             {
@@ -1094,6 +1104,7 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
 			report = razer_chroma_standard_set_led_brightness(VARSTORE, LOGO_LED, brightness);
             break;
         
+        case USB_DEVICE_ID_RAZER_NOSTROMO:
         default:
             if (is_blade_laptop(usb_dev)) {
                 report = razer_chroma_misc_set_blade_brightness(brightness);
@@ -1133,6 +1144,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
 			report = razer_chroma_standard_get_led_brightness(VARSTORE, LOGO_LED);
             break;
     
+		case USB_DEVICE_ID_RAZER_NOSTROMO:
         default:
             if (is_blade_laptop(usb_dev)) {
                 report = razer_chroma_misc_get_blade_brightness();
@@ -1252,7 +1264,8 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 			case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
 				report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
 				break;
-				
+			
+			case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
 			case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
 				report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
 				report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
@@ -1643,11 +1656,30 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
                 break;
 
+            case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
+                break;
+
             case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
+                break;
+                
+            case USB_DEVICE_ID_RAZER_NOSTROMO:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
@@ -1873,6 +1905,25 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
                 device_remove_file(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
                 break;
+            
+            case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+                device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+                device_remove_file(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
+                break;
+
+            case USB_DEVICE_ID_RAZER_NOSTROMO:
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
+                break;
 
             case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
                 device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
@@ -1990,6 +2041,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
  */
 static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORBWEAVER) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOSTROMO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL_ALT) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012) },
@@ -2010,7 +2062,8 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORNATA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ANANSI) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2) },
-    { }
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_LATE_2016) },
+    { 0 }
 };
 
 MODULE_DEVICE_TABLE(hid, razer_devices);

@@ -1,3 +1,23 @@
+razer (1.1.10-0ubuntu1) xenial; urgency=low
+
+  * Fixed bug with Razer Blade QHD Lighting
+  * Added Device - Razer Blade (Late 2016)
+  * Added Device - Razer Mamba 2012 (Wired)
+  * Added Device - Razer Mamba 2012 (Wireless)
+  * Added Device - Razer Taipan
+  * Added Device - Razer Nostromo
+  * Now a DBus method to trigger reactive on firefly
+  * Added a maxDPI() method to DBus and the python library
+  * Fixed limited with some Blade RGB payloads
+  * Fixed some crash conditions
+  * Slowly prepping driver for some windows ifdefs so that it can compile on windows easily
+  * Added raw_event function to mice that detects buttons when in device mode (doesnt work yet, proper code is in other branch)
+  * Started adding mutex's to mice
+  * Added macros globally in pylib
+  * Added firefly class to pylib
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sat, 15 Apr 2017 21:54:00 +0000
+
 razer (1.1.9-0ubuntu1) xenial; urgency=low
 
   * Added options to daemon for restarting / stopping using the dameon script
