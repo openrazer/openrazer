@@ -85,6 +85,11 @@ struct razer_mouse_device {
     struct usb_device *usbdev;
     struct hid_device *hiddev;
     unsigned char effect;
+    
+    DECLARE_BITMAP(other_buttons, KEY_CNT);
+    struct input_dev *input;
+
+    
     char name[128];
     char phys[64];
 };

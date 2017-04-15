@@ -19,14 +19,16 @@ class MacroV2Base(multiprocessing.Process):
     KEY_DOWN = 1
     KEY_AUTOREPEAT = 2
 
-    def __init__(self, device_number, event_files, config, parent, grab_event_files=False):
+    def __init__(self, serial, device_number, event_files, config, parent, grab_event_files=False, non_grab_files=None):
         super(MacroV2Base, self).__init__()
 
+        self._serial = serial
         self._config = config
-        self._macro_file = os.path.join(self._config['General']['DataDir'], 'macros.json')
+        self._macro_file = os.path.join(self._config['General']['DataDir'], 'macros-{0}.json'.format(serial))
         self._device_number = device_number
         self._logger = logging.getLogger('razer.device{0}.macroV2'.format(device_number))
         self._event_files = event_files
+        self._event_files_nograb = non_grab_files
         self._parent = parent
         self._grab_event_files = grab_event_files
 
@@ -103,6 +105,12 @@ class MacroV2Base(multiprocessing.Process):
                 dev.grab()
             selector.register(dev, selectors.EVENT_READ)
 
+        # Hack for reading mouse event file just for keypresses
+        if self._event_files_nograb is not None:
+            for device_path in self._event_files_nograb:
+                dev = evdev.InputDevice(device_path)
+                selector.register(dev, selectors.EVENT_READ)
+
         while True:
             try:
                 for key, mask in selector.select():
@@ -119,7 +127,7 @@ class MacroV2Base(multiprocessing.Process):
                                 # self._logger.debug('Key {0} autorepeat'.format(event.code))
                                 self._key_autorepeat(event.timestamp(), event.code)
             except TypeError:
-                break        #self.key_manager.close()
+                break
 
     def _key_press(self, timestamp, key_code):
         """
@@ -237,8 +245,8 @@ class KeyboardMacroV2(MacroV2Base):
     BRIGHTNESS_UP_KEY = 194  # EVENT_MAPPING.get('BRIGHTNESSUP')
     BRIGHTNESS_DELTA = 10  # Speed at which brightness changes
 
-    def __init__(self, device_number, event_files, config, parent, grab_event_files=False):
-        super(KeyboardMacroV2, self).__init__(device_number, event_files, config, parent, grab_event_files)
+    def __init__(self, serial, device_number, event_files, config, parent, grab_event_files=False):
+        super(KeyboardMacroV2, self).__init__(serial, device_number, event_files, config, parent, grab_event_files)
 
         # State variables
         self._recording_macro = False
@@ -390,8 +398,28 @@ class KeyboardMacroV2(MacroV2Base):
 
 
 class NagaMacroV2(MacroV2Base):
-    def __init__(self, device_number, event_files, config, parent, grab_event_files=False):
-        super(NagaMacroV2, self).__init__(device_number, event_files, config, parent, grab_event_files)
+    # LEFT = 272
+    # RIGHT = 273
+    # MIDDLE = 274
+    BTN_DPI_UP = 276
+    BTN_DPI_DOWN = 275
+
+    BTN_SCROLL_LEFT = 262
+    BTN_SCROLL_RIGHT = 263
+
+    KEY_1 = 2
+    KEY_2 = 3
+    KEY_3 = 4
+    KEY_4 = 5
+    KEY_5 = 6
+    KEY_6 = 7
+    KEY_7 = 8
+
+    # Not used
+    WANTED_KEYS = (KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, BTN_DPI_UP, BTN_DPI_DOWN, BTN_SCROLL_LEFT, BTN_SCROLL_RIGHT)
+
+    def __init__(self, serial, device_number, event_files, config, parent, grab_event_files=False, non_grab_files=None):
+        super(NagaMacroV2, self).__init__(serial, device_number, event_files, config, parent, grab_event_files, non_grab_files)
 
     def _key_press(self, timestamp, key_code):
         """
@@ -403,6 +431,9 @@ class NagaMacroV2(MacroV2Base):
         :param key_code: Key Code
         :type key_code: int
         """
+
+        print("KEY {0}".format(key_code))
+
         if key_code in self._macros:
             self._logger.debug("Play macro {0}: {1}".format(key_code, self._macros[key_code]))
             self.play_macro(key_code)
@@ -430,6 +461,20 @@ class NagaMacroV2(MacroV2Base):
         :type key_code: int
         """
         pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

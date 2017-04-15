@@ -2,6 +2,7 @@
 Mouse class
 """
 import re
+import os
 from razer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice
 from razer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 # TODO replace with plain import
@@ -283,6 +284,7 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
     Class for the Razer Naga Hex V2
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Naga_Hex_V2-if0(1|2)-event-kbd')
+    EVENT_FILE_MOUSE_REGEX = re.compile(r'.*Razer_Naga_Hex_V2-event-mouse')
 
     USB_VID = 0x1532
     USB_PID = 0x0050
@@ -312,7 +314,11 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
     def __init__(self, *args, **kwargs):
         super(RazerNagaHexV2, self).__init__(*args, **kwargs)
 
-        self.macro_service = _NagaMacroV2(self._device_number, self.event_files, self.config, self, grab_event_files=True)
+        self.set_device_mode(0x03, 0x00)  # Driver mode
+
+        mouse_event_file = self._find_mouse_event_file()
+
+        self.macro_service = _NagaMacroV2(self.serial, self._device_number, self.event_files, self.config, self, grab_event_files=False, non_grab_files=mouse_event_file)
         self.macro_service.start()
 
     def _close(self):
@@ -322,6 +328,11 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
         super(RazerNagaHexV2, self)._close()
 
         self.macro_service.terminate()
+
+        try:
+            self.set_device_mode(0x00, 0x00)  # Device mode
+        except FileNotFoundError:  # Could be called when daemon is stopping or device is removed.
+            pass
 
     def _suspend_device(self):
         """
@@ -354,6 +365,16 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
         _da_set_scroll_brightness(self, scroll_brightness)
         _set_backlight_brightness(self, backlight_brightness)
         self.disable_notify = False
+
+    def _find_mouse_event_file(self):
+        search_dir = self._get_search_dir()
+
+        if os.path.exists(search_dir):
+            for event_file in os.listdir(search_dir):
+                if self.EVENT_FILE_MOUSE_REGEX is not None and self.EVENT_FILE_MOUSE_REGEX.match(event_file) is not None:
+                    return [os.path.join(search_dir, event_file)]
+
+        return None
 
 
 class RazerNagaHex(__RazerDevice):

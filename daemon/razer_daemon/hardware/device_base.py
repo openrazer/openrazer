@@ -12,6 +12,7 @@ from razer_daemon.dbus_services.service import DBusService
 import razer_daemon.dbus_services.dbus_methods
 from razer_daemon.misc import effect_sync
 
+
 # pylint: disable=too-many-instance-attributes
 class RazerDevice(DBusService):
     """
@@ -66,10 +67,7 @@ class RazerDevice(DBusService):
         # Find event files in /dev/input/by-id/ by matching against regex
         self.event_files = []
 
-        if self._testing:
-            search_dir = os.path.join(device_path, 'input')
-        else:
-            search_dir = '/dev/input/by-id/'
+        search_dir = self._get_search_dir()
 
         if os.path.exists(search_dir):
             for event_file in os.listdir(search_dir):
@@ -385,6 +383,12 @@ class RazerDevice(DBusService):
 
         for observer in self._observer_list:
             observer.notify(msg)
+
+    def _get_search_dir(self):
+        if self._testing:
+            return os.path.join(self._device_path, 'input')
+        else:
+            return '/dev/input/by-id/'
 
     @classmethod
     def match(cls, device_id, dev_path):

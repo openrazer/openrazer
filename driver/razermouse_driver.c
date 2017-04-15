@@ -45,14 +45,14 @@ MODULE_LICENSE(DRIVER_LICENSE);
 /**
  * Send report to the mouse
  */
-int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
+static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
     return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
 }
 
 /**
  * Function to send to device, get response, and actually check the response
  */
-struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
+static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
     int retval = -1;
     struct razer_report response_report;
@@ -1726,53 +1726,8 @@ static DEVICE_ATTR(logo_matrix_effect_none,        0220, NULL,                  
 
 
 
-/**
- * Raw event function
- */
-static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
-{
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    
-    // The event were looking for is 16 bytes long and starts with 0x04
-    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04)
-    {
-        // Convert 04... to 0100...
-        int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
-        u8 cur_value = 0x00;
-        
-        while(--index > 0)
-        {
-			cur_value = data[index];
-			if(cur_value == 0x00) { // Skip 0x00
-				continue;
-			}
-			
-			switch(cur_value) {
-				case 0x20: // DPI Up
-					cur_value = 0x68; // F13
-					break;
-				case 0x21: // DPI Down
-					cur_value = 0x69; // F14
-					break;
-				case 0x22: // Wheel Left
-					cur_value = 0x6A; // F15
-					break;
-				case 0x23: // Wheel Right
-					cur_value = 0x6B; // F16
-					break;
-			}
-			
-			data[index+1] = cur_value;
-		}
-		
-		
-		data[0] = 0x01;
-		data[1] = 0x00;
-		return 1;
-	}
-	
-	return 0;
-}
+
+
 
 /**
  * Probe method is ran whenever a device is binded to the driver
@@ -2191,13 +2146,110 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
     dev_info(&intf->dev, "Razer Device disconnected\n");
 }
 
+
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
-	if(size >= 4) {
-		printk(KERN_WARNING "razermouse_test: %02x%02x%02x%02x", data[0], data[1], data[2], data[3]);
+	struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+	struct razer_mouse_device *msc = hid_get_drvdata(hdev);
+	
+	
+	/*if(size >= 4 && intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+		printk(KERN_WARNING "razermouse_test: %02x%02x%02x%02x\n", data[0], data[1], data[2], data[3]);
+	}*/
+	
+	// If size is 8 this is the event were after
+	if(size == 8 && intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+		int sent_event = 0;
+		
+		/*if(data[0] & 0x10) { // DPI_UP
+			printk(KERN_WARNING "razermouse_test: DPI_UP  cnt %d\n", size);
+		}		
+		if(data[0] & 0x08) { // DPI_DOWN
+			printk(KERN_WARNING "razermouse_test: DPI_DOWN  cnt %d\n", size);
+		}*/
+		
+		if(data[0] & 0x20) { // SCROLL_LEFT
+			//printk(KERN_WARNING "razermouse_test: SCROLL_LEFT  cnt %d\n", size);
+			
+			input_report_key(msc->input, BTN_6, 1);
+			sent_event = 1;
+			set_bit(BTN_6, msc->other_buttons);
+		} else if (test_bit(BTN_6, msc->other_buttons)) {
+			input_report_key(msc->input, BTN_6, 0);
+			sent_event = 1;
+			clear_bit(BTN_6, msc->other_buttons);
+		}
+		
+		
+		if(data[0] & 0x40) { // SCROLL_RIGHT
+			//printk(KERN_WARNING "razermouse_test: SCROLL_RIGHT  cnt %d\n", size);
+			
+			input_report_key(msc->input, BTN_7, 1);
+			sent_event = 1;
+			set_bit(BTN_7, msc->other_buttons);
+		} else if (test_bit(BTN_7, msc->other_buttons)) {
+			input_report_key(msc->input, BTN_7, 0);
+			sent_event = 1;
+			clear_bit(BTN_7, msc->other_buttons);
+		}
+		
+		// Sync if we sent events
+		if(sent_event == 1) {
+			input_sync(msc->input);
+		}
 	}
+	
 	return 0;
 }
+
+static int razer_setup_input(struct input_dev *input, struct hid_device *hdev)
+{
+	__set_bit(EV_KEY, input->evbit);
+	
+	__set_bit(BTN_LEFT, input->keybit);
+	__set_bit(BTN_RIGHT, input->keybit);
+	__set_bit(BTN_MIDDLE, input->keybit);
+	
+	__set_bit(BTN_RIGHT, input->keybit);
+	
+	__set_bit(EV_REL, input->evbit);
+	__set_bit(REL_WHEEL, input->relbit);
+	__set_bit(REL_HWHEEL, input->relbit);
+	
+	__set_bit(BTN_4, input->keybit);
+	__set_bit(BTN_5, input->keybit);
+	__set_bit(BTN_6, input->keybit);
+	__set_bit(BTN_7, input->keybit);
+	
+	return 0;
+}
+
+static int razer_input_configured(struct hid_device *hdev, struct hid_input *hi)
+{
+	struct razer_mouse_device *msc = hid_get_drvdata(hdev);
+	int ret;
+
+	ret = razer_setup_input(msc->input, hdev);
+	if (ret) {
+		hid_err(hdev, "magicmouse setup input failed (%d)\n", ret);
+		/* clean msc->input to notify probe() of the failure */
+		msc->input = NULL;
+		return ret;
+	}
+
+	return 0;
+}
+
+static int razer_input_mapping(struct hid_device *hdev, struct hid_input *hi, struct hid_field *field, struct hid_usage *usage, unsigned long **bit, int *max)
+{
+	struct razer_mouse_device *msc = hid_get_drvdata(hdev);
+
+	if (!msc->input)
+		msc->input = hi->input;
+
+	return 0;
+}
+
 
 
 /**
@@ -2217,7 +2269,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ELITE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA) },
-    { }
+    { 0 }
 };
 
 MODULE_DEVICE_TABLE(hid, razer_devices);
@@ -2232,6 +2284,8 @@ static struct hid_driver razer_mouse_driver = {
     .probe     = razer_mouse_probe,
     .remove    = razer_mouse_disconnect,
     .raw_event = razer_raw_event,
+    .input_mapping    = razer_input_mapping,
+    .input_configured = razer_input_configured,
 };
 
 module_hid_driver(razer_mouse_driver);
