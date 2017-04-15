@@ -95,6 +95,15 @@ struct razer_mouse_device {
     unsigned char effect;
     char name[128];
     char phys[64];
+    
+    struct usb_device *usb_dev;
+    struct mutex lock;
+    unsigned char usb_interface_protocol;
+    
+    unsigned short usb_vid;
+    unsigned short usb_pid;
+    
+    char serial[23];
 };
 
 // Mamba Key Location

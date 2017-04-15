@@ -41,6 +41,8 @@ Also this is the master branch, devices may appear in the tables below but might
 | Device                          | USB VID:PID | Driver | Daemon |
 | ------------------------------- | ----------- | ------ | ------ |
 | Razer Imperator 2012            |  1532:002F  |   ✔    |   ✔    |
+| Razer Mamba 2012 (Wired)        |  1532:0024  |   ✔    |   ✔    |
+| Razer Mamba 2012 (Wireless)     |  1532:0025  |   ✔    |   ✔  (needs testing)  |
 | Razer Ouroboros 2012            |  1532:0032  |   ✔    |   ✔    |
 | Razer Taipan                    |  1532:0034  |   ✔    |   ✔    |
 | Razer Naga Hex                  |  1532:0041  |   ✔    |   ✔    |

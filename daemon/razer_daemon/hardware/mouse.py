@@ -70,8 +70,6 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaWired, self).__init__(*args, **kwargs)
 
-        print()
-
 
 class RazerMambaChromaTE(__RazerDeviceBrightnessSuspend):
     """
@@ -551,3 +549,60 @@ class RazerDiamondbackChroma(__RazerDeviceBrightnessSuspend):
 
     def __init__(self, *args, **kwargs):
         super(RazerDiamondbackChroma, self).__init__(*args, **kwargs)
+
+
+class RazerMamba2012Wireless(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Mamba 2012 (Wireless)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0025
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_battery', 'is_charging',
+               'set_idle_time', 'set_low_battery_threshold', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_spectrum']
+
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
+        "top_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-03.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-01.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-04.png"
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerMamba2012Wireless, self).__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
+        self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerMamba2012Wireless, self)._close()
+
+        self._battery_manager.close()
+
+
+class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Mamba 2012 (Wired)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0024
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse'
+               'set_idle_time', 'set_low_battery_threshold', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_spectrum']
+
+    RAZER_URLS = {
+        "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
+        "top_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-03.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-01.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-04.png"
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerMamba2012Wired, self).__init__(*args, **kwargs)

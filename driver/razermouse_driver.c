@@ -24,6 +24,7 @@
 #include <linux/init.h>
 #include <linux/usb/input.h>
 #include <linux/hid.h>
+#include <linux/random.h>
 
 #include "razermouse_driver.h"
 #include "razercommon.h"
@@ -452,20 +453,24 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
  */
 static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+	struct razer_mouse_device *device = dev_get_drvdata(dev);
     char serial_string[23];
     struct razer_report report = razer_chroma_standard_get_serial();
     struct razer_report response_report;
     
-    switch(usb_dev->descriptor.idProduct) {
+    switch(device->usb_pid) {
+		case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED: // Doesnt have proper serial
+		case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+			return sprintf(buf, "%s\n", &device->serial[0]);
+			break;
+		
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
             report.transaction_id.id = 0x3f;
             break;
     }
     
-    response_report = razer_send_payload(usb_dev, &report);
+    response_report = razer_send_payload(device->usb_dev, &report);
     strncpy(&serial_string[0], &response_report.arguments[0], 22);
     serial_string[22] = '\0';
 
@@ -1783,6 +1788,26 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 }
 
 /**
+ * Mouse init function
+ */
+void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interface *intf, struct hid_device *hdev) {
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    unsigned int rand_serial = 0;
+    
+    // Initialise mutex
+    mutex_init(&dev->lock);
+    // Setup values
+    dev->usb_dev = usb_dev;
+    dev->usb_vid = usb_dev->descriptor.idVendor;
+    dev->usb_pid = usb_dev->descriptor.idProduct;
+    dev->usb_interface_protocol = intf->cur_altsetting->desc.bInterfaceProtocol;
+                    
+    // Get a "random" integer
+    get_random_bytes(&rand_serial, sizeof(unsigned int));
+    sprintf(&dev->serial[0], "PM%012u", rand_serial);
+}
+
+/**
  * Probe method is ran whenever a device is binded to the driver
  */
 static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id *id)
@@ -1994,6 +2019,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     }
 
     hid_set_drvdata(hdev, dev);
+    dev_set_drvdata(&hdev->dev, dev);
 
     retval = hid_parse(hdev);
     if(retval)    {
