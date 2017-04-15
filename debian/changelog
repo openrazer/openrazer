@@ -1,3 +1,19 @@
+razer (1.1.9-0ubuntu1) xenial; urgency=low
+
+  * Added options to daemon for restarting / stopping using the dameon script
+  * Added more permission checks so solve some more issues.
+  * Added Device - Razer Core
+  * Added Device - Razer Naga Hex
+  * Added Device - Razer BlackWidow Classic (Alternate)
+  * Added Device - Razer BlackWidow Chroma V2
+  * Added in more urls
+  * Added custom mode to kraken
+  * Added config option to stop battery notifications
+  * Fixed bug when receiving multiple of the same screensaver events
+  * Major changes to man pages
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sat, 04 Mar 2017 14:47:00 +0000
+
 razer (1.1.8-0ubuntu1) xenial; urgency=low
 
   * Removed driver_verbose make target and made the driver target be verbose

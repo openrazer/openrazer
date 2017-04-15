@@ -25,7 +25,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer DeathStalker Chroma                     |  1532:0204  |   ✔    |   ✔    |      |
 | Razer Blade Stealth                           |  1532:0205  |   ✔    |   ✔    |      |
 | Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔    |   ✔    |      |
-| Razer Blade QHD                               |  1532:020F  |   ✔    |   ✔    | Individual Key lighting not working yet |
+| Razer Blade QHD                               |  1532:020F  |   ✔    |   ✔    |      |
 | Razer Blade Pro (Late 2016)                   |  1532:0210  |   ✔    |   ✔    |      |
 | Razer BlackWidow Ultimate 2016                |  1532:0214  |   ✔    |   ✔    |      |
 | Razer BlackWidow X Chroma                     |  1532:0216  |   ✔    |   ✔    |      |
@@ -34,12 +34,15 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Ornata Chroma                           |  1532:021E  |   ✔    |   ✔    |      |
 | Razer Ornata                                  |  1532:021F  |   ✔    |   ✔    |      |
 | Razer Blade Stealth (Late 2016)               |  1532:0220  |   ✔    |   ✔    |      |
+| Razer BlackWidow Chroma V2                    |  1532:0221  |   ✔    |   ✔    | Needs Testing |
+| Razer Blade (Late 2016)                       |  1532:0224  |   ✔    |   ✔    |      |
 
 ### Mouse
 | Device                          | USB VID:PID | Driver | Daemon |
 | ------------------------------- | ----------- | ------ | ------ |
 | Razer Imperator 2012            |  1532:002F  |   ✔    |   ✔    |
 | Razer Ouroboros 2012            |  1532:0032  |   ✔    |   ✔    |
+| Razer Taipan                    |  1532:0034  |   ✔    |   ✔    |
 | Razer Naga Hex                  |  1532:0041  |   ✔    |   ✔    |
 | Razer Abyssus 2014              |  1532:0042  |   ✔    |   ✔    |
 | Razer DeathAdder Chroma         |  1532:0043  |   ✔    |   ✔    |
@@ -102,6 +105,7 @@ Packages are available for these distributions:
 * [Arch](https://terrycain.github.io/razer-drivers/#arch)
 * [Fedora](https://terrycain.github.io/razer-drivers/#fedora)
 * [OpenSUSE](https://terrycain.github.io/razer-drivers/#opensuse)
+* [Gentoo](https://terrycain.github.io/razer-drivers/#gentoo)
 
 Other distributions can manually install [using these instructions.](https://terrycain.github.io/razer-drivers/#other)
 

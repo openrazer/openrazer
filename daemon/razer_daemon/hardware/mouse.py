@@ -36,6 +36,7 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
         super(RazerMambaChromaWireless, self).__init__(*args, **kwargs)
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
+        self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
 
     def _close(self):
         """
@@ -69,10 +70,12 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
     def __init__(self, *args, **kwargs):
         super(RazerMambaChromaWired, self).__init__(*args, **kwargs)
 
+        print()
+
 
 class RazerMambaChromaTE(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Mamba Chroma (Wired)
+    Class for the Razer Mamba Tournament Edition
     """
     USB_VID = 0x1532
     USB_PID = 0x0046
@@ -87,7 +90,7 @@ class RazerMambaChromaTE(__RazerDeviceBrightnessSuspend):
         "store": "http://www.razerzone.com/gb-en/store/razer-mamba-tournament-edition",
         "top_img": "http://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-1.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-2.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-5__store_gallery.png"
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-5.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -98,7 +101,6 @@ class RazerAbyssus(__RazerDevice):
     """
     Class for the Razer Abyssus
     """
-
     USB_VID = 0x1532
     USB_PID = 0x0042
     HAS_MATRIX = False
@@ -109,7 +111,7 @@ class RazerAbyssus(__RazerDevice):
         "store": "http://www.razerzone.com/gb-en/store/razer-abyssus",
         "top_img": "http://assets.razerzone.com/eeimages/products/17026/abyssus2014_gallery_1.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/17026/abyssus2014_gallery_4.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/17079/abyssus2014_gallery_3_2__store_gallery.png"
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/17079/abyssus2014_gallery_3_2.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -124,9 +126,8 @@ class RazerAbyssus(__RazerDevice):
 
 class RazerImperiator(__RazerDevice):
     """
-    Class for the Razer Imperiator 2012
+    Class for the Razer Imperator 2012
     """
-
     USB_VID = 0x1532
     USB_PID = 0x002F
     HAS_MATRIX = False
@@ -135,7 +136,7 @@ class RazerImperiator(__RazerDevice):
                'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gaming-mice/razer-imperator/",
+        "store": "http://www.razerzone.com/gaming-mice/razer-imperator",
         "top_img": "http://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-5.png",
         "side_img": "http://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-2.png",
         "perspective_img": "http://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-4.png"
@@ -153,9 +154,8 @@ class RazerImperiator(__RazerDevice):
 
 class RazerOuroboros(__RazerDevice):
     """
-    Class for the Razer Imperiator 2012
+    Class for the Razer Ouroboros
     """
-
     USB_VID = 0x1532
     USB_PID = 0x0032
     HAS_MATRIX = False
@@ -165,10 +165,10 @@ class RazerOuroboros(__RazerDevice):
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold']
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
+        "store": "https://www.razerzone.com/store/razer-ouroboros",
+        "top_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-1.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-5.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-2.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -203,7 +203,7 @@ class RazerOuroboros(__RazerDevice):
 
 class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Mamba Chroma (Wireless)
+    Class for the Razer Orochi (Wired)
     """
     USB_VID = 0x1532
     USB_PID = 0x0048
@@ -223,7 +223,7 @@ class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
 
 class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Deathadder Chroma
+    Class for the Razer DeathAdder Chroma
     """
     USB_VID = 0x1532
     USB_PID = 0x0043
@@ -282,7 +282,7 @@ class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
 
 class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Deathadder Chroma
+    Class for the Razer Naga Hex V2
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Naga_Hex_V2-if0(1|2)-event-kbd')
 
@@ -292,7 +292,7 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [1, 3]  # 1 Row, 15 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
-               'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
+               'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness', 'get_brightness', 'set_brightness',
                # Thumbgrid is technically backlight ID
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect','set_breath_single_effect', 'set_breath_dual_effect',
                # Logo
@@ -359,7 +359,7 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
 
 class RazerNagaHex(__RazerDevice):
     """
-    Class for the Razer Deathadder Chroma
+    Class for the Razer Naga Hex
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Naga_Hex-if01-event-kbd')
 
@@ -373,9 +373,9 @@ class RazerNagaHex(__RazerDevice):
 
     RAZER_URLS = {
         "store": None,
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
+        "top_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-6.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-5.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-1.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -417,9 +417,69 @@ class RazerNagaHex(__RazerDevice):
         self.disable_notify = False
 
 
+class RazerTaipan(__RazerDevice):
+    """
+    Class for the Razer Taipan
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Taipan-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0034
+    HAS_MATRIX = False
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active']
+
+    RAZER_URLS = {
+        "store": "https://www.razerzone.com/store/razer-taipan",
+        "top_img": "https://assets.razerzone.com/eeimages/products/293/razer-taipan-gallery-2-black__store_gallery.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/293/razer-taipan-gallery-3-black__store_gallery.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/293/razer-taipan-gallery-4-black__store_gallery.png"
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerTaipan, self).__init__(*args, **kwargs)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerNagaHex, self)._close()
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_active(self, False)
+        _da_set_scroll_active(self, False)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_active = self.suspend_args.get('active', (True, True))[0]
+        scroll_active = self.suspend_args.get('active', (True, True))[1]
+
+        self.disable_notify = True
+        _da_set_logo_active(self, logo_active)
+        _da_set_scroll_active(self, scroll_active)
+        self.disable_notify = False
+
+
 class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Deathadder Chroma
+    Class for the Razer DeathAdder Elite
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_DeathAdder_Elite-if0(1|2)-event-kbd')
 
@@ -478,7 +538,7 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
 
 class RazerDiamondbackChroma(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Mamba Chroma (Wired)
+    Class for the Razer Diamondback
     """
     USB_VID = 0x1532
     USB_PID = 0x004C
