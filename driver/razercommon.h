@@ -44,9 +44,9 @@ do { \
 #define BACKLIGHT_LED     0x05
 #define MACRO_LED         0x07
 #define GAME_LED          0x08
-#define RED_PROFILE_LED   0x0E
-#define GREEN_PROFILE_LED 0x0C
-#define BLUE_PROFILE_LED  0x0D
+#define RED_PROFILE_LED   0x0C
+#define GREEN_PROFILE_LED 0x0D
+#define BLUE_PROFILE_LED  0x0E
 
 // LED Effect definitions
 #define LED_STATIC           0x00

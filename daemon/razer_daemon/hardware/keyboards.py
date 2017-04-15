@@ -39,6 +39,47 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
+class RazerNostromo(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Tartarus Chroma
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Nostromo-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0111
+    HAS_MATRIX = False
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [-1, -1]  # 6 Rows, 22 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keypad',
+               'tartarus_get_profile_led_red', 'tartarus_set_profile_led_red', 'tartarus_get_profile_led_green', 'tartarus_set_profile_led_green', 'tartarus_get_profile_led_blue', 'tartarus_set_profile_led_blue',
+               'get_macros', 'delete_macro', 'add_macro',
+
+               # ?
+               'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier']
+
+    RAZER_URLS = {
+        "store": None,
+        "top_img": None,
+        "side_img": None,
+        "perspective_img": None
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerNostromo, self).__init__(*args, **kwargs)
+        # Methods are loaded into DBus by this point
+
+        self.key_manager = _GamepadKeyManager(self._device_number, self.event_files, self, testing=self._testing)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerNostromo, self)._close()
+
+        # TODO look into saving stats in /var/run maybe
+        self.key_manager.close()
+
+
 class RazerTartarus(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Tartarus Chroma

@@ -4,6 +4,7 @@ from razer.client.devices import RazerDevice as __RazerDevice
 from razer.client.macro import RazerMacro as _RazerMacro
 from razer.client import constants as _c
 
+
 class RazerMouse(__RazerDevice):
     _MACRO_CLASS = _RazerMacro
 
