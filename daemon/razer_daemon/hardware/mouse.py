@@ -596,7 +596,6 @@ class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
     DPI_MAX = 6400
 
 
-
 class RazerNaga2014(__RazerDevice):
     """
     Class for the Razer Taipan
@@ -608,7 +607,7 @@ class RazerNaga2014(__RazerDevice):
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'max_dpi', 'get_poll_rate', 'set_poll_rate',
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active', 'set_backlight_active', 'get_backlight_active']
 
     RAZER_URLS = {
