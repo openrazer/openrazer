@@ -756,7 +756,6 @@ class SingleLed(BaseRazerFX):
         return False
 
 
-
 class MiscLighting(BaseRazerFX):
     def __init__(self, serial: str, capabilities:dict, daemon_dbus=None):
         super(MiscLighting, self).__init__(serial, capabilities, daemon_dbus)
@@ -773,6 +772,11 @@ class MiscLighting(BaseRazerFX):
         else:
             self._scroll = None
 
+        if self.has('backlight'):
+            self._backlight = SingleLed(serial, capabilities, daemon_dbus, 'backlight')
+        else:
+            self._backlight = None
+
     @property
     def logo(self):
         return self._logo
@@ -780,6 +784,10 @@ class MiscLighting(BaseRazerFX):
     @property
     def scroll_wheel(self):
         return self._scroll
+
+    @property
+    def backlight(self):
+        return self._backlight
 
 
 class Frame(object):

@@ -1,6 +1,42 @@
 from razer_daemon.dbus_services import endpoint
 
 
+@endpoint('razer.device.lighting.backlight', 'getBacklightActive', out_sig='b')
+def get_backlight_active(self):
+    """
+    Get if the backlight is lit up
+
+    :return: Active
+    :rtype: bool
+    """
+    self.logger.debug("DBus call get_backlight_active")
+
+    driver_path = self.get_driver_path('backlight_led_state')
+
+    with open(driver_path, 'r') as driver_file:
+        active = int(driver_file.read().strip())
+        return active == 1
+
+
+@endpoint('razer.device.lighting.backlight', 'setBacklightActive', in_sig='b')
+def set_backlight_active(self, active):
+    """
+    Get if the backlight is lit up
+
+    :param active: Is active
+    :type active: bool
+    """
+    self.logger.debug("DBus call set_backlight_active")
+
+    driver_path = self.get_driver_path('backlight_led_state')
+
+    with open(driver_path, 'w') as driver_file:
+        if active:
+            driver_file.write('1')
+        else:
+            driver_file.write('0')
+
+
 @endpoint('razer.device.lighting.logo', 'getLogoActive', out_sig='b')
 def get_logo_active(self):
     """
