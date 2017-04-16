@@ -27,6 +27,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔    |   ✔    |      |
 | Razer Blade QHD                               |  1532:020F  |   ✔    |   ✔    |      |
 | Razer Blade Pro (Late 2016)                   |  1532:0210  |   ✔    |   ✔    |      |
+| Razer BlackWidow Chroma (Overwatch)           |  1532:0211  |   ✔    |   ✔    | Needs Testing |
 | Razer BlackWidow Ultimate 2016                |  1532:0214  |   ✔    |   ✔    |      |
 | Razer BlackWidow X Chroma                     |  1532:0216  |   ✔    |   ✔    |      |
 | Razer BlackWidow X Ultimate                   |  1532:0217  |   ✔    |   ✔    |      |
