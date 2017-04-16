@@ -188,24 +188,27 @@ class RazerDevice(DBusService):
         :return: String of the serial number
         :rtype: str
         """
+        # TODO raise exception if serial cant be got and handle during device add
         serial_path = os.path.join(self._device_path, 'device_serial')
-        with open(serial_path, 'r') as serial_file:
-            count = 0
-            serial = serial_file.read().strip()
+        count = 0
+        serial = ''
+        while len(serial) == 0:
+            if count >= 5:
+                break
 
-            while len(serial) == 0:
-                if count >= 3:
-                    break
+            try:
+                serial = open(serial_path, 'r').read().strip()
+            except (PermissionError, OSError) as err:
+                self.logger.warning('getting serial: {0}'.format(err))
+                serial = ''
 
-                try:
-                    serial = serial_file.read().strip()
-                except (PermissionError, OSError):
-                    serial = ''
+            count += 1
+            time.sleep(0.1)
 
-                count += 1
-                time.sleep(0.1)
+            if len(serial) == 0:
+                self.logger.debug('getting serial: {0} count:{1}'.format(serial, count))
 
-            return serial
+        return serial
 
     def get_device_mode(self):
         """

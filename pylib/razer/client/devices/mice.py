@@ -4,6 +4,7 @@ from razer.client.devices import RazerDevice as __RazerDevice
 from razer.client.macro import RazerMacro as _RazerMacro
 from razer.client import constants as _c
 
+
 class RazerMouse(__RazerDevice):
     _MACRO_CLASS = _RazerMacro
 
@@ -16,6 +17,19 @@ class RazerMouse(__RazerDevice):
 
         if self.has('dpi'):
             self._dbus_interfaces['dpi'] = _dbus.Interface(self._dbus, "razer.device.dpi")
+
+    @property
+    def max_dpi(self) -> int:
+        """
+        Gets max DPI
+
+        :return: Max DPI, if device does not have DPI it'll return None
+        :rtype: int or None
+        """
+        if self.has('dpi'):
+            return int(self._dbus_interfaces['dpi'].maxDPI())
+        else:
+            return None
 
     @property
     def dpi(self) -> tuple:
@@ -93,8 +107,8 @@ class RazerMouse(__RazerDevice):
         if self.has('poll_rate'):
             if not isinstance(poll_rate, int):
                 raise ValueError("Poll rate is not an integer: {0}".format(poll_rate))
-            if poll_rate not in (_c.POLL_128HZ, _c.POLL_500HZ, _c.POLL_1000HZ):
-                raise ValueError('Poll rate "{0}" is not one of {1}'.format(poll_rate, (_c.POLL_128HZ, _c.POLL_500HZ, _c.POLL_1000HZ)))
+            if poll_rate not in (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ):
+                raise ValueError('Poll rate "{0}" is not one of {1}'.format(poll_rate, (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ)))
 
             self._dbus_interfaces['device'].setPollRate(poll_rate)
 

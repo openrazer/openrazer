@@ -106,14 +106,14 @@ static bool is_blade_laptop(struct usb_device *usb_dev) {
 /**
  * Send report to the keyboard
  */
-int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
-    return razer_get_usb_response(usb_dev, 0x02, request_report, 0x02, response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report) {
+    return razer_get_usb_response(usb_dev, 0x01, request_report, 0x01, response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
 }
 
 /**
  * Function to send to device, get response, and actually check the response
  */
-struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
+static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
 	int retval = -1;
     struct razer_report response_report;
@@ -265,6 +265,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     switch (usb_dev->descriptor.idProduct)
     {
+		case USB_DEVICE_ID_RAZER_NOSTROMO:
+		    device_type = "Razer Nostromo\n";
+            break;
+		
 		case USB_DEVICE_ID_RAZER_ORBWEAVER:
 			device_type = "Razer Orbweaver\n";
             break;
@@ -284,7 +288,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
             device_type = "Razer BlackWidow Ultimate 2013\n";
             break;
-
+            
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
             device_type = "Razer BlackWidow Ultimate 2016\n";
             break;
@@ -315,6 +319,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
  
         case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
             device_type = "Razer Tartarus Chroma\n";
+            break;
+            
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+            device_type = "Razer BlackWidow Chroma (Overwatch)\n";
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
@@ -750,6 +758,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
             razer_send_payload(usb_dev, &report);
             break;
             
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
@@ -1100,6 +1109,7 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
 			report = razer_chroma_standard_set_led_brightness(VARSTORE, LOGO_LED, brightness);
             break;
         
+        case USB_DEVICE_ID_RAZER_NOSTROMO:
         default:
             if (is_blade_laptop(usb_dev)) {
                 report = razer_chroma_misc_set_blade_brightness(brightness);
@@ -1139,6 +1149,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
 			report = razer_chroma_standard_get_led_brightness(VARSTORE, LOGO_LED);
             break;
     
+		case USB_DEVICE_ID_RAZER_NOSTROMO:
         default:
             if (is_blade_laptop(usb_dev)) {
                 report = razer_chroma_misc_get_blade_brightness();
@@ -1672,6 +1683,12 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
                 break;
+                
+            case USB_DEVICE_ID_RAZER_NOSTROMO:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
+                break;
             
             case USB_DEVICE_ID_RAZER_ORNATA:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
@@ -1907,6 +1924,12 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
                 break;
 
+            case USB_DEVICE_ID_RAZER_NOSTROMO:
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
+                device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
+                break;
+
             case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
                 device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
                 device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
@@ -2023,6 +2046,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
  */
 static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORBWEAVER) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOSTROMO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ORIGINAL_ALT) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012) },
@@ -2035,6 +2059,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA) },
@@ -2044,7 +2069,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ANANSI) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_LATE_2016) },
-    { }
+    { 0 }
 };
 
 MODULE_DEVICE_TABLE(hid, razer_devices);

@@ -24,6 +24,7 @@
 #include <linux/init.h>
 #include <linux/usb/input.h>
 #include <linux/hid.h>
+#include <linux/random.h>
 
 #include "razermouse_driver.h"
 #include "razercommon.h"
@@ -116,6 +117,14 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     switch (usb_dev->descriptor.idProduct)
     {
+		case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+            device_type = "Razer Mamba 2012 (Wired)\n";
+            break;
+        
+        case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+            device_type = "Razer Mamba 2012 (Wireless)\n";
+            break;
+		
         case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
             device_type = "Razer Mamba (Wired)\n";
             break;
@@ -150,6 +159,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
             
         case USB_DEVICE_ID_RAZER_NAGA_HEX:
             device_type = "Razer Naga Hex\n";
+            break;
+        
+        case USB_DEVICE_ID_RAZER_NAGA_2014:
+            device_type = "Razer Naga 2014\n";
             break;
             
         case USB_DEVICE_ID_RAZER_TAIPAN:
@@ -444,22 +457,28 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
  */
 static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+	struct razer_mouse_device *device = dev_get_drvdata(dev);
     char serial_string[23];
     struct razer_report report = razer_chroma_standard_get_serial();
     struct razer_report response_report;
     
-    switch(usb_dev->descriptor.idProduct) {
+    switch(device->usb_pid) {
+		case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED: // Doesnt have proper serial
+		case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+			return sprintf(buf, "%s\n", &device->serial[0]);
+			break;
+		
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
             report.transaction_id.id = 0x3f;
             break;
     }
     
-    response_report = razer_send_payload(usb_dev, &report);
+    mutex_lock(&device->lock);
+    response_report = razer_send_payload(device->usb_dev, &report);
     strncpy(&serial_string[0], &response_report.arguments[0], 22);
     serial_string[22] = '\0';
+    mutex_unlock(&device->lock);
 
     return sprintf(buf, "%s\n", &serial_string[0]);
 }
@@ -1663,6 +1682,40 @@ static ssize_t razer_attr_write_logo_mode_none(struct device *dev, struct device
     return count;
 }
 
+/**
+ * Write device file "backlight_led_state"
+ */
+static ssize_t razer_attr_write_backlight_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);    
+    struct razer_report report = razer_chroma_standard_set_led_state(VARSTORE, BACKLIGHT_LED, enabled);
+    report.transaction_id.id = 0x3F;
+
+	mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Read device file "backlight_led_state"
+ */
+static ssize_t razer_attr_read_backlight_led_state(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, BACKLIGHT_LED);
+    struct razer_report response;
+    report.transaction_id.id = 0x3F;
+    
+    mutex_lock(&device->lock);
+    response = razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return sprintf(buf, "%d\n", response.arguments[2]);
+}
+
 
 /**
  * Set up the device driver files
@@ -1724,10 +1777,33 @@ static DEVICE_ATTR(logo_matrix_effect_breath,      0220, NULL,                  
 static DEVICE_ATTR(logo_matrix_effect_static,      0220, NULL,                             razer_attr_write_logo_mode_static);
 static DEVICE_ATTR(logo_matrix_effect_none,        0220, NULL,                             razer_attr_write_logo_mode_none);
 
+// For old-school led commands
+static DEVICE_ATTR(backlight_led_state,            0660, razer_attr_read_backlight_led_state, razer_attr_write_backlight_led_state); 
 
 
 
 
+
+
+/**
+ * Mouse init function
+ */
+void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interface *intf, struct hid_device *hdev) {
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    unsigned int rand_serial = 0;
+    
+    // Initialise mutex
+    mutex_init(&dev->lock);
+    // Setup values
+    dev->usb_dev = usb_dev;
+    dev->usb_vid = usb_dev->descriptor.idVendor;
+    dev->usb_pid = usb_dev->descriptor.idProduct;
+    dev->usb_interface_protocol = intf->cur_altsetting->desc.bInterfaceProtocol;
+                    
+    // Get a "random" integer
+    get_random_bytes(&rand_serial, sizeof(unsigned int));
+    sprintf(&dev->serial[0], "PM%012u", rand_serial);
+}
 
 /**
  * Probe method is ran whenever a device is binded to the driver
@@ -1746,6 +1822,8 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         retval = -ENOMEM;
         goto exit;
     }
+    
+    razer_mouse_init(dev, intf, hdev);
     
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE)
     {
@@ -1800,6 +1878,20 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
+                break;
+            
+            case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+            case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_rgb);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_effect);
                 break;
             
             case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
@@ -1894,6 +1986,14 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
                 break;
+                
+            case USB_DEVICE_ID_RAZER_NAGA_2014:
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_state);
+                break;
             
             case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);            
@@ -1927,6 +2027,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     }
 
     hid_set_drvdata(hdev, dev);
+    dev_set_drvdata(&hdev->dev, dev);
 
     retval = hid_parse(hdev);
     if(retval)    {
@@ -2015,6 +2116,20 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
                 device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
                 device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
+                break;
+            
+            case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+                device_remove_file(&hdev->dev, &dev_attr_charge_level);
+                device_remove_file(&hdev->dev, &dev_attr_charge_status);
+            case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+                device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+                device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
+                device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
+                device_remove_file(&hdev->dev, &dev_attr_dpi);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_rgb);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_effect);
                 break;
             
             case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
@@ -2108,6 +2223,14 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
                 device_remove_file(&hdev->dev, &dev_attr_poll_rate);
                 device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
                 device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
+                break;
+                
+            case USB_DEVICE_ID_RAZER_NAGA_2014:
+                device_remove_file(&hdev->dev, &dev_attr_dpi);
+                device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+                device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
+                device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
+                device_remove_file(&hdev->dev, &dev_attr_backlight_led_state);
                 break;
             
             case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
@@ -2256,7 +2379,10 @@ static int razer_input_mapping(struct hid_device *hdev, struct hid_input *hi, st
  * Device ID mapping table
  */
 static const struct hid_device_id razer_devices[] = {
+	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_2014) },
 	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX) },
+	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED) },
+	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) },

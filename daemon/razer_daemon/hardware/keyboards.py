@@ -42,6 +42,47 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         #self.key_manager.close()
 
 
+class RazerNostromo(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Tartarus Chroma
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Nostromo-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0111
+    HAS_MATRIX = False
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [-1, -1]  # 6 Rows, 22 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keypad',
+               'tartarus_get_profile_led_red', 'tartarus_set_profile_led_red', 'tartarus_get_profile_led_green', 'tartarus_set_profile_led_green', 'tartarus_get_profile_led_blue', 'tartarus_set_profile_led_blue',
+               'get_macros', 'delete_macro', 'add_macro',
+
+               # ?
+               'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier']
+
+    RAZER_URLS = {
+        "store": None,
+        "top_img": None,
+        "side_img": None,
+        "perspective_img": None
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerNostromo, self).__init__(*args, **kwargs)
+        # Methods are loaded into DBus by this point
+
+        self.key_manager = _GamepadKeyManager(self._device_number, self.event_files, self, testing=self._testing)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerNostromo, self)._close()
+
+        # TODO look into saving stats in /var/run maybe
+        self.key_manager.close()
+
+
 class RazerTartarus(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Tartarus Chroma
@@ -809,5 +850,44 @@ class RazerDeathStalkerChroma(_MacroKeyboard):
         Close the key manager
         """
         super(RazerBlackWidowChroma, self)._close()
+
+        self.ripple_manager.close()
+
+
+class RazerBlackWidowChromaOverwatch(_MacroKeyboard):
+    """
+    Class for the Razer BlackWidow Chroma
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Chroma(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0211
+    HAS_MATRIX = True
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
+
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
+
+    RAZER_URLS = {
+        "store": "https://www.razerzone.com/store/razer-blackwidow-chroma-v1",
+        "top_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-01.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-02.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-04.png"
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerBlackWidowChromaOverwatch, self).__init__(*args, **kwargs)
+
+        self.ripple_manager = _RippleManager(self, self._device_number)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerBlackWidowChromaOverwatch, self)._close()
 
         self.ripple_manager.close()
