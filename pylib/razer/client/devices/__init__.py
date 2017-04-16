@@ -97,6 +97,8 @@ class RazerDevice(object):
             'lighting_scroll_breath_dual': self._has_feature('razer.device.lighting.scroll', 'setScrollBreathDual'),
             'lighting_scroll_breath_random': self._has_feature('razer.device.lighting.scroll', 'setScrollBreathRandom'),
 
+            'lighting_backlight': self._has_feature('razer.device.lighting.backlight'),
+            'lighting_backlight_active': self._has_feature('razer.device.lighting.backlight', 'setBacklightActive'),
         }
 
         # Nasty hack to convert dbus.Int32 into native

@@ -7,7 +7,8 @@ from razer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 # TODO replace with plain import
 from razer_daemon.dbus_services.dbus_methods.deathadder_chroma import get_logo_brightness as _da_get_logo_brightness, set_logo_brightness as _da_set_logo_brightness, \
     get_scroll_brightness as _da_get_scroll_brightness, set_scroll_brightness as _da_set_scroll_brightness, set_logo_active as _da_set_logo_active, \
-    set_scroll_active as _da_set_scroll_active, get_scroll_active as _da_get_scroll_active, get_logo_active as _da_get_logo_active
+    set_scroll_active as _da_set_scroll_active, get_scroll_active as _da_get_scroll_active, get_logo_active as _da_get_logo_active, set_backlight_active as _da_set_backlight_active, \
+    get_backlight_active as _da_get_backlight_active
 from razer_daemon.dbus_services.dbus_methods.chroma_keyboard import get_brightness as _get_backlight_brightness, set_brightness as _set_backlight_brightness
 from razer_daemon.misc.key_event_management import NagaHexV2KeyManager as _NagaHexV2KeyManager
 
@@ -593,3 +594,60 @@ class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
     }
 
     DPI_MAX = 6400
+
+
+
+class RazerNaga2014(__RazerDevice):
+    """
+    Class for the Razer Taipan
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Naga_2014-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0040
+    HAS_MATRIX = False
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'max_dpi', 'get_poll_rate', 'set_poll_rate',
+               'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active', 'set_backlight_active', 'get_backlight_active']
+
+    RAZER_URLS = {
+        "store": None,
+        "top_img": None,
+        "side_img": None,
+        "perspective_img": None
+    }
+
+    DPI_MAX = 8200
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self), _da_get_backlight_active(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_active(self, False)
+        _da_set_scroll_active(self, False)
+        _da_get_backlight_active(self, False)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_active = self.suspend_args.get('active', (True, True, True))[0]
+        scroll_active = self.suspend_args.get('active', (True, True, True))[1]
+        backlight_active = self.suspend_args.get('active', (True, True, True))[2]
+
+        self.disable_notify = True
+        _da_set_logo_active(self, logo_active)
+        _da_set_scroll_active(self, scroll_active)
+        _da_set_backlight_active(self, backlight_active)
+        self.disable_notify = False
