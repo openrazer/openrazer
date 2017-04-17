@@ -1,7 +1,3 @@
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fd36d0d76e9842c4a7d67118bd01b275)](https://www.codacy.com/app/terry_5/razer-drivers?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=terrycain/razer-drivers&amp;utm_campaign=Badge_Grade)
-
----------------------
-
 # Razer Drivers
 
 A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
@@ -27,6 +23,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔    |   ✔    |      |
 | Razer Blade QHD                               |  1532:020F  |   ✔    |   ✔    |      |
 | Razer Blade Pro (Late 2016)                   |  1532:0210  |   ✔    |   ✔    |      |
+| Razer BlackWidow Chroma (Overwatch)           |  1532:0211  |   ✔    |   ✔    |      |
 | Razer BlackWidow Ultimate 2016                |  1532:0214  |   ✔    |   ✔    |      |
 | Razer BlackWidow X Chroma                     |  1532:0216  |   ✔    |   ✔    |      |
 | Razer BlackWidow X Ultimate                   |  1532:0217  |   ✔    |   ✔    |      |
@@ -45,6 +42,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Mamba 2012 (Wireless)     |  1532:0025  |   ✔    |   ✔    |
 | Razer Ouroboros 2012            |  1532:0032  |   ✔    |   ✔    |
 | Razer Taipan                    |  1532:0034  |   ✔    |   ✔    |
+| Razer Naga 2014                 |  1532:0040  |   ✔    |   ✔    |
 | Razer Naga Hex                  |  1532:0041  |   ✔    |   ✔    |
 | Razer Abyssus 2014              |  1532:0042  |   ✔    |   ✔    |
 | Razer DeathAdder Chroma         |  1532:0043  |   ✔    |   ✔    |

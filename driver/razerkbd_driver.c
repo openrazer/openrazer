@@ -288,7 +288,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
             device_type = "Razer BlackWidow Ultimate 2013\n";
             break;
-
+            
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
             device_type = "Razer BlackWidow Ultimate 2016\n";
             break;
@@ -319,6 +319,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
  
         case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
             device_type = "Razer Tartarus Chroma\n";
+            break;
+            
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+            device_type = "Razer BlackWidow Chroma (Overwatch)\n";
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
@@ -582,7 +586,7 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
     struct razer_report report = razer_chroma_standard_get_firmware_version();
     struct razer_report response_report = razer_send_payload(usb_dev, &report);
     
-    return sprintf(buf, "v%d.%d", response_report.arguments[0], response_report.arguments[1]);
+    return sprintf(buf, "v%d.%d\n", response_report.arguments[0], response_report.arguments[1]);
 }
 
 /**
@@ -754,6 +758,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
             razer_send_payload(usb_dev, &report);
             break;
             
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
@@ -2054,6 +2059,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA) },

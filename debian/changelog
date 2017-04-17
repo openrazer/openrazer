@@ -1,3 +1,17 @@
+razer (1.1.11-0ubuntu1) xenial; urgency=low
+
+  * Added Device - Overwatch Razer BlackWidow Chroma
+  * Added Device - Razer Naga 2014
+  * Fixed Bug where serial wasnt reported during device add, causing DBus to die a horrible death
+  * Fixed inconsistencies where some firmware versions has newlines when interacting with the driver directly
+  * Added some more mutex's in mouse driver
+  * Swapped around mice and keyboard block in udev as udev was doing the dodgy
+  * Added Naga 2014 to fake driver, fixed some other issues there
+  * Fixed poll_rate constant which was overlooked when numbers changed
+  * Added .backlight.active properties to mice in pylib
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Mon, 17 Apr 2017 11:21:00 +0000
+
 razer (1.1.10-0ubuntu1) xenial; urgency=low
 
   * Fixed bug with Razer Blade QHD Lighting
