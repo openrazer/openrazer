@@ -135,7 +135,7 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
     struct razer_report report = razer_chroma_standard_get_firmware_version();
     struct razer_report response_report = razer_send_payload(usb_dev, &report);
     
-    return sprintf(buf, "v%d.%d", response_report.arguments[0], response_report.arguments[1]);
+    return sprintf(buf, "v%d.%d\n", response_report.arguments[0], response_report.arguments[1]);
 }
 
 /**

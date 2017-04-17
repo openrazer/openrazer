@@ -141,7 +141,7 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
     response_report = razer_send_payload(device->usb_dev, &report);
     mutex_unlock(&device->lock);
     
-    return sprintf(buf, "v%d.%d", response_report.arguments[0], response_report.arguments[1]);
+    return sprintf(buf, "v%d.%d\n", response_report.arguments[0], response_report.arguments[1]);
 }
 
 /**
