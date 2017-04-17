@@ -306,6 +306,7 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
                'get_macros', 'delete_macro', 'add_macro',
                # Can set Logo, Scroll and thumbgrid with custom
                'set_custom_effect', 'set_key_row']
+    SIGNALS = ['dpi_changed']
 
     RAZER_URLS = {
         "store": "http://www.razerzone.com/store/razer-naga-hex-v2",

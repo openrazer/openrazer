@@ -113,6 +113,8 @@ struct razer_mouse_device {
     unsigned short usb_pid;
     
     char serial[23];
+    
+    char device_mode[2];
 };
 
 // Mamba Key Location

@@ -42,6 +42,27 @@ MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_LICENSE(DRIVER_LICENSE);
 
+static const struct razer_key_translation mouse_keys[] = {
+    { BTN_EXTRA, BTN_8 }, // DPI_UP
+    { BTN_SIDE,  BTN_9 }, // DPI_DOWN
+    { }
+};
+
+
+/**
+ * Essentially search through the struct array above.
+ */ 
+static const struct razer_key_translation *find_translation(const struct razer_key_translation *key_table, u16 from) {
+    const struct razer_key_translation *result;
+    
+    for (result = key_table; result->from; result++) {
+        if (result->from == from) {
+            return result;
+        }
+    }
+    
+    return NULL;
+}
 
 /**
  * Send report to the mouse
@@ -956,22 +977,25 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
  */
 static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report;
     
     if(count == 2)
     {
         report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
         
-        switch(usb_dev->descriptor.idProduct) {
+        switch(device->usb_pid) {
             case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
             case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
                 report.transaction_id.id = 0x3f;
                 break;
         }
         
-        razer_send_payload(usb_dev, &report);
+        mutex_lock(&device->lock);
+        razer_send_payload(device->usb_dev, &report);
+        device->device_mode[0] = buf[0];
+        device->device_mode[1] = buf[1];
+        mutex_unlock(&device->lock);
     } else {
         printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.");
     }
@@ -986,20 +1010,22 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
  */
 static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_standard_get_device_mode();
     struct razer_report response;
     
-    switch(usb_dev->descriptor.idProduct) {
+    switch(device->usb_pid) {
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
             report.transaction_id.id = 0x3f;
             break;
     }
     
-    response = razer_send_payload(usb_dev, &report);
+    mutex_lock(&device->lock);
+    response = razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
     
+    //return sprintf(buf, "%d:%d - %d:%d\n", response.arguments[0], response.arguments[1], device->device_mode[0], device->device_mode[1]);
     return sprintf(buf, "%d:%d\n", response.arguments[0], response.arguments[1]);
 }
 
@@ -2270,27 +2296,58 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 }
 
 
+
+
+
+
+
+/**
+ * Convert DPI Buttons to proper values
+ */
+static int razer_event(struct hid_device *hdev, struct hid_field *field, struct hid_usage *usage, __s32 value)
+{
+	struct razer_mouse_device *msc = hid_get_drvdata(hdev);
+	const struct razer_key_translation *translation;
+	int do_translate = 0;
+	
+	translation = find_translation(mouse_keys, usage->code);
+	
+	if(translation && msc->device_mode[0] == 0x03 && msc->device_mode[1] == 0x00) {
+		if(test_bit(usage->code, msc->other_buttons))
+		{
+			do_translate = 1;
+		}
+		
+		if(do_translate)
+		{
+			if(value)
+			{
+				set_bit(usage->code, msc->other_buttons);
+			} else {
+				clear_bit(usage->code, msc->other_buttons);
+			}
+		}
+		
+		input_event(field->hidinput->input, usage->type, translation->to, value);
+		return 1;
+	}
+	
+	
+	return 0;
+}
+
+/**
+ * Convert Left/Right scroll to other buttons
+ */
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
 	struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
 	struct razer_mouse_device *msc = hid_get_drvdata(hdev);
 	
-	
-	/*if(size >= 4 && intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
-		printk(KERN_WARNING "razermouse_test: %02x%02x%02x%02x\n", data[0], data[1], data[2], data[3]);
-	}*/
-	
 	// If size is 8 this is the event were after
-	if(size == 8 && intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+	if(size == 8 && intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE && msc->device_mode[0] == 0x03 && msc->device_mode[1] == 0x00) {
 		int sent_event = 0;
-		
-		/*if(data[0] & 0x10) { // DPI_UP
-			printk(KERN_WARNING "razermouse_test: DPI_UP  cnt %d\n", size);
-		}		
-		if(data[0] & 0x08) { // DPI_DOWN
-			printk(KERN_WARNING "razermouse_test: DPI_DOWN  cnt %d\n", size);
-		}*/
-		
+
 		if(data[0] & 0x20) { // SCROLL_LEFT
 			//printk(KERN_WARNING "razermouse_test: SCROLL_LEFT  cnt %d\n", size);
 			
@@ -2339,8 +2396,9 @@ static int razer_setup_input(struct input_dev *input, struct hid_device *hdev)
 	__set_bit(REL_WHEEL, input->relbit);
 	__set_bit(REL_HWHEEL, input->relbit);
 	
-	__set_bit(BTN_4, input->keybit);
-	__set_bit(BTN_5, input->keybit);
+	__set_bit(BTN_8, input->keybit);
+	__set_bit(BTN_9, input->keybit);
+	
 	__set_bit(BTN_6, input->keybit);
 	__set_bit(BTN_7, input->keybit);
 	
@@ -2410,6 +2468,7 @@ static struct hid_driver razer_mouse_driver = {
     .probe     = razer_mouse_probe,
     .remove    = razer_mouse_disconnect,
     .raw_event = razer_raw_event,
+    .event = razer_event,
     .input_mapping    = razer_input_mapping,
     .input_configured = razer_input_configured,
 };

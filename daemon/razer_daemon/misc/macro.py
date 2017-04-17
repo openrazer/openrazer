@@ -4,6 +4,7 @@ Macro stuff
 Has objects representing key events
 Launching programs etc...
 """
+import bisect
 import logging
 import subprocess
 import multiprocessing
@@ -49,47 +50,67 @@ class MacroV2Base(multiprocessing.Process):
             return 'AUTOREPEAT'
 
     def _load_macros(self):
+        json_obj = None
+
         if os.path.exists(self._macro_file):
             try:
                 with open(self._macro_file, 'r') as open_fp:
-                    loaded_macros = 0
-                    macro_list = json.load(open_fp)
-
-                    self._macro_sets = []
-
-                    for macro_set in macro_list:
-                        current_set = {}
-                        for macro_bind, macro_list in macro_set.items():
-                            current_set[int(macro_bind)] = macro_dict_to_obj(macro_list)
-                            loaded_macros += 1
-                        self._macro_sets.append(current_set)
-
-                    if loaded_macros == 1:
-                        self._logger.info("Loaded {0} macro".format(loaded_macros))
-                    else:
-                        self._logger.info("Loaded {0} macros".format(loaded_macros))
-                self._macros = self._macro_sets[0]
+                    json_obj = json.load(open_fp)
             except Exception:
-                self._logger.warning("Failed to load macros.json")
-                macro_set = {}
-                self._macro_sets.append(macro_set)
-                self._macros = macro_set
+                pass
+
+        self._deserialise(json_obj)
+
+    def _deserialise(self, json_obj=None):
+        """
+        Take a json list and covnert it to macros
+
+        :param json_obj: Json list
+        :type json_obj: list or dict or None
+        """
+
+        if json_obj is not None:
+            self._macro_sets = []
+
+            loaded_macros = 0
+            for macro_set in json_obj:
+                current_set = {}
+                for macro_bind, macro_list in macro_set.items():
+                    current_set[int(macro_bind)] = macro_dict_to_obj(macro_list)
+                    loaded_macros += 1
+                self._macro_sets.append(current_set)
+
+            if loaded_macros == 1:
+                self._logger.info("Loaded {0} macro".format(loaded_macros))
+            else:
+                self._logger.info("Loaded {0} macros".format(loaded_macros))
+
+            self._macros = self._macro_sets[0]
 
         else:
             macro_set = {}
             self._macro_sets.append(macro_set)
             self._macros = macro_set
 
+    def _serialise(self):
+        """
+        Get macros and return a json list of them
+
+        :return: Json List
+        :rtype: List
+        """
+        macro_list = []
+        for macro_set in self._macro_sets:
+            tmp = {}
+            for macro_key, macro_obj_list in macro_set.items():
+                tmp[macro_key] = macro_obj_to_dict(macro_obj_list)
+            macro_list.append(tmp)
+
+        return macro_list
+
     def _persist_macros(self):
         with open(self._macro_file, 'w') as open_fp:
-            macro_list = []
-            for macro_set in self._macro_sets:
-                tmp = {}
-                for macro_key, macro_obj_list in macro_set.items():
-                    tmp[macro_key] = macro_obj_to_dict(macro_obj_list)
-                macro_list.append(tmp)
-
-            self._macro_sets = json.dump(macro_list, open_fp)
+            json.dump(self._serialise(), open_fp)
 
     def _key_event_callback(self):
         """
@@ -179,7 +200,7 @@ class MacroV2Base(multiprocessing.Process):
         """
         self._logger.debug("Running macro - " + str(self._macros[macro_key]))
         for macro_obj in self._macros[macro_key]:
-            macro_obj.exec(uinput=self.uinput)
+            macro_obj.exec(uinput=self.uinput, caller=self, parent=self._parent)
 
         # macro_obj.join()
 
@@ -231,6 +252,10 @@ class MacroV2Base(multiprocessing.Process):
             self._macros[macro_key] = macro_list
         except Exception as err:
             self._logger.error("Failed to load macro {0}. Got {1}".format(macro_key, err))
+
+    # Observer
+    def notify(self, msg):
+        pass
 
 
 class KeyboardMacroV2(MacroV2Base):
@@ -401,8 +426,8 @@ class NagaMacroV2(MacroV2Base):
     # LEFT = 272
     # RIGHT = 273
     # MIDDLE = 274
-    BTN_DPI_UP = 276
-    BTN_DPI_DOWN = 275
+    BTN_DPI_UP = 264
+    BTN_DPI_DOWN = 265
 
     BTN_SCROLL_LEFT = 262
     BTN_SCROLL_RIGHT = 263
@@ -418,8 +443,70 @@ class NagaMacroV2(MacroV2Base):
     # Not used
     WANTED_KEYS = (KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, BTN_DPI_UP, BTN_DPI_DOWN, BTN_SCROLL_LEFT, BTN_SCROLL_RIGHT)
 
+    DEFUALT_DPI_LIST = [(500, 500), (800, 800), (1000, 1000), (1200, 1200), (1500, 1500), (2000, 2000)]
+
     def __init__(self, serial, device_number, event_files, config, parent, grab_event_files=False, non_grab_files=None):
+        self._dpi_list = []
+        self._current_dpi = None
+        self._has_dpi = hasattr(parent, 'setDPI')
+
+        # Call parent method, which calls load_macros() -> _deserialise()
         super(NagaMacroV2, self).__init__(serial, device_number, event_files, config, parent, grab_event_files, non_grab_files)
+
+        # Set DPI as by now it wont be none, dpi might not exist though
+        if self._has_dpi:
+            dpi_x, dpi_y = self._current_dpi
+            self._logger.debug('Restoring last known DPI ({0},{1})'.format(dpi_x, dpi_y))
+            parent.setDPI(dpi_x, dpi_y)
+
+        # Register observer with parent
+        parent.register_observer(self)
+
+    def notify(self, msg):
+        #                   0         1                               2         3                  4
+        # <class 'tuple'>: ('effect', RazerNagaHexV2:PM1642H00601138, 'setDPI', dbus.UInt16(1000), dbus.UInt16(1000))
+
+        #                                                                     by now we know [2] will be method name
+        if isinstance(msg, tuple) and len(msg) > 0 and msg[0] == 'effect' and msg[2] == 'setDPI':
+            self._current_dpi = (int(msg[3]), int(msg[4]))
+            self._parent.dpiChanged()
+            self._persist_macros()
+
+    def _serialise(self):
+        return {
+            'version': '1.0',
+            'current_dpi': self._current_dpi,
+            'dpi_list': self._dpi_list,
+            'macros': super(NagaMacroV2, self)._serialise()
+        }
+
+    def _deserialise(self, json_obj=None):
+        if not isinstance(json_obj, dict):
+            self._dpi_list = self.DEFUALT_DPI_LIST
+            self._current_dpi = self._dpi_list[0]
+            super(NagaMacroV2, self)._deserialise(json_obj=None)
+        else:
+            self._dpi_list = json_obj.get('dpi_list', self.DEFUALT_DPI_LIST)
+            self._current_dpi = json_obj.get('current_dpi', self._dpi_list[0])
+
+            macro_list = json_obj.get('macros', None)
+            super(NagaMacroV2, self)._deserialise(json_obj=macro_list)
+
+        #
+        # Setup default dpi handlers
+        if self._has_dpi:
+            modified = False
+
+            if self.BTN_DPI_UP not in self._macros:
+                modified = True
+                self._macros[self.BTN_DPI_UP] = [MacroDPIChange('up')]
+
+            if self.BTN_DPI_DOWN not in self._macros:
+                modified = True
+                self._macros[self.BTN_DPI_DOWN] = [MacroDPIChange('down')]
+
+            if modified:
+                self._persist_macros()
 
     def _key_press(self, timestamp, key_code):
         """
@@ -431,12 +518,12 @@ class NagaMacroV2(MacroV2Base):
         :param key_code: Key Code
         :type key_code: int
         """
-
-        print("KEY {0}".format(key_code))
-
-        if key_code in self._macros:
-            self._logger.debug("Play macro {0}: {1}".format(key_code, self._macros[key_code]))
-            self.play_macro(key_code)
+        if key_code in self.WANTED_KEYS:
+            if key_code in self._macros:
+                self._logger.debug("Play macro {0}: {1}".format(key_code, self._macros[key_code]))
+                self.play_macro(key_code)
+            else:
+                self._logger.debug('Macro Key {0}'.format(key_code))
 
     def _key_autorepeat(self, timestamp, key_code):
         """
@@ -462,7 +549,34 @@ class NagaMacroV2(MacroV2Base):
         """
         pass
 
+    def dpi_up(self):
+        # Can assume that people arnt using different dpi_x to dpi_y
+        if self._has_dpi:
+            total_dpis = len(self._dpi_list)
+            index = bisect.bisect_right([x[0] for x in self._dpi_list], self._current_dpi[0])
 
+            if index == total_dpis:
+                # dpi is equal to or higher than max level
+                pass
+            else:
+                dpi_x, dpi_y = self._dpi_list[index]
+                self._logger.debug('DPI UP: Current:({0[0]}, {0[1]}) Next ({1}, {2})'.format(self._current_dpi, dpi_x, dpi_y))
+                self._parent.setDPI(dpi_x, dpi_y)
+                self._logger.debug('TODO: DPI_UP DBus SIGNAL')
+
+    def dpi_down(self):
+        # Can assume that people arnt using different dpi_x to dpi_y
+        if self._has_dpi:
+            index = bisect.bisect_left([x[0] for x in self._dpi_list], self._current_dpi[0]) - 1
+
+            if index <= 0:
+                # dpi is equal to or higher than max level
+                pass
+            else:
+                dpi_x, dpi_y = self._dpi_list[index]
+                self._logger.debug('DPI DOWN: Current:({0[0]}, {0[1]}) Next ({1}, {2})'.format(self._current_dpi, dpi_x, dpi_y))
+                self._parent.setDPI(dpi_x, dpi_y)
+                self._logger.debug('TODO: DPI_DOWN DBus SIGNAL')
 
 
 
@@ -568,7 +682,7 @@ class MacroURL(MacroObject):
             'url': self.url,
         }
 
-    def exec(self):
+    def exec(self, **kwargs):
         """
         Open URL in the browser
         """
@@ -597,12 +711,36 @@ class MacroScript(MacroObject):
             'args': self.args
         }
 
-    def exec(self):
+    def exec(self, **kwargs):
         """
         Run script
         """
         proc = subprocess.Popen(self.script + self.args, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         proc.communicate()
+
+
+class MacroDPIChange(MacroObject):
+    def __init__(self, direction):
+        self.direction = direction
+
+    def __repr__(self):
+        return '<MacroDPIChange {0}>'.format(self.direction)
+
+    def to_dict(self):
+        return {
+            'type': 'MacroDPIChange',
+            'direction': self.direction,
+        }
+
+    def exec(self, caller, **kwargs):
+        """
+        Open URL in the browser
+        """
+
+        if self.direction == 'up':
+            caller.dpi_up()
+        else:
+            caller.dpi_down()
 
 
 def macro_dict_to_obj(macro_dict):
@@ -627,6 +765,8 @@ def macro_dict_to_obj(macro_dict):
         return MacroURL.from_dict(macro_dict)
     elif macro_dict['type'] == 'MacroScript':
         return MacroScript.from_dict(macro_dict)
+    elif macro_dict['type'] == 'MacroDPIChange':
+        return MacroDPIChange.from_dict(macro_dict)
     else:
         raise ValueError("unknown type {0}".format(type(macro_dict)))
 

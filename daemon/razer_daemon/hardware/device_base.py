@@ -23,6 +23,7 @@ class RazerDevice(DBusService):
     BUS_PATH = 'org.razer'
     OBJECT_PATH = '/org/razer/device/'
     METHODS = []
+    SIGNALS = []
 
     EVENT_FILE_REGEX = None
 
@@ -104,6 +105,7 @@ class RazerDevice(DBusService):
 
         # Load additional DBus methods
         self.load_methods()
+        self.load_signals()
 
     def send_effect_event(self, effect_name, *args):
         """
@@ -283,6 +285,27 @@ class RazerDevice(DBusService):
                 new_function = available_functions[method_name]
                 self.logger.debug("Adding %s.%s method to DBus", new_function.interface, new_function.name)
                 self.add_dbus_method(new_function.interface, new_function.name, new_function, new_function.in_sig, new_function.out_sig, new_function.byte_arrays)
+            except KeyError:
+                pass
+
+    def load_signals(self):
+        """
+        Load DBus signals
+
+        Goes through the list in self.SIGNALS and loads each effect and adds it to DBus
+        """
+        available_functions = {}
+        methods = dir(razer_daemon.dbus_services.dbus_methods)
+        for method in methods:
+            potential_function = getattr(razer_daemon.dbus_services.dbus_methods, method)
+            if isinstance(potential_function, types.FunctionType) and hasattr(potential_function, 'signal') and potential_function.signal:
+                available_functions[potential_function.__name__] = potential_function
+
+        for method_name in self.SIGNALS:
+            try:
+                new_function = available_functions[method_name]
+                self.logger.debug("Adding %s.%s method to DBus", new_function.interface, new_function.name)
+                self.add_dbus_signal(new_function.interface, new_function.name, new_function)
             except KeyError:
                 pass
 

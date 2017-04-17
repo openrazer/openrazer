@@ -3,7 +3,7 @@ BlackWidow Chroma Effects
 """
 import math
 import struct
-from razer_daemon.dbus_services import endpoint
+from razer_daemon.dbus_services import endpoint, signal
 
 
 @endpoint('razer.device.power', 'getBattery', out_sig='d')
@@ -134,6 +134,12 @@ def set_dpi_xy(self, dpi_x, dpi_y):
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(dpi_bytes)
 
+    # Notify others
+    e_sync = self.effect_sync
+    self.effect_sync = False
+    self.send_effect_event('setDPI', dpi_x, dpi_y)
+    self.effect_sync = e_sync
+
 
 @endpoint('razer.device.dpi', 'getDPI', out_sig='ai')
 def get_dpi_xy(self):
@@ -163,7 +169,6 @@ def max_dpi(self):
 
     else:
         return 500
-
 
 
 @endpoint('razer.device.misc', 'setPollRate', in_sig='q')
@@ -203,4 +208,8 @@ def get_poll_rate(self):
 
     return result
 
+
+@signal('razer.device.signal', 'dpiChanged')
+def dpi_changed(self):
+    return True
 
