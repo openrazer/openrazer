@@ -1,16 +1,14 @@
-# Razer Drivers
+# [Razer Drivers](https://terrycain.github.io/razer-drivers/)
 
 A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
 
-[See the website](https://terrycain.github.io/razer-drivers/)
-
-**Before raising an issue** saying something doesn't work, read [this](https://github.com/terrycain/razer-drivers/wiki/Troubleshooting) Wiki page, try not to create new issues if one exists, reopen it.
+**Before raising an issue** saying something doesn't work, read [the troubleshooting wiki page](https://github.com/terrycain/razer-drivers/wiki/Troubleshooting), try not to create new issues if one exists.
 
 Also this is the master branch, devices may appear in the tables below but might not be released in package form yet. Check out the stable branch for what _should_ be in the packages.
 
 ## Device Support
 ### Keyboards
-| Device                                        | USB VID:PID | Driver | Daemon | Misc |
+| Device                                        | USB VID:PID | Driver | Daemon | Notes |
 | --------------------------------------------- | ----------- | ------ | ------ | ---- |
 | Razer BlackWidow Ultimate 2012                |  1532:010D  |   ✔    |   ✔    |      |
 | Razer BlackWidow Classic (Alternate)          |  1532:010E  |   ✔    |   ✔    | Mostly untested |
@@ -37,9 +35,9 @@ Also this is the master branch, devices may appear in the tables below but might
 ### Mouse
 | Device                          | USB VID:PID | Driver | Daemon |
 | ------------------------------- | ----------- | ------ | ------ |
-| Razer Imperator 2012            |  1532:002F  |   ✔    |   ✔    |
 | Razer Mamba 2012 (Wired)        |  1532:0024  |   ✔    |   ✔    |
 | Razer Mamba 2012 (Wireless)     |  1532:0025  |   ✔    |   ✔    |
+| Razer Imperator 2012            |  1532:002F  |   ✔    |   ✔    |
 | Razer Ouroboros 2012            |  1532:0032  |   ✔    |   ✔    |
 | Razer Taipan                    |  1532:0034  |   ✔    |   ✔    |
 | Razer Naga 2014                 |  1532:0040  |   ✔    |   ✔    |
@@ -52,7 +50,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Orochi (Wired)            |  1532:0048  |   ✔    |   ✔    |
 | Razer Diamondback Chroma        |  1532:004C  |   ✔    |   ✔    |
 | Razer Naga Hex V2               |  1532:0050  |   ✔    |   ✔    |
-| Razer DeathAdder Elite          |  1532:005c  |   ✔    |   ✔    |
+| Razer DeathAdder Elite          |  1532:005C  |   ✔    |   ✔    |
 
 ### Mousemats
 | Device        | USB VID:PID | Driver | Daemon |
@@ -68,14 +66,14 @@ Also this is the master branch, devices may appear in the tables below but might
 ### Misc
 | Device                  | USB VID:PID | Driver | Daemon |
 | ----------------------- | ----------- | ------ | ------ |
-| Razer Chroma Mug Holder |  1532:0F07  |   ✔    |   ✔    |
-| Razer Tartarus Chroma   |  1532:0208  |   ✔    |   ✔    |
 | Razer Nostromo          |  1532:0111  |   ✔    |   ✔    |
 | Razer Orbweaver         |  1532:0113  |   ✔    |   ✔    |
+| Razer Tartarus Chroma   |  1532:0208  |   ✔    |   ✔    |
 | Razer Core              |  1532:0215  |   ✔    |   ✔    |
+| Razer Chroma Mug Holder |  1532:0F07  |   ✔    |   ✔    |
 
 #### Determining the Device ID
-Razer's devices use a VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:
+Razer devices use a USB VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:
 
     lsusb | grep '1532:'
 
@@ -83,18 +81,6 @@ This will output something similar to this:
 
     Bus 003 Device 005: ID 1532:0203 Razer USA, Ltd
 
-
--------------------
-
-### No device found
-Those of you on Ubuntu 16.10, some of you on 16.04 and at least some arch users might notice that even though your device is listed as supported it doesnt appear on any of the supporting applications. Udev is not playing ball. Look at [this](https://github.com/terrycain/razer-drivers/issues/67#issuecomment-260419314) comment and run it. Am currently working on a little service that should bind devices and set up the permissions like udev would.
-
--------------------
-
-### Daemon Support
-I've created a daemon that lives in userspace which allows one to easily interact with the driver. It abstracts away some of the logic and also (will eventually) allow you to build
-custom effects, though it does do mulitcoloured ripples :). As every device is slightly different I've maintained a mapping between devices supported by the driver and devices supported
-by the daemon. If your device is supported by the driver but not by the daemon then [raise an issue](https://github.com/terrycain/razer-drivers/issues/new).
 
 ---
 
@@ -108,13 +94,14 @@ Packages are available for these distributions:
 * [OpenSUSE](https://terrycain.github.io/razer-drivers/#opensuse)
 * [Gentoo](https://terrycain.github.io/razer-drivers/#gentoo)
 
-Other distributions can manually install [using these instructions.](https://terrycain.github.io/razer-drivers/#other)
+Other distributions can manually install [using these instructions](https://terrycain.github.io/razer-drivers/#other).
 
 ## Applications
 
 The following applications complement and interact with this driver:
 
 * [Polychromatic](https://github.com/lah7/polychromatic) - a graphical management tool and tray applet to managing Razer peripherals.
+* [RazerGenie](https://github.com/z3ntu/RazerGenie) - Qt application for configuring your Razer devices under GNU/Linux.
 * [MacroW](https://github.com/igorbb/MacroW) - a simple tool to record and play keyboard macros. (though the dameon does on the fly recording ;) )
 * [RazerCommander](https://github.com/GabMus/razerCommander) - Simple GUI written in Gtk3
 
@@ -127,9 +114,7 @@ The following applications complement and interact with this driver:
 
 ## Contributions
 
-Some guys have already donated to the cause. ;-) Feel free.
-The parent of the fork had a list of what would be done if money was donated. I don't need the money (though you can never have enough right ;-) ), but obviously its a great motivator.
-If you want you device and your not willing to get one to me then if your willing to follow [this](https://github.com/terrycain/razer-drivers/wiki/Reverse-Engineering-USB-Protocol) then support can be added.
+You can donate to [@terrycain](https://github.com/terrycain) with PayPal to terry@terrys-home.co.uk .
 
 ---
 
