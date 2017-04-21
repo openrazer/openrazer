@@ -118,4 +118,4 @@ You can donate to [@terrycain](https://github.com/terrycain) with PayPal to terr
 
 ---
 
-The project is licensed under the GPL and is not affiliated with [Razer, Inc](http://www.razerzone.com/).
+The project is licensed under the GPL and is not officially endorsed by [Razer, Inc](http://www.razerzone.com/).
