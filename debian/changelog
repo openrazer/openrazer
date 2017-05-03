@@ -1,3 +1,10 @@
+razer (1.1.12-0ubuntu1) xenial; urgency=high
+
+  * Changed README
+  * Added in missing DPI for DeathAdder Elite
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Wed, 3 May 2017 20:04:00 +0000
+
 razer (1.1.11-0ubuntu1) xenial; urgency=low
 
   * Added Device - Overwatch Razer BlackWidow Chroma

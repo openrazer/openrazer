@@ -492,6 +492,8 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
         "perspective_img": "http://assets.razerzone.com/eeimages/products/25919/daelite_gallery02.png"
     }
 
+    DPI_MAX = 16000
+
     def _suspend_device(self):
         """
         Suspend the device
