@@ -86,6 +86,9 @@
                         <a href="https://github.com/lah7/polychromatic" target="_blank">Polychromatic</a>
                       </li>
                       <li>
+                        <a href="https://github.com/z3ntu/RazerGenie" target="_blank">RazerGenie</a>
+                      </li>
+                      <li>
                         <a href="https://github.com/GabMus/razerCommander" target="_blank">razerCommander</a>
                       </li>
                       <li>
@@ -473,8 +476,7 @@
 <code><span class="fa fa-dollar"></span> sudo apt install python3-razer razer-kernel-modules-dkms razer-daemon razer-doc</code></pre>
 		    <p><strong>NOTE:</strong> If you get dependency errors when trying to install the driver packages please make sure that you have enabled the "universe" repository in <strong>Software & Updates</strong></p>
 
-                    <p>After installing the driver, you should <u>restart the computer</u> or probe it from the terminal:</p>
-                    <pre><code><span class="fa fa-dollar"></span> sudo modprobe razerkbd</code></pre>
+                    <p>After the drivers are installed, please restart the computer.</p>
 
                     <p>This PPA supports these versions:</p>
                     <ul>
@@ -487,23 +489,24 @@
                 </div>
               </div>
 
-<!--
+
               <div class="panel panel-default">
                 <div class="panel-heading">
                   <h4 class="panel-title">
                     <a data-toggle="collapse" data-parent="#distros" href="#debian">
                       <img src="img/distros/debian.png" width="24px" height="24px"/>
                       &nbsp; Debian</a>
-                    </a>
                   </h4>
                 </div>
-                <div id="ubuntu" class="panel-collapse collapse">
+                <div id="debian" class="panel-collapse collapse">
                   <div class="panel-body">
-                    (Not available)
+                    <h4><span class="fa fa-cube"></span> openSUSE Build System</h4>
+                    <p>Instructions are <a href="https://software.opensuse.org/download.html?project=hardware%3Arazer&package=openrazer-meta" target="_blank">available here.</a></p>
+                    <p>After the drivers are installed, please restart the computer.</p>
                   </div>
                 </div>
               </div>
--->
+
 
               <div class="panel panel-default">
                 <div class="panel-heading">
@@ -517,34 +520,12 @@
                 <div id="arch" class="panel-collapse collapse">
                   <div class="panel-body">
                     <h4><span class="fa fa-cube"></span>&nbsp;From AUR</h4>
-                    <p>Install <a href="https://aur.archlinux.org/packages/razer-driver-meta/" target="_blank">razer-driver-meta</a> from AUR,
-                    or install the three packages
-                    <a href="https://aur.archlinux.org/packages/razer-driver-dkms/" target="_blank">razer-driver-dkms</a>,
-                    <a href="https://aur.archlinux.org/packages/razer-daemon/" target="_blank">razer-daemon</a>
-                    and <a href="https://aur.archlinux.org/packages/python-razer/" target="_blank">python-razer</a> singularly from AUR.</p>
-
-                    <p>After installation, restart your computer so the devices can bind to the driver.</p>
+                    <p>Install <a href="https://aur.archlinux.org/packages/openrazer-meta/" target="_blank">openrazer-meta</a> from the AUR.
+                    <p>After the drivers are installed, please restart the computer.</p>
                   </div>
                 </div>
               </div>
 
-<!--
-              <div class="panel panel-default">
-                <div class="panel-heading">
-                  <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#distros" href="#debian">
-                      <img src="img/distros/debian.png" width="24px" height="24px"/>
-                      &nbsp; Debian</a>
-                    </a>
-                  </h4>
-                </div>
-                <div id="ubuntu" class="panel-collapse collapse">
-                  <div class="panel-body">
-                    (Not available)
-                  </div>
-                </div>
-              </div>
--->
 
               <div class="panel panel-default">
                 <div class="panel-heading">
@@ -557,16 +538,16 @@
                 <div id="fedora" class="panel-collapse collapse">
                   <div class="panel-body">
                     <h4><span class="fa fa-cube"></span>&nbsp;From the RPM Repository</h4>
-                    <p>1. Open the terminal and type these commands:</p>
+                    <p>Open the terminal and type these commands:</p>
                     <pre><code><span class="fa fa-dollar"></span> sudo dnf config-manager --add-repo http://download.opensuse.org/repositories/hardware:razer/Fedora_25/hardware:razer.repo</code>
 <code><span class="fa fa-dollar"></span> sudo dnf install openrazer-meta kernel-devel</code></pre>
                     <div class="danger">
                       <h5><span class="fa fa-warning"></span>
                       <a href="https://bugzilla.redhat.com/show_bug.cgi?id=1228897" target="_blank" style="color:red"><u>Due to this bug</u></a>,
-                      <code style="color:red">kernel-devel</code> needs to be installed in addition.
+                      <code style="color:red">kernel-devel</code> needs to be installed explicitly.
                       </h5>
                     </div>
-                    <p>2. Once installation finishes, restart your computer.</p>
+                    <p>After the drivers are installed, please restart the computer.</p>
                   </div>
                 </div>
               </div>
@@ -600,11 +581,11 @@
                   <div class="panel-body">
                     <h4><span class="fa fa-cube"></span> Gentoo ebuild</h4>
                     <p>Packages for Gentoo are provided by <a href="https://github.com/vifino/vifino-overlay">vifino</a>'s personal overlay.
-                    <p>1. Add the overlay to your system:</p>
+                    <p>Add the overlay to your system:</p>
                     <pre><code><span class="fa fa-dollar"></span> sudo layman -a vifino-overlay</code></pre>
-                    <p>2. Install the drivers package - this installs all the components -- driver and daemon.</p>
+                    <p>Install the drivers package - this installs all the components -- driver and daemon.</p>
                     <pre><code><span class="fa fa-dollar"></span> emerge razer-drivers</code></pre>
-                    <p>3. Restart your computer to ensure your devices bind to the driver.</p>
+                    <p>After the drivers are installed, please restart the computer.</p>
                   </div>
                 </div>
               </div>
