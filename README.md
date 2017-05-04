@@ -89,9 +89,10 @@ This will output something similar to this:
 Packages are available for these distributions:
 
 * [Ubuntu / Linux Mint](https://terrycain.github.io/razer-drivers/#ubuntu)
-* [Arch](https://terrycain.github.io/razer-drivers/#arch)
+* [Debian](https://terrycain.github.io/razer-drivers/#debian)
+* [Arch Linux](https://terrycain.github.io/razer-drivers/#arch)
 * [Fedora](https://terrycain.github.io/razer-drivers/#fedora)
-* [OpenSUSE](https://terrycain.github.io/razer-drivers/#opensuse)
+* [openSUSE](https://terrycain.github.io/razer-drivers/#opensuse)
 * [Gentoo](https://terrycain.github.io/razer-drivers/#gentoo)
 
 Other distributions can manually install [using these instructions](https://terrycain.github.io/razer-drivers/#other).
