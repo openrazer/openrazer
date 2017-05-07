@@ -10,4 +10,9 @@ print()
 
 # Iterate over each device and pretty out some standard information about each
 for device in device_manager.devices:
-    print("{}: type \"{}\"".format(device.name, device.type))
+    print("{}:".format(device.name))
+    print("   type: {}".format(device.type))
+    print("   serial: {}".format(device.serial))
+    print("   firmware version: {}".format(device.firmware_version))
+    print("   driver version: {}".format(device.driver_version))
+    print()
