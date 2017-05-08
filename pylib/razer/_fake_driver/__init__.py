@@ -45,6 +45,14 @@ class FakeDevice(object):
 
     @staticmethod
     def create_endpoint(path, chmod, default=None):
+        if "matrix_brightness" in path:
+            default = 0
+        if "is_mug_present" in path:
+            default = 0
+        if "dpi" in path:
+            default = "800:800"
+        if "poll_rate" in path:
+            default = 500
         if os.path.exists(path):
             os.chmod(path, 0o660)
             os.remove(path)
