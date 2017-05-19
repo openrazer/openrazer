@@ -31,7 +31,7 @@ from razer_daemon.device import DeviceCollection
 from razer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 
 
-def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, pid_file=None, test_dir=None):
+def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
     """
     Performs double fork behaviour of daemons
 
@@ -47,14 +47,11 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
     :param console_log: Log to console
     :type console_log: bool
 
-    :param run_dir: Run/Home directory
+    :param run_dir: Run directory (for pid file)
     :type run_dir: str
 
     :param config_file: Config filepath
     :type config_file: str
-
-    :param pid_file: PID filepath (wont create a file if None)
-    :type pid_file: str or None
 
     :param test_dir: Test directory
     :type test_dir: str or None
@@ -96,21 +93,21 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
         os.dup2(stdout.fileno(), sys.stdout.fileno())
         os.dup2(stdout.fileno(), sys.stderr.fileno())
 
+    pid_file = os.path.join(run_dir, "daemon.pid")
 
     # Change working directory
     if run_dir is not None and os.path.exists(run_dir) and os.path.isdir(run_dir):
         os.chdir(run_dir)
-    else:
-        run_dir = tempfile.mkdtemp(prefix='tmp_', suffix='_razer_daemon')
-        os.chdir(run_dir)
-
-    # Write PID
-    if pid_file is not None:
+        # Write PID file
         try:
             with open(pid_file, 'w') as pid_file_obj:
                 pid_file_obj.write(str(os.getpid()))
         except (OSError, IOError) as err:
             print("Error: {0}".format(err))
+    else:
+        run_dir = tempfile.mkdtemp(prefix='tmp_', suffix='_razer_daemon')
+        pid_file = os.path.join(run_dir, "daemon.pid")
+        os.chdir(run_dir)
 
     # Create daemon and run
     daemon = RazerDaemon(verbose, log_dir, console_log, run_dir, config_file, test_dir=test_dir)
@@ -123,7 +120,7 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
         daemon.logger.exception("Caught exception", exc_info=err)
 
     # If pid file exists, remove it
-    if pid_file is not None and os.path.exists(pid_file):
+    if run_dir is not None and os.path.exists(pid_file):
         os.remove(pid_file)
 
 
@@ -156,16 +153,13 @@ class RazerDaemon(DBusService):
         # Expanding ~ as python doesnt do it by default, also creating dirs if needed
         if log_dir is not None:
             log_dir = os.path.expanduser(log_dir)
-            os.makedirs(log_dir, mode=0o750, exist_ok=True)
         if run_dir is not None:
             run_dir = os.path.expanduser(run_dir)
-            os.makedirs(run_dir, mode=0o750, exist_ok=True)
         if config_file is not None:
             config_file = os.path.expanduser(config_file)
-            os.makedirs(os.path.dirname(config_file), mode=0o750, exist_ok=True)
 
         self._test_dir = test_dir
-        self._data_dir = run_dir
+        self._run_dir = run_dir
         self._config_file = config_file
         self._config = configparser.ConfigParser()
         self.read_config(config_file)
