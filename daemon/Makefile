@@ -4,9 +4,15 @@ PREFIX?=/usr
 purge_pycache:
 	@find -name '__pycache__' | xargs rm -rf
 
-install-resources:
+service:
+	@sed "s|##PREFIX##|$(PREFIX)|" resources/org.razer.service.in > org.razer.service
+	@sed "s|##PREFIX##|$(PREFIX)|" resources/razer-daemon.systemd.service.in > razer-daemon.service
+
+install-resources: service
 	@install -m 644 -D -v resources/razer.conf $(DESTDIR)$(PREFIX)/share/razer-daemon/razer.conf.example
 	@install -m 755 -D -v run_razer_daemon.py $(DESTDIR)$(PREFIX)/bin/razer-daemon
+	@install -m 644 -D -v org.razer.service $(DESTDIR)$(PREFIX)/share/dbus-1/services/org.razer.service
+	@install -m 644 -D -v razer-daemon.service $(DESTDIR)$(PREFIX)/lib/systemd/user/razer-daemon.service
 
 install: purge_pycache manpages install-resources
 	python3 setup.py install --prefix=$(PREFIX) --root=$(DESTDIR)
