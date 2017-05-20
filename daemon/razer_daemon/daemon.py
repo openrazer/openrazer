@@ -93,21 +93,21 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
         os.dup2(stdout.fileno(), sys.stdout.fileno())
         os.dup2(stdout.fileno(), sys.stderr.fileno())
 
-    pid_file = os.path.join(run_dir, "daemon.pid")
-
     # Change working directory
     if run_dir is not None and os.path.exists(run_dir) and os.path.isdir(run_dir):
         os.chdir(run_dir)
-        # Write PID file
-        try:
-            with open(pid_file, 'w') as pid_file_obj:
-                pid_file_obj.write(str(os.getpid()))
-        except (OSError, IOError) as err:
-            print("Error: {0}".format(err))
+        pid_file = os.path.join(run_dir, "razer-daemon.pid")
     else:
         run_dir = tempfile.mkdtemp(prefix='tmp_', suffix='_razer_daemon')
-        pid_file = os.path.join(run_dir, "daemon.pid")
+        pid_file = os.path.join(run_dir, "razer-daemon.pid")
         os.chdir(run_dir)
+
+    # Write PID file
+    try:
+        with open(pid_file, 'w') as pid_file_obj:
+            pid_file_obj.write(str(os.getpid()))
+    except (OSError, IOError) as err:
+        print("Error: {0}".format(err))
 
     # Create daemon and run
     daemon = RazerDaemon(verbose, log_dir, console_log, run_dir, config_file, test_dir=test_dir)
