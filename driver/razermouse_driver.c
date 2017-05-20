@@ -156,7 +156,11 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
             device_type = "Razer DeathAdder Chroma\n";
             break;
-            
+
+        case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
+            device_type = "Razer Naga Hex (Red)\n";
+            break;
+         
         case USB_DEVICE_ID_RAZER_NAGA_HEX:
             device_type = "Razer Naga Hex\n";
             break;
@@ -725,6 +729,7 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
     switch(usb_dev->descriptor.idProduct)
     {
 		// Damn naga hex only uses 1 byte per x, y dpi
+		case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
 		case USB_DEVICE_ID_RAZER_NAGA_HEX:
 			if(count == 1) {
 				dpi_x_byte = buf[0];
@@ -800,6 +805,7 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
     // So far I think imperator uses varstore
     switch(usb_dev->descriptor.idProduct)
     {
+		case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
 		case USB_DEVICE_ID_RAZER_NAGA_HEX:
 		    report = razer_chroma_misc_get_dpi_xy_byte();
             break;
@@ -821,7 +827,8 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
     response = razer_send_payload(usb_dev, &report);
     
     // Byte, Byte for DPI not Short, Short
-    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_NAGA_HEX) { // NagaHex is crap uses only byte for dpi
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_NAGA_HEX ||
+        usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_NAGA_HEX_RED) { // NagaHex is crap uses only byte for dpi
 		dpi_x = response.arguments[0];
 		dpi_y = response.arguments[1];
 	} else {
@@ -2024,6 +2031,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
                 break;
                 
+            case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
             case USB_DEVICE_ID_RAZER_NAGA_HEX:
             case USB_DEVICE_ID_RAZER_TAIPAN:
                 CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
@@ -2263,6 +2271,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
                 break;
             
             case USB_DEVICE_ID_RAZER_NAGA_HEX:
+            case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
             case USB_DEVICE_ID_RAZER_TAIPAN:
                 device_remove_file(&hdev->dev, &dev_attr_dpi);
                 device_remove_file(&hdev->dev, &dev_attr_poll_rate);
@@ -2319,6 +2328,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
  * Device ID mapping table
  */
 static const struct hid_device_id razer_devices[] = {
+	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX_RED) },
 	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_2014) },
 	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX) },
 	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED) },
