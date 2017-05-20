@@ -15,12 +15,12 @@ HOME = os.path.expanduser("~")
 XDG_DATA_HOME = os.environ.get("XDG_DATA_HOME", os.path.join(HOME, ".local", "share"))
 XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME", os.path.join(HOME, ".config"))
 
-RAZER_DATA_HOME = os.path.join(XDG_DATA_HOME, "razer-daemon")
+RAZER_DATA_HOME = os.path.join(XDG_DATA_HOME, "openrazer")
 XDG_RUNTIME_DIR = os.environ.get("XDG_RUNTIME_DIR", RAZER_DATA_HOME)
-RAZER_CONFIG_HOME = os.path.join(XDG_CONFIG_HOME, "razer-daemon")
+RAZER_CONFIG_HOME = os.path.join(XDG_CONFIG_HOME, "openrazer")
 RAZER_RUNTIME_DIR = XDG_RUNTIME_DIR
 
-EXAMPLE_CONF_FILE = '/usr/share/razer-daemon/razer.conf.example'
+EXAMPLE_CONF_FILE = '/usr/share/openrazer/razer.conf.example'
 
 CONF_FILE = os.path.join(RAZER_CONFIG_HOME, 'razer.conf')
 LOG_PATH = os.path.join(RAZER_DATA_HOME, 'logs')

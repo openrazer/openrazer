@@ -9,7 +9,7 @@ service:
 	@sed "s|##PREFIX##|$(PREFIX)|" resources/razer-daemon.systemd.service.in > razer-daemon.service
 
 install-resources: service
-	@install -m 644 -D -v resources/razer.conf $(DESTDIR)$(PREFIX)/share/razer-daemon/razer.conf.example
+	@install -m 644 -D -v resources/razer.conf $(DESTDIR)$(PREFIX)/share/openrazer/razer.conf.example
 	@install -m 755 -D -v run_razer_daemon.py $(DESTDIR)$(PREFIX)/bin/razer-daemon
 	@install -m 644 -D -v org.razer.service $(DESTDIR)$(PREFIX)/share/dbus-1/services/org.razer.service
 	@install -m 644 -D -v razer-daemon.service $(DESTDIR)$(PREFIX)/lib/systemd/user/razer-daemon.service
@@ -35,5 +35,5 @@ uninstall: manpages_uninstall
 	$(eval EGGPATH := $(shell readlink -f $(DAEMONPATH)-*.egg-info/)) # shows an error when it's not already installed (maybe use some if condition)
 	@rm -rf -v $(DAEMONPATH)
 	@rm -rf -v $(EGGPATH)
-	@rm -rf -v $(DESTDIR)$(PREFIX)/share/razer-daemon
+	@rm -rf -v $(DESTDIR)$(PREFIX)/share/openrazer
 	@rm -f -v $(DESTDIR)$(PREFIX)/bin/razer-daemon

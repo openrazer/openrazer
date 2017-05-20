@@ -30,13 +30,13 @@ Stop any existing daemon first, if one is running.
 Gracefully stop the existing daemon.
 .TP
 \fB--config\fR=\fIconfig_file\fR
-Specifies the location of the config file. If this is not provided it will default to \fB$HOME\fR/.config/razer-service/razer.conf and create it if needed from the example config.
+Specifies the location of the config file. If this is not provided it will default to \fB$HOME\fR/.config/openrazer/razer.conf and create it if needed from the example config.
 .TP
 \fB--run-dir\fR=\fIrun_directory\fR
-Tells the daemon what directory is its run directory, the directory it will change to once started. It will default to \fB$XDG_RUNTIME_DIR\fR, if not set it falls back to \fB$HOME\fR/.local/share/razer-service/.
+Tells the daemon what directory is its run directory, the directory it will change to once started. It will default to \fB$XDG_RUNTIME_DIR\fR, if not set it falls back to \fB$HOME\fR/.local/share/openrazer/.
 .TP
 \fB--log-dir\fR=\fIlog_directory\fR
-This argument decides where the log directory will be, the daemon itself will handle log rotation as it's a user session service. The daemon will default to \fB$HOME\fR/.local/share/razer-service/logs/ for its log directory.
+This argument decides where the log directory will be, the daemon itself will handle log rotation as it's a user session service. The daemon will default to \fB$HOME\fR/.local/share/openrazer/logs/ for its log directory.
 .TP
 \fB--test-dir\fR=\fItest_dir\fR
 If provided the daemon will operate in test-driver mode in which it exposes devices that aren't physically connected. Use
