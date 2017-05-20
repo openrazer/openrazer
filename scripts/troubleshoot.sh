@@ -58,7 +58,7 @@ fi
 # Step 4 - check the daemon
 log_dir=/tmp/razer_logs
 mkdir -p $log_dir
-razer-service -r -v --log-dir=$log_dir
+razer-daemon -r -v --log-dir=$log_dir
 sleep 3
 daemon_output=$(cat $log_dir/razer.log)
 if [ ! -z "$(echo $daemon_output | grep 'PermissionError: [Errno 13] Permission denied')" ]; then

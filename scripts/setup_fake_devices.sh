@@ -49,8 +49,8 @@ mkdir $config_dir/{,data,logs}
 mkdir $test_dir
 $terminal_cmd "$whereami/create_fake_device.py" --dest "$test_dir" $options &
 
-# Kill razer-service if it is running already.
-pkill -e razer-service
+# Kill razer-daemon if it is running already.
+pkill -e razer-daemon
 
 # Start the daemon in a new terminal window.
-$terminal_cmd razer-service --verbose -F --run-dir "$config_dir/data" --log-dir "$config_dir/logs" --pid-file "$config_dir/daemon.pid" --test-dir "$test_dir"
+$terminal_cmd razer-daemon --verbose -F --run-dir "$config_dir/data" --log-dir "$config_dir/logs" --pid-file "$config_dir/daemon.pid" --test-dir "$test_dir"
