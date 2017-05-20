@@ -15,10 +15,10 @@ HOME = os.path.expanduser("~")
 XDG_DATA_HOME = os.environ.get("XDG_DATA_HOME", os.path.join(HOME, ".local", "share"))
 XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME", os.path.join(HOME, ".config"))
 
-RAZER_DATA_HOME = os.path.join(XDG_DATA_HOME, "razer-service")
+RAZER_DATA_HOME = os.path.join(XDG_DATA_HOME, "razer-daemon")
 XDG_RUNTIME_DIR = os.environ.get("XDG_RUNTIME_DIR", RAZER_DATA_HOME)
-RAZER_CONFIG_HOME = os.path.join(XDG_CONFIG_HOME, "razer-service")
-RAZER_RUNTIME_DIR = os.path.join(XDG_RUNTIME_DIR, "razer-service")
+RAZER_CONFIG_HOME = os.path.join(XDG_CONFIG_HOME, "razer-daemon")
+RAZER_RUNTIME_DIR = os.path.join(XDG_RUNTIME_DIR, "razer-daemon")
 
 EXAMPLE_CONF_FILE = '/usr/share/razer-daemon/razer.conf.example'
 
@@ -67,11 +67,11 @@ def run():
 
     # TODO Fix up run_dir (especially in macros branch as things will break)
     if not os.path.exists(RAZER_CONFIG_HOME):
-        os.mkdir(RAZER_CONFIG_HOME)
+        os.makedirs(RAZER_CONFIG_HOME, exist_ok=True)
     if not os.path.exists(RAZER_DATA_HOME):
-        os.mkdir(RAZER_DATA_HOME)
+        os.makedirs(RAZER_DATA_HOME, exist_ok=True)
     if not os.path.exists(LOG_PATH):
-        os.mkdir(LOG_PATH)
+        os.makedirs(LOG_PATH, exist_ok=True)
     if not os.path.exists(CONF_FILE):
         if os.path.exists(EXAMPLE_CONF_FILE):
             shutil.copy(EXAMPLE_CONF_FILE, CONF_FILE)
