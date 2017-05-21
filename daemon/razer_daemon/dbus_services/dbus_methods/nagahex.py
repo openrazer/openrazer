@@ -52,7 +52,7 @@ def get_dpi_xy_byte(self):
         result = driver_file.read()
         dpi_x, dpi_y = [int(dpi) for dpi in result.strip().split(':')]
 
-    dpi_x = dpi_x / 255 * 2675
-    dpi_y = dpi_y / 255 * 2675
+    dpi_x = int(round(dpi_x / 255 * 6750, 2))
+    dpi_y = int(round(dpi_y / 255 * 6750, 2))
 
     return [dpi_x, dpi_y]
