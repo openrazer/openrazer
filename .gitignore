@@ -53,6 +53,7 @@ dist
 .project
 .cproject
 .git*
+!.gitignore
 *.o.cmd
 *.ko.cmd
 /driver/.tmp_versions
