@@ -1,3 +1,14 @@
+razer (1.1.13-0ubuntu1) xenial; urgency=high
+
+  * Added Device - Razer Naga Hex (Red)
+  * Fixed bug where udev was matching whole tree not just device
+  * Fixed bug in 1byte dpi logic for old devices
+  * Renamed razer-service back to razer-daemon
+  * Added more example scripts
+  * Changed default serials on fake driver configs
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sun, 11 Jun 2017 17:24:00 +0000
+
 razer (1.1.12-0ubuntu1) xenial; urgency=high
 
   * Changed README
