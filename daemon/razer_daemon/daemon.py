@@ -3,7 +3,7 @@ Daemon class
 
 This class is the main core of the daemon, this serves a basic dbus module to control the main bit of the daemon
 """
-__version__ = '1.1.12'
+__version__ = '1.1.13'
 
 import configparser
 import logging
@@ -145,13 +145,13 @@ class RazerDaemon(DBusService):
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
 
         # Check if process exists
-        exit_code = subprocess.call(['pgrep', 'razer-service'], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        exit_code = subprocess.call(['pgrep', 'razer-daemon'], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
         if exit_code == 0:
             print("Daemon already exists. Please stop that one.", file=sys.stderr)
             exit(-1)
 
-        setproctitle.setproctitle('razer-service')
+        setproctitle.setproctitle('razer-daemon')
 
         # Expanding ~ as python doesnt do it by default, also creating dirs if needed
         if log_dir is not None:

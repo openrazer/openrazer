@@ -5,27 +5,33 @@ GOTO="razer_end"
 LABEL="razer_vendor"
 
 # Mice
-ATTRS{idProduct}=="0024|0025|002f|0032|0034|0040|0041|0042|0043|0044|0045|0046|0048|004c|0050|005c", \
+ATTRS{idProduct}=="0024|0025|002f|0032|0034|0036|0040|0041|0042|0043|0044|0045|0046|0048|004c|0050|005c", \
+    ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razermouse"
 
 # Keyboards
 ATTRS{idProduct}=="010d|010e|0111|0113|011b|011a|010f|0203|0204|0205|0208|0209|020f|0210|0211|0214|0216|021a|0217|021a|021e|021f|0220|0221|0224", \
+    ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerkbd"
 
 # Firefly
 ATTRS{idProduct}=="0c00", \
+    ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerfirefly"
 
 # Kraken
 ATTRS{idProduct}=="0504|0510", \
+    ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerkraken"
 
 # Razer Mug
 ATTRS{idProduct}=="0f07", \
+    ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razermug"
 
 # Core
 ATTRS{idProduct}=="0215", \
+    ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razercore"
 
 # Get out if no match

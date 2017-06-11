@@ -73,14 +73,14 @@ daemon_install:
 	@echo "====================================================="
 	make --no-print-directory -C daemon install
 	@mkdir -p $(DESTDIR)/etc/xdg/autostart
-	@cp -v ./install_files/desktop/razer-service.desktop $(DESTDIR)/etc/xdg/autostart/razer-service.desktop
+	@cp -v ./install_files/desktop/razer-daemon.desktop $(DESTDIR)/etc/xdg/autostart/razer-daemon.desktop
 
 ubuntu_daemon_install:
 	@echo -e "\n::\033[34m Installing Razer Daemon\033[0m"
 	@echo "====================================================="
 	make --no-print-directory -C daemon ubuntu_install
 	@mkdir -p $(DESTDIR)/etc/xdg/autostart
-	@cp -v ./install_files/desktop/razer-service.desktop $(DESTDIR)/etc/xdg/autostart/razer-service.desktop
+	@cp -v ./install_files/desktop/razer-daemon.desktop $(DESTDIR)/etc/xdg/autostart/razer-daemon.desktop
 
 
 
@@ -88,7 +88,7 @@ daemon_uninstall:
 	@echo -e "\n::\033[34m Uninstalling Razer Daemon\033[0m"
 	@echo "====================================================="
 	make --no-print-directory -C daemon uninstall
-	@rm -fv $(DESTDIR)/etc/xdg/autostart/razer-service.desktop
+	@rm -fv $(DESTDIR)/etc/xdg/autostart/razer-daemon.desktop
 
 
 # Python Library
