@@ -11,13 +11,14 @@ Also this is the master branch, devices may appear in the tables below but might
 | Device                                        | USB VID:PID | Driver | Daemon | Notes |
 | --------------------------------------------- | ----------- | ------ | ------ | ---- |
 | Razer BlackWidow Ultimate 2012                |  1532:010D  |   ✔    |   ✔    |      |
-| Razer BlackWidow Classic (Alternate)          |  1532:010E  |   ✔    |   ✔    | Mostly untested |
+| Razer BlackWidow Classic (Alternate)          |  1532:010E  |   ✔    |   ✔    |      |
 | Razer Anansi                                  |  1532:010F  |   ✔    |   ✔    |      |
 | Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔    |   ✔    |      |
 | Razer BlackWidow Classic                      |  1532:011B  |   ✔    |   ✔    |      |
 | Razer BlackWidow Chroma                       |  1532:0203  |   ✔    |   ✔    |      |
 | Razer DeathStalker Chroma                     |  1532:0204  |   ✔    |   ✔    |      |
 | Razer Blade Stealth                           |  1532:0205  |   ✔    |   ✔    |      |
+| Razer Orbweaver Chroma                        |  1532:0207  |   ✔    |   ✔    | Needs Testing |
 | Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔    |   ✔    |      |
 | Razer Blade QHD                               |  1532:020F  |   ✔    |   ✔    |      |
 | Razer Blade Pro (Late 2016)                   |  1532:0210  |   ✔    |   ✔    |      |
@@ -29,7 +30,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Ornata Chroma                           |  1532:021E  |   ✔    |   ✔    |      |
 | Razer Ornata                                  |  1532:021F  |   ✔    |   ✔    |      |
 | Razer Blade Stealth (Late 2016)               |  1532:0220  |   ✔    |   ✔    |      |
-| Razer BlackWidow Chroma V2                    |  1532:0221  |   ✔    |   ✔    | Needs Testing |
+| Razer BlackWidow Chroma V2                    |  1532:0221  |   ✔    |   ✔    |      |
 | Razer Blade (Late 2016)                       |  1532:0224  |   ✔    |   ✔    |      |
 
 ### Mouse
