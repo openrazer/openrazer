@@ -1890,9 +1890,9 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
 
         case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+        case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
-        case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
@@ -1904,27 +1904,13 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
 
         case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_effect);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_colour);
+        case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
-            break;
-
-
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
@@ -2127,9 +2113,9 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+        case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
             device_remove_file(&hdev->dev, &dev_attr_charge_level);
             device_remove_file(&hdev->dev, &dev_attr_charge_status);
-        case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
             device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
@@ -2141,26 +2127,13 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
-            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
-            device_remove_file(&hdev->dev, &dev_attr_charge_level);
-            device_remove_file(&hdev->dev, &dev_attr_charge_status);
             device_remove_file(&hdev->dev, &dev_attr_charge_effect);
             device_remove_file(&hdev->dev, &dev_attr_charge_colour);
+        case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);
             device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
             device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
-            device_remove_file(&hdev->dev, &dev_attr_dpi);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
-            break;
-
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
             device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);

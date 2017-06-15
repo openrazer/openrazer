@@ -61,7 +61,7 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'max_dpi',
-               'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
+               'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'set_idle_time', 'set_low_battery_threshold', 'get_battery', 'is_charging']
 
     RAZER_URLS = {
         "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
@@ -639,7 +639,8 @@ class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse',
                'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
-               'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_spectrum']
+               'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_spectrum',
+               'get_battery', 'is_charging']
 
     RAZER_URLS = {
         "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
