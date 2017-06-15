@@ -28,6 +28,7 @@ def copy_func(function_reference, name=None):
     else:
         return types.FunctionType(function_reference.__code__, function_reference.__globals__, name or function_reference.func_name, function_reference.__defaults__, function_reference.__closure__)
 
+
 class DBusServiceFactory(object):
     """
     Factory object to create differnet service objects.
@@ -55,6 +56,7 @@ class DBusServiceFactory(object):
         DBusServiceFactory.service_number += 1
 
         return new_service(bus_name, object_path)
+
 
 class DBusService(dbus.service.Object):
     """
