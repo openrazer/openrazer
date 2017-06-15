@@ -10,7 +10,7 @@ from razer_daemon.daemon import daemonize
 from subprocess import check_output
 from time import sleep
 
-SHARE_DIR = '/usr/share/razer-service'
+SHARE_DIR = '/usr/share/razer-daemon'
 EXAMPLE_CONF = os.path.join(SHARE_DIR, 'razer.conf.example')
 
 BASE_PATH = os.path.join(os.path.abspath(os.environ['HOME']), '.razer-service')
@@ -40,19 +40,19 @@ def parse_args():
 
 def stop_daemon():
     try:
-        pid = int(check_output(["pidof", "-s", "razer-service"]))
-        print("Stopping razer-service... (PID {0})".format(str(pid)))
+        pid = int(check_output(["pidof", "-s", "razer-daemon"]))
+        print("Stopping razer-daemon... (PID {0})".format(str(pid)))
         os.kill(pid, signal.SIGTERM)
         sleep(3)
 
         # Give it time to stop
-        pid = check_output(["pidof", "-s", "razer-service"])
+        pid = check_output(["pidof", "-s", "razer-daemon"])
         if len(pid) > 0:
             os.kill(int(pid), signal.SIGKILL)
             sleep(3)
 
     except Exception:
-        print("No razer-service currently running.")
+        print("No razer-daemon currently running.")
 
 
 def run():

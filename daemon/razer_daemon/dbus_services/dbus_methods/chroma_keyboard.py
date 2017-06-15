@@ -276,6 +276,22 @@ def set_none_effect(self):
         driver_file.write('1')
 
 
+@endpoint('razer.device.misc', 'triggerReactive')
+def trigger_reactive_effect(self):
+    """
+    Trigger reactive on Firefly
+    """
+    self.logger.debug("DBus call trigger_reactive_effect")
+
+    # Notify others
+    self.send_effect_event('triggerReactive')
+
+    driver_path = self.get_driver_path('matrix_reactive_trigger')
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write('1')
+
+
 @endpoint('razer.device.lighting.chroma', 'setReactive', in_sig='yyyy')
 def set_reactive_effect(self, red, green, blue, speed):
     """

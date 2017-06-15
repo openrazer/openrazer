@@ -13,11 +13,11 @@
 #define __HID_RAZER_MUG_H
 
 #ifndef USB_VENDOR_ID_RAZER
-    #define USB_VENDOR_ID_RAZER 0x1532
+#define USB_VENDOR_ID_RAZER 0x1532
 #endif
 
 #ifndef USB_DEVICE_ID_RAZER_CHROMA_MUG
-    #define USB_DEVICE_ID_RAZER_CHROMA_MUG 0x0f07
+#define USB_DEVICE_ID_RAZER_CHROMA_MUG 0x0f07
 #endif
 
 struct razer_mug_device {
@@ -25,20 +25,20 @@ struct razer_mug_device {
     struct input_dev *input;
     struct mutex lock;
     unsigned char usb_interface_protocol;
-    
+
     unsigned short usb_vid;
     unsigned short usb_pid;
-    
+
     unsigned char mug_present_poll;
-    
+
     char serial[23];
     // 3 Bytes, first byte is wether fw version is collected, 2nd byte is major version, 3rd is minor, should be printed out in hex form as are bcd
     unsigned char firmware_version[3];
 };
 
-/* 
+/*
  * USB INTERRUPT
- * 
+ *
  * */
 
 #endif
