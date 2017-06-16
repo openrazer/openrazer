@@ -70,6 +70,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | ----------------------- | ----------- | ------ | ------ |
 | Razer Nostromo          |  1532:0111  |   ✔    |   ✔    |
 | Razer Orbweaver         |  1532:0113  |   ✔    |   ✔    |
+| Razer Tartarus          |  1532:0201  |   ✔    |   ✔    |
 | Razer Tartarus Chroma   |  1532:0208  |   ✔    |   ✔    |
 | Razer Core              |  1532:0215  |   ✔    |   ✔    |
 | Razer Chroma Mug Holder |  1532:0F07  |   ✔    |   ✔    |
