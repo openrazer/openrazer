@@ -134,6 +134,7 @@ def set_dpi_xy(self, dpi_x, dpi_y):
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(dpi_bytes)
 
+
 @endpoint('razer.device.dpi', 'getDPI', out_sig='ai')
 def get_dpi_xy(self):
     """
@@ -153,6 +154,18 @@ def get_dpi_xy(self):
     return [dpi_x, dpi_y]
 
 
+@endpoint('razer.device.dpi', 'maxDPI', out_sig='i')
+def max_dpi(self):
+    self.logger.debug("DBus call get_dpi_both")
+
+    if hasattr(self, 'DPI_MAX'):
+        return self.DPI_MAX
+
+    else:
+        return 500
+
+
+
 @endpoint('razer.device.misc', 'setPollRate', in_sig='q')
 def set_poll_rate(self, rate):
     """
@@ -170,6 +183,7 @@ def set_poll_rate(self, rate):
             driver_file.write(str(rate))
     else:
         self.logger.error("Poll rate %d is invalid", rate)
+
 
 @endpoint('razer.device.misc', 'getPollRate', out_sig='i')
 def get_poll_rate(self):

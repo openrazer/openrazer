@@ -5,12 +5,9 @@ import dbus as _dbus
 
 from razer.client.constants import MACRO_LED_STATIC, MACRO_LED_BLINK
 from razer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFactory as __BaseDeviceFactory
-from razer.client.macro import RazerMacro as _RazerMacro
 
 
 class RazerKeyboard(__RazerDevice):
-    _MACRO_CLASS = _RazerMacro
-
     def __init__(self, serial, vid_pid=None, daemon_dbus=None):
         super(RazerKeyboard, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
 
@@ -27,14 +24,6 @@ class RazerKeyboard(__RazerDevice):
         if self.has('macro_mode_led'):
             self._dbus_interfaces['macro_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.macromode")
 
-        if self.has('macro_logic'):
-            if self._MACRO_CLASS is not None:
-                self.macro = self._MACRO_CLASS(serial, daemon_dbus=daemon_dbus, capabilities=self._capabilities)
-            else:
-                self._capabilities['macro_logic'] = False
-                self.macro = None
-        else:
-            self.macro = None
 
     @property
     def game_mode_led(self) -> bool:
@@ -120,6 +109,7 @@ class RazerKeyboard(__RazerDevice):
 DEVICE_PID_MAP = {
     
 }
+
 
 class RazerKeyboardFactory(__BaseDeviceFactory):
     @staticmethod

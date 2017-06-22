@@ -138,10 +138,14 @@ class KeyWatcher(threading.Thread):
         # Loop
         while not self._shutdown:
             # epoll is nice but it wasn't getting events properly :(
-            if self._use_epoll:
-                self._poll_epoll(poll_object, event_file_map)
-            else:
-                self._poll_read()
+
+            try:  # Cheap hack until i merged new code
+                if self._use_epoll:
+                    self._poll_epoll(poll_object, event_file_map)
+                else:
+                    self._poll_read()
+            except (IOError, OSError):  # Basically if theres an error, most likely device has been removed then it'll get deleted properly
+                pass
 
             time.sleep(SPIN_SLEEP)
 

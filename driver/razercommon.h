@@ -14,7 +14,7 @@
 
 #include <linux/usb/input.h>
 
-#define VERSION "1.1.8"
+#define VERSION "1.1.13"
 
 
 // Macro to create device files
@@ -44,9 +44,9 @@ do { \
 #define BACKLIGHT_LED     0x05
 #define MACRO_LED         0x07
 #define GAME_LED          0x08
-#define RED_PROFILE_LED   0x0E
-#define GREEN_PROFILE_LED 0x0C
-#define BLUE_PROFILE_LED  0x0D
+#define RED_PROFILE_LED   0x0C
+#define GREEN_PROFILE_LED 0x0D
+#define BLUE_PROFILE_LED  0x0E
 
 // LED Effect definitions
 #define LED_STATIC           0x00
@@ -114,9 +114,9 @@ struct razer_report {
 };
 
 struct razer_key_translation {
-	u16 from;
-	u16 to;
-	u8 flags;
+    u16 from;
+    u16 to;
+    u8 flags;
 };
 
 int razer_send_control_msg(struct usb_device *usb_dev,void const *data, unsigned int report_index, unsigned long wait_min, unsigned long wait_max);

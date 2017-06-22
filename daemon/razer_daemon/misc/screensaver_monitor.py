@@ -18,6 +18,7 @@ class ScreensaverMonitor(object):
 
         self._parent = parent
         self._monitoring = True
+        self._active = None
 
         self._dbus_instances = []
         # Get session bus
@@ -67,8 +68,15 @@ class ScreensaverMonitor(object):
         :param active: If the screensaver is active
         :type active: dbus.Boolean
         """
+        active = bool(active)
+
         if self.monitoring:
-            if bool(active):
-                self.suspend()
+            if active:
+                # Only trigger once per state change
+                if self._active is None or not self._active:
+                    self._active = active
+                    self.suspend()
             else:
-                self.resume()
+                if self._active is None or self._active:
+                    self._active = active
+                    self.resume()

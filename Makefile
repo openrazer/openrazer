@@ -57,13 +57,13 @@ driver_uninstall:
 lp_driver:
 	@echo -e "\n::\033[32m Compiling Razer kernel modules (Launchpad)\033[0m"
 	@echo "========================================"
-	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+generic' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
+	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+(generic|amd64)' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules > /dev/null 2>&1
 
 lp_driver_clean:
 	@echo -e "\n::\033[32m Cleaning Razer kernel modules (Launchpad)\033[0m"
 	@echo "========================================"
-	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+generic' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
+	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+(generic|amd64)' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
 	make -C "$(KERNELDIR)" SUBDIRS="$(DRIVERDIR)" clean
 
 
@@ -73,14 +73,14 @@ daemon_install:
 	@echo "====================================================="
 	make --no-print-directory -C daemon install
 	@mkdir -p $(DESTDIR)/etc/xdg/autostart
-	@cp -v ./install_files/desktop/razer-service.desktop $(DESTDIR)/etc/xdg/autostart/razer-service.desktop
+	@cp -v ./install_files/desktop/razer-daemon.desktop $(DESTDIR)/etc/xdg/autostart/razer-daemon.desktop
 
 ubuntu_daemon_install:
 	@echo -e "\n::\033[34m Installing Razer Daemon\033[0m"
 	@echo "====================================================="
 	make --no-print-directory -C daemon ubuntu_install
 	@mkdir -p $(DESTDIR)/etc/xdg/autostart
-	@cp -v ./install_files/desktop/razer-service.desktop $(DESTDIR)/etc/xdg/autostart/razer-service.desktop
+	@cp -v ./install_files/desktop/razer-daemon.desktop $(DESTDIR)/etc/xdg/autostart/razer-daemon.desktop
 
 
 
@@ -88,7 +88,7 @@ daemon_uninstall:
 	@echo -e "\n::\033[34m Uninstalling Razer Daemon\033[0m"
 	@echo "====================================================="
 	make --no-print-directory -C daemon uninstall
-	@rm -fv $(DESTDIR)/etc/xdg/autostart/razer-service.desktop
+	@rm -fv $(DESTDIR)/etc/xdg/autostart/razer-daemon.desktop
 
 
 # Python Library

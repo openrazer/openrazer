@@ -1,3 +1,71 @@
+razer (1.1.13-0ubuntu1) xenial; urgency=high
+
+  * Added Device - Razer Naga Hex (Red)
+  * Fixed bug where udev was matching whole tree not just device
+  * Fixed bug in 1byte dpi logic for old devices
+  * Renamed razer-service back to razer-daemon
+  * Added more example scripts
+  * Changed default serials on fake driver configs
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sun, 11 Jun 2017 17:24:00 +0000
+
+razer (1.1.12-0ubuntu1) xenial; urgency=high
+
+  * Changed README
+  * Added in missing DPI for DeathAdder Elite
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Wed, 3 May 2017 20:04:00 +0000
+
+razer (1.1.11-0ubuntu1) xenial; urgency=low
+
+  * Added Device - Overwatch Razer BlackWidow Chroma
+  * Added Device - Razer Naga 2014
+  * Fixed Bug where serial wasnt reported during device add, causing DBus to die a horrible death
+  * Fixed inconsistencies where some firmware versions has newlines when interacting with the driver directly
+  * Added some more mutex's in mouse driver
+  * Swapped around mice and keyboard block in udev as udev was doing the dodgy
+  * Added Naga 2014 to fake driver, fixed some other issues there
+  * Fixed poll_rate constant which was overlooked when numbers changed
+  * Added .backlight.active properties to mice in pylib
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Mon, 17 Apr 2017 11:21:00 +0000
+
+razer (1.1.10-0ubuntu1) xenial; urgency=low
+
+  * Fixed bug with Razer Blade QHD Lighting
+  * Added Device - Razer Blade (Late 2016)
+  * Added Device - Razer Mamba 2012 (Wired)
+  * Added Device - Razer Mamba 2012 (Wireless)
+  * Added Device - Razer Taipan
+  * Added Device - Razer Nostromo
+  * Now a DBus method to trigger reactive on firefly
+  * Added a maxDPI() method to DBus and the python library
+  * Fixed limited with some Blade RGB payloads
+  * Fixed some crash conditions
+  * Slowly prepping driver for some windows ifdefs so that it can compile on windows easily
+  * Added raw_event function to mice that detects buttons when in device mode (doesnt work yet, proper code is in other branch)
+  * Started adding mutex's to mice
+  * Added macros globally in pylib
+  * Added firefly class to pylib
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sat, 15 Apr 2017 21:54:00 +0000
+
+razer (1.1.9-0ubuntu1) xenial; urgency=low
+
+  * Added options to daemon for restarting / stopping using the dameon script
+  * Added more permission checks so solve some more issues.
+  * Added Device - Razer Core
+  * Added Device - Razer Naga Hex
+  * Added Device - Razer BlackWidow Classic (Alternate)
+  * Added Device - Razer BlackWidow Chroma V2
+  * Added in more urls
+  * Added custom mode to kraken
+  * Added config option to stop battery notifications
+  * Fixed bug when receiving multiple of the same screensaver events
+  * Major changes to man pages
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sat, 04 Mar 2017 14:47:00 +0000
+
 razer (1.1.8-0ubuntu1) xenial; urgency=low
 
   * Removed driver_verbose make target and made the driver target be verbose

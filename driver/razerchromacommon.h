@@ -40,6 +40,9 @@ struct razer_report razer_chroma_standard_matrix_effect_spectrum(unsigned char v
 struct razer_report razer_chroma_standard_matrix_effect_reactive(unsigned char variable_storage, unsigned char led_id, unsigned char speed, struct razer_rgb *rgb1);
 struct razer_report razer_chroma_standard_matrix_effect_static(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1);
 struct razer_report razer_chroma_standard_matrix_effect_starlight_single(unsigned char variable_storage, unsigned char led_id, unsigned char speed, struct razer_rgb *rgb1);
+struct razer_report razer_chroma_standard_matrix_effect_starlight_dual(unsigned char variable_storage, unsigned char led_id, unsigned char speed, struct razer_rgb *rgb1, struct razer_rgb *rgb2);
+struct razer_report razer_chroma_standard_matrix_effect_starlight_random(unsigned char variable_storage, unsigned char led_id, unsigned char speed);
+
 struct razer_report razer_chroma_standard_matrix_effect_breathing_random(unsigned char variable_storage, unsigned char led_id);
 struct razer_report razer_chroma_standard_matrix_effect_breathing_single(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1);
 struct razer_report razer_chroma_standard_matrix_effect_breathing_dual(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1, struct razer_rgb *rgb2);
@@ -47,9 +50,9 @@ struct razer_report razer_chroma_standard_matrix_effect_custom_frame(unsigned ch
 struct razer_report razer_chroma_standard_matrix_set_custom_frame(unsigned char row_index, unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data);
 
 
-/* 
+/*
  * Extended Matrix Effects Functions
- * 
+ *
  * Class 0x0F
  * Trans 0x3F (Dev 0b001 Game Controller 1, Trans 0b11111)
  */
@@ -71,11 +74,11 @@ struct razer_report razer_chroma_extended_matrix_set_custom_frame(unsigned char 
 
 /*
  * Extended Matrix Effects (Mouse) Functions
- * 
+ *
  * Class 0x0D
  * Trans 0x3F (not set) (Dev 0b001 Game Controller 1, Trans 0b11111)
  */
-struct razer_report razer_chroma_mouse_extended_matrix_effect_none(unsigned char variable_storage, unsigned char led_id); 
+struct razer_report razer_chroma_mouse_extended_matrix_effect_none(unsigned char variable_storage, unsigned char led_id);
 struct razer_report razer_chroma_mouse_extended_matrix_effect_static(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1);
 struct razer_report razer_chroma_mouse_extended_matrix_effect_spectrum(unsigned char variable_storage, unsigned char led_id);
 struct razer_report razer_chroma_mouse_extended_matrix_effect_reactive(unsigned char variable_storage, unsigned char led_id, unsigned char speed, struct razer_rgb *rgb1);
@@ -93,6 +96,7 @@ struct razer_report razer_chroma_misc_set_blade_brightness(unsigned char brightn
 struct razer_report razer_chroma_misc_get_blade_brightness(void);
 
 struct razer_report razer_chroma_misc_one_row_set_custom_frame(unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data);
+struct razer_report razer_chroma_misc_matrix_reactive_trigger(void);
 
 struct razer_report razer_chroma_misc_get_battery_level(void);
 struct razer_report razer_chroma_misc_get_charging_status(void);
