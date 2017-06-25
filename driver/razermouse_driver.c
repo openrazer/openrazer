@@ -326,8 +326,12 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Imperator 2012\n";
         break;
 
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
-        device_type = "Razer Ouroboros\n";
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+        device_type = "Razer Ouroboros (Wired)\n";
+        break;
+
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
+        device_type = "Razer Ouroboros (Wireless)\n";
         break;
 
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
@@ -799,7 +803,8 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_2012:
     case USB_DEVICE_ID_RAZER_IMPERATOR:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_TAIPAN:
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
@@ -1321,7 +1326,8 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
     case USB_DEVICE_ID_RAZER_NAGA_2012:
     case USB_DEVICE_ID_RAZER_IMPERATOR:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_TAIPAN:
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
@@ -1441,7 +1447,8 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_NAGA_EPIC:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
@@ -1536,7 +1543,8 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_NAGA_EPIC:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
@@ -1779,7 +1787,8 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_2012:
     case USB_DEVICE_ID_RAZER_IMPERATOR:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_TAIPAN:
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
@@ -1950,7 +1959,8 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_2012:
     case USB_DEVICE_ID_RAZER_IMPERATOR:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_TAIPAN:
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
@@ -2312,7 +2322,8 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
     case USB_DEVICE_ID_RAZER_IMPERATOR:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_TAIPAN:
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
@@ -2482,7 +2493,8 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
 
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_TAIPAN:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
@@ -3047,7 +3059,8 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_NAGA_EPIC:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
@@ -3136,7 +3149,8 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_NAGA_EPIC:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
@@ -3211,7 +3225,8 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
     case USB_DEVICE_ID_RAZER_NAGA_EPIC:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
@@ -3298,7 +3313,8 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_NAGA_EPIC:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
@@ -3574,7 +3590,8 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_2012:
     case USB_DEVICE_ID_RAZER_IMPERATOR:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_TAIPAN:
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
@@ -3714,7 +3731,8 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_2012:
     case USB_DEVICE_ID_RAZER_IMPERATOR:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_TAIPAN:
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
@@ -3850,7 +3868,8 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
         request = razer_chroma_standard_get_led_brightness(VARSTORE, led_id);
         request.transaction_id.id = 0xFF;
         break;
@@ -3949,7 +3968,8 @@ static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
         request = razer_chroma_standard_set_led_brightness(VARSTORE, led_id, brightness);
         request.transaction_id.id = 0xFF;
         break;
@@ -4762,7 +4782,8 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
     case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
     case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC:
@@ -4900,7 +4921,8 @@ static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
     case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
     case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
@@ -6173,7 +6195,8 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             break;
 
-        case USB_DEVICE_ID_RAZER_OUROBOROS:
+        case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+        case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
@@ -7241,7 +7264,8 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             break;
 
-        case USB_DEVICE_ID_RAZER_OUROBOROS:
+        case USB_DEVICE_ID_RAZER_OUROBOROS_WIRED:
+        case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
             device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
@@ -7874,7 +7898,8 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TAIPAN) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_IMPERATOR) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OUROBOROS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OUROBOROS_WIRED) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_2013) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_2013) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_CHROMA) },

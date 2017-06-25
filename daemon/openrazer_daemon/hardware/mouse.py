@@ -280,9 +280,9 @@ class RazerImperator(__RazerDevice):
     DPI_MAX = 6400
 
 
-class RazerOuroboros(__RazerDevice):
+class RazerOuroborosWired(__RazerDevice):
     """
-    Class for the Razer Ouroboros
+    Class for the Razer Ouroboros (Wired)
     """
     USB_VID = 0x1532
     USB_PID = 0x0032
@@ -293,6 +293,13 @@ class RazerOuroboros(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/26/26_ouroboros.png"
 
     DPI_MAX = 8200
+
+
+class RazerOuroborosWireless(RazerOuroborosWired):
+    """
+    Class for the Razer Ouroboros (Wireless)
+    """
+    USB_PID = 0x0033
 
 
 class RazerOrochi2013(__RazerDevice):
