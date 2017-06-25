@@ -2,3 +2,4 @@ usr/lib/python3/dist-packages/razer_daemon
 usr/bin/razer-daemon
 usr/share/openrazer
 usr/lib/systemd/user
+usr/share/dbus-1/services/org.razer.service
