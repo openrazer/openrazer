@@ -706,3 +706,52 @@ class RazerNaga2014(__RazerDevice):
         _da_set_scroll_active(self, scroll_active)
         _da_set_backlight_active(self, backlight_active)
         self.disable_notify = False
+
+
+class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Orochi (Wired)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0013
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Orochi-if01-event-kbd')
+
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active', 'set_scroll_active', 'get_scroll_active']
+
+    RAZER_URLS = {
+        "store": None,
+        "top_img": None,
+        "side_img": None,
+        "perspective_img": None
+    }
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_active(self, False)
+        _da_set_scroll_active(self, False)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_active = self.suspend_args.get('active', (True, True))[0]
+        scroll_active = self.suspend_args.get('active', (True, True))[1]
+
+        self.disable_notify = True
+        _da_set_logo_active(self, logo_active)
+        _da_set_scroll_active(self, scroll_active)
+        self.disable_notify = False
