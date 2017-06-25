@@ -37,6 +37,7 @@ Also this is the master branch, devices may appear in the tables below but might
 ### Mouse
 | Device                          | USB VID:PID | Driver | Daemon |
 | ------------------------------- | ----------- | ------ | ------ |
+| Razer Orochi 2011               |  1532:0013  |   ✔    |   ✔    |
 | Razer Mamba 2012 (Wired)        |  1532:0024  |   ✔    |   ✔    |
 | Razer Mamba 2012 (Wireless)     |  1532:0025  |   ✔    |   ✔    |
 | Razer Imperator 2012            |  1532:002F  |   ✔    |   ✔    |
