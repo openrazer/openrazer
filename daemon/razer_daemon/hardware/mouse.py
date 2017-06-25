@@ -718,7 +718,8 @@ class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
 
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active', 'set_scroll_active', 'get_scroll_active']
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active', 'set_scroll_active', 'get_scroll_active',
+               'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate']
 
     RAZER_URLS = {
         "store": None,
@@ -726,6 +727,8 @@ class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
         "side_img": None,
         "perspective_img": None
     }
+
+    MAX_DPI = 4000
 
     def _suspend_device(self):
         """

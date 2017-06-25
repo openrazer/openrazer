@@ -117,7 +117,9 @@ struct razer_mouse_device {
 
     char serial[23];
     
-    unsigned char orochi2011;
+    unsigned char orochi2011_led;
+    unsigned char orochi2011_dpi;
+    unsigned short orochi2011_poll;
 };
 
 // Mamba Key Location
