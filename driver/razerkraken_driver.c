@@ -217,10 +217,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     char *device_type;
 
     switch (device->usb_pid) {
-	case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC:
+    case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC:
         device_type = "Razer Kraken 7.1 Classic (??)\n";
         break;
-		
+
     case USB_DEVICE_ID_RAZER_KRAKEN:
         device_type = "Razer Kraken 7.1 Chroma (Rainie)\n";
         break;
@@ -335,15 +335,15 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 
         // Lock sending of the 2 commands
         mutex_lock(&device->lock);
-        
+
         // Basically Kraken Classic doesnt take RGB arguments so only do it for the KrakenV1,V2
         switch(device->usb_pid) {
-		case USB_DEVICE_ID_RAZER_KRAKEN:
-		case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-			razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 0);
-			break;
-		}
-        
+        case USB_DEVICE_ID_RAZER_KRAKEN:
+        case USB_DEVICE_ID_RAZER_KRAKEN_V2:
+            razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 0);
+            break;
+        }
+
         // Send Set static command
         razer_kraken_send_control_msg(device->usb_dev, &effect_report, 0);
         mutex_unlock(&device->lock);
