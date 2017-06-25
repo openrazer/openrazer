@@ -10,12 +10,20 @@ from razer_daemon.daemon import daemonize
 from subprocess import check_output
 from time import sleep
 
-SHARE_DIR = '/usr/share/razer-daemon'
-EXAMPLE_CONF = os.path.join(SHARE_DIR, 'razer.conf.example')
+# Basically copied from https://github.com/jleclanche/python-xdg/blob/master/xdg/basedir.py
+HOME = os.path.expanduser("~")
+XDG_DATA_HOME = os.environ.get("XDG_DATA_HOME", os.path.join(HOME, ".local", "share"))
+XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME", os.path.join(HOME, ".config"))
 
-BASE_PATH = os.path.join(os.path.abspath(os.environ['HOME']), '.razer-service')
-CONF_PATH = os.path.join(BASE_PATH, 'razer.conf')
-LOG_PATH = os.path.join(BASE_PATH, 'logs')
+RAZER_DATA_HOME = os.path.join(XDG_DATA_HOME, "razer-daemon")
+XDG_RUNTIME_DIR = os.environ.get("XDG_RUNTIME_DIR", RAZER_DATA_HOME)
+RAZER_CONFIG_HOME = os.path.join(XDG_CONFIG_HOME, "razer-daemon")
+RAZER_RUNTIME_DIR = XDG_RUNTIME_DIR
+
+EXAMPLE_CONF_FILE = '/usr/share/razer-daemon/razer.conf.example'
+
+CONF_FILE = os.path.join(RAZER_CONFIG_HOME, 'razer.conf')
+LOG_PATH = os.path.join(RAZER_DATA_HOME, 'logs')
 
 
 def parse_args():
@@ -28,10 +36,9 @@ def parse_args():
     parser.add_argument('-r', '--respawn', action='store_true', help='Stop any existing daemon first, if one is running.')
     parser.add_argument('-s', '--stop', action='store_true', help='Gracefully stop the existing daemon.')
 
-    parser.add_argument('--config', type=str, help='Location of the config file', default=CONF_PATH)
-    parser.add_argument('--run-dir', type=str, help='Location of the data directory', default=BASE_PATH)
+    parser.add_argument('--config', type=str, help='Location of the config file', default=CONF_FILE)
+    parser.add_argument('--run-dir', type=str, help='Location of the run directory', default=RAZER_RUNTIME_DIR)
     parser.add_argument('--log-dir', type=str, help='Location of the log directory', default=LOG_PATH)
-    parser.add_argument('--pid-file', type=str, help='Location of the pid file')
 
     parser.add_argument('--test-dir', type=str, help='Directory containing test driver structure')
 
@@ -58,14 +65,18 @@ def stop_daemon():
 def run():
     args = parse_args()
 
-    if not os.path.exists(BASE_PATH):
-        os.mkdir(BASE_PATH)
-        os.mkdir(LOG_PATH)
-        os.mkdir(os.path.join(BASE_PATH, 'data'))
-        if os.path.exists(EXAMPLE_CONF):
-            shutil.copy(EXAMPLE_CONF, CONF_PATH)
+    # TODO Fix up run_dir (especially in macros branch as things will break)
+    if not os.path.exists(RAZER_CONFIG_HOME):
+        os.makedirs(RAZER_CONFIG_HOME, exist_ok=True)
+    if not os.path.exists(RAZER_DATA_HOME):
+        os.makedirs(RAZER_DATA_HOME, exist_ok=True)
+    if not os.path.exists(LOG_PATH):
+        os.makedirs(LOG_PATH, exist_ok=True)
+    if not os.path.exists(CONF_FILE):
+        if os.path.exists(EXAMPLE_CONF_FILE):
+            shutil.copy(EXAMPLE_CONF_FILE, CONF_FILE)
         else:
-            print('Cant find "{0}"'.format(EXAMPLE_CONF), file=sys.stderr)
+            print('Cant find "{0}"'.format(EXAMPLE_CONF_FILE), file=sys.stderr)
 
     if args.stop:
         stop_daemon()
@@ -89,9 +100,6 @@ def run():
 
     if args.run_dir:
         daemon_args['run_dir'] = args.run_dir
-
-    if args.pid_file:
-        daemon_args['pid_file'] = args.pid_file
 
     daemonize(**daemon_args)
 
