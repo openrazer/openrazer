@@ -142,7 +142,7 @@ class RazerDaemon(DBusService):
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
 
         # Check if process exists and is not running as current user
-        proc = subprocess.Popen(['pgrep', 'razer-daemon'], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        proc = subprocess.Popen(['pgrep', 'razer-daemon'], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE)
         stdout = proc.communicate()[0]
 
         # If 0 there are other services running
