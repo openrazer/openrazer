@@ -214,6 +214,13 @@ class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
                'set_breath_dual_effect', 'set_static_effect', 'set_spectrum_effect', 'tartarus_get_profile_led_red', 'tartarus_set_profile_led_red', 'tartarus_get_profile_led_green',
                'tartarus_set_profile_led_green', 'tartarus_get_profile_led_blue', 'tartarus_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier']
 
+    RAZER_URLS = {
+        "store": "https://www.razerzone.com/gaming-keyboards-keypads/razer-orbweaver-chroma",
+        "top_img": "https://assets2.razerzone.com/images/orbweaver-chroma/370604e681b07ee0ffc2047f569e438e-orbweaver-crhoma-gallery-02.jpg",
+        "side_img": "https://assets2.razerzone.com/images/orbweaver-chroma/8def7438b6f8d4faf24c9218daa07ad0-orbweaver-crhoma-gallery-03.jpg",
+        "perspective_img": "https://assets2.razerzone.com/images/orbweaver-chroma/518c021598fd22a51a714a1b276d1e9e-orbweaver-crhoma-gallery-04.jpg"
+    }
+
 
     def __init__(self, *args, **kwargs):
         super(RazerOrbweaverChroma, self).__init__(*args, **kwargs)
@@ -904,10 +911,10 @@ class RazerDeathStalkerExpert(_MacroKeyboard):
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
+        "store": "https://www2.razerzone.com/gaming-keyboards-keypads/razer-deathstalker",
+        "top_img": "https://assets.razerzone.com/eeimages/products/771/razer-dstalk-gallery-5.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/771/razer-dstalk-gallery-3.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/771/razer-dstalk-gallery-2.png"
     }
 
 

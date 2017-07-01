@@ -722,10 +722,10 @@ class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
                'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate']
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
+        "store": "https://www.razerzone.com/gaming-mice/razer-orochi",
+        "top_img": "https://assets2.razerzone.com/images/razer-orochi/778bd94896bc70d1c18fc7e53d44abdc-Orochi-Base_gallery_4.jpg",
+        "side_img": "https://assets2.razerzone.com/images/razer-orochi/60d430d24a21c8b7bb8b9aba65b0a84e-Orochi-Base_gallery_2.jpg",
+        "perspective_img": "https://assets2.razerzone.com/images/razer-orochi/d6dd3766e7d8b5e937b4bffc8e4f9dee-Orochi-Base_gallery_7.jpg"
     }
 
     MAX_DPI = 4000
