@@ -24,13 +24,17 @@ class BatteryNotifier(threading.Thread):
     """
     def __init__(self, parent, device_id, device_name):
         super(BatteryNotifier, self).__init__()
+        self._logger = logging.getLogger('razer.device{0}.batterynotifier'.format(device_id))
+        self._notify2 = notify2 is not None
 
         self.event = threading.Event()
 
-        if notify2 is not None:
-            notify2.init('razer_daemon')
-
-        self._logger = logging.getLogger('razer.device{0}.batterynotifier'.format(device_id))
+        if self._notify2:
+            try:
+                notify2.init('razer_daemon')
+            except Exception as err:
+                self._logger.warning("Failed to init notification daemon, err: {0}".format(err))
+                self._notify2 = False
 
         self._shutdown = False
         self._device_name = device_name
@@ -38,7 +42,7 @@ class BatteryNotifier(threading.Thread):
         # Could save reference to parent but only need battery level function
         self._get_battery_func = parent.getBattery
 
-        if notify2 is not None:
+        if self._notify2:
             self._notification = notify2.Notification(summary="{0}")
             self._notification.set_timeout(NOTIFY_TIMEOUT)
 
@@ -76,15 +80,15 @@ class BatteryNotifier(threading.Thread):
                 battery_level = self._get_battery_func()
 
             if battery_level < 10.0:
-                if notify2 is not None:
+                if self._notify2:
                     self._notification.update(summary="{0} Battery at {1:.1f}%".format(self._device_name, battery_level), message='Please charge your device', icon='notification-battery-low')
                     self._notification.show()
             else:
-                if notify2 is not None:
+                if self._notify2:
                     self._notification.update(summary="{0} Battery at {1:.1f}%".format(self._device_name, battery_level))
                     self._notification.show()
 
-            if notify2 is None:
+            if self._notify2:
                 self._logger.debug("{0} Battery at {1:.1f}%".format(self._device_name, battery_level))
 
     def run(self):

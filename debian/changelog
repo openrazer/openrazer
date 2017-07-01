@@ -1,3 +1,19 @@
+razer (1.1.14-0ubuntu1) xenial; urgency=high
+  * Added Device - Razer DeathStalker Expert
+  * Added Device - Razer Orbweaver Chroma
+  * Added Device - Razer Orochi 2011
+  * Fixed bug (in daemon code) where serial is blank or 'Default String'
+  * Fixed bug where battery notifier will crash if started before notification daemon
+  * Replaced XDG Autostart with SystemD dbus unit, will autostart when org.razer is accessed
+  * Updated man pages
+  * Nerf'd make install
+  * Moved data dir to .local
+  * Updated pid check to allow for running as 1 daemon per user
+  * Added battery endpoints to Mamaba2012
+  * z3ntu reformatted all the driver files
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sat, 1 Jul 2017 17:33:00 +0000
+
 razer (1.1.13-0ubuntu1) xenial; urgency=high
 
   * Added Device - Razer Naga Hex (Red)

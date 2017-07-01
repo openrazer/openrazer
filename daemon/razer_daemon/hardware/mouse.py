@@ -61,7 +61,7 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'max_dpi',
-               'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
+               'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'set_idle_time', 'set_low_battery_threshold', 'get_battery', 'is_charging']
 
     RAZER_URLS = {
         "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
@@ -639,7 +639,8 @@ class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse',
                'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
-               'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_spectrum']
+               'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_spectrum',
+               'get_battery', 'is_charging']
 
     RAZER_URLS = {
         "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
@@ -704,4 +705,56 @@ class RazerNaga2014(__RazerDevice):
         _da_set_logo_active(self, logo_active)
         _da_set_scroll_active(self, scroll_active)
         _da_set_backlight_active(self, backlight_active)
+        self.disable_notify = False
+
+
+class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Orochi (Wired)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0013
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Orochi-if01-event-kbd')
+
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active', 'set_scroll_active', 'get_scroll_active',
+               'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate']
+
+    RAZER_URLS = {
+        "store": None,
+        "top_img": None,
+        "side_img": None,
+        "perspective_img": None
+    }
+
+    MAX_DPI = 4000
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_active(self, False)
+        _da_set_scroll_active(self, False)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_active = self.suspend_args.get('active', (True, True))[0]
+        scroll_active = self.suspend_args.get('active', (True, True))[1]
+
+        self.disable_notify = True
+        _da_set_logo_active(self, logo_active)
+        _da_set_scroll_active(self, scroll_active)
         self.disable_notify = False

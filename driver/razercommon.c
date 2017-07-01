@@ -36,13 +36,13 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
 
     // Send usb control message
     len = usb_control_msg(usb_dev, usb_sndctrlpipe(usb_dev, 0),
-            request,      // Request
-            request_type, // RequestType
-            value,        // Value
-            report_index, // Index
-            buf,          // Data
-            size,         // Length
-            USB_CTRL_SET_TIMEOUT);
+                          request,      // Request
+                          request_type, // RequestType
+                          value,        // Value
+                          report_index, // Index
+                          buf,          // Data
+                          size,         // Length
+                          USB_CTRL_SET_TIMEOUT);
 
     // Wait
     usleep_range(wait_min, wait_max);
@@ -93,13 +93,13 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
 
     // Now ask for reponse
     len = usb_control_msg(usb_dev, usb_rcvctrlpipe(usb_dev, 0),
-          request,         // Request
-          request_type,    // RequestType
-          value,           // Value
-          response_index,  // Index
-          buf,             // Data
-          size, 
-          USB_CTRL_SET_TIMEOUT);
+                          request,         // Request
+                          request_type,    // RequestType
+                          value,           // Value
+                          response_index,  // Index
+                          buf,             // Data
+                          size,
+                          USB_CTRL_SET_TIMEOUT);
 
     usleep_range(wait_min, wait_max);
 
@@ -107,8 +107,7 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
     kfree(buf);
 
     // Error if report is wrong length
-    if(len != 90)
-    {
+    if(len != 90) {
         printk(KERN_WARNING "razer driver: Invalid USB repsonse. USB Report length: %d\n", len);
         result = 1;
     }
@@ -131,8 +130,7 @@ unsigned char razer_calculate_crc(struct razer_report *report)
     unsigned char *_report = (unsigned char*)report;
 
     unsigned int i;
-    for(i = 2; i < 88; i++)
-    {
+    for(i = 2; i < 88; i++) {
         crc ^= _report[i];
     }
 
@@ -175,16 +173,16 @@ struct razer_report get_empty_razer_report(void)
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message)
 {
     printk(KERN_WARNING "%s: %s. Start Marker: %02x id: %02x Num Params: %02x Reserved: %02x Command: %02x Params: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x .\n",
-        driver_name,
-        message,
-        report->status,
-        report->transaction_id.id,
-        report->data_size,
-        report->command_class,
-        report->command_id.id,
-        report->arguments[0], report->arguments[1], report->arguments[2], report->arguments[3], report->arguments[4], report->arguments[5],
-        report->arguments[6], report->arguments[7], report->arguments[8], report->arguments[9], report->arguments[10], report->arguments[11], 
-        report->arguments[12], report->arguments[13], report->arguments[14], report->arguments[15]);
+           driver_name,
+           message,
+           report->status,
+           report->transaction_id.id,
+           report->data_size,
+           report->command_class,
+           report->command_id.id,
+           report->arguments[0], report->arguments[1], report->arguments[2], report->arguments[3], report->arguments[4], report->arguments[5],
+           report->arguments[6], report->arguments[7], report->arguments[8], report->arguments[9], report->arguments[10], report->arguments[11],
+           report->arguments[12], report->arguments[13], report->arguments[14], report->arguments[15]);
 }
 
 /**
@@ -192,19 +190,19 @@ void print_erroneous_report(struct razer_report* report, char* driver_name, char
  */
 unsigned char clamp_u8(unsigned char value, unsigned char min, unsigned char max)
 {
-	if(value > max)
-		return max;
-	if(value < min)
-		return min;
-	return value;
+    if(value > max)
+        return max;
+    if(value < min)
+        return min;
+    return value;
 }
 unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned short max)
 {
-	if(value > max)
-		return max;
-	if(value < min)
-		return min;
-	return value;
+    if(value > max)
+        return max;
+    if(value < min)
+        return min;
+    return value;
 }
 
 

@@ -72,23 +72,17 @@ daemon_install:
 	@echo -e "\n::\033[34m Installing Razer Daemon\033[0m"
 	@echo "====================================================="
 	make --no-print-directory -C daemon install
-	@mkdir -p $(DESTDIR)/etc/xdg/autostart
-	@cp -v ./install_files/desktop/razer-daemon.desktop $(DESTDIR)/etc/xdg/autostart/razer-daemon.desktop
 
 ubuntu_daemon_install:
 	@echo -e "\n::\033[34m Installing Razer Daemon\033[0m"
 	@echo "====================================================="
 	make --no-print-directory -C daemon ubuntu_install
-	@mkdir -p $(DESTDIR)/etc/xdg/autostart
-	@cp -v ./install_files/desktop/razer-daemon.desktop $(DESTDIR)/etc/xdg/autostart/razer-daemon.desktop
-
 
 
 daemon_uninstall:
 	@echo -e "\n::\033[34m Uninstalling Razer Daemon\033[0m"
 	@echo "====================================================="
 	make --no-print-directory -C daemon uninstall
-	@rm -fv $(DESTDIR)/etc/xdg/autostart/razer-daemon.desktop
 
 
 # Python Library
@@ -123,7 +117,7 @@ setup_dkms:
 	rm -fv $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/*.mod.c
 
 remove_dkms:
-    @echo "\n::\033[34m Removing DKMS files\033[0m"
+	@echo "\n::\033[34m Removing DKMS files\033[0m"
 	@echo "====================================================="
 	rm -rf $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0
 
@@ -156,11 +150,17 @@ ubuntu_install: setup_dkms ubuntu_udev_install ubuntu_daemon_install ubuntu_pyth
 	mv $(DESTDIR)/usr/lib/python3.* $(DESTDIR)/usr/lib/python3
 	mv $(DESTDIR)/usr/lib/python3/site-packages $(DESTDIR)/usr/lib/python3/dist-packages
 
-install: all driver_install udev_install python_library_install
+install_i_know_what_i_am_doing: all driver_install udev_install python_library_install
 	@make --no-print-directory -C daemon install DESTDIR=$(DESTDIR)
+
+install: manual_install_msg ;
+
+manual_install_msg:
+	@echo "Please do not install the driver using this method. Use a distribution package as it tracks the files installed and can remove them afterwards. If you are 100% sure, you want to do this, find the correct target in the Makefile."
+	@echo "Exiting."
 
 uninstall: driver_uninstall udev_uninstall python_library_uninstall
 	@make --no-print-directory -C daemon uninstall DESTDIR=$(DESTDIR)
 
 
-.PHONY: driver daemon
+.PHONY: driver
