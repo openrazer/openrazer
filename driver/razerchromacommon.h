@@ -118,4 +118,7 @@ struct razer_report razer_chroma_misc_get_dpi_xy_byte(void);
 struct razer_report razer_chroma_misc_set_idle_time(unsigned short idle_time);
 struct razer_report razer_chroma_misc_set_low_battery_threshold(unsigned char battery_threshold);
 
+struct razer_report razer_chroma_misc_set_orochi2011_led(unsigned char led_bitfield);
+struct razer_report razer_chroma_misc_set_orochi2011_poll_dpi(unsigned char poll_rate, unsigned char dpi_x, unsigned char dpi_y);
+
 #endif

@@ -146,6 +146,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Ouroboros\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
+        device_type = "Razer Orochi 2011\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
         device_type = "Razer Orochi (Wired)\n";
         break;
@@ -202,6 +206,10 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
     struct razer_report response_report;
 
     switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Orochi 2011 doesnt have FW
+        return sprintf(buf, "v%d.%d\n", 9, 99);
+        break;
+	
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
         report.transaction_id.id = 0x3f;
@@ -455,6 +463,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
     struct razer_report response_report;
 
     switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED: // Doesnt have proper serial
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
         return sprintf(buf, "%s\n", &device->serial[0]);
@@ -557,20 +566,23 @@ static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct d
  */
 static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_misc_get_polling_rate();
     struct razer_report response_report;
     unsigned short polling_rate = 0;
 
-    switch(usb_dev->descriptor.idProduct) {
+    switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
         report.transaction_id.id = 0x3f;
         break;
     }
 
-    response_report = razer_send_payload(usb_dev, &report);
+    if(device->usb_pid == USB_DEVICE_ID_RAZER_OROCHI_2011) {
+        response_report.arguments[0] = device->orochi2011_poll;
+    } else {
+        response_report = razer_send_payload(device->usb_dev, &report);
+    }
 
     switch(response_report.arguments[0]) {
     case 0x01:
@@ -594,12 +606,16 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
  */
 static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     unsigned short polling_rate = (unsigned short)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_misc_set_polling_rate(polling_rate);
 
-    switch(usb_dev->descriptor.idProduct) {
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
+        device->orochi2011_poll = polling_rate;
+        report = razer_chroma_misc_set_orochi2011_poll_dpi(device->orochi2011_poll, device->orochi2011_dpi, device->orochi2011_dpi);
+        break;
+
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
@@ -608,7 +624,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
         break;
     }
 
-    razer_send_payload(usb_dev, &report);
+    razer_send_payload(device->usb_dev, &report);
 
     return count;
 }
@@ -697,8 +713,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
  */
 static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report;
     unsigned short dpi_x;
     unsigned short dpi_y;
@@ -708,7 +723,7 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
 
 
     // So far I think imperator uses varstore
-    switch(usb_dev->descriptor.idProduct) {
+    switch(device->usb_pid) {
     // Damn naga hex only uses 1 byte per x, y dpi
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
@@ -724,9 +739,26 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
         }
 
         report = razer_chroma_misc_set_dpi_xy_byte(dpi_x_byte, dpi_y_byte);
-        razer_send_payload(usb_dev, &report);
+        razer_send_payload(device->usb_dev, &report);
         return count;
+        break;
 
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
+        if(count == 1) {
+            dpi_x_byte = buf[0];
+            dpi_y_byte = buf[0];
+        } else if (count == 2) {
+            dpi_x_byte = buf[0];
+            dpi_y_byte = buf[1];
+        } else {
+            printk(KERN_WARNING "razermouse: DPI requires 1 byte or 2 bytes\n");
+            return count;
+        }
+        device->orochi2011_dpi = dpi_x_byte;
+
+        report = razer_chroma_misc_set_orochi2011_poll_dpi(device->orochi2011_poll, dpi_x_byte, dpi_y_byte);
+        razer_send_payload(device->usb_dev, &report);
+        return count;
         break;
 
     case USB_DEVICE_ID_RAZER_IMPERATOR:
@@ -753,14 +785,14 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
             report = razer_chroma_misc_set_dpi_xy(varstore, dpi_x, dpi_y);
         }
 
-        switch(usb_dev->descriptor.idProduct) { // New devices set the device ID properly
+        switch(device->usb_pid) { // New devices set the device ID properly
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
             report.transaction_id.id = 0x3f;
             break;
         }
 
-        razer_send_payload(usb_dev, &report);
+        razer_send_payload(device->usb_dev, &report);
     }
 
     return count;
@@ -773,15 +805,18 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
  */
 static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report;
     struct razer_report response;
     unsigned short dpi_x;
     unsigned short dpi_y;
 
     // So far I think imperator uses varstore
-    switch(usb_dev->descriptor.idProduct) {
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
+        return sprintf(buf, "%u:%u\n", device->orochi2011_dpi, device->orochi2011_dpi);
+        break;
+	
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
         report = razer_chroma_misc_get_dpi_xy_byte();
@@ -801,11 +836,11 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
         break;
     }
 
-    response = razer_send_payload(usb_dev, &report);
+    response = razer_send_payload(device->usb_dev, &report);
 
     // Byte, Byte for DPI not Short, Short
-    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_NAGA_HEX ||
-        usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_NAGA_HEX_RED) { // NagaHex is crap uses only byte for dpi
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX ||
+        device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX_RED) { // NagaHex is crap uses only byte for dpi
         dpi_x = response.arguments[0];
         dpi_y = response.arguments[1];
     } else {
@@ -942,6 +977,9 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
         report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
 
         switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Doesnt have device mode
+            return count;
+            break;
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
             report.transaction_id.id = 0x3f;
@@ -969,6 +1007,10 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     struct razer_report response;
 
     switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
+        return sprintf(buf, "%d:%d\n", 0, 0);
+        break;
+
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
         report.transaction_id.id = 0x3f;
@@ -1109,13 +1151,23 @@ static ssize_t razer_attr_write_logo_led_brightness(struct device *dev, struct d
  */
 static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_standard_set_led_state(VARSTORE, SCROLL_WHEEL_LED, enabled);
     report.transaction_id.id = 0x3F;
 
-    razer_send_payload(usb_dev, &report);
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
+        if(enabled) {
+            device->orochi2011_led |= 0b00000001;
+        } else {
+            device->orochi2011_led &= 0b11111110;
+        }		
+        report = razer_chroma_misc_set_orochi2011_led(device->orochi2011_led);
+        break;
+    }
+
+    razer_send_payload(device->usb_dev, &report);
 
     return count;
 }
@@ -1125,13 +1177,20 @@ static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct devi
  */
 static ssize_t razer_attr_read_scroll_led_state(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, SCROLL_WHEEL_LED);
     struct razer_report response;
     report.transaction_id.id = 0x3F;
 
-    response = razer_send_payload(usb_dev, &report);
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
+        return sprintf(buf, "%d\n", device->orochi2011_led & 0b00000001);
+        break;
+    default:
+        response = razer_send_payload(device->usb_dev, &report);
+        break;
+    }
+
     return sprintf(buf, "%d\n", response.arguments[2]);
 }
 
@@ -1140,13 +1199,23 @@ static ssize_t razer_attr_read_scroll_led_state(struct device *dev, struct devic
  */
 static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_standard_set_led_state(VARSTORE, LOGO_LED, enabled);
     report.transaction_id.id = 0x3F;
+    
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
+        if(enabled) {
+            device->orochi2011_led |= 0b00000010;
+        } else {
+            device->orochi2011_led &= 0b11111101;
+        }		
+        report = razer_chroma_misc_set_orochi2011_led(device->orochi2011_led);
+        break;
+    }
 
-    razer_send_payload(usb_dev, &report);
+    razer_send_payload(device->usb_dev, &report);
 
     return count;
 }
@@ -1156,12 +1225,19 @@ static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device
  */
 static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, LOGO_LED);
     struct razer_report response;
     report.transaction_id.id = 0x3F;
-    response = razer_send_payload(usb_dev, &report);
+    
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
+        return sprintf(buf, "%d\n", (device->orochi2011_led & 0b00000010) >> 1);
+        break;
+    default:
+        response = razer_send_payload(device->usb_dev, &report);
+        break;
+    }
 
     return sprintf(buf, "%d\n", response.arguments[2]);
 }
@@ -1814,6 +1890,10 @@ void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interface *intf
     // Get a "random" integer
     get_random_bytes(&rand_serial, sizeof(unsigned int));
     sprintf(&dev->serial[0], "PM%012u", rand_serial);
+    
+    // Setup orochi2011
+    dev->orochi2011_dpi = 0x4c;
+    dev->orochi2011_poll = 500;
 }
 
 /**
@@ -1936,6 +2016,13 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+            break;
+
+        case USB_DEVICE_ID_RAZER_OROCHI_2011:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             break;
 
         case USB_DEVICE_ID_RAZER_ABYSSUS:
@@ -2161,6 +2248,13 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
             break;
 
+        case USB_DEVICE_ID_RAZER_OROCHI_2011:
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            break;
+
         case USB_DEVICE_ID_RAZER_ABYSSUS:
             device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
             break;
@@ -2256,6 +2350,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
  * Device ID mapping table
  */
 static const struct hid_device_id razer_devices[] = {
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_2011) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX_RED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_2014) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX) },

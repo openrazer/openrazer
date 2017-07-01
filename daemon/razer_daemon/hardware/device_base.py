@@ -47,6 +47,9 @@ class RazerDevice(DBusService):
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
 
+        # Serial cache
+        self._serial = None
+
         self._observer_list = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
@@ -108,9 +111,6 @@ class RazerDevice(DBusService):
 
         # Load additional DBus methods
         self.load_methods()
-
-        # Serial cache
-        self._serial = None
 
     def send_effect_event(self, effect_name, *args):
         """

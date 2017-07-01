@@ -1,0 +1,11 @@
+[Unit]
+Description=Daemon to manage razer devices in userspace
+Documentation=man:razer-daemon(8)
+
+[Service]
+Type=dbus
+BusName=org.razer
+ExecStart=##PREFIX##/bin/razer-daemon -Fv
+
+[Install]
+WantedBy=default.target

@@ -16,6 +16,10 @@
 #define USB_VENDOR_ID_RAZER 0x1532
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_OROCHI_2011
+#define USB_DEVICE_ID_RAZER_OROCHI_2011 0x0013
+#endif
+
 #ifndef USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED
 #define USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED 0x0024
 #endif
@@ -112,6 +116,10 @@ struct razer_mouse_device {
     unsigned short usb_pid;
 
     char serial[23];
+    
+    unsigned char orochi2011_led;
+    unsigned char orochi2011_dpi;
+    unsigned short orochi2011_poll;
 };
 
 // Mamba Key Location
