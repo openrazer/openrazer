@@ -141,12 +141,26 @@ class RazerDaemon(DBusService):
 
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
 
-        # Check if process exists
-        exit_code = subprocess.call(['pgrep', 'razer-daemon'], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        # Check if process exists and is not running as current user
+        proc = subprocess.Popen(['pgrep', 'razer-daemon'], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        stdout = proc.communicate()[0]
 
-        if exit_code == 0:
-            print("Daemon already exists. Please stop that one.", file=sys.stderr)
-            exit(-1)
+        # If 0 there are other services running
+        if proc.returncode == 0:
+            current_uid = str(os.getuid())
+
+            # Loop through other running daemon's
+            pids = stdout.decode().strip('\n').split('\n')
+            for pid in pids:
+                # Open status file in /proc to get uid
+                with open('/proc/{0}/status'.format(pid), 'r') as status_file:
+                    for line in status_file:
+                        # Looking for
+                        # Uid:	1000	1000	1000	1000
+                        # If they match current pid, then we have a daemon running as this user
+                        if line.startswith('Uid:') and line.strip('\n').split()[-1] == current_uid:
+                            print("Daemon already exists. Please stop that one.", file=sys.stderr)
+                            sys.exit(-1)
 
         setproctitle.setproctitle('razer-daemon')
 
