@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.razer
+Exec=##PREFIX##/bin/razer-daemon
+SystemdService=razer-daemon.service
