@@ -14,10 +14,10 @@ class RazerCore(__RazerDeviceBrightnessSuspend):
     MATRIX_DIMS = [1, 9]  # 6 Rows, 22 Cols
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-6.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-2.png",
-        "perspective_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-3.png"
+        "store": "https://www.razerzone.com/gaming-systems/razer-core",
+        "top_img": "https://assets2.razerzone.com/images/razer-core/d0a4b25e594c263397b704ac9e8e0490-rzr-core-1500x1000-01.jpg",
+        "side_img": "https://assets2.razerzone.com/images/razer-core/1b215ac8e728cd71225edf95b8a18f1c-rzr-core-1500x1000-05.jpg",
+        "perspective_img": "https://assets2.razerzone.com/images/razer-core/01689cb99a40585d574712f3ca82838a-rzr-core-1500x1000-04.jpg"
     }
 
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
