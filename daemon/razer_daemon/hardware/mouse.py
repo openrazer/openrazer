@@ -123,7 +123,7 @@ class RazerAbyssus(__RazerDevice):
         self.logger.debug("Abyssus doesnt have suspend/resume")
 
 
-class RazerImperiator(__RazerDevice):
+class RazerImperator(__RazerDevice):
     """
     Class for the Razer Imperator 2012
     """
@@ -144,10 +144,10 @@ class RazerImperiator(__RazerDevice):
     DPI_MAX = 6400
 
     def _resume_device(self):
-        self.logger.debug("Imperiator doesnt have suspend/resume")
+        self.logger.debug("Imperator doesnt have suspend/resume")
 
     def _suspend_device(self):
-        self.logger.debug("Imperiator doesnt have suspend/resume")
+        self.logger.debug("Imperator doesnt have suspend/resume")
 
 
 class RazerOuroboros(__RazerDevice):
@@ -579,7 +579,7 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
 
 class RazerDiamondbackChroma(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Diamondback
+    Class for the Razer Diamondback Chroma
     """
     USB_VID = 0x1532
     USB_PID = 0x004C
@@ -654,7 +654,7 @@ class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
 
 class RazerNaga2014(__RazerDevice):
     """
-    Class for the Razer Taipan
+    Class for the Razer Naga 2014
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Naga_2014-if0(1|2)-event-kbd')
 
@@ -710,7 +710,7 @@ class RazerNaga2014(__RazerDevice):
 
 class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Orochi (Wired)
+    Class for the Razer Orochi 2011
     """
     USB_VID = 0x1532
     USB_PID = 0x0013

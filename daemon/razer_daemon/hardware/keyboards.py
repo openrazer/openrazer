@@ -41,7 +41,7 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
 
 class RazerNostromo(_RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Tartarus Chroma
+    Class for the Razer Nostromo
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Nostromo-event-kbd')
 
@@ -82,7 +82,7 @@ class RazerNostromo(_RazerDeviceBrightnessSuspend):
 
 class RazerTartarus(_RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Tartarus Chroma
+    Class for the Razer Tartarus
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Tartarus(-if01)?-event-kbd')
 
@@ -198,10 +198,8 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
 
 class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
     """
-        Keyboard class
-
-        Has macro functionality and brightness based suspend
-        """
+    Class for the Razer Orbweaver Chroma
+    """
 
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Orbweaver_Chroma(-if01)?-event-kbd')
 
@@ -955,7 +953,7 @@ class RazerDeathStalkerChroma(_MacroKeyboard):
 
 class RazerBlackWidowChromaOverwatch(_MacroKeyboard):
     """
-    Class for the Razer BlackWidow Chroma
+    Class for the Razer BlackWidow Chroma (Overwatch)
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Chroma(-if01)?-event-kbd')
 
