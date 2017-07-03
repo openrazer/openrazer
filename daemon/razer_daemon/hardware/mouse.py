@@ -27,10 +27,10 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
                'set_charge_effect', 'set_charge_colour', 'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
-        "top_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-03.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-01.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-04.png"
+        "store": "https://www.razerzone.com/gb-en/store/razer-mamba",
+        "top_img": "https://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-03.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-10.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-04.png"
     }
 
     DPI_MAX = 16000
@@ -64,10 +64,10 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
                'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'set_idle_time', 'set_low_battery_threshold', 'get_battery', 'is_charging']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
-        "top_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-03.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-01.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-04.png"
+        "store": "https://www.razerzone.com/gb-en/store/razer-mamba",
+        "top_img": "https://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-03.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-01.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-04.png"
     }
 
     DPI_MAX = 16000
@@ -87,10 +87,10 @@ class RazerMambaChromaTE(__RazerDeviceBrightnessSuspend):
                'get_dpi_xy', 'set_dpi_xy']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-mamba-tournament-edition",
-        "top_img": "http://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-1.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-2.png",
-        "perspective_img": "https://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-5.png"
+        "store": "https://www.razerzone.com/gb-en/store/razer-mamba-tournament-edition",
+        "top_img": "https://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-1.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-5.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-2.png"
     }
 
     DPI_MAX = 16000
@@ -107,10 +107,10 @@ class RazerAbyssus(__RazerDevice):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-abyssus",
-        "top_img": "http://assets.razerzone.com/eeimages/products/17026/abyssus2014_gallery_1.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/17026/abyssus2014_gallery_4.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/17079/abyssus2014_gallery_3_2.png"
+        "store": "https://www.razerzone.com/gb-en/store/razer-abyssus",
+        "top_img": "https://assets.razerzone.com/eeimages/products/17026/abyssus2014_gallery_1.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/17026/abyssus2014_gallery_4.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/17079/abyssus2014_gallery_3_2.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -123,7 +123,7 @@ class RazerAbyssus(__RazerDevice):
         self.logger.debug("Abyssus doesnt have suspend/resume")
 
 
-class RazerImperiator(__RazerDevice):
+class RazerImperator(__RazerDevice):
     """
     Class for the Razer Imperator 2012
     """
@@ -135,19 +135,19 @@ class RazerImperiator(__RazerDevice):
                'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gaming-mice/razer-imperator",
-        "top_img": "http://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-5.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-2.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-4.png"
+        "store": "https://www.razerzone.com/gaming-mice/razer-imperator",
+        "top_img": "https://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-5.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-4.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-1.png"
     }
 
     DPI_MAX = 6400
 
     def _resume_device(self):
-        self.logger.debug("Imperiator doesnt have suspend/resume")
+        self.logger.debug("Imperator doesnt have suspend/resume")
 
     def _suspend_device(self):
-        self.logger.debug("Imperiator doesnt have suspend/resume")
+        self.logger.debug("Imperator doesnt have suspend/resume")
 
 
 class RazerOuroboros(__RazerDevice):
@@ -211,10 +211,10 @@ class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'set_scroll_active', 'get_scroll_active']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-orochi",
-        "top_img": "http://assets.razerzone.com/eeimages/products/22770/razer-orochi-05-01.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/22770/razer-orochi-07-01.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/22770/razer-orochi-08-01.png"
+        "store": "https://www.razerzone.com/gb-en/store/razer-orochi",
+        "top_img": "https://assets.razerzone.com/eeimages/products/22770/razer-orochi-05-01.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/22770/razer-orochi-07-01.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/22770/razer-orochi-08-01.png"
     }
 
     DPI_MAX = 8200
@@ -234,10 +234,10 @@ class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-deathadder-chroma",
-        "top_img": "http://assets.razerzone.com/eeimages/products/17531/deathadder_chroma_gallery_2.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/17963/deathadder_chroma_gallery_5.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/17963/deathadder_chroma_gallery_4.png"
+        "store": "https://www.razerzone.com/gb-en/store/razer-deathadder-chroma",
+        "top_img": "https://assets.razerzone.com/eeimages/products/17531/deathadder_chroma_gallery_2.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/17963/deathadder_chroma_gallery_5.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/17963/deathadder_chroma_gallery_4.png"
     }
 
     DPI_MAX = 10000
@@ -306,10 +306,10 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
                'set_custom_effect', 'set_key_row']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/store/razer-naga-hex-v2",
-        "top_img": "http://assets.razerzone.com/eeimages/products/25031/nagahexv2-gallery-2.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/25031/nagahexv2-gallery-6.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/25031/nagahexv2-gallery-3.png"
+        "store": "https://www.razerzone.com/store/razer-naga-hex-v2",
+        "top_img": "https://assets.razerzone.com/eeimages/products/25031/nagahexv2-gallery-2.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/25031/nagahexv2-gallery-6.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/25031/nagahexv2-gallery-3.png"
     }
 
     DPI_MAX = 16000
@@ -539,10 +539,10 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
                'set_custom_effect', 'set_key_row']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-deathadder-elite",
-        "top_img": "http://assets.razerzone.com/eeimages/products/25919/daelite_gallery01.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/25919/daelite_gallery03.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/25919/daelite_gallery02.png"
+        "store": "https://www.razerzone.com/gb-en/store/razer-deathadder-elite",
+        "top_img": "https://assets.razerzone.com/eeimages/products/25919/daelite_gallery01.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/25919/daelite_gallery03.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/25919/daelite_gallery02.png"
     }
 
     DPI_MAX = 16000
@@ -579,7 +579,7 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
 
 class RazerDiamondbackChroma(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Diamondback
+    Class for the Razer Diamondback Chroma
     """
     USB_VID = 0x1532
     USB_PID = 0x004C
@@ -591,6 +591,13 @@ class RazerDiamondbackChroma(__RazerDeviceBrightnessSuspend):
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy']
 
     DPI_MAX = 16000
+
+    RAZER_URLS = {
+        "store": "https://www.razerzone.com/store/razer-diamondback",
+        "top_img": "https://assets.razerzone.com/eeimages/products/22772/rzr_diamondback_01__store_gallery.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/22772/rzr_diamondback_04__store_gallery.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/22772/rzr_diamondback_02__store_gallery.png"
+    }
 
 
 class RazerMamba2012Wireless(__RazerDeviceBrightnessSuspend):
@@ -606,10 +613,10 @@ class RazerMamba2012Wireless(__RazerDeviceBrightnessSuspend):
                'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_spectrum']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
-        "top_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-03.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-01.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-04.png"
+        "store": "https://www.razerzone.com/store/razer-mamba",
+        "top_img": "https://assets.razerzone.com/press/mamba-4g-2.jpg",
+        "side_img": None,
+        "perspective_img": "https://assets.razerzone.com/eeimages/support/products/18/mamba1.jpg"
     }
 
     DPI_MAX = 6400
@@ -643,10 +650,10 @@ class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
                'get_battery', 'is_charging']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
-        "top_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-03.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-01.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/22343/razer-mamba-gallery-04.png"
+        "store": "https://www.razerzone.com/store/razer-mamba",
+        "top_img": "https://assets.razerzone.com/press/mamba-4g-2.jpg",
+        "side_img": None,
+        "perspective_img": "https://assets.razerzone.com/eeimages/support/products/18/mamba1.jpg"
     }
 
     DPI_MAX = 6400
@@ -654,7 +661,7 @@ class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
 
 class RazerNaga2014(__RazerDevice):
     """
-    Class for the Razer Taipan
+    Class for the Razer Naga 2014
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Naga_2014-if0(1|2)-event-kbd')
 
@@ -667,10 +674,10 @@ class RazerNaga2014(__RazerDevice):
                'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active', 'set_backlight_active', 'get_backlight_active']
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
+        "store": "https://www.razerzone.com/gaming-mice/razer-naga",
+        "top_img": "https://assets2.razerzone.com/images/razer-naga-2014/6267ff992d7535b16817e551545d37df-razer-naga-2014-gallery-01.jpg",
+        "side_img": "https://assets2.razerzone.com/images/razer-naga-2014/1de23ed838df6362d79b02ff1f5d9efa-razer-naga-2014-gallery-05.jpg",
+        "perspective_img": "https://assets2.razerzone.com/images/razer-naga-2014/1de23ed838df6362d79b02ff1f5d9efa-razer-naga-2014-gallery-05.jpg"
     }
 
     DPI_MAX = 8200
@@ -710,7 +717,7 @@ class RazerNaga2014(__RazerDevice):
 
 class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Orochi (Wired)
+    Class for the Razer Orochi 2011
     """
     USB_VID = 0x1532
     USB_PID = 0x0013
@@ -722,10 +729,10 @@ class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
                'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate']
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
+        "store": "https://www.razerzone.com/gaming-mice/razer-orochi",
+        "top_img": "https://assets2.razerzone.com/images/razer-orochi/778bd94896bc70d1c18fc7e53d44abdc-Orochi-Base_gallery_4.jpg",
+        "side_img": "https://assets2.razerzone.com/images/razer-orochi/60d430d24a21c8b7bb8b9aba65b0a84e-Orochi-Base_gallery_2.jpg",
+        "perspective_img": "https://assets2.razerzone.com/images/razer-orochi/d6dd3766e7d8b5e937b4bffc8e4f9dee-Orochi-Base_gallery_7.jpg"
     }
 
     MAX_DPI = 4000
