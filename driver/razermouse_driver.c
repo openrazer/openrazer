@@ -146,6 +146,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Ouroboros\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_OROCHI_2013:
+        device_type = "Razer Orochi 2013\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
         device_type = "Razer Orochi (Wired)\n";
         break;
