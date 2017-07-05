@@ -207,7 +207,7 @@ class RazerOrochi2013(__RazerDevice):
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy',
-               'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active']
+               'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active', 'max_dpi']
 
     DPI_MAX = 6400
 
