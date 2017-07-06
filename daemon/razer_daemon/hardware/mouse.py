@@ -198,6 +198,36 @@ class RazerOuroboros(__RazerDevice):
         self.disable_notify = False
 
 
+class RazerOrochi2013(__RazerDevice):
+    """
+    Class for the Razer Orochi 2013
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0039
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy',
+               'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active', 'max_dpi']
+
+    DPI_MAX = 6400
+
+    RAZER_URLS = {
+        "store": None,
+        "top_img": "http://assets.razerzone.com/eeimages/products/6713/razer-orochi-2013-gallery-1.png",
+        "side_img": "http://assets.razerzone.com/eeimages/products/6713/razer-orochi-2013-gallery-3.png",
+        "perspective_img": "http://assets.razerzone.com/eeimages/products/6713/razer-orochi-2013-gallery-5.png"
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerOrochi2013, self).__init__(*args, **kwargs)
+
+    def _resume_device(self):
+        self.logger.debug("Orochi doesnt have suspend/resume")
+
+    def _suspend_device(self):
+        self.logger.debug("Orochi doesnt have suspend/resume")
+
+
 class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Orochi (Wired)
