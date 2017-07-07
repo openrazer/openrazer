@@ -15,7 +15,7 @@ import coverage
 
 def run_daemon(daemon_dir, driver_dir):
     # TODO console_log false
-    razer_daemon.daemon.daemonize(foreground=True, verbose=True, console_log=False, run_dir=daemon_dir, pid_file=os.path.join(daemon_dir, 'daemon.pid'), test_dir=driver_dir)
+    razer_daemon.daemon.daemonize(foreground=True, verbose=True, console_log=False, run_dir=daemon_dir, pid_file=os.path.join(daemon_dir, 'razer-daemon.pid'), test_dir=driver_dir)
 
 class DeviceManagerTest(unittest.TestCase):
     @classmethod

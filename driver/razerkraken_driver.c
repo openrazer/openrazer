@@ -217,10 +217,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     char *device_type;
 
     switch (device->usb_pid) {
-	case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC:
+    case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC:
         device_type = "Razer Kraken 7.1 Classic (??)\n";
         break;
-		
+
     case USB_DEVICE_ID_RAZER_KRAKEN:
         device_type = "Razer Kraken 7.1 Chroma (Rainie)\n";
         break;
@@ -335,15 +335,15 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 
         // Lock sending of the 2 commands
         mutex_lock(&device->lock);
-        
+
         // Basically Kraken Classic doesnt take RGB arguments so only do it for the KrakenV1,V2
         switch(device->usb_pid) {
-		case USB_DEVICE_ID_RAZER_KRAKEN:
-		case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-			razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 0);
-			break;
-		}
-        
+        case USB_DEVICE_ID_RAZER_KRAKEN:
+        case USB_DEVICE_ID_RAZER_KRAKEN_V2:
+            razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 0);
+            break;
+        }
+
         // Send Set static command
         razer_kraken_send_control_msg(device->usb_dev, &effect_report, 0);
         mutex_unlock(&device->lock);
@@ -754,6 +754,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
+            break;
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
@@ -811,6 +812,8 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
+            break;
+
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
@@ -819,7 +822,6 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Brething effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
-
             break;
         }
     }
