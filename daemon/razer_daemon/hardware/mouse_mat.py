@@ -14,10 +14,10 @@ class RazerFireFly(__RazerDeviceBrightnessSuspend):
     MATRIX_DIMS = [1, 15]  # 6 Rows, 22 Cols
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-firefly",
-        "top_img": "http://assets.razerzone.com/eeimages/products/21936/rzr_firefly_gallery-2.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/21936/fireflycloth-gallery-6.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/21936/fireflycloth-gallery-3.png"
+        "store": "https://www.razerzone.com/gb-en/store/razer-firefly",
+        "top_img": "https://assets.razerzone.com/eeimages/products/21936/rzr_firefly_gallery-2.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/21936/fireflycloth-gallery-6.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/21936/fireflycloth-gallery-3.png"
     }
 
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_firefly', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',

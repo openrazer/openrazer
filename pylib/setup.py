@@ -4,6 +4,6 @@ from setuptools import setup, find_packages
 
 setup(
     name = "razer",
-    version = "1.1.10",
+    version = "1.1.14",
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"])
 )

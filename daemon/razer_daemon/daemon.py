@@ -3,7 +3,7 @@ Daemon class
 
 This class is the main core of the daemon, this serves a basic dbus module to control the main bit of the daemon
 """
-__version__ = '1.1.10'
+__version__ = '1.1.14'
 
 import configparser
 import logging
@@ -31,7 +31,7 @@ from razer_daemon.device import DeviceCollection
 from razer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 
 
-def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, pid_file=None, test_dir=None):
+def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
     """
     Performs double fork behaviour of daemons
 
@@ -47,14 +47,11 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
     :param console_log: Log to console
     :type console_log: bool
 
-    :param run_dir: Run/Home directory
+    :param run_dir: Run directory (for pid file)
     :type run_dir: str
 
     :param config_file: Config filepath
     :type config_file: str
-
-    :param pid_file: PID filepath (wont create a file if None)
-    :type pid_file: str or None
 
     :param test_dir: Test directory
     :type test_dir: str or None
@@ -96,23 +93,23 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
         os.dup2(stdout.fileno(), sys.stdout.fileno())
         os.dup2(stdout.fileno(), sys.stderr.fileno())
 
-
     # Change working directory
     if run_dir is not None:
         if not os.path.exists(run_dir):
             os.makedirs(run_dir)
         os.chdir(run_dir)
+        pid_file = os.path.join(run_dir, "razer-daemon.pid")
     else:
         run_dir = tempfile.mkdtemp(prefix='tmp_', suffix='_razer_daemon')
+        pid_file = os.path.join(run_dir, "razer-daemon.pid")
         os.chdir(run_dir)
 
-    # Write PID
-    if pid_file is not None:
-        try:
-            with open(pid_file, 'w') as pid_file_obj:
-                pid_file_obj.write(str(os.getpid()))
-        except (OSError, IOError) as err:
-            print("Error: {0}".format(err))
+    # Write PID file
+    try:
+        with open(pid_file, 'w') as pid_file_obj:
+            pid_file_obj.write(str(os.getpid()))
+    except (OSError, IOError) as err:
+        print("Error: {0}".format(err))
 
     # Create daemon and run
     daemon = RazerDaemon(verbose, log_dir, console_log, run_dir, config_file, test_dir=test_dir)
@@ -125,7 +122,7 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
         daemon.logger.exception("Caught exception", exc_info=err)
 
     # If pid file exists, remove it
-    if pid_file is not None and os.path.exists(pid_file):
+    if run_dir is not None and os.path.exists(pid_file):
         os.remove(pid_file)
 
 
@@ -146,28 +143,39 @@ class RazerDaemon(DBusService):
 
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
 
-        # Check if process exists
-        exit_code = subprocess.call(['pgrep', 'razer-service'], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        # Check if process exists and is not running as current user
+        proc = subprocess.Popen(['pgrep', 'razer-daemon'], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE)
+        stdout = proc.communicate()[0]
 
-        if exit_code == 0:
-            print("Daemon already exists. Please stop that one.", file=sys.stderr)
-            exit(-1)
+        # If 0 there are other services running
+        if proc.returncode == 0:
+            current_uid = str(os.getuid())
 
-        setproctitle.setproctitle('razer-service')
+            # Loop through other running daemon's
+            pids = stdout.decode().strip('\n').split('\n')
+            for pid in pids:
+                # Open status file in /proc to get uid
+                with open('/proc/{0}/status'.format(pid), 'r') as status_file:
+                    for line in status_file:
+                        # Looking for
+                        # Uid:	1000	1000	1000	1000
+                        # If they match current pid, then we have a daemon running as this user
+                        if line.startswith('Uid:') and line.strip('\n').split()[-1] == current_uid:
+                            print("Daemon already exists. Please stop that one.", file=sys.stderr)
+                            sys.exit(-1)
+
+        setproctitle.setproctitle('razer-daemon')
 
         # Expanding ~ as python doesnt do it by default, also creating dirs if needed
         if log_dir is not None:
             log_dir = os.path.expanduser(log_dir)
-            os.makedirs(log_dir, mode=0o750, exist_ok=True)
         if run_dir is not None:
             run_dir = os.path.expanduser(run_dir)
-            os.makedirs(run_dir, mode=0o750, exist_ok=True)
         if config_file is not None:
             config_file = os.path.expanduser(config_file)
-            os.makedirs(os.path.dirname(config_file), mode=0o750, exist_ok=True)
 
         self._test_dir = test_dir
-        self._data_dir = run_dir
+        self._run_dir = run_dir
         self._config_file = config_file
         self._config = configparser.ConfigParser()
         self.read_config(config_file)

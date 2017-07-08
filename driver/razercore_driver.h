@@ -14,11 +14,11 @@
 
 // TODO MOVE TO COMMON
 #ifndef USB_VENDOR_ID_RAZER
-    #define USB_VENDOR_ID_RAZER 0x1532
+#define USB_VENDOR_ID_RAZER 0x1532
 #endif
 
 #ifndef USB_DEVICE_ID_RAZER_CORE
-    #define USB_DEVICE_ID_RAZER_CORE 0x0215
+#define USB_DEVICE_ID_RAZER_CORE 0x0215
 #endif
 
 /* Each report has 90 bytes*/

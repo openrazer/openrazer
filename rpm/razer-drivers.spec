@@ -4,7 +4,7 @@
 %define dkms_version 1.0.0
 
 Name: razer-drivers
-Version: 1.1.10
+Version: 1.1.14
 Release: 1%{?dist}
 Summary: Razer drivers for Linux
 
@@ -143,13 +143,13 @@ fi
 %{_usrsrc}/%{dkms_name}-%{dkms_version}/
 
 %files -n razer-daemon
-%{_sysconfdir}/xdg/autostart/razer-service.desktop
-%{_bindir}/razer-service
+%{_sysconfdir}/xdg/autostart/razer-daemon.desktop
+%{_bindir}/razer-daemon
 %{python3_sitelib}/razer_daemon/
 %{python3_sitelib}/razer_daemon-*.egg-info/
-%{_datadir}/razer-service/
+%{_datadir}/razer-daemon/
 %{_mandir}/man5/razer.conf.5.gz
-%{_mandir}/man8/razer-service.8.gz
+%{_mandir}/man8/razer-daemon.8.gz
 
 %files -n python3-razer
 %{python3_sitelib}/razer/

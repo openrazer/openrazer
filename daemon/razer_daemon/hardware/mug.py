@@ -22,6 +22,13 @@ class RazerChromaMugHolder(_RazerDeviceBrightnessSuspend):
                'get_brightness', 'set_brightness', 'is_mug_present',
                'set_custom_effect', 'set_key_row']
 
+    RAZER_URLS = {
+        "store": "https://www.razerzone.com/gaming-accessories/razer-chroma-mug",
+        "top_img": "https://assets2.razerzone.com/images/mug-holder/e64e507b73e61c44789d996065fd9645-1500x1000mug_01.jpg",
+        "side_img": None,
+        "perspective_img": "https://assets2.razerzone.com/images/mug-holder/e64e507b73e61c44789d996065fd9645-1500x1000mug_01.jpg"
+    }
+
     def __init__(self, *args, **kwargs):
         super(RazerChromaMugHolder, self).__init__(*args, **kwargs)
 

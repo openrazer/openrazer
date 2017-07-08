@@ -5,7 +5,7 @@ razer.conf \- configuration file for the Razer Service
 
 .SH "DESCRIPTION"
 .PP
-\fB$HOME\fI/.razer-service/razer.conf\fR configures some startup and runtime options of the \fBrazer-service\fR(8). \fBrazer-service\fR(8) is able to use configuration files specified in non-standard locations by providing the \fI--config\fR argument.
+\fB$HOME\fI/.config/openrazer/razer.conf\fR, overrideable with \fB$XDG_CONFIG_HOME\fR, configures some startup and runtime options of the \fBrazer-service\fR(8). \fBrazer-service\fR(8) is able to use configuration files specified in non-standard locations by providing the \fI--config\fR argument.
 .PP
 The configuration file is formatted like a .INI file and is parsed by Python's ConfigParser so as long as that module can read the file all is good.
 
@@ -29,6 +29,10 @@ This flag specifies if the effects syncing logic is active when the daemon is st
 \fBdevices_off_on_screensaver\fR \fIbool\fR
 This flag specifies if the functionality to turn off razer devices when the screensaver is activated is active when the daemon starts.
 
+.TP
+\fBmouse_battery_notifier\fR \fIbool\fR
+This flag specifies that notifications should be shown every ten minutes with the remaining battery level.
+
 .SH "STATISTICS SECTION"
 .PP
 The \fB[Statistics]\fR section in the configuration file contains options to control how and when statistics will be collected.
@@ -38,5 +42,5 @@ The \fB[Statistics]\fR section in the configuration file contains options to con
 This flag specifies if the daemon is to collect key statistics. Currently this is only collecting the key count per hour per key.
 
 .SH "SEE ALSO"
-.BR razer-service (8),
+.BR razer-daemon (8),
 .BR https://github.com/terrycain/razer_drivers

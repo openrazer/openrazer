@@ -1,3 +1,51 @@
+razer (1.1.14-0ubuntu1) xenial; urgency=high
+  * Added Device - Razer DeathStalker Expert
+  * Added Device - Razer Orbweaver Chroma
+  * Added Device - Razer Orochi 2011
+  * Fixed bug (in daemon code) where serial is blank or 'Default String'
+  * Fixed bug where battery notifier will crash if started before notification daemon
+  * Replaced XDG Autostart with SystemD dbus unit, will autostart when org.razer is accessed
+  * Updated man pages
+  * Nerf'd make install
+  * Moved data dir to .local
+  * Updated pid check to allow for running as 1 daemon per user
+  * Added battery endpoints to Mamaba2012
+  * z3ntu reformatted all the driver files
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sat, 1 Jul 2017 17:33:00 +0000
+
+razer (1.1.13-0ubuntu1) xenial; urgency=high
+
+  * Added Device - Razer Naga Hex (Red)
+  * Fixed bug where udev was matching whole tree not just device
+  * Fixed bug in 1byte dpi logic for old devices
+  * Renamed razer-service back to razer-daemon
+  * Added more example scripts
+  * Changed default serials on fake driver configs
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sun, 11 Jun 2017 17:24:00 +0000
+
+razer (1.1.12-0ubuntu1) xenial; urgency=high
+
+  * Changed README
+  * Added in missing DPI for DeathAdder Elite
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Wed, 3 May 2017 20:04:00 +0000
+
+razer (1.1.11-0ubuntu1) xenial; urgency=low
+
+  * Added Device - Overwatch Razer BlackWidow Chroma
+  * Added Device - Razer Naga 2014
+  * Fixed Bug where serial wasnt reported during device add, causing DBus to die a horrible death
+  * Fixed inconsistencies where some firmware versions has newlines when interacting with the driver directly
+  * Added some more mutex's in mouse driver
+  * Swapped around mice and keyboard block in udev as udev was doing the dodgy
+  * Added Naga 2014 to fake driver, fixed some other issues there
+  * Fixed poll_rate constant which was overlooked when numbers changed
+  * Added .backlight.active properties to mice in pylib
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Mon, 17 Apr 2017 11:21:00 +0000
+
 razer (1.1.10-0ubuntu1) xenial; urgency=low
 
   * Fixed bug with Razer Blade QHD Lighting

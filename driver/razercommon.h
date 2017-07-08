@@ -14,7 +14,7 @@
 
 #include <linux/usb/input.h>
 
-#define VERSION "1.1.10"
+#define VERSION "1.1.14"
 
 
 // Macro to create device files
@@ -114,9 +114,9 @@ struct razer_report {
 };
 
 struct razer_key_translation {
-	u16 from;
-	u16 to;
-	u8 flags;
+    u16 from;
+    u16 to;
+    u8 flags;
 };
 
 int razer_send_control_msg(struct usb_device *usb_dev,void const *data, unsigned int report_index, unsigned long wait_min, unsigned long wait_max);
