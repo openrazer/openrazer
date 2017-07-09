@@ -43,9 +43,9 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_LICENSE(DRIVER_LICENSE);
 
 static const struct razer_key_translation mouse_keys[] = {
-    { BTN_EXTRA, BTN_8 }, // DPI_UP
-    { BTN_SIDE,  BTN_9 }, // DPI_DOWN
-    { }
+//    { BTN_EXTRA, BTN_8 }, // DPI_UP
+//    { BTN_SIDE,  BTN_9 }, // DPI_DOWN
+    { 0 }
 };
 
 
@@ -1009,7 +1009,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     if(count == 2) {
         report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
 
-        switch(usb_dev->descriptor.idProduct) {
+        switch(device->usb_pid) {
         case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Doesnt have device mode
             return count;
             break;
@@ -1042,7 +1042,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     struct razer_report report = razer_chroma_standard_get_device_mode();
     struct razer_report response;
 
-    switch(usb_dev->descriptor.idProduct) {
+    switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
         return sprintf(buf, "%d:%d\n", 0, 0);
         break;
@@ -1862,53 +1862,6 @@ static DEVICE_ATTR(logo_matrix_effect_none,        0220, NULL,                  
 static DEVICE_ATTR(backlight_led_state,            0660, razer_attr_read_backlight_led_state, razer_attr_write_backlight_led_state);
 
 
-
-/**
- * Raw event function
- */
-static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
-{
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-
-    // The event were looking for is 16 bytes long and starts with 0x04
-    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
-        // Convert 04... to 0100...
-        int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
-        u8 cur_value = 0x00;
-
-        while(--index > 0) {
-            cur_value = data[index];
-            if(cur_value == 0x00) { // Skip 0x00
-                continue;
-            }
-
-            switch(cur_value) {
-            case 0x20: // DPI Up
-                cur_value = 0x68; // F13
-                break;
-            case 0x21: // DPI Down
-                cur_value = 0x69; // F14
-                break;
-            case 0x22: // Wheel Left
-                cur_value = 0x6A; // F15
-                break;
-            case 0x23: // Wheel Right
-                cur_value = 0x6B; // F16
-                break;
-            }
-
-            data[index+1] = cur_value;
-        }
-
-
-        data[0] = 0x01;
-        data[1] = 0x00;
-        return 1;
-    }
-
-    return 0;
-}
-
 /**
  * Mouse init function
  */
@@ -2411,6 +2364,8 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
 	
 	translation = find_translation(mouse_keys, usage->code);
 	
+	//printk(KERN_WARNING "razermouse_test: code %d value %d\n", usage->code, value);
+	
 	if(translation && msc->device_mode[0] == 0x03 && msc->device_mode[1] == 0x00) {
 		if(test_bit(usage->code, msc->other_buttons))
 		{
@@ -2442,42 +2397,155 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 {
 	struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
 	struct razer_mouse_device *msc = hid_get_drvdata(hdev);
+	int sent_event = 0;
 	
-	// If size is 8 this is the event were after
-	if(size == 8 && intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE && msc->device_mode[0] == 0x03 && msc->device_mode[1] == 0x00) {
-		int sent_event = 0;
-
-		if(data[0] & 0x20) { // SCROLL_LEFT
-			//printk(KERN_WARNING "razermouse_test: SCROLL_LEFT  cnt %d\n", size);
+	if(size >= 8 ) {
+	    //printk(KERN_WARNING "razermouse_test: device_mode, data: %02x%02x%02x%02x%02x%02x%02x%02x\n", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+	}
+	
+	if (size >= 8 && intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && data[0] == 0x04) {
+		int i = 1;
+		int btn_dpi_up = 0;
+		int btn_dpi_down = 0;
+		int btn_scroll_l = 0;
+		int btn_scroll_r = 0;
+		
+		// Find pressed buttons
+		for(; i < size; ++i){
+			if (data[i] == 0x00) {
+				break;
+			}
 			
-			input_report_key(msc->input, BTN_6, 1);
+			switch(data[i]) {
+			case 0x20:
+			    btn_dpi_up = 1;
+			    break;
+			case 0x21:
+			    btn_dpi_down = 1;
+			    break;
+			case 0x22:
+			    btn_scroll_l = 1;
+			    break;
+			case 0x23:
+			    btn_scroll_r = 1;
+			    break;
+			}
+			
+		}
+		
+		if(btn_dpi_up) {
+			if (!test_bit(BTN_8, msc->other_buttons)) {
+				printk(KERN_WARNING "razermouse_test: DPI-UP pressed\n");
+				input_report_key(msc->input, BTN_8, 1);
+				sent_event = 1;
+				set_bit(BTN_8, msc->other_buttons);
+			}
+		} else if (test_bit(BTN_8, msc->other_buttons)) {
+			printk(KERN_WARNING "razermouse_test: DPI-UP released\n");
+			input_report_key(msc->input, BTN_8, 0);
 			sent_event = 1;
-			set_bit(BTN_6, msc->other_buttons);
+			clear_bit(BTN_8, msc->other_buttons);
+		}	
+		if(btn_dpi_down) {
+			if (!test_bit(BTN_9, msc->other_buttons)) {
+				printk(KERN_WARNING "razermouse_test: DPI-DOWN pressed\n");
+				input_report_key(msc->input, BTN_9, 1);
+				sent_event = 1;
+				set_bit(BTN_9, msc->other_buttons);
+			}
+		} else if (test_bit(BTN_9, msc->other_buttons)) {
+			printk(KERN_WARNING "razermouse_test: DPI-DOWN released\n");
+			input_report_key(msc->input, BTN_9, 0);
+			sent_event = 1;
+			clear_bit(BTN_9, msc->other_buttons);
+		}
+		if(btn_scroll_l) {
+			if (!test_bit(BTN_6, msc->other_buttons)) {
+				printk(KERN_WARNING "razermouse_test: SCROLL-LEFT pressed\n");
+				input_report_key(msc->input, BTN_6, 1);
+				sent_event = 1;
+				set_bit(BTN_6, msc->other_buttons);
+			}
 		} else if (test_bit(BTN_6, msc->other_buttons)) {
+			printk(KERN_WARNING "razermouse_test: SCROLL-LEFT released\n");
 			input_report_key(msc->input, BTN_6, 0);
 			sent_event = 1;
 			clear_bit(BTN_6, msc->other_buttons);
-		}
-		
-		
-		if(data[0] & 0x40) { // SCROLL_RIGHT
-			//printk(KERN_WARNING "razermouse_test: SCROLL_RIGHT  cnt %d\n", size);
-			
-			input_report_key(msc->input, BTN_7, 1);
-			sent_event = 1;
-			set_bit(BTN_7, msc->other_buttons);
+		}	
+		if(btn_scroll_r) {
+			if (!test_bit(BTN_7, msc->other_buttons)) {
+				printk(KERN_WARNING "razermouse_test: SCROLL-RIGHT pressed\n");
+				input_report_key(msc->input, BTN_7, 1);
+				sent_event = 1;
+				set_bit(BTN_7, msc->other_buttons);
+			}
 		} else if (test_bit(BTN_7, msc->other_buttons)) {
+			printk(KERN_WARNING "razermouse_test: SCROLL-RIGHT released\n");
 			input_report_key(msc->input, BTN_7, 0);
 			sent_event = 1;
 			clear_bit(BTN_7, msc->other_buttons);
 		}
-		
-		// Sync if we sent events
-		if(sent_event == 1) {
-			input_sync(msc->input);
+	}
+	
+	if (size >= 8 && intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE && msc->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX_V2) {
+		if(data[0] == 0x10) {
+			if (!test_bit(BTN_8, msc->other_buttons)) {
+				printk(KERN_WARNING "razermouse_test: DPI-UP pressed\n");
+				input_report_key(msc->input, BTN_8, 1);
+				sent_event = 1;
+				set_bit(BTN_8, msc->other_buttons);
+			}
+		} else if (test_bit(BTN_8, msc->other_buttons)) {
+			printk(KERN_WARNING "razermouse_test: DPI-UP released\n");
+			input_report_key(msc->input, BTN_8, 0);
+			sent_event = 1;
+			clear_bit(BTN_8, msc->other_buttons);
+		}	
+		if(data[0] == 0x08) {
+			if (!test_bit(BTN_9, msc->other_buttons)) {
+				printk(KERN_WARNING "razermouse_test: DPI-DOWN pressed\n");
+				input_report_key(msc->input, BTN_9, 1);
+				sent_event = 1;
+				set_bit(BTN_9, msc->other_buttons);
+			}
+		} else if (test_bit(BTN_9, msc->other_buttons)) {
+			printk(KERN_WARNING "razermouse_test: DPI-DOWN released\n");
+			input_report_key(msc->input, BTN_9, 0);
+			sent_event = 1;
+			clear_bit(BTN_9, msc->other_buttons);
+		}
+		if(data[0] == 0x20) {
+			if (!test_bit(BTN_6, msc->other_buttons)) {
+				printk(KERN_WARNING "razermouse_test: SCROLL-LEFT pressed\n");
+				input_report_key(msc->input, BTN_6, 1);
+				sent_event = 1;
+				set_bit(BTN_6, msc->other_buttons);
+			}
+		} else if (test_bit(BTN_6, msc->other_buttons)) {
+			printk(KERN_WARNING "razermouse_test: SCROLL-LEFT released\n");
+			input_report_key(msc->input, BTN_6, 0);
+			sent_event = 1;
+			clear_bit(BTN_6, msc->other_buttons);
+		}	
+		if(data[0] == 0x40) {
+			if (!test_bit(BTN_7, msc->other_buttons)) {
+				printk(KERN_WARNING "razermouse_test: SCROLL-RIGHT pressed\n");
+				input_report_key(msc->input, BTN_7, 1);
+				sent_event = 1;
+				set_bit(BTN_7, msc->other_buttons);
+			}
+		} else if (test_bit(BTN_7, msc->other_buttons)) {
+			printk(KERN_WARNING "razermouse_test: SCROLL-RIGHT released\n");
+			input_report_key(msc->input, BTN_7, 0);
+			sent_event = 1;
+			clear_bit(BTN_7, msc->other_buttons);
 		}
 	}
 	
+	if(sent_event == 1) {
+		input_sync(msc->input);
+	}
+
 	return 0;
 }
 
@@ -2489,17 +2557,18 @@ static int razer_setup_input(struct input_dev *input, struct hid_device *hdev)
 	__set_bit(BTN_RIGHT, input->keybit);
 	__set_bit(BTN_MIDDLE, input->keybit);
 	
-	__set_bit(BTN_RIGHT, input->keybit);
-	
 	__set_bit(EV_REL, input->evbit);
 	__set_bit(REL_WHEEL, input->relbit);
-	__set_bit(REL_HWHEEL, input->relbit);
-	
-	__set_bit(BTN_8, input->keybit);
-	__set_bit(BTN_9, input->keybit);
-	
+
+	__set_bit(BTN_EXTRA, input->keybit); // Possibly BTN_8 BTN_EXTRA
+	__set_bit(BTN_SIDE, input->keybit); // Possibly BTN_9 BTN_SIDE
+
 	__set_bit(BTN_6, input->keybit);
 	__set_bit(BTN_7, input->keybit);
+		
+	__set_bit(BTN_8, input->keybit);
+	__set_bit(BTN_9, input->keybit);
+
 	
 	return 0;
 }

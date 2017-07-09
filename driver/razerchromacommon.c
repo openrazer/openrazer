@@ -1163,7 +1163,7 @@ struct razer_report razer_chroma_misc_set_orochi2011_led(unsigned char led_bitfi
     return report;
 }
 
-struct razer_report razer_chroma_misc_set_orochi2011_poll_dpi(unsigned char poll_rate, unsigned char dpi_x, unsigned char dpi_y)
+struct razer_report razer_chroma_misc_set_orochi2011_poll_dpi(unsigned short poll_rate, unsigned char dpi_x, unsigned char dpi_y)
 {
     struct razer_report report;
     memcpy(&report, &orochi2011_dpi, sizeof(orochi2011_dpi));
