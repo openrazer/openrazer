@@ -533,7 +533,7 @@ class RazerBladeStealth(_MacroKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row'
 
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'set_logo_active']
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blade-stealth",
@@ -571,7 +571,7 @@ class RazerBladeStealthLate2016(_MacroKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row',
 
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'set_logo_active']
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blade",
@@ -608,7 +608,7 @@ class RazerBladeProLate2016(_MacroKeyboard):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'set_logo_active']
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blade-pro",
@@ -684,7 +684,7 @@ class RazerBladeQHD(_MacroKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
 
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'set_logo_active']
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blade",
