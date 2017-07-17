@@ -61,6 +61,11 @@ class RazerDevice(object):
             'lighting_none': self._has_feature('razer.device.lighting.chroma', 'setNone'),
             'lighting_spectrum': self._has_feature('razer.device.lighting.chroma', 'setSpectrum'),
             'lighting_static': self._has_feature('razer.device.lighting.chroma', 'setStatic'),
+
+            'lighting_starlight_single': self._has_feature('razer.device.lighting.chroma', 'setStarlightSingle'),
+            'lighting_starlight_dual': self._has_feature('razer.device.lighting.chroma', 'setStarlightDual'),
+            'lighting_starlight_random': self._has_feature('razer.device.lighting.chroma', 'setStarlightRandom'),
+
             'lighting_ripple': self._has_feature('razer.device.lighting.custom', 'setRipple'),  # Thinking of extending custom to do more hence the key check
             'lighting_ripple_random': self._has_feature('razer.device.lighting.custom', 'setRippleRandomColour'),
 
