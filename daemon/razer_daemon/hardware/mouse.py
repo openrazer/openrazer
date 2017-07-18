@@ -137,7 +137,7 @@ class RazerImperator(__RazerDevice):
     RAZER_URLS = {
         "store": "https://www.razerzone.com/gaming-mice/razer-imperator",
         "top_img": "https://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-5.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-4.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-2.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/37/razer-imperator-gallery-1.png"
     }
 
@@ -165,7 +165,7 @@ class RazerOuroboros(__RazerDevice):
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-ouroboros",
         "top_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-1.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-5.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-2.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-2.png"
     }
 
@@ -459,9 +459,9 @@ class RazerNagaHexRed(__RazerDevice):
 
     RAZER_URLS = {
         "store": None,
-        "top_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-6.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-5.png",
-        "perspective_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-1.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-12.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-11.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-7.png"
     }
 
     DPI_MAX = 5600
