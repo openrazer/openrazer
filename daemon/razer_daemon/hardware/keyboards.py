@@ -60,7 +60,7 @@ class RazerNostromo(_RazerDeviceBrightnessSuspend):
     RAZER_URLS = {
         "store": "https://www2.razerzone.com/gaming-keyboards-keypads/razer-nostromo",
         "top_img": "https://assets.razerzone.com/eeimages/products/59/razer-nostromo-gallery-1.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/59/razer-nostromo-gallery-4.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/59/razer-nostromo-gallery-1.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/59/razer-nostromo-gallery-2.png"
     }
 
@@ -538,7 +538,7 @@ class RazerBladeStealth(_MacroKeyboard):
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blade-stealth",
         "top_img": "https://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-08-v2.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-01-v2.png"
     }
 
