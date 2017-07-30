@@ -14,9 +14,9 @@ class RazerCore(__RazerDeviceBrightnessSuspend):
     MATRIX_DIMS = [1, 9]  # 6 Rows, 22 Cols
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-6.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-2.png",
+        "store": "https://www.razerzone.com/gaming-systems/razer-core",
+        "top_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-2.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-6.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-3.png"
     }
 

@@ -44,6 +44,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Ouroboros 2012            |  1532:0032  |   ✔    |   ✔    |
 | Razer Taipan                    |  1532:0034  |   ✔    |   ✔    |
 | Razer Naga Hex (Red)            |  1532:0036  |   ✔    |   ✔    |
+| Razer Orochi 2013               |  1532:0039  |   ✔    |   ✔    |
 | Razer Naga 2014                 |  1532:0040  |   ✔    |   ✔    |
 | Razer Naga Hex                  |  1532:0041  |   ✔    |   ✔    |
 | Razer Abyssus 2014              |  1532:0042  |   ✔    |   ✔    |
@@ -64,6 +65,7 @@ Also this is the master branch, devices may appear in the tables below but might
 ### Headsets
 | Device                   | USB VID:PID | Driver | Daemon |
 | ------------------------ | ----------- | ------ | ------ |
+| Razer Kraken 7.1 Classic |  1532:0501  |   ✔    |   ✔    |
 | Razer Kraken 7.1 Chroma  |  1532:0504  |   ✔    |   ✔    |
 | Razer Kraken 7.1 V2      |  1532:0510  |   ✔    |   ✔    |
 
@@ -72,6 +74,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | ----------------------- | ----------- | ------ | ------ |
 | Razer Nostromo          |  1532:0111  |   ✔    |   ✔    |
 | Razer Orbweaver         |  1532:0113  |   ✔    |   ✔    |
+| Razer Tartarus          |  1532:0201  |   ✔    |   ✔    |
 | Razer Tartarus Chroma   |  1532:0208  |   ✔    |   ✔    |
 | Razer Core              |  1532:0215  |   ✔    |   ✔    |
 | Razer Chroma Mug Holder |  1532:0F07  |   ✔    |   ✔    |

@@ -1,8 +1,9 @@
+import json
 import dbus as _dbus
 from razer.client.device import RazerDeviceFactory as _RazerDeviceFactory
 from razer.client import constants
 
-__version__ = '1.1.14'
+__version__ = '1.1.15'
 
 
 class DaemonNotFound(Exception):
@@ -83,6 +84,12 @@ class DeviceManager(object):
             raise ValueError("Sync must be a boolean")
 
         self._dbus_devices.syncEffects(sync)
+
+    @property
+    def supported_devices(self):
+        json_data = self._dbus_daemon.supportedDevices()
+
+        return json.loads(json_data)
 
     @property
     def devices(self):

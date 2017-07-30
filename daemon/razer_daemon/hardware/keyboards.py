@@ -41,7 +41,7 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
 
 class RazerNostromo(_RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Tartarus Chroma
+    Class for the Razer Nostromo
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Nostromo-event-kbd')
 
@@ -58,10 +58,10 @@ class RazerNostromo(_RazerDeviceBrightnessSuspend):
                'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier']
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
+        "store": "https://www2.razerzone.com/gaming-keyboards-keypads/razer-nostromo",
+        "top_img": "https://assets.razerzone.com/eeimages/products/59/razer-nostromo-gallery-1.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/59/razer-nostromo-gallery-1.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/59/razer-nostromo-gallery-2.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -82,6 +82,44 @@ class RazerNostromo(_RazerDeviceBrightnessSuspend):
 
 class RazerTartarus(_RazerDeviceBrightnessSuspend):
     """
+    Class for the Razer Tartarus
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Tartarus(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0201
+    HAS_MATRIX = False
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [-1, -1]  # 6 Rows, 22 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_tartarus',
+               'set_static_effect', 'bw_set_pulsate', 'tartarus_get_profile_led_red', 'tartarus_set_profile_led_red', 'tartarus_get_profile_led_green',
+               'tartarus_set_profile_led_green', 'tartarus_get_profile_led_blue', 'tartarus_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier']
+
+    RAZER_URLS = {
+        "store": "https://www.razerzone.com/gaming-keyboards-keypads/razer-tartarus-classic",
+        "top_img": "https://assets2.razerzone.com/images/tartarus-classic/b0535b8924b38f53cb8b853d536798ed-Tartarus-Classic-Base_gallery04.jpg",
+        "side_img": "https://assets2.razerzone.com/images/tartarus-classic/f89a70c59f993f08e95a8060ee2623da-Tartarus-Classic-Base_gallery02.jpg",
+        "perspective_img": "https://assets2.razerzone.com/images/tartarus-classic/b3a11ddda103b2473c3253a0a82af389-Tartarus-Classic-Base_gallery03.jpg"
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerTartarus, self).__init__(*args, **kwargs)
+        # Methods are loaded into DBus by this point
+
+        self.key_manager = _GamepadKeyManager(self._device_number, self.event_files, self, testing=self._testing)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerTartarus, self)._close()
+
+        # TODO look into saving stats in /var/run maybe
+        self.key_manager.close()
+
+
+class RazerTartarusChroma(_RazerDeviceBrightnessSuspend):
+    """
     Class for the Razer Tartarus Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Tartarus_Chroma(-if01)?-event-kbd')
@@ -97,13 +135,13 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-tartarus-chroma",
-        "top_img": "http://assets.razerzone.com/eeimages/products/22356/razer-tartarus-chroma-01-02.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/22356/razer-tartarus-chroma-02.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/22356/razer-tartarus-chroma-03.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/22356/razer-tartarus-chroma-01-02.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/22356/razer-tartarus-chroma-02.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/22356/razer-tartarus-chroma-03.png"
     }
 
     def __init__(self, *args, **kwargs):
-        super(RazerTartarus, self).__init__(*args, **kwargs)
+        super(RazerTartarusChroma, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
         self.key_manager = _GamepadKeyManager(self._device_number, self.event_files, self, testing=self._testing)
@@ -112,7 +150,7 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
         """
         Close the key manager
         """
-        super(RazerTartarus, self)._close()
+        super(RazerTartarusChroma, self)._close()
 
         # TODO look into saving stats in /var/run maybe
         self.key_manager.close()
@@ -160,10 +198,8 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
 
 class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
     """
-        Keyboard class
-
-        Has macro functionality and brightness based suspend
-        """
+    Class for the Razer Orbweaver Chroma
+    """
 
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Orbweaver_Chroma(-if01)?-event-kbd')
 
@@ -175,6 +211,13 @@ class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_tartarus', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_static_effect', 'set_spectrum_effect', 'tartarus_get_profile_led_red', 'tartarus_set_profile_led_red', 'tartarus_get_profile_led_green',
                'tartarus_set_profile_led_green', 'tartarus_get_profile_led_blue', 'tartarus_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier']
+
+    RAZER_URLS = {
+        "store": "https://www.razerzone.com/gaming-keyboards-keypads/razer-orbweaver-chroma",
+        "top_img": "https://assets2.razerzone.com/images/orbweaver-chroma/370604e681b07ee0ffc2047f569e438e-orbweaver-crhoma-gallery-02.jpg",
+        "side_img": "https://assets2.razerzone.com/images/orbweaver-chroma/8def7438b6f8d4faf24c9218daa07ad0-orbweaver-crhoma-gallery-03.jpg",
+        "perspective_img": "https://assets2.razerzone.com/images/orbweaver-chroma/518c021598fd22a51a714a1b276d1e9e-orbweaver-crhoma-gallery-04.jpg"
+    }
 
 
     def __init__(self, *args, **kwargs):
@@ -209,9 +252,9 @@ class RazerBlackWidow2012(_MacroKeyboard):
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blackwidow-ultimate-classic",
-        "top_img": "http://assets.razerzone.com/eeimages/products/22212/razer-blackwidow-ultimate-classic-gallery-4.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/22212/razer-blackwidow-ultimate-classic-gallery-1.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/22212/razer-blackwidow-ultimate-classic-gallery-2.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/22212/razer-blackwidow-ultimate-classic-gallery-4.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/22212/razer-blackwidow-ultimate-classic-gallery-1.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/22212/razer-blackwidow-ultimate-classic-gallery-2.png"
     }
 
 
@@ -230,10 +273,10 @@ class RazerBlackWidowClassic(_MacroKeyboard):
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/store/razer-blackwidow-old", # URL is dead
-        "top_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-01.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-02.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-04.png"
+        "store": "https://www.amazon.com/Razer-BlackWidow-Tournament-Essential-Mechanical/dp/B00IG3GPC0",
+        "top_img": "https://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-01.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-02.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-04.png"
     }
 
 
@@ -252,10 +295,10 @@ class RazerBlackWidowClassicAlternate(_MacroKeyboard):
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
-        "store": "http://www.razerzone.com/gb-en/store/razer-blackwidow-old", # URL is dead
-        "top_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-01.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-02.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-04.png"
+        "store": "https://www.amazon.com/Razer-BlackWidow-Tournament-Essential-Mechanical/dp/B00IG3GPC0",
+        "top_img": "https://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-01.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-02.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-04.png"
     }
 
 
@@ -275,9 +318,9 @@ class RazerBlackWidow2013(_MacroKeyboard):
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blackwidow-ultimate-2014",
-        "top_img": "http://assets.razerzone.com/eeimages/products/17561/razer-blackwidow-ultimate-gallery-02.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/17561/razer-blackwidow-ultimate-gallery-01.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/17561/razer-blackwidow-ultimate-gallery-04.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/17561/razer-blackwidow-ultimate-gallery-02.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/17561/razer-blackwidow-ultimate-gallery-01.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/17561/razer-blackwidow-ultimate-gallery-04.png"
     }
 
 
@@ -301,9 +344,9 @@ class RazerBlackWidowChroma(_MacroKeyboard):
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blackwidow-chroma-v1",
-        "top_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-01.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-02.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-04.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-01.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-02.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-04.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -378,9 +421,9 @@ class RazerBlackWidowChromaTournamentEdition(_MacroKeyboard):
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blackwidow-tournament-edition-chroma",
-        "top_img": "http://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-01.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-03.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-04.png"
+        "top_img": "https://assets2.razerzone.com/images/blackwidow-te-chroma/508721b4948304fe823e0d84b2ca114f-Blackwidow-TE-Chroma-Base_gallery2.jpg",
+        "side_img": "https://assets2.razerzone.com/images/blackwidow-te-chroma/87f7492792c72241c6d5bc302e36d46f-Blackwidow-TE-Chroma-Base_gallery3.jpg",
+        "perspective_img": "https://assets2.razerzone.com/images/blackwidow-te-chroma/918fc196cb8aec3e140316650d97a075-Blackwidow-TE-Chroma-Base_gallery5.jpg"
     }
 
     def __init__(self, *args, **kwargs):
@@ -417,9 +460,9 @@ class RazerBlackWidowXChroma(_MacroKeyboard):
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blackwidow-x-chroma",
-        "top_img": "http://assets.razerzone.com/eeimages/products/24325/razer-blackwidow-x-chroma-redo-1.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/24325/razer-blackwidow-x-chroma-redo-3.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/24325/razer-blackwidow-x-chroma-redo-4.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/24325/razer-blackwidow-x-chroma-redo-1.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/24325/razer-blackwidow-x-chroma-redo-3.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/24325/razer-blackwidow-x-chroma-redo-4.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -456,9 +499,9 @@ class RazerBlackWidowXChromaTournamentEdition(_MacroKeyboard):
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blackwidow-x-tournament-edition-chroma",
-        "top_img": "http://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-01.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-03.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-04.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-01.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-03.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-04.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -490,13 +533,13 @@ class RazerBladeStealth(_MacroKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row'
 
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'set_logo_active']
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blade-stealth",
-        "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-08-v2.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-01-v2.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -528,13 +571,13 @@ class RazerBladeStealthLate2016(_MacroKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row',
 
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'blade_get_logo_active', 'blade_set_logo_active']
 
     RAZER_URLS = {
-        "store": "https://www.razerzone.com/store/razer-blade-stealth",
-        "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2.png"
+        "store": "https://www.razerzone.com/store/razer-blade",
+        "top_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-15__store_gallery.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-22__store_gallery.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-02__store_gallery.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -565,13 +608,13 @@ class RazerBladeProLate2016(_MacroKeyboard):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'set_logo_active']
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blade-pro",
-        "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-07__store_gallery.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-13__store_gallery.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-01__store_gallery.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -606,9 +649,9 @@ class RazerBladeLate2016(_MacroKeyboard):
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blade-pro",
-        "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-07__store_gallery.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-13__store_gallery.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-01__store_gallery.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -641,13 +684,13 @@ class RazerBladeQHD(_MacroKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
 
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'set_logo_active']
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blade",
-        "top_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-05-v2.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-03-v2.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-04-v2.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/25684/rzrblade14-07__store_gallery.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/25684/rzrblade14-13__store_gallery.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/25684/rzrblade14-02__store_gallery.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -684,9 +727,9 @@ class RazerBlackWidow2016(_MacroKeyboard):
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blackwidow-ultimate-2016",
-        "top_img": "http://assets.razerzone.com/eeimages/products/22916/razer-blackwidow-gallery-01.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/22916/razer-blackwidow-gallery-07.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/22916/razer-blackwidow-gallery-02.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/22916/razer-blackwidow-gallery-01.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/22916/razer-blackwidow-gallery-07.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/22916/razer-blackwidow-gallery-02.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -763,9 +806,9 @@ class RazerOrnataChroma(_MacroKeyboard):
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-ornata-chroma",
-        "top_img": "http://assets.razerzone.com/eeimages/products/25713/razer-ornata-chroma-gallery-05.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/25713/razer-ornata-chroma-gallery-07.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/25713/razer-ornata-chroma-gallery-08.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/25713/razer-ornata-chroma-gallery-05.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/25713/razer-ornata-chroma-gallery-07.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/25713/razer-ornata-chroma-gallery-08.png"
     }
 
     def __init__(self, *args, **kwargs):
@@ -866,10 +909,10 @@ class RazerDeathStalkerExpert(_MacroKeyboard):
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
+        "store": "https://www2.razerzone.com/gaming-keyboards-keypads/razer-deathstalker",
+        "top_img": "https://assets.razerzone.com/eeimages/products/771/razer-dstalk-gallery-5.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/771/razer-dstalk-gallery-3.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/771/razer-dstalk-gallery-2.png"
     }
 
 
@@ -910,7 +953,7 @@ class RazerDeathStalkerChroma(_MacroKeyboard):
 
 class RazerBlackWidowChromaOverwatch(_MacroKeyboard):
     """
-    Class for the Razer BlackWidow Chroma
+    Class for the Razer BlackWidow Chroma (Overwatch)
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Chroma(-if01)?-event-kbd')
 
@@ -927,10 +970,10 @@ class RazerBlackWidowChromaOverwatch(_MacroKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     RAZER_URLS = {
-        "store": "https://www.razerzone.com/store/razer-blackwidow-chroma-v1",
-        "top_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-01.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-02.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-04.png"
+        "store": "https://www.razerzone.com/licensed-and-team-peripherals/overwatch-razer-blackwidow-chroma/",
+        "top_img": "https://assets.razerzone.com/eeimages/products/23326/overwatch-razer-gallery-5.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/23326/overwatch-razer-gallery-3.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/23326/overwatch-razer-gallery-1.png"
     }
 
     def __init__(self, *args, **kwargs):

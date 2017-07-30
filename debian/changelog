@@ -1,3 +1,14 @@
+razer (1.1.15-0ubuntu1) xenial; urgency=high
+  * Added Device - Razer Orochi 2013
+  * Added Device - Razer Kraken 7.1 Classic
+  * Added Device - Razer Tartarus
+  * Added startlight to pylib
+  * Added DBus endpoint to list supported devices
+  * Fixed some Razer image resource urls
+  * Added replaces in control file to purge razer-chroma-drivers
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Sat, 30 Jul 2017 16:12:00 +0000
+
 razer (1.1.14-0ubuntu1) xenial; urgency=high
   * Added Device - Razer DeathStalker Expert
   * Added Device - Razer Orbweaver Chroma

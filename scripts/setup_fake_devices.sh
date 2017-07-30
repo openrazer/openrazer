@@ -53,4 +53,4 @@ $terminal_cmd "$whereami/create_fake_device.py" --dest "$test_dir" $options &
 pkill -e razer-daemon
 
 # Start the daemon in a new terminal window.
-$terminal_cmd razer-daemon --verbose -F --run-dir "$config_dir/data" --log-dir "$config_dir/logs" --pid-file "$config_dir/daemon.pid" --test-dir "$test_dir"
+$terminal_cmd razer-daemon --verbose -F --run-dir "$config_dir/data" --log-dir "$config_dir/logs" --test-dir "$test_dir"

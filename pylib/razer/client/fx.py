@@ -427,6 +427,125 @@ class RazerFX(BaseRazerFX):
             return True
         return False
 
+    def starlight_single(self, red: int, green: int, blue: int, time: int) -> bool:
+        """
+        Starlight effect
+
+        :param red: Red component. Must be 0->255
+        :type red: int
+
+        :param green: Green component. Must be 0->255
+        :type green: int
+
+        :param blue: Blue component. Must be 0->255
+        :type blue: int
+
+        :param time: Starlight speed
+        :type time: int
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If parameters are invalid
+        """
+        if time not in (c.STARLIGHT_FAST, c.STARLIGHT_NORMAL, c.STARLIGHT_SLOW):
+            raise ValueError("Time not one of STARLIGHT_FAST, STARLIGHT_NORMAL or STARLIGHT_SLOW")
+        if not isinstance(red, int):
+            raise ValueError("Red is not an integer")
+        if not isinstance(green, int):
+            raise ValueError("Green is not an integer")
+        if not isinstance(blue, int):
+            raise ValueError("Blue is not an integer")
+
+        if self.has('starlight_single'):
+            red = clamp_ubyte(red)
+            green = clamp_ubyte(green)
+            blue = clamp_ubyte(blue)
+
+            self._lighting_dbus.setStarlightSingle(time, red, green, blue)
+
+            return True
+        return False
+
+    def starlight_dual(self, red: int, green: int, blue: int, red2: int, green2: int, blue2: int, time: int) -> bool:
+        """
+        Starlight effect
+
+        :param red: Red component. Must be 0->255
+        :type red: int
+
+        :param green: Green component. Must be 0->255
+        :type green: int
+
+        :param blue: Blue component. Must be 0->255
+        :type blue: int
+
+        :param red2: Red component. Must be 0->255
+        :type red2: int
+
+        :param green2: Green component. Must be 0->255
+        :type green2: int
+
+        :param blue2: Blue component. Must be 0->255
+        :type blue2: int
+
+        :param time: Starlight speed
+        :type time: int
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If parameters are invalid
+        """
+        if time not in (c.STARLIGHT_FAST, c.STARLIGHT_NORMAL, c.STARLIGHT_SLOW):
+            raise ValueError("Time not one of STARLIGHT_FAST, STARLIGHT_NORMAL or STARLIGHT_SLOW")
+        if not isinstance(red, int):
+            raise ValueError("Red is not an integer")
+        if not isinstance(green, int):
+            raise ValueError("Green is not an integer")
+        if not isinstance(blue, int):
+            raise ValueError("Blue is not an integer")
+        if not isinstance(red2, int):
+            raise ValueError("Red 2 is not an integer")
+        if not isinstance(green2, int):
+            raise ValueError("Green 2 is not an integer")
+        if not isinstance(blue2, int):
+            raise ValueError("Blue 2 is not an integer")
+
+        if self.has('starlight_dual'):
+            red = clamp_ubyte(red)
+            green = clamp_ubyte(green)
+            blue = clamp_ubyte(blue)
+            red2 = clamp_ubyte(red2)
+            green2 = clamp_ubyte(green2)
+            blue2 = clamp_ubyte(blue2)
+
+            self._lighting_dbus.setStarlightDual(time, red, green, blue, red2, green2, blue2)
+
+            return True
+        return False
+
+    def starlight_random(self, time: int) -> bool:
+        """
+        Starlight effect
+
+        :param time: Starlight speed
+        :type time: int
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If parameters are invalid
+        """
+        if time not in (c.STARLIGHT_FAST, c.STARLIGHT_NORMAL, c.STARLIGHT_SLOW):
+            raise ValueError("Time not one of STARLIGHT_FAST, STARLIGHT_NORMAL or STARLIGHT_SLOW")
+
+        if self.has('starlight_random'):
+            self._lighting_dbus.setStarlightRandom(time)
+
+            return True
+        return False
+
 
 class RazerAdvancedFX(BaseRazerFX):
     def __init__(self, serial: str, capabilities:dict, daemon_dbus=None, matrix_dims=(-1, -1)):

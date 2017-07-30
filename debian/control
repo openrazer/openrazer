@@ -17,6 +17,7 @@ Architecture: amd64 i386
 Depends: dkms,
          udev,
          ${misc:Depends}
+Replaces: razer-chroma-driver
 Description: Razer Peripheral Drivers
  A keyboard driver, a mouse driver and a mousemat driver
  for Razer devices, plus support for Razer Blade devices.
@@ -34,7 +35,8 @@ Depends: razer-kernel-modules-dkms,
          python3-notify2,
          gir1.2-gtk-3.0,
          xautomation,
-         xdotool
+         xdotool,
+         dbus-user-session
 Recommends: python3-razer
 Description: Razer Device Daemon
  A user-space daemon used to interface with the driver.

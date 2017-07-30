@@ -4,7 +4,7 @@
 %define dkms_version 1.0.0
 
 Name: razer-drivers
-Version: 1.1.14
+Version: 1.1.15
 Release: 1%{?dist}
 Summary: Razer drivers for Linux
 

@@ -3,7 +3,7 @@ Daemon class
 
 This class is the main core of the daemon, this serves a basic dbus module to control the main bit of the daemon
 """
-__version__ = '1.1.14'
+__version__ = '1.1.15'
 
 import configparser
 import logging
@@ -24,6 +24,7 @@ from gi.repository import GObject, GLib
 from pyudev import Context, Monitor, MonitorObserver
 import grp
 import getpass
+import json
 
 import razer_daemon.hardware
 from razer_daemon.dbus_services.service import DBusService
@@ -232,6 +233,7 @@ class RazerDaemon(DBusService):
             self.logger.warning("Could not check if user is a member of the plugdev group. Continuing...")
 
         self._screensaver_monitor = ScreensaverMonitor(self)
+        self._screensaver_monitor.monitoring = self._config.getboolean('Startup', 'devices_off_on_screensaver')
 
         self._razer_devices = DeviceCollection()
         self._load_devices(first_run=True)
@@ -239,6 +241,8 @@ class RazerDaemon(DBusService):
         # Add DBus methods
         self.logger.info("Adding razer.devices.getDevices method to DBus")
         self.add_dbus_method('razer.devices', 'getDevices', self.get_serial_list, out_signature='as')
+        self.logger.info("Adding razer.daemon.supportedDevices method to DBus")
+        self.add_dbus_method('razer.daemon', 'supportedDevices', self.supported_devices, out_signature='s')
         self.logger.info("Adding razer.devices.enableTurnOffOnScreensaver method to DBus")
         self.add_dbus_method('razer.devices', 'enableTurnOffOnScreensaver', self.enable_turn_off_on_screensaver, in_signature='b')
         self.logger.info("Adding razer.devices.syncEffects method to DBus")
@@ -342,6 +346,11 @@ class RazerDaemon(DBusService):
         Enable the turning off of devices when the screensaver is active
         """
         self._screensaver_monitor.monitoring = enable
+
+    def supported_devices(self):
+        result = {cls.__name__: (cls.USB_VID, cls.USB_PID) for cls in self._device_classes}
+
+        return json.dumps(result)
 
     def version(self):
         """
