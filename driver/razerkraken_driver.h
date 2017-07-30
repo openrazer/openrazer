@@ -16,12 +16,16 @@
 #define USB_VENDOR_ID_RAZER 0x1532
 #endif
 
-#ifndef USB_DEVICE_ID_RAZER_KRAKEN_V2 // Codename Kylie
-#define USB_DEVICE_ID_RAZER_KRAKEN_V2 0x0510
+#ifndef USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC // Codename Unknown
+#define USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC 0x0501
 #endif
 
 #ifndef USB_DEVICE_ID_RAZER_KRAKEN // Codename Rainie
 #define USB_DEVICE_ID_RAZER_KRAKEN 0x0504
+#endif
+
+#ifndef USB_DEVICE_ID_RAZER_KRAKEN_V2 // Codename Kylie
+#define USB_DEVICE_ID_RAZER_KRAKEN_V2 0x0510
 #endif
 
 #define USB_INTERFACE_PROTOCOL_NONE 0
@@ -134,6 +138,8 @@ union razer_kraken_effect_byte {
  *    =====================================================
  *    0   0  0  0  0  1  0  1 0x05 Spectrum Cycling on
  *
+ * Note 2:
+ *   Razer Kraken Classic uses 0x1008 for Logo LED on off.
  * */
 
 #define KYLIE_SET_LED_ADDRESS 0x172D
