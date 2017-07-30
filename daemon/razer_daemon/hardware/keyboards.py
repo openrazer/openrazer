@@ -571,7 +571,7 @@ class RazerBladeStealthLate2016(_MacroKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row',
 
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'blade_get_logo_active', 'blade_set_logo_active']
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blade",

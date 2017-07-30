@@ -993,6 +993,22 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
  *
  * Sets the logo lighting state to the ASCII number written to this file.
  */
+static ssize_t razer_attr_read_set_logo(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = razer_chroma_standard_get_led_effect(VARSTORE, LOGO_LED);
+    struct razer_report response;
+    response = razer_send_payload(usb_dev, &report);
+
+    return sprintf(buf, "%d\n", response.arguments[2]);
+}
+
+/**
+ * Write device file "set_logo"
+ *
+ * Sets the logo lighting state to the ASCII number written to this file.
+ */
 static ssize_t razer_attr_write_set_logo(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
@@ -1361,7 +1377,7 @@ static ssize_t razer_attr_read_key_alt_f4(struct device *dev, struct device_attr
 static DEVICE_ATTR(game_led_state,          0660, razer_attr_read_mode_game,                  razer_attr_write_mode_game);
 static DEVICE_ATTR(macro_led_state,         0660, razer_attr_read_mode_macro,                 razer_attr_write_mode_macro);
 static DEVICE_ATTR(macro_led_effect,        0660, razer_attr_read_mode_macro_effect,          razer_attr_write_mode_macro_effect);
-static DEVICE_ATTR(logo_led_state,          0220, NULL,                                       razer_attr_write_set_logo);
+static DEVICE_ATTR(logo_led_state,          0660, razer_attr_read_set_logo,                   razer_attr_write_set_logo);
 static DEVICE_ATTR(profile_led_red,         0660, razer_attr_read_tartarus_profile_led_red,   razer_attr_write_tartarus_profile_led_red);
 static DEVICE_ATTR(profile_led_green,       0660, razer_attr_read_tartarus_profile_led_green, razer_attr_write_tartarus_profile_led_green);
 static DEVICE_ATTR(profile_led_blue,        0660, razer_attr_read_tartarus_profile_led_blue,  razer_attr_write_tartarus_profile_led_blue);
