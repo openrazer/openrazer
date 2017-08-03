@@ -120,7 +120,7 @@ struct razer_mouse_device {
     unsigned short usb_pid;
 
     char serial[23];
-    
+
     unsigned char orochi2011_led;
     unsigned char orochi2011_dpi;
     unsigned short orochi2011_poll;

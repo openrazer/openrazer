@@ -1167,24 +1167,24 @@ struct razer_report razer_chroma_misc_set_orochi2011_poll_dpi(unsigned short pol
 {
     struct razer_report report;
     memcpy(&report, &orochi2011_dpi, sizeof(orochi2011_dpi));
-    
+
     switch(poll_rate) {
     case 1000:
         poll_rate = 0x01;
-    break;
+        break;
     case  500:
         poll_rate = 0x02;
         break;
     case  125:
         poll_rate = 0x08;
         break;
-	default: // 500Hz
+    default: // 500Hz
         poll_rate = 0x02;
         break;
     }
-    
+
     report.arguments[1] = poll_rate;
-    
+
     report.arguments[3] = clamp_u8(dpi_x, 0x15, 0x9C);
     report.arguments[4] = clamp_u8(dpi_y, 0x15, 0x9C);
 
