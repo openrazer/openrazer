@@ -55,6 +55,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Orochi (Wired)            |  1532:0048  |   ✔    |   ✔    |
 | Razer Diamondback Chroma        |  1532:004C  |   ✔    |   ✔    |
 | Razer Naga Hex V2               |  1532:0050  |   ✔    |   ✔    |
+| Razer Abyssus V2                |  1532:005B  |   ✔    |   ✔    |
 | Razer DeathAdder Elite          |  1532:005C  |   ✔    |   ✔    |
 
 ### Mousemats
