@@ -213,7 +213,7 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
     case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Orochi 2011 doesnt have FW
         return sprintf(buf, "v%d.%d\n", 9, 99);
         break;
-	
+
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
         report.transaction_id.id = 0x3f;
@@ -828,7 +828,7 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
         return sprintf(buf, "%u:%u\n", device->orochi2011_dpi, device->orochi2011_dpi);
         break;
-	
+
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
         report = razer_chroma_misc_get_dpi_xy_byte();
@@ -1175,7 +1175,7 @@ static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct devi
             device->orochi2011_led |= 0b00000001;
         } else {
             device->orochi2011_led &= 0b11111110;
-        }		
+        }
         report = razer_chroma_misc_set_orochi2011_led(device->orochi2011_led);
         break;
     }
@@ -1216,14 +1216,14 @@ static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_standard_set_led_state(VARSTORE, LOGO_LED, enabled);
     report.transaction_id.id = 0x3F;
-    
+
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
         if(enabled) {
             device->orochi2011_led |= 0b00000010;
         } else {
             device->orochi2011_led &= 0b11111101;
-        }		
+        }
         report = razer_chroma_misc_set_orochi2011_led(device->orochi2011_led);
         break;
     }
@@ -1242,7 +1242,7 @@ static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_
     struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, LOGO_LED);
     struct razer_report response;
     report.transaction_id.id = 0x3F;
-    
+
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
         return sprintf(buf, "%d\n", (device->orochi2011_led & 0b00000010) >> 1);
@@ -1903,7 +1903,7 @@ void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interface *intf
     // Get a "random" integer
     get_random_bytes(&rand_serial, sizeof(unsigned int));
     sprintf(&dev->serial[0], "PM%012u", rand_serial);
-    
+
     // Setup orochi2011
     dev->orochi2011_dpi = 0x4c;
     dev->orochi2011_poll = 500;

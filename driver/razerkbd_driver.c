@@ -110,7 +110,19 @@ static bool is_blade_laptop(struct usb_device *usb_dev)
  */
 static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report)
 {
-    return razer_get_usb_response(usb_dev, 0x01, request_report, 0x01, response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+    uint report_index;
+    uint response_index;
+    switch (usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_ANANSI:
+        report_index = 0x02;
+        response_index = 0x02;
+        break;
+    default:
+        report_index = 0x01;
+        response_index = 0x01;
+        break;
+    }
+    return razer_get_usb_response(usb_dev, report_index, request_report, response_index, response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
 }
 
 /**
@@ -1670,7 +1682,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             break;
 
         case USB_DEVICE_ID_RAZER_TARTARUS:
-		    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_pulsate);         // Pulsate effect, like breathing
@@ -1944,7 +1956,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_TARTARUS:
-		    device_remove_file(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+            device_remove_file(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
             device_remove_file(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
             device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_pulsate);         // Pulsate effect, like breathing
