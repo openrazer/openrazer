@@ -908,3 +908,23 @@ class RazerAbyssusV2(__RazerDeviceBrightnessSuspend):
         self.disable_notify = False
 
 
+class RazerOrochiWireless(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Orochi (Wired)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0056
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness',
+               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
+               'set_breath_single_effect', 'set_breath_dual_effect', 'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'set_scroll_active', 'get_scroll_active']
+
+    RAZER_URLS = {
+        "store": "https://www.razerzone.com/gb-en/store/razer-orochi",
+        "top_img": "https://assets.razerzone.com/eeimages/products/22770/razer-orochi-05-01.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/22770/razer-orochi-07-01.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/22770/razer-orochi-08-01.png"
+    }
+
+    DPI_MAX = 8200
