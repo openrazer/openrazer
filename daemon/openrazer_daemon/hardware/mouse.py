@@ -1468,6 +1468,24 @@ class RazerDeathAdderV2XHyperSpeed(__RazerDevice):
     DPI_MAX = 14000
 
 
+class RazerNagaEpic(__RazerDevice):
+    """
+    Class for the Razer Naga Epic
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Naga_Epic-if01-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x001F
+    DEDICATED_MACRO_KEYS = True
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
+               'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_none', 'set_scroll_static', 'set_scroll_spectrum',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold']
+
+    DEVICE_IMAGE = "https://hwimg.nl/Razer_naga-epic.png"
+
+    DPI_MAX = 5600
+
+
 class RazerViperV2ProWired(__RazerDevice):
     """
     Class for the Razer Viper V2 Pro (Wired)
