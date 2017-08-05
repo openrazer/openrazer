@@ -15,11 +15,11 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Anansi                                  |  1532:010F  |   ✔    |   ✔    |      |
 | Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔    |   ✔    |      |
 | Razer BlackWidow Classic                      |  1532:011B  |   ✔    |   ✔    |      |
-| Razer DeathStalker Expert                     |  1532:0202  |   ✔    |   ✔    | Untested |
+| Razer DeathStalker Expert                     |  1532:0202  |   ✔    |   ✔    |      |
 | Razer BlackWidow Chroma                       |  1532:0203  |   ✔    |   ✔    |      |
 | Razer DeathStalker Chroma                     |  1532:0204  |   ✔    |   ✔    |      |
 | Razer Blade Stealth                           |  1532:0205  |   ✔    |   ✔    |      |
-| Razer Orbweaver Chroma                        |  1532:0207  |   ✔    |   ✔    | Needs Testing |
+| Razer Orbweaver Chroma                        |  1532:0207  |   ✔    |   ✔    |      |
 | Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |   ✔    |   ✔    |      |
 | Razer Blade QHD                               |  1532:020F  |   ✔    |   ✔    |      |
 | Razer Blade Pro (Late 2016)                   |  1532:0210  |   ✔    |   ✔    |      |
@@ -33,7 +33,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Blade Stealth (Late 2016)               |  1532:0220  |   ✔    |   ✔    |      |
 | Razer BlackWidow Chroma V2                    |  1532:0221  |   ✔    |   ✔    |      |
 | Razer Blade (Late 2016)                       |  1532:0224  |   ✔    |   ✔    |      |
-| Razer Blade Stealth (Mid 2017)                |  1532:022D  |   ✔    |   ✔    | Completly untested |
+| Razer Blade Stealth (Mid 2017)                |  1532:022D  |   ✔    |   ✔    | Working except ripple |
 
 ### Mouse
 | Device                          | USB VID:PID | Driver | Daemon |
