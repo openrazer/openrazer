@@ -105,8 +105,6 @@ Packages are available for these distributions:
 * [openSUSE](https://terrycain.github.io/razer-drivers/#opensuse)
 * [Gentoo](https://terrycain.github.io/razer-drivers/#gentoo)
 
-Other distributions can manually install [using these instructions](https://terrycain.github.io/razer-drivers/#other).
-
 ## Applications
 
 The following applications complement and interact with this driver:
