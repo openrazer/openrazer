@@ -25,7 +25,7 @@ class RazerKrakenClassic(__RazerDevice):
         "store": "http://web.archive.org/web/20160826002356/http://www.razerzone.com/gaming-audio/razer-kraken-71-chroma",
         "top_img": "https://assets.razerzone.com/eeimages/products/17519/02.png",
         "side_img": "https://assets.razerzone.com/eeimages/products/17519/03.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/17519/01.png"
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/17519/01.png"
     }
 
     def __init__(self, *args, **kwargs):
