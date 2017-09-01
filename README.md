@@ -1,8 +1,8 @@
-# [Razer Drivers](https://terrycain.github.io/razer-drivers/)
+# [Razer Drivers](https://openrazer.github.io/razer-drivers/)
 
 A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
 
-**Before raising an issue** saying something doesn't work, read [the troubleshooting wiki page](https://github.com/terrycain/razer-drivers/wiki/Troubleshooting), try not to create new issues if one exists.
+**Before raising an issue** saying something doesn't work, read [the troubleshooting wiki page](https://github.com/openrazer/razer-drivers/wiki/Troubleshooting), try not to create new issues if one exists.
 
 Also this is the master branch, devices may appear in the tables below but might not be released in package form yet. Check out the stable branch for what _should_ be in the packages.
 
@@ -98,12 +98,12 @@ This will output something similar to this:
 
 Packages are available for these distributions:
 
-* [Ubuntu / Linux Mint](https://terrycain.github.io/razer-drivers/#ubuntu)
-* [Debian](https://terrycain.github.io/razer-drivers/#debian)
-* [Arch Linux](https://terrycain.github.io/razer-drivers/#arch)
-* [Fedora](https://terrycain.github.io/razer-drivers/#fedora)
-* [openSUSE](https://terrycain.github.io/razer-drivers/#opensuse)
-* [Gentoo](https://terrycain.github.io/razer-drivers/#gentoo)
+* [Ubuntu / Linux Mint](https://openrazer.github.io/razer-drivers/#ubuntu)
+* [Debian](https://openrazer.github.io/razer-drivers/#debian)
+* [Arch Linux](https://openrazer.github.io/razer-drivers/#arch)
+* [Fedora](https://openrazer.github.io/razer-drivers/#fedora)
+* [openSUSE](https://openrazer.github.io/razer-drivers/#opensuse)
+* [Gentoo](https://openrazer.github.io/razer-drivers/#gentoo)
 
 ## Applications
 
@@ -123,7 +123,7 @@ The following applications complement and interact with this driver:
 
 ## Contributions
 
-You can donate to [@terrycain](https://github.com/terrycain) with PayPal to terry@terrys-home.co.uk .
+You can donate to [@terrycain](https://github.com/openrazer) with PayPal to terry@terrys-home.co.uk .
 
 ---
 
