@@ -213,9 +213,9 @@ class RazerOrochi2013(__RazerDevice):
 
     RAZER_URLS = {
         "store": None,
-        "top_img": "http://assets.razerzone.com/eeimages/products/6713/razer-orochi-2013-gallery-1.png",
-        "side_img": "http://assets.razerzone.com/eeimages/products/6713/razer-orochi-2013-gallery-3.png",
-        "perspective_img": "http://assets.razerzone.com/eeimages/products/6713/razer-orochi-2013-gallery-5.png"
+        "top_img": "https://assets.razerzone.com/eeimages/products/6713/razer-orochi-2013-gallery-1.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/6713/razer-orochi-2013-gallery-3.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/6713/razer-orochi-2013-gallery-5.png"
     }
 
     def __init__(self, *args, **kwargs):
