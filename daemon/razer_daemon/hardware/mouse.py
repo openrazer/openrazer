@@ -392,7 +392,7 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
 
 class RazerNagaChroma(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Deathadder Chroma
+    Class for the Razer Naga Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Naga_Chroma-if0(1|2)-event-kbd')
 
@@ -415,10 +415,10 @@ class RazerNagaChroma(__RazerDeviceBrightnessSuspend):
                'set_custom_effect', 'set_key_row']
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
+        "store": "https://www.razerzone.com/gaming-mice/razer-naga-epic-chroma",
+        "top_img": "https://assets2.razerzone.com/images/razer-naga-chroma/f7b87fa2737556bbeedb7352ee5cdb67-razer-naga-chroma-gallery-06.jpg",
+        "side_img": "https://assets2.razerzone.com/images/razer-naga-chroma/28b8a7b0bf18c4bb0ffe6fe22d070dba-razer-naga-chroma-gallery-02.jpg",
+        "perspective_img": "https://assets2.razerzone.com/images/razer-naga-chroma/15fc24f88b577a6d080ed9e0e6a1b219-razer-naga-chroma-gallery-03.jpg"
     }
 
     def __init__(self, *args, **kwargs):
@@ -859,10 +859,10 @@ class RazerAbyssusV2(__RazerDeviceBrightnessSuspend):
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
     RAZER_URLS = {
-        "store": None,
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
+        "store": "https://www.razerzone.com/gaming-mice/razer-abyssus-v2",
+        "top_img": "https://assets.razerzone.com/eeimages/products/25266/abyssus-v2-gallery-01.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/25266/abyssus-v2-gallery-04.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/25266/abyssus-v2-gallery-03.png"
     }
 
     DPI_MAX = 5000
