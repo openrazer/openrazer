@@ -1,3 +1,46 @@
+razer (1.1.16-0ubuntu1) xenial; urgency=high
+  * Added Device - Razer Blade Stealth Mid 2017
+  * Added Device - Razer Naga Chroma
+  * Added Device - Razer AbyssusV2
+  * Added fake driver config - Razer BlackWidow Chroma TE
+  * Added fake driver config - Razer BlackWidow Chroma V2
+  * Added fake driver config - Razer BlackWidow Original + Alt
+  * Added fake driver config - Razer BlackWidow Ultimate 2012, 2013, 2016
+  * Added fake driver config - Razer BlackWidow X Chroma, TE
+  * Added fake driver config - Razer BlackWidow X Ultimate
+  * Added fake driver config - Razer Blade Late 2016
+  * Added fake driver config - Razer Blade Pro Late 2016
+  * Added fake driver config - Razer Blade QHD
+  * Added fake driver config - Razer Blade Stealth Late 2016
+  * Added fake driver config - Razer Blade Stealth Mid 2017
+  * Added fake driver config - Razer DeathAdder Elite
+  * Added fake driver config - Razer DeathStalker Chroma
+  * Added fake driver config - Razer DeathStalker Expert
+  * Added fake driver config - Razer Diamondback Chroma
+  * Added fake driver config - Razer Firefly
+  * Added fake driver config - Razer Imperator
+  * Added fake driver config - Razer Kraken Classic
+  * Added fake driver config - Razer Mamba 2012 Wired
+  * Added fake driver config - Razer Mamba 2012 Wireless
+  * Added fake driver config - Razer Mamba Chroma Wired
+  * Added fake driver config - Razer Mamba Chroma TE Wired
+  * Added fake driver config - Razer Naga Chroma
+  * Added fake driver config - Razer Naga Hex
+  * Added fake driver config - Razer Naga Hex Red
+  * Added fake driver config - Razer Nostromo
+  * Added fake driver config - Razer Ornata
+  * Added fake driver config - Razer Ornata Chroma
+  * Added fake driver config - Razer Orochi 2011
+  * Added fake driver config - Razer Orochi 2013
+  * Added fake driver config - Razer Orochi Chroma
+  * Added fake driver config - Razer Ouroboros
+  * Added fake driver config - Razer Tapian
+  * Added fake driver config - Razer Tartarus Chroma
+  * Fixed Bug with laptops logo toggle
+  * Implemented suspend on Taipan
+
+ -- Terry Cain <terry@terrys-home.co.uk>  Fri, 1 Sep 2017 11:28:00 +0000
+
 razer (1.1.15-0ubuntu1) xenial; urgency=high
   * Added Device - Razer Orochi 2013
   * Added Device - Razer Kraken 7.1 Classic

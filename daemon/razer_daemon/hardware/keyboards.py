@@ -533,7 +533,7 @@ class RazerBladeStealth(_MacroKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row'
 
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'blade_get_logo_active', 'blade_set_logo_active']
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blade-stealth",
@@ -608,7 +608,7 @@ class RazerBladeProLate2016(_MacroKeyboard):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'blade_get_logo_active', 'blade_set_logo_active']
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blade-pro",
@@ -684,7 +684,7 @@ class RazerBladeQHD(_MacroKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
 
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'blade_get_logo_active', 'blade_set_logo_active']
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/store/razer-blade",
@@ -988,3 +988,42 @@ class RazerBlackWidowChromaOverwatch(_MacroKeyboard):
         super(RazerBlackWidowChromaOverwatch, self)._close()
 
         self.ripple_manager.close()
+
+
+class RazerBladeStealthMid2017(_MacroKeyboard):
+    """
+    Class for the Razer Blade Stealth (Late 2016)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade_Stealth(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x022D
+    HAS_MATRIX = True
+    DEDICATED_MACRO_KEYS = False
+    MATRIX_DIMS = [6, 16]  # 6 Rows, 22 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row',
+
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'blade_get_logo_active', 'blade_set_logo_active']
+
+    RAZER_URLS = {
+        "store": "https://www.razerzone.com/store/razer-blade",
+        "top_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-15__store_gallery.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-22__store_gallery.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-02__store_gallery.png"
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerBladeStealthMid2017, self).__init__(*args, **kwargs)
+
+        self.ripple_manager = _RippleManager(self, self._device_number)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerBladeStealthLate2016, self)._close()
+
+        self.ripple_manager.close()
+

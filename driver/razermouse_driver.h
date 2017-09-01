@@ -85,6 +85,14 @@
 #define USB_DEVICE_ID_RAZER_NAGA_HEX_V2 0x0050
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_NAGA_CHROMA
+ #define USB_DEVICE_ID_RAZER_NAGA_CHROMA 0x0053
+#endif
+
+#ifndef USB_DEVICE_ID_RAZER_ABYSSUS_V2
+#define USB_DEVICE_ID_RAZER_ABYSSUS_V2 0x005B
+#endif
+
 #ifndef USB_DEVICE_ID_RAZER_DEATHADDER_ELITE
 #define USB_DEVICE_ID_RAZER_DEATHADDER_ELITE 0x005C
 #endif
@@ -120,7 +128,7 @@ struct razer_mouse_device {
     unsigned short usb_pid;
 
     char serial[23];
-    
+
     unsigned char orochi2011_led;
     unsigned char orochi2011_dpi;
     unsigned short orochi2011_poll;

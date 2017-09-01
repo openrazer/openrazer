@@ -100,6 +100,7 @@ static bool is_blade_laptop(struct usb_device *usb_dev)
     case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
     case USB_DEVICE_ID_RAZER_BLADE_QHD:
     case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
         return true;
     }
     return false;
@@ -110,7 +111,19 @@ static bool is_blade_laptop(struct usb_device *usb_dev)
  */
 static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report)
 {
-    return razer_get_usb_response(usb_dev, 0x01, request_report, 0x01, response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+    uint report_index;
+    uint response_index;
+    switch (usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_ANANSI:
+        report_index = 0x02;
+        response_index = 0x02;
+        break;
+    default:
+        report_index = 0x01;
+        response_index = 0x01;
+        break;
+    }
+    return razer_get_usb_response(usb_dev, report_index, request_report, response_index, response_report, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
 }
 
 /**
@@ -306,6 +319,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
         device_type = "Razer Blade Stealth (Late 2016)\n";
+        break;
+    
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+        device_type = "Razer Blade Stealth (Mid 2017)\n";
         break;
 
     case USB_DEVICE_ID_RAZER_BLADE_QHD:
@@ -768,6 +785,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
     case USB_DEVICE_ID_RAZER_BLADE_QHD:
     case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
     case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
@@ -1284,6 +1302,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
         case USB_DEVICE_ID_RAZER_BLADE_QHD:
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
             report.transaction_id.id = 0x80; // Fall into the 2016/blade/blade2016 to set device id
@@ -1617,6 +1636,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
@@ -1670,7 +1690,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             break;
 
         case USB_DEVICE_ID_RAZER_TARTARUS:
-		    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_pulsate);         // Pulsate effect, like breathing
@@ -1885,6 +1905,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
@@ -1944,7 +1965,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_TARTARUS:
-		    device_remove_file(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+            device_remove_file(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
             device_remove_file(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
             device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_pulsate);         // Pulsate effect, like breathing
@@ -2103,6 +2124,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ANANSI) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_LATE_2016) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017) },
     { 0 }
 };
 
