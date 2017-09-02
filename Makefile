@@ -20,32 +20,32 @@ lp_all: lp_driver
 
 # Driver compilation
 driver:
-	@echo -e "\n::\033[32m Compiling Razer kernel modules\033[0m"
+	@echo -e "\n::\033[32m Compiling OpenRazer kernel modules\033[0m"
 	@echo "========================================"
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules
 
 driver_clean:
-	@echo -e "\n::\033[32m Cleaning Razer kernel modules\033[0m"
+	@echo -e "\n::\033[32m Cleaning OpenRazer kernel modules\033[0m"
 	@echo "========================================"
 	make -C "$(KERNELDIR)" SUBDIRS="$(DRIVERDIR)" clean
 
 # Install kernel modules and then update module dependencies
 driver_install:
-	@echo -e "\n::\033[34m Installing Razer kernel modules\033[0m"
+	@echo -e "\n::\033[34m Installing OpenRazer kernel modules\033[0m"
 	@echo "====================================================="
 	@cp -v $(DRIVERDIR)/*.ko $(DESTDIR)/$(MODULEDIR)
 	@chown -v root:root $(DESTDIR)/$(MODULEDIR)/*.ko
 	depmod
 
-# Just use for packaging razer-drivers, not for installing manually
+# Just use for packaging openrazer, not for installing manually
 driver_install_packaging:
-	@echo -e "\n::\033[34m Installing Razer kernel modules\033[0m"
+	@echo -e "\n::\033[34m Installing OpenRazer kernel modules\033[0m"
 	@echo "====================================================="
 	@cp -v $(DRIVERDIR)/*.ko $(DESTDIR)/$(MODULEDIR)
 
 # Remove kernel modules
 driver_uninstall:
-	@echo -e "\n::\033[34m Uninstalling Razer kernel modules\033[0m"
+	@echo -e "\n::\033[34m Uninstalling OpenRazer kernel modules\033[0m"
 	@echo "====================================================="
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razerkbd.ko
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razermouse.ko
@@ -55,13 +55,13 @@ driver_uninstall:
 
 # Launchpad hacks
 lp_driver:
-	@echo -e "\n::\033[32m Compiling Razer kernel modules (Launchpad)\033[0m"
+	@echo -e "\n::\033[32m Compiling OpenRazer kernel modules (Launchpad)\033[0m"
 	@echo "========================================"
 	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+(generic|amd64)' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
 	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules > /dev/null 2>&1
 
 lp_driver_clean:
-	@echo -e "\n::\033[32m Cleaning Razer kernel modules (Launchpad)\033[0m"
+	@echo -e "\n::\033[32m Cleaning OpenRazer kernel modules (Launchpad)\033[0m"
 	@echo "========================================"
 	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+(generic|amd64)' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
 	make -C "$(KERNELDIR)" SUBDIRS="$(DRIVERDIR)" clean
@@ -69,35 +69,35 @@ lp_driver_clean:
 
 # Razer Daemon
 daemon_install:
-	@echo -e "\n::\033[34m Installing Razer Daemon\033[0m"
+	@echo -e "\n::\033[34m Installing OpenRazer Daemon\033[0m"
 	@echo "====================================================="
 	make --no-print-directory -C daemon install
 
 ubuntu_daemon_install:
-	@echo -e "\n::\033[34m Installing Razer Daemon\033[0m"
+	@echo -e "\n::\033[34m Installing OpenRazer Daemon\033[0m"
 	@echo "====================================================="
 	make --no-print-directory -C daemon ubuntu_install
 
 
 daemon_uninstall:
-	@echo -e "\n::\033[34m Uninstalling Razer Daemon\033[0m"
+	@echo -e "\n::\033[34m Uninstalling OpenRazer Daemon\033[0m"
 	@echo "====================================================="
 	make --no-print-directory -C daemon uninstall
 
 
 # Python Library
 python_library_install:
-	@echo -e "\n::\033[34m Installing Razer python library\033[0m"
+	@echo -e "\n::\033[34m Installing OpenRazer python library\033[0m"
 	@echo "====================================================="
 	@make --no-print-directory -C pylib install
 
 ubuntu_python_library_install:
-	@echo -e "\n::\033[34m Installing Razer python library\033[0m"
+	@echo -e "\n::\033[34m Installing OpenRazer python library\033[0m"
 	@echo "====================================================="
 	@make --no-print-directory -C pylib ubuntu_install
 
 python_library_uninstall:
-	@echo -e "\n::\033[34m Uninstalling Razer python library\033[0m"
+	@echo -e "\n::\033[34m Uninstalling OpenRazer python library\033[0m"
 	@echo "====================================================="
 	@make --no-print-directory -C pylib uninstall
 
@@ -122,24 +122,24 @@ remove_dkms:
 	rm -rf $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0
 
 udev_install:
-	@echo -e "\n::\033[34m Installing Razer udev rules\033[0m"
+	@echo -e "\n::\033[34m Installing OpenRazer udev rules\033[0m"
 	@echo "====================================================="
 	install -m 644 -v -D install_files/udev/99-razer.rules $(DESTDIR)/usr/lib/udev/rules.d/99-razer.rules
 	install -m 755 -v -D install_files/udev/razer_mount $(DESTDIR)/usr/lib/udev/razer_mount
 
 udev_uninstall:
-	@echo -e "\n::\033[34m Uninstalling Razer udev rules\033[0m"
+	@echo -e "\n::\033[34m Uninstalling OpenRazer udev rules\033[0m"
 	@echo "====================================================="
 	rm -f $(DESTDIR)/usr/lib/udev/rules.d/99-razer.rules $(DESTDIR)/usr/lib/udev/razer_mount
 
 ubuntu_udev_install:
-	@echo -e "\n::\033[34m Installing Razer udev rules\033[0m"
+	@echo -e "\n::\033[34m Installing OpenRazer udev rules\033[0m"
 	@echo "====================================================="
 	install -m 644 -v -D install_files/udev/99-razer.rules $(DESTDIR)/lib/udev/rules.d/99-razer.rules
 	install -m 755 -v -D install_files/udev/razer_mount $(DESTDIR)/lib/udev/razer_mount
 
 ubuntu_udev_uninstall:
-	@echo -e "\n::\033[34m Uninstalling Razer udev rules\033[0m"
+	@echo -e "\n::\033[34m Uninstalling OpenRazer udev rules\033[0m"
 	@echo "====================================================="
 	rm -f $(DESTDIR)/lib/udev/rules.d/99-razer.rules $(DESTDIR)/lib/udev/razer_mount
 

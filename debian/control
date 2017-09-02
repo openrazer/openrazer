@@ -7,9 +7,9 @@ Build-Depends: debhelper (>= 8.0.0),
                linux-headers-generic,
                python3,
                python3-setuptools
-Homepage: https://terrycain.github.io/razer-drivers/
-Vcs-Git: git://git@github.com:terrycain/razer-drivers.git
-Vcs-Browser: https://github.com/terrycain/razer-drivers/
+Homepage: https://openrazer.github.io/
+Vcs-Git: git://git@github.com:openrazer/openrazer.git
+Vcs-Browser: https://github.com/openrazer/openrazer/
 
 Package: razer-kernel-modules-dkms
 Section: kernel
@@ -51,10 +51,10 @@ Depends: python3,
          python3-gi,
          python3-numpy
 Description: Razer Python Library
- Contains a client for interacting with the Razer daemon.
+ Contains a client for interacting with the OpenRazer daemon.
 
 Package: razer-doc
 Section: doc
 Architecture: all
-Description: Documentation and examples for the Razer Tools
+Description: Documentation and examples for the OpenRazer Tools
  Scripts on how to interact with the daemon and the driver.

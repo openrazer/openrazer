@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: razer
-Source: https://github.com/terrycain/razer-drivers
+Source: https://github.com/openrazer/openrazer
 
 Files: *
 Copyright: 2015-2016 Terry Cain <terry@terrys-home.co.uk>
@@ -9,7 +9,7 @@ Copyright: 2015-2016 Terry Cain <terry@terrys-home.co.uk>
 License: GPL-2+
 
 Files: logo/*.svg
-Copyright: 2015-2016 Luke Horwell <lukehorwell37+code@gmail.com>
+Copyright: 2015-2017 Luke Horwell <luke@ubuntu-mate.org>
 License: CC BY-SA 4.0
 
 License: GPL-2+

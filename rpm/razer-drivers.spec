@@ -9,9 +9,9 @@ Release: 1%{?dist}
 Summary: Razer drivers for Linux
 
 License: GPL-2.0
-URL: https://github.com/terrycain/razer-drivers
+URL: https://github.com/openrazer/openrazer
 
-Source0: https://github.com/terrycain/razer-drivers/archive/v%{version}.tar.gz
+Source0: https://github.com/openrazer/openrazer/archive/v%{version}.tar.gz
 BuildArch: noarch
 
 Requires: razer-kernel-modules-dkms

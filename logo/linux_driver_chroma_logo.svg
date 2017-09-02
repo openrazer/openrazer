@@ -18,7 +18,7 @@
    inkscape:version="0.91 r13725"
    sodipodi:docname="linux_driver_chroma_logo.svg">
   <title
-     id="title4232">Razer Chroma drivers for Linux logo</title>
+     id="title4263">OpenRazer &quot;Chroma&quot; Logo</title>
   <defs
      id="defs4">
     <linearGradient
@@ -193,14 +193,14 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.9086359"
-     inkscape:cx="106.73241"
-     inkscape:cy="143.70757"
+     inkscape:cx="101.49307"
+     inkscape:cy="146.32724"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
      units="px"
      inkscape:window-width="1920"
-     inkscape:window-height="1003"
+     inkscape:window-height="1004"
      inkscape:window-x="0"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
@@ -229,7 +229,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title>Linux Driver Logo for Razer BlackWidow Chroma Keyboard</dc:title>
+        <dc:title>OpenRazer &quot;Chroma&quot; Logo</dc:title>
         <cc:license
            rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
         <dc:date>January 2016</dc:date>
@@ -243,9 +243,9 @@
             <dc:title>CC BY-SA 4.0</dc:title>
           </cc:Agent>
         </dc:rights>
-        <dc:description>A razer inspired &quot;snake&quot; logo created to represent the Razer Linux drivers project.
+        <dc:description>A razer inspired &quot;snake&quot; logo created to represent the OpenRazer project.
 
-Source Code: https://github.com/terrycain/razer-drivers</dc:description>
+Source Code: https://github.com/openrazer/openrazer</dc:description>
         <dc:contributor>
           <cc:Agent>
             <dc:title>Luke Horwell</dc:title>
@@ -260,7 +260,7 @@ Source Code: https://github.com/terrycain/razer-drivers</dc:description>
             <rdf:li>Linux.</rdf:li>
           </rdf:Bag>
         </dc:subject>
-        <dc:coverage>Representing the Linux drivers.</dc:coverage>
+        <dc:coverage></dc:coverage>
       </cc:Work>
       <cc:License
          rdf:about="http://creativecommons.org/licenses/by-sa/3.0/">
