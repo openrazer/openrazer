@@ -40,7 +40,7 @@ class RazerMacro(object):
         """
         Add macro to specified bind key
 
-        :param bind_key: Bind Key (has to be in razer.keyboard.KEY_MAPPING)
+        :param bind_key: Bind Key (has to be in openrazer.keyboard.KEY_MAPPING)
         :type bind_key: str
 
         :param macro_object_sequence: List of macro objects
@@ -63,7 +63,7 @@ class RazerMacro(object):
 
     def del_macro(self, bind_key:str):
         if bind_key not in keyboard.KEY_MAPPING:
-            raise ValueError("Key {0} is not in razer.keyboard.KEY_MAPPING".format(bind_key))
+            raise ValueError("Key {0} is not in openrazer.keyboard.KEY_MAPPING".format(bind_key))
         else:
             self._macro_dbus.deleteMacro(bind_key)
 

@@ -5,9 +5,9 @@ import tempfile
 import time
 import unittest
 import shutil
-import razer.client
+import openrazer.client
 import razer_daemon.daemon
-import razer._fake_driver as fake_driver
+import openrazer._fake_driver as fake_driver
 
 import coverage
 
@@ -56,7 +56,7 @@ class DeviceManagerTest(unittest.TestCase):
     def setUp(self):
         self._bw_chroma.create_endpoints()
 
-        self.device_manager = razer.client.DeviceManager()
+        self.device_manager = openrazer.client.DeviceManager()
 
 
     def test_device_list(self):
@@ -133,9 +133,9 @@ class DeviceManagerTest(unittest.TestCase):
 
 
         self._bw_chroma.set('mode_macro_effect', '0')
-        self.assertEqual(device.macro_mode_led_effect, razer.client.constants.MACRO_LED_STATIC)
-        device.macro_mode_led_effect = razer.client.constants.MACRO_LED_BLINK
-        self.assertEqual(self._bw_chroma.get('mode_macro'), str(razer.client.constants.MACRO_LED_BLINK))
+        self.assertEqual(device.macro_mode_led_effect, openrazer.client.constants.MACRO_LED_STATIC)
+        device.macro_mode_led_effect = openrazer.client.constants.MACRO_LED_BLINK
+        self.assertEqual(self._bw_chroma.get('mode_macro'), str(openrazer.client.constants.MACRO_LED_BLINK))
 
     def test_device_keyboard_effect_none(self):
         device = self.device_manager.devices[0]
@@ -154,10 +154,10 @@ class DeviceManagerTest(unittest.TestCase):
     def test_device_keyboard_effect_wave(self):
         device = self.device_manager.devices[0]
 
-        device.fx.wave(razer.client.constants.WAVE_LEFT)
-        self.assertEqual(self._bw_chroma.get('mode_wave'), str(razer.client.constants.WAVE_LEFT))
-        device.fx.wave(razer.client.constants.WAVE_RIGHT)
-        self.assertEqual(self._bw_chroma.get('mode_wave'), str(razer.client.constants.WAVE_RIGHT))
+        device.fx.wave(openrazer.client.constants.WAVE_LEFT)
+        self.assertEqual(self._bw_chroma.get('mode_wave'), str(openrazer.client.constants.WAVE_LEFT))
+        device.fx.wave(openrazer.client.constants.WAVE_RIGHT)
+        self.assertEqual(self._bw_chroma.get('mode_wave'), str(openrazer.client.constants.WAVE_RIGHT))
 
         with self.assertRaises(ValueError):
             device.fx.wave('lalala')
@@ -178,7 +178,7 @@ class DeviceManagerTest(unittest.TestCase):
     def test_device_keyboard_effect_reactive(self):
         device = self.device_manager.devices[0]
 
-        time = razer.client.constants.REACTIVE_500MS
+        time = openrazer.client.constants.REACTIVE_500MS
         device.fx.reactive(255, 0, 255, time)
         self.assertEqual(b'\x01\xFF\x00\xFF', self._bw_chroma.get('mode_reactive', binary=True))
 

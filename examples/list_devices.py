@@ -1,4 +1,4 @@
-from razer.client import DeviceManager
+from openrazer.client import DeviceManager
 
 # Create a DeviceManager. This is used to get specific devices
 device_manager = DeviceManager()

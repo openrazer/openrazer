@@ -1,4 +1,4 @@
-from razer.client.devices import RazerDevice as __RazerDevice
+from openrazer.client.devices import RazerDevice as __RazerDevice
 
 
 class RazerFirefly(__RazerDevice):

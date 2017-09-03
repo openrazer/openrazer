@@ -1,9 +1,9 @@
 import sys
 import argparse
 
-import razer.client
+import openrazer.client
 
-device_manager = razer.client.DeviceManager()
+device_manager = openrazer.client.DeviceManager()
 keyboard = None
 
 def on_off(value, true='On', false='Off'):
@@ -30,7 +30,7 @@ if keyboard.has("game_mode_led"):
     print("Game Mode LED: {0}".format(on_off(keyboard.game_mode_led)))
 if keyboard.has("macro_mode_led"):
     macro_led = on_off(keyboard.macro_mode_led)
-    macro_led_state = on_off(keyboard.macro_mode_led_effect == razer.client.constants.MACRO_LED_STATIC, true='Static', false='Blinking')
+    macro_led_state = on_off(keyboard.macro_mode_led_effect == openrazer.client.constants.MACRO_LED_STATIC, true='Static', false='Blinking')
     print("Macro Mode LED: {0} ({1})".format(macro_led, macro_led_state))
 print("------------------------")
 print("Capabilities:")

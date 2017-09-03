@@ -3,8 +3,8 @@ Contains functionality specific to keyboard-like devices
 """
 import dbus as _dbus
 
-from razer.client.constants import MACRO_LED_STATIC, MACRO_LED_BLINK
-from razer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFactory as __BaseDeviceFactory
+from openrazer.client.constants import MACRO_LED_STATIC, MACRO_LED_BLINK
+from openrazer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFactory as __BaseDeviceFactory
 
 
 class RazerKeyboard(__RazerDevice):
@@ -107,7 +107,7 @@ class RazerKeyboard(__RazerDevice):
 
 
 DEVICE_PID_MAP = {
-    
+
 }
 
 

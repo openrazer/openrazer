@@ -1,14 +1,14 @@
 import sys
 import argparse
 
-import razer.client
+import openopenrazer.client
 
 choices = ('get', 'on', 'off', 'flashing', 'static', 'effect_state')
 parser = argparse.ArgumentParser()
 parser.add_argument('action', choices=choices)
 args  = parser.parse_args()
 
-device_manager = razer.client.DeviceManager()
+device_manager = openopenrazer.client.DeviceManager()
 keyboard = None
 
 for device in device_manager.devices:
@@ -33,7 +33,7 @@ if args.action == 'get':
         print("Macro mode LED: Off")
 
 elif args.action == 'effect_state':
-    if keyboard.macro_mode_led_effect == razer.client.constants.MACRO_LED_BLINK:
+    if keyboard.macro_mode_led_effect == openrazer.client.constants.MACRO_LED_BLINK:
         print("Macro mode LED: Blinking")
     else:
         print("Macro mode LED: Static")
@@ -44,12 +44,12 @@ elif args.action == 'on':
 
 elif args.action == 'flashing':
     keyboard.macro_mode_led = True
-    keyboard.macro_mode_led_effect = razer.client.constants.MACRO_LED_BLINK
+    keyboard.macro_mode_led_effect = openrazer.client.constants.MACRO_LED_BLINK
     print("Turned macro mode LED on (flashing)")
 
 elif args.action == 'static':
     keyboard.macro_mode_led = True
-    keyboard.macro_mode_led_effect = razer.client.constants.MACRO_LED_STATIC
+    keyboard.macro_mode_led_effect = openrazer.client.constants.MACRO_LED_STATIC
     print("Turned macro mode LED on (static)")
 
 else: # Off

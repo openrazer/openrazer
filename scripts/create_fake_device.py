@@ -10,7 +10,7 @@ import tempfile
 PYLIB = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'pylib')
 sys.path.insert(1, PYLIB)
 
-import razer._fake_driver as fake_driver
+import openrazer._fake_driver as fake_driver
 
 
 class FakeDevicePrompt(cmd.Cmd):

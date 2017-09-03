@@ -1,7 +1,7 @@
 import numpy as _np
 import dbus as _dbus
-#from razer.client.constants import WAVE_LEFT, WAVE_RIGHT, REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS, REACTIVE_2000MS
-from razer.client import constants as c
+#from openrazer.client.constants import WAVE_LEFT, WAVE_RIGHT, REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS, REACTIVE_2000MS
+from openrazer.client import constants as c
 
 #TODO logging.debug if value out of range v1.1
 def clamp_ubyte(value):

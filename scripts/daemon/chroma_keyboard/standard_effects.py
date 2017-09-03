@@ -1,8 +1,8 @@
 import sys
 import argparse
 
-import razer.client
-import razer.client.constants as c
+import openrazer.client
+import openrazer.client.constants as c
 
 def ripple_single_type() -> callable:
     """
@@ -40,7 +40,7 @@ action.add_argument('--ripple-random', metavar='REFRESH_RATE', type=float)
 
 args  = parser.parse_args()
 
-device_manager = razer.client.DeviceManager()
+device_manager = openrazer.client.DeviceManager()
 keyboard = None
 
 for device in device_manager.devices:

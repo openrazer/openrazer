@@ -1,8 +1,8 @@
 import json
 import dbus as _dbus
-from razer.client.fx import RazerFX as _RazerFX
+from openrazer.client.fx import RazerFX as _RazerFX
 from xml.etree import ElementTree as _ET
-from razer.client.macro import RazerMacro as _RazerMacro
+from openrazer.client.macro import RazerMacro as _RazerMacro
 
 
 class RazerDevice(object):

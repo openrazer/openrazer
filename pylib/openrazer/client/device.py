@@ -1,8 +1,8 @@
 import dbus as _dbus
-from razer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFactory as __BaseDeviceFactory
-from razer.client.devices.firefly import RazerFirefly as __RazerFirefly
-from razer.client.devices.keyboard import RazerKeyboardFactory as __RazerKeyboardFactory
-from razer.client.devices.mice import RazerMouse as __RazerMouse
+from openrazer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFactory as __BaseDeviceFactory
+from openrazer.client.devices.firefly import RazerFirefly as __RazerFirefly
+from openrazer.client.devices.keyboard import RazerKeyboardFactory as __RazerKeyboardFactory
+from openrazer.client.devices.mice import RazerMouse as __RazerMouse
 
 
 DEVICE_MAP ={
@@ -29,7 +29,7 @@ class RazerDeviceFactory(__BaseDeviceFactory):
         if there is only one model (like Firefly) or a factory for the keyboards (so we can differentiate between
         old blackwidows and chromas). If the device is not in the device mapping then the factory will default
         to a raw RazerDevice.
-        
+
         :param serial: Device serial
         :type serial: str
 

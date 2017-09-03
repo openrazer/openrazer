@@ -77,7 +77,7 @@ if [ ! -z "$(echo $daemon_output | grep 'PermissionError: [Errno 13] Permission 
 fi
 
 # Step 5 - check if the pylib sees the device(s)
-pylib_len=$(python -c "from razer.client import DeviceManager; a = DeviceManager(); print(len(a.devices))")
+pylib_len=$(python -c "from openrazer.client import DeviceManager; a = DeviceManager(); print(len(a.devices))")
 if [ "$pylib_len" == 0 ]; then
   echo "FATAL: The device was not recognized by the python library. Exiting."
   exit 1

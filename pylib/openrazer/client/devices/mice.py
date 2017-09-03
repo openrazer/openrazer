@@ -1,8 +1,8 @@
 import dbus as _dbus
 
-from razer.client.devices import RazerDevice as __RazerDevice
-from razer.client.macro import RazerMacro as _RazerMacro
-from razer.client import constants as _c
+from openrazer.client.devices import RazerDevice as __RazerDevice
+from openrazer.client.macro import RazerMacro as _RazerMacro
+from openrazer.client import constants as _c
 
 
 class RazerMouse(__RazerDevice):

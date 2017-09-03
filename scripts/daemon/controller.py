@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-import razer.client
+import openrazer.client
 
 import sys
 
@@ -63,21 +63,21 @@ def _get_devices() -> list:
     :return: List of devices ordered by serial
     :rtype: list
     """
-    device_manager = razer.client.DeviceManager()
+    device_manager = openrazer.client.DeviceManager()
 
     devices = sorted(device_manager.devices, key=lambda x: (str(x.serial), str(x.type)))
 
     return devices
 
 def _get_devices_by_serial() -> dict:
-    device_manager = razer.client.DeviceManager()
+    device_manager = openrazer.client.DeviceManager()
 
     devices = {device.serial: device for device in device_manager.devices}
 
     return devices
 
 def _get_devices_by_type() -> dict:
-    device_manager = razer.client.DeviceManager()
+    device_manager = openrazer.client.DeviceManager()
 
     devices = {}
 

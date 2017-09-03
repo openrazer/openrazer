@@ -1,9 +1,9 @@
 import sys
 import time
 
-import razer.client
+import openrazer.client
 
-device_manager = razer.client.DeviceManager()
+device_manager = openrazer.client.DeviceManager()
 keyboard = None
 
 for device in device_manager.devices:
