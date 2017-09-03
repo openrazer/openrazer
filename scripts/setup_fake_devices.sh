@@ -34,7 +34,7 @@ done
 options=$(zenity --list --multiple --checklist \
         --print-column=2 --separator=" " \
         --height=250 --width=400 \
-        --title="Create Fake Razer Device" \
+        --title="Create Fake OpenRazer Device" \
         --text="Select the devices to simulate." \
         --column "" --column "Device" \
          $devices)
@@ -49,8 +49,9 @@ mkdir $config_dir/{,data,logs}
 mkdir $test_dir
 $terminal_cmd "$whereami/create_fake_device.py" --dest "$test_dir" $options &
 
-# Kill razer-daemon if it is running already.
-pkill -e razer-daemon
+# Kill openrazer-daemon if it is running already.
+pkill -e openrazer-daemon
 
 # Start the daemon in a new terminal window.
-$terminal_cmd razer-daemon --verbose -F --run-dir "$config_dir/data" --log-dir "$config_dir/logs" --test-dir "$test_dir"
+$terminal_cmd openrazer-daemon --verbose -F --run-dir "$config_dir/data" --log-dir "$config_dir/logs" --test-dir "$test_dir"
+

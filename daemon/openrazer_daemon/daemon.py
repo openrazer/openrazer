@@ -97,10 +97,10 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
     # Change working directory
     if run_dir is not None and os.path.exists(run_dir) and os.path.isdir(run_dir):
         os.chdir(run_dir)
-        pid_file = os.path.join(run_dir, "razer-daemon.pid")
+        pid_file = os.path.join(run_dir, "openrazer-daemon.pid")
     else:
         run_dir = tempfile.mkdtemp(prefix='tmp_', suffix='_openrazer_daemon')
-        pid_file = os.path.join(run_dir, "razer-daemon.pid")
+        pid_file = os.path.join(run_dir, "openrazer-daemon.pid")
         os.chdir(run_dir)
 
     # Write PID file
@@ -143,7 +143,7 @@ class RazerDaemon(DBusService):
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
 
         # Check if process exists and is not running as current user
-        proc = subprocess.Popen(['pgrep', 'razer-daemon'], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE)
+        proc = subprocess.Popen(['pgrep', 'openrazer-daemon'], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE)
         stdout = proc.communicate()[0]
 
         # If 0 there are other services running
@@ -163,7 +163,7 @@ class RazerDaemon(DBusService):
                             print("Daemon already exists. Please stop that one.", file=sys.stderr)
                             sys.exit(-1)
 
-        setproctitle.setproctitle('razer-daemon')
+        setproctitle.setproctitle('openrazer-daemon')
 
         # Expanding ~ as python doesnt do it by default, also creating dirs if needed
         if log_dir is not None:

@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name=Razer Service
+Name=OpenRazer Service
 Comment=DBus daemon to abstract away from the driver and to provide more logic and integration with userspace stuffs.
 Keywords=razer;keyboard;chroma;
 NoDisplay=false
-Exec=/usr/bin/razer-daemon --foreground --verbose --run-dir ~/.razer-service/data --log-dir ~/.razer-service/logs --pid-file ~/.razer-service/daemon.pid
+Exec=/usr/bin/openrazer-daemon --foreground --verbose
 Icon=/usr/share/pixmaps/python3.xpm
 Terminal=false
 Type=Application

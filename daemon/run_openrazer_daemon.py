@@ -47,19 +47,19 @@ def parse_args():
 
 def stop_daemon():
     try:
-        pid = int(check_output(["pidof", "-s", "razer-daemon"]))
-        print("Stopping razer-daemon... (PID {0})".format(str(pid)))
+        pid = int(check_output(["pidof", "-s", "openrazer-daemon"]))
+        print("Stopping openrazer-daemon... (PID {0})".format(str(pid)))
         os.kill(pid, signal.SIGTERM)
         sleep(3)
 
         # Give it time to stop
-        pid = check_output(["pidof", "-s", "razer-daemon"])
+        pid = check_output(["pidof", "-s", "openrazer-daemon"])
         if len(pid) > 0:
             os.kill(int(pid), signal.SIGKILL)
             sleep(3)
 
     except Exception:
-        print("No razer-daemon currently running.")
+        print("No openrazer-daemon currently running.")
 
 
 def run():
