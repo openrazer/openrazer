@@ -1,14 +1,14 @@
 import sys
 import argparse
 
-import openopenrazer.client
+import openrazer.client
 
 choices = ('get', 'on', 'off', 'flashing', 'static', 'effect_state')
 parser = argparse.ArgumentParser()
 parser.add_argument('action', choices=choices)
 args  = parser.parse_args()
 
-device_manager = openopenrazer.client.DeviceManager()
+device_manager = openrazer.client.DeviceManager()
 keyboard = None
 
 for device in device_manager.devices:
