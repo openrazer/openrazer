@@ -89,7 +89,7 @@ Long description
 %install
 rm -rf $RPM_BUILD_ROOT
 # setup_dkms & udev_install -> razer-kernel-modules-dkms
-# daemon_install -> razer_daemon
+# daemon_install -> openrazer_daemon
 # python_library_install -> python3-razer
 make DESTDIR=$RPM_BUILD_ROOT setup_dkms udev_install daemon_install python_library_install
 
@@ -145,8 +145,8 @@ fi
 %files -n razer-daemon
 %{_sysconfdir}/xdg/autostart/razer-daemon.desktop
 %{_bindir}/razer-daemon
-%{python3_sitelib}/razer_daemon/
-%{python3_sitelib}/razer_daemon-*.egg-info/
+%{python3_sitelib}/openrazer_daemon/
+%{python3_sitelib}/openrazer_daemon-*.egg-info/
 %{_datadir}/razer-daemon/
 %{_mandir}/man5/razer.conf.5.gz
 %{_mandir}/man8/razer-daemon.8.gz

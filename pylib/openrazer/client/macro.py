@@ -2,8 +2,8 @@ import json as _json
 
 import dbus as _dbus
 
-import razer_daemon.misc.macro as _daemon_macro
-from razer_daemon import keyboard
+import openrazer_daemon.misc.macro as _daemon_macro
+from openrazer_daemon import keyboard
 
 
 class RazerMacro(object):

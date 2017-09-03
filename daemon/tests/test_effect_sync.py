@@ -1,7 +1,7 @@
 import unittest
 import unittest.mock
 
-import razer_daemon.misc.effect_sync
+import openrazer_daemon.misc.effect_sync
 
 # msg type = effect, arg = orig_device, arg = effect_name, arg.. = arg..
 MSG1 = ('effect', None, 'setBrightness', 255)
@@ -57,10 +57,10 @@ class DummyHardwareBlackWidowChroma(DummyHardwareDevice):
         self.effect_call = ('setBreathSingle', red, green, blue)
 
 class EffectSyncTest(unittest.TestCase):
-    @unittest.mock.patch('razer_daemon.misc.effect_sync.logging.getLogger', logger_mock)
+    @unittest.mock.patch('openrazer_daemon.misc.effect_sync.logging.getLogger', logger_mock)
     def setUp(self):
         self.hardware_device = DummyHardwareDevice()
-        self.effect_sync = razer_daemon.misc.effect_sync.EffectSync(self.hardware_device, 1)
+        self.effect_sync = openrazer_daemon.misc.effect_sync.EffectSync(self.hardware_device, 1)
 
     def test_observers(self):
 

@@ -1,6 +1,6 @@
 import unittest
 
-import razer_daemon.device
+import openrazer_daemon.device
 
 DEVICE1_SERIAL = 'XX000000'
 DEVICE1_ID = '0000:0000:0000.0000'
@@ -41,7 +41,7 @@ class DeviceTest(unittest.TestCase):
 
     def test_device_properties(self):
         dbus_object = DummyDBusObject()
-        device_object = razer_daemon.device.Device(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+        device_object = openrazer_daemon.device.Device(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
 
         self.assertEqual(device_object.device_id, DEVICE1_ID)
         self.assertEqual(device_object.serial, DEVICE1_SERIAL)
@@ -51,7 +51,7 @@ class DeviceTest(unittest.TestCase):
         dbus_object = DummyDBusObject()
         parent_object = DummyParentObject()
 
-        device_object = razer_daemon.device.Device(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+        device_object = openrazer_daemon.device.Device(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
         device_object.register_parent(parent_object)
 
         self.assertEqual(device_object._parent, parent_object)
@@ -61,7 +61,7 @@ class DeviceTest(unittest.TestCase):
 
         dbus_object = DummyDBusObject()
 
-        device_object = razer_daemon.device.Device(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+        device_object = openrazer_daemon.device.Device(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
         device_object.notify_child(msg)
 
         self.assertEqual(dbus_object.notify_msg, msg)
@@ -72,7 +72,7 @@ class DeviceTest(unittest.TestCase):
         dbus_object = DummyDBusObject()
         parent_object = DummyParentObject()
 
-        device_object = razer_daemon.device.Device(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+        device_object = openrazer_daemon.device.Device(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
         device_object.register_parent(parent_object)
 
         device_object.notify_parent(msg)
@@ -82,7 +82,7 @@ class DeviceTest(unittest.TestCase):
 
 class DeviceCollectionTest(unittest.TestCase):
     def setUp(self):
-        self.device_collection = razer_daemon.device.DeviceCollection()
+        self.device_collection = openrazer_daemon.device.DeviceCollection()
 
     def test_add(self):
         dbus_object = DummyDBusObject()

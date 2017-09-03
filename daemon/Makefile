@@ -10,7 +10,7 @@ service:
 
 install-resources: service
 	@install -m 644 -D -v resources/razer.conf $(DESTDIR)$(PREFIX)/share/openrazer/razer.conf.example
-	@install -m 755 -D -v run_razer_daemon.py $(DESTDIR)$(PREFIX)/bin/razer-daemon
+	@install -m 755 -D -v run_openrazer_daemon.py $(DESTDIR)$(PREFIX)/bin/razer-daemon
 	@install -m 644 -D -v org.razer.service $(DESTDIR)$(PREFIX)/share/dbus-1/services/org.razer.service
 	@install -m 644 -D -v razer-daemon.service $(DESTDIR)$(PREFIX)/lib/systemd/user/razer-daemon.service
 
@@ -31,7 +31,7 @@ manpages_uninstall:
 	@rm -f $(DESTDIR)$(PREFIX)/share/man/man8/razer-daemon.8.gz
 
 uninstall: manpages_uninstall
-	$(eval DAEMONPATH := $(shell find $(DESTDIR)$(PREFIX)/lib/python3* -maxdepth 2 -name "razer_daemon"))
+	$(eval DAEMONPATH := $(shell find $(DESTDIR)$(PREFIX)/lib/python3* -maxdepth 2 -name "openrazer_daemon"))
 	$(eval EGGPATH := $(shell readlink -f $(DAEMONPATH)-*.egg-info/)) # shows an error when it's not already installed (maybe use some if condition)
 	@rm -rf -v $(DAEMONPATH)
 	@rm -rf -v $(EGGPATH)

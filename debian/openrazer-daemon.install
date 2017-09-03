@@ -1,4 +1,4 @@
-usr/lib/python3/dist-packages/razer_daemon
+usr/lib/python3/dist-packages/openrazer_daemon
 usr/bin/razer-daemon
 usr/share/openrazer
 usr/lib/systemd/user

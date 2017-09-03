@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 import struct
-from razer_daemon.keyboard import EVENT_MAPPING, TARTARUS_EVENT_MAPPING
+from openrazer_daemon.keyboard import EVENT_MAPPING, TARTARUS_EVENT_MAPPING
 
 EVENT_FORMAT = '@llHHI'
 EVENT_SIZE = struct.calcsize(EVENT_FORMAT)
