@@ -6,7 +6,7 @@
 Name: razer-drivers
 Version: 1.1.16
 Release: 1%{?dist}
-Summary: Razer drivers for Linux
+Summary: OpenRazer drivers for Linux
 
 License: GPL-2.0
 URL: https://github.com/openrazer/openrazer
@@ -23,7 +23,7 @@ Razer Driver DKMS package
 
 
 %package -n razer-kernel-modules-dkms
-Summary: Razer Driver DKMS package
+Summary: OpenRazer Driver DKMS package
 Group: System Environment/Kernel
 Requires: dkms
 Requires: udev
@@ -39,7 +39,7 @@ Long description
 
 
 %package -n razer-daemon
-Summary: Razer Service package
+Summary: OpenRazer Service package
 Group: System Environment/Daemons
 BuildRequires: python3-devel
 BuildRequires: python3-setuptools
@@ -61,7 +61,7 @@ Long description
 
 
 %package -n python3-razer
-Summary: Razer Python library
+Summary: OpenRazer Python library
 Group: System Environment/Libraries
 BuildRequires: python3-devel
 BuildRequires: python3-setuptools
@@ -143,14 +143,14 @@ fi
 %{_usrsrc}/%{dkms_name}-%{dkms_version}/
 
 %files -n razer-daemon
-%{_sysconfdir}/xdg/autostart/razer-daemon.desktop
+%{_sysconfdir}/xdg/autostart/openrazer-daemon.desktop
 %{_bindir}/razer-daemon
 %{python3_sitelib}/openrazer_daemon/
 %{python3_sitelib}/openrazer_daemon-*.egg-info/
-%{_datadir}/razer-daemon/
+%{_datadir}/openrazer-daemon/
 %{_mandir}/man5/razer.conf.5.gz
-%{_mandir}/man8/razer-daemon.8.gz
+%{_mandir}/man8/openrazer-daemon.8.gz
 
 %files -n python3-razer
-%{python3_sitelib}/razer/
-%{python3_sitelib}/razer-*.egg-info/
+%{python3_sitelib}/openrazer/
+%{python3_sitelib}/openrazer-*.egg-info/
