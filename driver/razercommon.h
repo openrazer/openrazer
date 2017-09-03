@@ -14,7 +14,7 @@
 
 #include <linux/usb/input.h>
 
-#define VERSION "1.1.16"
+#define VERSION "2.0.0"
 
 
 // Macro to create device files
