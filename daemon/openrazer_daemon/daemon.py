@@ -46,9 +46,15 @@ class RazerDaemon(DBusService):
 
     BUS_NAME = 'org.razer'
 
-    def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
+    def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None, bustype='session'):
+
+        self._initialized = False
 
         setproctitle.setproctitle('openrazer-daemon')
+
+        # We override this now so anything created by this class uses the
+        # same bus type
+        DBusService.BUS_TYPE = bustype
 
         # Expanding ~ as python doesnt do it by default, also creating dirs if needed
         try:
@@ -88,7 +94,11 @@ class RazerDaemon(DBusService):
         # Setup DBus to use gobject main loop
         dbus.mainloop.glib.threads_init()
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-        DBusService.__init__(self, self.BUS_NAME, '/org/razer')
+        try:
+            DBusService.__init__(self, self.BUS_NAME, '/org/razer')
+        except dbus.exceptions.DBusException as e:
+            self.logger.critical("Failed to start DBus service: {}".format(e.get_dbus_message()))
+            return
 
         self._init_signals()
         self._main_loop = GObject.MainLoop()
@@ -125,6 +135,8 @@ class RazerDaemon(DBusService):
         # TODO remove
         self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
         # TODO ======
+
+        self._initialized = True
 
     @dbus.service.signal('razer.devices')
     def device_removed(self):
@@ -490,6 +502,9 @@ class RazerDaemon(DBusService):
         """
         Run the daemon
         """
+        if not self._initialized:
+            return
+
         self.logger.info('Serving DBus')
 
         # Start listening for device changes
