@@ -27,6 +27,17 @@ Description: OpenRazer Peripheral Drivers
  A keyboard driver, a mouse driver and a mousemat driver
  for Razer devices, plus support for Razer Blade devices.
 
+Package: openrazer
+Version: 1.0
+Depends: openrazer-kernel-modules-dkms,
+         openrazer-daemon,
+         python3-openrazer,
+         openrazer-doc
+Architecture: all
+Description: Metapackage for OpenRazer components
+ Package that depends on the OpenRazer driver and userspace
+ daemon, plus a Python library and documentation.
+
 Package: openrazer-daemon
 Section: misc
 Architecture: amd64 i386
@@ -62,7 +73,7 @@ Provides: python3-razer
 Conflicts: python3-razer
 Replaces: python3-razer
 Description: OpenRazer Python Library
- Contains a client for interacting with the OpenRazer daemon.
+ Contains a library for interacting with the OpenRazer daemon.
 
 Package: openrazer-doc
 Section: doc
@@ -72,3 +83,4 @@ Conflicts: razer-doc
 Replaces: razer-doc
 Description: Documentation and examples for the OpenRazer Tools
  Scripts on how to interact with the daemon and the driver.
+
