@@ -316,8 +316,11 @@ class RazerDaemon(DBusService):
         self._udev_observer = MonitorObserver(udev_monitor, callback=self._udev_input_event, name='device-monitor')
 
     def _init_screensaver_monitor(self):
-        self._screensaver_monitor = ScreensaverMonitor(self)
-        self._screensaver_monitor.monitoring = self._config.getboolean('Startup', 'devices_off_on_screensaver')
+        try:
+            self._screensaver_monitor = ScreensaverMonitor(self)
+            self._screensaver_monitor.monitoring = self._config.getboolean('Startup', 'devices_off_on_screensaver')
+        except dbus.exceptions.DBusException as e:
+            self.logger.error("Failed to init ScreensaverMonitor: {}".format(e))
 
     def _init_signals(self):
         """
