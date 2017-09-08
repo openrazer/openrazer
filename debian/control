@@ -27,7 +27,7 @@ Description: OpenRazer Peripheral Drivers
  A keyboard driver, a mouse driver and a mousemat driver
  for Razer devices, plus support for Razer Blade devices.
 
-Package: openrazer
+Package: openrazer-meta
 Version: 1.0
 Depends: openrazer-kernel-modules-dkms,
          openrazer-daemon,
