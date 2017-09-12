@@ -65,7 +65,6 @@ def stop_daemon():
 def run():
     args = parse_args()
 
-    # TODO Fix up run_dir (especially in macros branch as things will break)
     try:
         os.makedirs(RAZER_CONFIG_HOME, exist_ok=True)
         os.makedirs(RAZER_DATA_HOME, exist_ok=True)

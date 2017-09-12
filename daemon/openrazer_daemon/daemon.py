@@ -99,13 +99,14 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
         os.dup2(stdout.fileno(), sys.stderr.fileno())
 
     # Change working directory
-    if run_dir is not None and os.path.isdir(run_dir):
-        os.chdir(run_dir)
-        pid_file = os.path.join(run_dir, "openrazer-daemon.pid")
+    if run_dir is not None:
+        if not os.path.exists(run_dir):
+            os.makedirs(run_dir, exist_ok=True)
     else:
         run_dir = tempfile.mkdtemp(prefix='tmp_', suffix='_openrazer_daemon')
-        pid_file = os.path.join(run_dir, "openrazer-daemon.pid")
-        os.chdir(run_dir)
+
+    pid_file = os.path.join(run_dir, "openrazer-daemon.pid")
+    os.chdir(run_dir)
 
     # Write PID file
     try:
