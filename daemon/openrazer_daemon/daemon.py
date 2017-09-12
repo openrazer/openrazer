@@ -188,14 +188,9 @@ class RazerDaemon(DBusService):
         self.logger.info("Initialising Daemon (v%s). Pid: %d", __version__, os.getpid())
 
         # Check for plugdev group
-        try:
-            plugdev_group = grp.getgrnam('plugdev')
-
-            if getpass.getuser() not in plugdev_group.gr_mem:
-                self.logger.critical("User is not a member of the plugdev group")
-                sys.exit(1)
-        except KeyError:
-            self.logger.warning("Could not check if user is a member of the plugdev group. Continuing...")
+        if not self._check_plugdev_group():
+            self.logger.critical("User is not a member of the plugdev group")
+            sys.exit(1)
 
         self._screensaver_monitor = ScreensaverMonitor(self)
         self._screensaver_monitor.monitoring = self._config.getboolean('Startup', 'devices_off_on_screensaver')
@@ -297,6 +292,21 @@ class RazerDaemon(DBusService):
             logger.addHandler(file_logger)
 
         return logger
+
+    def _check_plugdev_group(self):
+        """
+        Check if the user is a member of the plugdev group.
+        :rtype: bool
+        """
+        try:
+            plugdev_group = grp.getgrnam('plugdev')
+
+            if getpass.getuser() not in plugdev_group.gr_mem:
+                return False
+        except KeyError:
+            self.logger.warning("Could not check if user is a member of the plugdev group. Continuing...")
+
+        return True
 
     def _init_signals(self):
         """
