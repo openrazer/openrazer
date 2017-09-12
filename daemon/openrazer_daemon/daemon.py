@@ -182,10 +182,7 @@ class RazerDaemon(DBusService):
         self._main_loop = GObject.MainLoop()
 
         # Listen for input events from udev
-        self._udev_context = Context()
-        udev_monitor = Monitor.from_netlink(self._udev_context)
-        udev_monitor.filter_by(subsystem='hid')
-        self._udev_observer = MonitorObserver(udev_monitor, callback=self._udev_input_event, name='device-monitor')
+        self._init_udev_monitor()
 
         # Load Classes
         self._device_classes = openrazer_daemon.hardware.get_device_classes()
@@ -313,6 +310,12 @@ class RazerDaemon(DBusService):
             pass
 
         return False
+
+    def _init_udev_monitor(self):
+        self._udev_context = Context()
+        udev_monitor = Monitor.from_netlink(self._udev_context)
+        udev_monitor.filter_by(subsystem='hid')
+        self._udev_observer = MonitorObserver(udev_monitor, callback=self._udev_input_event, name='device-monitor')
 
     def _init_signals(self):
         """
