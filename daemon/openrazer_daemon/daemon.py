@@ -307,12 +307,12 @@ class RazerDaemon(DBusService):
         try:
             plugdev_group = grp.getgrnam('plugdev')
 
-            if user not in plugdev_group.gr_mem:
-                return False
+            if user in plugdev_group.gr_mem:
+                return True
         except KeyError:
-            self.logger.warning("Could not check if user is a member of the plugdev group. Continuing...")
+            pass
 
-        return True
+        return False
 
     def _init_signals(self):
         """
