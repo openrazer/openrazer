@@ -16,7 +16,7 @@ class DeviceManager(object):
     """
     def __init__(self):
         # Load up the DBus
-        session_bus = _dbus.SessionBus()
+        session_bus = _dbus.SystemBus()
         try:
             self._dbus = session_bus.get_object("org.razer", "/org/razer")
         except _dbus.DBusException:

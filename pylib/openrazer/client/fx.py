@@ -28,7 +28,7 @@ class BaseRazerFX(object):
         self._capabilities = capabilities
 
         if daemon_dbus is None:
-            session_bus = _dbus.SessionBus()
+            session_bus = _dbus.SystemBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
         self._dbus = daemon_dbus
 
@@ -558,7 +558,7 @@ class RazerAdvancedFX(BaseRazerFX):
             raise ValueError("Matrix dimenions cannot contain -1")
 
         if daemon_dbus is None:
-            session_bus = _dbus.SessionBus()
+            session_bus = _dbus.SystemBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
 
         self._matrix_dims = matrix_dims

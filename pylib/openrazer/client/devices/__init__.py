@@ -15,7 +15,7 @@ class RazerDevice(object):
     def __init__(self, serial, vid_pid=None, daemon_dbus=None):
         # Load up the DBus
         if daemon_dbus is None:
-            session_bus = _dbus.SessionBus()
+            session_bus = _dbus.SystemBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
 
         self._dbus = daemon_dbus
