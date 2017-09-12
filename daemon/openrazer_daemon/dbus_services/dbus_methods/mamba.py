@@ -156,7 +156,7 @@ def get_dpi_xy(self):
 
 @endpoint('razer.device.dpi', 'maxDPI', out_sig='i')
 def max_dpi(self):
-    self.logger.debug("DBus call get_dpi_both")
+    self.logger.debug("DBus call get_dpi_max")
 
     if hasattr(self, 'DPI_MAX'):
         return self.DPI_MAX
