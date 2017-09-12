@@ -47,6 +47,9 @@ def get_logo_active(self):
     """
     self.logger.debug("DBus call get_logo_active")
 
+    if self.USE_HIDRAW:
+        return self.get_logo_active()
+
     driver_path = self.get_driver_path('logo_led_state')
 
     with open(driver_path, 'r') as driver_file:
@@ -63,6 +66,9 @@ def set_logo_active(self, active):
     :type active: bool
     """
     self.logger.debug("DBus call set_logo_active")
+
+    if self.USE_HIDRAW:
+        return self.set_logo_active(active)
 
     driver_path = self.get_driver_path('logo_led_state')
 
@@ -257,6 +263,9 @@ def get_scroll_active(self):
     """
     self.logger.debug("DBus call get_scroll_active")
 
+    if self.USE_HIDRAW:
+        return self.get_scroll_active()
+
     driver_path = self.get_driver_path('scroll_led_state')
 
     with open(driver_path, 'r') as driver_file:
@@ -273,6 +282,9 @@ def set_scroll_active(self, active):
     :type active: bool
     """
     self.logger.debug("DBus call set_scroll_active")
+
+    if self.USE_HIDRAW:
+        return self.set_scroll_active(active)
 
     driver_path = self.get_driver_path('scroll_led_state')
 

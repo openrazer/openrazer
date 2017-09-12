@@ -127,6 +127,9 @@ def set_dpi_xy(self, dpi_x, dpi_y):
     """
     self.logger.debug("DBus call set_dpi_both")
 
+    if self.USE_HIDRAW:
+        return self.set_dpi_xy(dpi_x, dpi_y)
+
     driver_path = self.get_driver_path('dpi')
 
     dpi_bytes = struct.pack('>HH', dpi_x, dpi_y)
@@ -144,6 +147,9 @@ def get_dpi_xy(self):
     :rtype: list of int
     """
     self.logger.debug("DBus call get_dpi_both")
+
+    if self.USE_HIDRAW:
+        return self.get_dpi_xy()
 
     driver_path = self.get_driver_path('dpi')
 
@@ -177,6 +183,9 @@ def set_poll_rate(self, rate):
     self.logger.debug("DBus call set_poll_rate")
 
     if rate in (1000, 500, 125):
+        if self.USE_HIDRAW:
+            return self.set_poll_rate(rate)
+
         driver_path = self.get_driver_path('poll_rate')
 
         with open(driver_path, 'w') as driver_file:
@@ -194,6 +203,9 @@ def get_poll_rate(self):
     :rtype: int
     """
     self.logger.debug("DBus call get_poll_rate")
+
+    if self.USE_HIDRAW:
+        return self.get_poll_rate()
 
     driver_path = self.get_driver_path('poll_rate')
 

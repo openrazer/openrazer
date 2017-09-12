@@ -2,7 +2,7 @@
 Mouse class
 """
 import re
-from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice
+from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice, RazerReport as _RazerReport
 from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 # TODO replace with plain import
 from openrazer_daemon.dbus_services.dbus_methods.deathadder_chroma import get_logo_brightness as _da_get_logo_brightness, set_logo_brightness as _da_set_logo_brightness, \
@@ -145,12 +145,19 @@ class RazerImperator(__RazerDevice):
 
     USE_HIDRAW = True
 
+    DEVICE_NAME = "Razer Imperator 2012"
+
     def _resume_device(self):
         self.logger.debug("Imperator doesnt have suspend/resume")
 
     def _suspend_device(self):
         self.logger.debug("Imperator doesnt have suspend/resume")
 
+    def get_dpi_xy(self):
+        return self.get_misc_dpi_xy(_RazerReport.VARSTORE)
+
+    def set_dpi_xy(self, dpi_x, dpi_y):
+        return self.set_misc_dpi_xy(_RazerReport.VARSTORE, dpi_x, dpi_y)
 
 
 class RazerOuroboros(__RazerDevice):
@@ -836,6 +843,12 @@ class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
 
     def get_hidraw_serial(self):
         return ''
+
+    def get_hidraw_device_mode(self):
+        return '0:0'
+
+    def set_hidraw_device_mode(self, mode_id, param):
+        pass
 
     def _suspend_device(self):
         """

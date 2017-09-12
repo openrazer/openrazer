@@ -21,6 +21,27 @@ class RazerReport(object):
     RAZER_CMD_TIMEOUT       = 0x04
     RAZER_CMD_NOT_SUPPORTED = 0x05
 
+    # LED STORAGE Options
+    NOSTORE                 = 0x00
+    VARSTORE                = 0x01
+
+    # LED definitions
+    SCROLL_WHEEL_LED        = 0x01
+    BATTERY_LED             = 0x03
+    LOGO_LED                = 0x04
+    BACKLIGHT_LED           = 0x05
+    MACRO_LED               = 0x07
+    GAME_LED                = 0x08
+    RED_PROFILE_LED         = 0x0C
+    GREEN_PROFILE_LED       = 0x0D
+    BLUE_PROFILE_LED        = 0x0E
+
+    # LED Effect definitions
+    LED_STATIC              = 0x00
+    LED_BLINKING            = 0x01
+    LED_PULSATING           = 0x02
+    LED_SPECTRUM_CYCLING    = 0x04
+
     def __init__(self, bytes = None):
         if bytes is not None:
             self.bytes = bytes
@@ -392,6 +413,11 @@ class RazerDevice(DBusService):
 
         return self._serial
 
+    def get_hidraw_device_mode(self):
+        request = self.razer_get_report(0x00, 0x84, 0x02)
+        response = self.razer_send_payload(request)
+        return "{}:{}".format(response.arguments[0], response.arguments[1])
+
     def get_device_mode(self):
         """
         Get device mode
@@ -399,6 +425,8 @@ class RazerDevice(DBusService):
         :return: String of device mode and arg seperated by colon, e.g. 0:0 or 3:0
         :rtype: str
         """
+        if self.USE_HIDRAW:
+            return self.get_hidraw_device_mode()
         device_mode_path = os.path.join(self._device_path, 'device_mode')
         with open(device_mode_path, 'r') as mode_file:
             count = 0
@@ -413,6 +441,19 @@ class RazerDevice(DBusService):
 
             return mode
 
+    def set_hidraw_device_mode(self, mode_id, param):
+        request = self.razer_get_report(0x00, 0x04, 0x02)
+
+        if mode_id not in (0, 3):
+            mode_id = 0
+        if param != 0:
+            param = 0
+
+        request.arguments[0] = mode_id;
+        request.arguments[1] = param;
+
+        response = self.razer_send_payload(request)
+
     def set_device_mode(self, mode_id, param):
         """
         Set device mode
@@ -423,6 +464,8 @@ class RazerDevice(DBusService):
         :param param: Device mode parameter
         :type param: int
         """
+        if self.USE_HIDRAW:
+            return self.set_hidraw_device_mode(mode_id, param)
         device_mode_path = os.path.join(self._device_path, 'device_mode')
         with open(device_mode_path, 'wb') as mode_file:
 
@@ -433,6 +476,78 @@ class RazerDevice(DBusService):
                 param = 0
 
             mode_file.write(bytes([mode_id, param]))
+
+    def get_firmware_version(self):
+        request = self.razer_get_report(0x00, 0x81, 0x02)
+        response = self.razer_send_payload(request)
+        return "v{}.{}".format(response.arguments[0], response.arguments[1])
+
+    def get_led_active(self, led):
+        request = self.razer_get_report(0x03, 0x80, 0x03)
+        request.arguments = [0x01, led]
+        request.transaction_id = 0x3F
+        response = self.razer_send_payload(request)
+        return response.arguments[2]
+
+    def set_led_active(self, led, enabled):
+        request = self.razer_get_report(0x03, 0x00, 0x03)
+        led_state = 0x01 if enabled else 0x00
+        request.arguments = [0x01, led, led_state]
+        request.transaction_id = 0x3F
+        self.razer_send_payload(request)
+
+    def get_logo_active(self):
+        return self.get_led_active(RazerReport.LOGO_LED) == 1
+
+    def set_logo_active(self, enabled):
+        return self.set_led_active(RazerReport.LOGO_LED, enabled)
+
+    def get_scroll_active(self):
+        return self.get_led_active(RazerReport.SCROLL_WHEEL_LED) == 1
+
+    def set_scroll_active(self, enabled):
+        self.set_led_active(RazerReport.SCROLL_WHEEL_LED, enabled)
+
+    def set_dpi_xy(self, dpi_x, dpi_y):
+        return self.set_misc_dpi_xy(RazerReport.NOSTORE, dpi_x, dpi_y)
+
+    def set_misc_dpi_xy(self, var_store, dpi_x, dpi_y):
+        request = self.razer_get_report(0x04, 0x05, 0x07)
+
+        # Keep the DPI within bounds
+        dpi_x = max(min(dpi_x, 16000), 128);
+        dpi_y = max(min(dpi_y, 16000), 128);
+
+        request.arguments = [var_store,
+                             (dpi_x >> 8) & 0x00FF,
+                              dpi_x & 0x00FF,
+                             (dpi_y >> 8) & 0x00FF,
+                              dpi_y & 0x00FF]
+        self.razer_send_payload(request)
+
+    def get_dpi_xy(self):
+        return self.get_misc_dpi_xy(RazerReport.NOSTORE)
+
+    def get_misc_dpi_xy(self, var_store):
+        request = self.razer_get_report(0x04, 0x85, 0x07)
+        request.arguments = [var_store]
+        response = self.razer_send_payload(request)
+
+        dpi_x = (response.arguments[1] << 8) | (response.arguments[2] & 0xFF)
+        dpi_y = (response.arguments[3] << 8) | (response.arguments[4] & 0xFF)
+
+        return [dpi_x, dpi_y]
+
+    def set_poll_rate(self, rate):
+        request = self.razer_get_report(0x00, 0x05, 0x01)
+        request.arguments = [int(1000 / rate)]
+        self.razer_send_payload(request)
+
+    def get_poll_rate(self):
+        request = self.razer_get_report(0x00, 0x85, 0x01)
+        response = self.razer_send_payload(request)
+        rate = response.arguments[0]
+        return 1000 / rate if rate > 0 else 0
 
     def get_vid_pid(self):
         """
