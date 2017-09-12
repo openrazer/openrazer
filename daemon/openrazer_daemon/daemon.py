@@ -58,6 +58,10 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
     :type test_dir: str or None
     """
 
+    if run_dir is not None and os.path.exists(run_dir) and not os.path.isdir(run_dir):
+        print("Invalid run_dir - file exists but is not a directory", file=sys.stderr)
+        sys.exit(1)
+
     if not foreground:
         # Attempt to double fork
         try:
