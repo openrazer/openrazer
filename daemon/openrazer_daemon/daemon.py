@@ -95,7 +95,7 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
         os.dup2(stdout.fileno(), sys.stderr.fileno())
 
     # Change working directory
-    if run_dir is not None and os.path.exists(run_dir) and os.path.isdir(run_dir):
+    if run_dir is not None and os.path.isdir(run_dir):
         os.chdir(run_dir)
         pid_file = os.path.join(run_dir, "openrazer-daemon.pid")
     else:
