@@ -162,6 +162,12 @@ class RazerDaemon(DBusService):
         self._config = configparser.ConfigParser()
         self.read_config(config_file)
 
+        # Logging
+        log_level = logging.INFO
+        if verbose or self._config.getboolean('General', 'verbose_logging'):
+            log_level = logging.DEBUG
+        self.logger = self._create_logger(log_dir, log_level, console_log)
+
         # Setup DBus to use gobject main loop
         dbus.mainloop.glib.threads_init()
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
@@ -175,12 +181,6 @@ class RazerDaemon(DBusService):
         udev_monitor = Monitor.from_netlink(self._udev_context)
         udev_monitor.filter_by(subsystem='hid')
         self._udev_observer = MonitorObserver(udev_monitor, callback=self._udev_input_event, name='device-monitor')
-
-        # Logging
-        log_level = logging.INFO
-        if verbose or self._config.getboolean('General', 'verbose_logging'):
-            log_level = logging.DEBUG
-        self.logger = self._create_logger(log_dir, log_level, console_log)
 
         # Load Classes
         self._device_classes = openrazer_daemon.hardware.get_device_classes()
