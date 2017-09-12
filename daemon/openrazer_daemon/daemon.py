@@ -295,13 +295,19 @@ class RazerDaemon(DBusService):
 
     def _check_plugdev_group(self):
         """
-        Check if the user is a member of the plugdev group.
+        Check if the user is a member of the plugdev group. For the root
+        user, this always returns True
+
         :rtype: bool
         """
+        user = getpass.getuser()
+        if user == 'root':
+            return True
+
         try:
             plugdev_group = grp.getgrnam('plugdev')
 
-            if getpass.getuser() not in plugdev_group.gr_mem:
+            if user not in plugdev_group.gr_mem:
                 return False
         except KeyError:
             self.logger.warning("Could not check if user is a member of the plugdev group. Continuing...")
