@@ -194,22 +194,21 @@ class RazerDaemon(DBusService):
         self._load_devices(first_run=True)
 
         # Add DBus methods
-        self.logger.info("Adding razer.devices.getDevices method to DBus")
-        self.add_dbus_method('razer.devices', 'getDevices', self.get_serial_list, out_signature='as')
-        self.logger.info("Adding razer.daemon.supportedDevices method to DBus")
-        self.add_dbus_method('razer.daemon', 'supportedDevices', self.supported_devices, out_signature='s')
-        self.logger.info("Adding razer.devices.enableTurnOffOnScreensaver method to DBus")
-        self.add_dbus_method('razer.devices', 'enableTurnOffOnScreensaver', self.enable_turn_off_on_screensaver, in_signature='b')
-        self.logger.info("Adding razer.devices.syncEffects method to DBus")
-        self.add_dbus_method('razer.devices', 'getOffOnScreensaver', self.get_off_on_screensaver, out_signature='b')
-        self.logger.info("Adding razer.devices.syncEffects method to DBus")
-        self.add_dbus_method('razer.devices', 'syncEffects', self.sync_effects, in_signature='b')
-        self.logger.info("Adding razer.devices.syncEffects method to DBus")
-        self.add_dbus_method('razer.devices', 'getSyncEffects', self.get_sync_effects, out_signature='b')
-        self.logger.info("Adding razer.daemon.version method to DBus")
-        self.add_dbus_method('razer.daemon', 'version', self.version, out_signature='s')
-        self.logger.info("Adding razer.daemon.stop method to DBus")
-        self.add_dbus_method('razer.daemon', 'stop', self.stop)
+        methods = {
+            # interface, method, callback, in-args, out-args
+            ('razer.devices', 'getDevices', self.get_serial_list, None, 'as'),
+            ('razer.devices', 'supportedDevices', self.supported_devices, None, 's'),
+            ('razer.devices', 'enableTurnOffOnScreensaver', self.enable_turn_off_on_screensaver, 'b', None),
+            ('razer.devices', 'getOffOnScreensaver', self.get_off_on_screensaver, None, 'b'),
+            ('razer.devices', 'syncEffects', self.sync_effects, 'b', None),
+            ('razer.devices', 'getSyncEffects', self.get_sync_effects, None, 'b'),
+            ('razer.daemon', 'version', self.version, None, 's'),
+            ('razer.daemon', 'stop', self.stop, None, None),
+        }
+
+        for m in methods:
+            self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
+            self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
 
         # TODO remove
         self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
