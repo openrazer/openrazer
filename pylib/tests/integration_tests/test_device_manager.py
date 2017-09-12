@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import multiprocessing
 import os
 import signal
@@ -332,3 +334,6 @@ class DeviceManagerTest(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             device.macro.del_macro('M6') # Unknown key
+
+if __name__ == "__main__":
+     unittest.main()
