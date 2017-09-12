@@ -143,11 +143,14 @@ class RazerImperator(__RazerDevice):
 
     DPI_MAX = 6400
 
+    USE_HIDRAW = True
+
     def _resume_device(self):
         self.logger.debug("Imperator doesnt have suspend/resume")
 
     def _suspend_device(self):
         self.logger.debug("Imperator doesnt have suspend/resume")
+
 
 
 class RazerOuroboros(__RazerDevice):
@@ -343,6 +346,10 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
     }
 
     DPI_MAX = 16000
+
+    @property
+    def hid_transaction_id(self):
+        return 0x3f
 
     def __init__(self, *args, **kwargs):
         super(RazerNagaHexV2, self).__init__(*args, **kwargs)
@@ -627,6 +634,10 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
 
     DPI_MAX = 16000
 
+    @property
+    def hid_transaction_id(self):
+        return 0x3f
+
     def _suspend_device(self):
         """
         Suspend the device
@@ -715,6 +726,9 @@ class RazerMamba2012Wireless(__RazerDeviceBrightnessSuspend):
 
         self._battery_manager.close()
 
+    def get_hidraw_serial(self):
+        return ''
+
 
 class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
     """
@@ -737,6 +751,9 @@ class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
     }
 
     DPI_MAX = 6400
+
+    def get_hidraw_serial(self):
+        return ''
 
 
 class RazerNaga2014(__RazerDevice):
@@ -816,6 +833,9 @@ class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
     }
 
     MAX_DPI = 4000
+
+    def get_hidraw_serial(self):
+        return ''
 
     def _suspend_device(self):
         """
