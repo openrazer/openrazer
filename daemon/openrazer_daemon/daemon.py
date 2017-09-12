@@ -188,9 +188,7 @@ class RazerDaemon(DBusService):
         self._device_classes = openrazer_daemon.hardware.get_device_classes()
 
         self.logger.info("Initialising Daemon (v%s). Pid: %d", __version__, os.getpid())
-
-        self._screensaver_monitor = ScreensaverMonitor(self)
-        self._screensaver_monitor.monitoring = self._config.getboolean('Startup', 'devices_off_on_screensaver')
+        self._init_screensaver_monitor()
 
         self._razer_devices = DeviceCollection()
         self._load_devices(first_run=True)
@@ -316,6 +314,10 @@ class RazerDaemon(DBusService):
         udev_monitor = Monitor.from_netlink(self._udev_context)
         udev_monitor.filter_by(subsystem='hid')
         self._udev_observer = MonitorObserver(udev_monitor, callback=self._udev_input_event, name='device-monitor')
+
+    def _init_screensaver_monitor(self):
+        self._screensaver_monitor = ScreensaverMonitor(self)
+        self._screensaver_monitor.monitoring = self._config.getboolean('Startup', 'devices_off_on_screensaver')
 
     def _init_signals(self):
         """
