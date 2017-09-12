@@ -180,25 +180,7 @@ class RazerDaemon(DBusService):
         log_level = logging.INFO
         if verbose or self._config.getboolean('General', 'verbose_logging'):
             log_level = logging.DEBUG
-
-        self.logger = logging.getLogger('razer')
-        self.logger.setLevel(log_level)
-        formatter = logging.Formatter('%(asctime)s | %(name)-30s | %(levelname)-8s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-        # Dont propagate to default logger
-        self.logger.propagate = 0
-
-        if console_log:
-            console_logger = logging.StreamHandler()
-            console_logger.setLevel(log_level)
-            console_logger.setFormatter(formatter)
-            self.logger.addHandler(console_logger)
-
-        if log_dir is not None:
-            log_file = os.path.join(log_dir, 'razer.log')
-            file_logger = logging.handlers.RotatingFileHandler(log_file, maxBytes=16777216, backupCount=10) # 16MiB
-            file_logger.setLevel(log_level)
-            file_logger.setFormatter(formatter)
-            self.logger.addHandler(file_logger)
+        self.logger = self._create_logger(log_dir, log_level, console_log)
 
         # Load Classes
         self._device_classes = openrazer_daemon.hardware.get_device_classes()
@@ -283,6 +265,38 @@ class RazerDaemon(DBusService):
                         if line.startswith('Uid:') and line.strip('\n').split()[-1] == current_uid:
                             return True
         return False
+
+    def _create_logger(self, log_dir, log_level, want_console_log):
+        """
+        Initializes a logger and returns it.
+
+        :param log_dir: If not None, specifies the directory to create the
+        log file in
+        :param log_level: The log level of messages to print
+        :param want_console_log: True if we should print to the console
+
+        :rtype:logging.Logger
+        """
+        logger = logging.getLogger('razer')
+        logger.setLevel(log_level)
+        formatter = logging.Formatter('%(asctime)s | %(name)-30s | %(levelname)-8s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        # Dont propagate to default logger
+        logger.propagate = 0
+
+        if want_console_log:
+            console_logger = logging.StreamHandler()
+            console_logger.setLevel(log_level)
+            console_logger.setFormatter(formatter)
+            logger.addHandler(console_logger)
+
+        if log_dir is not None:
+            log_file = os.path.join(log_dir, 'razer.log')
+            file_logger = logging.handlers.RotatingFileHandler(log_file, maxBytes=16777216, backupCount=10) # 16MiB
+            file_logger.setLevel(log_level)
+            file_logger.setFormatter(formatter)
+            logger.addHandler(file_logger)
+
+        return logger
 
     def _init_signals(self):
         """
