@@ -168,6 +168,11 @@ class RazerDaemon(DBusService):
             log_level = logging.DEBUG
         self.logger = self._create_logger(log_dir, log_level, console_log)
 
+        # Check for plugdev group
+        if not self._check_plugdev_group():
+            self.logger.critical("User is not a member of the plugdev group")
+            sys.exit(1)
+
         # Setup DBus to use gobject main loop
         dbus.mainloop.glib.threads_init()
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
@@ -186,11 +191,6 @@ class RazerDaemon(DBusService):
         self._device_classes = openrazer_daemon.hardware.get_device_classes()
 
         self.logger.info("Initialising Daemon (v%s). Pid: %d", __version__, os.getpid())
-
-        # Check for plugdev group
-        if not self._check_plugdev_group():
-            self.logger.critical("User is not a member of the plugdev group")
-            sys.exit(1)
 
         self._screensaver_monitor = ScreensaverMonitor(self)
         self._screensaver_monitor.monitoring = self._config.getboolean('Startup', 'devices_off_on_screensaver')
