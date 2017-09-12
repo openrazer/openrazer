@@ -5,8 +5,9 @@ import os
 import shutil
 import signal
 import sys
+import contextlib
 
-from openrazer_daemon.daemon import daemonize
+from openrazer_daemon.daemon import DaemonContext, RazerDaemon
 from subprocess import check_output
 from time import sleep
 
@@ -91,21 +92,21 @@ def run():
 
     install_example_config_file()
 
-    daemon_args = {
-        'verbose': args.verbose,
-        'foreground': args.foreground,
-        'log_dir': args.log_dir,
-        'test_dir': args.test_dir,
-        'console_log': args.foreground,
-        'config_file': args.config,
-        'run_dir': args.run_dir,
-    }
+    with contextlib.ExitStack() as stack:
+        if not args.foreground:
+            stack.enter_context(DaemonContext(args.run_dir, 'openrazer-daemon.pid'))
 
-    daemonize(**daemon_args)
-
-
-
-
+        daemon = RazerDaemon(verbose=args.verbose,
+                             log_dir=args.log_dir,
+                             console_log=args.foreground,
+                             config_file=args.config,
+                             test_dir=args.test_dir)
+        try:
+            daemon.run()
+        except KeyboardInterrupt:
+            daemon.logger.debug("Exited on user request")
+        except Exception as err:
+            daemon.logger.exception("Caught exception", exc_info=err)
 
 if __name__ == "__main__":
     run()

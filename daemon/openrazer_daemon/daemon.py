@@ -31,38 +31,23 @@ from openrazer_daemon.dbus_services.service import DBusService
 from openrazer_daemon.device import DeviceCollection
 from openrazer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 
-
-def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
+class DaemonContext():
     """
-    Performs double fork behaviour of daemons
+    A class to daemonize a program. Changes to the rundir (if any) and
+    creates a pidfile with the given name (if any). The pidfile is cleaned
+    up on context exit. Use as:
 
-    :param foreground: Run in foreground (don't fork)
-    :type foreground: bool
-
-    :param verbose: Verbose mode
-    :type verbose: bool
-
-    :param log_dir: Log directory
-    :type log_dir: str
-
-    :param console_log: Log to console
-    :type console_log: bool
-
-    :param run_dir: Run directory (for pid file)
-    :type run_dir: str
-
-    :param config_file: Config filepath
-    :type config_file: str
-
-    :param test_dir: Test directory
-    :type test_dir: str or None
+       with DaemonContext():
+           do stuff
     """
+    def __init__(self, rundir=None, pidfile=None):
+        self._run_dir = rundir
+        self._pidfile = pidfile
 
-    if run_dir is not None and os.path.exists(run_dir) and not os.path.isdir(run_dir):
-        print("Invalid run_dir - file exists but is not a directory", file=sys.stderr)
-        sys.exit(1)
+        if rundir is not None:
+            os.makedirs(rundir, exist_ok=True)
 
-    if not foreground:
+    def __enter__(self):
         # Attempt to double fork
         try:
             pid = os.fork()
@@ -98,36 +83,19 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
         os.dup2(stdout.fileno(), sys.stdout.fileno())
         os.dup2(stdout.fileno(), sys.stderr.fileno())
 
-    # Change working directory
-    if run_dir is not None:
-        if not os.path.exists(run_dir):
-            os.makedirs(run_dir, exist_ok=True)
-    else:
-        run_dir = tempfile.mkdtemp(prefix='tmp_', suffix='_openrazer_daemon')
+        if self._run_dir is not None:
+            try:
+                pidfile = self._pidfile
+                os.chdir(self._run_dir)
+                with open(pidfile, 'w') as f:
+                    f.write(str(os.getpid()))
+                self._pidfile = os.path.join(self._run_dir, pidfile)
+            except (OSError, IOError) as err:
+                print("Error: {0}".format(err))
 
-    pid_file = os.path.join(run_dir, "openrazer-daemon.pid")
-    os.chdir(run_dir)
-
-    # Write PID file
-    try:
-        with open(pid_file, 'w') as pid_file_obj:
-            pid_file_obj.write(str(os.getpid()))
-    except (OSError, IOError) as err:
-        print("Error: {0}".format(err))
-
-    # Create daemon and run
-    daemon = RazerDaemon(verbose, log_dir, console_log, run_dir, config_file, test_dir=test_dir)
-
-    try:
-        daemon.run()
-    except KeyboardInterrupt:
-        daemon.logger.debug("Exited on user request")
-    except Exception as err:
-        daemon.logger.exception("Caught exception", exc_info=err)
-
-    # If pid file exists, remove it
-    if run_dir is not None and os.path.exists(pid_file):
-        os.remove(pid_file)
+    def __exit__(self, type, value, traceback):
+        if self._pidfile is not None:
+            os.remove(self._pidfile)
 
 
 class RazerDaemon(DBusService):
