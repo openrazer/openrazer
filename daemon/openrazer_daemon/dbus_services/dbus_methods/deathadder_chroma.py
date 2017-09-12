@@ -106,6 +106,9 @@ def get_logo_brightness(self):
     """
     self.logger.debug("DBus call get_logo_brightness")
 
+    if self.USE_HIDRAW:
+        return self.get_logo_brightness()
+
     driver_path = self.get_driver_path('logo_led_brightness')
 
     with open(driver_path, 'r') as driver_file:
@@ -123,6 +126,9 @@ def set_logo_brightness(self, brightness):
     :type brightness: int
     """
     self.logger.debug("DBus call set_logo_brightness")
+
+    if self.USE_HIDRAW:
+        return self.set_logo_brightness(brightness)
 
     driver_path = self.get_driver_path('logo_led_brightness')
 
@@ -322,6 +328,9 @@ def get_scroll_brightness(self):
     """
     self.logger.debug("DBus call get_scroll_brightness")
 
+    if self.USE_HIDRAW:
+        return self.get_scroll_brightness()
+
     driver_path = self.get_driver_path('scroll_led_brightness')
 
     with open(driver_path, 'r') as driver_file:
@@ -339,6 +348,9 @@ def set_scroll_brightness(self, brightness):
     :type brightness: int
     """
     self.logger.debug("DBus call set_scroll_brightness")
+
+    if self.USE_HIDRAW:
+        return self.set_scroll_brightness(brightness)
 
     driver_path = self.get_driver_path('scroll_led_brightness')
 

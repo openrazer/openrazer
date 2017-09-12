@@ -496,17 +496,42 @@ class RazerDevice(DBusService):
         request.transaction_id = 0x3F
         self.razer_send_payload(request)
 
+    def get_led_brightness(self, led):
+        request = self.razer_get_report(0x03, 0x83, 0x03)
+        request.arguments = [RazerReport.VARSTORE, led]
+        response = self.razer_send_payload(request)
+        return response.arguments[2]
+
+    def set_led_brightness(self, led, brightness):
+        # Python has a double but we need an integer
+        brightness = int(brightness)
+        request = self.razer_get_report(0x03, 0x03, 0x03)
+        request.arguments = [RazerReport.VARSTORE, led, brightness]
+        self.razer_send_payload(request)
+
     def get_logo_active(self):
         return self.get_led_active(RazerReport.LOGO_LED) == 1
 
     def set_logo_active(self, enabled):
         return self.set_led_active(RazerReport.LOGO_LED, enabled)
 
+    def get_logo_brightness(self):
+        return self.get_led_brightness(RazerReport.LOGO_LED)
+
+    def set_logo_brightness(self, brightness):
+        return self.set_led_brightness(RazerReport.LOGO_LED, brightness)
+
     def get_scroll_active(self):
         return self.get_led_active(RazerReport.SCROLL_WHEEL_LED) == 1
 
     def set_scroll_active(self, enabled):
         self.set_led_active(RazerReport.SCROLL_WHEEL_LED, enabled)
+
+    def get_scroll_brightness(self):
+        return self.get_led_brightness(RazerReport.SCROLL_WHEEL_LED)
+
+    def set_scroll_brightness(self, brightness):
+        return self.set_led_brightness(RazerReport.SCROLL_WHEEL_LED, brightness)
 
     def set_dpi_xy(self, dpi_x, dpi_y):
         return self.set_misc_dpi_xy(RazerReport.NOSTORE, dpi_x, dpi_y)

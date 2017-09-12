@@ -260,7 +260,7 @@ class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
     DPI_MAX = 8200
 
 
-class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
+class RazerDeathAdderChroma(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer DeathAdder Chroma
     """
@@ -282,8 +282,12 @@ class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
 
     DPI_MAX = 10000
 
+    USE_HIDRAW = True
+
+    DEVICE_NAME = "Razer DeathAdder Chroma"
+
     def __init__(self, *args, **kwargs):
-        super(RazerDeathadderChroma, self).__init__(*args, **kwargs)
+        super(RazerDeathAdderChroma, self).__init__(*args, **kwargs)
 
         # Set brightness to max and LEDs to on, on startup
         _da_set_logo_brightness(self, 100)
