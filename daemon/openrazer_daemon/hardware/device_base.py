@@ -570,6 +570,10 @@ class RazerDevice(DBusService):
             observer.notify(msg)
 
     @classmethod
+    def razer_feature_report_desc(cls):
+        return ''.join(chr(x) for x in (0x06, 0x00, 0xff, 0x09, 0x02, 0x15, 0x00, 0x25, 0x01, 0x75, 0x08, 0x95, 0x5a, 0xb1, 0x01))
+
+    @classmethod
     def match(cls, device_id, dev_path):
         """
         Match against the device ID
@@ -586,6 +590,14 @@ class RazerDevice(DBusService):
         pattern = r'^[0-9A-F]{4}:' + '{0:04X}'.format(cls.USB_VID) + ':' + '{0:04X}'.format(cls.USB_PID) + r'\.[0-9A-F]{4}$'
 
         if re.match(pattern, device_id) is not None:
+            if cls.USE_HIDRAW:
+                hidraw_path = os.path.join('/dev', os.listdir(os.path.join(dev_path, 'hidraw'))[0])
+
+                with open(hidraw_path, 'rb') as hid:
+                    hid_node = hidraw.HIDRaw(hid)
+
+                    return cls.razer_feature_report_desc() in hid_node.getRawReportDescriptor()
+
             if 'device_type' in os.listdir(dev_path):
                 return True
 

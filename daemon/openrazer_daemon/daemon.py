@@ -389,7 +389,7 @@ class RazerDaemon(DBusService):
                 if sys_name in self._razer_devices:
                     continue
 
-                if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
+                if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and is supported
                     self.logger.info('Found device.%d: %s', device_number, sys_name)
 
                     # TODO add testdir support
@@ -401,14 +401,15 @@ class RazerDaemon(DBusService):
                             if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
                                 additional_interfaces.append(alt_device.sys_path)
 
-                    # Checking permissions
-                    test_file = os.path.join(sys_path, 'device_type')
-                    file_group_id = os.stat(test_file).st_gid
-                    file_group_name = grp.getgrgid(file_group_id)[0]
+                    if not device_class.USE_HIDRAW:
+                        # Checking permissions
+                        test_file = os.path.join(sys_path, 'device_type')
+                        file_group_id = os.stat(test_file).st_gid
+                        file_group_name = grp.getgrgid(file_group_id)[0]
 
-                    if os.getgid() != file_group_id and file_group_name != 'plugdev':
-                        self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
-                        break
+                        if os.getgid() != file_group_id and file_group_name != 'plugdev':
+                            self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
+                            break
 
                     razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
 
@@ -444,7 +445,7 @@ class RazerDaemon(DBusService):
             if sys_name in self._razer_devices:
                 continue
 
-            if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
+            if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and is supported
                 self.logger.info('Found valid device.%d: %s', device_number, sys_name)
                 razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None)
 
