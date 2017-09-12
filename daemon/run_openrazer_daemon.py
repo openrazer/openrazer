@@ -89,17 +89,11 @@ def run():
         'verbose': args.verbose,
         'foreground': args.foreground,
         'log_dir': args.log_dir,
-        'test_dir': args.test_dir
+        'test_dir': args.test_dir,
+        'console_log': args.foreground,
+        'config_file': args.config,
+        'run_dir': args.run_dir,
     }
-
-    if args.foreground:
-        daemon_args['console_log'] = True
-
-    if args.config:
-        daemon_args['config_file'] = args.config
-
-    if args.run_dir:
-        daemon_args['run_dir'] = args.run_dir
 
     daemonize(**daemon_args)
 
