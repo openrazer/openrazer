@@ -198,26 +198,26 @@ class RazerDaemon(DBusService):
         self._udev_observer = MonitorObserver(udev_monitor, callback=self._udev_input_event, name='device-monitor')
 
         # Logging
-        logging_level = logging.INFO
+        log_level = logging.INFO
         if verbose or self._config.getboolean('General', 'verbose_logging'):
-            logging_level = logging.DEBUG
+            log_level = logging.DEBUG
 
         self.logger = logging.getLogger('razer')
-        self.logger.setLevel(logging_level)
+        self.logger.setLevel(log_level)
         formatter = logging.Formatter('%(asctime)s | %(name)-30s | %(levelname)-8s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
         # Dont propagate to default logger
         self.logger.propagate = 0
 
         if console_log:
             console_logger = logging.StreamHandler()
-            console_logger.setLevel(logging_level)
+            console_logger.setLevel(log_level)
             console_logger.setFormatter(formatter)
             self.logger.addHandler(console_logger)
 
         if log_dir is not None:
             log_file = os.path.join(log_dir, 'razer.log')
             file_logger = logging.handlers.RotatingFileHandler(log_file, maxBytes=16777216, backupCount=10) # 16MiB
-            file_logger.setLevel(logging_level)
+            file_logger.setLevel(log_level)
             file_logger.setFormatter(formatter)
             self.logger.addHandler(file_logger)
 
