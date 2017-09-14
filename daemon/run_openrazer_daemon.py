@@ -5,6 +5,7 @@ import os
 import shutil
 import signal
 import sys
+import time
 import contextlib
 
 from openrazer_daemon.daemon import RazerDaemon
@@ -48,21 +49,49 @@ def parse_args():
     return parser.parse_args()
 
 
-def stop_daemon():
+def stop_daemon(args):
+    pidfile = os.path.join(args.run_dir, 'openrazer-daemon.pid')
     try:
-        pid = int(check_output(["pidof", "-s", "openrazer-daemon"]))
-        print("Stopping openrazer-daemon... (PID {0})".format(str(pid)))
-        os.kill(pid, signal.SIGTERM)
-        sleep(3)
+        with open(pidfile) as f:
+            pid = int(f.readline().strip())
 
-        # Give it time to stop
-        pid = check_output(["pidof", "-s", "openrazer-daemon"])
-        if len(pid) > 0:
-            os.kill(int(pid), signal.SIGKILL)
-            sleep(3)
+            # if we have psutil, check that the process name matches the
+            # pidfile. Otherwise we might terminate a process that's not
+            # ours.
+            try:
+                import psutil
+                try:
+                    if psutil.Process(pid).name() != "openrazer-daemon":
+                        raise ProcessLookupError()
+                except psutil.NoSuchProcess:
+                    raise ProcessLookupError()
+            except ModuleNotFoundError:
+                print("Module psutil is missing, not checking for process name")
 
-    except Exception:
-        print("No openrazer-daemon currently running.")
+            os.kill(pid, signal.SIGTERM)
+            pid_exists = True
+            delay = 3000
+            while delay > 0:
+                delay -= 100
+                try:
+                    time.sleep(0.1)
+                    os.kill(pid, 0)
+                except ProcessLookupError:
+                    print("Process {} stopped".format(pid))
+                    pid_exists = False
+                    break
+
+            # if we have to kill it, we probably need to remove the
+            # pidfile too, otherwise we rely on it to clean up properly
+            if pid_exists:
+                print("Process {} is hung, sending SIGKILL".format(pid))
+                os.kill(pid, signal.SIGKILL)
+                os.remove(pidfile)
+
+    except FileNotFoundError:
+        print("No pidfile found, assuming openrazer-daemon is not running")
+    except ProcessLookupError:
+        print("pidfile exists but no process is running. Remove {} and continue".format(pidfile))
 
 
 def install_example_config_file():
@@ -102,11 +131,12 @@ def run():
     global args
     args = parse_args()
     if args.stop:
-        stop_daemon()
+        stop_daemon(args)
         sys.exit(0)
 
     if args.respawn:
-        stop_daemon()
+        stop_daemon(args)
+        time.sleep(3)
 
     install_example_config_file()
 
