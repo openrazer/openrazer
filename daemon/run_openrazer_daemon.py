@@ -66,12 +66,14 @@ def run():
     args = parse_args()
 
     # TODO Fix up run_dir (especially in macros branch as things will break)
-    if not os.path.exists(RAZER_CONFIG_HOME):
+    try:
         os.makedirs(RAZER_CONFIG_HOME, exist_ok=True)
-    if not os.path.exists(RAZER_DATA_HOME):
         os.makedirs(RAZER_DATA_HOME, exist_ok=True)
-    if not os.path.exists(LOG_PATH):
         os.makedirs(LOG_PATH, exist_ok=True)
+    except NotADirectoryError as e:
+        print("Failed to create {}".format(e.filename), file=sys.stderr)
+        sys.exit(1)
+
     if not os.path.exists(CONF_FILE):
         if os.path.exists(EXAMPLE_CONF_FILE):
             shutil.copy(EXAMPLE_CONF_FILE, CONF_FILE)
