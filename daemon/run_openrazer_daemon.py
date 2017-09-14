@@ -7,9 +7,10 @@ import signal
 import sys
 import contextlib
 
-from openrazer_daemon.daemon import DaemonContext, RazerDaemon
+from openrazer_daemon.daemon import RazerDaemon
 from subprocess import check_output
 from time import sleep
+from daemonize import Daemonize
 
 # Basically copied from https://github.com/jleclanche/python-xdg/blob/master/xdg/basedir.py
 HOME = os.path.expanduser("~")
@@ -26,6 +27,7 @@ EXAMPLE_CONF_FILE = '/usr/share/openrazer/razer.conf.example'
 CONF_FILE = os.path.join(RAZER_CONFIG_HOME, 'razer.conf')
 LOG_PATH = os.path.join(RAZER_DATA_HOME, 'logs')
 
+args = None
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -81,7 +83,23 @@ def install_example_config_file():
         sys.exit(1)
 
 
+def run_daemon():
+    global args
+    daemon = RazerDaemon(verbose=args.verbose,
+                         log_dir=args.log_dir,
+                         console_log=args.foreground,
+                         config_file=args.config,
+                         test_dir=args.test_dir)
+    try:
+        daemon.run()
+    except KeyboardInterrupt:
+        daemon.logger.debug("Exited on user request")
+    except Exception as err:
+        daemon.logger.exception("Caught exception", exc_info=err)
+
+
 def run():
+    global args
     args = parse_args()
     if args.stop:
         stop_daemon()
@@ -92,21 +110,14 @@ def run():
 
     install_example_config_file()
 
-    with contextlib.ExitStack() as stack:
-        if not args.foreground:
-            stack.enter_context(DaemonContext(args.run_dir, 'openrazer-daemon.pid'))
-
-        daemon = RazerDaemon(verbose=args.verbose,
-                             log_dir=args.log_dir,
-                             console_log=args.foreground,
-                             config_file=args.config,
-                             test_dir=args.test_dir)
-        try:
-            daemon.run()
-        except KeyboardInterrupt:
-            daemon.logger.debug("Exited on user request")
-        except Exception as err:
-            daemon.logger.exception("Caught exception", exc_info=err)
+    os.makedirs(args.run_dir, exist_ok=True)
+    daemon = Daemonize(app="openrazer-daemon",
+                       pid=os.path.join(args.run_dir, "openrazer-daemon.pid"),
+                       action=run_daemon,
+                       foreground=args.foreground,
+                       verbose=args.verbose,
+                       chdir=args.run_dir)
+    daemon.start()
 
 if __name__ == "__main__":
     run()
