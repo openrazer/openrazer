@@ -167,6 +167,9 @@ class RazerDaemon(DBusService):
 
         if config_file is not None:
             config_file = os.path.expanduser(config_file)
+            if not os.path.exists(config_file):
+                print("Config file {} does not exist.".format(config_file), file=sys.stderr)
+                sys.exit(1)
 
         self._test_dir = test_dir
         self._run_dir = run_dir
