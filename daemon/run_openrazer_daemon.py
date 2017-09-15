@@ -62,29 +62,34 @@ def stop_daemon():
         print("No openrazer-daemon currently running.")
 
 
-def run():
-    args = parse_args()
+def install_example_config_file():
+    """
+    Installs the example config file in $XDG_CONFIG_HOME/openrazer/razer.conf
+    """
+    if os.path.exists(CONF_FILE):
+        return
 
     try:
-        os.makedirs(RAZER_CONFIG_HOME, exist_ok=True)
-        os.makedirs(RAZER_DATA_HOME, exist_ok=True)
-        os.makedirs(LOG_PATH, exist_ok=True)
-    except NotADirectoryError as e:
-        print("Failed to create {}".format(e.filename), file=sys.stderr)
-        sys.exit(1)
-
-    if not os.path.exists(CONF_FILE):
+        os.makedirs(os.dirname(CONF_FILE), exist_ok=True)
         if os.path.exists(EXAMPLE_CONF_FILE):
             shutil.copy(EXAMPLE_CONF_FILE, CONF_FILE)
         else:
             print('Cant find "{0}"'.format(EXAMPLE_CONF_FILE), file=sys.stderr)
+    except NotADirectoryError as e:
+        print("Failed to create {}".format(e.filename), file=sys.stderr)
+        sys.exit(1)
 
+
+def run():
+    args = parse_args()
     if args.stop:
         stop_daemon()
         sys.exit(0)
 
     if args.respawn:
         stop_daemon()
+
+    install_example_config_file()
 
     daemon_args = {
         'verbose': args.verbose,

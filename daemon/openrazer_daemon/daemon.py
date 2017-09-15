@@ -154,10 +154,17 @@ class RazerDaemon(DBusService):
         setproctitle.setproctitle('openrazer-daemon')
 
         # Expanding ~ as python doesnt do it by default, also creating dirs if needed
-        if log_dir is not None:
-            log_dir = os.path.expanduser(log_dir)
-        if run_dir is not None:
-            run_dir = os.path.expanduser(run_dir)
+        try:
+            if log_dir is not None:
+                log_dir = os.path.expanduser(log_dir)
+                os.makedirs(log_dir, exist_ok=True)
+            if run_dir is not None:
+                run_dir = os.path.expanduser(run_dir)
+                os.makedirs(run_dir, exist_ok=True)
+        except NotADirectoryError as e:
+            print("Failed to create {}".format(e.filename), file=sys.stderr)
+            sys.exit(1)
+
         if config_file is not None:
             config_file = os.path.expanduser(config_file)
 
