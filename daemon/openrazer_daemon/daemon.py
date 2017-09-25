@@ -142,6 +142,10 @@ class RazerDaemon(DBusService):
 
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
 
+        # BusyBox pgrep also matches "python3 /usr/bin/openrazer-daemon -Fv" but procps-ng pgrep (version installed on most Linux distros) doesn't match that.
+        # Change the proctitle before checking to something else to support BusyBox pgrep.
+        setproctitle.setproctitle('openrazer-not-yet-daemon')
+
         # Check if process exists and is not running as current user
         proc = subprocess.Popen(['pgrep', 'openrazer-daemon'], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE)
         stdout = proc.communicate()[0]
