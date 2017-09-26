@@ -6,7 +6,7 @@
 
 whereami=$(dirname "$0")
 
-device_cfg_files=$(ls "$whereami/../pylib/razer/_fake_driver/"*.cfg)
+device_cfg_files=$(ls "$whereami/../pylib/openrazer/_fake_driver/"*.cfg)
 config_dir="/tmp/daemon_config/"
 test_dir="/tmp/daemon_test"
 
