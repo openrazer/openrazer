@@ -11,6 +11,8 @@ MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/hid
 # Python dir
 PYTHONDIR?=$(shell python3 -c 'import sys; print(sys.path[-1])')
 
+DKMS_NAME?=openrazer-driver
+DKMS_VER?=1.0.0
 
 
 # Build all target
@@ -108,18 +110,18 @@ clean: driver_clean
 setup_dkms:
 	@echo -e "\n::\033[34m Installing DKMS files\033[0m"
 	@echo "====================================================="
-	install -m 644 -v -D Makefile $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/Makefile
-	install -m 644 -v -D install_files/dkms/dkms.conf $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/dkms.conf
-	install -m 755 -v -d driver $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver
-	install -m 644 -v -D driver/Makefile $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/Makefile
-	install -m 644 -v driver/*.c $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
-	install -m 644 -v driver/*.h $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/
-	rm -fv $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0/driver/*.mod.c
+	install -m 644 -v -D Makefile $(DESTDIR)/usr/src/$(DKMS_NAME)-$(DKMS_VER)/Makefile
+	install -m 644 -v -D install_files/dkms/dkms.conf $(DESTDIR)/usr/src/$(DKMS_NAME)-$(DKMS_VER)/dkms.conf
+	install -m 755 -v -d driver $(DESTDIR)/usr/src/$(DKMS_NAME)-$(DKMS_VER)/driver
+	install -m 644 -v -D driver/Makefile $(DESTDIR)/usr/src/$(DKMS_NAME)-$(DKMS_VER)/driver/Makefile
+	install -m 644 -v driver/*.c $(DESTDIR)/usr/src/$(DKMS_NAME)-$(DKMS_VER)/driver/
+	install -m 644 -v driver/*.h $(DESTDIR)/usr/src/$(DKMS_NAME)-$(DKMS_VER)/driver/
+	rm -fv $(DESTDIR)/usr/src/$(DKMS_NAME)-$(DKMS_VER)/driver/*.mod.c
 
 remove_dkms:
 	@echo "\n::\033[34m Removing DKMS files\033[0m"
 	@echo "====================================================="
-	rm -rf $(DESTDIR)/usr/src/razer_chroma_driver-1.0.0
+	rm -rf $(DESTDIR)/usr/src/$(DKMS_NAME)-$(DKMS_VER)
 
 udev_install:
 	@echo -e "\n::\033[34m Installing OpenRazer udev rules\033[0m"

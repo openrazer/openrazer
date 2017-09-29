@@ -2,7 +2,7 @@
 set -e
 
 # Automatically added by dh_dkms
-DKMS_NAME=razer_chroma_driver
+DKMS_NAME=openrazer-driver
 DKMS_VERSION=1.0.0
 
 case "$1" in

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dkms_name="razer_chroma_driver"  # TODO Rename when dkms module is renamed.
+dkms_name="openrazer-driver"  # TODO Rename when dkms module is renamed.
 
 echo "This script will now try to determine why the razer driver isn't working correctly."
 
@@ -34,7 +34,7 @@ if [ $? != 0 ]; then
         if [[ $dkms_install == *"Error! Could not find module source directory."* ]]; then
           echo "FATAL: Is the razer dkms package installed? Exiting."
           exit 1
-        elif [[ $dkms_install == *"Module razer_chroma_driver/1.0.0 already installed on kernel"* ]]; then
+        elif [[ $dkms_install == *"Module openrazer-driver/1.0.0 already installed on kernel"* ]]; then
           echo "FATAL: The dkms module is installed, but could not be loaded. Exiting."
           exit 1
         fi
