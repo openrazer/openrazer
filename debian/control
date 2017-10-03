@@ -52,7 +52,7 @@ Depends: razer-kernel-modules-dkms,
          gir1.2-gtk-3.0,
          xautomation,
          xdotool,
-         dbus-user-session
+         ${openrazer:dbus-user-session}
 Provides: razer-daemon
 Conflicts: razer-daemon
 Replaces: razer-daemon

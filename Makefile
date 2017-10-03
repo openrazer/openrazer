@@ -111,6 +111,9 @@ xdg_install:
 xdg_uninstall:
 	@rm -fv $(DESTDIR)/etc/xdg/autostart/openrazer-daemon.desktop
 
+install-systemd:
+	@make --no-print-directory -C daemon install-systemd
+
 # Clean target
 clean: driver_clean
 
