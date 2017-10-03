@@ -103,6 +103,13 @@ python_library_uninstall:
 	@echo "====================================================="
 	@make --no-print-directory -C pylib uninstall
 
+# Legacy XDG autostart
+xdg_install:
+	@mkdir -p $(DESTDIR)/etc/xdg/autostart
+	@cp -v ./install_files/desktop/openrazer-daemon.desktop $(DESTDIR)/etc/xdg/autostart/openrazer-daemon.desktop
+
+xdg_uninstall:
+	@rm -fv $(DESTDIR)/etc/xdg/autostart/openrazer-daemon.desktop
 
 # Clean target
 clean: driver_clean
