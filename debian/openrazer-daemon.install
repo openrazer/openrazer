@@ -1,5 +1,3 @@
 usr/lib/python3/dist-packages/openrazer_daemon
 usr/bin/openrazer-daemon
 usr/share/openrazer
-usr/lib/systemd/user
-usr/share/dbus-1/services/org.razer.service

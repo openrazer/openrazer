@@ -17,7 +17,7 @@ cd ${ROOT}
 
 # Extract version from changelog
 VERSION=$(cat ${ROOT}/debian/changelog | grep -m 1 -oP '(?<=openrazer \()[^\-]+')
-ORIG_TAR="razer_${VERSION}.orig.tar.gz"
+ORIG_TAR="openrazer_${VERSION}.orig.tar.gz"
 
 #git archive ${CURRENT_BRANCH} | gzip > ${TEMP_DIR}/${ORIG_TAR}
 tar --exclude-vcs --exclude-vcs-ignores -zcf ${TEMP_DIR}/${ORIG_TAR} -C ${ROOT} .
