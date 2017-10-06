@@ -421,6 +421,8 @@ class RazerNagaChroma(__RazerDeviceBrightnessSuspend):
         "perspective_img": "https://assets2.razerzone.com/images/razer-naga-chroma/15fc24f88b577a6d080ed9e0e6a1b219-razer-naga-chroma-gallery-03.jpg"
     }
 
+    DPI_MAX = 16000
+
     def __init__(self, *args, **kwargs):
         super(RazerNagaChroma, self).__init__(*args, **kwargs)
 
