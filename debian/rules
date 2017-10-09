@@ -30,6 +30,7 @@ else
 	dh_install --package=openrazer-daemon usr/share/dbus-1/services/org.razer.service
 	dh_install --package=openrazer-daemon usr/lib/systemd/user/openrazer-daemon.service
 endif
+	dh_install --remaining-packages
 
 override_dh_auto_install:
 ifeq ($(release_ver),16.04)
