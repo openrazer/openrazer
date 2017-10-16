@@ -1037,7 +1037,7 @@ class RazerBladePro2017(_MacroKeyboard):
     USB_PID = 0x0225
     HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = False
-    MATRIX_DIMS = [6, 22]  # 6 Rows, 22 Cols
+    MATRIX_DIMS = [6, 25]  # 6 Rows, 25 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
