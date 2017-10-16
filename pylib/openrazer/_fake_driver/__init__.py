@@ -50,7 +50,8 @@ class FakeDevice(object):
             os.remove(path)
 
         if default is not None:
-            open(path, 'w').write(str(default))
+            with open(path, 'w') as f:
+                f.write(str(default))
         else:
             touch(path)
         os.chmod(path, chmod)
