@@ -34,6 +34,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer BlackWidow Chroma V2                    |  1532:0221  |   ✔    |   ✔    |      |
 | Razer Blade (Late 2016)                       |  1532:0224  |   ✔    |   ✔    |      |
 | Razer Blade Stealth (Mid 2017)                |  1532:022D  |   ✔    |   ✔    | Working except ripple |
+| Razer Blade Pro (2017)                        |  1532:0225  |   ✔    |   ✔    | Working except ripple |
 
 ### Mouse
 | Device                          | USB VID:PID | Driver | Daemon |
