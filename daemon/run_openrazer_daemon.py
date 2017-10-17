@@ -62,22 +62,26 @@ def stop_daemon():
         print("No openrazer-daemon currently running.")
 
 
-def run():
-    args = parse_args()
+def install_example_config_file():
+    """
+    Installs the example config file in $XDG_CONFIG_HOME/openrazer/razer.conf
+    """
+    if os.path.exists(CONF_FILE):
+        return
 
-    # TODO Fix up run_dir (especially in macros branch as things will break)
-    if not os.path.exists(RAZER_CONFIG_HOME):
-        os.makedirs(RAZER_CONFIG_HOME, exist_ok=True)
-    if not os.path.exists(RAZER_DATA_HOME):
-        os.makedirs(RAZER_DATA_HOME, exist_ok=True)
-    if not os.path.exists(LOG_PATH):
-        os.makedirs(LOG_PATH, exist_ok=True)
-    if not os.path.exists(CONF_FILE):
+    try:
+        os.makedirs(os.dirname(CONF_FILE), exist_ok=True)
         if os.path.exists(EXAMPLE_CONF_FILE):
             shutil.copy(EXAMPLE_CONF_FILE, CONF_FILE)
         else:
             print('Cant find "{0}"'.format(EXAMPLE_CONF_FILE), file=sys.stderr)
+    except NotADirectoryError as e:
+        print("Failed to create {}".format(e.filename), file=sys.stderr)
+        sys.exit(1)
 
+
+def run():
+    args = parse_args()
     if args.stop:
         stop_daemon()
         sys.exit(0)
@@ -85,21 +89,17 @@ def run():
     if args.respawn:
         stop_daemon()
 
+    install_example_config_file()
+
     daemon_args = {
         'verbose': args.verbose,
         'foreground': args.foreground,
         'log_dir': args.log_dir,
-        'test_dir': args.test_dir
+        'test_dir': args.test_dir,
+        'console_log': args.foreground,
+        'config_file': args.config,
+        'run_dir': args.run_dir,
     }
-
-    if args.foreground:
-        daemon_args['console_log'] = True
-
-    if args.config:
-        daemon_args['config_file'] = args.config
-
-    if args.run_dir:
-        daemon_args['run_dir'] = args.run_dir
 
     daemonize(**daemon_args)
 
@@ -107,4 +107,5 @@ def run():
 
 
 
-run()
+if __name__ == "__main__":
+    run()

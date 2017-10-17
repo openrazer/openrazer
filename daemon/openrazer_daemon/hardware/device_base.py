@@ -84,30 +84,26 @@ class RazerDevice(DBusService):
         object_path = os.path.join(self.OBJECT_PATH, self.serial)
         DBusService.__init__(self, self.BUS_PATH, object_path)
 
-        # Register method to get the devices serial
-        self.logger.debug("Adding getSerial method to DBus")
-        self.add_dbus_method('razer.device.misc', 'getSerial', self.get_serial, out_signature='s')
-
         # Set up methods to suspend and restore device operation
         self.suspend_args = {}
         self.method_args = {}
-        self.logger.debug("Adding razer.device.misc.suspendDevice method to DBus")
-        self.add_dbus_method('razer.device.misc', 'suspendDevice', self.suspend_device)
 
-        self.logger.debug("Adding razer.device.misc.getDeviceMode method to DBus")
-        self.add_dbus_method('razer.device.misc', 'getDeviceMode', self.get_device_mode, out_signature='s')
-        self.logger.debug("Adding razer.device.misc.getRazerUrls method to DBus")
-        self.add_dbus_method('razer.device.misc', 'getRazerUrls', self.get_image_json, out_signature='s')
-        self.logger.debug("Adding razer.device.misc.setDeviceMode method to DBus")
-        self.add_dbus_method('razer.device.misc', 'setDeviceMode', self.set_device_mode, in_signature='yy')
-        self.logger.debug("Adding razer.device.misc.resumeDevice method to DBus")
-        self.add_dbus_method('razer.device.misc', 'resumeDevice', self.resume_device)
-        self.logger.debug("Adding razer.device.misc.getVidPid method to DBus")
-        self.add_dbus_method('razer.device.misc', 'getVidPid', self.get_vid_pid, out_signature='ai')
-        self.logger.debug("Adding razer.device.misc.version method to DBus")
-        self.add_dbus_method('razer.device.misc', 'getDriverVersion', openrazer_daemon.dbus_services.dbus_methods.version, out_signature='s')
-        self.logger.debug("Adding razer.device.misc.hasDedicatedMacroKeys method to DBus")
-        self.add_dbus_method('razer.device.misc', 'hasDedicatedMacroKeys', self.dedicated_macro_keys, out_signature='b')
+        methods = {
+            # interface, method, callback, in-args, out-args
+            ('razer.device.misc', 'getSerial', self.get_serial, None, 's'),
+            ('razer.device.misc', 'suspendDevice', self.suspend_device, None, None),
+            ('razer.device.misc', 'getDeviceMode', self.get_device_mode, None, 's'),
+            ('razer.device.misc', 'getRazerUrls', self.get_image_json, None, 's'),
+            ('razer.device.misc', 'setDeviceMode', self.set_device_mode, 'yy', None),
+            ('razer.device.misc', 'resumeDevice', self.resume_device, None, None),
+            ('razer.device.misc', 'getVidPid', self.get_vid_pid, None, 'ai'),
+            ('razer.device.misc', 'getDriverVersion', openrazer_daemon.dbus_services.dbus_methods.version, None, 's'),
+            ('razer.device.misc', 'hasDedicatedMacroKeys', self.dedicated_macro_keys, None, 'b'),
+        }
+
+        for m in methods:
+            self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
+            self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
 
         # Load additional DBus methods
         self.load_methods()
