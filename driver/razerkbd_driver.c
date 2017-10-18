@@ -1024,6 +1024,7 @@ static int has_inverted_led_state(struct device *dev)
     case USB_DEVICE_ID_RAZER_BLADE_QHD:
     /* case USB_DEVICE_ID_RAZER_BLADE_LATE_2016: */
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
         return 1;
     default:
         return 0;
@@ -1046,7 +1047,7 @@ static ssize_t razer_attr_read_set_logo(struct device *dev, struct device_attrib
     response = razer_send_payload(usb_dev, &report);
     state = response.arguments[2];
 
-    if (has_inverted_led_state(dev))
+    if (has_inverted_led_state(dev) && (state == 0 || state == 1))
         state = !state;
 
     return sprintf(buf, "%d\n", state);
@@ -1064,7 +1065,7 @@ static ssize_t razer_attr_write_set_logo(struct device *dev, struct device_attri
     unsigned char state = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report report;
 
-    if (has_inverted_led_state(dev))
+    if (has_inverted_led_state(dev) && (state == 0 || state == 1))
         state = !state;
 
     report = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, state);
