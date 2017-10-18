@@ -6,7 +6,8 @@ Standards-Version: 3.9.5
 Build-Depends: debhelper (>= 8.0.0),
                linux-headers-generic,
                python3,
-               python3-setuptools
+               python3-setuptools,
+               lsb-release
 Homepage: https://openrazer.github.io/
 Vcs-Git: git://git@github.com:openrazer/openrazer.git
 Vcs-Browser: https://github.com/openrazer/openrazer/
