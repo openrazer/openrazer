@@ -58,10 +58,6 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
     :type test_dir: str or None
     """
 
-    if run_dir is not None and os.path.exists(run_dir) and not os.path.isdir(run_dir):
-        print("Invalid run_dir - file exists but is not a directory", file=sys.stderr)
-        sys.exit(1)
-
     if not foreground:
         # Attempt to double fork
         try:
@@ -99,14 +95,13 @@ def daemonize(foreground=False, verbose=False, log_dir=None, console_log=False, 
         os.dup2(stdout.fileno(), sys.stderr.fileno())
 
     # Change working directory
-    if run_dir is not None:
-        if not os.path.exists(run_dir):
-            os.makedirs(run_dir, exist_ok=True)
+    if run_dir is not None and os.path.exists(run_dir) and os.path.isdir(run_dir):
+        os.chdir(run_dir)
+        pid_file = os.path.join(run_dir, "openrazer-daemon.pid")
     else:
         run_dir = tempfile.mkdtemp(prefix='tmp_', suffix='_openrazer_daemon')
-
-    pid_file = os.path.join(run_dir, "openrazer-daemon.pid")
-    os.chdir(run_dir)
+        pid_file = os.path.join(run_dir, "openrazer-daemon.pid")
+        os.chdir(run_dir)
 
     # Write PID file
     try:
@@ -143,107 +138,9 @@ class RazerDaemon(DBusService):
     * disableTurnOffOnScreensaver - Pauses the run loop on the screensaver thread
     """
 
-    BUS_NAME = 'org.razer'
+    BUS_PATH = 'org.razer'
 
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
-
-        if self._already_running():
-            print("Daemon already exists. Please stop that one.", file=sys.stderr)
-            sys.exit(-1)
-
-        setproctitle.setproctitle('openrazer-daemon')
-
-        # Expanding ~ as python doesnt do it by default, also creating dirs if needed
-        try:
-            if log_dir is not None:
-                log_dir = os.path.expanduser(log_dir)
-                os.makedirs(log_dir, exist_ok=True)
-            if run_dir is not None:
-                run_dir = os.path.expanduser(run_dir)
-                os.makedirs(run_dir, exist_ok=True)
-        except NotADirectoryError as e:
-            print("Failed to create {}".format(e.filename), file=sys.stderr)
-            sys.exit(1)
-
-        if config_file is not None:
-            config_file = os.path.expanduser(config_file)
-            if not os.path.exists(config_file):
-                print("Config file {} does not exist.".format(config_file), file=sys.stderr)
-                sys.exit(1)
-
-        self._test_dir = test_dir
-        self._run_dir = run_dir
-        self._config_file = config_file
-        self._config = configparser.ConfigParser()
-        self.read_config(config_file)
-
-        # Logging
-        log_level = logging.INFO
-        if verbose or self._config.getboolean('General', 'verbose_logging'):
-            log_level = logging.DEBUG
-        self.logger = self._create_logger(log_dir, log_level, console_log)
-
-        # Check for plugdev group
-        if not self._check_plugdev_group():
-            self.logger.critical("User is not a member of the plugdev group")
-            sys.exit(1)
-
-        # Setup DBus to use gobject main loop
-        dbus.mainloop.glib.threads_init()
-        dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-        DBusService.__init__(self, self.BUS_NAME, '/org/razer')
-
-        self._init_signals()
-        self._main_loop = GObject.MainLoop()
-
-        # Listen for input events from udev
-        self._init_udev_monitor()
-
-        # Load Classes
-        self._device_classes = openrazer_daemon.hardware.get_device_classes()
-
-        self.logger.info("Initialising Daemon (v%s). Pid: %d", __version__, os.getpid())
-        self._init_screensaver_monitor()
-
-        self._razer_devices = DeviceCollection()
-        self._load_devices(first_run=True)
-
-        # Add DBus methods
-        methods = {
-            # interface, method, callback, in-args, out-args
-            ('razer.devices', 'getDevices', self.get_serial_list, None, 'as'),
-            ('razer.devices', 'supportedDevices', self.supported_devices, None, 's'),
-            ('razer.devices', 'enableTurnOffOnScreensaver', self.enable_turn_off_on_screensaver, 'b', None),
-            ('razer.devices', 'getOffOnScreensaver', self.get_off_on_screensaver, None, 'b'),
-            ('razer.devices', 'syncEffects', self.sync_effects, 'b', None),
-            ('razer.devices', 'getSyncEffects', self.get_sync_effects, None, 'b'),
-            ('razer.daemon', 'version', self.version, None, 's'),
-            ('razer.daemon', 'stop', self.stop, None, None),
-        }
-
-        for m in methods:
-            self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
-            self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
-
-        # TODO remove
-        self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
-        # TODO ======
-
-    @dbus.service.signal('razer.devices')
-    def device_removed(self):
-        self.logger.debug("Emitted Device Remove Signal")
-
-    @dbus.service.signal('razer.devices')
-    def device_added(self):
-        self.logger.debug("Emitted Device Added Signal")
-
-    def _already_running(self):
-        """
-        Returns True if a process with our name is already running or false
-        otherwise.
-
-        :rtype: bool
-        """
 
         # BusyBox pgrep also matches "python3 /usr/bin/openrazer-daemon -Fv" but procps-ng pgrep (version installed on most Linux distros) doesn't match that.
         # Change the proctitle before checking to something else to support BusyBox pgrep.
@@ -267,74 +164,113 @@ class RazerDaemon(DBusService):
                         # Uid:	1000	1000	1000	1000
                         # If they match current pid, then we have a daemon running as this user
                         if line.startswith('Uid:') and line.strip('\n').split()[-1] == current_uid:
-                            return True
-        return False
+                            print("Daemon already exists. Please stop that one.", file=sys.stderr)
+                            sys.exit(-1)
 
-    def _create_logger(self, log_dir, log_level, want_console_log):
-        """
-        Initializes a logger and returns it.
+        setproctitle.setproctitle('openrazer-daemon')
 
-        :param log_dir: If not None, specifies the directory to create the
-        log file in
-        :param log_level: The log level of messages to print
-        :param want_console_log: True if we should print to the console
-
-        :rtype:logging.Logger
-        """
-        logger = logging.getLogger('razer')
-        logger.setLevel(log_level)
-        formatter = logging.Formatter('%(asctime)s | %(name)-30s | %(levelname)-8s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-        # Dont propagate to default logger
-        logger.propagate = 0
-
-        if want_console_log:
-            console_logger = logging.StreamHandler()
-            console_logger.setLevel(log_level)
-            console_logger.setFormatter(formatter)
-            logger.addHandler(console_logger)
-
+        # Expanding ~ as python doesnt do it by default, also creating dirs if needed
         if log_dir is not None:
-            log_file = os.path.join(log_dir, 'razer.log')
-            file_logger = logging.handlers.RotatingFileHandler(log_file, maxBytes=16777216, backupCount=10) # 16MiB
-            file_logger.setLevel(log_level)
-            file_logger.setFormatter(formatter)
-            logger.addHandler(file_logger)
+            log_dir = os.path.expanduser(log_dir)
+        if run_dir is not None:
+            run_dir = os.path.expanduser(run_dir)
+        if config_file is not None:
+            config_file = os.path.expanduser(config_file)
 
-        return logger
+        self._test_dir = test_dir
+        self._run_dir = run_dir
+        self._config_file = config_file
+        self._config = configparser.ConfigParser()
+        self.read_config(config_file)
 
-    def _check_plugdev_group(self):
-        """
-        Check if the user is a member of the plugdev group. For the root
-        user, this always returns True
+        # Setup DBus to use gobject main loop
+        dbus.mainloop.glib.threads_init()
+        dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+        DBusService.__init__(self, self.BUS_PATH, '/org/razer')
 
-        :rtype: bool
-        """
-        user = getpass.getuser()
-        if user == 'root':
-            return True
+        self._init_signals()
+        self._main_loop = GObject.MainLoop()
 
-        try:
-            plugdev_group = grp.getgrnam('plugdev')
-
-            if user in plugdev_group.gr_mem:
-                return True
-        except KeyError:
-            pass
-
-        return False
-
-    def _init_udev_monitor(self):
+        # Listen for input events from udev
         self._udev_context = Context()
         udev_monitor = Monitor.from_netlink(self._udev_context)
         udev_monitor.filter_by(subsystem='hid')
         self._udev_observer = MonitorObserver(udev_monitor, callback=self._udev_input_event, name='device-monitor')
 
-    def _init_screensaver_monitor(self):
+        # Logging
+        logging_level = logging.INFO
+        if verbose or self._config.getboolean('General', 'verbose_logging'):
+            logging_level = logging.DEBUG
+
+        self.logger = logging.getLogger('razer')
+        self.logger.setLevel(logging_level)
+        formatter = logging.Formatter('%(asctime)s | %(name)-30s | %(levelname)-8s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        # Dont propagate to default logger
+        self.logger.propagate = 0
+
+        if console_log:
+            console_logger = logging.StreamHandler()
+            console_logger.setLevel(logging_level)
+            console_logger.setFormatter(formatter)
+            self.logger.addHandler(console_logger)
+
+        if log_dir is not None:
+            log_file = os.path.join(log_dir, 'razer.log')
+            file_logger = logging.handlers.RotatingFileHandler(log_file, maxBytes=16777216, backupCount=10) # 16MiB
+            file_logger.setLevel(logging_level)
+            file_logger.setFormatter(formatter)
+            self.logger.addHandler(file_logger)
+
+        # Load Classes
+        self._device_classes = openrazer_daemon.hardware.get_device_classes()
+
+        self.logger.info("Initialising Daemon (v%s). Pid: %d", __version__, os.getpid())
+
+        # Check for plugdev group
         try:
-            self._screensaver_monitor = ScreensaverMonitor(self)
-            self._screensaver_monitor.monitoring = self._config.getboolean('Startup', 'devices_off_on_screensaver')
-        except dbus.exceptions.DBusException as e:
-            self.logger.error("Failed to init ScreensaverMonitor: {}".format(e))
+            plugdev_group = grp.getgrnam('plugdev')
+
+            if getpass.getuser() not in plugdev_group.gr_mem:
+                self.logger.critical("User is not a member of the plugdev group")
+                sys.exit(1)
+        except KeyError:
+            self.logger.warning("Could not check if user is a member of the plugdev group. Continuing...")
+
+        self._screensaver_monitor = ScreensaverMonitor(self)
+        self._screensaver_monitor.monitoring = self._config.getboolean('Startup', 'devices_off_on_screensaver')
+
+        self._razer_devices = DeviceCollection()
+        self._load_devices(first_run=True)
+
+        # Add DBus methods
+        self.logger.info("Adding razer.devices.getDevices method to DBus")
+        self.add_dbus_method('razer.devices', 'getDevices', self.get_serial_list, out_signature='as')
+        self.logger.info("Adding razer.daemon.supportedDevices method to DBus")
+        self.add_dbus_method('razer.daemon', 'supportedDevices', self.supported_devices, out_signature='s')
+        self.logger.info("Adding razer.devices.enableTurnOffOnScreensaver method to DBus")
+        self.add_dbus_method('razer.devices', 'enableTurnOffOnScreensaver', self.enable_turn_off_on_screensaver, in_signature='b')
+        self.logger.info("Adding razer.devices.syncEffects method to DBus")
+        self.add_dbus_method('razer.devices', 'getOffOnScreensaver', self.get_off_on_screensaver, out_signature='b')
+        self.logger.info("Adding razer.devices.syncEffects method to DBus")
+        self.add_dbus_method('razer.devices', 'syncEffects', self.sync_effects, in_signature='b')
+        self.logger.info("Adding razer.devices.syncEffects method to DBus")
+        self.add_dbus_method('razer.devices', 'getSyncEffects', self.get_sync_effects, out_signature='b')
+        self.logger.info("Adding razer.daemon.version method to DBus")
+        self.add_dbus_method('razer.daemon', 'version', self.version, out_signature='s')
+        self.logger.info("Adding razer.daemon.stop method to DBus")
+        self.add_dbus_method('razer.daemon', 'stop', self.stop)
+
+        # TODO remove
+        self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
+        # TODO ======
+
+    @dbus.service.signal('razer.devices')
+    def device_removed(self):
+        self.logger.debug("Emitted Device Remove Signal")
+
+    @dbus.service.signal('razer.devices')
+    def device_added(self):
+        self.logger.debug("Emitted Device Added Signal")
 
     def _init_signals(self):
         """
