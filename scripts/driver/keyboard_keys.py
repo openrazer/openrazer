@@ -4,8 +4,10 @@ Simple program to walk through each key, illuminating it red so I can see
 what element in the 22 RGB list each key referrs to.
 """
 
-colour_file = '/sys/bus/hid/drivers/razerkbd/0003:1532:0203.000A/matrix_custom_frame'
-custom_mode = '/sys/bus/hid/drivers/razerkbd/0003:1532:0203.000A/matrix_effect_custom'
+import glob
+
+colour_file = glob.glob('/sys/bus/hid/drivers/razerkbd/0*/matrix_custom_frame')[0]
+custom_mode = glob.glob('/sys/bus/hid/drivers/razerkbd/0*/matrix_effect_custom')[0]
 
 
 def clear_row(row_num):
