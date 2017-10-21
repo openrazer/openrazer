@@ -102,7 +102,7 @@ def install_example_config_file():
         return
 
     try:
-        os.makedirs(os.dirname(CONF_FILE), exist_ok=True)
+        os.makedirs(os.path.dirname(CONF_FILE), exist_ok=True)
         if os.path.exists(EXAMPLE_CONF_FILE):
             shutil.copy(EXAMPLE_CONF_FILE, CONF_FILE)
         else:
