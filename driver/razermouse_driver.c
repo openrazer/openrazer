@@ -2165,7 +2165,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_state);
             break;
 
-	    case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
+        case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
@@ -2403,7 +2403,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_backlight_led_state);
             break;
 
-		case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
+        case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);

@@ -321,7 +321,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
         device_type = "Razer Blade Stealth (Late 2016)\n";
         break;
-    
+
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
         device_type = "Razer Blade Stealth (Mid 2017)\n";
         break;
@@ -337,7 +337,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
         device_type = "Razer Blade (Late 2016)\n";
         break;
-        
+
     case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
         device_type = "Razer Blade Pro (2017)\n";
         break;
@@ -1726,7 +1726,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
             break;
-            
+
 
         case USB_DEVICE_ID_RAZER_TARTARUS:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
