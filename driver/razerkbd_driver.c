@@ -1040,9 +1040,9 @@ static ssize_t razer_attr_read_set_logo(struct device *dev, struct device_attrib
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_led_effect(VARSTORE, LOGO_LED);
-    struct razer_report response;  
+    struct razer_report response;
     int state;
-    
+
     // Blade laptops don't use effect for logo on/off, and mode 2 ("blink") is technically unsupported.
     if (is_blade_laptop(dev))
         report = razer_chroma_standard_get_led_state(VARSTORE, LOGO_LED);
