@@ -1030,7 +1030,6 @@ static int has_inverted_led_state(struct device *dev)
     case USB_DEVICE_ID_RAZER_BLADE_QHD:
     /* case USB_DEVICE_ID_RAZER_BLADE_LATE_2016: */
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
-    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
     case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
         return 1;
     default:
