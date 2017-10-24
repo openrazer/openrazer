@@ -141,12 +141,13 @@ def run():
     install_example_config_file()
 
     os.makedirs(args.run_dir, exist_ok=True)
+    # move to Daemonize when daemonize-2.4 is available
+    os.chdir(args.run_dir)
     daemon = Daemonize(app="openrazer-daemon",
                        pid=os.path.join(args.run_dir, "openrazer-daemon.pid"),
                        action=run_daemon,
                        foreground=args.foreground,
-                       verbose=args.verbose,
-                       chdir=args.run_dir)
+                       verbose=args.verbose)
     daemon.start()
 
 if __name__ == "__main__":
