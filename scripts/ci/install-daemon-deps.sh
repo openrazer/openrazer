@@ -3,6 +3,8 @@
 # Ubuntus python3-daemonize version is outdated. Grab and install it manually.
 curl -L -O https://launchpad.net/~openrazer/+archive/ubuntu/daily/+files/python3-daemonize_2.4.7-xenial_all.deb
 dpkg -i python3-daemonize_2.4.7-xenial_all.deb
+curl -L -O https://launchpad.net/~z3ntu/+archive/ubuntu/experiments/+files/python3-evdev_0.7.0-4_amd64.deb
+dpkg -i python3-evdev_0.7.0-4_amd64.deb
 apt-get -f -y install
 
 apt-get -y install \
