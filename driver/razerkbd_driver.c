@@ -342,9 +342,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
         device_type = "Razer Blade Pro (2017)\n";
         break;
-        
+
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
-        device_type = "Razer Blade Stealth (Late 2017)\n";    
+        device_type = "Razer Blade Stealth (Late 2017)\n";
+        break;
 
     case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
         device_type = "Razer Tartarus Chroma\n";
