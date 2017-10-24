@@ -1050,7 +1050,7 @@ static ssize_t razer_attr_read_set_logo(struct device *dev, struct device_attrib
     int state;
 
     // Blade laptops don't use effect for logo on/off, and mode 2 ("blink") is technically unsupported.
-    if (is_blade_laptop(dev))
+    if (is_blade_laptop(usb_dev))
         report = razer_chroma_standard_get_led_state(VARSTORE, LOGO_LED);
 
     response = razer_send_payload(usb_dev, &report);
@@ -1079,7 +1079,7 @@ static ssize_t razer_attr_write_set_logo(struct device *dev, struct device_attri
 
     // Blade laptops are... different. They use state instead of effect.
     // Note: This does allow setting of mode 2 ("blink"), but this is an undocumented feature.
-    if (is_blade_laptop(dev) && (state == 0 || state == 1)) {
+    if (is_blade_laptop(usb_dev) && (state == 0 || state == 1)) {
         report = razer_chroma_standard_set_led_state(VARSTORE, LOGO_LED, state);
     } else {
         report = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, state);
