@@ -34,6 +34,10 @@ class RazerKrakenClassic(__RazerDevice):
     def _close(self):
         super(RazerKrakenClassic, self)._close()
 
+    @property
+    def hid_request_index(self):
+        return None
+
     @staticmethod
     def decode_bitfield(bitfield):
         return {
@@ -108,6 +112,10 @@ class RazerKraken(__RazerDevice):
 
     def _close(self):
         super(RazerKraken, self)._close()
+
+    @property
+    def hid_request_index(self):
+        return None
 
     @staticmethod
     def decode_bitfield(bitfield):
@@ -192,6 +200,10 @@ class RazerKrakenV2(__RazerDevice):
 
     def _close(self):
         super(RazerKrakenV2, self)._close()
+
+    @property
+    def hid_request_index(self):
+        return None
 
     @staticmethod
     def decode_bitfield(bitfield):

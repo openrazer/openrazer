@@ -8,7 +8,17 @@ from openrazer_daemon.misc.key_event_management import KeyboardKeyManager as _Ke
 from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
 
 
-class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
+class _RazerKeyboard(_RazerDeviceBrightnessSuspend):
+    @property
+    def hid_response_index(self):
+        return 0x01
+
+    @property
+    def hid_request_index(self):
+        return 0x01
+
+
+class _MacroKeyboard(_RazerKeyboard):
     """
     Keyboard class
 
@@ -39,7 +49,7 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
-class RazerNostromo(_RazerDeviceBrightnessSuspend):
+class RazerNostromo(_RazerKeyboard):
     """
     Class for the Razer Nostromo
     """
@@ -80,7 +90,7 @@ class RazerNostromo(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
-class RazerTartarus(_RazerDeviceBrightnessSuspend):
+class RazerTartarus(_RazerKeyboard):
     """
     Class for the Razer Tartarus
     """
@@ -118,7 +128,7 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
-class RazerTartarusChroma(_RazerDeviceBrightnessSuspend):
+class RazerTartarusChroma(_RazerKeyboard):
     """
     Class for the Razer Tartarus Chroma
     """
@@ -156,7 +166,7 @@ class RazerTartarusChroma(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
-class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
+class RazerOrbweaver(_RazerKeyboard):
     """
     Class for the Razer Orbweaver
     """
@@ -196,7 +206,7 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
-class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
+class RazerOrbweaverChroma(_RazerKeyboard):
     """
     Class for the Razer Orbweaver Chroma
     """
@@ -555,6 +565,10 @@ class RazerBladeStealth(_MacroKeyboard):
 
         self.ripple_manager.close()
 
+    @property
+    def hid_request_index(self):
+        return None
+
 
 class RazerBladeStealthLate2016(_MacroKeyboard):
     """
@@ -593,6 +607,10 @@ class RazerBladeStealthLate2016(_MacroKeyboard):
 
         self.ripple_manager.close()
 
+    @property
+    def hid_request_index(self):
+        return None
+
 
 class RazerBladeProLate2016(_MacroKeyboard):
     """
@@ -630,6 +648,10 @@ class RazerBladeProLate2016(_MacroKeyboard):
 
         self.ripple_manager.close()
 
+    @property
+    def hid_request_index(self):
+        return None
+
 
 class RazerBladeLate2016(_MacroKeyboard):
     """
@@ -666,6 +688,10 @@ class RazerBladeLate2016(_MacroKeyboard):
         super(RazerBladeLate2016, self)._close()
 
         self.ripple_manager.close()
+
+    @property
+    def hid_request_index(self):
+        return None
 
 
 class RazerBladeQHD(_MacroKeyboard):
@@ -705,6 +731,10 @@ class RazerBladeQHD(_MacroKeyboard):
         super(RazerBladeQHD, self)._close()
 
         self.ripple_manager.close()
+
+    @property
+    def hid_request_index(self):
+        return None
 
 
 class RazerBlackWidow2016(_MacroKeyboard):
@@ -892,6 +922,14 @@ class RazerAnansi(_MacroKeyboard):
 
     def _close(self):
         super(RazerAnansi, self)._close()
+
+    @property
+    def hid_response_index(self):
+        return 0x02
+
+    @property
+    def hid_request_index(self):
+        return 0x02
 
 
 class RazerDeathStalkerExpert(_MacroKeyboard):
@@ -1100,4 +1138,8 @@ class RazerBladeStealthLate2017(_MacroKeyboard):
 
         self.ripple_manager.close()
 
+
+    @property
+    def hid_request_index(self):
+        return None
 

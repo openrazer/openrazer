@@ -34,3 +34,6 @@ class RazerChromaMugHolder(_RazerDeviceBrightnessSuspend):
 
     def _close(self):
         super(RazerChromaMugHolder, self)._close()
+
+    def get_hidraw_serial(self):
+        return ''

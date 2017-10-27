@@ -39,6 +39,7 @@ def parse_args():
 
     parser.add_argument('-r', '--respawn', action='store_true', help='Stop any existing daemon first, if one is running.')
     parser.add_argument('-s', '--stop', action='store_true', help='Gracefully stop the existing daemon.')
+    parser.add_argument('--use-system-bus', action='store_true', help='Run on the system bus', default=False)
 
     parser.add_argument('--config', type=str, help='Location of the config file', default=CONF_FILE)
     parser.add_argument('--run-dir', type=str, help='Location of the run directory', default=RAZER_RUNTIME_DIR)
@@ -114,11 +115,18 @@ def install_example_config_file():
 
 def run_daemon():
     global args
+
+    if args.use_system_bus:
+        bustype = 'system'
+    else:
+        bustype = 'session'
+
     daemon = RazerDaemon(verbose=args.verbose,
                          log_dir=args.log_dir,
                          console_log=args.foreground,
                          config_file=args.config,
-                         test_dir=args.test_dir)
+                         test_dir=args.test_dir,
+                         bustype=bustype)
     try:
         daemon.run()
     except KeyboardInterrupt:

@@ -43,7 +43,7 @@ class RazerDeviceFactory(__BaseDeviceFactory):
         :rtype: RazerDevice
         """
         if daemon_dbus is None:
-            session_bus = _dbus.SessionBus()
+            session_bus = _dbus.SystemBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
 
         device_dbus = _dbus.Interface(daemon_dbus, "razer.device.misc")

@@ -9,7 +9,7 @@ from openrazer_daemon import keyboard
 class RazerMacro(object):
     def __init__(self, serial:str, daemon_dbus=None, capabilities=None):
         if daemon_dbus is None:
-            session_bus = _dbus.SessionBus()
+            session_bus = _dbus.SystemBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
 
         if capabilities is None:

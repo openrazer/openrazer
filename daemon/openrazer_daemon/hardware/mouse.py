@@ -2,7 +2,7 @@
 Mouse class
 """
 import re
-from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice
+from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice, RazerReport as _RazerReport
 from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 # TODO replace with plain import
 from openrazer_daemon.dbus_services.dbus_methods.deathadder_chroma import get_logo_brightness as _da_get_logo_brightness, set_logo_brightness as _da_set_logo_brightness, \
@@ -143,11 +143,21 @@ class RazerImperator(__RazerDevice):
 
     DPI_MAX = 6400
 
+    USE_HIDRAW = True
+
+    DEVICE_NAME = "Razer Imperator 2012"
+
     def _resume_device(self):
         self.logger.debug("Imperator doesnt have suspend/resume")
 
     def _suspend_device(self):
         self.logger.debug("Imperator doesnt have suspend/resume")
+
+    def get_dpi_xy(self):
+        return self.get_misc_dpi_xy(_RazerReport.VARSTORE)
+
+    def set_dpi_xy(self, dpi_x, dpi_y):
+        return self.set_misc_dpi_xy(_RazerReport.VARSTORE, dpi_x, dpi_y)
 
 
 class RazerOuroboros(__RazerDevice):
@@ -250,7 +260,7 @@ class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
     DPI_MAX = 8200
 
 
-class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
+class RazerDeathAdderChroma(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer DeathAdder Chroma
     """
@@ -272,8 +282,12 @@ class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
 
     DPI_MAX = 10000
 
+    USE_HIDRAW = True
+
+    DEVICE_NAME = "Razer DeathAdder Chroma"
+
     def __init__(self, *args, **kwargs):
-        super(RazerDeathadderChroma, self).__init__(*args, **kwargs)
+        super(RazerDeathAdderChroma, self).__init__(*args, **kwargs)
 
         # Set brightness to max and LEDs to on, on startup
         _da_set_logo_brightness(self, 100)
@@ -343,6 +357,10 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
     }
 
     DPI_MAX = 16000
+
+    @property
+    def hid_transaction_id(self):
+        return 0x3f
 
     def __init__(self, *args, **kwargs):
         super(RazerNagaHexV2, self).__init__(*args, **kwargs)
@@ -627,6 +645,10 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
 
     DPI_MAX = 16000
 
+    @property
+    def hid_transaction_id(self):
+        return 0x3f
+
     def _suspend_device(self):
         """
         Suspend the device
@@ -715,6 +737,9 @@ class RazerMamba2012Wireless(__RazerDeviceBrightnessSuspend):
 
         self._battery_manager.close()
 
+    def get_hidraw_serial(self):
+        return ''
+
 
 class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
     """
@@ -737,6 +762,9 @@ class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
     }
 
     DPI_MAX = 6400
+
+    def get_hidraw_serial(self):
+        return ''
 
 
 class RazerNaga2014(__RazerDevice):
@@ -816,6 +844,15 @@ class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
     }
 
     MAX_DPI = 4000
+
+    def get_hidraw_serial(self):
+        return ''
+
+    def get_hidraw_device_mode(self):
+        return '0:0'
+
+    def set_hidraw_device_mode(self, mode_id, param):
+        pass
 
     def _suspend_device(self):
         """
