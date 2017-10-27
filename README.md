@@ -115,6 +115,7 @@ The following applications complement and interact with this driver:
 * [RazerGenie](https://github.com/z3ntu/RazerGenie) - Qt application for configuring your Razer devices under GNU/Linux.
 * [MacroW](https://github.com/igorbb/MacroW) - a simple tool to record and play keyboard macros. (though the dameon does on the fly recording ;) )
 * [RazerCommander](https://github.com/GabMus/razerCommander) - Simple GUI written in Gtk3
+* [Chroma Feedback](https://github.com/redaxmedia/chroma-feedback) - Turn your Razer keyboard, mouse or headphone into a extreme feedback device for Travis CI
 
 ## Status of Code
 
