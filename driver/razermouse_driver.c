@@ -138,6 +138,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Abyssus 2014\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
+        device_type = "Razer Abyssus 1800\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_IMPERATOR:
         device_type = "Razer Imperator 2012\n";
         break;
@@ -767,6 +771,7 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
     // Damn naga hex only uses 1 byte per x, y dpi
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
         if(count == 1) {
             dpi_x_byte = buf[0];
             dpi_y_byte = buf[0];
@@ -860,6 +865,7 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
 
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
         report = razer_chroma_misc_get_dpi_xy_byte();
         break;
 
@@ -882,7 +888,8 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
 
     // Byte, Byte for DPI not Short, Short
     if (device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX_RED) { // NagaHex is crap uses only byte for dpi
+        device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX_RED ||
+        device->usb_pid == USB_DEVICE_ID_RAZER_ABYSSUS_1800) { // NagaHex is crap uses only byte for dpi
         dpi_x = response.arguments[0];
         dpi_y = response.arguments[1];
     } else {
@@ -2193,6 +2200,11 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
             break;
 
+        case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            break;
         }
 
     }
@@ -2430,6 +2442,12 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
             break;
+
+        case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            break;
         }
 
     }
@@ -2446,6 +2464,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
  */
 static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_2011) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_1800) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX_RED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_2014) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX) },
