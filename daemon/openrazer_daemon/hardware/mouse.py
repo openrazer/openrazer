@@ -857,3 +857,17 @@ class RazerAbyssusV2(__RazerDeviceBrightnessSuspend):
         _da_set_logo_brightness(self, logo_brightness)
         _da_set_scroll_brightness(self, scroll_brightness)
         self.disable_notify = False
+
+
+class RazerAbyssus1800(__RazerDevice):
+    """
+    Class for the Razer Abyssus 1800
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0020
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
+               'get_logo_active', 'set_logo_active']
+
+    DPI_MAX = 1800
+
+    # TODO: Find device images
