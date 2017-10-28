@@ -11,10 +11,9 @@ class RazerCore(__RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0215
     HAS_MATRIX = True
-    MATRIX_DIMS = [1, 9]  # 6 Rows, 22 Cols
+    MATRIX_DIMS = [1, 9]
 
     RAZER_URLS = {
-        "store": "https://www.razerzone.com/gaming-systems/razer-core",
         "top_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-2.png",
         "side_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-6.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-3.png"
