@@ -252,7 +252,7 @@ class RazerDeathAdderChroma(__RazerDeviceBrightnessSuspend):
     DPI_MAX = 10000
 
     def __init__(self, *args, **kwargs):
-        super(RazerDeathadderChroma, self).__init__(*args, **kwargs)
+        super(RazerDeathAdderChroma, self).__init__(*args, **kwargs)
 
         # Set brightness to max and LEDs to on, on startup
         _da_set_logo_brightness(self, 100)

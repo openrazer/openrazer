@@ -477,7 +477,7 @@ class RazerBlackWidowXTournamentEditionChroma(_MacroKeyboard):
     }
 
     def __init__(self, *args, **kwargs):
-        super(RazerBlackWidowXChromaTournamentEdition, self).__init__(*args, **kwargs)
+        super(RazerBlackWidowXTournamentEditionChroma, self).__init__(*args, **kwargs)
 
         self.ripple_manager = _RippleManager(self, self._device_number)
 
@@ -485,7 +485,7 @@ class RazerBlackWidowXTournamentEditionChroma(_MacroKeyboard):
         """
         Close the key manager
         """
-        super(RazerBlackWidowXChromaTournamentEdition, self)._close()
+        super(RazerBlackWidowXTournamentEditionChroma, self)._close()
 
         self.ripple_manager.close()
 
@@ -699,7 +699,7 @@ class RazerBlackWidowUltimate2016(_MacroKeyboard):
     }
 
     def __init__(self, *args, **kwargs):
-        super(RazerBlackWidow2016, self).__init__(*args, **kwargs)
+        super(RazerBlackWidowUltimate2016, self).__init__(*args, **kwargs)
 
         self.ripple_manager = _RippleManager(self, self._device_number)
 
@@ -707,7 +707,7 @@ class RazerBlackWidowUltimate2016(_MacroKeyboard):
         """
         Close the key manager
         """
-        super(RazerBlackWidow2016, self)._close()
+        super(RazerBlackWidowUltimate2016, self)._close()
 
         self.ripple_manager.close()
 
