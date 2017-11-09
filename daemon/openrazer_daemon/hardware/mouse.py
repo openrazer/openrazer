@@ -732,7 +732,7 @@ class RazerNaga2014(__RazerDevice):
         self.disable_notify = True
         _da_set_logo_active(self, False)
         _da_set_scroll_active(self, False)
-        _da_get_backlight_active(self, False)
+        _da_set_backlight_active(self, False)
         self.disable_notify = False
 
     def _resume_device(self):
