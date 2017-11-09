@@ -48,7 +48,7 @@ class RazerDaemon(DBusService):
 
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
 
-        setproctitle.setproctitle('openrazer-daemon')
+        setproctitle.setproctitle('openrazer-daemon')  # pylint: disable=no-member
 
         # Expanding ~ as python doesnt do it by default, also creating dirs if needed
         try:
