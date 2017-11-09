@@ -19,6 +19,7 @@ MSG5 = ('effect', None, 'setPulsate')
 def logger_mock(*args):
     return unittest.mock.MagicMock()
 
+
 class DummyHardwareDevice(object):
     def __init__(self):
         self.observer_list = []
@@ -42,6 +43,7 @@ class DummyHardwareDevice(object):
     def setStatic(self):
         raise Exception("test")
 
+
 class DummyHardwareBlackWidowStandard(DummyHardwareDevice):
     def setStatic(self):
         self.effect_call = ('setStatic',)
@@ -49,12 +51,14 @@ class DummyHardwareBlackWidowStandard(DummyHardwareDevice):
     def setPulsate(self):
         self.effect_call = ('setPulsate',)
 
+
 class DummyHardwareBlackWidowChroma(DummyHardwareDevice):
     def setStatic(self, red, green, blue):
         self.effect_call = ('setStatic', red, green, blue)
 
     def setBreathSingle(self, red, green, blue):
         self.effect_call = ('setBreathSingle', red, green, blue)
+
 
 class EffectSyncTest(unittest.TestCase):
     @unittest.mock.patch('openrazer_daemon.misc.effect_sync.logging.getLogger', logger_mock)
@@ -73,7 +77,7 @@ class EffectSyncTest(unittest.TestCase):
 
     def test_get_num_arguments(self):
 
-        func_2_args = lambda x, y: x+y
+        def func_2_args(x, y): return x + y
 
         num_args = self.effect_sync.get_num_arguments(func_2_args)
 
@@ -152,6 +156,3 @@ class EffectSyncTest(unittest.TestCase):
 
         # Logger should have called .exception
         self.assertTrue(self.effect_sync._logger.exception.called)
-
-
-

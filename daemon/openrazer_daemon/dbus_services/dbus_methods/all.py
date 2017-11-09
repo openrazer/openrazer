@@ -15,7 +15,7 @@ def version(self):
     """
     self.logger.debug("DBus call version")
 
-    #Caching
+    # Caching
     if 'driver_version' in self.method_args:
         return self.method_args['driver_version']
 
@@ -191,4 +191,3 @@ def get_matrix_dims(self):
     self.logger.debug("DBus call has_matrix")
 
     return list(self.MATRIX_DIMS)
-

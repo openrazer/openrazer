@@ -430,6 +430,7 @@ class RazerDeviceBrightnessSuspend(RazerDevice):
 
     Suspend functions
     """
+
     def _suspend_device(self):
         """
         Suspend the device

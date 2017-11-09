@@ -65,7 +65,7 @@ def set_low_battery_threshold(self, threshold):
 
     driver_path = self.get_driver_path('charge_low_threshold')
 
-    threshold = math.floor((threshold/100) * 255)
+    threshold = math.floor((threshold / 100) * 255)
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(threshold))
@@ -165,7 +165,6 @@ def max_dpi(self):
         return 500
 
 
-
 @endpoint('razer.device.misc', 'setPollRate', in_sig='q')
 def set_poll_rate(self, rate):
     """
@@ -202,5 +201,3 @@ def get_poll_rate(self):
         result = int(result.strip())
 
     return result
-
-

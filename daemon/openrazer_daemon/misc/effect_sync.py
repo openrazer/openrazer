@@ -4,10 +4,12 @@ Class to manage syncing of effects
 import inspect
 import logging
 
+
 class EffectSync(object):
     """
     Class which deals with receiving effect events from other devices
     """
+
     def __init__(self, parent, device_number):
         self._logger = logging.getLogger('razer.device{0}.effect_sync'.format(device_number))
         self._parent = parent
@@ -69,7 +71,7 @@ class EffectSync(object):
                             effect_func()
                         else:
                             # BW -> Chroma
-                            effect_func(0x0, 0xFF, 0x00) # Green
+                            effect_func(0x0, 0xFF, 0x00)  # Green
 
             else:
                 # We dont have method
@@ -77,12 +79,12 @@ class EffectSync(object):
                     # BW -> Chroma?
                     effect_func = getattr(self._parent, 'setBreathSingle', None)
                     if effect_func is not None:
-                        effect_func(0x00, 0xFF, 0x00) # Green
+                        effect_func(0x00, 0xFF, 0x00)  # Green
                 if effect_name in ('setBreathSingle', 'setBreathRandom', 'setBreathDual'):
                     # Chroma -> BW?
                     effect_func = getattr(self._parent, 'setPulsate', None)
                     if effect_func is not None:
-                        effect_func() # Pulsate
+                        effect_func()  # Pulsate
 
         except Exception as err:
             self._logger.exception("Caught exception trying to sync effects.", exc_info=err)

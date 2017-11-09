@@ -204,7 +204,6 @@ class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
         "perspective_img": "https://assets2.razerzone.com/images/orbweaver-chroma/518c021598fd22a51a714a1b276d1e9e-orbweaver-crhoma-gallery-04.jpg"
     }
 
-
     def __init__(self, *args, **kwargs):
         super(RazerOrbweaverChroma, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point

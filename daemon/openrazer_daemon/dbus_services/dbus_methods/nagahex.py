@@ -4,6 +4,7 @@ Naga Hex DPI
 import struct
 from openrazer_daemon.dbus_services import endpoint
 
+
 @endpoint('razer.device.dpi', 'setDPI', in_sig='qq')
 def set_dpi_xy_byte(self, dpi_x, dpi_y):
     """

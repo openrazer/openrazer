@@ -31,6 +31,7 @@ from openrazer_daemon.dbus_services.service import DBusService
 from openrazer_daemon.device import DeviceCollection
 from openrazer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 
+
 class RazerDaemon(DBusService):
     """
     Daemon class
@@ -159,7 +160,7 @@ class RazerDaemon(DBusService):
 
         if log_dir is not None:
             log_file = os.path.join(log_dir, 'razer.log')
-            file_logger = logging.handlers.RotatingFileHandler(log_file, maxBytes=16777216, backupCount=10) # 16MiB
+            file_logger = logging.handlers.RotatingFileHandler(log_file, maxBytes=16777216, backupCount=10)  # 16MiB
             file_logger.setLevel(log_level)
             file_logger.setFormatter(formatter)
             logger.addHandler(file_logger)

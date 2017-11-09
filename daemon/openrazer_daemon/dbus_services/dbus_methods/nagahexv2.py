@@ -1,5 +1,6 @@
 from openrazer_daemon.dbus_services import endpoint
 
+
 @endpoint('razer.device.lighting.logo', 'setLogoStatic', in_sig='yyy')
 def set_logo_static_naga_hex_v2(self, red, green, blue):
     """

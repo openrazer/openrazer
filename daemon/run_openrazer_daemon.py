@@ -31,6 +31,7 @@ LOG_PATH = os.path.join(RAZER_DATA_HOME, 'logs')
 
 args = None
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
 
@@ -161,6 +162,7 @@ def run():
                        chdir=args.run_dir,
                        logger=logger)
     daemon.start()
+
 
 if __name__ == "__main__":
     run()
