@@ -50,7 +50,7 @@ class RazerMouse(__RazerDevice):
             raise NotImplementedError()
 
     @dpi.setter
-    def dpi(self, value:tuple):
+    def dpi(self, value: tuple):
         """
         Set mouse dpi
 
@@ -69,7 +69,7 @@ class RazerMouse(__RazerDevice):
             if not isinstance(dpi_x, int) or not isinstance(dpi_y, int):
                 raise ValueError("DPI X or Y is not an integer, X:{0} Y:{1}".format(type(dpi_x), type(dpi_y)))
 
-            if dpi_x < 0 or dpi_x > 16000: # TODO add in max dpi option
+            if dpi_x < 0 or dpi_x > 16000:  # TODO add in max dpi option
                 raise ValueError("DPI X either too small or too large, X:{0}".format(dpi_x))
             if dpi_y < 0 or dpi_y > 16000:  # TODO add in max dpi option
                 raise ValueError("DPI Y either too small or too large, Y:{0}".format(dpi_y))
@@ -93,9 +93,8 @@ class RazerMouse(__RazerDevice):
         else:
             raise NotImplementedError()
 
-
     @poll_rate.setter
-    def poll_rate(self, poll_rate:int):
+    def poll_rate(self, poll_rate: int):
         """
         Set poll rate of device
 

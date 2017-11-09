@@ -14,6 +14,7 @@ KEY_ACTION = {
     'repeat': 0x02
 }
 
+
 def touch(fname, times=None):
     with open(fname, 'a'):
         os.utime(fname, times)
@@ -182,6 +183,7 @@ class FakeDevice(object):
                 os.chmod(path, 0o660)
 
             shutil.rmtree(self._tmp_dir)
+
 
 if __name__ == '__main__':
 

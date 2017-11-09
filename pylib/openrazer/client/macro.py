@@ -7,7 +7,7 @@ from openrazer_daemon import keyboard
 
 
 class RazerMacro(object):
-    def __init__(self, serial:str, daemon_dbus=None, capabilities=None):
+    def __init__(self, serial: str, daemon_dbus=None, capabilities=None):
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
@@ -28,7 +28,7 @@ class RazerMacro(object):
         macro_key_mapping = {}
         for bind_key, macro_list in macro_structure.items():
             macro_objects = []
-            for macro_dict  in macro_list:
+            for macro_dict in macro_list:
                 macro_obj = _daemon_macro.macro_dict_to_obj(macro_dict)
                 macro_objects.append(macro_obj)
 
@@ -36,7 +36,7 @@ class RazerMacro(object):
 
         return macro_key_mapping
 
-    def add_macro(self, bind_key:str, macro_object_sequence:list):
+    def add_macro(self, bind_key: str, macro_object_sequence: list):
         """
         Add macro to specified bind key
 
@@ -61,7 +61,7 @@ class RazerMacro(object):
         json_payload = _json.dumps(macro_list)
         self._macro_dbus.addMacro(bind_key, json_payload)
 
-    def del_macro(self, bind_key:str):
+    def del_macro(self, bind_key: str):
         if bind_key not in keyboard.KEY_MAPPING:
             raise ValueError("Key {0} is not in openrazer.keyboard.KEY_MAPPING".format(bind_key))
         else:
@@ -79,7 +79,7 @@ class RazerMacro(object):
             self._macro_dbus.getModeModifier(value)
 
     @staticmethod
-    def create_url_macro_item(url:str) -> _daemon_macro.MacroURL:
+    def create_url_macro_item(url: str) -> _daemon_macro.MacroURL:
         """
         Create a macro object that opens a URL in a browser
 
@@ -92,7 +92,7 @@ class RazerMacro(object):
         return _daemon_macro.MacroURL(url)
 
     @staticmethod
-    def create_script_macro_item(script_path:str, script_args:str=None) -> _daemon_macro.MacroScript:
+    def create_script_macro_item(script_path: str, script_args: str=None) -> _daemon_macro.MacroScript:
         """
         Create a macro object that runs a script
 
@@ -109,7 +109,7 @@ class RazerMacro(object):
         return _daemon_macro.MacroScript(script_path, script_args)
 
     @staticmethod
-    def create_keypress_up_macro_item(key_name:str, pre_pause:int=0) -> _daemon_macro.MacroKey:
+    def create_keypress_up_macro_item(key_name: str, pre_pause: int=0) -> _daemon_macro.MacroKey:
         """
         Create a macro action that consists of a key release event
 
@@ -125,7 +125,7 @@ class RazerMacro(object):
         return _daemon_macro.MacroKey(key_name, pre_pause, 'UP')
 
     @staticmethod
-    def create_keypress_down_macro_item(key_name: str, pre_pause:int=0) -> _daemon_macro.MacroKey:
+    def create_keypress_down_macro_item(key_name: str, pre_pause: int=0) -> _daemon_macro.MacroKey:
         """
         Create a macro action that consists of a key press event
 
@@ -141,7 +141,7 @@ class RazerMacro(object):
         return _daemon_macro.MacroKey(key_name, pre_pause, 'DOWN')
 
     @classmethod
-    def create_keypress_macro_item(cls, key_name: str, pre_pause:int=0) -> list:
+    def create_keypress_macro_item(cls, key_name: str, pre_pause: int=0) -> list:
         """
         Create a macro action that consists of a key press and release event
 
