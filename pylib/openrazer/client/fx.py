@@ -1044,8 +1044,8 @@ class Frame(object):
         self._fb1 = _np.copy(self._matrix)
 
     def to_framebuffer_or(self):
-        self._fb1 = _np.bitwise_or(self._fb1, self._matrix)
+        self._fb1 = _np.bitwise_or(self._fb1, self._matrix)  # pylint: disable=no-member
 
     def draw_with_fb_or(self):
-        self._matrix = _np.bitwise_or(self._fb1, self._matrix)
+        self._matrix = _np.bitwise_or(self._fb1, self._matrix)  # pylint: disable=no-member
         return bytes(self)

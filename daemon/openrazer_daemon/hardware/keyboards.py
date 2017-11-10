@@ -902,7 +902,7 @@ class RazerDeathStalkerChroma(_MacroKeyboard):
         """
         Close the key manager
         """
-        super(RazerBlackWidowChroma, self)._close()
+        super(RazerDeathStalkerChroma, self)._close()
 
         self.ripple_manager.close()
 
@@ -977,7 +977,7 @@ class RazerBladeStealthMid2017(_MacroKeyboard):
         """
         Close the key manager
         """
-        super(RazerBladeStealthLate2016, self)._close()
+        super(RazerBladeStealthMid2017, self)._close()
 
         self.ripple_manager.close()
 

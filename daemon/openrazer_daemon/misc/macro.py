@@ -209,7 +209,6 @@ def macro_dict_to_obj(macro_dict):
     :raises ValueError: When a type isn't known
     """
 
-    # pylint: disable=redefined-variable-type
     if macro_dict['type'] == 'MacroKey':
         result = MacroKey.from_dict(macro_dict)
     elif macro_dict['type'] == 'MacroURL':
