@@ -3,6 +3,7 @@ Tartarus Chroma Effects
 """
 from openrazer_daemon.dbus_services import endpoint
 
+
 @endpoint('razer.device.lighting.profile_led', 'getRedLED', out_sig='b')
 def tartarus_get_profile_led_red(self):
     """

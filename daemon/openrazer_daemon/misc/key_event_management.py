@@ -83,7 +83,7 @@ class KeyWatcher(threading.Thread):
         # Event Seconds, Event Microseconds, Event Type, Event Code, Event Value
         ev_sec, ev_usec, ev_type, ev_code, ev_value = struct.unpack(EVENT_FORMAT, data)
 
-        if ev_type != 0x01: # input-event-codes.h EV_KEY 0x01
+        if ev_type != 0x01:  # input-event-codes.h EV_KEY 0x01
             return None, None, None
 
         if ev_value == 0:
@@ -198,6 +198,7 @@ class KeyWatcher(threading.Thread):
         :rtype: bool
         """
         return self._shutdown
+
     @shutdown.setter
     def shutdown(self, value):
         """
@@ -269,8 +270,7 @@ class KeyboardKeyManager(object):
         if self._should_grab_event_files:
             self.grab_event_files(True)
 
-
-    #TODO add property for enabling key stats?
+    # TODO add property for enabling key stats?
 
     @property
     def temp_key_store(self):
@@ -358,13 +358,13 @@ class KeyboardKeyManager(object):
         if not self._event_files_locked and self._should_grab_event_files:
             self.grab_event_files(True)
 
-        if key_press == 'autorepeat': # TODO not done right yet
-           # If its brightness then convert autorepeat to key presses
-           if key_id in (190, 194):
-               key_press = 'press'
-           else:
-               # Quit out early
-               return
+        if key_press == 'autorepeat':  # TODO not done right yet
+            # If its brightness then convert autorepeat to key presses
+            if key_id in (190, 194):
+                key_press = 'press'
+            else:
+                # Quit out early
+                return
 
         now = datetime.datetime.now()
 
@@ -506,7 +506,6 @@ class KeyboardKeyManager(object):
 
         except KeyError as err:
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
-
 
     def add_kb_macro(self):
         """
@@ -694,7 +693,6 @@ class GamepadKeyManager(KeyboardKeyManager):
         if not self._event_files_locked:
             self.grab_event_files(True)
 
-
         now = datetime.datetime.now()
 
         # Remove expired keys from store
@@ -739,9 +737,9 @@ class GamepadKeyManager(KeyboardKeyManager):
                 self._temp_key_store.append((now + self._temp_expire_time, self.GAMEPAD_KEY_MAPPING[key_name], colour))
 
             # if self._testing:
-            #if key_press:
+            # if key_press:
                 #self._logger.debug("Got Key: {0} Down".format(key_name))
-            #else:
+            # else:
                 #self._logger.debug("Got Key: {0} Up".format(key_name))
 
             # Logic for mode switch modifier
@@ -803,6 +801,7 @@ class MediaKeyPress(threading.Thread):
     """
     Class to run xdotool to execute media/volume keypresses
     """
+
     def __init__(self, media_key):
         super(MediaKeyPress, self).__init__()
         if media_key == 'sleep':
@@ -817,20 +816,3 @@ class MediaKeyPress(threading.Thread):
         else:
             proc = subprocess.Popen(['xdotool', 'key', self._media_key], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             proc.communicate()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

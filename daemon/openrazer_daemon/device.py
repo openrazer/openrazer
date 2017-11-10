@@ -7,6 +7,7 @@ class Device(object):
     """
     Razer Device (High level not dbus)
     """
+
     def __init__(self, device_id, device_serial, device_dbus_object):
         self._parent = None
 
@@ -25,6 +26,7 @@ class Device(object):
         :rtype: str
         """
         return self._id
+
     @property
     def serial(self):
         """
@@ -34,6 +36,7 @@ class Device(object):
         :rtype: str
         """
         return self._serial
+
     @property
     def dbus(self):
         """
@@ -79,6 +82,7 @@ class DeviceCollection(object):
 
     Can be referenced by either ID or serial
     """
+
     def __init__(self):
         self._id_map = {}
         self._serial_map = {}

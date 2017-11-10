@@ -12,6 +12,7 @@ class ScreensaverMonitor(object):
     """
     Simple class for monitoring signals on the Session Bus
     """
+
     def __init__(self, parent):
         self._logger = logging.getLogger('razer.screensaver')
         self._logger.info("Initialising DBus Screensaver Monitor")

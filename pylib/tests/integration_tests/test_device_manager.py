@@ -14,10 +14,10 @@ import openrazer._fake_driver as fake_driver
 import coverage
 
 
-
 def run_daemon(daemon_dir, driver_dir):
     # TODO console_log false
     openrazer_daemon.daemon.RazerDaemon(verbose=True, console_log=False, test_dir=driver_dir)
+
 
 class DeviceManagerTest(unittest.TestCase):
     @classmethod
@@ -59,7 +59,6 @@ class DeviceManagerTest(unittest.TestCase):
         self._bw_chroma.create_endpoints()
 
         self.device_manager = openrazer.client.DeviceManager()
-
 
     def test_device_list(self):
         self.assertEqual(len(self.device_manager.devices), 1)
@@ -111,8 +110,6 @@ class DeviceManagerTest(unittest.TestCase):
 
         self.assertEqual(device.capabilities, device._capabilities)
 
-
-
     def test_device_keyboard_game_mode(self):
         device = self.device_manager.devices[0]
 
@@ -132,7 +129,6 @@ class DeviceManagerTest(unittest.TestCase):
         self.assertEqual(self._bw_chroma.get('mode_macro'), '0')
         device.macro_mode_led = True
         self.assertEqual(self._bw_chroma.get('mode_macro'), '1')
-
 
         self._bw_chroma.set('mode_macro_effect', '0')
         self.assertEqual(device.macro_mode_led_effect, openrazer.client.constants.MACRO_LED_STATIC)
@@ -214,7 +210,7 @@ class DeviceManagerTest(unittest.TestCase):
         self.assertEqual(b'\xFF\x00\xFF\xFF\x00\x00', self._bw_chroma.get('mode_breath', binary=True))
 
         for r1, g1, b1, r2, g2, b2 in ((256.0, 0, 0, 0, 0, 0), (0, 256.0, 0, 0, 0, 0), (0, 0, 256.0, 0, 0, 0),
-                                 (0, 0, 0, 256.0, 0, 0), (0, 0, 0, 0, 256.0, 0), (0, 0, 0, 0, 0, 256.0)):
+                                       (0, 0, 0, 256.0, 0, 0), (0, 0, 0, 0, 256.0, 0), (0, 0, 0, 0, 0, 256.0)):
             with self.assertRaises(ValueError):
                 device.fx.breath_dual(r1, g1, b1, r2, g2, b2)
 
@@ -234,7 +230,6 @@ class DeviceManagerTest(unittest.TestCase):
         refresh_rate = 0.01
         device.fx.ripple(255, 0, 255, refresh_rate)
         time.sleep(0.1)
-
 
         custom_effect_payload = self._bw_chroma.get('set_key_row', binary=True)
         self.assertGreater(len(custom_effect_payload), 1)
@@ -276,12 +271,12 @@ class DeviceManagerTest(unittest.TestCase):
         custom_effect_payload = self._bw_chroma.get('set_key_row', binary=True)
         self.assertEqual(custom_effect_payload[:4], b'\x00\xFF\x00\xFF')
 
-        device.fx.advanced.matrix.to_framebuffer() # Save 255, 0, 255
-        device.fx.advanced.matrix.reset() # Clear FB
+        device.fx.advanced.matrix.to_framebuffer()  # Save 255, 0, 255
+        device.fx.advanced.matrix.reset()  # Clear FB
 
         device.fx.advanced.matrix.set(0, 0, (0, 255, 0))
 
-        device.fx.advanced.draw_fb_or() # Draw FB or'd with Matrix
+        device.fx.advanced.draw_fb_or()  # Draw FB or'd with Matrix
         custom_effect_payload = self._bw_chroma.get('set_key_row', binary=True)
         self.assertEqual(custom_effect_payload[:4], b'\x00\xFF\xFF\xFF')
 
@@ -333,7 +328,8 @@ class DeviceManagerTest(unittest.TestCase):
         self.assertNotIn('M2', macros)
 
         with self.assertRaises(ValueError):
-            device.macro.del_macro('M6') # Unknown key
+            device.macro.del_macro('M6')  # Unknown key
+
 
 if __name__ == "__main__":
-     unittest.main()
+    unittest.main()

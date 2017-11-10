@@ -5,6 +5,7 @@ Has an endpoint decorator to wrap a method for DBus
 """
 from functools import wraps
 
+
 def endpoint(interface_name, function_name, in_sig=None, out_sig=None, byte_arrays=False):
     """
     DBus Endpoint

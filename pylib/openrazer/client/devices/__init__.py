@@ -150,7 +150,7 @@ class RazerDevice(object):
 
         return interfaces
 
-    def _has_feature(self, object_path:str, method_name=None) -> bool:
+    def _has_feature(self, object_path: str, method_name=None) -> bool:
         """
         Checks to see if the device has said DBus method
 
@@ -175,7 +175,7 @@ class RazerDevice(object):
         else:
             return False
 
-    def has(self, capability:str) -> bool:
+    def has(self, capability: str) -> bool:
         """
         Convenience function to check capability
 
@@ -249,7 +249,7 @@ class RazerDevice(object):
         return self._dbus_interfaces['brightness'].getBrightness()
 
     @brightness.setter
-    def brightness(self, value:float):
+    def brightness(self, value: float):
         """
         Set device brightness
 
@@ -308,5 +308,5 @@ class RazerDevice(object):
 
 class BaseDeviceFactory(object):
     @staticmethod
-    def get_device(serial:str, daemon_dbus=None) -> RazerDevice:
+    def get_device(serial: str, daemon_dbus=None) -> RazerDevice:
         raise NotImplementedError()

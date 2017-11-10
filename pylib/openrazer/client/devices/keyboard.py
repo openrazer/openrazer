@@ -24,7 +24,6 @@ class RazerKeyboard(__RazerDevice):
         if self.has('macro_mode_led'):
             self._dbus_interfaces['macro_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.macromode")
 
-
     @property
     def game_mode_led(self) -> bool:
         """
@@ -39,7 +38,7 @@ class RazerKeyboard(__RazerDevice):
             return False
 
     @game_mode_led.setter
-    def game_mode_led(self, value:bool):
+    def game_mode_led(self, value: bool):
         """
         Set game mode LED state
 
@@ -66,7 +65,7 @@ class RazerKeyboard(__RazerDevice):
             return False
 
     @macro_mode_led.setter
-    def macro_mode_led(self, value:bool):
+    def macro_mode_led(self, value: bool):
         """
         Set macro mode LED state
 
@@ -94,7 +93,7 @@ class RazerKeyboard(__RazerDevice):
             return False
 
     @macro_mode_led_effect.setter
-    def macro_mode_led_effect(self, value:int):
+    def macro_mode_led_effect(self, value: int):
         """
         Set macro mode LED effect
 

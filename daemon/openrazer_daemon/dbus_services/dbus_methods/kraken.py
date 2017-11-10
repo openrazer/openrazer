@@ -61,7 +61,7 @@ def get_breath_effect_args_kraken(self):
 
             # Result could be 4 bytes (breathing1), 8 bytes (breathing2), 12 bytes (breathing3) and we need to cut of the
             # intensity value, so i thought it easier to cut it into chunks of 4, append the first 3 values to `result`
-            for chunk in [bytestring[i:i+4] for i in range(0, len(bytestring), 4)]:
+            for chunk in [bytestring[i:i + 4] for i in range(0, len(bytestring), 4)]:
                 # Get first 3 values
                 values = list(chunk)[:3]
                 # Add those 3 values into the list
@@ -85,7 +85,7 @@ def set_custom_kraken(self, rgbi):
     if len(rgbi) not in (3, 4):
         raise ValueError("List must be of 3 or 4 bytes")
 
-    #DodgyCoding
+    # DodgyCoding
     rgbi_list = list(rgbi)
     for index, item in enumerate(list(rgbi)):
         item = int(item)
@@ -99,4 +99,3 @@ def set_custom_kraken(self, rgbi):
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(bytes(rgbi_list))
-

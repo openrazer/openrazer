@@ -5,7 +5,7 @@ from openrazer.client.devices.keyboard import RazerKeyboardFactory as __RazerKey
 from openrazer.client.devices.mice import RazerMouse as __RazerMouse
 
 
-DEVICE_MAP ={
+DEVICE_MAP = {
     'firefly': __RazerFirefly,
     'keyboard': __RazerKeyboardFactory,
     'mouse': __RazerMouse,
@@ -65,5 +65,3 @@ class RazerDeviceFactory(__BaseDeviceFactory):
             device = DEVICE_MAP['default'](serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
 
         return device
-
-

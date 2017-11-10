@@ -467,7 +467,7 @@ class KeyboardColour(object):
 
         for row in range(0, 6):
             # Create 22 rgb values
-            self.rows.append([RGB() for _ in range(0,22)])
+            self.rows.append([RGB() for _ in range(0, 22)])
 
     def set_key_colour(self, row, col, colour):
         """
@@ -527,7 +527,7 @@ class KeyboardColour(object):
         """
         assert isinstance(row_id, int), "Row ID is not an int"
 
-        payload = bytes([row_id, 0x00, len(self.rows[row_id])-1])
+        payload = bytes([row_id, 0x00, len(self.rows[row_id]) - 1])
 
         for rgb in self.rows[row_id]:
             payload += bytes(rgb)
@@ -543,7 +543,7 @@ class KeyboardColour(object):
         """
         payload = b''
 
-        for row in range(0,6):
+        for row in range(0, 6):
             payload += self.get_row_binary(row)
 
         return payload
@@ -557,14 +557,14 @@ class KeyboardColour(object):
         """
         self.reset_rows()
 
-        for row_id in range (0, 6):
-            binary_blob = binary_blob[1:] # Skip first byte
+        for row_id in range(0, 6):
+            binary_blob = binary_blob[1:]  # Skip first byte
 
-            for col_id, binary_rgb in enumerate([binary_blob[i:i+3] for i in range(0, 66, 3)]):
+            for col_id, binary_rgb in enumerate([binary_blob[i:i + 3] for i in range(0, 66, 3)]):
                 rgb = struct.unpack('=BBB', binary_rgb)
                 self.rows[row_id][col_id].set(rgb)
 
-            binary_blob = binary_blob[66:] # Skip the current row
+            binary_blob = binary_blob[66:]  # Skip the current row
 
 
 def get_keyboard_layout():
@@ -595,7 +595,7 @@ def get_keyboard_layout():
             elif line.startswith('variant'):
                 variant = line.split(':', 1)[1].strip().split(',')[0]
 
-                if 'latin9' in variant: # Removes some rubbish from ubuntu
+                if 'latin9' in variant:  # Removes some rubbish from ubuntu
                     variant = 'latin9'
 
         if variant == '':

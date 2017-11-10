@@ -18,7 +18,7 @@ def get_brightness(self):
     driver_path = self.get_driver_path('matrix_brightness')
 
     with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0/255.0), 2)
+        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
 
         self.method_args['brightness'] = brightness
 
@@ -39,7 +39,7 @@ def set_brightness(self, brightness):
 
     self.method_args['brightness'] = brightness
 
-    brightness = int(round(brightness * (255.0/100.0)))
+    brightness = int(round(brightness * (255.0 / 100.0)))
     if brightness > 255:
         brightness = 255
     elif brightness < 0:
@@ -413,6 +413,7 @@ def set_breath_triple_effect(self, red1, green1, blue1, red2, green2, blue2, red
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
 
 @endpoint('razer.device.lighting.chroma', 'setBreathDual', in_sig='yyyyyy')
 def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):

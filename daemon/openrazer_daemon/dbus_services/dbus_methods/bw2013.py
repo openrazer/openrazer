@@ -3,6 +3,7 @@ BlackWidow Ultimate 2013 effects
 """
 from openrazer_daemon.dbus_services import endpoint
 
+
 @endpoint('razer.device.lighting.bw2013', 'getEffect', out_sig='y')
 def bw_get_effect(self):
     """
@@ -50,6 +51,3 @@ def bw_set_static(self):
 
     # Notify others
     self.send_effect_event('setStatic')
-
-
-

@@ -10,12 +10,14 @@ import time
 # pylint: disable=import-error
 from openrazer_daemon.keyboard import KeyboardColour
 
+
 class RippleEffectThread(threading.Thread):
     """
     Ripple thread.
 
     This thread contains the run loop which performs all the circle calculations and generating of the binary payload
     """
+
     def __init__(self, parent, device_number):
         super(RippleEffectThread, self).__init__()
 
@@ -36,6 +38,7 @@ class RippleEffectThread(threading.Thread):
         Get the shutdown flag
         """
         return self._shutdown
+
     @shutdown.setter
     def shutdown(self, value):
         """
@@ -45,6 +48,7 @@ class RippleEffectThread(threading.Thread):
         :type value: bool
         """
         self._shutdown = value
+
     @property
     def active(self):
         """
@@ -54,6 +58,7 @@ class RippleEffectThread(threading.Thread):
         :rtype: bool
         """
         return self._active
+
     @property
     def key_list(self):
         """
@@ -125,14 +130,14 @@ class RippleEffectThread(threading.Thread):
                             else:
                                 # To account for logo placement
                                 for cirlce_centre_row, circle_centre_col, rad, colour in radiuses:
-                                    radius = math.sqrt(math.pow(cirlce_centre_row-row, 2) + math.pow(circle_centre_col-col, 2))
-                                    if rad >= radius >= rad-1:
+                                    radius = math.sqrt(math.pow(cirlce_centre_row - row, 2) + math.pow(circle_centre_col - col, 2))
+                                    if rad >= radius >= rad - 1:
                                         self._kerboard_grid.set_key_colour(0, 20, colour)
                                         break
                         else:
                             for cirlce_centre_row, circle_centre_col, rad, colour in radiuses:
-                                radius = math.sqrt(math.pow(cirlce_centre_row-row, 2) + math.pow(circle_centre_col-col, 2))
-                                if rad >= radius >= rad-1:
+                                radius = math.sqrt(math.pow(cirlce_centre_row - row, 2) + math.pow(circle_centre_col - col, 2))
+                                if rad >= radius >= rad - 1:
                                     self._kerboard_grid.set_key_colour(row, col, colour)
                                     break
 
@@ -143,10 +148,12 @@ class RippleEffectThread(threading.Thread):
 
             time.sleep(self._refresh_rate)
 
+
 class RippleManager(object):
     """
     Class which manages the overall process of performing a ripple effect
     """
+
     def __init__(self, parent, device_number):
         self._logger = logging.getLogger('razer.device{0}.ripplemanager'.format(device_number))
         self._parent = parent
