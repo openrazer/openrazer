@@ -90,15 +90,15 @@ def get_device_type_mouse(self):
 
 
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
-def get_device_type_firefly(self):
+def get_device_type_mousemat(self):
     """
     Get the device's type
 
-    :return:'firefly'
+    :return:'mousemat'
     :rtype: str
     """
     self.logger.debug("DBus call get_device_type")
-    return 'firefly'
+    return 'mousemat'
 
 
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
