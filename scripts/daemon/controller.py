@@ -4,6 +4,7 @@ import openrazer.client
 
 import sys
 
+
 def _clamp_u8(value):
     if value > 255:
         return 255
@@ -11,6 +12,7 @@ def _clamp_u8(value):
         return 0
     else:
         return value
+
 
 def _print_table(header_list, rows):
     column_lengths = [len(header_item) for header_item in header_list]
@@ -56,6 +58,7 @@ def _print_table(header_list, rows):
 
     print(result)
 
+
 def _get_devices() -> list:
     """
     Gets devices ordered by serial
@@ -69,12 +72,14 @@ def _get_devices() -> list:
 
     return devices
 
+
 def _get_devices_by_serial() -> dict:
     device_manager = openrazer.client.DeviceManager()
 
     devices = {device.serial: device for device in device_manager.devices}
 
     return devices
+
 
 def _get_devices_by_type() -> dict:
     device_manager = openrazer.client.DeviceManager()
@@ -94,6 +99,7 @@ def _get_devices_by_type() -> dict:
         devices[key] = sorted(devices[key], key=lambda x: str(x.serial))
 
     return devices
+
 
 def _get_device_from_filter(args):
     if args.serial is not None:
@@ -137,9 +143,6 @@ def _get_device_from_filter(args):
         return device
 
 
-
-
-
 def list_devices(args):
     """
     Subcommand to list all devices
@@ -178,14 +181,6 @@ def brightness_func(args):
             print("Setting brightness to {0}%".format(brightness_value))
 
         device.brightness = brightness_value
-
-
-
-
-
-
-
-
 
 
 def parse_args():
@@ -238,10 +233,12 @@ def parse_args():
 
     return args
 
+
 CMD_MAP = {
     'list': list_devices,
     'brightness': brightness_func
 }
+
 
 def run():
     args = parse_args()
@@ -252,10 +249,6 @@ def run():
         print('Someone forgot to add mapping for command "{0}"'.format(args.command))
 
     print()
-
-
-
-
 
 
 if __name__ == '__main__':

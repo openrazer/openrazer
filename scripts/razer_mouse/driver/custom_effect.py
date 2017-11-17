@@ -6,6 +6,7 @@ import time
 import random
 import sys
 
+
 def clamp_to_min_max(value, min, max):
     if value > max:
         value = max
@@ -13,8 +14,10 @@ def clamp_to_min_max(value, min, max):
         value = min
     return value
 
+
 def clamp_to_u8(value):
     return clamp_to_min_max(value, 0, 255)
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Set a custom colour effect")
@@ -22,6 +25,7 @@ def parse_args():
 
     args = parser.parse_args()
     return args
+
 
 def run():
     args = parse_args()
@@ -61,7 +65,6 @@ def run():
         time.sleep(0.2)
 
     print("Done")
-
 
 
 if __name__ == '__main__':

@@ -41,6 +41,7 @@ def parse_args():
 
     return parser.parse_args()
 
+
 def run():
     args = parse_args()
 
@@ -60,6 +61,7 @@ def run():
         loop_on_event(args.event_file, mapping)
     except KeyboardInterrupt:
         print("Exiting", file=sys.stderr)
+
 
 if __name__ == '__main__':
     run()

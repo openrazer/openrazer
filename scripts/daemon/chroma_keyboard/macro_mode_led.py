@@ -6,7 +6,7 @@ import openrazer.client
 choices = ('get', 'on', 'off', 'flashing', 'static', 'effect_state')
 parser = argparse.ArgumentParser()
 parser.add_argument('action', choices=choices)
-args  = parser.parse_args()
+args = parser.parse_args()
 
 device_manager = openrazer.client.DeviceManager()
 keyboard = None
@@ -52,6 +52,6 @@ elif args.action == 'static':
     keyboard.macro_mode_led_effect = openrazer.client.constants.MACRO_LED_STATIC
     print("Turned macro mode LED on (static)")
 
-else: # Off
+else:  # Off
     keyboard.macro_mode_led = False
     print("Turned macro mode LED off")

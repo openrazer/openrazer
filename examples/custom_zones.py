@@ -16,9 +16,12 @@ print()
 device_manager.sync_effects = False
 
 # Helper funciton to generate interesting colors
+
+
 def random_color():
     rgb = colorsys.hsv_to_rgb(random.uniform(0, 1), random.uniform(0.5, 1), 1)
     return tuple(map(lambda x: int(256 * x), rgb))
+
 
 # Set random colors for each zone of each device
 for device in device_manager.devices:

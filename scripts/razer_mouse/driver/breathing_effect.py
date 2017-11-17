@@ -5,12 +5,14 @@ import os
 import struct
 import sys
 
+
 def clamp_to_u8(value):
     if value > 255:
         value = 255
     elif value < 0:
         value = 0
     return value
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Set the breathing effect")
@@ -21,9 +23,9 @@ def parse_args():
     group.add_argument('--single', nargs=3, metavar=("R", "G", "B"), type=int, help="Single colour breathing effect")
     group.add_argument('--dual', nargs=6, metavar=("R1", "G1", "B1", "R2", "G2", "B2"), type=int, help="Dual colour breathing effect")
 
-
     args = parser.parse_args()
     return args
+
 
 def run():
     args = parse_args()
@@ -62,7 +64,6 @@ def run():
     with open(breathing_mode_filepath, 'wb') as breathing_mode_file:
         breathing_mode_file.write(byte_string)
     print("Done")
-
 
 
 if __name__ == '__main__':

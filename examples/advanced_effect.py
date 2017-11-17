@@ -28,9 +28,12 @@ effects = [
 ]
 
 # Helper funciton to generate interesting colors
+
+
 def random_color():
     rgb = colorsys.hsv_to_rgb(random.uniform(0, 1), random.uniform(0.5, 1), 1)
     return tuple(map(lambda x: int(256 * x), rgb))
+
 
 # Iterate over each device and set a random effect that it supports.
 for device in device_manager.devices:

@@ -4,6 +4,7 @@ import argparse
 import openrazer.client
 import openrazer.client.constants as c
 
+
 def ripple_single_type() -> callable:
     """
     Creates a simple callable which will convert int, int, int, float
@@ -11,6 +12,7 @@ def ripple_single_type() -> callable:
     :rtype: callable
     """
     count = 0
+
     def parse(arg_value):
         nonlocal count
 
@@ -26,6 +28,7 @@ def ripple_single_type() -> callable:
             raise argparse.ArgumentTypeError("{0} is not a float".format(arg_value))
     return parse
 
+
 parser = argparse.ArgumentParser()
 action = parser.add_mutually_exclusive_group(required=True)
 action.add_argument('--breath-random', action='store_true')
@@ -38,7 +41,7 @@ action.add_argument('--wave', metavar='DIRECTION', choices=('LEFT', 'RIGHT'), ty
 action.add_argument('--ripple-single', nargs=4, metavar='R G B REFRESH_RATE', type=ripple_single_type())
 action.add_argument('--ripple-random', metavar='REFRESH_RATE', type=float)
 
-args  = parser.parse_args()
+args = parser.parse_args()
 
 device_manager = openrazer.client.DeviceManager()
 keyboard = None
@@ -112,7 +115,7 @@ elif args.static is not None:
     assert 0 <= b <= 255, "Blue component must be between 0-255 inclusive"
 
     if keyboard.fx.has("static"):
-        keyboard.fx.static( r, g, b)
+        keyboard.fx.static(r, g, b)
     else:
         print("Keyboard doesn't support static mode", file=sys.stderr)
         sys.exit(1)
@@ -146,7 +149,6 @@ elif args.ripple_single:
 elif args.ripple_random:
     refresh_rate = args.ripple_random
     assert refresh_rate > 0, "Refresh rate cannot be negative"
-
 
     if keyboard.fx.has("ripple"):
         keyboard.fx.ripple_random(refresh_rate)

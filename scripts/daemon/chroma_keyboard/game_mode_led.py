@@ -6,7 +6,7 @@ import openrazer.client
 choices = ('get', 'on', 'off')
 parser = argparse.ArgumentParser()
 parser.add_argument('action', choices=choices)
-args  = parser.parse_args()
+args = parser.parse_args()
 
 device_manager = openrazer.client.DeviceManager()
 keyboard = None

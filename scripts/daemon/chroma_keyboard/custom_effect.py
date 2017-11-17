@@ -32,10 +32,10 @@ while last_row >= 0 and last_col >= 0:
         if row % 2 == 0:
             col_range = range(0, COLS)
         else:
-            col_range = range(COLS-1, -1, -1)
+            col_range = range(COLS - 1, -1, -1)
 
         for col in col_range:
-            if not (row == 0 and col in (18, 19, 20, 21)) and not (row == 5 and col in (4,5,6,8,9,10)): # Skip big dead area
+            if not (row == 0 and col in (18, 19, 20, 21)) and not (row == 5 and col in (4, 5, 6, 8, 9, 10)):  # Skip big dead area
                 keyboard.fx.advanced.matrix.reset()
                 keyboard.fx.advanced.matrix[row, col] = COLOUR
                 keyboard.fx.advanced.draw_fb_or()
