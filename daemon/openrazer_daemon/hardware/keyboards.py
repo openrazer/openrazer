@@ -897,6 +897,8 @@ class RazerDeathStalkerChroma(_MacroKeyboard):
     def __init__(self, *args, **kwargs):
         super(RazerDeathStalkerChroma, self).__init__(*args, **kwargs)
 
+        self.ripple_manager = _RippleManager(self, self._device_number)
+
     def _close(self):
         """
         Close the key manager
