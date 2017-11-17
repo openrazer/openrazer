@@ -8,7 +8,7 @@ from openrazer_daemon.dbus_services.dbus_methods.chroma_keyboard import *
 from openrazer_daemon.dbus_services.dbus_methods.bw2013 import *
 from openrazer_daemon.dbus_services.dbus_methods.mamba import *
 from openrazer_daemon.dbus_services.dbus_methods.macro import *
-from openrazer_daemon.dbus_services.dbus_methods.tartarus import *
+from openrazer_daemon.dbus_services.dbus_methods.keypad import *
 from openrazer_daemon.dbus_services.dbus_methods.deathadder_chroma import *
 from openrazer_daemon.dbus_services.dbus_methods.nagahexv2 import *
 from openrazer_daemon.dbus_services.dbus_methods.nagahex import *

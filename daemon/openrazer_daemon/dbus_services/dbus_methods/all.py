@@ -102,18 +102,6 @@ def get_device_type_mousemat(self):
 
 
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
-def get_device_type_tartarus(self):
-    """
-    Get the device's type
-
-    :return:'tartarus'
-    :rtype: str
-    """
-    self.logger.debug("DBus call get_device_type")
-    return 'tartarus'
-
-
-@endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
 def get_device_type_core(self):
     """
     Get the device's type
@@ -130,7 +118,7 @@ def get_device_type_keypad(self):
     """
     Get the device's type
 
-    :return:'core'
+    :return:'keypad'
     :rtype: str
     """
     self.logger.debug("DBus call get_device_type")
@@ -142,7 +130,7 @@ def get_device_type_headset(self):
     """
     Get the device's type
 
-    :return:'tartarus'
+    :return:'headset'
     :rtype: str
     """
     self.logger.debug("DBus call get_device_type")
@@ -154,7 +142,7 @@ def get_device_type_mug(self):
     """
     Get the device's type
 
-    :return:'tartarus'
+    :return:'mug'
     :rtype: str
     """
     self.logger.debug("DBus call get_device_type")

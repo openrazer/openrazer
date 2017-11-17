@@ -49,11 +49,11 @@ class RazerNostromo(_RazerDeviceBrightnessSuspend):
     USB_PID = 0x0111
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keypad',
-               'tartarus_get_profile_led_red', 'tartarus_set_profile_led_red', 'tartarus_get_profile_led_green', 'tartarus_set_profile_led_green', 'tartarus_get_profile_led_blue', 'tartarus_set_profile_led_blue',
+               'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green', 'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
                'get_macros', 'delete_macro', 'add_macro',
 
                # ?
-               'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier']
+               'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
 
     RAZER_URLS = {
         "top_img": "https://assets.razerzone.com/eeimages/products/59/razer-nostromo-gallery-1.png",
@@ -86,9 +86,9 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0201
     DEDICATED_MACRO_KEYS = True
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_tartarus',
-               'set_static_effect', 'bw_set_pulsate', 'tartarus_get_profile_led_red', 'tartarus_set_profile_led_red', 'tartarus_get_profile_led_green',
-               'tartarus_set_profile_led_green', 'tartarus_get_profile_led_blue', 'tartarus_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier']
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keypad',
+               'set_static_effect', 'bw_set_pulsate', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
+               'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
 
     RAZER_URLS = {
         "top_img": "https://assets2.razerzone.com/images/tartarus-classic/b0535b8924b38f53cb8b853d536798ed-Tartarus-Classic-Base_gallery04.jpg",
@@ -121,9 +121,9 @@ class RazerTartarusChroma(_RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0208
     DEDICATED_MACRO_KEYS = True
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_tartarus', 'set_breath_random_effect', 'set_breath_single_effect',
-               'set_breath_dual_effect', 'set_static_effect', 'set_spectrum_effect', 'tartarus_get_profile_led_red', 'tartarus_set_profile_led_red', 'tartarus_get_profile_led_green',
-               'tartarus_set_profile_led_green', 'tartarus_get_profile_led_blue', 'tartarus_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier']
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keypad', 'set_breath_random_effect', 'set_breath_single_effect',
+               'set_breath_dual_effect', 'set_static_effect', 'set_spectrum_effect', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
+               'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
 
     RAZER_URLS = {
         "top_img": "https://assets.razerzone.com/eeimages/products/22356/razer-tartarus-chroma-01-02.png",
@@ -157,8 +157,8 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
     USB_PID = 0x0113
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keypad',
-               'tartarus_get_profile_led_red', 'tartarus_set_profile_led_red', 'tartarus_get_profile_led_green', 'tartarus_set_profile_led_green', 'tartarus_get_profile_led_blue', 'tartarus_set_profile_led_blue',
-               'get_macros', 'delete_macro', 'add_macro', 'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier',
+               'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green', 'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
+               'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier',
 
                'bw_set_pulsate', 'bw_set_static']
 
@@ -194,9 +194,9 @@ class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0207
     DEDICATED_MACRO_KEYS = True
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_tartarus', 'set_breath_random_effect', 'set_breath_single_effect',
-               'set_breath_dual_effect', 'set_static_effect', 'set_spectrum_effect', 'tartarus_get_profile_led_red', 'tartarus_set_profile_led_red', 'tartarus_get_profile_led_green',
-               'tartarus_set_profile_led_green', 'tartarus_get_profile_led_blue', 'tartarus_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'tartarus_get_mode_modifier', 'tartarus_set_mode_modifier']
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keypad', 'set_breath_random_effect', 'set_breath_single_effect',
+               'set_breath_dual_effect', 'set_static_effect', 'set_spectrum_effect', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
+               'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
 
     RAZER_URLS = {
         "top_img": "https://assets2.razerzone.com/images/orbweaver-chroma/370604e681b07ee0ffc2047f569e438e-orbweaver-crhoma-gallery-02.jpg",

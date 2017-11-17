@@ -9,7 +9,7 @@ DEVICE_MAP = {
     'mousemat': __RazerMousemat,
     'keyboard': __RazerKeyboardFactory,
     'mouse': __RazerMouse,
-    'tartarus': __RazerKeyboardFactory,
+    'keypad': __RazerKeyboardFactory,
     'default': __RazerDevice
 }
 
