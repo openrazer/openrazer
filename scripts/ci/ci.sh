@@ -17,6 +17,9 @@ dir=$(dirname $0)
 # Check the formatting of the driver
 ./$dir/check-formatting.sh
 
+# Check for duplicate fake driver serials
+./$dir/test-duplicate-fake-driver-serials.sh
+
 # Launch dbus
 eval `dbus-launch --sh-syntax`
 
