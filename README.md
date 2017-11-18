@@ -35,6 +35,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Blade (Late 2016)                       |  1532:0224  |   ✔    |   ✔    |      |
 | Razer Blade Stealth (Mid 2017)                |  1532:022D  |   ✔    |   ✔    | Working except ripple |
 | Razer Blade Pro (2017)                        |  1532:0225  |   ✔    |   ✔    | Ripple partially working |
+| Razer Blade Pro FullHD (2017)                 |  1532:022F  |   ✔    |   ✔    | Static and reactive not working|
 | Razer Blade Stealth (Late 2017)               |  1532:0232  |   ✔    |   ✔    | Working except ripple |
 
 ### Mouse
