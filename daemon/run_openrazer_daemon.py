@@ -146,7 +146,7 @@ def run():
     # daemonize logs exceptions to its logger (which defaults to the syslog)
     # and does not make them appear on stdout/stderr. If we're in foreground
     # mode, override that logger with our own.
-    if not args.foreground:
+    if args.foreground:
         logger = logging.getLogger('run-daemon')
         if args.verbose:
             logger.setLevel(logging.DEBUG)
