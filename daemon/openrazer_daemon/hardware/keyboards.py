@@ -1018,6 +1018,40 @@ class RazerBladePro2017(_MacroKeyboard):
 
         self.ripple_manager.close()
 
+class RazerBladePro2017FullHD(_MacroKeyboard):
+    """
+    Class for the Razer Blade Pro FullHD (2017)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade_ProFullHD(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x022F
+    HAS_MATRIX = True
+    DEDICATED_MACRO_KEYS = False
+    MATRIX_DIMS = [6, 25]
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'blade_get_logo_active', 'blade_set_logo_active']
+
+    RAZER_URLS = {
+        "top_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-07__store_gallery.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-13__store_gallery.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-01__store_gallery.png"
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerBladePro2017FullHD, self).__init__(*args, **kwargs)
+
+        self.ripple_manager = _RippleManager(self, self._device_number)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerBladePro2017FullHD, self)._close()
+
+        self.ripple_manager.close()
 
 class RazerBladeStealthLate2017(_MacroKeyboard):
     """
