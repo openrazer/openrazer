@@ -5,6 +5,7 @@ import os
 import struct
 import sys
 
+
 def clamp_to_min_max(value, min, max):
     if value > max:
         value = max
@@ -12,8 +13,10 @@ def clamp_to_min_max(value, min, max):
         value = min
     return value
 
+
 def clamp_to_u8(value):
     return clamp_to_min_max(value, 0, 255)
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Set the mouse DPI")
@@ -22,9 +25,9 @@ def parse_args():
     parser.add_argument('--dpi_x', required=True, type=int, help="DPI on the X axis (100, 16000)")
     parser.add_argument('--dpi_y', type=int, help="DPI on the Y axis (if omitted, dpi_x is used), (100, 16000)")
 
-
     args = parser.parse_args()
     return args
+
 
 def run():
     args = parse_args()
@@ -59,7 +62,6 @@ def run():
     with open(set_mouse_dpi_filepath, 'wb') as set_mouse_dpi_file:
         set_mouse_dpi_file.write(byte_string)
     print("Done")
-
 
 
 if __name__ == '__main__':

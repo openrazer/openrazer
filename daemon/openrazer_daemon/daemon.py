@@ -3,7 +3,7 @@ Daemon class
 
 This class is the main core of the daemon, this serves a basic dbus module to control the main bit of the daemon
 """
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 
 import configparser
 import logging
@@ -31,6 +31,7 @@ from openrazer_daemon.dbus_services.service import DBusService
 from openrazer_daemon.device import DeviceCollection
 from openrazer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 
+
 class RazerDaemon(DBusService):
     """
     Daemon class
@@ -48,7 +49,7 @@ class RazerDaemon(DBusService):
 
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
 
-        setproctitle.setproctitle('openrazer-daemon')
+        setproctitle.setproctitle('openrazer-daemon')  # pylint: disable=no-member
 
         # Expanding ~ as python doesnt do it by default, also creating dirs if needed
         try:
@@ -159,7 +160,7 @@ class RazerDaemon(DBusService):
 
         if log_dir is not None:
             log_file = os.path.join(log_dir, 'razer.log')
-            file_logger = logging.handlers.RotatingFileHandler(log_file, maxBytes=16777216, backupCount=10) # 16MiB
+            file_logger = logging.handlers.RotatingFileHandler(log_file, maxBytes=16777216, backupCount=10)  # 16MiB
             file_logger.setLevel(log_level)
             file_logger.setFormatter(formatter)
             logger.addHandler(file_logger)

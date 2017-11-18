@@ -7,6 +7,7 @@ import signal
 import sys
 import time
 import contextlib
+import logging
 
 from openrazer_daemon.daemon import RazerDaemon
 from subprocess import check_output
@@ -29,6 +30,7 @@ CONF_FILE = os.path.join(RAZER_CONFIG_HOME, 'razer.conf')
 LOG_PATH = os.path.join(RAZER_DATA_HOME, 'logs')
 
 args = None
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -129,7 +131,10 @@ def run_daemon():
 
 def run():
     global args
+
+    logger = None
     args = parse_args()
+
     if args.stop:
         stop_daemon(args)
         sys.exit(0)
@@ -137,6 +142,14 @@ def run():
     if args.respawn:
         stop_daemon(args)
         time.sleep(3)
+
+    # daemonize logs exceptions to its logger (which defaults to the syslog)
+    # and does not make them appear on stdout/stderr. If we're in foreground
+    # mode, override that logger with our own.
+    if not args.foreground:
+        logger = logging.getLogger('run-daemon')
+        if args.verbose:
+            logger.setLevel(logging.DEBUG)
 
     install_example_config_file()
 
@@ -146,8 +159,10 @@ def run():
                        action=run_daemon,
                        foreground=args.foreground,
                        verbose=args.verbose,
-                       chdir=args.run_dir)
+                       chdir=args.run_dir,
+                       logger=logger)
     daemon.start()
+
 
 if __name__ == "__main__":
     run()

@@ -12,7 +12,7 @@ custom_mode = glob.glob('/sys/bus/hid/drivers/razerkbd/0*/matrix_effect_custom')
 
 def clear_row(row_num):
 
-    result = bytes([row_num, 0x00, 0x15]) # Results in b'\x00', b'\x01' ...
+    result = bytes([row_num, 0x00, 0x15])  # Results in b'\x00', b'\x01' ...
 
     for i in range(0, 22):
         result += b'\x00\x00\x00'
@@ -54,4 +54,3 @@ for i in range(0, 6):
         input()
     write_binarystr(colour_file, clear_row(i))
     write_binarystr(custom_mode, bytes('1', 'ascii'))
-

@@ -8,6 +8,7 @@ DEVICE1_ID = '0000:0000:0000.0000'
 DEVICE2_SERIAL = 'XX000001'
 DEVICE2_ID = '0000:0000:0000.0001'
 
+
 class DummyDBusObject(object):
     def __init__(self):
         self.notify_msg = None
@@ -22,6 +23,7 @@ class DummyDBusObject(object):
     def notify_parent(self, msg):
         self.parent.notify_parent(msg)
 
+
 class DummyParentObject(object):
     def __init__(self):
         self.notify_msg = None
@@ -32,6 +34,8 @@ class DummyParentObject(object):
         self.notify_msg = msg
 
 # TODO move device_object creation to setUp
+
+
 class DeviceTest(unittest.TestCase):
     def setUp(self):
         pass
@@ -79,6 +83,7 @@ class DeviceTest(unittest.TestCase):
 
         self.assertEqual(parent_object.notify_msg, msg)
         self.assertEqual(parent_object.notify_device, device_object)
+
 
 class DeviceCollectionTest(unittest.TestCase):
     def setUp(self):

@@ -36,7 +36,6 @@ class RazerDevice(DBusService):
     WAVE_DIRS = (1, 2)
 
     RAZER_URLS = {
-        "store": None,
         "top_img": None,
         "side_img": None,
         "perspective_img": None
@@ -431,6 +430,7 @@ class RazerDeviceBrightnessSuspend(RazerDevice):
 
     Suspend functions
     """
+
     def _suspend_device(self):
         """
         Suspend the device

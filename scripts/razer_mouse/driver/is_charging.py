@@ -4,12 +4,14 @@ import glob
 import os
 import sys
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Get charging status")
     parser.add_argument('-d', '--device', type=str, help="Device string like \"0003:1532:0045.000C\"")
 
     args = parser.parse_args()
     return args
+
 
 def run():
     args = parse_args()
@@ -45,7 +47,6 @@ def run():
         except ValueError as ex:
             print("Failed to get charging status.\n{0}".format(ex), file=sys.stderr)
             sys.exit(1)
-
 
 
 if __name__ == '__main__':

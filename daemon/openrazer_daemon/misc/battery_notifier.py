@@ -12,7 +12,6 @@ except ImportError:
     notify2 = None
 
 
-
 # TODO https://askubuntu.com/questions/110969/notify-send-ignores-timeout
 INTERVAL_FREQ = 60 * 10
 NOTIFY_TIMEOUT = 4000
@@ -22,6 +21,7 @@ class BatteryNotifier(threading.Thread):
     """
     Thread to notify about battery
     """
+
     def __init__(self, parent, device_id, device_name):
         super(BatteryNotifier, self).__init__()
         self._logger = logging.getLogger('razer.device{0}.batterynotifier'.format(device_id))
@@ -109,6 +109,7 @@ class BatteryManager(object):
     """
     Class which manages the overall process of notifing battery levels
     """
+
     def __init__(self, parent, device_number, device_name):
         self._logger = logging.getLogger('razer.device{0}.batterymanager'.format(device_number))
         self._parent = parent

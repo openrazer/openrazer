@@ -15,14 +15,11 @@ class RazerKrakenClassic(__RazerDevice):
 
     USB_VID = 0x1532
     USB_PID = 0x0501
-    HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = False
-    MATRIX_DIMS = [-1, -1]
     METHODS = ['get_firmware', 'get_device_name', 'get_device_type_headset', 'has_matrix', 'get_matrix_dims',
                'set_static_effect', 'set_none_effect', 'get_current_effect_kraken']
 
     RAZER_URLS = {
-        "store": "http://web.archive.org/web/20160826002356/http://www.razerzone.com/gaming-audio/razer-kraken-71-chroma",
         "top_img": "https://assets.razerzone.com/eeimages/products/17519/02.png",
         "side_img": "https://assets.razerzone.com/eeimages/products/17519/03.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/17519/01.png"
@@ -89,15 +86,12 @@ class RazerKraken(__RazerDevice):
 
     USB_VID = 0x1532
     USB_PID = 0x0504
-    HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = False
-    MATRIX_DIMS = [-1, -1]
     METHODS = ['get_firmware', 'get_device_name', 'get_device_type_headset', 'has_matrix', 'get_matrix_dims',
                'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_single_effect',
                'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken', 'set_custom_kraken']
 
     RAZER_URLS = {
-        "store": "https://web.archive.org/web/20160826002356/https://www.razerzone.com/gaming-audio/razer-kraken-71-chroma",
         "top_img": "https://assets.razerzone.com/eeimages/products/17519/02.png",
         "side_img": "https://assets.razerzone.com/eeimages/products/17519/03.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/17519/01.png"
@@ -173,15 +167,12 @@ class RazerKrakenV2(__RazerDevice):
 
     USB_VID = 0x1532
     USB_PID = 0x0510
-    HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = False
-    MATRIX_DIMS = [-1, -1]
     METHODS = ['get_firmware', 'get_device_name', 'get_device_type_headset', 'has_matrix', 'get_matrix_dims',
                'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_single_effect', 'set_breath_dual_effect', 'set_breath_triple_effect',
                'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken', 'set_custom_kraken']
 
     RAZER_URLS = {
-        "store": "https://www.razerzone.com/gaming-audio/razer-kraken-71-v2",
         "top_img": "https://assets.razerzone.com/eeimages/products/26005/kraken71v2_gallery04-v2.png",
         "side_img": "https://assets.razerzone.com/eeimages/products/26005/kraken71v2_gallery01-v2.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26005/kraken71v2_gallery03-v2.png"

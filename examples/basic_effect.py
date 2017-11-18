@@ -19,4 +19,3 @@ for device in device_manager.devices:
     # Set the effect to wave.
     # wave requires a direction, but different effect have different arguments.
     device.fx.wave(razer_constants.WAVE_LEFT)
-

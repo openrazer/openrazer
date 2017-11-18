@@ -5,6 +5,7 @@ import os
 import struct
 import sys
 
+
 def clamp_to_u8(value):
     if value > 255:
         value = 255
@@ -12,15 +13,16 @@ def clamp_to_u8(value):
         value = 0
     return value
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Set the charging colour")
     parser.add_argument('-d', '--device', type=str, help="Device string like \"0003:1532:0045.000C\"")
 
     parser.add_argument('--colour', required=True, nargs=3, metavar=("R", "G", "B"), type=int, help="Charging colour")
 
-
     args = parser.parse_args()
     return args
+
 
 def run():
     args = parse_args()
@@ -50,7 +52,6 @@ def run():
     with open(set_charging_colour_filepath, 'wb') as set_charging_colour_file:
         set_charging_colour_file.write(byte_string)
     print("Done")
-
 
 
 if __name__ == '__main__':

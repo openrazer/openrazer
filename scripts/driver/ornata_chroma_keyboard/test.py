@@ -43,6 +43,7 @@ def parse_args():
 
     return parser.parse_args()
 
+
 if __name__ == '__main__':
     args = parse_args()
 
@@ -125,7 +126,6 @@ if __name__ == '__main__':
             write_binary(driver_path, 'matrix_effect_starlight', b'\x01\x00\xFF\x00\x00\x00\xFF')
             time.sleep(10)
 
-
         if not args.skip_custom:
             # Custom LEDs all rows
             payload_all = b''
@@ -186,11 +186,5 @@ if __name__ == '__main__':
 
         print("Finished")
 
-
     if not found_chroma:
         print("No Blackwidow Chromas found")
-
-
-
-
-

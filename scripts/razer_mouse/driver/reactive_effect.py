@@ -5,6 +5,7 @@ import os
 import struct
 import sys
 
+
 def clamp_to_min_max(value, min, max):
     if value > max:
         value = max
@@ -12,8 +13,10 @@ def clamp_to_min_max(value, min, max):
         value = min
     return value
 
+
 def clamp_to_u8(value):
     return clamp_to_min_max(value, 0, 255)
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Set the reactive effect")
@@ -22,9 +25,9 @@ def parse_args():
     parser.add_argument('--speed', required=True, type=int, help="Random breathing effect")
     parser.add_argument('--colour', required=True, nargs=3, metavar=("R", "G", "B"), type=int, help="Reactive colour effect")
 
-
     args = parser.parse_args()
     return args
+
 
 def run():
     args = parse_args()
@@ -55,7 +58,6 @@ def run():
     with open(reactive_mode_filepath, 'wb') as reactive_mode_file:
         reactive_mode_file.write(byte_string)
     print("Done")
-
 
 
 if __name__ == '__main__':

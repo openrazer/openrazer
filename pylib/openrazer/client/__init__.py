@@ -3,7 +3,7 @@ import dbus as _dbus
 from openrazer.client.device import RazerDeviceFactory as _RazerDeviceFactory
 from openrazer.client import constants
 
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 
 
 class DaemonNotFound(Exception):
@@ -14,6 +14,7 @@ class DeviceManager(object):
     """
     DeviceManager Class
     """
+
     def __init__(self):
         # Load up the DBus
         session_bus = _dbus.SessionBus()
@@ -126,7 +127,5 @@ class DeviceManager(object):
 if __name__ == '__main__':
     a = DeviceManager()
     b = a.devices[0]
-
-
 
     print()

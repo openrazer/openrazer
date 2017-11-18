@@ -1,3 +1,9 @@
+openrazer (2.1-0ubuntu1) xenial; urgency=high
+
+  * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v2.1
+
+ -- Luca Weiss <luca@z3ntu.xyz>  Tue, 14 Nov 2017 21:15:36 +0100
+
 openrazer (2.0.0-0ubuntu1) xenial; urgency=high
 
   * Renamed to OpenRazer.

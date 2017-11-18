@@ -181,6 +181,7 @@ def create_envionment(device_name, destination):
     except ValueError:
         print('Device {0}.cfg not found'.format(device_name))
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('device', metavar='DEVICE', nargs='+', help='Device config name')
@@ -190,6 +191,7 @@ def parse_args():
     parser.add_argument('--create-only', action='store_true', help='Create the target structure and then exit')
 
     return parser.parse_args()
+
 
 def run():
     args = parse_args()
@@ -226,15 +228,6 @@ def run():
                 FakeDevicePrompt(device_map).cmdloop()
         except KeyboardInterrupt:
             pass
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':

@@ -6,11 +6,13 @@ import openrazer.client
 device_manager = openrazer.client.DeviceManager()
 keyboard = None
 
+
 def on_off(value, true='On', false='Off'):
     if value:
         return true
     else:
         return false
+
 
 for device in device_manager.devices:
     if device.type == 'keyboard':

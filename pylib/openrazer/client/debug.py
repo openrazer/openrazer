@@ -57,7 +57,7 @@ def print_attrs(obj, recurse_to=None, indent=0):
 
     props, funcs, fields = get_attrs(obj)
 
-    print2 = lambda x: print((" " * indent) + x)
+    def print2(x): return print((" " * indent) + x)
 
     print(obj.__class__.__name__)
     if len(props) > 0:

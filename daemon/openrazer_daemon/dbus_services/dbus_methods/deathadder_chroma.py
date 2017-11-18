@@ -103,7 +103,7 @@ def get_logo_brightness(self):
     driver_path = self.get_driver_path('logo_led_brightness')
 
     with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0/255.0), 2)
+        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
 
         return brightness
 
@@ -122,7 +122,7 @@ def set_logo_brightness(self, brightness):
 
     self.method_args['brightness'] = brightness
 
-    brightness = int(round(brightness * (255.0/100.0)))
+    brightness = int(round(brightness * (255.0 / 100.0)))
     if brightness > 255:
         brightness = 255
     elif brightness < 0:
@@ -313,7 +313,7 @@ def get_scroll_brightness(self):
     driver_path = self.get_driver_path('scroll_led_brightness')
 
     with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0/255.0), 2)
+        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
 
         return brightness
 
@@ -332,7 +332,7 @@ def set_scroll_brightness(self, brightness):
 
     self.method_args['brightness'] = brightness
 
-    brightness = int(round(brightness * (255.0/100.0)))
+    brightness = int(round(brightness * (255.0 / 100.0)))
     if brightness > 255:
         brightness = 255
     elif brightness < 0:

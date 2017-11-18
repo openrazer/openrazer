@@ -14,10 +14,12 @@ from openrazer_daemon.keyboard import XTE_MAPPING
 # This determins if the macro keys are executed with their natural spacing
 XTE_SLEEP = False
 
+
 class MacroObject(object):
     """
     Macro base object
     """
+
     def to_dict(self):
         """
         Convert the object to a dict to be sent over DBus
@@ -40,10 +42,12 @@ class MacroObject(object):
         del values_dict['type']
         return cls(**values_dict)
 
+
 class MacroKey(MacroObject):
     """
     Is an object of a key event used in macros
     """
+
     def __init__(self, key_id, pre_pause, state):
         self.key_id = key_id
         self.pre_pause = pre_pause
@@ -74,10 +78,13 @@ class MacroKey(MacroObject):
         return XTE_MAPPING.get(self.key_id, self.key_id)
 
 # If it only opens a new tab in chroma - https://askubuntu.com/questions/540939/xdg-open-only-opens-a-new-tab-in-a-new-chromium-window-despite-passing-it-a-url
+
+
 class MacroURL(MacroObject):
     """
     Is an object of a key event used in macros
     """
+
     def __init__(self, url):
         self.url = url
 
@@ -100,10 +107,12 @@ class MacroURL(MacroObject):
         proc = subprocess.Popen(['xdg-open', self.url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         proc.communicate()
 
+
 class MacroScript(MacroObject):
     """
     Is an object of a key event used in macros
     """
+
     def __init__(self, script, args=None):
         self.script = script
         if isinstance(args, str):
@@ -131,10 +140,12 @@ class MacroScript(MacroObject):
         proc = subprocess.Popen(self.script + self.args, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         proc.communicate()
 
+
 class MacroRunner(threading.Thread):
     """
     Thread to run macros
     """
+
     def __init__(self, device_id, macro_bind, macro_data):
         super(MacroRunner, self).__init__()
 
@@ -196,6 +207,7 @@ class MacroRunner(threading.Thread):
 
         self._logger.debug("Finished running macro %s", self._macro_bind)
 
+
 def macro_dict_to_obj(macro_dict):
     """
     Converts a macro string to its relevant object
@@ -209,7 +221,6 @@ def macro_dict_to_obj(macro_dict):
     :raises ValueError: When a type isn't known
     """
 
-    # pylint: disable=redefined-variable-type
     if macro_dict['type'] == 'MacroKey':
         result = MacroKey.from_dict(macro_dict)
     elif macro_dict['type'] == 'MacroURL':

@@ -29,7 +29,7 @@ def expand_payload(payload):
     :return: Dictionary
     :rtype dict
     """
-    chunks = [payload[i:i+2] for i in range(0, len(payload), 2)]
+    chunks = [payload[i:i + 2] for i in range(0, len(payload), 2)]
 
     result = {}
 
@@ -41,6 +41,7 @@ def expand_payload(payload):
 
     return result
 
+
 def parse_args():
     """
     Parses command line arguments
@@ -51,6 +52,7 @@ def parse_args():
     parser.add_argument("file", metavar='FILE', type=str, help="CSV file")
 
     return parser.parse_args()
+
 
 def run():
     """
@@ -73,7 +75,7 @@ def run():
     print(format_string.format('Status', 'ID', 'Packet Num', 'Size', 'Class', 'Command', 'Params'))
     for frame in data:
         print(format_string.format(frame['status'], frame['transaction_id'], frame['packet_num'],
-                                                                      frame['data_size'], frame['class'], frame['command'], frame['params']))
+                                   frame['data_size'], frame['class'], frame['command'], frame['params']))
     print("")
 
 
