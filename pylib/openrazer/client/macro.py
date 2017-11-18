@@ -69,13 +69,13 @@ class RazerMacro(object):
 
     @property
     def mode_modifier(self):
-        if 'macro_tartarus_mode_modifier' in self._capabilities:
+        if 'macro_mode_modifier' in self._capabilities:
             return self._macro_dbus.getModeModifier()
         return False
 
     @mode_modifier.setter
     def mode_modifier(self, value):
-        if 'macro_tartarus_mode_modifier' in self._capabilities and isinstance(value, bool):
+        if 'macro_mode_modifier' in self._capabilities and isinstance(value, bool):
             self._macro_dbus.getModeModifier(value)
 
     @staticmethod
