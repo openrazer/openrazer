@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 # Ubuntus python3-daemonize version is outdated. Grab and install it manually.
 curl -L -O https://launchpad.net/~openrazer/+archive/ubuntu/daily/+files/python3-daemonize_2.4.7-xenial_all.deb

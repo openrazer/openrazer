@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 mkdir /tmp/daemon_stuff/{,data,logs}
 mkdir /tmp/daemon_test

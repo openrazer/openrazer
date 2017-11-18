@@ -1,8 +1,6 @@
-#!/bin/bash
-
-# -x = print all commands
+#!/bin/bash -ex
 # -e = exit on error
-set -x -e
+# -x = print all commands
 
 dir=$(dirname $0)
 
@@ -21,7 +19,7 @@ dir=$(dirname $0)
 ./$dir/test-duplicate-fake-driver-serials.sh
 
 # Launch dbus
-eval `dbus-launch --sh-syntax`
+eval $(dbus-launch --sh-syntax)
 
 # Compile the kernel driver
 ./$dir/compile-driver.sh
