@@ -39,6 +39,24 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
+class _RippleKeyboard(_MacroKeyboard):
+    """
+    Keyboard class
+
+    Inherits _MacroKeyboard and has a ripple manager
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(_RippleKeyboard, self).__init__(*args, **kwargs)
+
+        self.ripple_manager = _RippleManager(self, self._device_number)
+
+    def _close(self):
+        super(_RippleKeyboard, self)._close()
+
+        self.ripple_manager.close()
+
+
 class RazerNostromo(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Nostromo
@@ -300,7 +318,7 @@ class RazerBlackWidowUltimate2013(_MacroKeyboard):
     }
 
 
-class RazerBlackWidowChroma(_MacroKeyboard):
+class RazerBlackWidowChroma(_RippleKeyboard):
     """
     Class for the Razer BlackWidow Chroma
     """
@@ -324,21 +342,8 @@ class RazerBlackWidowChroma(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/17557/razer-blackwidow-ultimate-gallery-04.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBlackWidowChroma, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBlackWidowChroma, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBlackWidowChromaV2(_MacroKeyboard):
+class RazerBlackWidowChromaV2(_RippleKeyboard):
     """
     Class for the BlackWidow Chroma V2
     """
@@ -362,21 +367,8 @@ class RazerBlackWidowChromaV2(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26600/razer-blackwidow-chroma-v2-gallery-03-wristrest.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBlackWidowChromaV2, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBlackWidowChromaV2, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBlackWidowChromaTournamentEdition(_MacroKeyboard):
+class RazerBlackWidowChromaTournamentEdition(_RippleKeyboard):
     """
     Class for the Razer BlackWidow Tournament Edition Chroma
     """
@@ -398,21 +390,8 @@ class RazerBlackWidowChromaTournamentEdition(_MacroKeyboard):
         "perspective_img": "https://assets2.razerzone.com/images/blackwidow-te-chroma/918fc196cb8aec3e140316650d97a075-Blackwidow-TE-Chroma-Base_gallery5.jpg"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBlackWidowChromaTournamentEdition, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBlackWidowChromaTournamentEdition, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBlackWidowXChroma(_MacroKeyboard):
+class RazerBlackWidowXChroma(_RippleKeyboard):
     """
     Class for the Razer BlackWidow X Chroma
     """
@@ -435,21 +414,8 @@ class RazerBlackWidowXChroma(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/24325/razer-blackwidow-x-chroma-redo-4.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBlackWidowXChroma, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBlackWidowXChroma, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBlackWidowXTournamentEditionChroma(_MacroKeyboard):
+class RazerBlackWidowXTournamentEditionChroma(_RippleKeyboard):
     """
     Class for the Razer BlackWidow X Tournament Edition Chroma
     """
@@ -472,21 +438,8 @@ class RazerBlackWidowXTournamentEditionChroma(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/24362/razer-blackwidow-te-chroma-gallery-04.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBlackWidowXTournamentEditionChroma, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBlackWidowXTournamentEditionChroma, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBladeStealth(_MacroKeyboard):
+class RazerBladeStealth(_RippleKeyboard):
     """
     Class for the Razer Blade Stealth
     """
@@ -508,21 +461,8 @@ class RazerBladeStealth(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-01-v2.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBladeStealth, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBladeStealth, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBladeStealthLate2016(_MacroKeyboard):
+class RazerBladeStealthLate2016(_RippleKeyboard):
     """
     Class for the Razer Blade Stealth (Late 2016)
     """
@@ -543,19 +483,6 @@ class RazerBladeStealthLate2016(_MacroKeyboard):
         "side_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-22__store_gallery.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-02__store_gallery.png"
     }
-
-    def __init__(self, *args, **kwargs):
-        super(RazerBladeStealthLate2016, self).__init__(*args, **kwargs)
-
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBladeStealthLate2016, self)._close()
-
-        self.ripple_manager.close()
 
 
 class RazerBladeProLate2016(_MacroKeyboard):
@@ -579,21 +506,8 @@ class RazerBladeProLate2016(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-01__store_gallery.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBladeProLate2016, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBladeProLate2016, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBladeLate2016(_MacroKeyboard):
+class RazerBladeLate2016(_RippleKeyboard):
     """
     Class for the Razer Blade (Late 2016)
     """
@@ -614,21 +528,8 @@ class RazerBladeLate2016(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-01__store_gallery.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBladeLate2016, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBladeLate2016, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBladeQHD(_MacroKeyboard):
+class RazerBladeQHD(_RippleKeyboard):
     """
     Class for the Razer Blade (QHD)
     """
@@ -651,21 +552,8 @@ class RazerBladeQHD(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/25684/rzrblade14-02__store_gallery.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBladeQHD, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBladeQHD, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBlackWidowUltimate2016(_MacroKeyboard):
+class RazerBlackWidowUltimate2016(_RippleKeyboard):
     """
     Class for the Razer BlackWidow Ultimate 2016
     """
@@ -688,21 +576,8 @@ class RazerBlackWidowUltimate2016(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/22916/razer-blackwidow-gallery-02.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBlackWidowUltimate2016, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBlackWidowUltimate2016, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBlackWidowXUltimate(_MacroKeyboard):
+class RazerBlackWidowXUltimate(_RippleKeyboard):
     """
     Class for the Razer BlackWidow X Ultimate
     """
@@ -725,21 +600,8 @@ class RazerBlackWidowXUltimate(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/24363/razer-blackwidow-x-ultimate-redo-4.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBlackWidowXUltimate, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBlackWidowXUltimate, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerOrnataChroma(_MacroKeyboard):
+class RazerOrnataChroma(_RippleKeyboard):
     """
     Class for the Razer Ornata Chroma
     """
@@ -763,21 +625,8 @@ class RazerOrnataChroma(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/25713/razer-ornata-chroma-gallery-08.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerOrnataChroma, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerOrnataChroma, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerOrnata(_MacroKeyboard):
+class RazerOrnata(_RippleKeyboard):
     """
     Class for the Razer Ornata
     """
@@ -799,19 +648,6 @@ class RazerOrnata(_MacroKeyboard):
         "side_img": "https://assets.razerzone.com/eeimages/products/25675/razer_ornata_003.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/25675/razer_ornata_004.png"
     }
-
-    def __init__(self, *args, **kwargs):
-        super(RazerOrnata, self).__init__(*args, **kwargs)
-
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerOrnata, self)._close()
-
-        self.ripple_manager.close()
 
 
 class RazerAnansi(_MacroKeyboard):
@@ -859,7 +695,7 @@ class RazerDeathStalkerExpert(_MacroKeyboard):
     }
 
 
-class RazerDeathStalkerChroma(_MacroKeyboard):
+class RazerDeathStalkerChroma(_RippleKeyboard):
     """
     Class for the Razer DeathStalker Chroma
     """
@@ -881,21 +717,8 @@ class RazerDeathStalkerChroma(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/22563/rzr_deathstalker_chroma_02.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerDeathStalkerChroma, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerDeathStalkerChroma, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBlackWidowChromaOverwatch(_MacroKeyboard):
+class RazerBlackWidowChromaOverwatch(_RippleKeyboard):
     """
     Class for the Razer BlackWidow Chroma (Overwatch)
     """
@@ -919,21 +742,8 @@ class RazerBlackWidowChromaOverwatch(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/23326/overwatch-razer-gallery-1.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBlackWidowChromaOverwatch, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBlackWidowChromaOverwatch, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBladeStealthMid2017(_MacroKeyboard):
+class RazerBladeStealthMid2017(_RippleKeyboard):
     """
     Class for the Razer Blade Stealth (Mid 2017)
     """
@@ -955,21 +765,8 @@ class RazerBladeStealthMid2017(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-02__store_gallery.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBladeStealthMid2017, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBladeStealthMid2017, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBladePro2017(_MacroKeyboard):
+class RazerBladePro2017(_RippleKeyboard):
     """
     Class for the Razer Blade Pro (2017)
     """
@@ -990,21 +787,8 @@ class RazerBladePro2017(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-01__store_gallery.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBladePro2017, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBladePro2017, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBladePro2017FullHD(_MacroKeyboard):
+class RazerBladePro2017FullHD(_RippleKeyboard):
     """
     Class for the Razer Blade Pro FullHD (2017)
     """
@@ -1025,21 +809,8 @@ class RazerBladePro2017FullHD(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-01__store_gallery.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBladePro2017FullHD, self).__init__(*args, **kwargs)
 
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBladePro2017FullHD, self)._close()
-
-        self.ripple_manager.close()
-
-
-class RazerBladeStealthLate2017(_MacroKeyboard):
+class RazerBladeStealthLate2017(_RippleKeyboard):
     """
     Class for the Razer Blade Stealth (Late 2017)
     """
@@ -1060,16 +831,3 @@ class RazerBladeStealthLate2017(_MacroKeyboard):
         "side_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-22__store_gallery.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-02__store_gallery.png"
     }
-
-    def __init__(self, *args, **kwargs):
-        super(RazerBladeStealthLate2017, self).__init__(*args, **kwargs)
-
-        self.ripple_manager = _RippleManager(self, self._device_number)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBladeStealthLate2017, self)._close()
-
-        self.ripple_manager.close()
