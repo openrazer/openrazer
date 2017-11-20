@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash
 # Installation:
 #   cd my_gitproject
 #   wget -O pre-commit.sh http://tinyurl.com/mkovs45
