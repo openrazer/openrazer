@@ -385,7 +385,6 @@ class RazerBlackWidowChromaTournamentEdition(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0209
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix',  'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
@@ -422,7 +421,6 @@ class RazerBlackWidowXChroma(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0216
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
@@ -460,7 +458,6 @@ class RazerBlackWidowXTournamentEditionChroma(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x021a
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
@@ -498,7 +495,6 @@ class RazerBladeStealth(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0205
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
@@ -535,7 +531,6 @@ class RazerBladeStealthLate2016(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0220
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 16]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
@@ -572,7 +567,6 @@ class RazerBladeProLate2016(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0210
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
@@ -608,7 +602,6 @@ class RazerBladeLate2016(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0224
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 16]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
@@ -644,7 +637,6 @@ class RazerBladeQHD(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x020F
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 16]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect',
@@ -682,7 +674,6 @@ class RazerBlackWidowUltimate2016(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0214
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
@@ -720,7 +711,6 @@ class RazerBlackWidowXUltimate(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0217
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
@@ -759,7 +749,6 @@ class RazerOrnataChroma(_MacroKeyboard):
     USB_PID = 0x021e
     HAS_MATRIX = True
     WAVE_DIRS = (0, 1)
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
@@ -798,7 +787,6 @@ class RazerOrnata(_MacroKeyboard):
     USB_PID = 0x021f
     HAS_MATRIX = True
     WAVE_DIRS = (0, 1)
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_single_effect'
@@ -861,7 +849,6 @@ class RazerDeathStalkerExpert(_MacroKeyboard):
 
     USB_VID = 0x1532
     USB_PID = 0x0202
-    DEDICATED_MACRO_KEYS = False
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
@@ -955,7 +942,6 @@ class RazerBladeStealthMid2017(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x022D
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 16]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
@@ -992,7 +978,6 @@ class RazerBladePro2017(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0225
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 25]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
@@ -1028,7 +1013,6 @@ class RazerBladePro2017FullHD(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x022F
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 25]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
@@ -1064,7 +1048,6 @@ class RazerBladeStealthLate2017(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0232
     HAS_MATRIX = True
-    DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [6, 16]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
