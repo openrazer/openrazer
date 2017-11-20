@@ -29,7 +29,7 @@ def loop_on_event(event_file, mapping):
 
                 code = mapping.get(code, code)
 
-                print("Type: EV_KEY, Code: {1}, Value: {2}".format(ev_type, code, value))
+                print("Type: EV_KEY, Code: {0}, Value: {1}".format(code, value))
             else:
                 print("Type: {0}, Code: {1}, Value: {2}".format(ev_type, code, value))
 
