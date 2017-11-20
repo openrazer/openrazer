@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 # Checks for duplicate serials in the fake driver cfg files
 
