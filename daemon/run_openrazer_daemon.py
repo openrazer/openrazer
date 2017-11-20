@@ -68,7 +68,7 @@ def stop_daemon(args):
                         raise ProcessLookupError()
                 except psutil.NoSuchProcess:
                     raise ProcessLookupError()
-            except ModuleNotFoundError:
+            except ImportError:
                 print("Module psutil is missing, not checking for process name")
 
             os.kill(pid, signal.SIGTERM)
