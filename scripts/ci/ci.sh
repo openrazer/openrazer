@@ -15,6 +15,8 @@ dir=$(dirname $0)
 # Check the formatting of the driver
 ./$dir/check-astyle-formatting.sh
 ./$dir/check-autopep8-formatting.sh
+# Check with pylint for errors
+./$dir/check-pylint.sh
 
 # Check for duplicate fake driver serials
 ./$dir/test-duplicate-fake-driver-serials.sh
