@@ -553,17 +553,6 @@ class KeyboardKeyManager(object):
         macro_thread.start()
         self._threads.add(macro_thread)
 
-    def play_media_key(self, media_key):
-        """
-        Execute a media keys function
-
-        :param media_key: Media key name
-        :type media_key: str
-        """
-        media_key_thread = MediaKeyPress(media_key)
-        media_key_thread.start()
-        self._threads.add(media_key_thread)
-
     # Methods to be used with DBus
     def dbus_delete_macro(self, key_name):
         """
@@ -795,24 +784,3 @@ class GamepadKeyManager(KeyboardKeyManager):
 class OrbweaverKeyManager(GamepadKeyManager):
     GAMEPAD_EVENT_MAPPING = ORBWEAVER_EVENT_MAPPING
     GAMEPAD_KEY_MAPPING = ORBWEAVER_KEY_MAPPING
-
-
-class MediaKeyPress(threading.Thread):
-    """
-    Class to run xdotool to execute media/volume keypresses
-    """
-
-    def __init__(self, media_key):
-        super(MediaKeyPress, self).__init__()
-        if media_key == 'sleep':
-            self._media_key = media_key
-        else:
-            self._media_key = MEDIA_KEY_MAP[media_key]
-
-    def run(self):
-        if self._media_key == 'sleep':
-            subprocess.call(['dbus-send', '--system', '--print-reply', '--dest=org.freedesktop.login1',
-                             '/org/freedesktop/login1', 'org.freedesktop.login1.Manager.Suspend', 'boolean:true'])
-        else:
-            proc = subprocess.Popen(['xdotool', 'key', self._media_key], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            proc.communicate()
