@@ -174,15 +174,11 @@ class RazerDaemon(DBusService):
 
         :rtype: bool
         """
-        user = getpass.getuser()
-        if user == 'root':
+        if getpass.getuser() == 'root':
             return True
 
         try:
-            plugdev_group = grp.getgrnam('plugdev')
-
-            if user in plugdev_group.gr_mem:
-                return True
+            return grp.getgrnam('plugdev').gr_gid in os.getgroups()
         except KeyError:
             pass
 
