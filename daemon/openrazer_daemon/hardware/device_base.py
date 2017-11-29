@@ -41,7 +41,7 @@ class RazerDevice(DBusService):
         "perspective_img": None
     }
 
-    def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None):
+    def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None, additional_methods=[]):
 
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
@@ -66,6 +66,10 @@ class RazerDevice(DBusService):
         self._effect_sync = effect_sync.EffectSync(self, device_number)
 
         self._is_closed = False
+
+        # device methods available in all devices
+        self.methods_internal = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name']
+        self.methods_internal.extend(additional_methods)
 
         # Find event files in /dev/input/by-id/ by matching against regex
         self.event_files = []
@@ -277,7 +281,7 @@ class RazerDevice(DBusService):
         """
         Load DBus methods
 
-        Goes through the list in self.METHODS and loads each effect and adds it to DBus
+        Goes through the list in self.methods_internal and self.METHODS and loads each effect and adds it to DBus
         """
         available_functions = {}
         methods = dir(openrazer_daemon.dbus_services.dbus_methods)
@@ -286,7 +290,8 @@ class RazerDevice(DBusService):
             if isinstance(potential_function, types.FunctionType) and hasattr(potential_function, 'endpoint') and potential_function.endpoint:
                 available_functions[potential_function.__name__] = potential_function
 
-        for method_name in self.METHODS:
+        self.methods_internal.extend(self.METHODS)
+        for method_name in self.methods_internal:
             try:
                 new_function = available_functions[method_name]
                 self.logger.debug("Adding %s.%s method to DBus", new_function.interface, new_function.name)
@@ -430,6 +435,10 @@ class RazerDeviceBrightnessSuspend(RazerDevice):
 
     Suspend functions
     """
+
+    def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None, additional_methods=[]):
+        additional_methods.extend(['get_brightness', 'set_brightness'])
+        super().__init__(device_path, device_number, config, testing, additional_interfaces, additional_methods)
 
     def _suspend_device(self):
         """

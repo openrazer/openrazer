@@ -66,8 +66,7 @@ class RazerNostromo(_RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0111
     DEDICATED_MACRO_KEYS = True
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keypad',
-               'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green', 'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
+    METHODS = ['keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green', 'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
                'get_macros', 'delete_macro', 'add_macro',
 
                # ?
@@ -104,7 +103,7 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0201
     DEDICATED_MACRO_KEYS = True
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keypad',
+    METHODS = ['get_device_type_keypad',
                'set_static_effect', 'bw_set_pulsate', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
                'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
 
@@ -139,7 +138,7 @@ class RazerTartarusChroma(_RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0208
     DEDICATED_MACRO_KEYS = True
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keypad', 'set_breath_random_effect', 'set_breath_single_effect',
+    METHODS = ['get_device_type_keypad', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_static_effect', 'set_spectrum_effect', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
                'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
 
@@ -174,7 +173,7 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0113
     DEDICATED_MACRO_KEYS = True
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keypad',
+    METHODS = ['get_device_type_keypad',
                'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green', 'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
                'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier',
 
@@ -212,7 +211,7 @@ class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0207
     DEDICATED_MACRO_KEYS = True
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keypad', 'set_breath_random_effect', 'set_breath_single_effect',
+    METHODS = ['get_device_type_keypad', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_static_effect', 'set_spectrum_effect', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
                'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
 
@@ -248,7 +247,7 @@ class RazerBlackWidowUltimate2012(_MacroKeyboard):
     USB_PID = 0x010D
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
+    METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
@@ -268,7 +267,7 @@ class RazerBlackWidowClassic(_MacroKeyboard):
     USB_PID = 0x011B
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
+    METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
@@ -288,7 +287,7 @@ class RazerBlackWidowClassicAlternate(_MacroKeyboard):
     USB_PID = 0x010E
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
+    METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
@@ -308,7 +307,7 @@ class RazerBlackWidowUltimate2013(_MacroKeyboard):
     USB_PID = 0x011A
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
+    METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
@@ -329,7 +328,7 @@ class RazerBlackWidowChroma(_RippleKeyboard):
     HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
@@ -354,7 +353,7 @@ class RazerBlackWidowChromaV2(_RippleKeyboard):
     HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
@@ -378,7 +377,7 @@ class RazerBlackWidowChromaTournamentEdition(_RippleKeyboard):
     USB_PID = 0x0209
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix',  'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macros', 'delete_macro', 'add_macro',
 
@@ -401,7 +400,7 @@ class RazerBlackWidowXChroma(_RippleKeyboard):
     USB_PID = 0x0216
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
@@ -425,7 +424,7 @@ class RazerBlackWidowXTournamentEditionChroma(_RippleKeyboard):
     USB_PID = 0x021a
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
@@ -449,7 +448,7 @@ class RazerBladeStealth(_RippleKeyboard):
     USB_PID = 0x0205
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row'
 
@@ -472,7 +471,7 @@ class RazerBladeStealthLate2016(_RippleKeyboard):
     USB_PID = 0x0220
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 16]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row',
 
@@ -495,7 +494,7 @@ class RazerBladeProLate2016(_MacroKeyboard):
     USB_PID = 0x0210
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active']
@@ -517,7 +516,7 @@ class RazerBladeLate2016(_RippleKeyboard):
     USB_PID = 0x0224
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 16]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
@@ -539,7 +538,7 @@ class RazerBladeQHD(_RippleKeyboard):
     USB_PID = 0x020F
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 16]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
@@ -563,7 +562,7 @@ class RazerBlackWidowUltimate2016(_RippleKeyboard):
     USB_PID = 0x0214
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro', 'set_starlight_random_effect',
@@ -587,7 +586,7 @@ class RazerBlackWidowXUltimate(_RippleKeyboard):
     USB_PID = 0x0217
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro', 'set_starlight_random_effect',
@@ -612,7 +611,7 @@ class RazerOrnataChroma(_RippleKeyboard):
     HAS_MATRIX = True
     WAVE_DIRS = (0, 1)
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
@@ -637,7 +636,7 @@ class RazerOrnata(_RippleKeyboard):
     HAS_MATRIX = True
     WAVE_DIRS = (0, 1)
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_single_effect'
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode', 'set_breath_single_effect',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
@@ -659,10 +658,10 @@ class RazerAnansi(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x010f
     DEDICATED_MACRO_KEYS = True
-    METHODS = ['get_firmware', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness',
+    METHODS = ['get_device_type_keyboard',
                'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode', 'get_macro_effect',
                'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro', 'set_static_effect',
-               'set_spectrum_effect', 'has_matrix', 'get_matrix_dims', 'set_none_effect']
+               'set_spectrum_effect', 'set_none_effect']
 
     RAZER_URLS = {
         "top_img": "https://assets.razerzone.com/eeimages/products/58/razer-anansi-gallery-5.png",
@@ -679,7 +678,7 @@ class RazerDeathStalkerExpert(_MacroKeyboard):
 
     USB_VID = 0x1532
     USB_PID = 0x0202
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_brightness', 'set_brightness', 'get_device_name', 'get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
+    METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
@@ -700,7 +699,7 @@ class RazerDeathStalkerChroma(_RippleKeyboard):
     HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [1, 6]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro']
@@ -723,7 +722,7 @@ class RazerBlackWidowChromaOverwatch(_RippleKeyboard):
     HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
@@ -747,7 +746,7 @@ class RazerBladeStealthMid2017(_RippleKeyboard):
     USB_PID = 0x022D
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 16]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row',
 
@@ -770,7 +769,7 @@ class RazerBladePro2017(_RippleKeyboard):
     USB_PID = 0x0225
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 25]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour', 'blade_get_logo_active', 'blade_set_logo_active']
@@ -792,7 +791,7 @@ class RazerBladePro2017FullHD(_RippleKeyboard):
     USB_PID = 0x022F
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 25]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour', 'blade_get_logo_active', 'blade_set_logo_active']
@@ -814,7 +813,7 @@ class RazerBladeStealthLate2017(_RippleKeyboard):
     USB_PID = 0x0232
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 16]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_keyboard', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row',
 
