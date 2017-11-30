@@ -325,7 +325,7 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
     def __init__(self, *args, **kwargs):
         super(RazerNagaHexV2, self).__init__(*args, **kwargs)
 
-        self.key_manager = _NagaHexV2KeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing, should_grab_event_files=True)
+        # self.key_manager = _NagaHexV2KeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing, should_grab_event_files=True)
 
     def _close(self):
         """
@@ -333,7 +333,7 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
         """
         super(RazerNagaHexV2, self)._close()
 
-        self.key_manager.close()
+        # self.key_manager.close()
 
     def _suspend_device(self):
         """
@@ -380,7 +380,7 @@ class RazerNagaChroma(__RazerDeviceBrightnessSuspend):
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [1, 3]
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
-               'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
+               'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness', 'max_dpi',
                # Thumbgrid is technically backlight ID
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                # Logo
@@ -403,7 +403,7 @@ class RazerNagaChroma(__RazerDeviceBrightnessSuspend):
     def __init__(self, *args, **kwargs):
         super(RazerNagaChroma, self).__init__(*args, **kwargs)
 
-        self.key_manager = _NagaHexV2KeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing, should_grab_event_files=True)
+        # self.key_manager = _NagaHexV2KeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing, should_grab_event_files=True)
 
     def _close(self):
         """
@@ -411,7 +411,7 @@ class RazerNagaChroma(__RazerDeviceBrightnessSuspend):
         """
         super(RazerNagaChroma, self)._close()
 
-        self.key_manager.close()
+        # self.key_manager.close()
 
 
 class RazerNagaHex(__RazerDevice):
