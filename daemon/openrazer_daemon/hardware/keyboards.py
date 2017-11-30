@@ -501,6 +501,7 @@ class RazerBladeStealthLate2016(_RippleKeyboard):
     def hid_request_index(self):
         return None
 
+
 class RazerBladeProLate2016(_MacroKeyboard):
     """
     Class for the Razer Blade Pro (Late 2016)
@@ -526,6 +527,7 @@ class RazerBladeProLate2016(_MacroKeyboard):
     def hid_request_index(self):
         return None
 
+
 class RazerBladeLate2016(_RippleKeyboard):
     """
     Class for the Razer Blade (Late 2016)
@@ -550,6 +552,7 @@ class RazerBladeLate2016(_RippleKeyboard):
     @property
     def hid_request_index(self):
         return None
+
 
 class RazerBladeQHD(_RippleKeyboard):
     """

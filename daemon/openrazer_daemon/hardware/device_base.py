@@ -14,37 +14,38 @@ from openrazer_daemon.dbus_services.service import DBusService
 import openrazer_daemon.dbus_services.dbus_methods
 from openrazer_daemon.misc import effect_sync
 
+
 class RazerReport(object):
-    RAZER_CMD_BUSY          = 0x01
-    RAZER_CMD_SUCCESSFUL    = 0x02
-    RAZER_CMD_FAILURE       = 0x03
-    RAZER_CMD_TIMEOUT       = 0x04
+    RAZER_CMD_BUSY = 0x01
+    RAZER_CMD_SUCCESSFUL = 0x02
+    RAZER_CMD_FAILURE = 0x03
+    RAZER_CMD_TIMEOUT = 0x04
     RAZER_CMD_NOT_SUPPORTED = 0x05
 
     # LED STORAGE Options
-    NOSTORE                 = 0x00
-    VARSTORE                = 0x01
+    NOSTORE = 0x00
+    VARSTORE = 0x01
 
     # LED definitions
-    SCROLL_WHEEL_LED        = 0x01
-    BATTERY_LED             = 0x03
-    LOGO_LED                = 0x04
-    BACKLIGHT_LED           = 0x05
-    MACRO_LED               = 0x07
-    GAME_LED                = 0x08
-    RED_PROFILE_LED         = 0x0C
-    GREEN_PROFILE_LED       = 0x0D
-    BLUE_PROFILE_LED        = 0x0E
+    SCROLL_WHEEL_LED = 0x01
+    BATTERY_LED = 0x03
+    LOGO_LED = 0x04
+    BACKLIGHT_LED = 0x05
+    MACRO_LED = 0x07
+    GAME_LED = 0x08
+    RED_PROFILE_LED = 0x0C
+    GREEN_PROFILE_LED = 0x0D
+    BLUE_PROFILE_LED = 0x0E
 
     # LED Effect definitions
-    LED_STATIC              = 0x00
-    LED_BLINKING            = 0x01
-    LED_PULSATING           = 0x02
-    LED_SPECTRUM_CYCLING    = 0x04
+    LED_STATIC = 0x00
+    LED_BLINKING = 0x01
+    LED_PULSATING = 0x02
+    LED_SPECTRUM_CYCLING = 0x04
 
-    def __init__(self, bytes = None):
-        if bytes is not None:
-            self.bytes = bytes
+    def __init__(self, data=None):
+        if data is not None:
+            self.bytes = data
         else:
             self.bytes = bytearray(90)
 
@@ -246,7 +247,10 @@ class RazerDevice(DBusService):
     def hid_transaction_id(self):
         return 0xff
 
-    def razer_get_report(self, command_class, command_id, data_size, args = []):
+    def razer_get_report(self, command_class, command_id, data_size, args=None):
+        if args is None:
+            args = []
+
         report = RazerReport()
         report.transaction_id = self.hid_transaction_id
         report.data_size = data_size
@@ -256,9 +260,9 @@ class RazerDevice(DBusService):
         return report
 
     def razer_get_usb_response(self, data):
-        self.hid_node.sendFeatureReport(data.bytes, report_num = self.hid_request_index)
+        self.hid_node.sendFeatureReport(data.bytes, report_num=self.hid_request_index)
         time.sleep(0.001)
-        answer = self.hid_node.getFeatureReport(report_num = self.hid_response_index, length = 90)
+        answer = self.hid_node.getFeatureReport(report_num=self.hid_response_index, length=90)
         return RazerReport(answer[1:])
 
     def print_erroneous_report(self, report, message):
@@ -283,13 +287,13 @@ class RazerDevice(DBusService):
         if(response_report.remaining_packets != request_report.remaining_packets or
            response_report.command_class != request_report.command_class or
            response_report.command_id != request_report.command_id):
-            self.print_erroneous_report(response_report, "Response doesnt match request");
+            self.print_erroneous_report(response_report, "Response doesnt match request")
         elif response_report.status == RazerReport.RAZER_CMD_FAILURE:
-            self.print_erroneous_report(response_report, "Command failed");
+            self.print_erroneous_report(response_report, "Command failed")
         elif response_report.status == RazerReport.RAZER_CMD_NOT_SUPPORTED:
-            self.print_erroneous_report(response_report, "Command not supported");
+            self.print_erroneous_report(response_report, "Command not supported")
         elif response_report.status == RazerReport.RAZER_CMD_TIMEOUT:
-            self.print_erroneous_report(response_report, "Command timed out");
+            self.print_erroneous_report(response_report, "Command timed out")
 
         return response_report
 
@@ -448,8 +452,8 @@ class RazerDevice(DBusService):
         if param != 0:
             param = 0
 
-        request.arguments[0] = mode_id;
-        request.arguments[1] = param;
+        request.arguments[0] = mode_id
+        request.arguments[1] = param
 
         response = self.razer_send_payload(request)
 
