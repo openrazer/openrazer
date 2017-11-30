@@ -47,9 +47,15 @@ class RazerDaemon(DBusService):
 
     BUS_NAME = 'org.razer'
 
-    def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
+    def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None, bustype='session'):
+
+        self._initialized = False
 
         setproctitle.setproctitle('openrazer-daemon')  # pylint: disable=no-member
+
+        # We override this now so anything created by this class uses the
+        # same bus type
+        DBusService.BUS_TYPE = bustype
 
         # Expanding ~ as python doesnt do it by default, also creating dirs if needed
         try:
@@ -89,7 +95,11 @@ class RazerDaemon(DBusService):
         # Setup DBus to use gobject main loop
         dbus.mainloop.glib.threads_init()
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-        DBusService.__init__(self, self.BUS_NAME, '/org/razer')
+        try:
+            DBusService.__init__(self, self.BUS_NAME, '/org/razer')
+        except dbus.exceptions.DBusException as e:
+            self.logger.critical("Failed to start DBus service: {}".format(e.get_dbus_message()))
+            return
 
         self._init_signals()
         self._main_loop = GObject.MainLoop()
@@ -126,6 +136,8 @@ class RazerDaemon(DBusService):
         # TODO remove
         self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
         # TODO ======
+
+        self._initialized = True
 
     @dbus.service.signal('razer.devices')
     def device_removed(self):
@@ -378,7 +390,7 @@ class RazerDaemon(DBusService):
                 if sys_name in self._razer_devices:
                     continue
 
-                if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
+                if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and is supported
                     self.logger.info('Found device.%d: %s', device_number, sys_name)
 
                     # TODO add testdir support
@@ -390,14 +402,15 @@ class RazerDaemon(DBusService):
                             if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
                                 additional_interfaces.append(alt_device.sys_path)
 
-                    # Checking permissions
-                    test_file = os.path.join(sys_path, 'device_type')
-                    file_group_id = os.stat(test_file).st_gid
-                    file_group_name = grp.getgrgid(file_group_id)[0]
+                    if not device_class.USE_HIDRAW:
+                        # Checking permissions
+                        test_file = os.path.join(sys_path, 'device_type')
+                        file_group_id = os.stat(test_file).st_gid
+                        file_group_name = grp.getgrgid(file_group_id)[0]
 
-                    if os.getgid() != file_group_id and file_group_name != 'plugdev':
-                        self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
-                        break
+                        if os.getgid() != file_group_id and file_group_name != 'plugdev':
+                            self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
+                            break
 
                     razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
 
@@ -433,7 +446,7 @@ class RazerDaemon(DBusService):
             if sys_name in self._razer_devices:
                 continue
 
-            if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
+            if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and is supported
                 self.logger.info('Found valid device.%d: %s', device_number, sys_name)
                 razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None)
 
@@ -491,6 +504,9 @@ class RazerDaemon(DBusService):
         """
         Run the daemon
         """
+        if not self._initialized:
+            return
+
         self.logger.info('Serving DBus')
 
         # Start listening for device changes

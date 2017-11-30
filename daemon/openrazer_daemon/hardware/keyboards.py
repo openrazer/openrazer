@@ -8,7 +8,17 @@ from openrazer_daemon.misc.key_event_management import KeyboardKeyManager as _Ke
 from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
 
 
-class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
+class _RazerKeyboard(_RazerDeviceBrightnessSuspend):
+    @property
+    def hid_response_index(self):
+        return 0x01
+
+    @property
+    def hid_request_index(self):
+        return 0x01
+
+
+class _MacroKeyboard(_RazerKeyboard):
     """
     Keyboard class
 
@@ -95,7 +105,7 @@ class RazerNostromo(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
-class RazerTartarus(_RazerDeviceBrightnessSuspend):
+class RazerTartarus(_RazerKeyboard):
     """
     Class for the Razer Tartarus
     """
@@ -130,7 +140,7 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
-class RazerTartarusChroma(_RazerDeviceBrightnessSuspend):
+class RazerTartarusChroma(_RazerKeyboard):
     """
     Class for the Razer Tartarus Chroma
     """
@@ -165,7 +175,7 @@ class RazerTartarusChroma(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
-class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
+class RazerOrbweaver(_RazerKeyboard):
     """
     Class for the Razer Orbweaver
     """
@@ -202,7 +212,7 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
-class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
+class RazerOrbweaverChroma(_RazerKeyboard):
     """
     Class for the Razer Orbweaver Chroma
     """
@@ -460,6 +470,9 @@ class RazerBladeStealth(_RippleKeyboard):
         "side_img": "https://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-08-v2.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-01-v2.png"
     }
+    @property
+    def hid_request_index(self):
+        return None
 
 
 class RazerBladeStealthLate2016(_RippleKeyboard):
@@ -484,6 +497,9 @@ class RazerBladeStealthLate2016(_RippleKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-02__store_gallery.png"
     }
 
+    @property
+    def hid_request_index(self):
+        return None
 
 class RazerBladeProLate2016(_MacroKeyboard):
     """
@@ -506,6 +522,9 @@ class RazerBladeProLate2016(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-01__store_gallery.png"
     }
 
+    @property
+    def hid_request_index(self):
+        return None
 
 class RazerBladeLate2016(_RippleKeyboard):
     """
@@ -528,6 +547,9 @@ class RazerBladeLate2016(_RippleKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-01__store_gallery.png"
     }
 
+    @property
+    def hid_request_index(self):
+        return None
 
 class RazerBladeQHD(_RippleKeyboard):
     """
@@ -551,6 +573,10 @@ class RazerBladeQHD(_RippleKeyboard):
         "side_img": "https://assets.razerzone.com/eeimages/products/25684/rzrblade14-13__store_gallery.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/25684/rzrblade14-02__store_gallery.png"
     }
+
+    @property
+    def hid_request_index(self):
+        return None
 
 
 class RazerBlackWidowUltimate2016(_RippleKeyboard):
@@ -675,6 +701,14 @@ class RazerAnansi(_MacroKeyboard):
 
     def _close(self):
         super(RazerAnansi, self)._close()
+
+    @property
+    def hid_response_index(self):
+        return 0x02
+
+    @property
+    def hid_request_index(self):
+        return 0x02
 
 
 class RazerDeathStalkerExpert(_MacroKeyboard):
@@ -831,3 +865,8 @@ class RazerBladeStealthLate2017(_RippleKeyboard):
         "side_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-22__store_gallery.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26727/rzrblade14-02__store_gallery.png"
     }
+
+    @property
+    def hid_request_index(self):
+        return None
+

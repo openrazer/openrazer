@@ -42,6 +42,9 @@ def get_firmware(self):
     """
     self.logger.debug("DBus call get_firmware")
 
+    if self.USE_HIDRAW:
+        return self.get_firmware_version()
+
     driver_path = self.get_driver_path('firmware_version')
 
     with open(driver_path, 'r') as driver_file:
@@ -57,6 +60,9 @@ def get_device_name(self):
     :rtype: str
     """
     self.logger.debug("DBus call get_device_name")
+
+    if self.USE_HIDRAW:
+        return self.DEVICE_NAME
 
     driver_path = self.get_driver_path('device_type')
 
