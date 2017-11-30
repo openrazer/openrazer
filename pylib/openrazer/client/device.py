@@ -1,15 +1,15 @@
 import dbus as _dbus
 from openrazer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFactory as __BaseDeviceFactory
-from openrazer.client.devices.firefly import RazerFirefly as __RazerFirefly
+from openrazer.client.devices.mousemat import RazerMousemat as __RazerMousemat
 from openrazer.client.devices.keyboard import RazerKeyboardFactory as __RazerKeyboardFactory
 from openrazer.client.devices.mice import RazerMouse as __RazerMouse
 
 
 DEVICE_MAP = {
-    'firefly': __RazerFirefly,
+    'mousemat': __RazerMousemat,
     'keyboard': __RazerKeyboardFactory,
     'mouse': __RazerMouse,
-    'tartarus': __RazerKeyboardFactory,
+    'keypad': __RazerKeyboardFactory,
     'default': __RazerDevice
 }
 

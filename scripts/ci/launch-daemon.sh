@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 #env PYTHONPATH="pylib:daemon" \
 #python3 ./daemon/run_openrazer_daemon.py \

@@ -1,8 +1,6 @@
-#!/bin/bash
-
-# -x = print all commands
+#!/bin/bash -ex
 # -e = exit on error
-set -x -e
+# -x = print all commands
 
 dir=$(dirname $0)
 
@@ -10,18 +8,21 @@ dir=$(dirname $0)
 ./$dir/apt-update.sh
 
 # Install dependencies
-./$dir/install-astyle.sh
+./$dir/install-check-deps.sh
 ./$dir/install-driver-deps.sh
 ./$dir/install-daemon-deps.sh
 
 # Check the formatting of the driver
-./$dir/check-formatting.sh
+./$dir/check-astyle-formatting.sh
+./$dir/check-autopep8-formatting.sh
+# Check with pylint for errors
+./$dir/check-pylint.sh
 
 # Check for duplicate fake driver serials
 ./$dir/test-duplicate-fake-driver-serials.sh
 
 # Launch dbus
-eval `dbus-launch --sh-syntax`
+eval $(dbus-launch --sh-syntax)
 
 # Compile the kernel driver
 ./$dir/compile-driver.sh

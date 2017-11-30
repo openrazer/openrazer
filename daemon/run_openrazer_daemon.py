@@ -9,7 +9,7 @@ import time
 import contextlib
 import logging
 
-from openrazer_daemon.daemon import RazerDaemon
+from openrazer_daemon.daemon import RazerDaemon, __version__
 from subprocess import check_output
 from time import sleep
 from daemonize import Daemonize
@@ -41,6 +41,7 @@ def parse_args():
 
     parser.add_argument('-r', '--respawn', action='store_true', help='Stop any existing daemon first, if one is running.')
     parser.add_argument('-s', '--stop', action='store_true', help='Gracefully stop the existing daemon.')
+    parser.add_argument('--version', action='version', version='%(prog)s {version}'.format(version=__version__))
 
     parser.add_argument('--config', type=str, help='Location of the config file', default=CONF_FILE)
     parser.add_argument('--run-dir', type=str, help='Location of the run directory', default=RAZER_RUNTIME_DIR)
@@ -67,7 +68,7 @@ def stop_daemon(args):
                         raise ProcessLookupError()
                 except psutil.NoSuchProcess:
                     raise ProcessLookupError()
-            except ModuleNotFoundError:
+            except ImportError:
                 print("Module psutil is missing, not checking for process name")
 
             os.kill(pid, signal.SIGTERM)
