@@ -15,6 +15,9 @@ def get_brightness(self):
     """
     self.logger.debug("DBus call get_brightness")
 
+    if self.USE_HIDRAW:
+        return self.get_brightness()
+
     driver_path = self.get_driver_path('matrix_brightness')
 
     with open(driver_path, 'r') as driver_file:
@@ -35,18 +38,22 @@ def set_brightness(self, brightness):
     """
     self.logger.debug("DBus call set_brightness")
 
-    driver_path = self.get_driver_path('matrix_brightness')
-
-    self.method_args['brightness'] = brightness
-
     brightness = int(round(brightness * (255.0 / 100.0)))
     if brightness > 255:
         brightness = 255
     elif brightness < 0:
         brightness = 0
 
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write(str(brightness))
+    if self.USE_HIDRAW:
+        self.set_brightness(brightness)
+
+    else:
+        driver_path = self.get_driver_path('matrix_brightness')
+
+        self.method_args['brightness'] = brightness
+
+        with open(driver_path, 'w') as driver_file:
+            driver_file.write(str(brightness))
 
     # Notify others
     self.send_effect_event('setBrightness', brightness)
@@ -181,13 +188,17 @@ def set_wave_effect(self, direction):
     # Notify others
     self.send_effect_event('setWave', direction)
 
-    driver_path = self.get_driver_path('matrix_effect_wave')
-
     if direction not in self.WAVE_DIRS:
         direction = self.WAVE_DIRS[0]
 
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write(str(direction))
+    if self.USE_HIDRAW:
+        self.set_matrix_effect(0x01, 0x02, direction)
+
+    else:
+        driver_path = self.get_driver_path('matrix_effect_wave')
+
+        with open(driver_path, 'w') as driver_file:
+            driver_file.write(str(direction))
 
 
 @endpoint('razer.device.lighting.chroma', 'setStatic', in_sig='yyy')
@@ -209,12 +220,16 @@ def set_static_effect(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
-    driver_path = self.get_driver_path('matrix_effect_static')
+    if self.USE_HIDRAW:
+        self.set_matrix_effect(0x06, 0x04, [red, green, blue])
 
-    payload = bytes([red, green, blue])
+    else:
+        driver_path = self.get_driver_path('matrix_effect_static')
 
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+        payload = bytes([red, green, blue])
+
+        with open(driver_path, 'wb') as driver_file:
+            driver_file.write(payload)
 
 
 @endpoint('razer.device.lighting.chroma', 'setBlinking', in_sig='yyy')
@@ -254,10 +269,15 @@ def set_spectrum_effect(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
-    driver_path = self.get_driver_path('matrix_effect_spectrum')
+    if self.USE_HIDRAW:
+        self.set_matrix_effect(0x04, 0x01)
 
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write('1')
+    else:
+
+        driver_path = self.get_driver_path('matrix_effect_spectrum')
+
+        with open(driver_path, 'w') as driver_file:
+            driver_file.write('1')
 
 
 @endpoint('razer.device.lighting.chroma', 'setNone')
@@ -270,10 +290,15 @@ def set_none_effect(self):
     # Notify others
     self.send_effect_event('setNone')
 
-    driver_path = self.get_driver_path('matrix_effect_none')
+    if self.USE_HIDRAW:
+        self.set_matrix_effect(0x00, 0x01)
 
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write('1')
+    else:
+
+        driver_path = self.get_driver_path('matrix_effect_none')
+
+        with open(driver_path, 'w') as driver_file:
+            driver_file.write('1')
 
 
 @endpoint('razer.device.misc', 'triggerReactive')
@@ -286,10 +311,15 @@ def trigger_reactive_effect(self):
     # Notify others
     self.send_effect_event('triggerReactive')
 
-    driver_path = self.get_driver_path('matrix_reactive_trigger')
+    if self.USE_HIDRAW:
+        self.set_matrix_effect(0x02, 0x05, [0x00, 0x00, 0x00, 0x00])
 
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write('1')
+    else:
+
+        driver_path = self.get_driver_path('matrix_reactive_trigger')
+
+        with open(driver_path, 'w') as driver_file:
+            driver_file.write('1')
 
 
 @endpoint('razer.device.lighting.chroma', 'setReactive', in_sig='yyyy')
@@ -311,18 +341,22 @@ def set_reactive_effect(self, red, green, blue, speed):
     """
     self.logger.debug("DBus call set_reactive_effect")
 
-    driver_path = self.get_driver_path('matrix_effect_reactive')
-
     # Notify others
     self.send_effect_event('setReactive', red, green, blue, speed)
 
     if speed not in (1, 2, 3, 4):
         speed = 4
 
-    payload = bytes([speed, red, green, blue])
+    if self.USE_HIDRAW:
+        self.set_matrix_effect(0x02, 0x05, [speed, red, green, blue])
 
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+    else:
+
+        driver_path = self.get_driver_path('matrix_effect_reactive')
+        payload = bytes([speed, red, green, blue])
+
+        with open(driver_path, 'wb') as driver_file:
+            driver_file.write(payload)
 
 
 @endpoint('razer.device.lighting.chroma', 'setBreathRandom')
@@ -335,12 +369,17 @@ def set_breath_random_effect(self):
     # Notify others
     self.send_effect_event('setBreathRandom')
 
-    driver_path = self.get_driver_path('matrix_effect_breath')
+    if self.USE_HIDRAW:
+        self.set_matrix_effect(0x03, 0x02, 0x03)
 
-    payload = b'1'
+    else:
 
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+        driver_path = self.get_driver_path('matrix_effect_breath')
+
+        payload = b'1'
+
+        with open(driver_path, 'wb') as driver_file:
+            driver_file.write(payload)
 
 
 @endpoint('razer.device.lighting.chroma', 'setBreathSingle', in_sig='yyy')
@@ -362,12 +401,17 @@ def set_breath_single_effect(self, red, green, blue):
     # Notify others
     self.send_effect_event('setBreathSingle', red, green, blue)
 
-    driver_path = self.get_driver_path('matrix_effect_breath')
+    if self.USE_HIDRAW:
+        self.set_matrix_effect(0x03, 0x05, [0x01, red, green, blue])
 
-    payload = bytes([red, green, blue])
+    else:
 
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+        driver_path = self.get_driver_path('matrix_effect_breath')
+
+        payload = bytes([red, green, blue])
+
+        with open(driver_path, 'wb') as driver_file:
+            driver_file.write(payload)
 
 
 @endpoint('razer.device.lighting.chroma', 'setBreathTriple', in_sig='yyyyyyyyy')
@@ -443,12 +487,17 @@ def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
     # Notify others
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
 
-    driver_path = self.get_driver_path('matrix_effect_breath')
+    if self.USE_HIDRAW:
+        self.set_matrix_effect(0x03, 0x08, [0x02, red1, green1, blue1, red2, green2, blue2])
 
-    payload = bytes([red1, green1, blue1, red2, green2, blue2])
+    else:
 
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+        driver_path = self.get_driver_path('matrix_effect_breath')
+
+        payload = bytes([red1, green1, blue1, red2, green2, blue2])
+
+        with open(driver_path, 'wb') as driver_file:
+            driver_file.write(payload)
 
 
 @endpoint('razer.device.lighting.chroma', 'setCustom')
@@ -459,12 +508,17 @@ def set_custom_effect(self):
     # TODO uncomment
     # self.logger.debug("DBus call set_custom_effect")
 
-    driver_path = self.get_driver_path('matrix_effect_custom')
+    if self.USE_HIDRAW:
+        self.set_matrix_effect(0x05, 0x02, 0x00)
 
-    payload = b'1'
+    else:
 
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+        driver_path = self.get_driver_path('matrix_effect_custom')
+
+        payload = b'1'
+
+        with open(driver_path, 'wb') as driver_file:
+            driver_file.write(payload)
 
 
 @endpoint('razer.device.lighting.chroma', 'setKeyRow', in_sig='ay', byte_arrays=True)
@@ -485,10 +539,15 @@ def set_key_row(self, payload):
     # TODO uncomment
     # self.logger.debug("DBus call set_key_row")
 
-    driver_path = self.get_driver_path('matrix_custom_frame')
+    if self.USE_HIDRAW:
+        self.set_key_row(payload)
 
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+    else:
+
+        driver_path = self.get_driver_path('matrix_custom_frame')
+
+        with open(driver_path, 'wb') as driver_file:
+            driver_file.write(payload)
 
 
 @endpoint('razer.device.lighting.custom', 'setRipple', in_sig='yyyd')

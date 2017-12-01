@@ -326,7 +326,7 @@ class RazerDaemon(DBusService):
         """
         serial_list = self._razer_devices.serials()
         self.logger.debug('DBus called get_serial_list')
-        return serial_list
+        return sorted(serial_list)
 
     def sync_effects(self, enabled):
         """

@@ -27,6 +27,7 @@ def get_device_classes():
             if class_name in EXCLUDED_CLASSES or class_name.startswith('_') or not isinstance(class_instance, type):
                 continue
 
-            classes.append(class_instance)
+            if issubclass(class_instance, RazerDevice):
+                classes.append(class_instance)
 
     return sorted(classes, key=lambda cls: cls.__name__)

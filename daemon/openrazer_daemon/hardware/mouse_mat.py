@@ -8,6 +8,9 @@ class RazerFirefly(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Firefly (2013)
     """
+    DEVICE_NAME = 'Razer Firefly'
+    USE_HIDRAW = True
+
     USB_VID = 0x1532
     USB_PID = 0x0C00
     HAS_MATRIX = True
@@ -21,3 +24,6 @@ class RazerFirefly(__RazerDeviceBrightnessSuspend):
         "side_img": "https://assets.razerzone.com/eeimages/products/21936/fireflycloth-gallery-6.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/21936/fireflycloth-gallery-3.png"
     }
+
+    def set_key_row(self, binary):
+        self.set_firefly_key_row(binary)

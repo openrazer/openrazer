@@ -163,6 +163,7 @@ class RazerDevice(DBusService):
     }
 
     USE_HIDRAW = False
+    DEFAULT_LED = RazerReport.BACKLIGHT_LED
 
     def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None):
 
@@ -233,7 +234,6 @@ class RazerDevice(DBusService):
 
         # Load additional DBus methods
         self.load_methods()
-
 
     @property
     def hid_response_index(self):
@@ -512,6 +512,62 @@ class RazerDevice(DBusService):
         request.arguments = [RazerReport.VARSTORE, led, brightness]
         self.razer_send_payload(request)
 
+    def set_matrix_effect(self, _id, size, args=None):
+        self.set_standard_matrix_effect(_id, size, args)
+
+    def set_key_row(self, binary):
+        self.set_standard_key_row(binary)
+
+    def set_standard_matrix_effect(self, _id, size, args=None):
+        if args is None:
+            args = []
+        elif not isinstance(args, list):
+            args = [args]
+
+        args = [_id] + args
+
+        request = self.razer_get_report(0x03, 0x0A, size)
+        request.arguments = args
+        self.razer_send_payload(request)
+
+    def set_firefly_key_row(self, binary):
+        offset = 0
+        bin_length = len(binary)
+
+        max_row = self.MATRIX_DIMS[0] - 1
+        max_col = self.MATRIX_DIMS[1] - 1
+
+        try:
+            while offset < bin_length:
+                row_id = binary[offset]
+                start_col = binary[offset + 1]
+                stop_col = binary[offset + 2]
+                row_len = ((stop_col + 1) - start_col) * 3
+                offset += 3
+
+                if not (0 <= row_id <= max_row):
+                    self.logger.error('Bad row id {0}'.format(row_id))
+                    break
+                if stop_col > max_col:
+                    self.logger.error('Bad row length {0}'.format(row_len))
+                    break
+                if row_len + offset > bin_length:
+                    self.logger.error('Bad row length {0}, not enough data'.format(row_len))
+                    break
+
+                # Get one frame
+                rgbs = binary[offset:row_len]
+                request = self.razer_get_report(0x03, 0x0C, 0x32)
+                request.arguments = bytes([start_col, stop_col]) + (b'\x00' * (start_col * 3)) + rgbs
+                self.razer_send_payload(request)
+
+                offset += row_len
+
+        except Exception as err:
+            self.logger.error('Caught exception {0} during setting key row'.format(err))
+
+
+    # TODO This is for mouse only, move
     def get_logo_active(self):
         return self.get_led_active(RazerReport.LOGO_LED) == 1
 
@@ -745,6 +801,12 @@ class RazerDevice(DBusService):
                 return True
 
         return False
+
+    def get_brightness(self):
+        return self.get_led_brightness(RazerReport.BACKLIGHT_LED)
+
+    def set_brightness(self, value):
+        return self.set_led_brightness(RazerReport.BACKLIGHT_LED, value)
 
     def __del__(self):
         self.close()
