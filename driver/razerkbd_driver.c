@@ -351,6 +351,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Blade Stealth (Late 2017)\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_TARTARUS:
+        device_type = "Razer Tartarus\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
         device_type = "Razer Tartarus Chroma\n";
         break;
