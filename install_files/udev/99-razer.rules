@@ -32,7 +32,7 @@ ATTRS{idProduct}=="0f07", \
 # Core
 ATTRS{idProduct}=="0215", \
     ATTRS{idVendor}=="1532", \
-    ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razercore"
+    MODE="0660" GROUP="plugdev"
 
 # Get out if no match
 ENV{ID_RAZER_CHROMA}!="1", GOTO="razer_end"

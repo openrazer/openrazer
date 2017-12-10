@@ -11,11 +11,11 @@ from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
 class _RazerKeyboard(_RazerDeviceBrightnessSuspend):
     @property
     def hid_response_index(self):
-        return 0x01
+        return 0x00
 
     @property
     def hid_request_index(self):
-        return 0x01
+        return 0x00
 
 
 class _MacroKeyboard(_RazerKeyboard):
@@ -333,6 +333,9 @@ class RazerBlackWidowChroma(_RippleKeyboard):
     Class for the Razer BlackWidow Chroma
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Chroma(-if01)?-event-kbd')
+
+    DEVICE_NAME = 'Razer BlackWidow Chroma'
+    USE_HIDRAW = True
 
     USB_VID = 0x1532
     USB_PID = 0x0203

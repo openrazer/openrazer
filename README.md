@@ -16,7 +16,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer BlackWidow Ultimate 2013                |  1532:011A  |   ✔    |   ✔    |      ✘     |       |
 | Razer BlackWidow Classic                      |  1532:011B  |   ✔    |   ✔    |      ✘     |       |
 | Razer DeathStalker Expert                     |  1532:0202  |   ✔    |   ✔    |      ✘     |       |
-| Razer BlackWidow Chroma                       |  1532:0203  |   ✔    |   ✔    |      ✘     |       |
+| Razer BlackWidow Chroma                       |  1532:0203  |   ✔    |   ✔    |      ✔     | Custom LED mode untested but should work |
 | Razer DeathStalker Chroma                     |  1532:0204  |   ✔    |   ✔    |      ✘     |       |
 | Razer Blade Stealth                           |  1532:0205  |   ✔    |   ✔    |      ✘     |       |
 | Razer Orbweaver Chroma                        |  1532:0207  |   ✔    |   ✔    |      ✘     |       |
@@ -77,14 +77,14 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Kraken 7.1 V2      |  1532:0510  |   ✔    |   ✔    |      ✘     | Cant be driverless yet |
 
 ### Misc
-| Device                  | USB VID:PID | Driver | Daemon | Driverless |
-| ----------------------- | ----------- | ------ | ------ | ---------- |
-| Razer Nostromo          |  1532:0111  |   ✔    |   ✔    |      ✘     |
-| Razer Orbweaver         |  1532:0113  |   ✔    |   ✔    |      ✘     |
-| Razer Tartarus          |  1532:0201  |   ✔    |   ✔    |      ✘     |
-| Razer Tartarus Chroma   |  1532:0208  |   ✔    |   ✔    |      ✘     |
-| Razer Core              |  1532:0215  |   ✔    |   ✔    |      ✘     |
-| Razer Chroma Mug Holder |  1532:0F07  |   ✔    |   ✔    |      ✘     |
+| Device                  | USB VID:PID | Driver | Daemon | Driverless | Notes |
+| ----------------------- | ----------- | ------ | ------ | ---------- | ----- |
+| Razer Nostromo          |  1532:0111  |   ✔    |   ✔    |      ✘     |       |
+| Razer Orbweaver         |  1532:0113  |   ✔    |   ✔    |      ✘     |       |
+| Razer Tartarus          |  1532:0201  |   ✔    |   ✔    |      ✘     |       |
+| Razer Tartarus Chroma   |  1532:0208  |   ✔    |   ✔    |      ✘     |       |
+| Razer Core              |  1532:0215  |   ✔    |   ✔    |      ✔     | Untested |
+| Razer Chroma Mug Holder |  1532:0F07  |   ✔    |   ✔    |      ✘     |       |
 
 #### Determining the Device ID
 Razer devices use a USB VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:

@@ -69,6 +69,9 @@ def get_game_mode(self):
     """
     self.logger.debug("DBus call get_game_mode")
 
+    if self.USE_HIDRAW:
+        return self.get_led_active(0x08) == 0x01  # TODO replace LED with constant
+
     driver_path = self.get_driver_path('game_led_state')
 
     with open(driver_path, 'r') as driver_file:
@@ -84,6 +87,9 @@ def set_game_mode(self, enable):
     :type enable: bool
     """
     self.logger.debug("DBus call set_game_mode")
+
+    if self.USE_HIDRAW:
+        return self.set_led_active(0x08, 0x01 if enable else 0x00)  # TODO replace LED with constant
 
     driver_path = self.get_driver_path('game_led_state')
 
@@ -118,6 +124,9 @@ def get_macro_mode(self):
     """
     self.logger.debug("DBus call get_macro_mode")
 
+    if self.USE_HIDRAW:
+        return self.get_led_active(0x07) == 0x01  # TODO replace LED with constant
+
     driver_path = self.get_driver_path('macro_led_state')
 
     with open(driver_path, 'r') as driver_file:
@@ -133,6 +142,9 @@ def set_macro_mode(self, enable):
     :type enable: bool
     """
     self.logger.debug("DBus call set_macro_mode")
+
+    if self.USE_HIDRAW:
+        return self.set_led_active(0x07, 0x01 if enable else 0x00)  # TODO replace LED with constant
 
     driver_path = self.get_driver_path('macro_led_state')
 
@@ -153,6 +165,9 @@ def get_macro_effect(self):
     """
     self.logger.debug("DBus call get_macro_effect")
 
+    if self.USE_HIDRAW:
+        return self.get_led_effect(0x07)  # TODO replace LED with constant
+
     driver_path = self.get_driver_path('macro_led_effect')
 
     with open(driver_path, 'r') as driver_file:
@@ -168,6 +183,9 @@ def set_macro_effect(self, effect):
     :type effect: int
     """
     self.logger.debug("DBus call set_macro_effect")
+
+    if self.USE_HIDRAW:
+        return self.set_led_effect(0x07, effect)  # TODO replace LED with constant
 
     driver_path = self.get_driver_path('macro_led_effect')
 

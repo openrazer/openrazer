@@ -8,6 +8,9 @@ class RazerCore(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Core
     """
+    DEVICE_NAME = 'Razer Core'
+    USE_HIDRAW = True
+
     USB_VID = 0x1532
     USB_PID = 0x0215
     HAS_MATRIX = True

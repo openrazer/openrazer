@@ -499,6 +499,19 @@ class RazerDevice(DBusService):
         request.transaction_id = 0x3F
         self.razer_send_payload(request)
 
+    def get_led_effect(self, led):
+        request = self.razer_get_report(0x03, 0x82, 0x03)
+        request.arguments = [0x01, led]
+        request.transaction_id = 0x3F
+        response = self.razer_send_payload(request)
+        return response.arguments[2]
+
+    def set_led_effect(self, led, effect):
+        request = self.razer_get_report(0x03, 0x02, 0x03)
+        request.arguments = [0x01, led, effect]
+        request.transaction_id = 0x3F
+        self.razer_send_payload(request)
+
     def get_led_brightness(self, led):
         request = self.razer_get_report(0x03, 0x83, 0x03)
         request.arguments = [RazerReport.VARSTORE, led]
