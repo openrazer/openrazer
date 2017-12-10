@@ -93,6 +93,28 @@ class RazerMambaTE(__RazerDeviceBrightnessSuspend):
     DPI_MAX = 16000
 
 
+class RazerLanceheadTE(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Lancehead Tournament Edition (Wired)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0060
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 16]
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
+               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
+               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'max_dpi',
+               'get_dpi_xy', 'set_dpi_xy']
+
+    RAZER_URLS = {
+        "top_img": "https://d1urewwzb2qwii.cloudfront.net/sys-master/root/h5e/h0b/8888236245022",
+        "side_img": "https://d1urewwzb2qwii.cloudfront.net/sys-master/root/h28/hc5/8888234311710",
+        "perspective_img": "https://d1urewwzb2qwii.cloudfront.net/sys-master/root/h84/hb3/8888234868766"
+    }
+
+    DPI_MAX = 16000
+
+
 class RazerAbyssus(__RazerDevice):
     """
     Class for the Razer Abyssus
