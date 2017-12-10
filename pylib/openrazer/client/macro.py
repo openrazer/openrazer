@@ -65,16 +65,20 @@ class RazerMacro(object):
 
     def del_macro(self, bind_key: str):
         key_map = keyboard.KEY_MAPPING
+        map_str = "keyboard.KEY_MAPPING"
         # TODO: Check more devices (or find a non-manual way)
-        if self.name == "Razer Orbweaver":
+        if self.name in ["Razer Orbweaver", "Razer Orbweaver Chroma"]:
             key_map = keyboard.ORBWEAVER_KEY_MAPPING
-        elif self.name == "Razer Tartarus":
+            map_str = "keyboard.ORBWEAVER_KEY_MAPPING"
+        elif self.name in ["Razer Tartarus", "Razer Tartarus Chroma", "Razer Nostromo"]:
             key_map = keyboard.TARTARUS_KEY_MAPPING
-        elif self.name == "Razer Naga Hex V2":
+            map_str = "keyboard.TARTARUS_KEY_MAPPING"
+        elif self.name in ["Razer Naga Hex V2", "Razer Naga Chroma"]:
             key_map = keyboard.NAGA_HEX_V2_KEY_MAPPING
+            map_str = "keyboard.NAGA_HEX_V2_KEY_MAPPING"
 
         if bind_key not in key_map:
-            raise ValueError("Key {0} is not in openrazer.keyboard.KEY_MAPPING".format(bind_key))
+            raise ValueError("Key {0} is not in openrazer.{1}".format(bind_key, map_str))
         else:
             self._macro_dbus.deleteMacro(bind_key)
 
