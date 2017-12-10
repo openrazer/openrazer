@@ -66,7 +66,6 @@ class RazerMacro(object):
     def del_macro(self, bind_key: str):
         key_map = keyboard.KEY_MAPPING
         map_str = "keyboard.KEY_MAPPING"
-        # TODO: Check more devices (or find a non-manual way)
         if self.name in ["Razer Orbweaver", "Razer Orbweaver Chroma"]:
             key_map = keyboard.ORBWEAVER_KEY_MAPPING
             map_str = "keyboard.ORBWEAVER_KEY_MAPPING"
