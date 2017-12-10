@@ -118,7 +118,7 @@ class RazerDevice(object):
         # Setup Macro
         if self.has('macro_logic'):
             if self._MACRO_CLASS is not None:
-                self.macro = self._MACRO_CLASS(serial, daemon_dbus=daemon_dbus, capabilities=self._capabilities)
+                self.macro = self._MACRO_CLASS(serial, self.name, daemon_dbus=daemon_dbus, capabilities=self._capabilities)
             else:
                 self._capabilities['macro_logic'] = False
                 self.macro = None

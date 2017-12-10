@@ -7,7 +7,7 @@ from openrazer_daemon import keyboard
 
 
 class RazerMacro(object):
-    def __init__(self, serial: str, daemon_dbus=None, capabilities=None):
+    def __init__(self, serial: str, devname: str, daemon_dbus=None, capabilities=None):
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
@@ -20,6 +20,8 @@ class RazerMacro(object):
         self._macro_dbus = _dbus.Interface(daemon_dbus, "razer.device.macro")
 
         self._macro_enabled = False
+
+        self.name = devname
 
     def get_macros(self) -> dict:
         json_payload = self._macro_dbus.getMacros()
@@ -62,8 +64,20 @@ class RazerMacro(object):
         self._macro_dbus.addMacro(bind_key, json_payload)
 
     def del_macro(self, bind_key: str):
-        if bind_key not in keyboard.KEY_MAPPING:
-            raise ValueError("Key {0} is not in openrazer.keyboard.KEY_MAPPING".format(bind_key))
+        key_map = keyboard.KEY_MAPPING
+        map_str = "keyboard.KEY_MAPPING"
+        if self.name in ["Razer Orbweaver", "Razer Orbweaver Chroma"]:
+            key_map = keyboard.ORBWEAVER_KEY_MAPPING
+            map_str = "keyboard.ORBWEAVER_KEY_MAPPING"
+        elif self.name in ["Razer Tartarus", "Razer Tartarus Chroma", "Razer Nostromo"]:
+            key_map = keyboard.TARTARUS_KEY_MAPPING
+            map_str = "keyboard.TARTARUS_KEY_MAPPING"
+        elif self.name in ["Razer Naga Hex V2", "Razer Naga Chroma"]:
+            key_map = keyboard.NAGA_HEX_V2_KEY_MAPPING
+            map_str = "keyboard.NAGA_HEX_V2_KEY_MAPPING"
+
+        if bind_key not in key_map:
+            raise ValueError("Key {0} is not in openrazer.{1}".format(bind_key, map_str))
         else:
             self._macro_dbus.deleteMacro(bind_key)
 
