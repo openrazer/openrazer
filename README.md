@@ -38,29 +38,30 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Blade Stealth (Late 2017)               |  1532:0232  |   ✔    |   ✔    | Working except ripple |
 
 ### Mouse
-| Device                          | USB VID:PID | Driver | Daemon |
-| ------------------------------- | ----------- | ------ | ------ |
-| Razer Orochi 2011               |  1532:0013  |   ✔    |   ✔    |
-| Razer Mamba 2012 (Wired)        |  1532:0024  |   ✔    |   ✔    |
-| Razer Mamba 2012 (Wireless)     |  1532:0025  |   ✔    |   ✔    |
-| Razer Imperator 2012            |  1532:002F  |   ✔    |   ✔    |
-| Razer Ouroboros 2012            |  1532:0032  |   ✔    |   ✔    |
-| Razer Taipan                    |  1532:0034  |   ✔    |   ✔    |
-| Razer Naga Hex (Red)            |  1532:0036  |   ✔    |   ✔    |
-| Razer Orochi 2013               |  1532:0039  |   ✔    |   ✔    |
-| Razer Naga 2014                 |  1532:0040  |   ✔    |   ✔    |
-| Razer Naga Hex                  |  1532:0041  |   ✔    |   ✔    |
-| Razer Abyssus 2014              |  1532:0042  |   ✔    |   ✔    |
-| Razer DeathAdder Chroma         |  1532:0043  |   ✔    |   ✔    |
-| Razer Mamba (Wired)             |  1532:0044  |   ✔    |   ✔    |
-| Razer Mamba (Wireless)          |  1532:0045  |   ✔    |   ✔    |
-| Razer Mamba Tournament Edition  |  1532:0046  |   ✔    |   ✔    |
-| Razer Orochi (Wired)            |  1532:0048  |   ✔    |   ✔    |
-| Razer Diamondback Chroma        |  1532:004C  |   ✔    |   ✔    |
-| Razer Naga Hex V2               |  1532:0050  |   ✔    |   ✔    |
-| Razer Naga Chroma               |  1532:0053  |   ✔    |   ✔    |
-| Razer Abyssus V2                |  1532:005B  |   ✔    |   ✔    |
-| Razer DeathAdder Elite          |  1532:005C  |   ✔    |   ✔    |
+| Device                                        | USB VID:PID | Driver | Daemon |
+| --------------------------------------------- | ----------- | ------ | ------ |
+| Razer Orochi 2011                             |  1532:0013  |   ✔    |   ✔    |
+| Razer Mamba 2012 (Wired)                      |  1532:0024  |   ✔    |   ✔    |
+| Razer Mamba 2012 (Wireless)                   |  1532:0025  |   ✔    |   ✔    |
+| Razer Imperator 2012                          |  1532:002F  |   ✔    |   ✔    |
+| Razer Ouroboros 2012                          |  1532:0032  |   ✔    |   ✔    |
+| Razer Taipan                                  |  1532:0034  |   ✔    |   ✔    |
+| Razer Naga Hex (Red)                          |  1532:0036  |   ✔    |   ✔    |
+| Razer Orochi 2013                             |  1532:0039  |   ✔    |   ✔    |
+| Razer Naga 2014                               |  1532:0040  |   ✔    |   ✔    |
+| Razer Naga Hex                                |  1532:0041  |   ✔    |   ✔    |
+| Razer Abyssus 2014                            |  1532:0042  |   ✔    |   ✔    |
+| Razer DeathAdder Chroma                       |  1532:0043  |   ✔    |   ✔    |
+| Razer Mamba (Wired)                           |  1532:0044  |   ✔    |   ✔    |
+| Razer Mamba (Wireless)                        |  1532:0045  |   ✔    |   ✔    |
+| Razer Mamba Tournament Edition                |  1532:0046  |   ✔    |   ✔    |
+| Razer Orochi (Wired)                          |  1532:0048  |   ✔    |   ✔    |
+| Razer Diamondback Chroma                      |  1532:004C  |   ✔    |   ✔    |
+| Razer Naga Hex V2                             |  1532:0050  |   ✔    |   ✔    |
+| Razer Naga Chroma                             |  1532:0053  |   ✔    |   ✔    |
+| Razer Abyssus V2                              |  1532:005B  |   ✔    |   ✔    |
+| Razer DeathAdder Elite                        |  1532:005C  |   ✔    |   ✔    |
+| Razer Lancehead Tournament Edition            |  1532:0060  |   ✔    |   ✔    |
 
 ### Mousemats
 | Device        | USB VID:PID | Driver | Daemon |
