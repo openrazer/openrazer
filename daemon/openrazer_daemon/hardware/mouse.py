@@ -107,9 +107,9 @@ class RazerLanceheadTE(__RazerDeviceBrightnessSuspend):
                'get_dpi_xy', 'set_dpi_xy']
 
     RAZER_URLS = {
-        "top_img": "https://d1urewwzb2qwii.cloudfront.net/sys-master/root/h5e/h0b/8888236245022",
-        "side_img": "https://d1urewwzb2qwii.cloudfront.net/sys-master/root/h28/hc5/8888234311710",
-        "perspective_img": "https://d1urewwzb2qwii.cloudfront.net/sys-master/root/h84/hb3/8888234868766"
+        "top_img": "https://assets2.razerzone.com/images/lancehead-te-gallery-v4/11fc8cbd1f93ab4f3725a4b7852529059-1500x1000_LanceheadTEGM01.jpg",
+        "side_img": "https://assets.razerzone.com/eeimages/products/27310/lanceheadte-galleryimg-1500x1000-4.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/27310/lanceheadte-galleryimg-1500x1000-5.png"
     }
 
     DPI_MAX = 16000
