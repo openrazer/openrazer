@@ -473,6 +473,7 @@ class RazerBladeStealth(_RippleKeyboard):
         "side_img": "https://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-08-v2.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/23914/razer-blade-stealth-gallery-01-v2.png"
     }
+
     @property
     def hid_request_index(self):
         return None
@@ -875,4 +876,3 @@ class RazerBladeStealthLate2017(_RippleKeyboard):
     @property
     def hid_request_index(self):
         return None
-

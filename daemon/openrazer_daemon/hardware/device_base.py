@@ -266,17 +266,17 @@ class RazerDevice(DBusService):
         return RazerReport(answer[1:])
 
     def print_erroneous_report(self, report, message):
-        self.logger.warning("{}. Start Marker: {:02x} id: {:02x} Num Params: {:02x} Reserved: {:02x} Command: {:02x} Params: {:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x} .".format( \
-           message,
-           report.status,
-           report.transaction_id,
-           report.data_size,
-           report.command_class,
-           report.command_id,
-           report.arguments[0],  report.arguments[1],  report.arguments[2],  report.arguments[3],
-           report.arguments[4],  report.arguments[5],  report.arguments[6],  report.arguments[7],
-           report.arguments[8],  report.arguments[9],  report.arguments[10], report.arguments[11],
-           report.arguments[12], report.arguments[13], report.arguments[14], report.arguments[15]))
+        self.logger.warning("{}. Start Marker: {:02x} id: {:02x} Num Params: {:02x} Reserved: {:02x} Command: {:02x} Params: {:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x} .".format(
+            message,
+            report.status,
+            report.transaction_id,
+            report.data_size,
+            report.command_class,
+            report.command_id,
+            report.arguments[0],  report.arguments[1],  report.arguments[2],  report.arguments[3],
+            report.arguments[4],  report.arguments[5],  report.arguments[6],  report.arguments[7],
+            report.arguments[8],  report.arguments[9],  report.arguments[10], report.arguments[11],
+            report.arguments[12], report.arguments[13], report.arguments[14], report.arguments[15]))
 
     def razer_send_payload(self, request_report):
         request_report.set_crc()
@@ -569,7 +569,7 @@ class RazerDevice(DBusService):
                     break
 
                 # Get one frame
-                rgbs = binary[offset:offset+row_len]
+                rgbs = binary[offset:offset + row_len]
                 request = self.razer_get_report(0x03, 0x0C, 0x32)
                 request.arguments = bytes([start_col, stop_col]) + (b'\x00' * (start_col * 3)) + rgbs
                 self.razer_send_payload(request)
@@ -578,7 +578,6 @@ class RazerDevice(DBusService):
 
         except Exception as err:
             self.logger.error('Caught exception {0} during setting key row'.format(err))
-
 
     # TODO This is for mouse only, move
     def get_logo_active(self):
@@ -612,14 +611,14 @@ class RazerDevice(DBusService):
         request = self.razer_get_report(0x04, 0x05, 0x07)
 
         # Keep the DPI within bounds
-        dpi_x = max(min(dpi_x, 16000), 128);
-        dpi_y = max(min(dpi_y, 16000), 128);
+        dpi_x = max(min(dpi_x, 16000), 128)
+        dpi_y = max(min(dpi_y, 16000), 128)
 
         request.arguments = [var_store,
                              (dpi_x >> 8) & 0x00FF,
-                              dpi_x & 0x00FF,
+                             dpi_x & 0x00FF,
                              (dpi_y >> 8) & 0x00FF,
-                              dpi_y & 0x00FF]
+                             dpi_y & 0x00FF]
         self.razer_send_payload(request)
 
     def get_dpi_xy(self):
