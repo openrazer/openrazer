@@ -43,7 +43,7 @@ def parse_args():
     parser.add_argument('-s', '--stop', action='store_true', help='Gracefully stop the existing daemon.')
     parser.add_argument('--version', action='version', version='%(prog)s {version}'.format(version=__version__))
 
-    parser.add_argument('--as-root', action='store_true', help='All the daemon to be started as root')
+    parser.add_argument('--as-root', action='store_true', help='Allow the daemon to be started as root')
 
     parser.add_argument('--config', type=str, help='Location of the config file', default=CONF_FILE)
     parser.add_argument('--run-dir', type=str, help='Location of the run directory', default=RAZER_RUNTIME_DIR)
