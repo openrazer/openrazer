@@ -569,7 +569,7 @@ class RazerDevice(DBusService):
                     break
 
                 # Get one frame
-                rgbs = binary[offset:row_len]
+                rgbs = binary[offset:offset+row_len]
                 request = self.razer_get_report(0x03, 0x0C, 0x32)
                 request.arguments = bytes([start_col, stop_col]) + (b'\x00' * (start_col * 3)) + rgbs
                 self.razer_send_payload(request)
