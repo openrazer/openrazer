@@ -43,6 +43,8 @@ def parse_args():
     parser.add_argument('-s', '--stop', action='store_true', help='Gracefully stop the existing daemon.')
     parser.add_argument('--version', action='version', version='%(prog)s {version}'.format(version=__version__))
 
+    parser.add_argument('--as-root', action='store_true', help='Allow the daemon to be started as root')
+
     parser.add_argument('--config', type=str, help='Location of the config file', default=CONF_FILE)
     parser.add_argument('--run-dir', type=str, help='Location of the run directory', default=RAZER_RUNTIME_DIR)
     parser.add_argument('--log-dir', type=str, help='Location of the log directory', default=LOG_PATH)
@@ -139,6 +141,13 @@ def run():
     if args.stop:
         stop_daemon(args)
         sys.exit(0)
+
+    if os.getuid() == 0:
+        if args.as_root:
+            print("The daemon is being run as root.")
+        else:
+            print("The daemon should not be run as root. If you have a good reason to do so, use the --as-root flag.")
+            sys.exit(1)
 
     if args.respawn:
         stop_daemon(args)
