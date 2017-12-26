@@ -4,6 +4,6 @@ from setuptools import setup, find_packages
 
 setup(
     name="openrazer",
-    version="2.1.1",
+    version="2.2.0",
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"])
 )
