@@ -2838,3 +2838,44 @@ class RazerViper8KHz(__RazerDevice):
         self.disable_notify = True
         _da_set_logo_brightness(self, logo_brightness)
         self.disable_notify = False
+
+
+class RazerNagaEpicChromaWired(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Naga Epic Chroma (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Naga_Epic_Chroma-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x003E
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_battery', 'is_charging',
+               'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'set_scroll_static', 'set_scroll_pulsate', 'set_scroll_spectrum', 'get_scroll_brightness', 'set_scroll_brightness',
+               'set_backlight_active', 'get_backlight_active', 'get_backlight_effect', 'set_backlight_static', 'set_backlight_pulsate', 'set_backlight_spectrum', 'get_backlight_brightness', 'set_backlight_brightness']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/20776/rzrnagaepicchroma_04.png"
+
+    DPI_MAX = 8200
+
+    def __init__(self, *args, **kwargs):
+        super(RazerNagaEpicChromaWired, self).__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Naga Epic Chroma')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerNagaEpicChromaWired, self)._close()
+
+        self._battery_manager.close()
+
+
+class RazerNagaEpicChromaWireless(RazerNagaEpicChromaWired):
+    """
+    Class for the Razer Naga Epic Chroma (Wireless)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Naga_Epic_Chroma_Dock-if0(1|2)-event-kbd')
+
+    USB_PID = 0x003F
