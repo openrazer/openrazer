@@ -37,6 +37,122 @@ def set_backlight_active(self, active):
             driver_file.write('0')
 
 
+@endpoint('razer.device.lighting.backlight', 'getBacklightEffect', out_sig='y')
+def get_backlight_effect(self):
+    """
+    Get backlight effect
+
+    :return: Active
+    :rtype: bool
+    """
+    self.logger.debug("DBus call get_backlight_effect")
+
+    driver_path = self.get_driver_path('scroll_led_effect')
+
+    with open(driver_path, 'r') as driver_file:
+        effect = int(driver_file.read().strip())
+        return effect
+
+
+@endpoint('razer.device.lighting.backlight', 'getBacklightBrightness', out_sig='d')
+def get_backlight_brightness(self):
+    """
+    Get the device's brightness
+
+    :return: Brightness
+    :rtype: float
+    """
+    self.logger.debug("DBus call get_backlight_brightness")
+
+    driver_path = self.get_driver_path('backlight_led_brightness')
+
+    with open(driver_path, 'r') as driver_file:
+        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
+
+        return brightness
+
+
+@endpoint('razer.device.lighting.backlight', 'setBacklightBrightness', in_sig='d')
+def set_backlight_brightness(self, brightness):
+    """
+    Set the device's brightness
+
+    :param brightness: Brightness
+    :type brightness: int
+    """
+    self.logger.debug("DBus call set_backlight_brightness")
+
+    driver_path = self.get_driver_path('backlight_led_brightness')
+
+    self.method_args['brightness'] = brightness
+
+    brightness = int(round(brightness * (255.0 / 100.0)))
+    if brightness > 255:
+        brightness = 255
+    elif brightness < 0:
+        brightness = 0
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write(str(brightness))
+
+    # Notify others
+    self.send_effect_event('setBrightness', brightness)
+
+
+@endpoint('razer.device.lighting.backlight', 'setBacklightStatic', in_sig='yyy')
+def set_backlight_static(self, red, green, blue):
+    """
+    Set the device to static colour
+
+    :param red: Red component
+    :type red: int
+
+    :param green: Green component
+    :type green: int
+
+    :param blue: Blue component
+    :type blue: int
+    """
+    self.logger.debug("DBus call set_backlight_static")
+
+    # Notify others
+    self.send_effect_event('setStatic', red, green, blue)
+
+    rgb_driver_path = self.get_driver_path('backlight_led_rgb')
+    effect_driver_path = self.get_driver_path('backlight_led_effect')
+
+    payload = bytes([red, green, blue])
+
+    with open(rgb_driver_path, 'wb') as rgb_driver_file, open(effect_driver_path, 'w') as effect_driver_file:
+        rgb_driver_file.write(payload)
+        effect_driver_file.write('0')
+
+
+@endpoint('razer.device.lighting.backlight', 'setBacklightSpectrum')
+def set_backlight_spectrum(self):
+    """
+    Set the device to pulsate
+
+    :param red: Red component
+    :type red: int
+
+    :param green: Green component
+    :type green: int
+
+    :param blue: Blue component
+    :type blue: int
+    """
+    self.logger.debug("DBus call set_backlight_spectrum")
+
+    # Notify others
+    self.send_effect_event('setSpectrum')
+
+    effect_driver_path = self.get_driver_path('backlight_led_effect')
+
+    with open(effect_driver_path, 'w') as effect_driver_file:
+        effect_driver_file.write('4')
+
+
 @endpoint('razer.device.lighting.logo', 'getLogoActive', out_sig='b')
 def get_logo_active(self):
     """
