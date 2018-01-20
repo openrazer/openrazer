@@ -101,6 +101,8 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer DeathAdder 2013                         |  1532:0037  |
 | Razer DeathAdder 1800                         |  1532:0038  |
 | Razer Orochi 2013                             |  1532:0039  |
+| Razer Naga Epic Chroma (Wired)                |  1532:003E  |
+| Razer Naga Epic Chroma (Wireless)             |  1532:003F  |
 | Razer Naga 2014                               |  1532:0040  |
 | Razer Naga Hex                                |  1532:0041  |
 | Razer Abyssus 2014                            |  1532:0042  |

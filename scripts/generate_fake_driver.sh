@@ -1,6 +1,9 @@
 #!/bin/bash
 
 declare -A files_metadata=(
+    ["backlight_led_brightness"]="rw;0"
+    ["backlight_led_effect"]="rw;0"
+    ["backlight_led_rgb"]="rw;0xFF00FF"
     ["backlight_led_state"]="rw;0"
     ["charge_colour"]="w;"
     ["charge_effect"]="w;"
