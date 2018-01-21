@@ -16,7 +16,7 @@ echo -e "${BLUE}Copying source to temporary build directory${NC}"
 cd ${ROOT}
 
 # Extract version from changelog
-VERSION=$(cat ${ROOT}/debian/changelog | grep -m 1 -oP '(?<=openrazer \()[^\-]+')
+VERSION=$(cat ${ROOT}/debian/changelog | grep -m 1 -oP '(?<=openrazer \()[^\-\)]+')
 ORIG_TAR="openrazer_${VERSION}.orig.tar.gz"
 
 #git archive ${CURRENT_BRANCH} | gzip > ${TEMP_DIR}/${ORIG_TAR}
