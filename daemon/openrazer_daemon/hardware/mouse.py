@@ -877,14 +877,17 @@ class RazerLanceheadTE(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Lancehead Tournament Edition (Wired)
     """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Lancehead_TE-if0(1|2)-event-kbd')
+
     USB_VID = 0x1532
     USB_PID = 0x0060
     HAS_MATRIX = True
-    MATRIX_DIMS = [1, 16]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
+    MATRIX_DIMS = [1, 2]
+
+    # limited the features for testing purposes.
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
-               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'max_dpi',
-               'get_dpi_xy', 'set_dpi_xy']
+               'set_breath_single_effect', 'max_dpi']
 
     # TODO: Need to find proper images (transparent bg)
 
@@ -899,8 +902,8 @@ class RazerLanceheadTE(__RazerDeviceBrightnessSuspend):
     def __init__(self, *args, **kwargs):
         super(RazerLanceheadTE, self).__init__(*args, **kwargs)
 
-        # Set brightness to max and LEDs to on, on startup
-        _da_set_logo_brightness(self, 100)
-        _da_set_scroll_brightness(self, 100)
-        _da_set_logo_active(self, True)
-        _da_set_scroll_active(self, True)
+    def _resume_device(self):
+        self.logger.debug("LanceheadTE doesnt have suspend/resume")
+
+    def _suspend_device(self):
+        self.logger.debug("LanceheadTE doesnt have suspend/resume")
