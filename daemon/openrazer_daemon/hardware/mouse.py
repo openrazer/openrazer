@@ -873,7 +873,7 @@ class RazerAbyssus1800(__RazerDevice):
     # TODO: Find device images
 
 
-class RazerLanceheadTE(__RazerDeviceBrightnessSuspend):
+class RazerLanceheadTE(__RazerDevice):
     """
     Class for the Razer Lancehead Tournament Edition (Wired)
     """
