@@ -302,7 +302,7 @@ class RazerBlackWidowUltimate2013(_MacroKeyboard):
     """
     Class for the Razer BlackWidow Ultimate 2013
     """
-    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow_Ultimate_2013(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow_Ultimate(_2013)?(-if01)?-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x011A
