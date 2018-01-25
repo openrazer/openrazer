@@ -873,7 +873,7 @@ class RazerAbyssus1800(__RazerDevice):
     # TODO: Find device images
 
 
-class RazerLanceheadTE(__RazerDeviceBrightnessSuspend):
+class RazerLanceheadTE(__RazerDevice):
     """
     Class for the Razer Lancehead Tournament Edition (Wired)
     """
@@ -886,7 +886,7 @@ class RazerLanceheadTE(__RazerDeviceBrightnessSuspend):
     # limited the features for testing purposes.
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
-               'set_breath_single_effect', 'set_key_row', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy']
+               'set_breath_single_effect', 'max_dpi']
 
     # TODO: Need to find proper images (transparent bg)
 
@@ -902,18 +902,7 @@ class RazerLanceheadTE(__RazerDeviceBrightnessSuspend):
         super(RazerLanceheadTE, self).__init__(*args, **kwargs)
 
     def _resume_device(self):
-        self.logger.debug("Abyssus doesnt have suspend/resume")
+        self.logger.debug("LanceheadTE doesnt have suspend/resume")
 
     def _suspend_device(self):
-        self.logger.debug("Abyssus doesnt have suspend/resume")
-
-    @staticmethod
-    def decode_bitfield(bitfield):
-        return {
-            'state': (bitfield & 0x01) == 0x01,
-            'breathing1': (bitfield & 0x02) == 0x02,
-            'spectrum': (bitfield & 0x04) == 0x04,
-            'sync': (bitfield & 0x08) == 0x08,
-            'breathing2': (bitfield & 0x10) == 0x10,
-            'breathing3': (bitfield & 0x20) == 0x20,
-        }
+        self.logger.debug("LanceheadTE doesnt have suspend/resume")
