@@ -873,7 +873,7 @@ class RazerAbyssus1800(__RazerDevice):
     # TODO: Find device images
 
 
-class RazerLanceheadTE(__RazerDevice):
+class RazerLanceheadTE(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Lancehead Tournament Edition (Wired)
     """
@@ -882,12 +882,11 @@ class RazerLanceheadTE(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x0060
     HAS_MATRIX = True
-    MATRIX_DIMS = [1, 2]
 
     # limited the features for testing purposes.
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_wave_effect',
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
-               'set_breath_single_effect', 'max_dpi']
+               'set_breath_single_effect', 'set_breath_dual_effect', 'set_key_row', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy']
 
     # TODO: Need to find proper images (transparent bg)
 
@@ -898,12 +897,3 @@ class RazerLanceheadTE(__RazerDevice):
     }
 
     DPI_MAX = 16000
-
-    def __init__(self, *args, **kwargs):
-        super(RazerLanceheadTE, self).__init__(*args, **kwargs)
-
-    def _resume_device(self):
-        self.logger.debug("LanceheadTE doesnt have suspend/resume")
-
-    def _suspend_device(self):
-        self.logger.debug("LanceheadTE doesnt have suspend/resume")
