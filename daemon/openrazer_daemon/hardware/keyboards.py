@@ -16,6 +16,10 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
     """
 
     def __init__(self, *args, **kwargs):
+        if 'additional_methods' in kwargs:
+            kwargs['additional_methods'].extend(['get_keyboard_layout'])
+        else:
+            kwargs['additional_methods'] = ['get_keyboard_layout']
         super(_MacroKeyboard, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
