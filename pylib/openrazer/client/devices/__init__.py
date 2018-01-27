@@ -31,6 +31,10 @@ class RazerDevice(object):
         self._type = str(self._dbus_interfaces['device'].getDeviceType())
         self._fw = str(self._dbus_interfaces['device'].getFirmware())
         self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
+        if self._has_feature('razer.device.misc', 'getKeyboardLayout'):
+            self._kbd_layout = str(self._dbus_interfaces['device'].getKeyboardLayout())
+        else:
+            self._kbd_layout = None
         self._has_dedicated_macro = None
         self._urls = None
 
@@ -237,6 +241,16 @@ class RazerDevice(object):
         :rtype: str
         """
         return self._serial
+
+    @property
+    def keyboard_layout(self) -> str:
+        """
+        Device's keyboard layout
+
+        :return: Keyboard layout
+        :rtype: str
+        """
+        return self._kbd_layout
 
     @property
     def brightness(self) -> float:
