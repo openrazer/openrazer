@@ -10,6 +10,7 @@ layoutids = {"01": "en_US",
              "03": "de_DE",
              "06": "en_GB"}
 
+
 @endpoint('razer.device.misc', 'getDriverVersion', out_sig='s')
 def version(self):
     """
