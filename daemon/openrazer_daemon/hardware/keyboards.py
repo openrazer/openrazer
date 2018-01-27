@@ -670,12 +670,6 @@ class RazerAnansi(_MacroKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/58/razer-anansi-gallery-2.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerAnansi, self).__init__(*args, **kwargs)
-
-    def _close(self):
-        super(RazerAnansi, self)._close()
-
 
 class RazerDeathStalkerExpert(_MacroKeyboard):
     """

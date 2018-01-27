@@ -26,9 +26,3 @@ class RazerChromaMugHolder(_RazerDeviceBrightnessSuspend):
         "side_img": None,
         "perspective_img": "https://assets2.razerzone.com/images/mug-holder/e64e507b73e61c44789d996065fd9645-1500x1000mug_01.jpg"
     }
-
-    def __init__(self, *args, **kwargs):
-        super(RazerChromaMugHolder, self).__init__(*args, **kwargs)
-
-    def _close(self):
-        super(RazerChromaMugHolder, self)._close()

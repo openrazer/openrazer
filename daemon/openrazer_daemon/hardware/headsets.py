@@ -24,12 +24,6 @@ class RazerKrakenClassic(__RazerDevice):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/17519/01.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerKrakenClassic, self).__init__(*args, **kwargs)
-
-    def _close(self):
-        super(RazerKrakenClassic, self)._close()
-
     @staticmethod
     def decode_bitfield(bitfield):
         return {
@@ -94,12 +88,6 @@ class RazerKraken(__RazerDevice):
         "side_img": "https://assets.razerzone.com/eeimages/products/17519/03.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/17519/01.png"
     }
-
-    def __init__(self, *args, **kwargs):
-        super(RazerKraken, self).__init__(*args, **kwargs)
-
-    def _close(self):
-        super(RazerKraken, self)._close()
 
     @staticmethod
     def decode_bitfield(bitfield):
@@ -174,12 +162,6 @@ class RazerKrakenV2(__RazerDevice):
         "side_img": "https://assets.razerzone.com/eeimages/products/26005/kraken71v2_gallery01-v2.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26005/kraken71v2_gallery03-v2.png"
     }
-
-    def __init__(self, *args, **kwargs):
-        super(RazerKrakenV2, self).__init__(*args, **kwargs)
-
-    def _close(self):
-        super(RazerKrakenV2, self)._close()
 
     @staticmethod
     def decode_bitfield(bitfield):

@@ -107,9 +107,6 @@ class RazerAbyssus(__RazerDevice):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/17079/abyssus2014_gallery_3_2.png"
     }
 
-    def __init__(self, *args, **kwargs):
-        super(RazerAbyssus, self).__init__(*args, **kwargs)
-
     def _resume_device(self):
         self.logger.debug("Abyssus doesnt have suspend/resume")
 
@@ -202,9 +199,6 @@ class RazerOrochi2013(__RazerDevice):
         "side_img": "https://assets.razerzone.com/eeimages/products/6713/razer-orochi-2013-gallery-3.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/6713/razer-orochi-2013-gallery-5.png"
     }
-
-    def __init__(self, *args, **kwargs):
-        super(RazerOrochi2013, self).__init__(*args, **kwargs)
 
     def _resume_device(self):
         self.logger.debug("Orochi doesnt have suspend/resume")
