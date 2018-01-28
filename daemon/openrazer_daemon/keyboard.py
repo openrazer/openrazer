@@ -426,18 +426,24 @@ class KeyboardColour(object):
 
         return red, green, blue
 
-    def __init__(self):
-        self.rows = []
+    def __init__(self, rows, columns):
+        self.rows = rows
+        self.columns = columns
 
+        # Two-dimensional array to hold color data
+        self.colors = []
+
+        # Backup object (currently not used)
         self.backup = None
 
+        # Initialize array with empty values
         self.reset_rows()
 
     def backup_configuration(self):
         """
         Backs up the current configuration
         """
-        self.backup = KeyboardColour()
+        self.backup = KeyboardColour(self.rows, self.columns)
         self.backup.get_from_total_binary(self.get_total_binary())
 
     def restore_configuration(self):
@@ -447,7 +453,7 @@ class KeyboardColour(object):
         if self.backup is None:
             raise NoBackupError()
 
-        self.rows = self.backup.rows
+        self.colors = self.backup.colors
         self.backup = None
 
     def get_rows_raw(self):
@@ -457,17 +463,17 @@ class KeyboardColour(object):
         :return: Rows
         :rtype: list
         """
-        return self.rows
+        return self.colors
 
     def reset_rows(self):
         """
         Reset the rows of the keyboard
         """
-        self.rows.clear()
+        self.colors.clear()
 
-        for row in range(0, 6):
+        for row in range(0, self.rows):
             # Create 22 rgb values
-            self.rows.append([RGB() for _ in range(0, 22)])
+            self.colors.append([RGB() for _ in range(0, self.columns)])
 
     def set_key_colour(self, row, col, colour):
         """
@@ -484,7 +490,7 @@ class KeyboardColour(object):
 
         :raises KeyDoesNotExistError: If given key does not exist
         """
-        self.rows[row][col].set(KeyboardColour.gdk_colour_to_rgb(colour))
+        self.colors[row][col].set(KeyboardColour.gdk_colour_to_rgb(colour))
 
     def get_key_colour(self, key):
         """
@@ -499,7 +505,7 @@ class KeyboardColour(object):
             raise KeyDoesNotExistError("The key \"{0}\" does not exist".format(key))
 
         row_id, col_id = KEY_MAPPING[key]
-        return self.rows[row_id][col_id].get()
+        return self.colors[row_id][col_id].get()
 
     def reset_key(self, row, col):
         """
@@ -513,7 +519,7 @@ class KeyboardColour(object):
 
         :raises KeyDoesNotExistError: If given key does not exist
         """
-        self.rows[row][col].set((0, 0, 0))
+        self.colors[row][col].set((0, 0, 0))
 
     def get_row_binary(self, row_id):
         """
@@ -527,9 +533,9 @@ class KeyboardColour(object):
         """
         assert isinstance(row_id, int), "Row ID is not an int"
 
-        payload = bytes([row_id, 0x00, len(self.rows[row_id]) - 1])
+        payload = bytes([row_id, 0x00, len(self.colors[row_id]) - 1])
 
-        for rgb in self.rows[row_id]:
+        for rgb in self.colors[row_id]:
             payload += bytes(rgb)
 
         return payload
@@ -543,7 +549,7 @@ class KeyboardColour(object):
         """
         payload = b''
 
-        for row in range(0, 6):
+        for row in range(0, self.rows):
             payload += self.get_row_binary(row)
 
         return payload
@@ -557,12 +563,12 @@ class KeyboardColour(object):
         """
         self.reset_rows()
 
-        for row_id in range(0, 6):
+        for row_id in range(0, self.rows):
             binary_blob = binary_blob[1:]  # Skip first byte
 
             for col_id, binary_rgb in enumerate([binary_blob[i:i + 3] for i in range(0, 66, 3)]):
                 rgb = struct.unpack('=BBB', binary_rgb)
-                self.rows[row_id][col_id].set(rgb)
+                self.colors[row_id][col_id].set(rgb)
 
             binary_blob = binary_blob[66:]  # Skip the current row
 
