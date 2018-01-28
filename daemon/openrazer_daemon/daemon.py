@@ -23,6 +23,7 @@ from pyudev import Context, Monitor, MonitorObserver
 import grp
 import getpass
 import json
+import threading
 
 import openrazer_daemon.hardware
 from openrazer_daemon.dbus_services.service import DBusService
@@ -120,6 +121,9 @@ class RazerDaemon(DBusService):
         for m in methods:
             self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
             self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
+
+        self._collecting_udev = False
+        self._collecting_udev_devices = []
 
         # TODO remove
         self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
@@ -443,6 +447,14 @@ class RazerDaemon(DBusService):
                     self.device_added()
                 else:
                     logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
+            else:
+                # Basically find the other usb interfaces
+                device_match = sys_name.split('.')[0]
+                for d in self._razer_devices:
+                    if device_match in d.device_id and d.device_id != sys_name:
+                        if not sys_path in d.dbus.additional_interfaces:
+                            d.dbus.additional_interfaces.append(sys_path)
+                            return
 
     def _remove_device(self, device):
         """
@@ -477,9 +489,24 @@ class RazerDaemon(DBusService):
         """
         self.logger.debug('Device event [%s]: %s', device.action, device.device_path)
         if device.action == 'add':
-            self._add_device(device)
+            if self._collecting_udev:
+                self._collecting_udev_devices.append(device)
+                return
+            else:
+                self._collecting_udev_devices = [device]
+                self._collecting_udev = True
+                t = threading.Thread(target=self._collecting_udev_method, args=(device,))
+                t.start()
         elif device.action == 'remove':
             self._remove_device(device)
+
+    def _collecting_udev_method(self, device):
+        time.sleep(2)  # delay to let udev add all devices that we want
+        # Sort the devices
+        self._collecting_udev_devices.sort(key=lambda x: x.sys_path, reverse=True)
+        for d in self._collecting_udev_devices:
+            self._add_device(d)
+        self._collecting_udev = False
 
     def run(self):
         """
