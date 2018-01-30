@@ -106,7 +106,7 @@ class EffectSync(object):
                     if effect_name == 'setBreathRandom':
                         pargs = (0x00, 0xFF, 0x00)  # Green
                     else:
-                        pargs = args[0:4]  # limit args to first 3, as setBreathDual gives 6 args
+                        pargs = args[0:3]  # limit args to first 3, as setBreathDual gives 6 args
                     effect_func = getattr(self._parent, 'setPulsate', None)
                     if effect_func is not None:
                         effect_func(*pargs)
