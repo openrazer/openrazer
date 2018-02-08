@@ -1033,12 +1033,10 @@ static int has_inverted_led_state(struct device *dev)
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     switch(usb_dev->descriptor.idProduct) {
-    case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
     case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
     case USB_DEVICE_ID_RAZER_BLADE_QHD:
-    /* case USB_DEVICE_ID_RAZER_BLADE_LATE_2016: */
-    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
         return 1;
     default:
         return 0;
@@ -2217,5 +2215,3 @@ static struct hid_driver razer_kbd_driver = {
 };
 
 module_hid_driver(razer_kbd_driver);
-
-
