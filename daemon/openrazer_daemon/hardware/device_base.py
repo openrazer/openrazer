@@ -429,7 +429,7 @@ class RazerDevice(DBusService):
         return "{0}:{1}".format(self.__class__.__name__, self.serial)
 
 
-class RazerDeviceBrightnessSuspend(RazerDevice):
+class RazerDeviceSpecialBrightnessSuspend(RazerDevice):
     """
     Class for suspend using brightness
 
@@ -437,7 +437,6 @@ class RazerDeviceBrightnessSuspend(RazerDevice):
     """
 
     def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None, additional_methods=[]):
-        additional_methods.extend(['get_brightness', 'set_brightness'])
         super().__init__(device_path, device_number, config, testing, additional_interfaces, additional_methods)
 
     def _suspend_device(self):
@@ -465,3 +464,14 @@ class RazerDeviceBrightnessSuspend(RazerDevice):
         self.disable_notify = True
         openrazer_daemon.dbus_services.dbus_methods.set_brightness(self, brightness)
         self.disable_notify = False
+
+
+class RazerDeviceBrightnessSuspend(RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for devices that have get_brightness and set_brightness
+    Inherits from RazerDeviceSpecialBrightnessSuspend
+    """
+
+    def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None, additional_methods=[]):
+        additional_methods.extend(['get_brightness', 'set_brightness'])
+        super().__init__(device_path, device_number, config, testing, additional_interfaces, additional_methods)

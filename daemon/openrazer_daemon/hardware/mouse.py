@@ -2,7 +2,7 @@
 Mouse class
 """
 import re
-from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice
+from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDeviceSpecialBrightnessSuspend as __RazerDeviceSpecialBrightnessSuspend, RazerDevice as __RazerDevice
 from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 # TODO replace with plain import
 from openrazer_daemon.dbus_services.dbus_methods.deathadder_chroma import get_logo_brightness as _da_get_logo_brightness, set_logo_brightness as _da_set_logo_brightness, \
@@ -226,7 +226,7 @@ class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
     DPI_MAX = 8200
 
 
-class RazerDeathAdderChroma(__RazerDeviceBrightnessSuspend):
+class RazerDeathAdderChroma(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer DeathAdder Chroma
     """
@@ -362,7 +362,7 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
         self.disable_notify = False
 
 
-class RazerNagaChroma(__RazerDeviceBrightnessSuspend):
+class RazerNagaChroma(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Naga Chroma
     """
@@ -561,7 +561,7 @@ class RazerTaipan(__RazerDevice):
         self.disable_notify = False
 
 
-class RazerDeathAdderElite(__RazerDeviceBrightnessSuspend):
+class RazerDeathAdderElite(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer DeathAdder Elite
     """
@@ -640,7 +640,7 @@ class RazerDiamondbackChroma(__RazerDeviceBrightnessSuspend):
     }
 
 
-class RazerMamba2012Wireless(__RazerDeviceBrightnessSuspend):
+class RazerMamba2012Wireless(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Mamba 2012 (Wireless)
     """
@@ -673,7 +673,7 @@ class RazerMamba2012Wireless(__RazerDeviceBrightnessSuspend):
         self._battery_manager.close()
 
 
-class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
+class RazerMamba2012Wired(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Mamba 2012 (Wired)
     """
@@ -746,7 +746,7 @@ class RazerNaga2014(__RazerDevice):
         self.disable_notify = False
 
 
-class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
+class RazerOrochi2011(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Orochi 2011
     """
@@ -795,7 +795,7 @@ class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
         self.disable_notify = False
 
 
-class RazerAbyssusV2(__RazerDeviceBrightnessSuspend):
+class RazerAbyssusV2(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Abyssus V2
     """
