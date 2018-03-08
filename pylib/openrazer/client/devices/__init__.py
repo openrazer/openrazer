@@ -31,10 +31,6 @@ class RazerDevice(object):
         self._type = str(self._dbus_interfaces['device'].getDeviceType())
         self._fw = str(self._dbus_interfaces['device'].getFirmware())
         self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
-        if self._has_feature('razer.device.misc', 'getKeyboardLayout'):
-            self._kbd_layout = str(self._dbus_interfaces['device'].getKeyboardLayout())
-        else:
-            self._kbd_layout = None
         self._has_dedicated_macro = None
         self._urls = None
 
@@ -53,6 +49,7 @@ class RazerDevice(object):
             'brightness': self._has_feature('razer.device.lighting.brightness'),
 
             'macro_logic': self._has_feature('razer.device.macro'),
+            'keyboard_layout': self._has_feature('razer.device.misc', 'getKeyboardLayout'),
 
             # Default device is a chroma so lighting capabilities
             'lighting': self._has_feature('razer.device.lighting.chroma'),
@@ -112,6 +109,11 @@ class RazerDevice(object):
 
         # Nasty hack to convert dbus.Int32 into native
         self._matrix_dimensions = tuple([int(dim) for dim in self._dbus_interfaces['device'].getMatrixDimensions()])
+
+        if self.has('keyboard_layout'):
+            self._kbd_layout = str(self._dbus_interfaces['device'].getKeyboardLayout())
+        else:
+            self._kbd_layout = None
 
         # Setup FX
         if self._FX is None:
