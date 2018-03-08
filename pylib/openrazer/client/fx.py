@@ -60,6 +60,7 @@ class RazerFX(BaseRazerFX):
     :ivar advanced: Advanced effect object: :class:`razer.client.fx.RazerAdvancedFX`
     :ivar misc: Misc effects like for scroll wheel or logo: :class:`razer.client.fx.MiscLighting`
     """
+
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, matrix_dims=(-1, -1)):
         """
         Inits RazerFX
