@@ -1192,6 +1192,32 @@ struct razer_report razer_chroma_misc_set_orochi2011_poll_dpi(unsigned short pol
     return report;
 }
 
+/**
+ * Set the Naga Trinity to "Static" effect
+ */
+struct razer_report razer_naga_trinity_effect_static(struct razer_rgb *rgb)
+{
+    struct razer_report report = get_razer_report(0x0f, 0x03, 0x0e);
+
+    report.arguments[0] = 0x00; // Variable storage
+    report.arguments[1] = 0x00; // LED ID
+    report.arguments[2] = 0x00; // Unknown
+    report.arguments[3] = 0x00; // Unknown
+    report.arguments[4] = 0x02; // Effect ID
+    report.arguments[5] = rgb->r; // RGB 3x
+    report.arguments[6] = rgb->g;
+    report.arguments[7] = rgb->b;
+    report.arguments[8] = rgb->r;
+    report.arguments[9] = rgb->g;
+    report.arguments[10] = rgb->b;
+    report.arguments[11] = rgb->r;
+    report.arguments[12] = rgb->g;
+    report.arguments[13] = rgb->b;
+    report.transaction_id.id = 0x1f;
+
+    return report;
+}
+
 
 
 
