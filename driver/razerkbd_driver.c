@@ -164,6 +164,21 @@ static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct
 }
 
 /**
+ * Reads the physical layout of the keyboard.
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_kbd_layout(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = get_razer_report(0x00, 0x86, 0x02);
+    struct razer_report response = razer_send_payload(usb_dev, &report);
+
+    return sprintf(buf, "%02x\n", response.arguments[0]);
+}
+
+/**
  * Device mode function
  */
 void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsigned char param)
@@ -1465,6 +1480,7 @@ static DEVICE_ATTR(profile_led_blue,        0660, razer_attr_read_tartarus_profi
 
 static DEVICE_ATTR(test,                    0660, razer_attr_read_test,                       razer_attr_write_test);
 static DEVICE_ATTR(version,                 0440, razer_attr_read_version,                    NULL);
+static DEVICE_ATTR(kbd_layout,              0440, razer_attr_read_kbd_layout,                 NULL);
 static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_get_firmware_version,       NULL);
 static DEVICE_ATTR(fn_toggle,               0220, NULL,                                       razer_attr_write_set_fn_toggle);
 
@@ -1664,6 +1680,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);                                  // Test mode
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_kbd_layout);                            // Gets the physical layout
 
         switch(usb_dev->descriptor.idProduct) {
 
@@ -1938,6 +1955,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_test);                                  // Test mode
         device_remove_file(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
         device_remove_file(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
+        device_remove_file(&hdev->dev, &dev_attr_kbd_layout);                            // Gets the physical layout
 
         switch(usb_dev->descriptor.idProduct) {
 

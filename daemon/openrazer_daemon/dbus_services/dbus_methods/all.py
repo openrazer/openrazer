@@ -4,6 +4,12 @@ DBus methods available for all devices.
 import os
 from openrazer_daemon.dbus_services import endpoint
 
+# Keyboard layout IDs
+# There are more than listed here, but others are not known yet.
+layoutids = {"01": "en_US",
+             "03": "de_DE",
+             "06": "en_GB"}
+
 
 @endpoint('razer.device.misc', 'getDriverVersion', out_sig='s')
 def version(self):
@@ -62,6 +68,25 @@ def get_device_name(self):
 
     with open(driver_path, 'r') as driver_file:
         return driver_file.read().strip()
+
+
+@endpoint('razer.device.misc', 'getKeyboardLayout', out_sig='s')
+def get_keyboard_layout(self):
+    """
+    Get the device's keyboard layout
+
+    :return: String like 'en_US', 'de_DE', 'en_GB' or 'unknown'
+    :rtype: str
+    """
+    self.logger.debug("DBus call get_keyboard_layout")
+
+    driver_path = self.get_driver_path('kbd_layout')
+
+    with open(driver_path, 'r') as driver_file:
+        try:
+            return layoutids[driver_file.read().strip()]
+        except KeyError:
+            return "unknown"
 
 
 # Functions to define a hardware class

@@ -49,6 +49,7 @@ class RazerDevice(object):
             'brightness': self._has_feature('razer.device.lighting.brightness'),
 
             'macro_logic': self._has_feature('razer.device.macro'),
+            'keyboard_layout': self._has_feature('razer.device.misc', 'getKeyboardLayout'),
 
             # Default device is a chroma so lighting capabilities
             'lighting': self._has_feature('razer.device.lighting.chroma'),
@@ -108,6 +109,11 @@ class RazerDevice(object):
 
         # Nasty hack to convert dbus.Int32 into native
         self._matrix_dimensions = tuple([int(dim) for dim in self._dbus_interfaces['device'].getMatrixDimensions()])
+
+        if self.has('keyboard_layout'):
+            self._kbd_layout = str(self._dbus_interfaces['device'].getKeyboardLayout())
+        else:
+            self._kbd_layout = None
 
         # Setup FX
         if self._FX is None:
@@ -237,6 +243,16 @@ class RazerDevice(object):
         :rtype: str
         """
         return self._serial
+
+    @property
+    def keyboard_layout(self) -> str:
+        """
+        Device's keyboard layout
+
+        :return: Keyboard layout
+        :rtype: str
+        """
+        return self._kbd_layout
 
     @property
     def brightness(self) -> float:
