@@ -6,7 +6,6 @@ import shutil
 import signal
 import sys
 import time
-import contextlib
 import logging
 
 from openrazer_daemon.daemon import RazerDaemon, __version__

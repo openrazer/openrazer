@@ -9,18 +9,16 @@ import configparser
 import logging
 import logging.handlers
 import os
-import subprocess
 import sys
 import signal
 import time
-import tempfile
 import setproctitle
 import dbus.mainloop.glib
 import dbus.service
 import gi
 gi.require_version('Gdk', '3.0')
 import gi.repository
-from gi.repository import GObject, GLib
+from gi.repository import GLib
 from pyudev import Context, Monitor, MonitorObserver
 import grp
 import getpass
@@ -92,7 +90,7 @@ class RazerDaemon(DBusService):
         DBusService.__init__(self, self.BUS_NAME, '/org/razer')
 
         self._init_signals()
-        self._main_loop = GObject.MainLoop()
+        self._main_loop = GLib.MainLoop()
 
         # Listen for input events from udev
         self._init_udev_monitor()

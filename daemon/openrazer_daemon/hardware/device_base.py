@@ -204,7 +204,8 @@ class RazerDevice(DBusService):
                     break
 
                 try:
-                    serial = open(serial_path, 'r').read().strip()
+                    with open(serial_path, 'r') as f:
+                        serial = f.read().strip()
                 except (PermissionError, OSError) as err:
                     self.logger.warning('getting serial: {0}'.format(err))
                     serial = ''
