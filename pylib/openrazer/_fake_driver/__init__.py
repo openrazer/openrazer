@@ -77,7 +77,7 @@ class FakeDevice(object):
         self.create_events()
 
         if serial is not None:
-            self.set('get_serial', serial)
+            self.set('device_serial', serial)
 
     def _get_endpoint_path(self, endpoint):
         return os.path.join(self._tmp_dir, endpoint)
@@ -112,7 +112,7 @@ class FakeDevice(object):
             chmod, name, default, orig_perm = self.parse_endpoint_line(endpoint_line)
             path = self._get_endpoint_path(name)
 
-            if name == 'get_serial' and self._serial is not None:
+            if name == 'device_serial' and self._serial is not None:
                 default = self._serial
             self.endpoints[name] = (chmod, default, orig_perm)
             self.create_endpoint(path, chmod, default)
