@@ -70,7 +70,7 @@ class RazerNostromo(_RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0111
     DEDICATED_MACRO_KEYS = True
-    METHODS = ['keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green', 'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
+    METHODS = ['get_device_type_keypad', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green', 'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
                'get_macros', 'delete_macro', 'add_macro',
 
                # ?
