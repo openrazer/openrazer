@@ -86,21 +86,23 @@ class EffectSync(object):
                     if effect_func is not None:
                         effect_func(True)
 
-                # We dont have method
+                # The target device doesn't have these methods, use similar ones
+
                 if effect_name == 'setPulsate':
-                    # BW -> Chroma?
+                    # setPulsate doesn't provide a color but we need one, take green.
+                    pargs = (0x00, 0xFF, 0x00)  # Green
                     effect_func = getattr(self._parent, 'setBreathSingle', None)
                     if effect_func is not None:
-                        effect_func(*args)
+                        effect_func(*pargs)
                     effect_func = getattr(self._parent, 'setScrollPulsate', None)
                     if effect_func is not None:
-                        effect_func(*args)
+                        effect_func(*pargs)
                     effect_func = getattr(self._parent, 'setLogoPulsate', None)
                     if effect_func is not None:
-                        effect_func(*args)
+                        effect_func(*pargs)
                     effect_func = getattr(self._parent, 'setBacklightPulsate', None)
                     if effect_func is not None:
-                        effect_func(*args)
+                        effect_func(*pargs)
 
                 elif effect_name in ('setBreathSingle', 'setBreathRandom', 'setBreathDual'):
                     if effect_name == 'setBreathRandom':
@@ -109,7 +111,8 @@ class EffectSync(object):
                         pargs = args[0:3]  # limit args to first 3, as setBreathDual gives 6 args
                     effect_func = getattr(self._parent, 'setPulsate', None)
                     if effect_func is not None:
-                        effect_func(*pargs)
+                        # setPulsate doesn't take any argument
+                        effect_func()
                     effect_func = getattr(self._parent, 'setScrollPulsate', None)
                     if effect_func is not None:
                         effect_func(*pargs)

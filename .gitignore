@@ -1,5 +1,8 @@
 pylib/docs/_build
 
+# pytest caches
+.pytest_cache/
+
 # Object files
 *.o
 *.do
