@@ -1,7 +1,0 @@
-#!/bin/sh
-set -e
-
-# Remove the __pycache__
-find /usr/lib/python3/dist-packages/openrazer_daemon -name '__pycache__' | xargs rm -rf
-
-exit 0
