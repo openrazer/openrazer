@@ -33,10 +33,10 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Blade Stealth (Late 2016)               |  1532:0220  |   ✔    |   ✔    |      |
 | Razer BlackWidow Chroma V2                    |  1532:0221  |   ✔    |   ✔    |      |
 | Razer Blade (Late 2016)                       |  1532:0224  |   ✔    |   ✔    |      |
-| Razer Blade Stealth (Mid 2017)                |  1532:022D  |   ✔    |   ✔    | Working except ripple |
-| Razer Blade Pro (2017)                        |  1532:0225  |   ✔    |   ✔    | Ripple partially working |
-| Razer Blade Pro FullHD (2017)                 |  1532:022F  |   ✔    |   ✔    | Working except ripple |
-| Razer Blade Stealth (Late 2017)               |  1532:0232  |   ✔    |   ✔    | Working except ripple |
+| Razer Blade Stealth (Mid 2017)                |  1532:022D  |   ✔    |   ✔    |      |
+| Razer Blade Pro (2017)                        |  1532:0225  |   ✔    |   ✔    |      |
+| Razer Blade Pro FullHD (2017)                 |  1532:022F  |   ✔    |   ✔    |      |
+| Razer Blade Stealth (Late 2017)               |  1532:0232  |   ✔    |   ✔    |      |
 
 ### Mouse
 | Device                          | USB VID:PID | Driver | Daemon |
@@ -113,18 +113,10 @@ Packages are available for these distributions:
 
 The following applications complement and interact with this driver:
 
-* [Polychromatic](https://github.com/lah7/polychromatic) - a graphical management tool and tray applet to managing Razer peripherals.
+* [Polychromatic](https://github.com/polychromatic/polychromatic) - a graphical management tool and tray applet to managing Razer peripherals.
 * [RazerGenie](https://github.com/z3ntu/RazerGenie) - Qt application for configuring your Razer devices under GNU/Linux.
-* [MacroW](https://github.com/igorbb/MacroW) - a simple tool to record and play keyboard macros. (though the dameon does on the fly recording ;) )
-* [RazerCommander](https://github.com/GabMus/razerCommander) - Simple GUI written in Gtk3
+* [razerCommander](https://github.com/GabMus/razerCommander) - Simple GUI written in Gtk3
 * [Chroma Feedback](https://github.com/redaxmedia/chroma-feedback) - Turn your Razer keyboard, mouse or headphone into a extreme feedback device for Travis CI
-
-## Status of Code
-
- - **Driver:** Release Candidate
- - **Daemon:** Beta
- - **Client Library:** Beta
- - **Packages:** Beta
 
 ## Contributions
 
