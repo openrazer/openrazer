@@ -14,7 +14,9 @@
 
 #include <linux/usb/input.h>
 
-#define VERSION "2.3.0"
+#define DRIVER_VERSION "2.3.0"
+#define DRIVER_LICENSE "GPL v2"
+#define DRIVER_AUTHOR "Terry Cain <terry@terrys-home.co.uk>"
 
 
 // Macro to create device files

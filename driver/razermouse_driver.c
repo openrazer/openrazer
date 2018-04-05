@@ -33,13 +33,11 @@
 /*
  * Version Information
  */
-#define DRIVER_VERSION "1.0"
-#define DRIVER_AUTHOR "Terry Cain <terry@terrys-home.co.uk>"
 #define DRIVER_DESC "Razer Mouse Device Driver"
-#define DRIVER_LICENSE "GPL v2"
 
 MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
+MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
 
 
@@ -98,7 +96,7 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
  */
 static ssize_t razer_attr_read_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "%s\n", VERSION);
+    return sprintf(buf, "%s\n", DRIVER_VERSION);
 }
 
 /**
