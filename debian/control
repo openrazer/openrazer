@@ -7,9 +7,10 @@ Build-Depends: debhelper (>= 8.0.0),
                linux-headers-generic,
                python3,
                python3-setuptools,
-               lsb-release
+               lsb-release,
+               dkms
 Homepage: https://openrazer.github.io/
-Vcs-Git: git://git@github.com:openrazer/openrazer.git
+Vcs-Git: https://github.com/openrazer/openrazer.git
 Vcs-Browser: https://github.com/openrazer/openrazer/
 
 Package: openrazer-kernel-modules-dkms
@@ -29,7 +30,6 @@ Description: OpenRazer Peripheral Drivers
  for Razer devices, plus support for Razer Blade devices.
 
 Package: openrazer-meta
-Version: 1.0
 Depends: openrazer-kernel-modules-dkms,
          openrazer-daemon,
          python3-openrazer,
@@ -42,7 +42,7 @@ Description: Metapackage for OpenRazer components
 Package: openrazer-daemon
 Section: misc
 Architecture: amd64 i386
-Depends: razer-kernel-modules-dkms,
+Depends: openrazer-kernel-modules-dkms,
          python3,
          python3-dbus,
          python3-gi,
@@ -67,7 +67,8 @@ Description: OpenRazer Device Daemon
 Package: python3-openrazer
 Section: misc
 Architecture: all
-Depends: python3,
+Depends: openrazer-daemon,
+         python3,
          python3-dbus,
          python3-gi,
          python3-numpy
