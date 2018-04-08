@@ -34,7 +34,7 @@ if [ $? != 0 ]; then
         if [[ $dkms_install == *"Error! Could not find module source directory."* ]]; then
           echo "FATAL: Is the razer dkms package installed? Exiting."
           exit 1
-        elif [[ $dkms_install == *"Module openrazer-driver/1.0.0 already installed on kernel"* ]]; then
+        elif [[ $dkms_install == *"Module openrazer-driver/$dkms_version already installed on kernel"* ]]; then
           echo "FATAL: The dkms module is installed, but could not be loaded. Exiting."
           exit 1
         fi
