@@ -39,52 +39,52 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Blade Stealth (Late 2017)               |  1532:0232  |
 
 ### Mice
-| Device                          | USB VID:PID |
-| ------------------------------- | ----------- |
-| Razer Orochi 2011               |  1532:0013  |
-| Razer Abyssus 1800              |  1532:0020  |
-| Razer Mamba 2012 (Wired)        |  1532:0024  |
-| Razer Mamba 2012 (Wireless)     |  1532:0025  |
-| Razer Imperator 2012            |  1532:002F  |
-| Razer Ouroboros 2012            |  1532:0032  |
-| Razer Taipan                    |  1532:0034  |
-| Razer Naga Hex (Red)            |  1532:0036  |
-| Razer Orochi 2013               |  1532:0039  |
-| Razer Naga 2014                 |  1532:0040  |
-| Razer Naga Hex                  |  1532:0041  |
-| Razer Abyssus 2014              |  1532:0042  |
-| Razer DeathAdder Chroma         |  1532:0043  |
-| Razer Mamba (Wired)             |  1532:0044  |
-| Razer Mamba (Wireless)          |  1532:0045  |
-| Razer Mamba Tournament Edition  |  1532:0046  |
-| Razer Orochi (Wired)            |  1532:0048  |
-| Razer Diamondback Chroma        |  1532:004C  |
-| Razer Naga Hex V2               |  1532:0050  |
-| Razer Naga Chroma               |  1532:0053  |
-| Razer Abyssus V2                |  1532:005B  |
-| Razer DeathAdder Elite          |  1532:005C  |
+| Device                                        | USB VID:PID |
+| --------------------------------------------- | ----------- |
+| Razer Orochi 2011                             |  1532:0013  |
+| Razer Abyssus 1800                            |  1532:0020  |
+| Razer Mamba 2012 (Wired)                      |  1532:0024  |
+| Razer Mamba 2012 (Wireless)                   |  1532:0025  |
+| Razer Imperator 2012                          |  1532:002F  |
+| Razer Ouroboros 2012                          |  1532:0032  |
+| Razer Taipan                                  |  1532:0034  |
+| Razer Naga Hex (Red)                          |  1532:0036  |
+| Razer Orochi 2013                             |  1532:0039  |
+| Razer Naga 2014                               |  1532:0040  |
+| Razer Naga Hex                                |  1532:0041  |
+| Razer Abyssus 2014                            |  1532:0042  |
+| Razer DeathAdder Chroma                       |  1532:0043  |
+| Razer Mamba (Wired)                           |  1532:0044  |
+| Razer Mamba (Wireless)                        |  1532:0045  |
+| Razer Mamba Tournament Edition                |  1532:0046  |
+| Razer Orochi (Wired)                          |  1532:0048  |
+| Razer Diamondback Chroma                      |  1532:004C  |
+| Razer Naga Hex V2                             |  1532:0050  |
+| Razer Naga Chroma                             |  1532:0053  |
+| Razer Abyssus V2                              |  1532:005B  |
+| Razer DeathAdder Elite                        |  1532:005C  |
 
 ### Mousemats
-| Device        | USB VID:PID |
-| ------------- | ----------- |
-| Razer Firefly |  1532:0C00  |
+| Device                                        | USB VID:PID |
+| --------------------------------------------- | ----------- |
+| Razer Firefly                                 |  1532:0C00  |
 
 ### Headsets
-| Device                   | USB VID:PID |
-| ------------------------ | ----------- |
-| Razer Kraken 7.1         |  1532:0501  |
-| Razer Kraken 7.1 Chroma  |  1532:0504  |
-| Razer Kraken 7.1 V2      |  1532:0510  |
+| Device                                        | USB VID:PID |
+| --------------------------------------------- | ----------- |
+| Razer Kraken 7.1                              |  1532:0501  |
+| Razer Kraken 7.1 Chroma                       |  1532:0504  |
+| Razer Kraken 7.1 V2                           |  1532:0510  |
 
 ### Misc
-| Device                  | USB VID:PID |
-| ----------------------- | ----------- |
-| Razer Nostromo          |  1532:0111  |
-| Razer Orbweaver         |  1532:0113  |
-| Razer Tartarus          |  1532:0201  |
-| Razer Tartarus Chroma   |  1532:0208  |
-| Razer Core              |  1532:0215  |
-| Razer Chroma Mug Holder |  1532:0F07  |
+| Device                                        | USB VID:PID |
+| --------------------------------------------- | ----------- |
+| Razer Nostromo                                |  1532:0111  |
+| Razer Orbweaver                               |  1532:0113  |
+| Razer Tartarus                                |  1532:0201  |
+| Razer Tartarus Chroma                         |  1532:0208  |
+| Razer Core                                    |  1532:0215  |
+| Razer Chroma Mug Holder                       |  1532:0F07  |
 
 #### Determining the Device ID
 Razer devices use a USB VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:
