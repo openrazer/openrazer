@@ -75,6 +75,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | --------------------------------------------- | ----------- |
 | Razer Kraken 7.1                              |  1532:0501  |
 | Razer Kraken 7.1 Chroma                       |  1532:0504  |
+| Razer Kraken 7.1 Alternate                    |  1532:0506  |
 | Razer Kraken 7.1 V2                           |  1532:0510  |
 
 ### Misc

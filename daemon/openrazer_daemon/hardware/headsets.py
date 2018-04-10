@@ -71,6 +71,13 @@ class RazerKraken71(__RazerDevice):
         self.disable_notify = False
 
 
+class RazerKraken71Alternate(RazerKraken71):
+    """
+    Class for the Razer Kraken 7.1 (Alternate)
+    """
+    USB_PID = 0x0506
+
+
 class RazerKraken71Chroma(__RazerDevice):
     """
     Class for the Razer Kraken 7.1 Chroma
