@@ -216,15 +216,15 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC:
-        device_type = "Razer Kraken 7.1 Classic (??)\n";
+        device_type = "Razer Kraken 7.1\n";
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN:
-        device_type = "Razer Kraken 7.1 Chroma (Rainie)\n";
+        device_type = "Razer Kraken 7.1 Chroma\n"; // Rainie
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-        device_type = "Razer Kraken 7.1 V2 (Kylie)\n";
+        device_type = "Razer Kraken 7.1 V2\n"; // Kylie
         break;
 
     default:

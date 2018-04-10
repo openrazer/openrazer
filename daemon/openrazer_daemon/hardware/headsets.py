@@ -7,9 +7,9 @@ from openrazer_daemon.hardware.device_base import RazerDevice as __RazerDevice
 from openrazer_daemon.dbus_services.dbus_methods import kraken as _dbus_kraken, chroma_keyboard as _dbus_chroma
 
 
-class RazerKrakenClassic(__RazerDevice):
+class RazerKraken71(__RazerDevice):
     """
-    Class for the Razer Kraken 7.1 Chroma
+    Class for the Razer Kraken 7.1
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Kraken_7\.1_000000000000-event-if03')
 
@@ -71,7 +71,7 @@ class RazerKrakenClassic(__RazerDevice):
         self.disable_notify = False
 
 
-class RazerKraken(__RazerDevice):
+class RazerKraken71Chroma(__RazerDevice):
     """
     Class for the Razer Kraken 7.1 Chroma
     """
@@ -145,7 +145,7 @@ class RazerKraken(__RazerDevice):
         self.disable_notify = False
 
 
-class RazerKrakenV2(__RazerDevice):
+class RazerKraken71V2(__RazerDevice):
     """
     Class for the Razer Kraken 7.1 V2
     """
