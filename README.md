@@ -108,6 +108,8 @@ Packages are available for these distributions:
 * [Fedora](https://openrazer.github.io/#fedora)
 * [openSUSE](https://openrazer.github.io/#opensuse)
 * [Gentoo](https://openrazer.github.io/#gentoo)
+* [Solus](https://openrazer.github.io/#solus)
+* [Void Linux](https://openrazer.github.io/#voidlinux)
 
 ## Applications
 
