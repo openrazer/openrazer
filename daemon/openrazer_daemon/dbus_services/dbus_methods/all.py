@@ -7,6 +7,7 @@ from openrazer_daemon.dbus_services import endpoint
 # Keyboard layout IDs
 # There are more than listed here, but others are not known yet.
 layoutids = {"01": "en_US",
+             "02": "el_GR",
              "03": "de_DE",
              "06": "en_GB"}
 
