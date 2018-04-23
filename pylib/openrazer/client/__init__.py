@@ -98,7 +98,7 @@ class DeviceManager(object):
         A list of Razer devices
 
         :return: List of devices
-        :rtype: list[razer.client.devices.RazerDevice]
+        :rtype: list[openrazer.client.devices.RazerDevice]
         """
 
         return self._devices

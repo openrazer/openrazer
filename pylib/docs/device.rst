@@ -11,25 +11,25 @@ All the device class does is just combine DBus endpoints into a *simple* python 
 
 You shouln't need to create a RazerDevice (or any subclasses of it) manually, really you should just use the device manager. If you really want to create it manually you
 can just specify a serial and it will gather the needed data about the device via the daemon. You wont benifit from any subclasses that might be more specific for that device so
-if you call :func:`razer.client.device.RazerDeviceFactory.get_device` that will select the right class for the job. For example the Razer Tartarus would be covered by the RazerKeyboard device class
+if you call :func:`openrazer.client.device.RazerDeviceFactory.get_device` that will select the right class for the job. For example the Razer Tartarus would be covered by the RazerKeyboard device class
 which is more tailored to keyboard devices. A Razer Mamba would use a RazerMouse class which has DPI settings.
 
 The Device class and its derivatives all operate on the notion of capabilities. When the RazerDevice class is initialised, it creates an internal dictionary called ``RazerDevice._capabilities`` which 
 literally contains a massive set of keys with a boolean value. You could look into this dictionary to see if a specific feature is supported but I added a 
-convenience method :func:`razer.client.devices.RazerDevice.has` which literally takes a string and returns True/False. 
+convenience method :func:`openrazer.client.devices.RazerDevice.has` which literally takes a string and returns True/False.
 
 **For developers** All of the features that have the possibility of not being preset are
 stored in this dict, if you look at the source of the method/property that you are calling there will probably be a ``self.has`` line in there checking if the feature is available, I would advise 
 checking before you call stuff as otherwise you could get ``None``'s returned or worse exceptions being thrown.
 
-.. autoclass:: razer.client.devices.RazerDevice
+.. autoclass:: openrazer.client.devices.RazerDevice
    :members:
 
 Example:
 
 .. code-block:: python3
 
-   >>> from razer.client import DeviceManager
+   >>> from openrazer.client import DeviceManager
    >>> dev_manager = DeviceManager()
    >>> device = dev_manager.devices[0]
    >>> device
@@ -75,5 +75,5 @@ RazerDeviceFactory Class
 I thought I'd document the device factory here. All it does is when given a serial, it will get some info about the device and select a more appropiate class for the device if one exists. There
 is a dictionary which maps device types to classes, so mice and keyboards use their appropriate subclasses but if the device type doesn't exist it will fall back to RazerDevice.
 
-.. autoclass:: razer.client.device.RazerDeviceFactory
+.. autoclass:: openrazer.client.device.RazerDeviceFactory
    :members:

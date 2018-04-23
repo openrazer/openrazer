@@ -5,9 +5,9 @@
 DeviceManager Class
 ===================
 
-Ok first things first. The `DeviceManager` is the start of any interaction with the `razer-daemon` or Razer device.
+Ok first things first. The `DeviceManager` is the start of any interaction with the `openrazer-daemon` or Razer device.
 
-The DeviceManager class can be imported like :pycode:`from razer.client import DeviceManager`. During initialisation, the class connects to the daemon service over DBus and grabs a list of devices
+The DeviceManager class can be imported like :pycode:`from openrazer.client import DeviceManager`. During initialisation, the class connects to the daemon service over DBus and grabs a list of devices
 serials. From the list of serials it calls further DBus methods to gather enough data about the devices the serials refer to and then creates objects that represent said devices.
 
 Apart from allowing you to access Razer devices, the DeviceManager also has the current pylib version and daemon version exposed via properties incase
@@ -15,7 +15,7 @@ those values are useful (driver versions are available from within the device ob
 
 The DeviceManager class can also stop the daemon, enable/disable the logic to "turn off" the devices whilst the screensaver is active, and enable/disable syncing effects across multiple Razer devices.
 
-.. autoclass:: razer.client.DeviceManager
+.. autoclass:: openrazer.client.DeviceManager
    :members:
 
 Now for a few examples:
@@ -23,7 +23,7 @@ Now for a few examples:
 .. code-block:: python3
 
    >>> # Import the DeviceManager
-   >>> from razer.client import DeviceManager
+   >>> from openrazer.client import DeviceManager
 
    >>> # Create an instance of DeviceManager
    >>> dev_manager = DeviceManager()
