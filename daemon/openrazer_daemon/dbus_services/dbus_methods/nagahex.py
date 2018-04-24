@@ -31,6 +31,11 @@ def set_dpi_xy_byte(self, dpi_x, dpi_y):
     dpi_x_scaled = int(round(dpi_x / 6750 * 255, 2))
     dpi_y_scaled = int(round(dpi_y / 6750 * 255, 2))
 
+    if self._testing:
+        with open(driver_path, 'w') as driver_file:
+            driver_file.write("{}:{}".format(dpi_x_scaled, dpi_y_scaled))
+        return
+
     dpi_bytes = struct.pack('>BB', dpi_x_scaled, dpi_y_scaled)
 
     with open(driver_path, 'wb') as driver_file:

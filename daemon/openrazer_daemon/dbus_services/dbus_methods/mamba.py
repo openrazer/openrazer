@@ -129,6 +129,11 @@ def set_dpi_xy(self, dpi_x, dpi_y):
 
     driver_path = self.get_driver_path('dpi')
 
+    if self._testing:
+        with open(driver_path, 'w') as driver_file:
+            driver_file.write("{}:{}".format(dpi_x, dpi_y))
+        return
+
     dpi_bytes = struct.pack('>HH', dpi_x, dpi_y)
 
     with open(driver_path, 'wb') as driver_file:
