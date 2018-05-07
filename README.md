@@ -110,6 +110,7 @@ Packages are available for these distributions:
 * [Gentoo](https://openrazer.github.io/#gentoo)
 * [Solus](https://openrazer.github.io/#solus)
 * [Void Linux](https://openrazer.github.io/#voidlinux)
+* [Red Hat / CentOS](https://openrazer.github.io/#redhat) (unofficial)
 
 ## Applications
 
