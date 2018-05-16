@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """
 This script takes in CSV files generated from wireshark's "Export Packet Dissections > as CSV" option.
 

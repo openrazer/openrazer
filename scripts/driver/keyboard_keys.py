@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """
 Simple program to walk through each key, illuminating it red so I can see
 what element in the 22 RGB list each key referrs to.
