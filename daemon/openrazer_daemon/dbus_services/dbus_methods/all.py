@@ -9,6 +9,7 @@ from openrazer_daemon.dbus_services import endpoint
 layoutids = {"01": "en_US",
              "02": "el_GR",
              "03": "de_DE",
+             "04": "fr_FR",
              "06": "en_GB",
              "12": "pt_PT"}
 
