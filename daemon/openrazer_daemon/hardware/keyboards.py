@@ -261,7 +261,7 @@ class RazerBlackWidowUltimate2012(_MacroKeyboard):
     }
 
 
-class RazerBlackWidowClassic(_MacroKeyboard):
+class RazerBlackWidowStealth(_MacroKeyboard):
     """
     Class for the Razer BlackWidow (Classic)
     """
@@ -281,9 +281,9 @@ class RazerBlackWidowClassic(_MacroKeyboard):
     }
 
 
-class RazerBlackWidowClassicAlternate(_MacroKeyboard):
+class RazerBlackWidowStealthEdition(_MacroKeyboard):
     """
-    Class for the Razer BlackWidow (Classic)
+    Class for the Razer BlackWidow Stealth Edition
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow(-if01)?-event-kbd')
 
@@ -295,9 +295,9 @@ class RazerBlackWidowClassicAlternate(_MacroKeyboard):
                'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-01.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-02.png",
-        "perspective_img": "https://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-04.png"
+        "top_img": "https://drh1.img.digitalriver.com/DRHM/Storefront/Company/razerusa/images/product/gallery/razer-blackwidow-stealth-gallery5.jpg",
+        "side_img": "https://drh1.img.digitalriver.com/DRHM/Storefront/Company/razerusa/images/product/gallery/razer-blackwidow-stealth-gallery1.jpg",
+        "perspective_img": "https://drh2.img.digitalriver.com/DRHM/Storefront/Company/razerusa/images/product/gallery/razer-blackwidow-stealth-gallery2.jpg"
     }
 
 
