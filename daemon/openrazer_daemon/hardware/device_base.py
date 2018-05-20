@@ -209,6 +209,9 @@ class RazerDevice(DBusService):
                 except (PermissionError, OSError) as err:
                     self.logger.warning('getting serial: {0}'.format(err))
                     serial = ''
+                except UnicodeDecodeError as err:
+                    self.logger.warning('malformed serial: {0}'.format(err))
+                    serial = ''
 
                 count += 1
                 time.sleep(0.1)
