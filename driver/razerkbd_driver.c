@@ -610,13 +610,12 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    char serial_string[23];
+    char serial_string[51];
     struct razer_report report = razer_chroma_standard_get_serial();
     struct razer_report response_report;
 
     if (is_blade_laptop(usb_dev)) {
-        strcpy(&serial_string[0], dmi_get_system_info(DMI_PRODUCT_SERIAL));
-
+        strncpy(&serial_string[0], dmi_get_system_info(DMI_PRODUCT_SERIAL), 50);
     } else {
         response_report = razer_send_payload(usb_dev, &report);
         strncpy(&serial_string[0], &response_report.arguments[0], 22);
