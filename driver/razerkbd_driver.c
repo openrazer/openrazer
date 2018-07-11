@@ -1464,10 +1464,14 @@ static ssize_t razer_attr_write_key_super(struct device *dev, struct device_attr
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
     if (count >= 1) {
+
+#ifdef __DEBUG__
         printk(KERN_WARNING "razerkbd: Settings changed (KEY_SUPER is now %s)\n", !buf[0] ? "enabled" : "disabled");
         if (buf[0] || device->alter_keys[0]) {
           printk(KERN_WARNING "razerkbd: Settings dependency (Altering KEY_SUPER to KEY_FN is currently %s)\n", !(buf[0] && device->alter_keys[0]) ? "disabled" : "enabled");
         }
+#endif
+
         device->block_keys[0] = buf[0];
     }
 
@@ -1494,7 +1498,11 @@ static ssize_t razer_attr_write_key_alt_tab(struct device *dev, struct device_at
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
     if (count >= 1) {
+
+#ifdef __DEBUG__
         printk(KERN_WARNING "razerkbd: Settings changed (KEY_ALT_TAB is now %s)\n", !buf[0] ? "enabled" : "disabled");
+#endif
+
         device->block_keys[1] = buf[0];
     }
 
@@ -1521,7 +1529,11 @@ static ssize_t razer_attr_write_key_alt_f4(struct device *dev, struct device_att
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
     if (count >= 1) {
+
+#ifdef __DEBUG__
         printk(KERN_WARNING "razerkbd: Settings changed (KEY_ALT_F4 is now %s)\n", !buf[0] ? "enabled" : "disabled");
+#endif
+
         device->block_keys[2] = buf[0];
     }
 
@@ -1551,7 +1563,11 @@ static ssize_t razer_attr_write_key_capslock(struct device *dev, struct device_a
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
     if (count >= 1) {
+
+#ifdef __DEBUG__
         printk(KERN_WARNING "razerkbd: Settings changed (KEY_CAPSLOCK is now %s)\n", !buf[0] ? "enabled" : "disabled");
+#endif
+
         device->alter_keys[1] = device->block_capslock = buf[0];
     }
 
@@ -1582,8 +1598,12 @@ static ssize_t razer_attr_write_alter_super_fn(struct device *dev, struct device
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
     if (count >= 1) {
+
+#ifdef __DEBUG__
         printk(KERN_WARNING "razerkbd: Settings changed (Altering KEY_SUPER to KEY_FN is now %s)\n", !(buf[0] && device->block_keys) ? "disabled" : "enabled");
         printk(KERN_WARNING "razerkbd: Settings dependency (KEY_SUPER is currently %s)\n", !device->block_keys[0] ? "enabled" : "disabled");
+#endif
+
         device->alter_keys[0] = buf[0];
     }
 
