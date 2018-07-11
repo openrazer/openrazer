@@ -1,3 +1,9 @@
+openrazer (2.3.1) xenial; urgency=high
+
+  * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v2.3.1
+
+ -- Luca Weiss <luca@z3ntu.xyz>  Wed, 11 Jul 2018 17:09:23 +0200
+
 openrazer (2.3.0) xenial; urgency=high
 
   * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v2.3.0

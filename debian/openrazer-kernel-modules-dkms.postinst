@@ -6,7 +6,7 @@ set -e
 
 DKMS_NAME=openrazer-driver
 DKMS_PACKAGE_NAME=$DKMS_NAME-dkms
-DKMS_VERSION=2.3.0
+DKMS_VERSION=2.3.1
 
 postinst_found=0
 
