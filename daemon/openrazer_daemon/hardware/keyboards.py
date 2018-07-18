@@ -861,11 +861,11 @@ class RazerBlade2018(_RippleKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0233
     HAS_MATRIX = True
-    MATRIX_DIMS = [6, 25]
+    MATRIX_DIMS = [6, 15]
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'blade_get_logo_active', 'blade_set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active']
 
     RAZER_URLS = {
         "top_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-07__store_gallery.png",
