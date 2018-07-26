@@ -6,6 +6,8 @@ A collection of Linux drivers for the Razer devices, providing kernel drivers, D
 
 Also this is the master branch, devices may appear in the tables below but might not be released in package form yet. Check out the stable branch for what _should_ be in the packages.
 
+The below devices are fully feature supported by OpenRazer which means all available USB controllable functions for that product are made available by the library.
+
 ## Device Support
 ### Keyboards
 | Device                                        | USB VID:PID |
