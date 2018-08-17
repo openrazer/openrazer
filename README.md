@@ -38,6 +38,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Blade Pro (2017)                        |  1532:0225  |
 | Razer Blade Pro FullHD (2017)                 |  1532:022F  |
 | Razer Blade Stealth (Late 2017)               |  1532:0232  |
+| Razer Blade 15 (2018)                         |  1532:0233  |
 
 ### Mice
 | Device                                        | USB VID:PID |
