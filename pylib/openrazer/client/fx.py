@@ -957,11 +957,12 @@ class Frame(object):
         :raises AssertionError: If key is invalid
         """
         assert isinstance(key, tuple), "Key is not a tuple"
-        assert 0 <= key[0] < self._rows, "Row out of bounds"
-        assert 0 <= key[1] < self._cols, "Column out of bounds"
+        #assert 0 <= key[0] < self._rows, "Row out of bounds"
+        #assert 0 <= key[1] < self._cols, "Column out of bounds"
         assert isinstance(rgb, (list, tuple)) and len(rgb) == 3, "Value must be a tuple,list of 3 RGB components"
 
-        self._matrix[:, key[0], key[1]] = rgb
+        if (0 <= key[0] < self._rows) and (0 <= key[1] < self._cols):
+            self._matrix[:, key[0], key[1]] = rgb
 
     def __bytes__(self) -> bytes:
         """
