@@ -49,10 +49,13 @@ driver_install_packaging:
 driver_uninstall:
 	@echo -e "\n::\033[34m Uninstalling OpenRazer kernel modules\033[0m"
 	@echo "====================================================="
+	@rm -fv $(DESTDIR)/$(MODULEDIR)/razerkraken.ko
+	@rm -fv $(DESTDIR)/$(MODULEDIR)/razermug.ko
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razerkbd.ko
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razermouse.ko
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razerfirefly.ko
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razercore.ko
+	depmod
 
 
 # Launchpad hacks
