@@ -1468,7 +1468,7 @@ static ssize_t razer_attr_write_key_super(struct device *dev, struct device_attr
 #ifdef __DEBUG__
         printk(KERN_WARNING "razerkbd: Settings changed (KEY_SUPER is now %s)\n", !buf[0] ? "enabled" : "disabled");
         if (buf[0] || device->alter_keys[0]) {
-          printk(KERN_WARNING "razerkbd: Settings dependency (Altering KEY_SUPER to KEY_FN is currently %s)\n", !(buf[0] && device->alter_keys[0]) ? "disabled" : "enabled");
+            printk(KERN_WARNING "razerkbd: Settings dependency (Altering KEY_SUPER to KEY_FN is currently %s)\n", !(buf[0] && device->alter_keys[0]) ? "disabled" : "enabled");
         }
 #endif
 
