@@ -2,7 +2,7 @@ Source: openrazer
 Section: misc
 Priority: optional
 Maintainer: Terry Cain <terry@terrys-home.co.uk>
-Standards-Version: 3.9.5
+Standards-Version: 4.2.1
 Build-Depends: debhelper (>= 9),
                linux-headers-generic,
                python3,
