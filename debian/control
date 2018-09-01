@@ -41,7 +41,6 @@ Description: Metapackage for OpenRazer components
  daemon, plus a Python library and documentation.
 
 Package: openrazer-daemon
-Section: misc
 Architecture: amd64 i386
 Depends: openrazer-kernel-modules-dkms,
          python3,
@@ -66,7 +65,7 @@ Description: OpenRazer Device Daemon
  across devices.
 
 Package: python3-openrazer
-Section: misc
+Section: python
 Architecture: all
 Depends: openrazer-daemon,
          python3,
