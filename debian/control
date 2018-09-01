@@ -3,7 +3,7 @@ Section: misc
 Priority: optional
 Maintainer: Terry Cain <terry@terrys-home.co.uk>
 Standards-Version: 3.9.5
-Build-Depends: debhelper (>= 8.0.0),
+Build-Depends: debhelper (>= 9),
                linux-headers-generic,
                python3,
                python3-setuptools,
