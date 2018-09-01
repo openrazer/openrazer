@@ -55,7 +55,7 @@ https://github.com/openrazer/openrazer .
 
 .SH BUGS
 .PP
-This daemon makes use of the EVIOCGRAB ioctl which will get exclusive access of the keyboard's event files in /dev/input. Whilst the service has exclusive access to the event files other programs will not receive any key presses, this is required to make FN act like a modifier. Using \fBmacro_keys\fR is considered experimental as whilst it works it is still largely untested. If FN is held the service will grab the file and then release it when FN is released, there is a race condition where if FN is held and another key presses immediatly after the keypress event will leak to the system and programs will see its being held and not released (and spam the key).
+This daemon makes use of the EVIOCGRAB ioctl which will get exclusive access of the keyboard's event files in /dev/input. Whilst the service has exclusive access to the event files other programs will not receive any key presses, this is required to make FN act like a modifier. Using \fBmacro_keys\fR is considered experimental as whilst it works it is still largely untested. If FN is held the service will grab the file and then release it when FN is released, there is a race condition where if FN is held and another key presses immediately after the keypress event will leak to the system and programs will see its being held and not released (and spam the key).
 
 .SH "SEE ALSO"
 .BR razer.conf (5),
