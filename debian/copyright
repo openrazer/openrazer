@@ -1,5 +1,5 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: razer
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: OpenRazer
 Source: https://github.com/openrazer/openrazer
 
 Files: *
@@ -10,7 +10,7 @@ License: GPL-2+
 
 Files: logo/*.svg
 Copyright: 2015-2017 Luke Horwell <code@horwell.me>
-License: CC BY-SA 4.0
+License: CC-BY-SA-4.0
 
 License: GPL-2+
  This package is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@ License: GPL-2+
  On Debian systems, the complete text of the GNU General
  Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
 
-License: CC BY-SA 4.0
+License: CC-BY-SA-4.0
  Attribution — You must give appropriate credit, provide a link to the license,
  and indicate if changes were made. You may do so in any reasonable manner,
  but not in any way that suggests the licensor endorses you or your use.

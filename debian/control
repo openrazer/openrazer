@@ -2,8 +2,8 @@ Source: openrazer
 Section: misc
 Priority: optional
 Maintainer: Terry Cain <terry@terrys-home.co.uk>
-Standards-Version: 3.9.5
-Build-Depends: debhelper (>= 8.0.0),
+Standards-Version: 4.2.1
+Build-Depends: debhelper (>= 9),
                linux-headers-generic,
                python3,
                python3-setuptools,
@@ -41,7 +41,6 @@ Description: Metapackage for OpenRazer components
  daemon, plus a Python library and documentation.
 
 Package: openrazer-daemon
-Section: misc
 Architecture: amd64 i386
 Depends: openrazer-kernel-modules-dkms,
          python3,
@@ -66,7 +65,7 @@ Description: OpenRazer Device Daemon
  across devices.
 
 Package: python3-openrazer
-Section: misc
+Section: python
 Architecture: all
 Depends: openrazer-daemon,
          python3,
