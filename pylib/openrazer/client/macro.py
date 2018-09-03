@@ -106,7 +106,7 @@ class RazerMacro(object):
         return _daemon_macro.MacroURL(url)
 
     @staticmethod
-    def create_script_macro_item(script_path: str, script_args: str=None) -> _daemon_macro.MacroScript:
+    def create_script_macro_item(script_path: str, script_args: str = None) -> _daemon_macro.MacroScript:
         """
         Create a macro object that runs a script
 
@@ -123,7 +123,7 @@ class RazerMacro(object):
         return _daemon_macro.MacroScript(script_path, script_args)
 
     @staticmethod
-    def create_keypress_up_macro_item(key_name: str, pre_pause: int=0) -> _daemon_macro.MacroKey:
+    def create_keypress_up_macro_item(key_name: str, pre_pause: int = 0) -> _daemon_macro.MacroKey:
         """
         Create a macro action that consists of a key release event
 
@@ -139,7 +139,7 @@ class RazerMacro(object):
         return _daemon_macro.MacroKey(key_name, pre_pause, 'UP')
 
     @staticmethod
-    def create_keypress_down_macro_item(key_name: str, pre_pause: int=0) -> _daemon_macro.MacroKey:
+    def create_keypress_down_macro_item(key_name: str, pre_pause: int = 0) -> _daemon_macro.MacroKey:
         """
         Create a macro action that consists of a key press event
 
@@ -155,7 +155,7 @@ class RazerMacro(object):
         return _daemon_macro.MacroKey(key_name, pre_pause, 'DOWN')
 
     @classmethod
-    def create_keypress_macro_item(cls, key_name: str, pre_pause: int=0) -> list:
+    def create_keypress_macro_item(cls, key_name: str, pre_pause: int = 0) -> list:
         """
         Create a macro action that consists of a key press and release event
 

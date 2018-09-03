@@ -366,7 +366,7 @@ class RazerFX(BaseRazerFX):
             return True
         return False
 
-    def ripple(self, red: int, green: int, blue: int, refreshrate: float=c.RIPPLE_REFRESH_RATE) -> bool:
+    def ripple(self, red: int, green: int, blue: int, refreshrate: float = c.RIPPLE_REFRESH_RATE) -> bool:
         """
         Set the Ripple Effect.
 
@@ -407,7 +407,7 @@ class RazerFX(BaseRazerFX):
             return True
         return False
 
-    def ripple_random(self, refreshrate: float=c.RIPPLE_REFRESH_RATE):
+    def ripple_random(self, refreshrate: float = c.RIPPLE_REFRESH_RATE):
         """
         Set the Ripple Effect with random colours
 
