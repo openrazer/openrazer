@@ -15,7 +15,7 @@ Vcs-Git: https://github.com/openrazer/openrazer.git
 Homepage: https://openrazer.github.io/
 
 Package: openrazer-kernel-modules-dkms
-Architecture: amd64 i386
+Architecture: all
 Section: kernel
 Depends: dkms,
          udev,
@@ -50,7 +50,7 @@ Description: OpenRazer peripheral drivers (metapackage)
  userspace daemon, plus a Python library and documentation.
 
 Package: openrazer-daemon
-Architecture: amd64 i386
+Architecture: all
 Depends: openrazer-kernel-modules-dkms,
          python3,
          python3-dbus,
