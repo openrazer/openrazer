@@ -26,9 +26,14 @@ Provides: razer-chroma-driver,
           razer-kernel-modules-dkms
 Replaces: razer-chroma-driver,
           razer-kernel-modules-dkms
-Description: OpenRazer Peripheral Drivers
- A keyboard driver, a mouse driver and a mousemat driver
- for Razer devices, plus support for Razer Blade devices.
+Description: OpenRazer peripheral drivers (DKMS)
+ OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
+ Supported devices include keyboards, mice, mouse-mats, headsets and
+ various other devices.
+ .
+ This package provides the source code for the OpenRazer kernel module to be
+ build with dkms. Kernel sources or headers are required to compile this
+ module.
 
 Package: openrazer-meta
 Architecture: all
@@ -36,9 +41,13 @@ Depends: openrazer-kernel-modules-dkms,
          openrazer-daemon,
          python3-openrazer,
          openrazer-doc
-Description: Metapackage for OpenRazer components
- Package that depends on the OpenRazer driver and userspace
- daemon, plus a Python library and documentation.
+Description: OpenRazer peripheral drivers (metapackage)
+ OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
+ Supported devices include keyboards, mice, mouse-mats, headsets and
+ various other devices.
+ .
+ This package is a metapackage which depends on the OpenRazer driver and
+ userspace daemon, plus a Python library and documentation.
 
 Package: openrazer-daemon
 Architecture: amd64 i386
@@ -59,10 +68,13 @@ Recommends: python3-openrazer
 Conflicts: razer-daemon
 Provides: razer-daemon
 Replaces: razer-daemon
-Description: OpenRazer Device Daemon
- A user-space daemon used to interface with the driver.
- It auto-starts in the XDG directory and handles syncing
- across devices.
+Description: OpenRazer peripheral drivers (daemon)
+ OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
+ Supported devices include keyboards, mice, mouse-mats, headsets and
+ various other devices.
+ .
+ This package provides a user-space daemon used to interface with the driver.
+ It auto-starts in the XDG directory and handles syncing across devices.
 
 Package: python3-openrazer
 Architecture: all
@@ -75,8 +87,12 @@ Depends: openrazer-daemon,
 Conflicts: python3-razer
 Provides: python3-razer
 Replaces: python3-razer
-Description: OpenRazer Python Library
- Contains a library for interacting with the OpenRazer daemon.
+Description: OpenRazer peripheral drivers (Python 3)
+ OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
+ Supported devices include keyboards, mice, mouse-mats, headsets and
+ various other devices.
+ .
+ This package contains a library for interacting with the OpenRazer daemon.
 
 Package: openrazer-doc
 Architecture: all
@@ -84,5 +100,10 @@ Section: doc
 Conflicts: razer-doc
 Provides: razer-doc
 Replaces: razer-doc
-Description: Documentation and examples for the OpenRazer Tools
- Scripts on how to interact with the daemon and the driver.
+Description: OpenRazer peripheral drivers (documentation)
+ OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
+ Supported devices include keyboards, mice, mouse-mats, headsets and
+ various other devices.
+ .
+ This package contains scripts on how to interact with the daemon and
+ the driver.
