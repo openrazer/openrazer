@@ -1,8 +1,7 @@
 Source: openrazer
+Maintainer: Terry Cain <terry@terrys-home.co.uk>
 Section: misc
 Priority: optional
-Maintainer: Terry Cain <terry@terrys-home.co.uk>
-Standards-Version: 4.2.1
 Build-Depends: debhelper (>= 9),
                linux-headers-generic,
                python3,
@@ -10,19 +9,20 @@ Build-Depends: debhelper (>= 9),
                dh-python,
                lsb-release,
                dkms
-Homepage: https://openrazer.github.io/
-Vcs-Git: https://github.com/openrazer/openrazer.git
+Standards-Version: 4.2.1
 Vcs-Browser: https://github.com/openrazer/openrazer/
+Vcs-Git: https://github.com/openrazer/openrazer.git
+Homepage: https://openrazer.github.io/
 
 Package: openrazer-kernel-modules-dkms
-Section: kernel
 Architecture: amd64 i386
+Section: kernel
 Depends: dkms,
          udev,
          ${misc:Depends}
-Provides: razer-chroma-driver,
-          razer-kernel-modules-dkms
 Conflicts: razer-chroma-driver,
+           razer-kernel-modules-dkms
+Provides: razer-chroma-driver,
           razer-kernel-modules-dkms
 Replaces: razer-chroma-driver,
           razer-kernel-modules-dkms
@@ -31,11 +31,11 @@ Description: OpenRazer Peripheral Drivers
  for Razer devices, plus support for Razer Blade devices.
 
 Package: openrazer-meta
+Architecture: all
 Depends: openrazer-kernel-modules-dkms,
          openrazer-daemon,
          python3-openrazer,
          openrazer-doc
-Architecture: all
 Description: Metapackage for OpenRazer components
  Package that depends on the OpenRazer driver and userspace
  daemon, plus a Python library and documentation.
@@ -55,35 +55,34 @@ Depends: openrazer-kernel-modules-dkms,
          xautomation,
          xdotool,
          ${openrazer:dbus-user-session}
-Provides: razer-daemon
-Conflicts: razer-daemon
-Replaces: razer-daemon
 Recommends: python3-openrazer
+Conflicts: razer-daemon
+Provides: razer-daemon
+Replaces: razer-daemon
 Description: OpenRazer Device Daemon
  A user-space daemon used to interface with the driver.
  It auto-starts in the XDG directory and handles syncing
  across devices.
 
 Package: python3-openrazer
-Section: python
 Architecture: all
+Section: python
 Depends: openrazer-daemon,
          python3,
          python3-dbus,
          python3-gi,
          python3-numpy
-Provides: python3-razer
 Conflicts: python3-razer
+Provides: python3-razer
 Replaces: python3-razer
 Description: OpenRazer Python Library
  Contains a library for interacting with the OpenRazer daemon.
 
 Package: openrazer-doc
-Section: doc
 Architecture: all
-Provides: razer-doc
+Section: doc
 Conflicts: razer-doc
+Provides: razer-doc
 Replaces: razer-doc
 Description: Documentation and examples for the OpenRazer Tools
  Scripts on how to interact with the daemon and the driver.
-
