@@ -1,2 +1,3 @@
 lib/udev/
 usr/src/
+install_files/appstream/io.github.openrazer.openrazer.metainfo.xml usr/share/metainfo/
