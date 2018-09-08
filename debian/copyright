@@ -1,6 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: OpenRazer
 Source: https://github.com/openrazer/openrazer
+Files-Excluded: debian
 
 Files: *
 Copyright: 2015-2016 Terry Cain <terry@terrys-home.co.uk>

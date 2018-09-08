@@ -1,0 +1,4 @@
+version=4
+opts=repacksuffix=+dfsg,dversionmangle=s/\+dfsg//g,repack,compression=xz,\
+  filenamemangle=s/.+\/v?(\d\S+)\.tar\.gz/openrazer-$1\.tar\.gz/ \
+  https://github.com/openrazer/openrazer/tags .*/v?(\d\S+)\.tar\.gz
