@@ -19,8 +19,8 @@ cd ${ROOT}
 VERSION=$(cat ${ROOT}/debian/changelog | grep -m 1 -oP '(?<=openrazer \()[^\-\)]+')
 ORIG_TAR="openrazer_${VERSION}.orig.tar.gz"
 
-# Add a -1 revision to changelog for building
-sed -i 's|'$VERSION')|'$VERSION'-1)|' ${ROOT}/debian/changelog
+# Add a -0 revision to changelog for building
+sed -i 's|'$VERSION')|'$VERSION'-0)|' ${ROOT}/debian/changelog
 
 #git archive ${CURRENT_BRANCH} | gzip > ${TEMP_DIR}/${ORIG_TAR}
 tar --exclude-vcs --exclude-vcs-ignores -zcf ${TEMP_DIR}/${ORIG_TAR} -C ${ROOT} .
@@ -45,6 +45,6 @@ else
     echo -e "${RED}Failed to generate deb files. Check ${TEMP_DIR}/build.log for more details${NC}"
 fi
 
-# Add a -1 revision to changelog for building
-sed -i 's|'$VERSION'-1)|'$VERSION')|' ${ROOT}/debian/changelog
+# Add a -0 revision to changelog for building
+sed -i 's|'$VERSION'-0)|'$VERSION')|' ${ROOT}/debian/changelog
 
