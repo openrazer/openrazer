@@ -74,7 +74,7 @@ Description: OpenRazer peripheral drivers (daemon)
  various other devices.
  .
  This package provides a user-space daemon used to interface with the driver.
- It auto-starts in the XDG directory and handles syncing across devices.
+ It contains a systemd user unit and an AppStream files.
 
 Package: python3-openrazer
 Architecture: all
