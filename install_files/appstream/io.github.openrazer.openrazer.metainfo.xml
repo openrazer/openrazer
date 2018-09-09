@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+  <id>io.github.openrazer.openrazer</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0+</project_license>
+  <name>OpenRazer</name>
+  <summary>Drivers for Razer peripherals on GNU/Linux</summary>
+  <description>
+    <p>
+      OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
+      Supported devices include keyboards, mice, mouse-mats, headsets and
+      various other devices. OpenRazer provides kernel drivers, DBus services
+      and python bindings to interact with the DBus interface.
+    </p>
+  </description>
+  <url type="homepage">https://openrazer.github.io/</url>
+  <provides>
+    <modalias>usb:v1532p0013d*</modalias>
+    <modalias>usb:v1532p0020d*</modalias>
+    <modalias>usb:v1532p0024d*</modalias>
+    <modalias>usb:v1532p0025d*</modalias>
+    <modalias>usb:v1532p002Fd*</modalias>
+    <modalias>usb:v1532p0032d*</modalias>
+    <modalias>usb:v1532p0034d*</modalias>
+    <modalias>usb:v1532p0036d*</modalias>
+    <modalias>usb:v1532p0039d*</modalias>
+    <modalias>usb:v1532p0040d*</modalias>
+    <modalias>usb:v1532p0041d*</modalias>
+    <modalias>usb:v1532p0042d*</modalias>
+    <modalias>usb:v1532p0043d*</modalias>
+    <modalias>usb:v1532p0044d*</modalias>
+    <modalias>usb:v1532p0045d*</modalias>
+    <modalias>usb:v1532p0046d*</modalias>
+    <modalias>usb:v1532p0048d*</modalias>
+    <modalias>usb:v1532p004Cd*</modalias>
+    <modalias>usb:v1532p0050d*</modalias>
+    <modalias>usb:v1532p0053d*</modalias>
+    <modalias>usb:v1532p005Bd*</modalias>
+    <modalias>usb:v1532p005Cd*</modalias>
+    <modalias>usb:v1532p010Dd*</modalias>
+    <modalias>usb:v1532p010Ed*</modalias>
+    <modalias>usb:v1532p010Fd*</modalias>
+    <modalias>usb:v1532p0111d*</modalias>
+    <modalias>usb:v1532p0113d*</modalias>
+    <modalias>usb:v1532p011Ad*</modalias>
+    <modalias>usb:v1532p011Bd*</modalias>
+    <modalias>usb:v1532p0201d*</modalias>
+    <modalias>usb:v1532p0202d*</modalias>
+    <modalias>usb:v1532p0203d*</modalias>
+    <modalias>usb:v1532p0204d*</modalias>
+    <modalias>usb:v1532p0205d*</modalias>
+    <modalias>usb:v1532p0207d*</modalias>
+    <modalias>usb:v1532p0208d*</modalias>
+    <modalias>usb:v1532p0209d*</modalias>
+    <modalias>usb:v1532p020Fd*</modalias>
+    <modalias>usb:v1532p0210d*</modalias>
+    <modalias>usb:v1532p0211d*</modalias>
+    <modalias>usb:v1532p0214d*</modalias>
+    <modalias>usb:v1532p0215d*</modalias>
+    <modalias>usb:v1532p0216d*</modalias>
+    <modalias>usb:v1532p0217d*</modalias>
+    <modalias>usb:v1532p021Ad*</modalias>
+    <modalias>usb:v1532p021Ed*</modalias>
+    <modalias>usb:v1532p021Fd*</modalias>
+    <modalias>usb:v1532p0220d*</modalias>
+    <modalias>usb:v1532p0221d*</modalias>
+    <modalias>usb:v1532p0224d*</modalias>
+    <modalias>usb:v1532p0225d*</modalias>
+    <modalias>usb:v1532p022Ad*</modalias>
+    <modalias>usb:v1532p022Dd*</modalias>
+    <modalias>usb:v1532p022Fd*</modalias>
+    <modalias>usb:v1532p0232d*</modalias>
+    <modalias>usb:v1532p0233d*</modalias>
+    <modalias>usb:v1532p0501d*</modalias>
+    <modalias>usb:v1532p0504d*</modalias>
+    <modalias>usb:v1532p0510d*</modalias>
+    <modalias>usb:v1532p0C00d*</modalias>
+    <modalias>usb:v1532p0F07d*</modalias>
+  </provides>
+</component>

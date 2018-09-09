@@ -568,7 +568,7 @@ class RazerDeathAdderElite(__RazerDeviceSpecialBrightnessSuspend):
     EVENT_FILE_REGEX = re.compile(r'.*Razer_DeathAdder_Elite-if0(1|2)-event-kbd')
 
     USB_VID = 0x1532
-    USB_PID = 0x005c
+    USB_PID = 0x005C
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 2]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
