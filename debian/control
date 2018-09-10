@@ -14,6 +14,21 @@ Vcs-Browser: https://github.com/openrazer/openrazer/
 Vcs-Git: https://github.com/openrazer/openrazer.git
 Homepage: https://openrazer.github.io/
 
+Package: openrazer-meta
+Architecture: all
+Depends: ${misc:Depends},
+         openrazer-kernel-modules-dkms (= ${binary:Version}),
+         openrazer-daemon (= ${binary:Version}),
+         python3-openrazer (= ${binary:Version})
+Suggests: openrazer-doc (= ${binary:Version})
+Description: OpenRazer peripheral drivers (metapackage)
+ OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
+ Supported devices include keyboards, mice, mouse-mats, headsets and
+ various other devices.
+ .
+ This package is a metapackage which depends on the OpenRazer driver and
+ userspace daemon, plus a Python library and documentation.
+
 Package: openrazer-kernel-modules-dkms
 Architecture: all
 Section: kernel
@@ -34,21 +49,6 @@ Description: OpenRazer peripheral drivers (DKMS)
  This package provides the source code for the OpenRazer kernel module to be
  build with dkms. Kernel sources or headers are required to compile this
  module.
-
-Package: openrazer-meta
-Architecture: all
-Depends: ${misc:Depends},
-         openrazer-kernel-modules-dkms (= ${binary:Version}),
-         openrazer-daemon (= ${binary:Version}),
-         python3-openrazer (= ${binary:Version})
-Suggests: openrazer-doc (= ${binary:Version})
-Description: OpenRazer peripheral drivers (metapackage)
- OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
- Supported devices include keyboards, mice, mouse-mats, headsets and
- various other devices.
- .
- This package is a metapackage which depends on the OpenRazer driver and
- userspace daemon, plus a Python library and documentation.
 
 Package: openrazer-daemon
 Architecture: all
