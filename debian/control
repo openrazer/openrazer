@@ -17,9 +17,9 @@ Homepage: https://openrazer.github.io/
 Package: openrazer-kernel-modules-dkms
 Architecture: all
 Section: kernel
-Depends: dkms,
-         udev,
-         ${misc:Depends}
+Depends: ${misc:Depends},
+         dkms,
+         udev
 Conflicts: razer-chroma-driver,
            razer-kernel-modules-dkms
 Provides: razer-chroma-driver,
@@ -37,7 +37,8 @@ Description: OpenRazer peripheral drivers (DKMS)
 
 Package: openrazer-meta
 Architecture: all
-Depends: openrazer-kernel-modules-dkms,
+Depends: ${misc:Depends},
+         openrazer-kernel-modules-dkms,
          openrazer-daemon,
          python3-openrazer
 Suggests: openrazer-doc
@@ -51,7 +52,8 @@ Description: OpenRazer peripheral drivers (metapackage)
 
 Package: openrazer-daemon
 Architecture: all
-Depends: openrazer-kernel-modules-dkms,
+Depends: ${misc:Depends},
+         openrazer-kernel-modules-dkms,
          python3,
          python3-dbus,
          python3-gi,
@@ -79,7 +81,8 @@ Description: OpenRazer peripheral drivers (daemon)
 Package: python3-openrazer
 Architecture: all
 Section: python
-Depends: openrazer-daemon,
+Depends: ${misc:Depends},
+         openrazer-daemon,
          python3,
          python3-dbus,
          python3-gi,
@@ -97,6 +100,7 @@ Description: OpenRazer peripheral drivers (Python 3)
 Package: openrazer-doc
 Architecture: all
 Section: doc
+Depends: ${misc:Depends}
 Conflicts: razer-doc
 Provides: razer-doc
 Replaces: razer-doc
