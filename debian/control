@@ -38,10 +38,10 @@ Description: OpenRazer peripheral drivers (DKMS)
 Package: openrazer-meta
 Architecture: all
 Depends: ${misc:Depends},
-         openrazer-kernel-modules-dkms,
-         openrazer-daemon,
-         python3-openrazer
-Suggests: openrazer-doc
+         openrazer-kernel-modules-dkms (= ${binary:Version}),
+         openrazer-daemon (= ${binary:Version}),
+         python3-openrazer (= ${binary:Version})
+Suggests: openrazer-doc (= ${binary:Version})
 Description: OpenRazer peripheral drivers (metapackage)
  OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
  Supported devices include keyboards, mice, mouse-mats, headsets and
@@ -54,7 +54,7 @@ Package: openrazer-daemon
 Architecture: all
 Depends: ${misc:Depends},
          ${python3:Depends},
-         openrazer-kernel-modules-dkms,
+         openrazer-kernel-modules-dkms (= ${binary:Version}),
          python3-dbus,
          python3-gi,
          python3-pyudev,
@@ -66,7 +66,7 @@ Depends: ${misc:Depends},
          xautomation,
          xdotool,
          ${openrazer:dbus-user-session}
-Recommends: python3-openrazer
+Recommends: python3-openrazer (= ${binary:Version})
 Conflicts: razer-daemon
 Provides: razer-daemon
 Replaces: razer-daemon
@@ -83,7 +83,7 @@ Architecture: all
 Section: python
 Depends: ${misc:Depends},
          ${python3:Depends},
-         openrazer-daemon,
+         openrazer-daemon (= ${binary:Version}),
          python3-dbus,
          python3-gi,
          python3-numpy
