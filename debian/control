@@ -39,8 +39,8 @@ Package: openrazer-meta
 Architecture: all
 Depends: openrazer-kernel-modules-dkms,
          openrazer-daemon,
-         python3-openrazer,
-         openrazer-doc
+         python3-openrazer
+Suggests: openrazer-doc
 Description: OpenRazer peripheral drivers (metapackage)
  OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
  Supported devices include keyboards, mice, mouse-mats, headsets and
