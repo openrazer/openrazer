@@ -40,7 +40,8 @@ override_dh_auto_build:
 	echo "DKMS modules are built at packages installation time."
 
 override_dh_auto_clean:
-	$(MAKE) lp_driver_clean
+	echo "No need to clean DKMS modules at packages build time."
+	echo "DKMS modules are built at packages installation time."
 
 override_dh_dkms:
 	dh_dkms -p openrazer-kernel-modules-dkms -- install_files/dkms/dkms.conf
