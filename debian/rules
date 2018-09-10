@@ -36,7 +36,8 @@ else
 endif
 
 override_dh_auto_build:
-	dh_auto_build -- lp_all
+	echo "No need to build DKMS modules at packages build time."
+	echo "DKMS modules are built at packages installation time."
 
 override_dh_auto_clean:
 	$(MAKE) lp_driver_clean
