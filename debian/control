@@ -53,8 +53,8 @@ Description: OpenRazer peripheral drivers (metapackage)
 Package: openrazer-daemon
 Architecture: all
 Depends: ${misc:Depends},
+         ${python3:Depends},
          openrazer-kernel-modules-dkms,
-         python3,
          python3-dbus,
          python3-gi,
          python3-pyudev,
@@ -82,8 +82,8 @@ Package: python3-openrazer
 Architecture: all
 Section: python
 Depends: ${misc:Depends},
+         ${python3:Depends},
          openrazer-daemon,
-         python3,
          python3-dbus,
          python3-gi,
          python3-numpy
