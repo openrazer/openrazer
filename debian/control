@@ -49,6 +49,10 @@ Description: OpenRazer peripheral drivers (DKMS)
  This package provides the source code for the OpenRazer kernel module to be
  build with dkms. Kernel sources or headers are required to compile this
  module.
+ .
+ Please read the Troubleshooting Guide in
+ /usr/share/doc/openrazer-kernel-modules-dkms/README.Debian.
+
 
 Package: openrazer-daemon
 Architecture: all

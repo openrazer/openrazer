@@ -1,7 +1,0 @@
-#!/bin/sh
-set -e
-
-#DEBHELPER#
-
-# Actually needs -e but if added, it gets printed out literally and it works without just fine.
-echo "\n\033[1;36mADD YOUR USER TO THE PLUGDEV GROUP '\033[1;35msudo gpasswd -a <USERNAME> plugdev\033[1;36m'\033[0m"
