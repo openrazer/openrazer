@@ -12,11 +12,19 @@ release_ver := $(shell lsb_release --release --short)
 %:
 	dh $@ --with python3,dkms
 
-override_dh_gencontrol:
+override_dh_auto_clean:
+	echo "No need to clean DKMS modules at packages build time."
+	echo "DKMS modules are built at packages installation time."
+
+override_dh_auto_build:
+	echo "No need to build DKMS modules at packages build time."
+	echo "DKMS modules are built at packages installation time."
+
+override_dh_auto_install:
 ifeq ($(release_ver),16.04)
-	dh_gencontrol -- -Vopenrazer:dbus-user-session=
+	$(MAKE) ubuntu_install xdg_install DESTDIR=$(DEB_DESTDIR)
 else
-	dh_gencontrol -- -Vopenrazer:dbus-user-session=dbus-user-session
+	$(MAKE) ubuntu_install install-systemd DESTDIR=$(DEB_DESTDIR)
 endif
 
 override_dh_install:
@@ -28,20 +36,12 @@ else
 endif
 	dh_install --remaining-packages
 
-override_dh_auto_install:
-ifeq ($(release_ver),16.04)
-	$(MAKE) ubuntu_install xdg_install DESTDIR=$(DEB_DESTDIR)
-else
-	$(MAKE) ubuntu_install install-systemd DESTDIR=$(DEB_DESTDIR)
-endif
-
-override_dh_auto_build:
-	echo "No need to build DKMS modules at packages build time."
-	echo "DKMS modules are built at packages installation time."
-
-override_dh_auto_clean:
-	echo "No need to clean DKMS modules at packages build time."
-	echo "DKMS modules are built at packages installation time."
-
 override_dh_dkms:
 	dh_dkms -p openrazer-kernel-modules-dkms -- install_files/dkms/dkms.conf
+
+override_dh_gencontrol:
+ifeq ($(release_ver),16.04)
+	dh_gencontrol -- -Vopenrazer:dbus-user-session=
+else
+	dh_gencontrol -- -Vopenrazer:dbus-user-session=dbus-user-session
+endif
