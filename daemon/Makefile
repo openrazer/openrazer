@@ -8,18 +8,20 @@ service:
 	@sed "s|##PREFIX##|$(PREFIX)|" resources/org.razer.service.in > org.razer.service
 	@sed "s|##PREFIX##|$(PREFIX)|" resources/openrazer-daemon.systemd.service.in > openrazer-daemon.service
 
+openrazer-daemon: run_openrazer_daemon.py
+	@cp run_openrazer_daemon.py $@
+
 install-resources: service
 	@install -m 644 -D -v resources/razer.conf $(DESTDIR)$(PREFIX)/share/openrazer/razer.conf.example
-	@install -m 755 -D -v run_openrazer_daemon.py $(DESTDIR)$(PREFIX)/bin/openrazer-daemon
 
 install-systemd:
 	@install -m 644 -D -v org.razer.service $(DESTDIR)$(PREFIX)/share/dbus-1/services/org.razer.service
 	@install -m 644 -D -v openrazer-daemon.service $(DESTDIR)$(PREFIX)/lib/systemd/user/openrazer-daemon.service
 
-install: purge_pycache manpages install-resources install-systemd
+install: purge_pycache openrazer-daemon manpages install-resources install-systemd
 	python3 setup.py install --prefix=$(PREFIX) --root=$(DESTDIR)
 
-ubuntu_install: purge_pycache manpages install-resources
+ubuntu_install: purge_pycache openrazer-daemon manpages install-resources
 	python3 setup.py install --prefix=$(PREFIX) --root=$(DESTDIR) --no-compile
 
 manpages:
