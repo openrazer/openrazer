@@ -18,8 +18,6 @@ DKMS_VER?=2.3.1
 # Build all target
 all: driver
 
-lp_all: lp_driver
-
 # Driver compilation
 driver:
 	@echo -e "\n::\033[32m Compiling OpenRazer kernel modules\033[0m"
@@ -54,21 +52,6 @@ driver_uninstall:
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razerfirefly.ko
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razercore.ko
 
-
-# Launchpad hacks
-lp_driver:
-	@echo -e "\n::\033[32m Compiling OpenRazer kernel modules (Launchpad)\033[0m"
-	@echo "========================================"
-	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+(generic|amd64)' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
-	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules
-
-lp_driver_clean:
-	@echo -e "\n::\033[32m Cleaning OpenRazer kernel modules (Launchpad)\033[0m"
-	@echo "========================================"
-	$(eval KERNELDIR:=/lib/modules/$(shell dpkg --get-selections | grep -P 'linux-headers-.+(generic|amd64)' | awk '{print $$1}' | tail -1 | sed 's/linux-headers-//g')/build)
-	make -C "$(KERNELDIR)" SUBDIRS="$(DRIVERDIR)" clean
-
-
 # Razer Daemon
 daemon_install:
 	@echo -e "\n::\033[34m Installing OpenRazer Daemon\033[0m"
@@ -85,7 +68,6 @@ daemon_uninstall:
 	@echo -e "\n::\033[34m Uninstalling OpenRazer Daemon\033[0m"
 	@echo "====================================================="
 	make --no-print-directory -C daemon uninstall
-
 
 # Python Library
 python_library_install:
