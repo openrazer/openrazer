@@ -137,8 +137,18 @@ ubuntu_udev_uninstall:
 	@echo "====================================================="
 	rm -f $(DESTDIR)/lib/udev/rules.d/99-razer.rules $(DESTDIR)/lib/udev/razer_mount
 
+appstream_install:
+	@echo -e "\n::\033[34m Installing OpenRazer AppStream metadata\033[0m"
+	@echo "====================================================="
+	install -m 644 -v -D install_files/appstream/io.github.openrazer.openrazer.metainfo.xml $(DESTDIR)/usr/share/metainfo/io.github.openrazer.openrazer.metainfo.xml
+
+appstream_uninstall:
+	@echo -e "\n::\033[34m Uninstalling OpenRazer AppStream metadata\033[0m"
+	@echo "====================================================="
+	rm -f $(DESTDIR)/usr/share/metainfo/io.github.openrazer.openrazer.metainfo.xml
+
 # Install for Ubuntu
-ubuntu_install: setup_dkms ubuntu_udev_install ubuntu_daemon_install ubuntu_python_library_install
+ubuntu_install: setup_dkms ubuntu_udev_install ubuntu_daemon_install ubuntu_python_library_install appstream_install
 	@echo -e "\n::\033[34m Installing for Ubuntu\033[0m"
 	@echo "====================================================="
 	mv $(DESTDIR)/usr/lib/python3.* $(DESTDIR)/usr/lib/python3
