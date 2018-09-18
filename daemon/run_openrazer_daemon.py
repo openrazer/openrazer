@@ -98,17 +98,17 @@ def stop_daemon(args):
         print("pidfile exists but no process is running. Remove {} and continue".format(pidfile))
 
 
-def install_example_config_file():
+def install_example_config_file(config_file):
     """
-    Installs the example config file in $XDG_CONFIG_HOME/openrazer/razer.conf
+    Installs the example config file
     """
-    if os.path.exists(CONF_FILE):
+    if os.path.exists(config_file):
         return
 
     try:
-        os.makedirs(os.path.dirname(CONF_FILE), exist_ok=True)
+        os.makedirs(os.path.dirname(config_file), exist_ok=True)
         if os.path.exists(EXAMPLE_CONF_FILE):
-            shutil.copy(EXAMPLE_CONF_FILE, CONF_FILE)
+            shutil.copy(EXAMPLE_CONF_FILE, config_file)
         else:
             print('Cant find "{0}"'.format(EXAMPLE_CONF_FILE), file=sys.stderr)
     except NotADirectoryError as e:
@@ -160,7 +160,7 @@ def run():
         if args.verbose:
             logger.setLevel(logging.DEBUG)
 
-    install_example_config_file()
+    install_example_config_file(args.config)
 
     os.makedirs(args.run_dir, exist_ok=True)
     daemon = Daemonize(app="openrazer-daemon",
