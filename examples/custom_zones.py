@@ -9,6 +9,13 @@ device_manager = DeviceManager()
 
 
 print("Found {} Razer devices".format(len(device_manager.devices)))
+
+devices = device_manager.devices
+for device in devices:
+    if not device.fx.advanced:
+        print("Skipping device " + device.name + " (" + device.serial + ")")
+        devices.remove(device)
+
 print()
 
 # Disable daemon effect syncing.
@@ -24,7 +31,7 @@ def random_color():
 
 
 # Set random colors for each zone of each device
-for device in device_manager.devices:
+for device in devices:
     rows, cols = device.fx.advanced.rows, device.fx.advanced.cols
 
     for row in range(rows):

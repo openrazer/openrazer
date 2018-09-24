@@ -12,6 +12,13 @@ device_manager = DeviceManager()
 
 
 print("Found {} Razer devices".format(len(device_manager.devices)))
+
+devices = device_manager.devices
+for device in devices:
+    if not device.fx.advanced:
+        print("Skipping device " + device.name + " (" + device.serial + ")")
+        devices.remove(device)
+
 print()
 
 # Disable daemon effect syncing.
@@ -72,7 +79,7 @@ def starlight_effect(device):
 
 # Spawn a manager thread for each device and wait on all of them.
 threads = []
-for device in device_manager.devices:
+for device in devices:
     t = threading.Thread(target=starlight_effect, args=(device,), daemon=True)
     t.start()
     threads.append(t)
@@ -80,6 +87,6 @@ for device in device_manager.devices:
 
 # If there are still threads, update each device.
 while any(t.isAlive() for t in threads):
-    for device in device_manager.devices:
+    for device in devices:
         device.fx.advanced.draw()
     time.sleep(1 / 60)
