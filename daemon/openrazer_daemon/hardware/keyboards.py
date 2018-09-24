@@ -454,7 +454,7 @@ class RazerBladeStealth(_RippleKeyboard):
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
-               'set_custom_effect', 'set_key_row'
+               'set_custom_effect', 'set_key_row',
 
                'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active']
 
