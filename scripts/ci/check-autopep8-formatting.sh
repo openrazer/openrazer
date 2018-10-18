@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OPTIONS="--max-line-length 500"
+OPTIONS="--max-line-length 500 --ignore E402"
 
 RETURN=0
 AUTOPEP8=$(which autopep8)
