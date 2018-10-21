@@ -37,7 +37,7 @@ endif
 	dh_install --remaining-packages
 
 override_dh_dkms:
-	dh_dkms -p openrazer-kernel-modules-dkms -- install_files/dkms/dkms.conf
+	dh_dkms -p openrazer-driver-dkms -- install_files/dkms/dkms.conf
 
 override_dh_gencontrol:
 ifeq ($(release_ver),16.04)
