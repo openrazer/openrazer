@@ -17,7 +17,7 @@ Homepage: https://openrazer.github.io/
 Package: openrazer-meta
 Architecture: all
 Depends: ${misc:Depends},
-         openrazer-kernel-modules-dkms (= ${binary:Version}),
+         openrazer-driver-dkms (= ${binary:Version}),
          openrazer-daemon (= ${binary:Version}),
          python3-openrazer (= ${binary:Version})
 Suggests: openrazer-doc (= ${binary:Version})
@@ -29,18 +29,21 @@ Description: OpenRazer peripheral drivers (metapackage)
  This package is a metapackage which depends on the OpenRazer driver and
  userspace daemon, plus a Python library and documentation.
 
-Package: openrazer-kernel-modules-dkms
+Package: openrazer-driver-dkms
 Architecture: all
 Section: kernel
 Depends: ${misc:Depends},
          dkms,
          udev
 Conflicts: razer-chroma-driver,
-           razer-kernel-modules-dkms
+           razer-kernel-modules-dkms,
+           openrazer-kernel-modules-dkms
 Provides: razer-chroma-driver,
-          razer-kernel-modules-dkms
+          razer-kernel-modules-dkms,
+          openrazer-kernel-modules-dkms
 Replaces: razer-chroma-driver,
-          razer-kernel-modules-dkms
+          razer-kernel-modules-dkms,
+          openrazer-kernel-modules-dkms
 Description: OpenRazer peripheral drivers (DKMS)
  OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
  Supported devices include keyboards, mice, mouse-mats, headsets and
@@ -51,14 +54,14 @@ Description: OpenRazer peripheral drivers (DKMS)
  module.
  .
  Please read the Troubleshooting Guide in
- /usr/share/doc/openrazer-kernel-modules-dkms/README.Debian.
+ /usr/share/doc/openrazer-driver-dkms/README.Debian.
 
 
 Package: openrazer-daemon
 Architecture: all
 Depends: ${misc:Depends},
          ${python3:Depends},
-         openrazer-kernel-modules-dkms (= ${binary:Version}),
+         openrazer-driver-dkms (= ${binary:Version}),
          python3-dbus,
          python3-gi,
          python3-pyudev,
