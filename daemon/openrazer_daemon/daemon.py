@@ -50,7 +50,7 @@ class RazerDaemon(DBusService):
 
         setproctitle.setproctitle('openrazer-daemon')  # pylint: disable=no-member
 
-        # Expanding ~ as python doesnt do it by default, also creating dirs if needed
+        # Expanding ~ as python doesn't do it by default, also creating dirs if needed
         try:
             if log_dir is not None:
                 log_dir = os.path.expanduser(log_dir)
@@ -151,7 +151,7 @@ class RazerDaemon(DBusService):
         logger = logging.getLogger('razer')
         logger.setLevel(log_level)
         formatter = logging.Formatter('%(asctime)s | %(name)-30s | %(levelname)-8s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-        # Dont propagate to default logger
+        # Don't propagate to default logger
         logger.propagate = 0
 
         if want_console_log:
@@ -399,7 +399,7 @@ class RazerDaemon(DBusService):
 
                     razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
 
-                    # Wireless devices sometimes dont listen
+                    # Wireless devices sometimes don't listen
                     count = 0
                     while count < 3:
                         # Loop to get serial, exit early if it gets one
@@ -438,7 +438,7 @@ class RazerDaemon(DBusService):
                 # Its a udev event so currently the device hasn't been chmodded yet
                 time.sleep(0.2)
 
-                # Wireless devices sometimes dont listen
+                # Wireless devices sometimes don't listen
                 device_serial = razer_device.get_serial()
 
                 if len(device_serial) > 0:
@@ -476,7 +476,7 @@ class RazerDaemon(DBusService):
             del self._razer_devices[device.device_id]
             self.device_removed()
 
-        except IndexError:  # Why didnt i set it up as KeyError
+        except IndexError:  # Why didn't i set it up as KeyError
             # It will return "extra" events for the additional usb interfaces bound to the driver
             pass
 

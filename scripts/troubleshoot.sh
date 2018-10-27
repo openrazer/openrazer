@@ -18,7 +18,7 @@ if [ -z "$lsmod" ]; then
 fi
 
 # Step 3 - check if the module can load correctly
-echo "Please enter your 'sudo' password for priviliged operations."
+echo "Please enter your 'sudo' password for privileged operations."
 module_name="razerkbd"
 modprobe=$(sudo modprobe $module_name 2>&1)
 if [ $? != 0 ]; then

@@ -67,7 +67,7 @@ class Device(object):
 
     def notify_child(self, msg):
         """
-        Recieve observer messages
+        Receive observer messages
 
         :param msg: Tuple with first element a string
         :type msg: tuple

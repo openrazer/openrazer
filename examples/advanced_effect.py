@@ -27,7 +27,7 @@ effects = [
     'wave',
 ]
 
-# Helper funciton to generate interesting colors
+# Helper function to generate interesting colors
 
 
 def random_color():

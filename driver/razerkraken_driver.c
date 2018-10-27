@@ -334,7 +334,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         // Lock sending of the 2 commands
         mutex_lock(&device->lock);
 
-        // Basically Kraken Classic doesnt take RGB arguments so only do it for the KrakenV1,V2
+        // Basically Kraken Classic doesn't take RGB arguments so only do it for the KrakenV1,V2
         switch(device->usb_pid) {
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
@@ -567,7 +567,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x20, 0x16, 0x7f00);
 
     // Basically some simple caching
-    // Also skips going to device if it doesnt contain the serial
+    // Also skips going to device if it doesn't contain the serial
     if(device->serial[0] == '\0') {
 
         mutex_lock(&device->lock);

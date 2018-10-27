@@ -45,7 +45,7 @@ struct razer_kraken_device {
     unsigned short breathing_address[3];
 
     char serial[23];
-    // 3 Bytes, first byte is wether fw version is collected, 2nd byte is major version, 3rd is minor, should be printed out in hex form as are bcd
+    // 3 Bytes, first byte is whether fw version is collected, 2nd byte is major version, 3rd is minor, should be printed out in hex form as are bcd
     unsigned char firmware_version[3];
 
     u8 data[33];

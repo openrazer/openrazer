@@ -22,7 +22,7 @@ Note, that all paths shown as defaults, eg ~/.local/share/ or ~/.config/ can be 
 	Enable logging of DEBUG messages.
 
 *-F*, *--foreground*
-	Run the dameon in the foreground and don't fork. This also enables sending the log output to stdout (in addition to the log file).
+	Run the daemon in the foreground and don't fork. This also enables sending the log output to stdout (in addition to the log file).
 
 *-r*, *--respawn*
 	Stop any running daemon first (if one is running) before starting.

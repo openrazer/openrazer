@@ -31,7 +31,7 @@ def copy_func(function_reference, name=None):
 
 class DBusServiceFactory(object):
     """
-    Factory object to create differnet service objects.
+    Factory object to create different service objects.
 
     Different service objects are useful, as the DBus service table is stored in the class which would be shared
     between all class instances.
@@ -112,7 +112,7 @@ class DBusService(dbus.service.Object):
         # Get class key for use in the DBus introspection table
         class_key = [key for key in self._dbus_class_table.keys() if key.endswith(self.__class__.__name__)][0]
 
-        # Create a copy of the function so that if its used multiple times it wont affect other instances if the names changed
+        # Create a copy of the function so that if its used multiple times it won't affect other instances if the names changed
         function_deepcopy = copy_func(function, function_name)
         func = dbus.service.method(interface_name, in_signature=in_signature, out_signature=out_signature, byte_arrays=byte_arrays)(function_deepcopy)
 

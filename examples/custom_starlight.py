@@ -25,7 +25,7 @@ print()
 # Without this, the daemon will try to set the lighting effect to every device.
 device_manager.sync_effects = False
 
-# Helper funciton to generate interesting colors
+# Helper function to generate interesting colors
 
 
 def random_color():

@@ -54,11 +54,11 @@ class RazerMouse(__RazerDevice):
         """
         Set mouse dpi
 
-        Daemon does type validation but cant be too careful
+        Daemon does type validation but can't be too careful
         :param value: DPI X, Y tuple
         :type value: tuple
 
-        :raises ValueError: If the tuple isnt long enough or contains invalid crap
+        :raises ValueError: If the tuple isn't long enough or contains invalid crap
         :raises NotImplementedError: If function is not supported
         """
         if self.has('dpi'):

@@ -66,7 +66,7 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
  *   Razer BlackWidow Ultimate 2013*
  *   Razer Firefly*
  *
- * Request report is the report sent to the device specifing what response we want
+ * Request report is the report sent to the device specifying what response we want
  * Response report will get populated with a response
  *
  * Returns 0 when successful, 1 if the report length is invalid.
@@ -91,7 +91,7 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
     // TODO look to see if index needs to be different for the request and the response
     retval = razer_send_control_msg(usb_dev, request_report, report_index, wait_min, wait_max);
 
-    // Now ask for reponse
+    // Now ask for response
     len = usb_control_msg(usb_dev, usb_rcvctrlpipe(usb_dev, 0),
                           request,         // Request
                           request_type,    // RequestType
@@ -108,7 +108,7 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
 
     // Error if report is wrong length
     if(len != 90) {
-        printk(KERN_WARNING "razer driver: Invalid USB repsonse. USB Report length: %d\n", len);
+        printk(KERN_WARNING "razer driver: Invalid USB response. USB Report length: %d\n", len);
         result = 1;
     }
 

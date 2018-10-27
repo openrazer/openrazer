@@ -74,7 +74,7 @@ class BatteryNotifier(threading.Thread):
 
             battery_level = self._get_battery_func()
 
-            # Sometimes on wifi dont get batt
+            # Sometimes on wifi don't get batt
             if battery_level == -1.0:
                 time.sleep(0.2)
                 battery_level = self._get_battery_func()

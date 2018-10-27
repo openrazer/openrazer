@@ -5,7 +5,7 @@
 -- or ran with wireshark -X lua_script:FILENAME.lua
 --
 -- Could of binded it to the Razer USB Vendor:Product ID but when wiresharking USB comms to virtualbox
--- wireshark can miss the VID,PID decleration and then the dissector wouldn't apply so just use it when
+-- wireshark can miss the VID,PID declaration and then the dissector wouldn't apply so just use it when
 -- dissecting razer traffic, don't use it all the time as it'll apply to all usb-control requests
 
 razer_proto = Proto("razer", "Razer Protocol")

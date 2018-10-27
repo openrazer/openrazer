@@ -8,7 +8,7 @@ first_serial_num=$(echo "$serials" | head -n1 | sed 's/XX//' | sed -e 's/^[0]*//
 # get the last serial as number (same procedure)
 last_serial_num=$(echo "$serials" | tail -n1 | sed 's/XX//' | sed -e 's/^[0]*//')
 
-# iterate through all serials inbetween the first and the last to find holes
+# iterate through all serials between the first and the last to find holes
 for i in $(seq $first_serial_num $last_serial_num); do
     # check if there is no serial matching 0$i$ -> 01$ -> 01 at the end of a line
     if [ -z $(echo "$serials" | grep "0$i$") ]; then

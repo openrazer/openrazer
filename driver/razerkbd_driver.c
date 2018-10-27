@@ -162,7 +162,7 @@ static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct
         if(response_report.remaining_packets != request_report->remaining_packets ||
            response_report.command_class != request_report->command_class ||
            response_report.command_id.id != request_report->command_id.id) {
-            print_erroneous_report(&response_report, "razerkbd", "Response doesnt match request");
+            print_erroneous_report(&response_report, "razerkbd", "Response doesn't match request");
 //		} else if (response_report.status == RAZER_CMD_BUSY) {
 //			print_erroneous_report(&response_report, "razerkbd", "Device is busy");
         } else if (response_report.status == RAZER_CMD_FAILURE) {
@@ -1719,7 +1719,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         // If the currently bound device is the control (mouse) interface
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);                      // Get the firmware version
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);                         // Get serial nubmer
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);                         // Get serial number
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);                     // Gets and sets the brightness
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);                                  // Test mode
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
@@ -1769,7 +1769,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets whether FN is requires for F-Keys
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_QHD:
@@ -1783,7 +1783,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets whether FN is requires for F-Keys
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
@@ -1812,7 +1812,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets whether FN is requires for F-Keys
             break;
 
 
@@ -1996,7 +1996,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         // If the currently bound device is the control (mouse) interface
         device_remove_file(&hdev->dev, &dev_attr_version);
         device_remove_file(&hdev->dev, &dev_attr_firmware_version);                      // Get the firmware version
-        device_remove_file(&hdev->dev, &dev_attr_device_serial);                         // Get serial nubmer
+        device_remove_file(&hdev->dev, &dev_attr_device_serial);                         // Get serial number
         device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);                     // Gets and sets the brightness
         device_remove_file(&hdev->dev, &dev_attr_test);                                  // Test mode
         device_remove_file(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
@@ -2046,7 +2046,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
             device_remove_file(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
-            device_remove_file(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
+            device_remove_file(&hdev->dev, &dev_attr_fn_toggle);                     // Sets whether FN is requires for F-Keys
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_QHD:
@@ -2060,7 +2060,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
             device_remove_file(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
-            device_remove_file(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
+            device_remove_file(&hdev->dev, &dev_attr_fn_toggle);                     // Sets whether FN is requires for F-Keys
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
@@ -2089,7 +2089,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
-            device_remove_file(&hdev->dev, &dev_attr_fn_toggle);                     // Sets wether FN is requires for F-Keys
+            device_remove_file(&hdev->dev, &dev_attr_fn_toggle);                     // Sets whether FN is requires for F-Keys
             break;
 
         case USB_DEVICE_ID_RAZER_NOSTROMO:

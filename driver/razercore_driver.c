@@ -66,7 +66,7 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
         if(response_report.remaining_packets != request_report->remaining_packets ||
            response_report.command_class != request_report->command_class ||
            response_report.command_id.id != request_report->command_id.id) {
-            print_erroneous_report(&response_report, "razercore", "Response doesnt match request");
+            print_erroneous_report(&response_report, "razercore", "Response doesn't match request");
 //		} else if (response_report.status == RAZER_CMD_BUSY) {
 //			print_erroneous_report(&response_report, "razercore", "Device is busy");
         } else if (response_report.status == RAZER_CMD_FAILURE) {

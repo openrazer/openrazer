@@ -42,7 +42,7 @@ def _print_table(header_list, rows):
 
     # Remove trailing space, add newline
     result += (' ' * (max_line_length - len(result))) + '\n'
-    # Add ----- seperator and newline
+    # Add ----- separator and newline
     result += ('-' * max_line_length) + '\n'
 
     for row in rows:

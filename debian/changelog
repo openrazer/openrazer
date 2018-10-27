@@ -144,7 +144,7 @@ razer (1.1.11-0ubuntu1) xenial; urgency=low
 
   * Added Device - Overwatch Razer BlackWidow Chroma
   * Added Device - Razer Naga 2014
-  * Fixed Bug where serial wasnt reported during device add, causing DBus to die a horrible death
+  * Fixed Bug where serial wasn't reported during device add, causing DBus to die a horrible death
   * Fixed inconsistencies where some firmware versions has newlines when interacting with the driver directly
   * Added some more mutex's in mouse driver
   * Swapped around mice and keyboard block in udev as udev was doing the dodgy
@@ -167,7 +167,7 @@ razer (1.1.10-0ubuntu1) xenial; urgency=low
   * Fixed limited with some Blade RGB payloads
   * Fixed some crash conditions
   * Slowly prepping driver for some windows ifdefs so that it can compile on windows easily
-  * Added raw_event function to mice that detects buttons when in device mode (doesnt work yet, proper code is in other branch)
+  * Added raw_event function to mice that detects buttons when in device mode (doesn't work yet, proper code is in other branch)
   * Started adding mutex's to mice
   * Added macros globally in pylib
   * Added firefly class to pylib
@@ -176,7 +176,7 @@ razer (1.1.10-0ubuntu1) xenial; urgency=low
 
 razer (1.1.9-0ubuntu1) xenial; urgency=low
 
-  * Added options to daemon for restarting / stopping using the dameon script
+  * Added options to daemon for restarting / stopping using the daemon script
   * Added more permission checks so solve some more issues.
   * Added Device - Razer Core
   * Added Device - Razer Naga Hex
@@ -195,7 +195,7 @@ razer (1.1.8-0ubuntu1) xenial; urgency=low
   * Removed driver_verbose make target and made the driver target be verbose
   * Added Device - Razer Ornata
   * Replaced screensaver thread with some logic to monitor DBus signals
-  * Daemon now assignes the other interfaces of the device to the main device object
+  * Daemon now assigns the other interfaces of the device to the main device object
   * Fixed typo in Ornata Chroma daemon entry
   * Added poll rate to Mamba Chroma
   * Driver now has capability to block SuperKey, Alt+Tab, Alt+F4 for Game Mode
@@ -205,7 +205,7 @@ razer (1.1.8-0ubuntu1) xenial; urgency=low
 razer (1.1.7-0ubuntu1) xenial; urgency=low
 
   * Added Device - Razer Orbweaver
-  * Fixed error in dependancy name
+  * Fixed error in dependency name
   * Fixed error from merging
 
  -- Terry Cain <terry@terrys-home.co.uk>  Tue, 17 Jan 2017 19:29:00 +0000
@@ -224,7 +224,7 @@ razer (1.1.6-0ubuntu1) xenial; urgency=low
   * Added Razer BlackWidow 2012 and BlackWidow Classic to daemon
   * Fixed matrix limits on firefly and mug
   * Commented out evil log line that spams
-  * Fixed package dependancy issue when on KDE
+  * Fixed package dependency issue when on KDE
   * Fixed case issue in udev rules
   * Added config for kraken v1/2 and mug for device emulation
 
@@ -242,7 +242,7 @@ razer (1.1.5-0ubuntu1) xenial; urgency=low
   * Added setup.py for daemon and pylib
   * Added ability to read DPI
   * Added Mouse class in pylib
-  * Removed unused build dependancies
+  * Removed unused build dependencies
   * Fixed bug with man pages in makefile
   * Fixed bug if daemon example config didn't exist
   * Fixed bug where daemon device numbering was broken by PR #109
@@ -326,14 +326,14 @@ razer (1.0.13-0ubuntu1) trusty; urgency=low
 
 razer (1.0.12-0ubuntu1) trusty; urgency=low
 
-  * Fixed typo where BlackWidow Chroma TE DBus doesnt get macro methods
+  * Fixed typo where BlackWidow Chroma TE DBus doesn't get macro methods
 
  -- Terry Cain <terry@terrys-home.co.uk>  Tue, 27 Sep 2016 21:11:00 +0000
 
 razer (1.0.11-0ubuntu1) trusty; urgency=low
 
   * Minor daemon logic improvements
-  * Renamed some daemon methods and added in rudimentary caching for teh lulz
+  * Renamed some daemon methods and added in rudimentary caching for the lulz
   * Added capability for Mamba devices to change the colour of individual LEDs
   * Bug fixes for daemon in test mode
   * Fixed mouse driver for Mamba devices as I broke custom mode when I added Mamba TE support
@@ -358,7 +358,7 @@ razer (1.0.9-0ubuntu1) trusty; urgency=low
   * Added version into various components
   * Changed driver so that it does macros better
   * Added Razer Imperator 2012
-  * Added option in pylib to get wether or not device has dedicated macro keys
+  * Added option in pylib to get whether or not device has dedicated macro keys
   * Fixed typo in battery notifier
   * Changed key event management to use epoll so should use less CPU
 

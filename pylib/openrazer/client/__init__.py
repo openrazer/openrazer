@@ -58,7 +58,7 @@ class DeviceManager(object):
         :param enable: True to enable screensaver disable
         :type enable: bool
 
-        :raises ValueError: If enable isnt a bool
+        :raises ValueError: If enable isn't a bool
         """
         if not isinstance(enable, bool):
             raise ValueError("Enable must be a boolean")
@@ -79,7 +79,7 @@ class DeviceManager(object):
         :param sync: Sync effects
         :type sync: bool
 
-        :raises ValueError: If sync isnt a bool
+        :raises ValueError: If sync isn't a bool
         """
         if not isinstance(sync, bool):
             raise ValueError("Sync must be a boolean")

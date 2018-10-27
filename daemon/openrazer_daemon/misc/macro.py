@@ -11,7 +11,7 @@ import threading
 # pylint: disable=import-error
 from openrazer_daemon.keyboard import XTE_MAPPING
 
-# This determins if the macro keys are executed with their natural spacing
+# This determines if the macro keys are executed with their natural spacing
 XTE_SLEEP = False
 
 

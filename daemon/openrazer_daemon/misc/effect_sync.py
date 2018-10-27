@@ -74,7 +74,7 @@ class EffectSync(object):
                             effect_func(0x0, 0xFF, 0x00)  # Green
 
             else:
-                # setNone sets active to false and needs to be reenabled for effects to show - maybe a bit inefficient
+                # setNone sets active to false and needs to be re-enabled for effects to show - maybe a bit inefficient
                 if not effect_name == 'setNone':
                     effect_func = getattr(self._parent, 'setScrollActive', None)
                     if effect_func is not None:
@@ -160,7 +160,7 @@ class EffectSync(object):
         except Exception as err:
             self._logger.exception("Caught exception trying to sync effects.", exc_info=err)
 
-        # Reenable notifications
+        # Re-enable notifications
         self._parent.disable_notify = False
 
     @staticmethod

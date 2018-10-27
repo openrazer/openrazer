@@ -307,7 +307,7 @@ struct razer_report razer_chroma_standard_matrix_effect_starlight_single(unsigne
     report.arguments[4] = rgb1->g; // Green 1
     report.arguments[5] = rgb1->b; // Blue 1
 
-    // For now havent seen any chroma using this, seen the extended version
+    // For now haven't seen any chroma using this, seen the extended version
     report.arguments[6] = 0x00; // Red 2
     report.arguments[7] = 0x00; // Green 2
     report.arguments[8] = 0x00; // Blue 2
@@ -335,7 +335,7 @@ struct razer_report razer_chroma_standard_matrix_effect_starlight_dual(unsigned 
     report.arguments[4] = rgb1->g; // Green 1
     report.arguments[5] = rgb1->b; // Blue 1
 
-    // For now havent seen any chroma using this, seen the extended version
+    // For now haven't seen any chroma using this, seen the extended version
     report.arguments[6] = rgb2->r; // Red 2
     report.arguments[7] = rgb2->g; // Green 2
     report.arguments[8] = rgb2->b; // Blue 2
@@ -404,7 +404,7 @@ struct razer_report razer_chroma_standard_matrix_effect_breathing_dual(unsigned 
  * Status Trans Packet Proto DataSize Class CMD Args
  * ??
  *
- * Apparently Ultimate2016, Stealth and Stealth2016 need frame id to be 0x00, I dont think its needed (depending on set_custom_frame)
+ * Apparently Ultimate2016, Stealth and Stealth2016 need frame id to be 0x00, I don't think it's needed (depending on set_custom_frame)
  */
 struct razer_report razer_chroma_standard_matrix_effect_custom_frame(unsigned char variable_storage)
 {
@@ -885,7 +885,7 @@ struct razer_report razer_chroma_mouse_extended_matrix_effect_breathing_dual(uns
  * Misc Functions
  */
 /**
- * Toggled wether F1-12 act as F1-12 or if they act as the function options (without Fn pressed)
+ * Toggled whether F1-12 act as F1-12 or if they act as the function options (without Fn pressed)
  *
  * If 0 should mean that the F-keys work as normal F-keys
  * If 1 should mean that the F-keys act as if the FN key is held
@@ -981,7 +981,7 @@ struct razer_report razer_chroma_misc_get_charging_status(void)
 }
 
 /**
- * Set the charging effect, think if I remember correctly, its either static colour, or "whatever the mouse was last on"
+ * Set the charging effect, think if I remember correctly, it's either static colour, or "whatever the mouse was last on"
  */
 struct razer_report razer_chroma_misc_set_dock_charge_type(unsigned char charge_type)
 {

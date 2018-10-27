@@ -9,7 +9,7 @@ def is_mug_present(self):
     """
     Get if the mug is present
 
-    :return: True if theres a mug
+    :return: True if there's a mug
     :rtype: bool
     """
     self.logger.debug("DBus call is_mug_present")

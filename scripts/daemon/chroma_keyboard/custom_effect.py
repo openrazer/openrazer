@@ -15,7 +15,7 @@ else:
     sys.exit(1)
 
 if not keyboard.has('lighting_led_matrix'):
-    print("Keyboard doesnt have LED matrix", file=sys.stderr)
+    print("Keyboard doesn't have LED matrix", file=sys.stderr)
     sys.exit(1)
 
 ROWS = 6

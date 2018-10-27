@@ -553,11 +553,11 @@ class RazerAdvancedFX(BaseRazerFX):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, matrix_dims=(-1, -1)):
         super(RazerAdvancedFX, self).__init__(serial, capabilities, daemon_dbus)
 
-        # Only init'd when theres a matrix
+        # Only init'd when there's a matrix
         self._capabilities = capabilities
 
         if not all([dim >= 1 for dim in matrix_dims]):
-            raise ValueError("Matrix dimenions cannot contain -1")
+            raise ValueError("Matrix dimensions cannot contain -1")
 
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
@@ -595,7 +595,7 @@ class RazerAdvancedFX(BaseRazerFX):
 
     def draw(self):
         """
-        Draw whats in the current frame buffer
+        Draw what's in the current frame buffer
         """
         self._draw(bytes(self.matrix))
 
@@ -608,7 +608,7 @@ class RazerAdvancedFX(BaseRazerFX):
                 if row_id < self._matrix_dims[0] and column_id < self._matrix_dims[1]:
                     self._lighting_dbus.setKey(row_id, column_id, [clamp_ubyte(component) for component in rgb])
                 else:
-                    raise ValueError("Row or column out of bounds. Max dimentions are: {0},{1}".format(*self._matrix_dims))
+                    raise ValueError("Row or column out of bounds. Max dimensions are: {0},{1}".format(*self._matrix_dims))
             else:
                 raise ValueError("RGB must be an RGB tuple")
 

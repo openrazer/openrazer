@@ -132,7 +132,7 @@ class FakeDevicePrompt(cmd.Cmd):
                     print("Device endpoint not found")
 
             except ValueError:
-                print("Must specify a device enpoint then a space then data to write")
+                print("Must specify a device endpoint then a space then data to write")
 
     def complete_write(self, text, line, begidx, endidx):
         if not text:

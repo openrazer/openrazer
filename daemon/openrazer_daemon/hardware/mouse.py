@@ -108,10 +108,10 @@ class RazerAbyssus(__RazerDevice):
     }
 
     def _resume_device(self):
-        self.logger.debug("Abyssus doesnt have suspend/resume")
+        self.logger.debug("Abyssus doesn't have suspend/resume")
 
     def _suspend_device(self):
-        self.logger.debug("Abyssus doesnt have suspend/resume")
+        self.logger.debug("Abyssus doesn't have suspend/resume")
 
 
 class RazerImperator(__RazerDevice):
@@ -132,10 +132,10 @@ class RazerImperator(__RazerDevice):
     DPI_MAX = 6400
 
     def _resume_device(self):
-        self.logger.debug("Imperator doesnt have suspend/resume")
+        self.logger.debug("Imperator doesn't have suspend/resume")
 
     def _suspend_device(self):
-        self.logger.debug("Imperator doesnt have suspend/resume")
+        self.logger.debug("Imperator doesn't have suspend/resume")
 
 
 class RazerOuroboros(__RazerDevice):
@@ -201,10 +201,10 @@ class RazerOrochi2013(__RazerDevice):
     }
 
     def _resume_device(self):
-        self.logger.debug("Orochi doesnt have suspend/resume")
+        self.logger.debug("Orochi doesn't have suspend/resume")
 
     def _suspend_device(self):
-        self.logger.debug("Orochi doesnt have suspend/resume")
+        self.logger.debug("Orochi doesn't have suspend/resume")
 
 
 class RazerOrochiWired(__RazerDeviceBrightnessSuspend):

@@ -2,7 +2,7 @@
 Receives events from /dev/input/by-id/somedevice
 
 Events are 24 bytes long and are emitted from a character device in 24 byte chunks.
-As the keyboards have "2" keyboard interfaces we need to listen on both of them incase some n00b
+As the keyboards have "2" keyboard interfaces we need to listen on both of them in case some n00b
 switches to game mode.
 
 Each event is in the format of
@@ -143,7 +143,7 @@ class KeyWatcher(threading.Thread):
                     self._poll_epoll(poll_object, event_file_map)
                 else:
                     self._poll_read()
-            except (IOError, OSError):  # Basically if theres an error, most likely device has been removed then it'll get deleted properly
+            except (IOError, OSError):  # Basically if there's an error, most likely device has been removed then it'll get deleted properly
                 pass
 
             time.sleep(SPIN_SLEEP)
@@ -165,7 +165,7 @@ class KeyWatcher(threading.Thread):
 
                 date, key_action, key_code = self.parse_event_record(key_data)
 
-                # Skip if date, key_action and key_code is none as thats a spacer record
+                # Skip if date, key_action and key_code is none as that's a spacer record
                 if date is None:
                     continue
 
@@ -181,7 +181,7 @@ class KeyWatcher(threading.Thread):
 
             date, key_action, key_code = self.parse_event_record(key_data)
 
-            # Skip if date, key_action and key_code is none as thats a spacer record
+            # Skip if date, key_action and key_code is none as that's a spacer record
             if date is None:
                 continue
 
@@ -279,7 +279,7 @@ class KeyboardKeyManager(object):
         :return: List of keys
         :rtype: list
         """
-        # Locking so it doesnt mutate whilst copying
+        # Locking so it doesn't mutate whilst copying
         self._access_lock.acquire()
         now = datetime.datetime.now()
 
@@ -291,7 +291,7 @@ class KeyboardKeyManager(object):
         except IndexError:
             pass
 
-        # Creating a copy as then it doesnt mutate whilst iterating
+        # Creating a copy as then it doesn't mutate whilst iterating
         result = self._temp_key_store[:]
         self._access_lock.release()
         return result
@@ -341,7 +341,7 @@ class KeyboardKeyManager(object):
         * Pressing FN+F10 will toggle game mode.
         * Pressing any key will increment a statistical number in a dictionary used for generating
           heatmaps.
-        :param event_time: Time event occured
+        :param event_time: Time event occurred
         :type event_time: datetime.datetime
 
         :param key_id: Key Event ID
@@ -390,7 +390,7 @@ class KeyboardKeyManager(object):
             # Key release
             if key_press == 'release':
                 if self._recording_macro:
-                    # Skip as dont care about releasing macro bind key
+                    # Skip as don't care about releasing macro bind key
                     if key_name not in (self._current_macro_bind_key, 'MACROMODE'):
                         # Record key release events
                         self._current_macro_combo.append((event_time, key_name, 'UP'))
@@ -490,7 +490,7 @@ class KeyboardKeyManager(object):
                         else:
                             self._current_macro_bind_key = key_name
                             self._parent.setMacroEffect(0x00)
-                    # Don't want no recursion, cancel macro, dont let one call macro in a macro
+                    # Don't want no recursion, cancel macro, don't let one call macro in a macro
                     elif key_name == self._current_macro_bind_key:
                         self._logger.warning("Skipping macro assignment as would cause recursion")
                         self._recording_macro = False
@@ -574,7 +574,7 @@ class KeyboardKeyManager(object):
         {BIND_KEY: [MACRO_DICT...]}
 
         MACRO_DICT is a dict representation of an action that can be performed. The dict will have a
-        type key which determins what type of action it will perform.
+        type key which determines what type of action it will perform.
         For example there are key press macros, URL opening macros, Script running macros etc...
         :return: JSON of macros
         :rtype: str
@@ -666,7 +666,7 @@ class GamepadKeyManager(KeyboardKeyManager):
         * Pressing FN+F10 will toggle game mode.
         * Pressing any key will increment a statistical number in a dictionary used for generating
           heatmaps.
-        :param event_time: Time event occured
+        :param event_time: Time event occurred
         :type event_time: datetime.datetime
 
         :param key_id: Key Event ID

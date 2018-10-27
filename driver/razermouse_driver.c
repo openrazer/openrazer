@@ -66,7 +66,7 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
         if(response_report.remaining_packets != request_report->remaining_packets ||
            response_report.command_class != request_report->command_class ||
            response_report.command_id.id != request_report->command_id.id) {
-            print_erroneous_report(&response_report, "razermouse", "Response doesnt match request");
+            print_erroneous_report(&response_report, "razermouse", "Response doesn't match request");
 //        } else if (response_report.status == RAZER_CMD_BUSY) {
 //            print_erroneous_report(&response_report, "razermouse", "Device is busy");
         } else if (response_report.status == RAZER_CMD_FAILURE) {
@@ -220,7 +220,7 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
     struct razer_report response_report;
 
     switch(usb_dev->descriptor.idProduct) {
-    case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Orochi 2011 doesnt have FW
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Orochi 2011 doesn't have FW
         return sprintf(buf, "v%d.%d\n", 9, 99);
         break;
 
@@ -506,7 +506,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
-    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED: // Doesnt have proper serial
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED: // Doesn't have proper serial
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
         return sprintf(buf, "%s\n", &device->serial[0]);
         break;
@@ -962,7 +962,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 
         // printk(KERN_ALERT "razermouse: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
 
-        // Mouse only has 1 row, row0 (pseudo row as the command actaully doesnt take rows)
+        // Mouse only has 1 row, row0 (pseudo row as the command actually doesn't take rows)
         if(row_id != 0) {
             printk(KERN_ALERT "razermouse: Row ID must be 0\n");
             break;
@@ -1029,7 +1029,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
         report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
 
         switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Doesnt have device mode
+        case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Doesn't have device mode
             return count;
             break;
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1510,7 +1510,7 @@ static ssize_t razer_attr_write_scroll_mode_breath(struct device *dev, struct de
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report;
-    // TODO refactor main breathing matrix function, add in LED ID field and this nastyness goes away too!
+    // TODO refactor main breathing matrix function, add in LED ID field and this nastiness goes away too!
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
@@ -1700,7 +1700,7 @@ static ssize_t razer_attr_write_logo_mode_breath(struct device *dev, struct devi
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report;
-    // TODO refactor main breathing matrix function, add in LED ID field and this nastyness goes away too!
+    // TODO refactor main breathing matrix function, add in LED ID field and this nastiness goes away too!
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
