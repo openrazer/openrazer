@@ -712,6 +712,7 @@ struct razer_report razer_chroma_extended_matrix_brightness(unsigned char variab
     report.arguments[1] = led_id;
     report.arguments[2] = brightness;
 
+
     return report;
 }
 
@@ -773,6 +774,7 @@ struct razer_report razer_chroma_mouse_extended_matrix_effect_base(unsigned char
     return report;
 }
 
+
 /**
  * Set the device to "None" effect
  *
@@ -783,6 +785,7 @@ struct razer_report razer_chroma_mouse_extended_matrix_effect_none(unsigned char
 {
     return razer_chroma_mouse_extended_matrix_effect_base(0x03, variable_storage, led_id, 0x00);
 }
+
 
 /**
  * Set the device to "Static" effect
@@ -797,6 +800,15 @@ struct razer_report razer_chroma_mouse_extended_matrix_effect_static(unsigned ch
     report.arguments[3] = rgb->r;
     report.arguments[4] = rgb->g;
     report.arguments[5] = rgb->b;
+
+    if (led_id == MAMBA_ELITE) {
+        int i = 6;
+        for (i; i < 66; i+=3) {
+            report.arguments[i] = rgb->r;
+            report.arguments[i+1] = rgb->g;
+            report.arguments[i+2] = rgb->b;
+        }
+    }
     return report;
 }
 

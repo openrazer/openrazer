@@ -49,6 +49,7 @@ do { \
 #define RED_PROFILE_LED   0x0C
 #define GREEN_PROFILE_LED 0x0D
 #define BLUE_PROFILE_LED  0x0E
+#define MAMBA_ELITE       0x0F
 
 // LED Effect definitions
 #define LED_STATIC           0x00

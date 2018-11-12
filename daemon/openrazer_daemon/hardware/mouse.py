@@ -9,6 +9,7 @@ from openrazer_daemon.dbus_services.dbus_methods.deathadder_chroma import get_lo
     get_scroll_brightness as _da_get_scroll_brightness, set_scroll_brightness as _da_set_scroll_brightness, set_logo_active as _da_set_logo_active, \
     set_scroll_active as _da_set_scroll_active, get_scroll_active as _da_get_scroll_active, get_logo_active as _da_get_logo_active, set_backlight_active as _da_set_backlight_active, \
     get_backlight_active as _da_get_backlight_active
+from openrazer_daemon.dbus_services.dbus_methods.mambaelite import set_brightness_mamba_elite as _da_set_brightness_mamba_elite
 from openrazer_daemon.dbus_services.dbus_methods.chroma_keyboard import get_brightness as _get_backlight_brightness, set_brightness as _set_backlight_brightness
 from openrazer_daemon.misc.key_event_management import NagaHexV2KeyManager as _NagaHexV2KeyManager
 
@@ -865,3 +866,62 @@ class RazerAbyssus1800(__RazerDevice):
     DPI_MAX = 1800
 
     # TODO: Find device images
+
+
+class RazerMambaElite(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer Mamba Elite
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Mamba_Elite-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x006C
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 20]
+    METHODS = ['set_brightness_mamba_elite', 'get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
+               # Logo
+               'set_logo_static_mamba_elite', 'set_logo_spectrum_mamba_elite', 'set_logo_none_mamba_elite', 'set_logo_reactive_mamba_elite', 'set_logo_breath_random_mamba_elite', 'set_logo_breath_single_mamba_elite', 'set_logo_breath_dual_mamba_elite',
+               # Scroll wheel
+               'set_scroll_static_mamba_elite', 'set_scroll_spectrum_mamba_elite', 'set_scroll_none_mamba_elite', 'set_scroll_reactive_mamba_elite', 'set_scroll_breath_random_mamba_elite', 'set_scroll_breath_single_mamba_elite', 'set_scroll_breath_dual_mamba_elite',
+               # Can set LOGO and Scrol with custom
+               'set_custom_effect', 'set_key_row', 'set_static_effect', 'set_none_effect']
+
+    RAZER_URLS = {
+        "top_img": "https://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-1.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-5.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-2.png"
+    }
+
+    DPI_MAX = 16000
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        _da_set_scroll_brightness(self, 0)
+        _da_set_brightness_mamba_elite(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
+        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
+
+        self.disable_notify = True
+        _da_set_brightness_mamba_elite(self, 255)
+        _da_set_logo_brightness(self, logo_brightness)
+        _da_set_scroll_brightness(self, scroll_brightness)
+        self.disable_notify = False

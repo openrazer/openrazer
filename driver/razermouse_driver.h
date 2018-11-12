@@ -104,6 +104,9 @@
 #define USB_DEVICE_ID_RAZER_DEATHADDER_ELITE 0x005C
 #endif
 
+#ifndef USB_DEVICE_ID_RAZER_MAMBA_ELITE
+#define USB_DEVICE_ID_RAZER_MAMBA_ELITE 0x006C
+#endif
 
 /* Each keyboard report has 90 bytes*/
 #define RAZER_REPORT_LEN 0x5A
