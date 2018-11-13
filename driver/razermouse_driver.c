@@ -1089,6 +1089,18 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
             report.transaction_id.id = 0x3f;
             break;
+        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+            report.transaction_id.id = 0x1F;
+            report.data_size = 0x06;
+            report.command_class = 0x0f;
+            report.command_id.id = 0x02;
+            report.arguments[0] = 0x00;
+            report.arguments[1] = 0x00;
+            report.arguments[2] = 0x08;
+            report.arguments[3] = 0x01;
+            report.arguments[4] = 0x01;
+            report.arguments[5] = 0x00;
+            break;
         }
 
         razer_send_payload(usb_dev, &report);
