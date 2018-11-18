@@ -41,6 +41,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Blade Pro FullHD (2017)                 |  1532:022F  |
 | Razer Blade Stealth (Late 2017)               |  1532:0232  |
 | Razer Blade 15 (2018)                         |  1532:0233  |
+| Razer Blade 15 (2018) Mercury                 |  1532:0240  |
 
 ### Mice
 | Device                                        | USB VID:PID |
