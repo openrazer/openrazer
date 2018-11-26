@@ -123,7 +123,7 @@ The following applications complement and interact with this driver:
 * [Polychromatic](https://github.com/polychromatic/polychromatic) - a graphical management tool and tray applet to managing Razer peripherals.
 * [RazerGenie](https://github.com/z3ntu/RazerGenie) - Qt application for configuring your Razer devices under GNU/Linux.
 * [razerCommander](https://github.com/GabMus/razerCommander) - Simple GUI written in Gtk3
-* [Chroma Feedback](https://github.com/redaxmedia/chroma-feedback) - Turn your Razer keyboard, mouse or headphone into a extreme feedback device for Travis CI
+* [Chroma Feedback](https://github.com/redaxmedia/chroma-feedback) - Turn your Razer keyboard, mouse or headphone into a extreme feedback device
 
 ## Contributions
 
