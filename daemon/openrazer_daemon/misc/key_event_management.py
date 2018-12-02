@@ -164,9 +164,9 @@ class KeyWatcher(threading.Thread):
                     key_data = event_file_map[event_fd].read(EVENT_SIZE)
                     if not key_data:
                         break
-                    
+
                     date, key_action, key_code = self.parse_event_record(key_data)
-                    
+
                     # Skip if date, key_action and key_code is none as that's a spacer record
                     if date is None:
                         continue
@@ -176,7 +176,7 @@ class KeyWatcher(threading.Thread):
 
     def _poll_read(self):
         for event_file in self.open_event_files:
-            
+
             key_data = event_file.read(EVENT_SIZE)
 
             if key_data is None:
