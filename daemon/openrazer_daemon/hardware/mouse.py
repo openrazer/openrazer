@@ -921,3 +921,57 @@ class RazerAbyssus1800(__RazerDevice):
     DPI_MAX = 1800
 
     # TODO: Find device images
+
+
+class RazerDeathAdder3500(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer DeathAdder 3500
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0054
+    METHODS = ['get_device_type_mouse',
+               'get_logo_effect', 'get_logo_brightness', 'set_logo_brightness', 'set_logo_static', 'set_logo_pulsate', 'set_logo_blinking',
+               'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_pulsate', 'set_scroll_blinking',
+               'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
+
+    # TODO: Find device images
+
+    DPI_MAX = 3500
+
+    def __init__(self, *args, **kwargs):
+        super(RazerDeathAdder3500, self).__init__(*args, **kwargs)
+
+        # Set brightness to max and LEDs to on, on startup
+        _da_set_logo_brightness(self, 100)
+        _da_set_scroll_brightness(self, 100)
+        _da_set_logo_active(self, True)
+        _da_set_scroll_active(self, True)
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        _da_set_scroll_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
+        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        _da_set_scroll_brightness(self, scroll_brightness)
+        self.disable_notify = False

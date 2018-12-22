@@ -67,6 +67,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Diamondback Chroma                      |  1532:004C  |
 | Razer Naga Hex V2                             |  1532:0050  |
 | Razer Naga Chroma                             |  1532:0053  |
+| Razer DeathAdder 3500                         |  1532:0054  |
 | Razer Abyssus V2                              |  1532:005B  |
 | Razer DeathAdder Elite                        |  1532:005C  |
 
