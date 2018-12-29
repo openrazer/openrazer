@@ -11,6 +11,8 @@ layoutids = {"01": "en_US",
              "03": "de_DE",
              "04": "fr_FR",
              "06": "en_GB",
+             "07": "Nordic",
+             "10": "es_ES",
              "11": "it_IT",
              "12": "pt_PT",
              "81": "en_US_mac"}
