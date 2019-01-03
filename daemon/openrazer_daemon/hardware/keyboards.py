@@ -896,3 +896,24 @@ class RazerBlade2018Mercury(_RippleKeyboard):
         "side_img": "https://assets2.razerzone.com/images/blade-15/shop/blade15-mercury-7.jpg",
         "perspective_img": "https://assets2.razerzone.com/images/blade-15/shop/blade15-mercury-1.jpg"
     }
+
+
+class RazerBlade2018Base(_RippleKeyboard):
+    """
+    Class for the Razer Blade 15 (2018) Base Model
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x023b
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 16]
+    METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+
+    # Could not find png variants; tested and working in Polychromatic and RazerGenie
+    RAZER_URLS = {
+        "top_img": "https://assets2.razerzone.com/images/blade-15/shop/blade15-d1-2.jpg",
+        "side_img": "https://assets2.razerzone.com/images/blade-15/shop/blade15-d1-6.jpg",
+        "perspective_img": "https://assets2.razerzone.com/images/blade-15/shop/blade15-d1-1.jpg"
+    }
