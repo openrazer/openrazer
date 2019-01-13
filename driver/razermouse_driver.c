@@ -152,6 +152,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Orochi 2011\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
+        device_type = "Razer DeathAdder 2013\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
         device_type = "Razer Orochi 2013\n";
         break;
@@ -770,6 +774,7 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
     case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
         if(count == 1) {
             dpi_x_byte = buf[0];
             dpi_y_byte = buf[0];
@@ -864,6 +869,7 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
     case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
         report = razer_chroma_misc_get_dpi_xy_byte();
         break;
 
@@ -887,6 +893,7 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
     // Byte, Byte for DPI not Short, Short
     if (device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX ||
         device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX_RED ||
+        device->usb_pid == USB_DEVICE_ID_RAZER_DEATHADDER_2013 ||
         device->usb_pid == USB_DEVICE_ID_RAZER_ABYSSUS_1800) { // NagaHex is crap uses only byte for dpi
         dpi_x = response.arguments[0];
         dpi_y = response.arguments[1];
@@ -2133,6 +2140,17 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             break;
 
+        case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_rgb);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_effect);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_rgb);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_effect);
+            break;
+
         case USB_DEVICE_ID_RAZER_OROCHI_2013:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
@@ -2475,6 +2493,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TAIPAN) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_IMPERATOR) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OUROBOROS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_2013) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_2013) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA) },
