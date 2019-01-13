@@ -284,6 +284,62 @@ class RazerDeathAdderChroma(__RazerDeviceSpecialBrightnessSuspend):
         self.disable_notify = False
 
 
+class RazerDeathAdder2013(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer DeathAdder 2013
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0037
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
+               'get_scroll_active', 'set_scroll_active', 'set_scroll_static', 'set_scroll_pulsate', 'set_scroll_blinking',
+               'get_logo_active', 'set_logo_active', 'set_logo_static', 'set_logo_pulsate', 'set_logo_blinking']
+
+    # TODO: Find device images
+    RAZER_URLS = {
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/16/deathadder_500x500.png",
+        "side_img": None,
+        "perspective_img": None
+    }
+
+    DPI_MAX = 6400
+
+    def __init__(self, *args, **kwargs):
+        super(RazerDeathAdder2013, self).__init__(*args, **kwargs)
+
+        # Set brightness to max and LEDs to on, on startup
+        _da_set_logo_active(self, True)
+        _da_set_scroll_active(self, True)
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_active(self, False)
+        _da_set_scroll_active(self, False)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_active = self.suspend_args.get('active', (True, True))[0]
+        scroll_active = self.suspend_args.get('active', (True, True))[1]
+
+        self.disable_notify = True
+        _da_set_logo_active(self, logo_active)
+        _da_set_scroll_active(self, scroll_active)
+        self.disable_notify = False
+
+
 class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Naga Hex V2
