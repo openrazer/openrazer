@@ -531,6 +531,7 @@ class RazerBladeLate2016(_RippleKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-01__store_gallery.png"
     }
 
+
 class RazerBladeStealthLate2018(_RippleKeyboard):
     """
     Class for the Razer Blade Stealth (Late 2018)
