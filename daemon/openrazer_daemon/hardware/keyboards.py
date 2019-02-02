@@ -531,6 +531,27 @@ class RazerBladeLate2016(_RippleKeyboard):
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26227/razer-blade-pro-gallery-01__store_gallery.png"
     }
 
+class RazerBladeStealthLate2018(_RippleKeyboard):
+    """
+    Class for the Razer Blade Stealth (2018)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0239
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 16]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
+               'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active']
+
+    RAZER_URLS = {
+        "top_img": "https://assets.razerzone.com/eeimages/products/29668/razer-blade-stealth-13-gallery-07__store_gallery.jpg",
+        "side_img": "https://assets.razerzone.com/eeimages/products/29668/razer-blade-stealth-13-fhd-gallery-04__store_gallery.jpg",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/29668/razer-blade-stealth-13-fhd-gallery-03__store_gallery.jpg"
+    }
+
 
 class RazerBladeQHD(_RippleKeyboard):
     """
