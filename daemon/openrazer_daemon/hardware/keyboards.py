@@ -533,7 +533,7 @@ class RazerBladeLate2016(_RippleKeyboard):
 
 class RazerBladeStealthLate2018(_RippleKeyboard):
     """
-    Class for the Razer Blade Stealth (2018)
+    Class for the Razer Blade Stealth (Late 2018)
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
 
