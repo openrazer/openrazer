@@ -216,6 +216,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC:
+    case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC_ALT:
         device_type = "Razer Kraken 7.1\n";
         break;
 
@@ -707,6 +708,7 @@ void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *in
         dev->breathing_address[2] = KYLIE_BREATHING3_ADDRESS_START;
         break;
     case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC:
+    case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC_ALT:
     case USB_DEVICE_ID_RAZER_KRAKEN:
         dev->led_mode_address = RAINIE_SET_LED_ADDRESS;
         dev->custom_address = RAINIE_CUSTOM_ADDRESS_START;
@@ -749,6 +751,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
 
         switch(dev->usb_pid) {
         case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC:
+        case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC_ALT:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
@@ -807,6 +810,7 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
 
         switch(dev->usb_pid) {
         case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC:
+        case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC_ALT:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
@@ -850,6 +854,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
  */
 static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC_ALT) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_V2) },
     { }

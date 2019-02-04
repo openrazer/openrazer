@@ -115,10 +115,9 @@ class KeyWatcher(threading.Thread):
 
         self.open_event_files = [open(event_file, 'rb') for event_file in self._event_files]
         # Set open files to non blocking mode
-        if not use_epoll:
-            for event_file in self.open_event_files:
-                flags = fcntl.fcntl(event_file.fileno(), fcntl.F_GETFL)
-                fcntl.fcntl(event_file.fileno(), fcntl.F_SETFL, flags | os.O_NONBLOCK)
+        for event_file in self.open_event_files:
+            flags = fcntl.fcntl(event_file.fileno(), fcntl.F_GETFL)
+            fcntl.fcntl(event_file.fileno(), fcntl.F_SETFL, flags | os.O_NONBLOCK)
 
     def run(self):
         """
@@ -161,19 +160,23 @@ class KeyWatcher(threading.Thread):
         if len(events) != 0:
             # pylint: disable=unused-variable
             for event_fd, mask in events:
-                key_data = event_file_map[event_fd].read(EVENT_SIZE)
+                while True:
+                    key_data = event_file_map[event_fd].read(EVENT_SIZE)
+                    if not key_data:
+                        break
 
-                date, key_action, key_code = self.parse_event_record(key_data)
+                    date, key_action, key_code = self.parse_event_record(key_data)
 
-                # Skip if date, key_action and key_code is none as that's a spacer record
-                if date is None:
-                    continue
+                    # Skip if date, key_action and key_code is none as that's a spacer record
+                    if date is None:
+                        continue
 
-                # Now if key is pressed then we record
-                self._parent.key_action(date, key_code, key_action)
+                    # Now if key is pressed then we record
+                    self._parent.key_action(date, key_code, key_action)
 
     def _poll_read(self):
         for event_file in self.open_event_files:
+
             key_data = event_file.read(EVENT_SIZE)
 
             if key_data is None:

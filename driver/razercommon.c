@@ -101,8 +101,6 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
                           size,
                           USB_CTRL_SET_TIMEOUT);
 
-    usleep_range(wait_min, wait_max);
-
     memcpy(response_report, buf, sizeof(struct razer_report));
     kfree(buf);
 
