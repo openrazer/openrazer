@@ -116,6 +116,7 @@ static bool is_blade_laptop(struct usb_device *usb_dev)
     case USB_DEVICE_ID_RAZER_BLADE_2018:
     case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
     case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
     case USB_DEVICE_ID_RAZER_BLADE_QHD:
     case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
@@ -380,6 +381,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
         device_type = "Razer Blade 15 (2018) Base Model\n";
+        break;
+
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+        device_type = "Razer Blade 15 (2019) Advanced\n";
         break;
 
     case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
@@ -864,6 +869,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BLADE_2018:
     case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
     case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
     case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
     case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
     case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
@@ -1431,6 +1437,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BLADE_2018:
         case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
         case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
+        case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
         case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
         case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
             report.transaction_id.id = 0x80; // Fall into the 2016/blade/blade2016 to set device id
@@ -1836,6 +1843,14 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             break;
 
+        case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            break;
+
         case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
@@ -2121,6 +2136,14 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             break;
 
+        case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            break;
+
         case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
@@ -2302,6 +2325,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_2018) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_2018_BASE) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_2019_ADV) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_EXPERT) },

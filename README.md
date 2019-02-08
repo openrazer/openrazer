@@ -43,6 +43,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Blade 15 (2018)                         |  1532:0233  |
 | Razer Blade 15 (2018) Base Model              |  1532:023B  |
 | Razer Blade 15 (2018) Mercury                 |  1532:0240  |
+| Razer Blade 15 (2019) Advanced                |  1532:023A  |
 
 ### Mice
 | Device                                        | USB VID:PID |
