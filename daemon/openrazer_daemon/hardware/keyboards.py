@@ -943,7 +943,7 @@ class RazerBlade2019Adv(_RippleKeyboard):
 
     # Could not find png variants; tested and working in Polychromatic and RazerGenie
     RAZER_URLS = {
-        "top_img": "https://assets2.razerzone.com/images/blade-15/shop/blade15-d1-2.jpg",
-        "side_img": "https://assets2.razerzone.com/images/blade-15/shop/blade15-d1-6.jpg",
-        "perspective_img": "https://assets2.razerzone.com/images/blade-15/shop/blade15-d1-1.jpg"
+        "top_img": "https://d4kkpd69xt9l7.cloudfront.net/sys-master/images/hc5/haf/9127204093982/razer-blade-15-usp-nothing-else-like-a-blade-mobile-mercury.jpg",
+        "side_img": "https://assets2.razerzone.com/images/blade-15/blade15-usp-ports-advanced-model.jpg",
+        "perspective_img": "https://d4kkpd69xt9l7.cloudfront.net/sys-master/root/h78/h94/9126618628126/razer-blade-15-gallery07.jpg"
     }
