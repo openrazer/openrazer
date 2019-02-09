@@ -918,6 +918,7 @@ class RazerBlade2018Base(_RippleKeyboard):
         "perspective_img": "https://assets2.razerzone.com/images/blade-15/shop/blade15-d1-1.jpg"
     }
 
+
 class RazerBlade2019Adv(_RippleKeyboard):
     """
     Class for the Razer Blade 15 (2019) Advanced
