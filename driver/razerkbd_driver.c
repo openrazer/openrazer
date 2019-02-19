@@ -1794,11 +1794,11 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH_2019:
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_QHD:
