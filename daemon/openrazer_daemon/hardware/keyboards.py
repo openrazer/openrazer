@@ -937,3 +937,4 @@ class RazerBladeStealth2019(_RippleKeyboard):
         "top_img": "https://assets2.razerzone.com/images/blade-15/shop/blade15-d1-2.jpg",
         "side_img": "https://assets.razerzone.com/eeimages/hazel3/img/gallery/blade_stealth_h3_black_3.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/support/products/1475/1475_bladestealth13(2019).png"
+    }
