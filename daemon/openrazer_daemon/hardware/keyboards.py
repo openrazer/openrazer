@@ -918,6 +918,7 @@ class RazerBlade2018Base(_RippleKeyboard):
         "perspective_img": "https://assets2.razerzone.com/images/blade-15/shop/blade15-d1-1.jpg"
     }
 
+
 class RazerBladeStealth2019(_RippleKeyboard):
     """
     Class for the Razer Blade Stealth (2019)
