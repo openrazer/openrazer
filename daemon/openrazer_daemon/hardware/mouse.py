@@ -984,6 +984,5 @@ class RazerDeathAdder2013(__RazerDevice):
     USB_PID = 0x0037
     METHODS = ['get_device_type_mouse',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_active', 'set_logo_active']
-    DPI_MAX = 6400
-    #TODO: Find Device Images
     
+    DPI_MAX = 6400
