@@ -923,6 +923,24 @@ class RazerAbyssus1800(__RazerDevice):
     # TODO: Find device images
 
 
+class RazerAbyssus2000(__RazerDevice):
+    """
+    Class for the Razer Abyssus 2000
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x005E
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               'get_logo_active', 'set_logo_active']
+
+    DPI_MAX = 2000
+
+    RAZER_URLS = {
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/1277/1277_abyssus_2000.png",
+        "side_img": None,
+        "perspective_img": None
+    }
+
+
 class RazerDeathAdder3500(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer DeathAdder 3500
