@@ -73,6 +73,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer DeathAdder 3500                         |  1532:0054  |
 | Razer Abyssus V2                              |  1532:005B  |
 | Razer DeathAdder Elite                        |  1532:005C  |
+| Razer Abyssus 2000                            |  1532:005E  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |
