@@ -21,6 +21,9 @@ class RazerChromaMugHolder(_RazerDeviceBrightnessSuspend):
                'is_mug_present',
                'set_custom_effect', 'set_key_row']
 
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/mug-holder/e64e507b73e61c44789d996065fd9645-1500x1000mug_01.jpg"
+
+    # Deprecated - RAZER_URLS be removed in future.
     RAZER_URLS = {
         "top_img": "https://assets2.razerzone.com/images/mug-holder/e64e507b73e61c44789d996065fd9645-1500x1000mug_01.jpg",
         "side_img": None,

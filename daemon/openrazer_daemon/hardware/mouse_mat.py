@@ -16,8 +16,11 @@ class RazerFirefly(__RazerDeviceBrightnessSuspend):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'trigger_reactive_effect']
 
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/594/594_firefly_500x500.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
     RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/products/21936/rzr_firefly_gallery-2.png",
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/594/594_firefly_500x500.png",
         "side_img": "https://assets.razerzone.com/eeimages/products/21936/fireflycloth-gallery-6.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/21936/fireflycloth-gallery-3.png"
     }

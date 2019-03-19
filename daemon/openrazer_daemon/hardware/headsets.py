@@ -18,8 +18,11 @@ class RazerKraken71(__RazerDevice):
     METHODS = ['get_device_type_headset',
                'set_static_effect', 'set_none_effect', 'get_current_effect_kraken']
 
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/229/229_kraken_71.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
     RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/products/17519/02.png",
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/229/229_kraken_71.png",
         "side_img": "https://assets.razerzone.com/eeimages/products/17519/03.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/17519/01.png"
     }
@@ -90,8 +93,11 @@ class RazerKraken71Chroma(__RazerDevice):
                'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_single_effect',
                'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken', 'set_custom_kraken']
 
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/280/280_kraken_71_chroma.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
     RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/products/17519/02.png",
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/280/280_kraken_71_chroma.png",
         "side_img": "https://assets.razerzone.com/eeimages/products/17519/03.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/17519/01.png"
     }
@@ -164,8 +170,11 @@ class RazerKraken71V2(__RazerDevice):
                'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_single_effect', 'set_breath_dual_effect', 'set_breath_triple_effect',
                'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken', 'set_custom_kraken']
 
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/729/729_kraken_71_v2.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
     RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/products/26005/kraken71v2_gallery04-v2.png",
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/729/729_kraken_71_v2.png",
         "side_img": "https://assets.razerzone.com/eeimages/products/26005/kraken71v2_gallery01-v2.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/26005/kraken71v2_gallery03-v2.png"
     }

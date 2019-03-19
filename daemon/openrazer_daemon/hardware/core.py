@@ -13,8 +13,11 @@ class RazerCore(__RazerDeviceBrightnessSuspend):
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 9]
 
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/684/684_razer_core.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
     RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-2.png",
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/684/684_razer_core.png",
         "side_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-6.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/products/23914/gallery_core/razer-core-3.png"
     }
