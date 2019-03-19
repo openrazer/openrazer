@@ -938,3 +938,24 @@ class RazerBladeStealth2019(_RippleKeyboard):
         "side_img": "https://assets.razerzone.com/eeimages/hazel3/img/gallery/blade_stealth_h3_black_3.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/support/products/1475/1475_bladestealth13(2019).png"
     }
+
+
+class RazerBlade2019Adv(_RippleKeyboard):
+    """
+    Class for the Razer Blade 15 (2019) Advanced
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x023a
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 16]
+    METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+
+    # Could not find png variants; tested and working in Polychromatic and RazerGenie
+    RAZER_URLS = {
+        "top_img": "https://d4kkpd69xt9l7.cloudfront.net/sys-master/images/hc5/haf/9127204093982/razer-blade-15-usp-nothing-else-like-a-blade-mobile-mercury.jpg",
+        "side_img": "https://assets2.razerzone.com/images/blade-15/blade15-usp-ports-advanced-model.jpg",
+        "perspective_img": "https://d4kkpd69xt9l7.cloudfront.net/sys-master/root/h78/h94/9126618628126/razer-blade-15-gallery07.jpg"
+    }
