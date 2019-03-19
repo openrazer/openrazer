@@ -26,7 +26,6 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
 
         self.logger.info('Putting device into driver mode. Daemon will handle special functionality')
-
         self.set_device_mode(0x03, 0x00)  # Driver mode
 
     def _close(self):
