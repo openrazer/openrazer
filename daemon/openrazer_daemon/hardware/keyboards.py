@@ -213,7 +213,6 @@ class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
 
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Orbweaver_Chroma(-if01)?-event-kbd')
 
-
     USB_VID = 0x1532
     USB_PID = 0x0207
     DEDICATED_MACRO_KEYS = True
