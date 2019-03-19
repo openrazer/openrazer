@@ -1064,7 +1064,7 @@ class RazerBladeStealth2019(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1475/1475_bladestealth13(2019).png"
 
     # Deprecated - RAZER_URLS be removed in future.
-    RAZER_URLS ={
+    RAZER_URLS = {
         "top_img": "https://assets.razerzone.com/eeimages/support/products/1475/1475_bladestealth13(2019).png",
         "side_img": "https://assets.razerzone.com/eeimages/hazel3/img/gallery/blade_stealth_h3_black_3.png",
         "perspective_img": "https://assets.razerzone.com/eeimages/support/products/1475/1475_bladestealth13(2019).png"
