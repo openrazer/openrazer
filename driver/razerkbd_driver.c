@@ -1881,6 +1881,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
