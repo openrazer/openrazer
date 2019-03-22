@@ -233,7 +233,7 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev,
 	struct usb_interface *intf = to_usb_interface(dev->parent);
 	struct usb_device *usb_dev = interface_to_usbdev(intf);
 	struct razer_report report =
-		razer_chroma_extendex_matrix_effect_spectrum(VARSTORE, 0x1);
+		razer_chroma_extended_matrix_effect_spectrum(VARSTORE, 0x1);
 	razer_send_payload(usb_dev, &report);
 
 	return count;
@@ -315,7 +315,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev,
 	struct usb_interface *intf = to_usb_interface(dev->parent);
 	struct usb_device *usb_dev = interface_to_usbdev(intf);
 	struct razer_report report =
-		razer_chroma_extended_matrix_effect_custom_frame(NOSTORE);
+		razer_chroma_extended_matrix_effect_custom_frame();
 	razer_send_payload(usb_dev, &report);
 	return count;
 }
@@ -505,9 +505,6 @@ static int razer_goliathus_probe(struct hid_device *hdev,
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
 		CREATE_DEVICE_FILE(&hdev->dev,
-				   &dev_attr_matrix_reactive_trigger);
-		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
-		CREATE_DEVICE_FILE(&hdev->dev,
 				   &dev_attr_matrix_effect_spectrum);
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
 		CREATE_DEVICE_FILE(&hdev->dev,
@@ -562,9 +559,6 @@ static void razer_goliathus_disconnect(struct hid_device *hdev)
 	    USB_INTERFACE_PROTOCOL_MOUSE) {
 		device_remove_file(&hdev->dev, &dev_attr_version);
 		device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
-		device_remove_file(&hdev->dev,
-				   &dev_attr_matrix_reactive_trigger);
-		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
 		device_remove_file(&hdev->dev,
 				   &dev_attr_matrix_effect_spectrum);
 		device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
