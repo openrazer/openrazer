@@ -19,6 +19,11 @@ ATTRS{idProduct}=="0c00", \
     ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerfirefly"
 
+# Goliathus
+ATTRS{idProduct}=="0c01|0c02", \
+    ATTRS{idVendor}=="1532", \
+    ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razergoliathus"
+
 # Kraken
 ATTRS{idProduct}=="0501|0504|0506|0510", \
     ATTRS{idVendor}=="1532", \
