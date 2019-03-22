@@ -366,8 +366,6 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev,
 	unsigned char stop_col;
 	unsigned char row_length;
 
-	//printk(KERN_ALERT "razerfirefly: Total count: %d\n", (unsigned char)count);
-
 	while (offset < count) {
 		if (offset + 3 > count) {
 			printk(KERN_ALERT
@@ -379,8 +377,6 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev,
 		start_col = buf[offset++];
 		stop_col = buf[offset++];
 		row_length = ((stop_col + 1) - start_col) * 3;
-
-		// printk(KERN_ALERT "razerfirefly: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
 
 		if (row_id != 0) {
 			printk(KERN_ALERT "razerfirefly: Row ID must be 0\n");
@@ -551,7 +547,6 @@ static void razer_goliathus_disconnect(struct hid_device *hdev)
 {
 	struct razer_kbd_device *dev;
 	struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-	//struct usb_device *usb_dev = interface_to_usbdev(intf);
 
 	dev = hid_get_drvdata(hdev);
 
