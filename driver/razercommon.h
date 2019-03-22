@@ -26,6 +26,8 @@
 		}                                                              \
 	} while (0)
 
+#define USB_VENDOR_ID_RAZER 0x1532
+
 /* Each USB report has 90 bytes*/
 #define RAZER_USB_REPORT_LEN 0x5A
 
