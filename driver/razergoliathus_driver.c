@@ -38,6 +38,8 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
 
+static unsigned char saved_brightness = 0;
+
 /**
  * Send report to the firefly
  */
@@ -105,16 +107,11 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev,
 					      struct device_attribute *attr,
 					      char *buf)
 {
-	struct usb_interface *intf = to_usb_interface(dev->parent);
-	struct usb_device *usb_dev = interface_to_usbdev(intf);
-	struct razer_report response;
-	struct razer_report report =
-		razer_chroma_extended_matrix_get_brightness(VARSTORE,
-							    MOUSEPAD_LED);
-
-	response = razer_send_payload(usb_dev, &report);
-
-	return sprintf(buf, "%d\n", response.arguments[2]);
+	/*
+	 * Reading brightness from device does not work, save a value
+	 * internally instead and return it instead.
+	 */
+	return sprintf(buf, "%d\n", (int)saved_brightness);
 }
 
 /**
@@ -135,6 +132,8 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev,
 	report = razer_chroma_extended_matrix_brightness(VARSTORE, MOUSEPAD_LED,
 							 brightness);
 	razer_send_payload(usb_dev, &report);
+
+	saved_brightness = brightness;
 
 	return count;
 }
@@ -533,6 +532,8 @@ static int razer_goliathus_probe(struct hid_device *hdev,
 		hid_err(hdev, "hw start failed\n");
 		goto exit_free;
 	}
+
+	saved_brightness = 0xFF;
 
 	usb_disable_autosuspend(usb_dev);
 	return 0;
