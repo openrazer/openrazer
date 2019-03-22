@@ -11,14 +11,7 @@
 #ifndef __HID_RAZER_FIREFLY_H
 #define __HID_RAZER_FIREFLY_H
 
-// TODO MOVE TO COMMON
-#ifndef USB_VENDOR_ID_RAZER
-#define USB_VENDOR_ID_RAZER 0x1532
-#endif
-
-#ifndef USB_DEVICE_ID_RAZER_FIREFLY
 #define USB_DEVICE_ID_RAZER_FIREFLY 0x0C00
-#endif
 
 
 /* Each keyboard report has 90 bytes*/
