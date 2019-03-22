@@ -119,33 +119,33 @@
 /* Each keyboard report has 90 bytes*/
 #define RAZER_REPORT_LEN 0x5A
 
-#define RAZER_MAMBA_ROW_LEN 15          // 0 => 14
-#define RAZER_MAMBA_TE_ROW_LEN 16       // 0 => 15
-#define RAZER_DIAMONDBACK_ROW_LEN 21    // 0 => 20
+#define RAZER_MAMBA_ROW_LEN 15 // 0 => 14
+#define RAZER_MAMBA_TE_ROW_LEN 16 // 0 => 15
+#define RAZER_DIAMONDBACK_ROW_LEN 21 // 0 => 20
 
 #define RAZER_MOUSE_WAIT_MIN_US 600
 #define RAZER_MOUSE_WAIT_MAX_US 800
 
 struct razer_mouse_device {
-    //struct input_dev *dev;
-    struct usb_device *usbdev;
-    struct hid_device *hiddev;
-    unsigned char effect;
-    char name[128];
-    char phys[64];
+	//struct input_dev *dev;
+	struct usb_device *usbdev;
+	struct hid_device *hiddev;
+	unsigned char effect;
+	char name[128];
+	char phys[64];
 
-    struct usb_device *usb_dev;
-    struct mutex lock;
-    unsigned char usb_interface_protocol;
+	struct usb_device *usb_dev;
+	struct mutex lock;
+	unsigned char usb_interface_protocol;
 
-    unsigned short usb_vid;
-    unsigned short usb_pid;
+	unsigned short usb_vid;
+	unsigned short usb_pid;
 
-    char serial[23];
+	char serial[23];
 
-    unsigned char orochi2011_led;
-    unsigned char orochi2011_dpi;
-    unsigned short orochi2011_poll;
+	unsigned char orochi2011_led;
+	unsigned char orochi2011_dpi;
+	unsigned short orochi2011_poll;
 };
 
 // Mamba Key Location

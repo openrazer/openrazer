@@ -20,7 +20,6 @@
 #define USB_DEVICE_ID_RAZER_FIREFLY 0x0C00
 #endif
 
-
 /* Each keyboard report has 90 bytes*/
 #define RAZER_FIREFLY_REPORT_LEN 0x5A
 
@@ -45,12 +44,11 @@
 #define RAZER_FIREFLY_WAIT_MAX_US 1000
 
 struct razer_firefly_device {
-    struct usb_device *usbdev;
-    struct hid_device *hiddev;
-    unsigned char effect;
-    char name[128];
-    char phys[64];
+	struct usb_device *usbdev;
+	struct hid_device *hiddev;
+	unsigned char effect;
+	char name[128];
+	char phys[64];
 };
-
 
 #endif
