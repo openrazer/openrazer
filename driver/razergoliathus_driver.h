@@ -25,7 +25,6 @@
 #define USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED 0x0C02
 #endif
 
-
 /* Each keyboard report has 90 bytes*/
 #define RAZER_GOLIATHUS_REPORT_LEN 0x5A
 
@@ -50,12 +49,11 @@
 #define RAZER_GOLIATHUS_WAIT_MAX_US 1000
 
 struct razer_goliathus_device {
-    struct usb_device *usbdev;
-    struct hid_device *hiddev;
-    unsigned char effect;
-    char name[128];
-    char phys[64];
+	struct usb_device *usbdev;
+	struct hid_device *hiddev;
+	unsigned char effect;
+	char name[128];
+	char phys[64];
 };
-
 
 #endif
