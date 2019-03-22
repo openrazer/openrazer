@@ -40,6 +40,7 @@
 #define VARSTORE 0x01
 
 // LED definitions
+#define MOUSEPAD_LED 0x00
 #define SCROLL_WHEEL_LED 0x01
 #define BATTERY_LED 0x03
 #define LOGO_LED 0x04

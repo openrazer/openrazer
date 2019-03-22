@@ -109,7 +109,8 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev,
 	struct usb_device *usb_dev = interface_to_usbdev(intf);
 	struct razer_report response;
 	struct razer_report report =
-		razer_chroma_extended_matrix_get_brightness(VARSTORE, 0x1);
+		razer_chroma_extended_matrix_get_brightness(VARSTORE,
+							    MOUSEPAD_LED);
 
 	response = razer_send_payload(usb_dev, &report);
 
@@ -131,7 +132,7 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev,
 	struct razer_report report;
 	unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
 
-	report = razer_chroma_extended_matrix_brightness(VARSTORE, 0x1,
+	report = razer_chroma_extended_matrix_brightness(VARSTORE, MOUSEPAD_LED,
 							 brightness);
 	razer_send_payload(usb_dev, &report);
 
@@ -214,8 +215,8 @@ static ssize_t razer_attr_write_mode_none(struct device *dev,
 {
 	struct usb_interface *intf = to_usb_interface(dev->parent);
 	struct usb_device *usb_dev = interface_to_usbdev(intf);
-	struct razer_report report =
-		razer_chroma_extended_matrix_effect_none(VARSTORE, 0x1);
+	struct razer_report report = razer_chroma_extended_matrix_effect_none(
+		VARSTORE, MOUSEPAD_LED);
 	razer_send_payload(usb_dev, &report);
 
 	return count;
@@ -233,7 +234,8 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev,
 	struct usb_interface *intf = to_usb_interface(dev->parent);
 	struct usb_device *usb_dev = interface_to_usbdev(intf);
 	struct razer_report report =
-		razer_chroma_extended_matrix_effect_spectrum(VARSTORE, 0x1);
+		razer_chroma_extended_matrix_effect_spectrum(VARSTORE,
+							     MOUSEPAD_LED);
 	razer_send_payload(usb_dev, &report);
 
 	return count;
@@ -255,7 +257,8 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev,
 	if (count == 4) {
 		unsigned char speed = (unsigned char)buf[0];
 		report = razer_chroma_extended_matrix_effect_reactive(
-			VARSTORE, 0x1, speed, (struct razer_rgb *)&buf[1]);
+			VARSTORE, MOUSEPAD_LED, speed,
+			(struct razer_rgb *)&buf[1]);
 
 		razer_send_payload(usb_dev, &report);
 
@@ -281,20 +284,20 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev,
 	switch (count) {
 	case 3: // Single colour mode
 		report = razer_chroma_extended_matrix_effect_breathing_single(
-			VARSTORE, 0x1, (struct razer_rgb *)&buf[0]);
+			VARSTORE, MOUSEPAD_LED, (struct razer_rgb *)&buf[0]);
 		razer_send_payload(usb_dev, &report);
 		break;
 
 	case 6: // Dual colour mode
 		report = razer_chroma_extended_matrix_effect_breathing_dual(
-			VARSTORE, 0x1, (struct razer_rgb *)&buf[0],
+			VARSTORE, MOUSEPAD_LED, (struct razer_rgb *)&buf[0],
 			(struct razer_rgb *)&buf[3]);
 		razer_send_payload(usb_dev, &report);
 		break;
 
 	default: // "Random" colour mode
 		report = razer_chroma_extended_matrix_effect_breathing_random(
-			VARSTORE, 0x1);
+			VARSTORE, MOUSEPAD_LED);
 		razer_send_payload(usb_dev, &report);
 		break;
 		// TODO move default to case 1:. Then default: printk(warning). Also remove pointless buffer
@@ -335,7 +338,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev,
 
 	if (count == 3) {
 		report = razer_chroma_extended_matrix_effect_static(
-			VARSTORE, 0x1, (struct razer_rgb *)&buf[0]);
+			VARSTORE, MOUSEPAD_LED, (struct razer_rgb *)&buf[0]);
 		razer_send_payload(usb_dev, &report);
 	} else {
 		printk(KERN_WARNING
