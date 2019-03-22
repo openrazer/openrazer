@@ -72,7 +72,8 @@ def starlight_effect(device):
 
         if not active[(row, col)]:
             active[(row, col)] = True
-            threading.Thread(target=starlight_key, args=(device, row, col, active)).start()
+            threading.Thread(target=starlight_key, args=(
+                device, row, col, active)).start()
 
         time.sleep(0.1)
 

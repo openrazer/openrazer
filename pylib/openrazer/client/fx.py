@@ -31,7 +31,8 @@ class BaseRazerFX(object):
 
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
-            daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
+            daemon_dbus = session_bus.get_object(
+                "org.razer", "/org/razer/device/{0}".format(serial))
         self._dbus = daemon_dbus
 
     def has(self, capability: str) -> bool:
@@ -52,17 +53,20 @@ class RazerFX(BaseRazerFX):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, matrix_dims=(-1, -1)):
         super(RazerFX, self).__init__(serial, capabilities, daemon_dbus)
 
-        self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.chroma")
+        self._lighting_dbus = _dbus.Interface(
+            self._dbus, "razer.device.lighting.chroma")
 
         # all() part basically checks that all dimensions are present (-1 is bad)
         if self.has('led_matrix') and all([dim >= 1 for dim in matrix_dims]):
-            self.advanced = RazerAdvancedFX(serial, capabilities, daemon_dbus=self._dbus, matrix_dims=matrix_dims)
+            self.advanced = RazerAdvancedFX(
+                serial, capabilities, daemon_dbus=self._dbus, matrix_dims=matrix_dims)
         else:
             self.advanced = None
 
         # Only keyboards will have ripple set
         if self.has('led_matrix') and self.has('ripple'):
-            self._custom_lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.custom")
+            self._custom_lighting_dbus = _dbus.Interface(
+                self._dbus, "razer.device.lighting.custom")
         else:
             self._custom_lighting_dbus = None
 
@@ -107,7 +111,8 @@ class RazerFX(BaseRazerFX):
         :raises ValueError: If direction is invalid
         """
         if direction not in (c.WAVE_LEFT, c.WAVE_RIGHT):
-            raise ValueError("Direction must be WAVE_RIGHT (0x01) or WAVE_LEFT (0x02)")
+            raise ValueError(
+                "Direction must be WAVE_RIGHT (0x01) or WAVE_LEFT (0x02)")
 
         if self.has('wave'):
             self._lighting_dbus.setWave(direction)
@@ -172,7 +177,8 @@ class RazerFX(BaseRazerFX):
         :raises ValueError: If parameters are invalid
         """
         if time not in (c.REACTIVE_500MS, c.REACTIVE_1000MS, c.REACTIVE_1500MS, c.REACTIVE_2000MS):
-            raise ValueError("Time not one of REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS or REACTIVE_2000MS")
+            raise ValueError(
+                "Time not one of REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS or REACTIVE_2000MS")
         if not isinstance(red, int):
             raise ValueError("Red is not an integer")
         if not isinstance(green, int):
@@ -274,7 +280,8 @@ class RazerFX(BaseRazerFX):
             green2 = clamp_ubyte(green2)
             blue2 = clamp_ubyte(blue2)
 
-            self._lighting_dbus.setBreathDual(red, green, blue, red2, green2, blue2)
+            self._lighting_dbus.setBreathDual(
+                red, green, blue, red2, green2, blue2)
 
             return True
         return False
@@ -345,7 +352,8 @@ class RazerFX(BaseRazerFX):
             green3 = clamp_ubyte(green3)
             blue3 = clamp_ubyte(blue3)
 
-            self._lighting_dbus.setBreathTriple(red, green, blue, red2, green2, blue2, red3, green3, blue3)
+            self._lighting_dbus.setBreathTriple(
+                red, green, blue, red2, green2, blue2, red3, green3, blue3)
 
             return True
         return False
@@ -451,7 +459,8 @@ class RazerFX(BaseRazerFX):
         :raises ValueError: If parameters are invalid
         """
         if time not in (c.STARLIGHT_FAST, c.STARLIGHT_NORMAL, c.STARLIGHT_SLOW):
-            raise ValueError("Time not one of STARLIGHT_FAST, STARLIGHT_NORMAL or STARLIGHT_SLOW")
+            raise ValueError(
+                "Time not one of STARLIGHT_FAST, STARLIGHT_NORMAL or STARLIGHT_SLOW")
         if not isinstance(red, int):
             raise ValueError("Red is not an integer")
         if not isinstance(green, int):
@@ -500,7 +509,8 @@ class RazerFX(BaseRazerFX):
         :raises ValueError: If parameters are invalid
         """
         if time not in (c.STARLIGHT_FAST, c.STARLIGHT_NORMAL, c.STARLIGHT_SLOW):
-            raise ValueError("Time not one of STARLIGHT_FAST, STARLIGHT_NORMAL or STARLIGHT_SLOW")
+            raise ValueError(
+                "Time not one of STARLIGHT_FAST, STARLIGHT_NORMAL or STARLIGHT_SLOW")
         if not isinstance(red, int):
             raise ValueError("Red is not an integer")
         if not isinstance(green, int):
@@ -522,7 +532,8 @@ class RazerFX(BaseRazerFX):
             green2 = clamp_ubyte(green2)
             blue2 = clamp_ubyte(blue2)
 
-            self._lighting_dbus.setStarlightDual(time, red, green, blue, red2, green2, blue2)
+            self._lighting_dbus.setStarlightDual(
+                time, red, green, blue, red2, green2, blue2)
 
             return True
         return False
@@ -540,7 +551,8 @@ class RazerFX(BaseRazerFX):
         :raises ValueError: If parameters are invalid
         """
         if time not in (c.STARLIGHT_FAST, c.STARLIGHT_NORMAL, c.STARLIGHT_SLOW):
-            raise ValueError("Time not one of STARLIGHT_FAST, STARLIGHT_NORMAL or STARLIGHT_SLOW")
+            raise ValueError(
+                "Time not one of STARLIGHT_FAST, STARLIGHT_NORMAL or STARLIGHT_SLOW")
 
         if self.has('starlight_random'):
             self._lighting_dbus.setStarlightRandom(time)
@@ -551,7 +563,8 @@ class RazerFX(BaseRazerFX):
 
 class RazerAdvancedFX(BaseRazerFX):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, matrix_dims=(-1, -1)):
-        super(RazerAdvancedFX, self).__init__(serial, capabilities, daemon_dbus)
+        super(RazerAdvancedFX, self).__init__(
+            serial, capabilities, daemon_dbus)
 
         # Only init'd when there's a matrix
         self._capabilities = capabilities
@@ -561,10 +574,12 @@ class RazerAdvancedFX(BaseRazerFX):
 
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
-            daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
+            daemon_dbus = session_bus.get_object(
+                "org.razer", "/org/razer/device/{0}".format(serial))
 
         self._matrix_dims = matrix_dims
-        self._lighting_dbus = _dbus.Interface(daemon_dbus, "razer.device.lighting.chroma")
+        self._lighting_dbus = _dbus.Interface(
+            daemon_dbus, "razer.device.lighting.chroma")
 
         self.matrix = Frame(matrix_dims)
 
@@ -606,9 +621,11 @@ class RazerAdvancedFX(BaseRazerFX):
         if self.has('led_single'):
             if isinstance(rgb, (tuple, list)) and len(rgb) == 3 and all([isinstance(component, int) for component in rgb]):
                 if row_id < self._matrix_dims[0] and column_id < self._matrix_dims[1]:
-                    self._lighting_dbus.setKey(row_id, column_id, [clamp_ubyte(component) for component in rgb])
+                    self._lighting_dbus.setKey(
+                        row_id, column_id, [clamp_ubyte(component) for component in rgb])
                 else:
-                    raise ValueError("Row or column out of bounds. Max dimensions are: {0},{1}".format(*self._matrix_dims))
+                    raise ValueError("Row or column out of bounds. Max dimensions are: {0},{1}".format(
+                        *self._matrix_dims))
             else:
                 raise ValueError("RGB must be an RGB tuple")
 
@@ -618,7 +635,8 @@ class SingleLed(BaseRazerFX):
         super(SingleLed, self).__init__(serial, capabilities, daemon_dbus)
 
         self._led_name = led_name
-        self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.{0}".format(led_name))
+        self._lighting_dbus = _dbus.Interface(
+            self._dbus, "razer.device.lighting.{0}".format(led_name))
 
     def _shas(self, item):
         return self.has('{0}_{1}'.format(self._led_name, item))
@@ -753,7 +771,8 @@ class SingleLed(BaseRazerFX):
         :raises ValueError: If parameters are invalid
         """
         if time not in (c.REACTIVE_500MS, c.REACTIVE_1000MS, c.REACTIVE_1500MS, c.REACTIVE_2000MS):
-            raise ValueError("Time not one of REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS or REACTIVE_2000MS")
+            raise ValueError(
+                "Time not one of REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS or REACTIVE_2000MS")
         if not isinstance(red, int):
             raise ValueError("Red is not an integer")
         if not isinstance(green, int):
@@ -855,7 +874,8 @@ class SingleLed(BaseRazerFX):
             green2 = clamp_ubyte(green2)
             blue2 = clamp_ubyte(blue2)
 
-            self._getattr('set#BreathDual')(red, green, blue, red2, green2, blue2)
+            self._getattr('set#BreathDual')(
+                red, green, blue, red2, green2, blue2)
 
             return True
         return False
@@ -881,7 +901,8 @@ class MiscLighting(BaseRazerFX):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None):
         super(MiscLighting, self).__init__(serial, capabilities, daemon_dbus)
 
-        self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.logo")
+        self._lighting_dbus = _dbus.Interface(
+            self._dbus, "razer.device.lighting.logo")
 
         if self.has('logo'):
             self._logo = SingleLed(serial, capabilities, daemon_dbus, 'logo')
@@ -889,12 +910,14 @@ class MiscLighting(BaseRazerFX):
             self._logo = None
 
         if self.has('scroll'):
-            self._scroll = SingleLed(serial, capabilities, daemon_dbus, 'scroll')
+            self._scroll = SingleLed(
+                serial, capabilities, daemon_dbus, 'scroll')
         else:
             self._scroll = None
 
         if self.has('backlight'):
-            self._backlight = SingleLed(serial, capabilities, daemon_dbus, 'backlight')
+            self._backlight = SingleLed(
+                serial, capabilities, daemon_dbus, 'backlight')
         else:
             self._backlight = None
 
@@ -959,7 +982,8 @@ class Frame(object):
         assert isinstance(key, tuple), "Key is not a tuple"
         assert 0 <= key[0] < self._rows, "Row out of bounds"
         assert 0 <= key[1] < self._cols, "Column out of bounds"
-        assert isinstance(rgb, (list, tuple)) and len(rgb) == 3, "Value must be a tuple,list of 3 RGB components"
+        assert isinstance(rgb, (list, tuple)) and len(
+            rgb) == 3, "Value must be a tuple,list of 3 RGB components"
 
         self._matrix[:, key[0], key[1]] = rgb
 
@@ -977,7 +1001,8 @@ class Frame(object):
         Init/Clear the matrix
         """
         if self._matrix is None:
-            self._matrix = _np.zeros((self._components, self._rows, self._cols), 'uint8')
+            self._matrix = _np.zeros(
+                (self._components, self._rows, self._cols), 'uint8')
             self._fb1 = _np.copy(self._matrix)
         else:
             self._matrix.fill(0)
@@ -1047,8 +1072,10 @@ class Frame(object):
         self._fb1 = _np.copy(self._matrix)
 
     def to_framebuffer_or(self):
-        self._fb1 = _np.bitwise_or(self._fb1, self._matrix)  # pylint: disable=no-member
+        self._fb1 = _np.bitwise_or(
+            self._fb1, self._matrix)  # pylint: disable=no-member
 
     def draw_with_fb_or(self):
-        self._matrix = _np.bitwise_or(self._fb1, self._matrix)  # pylint: disable=no-member
+        self._matrix = _np.bitwise_or(
+            self._fb1, self._matrix)  # pylint: disable=no-member
         return bytes(self)

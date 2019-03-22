@@ -16,7 +16,8 @@ class RazerDevice(object):
         # Load up the DBus
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
-            daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
+            daemon_dbus = session_bus.get_object(
+                "org.razer", "/org/razer/device/{0}".format(serial))
 
         self._dbus = daemon_dbus
 
@@ -30,7 +31,8 @@ class RazerDevice(object):
         self._name = str(self._dbus_interfaces['device'].getDeviceName())
         self._type = str(self._dbus_interfaces['device'].getDeviceType())
         self._fw = str(self._dbus_interfaces['device'].getFirmware())
-        self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
+        self._drv_version = str(
+            self._dbus_interfaces['device'].getDriverVersion())
         self._has_dedicated_macro = None
         self._urls = None
 
@@ -67,7 +69,8 @@ class RazerDevice(object):
             'lighting_starlight_dual': self._has_feature('razer.device.lighting.chroma', 'setStarlightDual'),
             'lighting_starlight_random': self._has_feature('razer.device.lighting.chroma', 'setStarlightRandom'),
 
-            'lighting_ripple': self._has_feature('razer.device.lighting.custom', 'setRipple'),  # Thinking of extending custom to do more hence the key check
+            # Thinking of extending custom to do more hence the key check
+            'lighting_ripple': self._has_feature('razer.device.lighting.custom', 'setRipple'),
             'lighting_ripple_random': self._has_feature('razer.device.lighting.custom', 'setRippleRandomColour'),
 
             'lighting_pulsate': self._has_feature('razer.device.lighting.bw2013', 'setPulsate'),
@@ -108,10 +111,12 @@ class RazerDevice(object):
         }
 
         # Nasty hack to convert dbus.Int32 into native
-        self._matrix_dimensions = tuple([int(dim) for dim in self._dbus_interfaces['device'].getMatrixDimensions()])
+        self._matrix_dimensions = tuple(
+            [int(dim) for dim in self._dbus_interfaces['device'].getMatrixDimensions()])
 
         if self.has('keyboard_layout'):
-            self._kbd_layout = str(self._dbus_interfaces['device'].getKeyboardLayout())
+            self._kbd_layout = str(
+                self._dbus_interfaces['device'].getKeyboardLayout())
         else:
             self._kbd_layout = None
 
@@ -119,12 +124,14 @@ class RazerDevice(object):
         if self._FX is None:
             self.fx = None
         else:
-            self.fx = self._FX(serial, capabilities=self._capabilities, daemon_dbus=daemon_dbus, matrix_dims=self._matrix_dimensions)
+            self.fx = self._FX(serial, capabilities=self._capabilities,
+                               daemon_dbus=daemon_dbus, matrix_dims=self._matrix_dimensions)
 
         # Setup Macro
         if self.has('macro_logic'):
             if self._MACRO_CLASS is not None:
-                self.macro = self._MACRO_CLASS(serial, self.name, daemon_dbus=daemon_dbus, capabilities=self._capabilities)
+                self.macro = self._MACRO_CLASS(
+                    serial, self.name, daemon_dbus=daemon_dbus, capabilities=self._capabilities)
             else:
                 self._capabilities['macro_logic'] = False
                 self.macro = None
@@ -132,7 +139,8 @@ class RazerDevice(object):
             self.macro = None
 
     def _get_available_features(self):
-        introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')
+        introspect_interface = _dbus.Interface(
+            self._dbus, 'org.freedesktop.DBus.Introspectable')
         xml_spec = introspect_interface.Introspect()
         root = _ET.fromstring(xml_spec)
 
@@ -176,7 +184,8 @@ class RazerDevice(object):
         elif isinstance(method_name, (list, tuple)):
             result = True
             for method in method_name:
-                result &= object_path in self._available_features and method in self._available_features[object_path]
+                result &= object_path in self._available_features and method in self._available_features[
+                    object_path]
             return result
         else:
             return False
@@ -304,14 +313,16 @@ class RazerDevice(object):
         :rtype: bool
         """
         if self._has_dedicated_macro is None:
-            self._has_dedicated_macro = self._dbus_interfaces['device'].hasDedicatedMacroKeys()
+            self._has_dedicated_macro = self._dbus_interfaces['device'].hasDedicatedMacroKeys(
+            )
 
         return self._has_dedicated_macro
 
     @property
     def razer_urls(self) -> dict:
         if self._urls is None:
-            self._urls = json.loads(str(self._dbus_interfaces['device'].getRazerUrls()))
+            self._urls = json.loads(
+                str(self._dbus_interfaces['device'].getRazerUrls()))
 
         return self._urls
 

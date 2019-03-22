@@ -52,7 +52,8 @@ class DBusServiceFactory(object):
         :return: New object
         :rtype: DBusService
         """
-        new_service = type("DBUSService{0:04}".format(DBusServiceFactory.service_number), (DBusService,), {})
+        new_service = type("DBUSService{0:04}".format(
+            DBusServiceFactory.service_number), (DBusService,), {})
         DBusServiceFactory.service_number += 1
 
         return new_service(bus_name, object_path)
@@ -110,17 +111,20 @@ class DBusService(dbus.service.Object):
         """
 
         # Get class key for use in the DBus introspection table
-        class_key = [key for key in self._dbus_class_table.keys() if key.endswith(self.__class__.__name__)][0]
+        class_key = [key for key in self._dbus_class_table.keys(
+        ) if key.endswith(self.__class__.__name__)][0]
 
         # Create a copy of the function so that if its used multiple times it won't affect other instances if the names changed
         function_deepcopy = copy_func(function, function_name)
-        func = dbus.service.method(interface_name, in_signature=in_signature, out_signature=out_signature, byte_arrays=byte_arrays)(function_deepcopy)
+        func = dbus.service.method(interface_name, in_signature=in_signature,
+                                   out_signature=out_signature, byte_arrays=byte_arrays)(function_deepcopy)
 
         # Add method to DBus tables
         try:
             self._dbus_class_table[class_key][interface_name][function_name] = func
         except KeyError:
-            self._dbus_class_table[class_key][interface_name] = {function_name: func}
+            self._dbus_class_table[class_key][interface_name] = {
+                function_name: func}
 
         # Add method to class as DBus expects it to be there.
         setattr(self.__class__, function_name, func)
@@ -137,7 +141,8 @@ class DBusService(dbus.service.Object):
         """
 
         # Get class key for use in the DBus introspection table
-        class_key = [key for key in self._dbus_class_table.keys() if key.endswith(self.__class__.__name__)][0]
+        class_key = [key for key in self._dbus_class_table.keys(
+        ) if key.endswith(self.__class__.__name__)][0]
 
         # Remove method from DBus tables
         # Remove method from class

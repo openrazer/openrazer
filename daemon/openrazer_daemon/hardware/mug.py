@@ -10,7 +10,8 @@ class RazerChromaMugHolder(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Chroma Mug Holder
     """
-    EVENT_FILE_REGEX = re.compile(r'.*Razer_Chroma_Mug_Holder-if0(1|2)-event-kbd')
+    EVENT_FILE_REGEX = re.compile(
+        r'.*Razer_Chroma_Mug_Holder-if0(1|2)-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x0F07

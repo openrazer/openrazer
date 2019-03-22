@@ -405,11 +405,13 @@ def set_breath_triple_effect(self, red1, green1, blue1, red2, green2, blue2, red
     self.logger.debug("DBus call set_breath_dual_effect")
 
     # Notify others
-    self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2, red3, green3, blue3)
+    self.send_effect_event('setBreathDual', red1, green1,
+                           blue1, red2, green2, blue2, red3, green3, blue3)
 
     driver_path = self.get_driver_path('matrix_effect_breath')
 
-    payload = bytes([red1, green1, blue1, red2, green2, blue2, red3, green3, blue3])
+    payload = bytes([red1, green1, blue1, red2, green2,
+                     blue2, red3, green3, blue3])
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
@@ -441,7 +443,8 @@ def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
     self.logger.debug("DBus call set_breath_dual_effect")
 
     # Notify others
-    self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
+    self.send_effect_event('setBreathDual', red1, green1,
+                           blue1, red2, green2, blue2)
 
     driver_path = self.get_driver_path('matrix_effect_breath')
 
@@ -570,7 +573,8 @@ def set_starlight_dual_effect(self, speed, red1, green1, blue1, red2, green2, bl
     driver_path = self.get_driver_path('matrix_effect_starlight')
 
     with open(driver_path, 'wb') as driver_file:
-        driver_file.write(bytes([speed, red1, green1, blue1, red2, green2, blue2]))
+        driver_file.write(
+            bytes([speed, red1, green1, blue1, red2, green2, blue2]))
 
     # Notify others
     self.send_effect_event('setStarlightDual', speed, red1, green1, blue1)

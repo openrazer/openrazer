@@ -35,9 +35,11 @@ def get_static_effect_args_kraken(self):
     with open(driver_path, 'rb') as driver_file:
         bytestring = driver_file.read()
         if len(bytestring) != 4:
-            raise ValueError("Response from driver is not valid, should be length 4 got: {0}".format(len(bytestring)))
+            raise ValueError(
+                "Response from driver is not valid, should be length 4 got: {0}".format(len(bytestring)))
         else:
-            return list(bytestring[:3])  # We cut off the intensity value in the end, aint letting people mess with that.
+            # We cut off the intensity value in the end, aint letting people mess with that.
+            return list(bytestring[:3])
 
 
 @endpoint('razer.device.lighting.kraken', 'getBreathArgs', out_sig='ai')
@@ -55,7 +57,8 @@ def get_breath_effect_args_kraken(self):
     with open(driver_path, 'rb') as driver_file:
         bytestring = driver_file.read()
         if len(bytestring) % 4 != 0:
-            raise ValueError("Response from driver is not valid, should be length 4 got: {0}".format(len(bytestring)))
+            raise ValueError(
+                "Response from driver is not valid, should be length 4 got: {0}".format(len(bytestring)))
         else:
             result = []
 
@@ -67,7 +70,8 @@ def get_breath_effect_args_kraken(self):
                 # Add those 3 values into the list
                 result.extend(values)
 
-            return result  # We cut off the intensity value in the end, aint letting people mess with that.
+            # We cut off the intensity value in the end, aint letting people mess with that.
+            return result
 
 
 @endpoint('razer.device.lighting.kraken', 'setCustom', in_sig='ai')

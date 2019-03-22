@@ -21,7 +21,8 @@ class RippleEffectThread(threading.Thread):
     def __init__(self, parent, device_number):
         super(RippleEffectThread, self).__init__()
 
-        self._logger = logging.getLogger('razer.device{0}.ripplethread'.format(device_number))
+        self._logger = logging.getLogger(
+            'razer.device{0}.ripplethread'.format(device_number))
         self._parent = parent
 
         self._colour = (0, 255, 0)
@@ -129,7 +130,8 @@ class RippleEffectThread(threading.Thread):
                     # Current radius is based off a time metric
                     if self._colour is not None:
                         colour = self._colour
-                    radiuses.append((key_row, key_col, now_diff.total_seconds() * 24, colour))
+                    radiuses.append(
+                        (key_row, key_col, now_diff.total_seconds() * 24, colour))
 
                 # Iterate through the rows
                 for row in range(0, self._rows):
@@ -146,16 +148,20 @@ class RippleEffectThread(threading.Thread):
 
                             # To account for logo placement
                             for cirlce_centre_row, circle_centre_col, rad, colour in radiuses:
-                                radius = math.sqrt(math.pow(cirlce_centre_row - row, 2) + math.pow(circle_centre_col - col, 2))
+                                radius = math.sqrt(
+                                    math.pow(cirlce_centre_row - row, 2) + math.pow(circle_centre_col - col, 2))
                                 if rad >= radius >= rad - 2:
                                     # Again, (0, 20) is the logical location of the logo led
-                                    self._keyboard_grid.set_key_colour(0, 20, colour)
+                                    self._keyboard_grid.set_key_colour(
+                                        0, 20, colour)
                                     break
                         else:
                             for cirlce_centre_row, circle_centre_col, rad, colour in radiuses:
-                                radius = math.sqrt(math.pow(cirlce_centre_row - row, 2) + math.pow(circle_centre_col - col, 2))
+                                radius = math.sqrt(
+                                    math.pow(cirlce_centre_row - row, 2) + math.pow(circle_centre_col - col, 2))
                                 if rad >= radius >= rad - 2:
-                                    self._keyboard_grid.set_key_colour(row, col, colour)
+                                    self._keyboard_grid.set_key_colour(
+                                        row, col, colour)
                                     break
 
                 # Set the colors on the device
@@ -174,7 +180,8 @@ class RippleManager(object):
     """
 
     def __init__(self, parent, device_number):
-        self._logger = logging.getLogger('razer.device{0}.ripplemanager'.format(device_number))
+        self._logger = logging.getLogger(
+            'razer.device{0}.ripplemanager'.format(device_number))
         self._parent = parent
         self._parent.register_observer(self)
 

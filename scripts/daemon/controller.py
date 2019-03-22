@@ -68,7 +68,8 @@ def _get_devices() -> list:
     """
     device_manager = openrazer.client.DeviceManager()
 
-    devices = sorted(device_manager.devices, key=lambda x: (str(x.serial), str(x.type)))
+    devices = sorted(device_manager.devices,
+                     key=lambda x: (str(x.serial), str(x.type)))
 
     return devices
 
@@ -187,10 +188,14 @@ def parse_args():
     def add_filter_group(sub):
         group = sub.add_mutually_exclusive_group(required=True)
         group.add_argument('--serial', help='Select device via its serial')
-        group.add_argument('--keyboard', nargs='?', default=0, type=int, help='Select keyboard, if ID is omitted the first is used')
-        group.add_argument('--mouse', nargs='?', default=0, type=int, help='Select mouse, if ID is omitted the first is used')
-        group.add_argument('--firefly', nargs='?', default=0, type=int, help='Select Firefly, if ID is omitted the first is used')
-        group.add_argument('--tartarus', nargs='?', default=0, type=int, help='Select Tartarus, if ID is omitted the first is used')
+        group.add_argument('--keyboard', nargs='?', default=0, type=int,
+                           help='Select keyboard, if ID is omitted the first is used')
+        group.add_argument('--mouse', nargs='?', default=0, type=int,
+                           help='Select mouse, if ID is omitted the first is used')
+        group.add_argument('--firefly', nargs='?', default=0, type=int,
+                           help='Select Firefly, if ID is omitted the first is used')
+        group.add_argument('--tartarus', nargs='?', default=0, type=int,
+                           help='Select Tartarus, if ID is omitted the first is used')
 
     def add_raw(sub):
         sub.add_argument('--raw', action='store_true', help="Raw output")
@@ -199,26 +204,35 @@ def parse_args():
     subparser = parser.add_subparsers(dest='command', help='commands')
     subparser.required = True
 
-    help_parser = subparser.add_parser('help', help='The help command will display help, running "help <command>" will display more detailed help')
-    help_parser.add_argument('help', nargs='?', metavar='COMMAND', default=None, type=str)
+    help_parser = subparser.add_parser(
+        'help', help='The help command will display help, running "help <command>" will display more detailed help')
+    help_parser.add_argument(
+        'help', nargs='?', metavar='COMMAND', default=None, type=str)
 
     # No need to assign to a var as it has no args
     subparser.add_parser('list', help='Lists Razer Devices')
 
     # Brightness
-    brightness_parser = subparser.add_parser('brightness', help='Get or set the brightness')
+    brightness_parser = subparser.add_parser(
+        'brightness', help='Get or set the brightness')
     add_filter_group(brightness_parser)
     add_raw(brightness_parser)
-    brightness_parser.add_argument('--set', metavar='BRIGHTNESS', type=float, default=None, help='Gets brightness if omitted')
+    brightness_parser.add_argument(
+        '--set', metavar='BRIGHTNESS', type=float, default=None, help='Gets brightness if omitted')
 
     # Macro
     macro_parser = subparser.add_parser('macro', help='Manage macros')
     add_filter_group(macro_parser)
-    macro_exclusive_group = macro_parser.add_mutually_exclusive_group(required=True)
-    macro_exclusive_group.add_argument('--list', action='store_true', help="List active macros")
-    macro_exclusive_group.add_argument('--add-script', nargs=2, type=str, metavar=('BIND_KEY', 'SCRIPT_PATH'), help="Bind the given script to the given macro key. If you require script arguments either create a wrapper or use the API direct.")
-    macro_exclusive_group.add_argument('--add-url', nargs=2, type=str, metavar=('BIND_KEY', 'URL'), help="Bind the given URL to the given macro key, so that xdg-open will open a tab.")
-    macro_exclusive_group.add_argument('--add-keys', nargs='+', type=str, metavar=('BIND_KEY', 'KEYS'), help="Bind the given key string to the given macro key.")
+    macro_exclusive_group = macro_parser.add_mutually_exclusive_group(
+        required=True)
+    macro_exclusive_group.add_argument(
+        '--list', action='store_true', help="List active macros")
+    macro_exclusive_group.add_argument('--add-script', nargs=2, type=str, metavar=('BIND_KEY', 'SCRIPT_PATH'),
+                                       help="Bind the given script to the given macro key. If you require script arguments either create a wrapper or use the API direct.")
+    macro_exclusive_group.add_argument('--add-url', nargs=2, type=str, metavar=(
+        'BIND_KEY', 'URL'), help="Bind the given URL to the given macro key, so that xdg-open will open a tab.")
+    macro_exclusive_group.add_argument('--add-keys', nargs='+', type=str, metavar=(
+        'BIND_KEY', 'KEYS'), help="Bind the given key string to the given macro key.")
 
     args = parser.parse_args()
 
@@ -246,7 +260,8 @@ def run():
     if args.command in CMD_MAP:
         CMD_MAP[args.command](args)
     else:
-        print('Someone forgot to add mapping for command "{0}"'.format(args.command))
+        print('Someone forgot to add mapping for command "{0}"'.format(
+            args.command))
 
     print()
 

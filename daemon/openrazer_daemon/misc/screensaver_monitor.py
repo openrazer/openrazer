@@ -5,7 +5,8 @@ import logging
 import dbus
 import dbus.exceptions
 
-DBUS_SCREENSAVER_INTERFACES = ('org.freedesktop.ScreenSaver', 'org.gnome.ScreenSaver', 'org.mate.ScreenSaver')
+DBUS_SCREENSAVER_INTERFACES = (
+    'org.freedesktop.ScreenSaver', 'org.gnome.ScreenSaver', 'org.mate.ScreenSaver')
 
 
 class ScreensaverMonitor(object):
@@ -26,7 +27,8 @@ class ScreensaverMonitor(object):
         bus = dbus.SessionBus()
         # Loop through and monitor the signals
         for screensaver_interface in DBUS_SCREENSAVER_INTERFACES:
-            bus.add_signal_receiver(self.signal_callback, dbus_interface=screensaver_interface, signal_name='ActiveChanged')
+            bus.add_signal_receiver(
+                self.signal_callback, dbus_interface=screensaver_interface, signal_name='ActiveChanged')
 
     @property
     def monitoring(self):

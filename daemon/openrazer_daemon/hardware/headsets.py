@@ -11,7 +11,8 @@ class RazerKraken71(__RazerDevice):
     """
     Class for the Razer Kraken 7.1
     """
-    EVENT_FILE_REGEX = re.compile(r'.*Razer_Kraken_7\.1_000000000000-event-if03')
+    EVENT_FILE_REGEX = re.compile(
+        r'.*Razer_Kraken_7\.1_000000000000-event-if03')
 
     USB_VID = 0x1532
     USB_PID = 0x0501
@@ -126,12 +127,14 @@ class RazerKraken71Chroma(__RazerDevice):
 
         if dec['breathing1']:
             self.suspend_args['effect'] = 'breathing1'
-            self.suspend_args['args'] = _dbus_kraken.get_breath_effect_args_kraken(self)
+            self.suspend_args['args'] = _dbus_kraken.get_breath_effect_args_kraken(
+                self)
         elif dec['spectrum']:
             self.suspend_args['effect'] = 'spectrum'
         elif dec['state']:
             self.suspend_args['effect'] = 'static'
-            self.suspend_args['args'] = _dbus_kraken.get_static_effect_args_kraken(self)
+            self.suspend_args['args'] = _dbus_kraken.get_static_effect_args_kraken(
+                self)
 
         self.disable_notify = True
         _dbus_chroma.set_none_effect(self)
@@ -203,18 +206,22 @@ class RazerKraken71V2(__RazerDevice):
 
         if dec['breathing1']:
             self.suspend_args['effect'] = 'breathing1'
-            self.suspend_args['args'] = _dbus_kraken.get_breath_effect_args_kraken(self)
+            self.suspend_args['args'] = _dbus_kraken.get_breath_effect_args_kraken(
+                self)
         elif dec['breathing2']:
             self.suspend_args['effect'] = 'breathing2'
-            self.suspend_args['args'] = _dbus_kraken.get_breath_effect_args_kraken(self)
+            self.suspend_args['args'] = _dbus_kraken.get_breath_effect_args_kraken(
+                self)
         elif dec['breathing3']:
             self.suspend_args['effect'] = 'breathing3'
-            self.suspend_args['args'] = _dbus_kraken.get_breath_effect_args_kraken(self)
+            self.suspend_args['args'] = _dbus_kraken.get_breath_effect_args_kraken(
+                self)
         elif dec['spectrum']:
             self.suspend_args['effect'] = 'spectrum'
         elif dec['state']:
             self.suspend_args['effect'] = 'static'
-            self.suspend_args['args'] = _dbus_kraken.get_static_effect_args_kraken(self)
+            self.suspend_args['args'] = _dbus_kraken.get_static_effect_args_kraken(
+                self)
 
         self.disable_notify = True
         _dbus_chroma.set_none_effect(self)

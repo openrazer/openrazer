@@ -16,12 +16,16 @@ def clamp_to_u8(value):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Set the breathing effect")
-    parser.add_argument('-d', '--device', type=str, help="Device string like \"0003:1532:0045.000C\"")
+    parser.add_argument('-d', '--device', type=str,
+                        help="Device string like \"0003:1532:0045.000C\"")
 
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--random', action="store_true", help="Random breathing effect")
-    group.add_argument('--single', nargs=3, metavar=("R", "G", "B"), type=int, help="Single colour breathing effect")
-    group.add_argument('--dual', nargs=6, metavar=("R1", "G1", "B1", "R2", "G2", "B2"), type=int, help="Dual colour breathing effect")
+    group.add_argument('--random', action="store_true",
+                       help="Random breathing effect")
+    group.add_argument('--single', nargs=3, metavar=("R", "G", "B"),
+                       type=int, help="Single colour breathing effect")
+    group.add_argument('--dual', nargs=6, metavar=("R1", "G1", "B1",
+                                                   "R2", "G2", "B2"), type=int, help="Dual colour breathing effect")
 
     args = parser.parse_args()
     return args
@@ -31,7 +35,8 @@ def run():
     args = parse_args()
 
     if args.device is None:
-        mouse_dirs = glob.glob(os.path.join('/sys/bus/hid/drivers/razermouse/', "*:*:*.*"))
+        mouse_dirs = glob.glob(os.path.join(
+            '/sys/bus/hid/drivers/razermouse/', "*:*:*.*"))
 
         if len(mouse_dirs) > 1:
             print("Multiple mouse directories found. Rerun with -d", file=sys.stderr)
@@ -42,7 +47,8 @@ def run():
 
         mouse_dir = mouse_dirs[0]
     else:
-        mouse_dir = os.path.join('/sys/bus/hid/drivers/razermouse/', args.device)
+        mouse_dir = os.path.join(
+            '/sys/bus/hid/drivers/razermouse/', args.device)
 
     if not os.path.isdir(mouse_dir):
         print("Multiple mouse directories found. Rerun with -d", file=sys.stderr)

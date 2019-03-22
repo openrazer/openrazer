@@ -72,7 +72,8 @@ def run():
             data.append(expand_payload(line['Leftover Capture Data']))
 
     format_string = "{0:<6}  {1:<2}  {2:<10}  {3:<4}  {4:<5} {5:<7}  {6}"
-    print(format_string.format('Status', 'ID', 'Packet Num', 'Size', 'Class', 'Command', 'Params'))
+    print(format_string.format('Status', 'ID', 'Packet Num',
+                               'Size', 'Class', 'Command', 'Params'))
     for frame in data:
         print(format_string.format(frame['status'], frame['transaction_id'], frame['packet_num'],
                                    frame['data_size'], frame['class'], frame['command'], frame['params']))

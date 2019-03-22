@@ -104,7 +104,8 @@ class MacroURL(MacroObject):
         """
         Open URL in the browser
         """
-        proc = subprocess.Popen(['xdg-open', self.url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            ['xdg-open', self.url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         proc.communicate()
 
 
@@ -137,7 +138,8 @@ class MacroScript(MacroObject):
         """
         Run script
         """
-        proc = subprocess.Popen(self.script + self.args, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(self.script + self.args, shell=True,
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         proc.communicate()
 
 
@@ -149,7 +151,8 @@ class MacroRunner(threading.Thread):
     def __init__(self, device_id, macro_bind, macro_data):
         super(MacroRunner, self).__init__()
 
-        self._logger = logging.getLogger('razer.device{0}.macro{1}'.format(device_id, macro_bind))
+        self._logger = logging.getLogger(
+            'razer.device{0}.macro{1}'.format(device_id, macro_bind))
         self._macro_data = macro_data
         self._macro_bind = macro_bind
 

@@ -1,12 +1,12 @@
+import subprocess
+import struct
+from gi.repository import Gdk
 """
 Module to handle custom colours
 """
 
 import gi
 gi.require_version('Gdk', '3.0')
-from gi.repository import Gdk
-import struct
-import subprocess
 
 
 KEY_MAPPING = {
@@ -502,7 +502,8 @@ class KeyboardColour(object):
         :raises KeyDoesNotExistError: If given key does not exist
         """
         if key not in KEY_MAPPING:
-            raise KeyDoesNotExistError("The key \"{0}\" does not exist".format(key))
+            raise KeyDoesNotExistError(
+                "The key \"{0}\" does not exist".format(key))
 
         row_id, col_id = KEY_MAPPING[key]
         return self.colors[row_id][col_id].get()

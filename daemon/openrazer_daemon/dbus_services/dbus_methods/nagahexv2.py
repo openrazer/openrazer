@@ -173,7 +173,8 @@ def set_logo_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, bl
     self.logger.debug("DBus call set_breath_dual_effect")
 
     # Notify others
-    self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
+    self.send_effect_event('setBreathDual', red1, green1,
+                           blue1, red2, green2, blue2)
 
     driver_path = self.get_driver_path('logo_matrix_effect_breath')
 
@@ -355,7 +356,8 @@ def set_scroll_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, 
     self.logger.debug("DBus call set_breath_dual_effect")
 
     # Notify others
-    self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
+    self.send_effect_event('setBreathDual', red1, green1,
+                           blue1, red2, green2, blue2)
 
     driver_path = self.get_driver_path('scroll_matrix_effect_breath')
 

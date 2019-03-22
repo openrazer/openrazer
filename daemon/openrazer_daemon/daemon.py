@@ -1,3 +1,14 @@
+from openrazer_daemon.misc.screensaver_monitor import ScreensaverMonitor
+from openrazer_daemon.device import DeviceCollection
+from openrazer_daemon.dbus_services.service import DBusService
+import openrazer_daemon.hardware
+import threading
+import json
+import getpass
+import grp
+from pyudev import Context, Monitor, MonitorObserver
+from gi.repository import GLib
+import gi.repository
 """
 Daemon class
 
@@ -17,18 +28,6 @@ import dbus.mainloop.glib
 import dbus.service
 import gi
 gi.require_version('Gdk', '3.0')
-import gi.repository
-from gi.repository import GLib
-from pyudev import Context, Monitor, MonitorObserver
-import grp
-import getpass
-import json
-import threading
-
-import openrazer_daemon.hardware
-from openrazer_daemon.dbus_services.service import DBusService
-from openrazer_daemon.device import DeviceCollection
-from openrazer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 
 
 class RazerDaemon(DBusService):
@@ -48,7 +47,8 @@ class RazerDaemon(DBusService):
 
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
 
-        setproctitle.setproctitle('openrazer-daemon')  # pylint: disable=no-member
+        setproctitle.setproctitle(
+            'openrazer-daemon')  # pylint: disable=no-member
 
         # Expanding ~ as python doesn't do it by default, also creating dirs if needed
         try:
@@ -99,7 +99,8 @@ class RazerDaemon(DBusService):
         # Load Classes
         self._device_classes = openrazer_daemon.hardware.get_device_classes()
 
-        self.logger.info("Initialising Daemon (v%s). Pid: %d", __version__, os.getpid())
+        self.logger.info("Initialising Daemon (v%s). Pid: %d",
+                         __version__, os.getpid())
         self._init_screensaver_monitor()
 
         self._razer_devices = DeviceCollection()
@@ -109,9 +110,12 @@ class RazerDaemon(DBusService):
         methods = {
             # interface, method, callback, in-args, out-args
             ('razer.devices', 'getDevices', self.get_serial_list, None, 'as'),
-            ('razer.devices', 'supportedDevices', self.supported_devices, None, 's'),
-            ('razer.devices', 'enableTurnOffOnScreensaver', self.enable_turn_off_on_screensaver, 'b', None),
-            ('razer.devices', 'getOffOnScreensaver', self.get_off_on_screensaver, None, 'b'),
+            ('razer.devices', 'supportedDevices',
+             self.supported_devices, None, 's'),
+            ('razer.devices', 'enableTurnOffOnScreensaver',
+             self.enable_turn_off_on_screensaver, 'b', None),
+            ('razer.devices', 'getOffOnScreensaver',
+             self.get_off_on_screensaver, None, 'b'),
             ('razer.devices', 'syncEffects', self.sync_effects, 'b', None),
             ('razer.devices', 'getSyncEffects', self.get_sync_effects, None, 'b'),
             ('razer.daemon', 'version', self.version, None, 's'),
@@ -120,13 +124,15 @@ class RazerDaemon(DBusService):
 
         for m in methods:
             self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
-            self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
+            self.add_dbus_method(
+                m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
 
         self._collecting_udev = False
         self._collecting_udev_devices = []
 
         # TODO remove
-        self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
+        self.sync_effects(self._config.getboolean(
+            'Startup', 'sync_effects_enabled'))
         # TODO ======
 
     @dbus.service.signal('razer.devices')
@@ -150,7 +156,8 @@ class RazerDaemon(DBusService):
         """
         logger = logging.getLogger('razer')
         logger.setLevel(log_level)
-        formatter = logging.Formatter('%(asctime)s | %(name)-30s | %(levelname)-8s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        formatter = logging.Formatter(
+            '%(asctime)s | %(name)-30s | %(levelname)-8s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
         # Don't propagate to default logger
         logger.propagate = 0
 
@@ -162,7 +169,8 @@ class RazerDaemon(DBusService):
 
         if log_dir is not None:
             log_file = os.path.join(log_dir, 'razer.log')
-            file_logger = logging.handlers.RotatingFileHandler(log_file, maxBytes=16777216, backupCount=10)  # 16MiB
+            file_logger = logging.handlers.RotatingFileHandler(
+                log_file, maxBytes=16777216, backupCount=10)  # 16MiB
             file_logger.setLevel(log_level)
             file_logger.setFormatter(formatter)
             logger.addHandler(file_logger)
@@ -190,14 +198,17 @@ class RazerDaemon(DBusService):
         self._udev_context = Context()
         udev_monitor = Monitor.from_netlink(self._udev_context)
         udev_monitor.filter_by(subsystem='hid')
-        self._udev_observer = MonitorObserver(udev_monitor, callback=self._udev_input_event, name='device-monitor')
+        self._udev_observer = MonitorObserver(
+            udev_monitor, callback=self._udev_input_event, name='device-monitor')
 
     def _init_screensaver_monitor(self):
         try:
             self._screensaver_monitor = ScreensaverMonitor(self)
-            self._screensaver_monitor.monitoring = self._config.getboolean('Startup', 'devices_off_on_screensaver')
+            self._screensaver_monitor.monitoring = self._config.getboolean(
+                'Startup', 'devices_off_on_screensaver')
         except dbus.exceptions.DBusException as e:
-            self.logger.error("Failed to init ScreensaverMonitor: {}".format(e))
+            self.logger.error(
+                "Failed to init ScreensaverMonitor: {}".format(e))
 
     def _init_signals(self):
         """
@@ -240,7 +251,8 @@ class RazerDaemon(DBusService):
 
         for sig in signal.SIGINT, signal.SIGTERM, signal.SIGHUP:
             signal.signal(sig, idle_handler)
-            GLib.idle_add(install_glib_handler, sig, priority=GLib.PRIORITY_HIGH)
+            GLib.idle_add(install_glib_handler, sig,
+                          priority=GLib.PRIORITY_HIGH)
 
     def read_config(self, config_file):
         """
@@ -279,7 +291,8 @@ class RazerDaemon(DBusService):
         self._screensaver_monitor.monitoring = enable
 
     def supported_devices(self):
-        result = {cls.__name__: (cls.USB_VID, cls.USB_PID) for cls in self._device_classes}
+        result = {cls.__name__: (cls.USB_VID, cls.USB_PID)
+                  for cls in self._device_classes}
 
         return json.dumps(result)
 
@@ -348,17 +361,21 @@ class RazerDaemon(DBusService):
         """
         if first_run:
             # Just some pretty output
-            max_name_len = max([len(cls.__name__) for cls in self._device_classes]) + 2
+            max_name_len = max([len(cls.__name__)
+                                for cls in self._device_classes]) + 2
             for cls in self._device_classes:
-                format_str = 'Loaded device specification: {0:-<' + str(max_name_len) + '} ({1:04x}:{2:04X})'
+                format_str = 'Loaded device specification: {0:-<' + str(
+                    max_name_len) + '} ({1:04x}:{2:04X})'
 
-                self.logger.debug(format_str.format(cls.__name__ + ' ', cls.USB_VID, cls.USB_PID))
+                self.logger.debug(format_str.format(
+                    cls.__name__ + ' ', cls.USB_VID, cls.USB_PID))
 
         if self._test_dir is not None:
             device_list = os.listdir(self._test_dir)
             test_mode = True
         else:
-            device_list = list(self._udev_context.list_devices(subsystem='hid'))
+            device_list = list(
+                self._udev_context.list_devices(subsystem='hid'))
             test_mode = False
 
         device_number = 0
@@ -376,8 +393,10 @@ class RazerDaemon(DBusService):
                 if sys_name in self._razer_devices:
                     continue
 
-                if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
-                    self.logger.info('Found device.%d: %s', device_number, sys_name)
+                # Check it matches sys/ ID format and has device_type file
+                if device_class.match(sys_name, sys_path):
+                    self.logger.info('Found device.%d: %s',
+                                     device_number, sys_name)
 
                     # TODO add testdir support
                     # Basically find the other usb interfaces
@@ -386,7 +405,8 @@ class RazerDaemon(DBusService):
                     if not test_mode:
                         for alt_device in device_list:
                             if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
-                                additional_interfaces.append(alt_device.sys_path)
+                                additional_interfaces.append(
+                                    alt_device.sys_path)
 
                     # Checking permissions
                     test_file = os.path.join(sys_path, 'device_type')
@@ -394,10 +414,12 @@ class RazerDaemon(DBusService):
                     file_group_name = grp.getgrgid(file_group_id)[0]
 
                     if os.getgid() != file_group_id and file_group_name != 'plugdev':
-                        self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
+                        self.logger.critical(
+                            "Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
                         break
 
-                    razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
+                    razer_device = device_class(
+                        sys_path, device_number, self._config, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
 
                     # Wireless devices sometimes don't listen
                     count = 0
@@ -409,10 +431,12 @@ class RazerDaemon(DBusService):
                         time.sleep(0.1)
                         count += 1
                     else:
-                        logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
+                        logging.warning(
+                            "Could not get serial for device {0}. Skipping".format(sys_name))
                         continue
 
-                    self._razer_devices.add(sys_name, device_serial, razer_device)
+                    self._razer_devices.add(
+                        sys_name, device_serial, razer_device)
 
                     device_number += 1
 
@@ -431,9 +455,12 @@ class RazerDaemon(DBusService):
             if sys_name in self._razer_devices:
                 continue
 
-            if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
-                self.logger.info('Found valid device.%d: %s', device_number, sys_name)
-                razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None)
+            # Check it matches sys/ ID format and has device_type file
+            if device_class.match(sys_name, sys_path):
+                self.logger.info('Found valid device.%d: %s',
+                                 device_number, sys_name)
+                razer_device = device_class(
+                    sys_path, device_number, self._config, testing=self._test_dir is not None)
 
                 # Its a udev event so currently the device hasn't been chmodded yet
                 time.sleep(0.2)
@@ -443,10 +470,12 @@ class RazerDaemon(DBusService):
 
                 if len(device_serial) > 0:
                     # Add Device
-                    self._razer_devices.add(sys_name, device_serial, razer_device)
+                    self._razer_devices.add(
+                        sys_name, device_serial, razer_device)
                     self.device_added()
                 else:
-                    logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
+                    logging.warning(
+                        "Could not get serial for device {0}. Skipping".format(sys_name))
             else:
                 # Basically find the other usb interfaces
                 device_match = sys_name.split('.')[0]
@@ -487,7 +516,8 @@ class RazerDaemon(DBusService):
         :param device: Udev device
         :type device: pyudev.device._device.Device
         """
-        self.logger.debug('Device event [%s]: %s', device.action, device.device_path)
+        self.logger.debug(
+            'Device event [%s]: %s', device.action, device.device_path)
         if device.action == 'add':
             if self._collecting_udev:
                 self._collecting_udev_devices.append(device)
@@ -495,7 +525,8 @@ class RazerDaemon(DBusService):
             else:
                 self._collecting_udev_devices = [device]
                 self._collecting_udev = True
-                t = threading.Thread(target=self._collecting_udev_method, args=(device,))
+                t = threading.Thread(
+                    target=self._collecting_udev_method, args=(device,))
                 t.start()
         elif device.action == 'remove':
             self._remove_device(device)
@@ -503,7 +534,8 @@ class RazerDaemon(DBusService):
     def _collecting_udev_method(self, device):
         time.sleep(2)  # delay to let udev add all devices that we want
         # Sort the devices
-        self._collecting_udev_devices.sort(key=lambda x: x.sys_path, reverse=True)
+        self._collecting_udev_devices.sort(
+            key=lambda x: x.sys_path, reverse=True)
         for d in self._collecting_udev_devices:
             self._add_device(d)
         self._collecting_udev = False

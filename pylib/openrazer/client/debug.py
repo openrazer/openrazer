@@ -26,7 +26,8 @@ def get_attrs(obj):
                     if attr.fset is not None:
                         set_sig = inspect.signature(attr.fset)
                         if len(set_sig.parameters.keys()) > 0:
-                            set_type = str(set_sig.parameters[list(set_sig.parameters.keys())[-1]])
+                            set_type = str(set_sig.parameters[list(
+                                set_sig.parameters.keys())[-1]])
                         else:
                             set_type = ''
 
@@ -34,7 +35,8 @@ def get_attrs(obj):
                             set_type = ':' + set_type.split(':')[1]
                         else:
                             set_type = ''
-                        props.append(obj_attr + ' - get{0}, set{1}'.format(get_sig, set_type))
+                        props.append(
+                            obj_attr + ' - get{0}, set{1}'.format(get_sig, set_type))
                     else:
                         props.append(obj_attr + ' - get{0}'.format(get_sig))
                     break
@@ -72,10 +74,12 @@ def print_attrs(obj, recurse_to=None, indent=0):
             if prop in recurse_to:
                 if len(props) != index:
                     print((" " * indent) + ' {0}  ├- {1} - '.format(pipe, prop), end='')
-                    print_attrs(getattr(obj, prop), recurse_to=(recurse_to - set(prop)), indent=indent + 7)
+                    print_attrs(getattr(obj, prop), recurse_to=(
+                        recurse_to - set(prop)), indent=indent + 7)
                 else:
                     print((" " * indent) + ' {0}  └- {1} - '.format(pipe, prop), end='')
-                    print_attrs(getattr(obj, prop), recurse_to=(recurse_to - set(prop)), indent=indent + 7)
+                    print_attrs(getattr(obj, prop), recurse_to=(
+                        recurse_to - set(prop)), indent=indent + 7)
             else:
                 if len(props) != index:
                     print2(' {0}  ├- {1}'.format(pipe, prop))
@@ -101,10 +105,12 @@ def print_attrs(obj, recurse_to=None, indent=0):
             if field in recurse_to:
                 if len(fields) != index:
                     print((" " * indent) + '   ├- {0} - '.format(field), end='')
-                    print_attrs(getattr(obj, field), recurse_to=(recurse_to - set(field)), indent=indent + 6)
+                    print_attrs(getattr(obj, field), recurse_to=(
+                        recurse_to - set(field)), indent=indent + 6)
                 else:
                     print((" " * indent) + '   └- {0} - '.format(field), end='')
-                    print_attrs(getattr(obj, field), recurse_to=(recurse_to - set(field)), indent=indent + 6)
+                    print_attrs(getattr(obj, field), recurse_to=(
+                        recurse_to - set(field)), indent=indent + 6)
             else:
                 if len(fields) != index:
                     print2('   ├- {0}'.format(field))

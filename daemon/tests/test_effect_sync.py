@@ -64,7 +64,8 @@ class EffectSyncTest(unittest.TestCase):
     @unittest.mock.patch('openrazer_daemon.misc.effect_sync.logging.getLogger', logger_mock)
     def setUp(self):
         self.hardware_device = DummyHardwareDevice()
-        self.effect_sync = openrazer_daemon.misc.effect_sync.EffectSync(self.hardware_device, 1)
+        self.effect_sync = openrazer_daemon.misc.effect_sync.EffectSync(
+            self.hardware_device, 1)
 
     def test_observers(self):
 
@@ -128,7 +129,8 @@ class EffectSyncTest(unittest.TestCase):
 
         self.effect_sync.notify(MSG3)
 
-        self.assertTupleEqual(self.hardware_device.effect_call, ('setStatic', 0, 255, 0))
+        self.assertTupleEqual(
+            self.hardware_device.effect_call, ('setStatic', 0, 255, 0))
 
     def test_notify_run_effect_edge_case_3(self):
         # Set the parent to a blackwidow (non chroma)
@@ -148,7 +150,8 @@ class EffectSyncTest(unittest.TestCase):
 
         self.effect_sync.notify(MSG5)
 
-        self.assertTupleEqual(self.hardware_device.effect_call, ('setBreathSingle', 0, 255, 0))
+        self.assertTupleEqual(self.hardware_device.effect_call,
+                              ('setBreathSingle', 0, 255, 0))
 
     def test_notify_run_effect_edge_case_5(self):
         # Exception of standard setStatic() should be caught

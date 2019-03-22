@@ -6,7 +6,8 @@ import time
 import random
 
 
-COLOURS = (b'\xFF\x00\x00', b'\x00\xFF\x00', b'\x00\x00\xFF', b'\xFF\xFF\x00', b'\xFF\x00\xFF', b'\x00\xFF\xFF')
+COLOURS = (b'\xFF\x00\x00', b'\x00\xFF\x00', b'\x00\x00\xFF',
+           b'\xFF\xFF\x00', b'\xFF\x00\xFF', b'\x00\xFF\xFF')
 
 
 def write_binary(driver_path, device_file, payload):
@@ -25,7 +26,8 @@ def write_string(driver_path, device_file, payload):
 
 
 def find_devices(vid, pid):
-    driver_paths = glob.glob(os.path.join('/sys/bus/hid/drivers/razerfirefly', '*:{0:04X}:{1:04X}.*'.format(vid, pid)))
+    driver_paths = glob.glob(os.path.join(
+        '/sys/bus/hid/drivers/razerfirefly', '*:{0:04X}:{1:04X}.*'.format(vid, pid)))
 
     for driver_path in driver_paths:
         device_type_path = os.path.join(driver_path, 'device_type')
@@ -54,11 +56,16 @@ if __name__ == '__main__':
 
         print("Razer Firefly {0}\n".format(index))
 
-        print("Driver version: {0}".format(read_string(driver_path, 'version')))
-        print("Driver firmware version: {0}".format(read_string(driver_path, 'firmware_version')))
-        print("Device serial: {0}".format(read_string(driver_path, 'device_serial')))
-        print("Device type: {0}".format(read_string(driver_path, 'device_type')))
-        print("Device mode: {0}".format(read_string(driver_path, 'device_mode')))
+        print("Driver version: {0}".format(
+            read_string(driver_path, 'version')))
+        print("Driver firmware version: {0}".format(
+            read_string(driver_path, 'firmware_version')))
+        print("Device serial: {0}".format(
+            read_string(driver_path, 'device_serial')))
+        print("Device type: {0}".format(
+            read_string(driver_path, 'device_type')))
+        print("Device mode: {0}".format(
+            read_string(driver_path, 'device_mode')))
 
         # Set to static red so that we have something standard
         write_binary(driver_path, 'matrix_effect_static', b'\xFF\x00\x00')
@@ -69,17 +76,20 @@ if __name__ == '__main__':
             print("Max brightness...", end='')
             write_string(driver_path, 'matrix_brightness', '255')
             time.sleep(1)
-            print("brightness ({0})".format(read_string(driver_path, 'matrix_brightness')))
+            print("brightness ({0})".format(
+                read_string(driver_path, 'matrix_brightness')))
             time.sleep(1)
             print("Half brightness...", end='')
             write_string(driver_path, 'matrix_brightness', '128')
             time.sleep(1)
-            print("brightness ({0})".format(read_string(driver_path, 'matrix_brightness')))
+            print("brightness ({0})".format(
+                read_string(driver_path, 'matrix_brightness')))
             time.sleep(1)
             print("Zero brightness...", end='')
             write_string(driver_path, 'matrix_brightness', '0')
             time.sleep(1)
-            print("brightness ({0})".format(read_string(driver_path, 'matrix_brightness')))
+            print("brightness ({0})".format(
+                read_string(driver_path, 'matrix_brightness')))
             time.sleep(1)
             write_string(driver_path, 'matrix_brightness', '255')
 
@@ -110,7 +120,8 @@ if __name__ == '__main__':
             write_binary(driver_path, 'matrix_effect_breath', b'\xFF\x00\x00')
             time.sleep(10)
             print("Breathing blue-green")
-            write_binary(driver_path, 'matrix_effect_breath', b'\x00\xFF\x00\x00\x00\xFF')
+            write_binary(driver_path, 'matrix_effect_breath',
+                         b'\x00\xFF\x00\x00\x00\xFF')
             time.sleep(10)
 
         if not args.skip_custom:
@@ -128,7 +139,8 @@ if __name__ == '__main__':
             input()
             write_binary(driver_path, 'matrix_custom_frame', payload_all)
             write_binary(driver_path, 'matrix_effect_custom', b'\x00')
-            print("Custom LED matrix partial colours test. First and last led to white. Press enter to begin.")
+            print(
+                "Custom LED matrix partial colours test. First and last led to white. Press enter to begin.")
             input()
             write_binary(driver_path, 'matrix_custom_frame', payload_m1_5)
             write_binary(driver_path, 'matrix_effect_custom', b'\x00')

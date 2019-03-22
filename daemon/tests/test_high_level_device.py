@@ -45,7 +45,8 @@ class DeviceTest(unittest.TestCase):
 
     def test_device_properties(self):
         dbus_object = DummyDBusObject()
-        device_object = openrazer_daemon.device.Device(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+        device_object = openrazer_daemon.device.Device(
+            DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
 
         self.assertEqual(device_object.device_id, DEVICE1_ID)
         self.assertEqual(device_object.serial, DEVICE1_SERIAL)
@@ -55,7 +56,8 @@ class DeviceTest(unittest.TestCase):
         dbus_object = DummyDBusObject()
         parent_object = DummyParentObject()
 
-        device_object = openrazer_daemon.device.Device(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+        device_object = openrazer_daemon.device.Device(
+            DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
         device_object.register_parent(parent_object)
 
         self.assertEqual(device_object._parent, parent_object)
@@ -65,7 +67,8 @@ class DeviceTest(unittest.TestCase):
 
         dbus_object = DummyDBusObject()
 
-        device_object = openrazer_daemon.device.Device(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+        device_object = openrazer_daemon.device.Device(
+            DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
         device_object.notify_child(msg)
 
         self.assertEqual(dbus_object.notify_msg, msg)
@@ -76,7 +79,8 @@ class DeviceTest(unittest.TestCase):
         dbus_object = DummyDBusObject()
         parent_object = DummyParentObject()
 
-        device_object = openrazer_daemon.device.Device(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+        device_object = openrazer_daemon.device.Device(
+            DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
         device_object.register_parent(parent_object)
 
         device_object.notify_parent(msg)
@@ -147,7 +151,8 @@ class DeviceCollectionTest(unittest.TestCase):
         self.device_collection.add(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
 
         device_id, device_obj1 = list(self.device_collection.id_items())[0]
-        device_serial, device_obj2 = list(self.device_collection.serial_items())[0]
+        device_serial, device_obj2 = list(
+            self.device_collection.serial_items())[0]
 
         self.assertEqual(device_id, DEVICE1_ID)
         self.assertEqual(device_serial, DEVICE1_SERIAL)

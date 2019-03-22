@@ -21,24 +21,31 @@ def ripple_single_type() -> callable:
             try:
                 return int(arg_value)
             except ValueError:
-                raise argparse.ArgumentTypeError("{0} is not an integer".format(arg_value))
+                raise argparse.ArgumentTypeError(
+                    "{0} is not an integer".format(arg_value))
         try:
             return float(arg_value)
         except ValueError:
-            raise argparse.ArgumentTypeError("{0} is not a float".format(arg_value))
+            raise argparse.ArgumentTypeError(
+                "{0} is not a float".format(arg_value))
     return parse
 
 
 parser = argparse.ArgumentParser()
 action = parser.add_mutually_exclusive_group(required=True)
 action.add_argument('--breath-random', action='store_true')
-action.add_argument('--breath-single', nargs=3, metavar=('R', 'G', 'B'), type=int)
-action.add_argument('--breath-dual', nargs=6, metavar=('R1', 'G1', 'B1', 'R2', 'G2', 'B2'), type=int)
-action.add_argument('--reactive', nargs=4, metavar=('TIME', 'R', 'G', 'B'), type=int)
+action.add_argument('--breath-single', nargs=3,
+                    metavar=('R', 'G', 'B'), type=int)
+action.add_argument('--breath-dual', nargs=6, metavar=('R1',
+                                                       'G1', 'B1', 'R2', 'G2', 'B2'), type=int)
+action.add_argument('--reactive', nargs=4,
+                    metavar=('TIME', 'R', 'G', 'B'), type=int)
 action.add_argument('--spectrum', action='store_true')
 action.add_argument('--static', nargs=3, metavar=('R', 'G', 'B'), type=int)
-action.add_argument('--wave', metavar='DIRECTION', choices=('LEFT', 'RIGHT'), type=str)
-action.add_argument('--ripple-single', nargs=4, metavar='R G B REFRESH_RATE', type=ripple_single_type())
+action.add_argument('--wave', metavar='DIRECTION',
+                    choices=('LEFT', 'RIGHT'), type=str)
+action.add_argument('--ripple-single', nargs=4,
+                    metavar='R G B REFRESH_RATE', type=ripple_single_type())
 action.add_argument('--ripple-random', metavar='REFRESH_RATE', type=float)
 
 args = parser.parse_args()
@@ -90,7 +97,8 @@ elif args.breath_dual is not None:
 
 elif args.reactive is not None:
     t, r, g, b = args.reactive
-    assert t in (c.REACTIVE_500MS, c.REACTIVE_1000MS, c.REACTIVE_1500MS, c.REACTIVE_2000MS)
+    assert t in (c.REACTIVE_500MS, c.REACTIVE_1000MS,
+                 c.REACTIVE_1500MS, c.REACTIVE_2000MS)
     assert 0 <= r <= 255, "Red component must be between 0-255 inclusive"
     assert 0 <= g <= 255, "Green component must be between 0-255 inclusive"
     assert 0 <= b <= 255, "Blue component must be between 0-255 inclusive"

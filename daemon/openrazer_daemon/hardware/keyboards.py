@@ -23,9 +23,11 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         super(_MacroKeyboard, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
-        self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
+        self.key_manager = _KeyboardKeyManager(
+            self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
 
-        self.logger.info('Putting device into driver mode. Daemon will handle special functionality')
+        self.logger.info(
+            'Putting device into driver mode. Daemon will handle special functionality')
         self.set_device_mode(0x03, 0x00)  # Driver mode
 
     def _close(self):
@@ -36,7 +38,8 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
 
         try:
             self.set_device_mode(0x00, 0x00)  # Device mode
-        except FileNotFoundError:  # Could be called when daemon is stopping or device is removed.
+        # Could be called when daemon is stopping or device is removed.
+        except FileNotFoundError:
             pass
 
         # TODO look into saving stats in /var/run maybe
@@ -222,7 +225,8 @@ class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
     Class for the Razer Orbweaver Chroma
     """
 
-    EVENT_FILE_REGEX = re.compile(r'.*Razer_Orbweaver_Chroma(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(
+        r'.*Razer_Orbweaver_Chroma(-if01)?-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x0207
@@ -260,7 +264,8 @@ class RazerBlackWidowUltimate2012(_MacroKeyboard):
     """
     Class for the Razer BlackWidow Ultimate 2012
     """
-    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow_Ultimate_2012(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(
+        r'.*Razer_BlackWidow_Ultimate_2012(-if01)?-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x010D
@@ -329,7 +334,8 @@ class RazerBlackWidowUltimate2013(_MacroKeyboard):
     """
     Class for the Razer BlackWidow Ultimate 2013
     """
-    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow_Ultimate(_2013)?(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(
+        r'.*Razer_BlackWidow_Ultimate(_2013)?(-if01)?-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x011A
@@ -408,7 +414,8 @@ class RazerBlackWidowChromaTournamentEdition(_RippleKeyboard):
     """
     Class for the Razer BlackWidow Tournament Edition Chroma
     """
-    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Tournament_Edition_Chroma(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(
+        r'.*BlackWidow_Tournament_Edition_Chroma(-if01)?-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x0209
@@ -461,7 +468,8 @@ class RazerBlackWidowXTournamentEditionChroma(_RippleKeyboard):
     """
     Class for the Razer BlackWidow X Tournament Edition Chroma
     """
-    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_X_Tournament_Edition_Chroma(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(
+        r'.*BlackWidow_X_Tournament_Edition_Chroma(-if01)?-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x021A
@@ -617,7 +625,8 @@ class RazerBlackWidowUltimate2016(_RippleKeyboard):
     """
     Class for the Razer BlackWidow Ultimate 2016
     """
-    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Ultimate_2016(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(
+        r'.*BlackWidow_Ultimate_2016(-if01)?-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x0214

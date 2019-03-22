@@ -80,7 +80,8 @@ class KeyWatcher(threading.Thread):
         :rtype: tuple
         """
         # Event Seconds, Event Microseconds, Event Type, Event Code, Event Value
-        ev_sec, ev_usec, ev_type, ev_code, ev_value = struct.unpack(EVENT_FORMAT, data)
+        ev_sec, ev_usec, ev_type, ev_code, ev_value = struct.unpack(
+            EVENT_FORMAT, data)
 
         if ev_type != 0x01:  # input-event-codes.h EV_KEY 0x01
             return None, None, None
@@ -107,24 +108,28 @@ class KeyWatcher(threading.Thread):
     def __init__(self, device_id, event_files, parent, use_epoll=True):
         super(KeyWatcher, self).__init__()
 
-        self._logger = logging.getLogger('razer.device{0}.keywatcher'.format(device_id))
+        self._logger = logging.getLogger(
+            'razer.device{0}.keywatcher'.format(device_id))
         self._event_files = event_files
         self._shutdown = False
         self._use_epoll = use_epoll
         self._parent = parent
 
-        self.open_event_files = [open(event_file, 'rb') for event_file in self._event_files]
+        self.open_event_files = [open(event_file, 'rb')
+                                 for event_file in self._event_files]
         # Set open files to non blocking mode
         for event_file in self.open_event_files:
             flags = fcntl.fcntl(event_file.fileno(), fcntl.F_GETFL)
-            fcntl.fcntl(event_file.fileno(), fcntl.F_SETFL, flags | os.O_NONBLOCK)
+            fcntl.fcntl(event_file.fileno(), fcntl.F_SETFL,
+                        flags | os.O_NONBLOCK)
 
     def run(self):
         """
         Main event loop
         """
         # Create dict of Event File Descriptor: Event File Object
-        event_file_map = {event_file.fileno(): event_file for event_file in self.open_event_files}
+        event_file_map = {
+            event_file.fileno(): event_file for event_file in self.open_event_files}
 
         # Create epoll object
         poll_object = select.epoll()
@@ -142,7 +147,8 @@ class KeyWatcher(threading.Thread):
                     self._poll_epoll(poll_object, event_file_map)
                 else:
                     self._poll_read()
-            except (IOError, OSError):  # Basically if there's an error, most likely device has been removed then it'll get deleted properly
+            # Basically if there's an error, most likely device has been removed then it'll get deleted properly
+            except (IOError, OSError):
                 pass
 
             time.sleep(SPIN_SLEEP)
@@ -165,7 +171,8 @@ class KeyWatcher(threading.Thread):
                     if not key_data:
                         break
 
-                    date, key_action, key_code = self.parse_event_record(key_data)
+                    date, key_action, key_code = self.parse_event_record(
+                        key_data)
 
                     # Skip if date, key_action and key_code is none as that's a spacer record
                     if date is None:
@@ -232,14 +239,16 @@ class KeyboardKeyManager(object):
     def __init__(self, device_id, event_files, parent, use_epoll=False, testing=False, should_grab_event_files=False):
 
         self._device_id = device_id
-        self._logger = logging.getLogger('razer.device{0}.keymanager'.format(device_id))
+        self._logger = logging.getLogger(
+            'razer.device{0}.keymanager'.format(device_id))
         self._parent = parent
         self._parent.register_observer(self)
         self._testing = testing
 
         self._event_files = event_files
         self._access_lock = threading.Lock()
-        self._keywatcher = KeyWatcher(device_id, event_files, self, use_epoll=use_epoll)
+        self._keywatcher = KeyWatcher(
+            device_id, event_files, self, use_epoll=use_epoll)
         self._open_event_files = self._keywatcher.open_event_files
 
         if len(event_files) > 0:
@@ -396,7 +405,8 @@ class KeyboardKeyManager(object):
                     # Skip as don't care about releasing macro bind key
                     if key_name not in (self._current_macro_bind_key, 'MACROMODE'):
                         # Record key release events
-                        self._current_macro_combo.append((event_time, key_name, 'UP'))
+                        self._current_macro_combo.append(
+                            (event_time, key_name, 'UP'))
 
             else:
                 # Key press
@@ -410,18 +420,22 @@ class KeyboardKeyManager(object):
                     # self._logger.debug("Increased key %s", key_name)
                 except KeyError:
                     # Create bucket
-                    self._stats[storage_bucket] = dict.fromkeys(self.KEY_MAP, 0)
+                    self._stats[storage_bucket] = dict.fromkeys(
+                        self.KEY_MAP, 0)
                     try:
                         # Increment key
                         self._stats[storage_bucket][key_name] += 1
                         # self._logger.debug("Increased key %s", key_name)
                     except KeyError as err:
-                        self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
+                        self._logger.exception(
+                            "Got key error. Couldn't store in bucket", exc_info=err)
 
                 if self._temp_key_store_active:
-                    colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
+                    colour = random_colour_picker(
+                        self._last_colour_choice, COLOUR_CHOICES)
                     self._last_colour_choice = colour
-                    self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_name], colour))
+                    self._temp_key_store.append(
+                        (now + self._temp_expire_time, self.KEY_MAP[key_name], colour))
 
                 # Macro FN+F9 logic
                 if key_name == 'MACROMODE':
@@ -444,7 +458,8 @@ class KeyboardKeyManager(object):
                                 self.add_kb_macro()
                             else:
                                 # Clear macro
-                                self.dbus_delete_macro(self._current_macro_bind_key)
+                                self.dbus_delete_macro(
+                                    self._current_macro_bind_key)
                         self._recording_macro = False
                         self._parent.setMacroMode(False)
                 # Sets up game mode as when enabling macro keys it stops the key working
@@ -457,7 +472,8 @@ class KeyboardKeyManager(object):
                 # Brightness logic
                 elif key_name == 'BRIGHTNESSDOWN':
                     # Get brightness value
-                    current_brightness = self._parent.method_args.get('brightness', None)
+                    current_brightness = self._parent.method_args.get(
+                        'brightness', None)
                     if current_brightness is None:
                         current_brightness = self._parent.getBrightness()
 
@@ -470,7 +486,8 @@ class KeyboardKeyManager(object):
                         #self._parent.method_args['brightness'] = current_brightness
                 elif key_name == 'BRIGHTNESSUP':
                     # Get brightness value
-                    current_brightness = self._parent.method_args.get('brightness', None)
+                    current_brightness = self._parent.method_args.get(
+                        'brightness', None)
                     if current_brightness is None:
                         current_brightness = self._parent.getBrightness()
 
@@ -487,7 +504,8 @@ class KeyboardKeyManager(object):
                     if self._current_macro_bind_key is None:
                         # Restrict macro bind keys to M1-M5
                         if key_name not in ('M1', 'M2', 'M3', 'M4', 'M5'):
-                            self._logger.warning("Macros are only for M1-M5 for now.")
+                            self._logger.warning(
+                                "Macros are only for M1-M5 for now.")
                             self._recording_macro = False
                             self._parent.setMacroMode(False)
                         else:
@@ -495,12 +513,14 @@ class KeyboardKeyManager(object):
                             self._parent.setMacroEffect(0x00)
                     # Don't want no recursion, cancel macro, don't let one call macro in a macro
                     elif key_name == self._current_macro_bind_key:
-                        self._logger.warning("Skipping macro assignment as would cause recursion")
+                        self._logger.warning(
+                            "Skipping macro assignment as would cause recursion")
                         self._recording_macro = False
                         self._parent.setMacroMode(False)
                     # Anything else just record it
                     else:
-                        self._current_macro_combo.append((event_time, key_name, 'DOWN'))
+                        self._current_macro_combo.append(
+                            (event_time, key_name, 'DOWN'))
                 # Not recording anything so if a macro key is pressed then run
                 else:
                     # If key has a macro, play it
@@ -508,7 +528,8 @@ class KeyboardKeyManager(object):
                         self.play_macro(key_name)
 
         except KeyError as err:
-            self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
+            self._logger.exception(
+                "Got key error. Couldn't convert event to key name", exc_info=err)
 
     def add_kb_macro(self):
         """
@@ -551,8 +572,10 @@ class KeyboardKeyManager(object):
         :param macro_key: Macro Key
         :type macro_key: str
         """
-        self._logger.info("Running Macro %s:%s", macro_key, str(self._macros[macro_key]))
-        macro_thread = MacroRunner(self._device_id, macro_key, self._macros[macro_key])
+        self._logger.info("Running Macro %s:%s", macro_key,
+                          str(self._macros[macro_key]))
+        macro_thread = MacroRunner(
+            self._device_id, macro_key, self._macros[macro_key])
         macro_thread.start()
         self._threads.add(macro_thread)
 
@@ -600,7 +623,8 @@ class KeyboardKeyManager(object):
         :param macro_json: Macro JSON
         :type macro_json: str
         """
-        macro_list = [macro_dict_to_obj(macro_object_dict) for macro_object_dict in json.loads(macro_json)]
+        macro_list = [macro_dict_to_obj(macro_object_dict)
+                      for macro_object_dict in json.loads(macro_json)]
         self._macros[macro_key] = macro_list
 
     def close(self):
@@ -650,7 +674,8 @@ class GamepadKeyManager(KeyboardKeyManager):
     GAMEPAD_KEY_MAPPING = TARTARUS_KEY_MAPPING
 
     def __init__(self, device_id, event_files, parent, use_epoll=True, testing=False):
-        super(GamepadKeyManager, self).__init__(device_id, event_files, parent, use_epoll, testing=testing)
+        super(GamepadKeyManager, self).__init__(
+            device_id, event_files, parent, use_epoll, testing=testing)
 
         self._mode_modifier = False
         self._mode_modifier_combo = []
@@ -715,18 +740,22 @@ class GamepadKeyManager(KeyboardKeyManager):
                 # self._logger.debug("Increased key %s", key_name)
             except KeyError:
                 # Create bucket
-                self._stats[storage_bucket] = dict.fromkeys(self.GAMEPAD_KEY_MAPPING, 0)
+                self._stats[storage_bucket] = dict.fromkeys(
+                    self.GAMEPAD_KEY_MAPPING, 0)
                 try:
                     # Increment key
                     self._stats[storage_bucket][key_name] += 1
                     # self._logger.debug("Increased key %s", key_name)
                 except KeyError as err:
-                    self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
+                    self._logger.exception(
+                        "Got key error. Couldn't store in bucket", exc_info=err)
 
             if self._temp_key_store_active:
-                colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
+                colour = random_colour_picker(
+                    self._last_colour_choice, COLOUR_CHOICES)
                 self._last_colour_choice = colour
-                self._temp_key_store.append((now + self._temp_expire_time, self.GAMEPAD_KEY_MAPPING[key_name], colour))
+                self._temp_key_store.append(
+                    (now + self._temp_expire_time, self.GAMEPAD_KEY_MAPPING[key_name], colour))
 
             # if self._testing:
             # if key_press:
@@ -759,7 +788,8 @@ class GamepadKeyManager(KeyboardKeyManager):
                 self.play_macro(key_name)
 
         except KeyError as err:
-            self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
+            self._logger.exception(
+                "Got key error. Couldn't convert event to key name", exc_info=err)
 
         self._access_lock.release()
 

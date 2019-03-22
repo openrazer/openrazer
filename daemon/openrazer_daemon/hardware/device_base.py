@@ -43,8 +43,10 @@ class RazerDevice(DBusService):
 
     def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None, additional_methods=[]):
 
-        self.logger = logging.getLogger('razer.device{0}'.format(device_number))
-        self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
+        self.logger = logging.getLogger(
+            'razer.device{0}'.format(device_number))
+        self.logger.info("Initialising device.%d %s",
+                         device_number, self.__class__.__name__)
 
         # Serial cache
         self._serial = None
@@ -68,7 +70,8 @@ class RazerDevice(DBusService):
         self._is_closed = False
 
         # device methods available in all devices
-        self.methods_internal = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name']
+        self.methods_internal = [
+            'get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name']
         self.methods_internal.extend(additional_methods)
 
         # Find event files in /dev/input/by-id/ by matching against regex
@@ -82,7 +85,8 @@ class RazerDevice(DBusService):
         if os.path.exists(search_dir):
             for event_file in os.listdir(search_dir):
                 if self.EVENT_FILE_REGEX is not None and self.EVENT_FILE_REGEX.match(event_file) is not None:
-                    self.event_files.append(os.path.join(search_dir, event_file))
+                    self.event_files.append(
+                        os.path.join(search_dir, event_file))
 
         object_path = os.path.join(self.OBJECT_PATH, self.serial)
         DBusService.__init__(self, self.BUS_PATH, object_path)
@@ -97,16 +101,20 @@ class RazerDevice(DBusService):
             ('razer.device.misc', 'suspendDevice', self.suspend_device, None, None),
             ('razer.device.misc', 'getDeviceMode', self.get_device_mode, None, 's'),
             ('razer.device.misc', 'getRazerUrls', self.get_image_json, None, 's'),
-            ('razer.device.misc', 'setDeviceMode', self.set_device_mode, 'yy', None),
+            ('razer.device.misc', 'setDeviceMode',
+             self.set_device_mode, 'yy', None),
             ('razer.device.misc', 'resumeDevice', self.resume_device, None, None),
             ('razer.device.misc', 'getVidPid', self.get_vid_pid, None, 'ai'),
-            ('razer.device.misc', 'getDriverVersion', openrazer_daemon.dbus_services.dbus_methods.version, None, 's'),
-            ('razer.device.misc', 'hasDedicatedMacroKeys', self.dedicated_macro_keys, None, 'b'),
+            ('razer.device.misc', 'getDriverVersion',
+             openrazer_daemon.dbus_services.dbus_methods.version, None, 's'),
+            ('razer.device.misc', 'hasDedicatedMacroKeys',
+             self.dedicated_macro_keys, None, 'b'),
         }
 
         for m in methods:
             self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
-            self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
+            self.add_dbus_method(
+                m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
 
         # Load additional DBus methods
         self.load_methods()
@@ -217,7 +225,8 @@ class RazerDevice(DBusService):
                 time.sleep(0.1)
 
                 if len(serial) == 0:
-                    self.logger.debug('getting serial: {0} count:{1}'.format(serial, count))
+                    self.logger.debug(
+                        'getting serial: {0} count:{1}'.format(serial, count))
 
             if serial == '' or serial == 'Default string' or serial == 'empty (NULL)' or serial == 'As printed in the D cover':
                 serial = 'UNKWN{0:012}'.format(random.randint(0, 4096))
@@ -290,7 +299,8 @@ class RazerDevice(DBusService):
         available_functions = {}
         methods = dir(openrazer_daemon.dbus_services.dbus_methods)
         for method in methods:
-            potential_function = getattr(openrazer_daemon.dbus_services.dbus_methods, method)
+            potential_function = getattr(
+                openrazer_daemon.dbus_services.dbus_methods, method)
             if isinstance(potential_function, types.FunctionType) and hasattr(potential_function, 'endpoint') and potential_function.endpoint:
                 available_functions[potential_function.__name__] = potential_function
 
@@ -298,8 +308,10 @@ class RazerDevice(DBusService):
         for method_name in self.methods_internal:
             try:
                 new_function = available_functions[method_name]
-                self.logger.debug("Adding %s.%s method to DBus", new_function.interface, new_function.name)
-                self.add_dbus_method(new_function.interface, new_function.name, new_function, new_function.in_sig, new_function.out_sig, new_function.byte_arrays)
+                self.logger.debug("Adding %s.%s method to DBus",
+                                  new_function.interface, new_function.name)
+                self.add_dbus_method(new_function.interface, new_function.name, new_function,
+                                     new_function.in_sig, new_function.out_sig, new_function.byte_arrays)
             except KeyError as e:
                 self.logger.warning("Couldn't add method to DBus: %s", e)
                 pass
@@ -419,7 +431,8 @@ class RazerDevice(DBusService):
         :return: True if its the correct device ID
         :rtype: bool
         """
-        pattern = r'^[0-9A-F]{4}:' + '{0:04X}'.format(cls.USB_VID) + ':' + '{0:04X}'.format(cls.USB_PID) + r'\.[0-9A-F]{4}$'
+        pattern = r'^[0-9A-F]{4}:' + '{0:04X}'.format(
+            cls.USB_VID) + ':' + '{0:04X}'.format(cls.USB_PID) + r'\.[0-9A-F]{4}$'
 
         if re.match(pattern, device_id) is not None:
             if 'device_type' in os.listdir(dev_path):
@@ -442,7 +455,8 @@ class RazerDeviceSpecialBrightnessSuspend(RazerDevice):
     """
 
     def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None, additional_methods=[]):
-        super().__init__(device_path, device_number, config, testing, additional_interfaces, additional_methods)
+        super().__init__(device_path, device_number, config,
+                         testing, additional_interfaces, additional_methods)
 
     def _suspend_device(self):
         """
@@ -451,7 +465,8 @@ class RazerDeviceSpecialBrightnessSuspend(RazerDevice):
         Get the current brightness level, store it for later and then set the brightness to 0
         """
         self.suspend_args.clear()
-        self.suspend_args['brightness'] = openrazer_daemon.dbus_services.dbus_methods.get_brightness(self)
+        self.suspend_args['brightness'] = openrazer_daemon.dbus_services.dbus_methods.get_brightness(
+            self)
 
         # Todo make it context?
         self.disable_notify = True
@@ -467,7 +482,8 @@ class RazerDeviceSpecialBrightnessSuspend(RazerDevice):
         brightness = self.suspend_args.get('brightness', 100)
 
         self.disable_notify = True
-        openrazer_daemon.dbus_services.dbus_methods.set_brightness(self, brightness)
+        openrazer_daemon.dbus_services.dbus_methods.set_brightness(
+            self, brightness)
         self.disable_notify = False
 
 
@@ -479,4 +495,5 @@ class RazerDeviceBrightnessSuspend(RazerDeviceSpecialBrightnessSuspend):
 
     def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None, additional_methods=[]):
         additional_methods.extend(['get_brightness', 'set_brightness'])
-        super().__init__(device_path, device_number, config, testing, additional_interfaces, additional_methods)
+        super().__init__(device_path, device_number, config,
+                         testing, additional_interfaces, additional_methods)

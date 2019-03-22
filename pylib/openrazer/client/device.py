@@ -44,7 +44,8 @@ class RazerDeviceFactory(__BaseDeviceFactory):
         """
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
-            daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
+            daemon_dbus = session_bus.get_object(
+                "org.razer", "/org/razer/device/{0}".format(serial))
 
         device_dbus = _dbus.Interface(daemon_dbus, "razer.device.misc")
 
@@ -56,12 +57,15 @@ class RazerDeviceFactory(__BaseDeviceFactory):
             device_class = DEVICE_MAP[device_type]
             if hasattr(device_class, 'get_device'):
                 # DeviceFactory
-                device = device_class.get_device(serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
+                device = device_class.get_device(
+                    serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
             else:
                 # DeviceClass
-                device = device_class(serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
+                device = device_class(
+                    serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
         else:
             # No mapping, default to RazerDevice
-            device = DEVICE_MAP['default'](serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
+            device = DEVICE_MAP['default'](
+                serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
 
         return device

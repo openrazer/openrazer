@@ -4,7 +4,8 @@ import glob
 import os
 import shutil
 
-SPECS = {os.path.splitext(os.path.basename(spec_file))[0]: spec_file for spec_file in glob.glob(os.path.join(os.path.dirname(__file__), '*.cfg'))}
+SPECS = {os.path.splitext(os.path.basename(spec_file))[
+    0]: spec_file for spec_file in glob.glob(os.path.join(os.path.dirname(__file__), '*.cfg'))}
 EVENT_FORMAT = '@llHHI'
 EV_KEY = 0x01
 
@@ -68,7 +69,8 @@ class FakeDevice(object):
         self._config.read(SPECS[spec_name])
         self._serial = serial
 
-        self._tmp_dir = os.path.join(tmp_dir, self._config.get('device', 'dir_name'))
+        self._tmp_dir = os.path.join(
+            tmp_dir, self._config.get('device', 'dir_name'))
         os.makedirs(self._tmp_dir, exist_ok=True)
 
         self.endpoints = {}
@@ -109,7 +111,8 @@ class FakeDevice(object):
 
     def create_endpoints(self):
         for endpoint_line in self._config.get('device', 'files').splitlines():
-            chmod, name, default, orig_perm = self.parse_endpoint_line(endpoint_line)
+            chmod, name, default, orig_perm = self.parse_endpoint_line(
+                endpoint_line)
             path = self._get_endpoint_path(name)
 
             if name == 'device_serial' and self._serial is not None:
@@ -169,7 +172,8 @@ class FakeDevice(object):
         else:
             value = 0x00
 
-        event_binary = struct.pack(EVENT_FORMAT, self._tick, 0, EV_KEY, key_code, value)
+        event_binary = struct.pack(
+            EVENT_FORMAT, self._tick, 0, EV_KEY, key_code, value)
         pipe_fd = self.events[file_id][1]
         os.write(pipe_fd, event_binary)
 

@@ -20,9 +20,11 @@ def clamp_to_u8(value):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Set the static effect")
-    parser.add_argument('-d', '--device', type=str, help="Device string like \"0003:1532:0045.000C\"")
+    parser.add_argument('-d', '--device', type=str,
+                        help="Device string like \"0003:1532:0045.000C\"")
 
-    parser.add_argument('--colour', required=True, nargs=3, metavar=("R", "G", "B"), type=int, help="Static colour")
+    parser.add_argument('--colour', required=True, nargs=3,
+                        metavar=("R", "G", "B"), type=int, help="Static colour")
 
     args = parser.parse_args()
     return args
@@ -32,7 +34,8 @@ def run():
     args = parse_args()
 
     if args.device is None:
-        mouse_dirs = glob.glob(os.path.join('/sys/bus/hid/drivers/razermouse/', "*:*:*.*"))
+        mouse_dirs = glob.glob(os.path.join(
+            '/sys/bus/hid/drivers/razermouse/', "*:*:*.*"))
 
         if len(mouse_dirs) > 1:
             print("Multiple mouse directories found. Rerun with -d", file=sys.stderr)
@@ -43,7 +46,8 @@ def run():
 
         mouse_dir = mouse_dirs[0]
     else:
-        mouse_dir = os.path.join('/sys/bus/hid/drivers/razermouse/', args.device)
+        mouse_dir = os.path.join(
+            '/sys/bus/hid/drivers/razermouse/', args.device)
 
     if not os.path.isdir(mouse_dir):
         print("Multiple mouse directories found. Rerun with -d", file=sys.stderr)

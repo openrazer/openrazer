@@ -9,20 +9,27 @@ from openrazer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFac
 
 class RazerKeyboard(__RazerDevice):
     def __init__(self, serial, vid_pid=None, daemon_dbus=None):
-        super(RazerKeyboard, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
+        super(RazerKeyboard, self).__init__(
+            serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
 
         # Capabilities
-        self._capabilities['game_mode_led'] = self._has_feature('razer.device.led.gamemode')
-        self._capabilities['macro_mode_led'] = self._has_feature('razer.device.led.macromode', 'setMacroMode')
-        self._capabilities['macro_mode_led_effect'] = self._has_feature('razer.device.led.macromode', 'setMacroEffect')
-        self._capabilities['macro_mode_modifier'] = self._has_feature('razer.device.macro', 'setModeModifier')
+        self._capabilities['game_mode_led'] = self._has_feature(
+            'razer.device.led.gamemode')
+        self._capabilities['macro_mode_led'] = self._has_feature(
+            'razer.device.led.macromode', 'setMacroMode')
+        self._capabilities['macro_mode_led_effect'] = self._has_feature(
+            'razer.device.led.macromode', 'setMacroEffect')
+        self._capabilities['macro_mode_modifier'] = self._has_feature(
+            'razer.device.macro', 'setModeModifier')
 
         # Setup base stuff if need be
         if self.has('game_mode_led'):
-            self._dbus_interfaces['game_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.gamemode")
+            self._dbus_interfaces['game_mode_led'] = _dbus.Interface(
+                self._dbus, "razer.device.led.gamemode")
 
         if self.has('macro_mode_led'):
-            self._dbus_interfaces['macro_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.macromode")
+            self._dbus_interfaces['macro_mode_led'] = _dbus.Interface(
+                self._dbus, "razer.device.led.macromode")
 
     @property
     def game_mode_led(self) -> bool:

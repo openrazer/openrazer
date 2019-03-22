@@ -15,8 +15,10 @@ from daemonize import Daemonize
 
 # Basically copied from https://github.com/jleclanche/python-xdg/blob/master/xdg/basedir.py
 HOME = os.path.expanduser("~")
-XDG_DATA_HOME = os.environ.get("XDG_DATA_HOME", os.path.join(HOME, ".local", "share"))
-XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME", os.path.join(HOME, ".config"))
+XDG_DATA_HOME = os.environ.get(
+    "XDG_DATA_HOME", os.path.join(HOME, ".local", "share"))
+XDG_CONFIG_HOME = os.environ.get(
+    "XDG_CONFIG_HOME", os.path.join(HOME, ".config"))
 
 RAZER_DATA_HOME = os.path.join(XDG_DATA_HOME, "openrazer")
 XDG_RUNTIME_DIR = os.environ.get("XDG_RUNTIME_DIR", RAZER_DATA_HOME)
@@ -34,21 +36,31 @@ args = None
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose logging')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        help='Enable verbose logging')
 
-    parser.add_argument('-F', '--foreground', action='store_true', help='Don\'t fork stay in the foreground')
+    parser.add_argument('-F', '--foreground', action='store_true',
+                        help='Don\'t fork stay in the foreground')
 
-    parser.add_argument('-r', '--respawn', action='store_true', help='Stop any existing daemon first, if one is running.')
-    parser.add_argument('-s', '--stop', action='store_true', help='Gracefully stop the existing daemon.')
-    parser.add_argument('--version', action='version', version='%(prog)s {version}'.format(version=__version__))
+    parser.add_argument('-r', '--respawn', action='store_true',
+                        help='Stop any existing daemon first, if one is running.')
+    parser.add_argument('-s', '--stop', action='store_true',
+                        help='Gracefully stop the existing daemon.')
+    parser.add_argument('--version', action='version',
+                        version='%(prog)s {version}'.format(version=__version__))
 
-    parser.add_argument('--as-root', action='store_true', help='Allow the daemon to be started as root')
+    parser.add_argument('--as-root', action='store_true',
+                        help='Allow the daemon to be started as root')
 
-    parser.add_argument('--config', type=str, help='Location of the config file', default=CONF_FILE)
-    parser.add_argument('--run-dir', type=str, help='Location of the run directory', default=RAZER_RUNTIME_DIR)
-    parser.add_argument('--log-dir', type=str, help='Location of the log directory', default=LOG_PATH)
+    parser.add_argument('--config', type=str,
+                        help='Location of the config file', default=CONF_FILE)
+    parser.add_argument('--run-dir', type=str,
+                        help='Location of the run directory', default=RAZER_RUNTIME_DIR)
+    parser.add_argument('--log-dir', type=str,
+                        help='Location of the log directory', default=LOG_PATH)
 
-    parser.add_argument('--test-dir', type=str, help='Directory containing test driver structure')
+    parser.add_argument('--test-dir', type=str,
+                        help='Directory containing test driver structure')
 
     return parser.parse_args()
 
@@ -95,7 +107,8 @@ def stop_daemon(args):
     except FileNotFoundError:
         print("No pidfile found, assuming openrazer-daemon is not running")
     except ProcessLookupError:
-        print("pidfile exists but no process is running. Remove {} and continue".format(pidfile))
+        print("pidfile exists but no process is running. Remove {} and continue".format(
+            pidfile))
 
 
 def install_example_config_file(config_file):

@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import openrazer._fake_driver as fake_driver
 import argparse
 import atexit
 import cmd
@@ -9,8 +10,6 @@ import tempfile
 
 PYLIB = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'pylib')
 sys.path.insert(1, PYLIB)
-
-import openrazer._fake_driver as fake_driver
 
 
 class FakeDevicePrompt(cmd.Cmd):
@@ -40,7 +39,8 @@ class FakeDevicePrompt(cmd.Cmd):
                 self._ep[endpoint] = details[2]
 
             self._read = [endpoint for endpoint, perm in self._ep.items()]
-            self._write = [endpoint for endpoint, perm in self._ep.items() if perm in ('w', 'rw')]
+            self._write = [endpoint for endpoint,
+                           perm in self._ep.items() if perm in ('w', 'rw')]
         else:
             self._current_device = None
             self.prompt = "> "
@@ -51,7 +51,8 @@ class FakeDevicePrompt(cmd.Cmd):
         """
         if arg in self._device_map:
             if arg is None or len(arg) == 0:
-                print('Need to specify a device name. One of: {0}'.format(','.join(self._device_map.keys())))
+                print('Need to specify a device name. One of: {0}'.format(
+                    ','.join(self._device_map.keys())))
             else:
                 self._change_device(arg)
         else:
@@ -61,7 +62,8 @@ class FakeDevicePrompt(cmd.Cmd):
         if not text:
             completions = list(self._device_map.keys())
         else:
-            completions = [item for item in list(self._device_map.keys()) if item.startswith(text)]
+            completions = [item for item in list(
+                self._device_map.keys()) if item.startswith(text)]
 
         return completions
 
@@ -95,7 +97,8 @@ class FakeDevicePrompt(cmd.Cmd):
         """Read ASCII from given device file"""
         if self._current_device is not None:
             if arg in self._ep:
-                result = self._device_map[self._current_device].get(arg, binary=binary)
+                result = self._device_map[self._current_device].get(
+                    arg, binary=binary)
 
                 print(result)
             elif arg in self._ep:
@@ -111,7 +114,8 @@ class FakeDevicePrompt(cmd.Cmd):
         if not text:
             completions = self._read
         else:
-            completions = [item for item in self._read if item.startswith(text)]
+            completions = [
+                item for item in self._read if item.startswith(text)]
 
         return completions
 
@@ -125,9 +129,11 @@ class FakeDevicePrompt(cmd.Cmd):
 
                 if device_file in self._ep:
                     if len(data) > 0:
-                        self._device_map[self._current_device].set(device_file, data)
+                        self._device_map[self._current_device].set(
+                            device_file, data)
 
-                        print("{0}: {1}".format(device_file, self._device_map[self._current_device].get(device_file)))
+                        print("{0}: {1}".format(
+                            device_file, self._device_map[self._current_device].get(device_file)))
                 else:
                     print("Device endpoint not found")
 
@@ -138,7 +144,8 @@ class FakeDevicePrompt(cmd.Cmd):
         if not text:
             completions = self._write
         else:
-            completions = [item for item in self._write if item.startswith(text)]
+            completions = [
+                item for item in self._write if item.startswith(text)]
 
         return completions
 
@@ -154,8 +161,10 @@ class FakeDevicePrompt(cmd.Cmd):
                 print("Event ID {0} is invalid".format(event_file))
             else:
                 try:
-                    bytes_written = self._device_map[self._current_device].emit_kb_event(event_file, int(key_id), value)
-                    print("Wrote {0} bytes to {1}".format(bytes_written, self._device_map[self._current_device].events[event_file][0]))
+                    bytes_written = self._device_map[self._current_device].emit_kb_event(
+                        event_file, int(key_id), value)
+                    print("Wrote {0} bytes to {1}".format(
+                        bytes_written, self._device_map[self._current_device].events[event_file][0]))
                 except ValueError as err:
                     print("Caught exception: {0}".format(err))
 
@@ -184,11 +193,16 @@ def create_envionment(device_name, destination):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('device', metavar='DEVICE', nargs='+', help='Device config name')
-    parser.add_argument('--dest', metavar='DESTDIR', required=False, default=None, help='Directory to create driver files in. If omitted then a tmp directory is used')
-    parser.add_argument('--non-interactive', dest='interactive', action='store_false', help='Dont display prompt, just hang until killed')
-    parser.add_argument('--clear-dest', action='store_true', help='Clear the destination folder if it exists before starting')
-    parser.add_argument('--create-only', action='store_true', help='Create the target structure and then exit')
+    parser.add_argument('device', metavar='DEVICE',
+                        nargs='+', help='Device config name')
+    parser.add_argument('--dest', metavar='DESTDIR', required=False, default=None,
+                        help='Directory to create driver files in. If omitted then a tmp directory is used')
+    parser.add_argument('--non-interactive', dest='interactive',
+                        action='store_false', help='Dont display prompt, just hang until killed')
+    parser.add_argument('--clear-dest', action='store_true',
+                        help='Clear the destination folder if it exists before starting')
+    parser.add_argument('--create-only', action='store_true',
+                        help='Create the target structure and then exit')
 
     return parser.parse_args()
 
@@ -213,7 +227,8 @@ def run():
 
         # Register cleanup
         if args.dest is None:
-            atexit.register(lambda: shutil.rmtree(destination, ignore_errors=True))
+            atexit.register(lambda: shutil.rmtree(
+                destination, ignore_errors=True))
         else:
             for device in device_map.values():
                 # device = FakeDriver

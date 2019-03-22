@@ -6,8 +6,10 @@ what element in the 22 RGB list each key refers to.
 
 import glob
 
-colour_file = glob.glob('/sys/bus/hid/drivers/razerkbd/0*/matrix_custom_frame')[0]
-custom_mode = glob.glob('/sys/bus/hid/drivers/razerkbd/0*/matrix_effect_custom')[0]
+colour_file = glob.glob(
+    '/sys/bus/hid/drivers/razerkbd/0*/matrix_custom_frame')[0]
+custom_mode = glob.glob(
+    '/sys/bus/hid/drivers/razerkbd/0*/matrix_effect_custom')[0]
 
 
 def clear_row(row_num):

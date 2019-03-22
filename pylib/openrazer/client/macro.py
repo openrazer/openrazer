@@ -10,7 +10,8 @@ class RazerMacro(object):
     def __init__(self, serial: str, devname: str, daemon_dbus=None, capabilities=None):
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
-            daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
+            daemon_dbus = session_bus.get_object(
+                "org.razer", "/org/razer/device/{0}".format(serial))
 
         if capabilities is None:
             self._capabilities = {}
@@ -56,7 +57,8 @@ class RazerMacro(object):
         macro_list = []
         for macro_obj in macro_object_sequence:
             if not isinstance(macro_obj, _daemon_macro.MacroObject):
-                raise ValueError("{0} is not a macro object".format(str(macro_obj)))
+                raise ValueError(
+                    "{0} is not a macro object".format(str(macro_obj)))
 
             macro_list.append(macro_obj.to_dict())
 
@@ -77,7 +79,8 @@ class RazerMacro(object):
             map_str = "keyboard.NAGA_HEX_V2_KEY_MAPPING"
 
         if bind_key not in key_map:
-            raise ValueError("Key {0} is not in openrazer.{1}".format(bind_key, map_str))
+            raise ValueError(
+                "Key {0} is not in openrazer.{1}".format(bind_key, map_str))
         else:
             self._macro_dbus.deleteMacro(bind_key)
 

@@ -29,15 +29,19 @@ def loop_on_event(event_file, mapping):
 
                 code = mapping.get(code, code)
 
-                print("Type: EV_KEY, Code: {0}, Value: {1}".format(code, value))
+                print("Type: EV_KEY, Code: {0}, Value: {1}".format(
+                    code, value))
             else:
-                print("Type: {0}, Code: {1}, Value: {2}".format(ev_type, code, value))
+                print("Type: {0}, Code: {1}, Value: {2}".format(
+                    ev_type, code, value))
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('event_file', metavar='EVENT_FILE', type=str, help="Device event file like \"/dev/input/by-id/usb-Razer_Razer_BlackWidow_Chroma-event-kbd\"")
-    parser.add_argument('--tartarus', action='store_true', help='Use the tartarus event mapping instead')
+    parser.add_argument('event_file', metavar='EVENT_FILE', type=str,
+                        help="Device event file like \"/dev/input/by-id/usb-Razer_Razer_BlackWidow_Chroma-event-kbd\"")
+    parser.add_argument('--tartarus', action='store_true',
+                        help='Use the tartarus event mapping instead')
 
     return parser.parse_args()
 

@@ -24,7 +24,8 @@ class BatteryNotifier(threading.Thread):
 
     def __init__(self, parent, device_id, device_name):
         super(BatteryNotifier, self).__init__()
-        self._logger = logging.getLogger('razer.device{0}.batterynotifier'.format(device_id))
+        self._logger = logging.getLogger(
+            'razer.device{0}.batterynotifier'.format(device_id))
         self._notify2 = notify2 is not None
 
         self.event = threading.Event()
@@ -33,7 +34,8 @@ class BatteryNotifier(threading.Thread):
             try:
                 notify2.init('openrazer_daemon')
             except Exception as err:
-                self._logger.warning("Failed to init notification daemon, err: {0}".format(err))
+                self._logger.warning(
+                    "Failed to init notification daemon, err: {0}".format(err))
                 self._notify2 = False
 
         self._shutdown = False
@@ -81,15 +83,18 @@ class BatteryNotifier(threading.Thread):
 
             if battery_level < 10.0:
                 if self._notify2:
-                    self._notification.update(summary="{0} Battery at {1:.1f}%".format(self._device_name, battery_level), message='Please charge your device', icon='notification-battery-low')
+                    self._notification.update(summary="{0} Battery at {1:.1f}%".format(
+                        self._device_name, battery_level), message='Please charge your device', icon='notification-battery-low')
                     self._notification.show()
             else:
                 if self._notify2:
-                    self._notification.update(summary="{0} Battery at {1:.1f}%".format(self._device_name, battery_level))
+                    self._notification.update(summary="{0} Battery at {1:.1f}%".format(
+                        self._device_name, battery_level))
                     self._notification.show()
 
             if self._notify2:
-                self._logger.debug("{0} Battery at {1:.1f}%".format(self._device_name, battery_level))
+                self._logger.debug("{0} Battery at {1:.1f}%".format(
+                    self._device_name, battery_level))
 
     def run(self):
         """
@@ -111,10 +116,12 @@ class BatteryManager(object):
     """
 
     def __init__(self, parent, device_number, device_name):
-        self._logger = logging.getLogger('razer.device{0}.batterymanager'.format(device_number))
+        self._logger = logging.getLogger(
+            'razer.device{0}.batterymanager'.format(device_number))
         self._parent = parent
 
-        self._battery_thread = BatteryNotifier(parent, device_number, device_name)
+        self._battery_thread = BatteryNotifier(
+            parent, device_number, device_name)
         self._battery_thread.start()
 
         self._is_closed = False
