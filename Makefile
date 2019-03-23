@@ -22,12 +22,12 @@ all: driver
 driver:
 	@echo -e "\n::\033[32m Compiling OpenRazer kernel modules\033[0m"
 	@echo "========================================"
-	make -C $(KERNELDIR) M=$(DRIVERDIR) modules
+	$(MAKE) -C $(KERNELDIR) M=$(DRIVERDIR) modules
 
 driver_clean:
 	@echo -e "\n::\033[32m Cleaning OpenRazer kernel modules\033[0m"
 	@echo "========================================"
-	make -C "$(KERNELDIR)" M="$(DRIVERDIR)" clean
+	$(MAKE) -C "$(KERNELDIR)" M="$(DRIVERDIR)" clean
 
 # Install kernel modules and then update module dependencies
 driver_install:
