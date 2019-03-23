@@ -83,7 +83,10 @@ static const struct razer_key_translation chroma_keys_2[] = {
 	{ KEY_F7, KEY_PREVIOUSSONG },
 	{ KEY_F8, KEY_NEXTSONG },
 	{ KEY_F11, RAZER_GAME_KEY },
-	//     { KEY_F12,   RAZER_EFFECT_KEY }, // enable if daemon supports, see #577
+#if 0
+	// enable if daemon supports, see #577
+	{ KEY_F12,   RAZER_EFFECT_KEY },
+#endif
 	{ KEY_RIGHTALT, RAZER_MACRO_KEY },
 
 	{ KEY_PAUSE, KEY_SLEEP },
@@ -179,8 +182,6 @@ razer_send_payload(struct usb_device *usb_dev,
 			print_erroneous_report(
 				&response_report, "razerkbd",
 				"Response doesn't match request");
-			//		} else if (response_report.status == RAZER_CMD_BUSY) {
-			//			print_erroneous_report(&response_report, "razerkbd", "Device is busy");
 		} else if (response_report.status == RAZER_CMD_FAILURE) {
 			print_erroneous_report(&response_report, "razerkbd",
 					       "Command failed");
@@ -1264,7 +1265,6 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev,
 				0x3F; // TODO move to a usb_device variable
 			razer_send_payload(usb_dev, &report);
 			break;
-			// TODO move default to case 1:. Then default: printk(warning). Also remove pointless buffer
 		}
 		break;
 
@@ -1293,7 +1293,6 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev,
 					VARSTORE, BACKLIGHT_LED);
 			razer_send_payload(usb_dev, &report);
 			break;
-			// TODO move default to case 1:. Then default: printk(warning). Also remove pointless buffer
 		}
 		break;
 	}
@@ -1632,8 +1631,6 @@ razer_attr_write_matrix_custom_frame(struct device *dev,
 	unsigned char stop_col;
 	unsigned char row_length;
 
-	//printk(KERN_ALERT "razerkbd: Total count: %d\n", (unsigned char)count);
-
 	while (offset < count) {
 		if (offset + 3 > count) {
 			printk(KERN_ALERT
@@ -1645,8 +1642,6 @@ razer_attr_write_matrix_custom_frame(struct device *dev,
 		start_col = buf[offset++];
 		stop_col = buf[offset++];
 		row_length = ((stop_col + 1) - start_col) * 3;
-
-		// printk(KERN_ALERT "razerkbd: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
 
 		if (start_col > stop_col) {
 			printk(KERN_ALERT
@@ -1800,7 +1795,6 @@ static ssize_t razer_attr_read_key_alt_f4(struct device *dev,
  * Write only is 0220
  * Read and write is 0664
  */
-// TODO device_mode endpoint
 static DEVICE_ATTR(game_led_state, 0660, razer_attr_read_mode_game,
 		   razer_attr_write_mode_game);
 static DEVICE_ATTR(macro_led_state, 0660, razer_attr_read_mode_macro,
@@ -1972,9 +1966,8 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report,
 		    USB_INTERFACE_PROTOCOL_KEYBOARD &&
 	    size == 16 && data[0] == 0x04) {
 		// Convert 04... to 0100...
-		int index =
-			size -
-			1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
+		// This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
+		int index = size - 1;
 		u8 cur_value = 0x00;
 		int found_fn = 0x00;
 
@@ -1986,7 +1979,6 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report,
 
 			switch (cur_value) {
 			case 0x01: // FN
-				//cur_value = 0x73; // F24
 				cur_value = 0x00;
 				found_fn = 0x01;
 				break;
@@ -2016,7 +2008,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report,
 		data[1] = 0x00;
 
 		// Some reason just by editing data, it generates a normal event above. (Could quite possibly work like that, no clue)
-		//hid_report_raw_event(hdev, HID_INPUT_REPORT, data, size, 0);
+		// hid_report_raw_event(hdev, HID_INPUT_REPORT, data, size, 0);
 		return 1;
 	}
 
@@ -2678,8 +2670,6 @@ static int razer_kbd_probe(struct hid_device *hdev,
 		usb_disable_autosuspend(usb_dev);
 	}
 
-	//razer_activate_macro_keys(usb_dev);
-	//msleep(3000);
 	return 0;
 exit:
 	return retval;

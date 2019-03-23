@@ -75,8 +75,6 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev,
 			print_erroneous_report(
 				&response_report, "razermouse",
 				"Response doesn't match request");
-			//        } else if (response_report.status == RAZER_CMD_BUSY) {
-			//            print_erroneous_report(&response_report, "razermouse", "Device is busy");
 		} else if (response_report.status == RAZER_CMD_FAILURE) {
 			print_erroneous_report(&response_report, "razermouse",
 					       "Command failed");
@@ -1105,8 +1103,6 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev,
 	unsigned char stop_col;
 	unsigned char row_length;
 
-	//printk(KERN_ALERT "razermouse: Total count: %d\n", (unsigned char)count);
-
 	while (offset < count) {
 		if (offset + 3 > count) {
 			printk(KERN_ALERT
@@ -1118,8 +1114,6 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev,
 		start_col = buf[offset++];
 		stop_col = buf[offset++];
 		row_length = ((stop_col + 1) - start_col) * 3;
-
-		// printk(KERN_ALERT "razermouse: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
 
 		// Mouse only has 1 row, row0 (pseudo row as the command actually doesn't take rows)
 		if (row_id != 0) {
@@ -2316,9 +2310,8 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report,
 		    USB_INTERFACE_PROTOCOL_KEYBOARD &&
 	    size == 16 && data[0] == 0x04) {
 		// Convert 04... to 0100...
-		int index =
-			size -
-			1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
+		// This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
+		int index = size - 1;
 		u8 cur_value = 0x00;
 
 		while (--index > 0) {
@@ -2760,9 +2753,6 @@ static int razer_mouse_probe(struct hid_device *hdev,
 		goto exit_free;
 	}
 
-	//razer_reset(usb_dev);
-	//razer_activate_macro_keys(usb_dev);
-	//msleep(3000);
 	return 0;
 exit:
 	return retval;

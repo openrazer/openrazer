@@ -188,7 +188,6 @@ unsigned int get_rgb_from_addr(struct device *dev, unsigned short address,
 
 	// Check for actual data
 	if (device->data[0] == 0x05) {
-		//printk(KERN_CRIT "razerkraken: Got %02x%02x%02x %02x\n", device->data[1], device->data[2], device->data[3], device->data[4]);
 		memcpy(&buf[0], &device->data[1], len);
 		written = len;
 	} else {
@@ -234,11 +233,13 @@ static ssize_t razer_attr_read_device_type(struct device *dev,
 		break;
 
 	case USB_DEVICE_ID_RAZER_KRAKEN:
-		device_type = "Razer Kraken 7.1 Chroma\n"; // Rainie
+		// Rainie
+		device_type = "Razer Kraken 7.1 Chroma\n";
 		break;
 
 	case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-		device_type = "Razer Kraken 7.1 V2\n"; // Kylie
+		// Kylie
+		device_type = "Razer Kraken 7.1 V2\n";
 		break;
 
 	default:
@@ -984,9 +985,8 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report,
 {
 	struct razer_kraken_device *device = dev_get_drvdata(&hdev->dev);
 
-	//printk(KERN_WARNING "razerkraken: Got raw message %d\n", size);
-
-	if (size == 33) { // Should be a response to a Control packet
+	if (size == 33) {
+		// Should be a response to a Control packet
 		memcpy(&device->data[0], &data[0], size);
 
 	} else {

@@ -74,8 +74,6 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev,
 			print_erroneous_report(
 				&response_report, "razermug",
 				"Response doesn't match request");
-			//        } else if (response_report.status == RAZER_CMD_BUSY) {
-			//            print_erroneous_report(&response_report, "razermouse", "Device is busy");
 		} else if (response_report.status == RAZER_CMD_FAILURE) {
 			print_erroneous_report(&response_report, "razermug",
 					       "Command failed");
@@ -378,8 +376,6 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev,
 	unsigned char stop_col;
 	unsigned char row_length;
 
-	//printk(KERN_ALERT "razermyg: Total count: %d\n", (unsigned char)count);
-
 	while (offset < count) {
 		if (offset + 3 > count) {
 			printk(KERN_ALERT
@@ -391,8 +387,6 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev,
 		start_col = buf[offset++];
 		stop_col = buf[offset++];
 		row_length = ((stop_col + 1) - start_col) * 3;
-
-		// printk(KERN_ALERT "razermug: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
 
 		if (row_id != 0) {
 			printk(KERN_ALERT "razermug: Row ID must be 0\n");
