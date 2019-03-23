@@ -262,7 +262,7 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev,
 		razer_send_payload(usb_dev, &report);
 
 	} else {
-		printk(KERN_WARNING
+		printk(KERN_ERR
 		       "razergoliathus: Reactive only accepts Speed, RGB (4byte)");
 	}
 	return count;
@@ -340,7 +340,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev,
 			VARSTORE, MOUSEPAD_LED, (struct razer_rgb *)&buf[0]);
 		razer_send_payload(usb_dev, &report);
 	} else {
-		printk(KERN_WARNING
+		printk(KERN_ERR
 		       "razergoliathus: Static mode only accepts RGB (3byte)");
 	}
 
@@ -370,7 +370,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev,
 
 	while (offset < count) {
 		if (offset + 3 > count) {
-			printk(KERN_ALERT
+			printk(KERN_ERR
 			       "razergoliathus: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
 			break;
 		}
@@ -381,18 +381,18 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev,
 		row_length = ((stop_col + 1) - start_col) * 3;
 
 		if (row_id != 0) {
-			printk(KERN_ALERT "razergoliathus: Row ID must be 0\n");
+			printk(KERN_ERR "razergoliathus: Row ID must be 0\n");
 			break;
 		}
 
 		if (start_col > stop_col) {
-			printk(KERN_ALERT
+			printk(KERN_ERR
 			       "razergoliathus: Start column is greater than end column\n");
 			break;
 		}
 
 		if (offset + row_length > count) {
-			printk(KERN_ALERT
+			printk(KERN_ERR
 			       "razergoliathus: Not enough RGB to fill row\n");
 			break;
 		}
@@ -423,7 +423,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev,
 		report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
 		razer_send_payload(usb_dev, &report);
 	} else {
-		printk(KERN_WARNING
+		printk(KERN_ERR
 		       "razergoliathus: Device mode only takes 2 bytes.");
 	}
 
