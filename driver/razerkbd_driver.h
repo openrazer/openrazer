@@ -10,8 +10,8 @@
  * any later version.
  */
 
-#ifndef __HID_RAZER_KEYBOARD_BLACKWIDOW_CHROMA_H
-#define __HID_RAZER_KEYBOARD_BLACKWIDOW_CHROMA_H
+#ifndef __HID_RAZER_KBD_H
+#define __HID_RAZER_KBD_H
 
 #define USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012 0x010D
 // 2011 or so edition, see https://web.archive.org/web/20111113132427/http://store.razerzone.com:80/store/razerusa/en_US/pd/productID.235228400/categoryId.49136200/parentCategoryId.35156900
