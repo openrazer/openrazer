@@ -14,10 +14,10 @@ ATTRS{idProduct}=="010d|010e|0111|0113|011b|011a|010f|0201|0202|0203|0204|0205|0
     ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerkbd"
 
-# Firefly
+# Mouse Mats
 ATTRS{idProduct}=="0c00", \
     ATTRS{idVendor}=="1532", \
-    ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerfirefly"
+    ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razermousemat"
 
 # Kraken
 ATTRS{idProduct}=="0501|0504|0506|0510", \
