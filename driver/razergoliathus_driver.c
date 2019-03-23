@@ -41,7 +41,7 @@ MODULE_LICENSE(DRIVER_LICENSE);
 static unsigned char saved_brightness = 0;
 
 /**
- * Send report to the firefly
+ * Send report to the mousepad
  */
 int razer_get_report(struct usb_device *usb_dev,
 		     struct razer_report *request_report,
@@ -308,7 +308,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev,
 /**
  * Write device file "mode_custom"
  *
- * Sets the firefly to custom mode whenever the file is written to
+ * Sets the mousepad to custom mode whenever the file is written to
  */
 static ssize_t razer_attr_write_mode_custom(struct device *dev,
 					    struct device_attribute *attr,
@@ -325,7 +325,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev,
 /**
  * Write device file "mode_static"
  *
- * Set the firefly to static mode when 3 RGB bytes are written
+ * Set the mousepad to static mode when 3 RGB bytes are written
  */
 static ssize_t razer_attr_write_mode_static(struct device *dev,
 					    struct device_attribute *attr,
@@ -350,7 +350,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev,
 /**
  * Write device file "set_key_row"
  *
- * Writes the colour to the LEDs of the firefly
+ * Writes the colour to the LEDs of the mousepad
  *
  * Start is 0x00
  * Stop is 0x0E
@@ -381,19 +381,19 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev,
 		row_length = ((stop_col + 1) - start_col) * 3;
 
 		if (row_id != 0) {
-			printk(KERN_ALERT "razerfirefly: Row ID must be 0\n");
+			printk(KERN_ALERT "razergoliathus: Row ID must be 0\n");
 			break;
 		}
 
 		if (start_col > stop_col) {
 			printk(KERN_ALERT
-			       "razerfirefly: Start column is greater than end column\n");
+			       "razergoliathus: Start column is greater than end column\n");
 			break;
 		}
 
 		if (offset + row_length > count) {
 			printk(KERN_ALERT
-			       "razerfirefly: Not enough RGB to fill row\n");
+			       "razergoliathus: Not enough RGB to fill row\n");
 			break;
 		}
 
