@@ -80,6 +80,8 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Device                                        | USB VID:PID |
 | --------------------------------------------- | ----------- |
 | Razer Firefly                                 |  1532:0C00  |
+| Razer Goliathus                               |  1532:0C01  |
+| Razer Goliathus Extended                      |  1532:0C02  |
 
 ### Headsets
 | Device                                        | USB VID:PID |
