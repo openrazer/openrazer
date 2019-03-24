@@ -15,7 +15,7 @@ ATTRS{idProduct}=="010d|010e|0111|0113|011b|011a|010f|0201|0202|0203|0204|0205|0
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerkbd"
 
 # Mouse Mats
-ATTRS{idProduct}=="0c00", \
+ATTRS{idProduct}=="0c00|0c01|0c02", \
     ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razermousemat"
 
