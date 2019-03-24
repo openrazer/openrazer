@@ -55,7 +55,7 @@ int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_re
 struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
     int retval = -1;
-    struct razer_report response_report;
+    struct razer_report response_report = {0};
 
     request_report->crc = razer_calculate_crc(request_report);
 
@@ -229,7 +229,7 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_firmware_version();
-    struct razer_report response_report;
+    struct razer_report response_report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Orochi 2011 doesn't have FW
@@ -273,7 +273,7 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -337,7 +337,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 3) {
         switch (usb_dev->descriptor.idProduct) {
@@ -390,7 +390,7 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -421,7 +421,7 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 4) {
         unsigned char speed = (unsigned char)buf[0];
@@ -458,7 +458,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch (usb_dev->descriptor.idProduct) { // TODO refactor to have 2 methods to split out the breathing crap
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -514,7 +514,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     char serial_string[23];
     struct razer_report report = razer_chroma_standard_get_serial();
-    struct razer_report response_report;
+    struct razer_report response_report = {0};
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
@@ -577,7 +577,7 @@ static ssize_t razer_attr_write_set_charging_effect(struct device *dev, struct d
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 1) {
         report = razer_chroma_misc_set_dock_charge_type(buf[0]);
@@ -622,7 +622,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_misc_get_polling_rate();
-    struct razer_report response_report;
+    struct razer_report response_report = {0};
     unsigned short polling_rate = 0;
 
     switch(device->usb_pid) {
@@ -694,7 +694,7 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
@@ -729,8 +729,8 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
-    struct razer_report response;
+    struct razer_report report = {0};
+    struct razer_report response = {0};
     unsigned char brightness_index = 0x02;
 
     switch(usb_dev->descriptor.idProduct) {
@@ -768,7 +768,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
 static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report report;
+    struct razer_report report = {0};
     unsigned short dpi_x;
     unsigned short dpi_y;
     unsigned char dpi_x_byte;
@@ -863,8 +863,8 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
 static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report report;
-    struct razer_report response;
+    struct razer_report report = {0};
+    struct razer_report response = {0};
     unsigned short dpi_x;
     unsigned short dpi_y;
 
@@ -955,7 +955,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
-    struct razer_report report;
+    struct razer_report report = {0};
     size_t offset = 0;
     unsigned char row_id;
     unsigned char start_col;
@@ -1038,7 +1038,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 2) {
         report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
@@ -1071,7 +1071,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_device_mode();
-    struct razer_report response;
+    struct razer_report response = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
@@ -1097,7 +1097,7 @@ static ssize_t razer_attr_read_scroll_led_brightness(struct device *dev, struct 
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_led_brightness(VARSTORE, SCROLL_WHEEL_LED);
-    struct razer_report response;
+    struct razer_report response = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1128,7 +1128,7 @@ static ssize_t razer_attr_write_scroll_led_brightness(struct device *dev, struct
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1158,8 +1158,8 @@ static ssize_t razer_attr_read_logo_led_brightness(struct device *dev, struct de
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
-    struct razer_report response;
+    struct razer_report report = {0};
+    struct razer_report response = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1190,7 +1190,7 @@ static ssize_t razer_attr_write_logo_led_brightness(struct device *dev, struct d
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1246,7 +1246,7 @@ static ssize_t razer_attr_read_scroll_led_state(struct device *dev, struct devic
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, SCROLL_WHEEL_LED);
-    struct razer_report response;
+    struct razer_report response = {0};
     report.transaction_id.id = 0x3F;
 
     switch (device->usb_pid) {
@@ -1294,7 +1294,7 @@ static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, LOGO_LED);
-    struct razer_report response;
+    struct razer_report response = {0};
     report.transaction_id.id = 0x3F;
 
     switch (device->usb_pid) {
@@ -1316,7 +1316,7 @@ static ssize_t razer_attr_write_scroll_led_rgb(struct device *dev, struct device
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 3) {
         report = razer_chroma_standard_set_led_rgb(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
@@ -1337,7 +1337,7 @@ static ssize_t razer_attr_read_scroll_led_rgb(struct device *dev, struct device_
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_led_rgb(VARSTORE, SCROLL_WHEEL_LED);
-    struct razer_report response;
+    struct razer_report response = {0};
     report.transaction_id.id = 0x3F;
     response = razer_send_payload(usb_dev, &report);
 
@@ -1352,7 +1352,7 @@ static ssize_t razer_attr_write_logo_led_rgb(struct device *dev, struct device_a
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 3) {
         report = razer_chroma_standard_set_led_rgb(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
@@ -1373,7 +1373,7 @@ static ssize_t razer_attr_read_logo_led_rgb(struct device *dev, struct device_at
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_led_rgb(VARSTORE, LOGO_LED);
-    struct razer_report response;
+    struct razer_report response = {0};
 
     report.transaction_id.id = 0x3F;
     response = razer_send_payload(usb_dev, &report);
@@ -1406,7 +1406,7 @@ static ssize_t razer_attr_read_scroll_led_effect(struct device *dev, struct devi
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_led_effect(VARSTORE, SCROLL_WHEEL_LED);
-    struct razer_report response;
+    struct razer_report response = {0};
     report.transaction_id.id = 0x3F;
     response = razer_send_payload(usb_dev, &report);
 
@@ -1437,7 +1437,7 @@ static ssize_t razer_attr_read_logo_led_effect(struct device *dev, struct device
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_led_effect(VARSTORE, LOGO_LED);
-    struct razer_report response;
+    struct razer_report response = {0};
 
     report.transaction_id.id = 0x3F;
     response = razer_send_payload(usb_dev, &report);
@@ -1454,7 +1454,7 @@ static ssize_t razer_attr_write_scroll_mode_spectrum(struct device *dev, struct 
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1486,7 +1486,7 @@ static ssize_t razer_attr_write_scroll_mode_reactive(struct device *dev, struct 
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 4) {
         unsigned char speed = (unsigned char)buf[0];
@@ -1524,7 +1524,7 @@ static ssize_t razer_attr_write_scroll_mode_breath(struct device *dev, struct de
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
     // TODO refactor main breathing matrix function, add in LED ID field and this nastiness goes away too!
 
     switch(usb_dev->descriptor.idProduct) {
@@ -1577,7 +1577,7 @@ static ssize_t razer_attr_write_scroll_mode_static(struct device *dev, struct de
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 3) {
 
@@ -1614,7 +1614,7 @@ static ssize_t razer_attr_write_scroll_mode_none(struct device *dev, struct devi
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
@@ -1645,7 +1645,7 @@ static ssize_t razer_attr_write_logo_mode_spectrum(struct device *dev, struct de
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
@@ -1676,7 +1676,7 @@ static ssize_t razer_attr_write_logo_mode_reactive(struct device *dev, struct de
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 4) {
         unsigned char speed = (unsigned char)buf[0];
@@ -1714,7 +1714,7 @@ static ssize_t razer_attr_write_logo_mode_breath(struct device *dev, struct devi
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
     // TODO refactor main breathing matrix function, add in LED ID field and this nastiness goes away too!
 
     switch(usb_dev->descriptor.idProduct) {
@@ -1767,7 +1767,7 @@ static ssize_t razer_attr_write_logo_mode_static(struct device *dev, struct devi
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 3) {
         switch(usb_dev->descriptor.idProduct) {
@@ -1803,7 +1803,7 @@ static ssize_t razer_attr_write_logo_mode_none(struct device *dev, struct device
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
@@ -1849,7 +1849,7 @@ static ssize_t razer_attr_read_backlight_led_state(struct device *dev, struct de
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, BACKLIGHT_LED);
-    struct razer_report response;
+    struct razer_report response = {0};
     report.transaction_id.id = 0x3F;
 
     mutex_lock(&device->lock);

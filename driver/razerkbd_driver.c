@@ -155,7 +155,7 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
 static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
     int retval = -1;
-    struct razer_report response_report;
+    struct razer_report response_report = {0};
 
     request_report->crc = razer_calculate_crc(request_report);
 
@@ -252,7 +252,7 @@ static ssize_t razer_attr_read_mode_game(struct device *dev, struct device_attri
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, GAME_LED);
-    struct razer_report response;
+    struct razer_report response = {0};
 
     response = razer_send_payload(usb_dev, &report);
     return sprintf(buf, "%d\n", response.arguments[2]);
@@ -286,7 +286,7 @@ static ssize_t razer_attr_read_mode_macro(struct device *dev, struct device_attr
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, MACRO_LED);
-    struct razer_report response;
+    struct razer_report response = {0};
 
     response = razer_send_payload(usb_dev, &report);
     return sprintf(buf, "%d\n", response.arguments[2]);
@@ -482,7 +482,7 @@ static ssize_t razer_attr_write_mode_macro_effect(struct device *dev, struct dev
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
 
     switch(usb_dev->descriptor.idProduct) {
@@ -665,7 +665,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     char serial_string[51];
     struct razer_report report = razer_chroma_standard_get_serial();
-    struct razer_report response_report;
+    struct razer_report response_report = {0};
 
     if (is_blade_laptop(usb_dev)) {
         strncpy(&serial_string[0], dmi_get_system_info(DMI_PRODUCT_SERIAL), 50);
@@ -702,7 +702,7 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_ORNATA:
@@ -742,7 +742,7 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_ORNATA:
@@ -774,7 +774,7 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_ORNATA:
@@ -811,7 +811,7 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 4) {
         unsigned char speed = (unsigned char)buf[0];
@@ -849,7 +849,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_ORBWEAVER:
@@ -957,7 +957,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_rgb rgb1 = {.r = 0x00, .g = 0xFF, .b = 0x00};
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_ORNATA:
@@ -1022,7 +1022,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_ORNATA:
@@ -1137,7 +1137,7 @@ static ssize_t razer_attr_read_set_logo(struct device *dev, struct device_attrib
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = razer_chroma_standard_get_led_effect(VARSTORE, LOGO_LED);
-    struct razer_report response;
+    struct razer_report response = {0};
     int state;
 
     // Blade laptops don't use effect for logo on/off, and mode 2 ("blink") is technically unsupported.
@@ -1163,7 +1163,7 @@ static ssize_t razer_attr_write_set_logo(struct device *dev, struct device_attri
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char state = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if (has_inverted_led_state(dev) && (state == 0 || state == 1))
         state = !state;
@@ -1190,7 +1190,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_ORNATA:
@@ -1265,7 +1265,7 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_ORNATA:
@@ -1306,8 +1306,8 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char brightness = 0;
-    struct razer_report report;
-    struct razer_report response;
+    struct razer_report report = {0};
+    struct razer_report response = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_ORNATA:
@@ -1354,7 +1354,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if (count != 2) {
         printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.");
@@ -1397,7 +1397,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
     size_t offset = 0;
     unsigned char row_id;
     unsigned char start_col;

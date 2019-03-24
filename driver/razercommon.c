@@ -140,7 +140,7 @@ unsigned char razer_calculate_crc(struct razer_report *report)
  */
 struct razer_report get_razer_report(unsigned char command_class, unsigned char command_id, unsigned char data_size)
 {
-    struct razer_report new_report;
+    struct razer_report new_report = {0};
     memset(&new_report, 0, sizeof(struct razer_report));
 
     new_report.status = 0x00;
@@ -159,7 +159,7 @@ struct razer_report get_razer_report(unsigned char command_class, unsigned char 
  */
 struct razer_report get_empty_razer_report(void)
 {
-    struct razer_report new_report;
+    struct razer_report new_report = {0};
     memset(&new_report, 0, sizeof(struct razer_report));
 
     return new_report;

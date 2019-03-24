@@ -55,7 +55,7 @@ int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_re
 struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
     int retval = -1;
-    struct razer_report response_report;
+    struct razer_report response_report = {0};
 
     request_report->crc = razer_calculate_crc(request_report);
 
@@ -92,7 +92,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report response;
+    struct razer_report response = {0};
     struct razer_report report = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);;
 
     response = razer_send_payload(usb_dev, &report);
@@ -110,7 +110,7 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
     unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
 
     report = razer_chroma_standard_set_led_brightness(VARSTORE, BACKLIGHT_LED, brightness);
@@ -229,7 +229,7 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 4) {
         unsigned char speed = (unsigned char)buf[0];
@@ -266,7 +266,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
-    struct razer_report report;
+    struct razer_report report = {0};
 
     switch(count) {
     case 3: // Single colour mode
@@ -314,7 +314,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 3) {
         report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
@@ -338,7 +338,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
     size_t offset = 0;
     unsigned char row_id;
     unsigned char start_col;
@@ -393,7 +393,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report;
+    struct razer_report report = {0};
 
     if(count == 2) {
         report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
