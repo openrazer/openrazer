@@ -462,7 +462,7 @@ class KeyboardKeyManager(object):
                         current_brightness = self._parent.getBrightness()
 
                     if current_brightness > 0:
-                        current_brightness -= 20
+                        current_brightness -= 10
                         if current_brightness < 0:
                             current_brightness = 0
 
@@ -475,7 +475,7 @@ class KeyboardKeyManager(object):
                         current_brightness = self._parent.getBrightness()
 
                     if current_brightness < 100:
-                        current_brightness += 20
+                        current_brightness += 10
                         if current_brightness > 100:
                             current_brightness = 100
 
