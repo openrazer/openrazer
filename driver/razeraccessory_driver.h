@@ -9,12 +9,12 @@
  * any later version.
  */
 
-#ifndef __HID_RAZER_MUG_H
-#define __HID_RAZER_MUG_H
+#ifndef __HID_RAZER_ACCESSORY_H
+#define __HID_RAZER_ACCESSORY_H
 
 #define USB_DEVICE_ID_RAZER_CHROMA_MUG 0x0f07
 
-struct razer_mug_device {
+struct razer_accessory_device {
     struct usb_device *usb_dev;
     struct input_dev *input;
     struct mutex lock;
