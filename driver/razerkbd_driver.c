@@ -26,6 +26,8 @@
 #include <linux/hid.h>
 #include <linux/dmi.h>
 
+#include "usb_hid_keys.h"
+
 #include "razerkbd_driver.h"
 #include "razercommon.h"
 #include "razerchromacommon.h"
@@ -217,6 +219,7 @@ void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsig
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
         report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+		break;
     }
 
     razer_send_payload(usb_dev, &report);
@@ -1701,7 +1704,6 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
         return 0;
     }
 
-
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
         // Skip this if its control (mouse) interface
         return 0;
@@ -1735,6 +1737,7 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
         break;
     }
 
+
     if(translation) {
         if(test_bit(usage->code, asc->pressed_fn)) {
             do_translate = 1;
@@ -1753,8 +1756,6 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
             return 1;
         }
     }
-
-
     return 0;
 }
 
@@ -1773,6 +1774,10 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
  *
  * HID Usage Table http://www.freebsddiary.org/APC/usb_hid_usages.php
  */
+
+// 0000   00 00 00 01 00 00 00 00 -- volume+
+// 0000   00 00 00 ff 00 00 00 00 -- volume-
+
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
@@ -1789,6 +1794,29 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
         return 0;
     }
+
+	// The volume scroller becomes mouse's scroll for USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
+	if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE
+		&& intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE
+		&& size == 8 && data[0] == 0x00) {
+
+/*
+		// 00 00 00 ff 00 00 00 00 -- volume-
+		// 00 00 00 01 00 00 00 00 -- volume+
+		const int rotate = ((char)data[3]);
+    	printk(KERN_INFO "razerkbd: mouse-convert %d\n", rotate);
+		input_report_key(hdev, BTN_0, 1);
+		input_report_key(hdev, BTN_0, 0);
+		input_sync(button_dev);
+
+		memset(data, 0, size);
+        data[0] = 0x01;
+        data[1] = 0x00;
+		data[2] = (rotate>0)?USB_HID_KEY_MEDIA_VOLUMEUP:USB_HID_KEY_MEDIA_VOLUMEDOWN;
+//		input_report_key(hdev, ...);  ?
+		*/
+        return 0;
+	}
 
     // The event were looking for is 16 bytes long and starts with 0x04
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
@@ -1810,22 +1838,33 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
                 found_fn = 0x01;
                 break;
             case 0x20: // M1
-                cur_value = 0x68; // F13
+                cur_value = USB_HID_KEY_F13; // F13
                 break;
             case 0x21: // M2
-                cur_value = 0x69; // F14
+                cur_value = USB_HID_KEY_F14; // F14
                 break;
             case 0x22: // M3
-                cur_value = 0x6A; // F15
+                cur_value = USB_HID_KEY_F15; // F15
                 break;
             case 0x23: // M4
-                cur_value = 0x6B; // F16
+                cur_value = USB_HID_KEY_F16; // F16
                 break;
             case 0x24: // M5
-                cur_value = 0x6C; // F17
+                cur_value = USB_HID_KEY_F17; // F17
                 break;
+			case 0x52: // Mute
+				cur_value = USB_HID_KEY_MEDIA_MUTE;
+				break;
+			case 0x53: // Next (song)
+				cur_value = USB_HID_KEY_MEDIA_NEXTSONG;
+				break;
+			case 0x55: // Play/Pause
+				cur_value = USB_HID_KEY_MEDIA_PLAYPAUSE;
+				break;
+			case 0x54: // Prev (song)
+				cur_value = USB_HID_KEY_MEDIA_PREVIOUSSONG;
+				break;
             }
-
             data[index+1] = cur_value;
         }
 
