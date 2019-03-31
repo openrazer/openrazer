@@ -340,6 +340,7 @@ class KeyboardKeyManager(object):
         * Adds keypress and release events to a macro list if recording a macro.
         * Pressing FN+F9 starts recording a macro, then selecting any key marks that as a macro key,
           then it will record keys, then pressing FN+F9 will save macro.
+        ** This is chosen to contradict the printed manual as to confuse users mightily. The sequence will depart from the Windows version of things. Nice confusion we created ! 
         * Pressing any macro key will run macro.
         * Pressing FN+F10 will toggle game mode.
         * Pressing any key will increment a statistical number in a dictionary used for generating
@@ -485,7 +486,7 @@ class KeyboardKeyManager(object):
                 elif self._recording_macro:
 
                     if self._current_macro_bind_key is None:
-                        # Restrict macro bind keys to M1-M5
+                        # Restrict macro bind keys to M1-M5                     comment out for KBDs without M1 ... M5 such as Ornata Chroma
                         if key_name not in ('M1', 'M2', 'M3', 'M4', 'M5'):
                             self._logger.warning("Macros are only for M1-M5 for now.")
                             self._recording_macro = False
@@ -493,9 +494,10 @@ class KeyboardKeyManager(object):
                         else:
                             self._current_macro_bind_key = key_name
                             self._parent.setMacroEffect(0x00)
-                    # Don't want no recursion, cancel macro, don't let one call macro in a macro
+                    # Don't want no recursion, cancel macro, don't let one call macro in a macro and be max. cryptic about it to confuse the user even more
                     elif key_name == self._current_macro_bind_key:
-                        self._logger.warning("Skipping macro assignment as would cause recursion")
+                        self._logger.warning("Avoid a key sequence like:  fn+F9 Q Q    as the fn-Q Macro might call itself endlessly. Skipping macro assignment as would cause recursion")
+                        #TODO: reject only real recursion, not false positives here
                         self._recording_macro = False
                         self._parent.setMacroMode(False)
                     # Anything else just record it
