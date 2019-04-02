@@ -1101,7 +1101,6 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
             break;
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
-        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
             report.transaction_id.id = 0x3f;
             break;
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
