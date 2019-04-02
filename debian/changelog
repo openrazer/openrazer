@@ -1,3 +1,9 @@
+openrazer (2.5.0) bionic; urgency=high
+
+  * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v2.5.0
+
+ -- Luca Weiss <luca@z3ntu.xyz>  Thu, 28 Mar 2019 19:06:54 +0100
+
 openrazer (2.4.0) xenial; urgency=high
 
   * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v2.4.0

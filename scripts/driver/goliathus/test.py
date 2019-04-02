@@ -6,7 +6,8 @@ import time
 import random
 
 
-COLOURS = (b'\xFF\x00\x00', b'\x00\xFF\x00', b'\x00\x00\xFF', b'\xFF\xFF\x00', b'\xFF\x00\xFF', b'\x00\xFF\xFF')
+COLOURS = (b'\xFF\x00\x00', b'\x00\xFF\x00', b'\x00\x00\xFF',
+           b'\xFF\xFF\x00', b'\xFF\x00\xFF', b'\x00\xFF\xFF')
 
 
 def write_binary(driver_path, device_file, payload):
@@ -25,7 +26,8 @@ def write_string(driver_path, device_file, payload):
 
 
 def find_devices(vid, pid):
-    driver_paths = glob.glob(os.path.join('/sys/bus/hid/drivers/razermousemat', '*:{0:04X}:{1:04X}.*'.format(vid, pid)))
+    driver_paths = glob.glob(os.path.join(
+        '/sys/bus/hid/drivers/razermousemat', '*:{0:04X}:{1:04X}.*'.format(vid, pid)))
 
     for driver_path in driver_paths:
         device_type_path = os.path.join(driver_path, 'device_type')
@@ -49,16 +51,21 @@ if __name__ == '__main__':
 
     found_chroma = False
 
-    for index, driver_path in enumerate(find_devices(0x1532, 0x0C00), start=1):
+    for index, driver_path in enumerate(find_devices(0x1532, 0x0C02), start=1):
         found_chroma = True
 
-        print("Razer Firefly {0}\n".format(index))
+        print("Razer Goliathus {0}\n".format(index))
 
-        print("Driver version: {0}".format(read_string(driver_path, 'version')))
-        print("Driver firmware version: {0}".format(read_string(driver_path, 'firmware_version')))
-        print("Device serial: {0}".format(read_string(driver_path, 'device_serial')))
-        print("Device type: {0}".format(read_string(driver_path, 'device_type')))
-        print("Device mode: {0}".format(read_string(driver_path, 'device_mode')))
+        print("Driver version: {0}".format(
+            read_string(driver_path, 'version')))
+        print("Driver firmware version: {0}".format(
+            read_string(driver_path, 'firmware_version')))
+        print("Device serial: {0}".format(
+            read_string(driver_path, 'device_serial')))
+        print("Device type: {0}".format(
+            read_string(driver_path, 'device_type')))
+        print("Device mode: {0}".format(
+            read_string(driver_path, 'device_mode')))
 
         # Set to static red so that we have something standard
         write_binary(driver_path, 'matrix_effect_static', b'\xFF\x00\x00')
@@ -69,19 +76,42 @@ if __name__ == '__main__':
             print("Max brightness...", end='')
             write_string(driver_path, 'matrix_brightness', '255')
             time.sleep(1)
-            print("brightness ({0})".format(read_string(driver_path, 'matrix_brightness')))
+            print("brightness ({0})".format(
+                read_string(driver_path, 'matrix_brightness')))
             time.sleep(1)
             print("Half brightness...", end='')
             write_string(driver_path, 'matrix_brightness', '128')
             time.sleep(1)
-            print("brightness ({0})".format(read_string(driver_path, 'matrix_brightness')))
+            print("brightness ({0})".format(
+                read_string(driver_path, 'matrix_brightness')))
             time.sleep(1)
             print("Zero brightness...", end='')
             write_string(driver_path, 'matrix_brightness', '0')
             time.sleep(1)
-            print("brightness ({0})".format(read_string(driver_path, 'matrix_brightness')))
+            print("brightness ({0})".format(
+                read_string(driver_path, 'matrix_brightness')))
             time.sleep(1)
             write_string(driver_path, 'matrix_brightness', '255')
+
+            print("Starting reactive tests. Press enter to begin.")
+            input()
+            print("Reactive blue")
+            write_binary(driver_path, 'matrix_effect_reactive', b'\x01\x00\x00\xFF')
+            time.sleep(2)
+            print("Trigger reactive")
+            write_string(driver_path, 'matrix_reactive_trigger', '1')
+            time.sleep(2)
+            print("Trigger reactive")
+            write_string(driver_path, 'matrix_reactive_trigger', '1')
+            time.sleep(2)
+            print("Trigger reactive")
+            write_string(driver_path, 'matrix_reactive_trigger', '1')
+            time.sleep(2)
+            print("Trigger reactive")
+            write_string(driver_path, 'matrix_reactive_trigger', '1')
+            time.sleep(2)
+            print("Trigger reactive")
+            write_string(driver_path, 'matrix_reactive_trigger', '1')
 
             print("Starting other colour effect tests. Press enter to begin.")
             input()
@@ -97,12 +127,6 @@ if __name__ == '__main__':
             print("None")
             write_binary(driver_path, 'matrix_effect_none', b'\x00')
             time.sleep(5)
-            print("Wave Left")
-            write_string(driver_path, 'matrix_effect_wave', '1')
-            time.sleep(5)
-            print("Wave Right")
-            write_string(driver_path, 'matrix_effect_wave', '2')
-            time.sleep(5)
             print("Breathing random")
             write_binary(driver_path, 'matrix_effect_breath', b'\x00')
             time.sleep(10)
@@ -110,31 +134,32 @@ if __name__ == '__main__':
             write_binary(driver_path, 'matrix_effect_breath', b'\xFF\x00\x00')
             time.sleep(10)
             print("Breathing blue-green")
-            write_binary(driver_path, 'matrix_effect_breath', b'\x00\xFF\x00\x00\x00\xFF')
+            write_binary(driver_path, 'matrix_effect_breath',
+                         b'\x00\xFF\x00\x00\x00\xFF')
             time.sleep(10)
 
         if not args.skip_custom:
-            # Custom LEDs all rows
-            payload_all = b'\x00\x00\x0E'
-            for i in range(0, 15):  # 15 colours 0x00-0x0E
-                payload_all += random.choice(COLOURS)
+            # row, start_col, end_col
+            payload_all = b'\x00\x00\x00'
+            # add 1 column (end_col + 1 - start_col == 0) of LEDs (1 LED)
+            payload_all += random.choice(COLOURS)
 
-            payload_m1_5 = b''
-            for led in (0x00, 0x0E):
-                led_byte = led.to_bytes(1, byteorder='big')
-                payload_m1_5 += b'\x00' + led_byte + led_byte + b'\xFF\xFF\xFF'
+            payload_white = b'\x00\x00\x00'
+            payload_white += b'\xFF\xFF\xFF'
 
-            print("Custom LED matrix colours test. Press enter to begin.")
+            print("Custom LED matrix colours test")
+            print("Press enter to begin.")
             input()
             write_binary(driver_path, 'matrix_custom_frame', payload_all)
             write_binary(driver_path, 'matrix_effect_custom', b'\x00')
-            print("Custom LED matrix partial colours test. First and last led to white. Press enter to begin.")
+            print("Custom LED matrix partial colours test")
+            print("Set LED to white. Press enter to begin.")
             input()
-            write_binary(driver_path, 'matrix_custom_frame', payload_m1_5)
+            write_binary(driver_path, 'matrix_custom_frame', payload_white)
             write_binary(driver_path, 'matrix_effect_custom', b'\x00')
             time.sleep(0.5)
 
         print("Finished")
 
     if not found_chroma:
-        print("No Fireflies found")
+        print("No Goliathus found")

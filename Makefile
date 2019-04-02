@@ -12,7 +12,7 @@ MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/hid
 PYTHONDIR?=$(shell python3 -c 'import sys; print(sys.path[-1])')
 
 DKMS_NAME?=openrazer-driver
-DKMS_VER?=2.4.0
+DKMS_VER?=2.5.0
 
 
 # Build all target
@@ -22,12 +22,12 @@ all: driver
 driver:
 	@echo -e "\n::\033[32m Compiling OpenRazer kernel modules\033[0m"
 	@echo "========================================"
-	make -C $(KERNELDIR) SUBDIRS=$(DRIVERDIR) modules
+	$(MAKE) -C $(KERNELDIR) M=$(DRIVERDIR) modules
 
 driver_clean:
 	@echo -e "\n::\033[32m Cleaning OpenRazer kernel modules\033[0m"
 	@echo "========================================"
-	make -C "$(KERNELDIR)" SUBDIRS="$(DRIVERDIR)" clean
+	$(MAKE) -C "$(KERNELDIR)" M="$(DRIVERDIR)" clean
 
 # Install kernel modules and then update module dependencies
 driver_install:

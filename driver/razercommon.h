@@ -14,7 +14,7 @@
 
 #include <linux/usb/input.h>
 
-#define DRIVER_VERSION "2.4.0"
+#define DRIVER_VERSION "2.5.0"
 #define DRIVER_LICENSE "GPL v2"
 #define DRIVER_AUTHOR "Terry Cain <terry@terrys-home.co.uk>"
 
@@ -28,6 +28,8 @@ do { \
 } while (0)
 
 
+#define USB_VENDOR_ID_RAZER 0x1532
+
 /* Each USB report has 90 bytes*/
 #define RAZER_USB_REPORT_LEN 0x5A
 
@@ -40,6 +42,7 @@ do { \
 #define VARSTORE         0x01
 
 // LED definitions
+#define ZERO_LED      0x00
 #define SCROLL_WHEEL_LED  0x01
 #define BATTERY_LED       0x03
 #define LOGO_LED          0x04

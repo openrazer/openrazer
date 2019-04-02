@@ -38,9 +38,13 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Cynosa Chroma                           |  1532:022A  |
 | Razer Blade Stealth (Mid 2017)                |  1532:022D  |
 | Razer Blade Pro (2017)                        |  1532:0225  |
+| Razer Huntsman Elite                          |  1532:0226  |
 | Razer Blade Pro FullHD (2017)                 |  1532:022F  |
 | Razer Blade Stealth (Late 2017)               |  1532:0232  |
 | Razer Blade 15 (2018)                         |  1532:0233  |
+| Razer Blade Stealth (2019)                    |  1532:0239  |
+| Razer Blade 15 (2019) Advanced                |  1532:023A  |
+| Razer Blade 15 (2018) Base Model              |  1532:023B  |
 | Razer Blade 15 (2018) Mercury                 |  1532:0240  |
 
 ### Mice
@@ -54,6 +58,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Ouroboros 2012                          |  1532:0032  |
 | Razer Taipan                                  |  1532:0034  |
 | Razer Naga Hex (Red)                          |  1532:0036  |
+| Razer DeathAdder 2013                         |  1532:0037  |
 | Razer Orochi 2013                             |  1532:0039  |
 | Razer Naga 2014                               |  1532:0040  |
 | Razer Naga Hex                                |  1532:0041  |
@@ -66,13 +71,17 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Diamondback Chroma                      |  1532:004C  |
 | Razer Naga Hex V2                             |  1532:0050  |
 | Razer Naga Chroma                             |  1532:0053  |
+| Razer DeathAdder 3500                         |  1532:0054  |
 | Razer Abyssus V2                              |  1532:005B  |
 | Razer DeathAdder Elite                        |  1532:005C  |
+| Razer Abyssus 2000                            |  1532:005E  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |
 | --------------------------------------------- | ----------- |
 | Razer Firefly                                 |  1532:0C00  |
+| Razer Goliathus                               |  1532:0C01  |
+| Razer Goliathus Extended                      |  1532:0C02  |
 
 ### Headsets
 | Device                                        | USB VID:PID |
