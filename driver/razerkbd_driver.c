@@ -16,8 +16,6 @@
  * Should you need to contact me, the author, you can do so by
  * e-mail - mail your message to Terry Cain <terry@terrys-home.co.uk>
  */
-
-
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -169,8 +167,8 @@ static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct
            response_report.command_class != request_report->command_class ||
            response_report.command_id.id != request_report->command_id.id) {
             print_erroneous_report(&response_report, "razerkbd", "Response doesn't match request");
-//		} else if (response_report.status == RAZER_CMD_BUSY) {
-//			print_erroneous_report(&response_report, "razerkbd", "Device is busy");
+//      } else if (response_report.status == RAZER_CMD_BUSY) {
+//          print_erroneous_report(&response_report, "razerkbd", "Device is busy");
         } else if (response_report.status == RAZER_CMD_FAILURE) {
             print_erroneous_report(&response_report, "razerkbd", "Command failed");
         } else if (response_report.status == RAZER_CMD_NOT_SUPPORTED) {
@@ -219,7 +217,7 @@ void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsig
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
         report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
-		break;
+        break;
     }
 
     razer_send_payload(usb_dev, &report);
@@ -1685,9 +1683,6 @@ static DEVICE_ATTR(key_super,               0660, razer_attr_read_key_super,    
 static DEVICE_ATTR(key_alt_tab,             0660, razer_attr_read_key_alt_tab,                razer_attr_write_key_alt_tab);
 static DEVICE_ATTR(key_alt_f4,              0660, razer_attr_read_key_alt_f4,                 razer_attr_write_key_alt_f4);
 
-
-
-
 /**
  * Deal with FN toggle
  */
@@ -1764,19 +1759,33 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
  *
  * Bastard function. Could most probably be done a load better.
  * Basically it shifts all of the key's in the 04... event to the right 1, and then sets the first 2 bytes to 0x0100. This then allows the keys to be processed with the above normal event function
- * Converts M1-M5 into F13-F17. It also blanks out FN keypresses so it acts more like the modifier it should be.
  *
+ * Converts M1-M5 into F13-F17. It also blanks out FN keypresses so it acts more like the modifier it should be.
  * 04012000000000000000 FN is pressed, M1 pressed
  * 04010000000000000000 M1 is released
  * goes to
  * 01000068000000000000 FN is pressed (blanked), M1 pressed (converted to F13)
  * 01000000000000000000 M1 is released
  *
- * HID Usage Table http://www.freebsddiary.org/APC/usb_hid_usages.php
+ * Converts Mute/Next/Play/Prev into multimedia keys
+ *   04 00 52 00  ... 00 - Mute key pressed
+ *   04 00 00 00 ... 00 - Mute key released
+ * goes to
+ *   01 00 00 E2 00 ... 00 - Mute pressed (converted to KEY_MEDIA_MUTE)
+ *   01 00 00 00 00 ... 00
+ * they key codes are
+ *   0x52 - Mute
+ *   0x53 - Next song
+ *   0x55 - Play/Pause
+ *   0x54 - Prev song
+ *
+ * [BWE-scroll] BlackWidow Elite: Sends wheel scroll for volume
+ * 00 00 00 01 00 00 00 00 -- volume up
+ * 00 00 00 ff 00 00 00 00 -- volume down
+ *
+ * [HID Usage Table](http://www.freebsddiary.org/APC/usb_hid_usages.php)
+ * [HID Key Codes Table](https://source.android.com/devices/input/keyboard-devices.html)
  */
-
-// 0000   00 00 00 01 00 00 00 00 -- volume+
-// 0000   00 00 00 ff 00 00 00 00 -- volume-
 
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
@@ -1795,28 +1804,19 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
         return 0;
     }
 
-	// The volume scroller becomes mouse's scroll for USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
-	if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE
-		&& intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE
-		&& size == 8 && data[0] == 0x00) {
-
-/*
-		// 00 00 00 ff 00 00 00 00 -- volume-
-		// 00 00 00 01 00 00 00 00 -- volume+
-		const int rotate = ((char)data[3]);
-    	printk(KERN_INFO "razerkbd: mouse-convert %d\n", rotate);
-		input_report_key(hdev, BTN_0, 1);
-		input_report_key(hdev, BTN_0, 0);
-		input_sync(button_dev);
-
-		memset(data, 0, size);
-        data[0] = 0x01;
-        data[1] = 0x00;
-		data[2] = (rotate>0)?USB_HID_KEY_MEDIA_VOLUMEUP:USB_HID_KEY_MEDIA_VOLUMEDOWN;
-//		input_report_key(hdev, ...);  ?
-		*/
+/* [BWE-scroll]
+// The volume scroller becomes mouse's scroll for USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE
+        && intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE
+        && size == 8
+        && data[0] == 0x00) {
+            const int button = (data[3] >= 0x80?KEY_VOLUMEDOWN:KEY_VOLUMEUP);
+            input_event(input, EV_KEY, button, 1);
+            input_event(input, EV_KEY, button, 0);
+            input_sync(shared->input);
         return 0;
-	}
+       }
+*/
 
     // The event were looking for is 16 bytes long and starts with 0x04
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
@@ -1852,18 +1852,18 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
             case 0x24: // M5
                 cur_value = USB_HID_KEY_F17; // F17
                 break;
-			case 0x52: // Mute
-				cur_value = USB_HID_KEY_MEDIA_MUTE;
-				break;
-			case 0x53: // Next (song)
-				cur_value = USB_HID_KEY_MEDIA_NEXTSONG;
-				break;
-			case 0x55: // Play/Pause
-				cur_value = USB_HID_KEY_MEDIA_PLAYPAUSE;
-				break;
-			case 0x54: // Prev (song)
-				cur_value = USB_HID_KEY_MEDIA_PREVIOUSSONG;
-				break;
+            case 0x52: // Mute
+                cur_value = USB_HID_KEY_MEDIA_MUTE;
+                break;
+            case 0x53: // Next (song)
+                cur_value = USB_HID_KEY_MEDIA_NEXTSONG;
+                break;
+            case 0x55: // Play/Pause
+                cur_value = USB_HID_KEY_MEDIA_PLAYPAUSE;
+                break;
+            case 0x54: // Prev (song)
+                cur_value = USB_HID_KEY_MEDIA_PREVIOUSSONG;
+                break;
             }
             data[index+1] = cur_value;
         }
@@ -1878,6 +1878,22 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
         return 1;
     }
 
+    return 0;
+}
+
+/**
+ * Set static hid-events translation map
+ *
+ * [BWE-Wheel] 'BlackWindow Elite' generates wheel-events for volume control spinner
+ */
+static int razer_kbd_input_mapping(struct hid_device *hdev, struct hid_input *hi, struct hid_field *field,
+                                struct hid_usage *usage, unsigned long **bit, int *max) {
+
+    // [BWE-Wheel]
+    if (USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE == hdev->product && HID_TYPE_USBMOUSE == hdev->type && HID_GD_WHEEL == usage->hid) {
+        hid_map_usage(hi, usage, bit, max, EV_ABS, ABS_VOLUME);
+        return 1;
+    }
     return 0;
 }
 
@@ -2550,11 +2566,16 @@ MODULE_DEVICE_TABLE(hid, razer_devices);
 static struct hid_driver razer_kbd_driver = {
     .name = "razerkbd",
     .id_table = razer_devices,
+
+    .input_mapping = razer_kbd_input_mapping,
+
     .probe = razer_kbd_probe,
     .remove = razer_kbd_disconnect,
 
     .event = razer_event,
-    .raw_event = razer_raw_event,
+    .raw_event = razer_raw_event
 };
 
 module_hid_driver(razer_kbd_driver);
+
+// vim: tabstop=4 shiftwidth=4 softtabstop=4 expandtab colorcolumn=96 :
