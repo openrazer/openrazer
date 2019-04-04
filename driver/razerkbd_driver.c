@@ -1786,10 +1786,6 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
  *   0x55 - Play/Pause
  *   0x54 - Prev song
  *
- * [BWE-scroll] BlackWidow Elite: Sends wheel scroll for volume
- * 00 00 00 01 00 00 00 00 -- volume up
- * 00 00 00 ff 00 00 00 00 -- volume down
- *
  * [HID Usage Table](http://www.freebsddiary.org/APC/usb_hid_usages.php)
  * [HID Key Codes Table](https://source.android.com/devices/input/keyboard-devices.html)
  */
@@ -1810,20 +1806,6 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
         return 0;
     }
-
-/* [BWE-scroll]
-// The volume scroller becomes mouse's scroll for USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
-    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE
-        && intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE
-        && size == 8
-        && data[0] == 0x00) {
-            const int button = (data[3] >= 0x80?KEY_VOLUMEDOWN:KEY_VOLUMEUP);
-            input_event(input, EV_KEY, button, 1);
-            input_event(input, EV_KEY, button, 0);
-            input_sync(shared->input);
-        return 0;
-       }
-*/
 
     // The event were looking for is 16 bytes long and starts with 0x04
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
