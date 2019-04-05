@@ -1054,7 +1054,6 @@ class RazerMambaElite(__RazerDeviceSpecialBrightnessSuspend):
         self.disable_notify = False
 
 
-
 class RazerAbyssus2000(__RazerDevice):
     """
     Class for the Razer Abyssus 2000
