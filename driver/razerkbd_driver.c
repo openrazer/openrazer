@@ -1873,7 +1873,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 /**
  * Set static hid-events translation map
  *
- * [BWE-Wheel] 'BlackWindow Elite' generates wheel-events for volume control spinner
+ * [BWE-Wheel] 'BlackWidow Elite' generates wheel-events for volume control spinner
  */
 static int razer_kbd_input_mapping(struct hid_device *hdev, struct hid_input *hi, struct hid_field *field,
                                    struct hid_usage *usage, unsigned long **bit, int *max)
