@@ -802,8 +802,8 @@ struct razer_report razer_chroma_mouse_extended_matrix_effect_static(unsigned ch
     report.arguments[5] = rgb->b;
 
     if (led_id == MAMBA_ELITE) {
-        int i = 6;
-        for (i; i < 66; i+=3) {
+        int i = 5;
+        for (i; i < 67; i+=3) {
             report.arguments[i] = rgb->r;
             report.arguments[i+1] = rgb->g;
             report.arguments[i+2] = rgb->b;
