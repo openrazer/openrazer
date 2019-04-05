@@ -212,11 +212,6 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Mamba Elite\n";
         break;
 
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
-        device_type = "Razer DeathAdder 3500\n";
-        break;
-
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
         device_type = "Razer DeathAdder 3500\n";
         break;
