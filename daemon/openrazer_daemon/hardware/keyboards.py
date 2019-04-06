@@ -747,6 +747,25 @@ class RazerCynosaChroma(_RippleKeyboard):
     }
 
 
+class RazerBlackWidowLite(_RippleKeyboard):
+    """
+    Class for the Razer BlackWidow Lite
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_Lite(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0235
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 22]
+    METHODS = ['get_device_type_keyboard', 'set_static_effect',
+               'set_none_effect', 'set_breath_single_effect',
+               'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
+               ]
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1456/1456_blackwidowlite_-_2.png"
+
+
 class RazerOrnata(_RippleKeyboard):
     """
     Class for the Razer Ornata
