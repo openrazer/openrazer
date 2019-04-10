@@ -567,6 +567,45 @@ class RazerNagaChroma(__RazerDeviceSpecialBrightnessSuspend):
         # self.key_manager.close()
 
 
+class RazerNagaTrinity(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer Naga Trinity
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Naga_Trinity-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0067
+    HAS_MATRIX = True
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [1, 3]
+    METHODS = ['get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               'get_brightness', 'set_brightness']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/636/636_naga_chroma.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
+    RAZER_URLS = {
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/636/636_naga_chroma.png",
+        "side_img": "https://assets2.razerzone.com/images/razer-naga-chroma/28b8a7b0bf18c4bb0ffe6fe22d070dba-razer-naga-chroma-gallery-02.jpg",
+        "perspective_img": "https://assets2.razerzone.com/images/razer-naga-chroma/15fc24f88b577a6d080ed9e0e6a1b219-razer-naga-chroma-gallery-03.jpg"
+    }
+
+    DPI_MAX = 16000
+
+    def __init__(self, *args, **kwargs):
+        super(RazerNagaTrinity, self).__init__(*args, **kwargs)
+
+        # self.key_manager = _NagaHexV2KeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing, should_grab_event_files=True)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerNagaTrinity, self)._close()
+
+        # self.key_manager.close()
+
+
 class RazerNagaHex(__RazerDevice):
     """
     Class for the Razer Naga Hex
