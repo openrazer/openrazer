@@ -59,6 +59,25 @@ do { \
 #define LED_PULSATING        0x02
 #define LED_SPECTRUM_CYCLING 0x04
 
+// CALIBRATION OPERATION SET/RESET
+
+#define CALIB_SET   0x01
+#define CALIB_RESET 0x00
+
+/* CALIBRATION: SENSOR TYPE
+*
+* ( Just maker difference for now.
+* Pcaps needed to know if exist difference between
+* the same maker. Example: Pixart 3389 aka 5g infrared
+* vs Pixart s398x aka 4g infrared )
+*/
+
+#define PIXART  0x04
+#define PIXART1 0x00
+
+#define PHILIPS  0x05
+#define PHILIPS1 0x01
+
 // Report Responses
 #define RAZER_CMD_BUSY          0x01
 #define RAZER_CMD_SUCCESSFUL    0x02
