@@ -13,6 +13,31 @@ from openrazer_daemon.dbus_services.dbus_methods.chroma_keyboard import get_brig
 from openrazer_daemon.misc.key_event_management import NagaHexV2KeyManager as _NagaHexV2KeyManager
 
 
+class RazerLanceheadTEWired(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Lancehead Tournament Edition (Wired)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0060
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 15]
+    METHODS = ['get_device_type_mouse', 'set_wave_effect',
+               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
+               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'max_dpi',
+               'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'set_idle_time', 'set_low_battery_threshold', 'get_battery', 'is_charging']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1203/1206_lanceheadte.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
+    RAZER_URLS = {
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/1203/1206_lanceheadte.png",
+        "side_img": "https://d4kkpd69xt9l7.cloudfront.net/sys-master/root/h28/hc5/8888234311710",
+        "perspective_img": "https://d4kkpd69xt9l7.cloudfront.net/sys-master/root/h84/hb3/8888234868766"
+    }
+
+    DPI_MAX = 16000
+
+
 class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Mamba Chroma (Wireless)
