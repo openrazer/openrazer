@@ -13,19 +13,26 @@ from openrazer_daemon.dbus_services.dbus_methods.chroma_keyboard import get_brig
 from openrazer_daemon.misc.key_event_management import NagaHexV2KeyManager as _NagaHexV2KeyManager
 
 
-class RazerLanceheadTEWired(__RazerDeviceBrightnessSuspend):
+class RazerLanceheadTE(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Lancehead Tournament Edition (Wired)
     """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Lancehead_TE-if0(1|2)-event-kbd')
+    
     USB_VID = 0x1532
     USB_PID = 0x0060
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 16]
-    METHODS = ['get_device_type_mouse', 'set_wave_effect',
-               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
-               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'max_dpi',
-               'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'set_idle_time', 'set_low_battery_threshold', 'get_battery', 'is_charging']
-
+    METHODS = ['get_device_type_mouse', 'set_key_row', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'set_idle_time', 'set_low_battery_threshold', 'get_battery', 'is_charging', 'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
+               # Effects
+               'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect',
+               # Logo
+               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               # Scroll wheel
+               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               # Can set LOGO and Scrol with custom
+               'set_custom_effect', 'set_key_row']
+    
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1203/1206_lanceheadte.png"
 
     # Deprecated - RAZER_URLS be removed in future.
@@ -36,6 +43,33 @@ class RazerLanceheadTEWired(__RazerDeviceBrightnessSuspend):
     }
 
     DPI_MAX = 16000
+    
+    def _suspend_device(self):
+        """
+        Suspend the device
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        _da_set_scroll_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
+        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        _da_set_scroll_brightness(self, scroll_brightness)
+        self.disable_notify = False
 
 
 class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
