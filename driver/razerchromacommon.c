@@ -685,6 +685,22 @@ struct razer_report razer_chroma_extended_matrix_effect_breathing_dual(unsigned 
 
     return report;
 }
+struct razer_report razer_chroma_extended_matrix_effect_breathing_dual_lanceheadte(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1, struct razer_rgb *rgb2)
+{
+    struct razer_report report = razer_chroma_extended_matrix_effect_base(0x06, variable_storage, led_id, 0x02);
+
+    report.arguments[3] = 0x02;
+    report.arguments[5] = 0x02;
+
+    report.arguments[6] = rgb1->r;
+    report.arguments[7] = rgb1->g;
+    report.arguments[8] = rgb1->b;
+    report.arguments[9] = rgb2->r;
+    report.arguments[10] = rgb2->g;
+    report.arguments[11] = rgb2->b;
+
+    return report;
+}
 
 /**
  * Set the device to "Custom" effect
