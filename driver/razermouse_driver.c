@@ -1529,7 +1529,6 @@ static ssize_t razer_attr_write_scroll_mode_breath(struct device *dev, struct de
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
         switch(count) {
         case 3: // Single colour mode
             report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
@@ -1537,6 +1536,22 @@ static ssize_t razer_attr_write_scroll_mode_breath(struct device *dev, struct de
 
         case 6: // Dual colour mode
             report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            break;
+
+        default: // "Random" colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, SCROLL_WHEEL_LED);
+            break;
+        }
+        break;
+
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+        switch(count) {
+        case 3: // Single colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
+            break;
+
+        case 6: // Dual colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_dual_lanceheadte(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
             break;
 
         default: // "Random" colour mode
