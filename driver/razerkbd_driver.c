@@ -212,6 +212,7 @@ void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsig
     }
 
     switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
     case USB_DEVICE_ID_RAZER_ORNATA:
     case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
     case USB_DEVICE_ID_RAZER_CYNOSA_CHROMA:
@@ -448,6 +449,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer BlackWidow X Chroma Tournament Edition\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
+        device_type = "Razer BlackWidow Lite\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_ORNATA:
         device_type = "Razer Ornata\n";
         break;
@@ -495,6 +500,7 @@ static ssize_t razer_attr_write_mode_macro_effect(struct device *dev, struct dev
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
 
     switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
     case USB_DEVICE_ID_RAZER_ORNATA:
     case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
@@ -720,6 +726,7 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
     struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
     case USB_DEVICE_ID_RAZER_ORNATA:
     case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
@@ -947,6 +954,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         }
         break;
 
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
     case USB_DEVICE_ID_RAZER_ORNATA:
     case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
@@ -991,7 +999,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 }
 
 /**
- * Write device file "mode_startlight"
+ * Write device file "mode_starlight"
  *
  * Starlight keyboard effect is activated whenever this file is written to (for bw2016)
  *
@@ -1088,6 +1096,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
     struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
     case USB_DEVICE_ID_RAZER_ORNATA:
         switch(count) {
         case 3: // Single colour mode
@@ -1358,6 +1367,7 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
     struct razer_report report = {0};
 
     switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
     case USB_DEVICE_ID_RAZER_ORNATA:
     case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
@@ -1405,6 +1415,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
     struct razer_report response = {0};
 
     switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
     case USB_DEVICE_ID_RAZER_ORNATA:
     case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
@@ -2079,6 +2090,15 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
             break;
 
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
+            break;
+
         case USB_DEVICE_ID_RAZER_ORNATA:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
@@ -2434,6 +2454,15 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
             break;
 
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            device_remove_file(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
+            device_remove_file(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
+            device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
+            break;
+
         case USB_DEVICE_ID_RAZER_ORNATA:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
@@ -2543,6 +2572,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORNATA_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CYNOSA_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORNATA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ANANSI) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2) },
