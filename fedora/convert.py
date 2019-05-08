@@ -39,6 +39,7 @@ def apply():
     timestamp = None
     changes.clear()
 
+
 for line in sys.stdin:
     line = line.rstrip()
     if (not line):
