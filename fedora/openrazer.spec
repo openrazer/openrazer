@@ -1,12 +1,18 @@
-# ./convert.py <../debian/changelog >changelog
-# rpmbuild -bb --build-in-place openrazer.spec
-
-# gitcommit - git-commit source's tag for packages
+# SPEC-file for fedora
+#
+# Tested on: fc29
+#
+# Supported extras:
+#	* --build-in-place 					- build from local sources (current dir must be './fedora')
+#   * --define 'gitcommit 6ae1f7d' 		- git-commit source's tag for packages
+#
+# Note: Convert changelog from debian's format before building
+#     ./convert.py <../debian/changelog > ./changelog
 
 %define dkms_name openrazer-driver
 %define dkms_version 2.5.0
 
-#define gitcommit 6ae1f7d55bf10cc6b5cb62a5ce99ff22c43e0701
+#define gitcommit 6ae1f7d
 
 Name: openrazer-meta
 Version: 2.5.0
