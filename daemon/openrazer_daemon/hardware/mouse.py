@@ -27,9 +27,9 @@ class RazerLanceheadTE(__RazerDeviceSpecialBrightnessSuspend):
                # Effects
                # 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect',
                # Logo
-               'set_logo_static_lancehead_te', 'set_logo_spectrum_lancehead_te', 'set_logo_none_lancehead_te', 'set_logo_reactive_lancehead_te', 'set_logo_breath_random_lancehead_te', 'set_logo_breath_single_lancehead_te', 'set_logo_breath_dual_lancehead_te',
+               'set_logo_wave_lancehead_te', 'set_logo_static_lancehead_te', 'set_logo_spectrum_lancehead_te', 'set_logo_none_lancehead_te', 'set_logo_reactive_lancehead_te', 'set_logo_breath_random_lancehead_te', 'set_logo_breath_single_lancehead_te', 'set_logo_breath_dual_lancehead_te',
                # Scroll wheel
-               'set_scroll_static_lancehead_te', 'set_scroll_spectrum_lancehead_te', 'set_scroll_none_lancehead_te', 'set_scroll_reactive_lancehead_te', 'set_scroll_breath_random_lancehead_te', 'set_scroll_breath_single_lancehead_te', 'set_scroll_breath_dual_lancehead_te',
+               'set_scroll_wave_lancehead_te', 'set_scroll_static_lancehead_te', 'set_scroll_spectrum_lancehead_te', 'set_scroll_none_lancehead_te', 'set_scroll_reactive_lancehead_te', 'set_scroll_breath_random_lancehead_te', 'set_scroll_breath_single_lancehead_te', 'set_scroll_breath_dual_lancehead_te',
                # Can set LOGO and Scrol with custom
                'set_custom_effect', 'set_key_row']
     
