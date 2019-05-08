@@ -650,7 +650,9 @@ struct razer_report razer_chroma_extended_matrix_effect_reactive(unsigned char v
  * 00     3f    0000   00    09       0f    02  01050201000100ff00       | SET LED MATRIX Effect (VARSTR, Backlight, Breathing 0x02, Colours 0x01, ? 0x00, Colours 0x01, RGB 0x00FF00)
  * 00     3f    0000   00    0c       0f    02  01050202000200ff00ff0000 | SET LED MATRIX Effect (VARSTR, Backlight, Breathing 0x02, Colours 0x02, ? 0x00, Colours 0x02, RGB 0x00FF00, RGB 0xFF0000)
  * 00     3f    0000   00    06       0f    02  010502000000             | SET LED MATRIX Effect (VARSTR, Backlight, Breathing 0x02, Colours 0x00, ? 0x0000)
- * 00     1f    0000   00    06       0f    02  000008000000 0000 0000 0000 0000 0000
+ * 
+ * Lancehead TE appears to use a custom frame for dual breathing scroll wheel??
+ * 00     1f    0000   00    06       0f    02  000008000000000000000000
  * 001f 0000 0006 0f02 0000 0800 0000 0000 0000 0000 0000 0000
  */
 struct razer_report razer_chroma_extended_matrix_effect_breathing_random(unsigned char variable_storage, unsigned char led_id)
@@ -672,25 +674,6 @@ struct razer_report razer_chroma_extended_matrix_effect_breathing_single(unsigne
     return report;
 }
 struct razer_report razer_chroma_extended_matrix_effect_breathing_dual(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1, struct razer_rgb *rgb2)
-{
-    struct razer_report report = razer_chroma_extended_matrix_effect_base(0x0C, variable_storage, led_id, 0x02);
-
-    report.arguments[3] = 0x02;
-    report.arguments[5] = 0x02;
-
-    report.arguments[6] = rgb1->r;
-    report.arguments[7] = rgb1->g;
-    report.arguments[8] = rgb1->b;
-    report.arguments[9] = rgb2->r;
-    report.arguments[10] = rgb2->g;
-    report.arguments[11] = rgb2->b;
-
-    return report;
-}
-
-// 001f 0000 0006 0f02 0000 0800 0000 0000 0000 0000 0000 0000
-//Lancehead TE appears to use a custom frame for dual breathing scroll wheel??
-struct razer_report razer_chroma_extended_matrix_effect_breathing_dual_lanceheadte(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1, struct razer_rgb *rgb2)
 {
     struct razer_report report = razer_chroma_extended_matrix_effect_base(0x0C, variable_storage, led_id, 0x02);
 
