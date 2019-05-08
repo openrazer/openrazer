@@ -650,6 +650,10 @@ struct razer_report razer_chroma_extended_matrix_effect_reactive(unsigned char v
  * 00     3f    0000   00    09       0f    02  01050201000100ff00       | SET LED MATRIX Effect (VARSTR, Backlight, Breathing 0x02, Colours 0x01, ? 0x00, Colours 0x01, RGB 0x00FF00)
  * 00     3f    0000   00    0c       0f    02  01050202000200ff00ff0000 | SET LED MATRIX Effect (VARSTR, Backlight, Breathing 0x02, Colours 0x02, ? 0x00, Colours 0x02, RGB 0x00FF00, RGB 0xFF0000)
  * 00     3f    0000   00    06       0f    02  010502000000             | SET LED MATRIX Effect (VARSTR, Backlight, Breathing 0x02, Colours 0x00, ? 0x0000)
+ * 
+ * Lancehead TE appears to use a custom frame for dual breathing scroll wheel??
+ * 00     1f    0000   00    06       0f    02  000008000000000000000000
+ * 001f 0000 0006 0f02 0000 0800 0000 0000 0000 0000 0000 0000
  */
 struct razer_report razer_chroma_extended_matrix_effect_breathing_random(unsigned char variable_storage, unsigned char led_id)
 {

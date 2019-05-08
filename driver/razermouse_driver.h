@@ -42,7 +42,6 @@
 /* Each keyboard report has 90 bytes*/
 #define RAZER_REPORT_LEN 0x5A
 
-#define RAZER_LANCEHEAD_TE_ROW_LEN 16   // 0 => 15
 #define RAZER_MAMBA_ROW_LEN 15          // 0 => 14
 #define RAZER_MAMBA_TE_ROW_LEN 16       // 0 => 15
 #define RAZER_DIAMONDBACK_ROW_LEN 21    // 0 => 20

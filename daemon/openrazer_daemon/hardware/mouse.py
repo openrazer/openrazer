@@ -22,10 +22,10 @@ class RazerLanceheadTE(__RazerDeviceSpecialBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0060
     HAS_MATRIX = True
-    MATRIX_DIMS = [1, 16]
+    MATRIX_DIMS = [1, 2]
     METHODS = ['get_device_type_mouse', 'set_key_row', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'set_idle_time', 'set_low_battery_threshold', 'get_battery', 'is_charging', 'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Effects
-               'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect',
+               # 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect',
                # Logo
                'set_logo_static_lancehead_te', 'set_logo_spectrum_lancehead_te', 'set_logo_none_lancehead_te', 'set_logo_reactive_lancehead_te', 'set_logo_breath_random_lancehead_te', 'set_logo_breath_single_lancehead_te', 'set_logo_breath_dual_lancehead_te',
                # Scroll wheel
