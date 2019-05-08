@@ -5,7 +5,6 @@ A collection of Linux drivers for the Razer devices, providing kernel drivers, D
 ## Note:  This is a forked version of OpenRazer 2.5.0 that has been tweaked to add logo and scroll wheel lighting effect support for the Razer Lancehead Tournament Edition.
 
 * There is no side LED support.
-* The breath dual effect currently does not work for the scroll wheel for some odd reason.
 
 **Before raising an issue** saying something doesn't work, read [the troubleshooting wiki page](https://github.com/openrazer/openrazer/wiki/Troubleshooting), try not to create new issues if one exists.
 
