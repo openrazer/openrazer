@@ -50,6 +50,8 @@ MODULE_LICENSE(DRIVER_LICENSE);
 
 #define KEY_FLAG_BLOCK 0b00000001
 
+#define RAZER_TRANSACTION_ID_1F 0x1F
+
 /**
  * List of keys to swap
  */
@@ -216,7 +218,7 @@ void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsig
         report.transaction_id.id = 0x3F;
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
-        report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+        report.transaction_id.id = RAZER_TRANSACTION_ID_1F;
         break;
     }
 
@@ -503,7 +505,7 @@ static ssize_t razer_attr_write_mode_macro_effect(struct device *dev, struct dev
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
         report = razer_chroma_standard_set_led_effect(NOSTORE, MACRO_LED, enabled);
-        report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+        report.transaction_id.id = RAZER_TRANSACTION_ID_1F;
         break;
 
     case USB_DEVICE_ID_RAZER_ANANSI:
@@ -727,7 +729,7 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
         report = razer_chroma_extended_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
-        report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+        report.transaction_id.id = RAZER_TRANSACTION_ID_1F;
         break;
 
     case USB_DEVICE_ID_RAZER_ANANSI:
@@ -779,7 +781,7 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
         report = razer_chroma_extended_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, direction);
-        report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+        report.transaction_id.id = RAZER_TRANSACTION_ID_1F;
         break;
 
     default:
@@ -812,7 +814,7 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
         report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, BACKLIGHT_LED);
-        report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+        report.transaction_id.id = RAZER_TRANSACTION_ID_1F;
         break;
 
     case USB_DEVICE_ID_RAZER_ANANSI:
@@ -857,7 +859,7 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
             report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
-            report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+            report.transaction_id.id = RAZER_TRANSACTION_ID_1F;
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
@@ -960,7 +962,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
         if(count == 3) {
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-            report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+            report.transaction_id.id = RAZER_TRANSACTION_ID_1F;
             razer_send_payload(usb_dev, &report);
         } else {
             printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)");
@@ -1044,7 +1046,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
             printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
             break;
         }
-        report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+        report.transaction_id.id = RAZER_TRANSACTION_ID_1F;
         razer_send_payload(usb_dev, &report);
         break;
 
@@ -1135,7 +1137,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
             printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)");
             break;
         }
-        report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+        report.transaction_id.id = RAZER_TRANSACTION_ID_1F;
         razer_send_payload(usb_dev, &report);
         break;
 
@@ -1278,7 +1280,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
         report = razer_chroma_extended_matrix_effect_custom_frame();
-        report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+        report.transaction_id.id = RAZER_TRANSACTION_ID_1F;
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
@@ -1365,7 +1367,7 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
         report = razer_chroma_extended_matrix_brightness(VARSTORE, BACKLIGHT_LED, brightness);
-        report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+        report.transaction_id.id = RAZER_TRANSACTION_ID_1F;
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH:
@@ -1412,7 +1414,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
         report = razer_chroma_extended_matrix_get_brightness(VARSTORE, BACKLIGHT_LED);
-        report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+        report.transaction_id.id = RAZER_TRANSACTION_ID_1F;
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH:
@@ -1538,7 +1540,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
             report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
-            report.transaction_id.id = RAZER_BLACKWIDOW_ELITE_TRANSACTION_ID;
+            report.transaction_id.id = RAZER_TRANSACTION_ID_1F;
             break;
 
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
@@ -1873,18 +1875,25 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 /**
  * Set static hid-events translation map
  *
- * [BWE-Wheel] 'BlackWidow Elite' generates wheel-events for volume control spinner
+ * These keyboards Generates wheel-events for volume control spinner
+ * - BlackWidow Elite
+ * - Huntsman Elite
  */
 static int razer_kbd_input_mapping(struct hid_device *hdev, struct hid_input *hi, struct hid_field *field,
                                    struct hid_usage *usage, unsigned long **bit, int *max)
 {
+    switch (hdev->product) {
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
+        if (HID_TYPE_USBMOUSE == hdev->type && HID_GD_WHEEL == usage->hid) {
+            hid_map_usage(hi, usage, bit, max, EV_ABS, ABS_VOLUME);
+            return 1;
+        }
+        return 0;
 
-    // [BWE-Wheel]
-    if (USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE == hdev->product && HID_TYPE_USBMOUSE == hdev->type && HID_GD_WHEEL == usage->hid) {
-        hid_map_usage(hi, usage, bit, max, EV_ABS, ABS_VOLUME);
-        return 1;
+    default:
+        return 0;
     }
-    return 0;
 }
 
 /**
@@ -2567,5 +2576,3 @@ static struct hid_driver razer_kbd_driver = {
 };
 
 module_hid_driver(razer_kbd_driver);
-
-// vim: tabstop=4 shiftwidth=4 softtabstop=4 expandtab colorcolumn=96 :
