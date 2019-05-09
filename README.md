@@ -2,10 +2,6 @@
 
 A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
 
-## Note:  This is a forked version of OpenRazer 2.5.0 that has been tweaked to add logo and scroll wheel lighting effect support for the Razer Lancehead Tournament Edition.
-
-* There is no side LED support.
-
 **Before raising an issue** saying something doesn't work, read [the troubleshooting wiki page](https://github.com/openrazer/openrazer/wiki/Troubleshooting), try not to create new issues if one exists.
 
 Also this is the master branch, devices may appear in the tables below but might not be released in package form yet. Check out the stable branch for what _should_ be in the packages.
