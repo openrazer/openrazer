@@ -1450,7 +1450,7 @@ static ssize_t razer_attr_write_scroll_mode_wave(struct device *dev, struct devi
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-        report = razer_chroma_standard_matrix_effect_wave(VARSTORE, SCROLL_WHEEL_LED, direction);
+        report = razer_chroma_extended_matrix_effect_wave(VARSTORE, SCROLL_WHEEL_LED, direction);
         break;
     }
 
@@ -1649,7 +1649,7 @@ static ssize_t razer_attr_write_logo_mode_wave(struct device *dev, struct device
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-        report = razer_chroma_standard_matrix_effect_wave(VARSTORE, LOGO_LED, direction);
+        report = razer_chroma_extended_matrix_effect_wave(VARSTORE, LOGO_LED, direction);
         break;
     }
 
