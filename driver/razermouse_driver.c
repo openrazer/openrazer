@@ -376,7 +376,7 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_standard_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, direction);
-        
+
     razer_send_payload(usb_dev, &report);
     return count;
 }
