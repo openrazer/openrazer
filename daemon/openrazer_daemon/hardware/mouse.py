@@ -18,7 +18,7 @@ class RazerLanceheadTE(__RazerDeviceSpecialBrightnessSuspend):
     Class for the Razer Lancehead Tournament Edition (Wired)
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Lancehead_TE-if0(1|2)-event-kbd')
-    
+
     USB_VID = 0x1532
     USB_PID = 0x0060
     HAS_MATRIX = True
@@ -32,7 +32,7 @@ class RazerLanceheadTE(__RazerDeviceSpecialBrightnessSuspend):
                'set_scroll_wave_lancehead_te', 'set_scroll_static_lancehead_te', 'set_scroll_spectrum_lancehead_te', 'set_scroll_none_lancehead_te', 'set_scroll_reactive_lancehead_te', 'set_scroll_breath_random_lancehead_te', 'set_scroll_breath_single_lancehead_te', 'set_scroll_breath_dual_lancehead_te',
                # Can set LOGO and Scrol with custom
                'set_custom_effect', 'set_key_row']
-    
+
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1203/1206_lanceheadte.png"
 
     # Deprecated - RAZER_URLS be removed in future.
@@ -43,7 +43,7 @@ class RazerLanceheadTE(__RazerDeviceSpecialBrightnessSuspend):
     }
 
     DPI_MAX = 16000
-    
+
     def _suspend_device(self):
         """
         Suspend the device
