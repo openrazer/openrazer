@@ -1138,4 +1138,3 @@ class RazerBladeMid2019Mercury(_RippleKeyboard):
         "side_img": "https://assets2.razerzone.com/images/blade-15/blade15-usp-ports-advanced-model.jpg",
         "perspective_img": "https://d4kkpd69xt9l7.cloudfront.net/sys-master/root/h78/h94/9126618628126/razer-blade-15-gallery07.jpg"
     }
-
