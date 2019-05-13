@@ -1468,7 +1468,6 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
         case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
         case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
-        case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
         case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
         case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
             report.transaction_id.id = 0x80; // Fall into the 2016/blade/blade2016 to set device id
