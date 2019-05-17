@@ -222,6 +222,17 @@ class EffectSync(object):
                     if effect_func is not None:
                         effect_func(*args)
 
+                elif effect_name == 'setBrightness':
+                    effect_func = getattr(self._parent, 'setScrollBrightness', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setLogoBrightness', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setBacklightBrightness', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+
         except Exception as err:
             self._logger.exception("Caught exception trying to sync effects.", exc_info=err)
 
