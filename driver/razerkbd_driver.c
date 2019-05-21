@@ -1624,6 +1624,11 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
         return 0;
     }
 
+    // Ignore keys handled as macro keys
+    if(usage->code >= KEY_F13 && usage->code <= KEY_F17) {
+        return 1;
+    }
+
     // Block win key
     if(asc->block_keys[0] && (usage->code == KEY_LEFTMETA || usage->code == KEY_RIGHTMETA)) {
         return 1;
@@ -1678,15 +1683,12 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
 /**
  * Raw event function
  *
- * Bastard function. Could most probably be done a load better.
- * Basically it shifts all of the key's in the 04... event to the right 1, and then sets the first 2 bytes to 0x0100. This then allows the keys to be processed with the above normal event function
- * Converts M1-M5 into F13-F17. It also blanks out FN keypresses so it acts more like the modifier it should be.
+ * This function converts M1-M5 into F13-F17. It also blanks out FN keypresses so it acts more like the modifier
+ * it should be.
  *
+ * Examples of the raw input processed by this function:
  * 04012000000000000000 FN is pressed, M1 pressed
  * 04010000000000000000 M1 is released
- * goes to
- * 01000068000000000000 FN is pressed (blanked), M1 pressed (converted to F13)
- * 01000000000000000000 M1 is released
  *
  * HID Usage Table http://www.freebsddiary.org/APC/usb_hid_usages.php
  */
@@ -1709,12 +1711,18 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 
     // The event were looking for is 16 bytes long and starts with 0x04
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
-        // Convert 04... to 0100...
-        int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
+        struct hid_report_enum *hid_report_enum = hdev->report_enum + HID_INPUT_REPORT;
+        struct hid_report *report_1 = hid_report_enum->report_id_hash[1];
+        struct input_dev *idev = report_1->field[0]->hidinput->input;
+
+        int index;
         u8 cur_value = 0x00;
         int found_fn = 0x00;
 
-        while(--index > 0) {
+        char fn_keys[KEY_F17 - KEY_F13 + 1];
+        memset(fn_keys, 0, sizeof(fn_keys));
+
+        for (index = 1; index < size; index++) {
             cur_value = data[index];
             if(cur_value == 0x00) { // Skip 0x00
                 continue;
@@ -1722,37 +1730,40 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 
             switch(cur_value) {
             case 0x01: // FN
-                //cur_value = 0x73; // F24
+                //cur_value = KEY_F24;
                 cur_value = 0x00;
                 found_fn = 0x01;
                 break;
             case 0x20: // M1
-                cur_value = 0x68; // F13
+                cur_value = KEY_F13;
                 break;
             case 0x21: // M2
-                cur_value = 0x69; // F14
+                cur_value = KEY_F14;
                 break;
             case 0x22: // M3
-                cur_value = 0x6A; // F15
+                cur_value = KEY_F15;
                 break;
             case 0x23: // M4
-                cur_value = 0x6B; // F16
+                cur_value = KEY_F16;
                 break;
             case 0x24: // M5
-                cur_value = 0x6C; // F17
+                cur_value = KEY_F17;
+                break;
+            default:
+                cur_value = 0x00;
                 break;
             }
 
-            data[index+1] = cur_value;
+            if (cur_value != 0) {
+                if (cur_value >= KEY_F13 && cur_value <= KEY_F17) {
+                    fn_keys[cur_value - KEY_F13] = true;
+                }
+            }
         }
-
         asc->fn_on = !!found_fn;
-
-        data[0] = 0x01;
-        data[1] = 0x00;
-
-        // Some reason just by editing data, it generates a normal event above. (Could quite possibly work like that, no clue)
-        //hid_report_raw_event(hdev, HID_INPUT_REPORT, data, size, 0);
+        for (index = KEY_F13; index <= KEY_F17; index++) {
+            input_event(idev, EV_KEY, index, fn_keys[index - KEY_F13]);
+        }
         return 1;
     }
 
