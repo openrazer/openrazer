@@ -35,6 +35,11 @@ class RazerLanceheadTE(__RazerDeviceSpecialBrightnessSuspend):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1203/1206_lanceheadte.png"
 
+    # Deprecated - RAZER_URLS be removed in future.
+    RAZER_URLS = {
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/1203/1206_lanceheadte.png"
+    }
+
     DPI_MAX = 16000
 
     def _suspend_device(self):
