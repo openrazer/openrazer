@@ -41,4 +41,3 @@ def set_scroll_wave_lancehead_te(self, direction):
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(direction))
-
