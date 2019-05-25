@@ -1437,7 +1437,7 @@ static ssize_t razer_attr_read_logo_led_effect(struct device *dev, struct device
 }
 
 /**
- * Write device file "mode_wave" (for extended mouse matrix effects)
+ * Write device file "scroll_mode_wave" (for extended mouse matrix effects)
  *
  * Wave effect mode is activated whenever the file is written to
  */
@@ -1460,7 +1460,7 @@ static ssize_t razer_attr_write_scroll_mode_wave(struct device *dev, struct devi
 }
 
 /**
- * Write device file "mode_spectrum" (for extended mouse matrix effects)
+ * Write device file "scroll_mode_spectrum" (for extended mouse matrix effects)
  *
  * Spectrum effect mode is activated whenever the file is written to
  */
@@ -1488,7 +1488,7 @@ static ssize_t razer_attr_write_scroll_mode_spectrum(struct device *dev, struct 
 }
 
 /**
- * Write device file "mode_reactive" (for extended mouse matrix effects)
+ * Write device file "scroll_mode_reactive" (for extended mouse matrix effects)
  *
  * Sets reactive mode when this file is written to. A speed byte and 3 RGB bytes should be written
  */
@@ -1522,7 +1522,7 @@ static ssize_t razer_attr_write_scroll_mode_reactive(struct device *dev, struct 
 }
 
 /**
- * Write device file "mode_breath" (for extended mouse matrix effects)
+ * Write device file "scroll_mode_breath" (for extended mouse matrix effects)
  *
  * Sets breathing mode by writing 1, 3 or 6 bytes
  */
@@ -1576,7 +1576,7 @@ static ssize_t razer_attr_write_scroll_mode_breath(struct device *dev, struct de
 }
 
 /**
- * Write device file "mode_static" (for extended mouse matrix effects)
+ * Write device file "scroll_mode_static" (for extended mouse matrix effects)
  *
  * Set the mouse to static mode when 3 RGB bytes are written
  */
@@ -1609,7 +1609,7 @@ static ssize_t razer_attr_write_scroll_mode_static(struct device *dev, struct de
 }
 
 /**
- * Write device file "mode_none" (for extended mouse matrix effects)
+ * Write device file "scroll_mode_none" (for extended mouse matrix effects)
  *
  * No effect is activated whenever this file is written to
  */
@@ -1636,7 +1636,7 @@ static ssize_t razer_attr_write_scroll_mode_none(struct device *dev, struct devi
 }
 
 /**
- * Write device file "mode_wave" (for extended mouse matrix effects)
+ * Write device file "logo_mode_wave" (for extended mouse matrix effects)
  *
  * Wave effect mode is activated whenever the file is written to
  */
@@ -1659,7 +1659,7 @@ static ssize_t razer_attr_write_logo_mode_wave(struct device *dev, struct device
 }
 
 /**
- * Write device file "mode_spectrum" (for extended mouse matrix effects)
+ * Write device file "logo_mode_spectrum" (for extended mouse matrix effects)
  *
  * Spectrum effect mode is activated whenever the file is written to
  */
@@ -1686,7 +1686,7 @@ static ssize_t razer_attr_write_logo_mode_spectrum(struct device *dev, struct de
 }
 
 /**
- * Write device file "mode_reactive" (for extended mouse matrix effects)
+ * Write device file "logo_mode_reactive" (for extended mouse matrix effects)
  *
  * Sets reactive mode when this file is written to. A speed byte and 3 RGB bytes should be written
  */
@@ -1720,7 +1720,7 @@ static ssize_t razer_attr_write_logo_mode_reactive(struct device *dev, struct de
 }
 
 /**
- * Write device file "mode_breath" (for extended mouse matrix effects)
+ * Write device file "logo_mode_breath" (for extended mouse matrix effects)
  *
  * Sets breathing mode by writing 1, 3 or 6 bytes
  */
@@ -1774,7 +1774,7 @@ static ssize_t razer_attr_write_logo_mode_breath(struct device *dev, struct devi
 }
 
 /**
- * Write device file "mode_static" (for extended mouse matrix effects)
+ * Write device file "logo_mode_static" (for extended mouse matrix effects)
  *
  * Set the mouse to static mode when 3 RGB bytes are written
  */
@@ -1806,7 +1806,7 @@ static ssize_t razer_attr_write_logo_mode_static(struct device *dev, struct devi
 }
 
 /**
- * Write device file "mode_none" (for extended mouse matrix effects)
+ * Write device file "logo_mode_none" (for extended mouse matrix effects)
  *
  * No effect is activated whenever this file is written to
  */
