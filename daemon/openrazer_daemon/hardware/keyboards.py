@@ -1131,10 +1131,3 @@ class RazerBladeMid2019Mercury(_RippleKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-15/shop/blade15-mercury-1.jpg"
-
-    # Deprecated - RAZER_URLS be removed in future.
-    RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/support/products/1482/blade15.png",
-        "side_img": "https://assets2.razerzone.com/images/blade-15/blade15-usp-ports-advanced-model.jpg",
-        "perspective_img": "https://d4kkpd69xt9l7.cloudfront.net/sys-master/root/h78/h94/9126618628126/razer-blade-15-gallery07.jpg"
-    }
