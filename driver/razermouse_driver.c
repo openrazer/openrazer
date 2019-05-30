@@ -212,6 +212,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer DeathAdder 3500\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+        device_type = "Razer Lancehead Tournament Edition\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
     }
@@ -278,6 +282,8 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+        printk("trying to");
         report = razer_chroma_mouse_extended_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
         break;
 
@@ -309,6 +315,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
         report = razer_chroma_extended_matrix_effect_custom_frame();
         break;
 
@@ -337,6 +344,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     if(count == 3) {
         switch (usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
             report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
             break;
 
@@ -369,7 +377,15 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report report = razer_chroma_standard_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, direction);
+    struct razer_report report;
+    switch(usb_dev->descriptor.idProduct) {
+      case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+        report = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
+        break;
+      default:
+        report = razer_chroma_standard_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, direction);
+        break;
+    }
 
     razer_send_payload(usb_dev, &report);
     return count;
@@ -390,6 +406,10 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
         report = razer_chroma_mouse_extended_matrix_effect_spectrum(VARSTORE, BACKLIGHT_LED);
+        break;
+
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+        report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
         break;
 
     default:
@@ -420,6 +440,10 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
             report = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+            break;
+    
+        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+            report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, ZERO_LED, speed, (struct razer_rgb*)&buf[1]);
             break;
 
         default:
@@ -2039,6 +2063,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
 
         case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
@@ -2300,6 +2325,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
             device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
@@ -2445,6 +2471,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TAIPAN) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_IMPERATOR) },
