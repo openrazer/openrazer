@@ -282,9 +282,11 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-        printk("trying to");
         report = razer_chroma_mouse_extended_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
+        break;
+    
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+        report = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
         break;
 
     default:
@@ -344,8 +346,12 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     if(count == 3) {
         switch (usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
             report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+            break;
+
+        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+            report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
+            report.transaction_id.id = 0xff;
             break;
 
         case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
@@ -484,6 +490,22 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 
         default: // "Random" colour mode
             report = razer_chroma_mouse_extended_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
+            break;
+        }
+        break;
+
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+        switch(count) {
+        case 3: // Single colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
+            break;
+
+        case 6: // Dual colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            break;
+
+        default: // "Random" colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
             break;
         }
         break;
@@ -717,6 +739,11 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
         report.transaction_id.id = 0x3f;
         break;
 
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+        report = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
+        report.transaction_id.id = 0x3f;
+        break;
+
     default:
         report = razer_chroma_standard_set_led_brightness(VARSTORE, BACKLIGHT_LED, brightness);
         break;
@@ -754,6 +781,11 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
         // Orochi sets brightness of scroll wheel apparently
         report = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
         report.transaction_id.id = 0x3f;
+        break;
+
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+        // TODO fix
+        report = razer_chroma_extended_matrix_get_brightness(VARSTORE, BACKLIGHT_LED);
         break;
 
     default:
@@ -2063,10 +2095,10 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
 
         case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
@@ -2074,6 +2106,20 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+            break;
+
+        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
             break;
 
