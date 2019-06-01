@@ -113,7 +113,7 @@ class RazerLanceheadTE(__RazerDeviceBrightnessSuspend):
     METHODS = ['get_device_type_mouse', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'max_dpi',
-               'get_dpi_xy', 'set_dpi_xy']
+               'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/606/606_mambate_500x500.png"
 
