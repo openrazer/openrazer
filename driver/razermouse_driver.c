@@ -785,7 +785,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
 
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
         // TODO fix
-        report = razer_chroma_extended_matrix_get_brightness(VARSTORE, BACKLIGHT_LED);
+        report = razer_chroma_extended_matrix_get_brightness(VARSTORE, SCROLL_WHEEL_LED);
         break;
 
     default:
@@ -2371,10 +2371,10 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
             device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
@@ -2382,6 +2382,20 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);
             device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+            break;
+
+        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
             break;
 
