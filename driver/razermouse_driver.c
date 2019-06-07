@@ -784,7 +784,8 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
         break;
 
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-        // TODO fix
+        // Lancehead TE brightness can't be retrieved using ZERO_LED or BACKLIGHT_LED
+        // we use SCROLL_WHEEL_LED instead and it seems to work well
         report = razer_chroma_extended_matrix_get_brightness(VARSTORE, SCROLL_WHEEL_LED);
         break;
 
