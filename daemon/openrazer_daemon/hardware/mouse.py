@@ -115,13 +115,11 @@ class RazerLanceheadTE(__RazerDeviceBrightnessSuspend):
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'max_dpi',
                'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
-    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/606/606_mambate_500x500.png"
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1203/1206_lanceheadte.png"
 
     # Deprecated - RAZER_URLS be removed in future.
     RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/support/products/606/606_mambate_500x500.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-5.png",
-        "perspective_img": "https://assets.razerzone.com/eeimages/products/22294/mambategallery-800x800-2.png"
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/1203/1206_lanceheadte.png"
     }
 
     DPI_MAX = 16000
