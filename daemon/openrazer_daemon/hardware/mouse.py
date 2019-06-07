@@ -188,11 +188,13 @@ class RazerOuroboros(__RazerDevice):
                'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active', 'get_scroll_brightness', 'set_scroll_brightness',
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold']
 
-    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1203/1206_lanceheadte.png"
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/26/26_ouroboros.png"
 
     # Deprecated - RAZER_URLS be removed in future.
     RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/support/products/1203/1206_lanceheadte.png"
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/26/26_ouroboros.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-2.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-2.png"
     }
 
     DPI_MAX = 8200
