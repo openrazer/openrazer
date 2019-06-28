@@ -1073,3 +1073,23 @@ class RazerDeathAdder3500(__RazerDeviceSpecialBrightnessSuspend):
         _da_set_logo_brightness(self, logo_brightness)
         _da_set_scroll_brightness(self, scroll_brightness)
         self.disable_notify = False
+
+class RazerDeathAdderEssential(__RazerDevice):
+    """
+    Class for the Razer DeathAdder Essential
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x006E
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               'get_logo_active', 'set_logo_active']
+
+    DPI_MAX = 6400
+
+    DEVICE_IMAGE = "https://d4kkpd69xt9l7.cloudfront.net/sys-master/images/hdf/h9e/9024985661470/DeathAdder-Essential-Base.png_300Wx300H"
+
+    # Deprecated - RAZER_URLS be removed in future.
+    RAZER_URLS = {
+        "top_img": "https://d4kkpd69xt9l7.cloudfront.net/sys-master/images/hdf/h9e/9024985661470/DeathAdder-Essential-Base.png_300Wx300H",
+        "side_img": None,
+        "perspective_img": None
+    }
