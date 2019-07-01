@@ -212,6 +212,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer DeathAdder 3500\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+        device_type = "Razer Deathadder Essential\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
     }
@@ -1083,6 +1087,7 @@ static ssize_t razer_attr_read_scroll_led_brightness(struct device *dev, struct 
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         report = razer_chroma_extended_matrix_get_brightness(VARSTORE, SCROLL_WHEEL_LED);
         break;
 
@@ -1113,6 +1118,7 @@ static ssize_t razer_attr_write_scroll_led_brightness(struct device *dev, struct
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         report = razer_chroma_extended_matrix_brightness(VARSTORE, SCROLL_WHEEL_LED, brightness);
         break;
 
@@ -1143,6 +1149,7 @@ static ssize_t razer_attr_read_logo_led_brightness(struct device *dev, struct de
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         report = razer_chroma_extended_matrix_get_brightness(VARSTORE, LOGO_LED);
         break;
 
@@ -1173,6 +1180,7 @@ static ssize_t razer_attr_write_logo_led_brightness(struct device *dev, struct d
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         report = razer_chroma_extended_matrix_brightness(VARSTORE, LOGO_LED, brightness);
         break;
 
@@ -1509,6 +1517,7 @@ static ssize_t razer_attr_write_scroll_mode_breath(struct device *dev, struct de
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         switch(count) {
         case 3: // Single colour mode
             report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
@@ -1551,6 +1560,7 @@ static ssize_t razer_attr_write_scroll_mode_static(struct device *dev, struct de
             break;
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
             break;
         }
@@ -1581,6 +1591,7 @@ static ssize_t razer_attr_write_scroll_mode_none(struct device *dev, struct devi
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         report = razer_chroma_extended_matrix_effect_none(VARSTORE, SCROLL_WHEEL_LED);
         break;
     }
@@ -1679,6 +1690,7 @@ static ssize_t razer_attr_write_logo_mode_breath(struct device *dev, struct devi
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         switch(count) {
         case 3: // Single colour mode
             report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
@@ -1720,6 +1732,7 @@ static ssize_t razer_attr_write_logo_mode_static(struct device *dev, struct devi
             break;
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
             break;
         }
@@ -1750,6 +1763,7 @@ static ssize_t razer_attr_write_logo_mode_none(struct device *dev, struct device
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         report = razer_chroma_extended_matrix_effect_none(VARSTORE, LOGO_LED);
         break;
     }
@@ -2169,6 +2183,19 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             break;
+
+        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            break;
         }
 
     }
@@ -2419,6 +2446,19 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             break;
+
+        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            break;
         }
 
     }
@@ -2459,6 +2499,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_3500) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL) },
     { }
 };
 
