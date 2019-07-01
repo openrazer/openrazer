@@ -1094,13 +1094,8 @@ class RazerDeathAdderEssential(__RazerDeviceSpecialBrightnessSuspend):
 
     # Deprecated - RAZER_URLS be removed in future.
     RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/support/products/1385/1385_deathadderessential.png",
-        "side_img": None,
-        "perspective_img": None
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/1385/1385_deathadderessential.png"
     }
-
-    #def __init__(self, *args, **kwargs):
-    #    super(RazerDeathAdderEssential, self).__init__(*args, **kwargs)
 
     def _suspend_device(self):
         """

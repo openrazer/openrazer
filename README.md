@@ -1,29 +1,3 @@
-## Razer DeathAdder Essential
-
-This fork and branch aim to implement support for Razer DeathAdder Essential.
-
-| Device                                        | USB VID:PID |
-| --------------------------------------------- | ----------- |
-| Razer DeathAdder Essential                    |  1532:006E  |
-
-
-### What works:
-- Setting DPI
-- Setting logo brightness
-- Setting logo effect (none|breathing|static)
-- Setting scroll wheel brightness
-- Setting scroll wheel (none|breathing|static)
-
-### Needs testing:
-- Setting Poll rate
-
-### Known issues:
-- RazorGenie offers the color selection for logo scroll wheel.
-Setting this affects the color but the mouse only changes the amount of green.
-This feature would presumably if the mouse had all LEDs (not just a green one).
-
-- Setting DPI for Y axle has no effect. Not sure if the mouse supports seperate DPIs for X and Y axles.
-
 # [OpenRazer](https://openrazer.github.io/)
 
 A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
@@ -103,6 +77,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Abyssus V2                              |  1532:005B  |
 | Razer DeathAdder Elite                        |  1532:005C  |
 | Razer Abyssus 2000                            |  1532:005E  |
+| Razer DeathAdder Essential                    |  1532:006E  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |
