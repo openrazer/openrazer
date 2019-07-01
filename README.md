@@ -47,6 +47,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Blade 15 (2019) Advanced                |  1532:023A  |
 | Razer Blade 15 (2018) Base Model              |  1532:023B  |
 | Razer Blade 15 (2018) Mercury                 |  1532:0240  |
+| Razer BlackWidow (2019)                       |  1532:0241  |
 | Razer Blade 15 (Mid 2019) Mercury             |  1532:0245  |
 
 ### Mice
