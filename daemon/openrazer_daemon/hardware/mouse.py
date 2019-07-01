@@ -1074,6 +1074,7 @@ class RazerDeathAdder3500(__RazerDeviceSpecialBrightnessSuspend):
         _da_set_scroll_brightness(self, scroll_brightness)
         self.disable_notify = False
 
+
 class RazerDeathAdderEssential(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer DeathAdder Essential
