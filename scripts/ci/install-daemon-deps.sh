@@ -16,5 +16,4 @@ apt-get -y install \
     python3-numpy \
     python3-pyudev \
     python3-setproctitle \
-    xautomation \
-    xdotool
+    xautomation

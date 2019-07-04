@@ -70,7 +70,6 @@ Depends: ${misc:Depends},
          python3-daemonize (>= 2.4.0),
          gir1.2-gtk-3.0,
          xautomation,
-         xdotool,
          ${openrazer:dbus-user-session}
 Recommends: python3-openrazer (= ${binary:Version})
 Conflicts: razer-daemon
