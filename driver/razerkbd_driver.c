@@ -42,6 +42,8 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
 
+struct razer_device_translations translations;
+
 // M1-M5 is F13-F17
 #define RAZER_MACRO_KEY 188 // 188 = KEY_F18
 #define RAZER_GAME_KEY 189 // 189 = KEY_F19
@@ -1675,6 +1677,27 @@ static ssize_t razer_attr_read_key_alt_f4(struct device *dev, struct device_attr
 }
 
 /**
+ * read key translations for device
+ */
+static ssize_t razer_attr_read_button_translations(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    return razer_get_translations(&translations, usb_dev->descriptor.idProduct, buf);
+}
+
+/**
+ * write key translations for device
+ */
+static ssize_t razer_attr_write_button_translations(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    razer_set_translations(&translations, usb_dev->descriptor.idProduct, buf, count);
+    return count;
+}
+
+/**
  * Set up the device driver files
 
  *
@@ -1714,6 +1737,8 @@ static DEVICE_ATTR(matrix_brightness,       0660, razer_attr_read_set_brightness
 static DEVICE_ATTR(matrix_effect_custom,    0220, NULL,                                       razer_attr_write_mode_custom);
 static DEVICE_ATTR(matrix_custom_frame,     0220, NULL,                                       razer_attr_write_matrix_custom_frame);
 
+// Translations
+static DEVICE_ATTR(button_translations,     0664, razer_attr_read_button_translations,        razer_attr_write_button_translations);
 
 static DEVICE_ATTR(key_super,               0660, razer_attr_read_key_super,                  razer_attr_write_key_super);
 static DEVICE_ATTR(key_alt_tab,             0660, razer_attr_read_key_alt_tab,                razer_attr_write_key_alt_tab);
@@ -1772,6 +1797,11 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
         break;
     }
 
+    if((translation = razer_get_translation(&translations, usb_dev->descriptor.idProduct, usage->code)) != NULL) {
+        // if we have translations override variable to use translations
+        asc->fn_on = 1;
+    }
+
     if(translation) {
         if(test_bit(usage->code, asc->pressed_fn)) {
             do_translate = 1;
@@ -1786,7 +1816,9 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
                 clear_bit(usage->code, asc->pressed_fn);
             }
 
-            input_event(field->hidinput->input, usage->type, translation->to, value);
+            if (translation->to != 0) {
+                input_event(field->hidinput->input, usage->type, translation->to, value);
+            }
             return 1;
         }
     }
@@ -2223,6 +2255,10 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         // When the daemon discovers the device it will instruct it to enter driver mode
         razer_set_device_mode(usb_dev, 0x00, 0x00);
     } else if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD) {
+        // Translations
+        razer_init_translations(&translations);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_button_translations);
+
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_super);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_tab);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_f4);
@@ -2551,10 +2587,15 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             break;
         }
     } else if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD) {
+        // Translations
+        device_remove_file(&hdev->dev, &dev_attr_button_translations);
+
         device_remove_file(&hdev->dev, &dev_attr_key_super);
         device_remove_file(&hdev->dev, &dev_attr_key_alt_tab);
         device_remove_file(&hdev->dev, &dev_attr_key_alt_f4);
     }
+
+    razer_cleanup_translations(&translations);
 
     hid_hw_stop(hdev);
     kfree(dev);

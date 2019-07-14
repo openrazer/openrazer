@@ -55,6 +55,7 @@ dist
 .idea
 .project
 .cproject
+.vscode
 *.o.cmd
 *.ko.cmd
 /driver/.tmp_versions

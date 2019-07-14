@@ -13,6 +13,7 @@
 #define DRIVER_RAZERCOMMON_H_
 
 #include <linux/usb/input.h>
+#include <linux/list.h>
 
 #define DRIVER_VERSION "2.6.0"
 #define DRIVER_LICENSE "GPL v2"
@@ -126,12 +127,30 @@ struct razer_key_translation {
     u8 flags;
 };
 
+struct razer_device_translations {
+    u16 id;
+    struct razer_key_translation** translations;
+    size_t length;
+    struct list_head list;
+};
+
 int razer_send_control_msg(struct usb_device *usb_dev,void const *data, unsigned int report_index, unsigned long wait_min, unsigned long wait_max);
 int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait_min, ulong wait_max);
 int razer_get_usb_response(struct usb_device *usb_dev, unsigned int report_index, struct razer_report* request_report, unsigned int response_index, struct razer_report* response_report, unsigned long wait_min, unsigned long wait_max);
 unsigned char razer_calculate_crc(struct razer_report *report);
 struct razer_report get_razer_report(unsigned char command_class, unsigned char command_id, unsigned char data_size);
 struct razer_report get_empty_razer_report(void);
+
+/**
+ * Buttons translations
+ */
+u8 razer_set_translations(struct razer_device_translations *translations, u16 id, const char *buf, size_t count);
+size_t razer_get_translations(struct razer_device_translations* translations, u16 id, char *buf);
+struct razer_key_translation *razer_get_translation(struct razer_device_translations *translations, u16 id, u16 key);
+void razer_init_translations(struct razer_device_translations *translations);
+void razer_cleanup_translations(struct razer_device_translations *translations);
+
+
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message);
 
 // Convenience functions

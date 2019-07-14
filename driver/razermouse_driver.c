@@ -40,6 +40,7 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
 
+struct razer_device_translations translations;
 
 /**
  * Send report to the mouse
@@ -2493,6 +2494,26 @@ static ssize_t razer_attr_read_backlight_led_state(struct device *dev, struct de
     return sprintf(buf, "%d\n", response.arguments[2]);
 }
 
+/**
+ * read key translations for device
+ */
+static ssize_t razer_attr_read_button_translations(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    return razer_get_translations(&translations, usb_dev->descriptor.idProduct, buf);
+}
+
+/**
+ * write key translations for device
+ */
+static ssize_t razer_attr_write_button_translations(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    razer_set_translations(&translations, usb_dev->descriptor.idProduct, buf, count);
+    return count;
+}
 
 /**
  * Set up the device driver files
@@ -2577,7 +2598,36 @@ static DEVICE_ATTR(right_matrix_effect_none,        0220, NULL,                 
 // For old-school led commands
 static DEVICE_ATTR(backlight_led_state,            0660, razer_attr_read_backlight_led_state, razer_attr_write_backlight_led_state);
 
+// Translations
+static DEVICE_ATTR(button_translations,       0664, razer_attr_read_button_translations,   razer_attr_write_button_translations);
 
+/**
+ * input events
+ */
+static int razer_event(struct hid_device *hdev, struct hid_field *field, struct hid_usage *usage, __s32 value)
+{
+    struct razer_key_translation *translation;
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+        // Skip this if its control (mouse) interface
+        return 0;
+    }
+
+    translation = razer_get_translation(&translations, usb_dev->descriptor.idProduct, usage->code);
+
+    // if is translation availiable then process
+    if (translation != NULL) {
+        // if translation is 0 it mean key is unbound and skip event
+        if (translation->to != 0) {
+            input_event(field->hidinput->input, usage->type, translation->to, value);
+        }
+
+        return 1;
+    }
+
+    return 0;
+}
 
 /**
  * Raw event function
@@ -2960,7 +3010,12 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
         }
 
+    } else if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_KEYBOARD) {
+        // Translations
+        razer_init_translations(&translations);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_button_translations);
     }
+
 
     hid_set_drvdata(hdev, dev);
     dev_set_drvdata(&hdev->dev, dev);
@@ -3272,8 +3327,12 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             break;
         }
 
+    } else if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD) {
+        // Translations
+        device_remove_file(&hdev->dev, &dev_attr_button_translations);
     }
 
+    razer_cleanup_translations(&translations);
 
     hid_hw_stop(hdev);
     kfree(dev);
@@ -3319,7 +3378,6 @@ static const struct hid_device_id razer_devices[] = {
 
 MODULE_DEVICE_TABLE(hid, razer_devices);
 
-
 /**
  * Describes the contents of the driver
  */
@@ -3329,6 +3387,7 @@ static struct hid_driver razer_mouse_driver = {
     .probe     = razer_mouse_probe,
     .remove    = razer_mouse_disconnect,
 
+    .event     = razer_event,
     .raw_event = razer_raw_event,
 };
 

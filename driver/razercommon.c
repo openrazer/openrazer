@@ -166,6 +166,226 @@ struct razer_report get_empty_razer_report(void)
 }
 
 /**
+ * Find key translations for given device
+ * @translations: list_head of all devices translations
+ * @id: id of device
+ *
+ * @return: struct with device translations
+ */
+static struct razer_device_translations *razer_get_device(struct razer_device_translations *translations, u16 id)
+{
+    struct razer_device_translations *ptr;
+    list_for_each_entry(ptr, &translations->list, list) {
+        if (ptr->id == id) {
+            return ptr;
+        }
+    }
+
+    return NULL;
+}
+
+/**
+ * free mamory of array containing translations for device
+ * @translations: pointer to device translations
+ */
+static void razer_free_translations(struct razer_device_translations *translations)
+{
+    size_t i;
+    for(i = 0; i < translations->length; i++) {
+        kfree(translations->translations[i]);
+    }
+    kfree(translations->translations);
+}
+
+/**
+ * allocate mamory for array containing translations device
+ * @translations: pointer to device translations
+ * @length: total count of translations for device
+ */
+static void razer_alloc_translations(struct razer_device_translations *translations, size_t length)
+{
+    size_t i;
+    translations->length = length;
+    translations->translations = kzalloc(sizeof(struct razer_key_translation*) * length, GFP_KERNEL);
+
+    for (i = 0; i < length; i++) {
+        translations->translations[i] = kzalloc(sizeof(struct razer_key_translation), GFP_KERNEL);
+    }
+}
+
+/**
+ * count translations for device only for logging and debugging
+ * @translations: pointer to device translations
+ * @id: id of device
+ */
+static u8 razer_count_translations(struct razer_device_translations *translations, u16 id)
+{
+    u8 i = 0;
+    struct razer_device_translations *ptr;
+    list_for_each_entry(ptr, &translations->list, list) {
+        if (ptr->id == id) {
+            i++;
+        }
+    }
+
+    return i;
+}
+
+/**
+ * modify translations, this function have some different
+ * "modes" of work depending on input:
+ *   1. device don't have translations -> allocate memory for it and set translations
+ *   2. device have translations and their count is diffrent than provided -> free mam then allocate new one then set translations
+ *   3. device have translations and their count is equal provided -> just set new translations
+ *   4. buffer contain one byte(it's value don't matter) -> delete bindings for device(default bindings)
+ * "protocol" of setting translations:
+ *   to set translations you need write array of u16 to *button_translations* file contained in
+ *   "/sys/bus/hid/drivers/<razer(mouse|kbd)/<DEVICE ID>/button_translations" each binding is
+ *   pair of u16 integeras representing first: keycode to remap, second: button destination keycode
+ *   eg. "echo -n -e \\x02\\x00\\x1E\\x00\\x03\\x00\\x30\\x00 > button_translations" translate my
+ *   razer naga keypad buttons:
+ *     1 -> a
+ *     2 -> b
+ *     rest -> default
+ *  or write one byte to delete bindings
+ *  eg. echo -n -e \\x00 > button_translations
+ *
+ * @translations: list_head of all devices translations
+ * @id: id of device
+ * @buff: buffer of input data
+ * @count: size of data in buffer
+ * @return:
+ *   0 -> translations successfully changed
+ *   1 -> deleted translations for device
+ *   2 -> error binding buffer is not pairs of u16
+ */
+u8 razer_set_translations(struct razer_device_translations *translations, u16 id, const char *buf, size_t count)
+{
+    size_t offset;
+    size_t bindingSize = sizeof(u16) * 2;
+    size_t bindingsCount = count / bindingSize;
+    struct razer_device_translations *it;
+
+    // here we delete bindings for device
+    if (count == sizeof(u8)) {
+        if ((it = razer_get_device(translations, id)) != NULL) {
+            razer_free_translations(it);
+            list_del(&it->list);
+            kfree(it);
+
+            printk("razercommon: [Translations] clear translations for device %d count %d should be 0!\n", (int)id, (int)razer_count_translations(translations, id));
+            return 1;
+        }
+    }
+
+    // here we check buffer is pairs of u16
+    if (count % sizeof(u16) != 0) {
+        return 2;
+    }
+
+    if ((it = razer_get_device(translations, id)) == NULL) {
+        // here we allocate bindings if device dont have any
+        it = kzalloc(sizeof(struct razer_device_translations), GFP_KERNEL);
+        it->id = id;
+        razer_alloc_translations(it, bindingsCount);
+        INIT_LIST_HEAD(&it->list);
+        list_add(&it->list, &translations->list);
+    }
+    if ((it = razer_get_device(translations, id)) != NULL && it->length != bindingsCount) {
+        // here we change baindings when count of existing bindings is different than new
+        razer_free_translations(it);
+        razer_alloc_translations(it, bindingsCount);
+    }
+
+    // bindings set
+    for (offset = 0; offset < bindingsCount; offset++) {
+        memcpy(it->translations[offset], buf + (offset * bindingSize), bindingSize);
+        it->translations[offset]->flags = 0;
+    }
+
+    printk("razercommon: [Translations] %d is count of translations for device id %d\n", (int)razer_count_translations(translations, id), (int)id);
+
+    return 0;
+}
+
+/**
+ * dump all bindings for device as bytearray for read by end user
+ * @translations: list_head of all devices translations
+ * @id: id of device
+ * @buff: buffer to write output
+ * @return: length of flushed data
+ */
+size_t razer_get_translations(struct razer_device_translations *translations, u16 id, char *buf)
+{
+    struct razer_device_translations *device;
+    size_t bindingSize = sizeof(u16) * 2;
+
+    if ((device = razer_get_device(translations, id)) != NULL) {
+        size_t offset, size = 0;
+        for (offset = 0; offset < device->length; offset++) {
+            memcpy(buf + (offset * bindingSize), device->translations[offset], bindingSize);
+            size += bindingSize;
+        }
+
+        return size;
+    }
+
+    strcpy(buf, "\0");
+    return 1;
+}
+
+/**
+ * get translation for device key
+ * @translations: list_head of all devices translations
+ * @id: id of device
+ * @key: keycode of pressed button
+ * @return: translated keycode for pressed button
+ */
+struct razer_key_translation *razer_get_translation(struct razer_device_translations *translations, u16 id, u16 key)
+{
+    struct razer_device_translations *device = razer_get_device(translations, id);
+
+    if (device != NULL) {
+        size_t i;
+        for(i = 0; i < device->length; i++) {
+            if (device->translations[i]->from == key) {
+                return device->translations[i];
+            }
+        }
+    }
+
+    return NULL;
+}
+
+
+/**
+ * init devices list
+ */
+void razer_init_translations(struct razer_device_translations *translations)
+{
+    INIT_LIST_HEAD(&translations->list);
+}
+
+/**
+ * cleanup function empty list of devices and free memory of all stored translations
+ * @translations: list_head of all devices translations
+ */
+void razer_cleanup_translations(struct razer_device_translations *translations)
+{
+    struct razer_device_translations *ptr, *next;
+
+    if (list_empty(&translations->list) != 0) {
+        return;
+    }
+
+    list_for_each_entry_safe(ptr, next, &translations->list, list) {
+        razer_free_translations(ptr);
+        list_del(&ptr->list);
+        kfree(ptr);
+    }
+}
+
+/**
  * Print report to syslog
  */
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message)

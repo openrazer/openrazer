@@ -540,7 +540,11 @@ class RazerNagaChroma(__RazerDeviceSpecialBrightnessSuspend):
                # #Macros
                'get_macros', 'delete_macro', 'add_macro',
                # Can set Logo, Scroll and thumbgrid with custom
-               'set_custom_effect', 'set_key_row']
+               'set_custom_effect', 'set_key_row',
+               # Key translations
+               'translations_get',
+               'translations_set'
+               ]
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/636/636_naga_chroma.png"
 

@@ -15,5 +15,6 @@ apt-get -y install \
     python3-notify2 \
     python3-numpy \
     python3-pyudev \
+    python3-evdev \
     python3-setproctitle \
     xautomation

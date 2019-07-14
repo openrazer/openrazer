@@ -2,6 +2,9 @@ import json
 import dbus as _dbus
 from openrazer.client.fx import RazerFX as _RazerFX
 from xml.etree import ElementTree as _ET
+import struct
+import evdev
+from functools import reduce
 from openrazer.client.macro import RazerMacro as _RazerMacro
 
 
@@ -24,7 +27,8 @@ class RazerDevice(object):
 
         self._dbus_interfaces = {
             'device': _dbus.Interface(self._dbus, "razer.device.misc"),
-            'brightness': _dbus.Interface(self._dbus, "razer.device.lighting.brightness")
+            'brightness': _dbus.Interface(self._dbus, "razer.device.lighting.brightness"),
+            'translations': _dbus.Interface(self._dbus, "razer.device.translations")
         }
 
         self._name = str(self._dbus_interfaces['device'].getDeviceName())
@@ -131,6 +135,9 @@ class RazerDevice(object):
 
             'lighting_backlight': self._has_feature('razer.device.lighting.backlight'),
             'lighting_backlight_active': self._has_feature('razer.device.lighting.backlight', 'setBacklightActive'),
+
+            'translations_get': self._has_feature('razer.device.translations', 'getTranslations'),
+            'translations_set': self._has_feature('razer.device.translations', 'setTranslations'),
         }
 
         # Nasty hack to convert dbus.Int32 into native
@@ -346,6 +353,37 @@ class RazerDevice(object):
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self._serial)
+
+    @property
+    def translations(self) -> dict:
+        """
+        Get device translations as key -> rebind pairs as dict
+
+        :return: Keybindings
+        :rtype: dict
+        """
+        bindingSize = struct.calcsize('HH')
+        rawbindings = bytes([v for v in self._dbus_interfaces['translations'].getTranslations()])
+        if rawbindings != b'\x00':
+            rawbindings = [struct.unpack('HH', rawbindings[i:i + bindingSize]) for i in range(0, len(rawbindings), bindingSize)]
+            return dict((evdev.ecodes.keys[k], evdev.ecodes.keys[v]) for (k, v) in rawbindings)
+
+        return {}
+
+    @translations.setter
+    def translations(self, value: dict):
+        """
+        Set device key translations
+
+        :param value: translations
+        :type value: dict
+        """
+        if value:
+            keycodes = [evdev.ecodes.ecodes[v] for v in list(reduce(lambda x, y: x + y, value.items()))]
+            self._dbus_interfaces['translations'].setTranslations(struct.pack('H' * len(keycodes), *keycodes))
+        else:
+            # if dict is empty clear translations(restore default keybindings)
+            self._dbus_interfaces['translations'].setTranslations(b'\x00')
 
 
 class BaseDeviceFactory(object):
