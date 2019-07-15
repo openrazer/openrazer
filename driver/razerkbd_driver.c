@@ -42,7 +42,12 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
 
-// M1-M5 is F13-F17
+#define RAZER_M1  KEY_F13 // = 183
+#define RAZER_M2  KEY_F14 // = 184
+#define RAZER_M3  KEY_F15 // = 185
+#define RAZER_M4  KEY_F16 // = 186
+#define RAZER_M5  KEY_F17 // = 187
+
 #define RAZER_MACRO_KEY 188 // 188 = KEY_F18
 #define RAZER_GAME_KEY 189 // 189 = KEY_F19
 #define RAZER_BRIGHTNESS_DOWN 190 // 190 = KEY_F20
@@ -70,6 +75,13 @@ static const struct razer_key_translation chroma_keys[] = {
     { KEY_F12,  RAZER_BRIGHTNESS_UP },
 
     { KEY_PAUSE, KEY_SLEEP },
+
+    //M Modifier for Razer Keyboards without M Keys
+    { KEY_1,  RAZER_M1},
+    { KEY_2,  RAZER_M2},
+    { KEY_3,  RAZER_M3},
+    { KEY_4,  RAZER_M4},
+    { KEY_5,  RAZER_M5},
 
     // Custom bind
     { KEY_KPENTER, KEY_CALC },
@@ -1610,13 +1622,25 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
     return count;
 }
 
-
-
+/**
+ * Write device file "key_super"
+ *
+ * Format
+ * BLOCKING_ENABLED
+ */
 static ssize_t razer_attr_write_key_super(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
     if (count >= 1) {
+
+#ifdef __DEBUG__
+        printk(KERN_WARNING "razerkbd: Settings changed (KEY_SUPER is now %s)\n", !buf[0] ? "enabled" : "disabled");
+        if (buf[0] || device->alter_keys[0]) {
+            printk(KERN_WARNING "razerkbd: Settings dependency (Altering KEY_SUPER to KEY_FN is currently %s)\n", !(buf[0] && device->alter_keys[0]) ? "disabled" : "enabled");
+        }
+#endif
+
         device->block_keys[0] = buf[0];
     }
 
@@ -1632,13 +1656,22 @@ static ssize_t razer_attr_read_key_super(struct device *dev, struct device_attri
     return 1;
 }
 
-
+/**
+ * Write device file "key_alt_tab"
+ *
+ * Format
+ * BLOCKING_ENABLED
+ */
 static ssize_t razer_attr_write_key_alt_tab(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
     if (count >= 1) {
-        printk(KERN_WARNING "razerkbd: Settings block_keys[1] to %u\n", buf[0]);
+
+#ifdef __DEBUG__
+        printk(KERN_WARNING "razerkbd: Settings changed (KEY_ALT_TAB is now %s)\n", !buf[0] ? "enabled" : "disabled");
+#endif
+
         device->block_keys[1] = buf[0];
     }
 
@@ -1654,11 +1687,22 @@ static ssize_t razer_attr_read_key_alt_tab(struct device *dev, struct device_att
     return 1;
 }
 
+/**
+ * Write device file "key_alt_f4"
+ *
+ * Format
+ * BLOCKING_ENABLED
+ */
 static ssize_t razer_attr_write_key_alt_f4(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
     if (count >= 1) {
+
+#ifdef __DEBUG__
+        printk(KERN_WARNING "razerkbd: Settings changed (KEY_ALT_F4 is now %s)\n", !buf[0] ? "enabled" : "disabled");
+#endif
+
         device->block_keys[2] = buf[0];
     }
 
@@ -1670,6 +1714,76 @@ static ssize_t razer_attr_read_key_alt_f4(struct device *dev, struct device_attr
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
     buf[0] = device->block_keys[2];
+
+    return 1;
+}
+
+/**
+ * Write device file "key_capslock"
+ *
+ * Blocks KEY_CAPSLOCK
+ *  ! Only works in Driver Mode
+ *
+ * Format
+ * BLOCK
+ */
+static ssize_t razer_attr_write_key_capslock(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+    if (count >= 1) {
+
+#ifdef __DEBUG__
+        printk(KERN_WARNING "razerkbd: Settings changed (KEY_CAPSLOCK is now %s)\n", !buf[0] ? "enabled" : "disabled");
+#endif
+
+        device->alter_keys[1] = device->block_capslock = buf[0];
+    }
+
+    return count;
+}
+
+static ssize_t razer_attr_read_key_capslock(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+    buf[0] = device->alter_keys[1];
+
+    return 1;
+}
+
+/**
+ * Write device file "alter_super_fn"
+ *
+ * Modifies KEY_SUPER into KEY_FN
+ *  ! Only works in Driver Mode
+ *  ! block_keys[0] must be enabled / key_super == 1
+ *
+ * Format
+ * ALTERING_ENABLED
+ */
+static ssize_t razer_attr_write_alter_super_fn(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+    if (count >= 1) {
+
+#ifdef __DEBUG__
+        printk(KERN_WARNING "razerkbd: Settings changed (Altering KEY_SUPER to KEY_FN is now %s)\n", !(buf[0] && device->block_keys) ? "disabled" : "enabled");
+        printk(KERN_WARNING "razerkbd: Settings dependency (KEY_SUPER is currently %s)\n", !device->block_keys[0] ? "enabled" : "disabled");
+#endif
+
+        device->alter_keys[0] = buf[0];
+    }
+
+    return count;
+}
+
+static ssize_t razer_attr_read_alter_super_fn(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+    buf[0] = device->alter_keys[0];
 
     return 1;
 }
@@ -1718,6 +1832,9 @@ static DEVICE_ATTR(matrix_custom_frame,     0220, NULL,                         
 static DEVICE_ATTR(key_super,               0660, razer_attr_read_key_super,                  razer_attr_write_key_super);
 static DEVICE_ATTR(key_alt_tab,             0660, razer_attr_read_key_alt_tab,                razer_attr_write_key_alt_tab);
 static DEVICE_ATTR(key_alt_f4,              0660, razer_attr_read_key_alt_f4,                 razer_attr_write_key_alt_f4);
+static DEVICE_ATTR(key_capslock,            0660, razer_attr_read_key_capslock,               razer_attr_write_key_capslock);
+
+static DEVICE_ATTR(alter_super_fn,          0660, razer_attr_read_alter_super_fn,             razer_attr_write_alter_super_fn);
 
 
 
@@ -1744,8 +1861,12 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
         return 0;
     }
 
-    // Block win key
+    // Block or alter win key
     if(asc->block_keys[0] && (usage->code == KEY_LEFTMETA || usage->code == KEY_RIGHTMETA)) {
+        if (asc->alter_keys[0] && value) {
+            asc->super_on = 1;
+        }
+
         return 1;
     }
 
@@ -1753,12 +1874,26 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     if(usage->code == KEY_LEFTALT) {
         asc->left_alt_on = value;
     }
+
     // Block Alt-Tab
     if(asc->block_keys[1] && asc->left_alt_on && usage->code == KEY_TAB) {
         return 1;
     }
+
     // Block Alt-F4
-    if(asc->block_keys[2] && asc->left_alt_on && usage->code == KEY_F4) {
+    if(asc->block_capslock && asc->left_alt_on && usage->code == KEY_F4) {
+        return 1;
+    }
+
+    // Block CapsLock;
+    // Note: tried this before with block_keys[3]
+    // but the driver didn't save the value properly (at all)
+    // the extra variable is a hack because the driver keeps resetting the
+    // key_capslock file after the use of KEY_FN
+    if(asc->alter_keys[1] && usage->code == KEY_CAPSLOCK) {
+        if (asc->alter_keys[2] != asc->block_capslock) {
+            asc->alter_keys[2] = asc->block_capslock;
+        }
         return 1;
     }
 
@@ -1776,15 +1911,20 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
         if(test_bit(usage->code, asc->pressed_fn)) {
             do_translate = 1;
         } else {
-            do_translate = asc->fn_on;
+            do_translate = asc->fn_on | asc->super_on;
         }
 
         if(do_translate) {
+            *(asc->pressed_fn) = *(asc->pressed_fn) ^ asc->super_on;
+
             if(value) {
                 set_bit(usage->code, asc->pressed_fn);
             } else {
                 clear_bit(usage->code, asc->pressed_fn);
             }
+
+            *(asc->pressed_fn) = *(asc->pressed_fn) ^ asc->super_on;
+            asc->super_on = 0;
 
             input_event(field->hidinput->input, usage->type, translation->to, value);
             return 1;
@@ -2225,6 +2365,8 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_super);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_tab);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_f4);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_capslock);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_alter_super_fn);
     }
 
 
@@ -2552,6 +2694,8 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_key_super);
         device_remove_file(&hdev->dev, &dev_attr_key_alt_tab);
         device_remove_file(&hdev->dev, &dev_attr_key_alt_f4);
+        device_remove_file(&hdev->dev, &dev_attr_key_capslock);
+        device_remove_file(&hdev->dev, &dev_attr_alter_super_fn);
     }
 
     hid_hw_stop(hdev);

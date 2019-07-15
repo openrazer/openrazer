@@ -48,6 +48,7 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
     usleep_range(wait_min, wait_max);
 
     kfree(buf);
+
     if(len!=size)
         printk(KERN_WARNING "razer driver: Device data transfer failed.");
 
@@ -202,22 +203,3 @@ unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned shor
         return min;
     return value;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

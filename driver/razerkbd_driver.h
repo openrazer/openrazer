@@ -110,8 +110,12 @@ struct razer_kbd_device {
     char phys[64];
     DECLARE_BITMAP(pressed_fn, KEY_CNT);
 
-    unsigned char block_keys[3];
+    unsigned char block_keys[3];                                                // 0 = KEY_SUPER; 1 = KEY_ALT_TAB; 2 = KEY_ALT_F4;
     unsigned char left_alt_on;
+    unsigned char block_capslock;
+
+    unsigned char alter_keys[3];                                                // 0 = ALTER_SUPER_FN; 1 = KEY_CAPSLOCK; 2 is also needed to block CAPSLOCK
+    unsigned char super_on;
 };
 
 
