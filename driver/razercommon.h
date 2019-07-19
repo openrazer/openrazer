@@ -52,6 +52,8 @@ do { \
 #define RED_PROFILE_LED   0x0C
 #define GREEN_PROFILE_LED 0x0D
 #define BLUE_PROFILE_LED  0x0E
+#define RIGHT_SIDE_LED    0x10
+#define LEFT_SIDE_LED     0x11
 
 // LED Effect definitions
 #define LED_STATIC           0x00

@@ -548,7 +548,9 @@ struct razer_report razer_chroma_extended_matrix_effect_wave(unsigned char varia
 {
     struct razer_report report = razer_chroma_extended_matrix_effect_base(0x06, variable_storage, led_id, 0x04);
 
-    direction = clamp_u8(direction, 0x00, 0x01);
+    // Some devices use values 0x00, 0x01
+    // Others use values 0x01, 0x02
+    direction = clamp_u8(direction, 0x00, 0x02);
 
     report.arguments[3] = direction;
     report.arguments[4] = 0x28; // Unknown
