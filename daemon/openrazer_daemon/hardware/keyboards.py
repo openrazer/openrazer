@@ -838,6 +838,24 @@ class RazerBlackWidow2019(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1501/1501-blackwidow2019.png"
 
 
+class RazerBlackWidowEssential(_RippleKeyboard):
+    """
+    Class for the Razer BlackWidow Essential
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow_Essential(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0237
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 22]
+    METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_none_effect',
+               'set_breath_single_effect', 'set_key_row', 'get_game_mode',
+               'set_game_mode', 'get_macro_mode', 'set_macro_mode', 'get_macro_effect',
+               'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1501/1501-blackwidow2019.png"
+
+
 class RazerOrnata(_RippleKeyboard):
     """
     Class for the Razer Ornata
