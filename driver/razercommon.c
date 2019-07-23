@@ -204,7 +204,36 @@ unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned shor
 }
 
 
+int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait_min, ulong wait_max)
+{
+    uint request = HID_REQ_SET_REPORT; // 0x09
+    uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
+    char *buf;
+    int len;
 
+    buf = kmemdup(data, report_size, GFP_KERNEL);
+    if (buf == NULL)
+        return -ENOMEM;
+
+    // Send usb control message
+    len = usb_control_msg(usb_dev, usb_sndctrlpipe(usb_dev, 0),
+                          request,      // Request
+                          request_type, // RequestType
+                          report_value, // Value
+                          report_index, // Index
+                          buf,          // Data
+                          report_size,  // Length
+                          USB_CTRL_SET_TIMEOUT);
+
+    // Wait
+    usleep_range(wait_min, wait_max);
+
+    kfree(buf);
+    if(len!=report_size)
+        printk(KERN_WARNING "razer driver: Device data transfer failed.");
+
+    return ((len < 0) ? len : ((len != report_size) ? -EIO : 0));
+}
 
 
 

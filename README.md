@@ -55,6 +55,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Device                                        | USB VID:PID |
 | --------------------------------------------- | ----------- |
 | Razer Orochi 2011                             |  1532:0013  |
+| Razer DeathAdder 3.5G                         |  1532:0016  |
 | Razer Abyssus 1800                            |  1532:0020  |
 | Razer Mamba 2012 (Wired)                      |  1532:0024  |
 | Razer Mamba 2012 (Wireless)                   |  1532:0025  |
