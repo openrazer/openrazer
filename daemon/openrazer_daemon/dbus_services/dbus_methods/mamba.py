@@ -177,6 +177,16 @@ def max_dpi(self):
         return 500
 
 
+@endpoint('razer.device.dpi', 'availableDPI', out_sig='ai')
+def available_dpi(self):
+    self.logger.debug("DBus call available_dpi")
+
+    if hasattr(self, 'AVAILABLE_DPI'):
+        return self.AVAILABLE_DPI
+
+    return []
+
+
 @endpoint('razer.device.misc', 'setPollRate', in_sig='q')
 def set_poll_rate(self, rate):
     """
