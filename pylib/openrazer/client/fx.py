@@ -68,6 +68,46 @@ class RazerFX(BaseRazerFX):
 
         self.misc = MiscLighting(serial, capabilities, self._dbus)
 
+    @property
+    def effect(self) -> str:
+        """
+        Get current effect
+
+        :return: Effect name ("static", "spectrum", etc.)
+        :rtype: str
+        """
+        return self._lighting_dbus.getEffect()
+
+    @property
+    def colors(self) -> bytearray:
+        """
+        Get current effect colors
+
+        :return: Effect colors (an array of 9 bytes, for 3 colors in RGB format)
+        :rtype: bytearray
+        """
+        return bytes(self._lighting_dbus.getEffectColors())
+
+    @property
+    def speed(self) -> int:
+        """
+        Get current effect speed
+
+        :return: Effect speed (a value between 0 and 3)
+        :rtype: int
+        """
+        return self._lighting_dbus.getEffectSpeed()
+
+    @property
+    def wave_dir(self) -> int:
+        """
+        Get current wave direction
+
+        :return: Wave direction (WAVE_LEFT or WAVE_RIGHT)
+        :rtype: int
+        """
+        return self._lighting_dbus.getWaveDir()
+
     def none(self) -> bool:
         """
         No effect
@@ -612,6 +652,12 @@ class RazerAdvancedFX(BaseRazerFX):
             else:
                 raise ValueError("RGB must be an RGB tuple")
 
+    def restore(self):
+        """
+        Restore the device to the last effect
+        """
+        self._lighting_dbus.restoreLastEffect()
+
 
 class SingleLed(BaseRazerFX):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, led_name='logo'):
@@ -643,6 +689,46 @@ class SingleLed(BaseRazerFX):
                 func(True)
             else:
                 func(False)
+
+    @property
+    def effect(self) -> str:
+        """
+        Get current effect
+
+        :return: Effect name ("static", "spectrum", etc.)
+        :rtype: str
+        """
+        return str(self._getattr('get#Effect')())
+
+    @property
+    def colors(self) -> bytearray:
+        """
+        Get current effect colors
+
+        :return: Effect colors (an array of 9 bytes, for 3 colors in RGB format)
+        :rtype: bytearray
+        """
+        return bytes(self._getattr('get#EffectColors')())
+
+    @property
+    def speed(self) -> int:
+        """
+        Get current effect speed
+
+        :return: Effect speed (a value between 0 and 3)
+        :rtype: int
+        """
+        return int(self._getattr('get#EffectSpeed')())
+
+    @property
+    def wave_dir(self) -> int:
+        """
+        Get current wave direction
+
+        :return: Wave direction (WAVE_LEFT or WAVE_RIGHT)
+        :rtype: int
+        """
+        return int(self._getattr('get#WaveDir')())
 
     @property
     def brightness(self):

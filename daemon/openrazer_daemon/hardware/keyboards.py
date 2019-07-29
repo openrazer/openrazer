@@ -55,6 +55,18 @@ class _RippleKeyboard(_MacroKeyboard):
 
         self.ripple_manager = _RippleManager(self, self._device_number)
 
+        # we need to set the effect to ripple (if needed) after the ripple manager has started
+        # otherwise it doesn't work
+        if self.zone["backlight"]["effect"] == "ripple" or self.zone["backlight"]["effect"] == "rippleRandomColour":
+            effect_func_name = 'set' + self.capitalize_first_char(self.zone["backlight"]["effect"])
+            effect_func = getattr(self, effect_func_name, None)
+
+            if effect_func is not None:
+                if effect_func_name == 'setRipple':
+                    effect_func(self.zone["backlight"]["colors"][0], self.zone["backlight"]["colors"][1], self.zone["backlight"]["colors"][2], self.ripple_manager._ripple_thread._refresh_rate)
+                elif effect_func_name == 'setRippleRandomColour':
+                    effect_func(self.ripple_manager._ripple_thread._refresh_rate)
+
     def _close(self):
         super(_RippleKeyboard, self)._close()
 
@@ -285,7 +297,7 @@ class RazerBlackWidowUltimate2012(_MacroKeyboard):
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
+               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/563/563_blackwidow_ultimate_classic.png"
 
@@ -301,7 +313,7 @@ class RazerBlackWidowStealth(_MacroKeyboard):
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
+               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-01.png"
 
@@ -317,7 +329,7 @@ class RazerBlackWidowStealthEdition(_MacroKeyboard):
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
+               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-01.png"
 
@@ -333,7 +345,7 @@ class RazerBlackWidowUltimate2013(_MacroKeyboard):
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
+               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/245/438_blackwidow_ultimate_2014.png"
 
@@ -836,7 +848,7 @@ class RazerDeathStalkerExpert(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0202
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 'bw_get_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
+               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/49/49_razer_deathstalker.png"
 

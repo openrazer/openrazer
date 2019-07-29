@@ -1,11 +1,15 @@
 from collections import defaultdict
 import colorsys
 import random
+import sys
 import time
 import threading
 
 from openrazer.client import DeviceManager
 from openrazer.client import constants as razer_constants
+
+# Set a quit flag that will be used when the user quits to restore effects.
+quit = False
 
 # Create a DeviceManager. This is used to get specific devices
 device_manager = DeviceManager()
@@ -76,6 +80,11 @@ def starlight_effect(device):
 
         time.sleep(0.1)
 
+        if quit:
+            break
+
+    device.fx.advanced.restore()
+
 
 # Spawn a manager thread for each device and wait on all of them.
 threads = []
@@ -86,7 +95,15 @@ for device in devices:
 
 
 # If there are still threads, update each device.
-while any(t.isAlive() for t in threads):
-    for device in devices:
-        device.fx.advanced.draw()
-    time.sleep(1 / 60)
+try:
+    while any(t.isAlive() for t in threads):
+        for device in devices:
+            device.fx.advanced.draw()
+        time.sleep(1 / 60)
+except KeyboardInterrupt:
+    quit = True
+
+    for t in threads:
+        t.join()
+
+    sys.exit(0)

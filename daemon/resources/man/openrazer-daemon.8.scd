@@ -36,6 +36,9 @@ Note, that all paths shown as defaults, eg ~/.local/share/ or ~/.config/ can be 
 *--config*=_config\_file_
 	Specifies the location of the config file. If this is not provided it will default to ~/.config/openrazer/razer.conf and create it if needed from the example config.
 
+*--persistence*=_persistence\_file_
+	Specifies the location of the persistence file. This will be created if non-existent. This file will store device states so they persist between reboots.
+
 *--run-dir*=_run\_directory_
 	Tells the daemon what directory is its run directory, the directory it will change to once started. It will default to *$XDG_RUNTIME_DIR*, if not set it falls back to ~/.local/share/openrazer/.
 
