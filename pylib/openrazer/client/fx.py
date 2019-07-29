@@ -464,7 +464,7 @@ class RazerFX(BaseRazerFX):
             green = clamp_ubyte(green)
             blue = clamp_ubyte(blue)
 
-            self._lighting_dbus.setStarlightSingle(time, red, green, blue)
+            self._lighting_dbus.setStarlightSingle(red, green, blue, time)
 
             return True
         return False
@@ -522,7 +522,7 @@ class RazerFX(BaseRazerFX):
             green2 = clamp_ubyte(green2)
             blue2 = clamp_ubyte(blue2)
 
-            self._lighting_dbus.setStarlightDual(time, red, green, blue, red2, green2, blue2)
+            self._lighting_dbus.setStarlightDual(red, green, blue, red2, green2, blue2, time)
 
             return True
         return False
