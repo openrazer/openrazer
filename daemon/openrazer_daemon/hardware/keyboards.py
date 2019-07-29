@@ -55,6 +55,18 @@ class _RippleKeyboard(_MacroKeyboard):
 
         self.ripple_manager = _RippleManager(self, self._device_number)
 
+        # we need to set the effect to ripple (if needed) after the ripple manager has started
+        # otherwise it doesn't work
+        if self.current_effect == "ripple" or self.current_effect == "rippleRandomColour":
+            effect_func_name = 'set' + self.current_effect[0].upper() + self.current_effect[1:]
+            effect_func = getattr(self, effect_func_name, None)
+
+            if not effect_func == None:
+                if effect_func_name == 'setRipple':
+                    effect_func(self.current_effect_colors[0], self.current_effect_colors[1], self.current_effect_colors[2], 0.025)
+                elif effect_func_name == 'setRippleRandomColour':
+                    effect_func(0.025)
+
     def _close(self):
         super(_RippleKeyboard, self)._close()
 

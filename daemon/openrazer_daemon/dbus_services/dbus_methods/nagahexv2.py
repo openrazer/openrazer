@@ -20,6 +20,10 @@ def set_logo_static_naga_hex_v2(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
+    # remember effect
+    self.current_logo_effect = 'static'
+    self.current_logo_effect_colors[0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('logo_matrix_effect_static')
 
     payload = bytes([red, green, blue])
@@ -38,6 +42,9 @@ def set_logo_spectrum_naga_hex_v2(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
+    # remember effect
+    self.current_logo_effect = 'spectrum'
+
     effect_driver_path = self.get_driver_path('logo_matrix_effect_spectrum')
 
     with open(effect_driver_path, 'w') as effect_driver_file:
@@ -53,6 +60,9 @@ def set_logo_none_naga_hex_v2(self):
 
     # Notify others
     self.send_effect_event('setNone')
+
+    # remember effect
+    self.current_logo_effect = 'none'
 
     driver_path = self.get_driver_path('logo_matrix_effect_none')
 
@@ -84,6 +94,11 @@ def set_logo_reactive_naga_hex_v2(self, red, green, blue, speed):
     # Notify others
     self.send_effect_event('setReactive', red, green, blue, speed)
 
+    # remember effect
+    self.current_logo_effect = 'reactive'
+    self.current_logo_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.current_logo_effect_speed = int(speed)
+
     if speed not in (1, 2, 3, 4):
         speed = 4
 
@@ -102,6 +117,9 @@ def set_logo_breath_random_naga_hex_v2(self):
 
     # Notify others
     self.send_effect_event('setBreathRandom')
+
+    # remember effect
+    self.current_logo_effect = 'breathRandom'
 
     driver_path = self.get_driver_path('logo_matrix_effect_breath')
 
@@ -129,6 +147,10 @@ def set_logo_breath_single_naga_hex_v2(self, red, green, blue):
 
     # Notify others
     self.send_effect_event('setBreathSingle', red, green, blue)
+
+    # remember effect
+    self.current_logo_effect = 'breathSingle'
+    self.current_logo_effect_colors[0:3] = int(red), int(green), int(blue)
 
     driver_path = self.get_driver_path('logo_matrix_effect_breath')
 
@@ -166,6 +188,10 @@ def set_logo_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, bl
     # Notify others
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
 
+    # remember effect
+    self.current_logo_effect = 'breathDual'
+    self.current_logo_effect_colors[0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
+
     driver_path = self.get_driver_path('logo_matrix_effect_breath')
 
     payload = bytes([red1, green1, blue1, red2, green2, blue2])
@@ -193,6 +219,10 @@ def set_scroll_static_naga_hex_v2(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
+    # remember effect
+    self.current_scroll_effect = 'static'
+    self.current_scroll_effect_colors[0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('scroll_matrix_effect_static')
 
     payload = bytes([red, green, blue])
@@ -211,6 +241,8 @@ def set_scroll_spectrum_naga_hex_v2(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
+    self.current_scroll_effect = 'spectrum'
+
     effect_driver_path = self.get_driver_path('scroll_matrix_effect_spectrum')
 
     with open(effect_driver_path, 'w') as effect_driver_file:
@@ -226,6 +258,8 @@ def set_scroll_none_naga_hex_v2(self):
 
     # Notify others
     self.send_effect_event('setNone')
+
+    self.current_scroll_effect = 'none'
 
     driver_path = self.get_driver_path('scroll_matrix_effect_none')
 
@@ -257,6 +291,11 @@ def set_scroll_reactive_naga_hex_v2(self, red, green, blue, speed):
     # Notify others
     self.send_effect_event('setReactive', red, green, blue, speed)
 
+    # remember effect
+    self.current_scroll_effect = 'reactive'
+    self.current_scroll_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.current_scroll_effect_speed = int(speed)
+
     if speed not in (1, 2, 3, 4):
         speed = 4
 
@@ -275,6 +314,9 @@ def set_scroll_breath_random_naga_hex_v2(self):
 
     # Notify others
     self.send_effect_event('setBreathRandom')
+
+    # remember effect
+    self.current_scroll_effect = 'breathRandom'
 
     driver_path = self.get_driver_path('scroll_matrix_effect_breath')
 
@@ -302,6 +344,10 @@ def set_scroll_breath_single_naga_hex_v2(self, red, green, blue):
 
     # Notify others
     self.send_effect_event('setBreathSingle', red, green, blue)
+
+    # remember effect
+    self.current_scroll_effect = 'breathSingle'
+    self.current_scroll_effect_colors[0:3] = int(red), int(green), int(blue)
 
     driver_path = self.get_driver_path('scroll_matrix_effect_breath')
 
@@ -338,6 +384,10 @@ def set_scroll_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, 
 
     # Notify others
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
+
+    # remember effect
+    self.current_scroll_effect = 'breathDual'
+    self.current_scroll_effect_colors[0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
 
     driver_path = self.get_driver_path('scroll_matrix_effect_breath')
 

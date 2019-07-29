@@ -253,15 +253,65 @@ class RazerDaemon(DBusService):
         for section in ('General', 'Startup', 'Statistics'):
             self._config[section] = {}
 
-        self._config['DEFAULT'] = {
+        self._config['General'] = {
             'verbose_logging': True,
+        }
+        self._config['Startup'] = {
             'sync_effects_enabled': True,
             'devices_off_on_screensaver': True,
-            'key_statistics': False,
+            'mouse_battery_notifier': True,
+        }
+        self._config['Statistics'] = {
+            'key_statistics': True,
         }
 
         if config_file is not None and os.path.exists(config_file):
             self._config.read(config_file)
+
+    def write_config(self, config_file):
+        """
+        Write in the config file
+
+        :param config_file: Config file
+        :type config_file: str or None
+        """
+        self._config['Startup']['sync_effects_enabled'] = 'True' if self.get_sync_effects() else 'False'
+        self._config['Startup']['devices_off_on_screensaver'] = 'True' if self.get_off_on_screensaver() else 'False'
+
+        for device in self._razer_devices:
+            if device.dbus.has_normal_effects:
+                self._config[device.dbus.get_serial()]['effect'] = device.dbus.current_effect
+                self._config[device.dbus.get_serial()]['colors'] = ' '.join(str(i) for i in device.dbus.current_effect_colors)
+                self._config[device.dbus.get_serial()]['speed'] = str(device.dbus.current_effect_speed)
+                self._config[device.dbus.get_serial()]['wave_dir'] = str(device.dbus.current_wave_dir)
+
+            if device.dbus.has_logo_effects:
+                self._config[device.dbus.get_serial()]['logo_effect'] = device.dbus.current_logo_effect
+                self._config[device.dbus.get_serial()]['logo_colors'] = ' '.join(str(i) for i in device.dbus.current_logo_effect_colors)
+                self._config[device.dbus.get_serial()]['logo_speed'] = str(device.dbus.current_logo_effect_speed)
+                self._config[device.dbus.get_serial()]['logo_wave_dir'] = str(device.dbus.current_logo_wave_dir)
+
+            if device.dbus.has_scroll_effects:
+                self._config[device.dbus.get_serial()]['scroll_effect'] = device.dbus.current_scroll_effect
+                self._config[device.dbus.get_serial()]['scroll_colors'] = ' '.join(str(i) for i in device.dbus.current_scroll_effect_colors)
+                self._config[device.dbus.get_serial()]['scroll_speed'] = str(device.dbus.current_scroll_effect_speed)
+                self._config[device.dbus.get_serial()]['scroll_wave_dir'] = str(device.dbus.current_scroll_wave_dir)
+
+            if device.dbus.has_left_effects:
+                self._config[device.dbus.get_serial()]['left_effect'] = device.dbus.current_left_effect
+                self._config[device.dbus.get_serial()]['left_colors'] = ' '.join(str(i) for i in device.dbus.current_left_effect_colors)
+                self._config[device.dbus.get_serial()]['left_speed'] = str(device.dbus.current_left_effect_speed)
+                self._config[device.dbus.get_serial()]['left_wave_dir'] = str(device.dbus.current_left_wave_dir)
+
+            if device.dbus.has_right_effects:
+                self._config[device.dbus.get_serial()]['right_effect'] = device.dbus.current_right_effect
+                self._config[device.dbus.get_serial()]['right_colors'] = ' '.join(str(i) for i in device.dbus.current_right_effect_colors)
+                self._config[device.dbus.get_serial()]['right_speed'] = str(device.dbus.current_right_effect_speed)
+                self._config[device.dbus.get_serial()]['right_wave_dir'] = str(device.dbus.current_right_wave_dir)
+
+        if config_file is not None:
+            with open(config_file, 'w') as cf:
+                self._config.write(cf)
 
     def get_off_on_screensaver(self):
         """
@@ -546,3 +596,6 @@ class RazerDaemon(DBusService):
 
         for device in self._razer_devices:
             device.dbus.close()
+
+        # Write config
+        self.write_config(self._config_file)

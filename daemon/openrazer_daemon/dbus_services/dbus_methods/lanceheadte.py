@@ -13,6 +13,10 @@ def set_logo_wave(self, direction):
     # Notify others
     self.send_effect_event('setWave', direction)
 
+    # remember effect
+    self.current_logo_effect = 'wave'
+    self.current_logo_wave_dir = int(direction)
+
     driver_path = self.get_driver_path('logo_matrix_effect_wave')
 
     if direction not in self.WAVE_DIRS:
@@ -33,6 +37,10 @@ def set_scroll_wave(self, direction):
 
     # Notify others
     self.send_effect_event('setWave', direction)
+
+    # remember effect
+    self.current_scroll_effect = 'wave'
+    self.current_scroll_wave_dir = int(direction)
 
     driver_path = self.get_driver_path('scroll_matrix_effect_wave')
 
@@ -98,6 +106,10 @@ def set_left_wave(self, direction):
     # Notify others
     self.send_effect_event('setWave', direction)
 
+    # remember effect
+    self.current_left_effect = 'wave'
+    self.current_left_wave_dir = int(direction)
+
     driver_path = self.get_driver_path('left_matrix_effect_wave')
 
     if direction not in self.WAVE_DIRS:
@@ -126,6 +138,10 @@ def set_left_static(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
+    # remember effect
+    self.current_left_effect = 'static'
+    self.current_left_effect_colors[0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('left_matrix_effect_static')
 
     payload = bytes([red, green, blue])
@@ -144,6 +160,9 @@ def set_left_spectrum(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
+    # remember effect
+    self.current_left_effect = 'spectrum'
+
     effect_driver_path = self.get_driver_path('left_matrix_effect_spectrum')
 
     with open(effect_driver_path, 'w') as effect_driver_file:
@@ -159,6 +178,9 @@ def set_left_none(self):
 
     # Notify others
     self.send_effect_event('setNone')
+
+    # remember effect
+    self.current_left_effect = 'none'
 
     driver_path = self.get_driver_path('left_matrix_effect_none')
 
@@ -190,8 +212,14 @@ def set_left_reactive(self, red, green, blue, speed):
     # Notify others
     self.send_effect_event('setReactive', red, green, blue, speed)
 
+    # remember effect
+    self.current_left_effect = 'reactive'
+    self.current_left_effect_colors[0:3] = int(red), int(green), int(blue)
+
     if speed not in (1, 2, 3, 4):
         speed = 4
+
+    self.current_left_effect_speed = int(speed)
 
     payload = bytes([speed, red, green, blue])
 
@@ -208,6 +236,9 @@ def set_left_breath_random(self):
 
     # Notify others
     self.send_effect_event('setBreathRandom')
+
+    # remember effect
+    self.current_left_effect = 'breathRandom'
 
     driver_path = self.get_driver_path('left_matrix_effect_breath')
 
@@ -235,6 +266,10 @@ def set_left_breath_single(self, red, green, blue):
 
     # Notify others
     self.send_effect_event('setBreathSingle', red, green, blue)
+
+    # remember effect
+    self.current_left_effect = 'breathSingle'
+    self.current_left_effect_colors[0:3] = int(red), int(green), int(blue)
 
     driver_path = self.get_driver_path('left_matrix_effect_breath')
 
@@ -271,6 +306,10 @@ def set_left_breath_dual(self, red1, green1, blue1, red2, green2, blue2):
 
     # Notify others
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
+
+    # remember effect
+    self.current_left_effect = 'breathDual'
+    self.current_left_effect_colors[0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
 
     driver_path = self.get_driver_path('left_matrix_effect_breath')
 
@@ -335,6 +374,10 @@ def set_right_wave(self, direction):
     # Notify others
     self.send_effect_event('setWave', direction)
 
+    # remember effect
+    self.current_right_effect = 'wave'
+    self.current_right_wave_dir = int(direction)
+
     driver_path = self.get_driver_path('right_matrix_effect_wave')
 
     if direction not in self.WAVE_DIRS:
@@ -363,6 +406,10 @@ def set_right_static(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
+    # remember effect
+    self.current_right_effect = 'static'
+    self.current_right_effect_colors[0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('right_matrix_effect_static')
 
     payload = bytes([red, green, blue])
@@ -381,6 +428,9 @@ def set_right_spectrum(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
+    # remember effect
+    self.current_right_effect = 'spectrum'
+
     effect_driver_path = self.get_driver_path('right_matrix_effect_spectrum')
 
     with open(effect_driver_path, 'w') as effect_driver_file:
@@ -396,6 +446,9 @@ def set_right_none(self):
 
     # Notify others
     self.send_effect_event('setNone')
+
+    # remember effect
+    self.current_right_effect = 'none'
 
     driver_path = self.get_driver_path('right_matrix_effect_none')
 
@@ -427,8 +480,14 @@ def set_right_reactive(self, red, green, blue, speed):
     # Notify others
     self.send_effect_event('setReactive', red, green, blue, speed)
 
+    # remember effect
+    self.current_right_effect = 'reactive'
+    self.current_right_effect_colors[0:3] = int(red), int(green), int(blue)
+
     if speed not in (1, 2, 3, 4):
         speed = 4
+
+    self.current_right_effect_speed = int(speed)
 
     payload = bytes([speed, red, green, blue])
 
@@ -445,6 +504,9 @@ def set_right_breath_random(self):
 
     # Notify others
     self.send_effect_event('setBreathRandom')
+
+    # remember effect
+    self.current_right_effect = 'breathRandom'
 
     driver_path = self.get_driver_path('right_matrix_effect_breath')
 
@@ -472,6 +534,10 @@ def set_right_breath_single(self, red, green, blue):
 
     # Notify others
     self.send_effect_event('setBreathSingle', red, green, blue)
+
+    # remember effect
+    self.current_right_effect = 'breathSingle'
+    self.current_right_effect_colors[0:3] = int(red), int(green), int(blue)
 
     driver_path = self.get_driver_path('right_matrix_effect_breath')
 
@@ -508,6 +574,10 @@ def set_right_breath_dual(self, red1, green1, blue1, red2, green2, blue2):
 
     # Notify others
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
+
+    # remember effect
+    self.current_right_effect = 'breathDual'
+    self.current_right_effect_colors[0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
 
     driver_path = self.get_driver_path('right_matrix_effect_breath')
 

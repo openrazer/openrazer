@@ -81,6 +81,8 @@ def get_logo_effect(self):
     :return: Active
     :rtype: bool
     """
+    # TODO: remove. we have a new solution that works across all
+    # devices and is more reliable (getCurrentLogoEffect)
     self.logger.debug("DBus call get_logo_effect")
 
     driver_path = self.get_driver_path('logo_led_effect')
@@ -154,6 +156,10 @@ def set_logo_static(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
+    # remember effect
+    self.current_logo_effect = 'static'
+    self.current_logo_effect_colors[0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('logo_led_rgb')
     effect_driver_path = self.get_driver_path('logo_led_effect')
 
@@ -167,7 +173,7 @@ def set_logo_static(self, red, green, blue):
 @endpoint('razer.device.lighting.logo', 'setLogoBlinking', in_sig='yyy')
 def set_logo_blinking(self, red, green, blue):
     """
-    Set the device to pulsate
+    Set the device to blinking
 
     :param red: Red component
     :type red: int
@@ -182,6 +188,10 @@ def set_logo_blinking(self, red, green, blue):
 
     # Notify others
     self.send_effect_event('setLogoBlinking', red, green, blue)
+
+    # remember effect
+    self.current_logo_effect = 'blinking'
+    self.current_logo_effect_colors[0:3] = int(red), int(green), int(blue)
 
     rgb_driver_path = self.get_driver_path('logo_led_rgb')
     effect_driver_path = self.get_driver_path('logo_led_effect')
@@ -212,6 +222,10 @@ def set_logo_pulsate(self, red, green, blue):
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
 
+    # remember effect
+    self.current_logo_effect = 'pulsate'
+    self.current_logo_effect_colors[0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('logo_led_rgb')
     effect_driver_path = self.get_driver_path('logo_led_effect')
 
@@ -225,7 +239,7 @@ def set_logo_pulsate(self, red, green, blue):
 @endpoint('razer.device.lighting.logo', 'setLogoSpectrum')
 def set_logo_spectrum(self):
     """
-    Set the device to pulsate
+    Set the device to spectrum
 
     :param red: Red component
     :type red: int
@@ -240,6 +254,9 @@ def set_logo_spectrum(self):
 
     # Notify others
     self.send_effect_event('setSpectrum')
+
+    # remember effect
+    self.current_logo_effect = 'spectrum'
 
     effect_driver_path = self.get_driver_path('logo_led_effect')
 
@@ -291,6 +308,8 @@ def get_scroll_effect(self):
     :return: Active
     :rtype: bool
     """
+    # TODO: remove. we have a new solution that works across all
+    # devices and is more reliable (getCurrentScrollEffect)
     self.logger.debug("DBus call get_scroll_effect")
 
     driver_path = self.get_driver_path('scroll_led_effect')
@@ -364,6 +383,10 @@ def set_scroll_static(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
+    # remember effect
+    self.current_scroll_effect = 'static'
+    self.current_scroll_effect_colors[0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('scroll_led_rgb')
     effect_driver_path = self.get_driver_path('scroll_led_effect')
 
@@ -377,7 +400,7 @@ def set_scroll_static(self, red, green, blue):
 @endpoint('razer.device.lighting.scroll', 'setScrollBlinking', in_sig='yyy')
 def set_scroll_blinking(self, red, green, blue):
     """
-    Set the device to pulsate
+    Set the device to BLINKING
 
     :param red: Red component
     :type red: int
@@ -392,6 +415,10 @@ def set_scroll_blinking(self, red, green, blue):
 
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
+
+    # remember effect
+    self.current_scroll_effect = 'blinking'
+    self.current_scroll_effect_colors[0:3] = int(red), int(green), int(blue)
 
     rgb_driver_path = self.get_driver_path('scroll_led_rgb')
     effect_driver_path = self.get_driver_path('scroll_led_effect')
@@ -422,6 +449,10 @@ def set_scroll_pulsate(self, red, green, blue):
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
 
+    # remember effect
+    self.current_scroll_effect = 'pulsate'
+    self.current_scroll_effect_colors[0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('scroll_led_rgb')
     effect_driver_path = self.get_driver_path('scroll_led_effect')
 
@@ -435,21 +466,15 @@ def set_scroll_pulsate(self, red, green, blue):
 @endpoint('razer.device.lighting.scroll', 'setScrollSpectrum')
 def set_scroll_spectrum(self):
     """
-    Set the device to pulsate
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
+    Set the device to copypaste
     """
     self.logger.debug("DBus call set_scroll_spectrum")
 
     # Notify others
     self.send_effect_event('setSpectrum')
+
+    # remember effect
+    self.current_scroll_effect = 'spectrum'
 
     effect_driver_path = self.get_driver_path('scroll_led_effect')
 

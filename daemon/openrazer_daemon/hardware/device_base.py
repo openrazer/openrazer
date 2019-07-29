@@ -63,6 +63,36 @@ class RazerDevice(DBusService):
         self._device_number = device_number
         self.serial = self.get_serial()
 
+        self.current_effect = 'spectrum'
+        self.current_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+        self.current_effect_speed = 1
+        self.current_wave_dir = 1
+        self.has_normal_effects = False
+
+        self.current_scroll_effect = 'spectrum'
+        self.current_scroll_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+        self.current_scroll_effect_speed = 1
+        self.current_scroll_wave_dir = 1
+        self.has_scroll_effects = False
+
+        self.current_logo_effect = 'spectrum'
+        self.current_logo_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+        self.current_logo_effect_speed = 1
+        self.current_logo_wave_dir = 1
+        self.has_logo_effects = False
+
+        self.current_left_effect = 'spectrum'
+        self.current_left_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+        self.current_left_effect_speed = 1
+        self.current_left_wave_dir = 1
+        self.has_left_effects = False
+
+        self.current_right_effect = 'spectrum'
+        self.current_right_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+        self.current_right_effect_speed = 1
+        self.current_right_wave_dir = 1
+        self.has_right_effects = False
+
         self._effect_sync = effect_sync.EffectSync(self, device_number)
 
         self._is_closed = False
@@ -104,12 +134,370 @@ class RazerDevice(DBusService):
             ('razer.device.misc', 'hasDedicatedMacroKeys', self.dedicated_macro_keys, None, 'b'),
         }
 
+        effect_methods = {
+            ('razer.device.misc', 'getCurrentEffect', self.get_current_effect, None, 's'),
+            ('razer.device.misc', 'getCurrentEffectColors', self.get_current_effect_colors, None, 'ay'),
+            ('razer.device.misc', 'getCurrentEffectSpeed', self.get_current_effect_speed, None, 'i'),
+            ('razer.device.misc', 'getCurrentWaveDir', self.get_current_wave_dir, None, 'i'),
+        }
+
+        logo_effect_methods = {
+            ('razer.device.misc', 'getCurrentLogoEffect', self.get_current_logo_effect, None, 's'),
+            ('razer.device.misc', 'getCurrentLogoEffectColors', self.get_current_logo_effect_colors, None, 'ay'),
+            ('razer.device.misc', 'getCurrentLogoEffectSpeed', self.get_current_logo_effect_speed, None, 'i'),
+        }
+
+        scroll_effect_methods = {
+            ('razer.device.misc', 'getCurrentScrollEffect', self.get_current_scroll_effect, None, 's'),
+            ('razer.device.misc', 'getCurrentScrollEffectColors', self.get_current_scroll_effect_colors, None, 'ay'),
+            ('razer.device.misc', 'getCurrentScrollEffectSpeed', self.get_current_scroll_effect_speed, None, 'i'),
+        }
+
+        left_effect_methods = {
+            ('razer.device.misc', 'getCurrentLeftEffect', self.get_current_left_effect, None, 's'),
+            ('razer.device.misc', 'getCurrentLeftEffectColors', self.get_current_left_effect_colors, None, 'ay'),
+            ('razer.device.misc', 'getCurrentLeftEffectSpeed', self.get_current_left_effect_speed, None, 'i'),
+        }
+
+        right_effect_methods = {
+            ('razer.device.misc', 'getCurrentRightEffect', self.get_current_right_effect, None, 's'),
+            ('razer.device.misc', 'getCurrentRightEffectColors', self.get_current_right_effect_colors, None, 'ay'),
+            ('razer.device.misc', 'getCurrentRightEffectSpeed', self.get_current_right_effect_speed, None, 'i'),
+        }
+
         for m in methods:
             self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
             self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
 
+        if 'set_static_effect' in self.METHODS:
+            self.has_normal_effects = True
+            for m in effect_methods:
+                self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
+                self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
+
+        if 'set_logo_static' in self.METHODS or 'set_logo_static_naga_hex_v2' in self.METHODS:
+            self.has_logo_effects = True
+            for m in logo_effect_methods:
+                self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
+                self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
+
+        if 'set_scroll_static' in self.METHODS or 'set_logo_static_naga_hex_v2' in self.METHODS:
+            self.has_scroll_effects = True
+            for m in scroll_effect_methods:
+                self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
+                self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
+
+        if 'set_left_static' in self.METHODS:
+            self.has_left_effects = True
+            for m in left_effect_methods:
+                self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
+                self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
+
+        if 'set_right_static' in self.METHODS:
+            self.has_right_effects = True
+            for m in right_effect_methods:
+                self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
+                self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
+
         # Load additional DBus methods
         self.load_methods()
+
+        # load last effect
+        if self.has_normal_effects:
+            if self.config.has_section(self._serial):
+                try:
+                    self.current_effect = self.config[self._serial]['effect']
+                except KeyError:
+                    self.current_effect = 'spectrum'
+                    pass
+                try:
+                    for index, item in enumerate(self.config[self._serial]['colors'].split(" ")):
+                        self.current_effect_colors[index] = int(item)
+                        if not 0 <= self.current_effect_colors[index] <= 255:
+                            raise ValueError('Color out of range')
+
+                    if len(self.current_effect_colors) != 9:
+                        raise ValueError('There must be exactly 9 colors')
+
+                except ValueError:
+                    # invalid colors. reinitialize
+                    self.current_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+                    self.logger.info("%s: Invalid colors; restoring to defaults.", self.__class__.__name__)
+                    pass
+
+                self.current_effect_speed = int(self.config[self._serial]['speed'])
+                self.current_wave_dir = int(self.config[self._serial]['wave_dir'])
+                effect_func_name = 'set' + self.current_effect[0].upper() + self.current_effect[1:]
+            else:
+                self.current_effect = 'spectrum'
+                effect_func_name = 'setSpectrum'
+
+            effect_func = getattr(self, effect_func_name, None)
+
+            if effect_func == None:
+                self.logger.info("%s: Invalid effect name %s; restoring to Spectrum.", self.__class__.__name__, effect_func_name)
+                effect_func_name = 'setSpectrum'
+                effect_func = getattr(self, effect_func_name, None)
+
+            if not effect_func == None:
+                if effect_func_name == 'setNone' or effect_func_name == 'setSpectrum' or effect_func_name == 'setBlinking' or effect_func_name == 'setBreathRandom':
+                    effect_func()
+                elif effect_func_name == 'setStatic' or effect_func_name == 'setBlinking' or effect_func_name == 'setBreathSingle':
+                    effect_func(self.current_effect_colors[0], self.current_effect_colors[1], self.current_effect_colors[2])
+                elif effect_func_name == 'setReactive':
+                    effect_func(self.current_effect_colors[0], self.current_effect_colors[1], self.current_effect_colors[2], self.current_effect_speed)
+                elif effect_func_name == 'setBreathDual':
+                    effect_func(self.current_effect_colors[0], self.current_effect_colors[1], self.current_effect_colors[2], self.current_effect_colors[3], self.current_effect_colors[4], self.current_effect_colors[5])
+                elif effect_func_name == 'setBreathTriple':
+                    effect_func(self.current_effect_colors[0], self.current_effect_colors[1], self.current_effect_colors[2], self.current_effect_colors[3], self.current_effect_colors[4], self.current_effect_colors[5], self.current_effect_colors[6], self.current_effect_colors[7], self.current_effect_colors[8])
+                elif effect_func_name == 'setWave':
+                    effect_func(self.current_wave_dir)
+                elif effect_func_name == 'setStarlightRandom':
+                    effect_func(self.current_effect_speed)
+                elif effect_func_name == 'setStarlightSingle':
+                    effect_func(self.current_effect_speed, self.current_effect_colors[0], self.current_effect_colors[1], self.current_effect_colors[2])
+                elif effect_func_name == 'setStarlightDual':
+                    effect_func(self.current_effect_speed, self.current_effect_colors[0], self.current_effect_colors[1], self.current_effect_colors[2], self.current_effect_colors[3], self.current_effect_colors[4], self.current_effect_colors[5])
+
+        # load last logo effect
+        if self.has_logo_effects:
+            if self.config.has_section(self._serial):
+                try:
+                    self.current_logo_effect = self.config[self._serial]['logo_effect']
+                except KeyError:
+                    self.current_logo_effect = 'spectrum'
+                    pass
+                try:
+                    for index, item in enumerate(self.config[self._serial]['logo_colors'].split(" ")):
+                        self.current_logo_effect_colors[index] = int(item)
+                        if not 0 <= self.current_logo_effect_colors[index] <= 255:
+                            raise ValueError('Color out of range')
+
+                    if len(self.current_logo_effect_colors) != 9:
+                        raise ValueError('There must be exactly 9 colors')
+
+                except ValueError:
+                    # invalid colors. reinitialize
+                    self.current_logo_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+                    self.logger.info("%s: Invalid logo colors; restoring to defaults.", self.__class__.__name__)
+                    pass
+
+                except KeyError:
+                    self.current_logo_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+                    pass
+
+                try:
+                    self.current_logo_effect_speed = int(self.config[self._serial]['logo_speed'])
+                    self.current_logo_wave_dir = int(self.config[self._serial]['logo_wave_dir'])
+
+                except KeyError:
+                    pass
+
+                effect_func_name = 'setLogo' + self.current_logo_effect[0].upper() + self.current_logo_effect[1:]
+            else:
+                self.current_logo_effect = 'spectrum'
+                effect_func_name = 'setLogoSpectrum'
+
+            effect_func = getattr(self, effect_func_name, None)
+
+            if effect_func == None:
+                self.logger.info("%s: Invalid logo effect name %s; restoring to Spectrum.", self.__class__.__name__, effect_func_name)
+                effect_func_name = 'setLogoSpectrum'
+                effect_func = getattr(self, effect_func_name, None)
+
+            if not effect_func == None:
+                if effect_func_name == 'setLogoNone' or effect_func_name == 'setLogoSpectrum' or effect_func_name == 'setLogoBlinking' or effect_func_name == 'setLogoBreathRandom':
+                    effect_func()
+                elif effect_func_name == 'setLogoStatic' or effect_func_name == 'setLogoBlinking' or effect_func_name == 'setLogoPulsate' or effect_func_name == 'setLogoBreathSingle':
+                    effect_func(self.current_logo_effect_colors[0], self.current_logo_effect_colors[1], self.current_logo_effect_colors[2])
+                elif effect_func_name == 'setLogoReactive':
+                    effect_func(self.current_logo_effect_colors[0], self.current_logo_effect_colors[1], self.current_logo_effect_colors[2], self.current_logo_effect_speed)
+                elif effect_func_name == 'setLogoBreathDual':
+                    effect_func(self.current_logo_effect_colors[0], self.current_logo_effect_colors[1], self.current_logo_effect_colors[2], self.current_logo_effect_colors[3], self.current_logo_effect_colors[4], self.current_logo_effect_colors[5])
+                elif effect_func_name == 'setLogoWave':
+                    effect_func(self.current_logo_wave_dir)
+                else:
+                    raise Exception("we can't handle this effect?")
+
+        # load last scroll effect
+        if self.has_scroll_effects:
+            if self.config.has_section(self._serial):
+                try:
+                    self.current_scroll_effect = self.config[self._serial]['scroll_effect']
+                except KeyError:
+                    self.current_scroll_effect = 'spectrum'
+                    pass
+                try:
+                    for index, item in enumerate(self.config[self._serial]['scroll_colors'].split(" ")):
+                        self.current_scroll_effect_colors[index] = int(item)
+                        if not 0 <= self.current_scroll_effect_colors[index] <= 255:
+                            raise ValueError('Color out of range')
+
+                    if len(self.current_scroll_effect_colors) != 9:
+                        raise ValueError('There must be exactly 9 colors')
+
+                except ValueError:
+                    # invalid colors. reinitialize
+                    self.current_scroll_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+                    self.logger.info("%s: Invalid scroll colors; restoring to defaults.", self.__class__.__name__)
+                    pass
+
+                except KeyError:
+                    self.current_scroll_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+                    pass
+
+                try:
+                    self.current_scroll_effect_speed = int(self.config[self._serial]['scroll_speed'])
+                    self.current_scroll_wave_dir = int(self.config[self._serial]['scroll_wave_dir'])
+
+                except KeyError:
+                    pass
+
+                effect_func_name = 'setScroll' + self.current_scroll_effect[0].upper() + self.current_scroll_effect[1:]
+            else:
+                self.current_scroll_effect = 'spectrum'
+                effect_func_name = 'setScrollSpectrum'
+
+            effect_func = getattr(self, effect_func_name, None)
+
+            if effect_func == None:
+                self.logger.info("%s: Invalid scroll effect name %s; restoring to Spectrum.", self.__class__.__name__, effect_func_name)
+                effect_func_name = 'setScrollSpectrum'
+                effect_func = getattr(self, effect_func_name, None)
+
+            if not effect_func == None:
+                if effect_func_name == 'setScrollNone' or effect_func_name == 'setScrollSpectrum' or effect_func_name == 'setScrollBlinking' or effect_func_name == 'setScrollBreathRandom':
+                    effect_func()
+                elif effect_func_name == 'setScrollStatic' or effect_func_name == 'setScrollBlinking' or effect_func_name == 'setScrollPulsate' or effect_func_name == 'setScrollBreathSingle':
+                    effect_func(self.current_scroll_effect_colors[0], self.current_scroll_effect_colors[1], self.current_scroll_effect_colors[2])
+                elif effect_func_name == 'setScrollReactive':
+                    effect_func(self.current_scroll_effect_colors[0], self.current_scroll_effect_colors[1], self.current_scroll_effect_colors[2], self.current_scroll_effect_speed)
+                elif effect_func_name == 'setScrollBreathDual':
+                    effect_func(self.current_scroll_effect_colors[0], self.current_scroll_effect_colors[1], self.current_scroll_effect_colors[2], self.current_scroll_effect_colors[3], self.current_scroll_effect_colors[4], self.current_scroll_effect_colors[5])
+                elif effect_func_name == 'setScrollWave':
+                    effect_func(self.current_scroll_wave_dir)
+                else:
+                    raise Exception("we can't handle this effect?")
+
+        # load last left effect
+        if self.has_left_effects:
+            if self.config.has_section(self._serial):
+                try:
+                    self.current_left_effect = self.config[self._serial]['left_effect']
+                except KeyError:
+                    self.current_left_effect = 'spectrum'
+                    pass
+                try:
+                    for index, item in enumerate(self.config[self._serial]['left_colors'].split(" ")):
+                        self.current_left_effect_colors[index] = int(item)
+                        if not 0 <= self.current_left_effect_colors[index] <= 255:
+                            raise ValueError('Color out of range')
+
+                    if len(self.current_left_effect_colors) != 9:
+                        raise ValueError('There must be exactly 9 colors')
+
+                except ValueError:
+                    # invalid colors. reinitialize
+                    self.current_left_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+                    self.logger.info("%s: Invalid left colors; restoring to defaults.", self.__class__.__name__)
+                    pass
+
+                except KeyError:
+                    self.current_left_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+                    pass
+
+                try:
+                    self.current_left_effect_speed = int(self.config[self._serial]['left_speed'])
+                    self.current_left_wave_dir = int(self.config[self._serial]['left_wave_dir'])
+
+                except KeyError:
+                    pass
+
+                effect_func_name = 'setLeft' + self.current_left_effect[0].upper() + self.current_left_effect[1:]
+            else:
+                self.current_left_effect = 'spectrum'
+                effect_func_name = 'setLeftSpectrum'
+
+            effect_func = getattr(self, effect_func_name, None)
+
+            if effect_func == None:
+                self.logger.info("%s: Invalid left effect name %s; restoring to Spectrum.", self.__class__.__name__, effect_func_name)
+                effect_func_name = 'setLeftSpectrum'
+                effect_func = getattr(self, effect_func_name, None)
+
+            if not effect_func == None:
+                if effect_func_name == 'setLeftNone' or effect_func_name == 'setLeftSpectrum' or effect_func_name == 'setLeftBlinking' or effect_func_name == 'setLeftBreathRandom':
+                    effect_func()
+                elif effect_func_name == 'setLeftStatic' or effect_func_name == 'setLeftBlinking' or effect_func_name == 'setLeftPulsate' or effect_func_name == 'setLeftBreathSingle':
+                    effect_func(self.current_left_effect_colors[0], self.current_left_effect_colors[1], self.current_left_effect_colors[2])
+                elif effect_func_name == 'setLeftReactive':
+                    effect_func(self.current_left_effect_colors[0], self.current_left_effect_colors[1], self.current_left_effect_colors[2], self.current_left_effect_speed)
+                elif effect_func_name == 'setLeftBreathDual':
+                    effect_func(self.current_left_effect_colors[0], self.current_left_effect_colors[1], self.current_left_effect_colors[2], self.current_left_effect_colors[3], self.current_left_effect_colors[4], self.current_left_effect_colors[5])
+                elif effect_func_name == 'setLeftWave':
+                    effect_func(self.current_left_wave_dir)
+                else:
+                    raise Exception("we can't handle this effect?")
+
+        # load last right effect
+        if self.has_right_effects:
+            if self.config.has_section(self._serial):
+                try:
+                    self.current_right_effect = self.config[self._serial]['right_effect']
+                except KeyError:
+                    self.current_right_effect = 'spectrum'
+                    pass
+                try:
+                    for index, item in enumerate(self.config[self._serial]['right_colors'].split(" ")):
+                        self.current_right_effect_colors[index] = int(item)
+                        if not 0 <= self.current_right_effect_colors[index] <= 255:
+                            raise ValueError('Color out of range')
+
+                    if len(self.current_right_effect_colors) != 9:
+                        raise ValueError('There must be exactly 9 colors')
+
+                except ValueError:
+                    # invalid colors. reinitialize
+                    self.current_right_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+                    self.logger.info("%s: Invalid right colors; restoring to defaults.", self.__class__.__name__)
+                    pass
+
+                except KeyError:
+                    self.current_right_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+                    pass
+
+                try:
+                    self.current_right_effect_speed = int(self.config[self._serial]['right_speed'])
+                    self.current_right_wave_dir = int(self.config[self._serial]['right_wave_dir'])
+
+                except KeyError:
+                    pass
+
+                effect_func_name = 'setRight' + self.current_right_effect[0].upper() + self.current_right_effect[1:]
+            else:
+                self.current_right_effect = 'spectrum'
+                effect_func_name = 'setRightSpectrum'
+
+            effect_func = getattr(self, effect_func_name, None)
+
+            if effect_func == None:
+                self.logger.info("%s: Invalid right effect name %s; restoring to Spectrum.", self.__class__.__name__, effect_func_name)
+                effect_func_name = 'setRightSpectrum'
+                effect_func = getattr(self, effect_func_name, None)
+
+            if not effect_func == None:
+                if effect_func_name == 'setRightNone' or effect_func_name == 'setRightSpectrum' or effect_func_name == 'setRightBlinking' or effect_func_name == 'setRightBreathRandom':
+                    effect_func()
+                elif effect_func_name == 'setRightStatic' or effect_func_name == 'setRightBlinking' or effect_func_name == 'setRightPulsate' or effect_func_name == 'setRightBreathSingle':
+                    effect_func(self.current_right_effect_colors[0], self.current_right_effect_colors[1], self.current_right_effect_colors[2])
+                elif effect_func_name == 'setRightReactive':
+                    effect_func(self.current_right_effect_colors[0], self.current_right_effect_colors[1], self.current_right_effect_colors[2], self.current_right_effect_speed)
+                elif effect_func_name == 'setRightBreathDual':
+                    effect_func(self.current_right_effect_colors[0], self.current_right_effect_colors[1], self.current_right_effect_colors[2], self.current_right_effect_colors[3], self.current_right_effect_colors[4], self.current_right_effect_colors[5])
+                elif effect_func_name == 'setRightWave':
+                    effect_func(self.current_right_wave_dir)
+                else:
+                    raise Exception("we can't handle this effect?")
 
     def send_effect_event(self, effect_name, *args):
         """
@@ -134,6 +522,226 @@ class RazerDevice(DBusService):
         :rtype: bool
         """
         return self.DEDICATED_MACRO_KEYS
+
+    def get_current_effect(self):
+        """
+        Get the device's current effect
+
+        :return: Effect
+        :rtype: string
+        """
+        self.logger.debug("DBus call get_current_effect")
+
+        return self.current_effect
+
+    def get_current_effect_colors(self):
+        """
+        Get the device's current effect's colors
+
+        :return: 3 colors
+        :rtype: list of byte
+        """
+        self.logger.debug("DBus call get_current_effect_colors")
+
+        return self.current_effect_colors
+
+    def get_current_effect_speed(self):
+        """
+        Get the device's current effect's speed
+
+        :return: Speed
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_effect_speed")
+
+        return self.current_effect_speed
+
+    def get_current_wave_dir(self):
+        """
+        Get the device's current wave direction
+
+        :return: Direction
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_wave_dir")
+
+        return self.current_wave_dir
+
+    def get_current_logo_effect(self):
+        """
+        Get the device's current logo effect
+
+        :return: Effect
+        :rtype: string
+        """
+        self.logger.debug("DBus call get_current_logo_effect")
+
+        return self.current_logo_effect
+
+    def get_current_logo_effect_colors(self):
+        """
+        Get the device's current logo effect's colors
+
+        :return: 3 colors
+        :rtype: list of byte
+        """
+        self.logger.debug("DBus call get_current_logo_effect_colors")
+
+        return self.current_logo_effect_colors
+
+    def get_current_logo_effect_speed(self):
+        """
+        Get the device's current logo effect's speed
+
+        :return: Speed
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_logo_effect_speed")
+
+        return self.current_logo_effect_speed
+
+    def get_current_logo_wave_dir(self):
+        """
+        Get the device's current logo wave direction
+
+        :return: Direction
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_logo_wave_dir")
+
+        return self.current_logo_wave_dir
+
+    def get_current_scroll_effect(self):
+        """
+        Get the device's current scroll effect
+
+        :return: Effect
+        :rtype: string
+        """
+        self.logger.debug("DBus call get_current_scroll_effect")
+
+        return self.current_scroll_effect
+
+    def get_current_scroll_effect_colors(self):
+        """
+        Get the device's current scroll effect's colors
+
+        :return: 3 colors
+        :rtype: list of byte
+        """
+        self.logger.debug("DBus call get_current_scroll_effect_colors")
+
+        return self.current_scroll_effect_colors
+
+    def get_current_scroll_effect_speed(self):
+        """
+        Get the device's current scroll effect's speed
+
+        :return: Speed
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_scroll_effect_speed")
+
+        return self.current_scroll_effect_speed
+
+    def get_current_scroll_wave_dir(self):
+        """
+        Get the device's current scroll wave direction
+
+        :return: Direction
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_scroll_wave_dir")
+
+        return self.current_scroll_wave_dir
+
+    def get_current_left_effect(self):
+        """
+        Get the device's current left effect
+
+        :return: Effect
+        :rtype: string
+        """
+        self.logger.debug("DBus call get_current_left_effect")
+
+        return self.current_left_effect
+
+    def get_current_left_effect_colors(self):
+        """
+        Get the device's current left effect's colors
+
+        :return: 3 colors
+        :rtype: list of byte
+        """
+        self.logger.debug("DBus call get_current_left_effect_colors")
+
+        return self.current_left_effect_colors
+
+    def get_current_left_effect_speed(self):
+        """
+        Get the device's current left effect's speed
+
+        :return: Speed
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_left_effect_speed")
+
+        return self.current_left_effect_speed
+
+    def get_current_left_wave_dir(self):
+        """
+        Get the device's current left wave direction
+
+        :return: Direction
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_left_wave_dir")
+
+        return self.current_left_wave_dir
+
+    def get_current_right_effect(self):
+        """
+        Get the device's current right effect
+
+        :return: Effect
+        :rtype: string
+        """
+        self.logger.debug("DBus call get_current_right_effect")
+
+        return self.current_right_effect
+
+    def get_current_right_effect_colors(self):
+        """
+        Get the device's current right effect's colors
+
+        :return: 3 colors
+        :rtype: list of byte
+        """
+        self.logger.debug("DBus call get_current_right_effect_colors")
+
+        return self.current_right_effect_colors
+
+    def get_current_right_effect_speed(self):
+        """
+        Get the device's current right effect's speed
+
+        :return: Speed
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_right_effect_speed")
+
+        return self.current_right_effect_speed
+
+    def get_current_right_wave_dir(self):
+        """
+        Get the device's current right wave direction
+
+        :return: Direction
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_right_wave_dir")
+
+        return self.current_right_wave_dir
 
     @property
     def effect_sync(self):
