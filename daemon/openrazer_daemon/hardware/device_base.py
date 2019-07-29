@@ -71,7 +71,7 @@ class RazerDevice(DBusService):
             self.storage_name = "ChromaMug"
         elif self.USB_PID == 0x0013:
             self.storage_name = "Orochi2011"
-        elif self.USB_PID == 0x0016:
+        elif self.USB_PID == 0x0029:
             self.storage_name = "DeathAdder35G"
         elif self.USB_PID == 0x0024 or self.USB_PID == 0x0025:
             self.storage_name = "Mamba2012"

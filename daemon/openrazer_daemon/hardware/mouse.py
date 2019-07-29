@@ -1183,7 +1183,7 @@ class RazerDeathAdder3_5G(__RazerDevice):
     Class for the Razer DeathAdder 3.5G
     """
     USB_VID = 0x1532
-    USB_PID = 0x0016
+    USB_PID = 0x0029
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_device_type_mouse',
                'get_poll_rate', 'set_poll_rate', 'get_dpi_xy', 'set_dpi_xy', 'available_dpi', 'max_dpi',

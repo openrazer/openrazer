@@ -16,10 +16,10 @@
   <url type="homepage">https://openrazer.github.io/</url>
   <provides>
     <modalias>usb:v1532p0013d*</modalias>
-    <modalias>usb:v1532p0016d*</modalias>
     <modalias>usb:v1532p0020d*</modalias>
     <modalias>usb:v1532p0024d*</modalias>
     <modalias>usb:v1532p0025d*</modalias>
+    <modalias>usb:v1532p0029d*</modalias>
     <modalias>usb:v1532p002Ed*</modalias>
     <modalias>usb:v1532p002Fd*</modalias>
     <modalias>usb:v1532p0032d*</modalias>
