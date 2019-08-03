@@ -145,24 +145,28 @@ class RazerDevice(DBusService):
             ('razer.device.misc', 'getCurrentLogoEffect', self.get_current_logo_effect, None, 's'),
             ('razer.device.misc', 'getCurrentLogoEffectColors', self.get_current_logo_effect_colors, None, 'ay'),
             ('razer.device.misc', 'getCurrentLogoEffectSpeed', self.get_current_logo_effect_speed, None, 'i'),
+            ('razer.device.misc', 'getCurrentLogoWaveDir', self.get_current_logo_wave_dir, None, 'i'),
         }
 
         scroll_effect_methods = {
             ('razer.device.misc', 'getCurrentScrollEffect', self.get_current_scroll_effect, None, 's'),
             ('razer.device.misc', 'getCurrentScrollEffectColors', self.get_current_scroll_effect_colors, None, 'ay'),
             ('razer.device.misc', 'getCurrentScrollEffectSpeed', self.get_current_scroll_effect_speed, None, 'i'),
+            ('razer.device.misc', 'getCurrentScrollWaveDir', self.get_current_scroll_wave_dir, None, 'i'),
         }
 
         left_effect_methods = {
             ('razer.device.misc', 'getCurrentLeftEffect', self.get_current_left_effect, None, 's'),
             ('razer.device.misc', 'getCurrentLeftEffectColors', self.get_current_left_effect_colors, None, 'ay'),
             ('razer.device.misc', 'getCurrentLeftEffectSpeed', self.get_current_left_effect_speed, None, 'i'),
+            ('razer.device.misc', 'getCurrentLeftWaveDir', self.get_current_left_wave_dir, None, 'i'),
         }
 
         right_effect_methods = {
             ('razer.device.misc', 'getCurrentRightEffect', self.get_current_right_effect, None, 's'),
             ('razer.device.misc', 'getCurrentRightEffectColors', self.get_current_right_effect_colors, None, 'ay'),
             ('razer.device.misc', 'getCurrentRightEffectSpeed', self.get_current_right_effect_speed, None, 'i'),
+            ('razer.device.misc', 'getCurrentRightWaveDir', self.get_current_right_wave_dir, None, 'i'),
         }
 
         for m in methods:

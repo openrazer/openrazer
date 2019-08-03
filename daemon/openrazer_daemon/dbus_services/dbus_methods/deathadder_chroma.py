@@ -400,7 +400,7 @@ def set_scroll_static(self, red, green, blue):
 @endpoint('razer.device.lighting.scroll', 'setScrollBlinking', in_sig='yyy')
 def set_scroll_blinking(self, red, green, blue):
     """
-    Set the device to BLINKING
+    Set the device to blinking
 
     :param red: Red component
     :type red: int
@@ -466,7 +466,7 @@ def set_scroll_pulsate(self, red, green, blue):
 @endpoint('razer.device.lighting.scroll', 'setScrollSpectrum')
 def set_scroll_spectrum(self):
     """
-    Set the device to copypaste
+    Set the device to spectrum
     """
     self.logger.debug("DBus call set_scroll_spectrum")
 
