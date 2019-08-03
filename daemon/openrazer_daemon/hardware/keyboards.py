@@ -63,9 +63,9 @@ class _RippleKeyboard(_MacroKeyboard):
 
             if not effect_func == None:
                 if effect_func_name == 'setRipple':
-                    effect_func(self.current_effect_colors[0], self.current_effect_colors[1], self.current_effect_colors[2], 0.025)
+                    effect_func(self.current_effect_colors[0], self.current_effect_colors[1], self.current_effect_colors[2], self.ripple_manager._ripple_thread._refresh_rate)
                 elif effect_func_name == 'setRippleRandomColour':
-                    effect_func(0.025)
+                    effect_func(self.ripple_manager._ripple_thread._refresh_rate)
 
     def _close(self):
         super(_RippleKeyboard, self)._close()
