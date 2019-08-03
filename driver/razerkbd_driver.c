@@ -1809,7 +1809,7 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
  * 01000000000000000000 M1 is released
  *
  * Converts Mute/Next/Play/Prev into multimedia keys
- *   04 00 52 00  ... 00 - Mute key pressed
+ *   04 00 52 00 ... 00 - Mute key pressed
  *   04 00 00 00 ... 00 - Mute key released
  * goes to
  *   01 00 00 E2 00 ... 00 - Mute pressed (converted to KEY_MEDIA_MUTE)
@@ -1828,74 +1828,73 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct razer_kbd_device *asc = hid_get_drvdata(hdev);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int index;
+    u8 cur_value = 0x00;
+    int found_fn = 0x00;
 
-    // No translations needed on the Pro...
-    if (is_blade_laptop(usb_dev)) {
+    // No translations needed on these situations
+    if (is_blade_laptop(usb_dev) ||
+        intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD ||
+        size<14 ||
+        data[0] != 0x04) {
         return 0;
     }
 
-    // The event were looking for is 16 bytes long and starts with 0x04
-    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
-        // Convert 04... to 0100...
-        int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
-        u8 cur_value = 0x00;
-        int found_fn = 0x00;
+    // Convert 04... to 0100...
+    index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
 
-        while(--index > 0) {
-            cur_value = data[index];
-            if(cur_value == 0x00) { // Skip 0x00
-                continue;
-            }
-
-            switch(cur_value) {
-            case 0x01: // FN
-                //cur_value = 0x73; // F24
-                cur_value = 0x00;
-                found_fn = 0x01;
-                break;
-            case 0x20: // M1
-                cur_value = USB_HID_KEY_F13; // F13
-                break;
-            case 0x21: // M2
-                cur_value = USB_HID_KEY_F14; // F14
-                break;
-            case 0x22: // M3
-                cur_value = USB_HID_KEY_F15; // F15
-                break;
-            case 0x23: // M4
-                cur_value = USB_HID_KEY_F16; // F16
-                break;
-            case 0x24: // M5
-                cur_value = USB_HID_KEY_F17; // F17
-                break;
-            case 0x52: // Mute
-                cur_value = USB_HID_KEY_MEDIA_MUTE;
-                break;
-            case 0x53: // Next (song)
-                cur_value = USB_HID_KEY_MEDIA_NEXTSONG;
-                break;
-            case 0x55: // Play/Pause
-                cur_value = USB_HID_KEY_MEDIA_PLAYPAUSE;
-                break;
-            case 0x54: // Prev (song)
-                cur_value = USB_HID_KEY_MEDIA_PREVIOUSSONG;
-                break;
-            }
-
-            data[index+1] = cur_value;
+    while(--index > 0) {
+        cur_value = data[index];
+        if(cur_value == 0x00) { // Skip 0x00
+            continue;
         }
 
-        asc->fn_on = !!found_fn;
+        switch(cur_value) {
+        case 0x01: // FN
+            //cur_value = 0x73; // F24
+            cur_value = 0x00;
+            found_fn = 0x01;
+            break;
+        case 0x20: // M1
+            cur_value = USB_HID_KEY_F13; // F13
+            break;
+        case 0x21: // M2
+            cur_value = USB_HID_KEY_F14; // F14
+            break;
+        case 0x22: // M3
+            cur_value = USB_HID_KEY_F15; // F15
+            break;
+        case 0x23: // M4
+            cur_value = USB_HID_KEY_F16; // F16
+            break;
+        case 0x24: // M5
+            cur_value = USB_HID_KEY_F17; // F17
+            break;
+        case 0x52: // Mute
+            cur_value = USB_HID_KEY_MEDIA_MUTE;
+            break;
+        case 0x53: // Next (song)
+            cur_value = USB_HID_KEY_MEDIA_NEXTSONG;
+            break;
+        case 0x55: // Play/Pause
+            cur_value = USB_HID_KEY_MEDIA_PLAYPAUSE;
+            break;
+        case 0x54: // Prev (song)
+            cur_value = USB_HID_KEY_MEDIA_PREVIOUSSONG;
+            break;
+        }
 
-        data[0] = 0x01;
-        data[1] = 0x00;
-
-        // Some reason just by editing data, it generates a normal event above. (Could quite possibly work like that, no clue)
-        //hid_report_raw_event(hdev, HID_INPUT_REPORT, data, size, 0);
-        return 1;
+        data[index+1] = cur_value;
     }
 
-    return 0;
+    asc->fn_on = !!found_fn;
+
+    data[0] = 0x01;
+    data[1] = 0x00;
+
+    // Some reason just by editing data, it generates a normal event above. (Could quite possibly work like that, no clue)
+    //hid_report_raw_event(hdev, HID_INPUT_REPORT, data, size, 0);
+    return 1;
 }
 
 /**
