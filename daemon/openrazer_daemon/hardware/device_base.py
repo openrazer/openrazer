@@ -35,6 +35,10 @@ class RazerDevice(DBusService):
 
     WAVE_DIRS = (1, 2)
 
+    ZONES = {
+      'backlight', 'logo', 'scroll', 'left', 'right'
+    }
+
     RAZER_URLS = {
         "top_img": None,
         "side_img": None,
@@ -63,34 +67,25 @@ class RazerDevice(DBusService):
         self._device_number = device_number
         self.serial = self.get_serial()
 
-        self.current_effect = 'spectrum'
-        self.current_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
-        self.current_effect_speed = 1
-        self.current_wave_dir = 1
+        for i in self.ZONES:
+            self.zone[i] = {
+                present: False,
+                active: True,
+                effect: 'spectrum',
+                colors: [0, 255, 0, 0, 255, 255, 0, 0, 255],
+                speed: 1,
+                wave_dir: 1
+            }
+
         self.has_normal_effects = False
 
-        self.current_scroll_effect = 'spectrum'
-        self.current_scroll_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
-        self.current_scroll_effect_speed = 1
-        self.current_scroll_wave_dir = 1
+        # TODO: remove
         self.has_scroll_effects = False
 
-        self.current_logo_effect = 'spectrum'
-        self.current_logo_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
-        self.current_logo_effect_speed = 1
-        self.current_logo_wave_dir = 1
         self.has_logo_effects = False
 
-        self.current_left_effect = 'spectrum'
-        self.current_left_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
-        self.current_left_effect_speed = 1
-        self.current_left_wave_dir = 1
         self.has_left_effects = False
 
-        self.current_right_effect = 'spectrum'
-        self.current_right_effect_colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
-        self.current_right_effect_speed = 1
-        self.current_right_wave_dir = 1
         self.has_right_effects = False
 
         self._effect_sync = effect_sync.EffectSync(self, device_number)
@@ -206,13 +201,16 @@ class RazerDevice(DBusService):
         # Load additional DBus methods
         self.load_methods()
 
+        # load last effects
+        """ NEW CODE HERE """
+
         # load last effect
         if self.has_normal_effects:
             if self.config.has_section(self._serial):
                 try:
-                    self.current_effect = self.config[self._serial]['effect']
+                    self.zone['backlight'].effect = self.config[self._serial]['effect']
                 except KeyError:
-                    self.current_effect = 'spectrum'
+                    self.zone['backlight'].effect = 'spectrum'
                     pass
                 try:
                     for index, item in enumerate(self.config[self._serial]['colors'].split(" ")):
