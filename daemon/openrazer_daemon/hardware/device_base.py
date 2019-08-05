@@ -198,9 +198,23 @@ class RazerDevice(DBusService):
                         self.zone[i]["colors"] = [0, 255, 0, 0, 255, 255, 0, 0, 255]
                         self.logger.info("%s: Invalid colors; restoring to defaults.", self.__class__.__name__)
                         pass
+                      
+                    except KeyError:
+                        # no colors. reinitialize
+                        self.zone[i]["colors"] = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+                        self.logger.info("%s: No colors found; restoring to defaults.", self.__class__.__name__)
+                        pass
 
-                    self.zone[i]["speed"] = int(self.config[self._serial][i + '_speed'])
-                    self.zone[i]["wave_dir"] = int(self.config[self._serial][i + '_wave_dir'])
+                    try:
+                        self.zone[i]["speed"] = int(self.config[self._serial][i + '_speed'])
+                        self.zone[i]["wave_dir"] = int(self.config[self._serial][i + '_wave_dir'])
+                        
+                    except KeyError:
+                        self.zone[i]["speed"] = 1
+                        self.zone[i]["wave_dir"] = 1
+                        self.logger.info("%s: No speed/wave direction found; restoring to defaults.", self.__class__.__name__)
+                        pass
+                      
                     if i == "backlight":
                         effect_func_name = 'set' + self.zone[i]["effect"][0].upper() + self.zone[i]["effect"][1:]
                     else:
