@@ -58,12 +58,12 @@ class _RippleKeyboard(_MacroKeyboard):
         # we need to set the effect to ripple (if needed) after the ripple manager has started
         # otherwise it doesn't work
         if self.zone["backlight"]["effect"] == "ripple" or self.zone["backlight"]["effect"] == "rippleRandomColour":
-            effect_func_name = 'set' + self.current_effect[0].upper() + self.current_effect[1:]
+            effect_func_name = 'set' + self.zone["backlight"]["effect"][0].upper() + self.zone["backlight"]["effect"][1:]
             effect_func = getattr(self, effect_func_name, None)
 
             if not effect_func == None:
                 if effect_func_name == 'setRipple':
-                    effect_func(self.current_effect_colors[0], self.current_effect_colors[1], self.current_effect_colors[2], self.ripple_manager._ripple_thread._refresh_rate)
+                    effect_func(self.zone["backlight"]["colors"][0], self.zone["backlight"]["colors"][1], self.zone["backlight"]["colors"][2], self.ripple_manager._ripple_thread._refresh_rate)
                 elif effect_func_name == 'setRippleRandomColour':
                     effect_func(self.ripple_manager._ripple_thread._refresh_rate)
 
