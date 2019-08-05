@@ -73,25 +73,6 @@ def set_logo_active(self, active):
             driver_file.write('0')
 
 
-@endpoint('razer.device.lighting.logo', 'getLogoEffect', out_sig='y')
-def get_logo_effect(self):
-    """
-    Get logo effect
-
-    :return: Active
-    :rtype: bool
-    """
-    # TODO: remove. we have a new solution that works across all
-    # devices and is more reliable (getCurrentLogoEffect)
-    self.logger.debug("DBus call get_logo_effect")
-
-    driver_path = self.get_driver_path('logo_led_effect')
-
-    with open(driver_path, 'r') as driver_file:
-        effect = int(driver_file.read().strip())
-        return effect
-
-
 @endpoint('razer.device.lighting.logo', 'getLogoBrightness', out_sig='d')
 def get_logo_brightness(self):
     """
@@ -298,25 +279,6 @@ def set_scroll_active(self, active):
             driver_file.write('1')
         else:
             driver_file.write('0')
-
-
-@endpoint('razer.device.lighting.scroll', 'getScrollEffect', out_sig='y')
-def get_scroll_effect(self):
-    """
-    Get scroll effect
-
-    :return: Active
-    :rtype: bool
-    """
-    # TODO: remove. we have a new solution that works across all
-    # devices and is more reliable (getCurrentScrollEffect)
-    self.logger.debug("DBus call get_scroll_effect")
-
-    driver_path = self.get_driver_path('scroll_led_effect')
-
-    with open(driver_path, 'r') as driver_file:
-        effect = int(driver_file.read().strip())
-        return effect
 
 
 @endpoint('razer.device.lighting.scroll', 'getScrollBrightness', out_sig='d')
