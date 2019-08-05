@@ -281,10 +281,10 @@ class RazerDaemon(DBusService):
         for device in self._razer_devices:
             for i in device.dbus.ZONES:
                 if device.dbus.zone[i]["present"]:
-                    self._config[device.dbus.get_serial()][i+'_effect'] = device.dbus.zone[i]["effect"]
-                    self._config[device.dbus.get_serial()][i+'_colors'] = ' '.join(str(i) for i in device.dbus.zone[i]["colors"])
-                    self._config[device.dbus.get_serial()][i+'_speed'] = str(device.dbus.zone[i]["speed"])
-                    self._config[device.dbus.get_serial()][i+'_wave_dir'] = str(device.dbus.zone[i]["wave_dir"])
+                    self._config[device.dbus.get_serial()][i + '_effect'] = device.dbus.zone[i]["effect"]
+                    self._config[device.dbus.get_serial()][i + '_colors'] = ' '.join(str(i) for i in device.dbus.zone[i]["colors"])
+                    self._config[device.dbus.get_serial()][i + '_speed'] = str(device.dbus.zone[i]["speed"])
+                    self._config[device.dbus.get_serial()][i + '_wave_dir'] = str(device.dbus.zone[i]["wave_dir"])
 
         if config_file is not None:
             with open(config_file, 'w') as cf:
