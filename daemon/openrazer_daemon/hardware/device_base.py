@@ -277,7 +277,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_effect")
 
-        return self.current_effect
+        return self.zone["backlight"]["effect"]
 
     def get_current_effect_colors(self):
         """
@@ -288,7 +288,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_effect_colors")
 
-        return self.current_effect_colors
+        return self.zone["backlight"]["colors"]
 
     def get_current_effect_speed(self):
         """
@@ -299,7 +299,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_effect_speed")
 
-        return self.current_effect_speed
+        return self.zone["backlight"]["speed"]
 
     def get_current_wave_dir(self):
         """
@@ -310,7 +310,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_wave_dir")
 
-        return self.current_wave_dir
+        return self.zone["backlight"]["wave_dir"]
 
     def get_current_logo_effect(self):
         """
@@ -321,7 +321,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_logo_effect")
 
-        return self.current_logo_effect
+        return self.zone["logo"]["effect"]
 
     def get_current_logo_effect_colors(self):
         """
@@ -332,7 +332,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_logo_effect_colors")
 
-        return self.current_logo_effect_colors
+        return self.zone["logo"]["colors"]
 
     def get_current_logo_effect_speed(self):
         """
@@ -343,7 +343,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_logo_effect_speed")
 
-        return self.current_logo_effect_speed
+        return self.zone["logo"]["speed"]
 
     def get_current_logo_wave_dir(self):
         """
@@ -354,7 +354,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_logo_wave_dir")
 
-        return self.current_logo_wave_dir
+        return self.zone["logo"]["wave_dir"]
 
     def get_current_scroll_effect(self):
         """
@@ -365,7 +365,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_scroll_effect")
 
-        return self.current_scroll_effect
+        return self.zone["scroll"]["effect"]
 
     def get_current_scroll_effect_colors(self):
         """
@@ -376,7 +376,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_scroll_effect_colors")
 
-        return self.current_scroll_effect_colors
+        return self.zone["scroll"]["colors"]
 
     def get_current_scroll_effect_speed(self):
         """
@@ -387,7 +387,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_scroll_effect_speed")
 
-        return self.current_scroll_effect_speed
+        return self.zone["scroll"]["speed"]
 
     def get_current_scroll_wave_dir(self):
         """
@@ -398,7 +398,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_scroll_wave_dir")
 
-        return self.current_scroll_wave_dir
+        return self.zone["scroll"]["wave_dir"]
 
     def get_current_left_effect(self):
         """
@@ -409,7 +409,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_left_effect")
 
-        return self.current_left_effect
+        return self.zone["left"]["effect"]
 
     def get_current_left_effect_colors(self):
         """
@@ -420,7 +420,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_left_effect_colors")
 
-        return self.current_left_effect_colors
+        return self.zone["left"]["colors"]
 
     def get_current_left_effect_speed(self):
         """
@@ -431,7 +431,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_left_effect_speed")
 
-        return self.current_left_effect_speed
+        return self.zone["left"]["speed"]
 
     def get_current_left_wave_dir(self):
         """
@@ -442,7 +442,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_left_wave_dir")
 
-        return self.current_left_wave_dir
+        return self.zone["left"]["wave_dir"]
 
     def get_current_right_effect(self):
         """
@@ -453,7 +453,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_right_effect")
 
-        return self.current_right_effect
+        return self.zone["right"]["effect"]
 
     def get_current_right_effect_colors(self):
         """
@@ -464,7 +464,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_right_effect_colors")
 
-        return self.current_right_effect_colors
+        return self.zone["right"]["colors"]
 
     def get_current_right_effect_speed(self):
         """
@@ -475,7 +475,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_right_effect_speed")
 
-        return self.current_right_effect_speed
+        return self.zone["right"]["speed"]
 
     def get_current_right_wave_dir(self):
         """
@@ -486,7 +486,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_right_wave_dir")
 
-        return self.current_right_wave_dir
+        return self.zone["right"]["wave_dir"]
 
     @property
     def effect_sync(self):
