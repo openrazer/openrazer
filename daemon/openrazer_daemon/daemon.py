@@ -279,35 +279,12 @@ class RazerDaemon(DBusService):
         self._config['Startup']['devices_off_on_screensaver'] = 'True' if self.get_off_on_screensaver() else 'False'
 
         for device in self._razer_devices:
-            if device.dbus.has_normal_effects:
-                self._config[device.dbus.get_serial()]['effect'] = device.dbus.current_effect
-                self._config[device.dbus.get_serial()]['colors'] = ' '.join(str(i) for i in device.dbus.current_effect_colors)
-                self._config[device.dbus.get_serial()]['speed'] = str(device.dbus.current_effect_speed)
-                self._config[device.dbus.get_serial()]['wave_dir'] = str(device.dbus.current_wave_dir)
-
-            if device.dbus.has_logo_effects:
-                self._config[device.dbus.get_serial()]['logo_effect'] = device.dbus.current_logo_effect
-                self._config[device.dbus.get_serial()]['logo_colors'] = ' '.join(str(i) for i in device.dbus.current_logo_effect_colors)
-                self._config[device.dbus.get_serial()]['logo_speed'] = str(device.dbus.current_logo_effect_speed)
-                self._config[device.dbus.get_serial()]['logo_wave_dir'] = str(device.dbus.current_logo_wave_dir)
-
-            if device.dbus.has_scroll_effects:
-                self._config[device.dbus.get_serial()]['scroll_effect'] = device.dbus.current_scroll_effect
-                self._config[device.dbus.get_serial()]['scroll_colors'] = ' '.join(str(i) for i in device.dbus.current_scroll_effect_colors)
-                self._config[device.dbus.get_serial()]['scroll_speed'] = str(device.dbus.current_scroll_effect_speed)
-                self._config[device.dbus.get_serial()]['scroll_wave_dir'] = str(device.dbus.current_scroll_wave_dir)
-
-            if device.dbus.has_left_effects:
-                self._config[device.dbus.get_serial()]['left_effect'] = device.dbus.current_left_effect
-                self._config[device.dbus.get_serial()]['left_colors'] = ' '.join(str(i) for i in device.dbus.current_left_effect_colors)
-                self._config[device.dbus.get_serial()]['left_speed'] = str(device.dbus.current_left_effect_speed)
-                self._config[device.dbus.get_serial()]['left_wave_dir'] = str(device.dbus.current_left_wave_dir)
-
-            if device.dbus.has_right_effects:
-                self._config[device.dbus.get_serial()]['right_effect'] = device.dbus.current_right_effect
-                self._config[device.dbus.get_serial()]['right_colors'] = ' '.join(str(i) for i in device.dbus.current_right_effect_colors)
-                self._config[device.dbus.get_serial()]['right_speed'] = str(device.dbus.current_right_effect_speed)
-                self._config[device.dbus.get_serial()]['right_wave_dir'] = str(device.dbus.current_right_wave_dir)
+            for i in device.dbus.ZONES:
+                if device.dbus.zone[i]["present"]:
+                    self._config[device.dbus.get_serial()][i+'_effect'] = device.dbus.zone[i]["effect"]
+                    self._config[device.dbus.get_serial()][i+'_colors'] = ' '.join(str(i) for i in device.dbus.zone[i]["colors"])
+                    self._config[device.dbus.get_serial()][i+'_speed'] = str(device.dbus.zone[i]["speed"])
+                    self._config[device.dbus.get_serial()][i+'_wave_dir'] = str(device.dbus.zone[i]["wave_dir"])
 
         if config_file is not None:
             with open(config_file, 'w') as cf:

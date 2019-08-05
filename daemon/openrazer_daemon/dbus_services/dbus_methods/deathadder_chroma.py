@@ -157,8 +157,8 @@ def set_logo_static(self, red, green, blue):
     self.send_effect_event('setStatic', red, green, blue)
 
     # remember effect
-    self.current_logo_effect = 'static'
-    self.current_logo_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["logo"]["effect"] = 'static'
+    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
 
     rgb_driver_path = self.get_driver_path('logo_led_rgb')
     effect_driver_path = self.get_driver_path('logo_led_effect')
@@ -190,8 +190,8 @@ def set_logo_blinking(self, red, green, blue):
     self.send_effect_event('setLogoBlinking', red, green, blue)
 
     # remember effect
-    self.current_logo_effect = 'blinking'
-    self.current_logo_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["logo"]["effect"] = 'blinking'
+    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
 
     rgb_driver_path = self.get_driver_path('logo_led_rgb')
     effect_driver_path = self.get_driver_path('logo_led_effect')
@@ -223,8 +223,8 @@ def set_logo_pulsate(self, red, green, blue):
     self.send_effect_event('setPulsate', red, green, blue)
 
     # remember effect
-    self.current_logo_effect = 'pulsate'
-    self.current_logo_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["logo"]["effect"] = 'pulsate'
+    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
 
     rgb_driver_path = self.get_driver_path('logo_led_rgb')
     effect_driver_path = self.get_driver_path('logo_led_effect')
@@ -256,7 +256,7 @@ def set_logo_spectrum(self):
     self.send_effect_event('setSpectrum')
 
     # remember effect
-    self.current_logo_effect = 'spectrum'
+    self.zone["logo"]["effect"] = 'spectrum'
 
     effect_driver_path = self.get_driver_path('logo_led_effect')
 
@@ -384,8 +384,8 @@ def set_scroll_static(self, red, green, blue):
     self.send_effect_event('setStatic', red, green, blue)
 
     # remember effect
-    self.current_scroll_effect = 'static'
-    self.current_scroll_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["scroll"]["effect"] = 'static'
+    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
 
     rgb_driver_path = self.get_driver_path('scroll_led_rgb')
     effect_driver_path = self.get_driver_path('scroll_led_effect')
@@ -417,8 +417,8 @@ def set_scroll_blinking(self, red, green, blue):
     self.send_effect_event('setPulsate', red, green, blue)
 
     # remember effect
-    self.current_scroll_effect = 'blinking'
-    self.current_scroll_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["scroll"]["effect"] = 'blinking'
+    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
 
     rgb_driver_path = self.get_driver_path('scroll_led_rgb')
     effect_driver_path = self.get_driver_path('scroll_led_effect')
@@ -450,8 +450,8 @@ def set_scroll_pulsate(self, red, green, blue):
     self.send_effect_event('setPulsate', red, green, blue)
 
     # remember effect
-    self.current_scroll_effect = 'pulsate'
-    self.current_scroll_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["scroll"]["effect"] = 'pulsate'
+    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
 
     rgb_driver_path = self.get_driver_path('scroll_led_rgb')
     effect_driver_path = self.get_driver_path('scroll_led_effect')
@@ -474,7 +474,7 @@ def set_scroll_spectrum(self):
     self.send_effect_event('setSpectrum')
 
     # remember effect
-    self.current_scroll_effect = 'spectrum'
+    self.zone["scroll"]["effect"] = 'spectrum'
 
     effect_driver_path = self.get_driver_path('scroll_led_effect')
 

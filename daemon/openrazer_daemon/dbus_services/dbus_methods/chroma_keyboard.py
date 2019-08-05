@@ -182,8 +182,8 @@ def set_wave_effect(self, direction):
     self.send_effect_event('setWave', direction)
 
     # remember effect
-    self.current_effect = 'wave'
-    self.current_wave_dir = int(direction)
+    self.zone["backlight"]["effect"] = 'wave'
+    self.zone["backlight"]["wave_dir"] = int(direction)
 
     driver_path = self.get_driver_path('matrix_effect_wave')
 
@@ -214,8 +214,8 @@ def set_static_effect(self, red, green, blue):
     self.send_effect_event('setStatic', red, green, blue)
 
     # remember effect
-    self.current_effect = 'static'
-    self.current_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["backlight"]["effect"] = 'static'
+    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
 
     driver_path = self.get_driver_path('matrix_effect_static')
 
@@ -245,8 +245,8 @@ def set_blinking_effect(self, red, green, blue):
     self.send_effect_event('setBlinking', red, green, blue)
 
     # remember effect
-    self.current_effect = 'blinking'
-    self.current_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["backlight"]["effect"] = 'blinking'
+    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
 
     driver_path = self.get_driver_path('matrix_effect_blinking')
 
@@ -267,7 +267,7 @@ def set_spectrum_effect(self):
     self.send_effect_event('setSpectrum')
 
     # remember effect
-    self.current_effect = 'spectrum'
+    self.zone["backlight"]["effect"] = 'spectrum'
 
     driver_path = self.get_driver_path('matrix_effect_spectrum')
 
@@ -286,7 +286,7 @@ def set_none_effect(self):
     self.send_effect_event('setNone')
 
     # remember effect
-    self.current_effect = 'none'
+    self.zone["backlight"]["effect"] = 'none'
 
     driver_path = self.get_driver_path('matrix_effect_none')
 
@@ -335,13 +335,13 @@ def set_reactive_effect(self, red, green, blue, speed):
     self.send_effect_event('setReactive', red, green, blue, speed)
 
     # remember effect
-    self.current_effect = 'reactive'
-    self.current_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["backlight"]["effect"] = 'reactive'
+    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
 
     if speed not in (1, 2, 3, 4):
         speed = 4
 
-    self.current_effect_speed = int(speed)
+    self.zone["backlight"]["speed"] = int(speed)
 
     payload = bytes([speed, red, green, blue])
 
@@ -360,7 +360,7 @@ def set_breath_random_effect(self):
     self.send_effect_event('setBreathRandom')
 
     # remember effect
-    self.current_effect = 'breathRandom'
+    self.zone["backlight"]["effect"] = 'breathRandom'
 
     driver_path = self.get_driver_path('matrix_effect_breath')
 
@@ -390,8 +390,8 @@ def set_breath_single_effect(self, red, green, blue):
     self.send_effect_event('setBreathSingle', red, green, blue)
 
     # remember effect
-    self.current_effect = 'breathSingle'
-    self.current_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["backlight"]["effect"] = 'breathSingle'
+    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
 
     driver_path = self.get_driver_path('matrix_effect_breath')
 
@@ -439,8 +439,8 @@ def set_breath_triple_effect(self, red1, green1, blue1, red2, green2, blue2, red
     self.send_effect_event('setBreathTriple', red1, green1, blue1, red2, green2, blue2, red3, green3, blue3)
 
     # remember effect
-    self.current_effect = 'breathTriple'
-    self.current_effect_colors = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2), int(red3), int(green3), int(blue3)
+    self.zone["backlight"]["effect"] = 'breathTriple'
+    self.zone["backlight"]["colors"] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2), int(red3), int(green3), int(blue3)
 
     driver_path = self.get_driver_path('matrix_effect_breath')
 
@@ -479,8 +479,8 @@ def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
 
     # remember effect
-    self.current_effect = 'breathDual'
-    self.current_effect_colors[0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
+    self.zone["backlight"]["effect"] = 'breathDual'
+    self.zone["backlight"]["colors"][0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
 
     driver_path = self.get_driver_path('matrix_effect_breath')
 
@@ -553,8 +553,8 @@ def set_ripple_effect(self, red, green, blue, refresh_rate):
     self.send_effect_event('setRipple', red, green, blue, refresh_rate)
 
     # remember effect
-    self.current_effect = 'ripple'
-    self.current_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["backlight"]["effect"] = 'ripple'
+    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
 
 
 @endpoint('razer.device.lighting.custom', 'setRippleRandomColour', in_sig='d')
@@ -571,7 +571,7 @@ def set_ripple_effect_random_colour(self, refresh_rate):
     self.send_effect_event('setRipple', None, None, None, refresh_rate)
 
     # remember effect
-    self.current_effect = 'rippleRandomColour'
+    self.zone["backlight"]["effect"] = 'rippleRandomColour'
 
 
 @endpoint('razer.device.lighting.chroma', 'setStarlightRandom', in_sig='y')
@@ -590,8 +590,8 @@ def set_starlight_random_effect(self, speed):
     self.send_effect_event('setStarlightRandom')
 
     # remember effect
-    self.current_effect = 'starlightRandom'
-    self.current_effect_speed = speed
+    self.zone["backlight"]["effect"] = 'starlightRandom'
+    self.zone["backlight"]["speed"] = speed
 
 
 @endpoint('razer.device.lighting.chroma', 'setStarlightSingle', in_sig='yyyy')
@@ -610,9 +610,9 @@ def set_starlight_single_effect(self, speed, red, green, blue):
     self.send_effect_event('setStarlightSingle', speed, red, green, blue)
 
     # remember effect
-    self.current_effect = 'starlightSingle'
-    self.current_effect_speed = speed
-    self.current_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["backlight"]["effect"] = 'starlightSingle'
+    self.zone["backlight"]["speed"] = speed
+    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
 
 
 @endpoint('razer.device.lighting.chroma', 'setStarlightDual', in_sig='yyyyyyy')
@@ -631,6 +631,6 @@ def set_starlight_dual_effect(self, speed, red1, green1, blue1, red2, green2, bl
     self.send_effect_event('setStarlightDual', speed, red1, green1, blue1)
 
     # remember effect
-    self.current_effect = 'starlightDual'
-    self.current_effect_speed = speed
-    self.current_effect_colors[0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
+    self.zone["backlight"]["effect"] = 'starlightDual'
+    self.zone["backlight"]["speed"] = speed
+    self.zone["backlight"]["colors"][0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)

@@ -14,8 +14,8 @@ def set_logo_wave(self, direction):
     self.send_effect_event('setWave', direction)
 
     # remember effect
-    self.current_logo_effect = 'wave'
-    self.current_logo_wave_dir = int(direction)
+    self.zone["logo"]["effect"] = 'wave'
+    self.zone["logo"]["wave_dir"] = int(direction)
 
     driver_path = self.get_driver_path('logo_matrix_effect_wave')
 
@@ -39,8 +39,8 @@ def set_scroll_wave(self, direction):
     self.send_effect_event('setWave', direction)
 
     # remember effect
-    self.current_scroll_effect = 'wave'
-    self.current_scroll_wave_dir = int(direction)
+    self.zone["scroll"]["effect"] = 'wave'
+    self.zone["scroll"]["wave_dir"] = int(direction)
 
     driver_path = self.get_driver_path('scroll_matrix_effect_wave')
 
@@ -107,8 +107,8 @@ def set_left_wave(self, direction):
     self.send_effect_event('setWave', direction)
 
     # remember effect
-    self.current_left_effect = 'wave'
-    self.current_left_wave_dir = int(direction)
+    self.zone["left"]["effect"] = 'wave'
+    self.zone["left"]["wave_dir"] = int(direction)
 
     driver_path = self.get_driver_path('left_matrix_effect_wave')
 
@@ -139,8 +139,8 @@ def set_left_static(self, red, green, blue):
     self.send_effect_event('setStatic', red, green, blue)
 
     # remember effect
-    self.current_left_effect = 'static'
-    self.current_left_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["left"]["effect"] = 'static'
+    self.zone["left"]["colors"][0:3] = int(red), int(green), int(blue)
 
     rgb_driver_path = self.get_driver_path('left_matrix_effect_static')
 
@@ -161,7 +161,7 @@ def set_left_spectrum(self):
     self.send_effect_event('setSpectrum')
 
     # remember effect
-    self.current_left_effect = 'spectrum'
+    self.zone["left"]["effect"] = 'spectrum'
 
     effect_driver_path = self.get_driver_path('left_matrix_effect_spectrum')
 
@@ -180,7 +180,7 @@ def set_left_none(self):
     self.send_effect_event('setNone')
 
     # remember effect
-    self.current_left_effect = 'none'
+    self.zone["left"]["effect"] = 'none'
 
     driver_path = self.get_driver_path('left_matrix_effect_none')
 
@@ -213,13 +213,13 @@ def set_left_reactive(self, red, green, blue, speed):
     self.send_effect_event('setReactive', red, green, blue, speed)
 
     # remember effect
-    self.current_left_effect = 'reactive'
-    self.current_left_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["left"]["effect"] = 'reactive'
+    self.zone["left"]["colors"][0:3] = int(red), int(green), int(blue)
 
     if speed not in (1, 2, 3, 4):
         speed = 4
 
-    self.current_left_effect_speed = int(speed)
+    self.zone["left"]["speed"] = int(speed)
 
     payload = bytes([speed, red, green, blue])
 
@@ -238,7 +238,7 @@ def set_left_breath_random(self):
     self.send_effect_event('setBreathRandom')
 
     # remember effect
-    self.current_left_effect = 'breathRandom'
+    self.zone["left"]["effect"] = 'breathRandom'
 
     driver_path = self.get_driver_path('left_matrix_effect_breath')
 
@@ -268,8 +268,8 @@ def set_left_breath_single(self, red, green, blue):
     self.send_effect_event('setBreathSingle', red, green, blue)
 
     # remember effect
-    self.current_left_effect = 'breathSingle'
-    self.current_left_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["left"]["effect"] = 'breathSingle'
+    self.zone["left"]["colors"][0:3] = int(red), int(green), int(blue)
 
     driver_path = self.get_driver_path('left_matrix_effect_breath')
 
@@ -308,8 +308,8 @@ def set_left_breath_dual(self, red1, green1, blue1, red2, green2, blue2):
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
 
     # remember effect
-    self.current_left_effect = 'breathDual'
-    self.current_left_effect_colors[0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
+    self.zone["left"]["effect"] = 'breathDual'
+    self.zone["left"]["colors"][0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
 
     driver_path = self.get_driver_path('left_matrix_effect_breath')
 
@@ -375,8 +375,8 @@ def set_right_wave(self, direction):
     self.send_effect_event('setWave', direction)
 
     # remember effect
-    self.current_right_effect = 'wave'
-    self.current_right_wave_dir = int(direction)
+    self.zone["right"]["effect"] = 'wave'
+    self.zone["right"]["wave_dir"] = int(direction)
 
     driver_path = self.get_driver_path('right_matrix_effect_wave')
 
@@ -407,8 +407,8 @@ def set_right_static(self, red, green, blue):
     self.send_effect_event('setStatic', red, green, blue)
 
     # remember effect
-    self.current_right_effect = 'static'
-    self.current_right_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["right"]["effect"] = 'static'
+    self.zone["right"]["colors"][0:3] = int(red), int(green), int(blue)
 
     rgb_driver_path = self.get_driver_path('right_matrix_effect_static')
 
@@ -429,7 +429,7 @@ def set_right_spectrum(self):
     self.send_effect_event('setSpectrum')
 
     # remember effect
-    self.current_right_effect = 'spectrum'
+    self.zone["right"]["effect"] = 'spectrum'
 
     effect_driver_path = self.get_driver_path('right_matrix_effect_spectrum')
 
@@ -448,7 +448,7 @@ def set_right_none(self):
     self.send_effect_event('setNone')
 
     # remember effect
-    self.current_right_effect = 'none'
+    self.zone["right"]["effect"] = 'none'
 
     driver_path = self.get_driver_path('right_matrix_effect_none')
 
@@ -481,13 +481,13 @@ def set_right_reactive(self, red, green, blue, speed):
     self.send_effect_event('setReactive', red, green, blue, speed)
 
     # remember effect
-    self.current_right_effect = 'reactive'
-    self.current_right_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["right"]["effect"] = 'reactive'
+    self.zone["right"]["colors"][0:3] = int(red), int(green), int(blue)
 
     if speed not in (1, 2, 3, 4):
         speed = 4
 
-    self.current_right_effect_speed = int(speed)
+    self.zone["right"]["speed"] = int(speed)
 
     payload = bytes([speed, red, green, blue])
 
@@ -506,7 +506,7 @@ def set_right_breath_random(self):
     self.send_effect_event('setBreathRandom')
 
     # remember effect
-    self.current_right_effect = 'breathRandom'
+    self.zone["right"]["effect"] = 'breathRandom'
 
     driver_path = self.get_driver_path('right_matrix_effect_breath')
 
@@ -536,8 +536,8 @@ def set_right_breath_single(self, red, green, blue):
     self.send_effect_event('setBreathSingle', red, green, blue)
 
     # remember effect
-    self.current_right_effect = 'breathSingle'
-    self.current_right_effect_colors[0:3] = int(red), int(green), int(blue)
+    self.zone["right"]["effect"] = 'breathSingle'
+    self.zone["right"]["colors"][0:3] = int(red), int(green), int(blue)
 
     driver_path = self.get_driver_path('right_matrix_effect_breath')
 
@@ -576,8 +576,8 @@ def set_right_breath_dual(self, red1, green1, blue1, red2, green2, blue2):
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
 
     # remember effect
-    self.current_right_effect = 'breathDual'
-    self.current_right_effect_colors[0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
+    self.zone["right"]["effect"] = 'breathDual'
+    self.zone["right"]["colors"][0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
 
     driver_path = self.get_driver_path('right_matrix_effect_breath')
 
