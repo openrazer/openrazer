@@ -281,6 +281,7 @@ class RazerDaemon(DBusService):
         for device in self._razer_devices:
             for i in device.dbus.ZONES:
                 if device.dbus.zone[i]["present"]:
+                    self._config[device.dbus.get_serial()][i + '_active'] = str(device.dbus.zone[i]["active"])
                     self._config[device.dbus.get_serial()][i + '_effect'] = device.dbus.zone[i]["effect"]
                     self._config[device.dbus.get_serial()][i + '_colors'] = ' '.join(str(i) for i in device.dbus.zone[i]["colors"])
                     self._config[device.dbus.get_serial()][i + '_speed'] = str(device.dbus.zone[i]["speed"])

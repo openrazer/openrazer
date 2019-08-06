@@ -64,6 +64,9 @@ def set_logo_active(self, active):
     """
     self.logger.debug("DBus call set_logo_active")
 
+    # remember status
+    self.zone["logo"]["active"] = bool(active)
+
     driver_path = self.get_driver_path('logo_led_state')
 
     with open(driver_path, 'w') as driver_file:
@@ -271,6 +274,9 @@ def set_scroll_active(self, active):
     :type active: bool
     """
     self.logger.debug("DBus call set_scroll_active")
+
+    # remember status
+    self.zone["scroll"]["active"] = bool(active)
 
     driver_path = self.get_driver_path('scroll_led_state')
 

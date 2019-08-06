@@ -178,12 +178,25 @@ class RazerDevice(DBusService):
         # load last effects
         for i in self.ZONES:
             if self.zone[i]["present"]:
+                self.zone[i]["active"] = self.config[self._serial][i + '_active']
+                if 'set_' + i + '_active' in self.METHODS:
+                    effect_func = getattr(self, "setLogoActive", None)
+                    if not effect_func == None:
+                        effect_func(self.zone[i]["active"])
+
                 if self.config.has_section(self._serial):
                     try:
                         self.zone[i]["effect"] = self.config[self._serial][i + '_effect']
                     except KeyError:
                         self.zone[i]["effect"] = 'spectrum'
                         pass
+
+                    try:
+                        self.zone[i]["active"] = bool(self.config[self._serial][i + '_active'])
+                    except KeyError:
+                        self.zone[i]["active"] = True
+                        pass
+
                     try:
                         for index, item in enumerate(self.config[self._serial][i + '_colors'].split(" ")):
                             self.zone[i]["colors"][index] = int(item)
