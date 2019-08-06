@@ -27,7 +27,7 @@ def set_backlight_active(self, active):
     :type active: bool
     """
     self.logger.debug("DBus call set_backlight_active")
-    
+
     # remember status
     self.zone["backlight"]["active"] = bool(active)
 
