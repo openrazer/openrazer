@@ -178,12 +178,6 @@ class RazerDevice(DBusService):
         # load last effects
         for i in self.ZONES:
             if self.zone[i]["present"]:
-                self.zone[i]["active"] = self.config[self._serial][i + '_active']
-                if 'set_' + i + '_active' in self.METHODS:
-                    effect_func = getattr(self, "setLogoActive", None)
-                    if not effect_func == None:
-                        effect_func(self.zone[i]["active"])
-
                 if self.config.has_section(self._serial):
                     try:
                         self.zone[i]["effect"] = self.config[self._serial][i + '_effect']
@@ -270,6 +264,11 @@ class RazerDevice(DBusService):
                         effect_func(self.zone[i]["speed"], self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2])
                     elif self.zone[i]["effect"] == 'starlightDual':
                         effect_func(self.zone[i]["speed"], self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5])
+
+                if 'set_' + i + '_active' in self.METHODS:
+                    active_func = getattr(self, "set" + i[0].upper() + i[1:] + "Active", None)
+                    if not active_func == None:
+                        active_func(self.zone[i]["active"])
 
     def send_effect_event(self, effect_name, *args):
         """
