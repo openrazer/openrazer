@@ -166,7 +166,7 @@ class RazerDevice(DBusService):
                 self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
 
         for i in self.ZONES[1:]:
-            if 'set_' + i + '_static' in self.METHODS or 'set_' + i + '_static_naga_hex_v2' in self.METHODS:
+            if 'set_' + i + '_static' in self.METHODS or 'set_' + i + '_static_naga_hex_v2' in self.METHODS or '`set_' + i + 'active' in self.METHODS:
                 self.zone[i]["present"] = True
                 for m in effect_methods[i]:
                     self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
@@ -242,7 +242,7 @@ class RazerDevice(DBusService):
 
                 effect_func = getattr(self, effect_func_name, None)
 
-                if effect_func == None:
+                if effect_func == None and not self.zone[i]["effect"] == "Spectrum":
                     self.logger.info("%s: Invalid effect name %s; restoring to Spectrum.", self.__class__.__name__, effect_func_name)
                     self.zone[i]["effect"] = 'spectrum'
                     if i == "backlight":
