@@ -51,6 +51,9 @@ class RazerDevice(DBusService):
         # Serial cache
         self._serial = None
 
+        # Local storage key name
+        self.storage_name = "UnknownDevice"
+
         self._observer_list = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
@@ -64,6 +67,17 @@ class RazerDevice(DBusService):
         self._device_path = device_path
         self._device_number = device_number
         self.serial = self.get_serial()
+
+        if self.USB_PID == 0x0f07:
+            self.storage_name = "ChromaMug"
+        elif self.USB_PID == 0x0013:
+            self.storage_name = "Orochi2011"
+        elif self.USB_PID == 0x0016:
+            self.storage_name = "DeathAdder35G"
+        elif self.USB_PID == 0x0024 or self.USB_PID == 0x0025:
+            self.storage_name = "Mamba2012"
+        else:
+            self.storage_name = self.serial
 
         self.zone = dict()
 
@@ -178,21 +192,21 @@ class RazerDevice(DBusService):
         # load last effects
         for i in self.ZONES:
             if self.zone[i]["present"]:
-                if self.config.has_section(self._serial):
+                if self.config.has_section(self.storage_name):
                     try:
-                        self.zone[i]["effect"] = self.config[self._serial][i + '_effect']
+                        self.zone[i]["effect"] = self.config[self.storage_name][i + '_effect']
                     except KeyError:
                         self.zone[i]["effect"] = 'spectrum'
                         pass
 
                     try:
-                        self.zone[i]["active"] = bool(self.config[self._serial][i + '_active'])
+                        self.zone[i]["active"] = bool(self.config[self.storage_name][i + '_active'])
                     except KeyError:
                         self.zone[i]["active"] = True
                         pass
 
                     try:
-                        for index, item in enumerate(self.config[self._serial][i + '_colors'].split(" ")):
+                        for index, item in enumerate(self.config[self.storage_name][i + '_colors'].split(" ")):
                             self.zone[i]["colors"][index] = int(item)
                             if not 0 <= self.zone[i]["colors"][index] <= 255:
                                 raise ValueError('Color out of range')
@@ -213,8 +227,8 @@ class RazerDevice(DBusService):
                         pass
 
                     try:
-                        self.zone[i]["speed"] = int(self.config[self._serial][i + '_speed'])
-                        self.zone[i]["wave_dir"] = int(self.config[self._serial][i + '_wave_dir'])
+                        self.zone[i]["speed"] = int(self.config[self.storage_name][i + '_speed'])
+                        self.zone[i]["wave_dir"] = int(self.config[self.storage_name][i + '_wave_dir'])
 
                     except KeyError:
                         self.zone[i]["speed"] = 1
