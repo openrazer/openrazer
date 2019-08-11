@@ -4,6 +4,7 @@ Hardware base class
 import re
 import os
 import types
+import inspect
 import logging
 import time
 import json
@@ -260,24 +261,26 @@ class RazerDevice(DBusService):
                     effect_func = getattr(self, effect_func_name, None)
 
                 if not effect_func == None:
-                    if self.zone[i]["effect"] == 'none' or self.zone[i]["effect"] == 'spectrum' or self.zone[i]["effect"] == 'blinking' or self.zone[i]["effect"] == 'breathRandom':
-                        effect_func()
-                    elif self.zone[i]["effect"] == 'static' or self.zone[i]["effect"] == 'blinking' or self.zone[i]["effect"] == 'breathSingle':
+                    if self.get_num_arguments(effect_func) == 1:
+                        if self.zone[i]["effect"] == 'starlightRandom':
+                            effect_func(self.zone[i]["speed"])
+                        else:
+                            effect_func(self.zone[i]["wave_dir"])
+                    elif self.get_num_arguments(effect_func) == 3:
                         effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2])
-                    elif self.zone[i]["effect"] == 'reactive':
-                        effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["speed"])
-                    elif self.zone[i]["effect"] == 'breathDual':
+                    elif self.get_num_arguments(effect_func) == 4:
+                        if self.zone[i]["effect"] == 'starlightSingle':
+                            effect_func(self.zone[i]["speed"], self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2])
+                        else:
+                            effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["speed"])
+                    elif self.get_num_arguments(effect_func) == 6:
                         effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5])
-                    elif self.zone[i]["effect"] == 'breathTriple':
-                        effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5], self.zone[i]["colors"][6], self.zone[i]["colors"][7], self.zone[i]["colors"][8])
-                    elif self.zone[i]["effect"] == 'wave':
-                        effect_func(self.zone[i]["wave_dir"])
-                    elif self.zone[i]["effect"] == 'starlightRandom':
-                        effect_func(self.zone[i]["speed"])
-                    elif self.zone[i]["effect"] == 'starlightSingle':
-                        effect_func(self.zone[i]["speed"], self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2])
-                    elif self.zone[i]["effect"] == 'starlightDual':
+                    elif self.get_num_arguments(effect_func) == 7:
                         effect_func(self.zone[i]["speed"], self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5])
+                    elif self.get_num_arguments(effect_func) == 9:
+                        effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5], self.zone[i]["colors"][6], self.zone[i]["colors"][7], self.zone[i]["colors"][8])
+                    else:
+                        effect_func()
 
                 if 'set_' + i + '_active' in self.METHODS:
                     active_func = getattr(self, "set" + i[0].upper() + i[1:] + "Active", None)
@@ -819,6 +822,20 @@ class RazerDevice(DBusService):
                 return True
 
         return False
+
+    @staticmethod
+    def get_num_arguments(func):
+        """
+        Get number of arguments in a function
+
+        :param func: Function
+        :type func: callable
+
+        :return: Number of arguments
+        :rtype: int
+        """
+        func_sig = inspect.signature(func)
+        return len(func_sig.parameters)
 
     def __del__(self):
         self.close()
