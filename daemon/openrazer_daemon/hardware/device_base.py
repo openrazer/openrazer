@@ -86,6 +86,7 @@ class RazerDevice(DBusService):
             self.zone[i] = {
                 "present": False,
                 "active": True,
+                "brightness": 0.75,
                 "effect": 'spectrum',
                 "colors": [0, 255, 0, 0, 255, 255, 0, 0, 255],
                 "speed": 1,

@@ -15,14 +15,7 @@ def get_brightness(self):
     """
     self.logger.debug("DBus call get_brightness")
 
-    driver_path = self.get_driver_path('matrix_brightness')
-
-    with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
-
-        self.method_args['brightness'] = brightness
-
-        return brightness
+    return self.zone["backlight"]["brightness"]
 
 
 @endpoint('razer.device.lighting.brightness', 'setBrightness', in_sig='d')
@@ -38,6 +31,8 @@ def set_brightness(self, brightness):
     driver_path = self.get_driver_path('matrix_brightness')
 
     self.method_args['brightness'] = brightness
+
+    self.zone["backlight"]["brightness"] = brightness
 
     brightness = int(round(brightness * (255.0 / 100.0)))
     if brightness > 255:

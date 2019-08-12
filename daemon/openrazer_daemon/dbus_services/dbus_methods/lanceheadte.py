@@ -60,12 +60,7 @@ def get_left_brightness(self):
     """
     self.logger.debug("DBus call get_left_brightness")
 
-    driver_path = self.get_driver_path('left_led_brightness')
-
-    with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
-
-        return brightness
+    return self.zone["left"]["brightness"]
 
 
 @endpoint('razer.device.lighting.left', 'setLeftBrightness', in_sig='d')
@@ -80,6 +75,8 @@ def set_left_brightness(self, brightness):
     driver_path = self.get_driver_path('left_led_brightness')
 
     self.method_args['brightness'] = brightness
+
+    self.zone["left"]["brightness"] = brightness
 
     brightness = int(round(brightness * (255.0 / 100.0)))
     if brightness > 255:
@@ -328,12 +325,7 @@ def get_right_brightness(self):
     """
     self.logger.debug("DBus call get_right_brightness")
 
-    driver_path = self.get_driver_path('right_led_brightness')
-
-    with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
-
-        return brightness
+    return self.zone["right"]["brightness"]
 
 
 @endpoint('razer.device.lighting.right', 'setRightBrightness', in_sig='d')
@@ -348,6 +340,8 @@ def set_right_brightness(self, brightness):
     driver_path = self.get_driver_path('right_led_brightness')
 
     self.method_args['brightness'] = brightness
+
+    self.zone["right"]["brightness"] = brightness
 
     brightness = int(round(brightness * (255.0 / 100.0)))
     if brightness > 255:

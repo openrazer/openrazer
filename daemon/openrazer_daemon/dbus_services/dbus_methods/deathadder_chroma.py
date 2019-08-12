@@ -89,12 +89,7 @@ def get_logo_brightness(self):
     """
     self.logger.debug("DBus call get_logo_brightness")
 
-    driver_path = self.get_driver_path('logo_led_brightness')
-
-    with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
-
-        return brightness
+    return self.zone["logo"]["brightness"]
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoBrightness', in_sig='d')
@@ -110,6 +105,8 @@ def set_logo_brightness(self, brightness):
     driver_path = self.get_driver_path('logo_led_brightness')
 
     self.method_args['brightness'] = brightness
+
+    self.zone["logo"]["brightness"] = brightness
 
     brightness = int(round(brightness * (255.0 / 100.0)))
     if brightness > 255:
@@ -300,12 +297,7 @@ def get_scroll_brightness(self):
     """
     self.logger.debug("DBus call get_scroll_brightness")
 
-    driver_path = self.get_driver_path('scroll_led_brightness')
-
-    with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
-
-        return brightness
+    return self.zone["scroll"]["brightness"]
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollBrightness', in_sig='d')
@@ -321,6 +313,8 @@ def set_scroll_brightness(self, brightness):
     driver_path = self.get_driver_path('scroll_led_brightness')
 
     self.method_args['brightness'] = brightness
+
+    self.zone["scroll"]["brightness"] = brightness
 
     brightness = int(round(brightness * (255.0 / 100.0)))
     if brightness > 255:
