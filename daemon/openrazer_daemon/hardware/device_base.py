@@ -86,7 +86,7 @@ class RazerDevice(DBusService):
             self.zone[i] = {
                 "present": False,
                 "active": True,
-                "brightness": 0.75,
+                "brightness": 75.0,
                 "effect": 'spectrum',
                 "colors": [0, 255, 0, 0, 255, 255, 0, 0, 255],
                 "speed": 1,
@@ -208,6 +208,12 @@ class RazerDevice(DBusService):
                         pass
 
                     try:
+                        self.zone[i]["brightness"] = float(self.config[self.storage_name][i + '_brightness'])
+                    except KeyError:
+                        self.zone[i]["brightness"] = 75.0
+                        pass
+
+                    try:
                         for index, item in enumerate(self.config[self.storage_name][i + '_colors'].split(" ")):
                             self.zone[i]["colors"][index] = int(item)
                             if not 0 <= self.zone[i]["colors"][index] <= 255:
@@ -287,6 +293,16 @@ class RazerDevice(DBusService):
                     active_func = getattr(self, "set" + i[0].upper() + i[1:] + "Active", None)
                     if not active_func == None:
                         active_func(self.zone[i]["active"])
+
+                # load brightness level
+                bright_func = None
+                if i == "backlight":
+                    bright_func = getattr(self, "setBrightness", None)
+                elif 'set_' + i + '_brightness' in self.METHODS:
+                    bright_func = getattr(self, "set" + i[0].upper() + i[1:] + "Brightness", None)
+
+                if not bright_func == None:
+                    bright_func(self.zone[i]["brightness"])
 
     def send_effect_event(self, effect_name, *args):
         """
