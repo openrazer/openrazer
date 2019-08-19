@@ -717,6 +717,16 @@ class SingleLed(BaseRazerFX):
             return True
         return False
 
+    def wave(self, direction: int) -> bool:
+        if direction not in (c.WAVE_LEFT, c.WAVE_RIGHT):
+            raise ValueError("Direction must be WAVE_RIGHT (0x01) or WAVE_LEFT (0x02)")
+
+        if self._shas('wave'):
+            self._getattr('set#Wave')(direction)
+
+            return True
+        return False
+
     def none(self) -> bool:
         if self._shas('none'):
             self._getattr('set#None')()
@@ -893,6 +903,16 @@ class MiscLighting(BaseRazerFX):
         else:
             self._scroll = None
 
+        if self.has('left'):
+            self._left = SingleLed(serial, capabilities, daemon_dbus, 'left')
+        else:
+            self._left = None
+
+        if self.has('right'):
+            self._right = SingleLed(serial, capabilities, daemon_dbus, 'right')
+        else:
+            self._right = None
+
         if self.has('backlight'):
             self._backlight = SingleLed(serial, capabilities, daemon_dbus, 'backlight')
         else:
@@ -905,6 +925,14 @@ class MiscLighting(BaseRazerFX):
     @property
     def scroll_wheel(self):
         return self._scroll
+
+    @property
+    def left(self):
+        return self._left
+
+    @property
+    def right(self):
+        return self._right
 
     @property
     def backlight(self):
