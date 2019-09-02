@@ -365,7 +365,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
     unsigned char stop_col;
     unsigned char row_length;
 
-    printk(KERN_ALERT "razerchromahdk: Total count: %d\n", (unsigned char)count);
+    //printk(KERN_ALERT "razerchromahdk: Total count: %d\n", (unsigned char)count);
 
     while(offset < count) {
         if(offset + 3 > count) {
@@ -378,7 +378,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
         stop_col = buf[offset++];
         row_length = ((stop_col+1) - start_col) * 3;
 
-        printk(KERN_ALERT "razerchromahdk: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
+        //printk(KERN_ALERT "razerchromahdk: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
 
         if(start_col > stop_col) {
             printk(KERN_ALERT "razerchromahdk: Start column is greater than end column\n");
