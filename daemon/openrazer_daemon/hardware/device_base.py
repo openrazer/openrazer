@@ -283,18 +283,20 @@ class RazerDevice(DBusService):
                         # these are: Starlight (Random) and Wave.
                         if self.zone[i]["effect"] == 'starlightRandom':
                             effect_func(self.zone[i]["speed"])
-                        else:
-                            # wave
+                        elif self.zone[i]["effect"] == 'wave':
                             effect_func(self.zone[i]["wave_dir"])
+                        else:
+                            self.logger.error("%s: Effect requires 1 argument but don't know how to handle it!", self.__class__.__name__)
                     elif self.get_num_arguments(effect_func) == 3:
                         effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2])
                     elif self.get_num_arguments(effect_func) == 4:
                         # once again, for some reason Starlight (Single) and Reactive use different argument order so we have to check too
                         if self.zone[i]["effect"] == 'starlightSingle':
                             effect_func(self.zone[i]["speed"], self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2])
-                        else:
-                            # reactive
+                        elif self.zone[i]["effect"] == 'reactive':
                             effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["speed"])
+                        else:
+                            self.logger.error("%s: Effect requires 4 arguments but don't know how to handle it!", self.__class__.__name__)
                     elif self.get_num_arguments(effect_func) == 6:
                         effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5])
                     elif self.get_num_arguments(effect_func) == 7:
