@@ -291,6 +291,7 @@ class RazerDevice(DBusService):
                             effect_func(wave_dir)
                         elif effect == 'rippleRandomColour':
                             # do nothing. this is handled in the ripple manager.
+                            pass
                         else:
                             self.logger.error("%s: Effect requires 1 argument but don't know how to handle it!", self.__class__.__name__)
                     elif self.get_num_arguments(effect_func) == 3:
@@ -303,6 +304,7 @@ class RazerDevice(DBusService):
                             effect_func(colors[0], colors[1], colors[2], speed)
                         elif effect == 'ripple':
                             # do nothing. this is handled in the ripple manager.
+                            pass
                         else:
                             self.logger.error("%s: Effect requires 4 arguments but don't know how to handle it!", self.__class__.__name__)
                     elif self.get_num_arguments(effect_func) == 6:
