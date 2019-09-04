@@ -253,15 +253,44 @@ class RazerDaemon(DBusService):
         for section in ('General', 'Startup', 'Statistics'):
             self._config[section] = {}
 
-        self._config['DEFAULT'] = {
+        self._config['General'] = {
             'verbose_logging': True,
+        }
+        self._config['Startup'] = {
             'sync_effects_enabled': True,
             'devices_off_on_screensaver': True,
-            'key_statistics': False,
+            'mouse_battery_notifier': True,
+        }
+        self._config['Statistics'] = {
+            'key_statistics': True,
         }
 
         if config_file is not None and os.path.exists(config_file):
             self._config.read(config_file)
+
+    def write_config(self, config_file):
+        """
+        Write in the config file
+
+        :param config_file: Config file
+        :type config_file: str or None
+        """
+        self._config['Startup']['sync_effects_enabled'] = 'True' if self.get_sync_effects() else 'False'
+        self._config['Startup']['devices_off_on_screensaver'] = 'True' if self.get_off_on_screensaver() else 'False'
+
+        for device in self._razer_devices:
+            for i in device.dbus.ZONES:
+                if device.dbus.zone[i]["present"]:
+                    self._config[device.dbus.storage_name][i + '_active'] = str(device.dbus.zone[i]["active"])
+                    self._config[device.dbus.storage_name][i + '_brightness'] = str(device.dbus.zone[i]["brightness"])
+                    self._config[device.dbus.storage_name][i + '_effect'] = device.dbus.zone[i]["effect"]
+                    self._config[device.dbus.storage_name][i + '_colors'] = ' '.join(str(i) for i in device.dbus.zone[i]["colors"])
+                    self._config[device.dbus.storage_name][i + '_speed'] = str(device.dbus.zone[i]["speed"])
+                    self._config[device.dbus.storage_name][i + '_wave_dir'] = str(device.dbus.zone[i]["wave_dir"])
+
+        if config_file is not None:
+            with open(config_file, 'w') as cf:
+                self._config.write(cf)
 
     def get_off_on_screensaver(self):
         """
@@ -546,3 +575,6 @@ class RazerDaemon(DBusService):
 
         for device in self._razer_devices:
             device.dbus.close()
+
+        # Write config
+        self.write_config(self._config_file)

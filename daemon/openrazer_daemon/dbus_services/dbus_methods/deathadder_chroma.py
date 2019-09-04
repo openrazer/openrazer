@@ -28,6 +28,9 @@ def set_backlight_active(self, active):
     """
     self.logger.debug("DBus call set_backlight_active")
 
+    # remember status
+    self.zone["backlight"]["active"] = bool(active)
+
     driver_path = self.get_driver_path('backlight_led_state')
 
     with open(driver_path, 'w') as driver_file:
@@ -64,6 +67,9 @@ def set_logo_active(self, active):
     """
     self.logger.debug("DBus call set_logo_active")
 
+    # remember status
+    self.zone["logo"]["active"] = bool(active)
+
     driver_path = self.get_driver_path('logo_led_state')
 
     with open(driver_path, 'w') as driver_file:
@@ -71,23 +77,6 @@ def set_logo_active(self, active):
             driver_file.write('1')
         else:
             driver_file.write('0')
-
-
-@endpoint('razer.device.lighting.logo', 'getLogoEffect', out_sig='y')
-def get_logo_effect(self):
-    """
-    Get logo effect
-
-    :return: Active
-    :rtype: bool
-    """
-    self.logger.debug("DBus call get_logo_effect")
-
-    driver_path = self.get_driver_path('logo_led_effect')
-
-    with open(driver_path, 'r') as driver_file:
-        effect = int(driver_file.read().strip())
-        return effect
 
 
 @endpoint('razer.device.lighting.logo', 'getLogoBrightness', out_sig='d')
@@ -100,12 +89,7 @@ def get_logo_brightness(self):
     """
     self.logger.debug("DBus call get_logo_brightness")
 
-    driver_path = self.get_driver_path('logo_led_brightness')
-
-    with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
-
-        return brightness
+    return self.zone["logo"]["brightness"]
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoBrightness', in_sig='d')
@@ -121,6 +105,8 @@ def set_logo_brightness(self, brightness):
     driver_path = self.get_driver_path('logo_led_brightness')
 
     self.method_args['brightness'] = brightness
+
+    self.zone["logo"]["brightness"] = brightness
 
     brightness = int(round(brightness * (255.0 / 100.0)))
     if brightness > 255:
@@ -154,6 +140,10 @@ def set_logo_static(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
+    # remember effect
+    self.zone["logo"]["effect"] = 'static'
+    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('logo_led_rgb')
     effect_driver_path = self.get_driver_path('logo_led_effect')
 
@@ -167,7 +157,7 @@ def set_logo_static(self, red, green, blue):
 @endpoint('razer.device.lighting.logo', 'setLogoBlinking', in_sig='yyy')
 def set_logo_blinking(self, red, green, blue):
     """
-    Set the device to pulsate
+    Set the device to blinking
 
     :param red: Red component
     :type red: int
@@ -182,6 +172,10 @@ def set_logo_blinking(self, red, green, blue):
 
     # Notify others
     self.send_effect_event('setLogoBlinking', red, green, blue)
+
+    # remember effect
+    self.zone["logo"]["effect"] = 'blinking'
+    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
 
     rgb_driver_path = self.get_driver_path('logo_led_rgb')
     effect_driver_path = self.get_driver_path('logo_led_effect')
@@ -212,6 +206,10 @@ def set_logo_pulsate(self, red, green, blue):
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
 
+    # remember effect
+    self.zone["logo"]["effect"] = 'pulsate'
+    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('logo_led_rgb')
     effect_driver_path = self.get_driver_path('logo_led_effect')
 
@@ -225,7 +223,7 @@ def set_logo_pulsate(self, red, green, blue):
 @endpoint('razer.device.lighting.logo', 'setLogoSpectrum')
 def set_logo_spectrum(self):
     """
-    Set the device to pulsate
+    Set the device to spectrum
 
     :param red: Red component
     :type red: int
@@ -240,6 +238,9 @@ def set_logo_spectrum(self):
 
     # Notify others
     self.send_effect_event('setSpectrum')
+
+    # remember effect
+    self.zone["logo"]["effect"] = 'spectrum'
 
     effect_driver_path = self.get_driver_path('logo_led_effect')
 
@@ -274,6 +275,9 @@ def set_scroll_active(self, active):
     """
     self.logger.debug("DBus call set_scroll_active")
 
+    # remember status
+    self.zone["scroll"]["active"] = bool(active)
+
     driver_path = self.get_driver_path('scroll_led_state')
 
     with open(driver_path, 'w') as driver_file:
@@ -281,23 +285,6 @@ def set_scroll_active(self, active):
             driver_file.write('1')
         else:
             driver_file.write('0')
-
-
-@endpoint('razer.device.lighting.scroll', 'getScrollEffect', out_sig='y')
-def get_scroll_effect(self):
-    """
-    Get scroll effect
-
-    :return: Active
-    :rtype: bool
-    """
-    self.logger.debug("DBus call get_scroll_effect")
-
-    driver_path = self.get_driver_path('scroll_led_effect')
-
-    with open(driver_path, 'r') as driver_file:
-        effect = int(driver_file.read().strip())
-        return effect
 
 
 @endpoint('razer.device.lighting.scroll', 'getScrollBrightness', out_sig='d')
@@ -310,12 +297,7 @@ def get_scroll_brightness(self):
     """
     self.logger.debug("DBus call get_scroll_brightness")
 
-    driver_path = self.get_driver_path('scroll_led_brightness')
-
-    with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
-
-        return brightness
+    return self.zone["scroll"]["brightness"]
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollBrightness', in_sig='d')
@@ -331,6 +313,8 @@ def set_scroll_brightness(self, brightness):
     driver_path = self.get_driver_path('scroll_led_brightness')
 
     self.method_args['brightness'] = brightness
+
+    self.zone["scroll"]["brightness"] = brightness
 
     brightness = int(round(brightness * (255.0 / 100.0)))
     if brightness > 255:
@@ -364,6 +348,10 @@ def set_scroll_static(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
+    # remember effect
+    self.zone["scroll"]["effect"] = 'static'
+    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('scroll_led_rgb')
     effect_driver_path = self.get_driver_path('scroll_led_effect')
 
@@ -377,7 +365,7 @@ def set_scroll_static(self, red, green, blue):
 @endpoint('razer.device.lighting.scroll', 'setScrollBlinking', in_sig='yyy')
 def set_scroll_blinking(self, red, green, blue):
     """
-    Set the device to pulsate
+    Set the device to blinking
 
     :param red: Red component
     :type red: int
@@ -392,6 +380,10 @@ def set_scroll_blinking(self, red, green, blue):
 
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
+
+    # remember effect
+    self.zone["scroll"]["effect"] = 'blinking'
+    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
 
     rgb_driver_path = self.get_driver_path('scroll_led_rgb')
     effect_driver_path = self.get_driver_path('scroll_led_effect')
@@ -422,6 +414,10 @@ def set_scroll_pulsate(self, red, green, blue):
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
 
+    # remember effect
+    self.zone["scroll"]["effect"] = 'pulsate'
+    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('scroll_led_rgb')
     effect_driver_path = self.get_driver_path('scroll_led_effect')
 
@@ -435,21 +431,15 @@ def set_scroll_pulsate(self, red, green, blue):
 @endpoint('razer.device.lighting.scroll', 'setScrollSpectrum')
 def set_scroll_spectrum(self):
     """
-    Set the device to pulsate
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
+    Set the device to spectrum
     """
     self.logger.debug("DBus call set_scroll_spectrum")
 
     # Notify others
     self.send_effect_event('setSpectrum')
+
+    # remember effect
+    self.zone["scroll"]["effect"] = 'spectrum'
 
     effect_driver_path = self.get_driver_path('scroll_led_effect')
 

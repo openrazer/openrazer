@@ -4,6 +4,7 @@ Hardware base class
 import re
 import os
 import types
+import inspect
 import logging
 import time
 import json
@@ -35,6 +36,8 @@ class RazerDevice(DBusService):
 
     WAVE_DIRS = (1, 2)
 
+    ZONES = ('backlight', 'logo', 'scroll', 'left', 'right')
+
     RAZER_URLS = {
         "top_img": None,
         "side_img": None,
@@ -49,6 +52,9 @@ class RazerDevice(DBusService):
         # Serial cache
         self._serial = None
 
+        # Local storage key name
+        self.storage_name = "UnknownDevice"
+
         self._observer_list = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
@@ -62,6 +68,30 @@ class RazerDevice(DBusService):
         self._device_path = device_path
         self._device_number = device_number
         self.serial = self.get_serial()
+
+        if self.USB_PID == 0x0f07:
+            self.storage_name = "ChromaMug"
+        elif self.USB_PID == 0x0013:
+            self.storage_name = "Orochi2011"
+        elif self.USB_PID == 0x0016:
+            self.storage_name = "DeathAdder35G"
+        elif self.USB_PID == 0x0024 or self.USB_PID == 0x0025:
+            self.storage_name = "Mamba2012"
+        else:
+            self.storage_name = self.serial
+
+        self.zone = dict()
+
+        for i in self.ZONES:
+            self.zone[i] = {
+                "present": False,
+                "active": True,
+                "brightness": 75.0,
+                "effect": 'spectrum',
+                "colors": [0, 255, 0, 0, 255, 255, 0, 0, 255],
+                "speed": 1,
+                "wave_dir": 1,
+            }
 
         self._effect_sync = effect_sync.EffectSync(self, device_number)
 
@@ -104,12 +134,175 @@ class RazerDevice(DBusService):
             ('razer.device.misc', 'hasDedicatedMacroKeys', self.dedicated_macro_keys, None, 'b'),
         }
 
+        effect_methods = {
+            "backlight": {
+                ('razer.device.misc', 'getCurrentEffect', self.get_current_effect, None, 's'),
+                ('razer.device.misc', 'getCurrentEffectColors', self.get_current_effect_colors, None, 'ay'),
+                ('razer.device.misc', 'getCurrentEffectSpeed', self.get_current_effect_speed, None, 'i'),
+                ('razer.device.misc', 'getCurrentWaveDir', self.get_current_wave_dir, None, 'i'),
+            },
+
+            "logo": {
+                ('razer.device.misc', 'getCurrentLogoEffect', self.get_current_logo_effect, None, 's'),
+                ('razer.device.misc', 'getCurrentLogoEffectColors', self.get_current_logo_effect_colors, None, 'ay'),
+                ('razer.device.misc', 'getCurrentLogoEffectSpeed', self.get_current_logo_effect_speed, None, 'i'),
+                ('razer.device.misc', 'getCurrentLogoWaveDir', self.get_current_logo_wave_dir, None, 'i'),
+            },
+
+            "scroll": {
+                ('razer.device.misc', 'getCurrentScrollEffect', self.get_current_scroll_effect, None, 's'),
+                ('razer.device.misc', 'getCurrentScrollEffectColors', self.get_current_scroll_effect_colors, None, 'ay'),
+                ('razer.device.misc', 'getCurrentScrollEffectSpeed', self.get_current_scroll_effect_speed, None, 'i'),
+                ('razer.device.misc', 'getCurrentScrollWaveDir', self.get_current_scroll_wave_dir, None, 'i'),
+            },
+
+            "left": {
+                ('razer.device.misc', 'getCurrentLeftEffect', self.get_current_left_effect, None, 's'),
+                ('razer.device.misc', 'getCurrentLeftEffectColors', self.get_current_left_effect_colors, None, 'ay'),
+                ('razer.device.misc', 'getCurrentLeftEffectSpeed', self.get_current_left_effect_speed, None, 'i'),
+                ('razer.device.misc', 'getCurrentLeftWaveDir', self.get_current_left_wave_dir, None, 'i'),
+            },
+
+            "right": {
+                ('razer.device.misc', 'getCurrentRightEffect', self.get_current_right_effect, None, 's'),
+                ('razer.device.misc', 'getCurrentRightEffectColors', self.get_current_right_effect_colors, None, 'ay'),
+                ('razer.device.misc', 'getCurrentRightEffectSpeed', self.get_current_right_effect_speed, None, 'i'),
+                ('razer.device.misc', 'getCurrentRightWaveDir', self.get_current_right_wave_dir, None, 'i'),
+            }
+        }
+
         for m in methods:
             self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
             self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
 
+        if 'set_static_effect' in self.METHODS:
+            self.zone["backlight"]["present"] = True
+            for m in effect_methods["backlight"]:
+                self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
+                self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
+
+        for i in self.ZONES[1:]:
+            if 'set_' + i + '_static' in self.METHODS or 'set_' + i + '_static_naga_hex_v2' in self.METHODS or '`set_' + i + 'active' in self.METHODS:
+                self.zone[i]["present"] = True
+                for m in effect_methods[i]:
+                    self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
+                    self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
+
         # Load additional DBus methods
         self.load_methods()
+
+        # load last effects
+        for i in self.ZONES:
+            if self.zone[i]["present"]:
+                if self.config.has_section(self.storage_name):
+                    try:
+                        self.zone[i]["effect"] = self.config[self.storage_name][i + '_effect']
+                    except KeyError:
+                        self.zone[i]["effect"] = 'spectrum'
+                        pass
+
+                    try:
+                        self.zone[i]["active"] = bool(self.config[self.storage_name][i + '_active'])
+                    except KeyError:
+                        self.zone[i]["active"] = True
+                        pass
+
+                    try:
+                        self.zone[i]["brightness"] = float(self.config[self.storage_name][i + '_brightness'])
+                    except KeyError:
+                        self.zone[i]["brightness"] = 75.0
+                        pass
+
+                    try:
+                        for index, item in enumerate(self.config[self.storage_name][i + '_colors'].split(" ")):
+                            self.zone[i]["colors"][index] = int(item)
+                            if not 0 <= self.zone[i]["colors"][index] <= 255:
+                                raise ValueError('Color out of range')
+
+                        if len(self.zone[i]["colors"]) != 9:
+                            raise ValueError('There must be exactly 9 colors')
+
+                    except ValueError:
+                        # invalid colors. reinitialize
+                        self.zone[i]["colors"] = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+                        self.logger.info("%s: Invalid colors; restoring to defaults.", self.__class__.__name__)
+                        pass
+
+                    except KeyError:
+                        # no colors. reinitialize
+                        self.zone[i]["colors"] = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+                        self.logger.info("%s: No colors found; restoring to defaults.", self.__class__.__name__)
+                        pass
+
+                    try:
+                        self.zone[i]["speed"] = int(self.config[self.storage_name][i + '_speed'])
+                        self.zone[i]["wave_dir"] = int(self.config[self.storage_name][i + '_wave_dir'])
+
+                    except KeyError:
+                        self.zone[i]["speed"] = 1
+                        self.zone[i]["wave_dir"] = 1
+                        self.logger.info("%s: No speed/wave direction found; restoring to defaults.", self.__class__.__name__)
+                        pass
+
+                    if i == "backlight":
+                        effect_func_name = 'set' + self.zone[i]["effect"][0].upper() + self.zone[i]["effect"][1:]
+                    else:
+                        effect_func_name = 'set' + i[0].upper() + i[1:] + self.zone[i]["effect"][0].upper() + self.zone[i]["effect"][1:]
+                else:
+                    self.zone[i]["effect"] = 'spectrum'
+                    effect_func_name = 'setSpectrum'
+                    if i == "backlight":
+                        effect_func_name = 'setSpectrum'
+                    else:
+                        effect_func_name = 'set' + i[0].upper() + i[1:] + 'Spectrum'
+
+                effect_func = getattr(self, effect_func_name, None)
+
+                if effect_func == None and not self.zone[i]["effect"] == "Spectrum":
+                    self.logger.info("%s: Invalid effect name %s; restoring to Spectrum.", self.__class__.__name__, effect_func_name)
+                    self.zone[i]["effect"] = 'spectrum'
+                    if i == "backlight":
+                        effect_func_name = 'setSpectrum'
+                    else:
+                        effect_func_name = 'set' + i[0].upper() + i[1:] + 'Spectrum'
+                    effect_func = getattr(self, effect_func_name, None)
+
+                if not effect_func == None:
+                    if self.get_num_arguments(effect_func) == 1:
+                        if self.zone[i]["effect"] == 'starlightRandom':
+                            effect_func(self.zone[i]["speed"])
+                        else:
+                            effect_func(self.zone[i]["wave_dir"])
+                    elif self.get_num_arguments(effect_func) == 3:
+                        effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2])
+                    elif self.get_num_arguments(effect_func) == 4:
+                        if self.zone[i]["effect"] == 'starlightSingle':
+                            effect_func(self.zone[i]["speed"], self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2])
+                        else:
+                            effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["speed"])
+                    elif self.get_num_arguments(effect_func) == 6:
+                        effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5])
+                    elif self.get_num_arguments(effect_func) == 7:
+                        effect_func(self.zone[i]["speed"], self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5])
+                    elif self.get_num_arguments(effect_func) == 9:
+                        effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5], self.zone[i]["colors"][6], self.zone[i]["colors"][7], self.zone[i]["colors"][8])
+                    else:
+                        effect_func()
+
+                if 'set_' + i + '_active' in self.METHODS:
+                    active_func = getattr(self, "set" + i[0].upper() + i[1:] + "Active", None)
+                    if not active_func == None:
+                        active_func(self.zone[i]["active"])
+
+                # load brightness level
+                bright_func = None
+                if i == "backlight":
+                    bright_func = getattr(self, "setBrightness", None)
+                elif 'set_' + i + '_brightness' in self.METHODS:
+                    bright_func = getattr(self, "set" + i[0].upper() + i[1:] + "Brightness", None)
+
+                if not bright_func == None:
+                    bright_func(self.zone[i]["brightness"])
 
     def send_effect_event(self, effect_name, *args):
         """
@@ -134,6 +327,226 @@ class RazerDevice(DBusService):
         :rtype: bool
         """
         return self.DEDICATED_MACRO_KEYS
+
+    def get_current_effect(self):
+        """
+        Get the device's current effect
+
+        :return: Effect
+        :rtype: string
+        """
+        self.logger.debug("DBus call get_current_effect")
+
+        return self.zone["backlight"]["effect"]
+
+    def get_current_effect_colors(self):
+        """
+        Get the device's current effect's colors
+
+        :return: 3 colors
+        :rtype: list of byte
+        """
+        self.logger.debug("DBus call get_current_effect_colors")
+
+        return self.zone["backlight"]["colors"]
+
+    def get_current_effect_speed(self):
+        """
+        Get the device's current effect's speed
+
+        :return: Speed
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_effect_speed")
+
+        return self.zone["backlight"]["speed"]
+
+    def get_current_wave_dir(self):
+        """
+        Get the device's current wave direction
+
+        :return: Direction
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_wave_dir")
+
+        return self.zone["backlight"]["wave_dir"]
+
+    def get_current_logo_effect(self):
+        """
+        Get the device's current logo effect
+
+        :return: Effect
+        :rtype: string
+        """
+        self.logger.debug("DBus call get_current_logo_effect")
+
+        return self.zone["logo"]["effect"]
+
+    def get_current_logo_effect_colors(self):
+        """
+        Get the device's current logo effect's colors
+
+        :return: 3 colors
+        :rtype: list of byte
+        """
+        self.logger.debug("DBus call get_current_logo_effect_colors")
+
+        return self.zone["logo"]["colors"]
+
+    def get_current_logo_effect_speed(self):
+        """
+        Get the device's current logo effect's speed
+
+        :return: Speed
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_logo_effect_speed")
+
+        return self.zone["logo"]["speed"]
+
+    def get_current_logo_wave_dir(self):
+        """
+        Get the device's current logo wave direction
+
+        :return: Direction
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_logo_wave_dir")
+
+        return self.zone["logo"]["wave_dir"]
+
+    def get_current_scroll_effect(self):
+        """
+        Get the device's current scroll effect
+
+        :return: Effect
+        :rtype: string
+        """
+        self.logger.debug("DBus call get_current_scroll_effect")
+
+        return self.zone["scroll"]["effect"]
+
+    def get_current_scroll_effect_colors(self):
+        """
+        Get the device's current scroll effect's colors
+
+        :return: 3 colors
+        :rtype: list of byte
+        """
+        self.logger.debug("DBus call get_current_scroll_effect_colors")
+
+        return self.zone["scroll"]["colors"]
+
+    def get_current_scroll_effect_speed(self):
+        """
+        Get the device's current scroll effect's speed
+
+        :return: Speed
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_scroll_effect_speed")
+
+        return self.zone["scroll"]["speed"]
+
+    def get_current_scroll_wave_dir(self):
+        """
+        Get the device's current scroll wave direction
+
+        :return: Direction
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_scroll_wave_dir")
+
+        return self.zone["scroll"]["wave_dir"]
+
+    def get_current_left_effect(self):
+        """
+        Get the device's current left effect
+
+        :return: Effect
+        :rtype: string
+        """
+        self.logger.debug("DBus call get_current_left_effect")
+
+        return self.zone["left"]["effect"]
+
+    def get_current_left_effect_colors(self):
+        """
+        Get the device's current left effect's colors
+
+        :return: 3 colors
+        :rtype: list of byte
+        """
+        self.logger.debug("DBus call get_current_left_effect_colors")
+
+        return self.zone["left"]["colors"]
+
+    def get_current_left_effect_speed(self):
+        """
+        Get the device's current left effect's speed
+
+        :return: Speed
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_left_effect_speed")
+
+        return self.zone["left"]["speed"]
+
+    def get_current_left_wave_dir(self):
+        """
+        Get the device's current left wave direction
+
+        :return: Direction
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_left_wave_dir")
+
+        return self.zone["left"]["wave_dir"]
+
+    def get_current_right_effect(self):
+        """
+        Get the device's current right effect
+
+        :return: Effect
+        :rtype: string
+        """
+        self.logger.debug("DBus call get_current_right_effect")
+
+        return self.zone["right"]["effect"]
+
+    def get_current_right_effect_colors(self):
+        """
+        Get the device's current right effect's colors
+
+        :return: 3 colors
+        :rtype: list of byte
+        """
+        self.logger.debug("DBus call get_current_right_effect_colors")
+
+        return self.zone["right"]["colors"]
+
+    def get_current_right_effect_speed(self):
+        """
+        Get the device's current right effect's speed
+
+        :return: Speed
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_right_effect_speed")
+
+        return self.zone["right"]["speed"]
+
+    def get_current_right_wave_dir(self):
+        """
+        Get the device's current right wave direction
+
+        :return: Direction
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_right_wave_dir")
+
+        return self.zone["right"]["wave_dir"]
 
     @property
     def effect_sync(self):
@@ -426,6 +839,20 @@ class RazerDevice(DBusService):
                 return True
 
         return False
+
+    @staticmethod
+    def get_num_arguments(func):
+        """
+        Get number of arguments in a function
+
+        :param func: Function
+        :type func: callable
+
+        :return: Number of arguments
+        :rtype: int
+        """
+        func_sig = inspect.signature(func)
+        return len(func_sig.parameters)
 
     def __del__(self):
         self.close()
