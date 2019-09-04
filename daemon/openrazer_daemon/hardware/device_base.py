@@ -276,33 +276,41 @@ class RazerDevice(DBusService):
 
                 # we check again here because there is a possibility the device may not even have Spectrum
                 if effect_func is not None:
+                    effect = self.zone[i]["effect"]
+                    colors = self.zone[i]["colors"]
+                    speed = self.zone[i]["speed"]
+                    wave_dir = self.zone[i]["wave_dir"]
                     if self.get_num_arguments(effect_func) == 0:
                         effect_func()
                     elif self.get_num_arguments(effect_func) == 1:
                         # there are 2 effects which require 1 argument.
                         # these are: Starlight (Random) and Wave.
-                        if self.zone[i]["effect"] == 'starlightRandom':
-                            effect_func(self.zone[i]["speed"])
-                        elif self.zone[i]["effect"] == 'wave':
-                            effect_func(self.zone[i]["wave_dir"])
+                        if effect == 'starlightRandom':
+                            effect_func(speed)
+                        elif effect == 'wave':
+                            effect_func(wave_dir)
+                        elif effect == 'rippleRandomColour':
+                            # do nothing. this is handled in the ripple manager.
                         else:
                             self.logger.error("%s: Effect requires 1 argument but don't know how to handle it!", self.__class__.__name__)
                     elif self.get_num_arguments(effect_func) == 3:
-                        effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2])
+                        effect_func(colors[0], colors[1], colors[2])
                     elif self.get_num_arguments(effect_func) == 4:
                         # once again, for some reason Starlight (Single) and Reactive use different argument order so we have to check too
-                        if self.zone[i]["effect"] == 'starlightSingle':
-                            effect_func(self.zone[i]["speed"], self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2])
-                        elif self.zone[i]["effect"] == 'reactive':
-                            effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["speed"])
+                        if effect == 'starlightSingle':
+                            effect_func(speed, colors[0], colors[1], colors[2])
+                        elif effect == 'reactive':
+                            effect_func(colors[0], colors[1], colors[2], speed)
+                        elif effect == 'ripple':
+                            # do nothing. this is handled in the ripple manager.
                         else:
                             self.logger.error("%s: Effect requires 4 arguments but don't know how to handle it!", self.__class__.__name__)
                     elif self.get_num_arguments(effect_func) == 6:
-                        effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5])
+                        effect_func(colors[0], colors[1], colors[2], colors[3], colors[4], colors[5])
                     elif self.get_num_arguments(effect_func) == 7:
-                        effect_func(self.zone[i]["speed"], self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5])
+                        effect_func(speed, colors[0], colors[1], colors[2], colors[3], colors[4], colors[5])
                     elif self.get_num_arguments(effect_func) == 9:
-                        effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5], self.zone[i]["colors"][6], self.zone[i]["colors"][7], self.zone[i]["colors"][8])
+                        effect_func(colors[0], colors[1], colors[2], colors[3], colors[4], colors[5], colors[6], colors[7], colors[8])
                     else:
                         self.logger.error("%s: Couldn't detect effect argument count!", self.__class__.__name__)
 
