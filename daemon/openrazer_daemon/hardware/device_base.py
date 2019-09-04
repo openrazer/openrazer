@@ -264,7 +264,7 @@ class RazerDevice(DBusService):
                 effect_func = getattr(self, effect_func_name, None)
 
                 # check if the effect method exists only if we didn't look for spectrum (because resetting to Spectrum when the effect is Spectrum is in vain)
-                if effect_func == None and not self.zone[i]["effect"] == "spectrum":
+                if effect_func == None and effect_func_name is not "setSpectrum":
                     # not found. restoring to Spectrum
                     self.logger.info("%s: Invalid effect name %s; restoring to Spectrum.", self.__class__.__name__, effect_func_name)
                     self.zone[i]["effect"] = 'spectrum'
