@@ -195,28 +195,36 @@ class RazerDevice(DBusService):
         # load last effects
         for i in self.ZONES:
             if self.zone[i]["present"]:
+                # check if we have the device in the config file
                 if self.config.has_section(self.storage_name):
+                    # try reading the effect name from the config
                     try:
                         self.zone[i]["effect"] = self.config[self.storage_name][i + '_effect']
                     except KeyError:
                         pass
 
+                    # zone active status
                     try:
                         self.zone[i]["active"] = bool(self.config[self.storage_name][i + '_active'])
                     except KeyError:
                         pass
 
+                    # brightness
                     try:
                         self.zone[i]["brightness"] = float(self.config[self.storage_name][i + '_brightness'])
                     except KeyError:
                         pass
 
+                    # colors.
+                    # these are stored as a string that must contain 9 numbers, separated with spaces.
                     try:
                         for index, item in enumerate(self.config[self.storage_name][i + '_colors'].split(" ")):
                             self.zone[i]["colors"][index] = int(item)
+                            # check if the color is in range
                             if not 0 <= self.zone[i]["colors"][index] <= 255:
                                 raise ValueError('Color out of range')
 
+                        # check if we have exactly 9 colors
                         if len(self.zone[i]["colors"]) != 9:
                             raise ValueError('There must be exactly 9 colors')
 
@@ -229,25 +237,30 @@ class RazerDevice(DBusService):
                     except KeyError:
                         pass
 
+                    # speed
                     try:
                         self.zone[i]["speed"] = int(self.config[self.storage_name][i + '_speed'])
+
+                    except KeyError:
+                        pass
+
+                    # wave direction
+                    try:
                         self.zone[i]["wave_dir"] = int(self.config[self.storage_name][i + '_wave_dir'])
 
                     except KeyError:
                         pass
 
-                    if i == "backlight":
-                        effect_func_name = 'set' + self.zone[i]["effect"][0].upper() + self.zone[i]["effect"][1:]
-                    else:
-                        effect_func_name = 'set' + i[0].upper() + i[1:] + self.zone[i]["effect"][0].upper() + self.zone[i]["effect"][1:]
+                # prepare the effect method name
+                # yes, we need to handle the backlight zone separately too.
+                # the backlight effect methods don't have a prefix.
+                # also, the "i[0].upper() + i[1:]" construct is a lowercase-to-uppercase one that preserves CamelCase (unlike .capitalize()), so I'm sorry but I had to do that.
+                if i == "backlight":
+                    effect_func_name = 'set' + self.zone[i]["effect"][0].upper() + self.zone[i]["effect"][1:]
                 else:
-                    self.zone[i]["effect"] = 'spectrum'
-                    effect_func_name = 'setSpectrum'
-                    if i == "backlight":
-                        effect_func_name = 'setSpectrum'
-                    else:
-                        effect_func_name = 'set' + i[0].upper() + i[1:] + 'Spectrum'
+                    effect_func_name = 'set' + i[0].upper() + i[1:] + self.zone[i]["effect"][0].upper() + self.zone[i]["effect"][1:]
 
+                # find the effect method
                 effect_func = getattr(self, effect_func_name, None)
 
                 if effect_func == None and not self.zone[i]["effect"] == "Spectrum":
