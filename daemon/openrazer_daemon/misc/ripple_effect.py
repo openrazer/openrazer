@@ -25,7 +25,7 @@ class RippleEffectThread(threading.Thread):
         self._parent = parent
 
         self._colour = (0, 255, 0)
-        self._refresh_rate = 0.025
+        self._refresh_rate = 0.040
 
         self._shutdown = False
         self._active = False
