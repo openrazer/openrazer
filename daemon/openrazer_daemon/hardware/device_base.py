@@ -263,7 +263,9 @@ class RazerDevice(DBusService):
                 # find the effect method
                 effect_func = getattr(self, effect_func_name, None)
 
-                if effect_func == None and not self.zone[i]["effect"] == "Spectrum":
+                # check if the effect method exists only if we didn't look for spectrum (because resetting to Spectrum when the effect is Spectrum is in vain)
+                if effect_func == None and not self.zone[i]["effect"] == "spectrum":
+                    # not found. restoring to Spectrum
                     self.logger.info("%s: Invalid effect name %s; restoring to Spectrum.", self.__class__.__name__, effect_func_name)
                     self.zone[i]["effect"] = 'spectrum'
                     if i == "backlight":
@@ -272,18 +274,26 @@ class RazerDevice(DBusService):
                         effect_func_name = 'set' + i[0].upper() + i[1:] + 'Spectrum'
                     effect_func = getattr(self, effect_func_name, None)
 
+                # we check again here because there is a possibility the device may not even have Spectrum
                 if not effect_func == None:
-                    if self.get_num_arguments(effect_func) == 1:
+                    if self.get_num_arguments(effect_func) == 0:
+                        effect_func()
+                    elif self.get_num_arguments(effect_func) == 1:
+                        # there are 2 effects which require 1 argument.
+                        # these are: Starlight (Random) and Wave.
                         if self.zone[i]["effect"] == 'starlightRandom':
                             effect_func(self.zone[i]["speed"])
                         else:
+                            # wave
                             effect_func(self.zone[i]["wave_dir"])
                     elif self.get_num_arguments(effect_func) == 3:
                         effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2])
                     elif self.get_num_arguments(effect_func) == 4:
+                        # once again, for some reason Starlight (Single) and Reactive use different argument order so we have to check too
                         if self.zone[i]["effect"] == 'starlightSingle':
                             effect_func(self.zone[i]["speed"], self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2])
                         else:
+                            # reactive
                             effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["speed"])
                     elif self.get_num_arguments(effect_func) == 6:
                         effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5])
@@ -292,7 +302,7 @@ class RazerDevice(DBusService):
                     elif self.get_num_arguments(effect_func) == 9:
                         effect_func(self.zone[i]["colors"][0], self.zone[i]["colors"][1], self.zone[i]["colors"][2], self.zone[i]["colors"][3], self.zone[i]["colors"][4], self.zone[i]["colors"][5], self.zone[i]["colors"][6], self.zone[i]["colors"][7], self.zone[i]["colors"][8])
                     else:
-                        effect_func()
+                        self.logger.error("%s: Couldn't detect effect argument count!", self.__class__.__name__)
 
                 if 'set_' + i + '_active' in self.METHODS:
                     active_func = getattr(self, "set" + i[0].upper() + i[1:] + "Active", None)
