@@ -275,7 +275,7 @@ class RazerDevice(DBusService):
                     effect_func = getattr(self, effect_func_name, None)
 
                 # we check again here because there is a possibility the device may not even have Spectrum
-                if not effect_func == None:
+                if effect_func is not None:
                     if self.get_num_arguments(effect_func) == 0:
                         effect_func()
                     elif self.get_num_arguments(effect_func) == 1:
@@ -308,7 +308,7 @@ class RazerDevice(DBusService):
 
                 if 'set_' + i + '_active' in self.METHODS:
                     active_func = getattr(self, "set" + i[0].upper() + i[1:] + "Active", None)
-                    if not active_func == None:
+                    if active_func is not None:
                         active_func(self.zone[i]["active"])
 
                 # load brightness level
@@ -318,7 +318,7 @@ class RazerDevice(DBusService):
                 elif 'set_' + i + '_brightness' in self.METHODS:
                     bright_func = getattr(self, "set" + i[0].upper() + i[1:] + "Brightness", None)
 
-                if not bright_func == None:
+                if bright_func is not None:
                     bright_func(self.zone[i]["brightness"])
 
     def send_effect_event(self, effect_name, *args):

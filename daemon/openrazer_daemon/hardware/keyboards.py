@@ -61,7 +61,7 @@ class _RippleKeyboard(_MacroKeyboard):
             effect_func_name = 'set' + self.zone["backlight"]["effect"][0].upper() + self.zone["backlight"]["effect"][1:]
             effect_func = getattr(self, effect_func_name, None)
 
-            if not effect_func == None:
+            if effect_func is not None:
                 if effect_func_name == 'setRipple':
                     effect_func(self.zone["backlight"]["colors"][0], self.zone["backlight"]["colors"][1], self.zone["backlight"]["colors"][2], self.ripple_manager._ripple_thread._refresh_rate)
                 elif effect_func_name == 'setRippleRandomColour':
