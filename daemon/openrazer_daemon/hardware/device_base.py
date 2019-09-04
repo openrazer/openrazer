@@ -199,19 +199,16 @@ class RazerDevice(DBusService):
                     try:
                         self.zone[i]["effect"] = self.config[self.storage_name][i + '_effect']
                     except KeyError:
-                        self.zone[i]["effect"] = 'spectrum'
                         pass
 
                     try:
                         self.zone[i]["active"] = bool(self.config[self.storage_name][i + '_active'])
                     except KeyError:
-                        self.zone[i]["active"] = True
                         pass
 
                     try:
                         self.zone[i]["brightness"] = float(self.config[self.storage_name][i + '_brightness'])
                     except KeyError:
-                        self.zone[i]["brightness"] = 75.0
                         pass
 
                     try:
@@ -230,9 +227,6 @@ class RazerDevice(DBusService):
                         pass
 
                     except KeyError:
-                        # no colors. reinitialize
-                        self.zone[i]["colors"] = [0, 255, 0, 0, 255, 255, 0, 0, 255]
-                        self.logger.info("%s: No colors found; restoring to defaults.", self.__class__.__name__)
                         pass
 
                     try:
@@ -240,9 +234,6 @@ class RazerDevice(DBusService):
                         self.zone[i]["wave_dir"] = int(self.config[self.storage_name][i + '_wave_dir'])
 
                     except KeyError:
-                        self.zone[i]["speed"] = 1
-                        self.zone[i]["wave_dir"] = 1
-                        self.logger.info("%s: No speed/wave direction found; restoring to defaults.", self.__class__.__name__)
                         pass
 
                     if i == "backlight":
