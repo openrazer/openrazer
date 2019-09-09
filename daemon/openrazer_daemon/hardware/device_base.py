@@ -297,10 +297,8 @@ class RazerDevice(DBusService):
                     elif self.get_num_arguments(effect_func) == 3:
                         effect_func(colors[0], colors[1], colors[2])
                     elif self.get_num_arguments(effect_func) == 4:
-                        # once again, for some reason Starlight (Single) and Reactive use different argument order so we have to check too
-                        if effect == 'starlightSingle':
-                            effect_func(speed, colors[0], colors[1], colors[2])
-                        elif effect == 'reactive':
+                        # starlight/reactive have different arguments.
+                        if effect == 'starlightSingle' or effect == 'reactive':
                             effect_func(colors[0], colors[1], colors[2], speed)
                         elif effect == 'ripple':
                             # do nothing. this is handled in the ripple manager.
@@ -310,7 +308,7 @@ class RazerDevice(DBusService):
                     elif self.get_num_arguments(effect_func) == 6:
                         effect_func(colors[0], colors[1], colors[2], colors[3], colors[4], colors[5])
                     elif self.get_num_arguments(effect_func) == 7:
-                        effect_func(speed, colors[0], colors[1], colors[2], colors[3], colors[4], colors[5])
+                        effect_func(colors[0], colors[1], colors[2], colors[3], colors[4], colors[5], speed)
                     elif self.get_num_arguments(effect_func) == 9:
                         effect_func(colors[0], colors[1], colors[2], colors[3], colors[4], colors[5], colors[6], colors[7], colors[8])
                     else:

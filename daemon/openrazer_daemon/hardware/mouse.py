@@ -1000,7 +1000,7 @@ class RazerOrochi2011(__RazerDeviceSpecialBrightnessSuspend):
         "perspective_img": "https://assets2.razerzone.com/images/razer-orochi/d6dd3766e7d8b5e937b4bffc8e4f9dee-Orochi-Base_gallery_7.jpg"
     }
 
-    MAX_DPI = 4000
+    DPI_MAX = 4000
 
     def _suspend_device(self):
         """
