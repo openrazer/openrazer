@@ -437,29 +437,31 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
             report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
             break;
-
+	
         case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
             report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
             report.transaction_id.id = 0xff;
             break;
-
+            
         case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
-            struct razer_report report = get_razer_report(0x0f, 0x03, 0x0e);
+			;
+			struct razer_rgb *rgb = (struct razer_rgb*)&buf[0];
+			razer_report report = get_razer_report(0x0f, 0x03, 0x0e);
 
-            report.arguments[0] = 0x00; // Variable storage
-            report.arguments[1] = 0x00; // LED ID
-            report.arguments[2] = 0x00; // Unknown
-            report.arguments[3] = 0x00; // Unknown
-            report.arguments[4] = 0x02; // Effect ID
-            report.arguments[5] = rgb->r; // RGB 3x
-            report.arguments[6] = rgb->g;
-            report.arguments[7] = rgb->b;
-            report.arguments[8] = rgb->r;
-            report.arguments[9] = rgb->g;
-            report.arguments[10] = rgb->b;
-            report.arguments[11] = rgb->r;
-            report.arguments[12] = rgb->g;
-            report.arguments[13] = rgb->b;
+			report.arguments[0] = 0x00; // Variable storage
+			report.arguments[1] = 0x00; // LED ID
+			report.arguments[2] = 0x00; // Unknown
+			report.arguments[3] = 0x00; // Unknown
+			report.arguments[4] = 0x02; // Effect ID
+			report.arguments[5] = rgb->r; // RGB 3x
+			report.arguments[6] = rgb->g;
+			report.arguments[7] = rgb->b;
+			report.arguments[8] = rgb->r;
+			report.arguments[9] = rgb->g;
+			report.arguments[10] = rgb->b;
+			report.arguments[11] = rgb->r;
+			report.arguments[12] = rgb->g;
+			report.arguments[13] = rgb->b;
             report.transaction_id.id = 0x1f;
             break;
 
