@@ -443,6 +443,26 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
             report.transaction_id.id = 0xff;
             break;
 
+        case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
+			struct razer_report report = get_razer_report(0x0f, 0x03, 0x0e);
+
+			report.arguments[0] = 0x00; // Variable storage
+			report.arguments[1] = 0x00; // LED ID
+			report.arguments[2] = 0x00; // Unknown
+			report.arguments[3] = 0x00; // Unknown
+			report.arguments[4] = 0x02; // Effect ID
+			report.arguments[5] = rgb->r; // RGB 3x
+			report.arguments[6] = rgb->g;
+			report.arguments[7] = rgb->b;
+			report.arguments[8] = rgb->r;
+			report.arguments[9] = rgb->g;
+			report.arguments[10] = rgb->b;
+			report.arguments[11] = rgb->r;
+			report.arguments[12] = rgb->g;
+			report.arguments[13] = rgb->b;
+            report.transaction_id.id = 0x1f;
+            break;
+
         default:
             report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
             break;
@@ -2940,6 +2960,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
             break;
         }
 
@@ -3251,6 +3272,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
             break;
         }
 
