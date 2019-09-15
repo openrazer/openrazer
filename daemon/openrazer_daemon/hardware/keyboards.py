@@ -1180,6 +1180,7 @@ class RazerBladeMid2019Mercury(_RippleKeyboard):
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-15/shop/blade15-mercury-1.jpg"
 
+
 class RazerBladePro2019(_RippleKeyboard):
     """
     Class for the Razer Blade Pro 17 (2019)
