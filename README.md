@@ -43,6 +43,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Blade Pro FullHD (2017)                 |  1532:022F  |
 | Razer Blade Stealth (Late 2017)               |  1532:0232  |
 | Razer Blade 15 (2018)                         |  1532:0233  |
+| Razer Blade Pro 17 (2019)                     |  1532:0234  |
 | Razer BlackWidow Lite (2018)                  |  1532:0235  |
 | Razer BlackWidow Essential                    |  1532:0237  |
 | Razer Blade Stealth (2019)                    |  1532:0239  |
