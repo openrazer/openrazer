@@ -1,9 +1,8 @@
 // USB HID keycodes
-// https://source.android.com/devices/input/keyboard-devices.html
-#pragma once
+// http://www.freebsddiary.org/APC/usb_hid_usages.php
 
-#ifndef __USB_HID_KEYCODES_H__
-#define __USB_HID_KEYCODES_H__
+#ifndef __USB_HID_KEYS_H
+#define __USB_HID_KEYS_H
 
 #define USB_HID_KEY_F13 0x68
 #define USB_HID_KEY_F14 0x69
@@ -21,9 +20,9 @@
 #define USB_HID_KEY_MEDIA_PLAYPAUSE 0xE8
 #define USB_HID_KEY_MEDIA_PREVIOUSSONG  0xEA
 #define USB_HID_KEY_MEDIA_NEXTSONG  0xEB
-#define USB_HID_KEY_MEDIA_VOLUMEUP 0xed
-#define USB_HID_KEY_MEDIA_VOLUMEDOWN 0xee
-#define USB_HID_KEY_MEDIA_MUTE 0xef
+#define USB_HID_KEY_MEDIA_VOLUMEUP 0xED
+#define USB_HID_KEY_MEDIA_VOLUMEDOWN 0xEE
+#define USB_HID_KEY_MEDIA_MUTE 0xEF
 #define USB_HID_KEY_MEDIA_SLEEP 0xF8
 
-#endif // __USB_HID_KEYCODES_H__
+#endif // __USB_HID_KEYS_H
