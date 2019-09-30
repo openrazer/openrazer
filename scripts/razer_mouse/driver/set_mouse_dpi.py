@@ -52,11 +52,10 @@ def run():
 
     dpi_x = clamp_to_min_max(args.dpi_x, 100, 16000)
     if args.dpi_y is None:
-        dpi_y = dpi_x
+        byte_string = struct.pack(">H", dpi_x)
     else:
         dpi_y = clamp_to_min_max(args.dpi_y, 100, 16000)
-
-    byte_string = struct.pack(">HH", dpi_x, dpi_y)
+        byte_string = struct.pack(">HH", dpi_x, dpi_y)
 
     set_mouse_dpi_filepath = os.path.join(mouse_dir, "dpi")
     with open(set_mouse_dpi_filepath, 'wb') as set_mouse_dpi_file:

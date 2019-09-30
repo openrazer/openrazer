@@ -662,9 +662,6 @@ static int razer_mousemat_probe(struct hid_device *hdev, const struct hid_device
 
     }
 
-    if (retval)
-        goto exit_free;
-
     hid_set_drvdata(hdev, dev);
 
 

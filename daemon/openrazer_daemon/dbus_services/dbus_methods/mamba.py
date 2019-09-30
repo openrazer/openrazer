@@ -125,16 +125,23 @@ def set_dpi_xy(self, dpi_x, dpi_y):
     :param dpi_y: Y DPI
     :type dpi_x: int
     """
-    self.logger.debug("DBus call set_dpi_both")
+    self.logger.debug("DBus call set_dpi_xy")
 
     driver_path = self.get_driver_path('dpi')
 
     if self._testing:
         with open(driver_path, 'w') as driver_file:
-            driver_file.write("{}:{}".format(dpi_x, dpi_y))
+            if dpi_y == -1:
+                driver_file.write("{}".format(dpi_x))
+            else:
+                driver_file.write("{}:{}".format(dpi_x, dpi_y))
         return
 
-    dpi_bytes = struct.pack('>HH', dpi_x, dpi_y)
+    # If the application requests just one value to be written
+    if dpi_y == -1:
+        dpi_bytes = struct.pack('>H', dpi_x)
+    else:
+        dpi_bytes = struct.pack('>HH', dpi_x, dpi_y)
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(dpi_bytes)
@@ -148,26 +155,36 @@ def get_dpi_xy(self):
     :return: List of X, Y DPI
     :rtype: list of int
     """
-    self.logger.debug("DBus call get_dpi_both")
+    self.logger.debug("DBus call get_dpi_xy")
 
     driver_path = self.get_driver_path('dpi')
 
     with open(driver_path, 'r') as driver_file:
         result = driver_file.read()
-        dpi_x, dpi_y = [int(dpi) for dpi in result.strip().split(':')]
+        dpi = [int(dpi) for dpi in result.strip().split(':')]
 
-    return [dpi_x, dpi_y]
+    return dpi
 
 
 @endpoint('razer.device.dpi', 'maxDPI', out_sig='i')
 def max_dpi(self):
-    self.logger.debug("DBus call get_dpi_both")
+    self.logger.debug("DBus call max_dpi")
 
     if hasattr(self, 'DPI_MAX'):
         return self.DPI_MAX
 
     else:
         return 500
+
+
+@endpoint('razer.device.dpi', 'availableDPI', out_sig='ai')
+def available_dpi(self):
+    self.logger.debug("DBus call available_dpi")
+
+    if hasattr(self, 'AVAILABLE_DPI'):
+        return self.AVAILABLE_DPI
+
+    return []
 
 
 @endpoint('razer.device.misc', 'setPollRate', in_sig='q')

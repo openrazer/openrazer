@@ -584,10 +584,10 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
         } else {
             printk(KERN_CRIT "razerkraken: Did not manage to get serial from device, using XX01 instead\n");
             device->serial[0] = 'X';
-            device->serial[0] = 'X';
-            device->serial[0] = '0';
-            device->serial[0] = '1';
-            device->serial[0] = '\0';
+            device->serial[1] = 'X';
+            device->serial[2] = '0';
+            device->serial[3] = '1';
+            device->serial[4] = '\0';
         }
         mutex_unlock(&device->lock);
 

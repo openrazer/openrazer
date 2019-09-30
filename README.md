@@ -48,11 +48,14 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Blade 15 (2019) Advanced                |  1532:023A  |
 | Razer Blade 15 (2018) Base Model              |  1532:023B  |
 | Razer Blade 15 (2018) Mercury                 |  1532:0240  |
+| Razer BlackWidow (2019)                       |  1532:0241  |
+| Razer Blade 15 (Mid 2019) Mercury             |  1532:0245  |
 
 ### Mice
 | Device                                        | USB VID:PID |
 | --------------------------------------------- | ----------- |
 | Razer Orochi 2011                             |  1532:0013  |
+| Razer DeathAdder 3.5G                         |  1532:0016  |
 | Razer Abyssus 1800                            |  1532:0020  |
 | Razer Mamba 2012 (Wired)                      |  1532:0024  |
 | Razer Mamba 2012 (Wireless)                   |  1532:0025  |
@@ -77,6 +80,8 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Abyssus V2                              |  1532:005B  |
 | Razer DeathAdder Elite                        |  1532:005C  |
 | Razer Abyssus 2000                            |  1532:005E  |
+| Razer Lancehead Tournament Edition            |  1532:0060  |
+| Razer DeathAdder Essential                    |  1532:006E  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |

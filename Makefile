@@ -12,7 +12,7 @@ MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/hid
 PYTHONDIR?=$(shell python3 -c 'import sys; print(sys.path[-1])')
 
 DKMS_NAME?=openrazer-driver
-DKMS_VER?=2.5.0
+DKMS_VER?=2.6.0
 
 
 # Build all target
@@ -111,7 +111,7 @@ setup_dkms:
 	rm -fv $(DESTDIR)/usr/src/$(DKMS_NAME)-$(DKMS_VER)/driver/*.mod.c
 
 remove_dkms:
-	@echo "\n::\033[34m Removing DKMS files\033[0m"
+	@echo -e "\n::\033[34m Removing DKMS files\033[0m"
 	@echo "====================================================="
 	rm -rf $(DESTDIR)/usr/src/$(DKMS_NAME)-$(DKMS_VER)
 

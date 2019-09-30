@@ -31,16 +31,7 @@ def set_logo_static_naga_hex_v2(self, red, green, blue):
 @endpoint('razer.device.lighting.logo', 'setLogoSpectrum')
 def set_logo_spectrum_naga_hex_v2(self):
     """
-    Set the device to pulsate
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
+    Set the device to spectrum mode
     """
     self.logger.debug("DBus call set_logo_spectrum")
 
@@ -56,7 +47,7 @@ def set_logo_spectrum_naga_hex_v2(self):
 @endpoint('razer.device.lighting.logo', 'setLogoNone')
 def set_logo_none_naga_hex_v2(self):
     """
-    Set the device to spectrum mode
+    Set the device to effect none
     """
     self.logger.debug("DBus call set_none_effect")
 
@@ -213,16 +204,7 @@ def set_scroll_static_naga_hex_v2(self, red, green, blue):
 @endpoint('razer.device.lighting.scroll', 'setScrollSpectrum')
 def set_scroll_spectrum_naga_hex_v2(self):
     """
-    Set the device to pulsate
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
+    Set the device to spectrum mode
     """
     self.logger.debug("DBus call set_scroll_spectrum")
 
@@ -238,7 +220,7 @@ def set_scroll_spectrum_naga_hex_v2(self):
 @endpoint('razer.device.lighting.scroll', 'setScrollNone')
 def set_scroll_none_naga_hex_v2(self):
     """
-    Set the device to spectrum mode
+    Set the device to effect none
     """
     self.logger.debug("DBus call set_none_effect")
 

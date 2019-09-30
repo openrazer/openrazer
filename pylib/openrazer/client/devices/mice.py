@@ -14,6 +14,7 @@ class RazerMouse(__RazerDevice):
         # Capabilities
         self._capabilities['poll_rate'] = self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate'))
         self._capabilities['dpi'] = self._has_feature('razer.device.dpi', ('getDPI', 'setDPI'))
+        self._capabilities['available_dpi'] = self._has_feature('razer.device.dpi', 'availableDPI')
 
         if self.has('dpi'):
             self._dbus_interfaces['dpi'] = _dbus.Interface(self._dbus, "razer.device.dpi")
@@ -28,6 +29,21 @@ class RazerMouse(__RazerDevice):
         """
         if self.has('dpi'):
             return int(self._dbus_interfaces['dpi'].maxDPI())
+        else:
+            return None
+
+    @property
+    def available_dpi(self) -> list:
+        """
+        Gets the available DPI
+
+        :return: Available DPI, if device has only a couple of fixed possible DPI values
+        :rtype: list or None
+        """
+        if self.has('available_dpi'):
+            dbuslist = self._dbus_interfaces['dpi'].availableDPI()
+            # Repack list from dbus ints to normal ints
+            return [int(d) for d in dbuslist]
         else:
             return None
 
