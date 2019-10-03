@@ -878,6 +878,10 @@ class RazerDevice(DBusService):
         func_sig = inspect.signature(func)
         return len(func_sig.parameters)
 
+    @staticmethod
+    def capitalize_first_char(string):
+        return string[0].upper() + string[1:]
+
     def __del__(self):
         self.close()
 

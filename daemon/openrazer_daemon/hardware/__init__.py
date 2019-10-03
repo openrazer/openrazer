@@ -32,12 +32,3 @@ def get_device_classes():
     return sorted(classes, key=lambda cls: cls.__name__)
 
 
-def capitalize_first_char(string):
-    """
-    Capitalize first character of a string
-
-    :type string: str
-    :return: String
-    :rtype: string
-    """
-    return string[0].upper() + string[1:]
