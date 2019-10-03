@@ -136,38 +136,38 @@ class RazerDevice(DBusService):
 
         effect_methods = {
             "backlight": {
-                ('razer.device.misc', 'getCurrentEffect', self.get_current_effect, None, 's'),
-                ('razer.device.misc', 'getCurrentEffectColors', self.get_current_effect_colors, None, 'ay'),
-                ('razer.device.misc', 'getCurrentEffectSpeed', self.get_current_effect_speed, None, 'i'),
-                ('razer.device.misc', 'getCurrentWaveDir', self.get_current_wave_dir, None, 'i'),
+                ('razer.device.lighting.chroma', 'getEffect', self.get_current_effect, None, 's'),
+                ('razer.device.lighting.chroma', 'getEffectColors', self.get_current_effect_colors, None, 'ay'),
+                ('razer.device.lighting.chroma', 'getEffectSpeed', self.get_current_effect_speed, None, 'i'),
+                ('razer.device.lighting.chroma', 'getWaveDir', self.get_current_wave_dir, None, 'i'),
             },
 
             "logo": {
-                ('razer.device.misc', 'getCurrentLogoEffect', self.get_current_logo_effect, None, 's'),
-                ('razer.device.misc', 'getCurrentLogoEffectColors', self.get_current_logo_effect_colors, None, 'ay'),
-                ('razer.device.misc', 'getCurrentLogoEffectSpeed', self.get_current_logo_effect_speed, None, 'i'),
-                ('razer.device.misc', 'getCurrentLogoWaveDir', self.get_current_logo_wave_dir, None, 'i'),
+                ('razer.device.lighting.logo', 'getLogoEffect', self.get_current_logo_effect, None, 's'),
+                ('razer.device.lighting.logo', 'getLogoEffectColors', self.get_current_logo_effect_colors, None, 'ay'),
+                ('razer.device.lighting.logo', 'getLogoEffectSpeed', self.get_current_logo_effect_speed, None, 'i'),
+                ('razer.device.lighting.logo', 'getLogoWaveDir', self.get_current_logo_wave_dir, None, 'i'),
             },
 
             "scroll": {
-                ('razer.device.misc', 'getCurrentScrollEffect', self.get_current_scroll_effect, None, 's'),
-                ('razer.device.misc', 'getCurrentScrollEffectColors', self.get_current_scroll_effect_colors, None, 'ay'),
-                ('razer.device.misc', 'getCurrentScrollEffectSpeed', self.get_current_scroll_effect_speed, None, 'i'),
-                ('razer.device.misc', 'getCurrentScrollWaveDir', self.get_current_scroll_wave_dir, None, 'i'),
+                ('razer.device.lighting.scroll', 'getScrollEffect', self.get_current_scroll_effect, None, 's'),
+                ('razer.device.lighting.scroll', 'getScrollEffectColors', self.get_current_scroll_effect_colors, None, 'ay'),
+                ('razer.device.lighting.scroll', 'getScrollEffectSpeed', self.get_current_scroll_effect_speed, None, 'i'),
+                ('razer.device.lighting.scroll', 'getScrollWaveDir', self.get_current_scroll_wave_dir, None, 'i'),
             },
 
             "left": {
-                ('razer.device.misc', 'getCurrentLeftEffect', self.get_current_left_effect, None, 's'),
-                ('razer.device.misc', 'getCurrentLeftEffectColors', self.get_current_left_effect_colors, None, 'ay'),
-                ('razer.device.misc', 'getCurrentLeftEffectSpeed', self.get_current_left_effect_speed, None, 'i'),
-                ('razer.device.misc', 'getCurrentLeftWaveDir', self.get_current_left_wave_dir, None, 'i'),
+                ('razer.device.lighting.left', 'getLeftEffect', self.get_current_left_effect, None, 's'),
+                ('razer.device.lighting.left', 'getLeftEffectColors', self.get_current_left_effect_colors, None, 'ay'),
+                ('razer.device.lighting.left', 'getLeftEffectSpeed', self.get_current_left_effect_speed, None, 'i'),
+                ('razer.device.lighting.left', 'getLeftWaveDir', self.get_current_left_wave_dir, None, 'i'),
             },
 
             "right": {
-                ('razer.device.misc', 'getCurrentRightEffect', self.get_current_right_effect, None, 's'),
-                ('razer.device.misc', 'getCurrentRightEffectColors', self.get_current_right_effect_colors, None, 'ay'),
-                ('razer.device.misc', 'getCurrentRightEffectSpeed', self.get_current_right_effect_speed, None, 'i'),
-                ('razer.device.misc', 'getCurrentRightWaveDir', self.get_current_right_wave_dir, None, 'i'),
+                ('razer.device.lighting.right', 'getRightEffect', self.get_current_right_effect, None, 's'),
+                ('razer.device.lighting.right', 'getRightEffectColors', self.get_current_right_effect_colors, None, 'ay'),
+                ('razer.device.lighting.right', 'getRightEffectSpeed', self.get_current_right_effect_speed, None, 'i'),
+                ('razer.device.lighting.right', 'getRightWaveDir', self.get_current_right_wave_dir, None, 'i'),
             }
         }
 

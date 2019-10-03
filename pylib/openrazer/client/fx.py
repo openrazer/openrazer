@@ -68,6 +68,46 @@ class RazerFX(BaseRazerFX):
 
         self.misc = MiscLighting(serial, capabilities, self._dbus)
 
+    @property
+    def effect(self) -> str:
+        """
+        Get current effect
+
+        :return: Effect name
+        :rtype: str
+        """
+        return self._lighting_dbus.getEffect()
+
+    @property
+    def colors(self) -> bytearray:
+        """
+        Get current effect colors
+
+        :return: Effect colors
+        :rtype: bytearray
+        """
+        return bytes(self._lighting_dbus.getEffectColors())
+
+    @property
+    def speed(self) -> int:
+        """
+        Get current effect speed
+
+        :return: Effect speed
+        :rtype: int
+        """
+        return self._lighting_dbus.getEffectSpeed()
+
+    @property
+    def wave_dir(self) -> int:
+        """
+        Get current wave direction
+
+        :return: Wave direction
+        :rtype: int
+        """
+        return self._lighting_dbus.getWaveDir()
+
     def none(self) -> bool:
         """
         No effect
@@ -643,6 +683,46 @@ class SingleLed(BaseRazerFX):
                 func(True)
             else:
                 func(False)
+
+    @property
+    def effect(self) -> str:
+        """
+        Get current effect
+
+        :return: Effect name
+        :rtype: str
+        """
+        return self._getattr('get#Effect')
+
+    @property
+    def colors(self) -> bytearray:
+        """
+        Get current effect colors
+
+        :return: Effect colors
+        :rtype: bytearray
+        """
+        return bytes(self._getattr('get#EffectColors'))
+
+    @property
+    def speed(self) -> int:
+        """
+        Get current effect speed
+
+        :return: Effect speed
+        :rtype: int
+        """
+        return self._getattr('get#EffectSpeed')
+
+    @property
+    def wave_dir(self) -> int:
+        """
+        Get current wave direction
+
+        :return: Wave direction
+        :rtype: int
+        """
+        return self._getattr('get#WaveDir')
 
     @property
     def brightness(self):

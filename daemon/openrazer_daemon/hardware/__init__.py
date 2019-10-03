@@ -30,5 +30,3 @@ def get_device_classes():
             classes.append(class_instance)
 
     return sorted(classes, key=lambda cls: cls.__name__)
-
-
