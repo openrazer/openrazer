@@ -254,11 +254,10 @@ class RazerDevice(DBusService):
                 # prepare the effect method name
                 # yes, we need to handle the backlight zone separately too.
                 # the backlight effect methods don't have a prefix.
-                # also, the "i[0].upper() + i[1:]" construct is a lowercase-to-uppercase one that preserves CamelCase (unlike .capitalize()), so I'm sorry but I had to do that.
                 if i == "backlight":
-                    effect_func_name = 'set' + self.zone[i]["effect"][0].upper() + self.zone[i]["effect"][1:]
+                    effect_func_name = 'set' + capitalize_first_char(self.zone[i]["effect"])
                 else:
-                    effect_func_name = 'set' + i[0].upper() + i[1:] + self.zone[i]["effect"][0].upper() + self.zone[i]["effect"][1:]
+                    effect_func_name = 'set' + capitalize_first_char(i) + capitalize_first_char(self.zone[i]["effect"])
 
                 # find the effect method
                 effect_func = getattr(self, effect_func_name, None)
@@ -271,7 +270,7 @@ class RazerDevice(DBusService):
                     if i == "backlight":
                         effect_func_name = 'setSpectrum'
                     else:
-                        effect_func_name = 'set' + i[0].upper() + i[1:] + 'Spectrum'
+                        effect_func_name = 'set' + capitalize_first_char(i) + 'Spectrum'
                     effect_func = getattr(self, effect_func_name, None)
 
                 # we check again here because there is a possibility the device may not even have Spectrum
@@ -315,7 +314,7 @@ class RazerDevice(DBusService):
                         self.logger.error("%s: Couldn't detect effect argument count!", self.__class__.__name__)
 
                 if 'set_' + i + '_active' in self.METHODS:
-                    active_func = getattr(self, "set" + i[0].upper() + i[1:] + "Active", None)
+                    active_func = getattr(self, "set" + capitalize_first_char(i) + "Active", None)
                     if active_func is not None:
                         active_func(self.zone[i]["active"])
 
@@ -324,7 +323,7 @@ class RazerDevice(DBusService):
                 if i == "backlight":
                     bright_func = getattr(self, "setBrightness", None)
                 elif 'set_' + i + '_brightness' in self.METHODS:
-                    bright_func = getattr(self, "set" + i[0].upper() + i[1:] + "Brightness", None)
+                    bright_func = getattr(self, "set" + capitalize_first_char(i) + "Brightness", None)
 
                 if bright_func is not None:
                     bright_func(self.zone[i]["brightness"])

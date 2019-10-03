@@ -58,7 +58,7 @@ class _RippleKeyboard(_MacroKeyboard):
         # we need to set the effect to ripple (if needed) after the ripple manager has started
         # otherwise it doesn't work
         if self.zone["backlight"]["effect"] == "ripple" or self.zone["backlight"]["effect"] == "rippleRandomColour":
-            effect_func_name = 'set' + self.zone["backlight"]["effect"][0].upper() + self.zone["backlight"]["effect"][1:]
+            effect_func_name = 'set' + capitalize_first_char(self.zone["backlight"]["effect"])
             effect_func = getattr(self, effect_func_name, None)
 
             if effect_func is not None:
