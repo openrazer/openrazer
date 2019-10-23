@@ -1281,3 +1281,21 @@ class RazerDeathAdderEssential(__RazerDeviceSpecialBrightnessSuspend):
         _da_set_logo_brightness(self, logo_brightness)
         _da_set_scroll_brightness(self, scroll_brightness)
         self.disable_notify = False
+
+
+class RazerDeathAdder1800(__RazerDevice):
+    """
+    Class for the Razer DeathAdder 1800
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0038
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
+               'get_logo_active', 'set_logo_active']
+
+    DPI_MAX = 1800
+
+    DEVICE_IMAGE = "https://rzrwarranty.s3.amazonaws.com/a7daf40ad78c9584a693e310effa956019cdcd081391f93f71a7cd36d3dc577e.png"
+
+    RAZER_URLS = {
+        "top_img": DEVICE_IMAGE
+    }

@@ -63,6 +63,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Taipan                                  |  1532:0034  |
 | Razer Naga Hex (Red)                          |  1532:0036  |
 | Razer DeathAdder 2013                         |  1532:0037  |
+| Razer DeathAdder 1800                         |  1532:0038  |
 | Razer Orochi 2013                             |  1532:0039  |
 | Razer Naga 2014                               |  1532:0040  |
 | Razer Naga Hex                                |  1532:0041  |
