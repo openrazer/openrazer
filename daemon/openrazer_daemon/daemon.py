@@ -275,14 +275,15 @@ class RazerDaemon(DBusService):
         :param config_file: Config file
         :type config_file: str or None
         """
+        self.logger.debug('Writing config')
         self._config['Startup']['sync_effects_enabled'] = 'True' if self.get_sync_effects() else 'False'
         self._config['Startup']['devices_off_on_screensaver'] = 'True' if self.get_off_on_screensaver() else 'False'
 
         for device in self._razer_devices:
+            self._config[device.dbus.storage_name] = {
+            }
             for i in device.dbus.ZONES:
                 if device.dbus.zone[i]["present"]:
-                    self._config[device.dbus.storage_name] = {
-                    }
                     self._config[device.dbus.storage_name][i + '_active'] = str(device.dbus.zone[i]["active"])
                     self._config[device.dbus.storage_name][i + '_brightness'] = str(device.dbus.zone[i]["brightness"])
                     self._config[device.dbus.storage_name][i + '_effect'] = device.dbus.zone[i]["effect"]
@@ -501,6 +502,7 @@ class RazerDaemon(DBusService):
 
             device.dbus.close()
             device.dbus.remove_from_connection()
+            self.write_config(self._config_file)
             self.logger.warning("Removing %s", device_id)
 
             # Delete device
