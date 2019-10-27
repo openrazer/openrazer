@@ -143,6 +143,16 @@ def set_dpi_xy(self, dpi_x, dpi_y):
     else:
         dpi_bytes = struct.pack('>HH', dpi_x, dpi_y)
 
+    self.dpi[0] = dpi_x
+    self.dpi[1] = dpi_y
+
+    # constrain DPI to maximum
+    if hasattr(self, 'DPI_MAX'):
+        if self.dpi[0] > self.DPI_MAX:
+            self.dpi[0] = self.DPI_MAX
+        if self.dpi[1] > self.DPI_MAX:
+            self.dpi[1] = self.DPI_MAX
+
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(dpi_bytes)
 
@@ -151,6 +161,19 @@ def set_dpi_xy(self, dpi_x, dpi_y):
 def get_dpi_xy(self):
     """
     get the DPI on the mouse
+
+    :return: List of X, Y DPI
+    :rtype: list of int
+    """
+    self.logger.debug("DBus call get_dpi_xy")
+
+    return self.dpi
+
+
+@endpoint('razer.device.dpi', 'getDPIHardware', out_sig='ai')
+def get_dpi_hardware_xy(self):
+    """
+    get the DPI on the mouse (hardware)
 
     :return: List of X, Y DPI
     :rtype: list of int
@@ -200,6 +223,9 @@ def set_poll_rate(self, rate):
     if rate in (1000, 500, 125):
         driver_path = self.get_driver_path('poll_rate')
 
+        # remember poll rate
+        self.poll_rate = rate
+
         with open(driver_path, 'w') as driver_file:
             driver_file.write(str(rate))
     else:
@@ -216,10 +242,4 @@ def get_poll_rate(self):
     """
     self.logger.debug("DBus call get_poll_rate")
 
-    driver_path = self.get_driver_path('poll_rate')
-
-    with open(driver_path, 'r') as driver_file:
-        result = driver_file.read()
-        result = int(result.strip())
-
-    return result
+    return int(self.poll_rate)

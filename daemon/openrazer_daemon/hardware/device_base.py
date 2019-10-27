@@ -93,6 +93,9 @@ class RazerDevice(DBusService):
                 "wave_dir": 1,
             }
 
+        self.dpi = [1800, 1800]
+        self.poll_rate = 500
+
         self._effect_sync = effect_sync.EffectSync(self, device_number)
 
         self._is_closed = False
@@ -191,6 +194,23 @@ class RazerDevice(DBusService):
 
         # Load additional DBus methods
         self.load_methods()
+
+        # load last DPI/poll rate state
+        if self.config.has_section(self.storage_name):
+            if 'set_dpi_xy' in self.METHODS:
+                self.dpi[0] = self.config[self.storage_name]['dpi_x']
+                self.dpi[1] = self.config[self.storage_name]['dpi_y']
+
+            if 'set_poll_rate' in self.METHODS:
+                self.poll_rate = self.config[self.storage_name]['poll_rate']
+
+        dpi_func = getattr(self, "setDPI", None)
+        if dpi_func is not None:
+            dpi_func(self.dpi[0], self.dpi[1])
+
+        poll_rate_func = getattr(self, "setPollRate", None)
+        if poll_rate_func is not None:
+            poll_rate_func(self.poll_rate)
 
         # load last effects
         for i in self.ZONES:
