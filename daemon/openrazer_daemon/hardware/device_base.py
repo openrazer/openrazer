@@ -198,11 +198,17 @@ class RazerDevice(DBusService):
         # load last DPI/poll rate state
         if self.config.has_section(self.storage_name):
             if 'set_dpi_xy' in self.METHODS:
-                self.dpi[0] = self.config[self.storage_name]['dpi_x']
-                self.dpi[1] = self.config[self.storage_name]['dpi_y']
+                try:
+                    self.dpi[0] = self.config[self.storage_name]['dpi_x']
+                    self.dpi[1] = self.config[self.storage_name]['dpi_y']
+                except KeyError:
+                    pass
 
             if 'set_poll_rate' in self.METHODS:
-                self.poll_rate = self.config[self.storage_name]['poll_rate']
+                try:
+                    self.poll_rate = self.config[self.storage_name]['poll_rate']
+                except KeyError:
+                    pass
 
         dpi_func = getattr(self, "setDPI", None)
         if dpi_func is not None:
