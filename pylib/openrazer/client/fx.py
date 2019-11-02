@@ -117,7 +117,7 @@ class RazerFX(BaseRazerFX):
 
     def static(self, red: int, green: int, blue: int) -> bool:
         """
-        Wave effect
+        Static effect
 
         :param red: Red component. Must be 0->255
         :type red: int
