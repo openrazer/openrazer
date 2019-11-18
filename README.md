@@ -55,6 +55,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Device                                        | USB VID:PID |
 | --------------------------------------------- | ----------- |
 | Razer Orochi 2011                             |  1532:0013  |
+| Razer DeathAdder 3.5G                         |  1532:0016  |
 | Razer Abyssus 1800                            |  1532:0020  |
 | Razer Mamba 2012 (Wired)                      |  1532:0024  |
 | Razer Mamba 2012 (Wireless)                   |  1532:0025  |
@@ -79,6 +80,8 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Abyssus V2                              |  1532:005B  |
 | Razer DeathAdder Elite                        |  1532:005C  |
 | Razer Abyssus 2000                            |  1532:005E  |
+| Razer Lancehead Tournament Edition            |  1532:0060  |
+| Razer Naga Trinity                            |  1532:0067  |
 | Razer DeathAdder Essential                    |  1532:006E  |
 
 ### Mousemats
@@ -128,6 +131,7 @@ Packages are available for these distributions:
 * [Fedora](https://openrazer.github.io/#fedora)
 * [openSUSE](https://openrazer.github.io/#opensuse)
 * [Gentoo](https://openrazer.github.io/#gentoo)
+* [NixOS](https://openrazer.github.io/#nixos)
 * [Solus](https://openrazer.github.io/#solus)
 * [Void Linux](https://openrazer.github.io/#voidlinux)
 * [Red Hat / CentOS](https://openrazer.github.io/#redhat) (unofficial)

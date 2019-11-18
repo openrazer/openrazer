@@ -545,7 +545,7 @@ def set_starlight_random_effect(self, speed):
 
 
 @endpoint('razer.device.lighting.chroma', 'setStarlightSingle', in_sig='yyyy')
-def set_starlight_single_effect(self, speed, red, green, blue):
+def set_starlight_single_effect(self, red, green, blue, speed):
     """
     Set starlight mode
     """
@@ -557,11 +557,11 @@ def set_starlight_single_effect(self, speed, red, green, blue):
         driver_file.write(bytes([speed, red, green, blue]))
 
     # Notify others
-    self.send_effect_event('setStarlightSingle', speed, red, green, blue)
+    self.send_effect_event('setStarlightSingle', red, green, blue, speed)
 
 
 @endpoint('razer.device.lighting.chroma', 'setStarlightDual', in_sig='yyyyyyy')
-def set_starlight_dual_effect(self, speed, red1, green1, blue1, red2, green2, blue2):
+def set_starlight_dual_effect(self, red1, green1, blue1, red2, green2, blue2, speed):
     """
     Set starlight dual mode
     """
@@ -573,4 +573,4 @@ def set_starlight_dual_effect(self, speed, red1, green1, blue1, red2, green2, bl
         driver_file.write(bytes([speed, red1, green1, blue1, red2, green2, blue2]))
 
     # Notify others
-    self.send_effect_event('setStarlightDual', speed, red1, green1, blue1)
+    self.send_effect_event('setStarlightDual', red1, green1, blue1, red2, green2, blue2, speed)

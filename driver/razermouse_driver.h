@@ -13,6 +13,7 @@
 #define __HID_RAZER_MOUSE_H
 
 #define USB_DEVICE_ID_RAZER_OROCHI_2011 0x0013
+#define USB_DEVICE_ID_RAZER_DEATHADDER_3_5G 0x0016
 #define USB_DEVICE_ID_RAZER_ABYSSUS_1800 0x0020
 #define USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED 0x0024
 #define USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS 0x0025
@@ -37,6 +38,8 @@
 #define USB_DEVICE_ID_RAZER_ABYSSUS_V2 0x005B
 #define USB_DEVICE_ID_RAZER_DEATHADDER_ELITE 0x005C
 #define USB_DEVICE_ID_RAZER_ABYSSUS_2000 0x005E
+#define USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED 0x0060
+#define USB_DEVICE_ID_RAZER_NAGA_TRINITY 0x0067
 #define USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL 0x006E
 
 /* Each keyboard report has 90 bytes*/
@@ -50,13 +53,6 @@
 #define RAZER_MOUSE_WAIT_MAX_US 800
 
 struct razer_mouse_device {
-    //struct input_dev *dev;
-    struct usb_device *usbdev;
-    struct hid_device *hiddev;
-    unsigned char effect;
-    char name[128];
-    char phys[64];
-
     struct usb_device *usb_dev;
     struct mutex lock;
     unsigned char usb_interface_protocol;
@@ -64,11 +60,19 @@ struct razer_mouse_device {
     unsigned short usb_vid;
     unsigned short usb_pid;
 
-    char serial[23];
+    char serial[23]; // Now storing a random serial to be used with old devices that don't support it
 
     unsigned char orochi2011_led;
     unsigned char orochi2011_dpi;
     unsigned short orochi2011_poll;
+
+    // The DeathAdder 3.5G, uses OR logic so need to remember last values. Part of a 4byte payload
+    struct {
+        unsigned char poll;
+        unsigned char dpi;
+        unsigned char profile;
+        unsigned char leds;
+    } da3_5g;
 };
 
 // Mamba Key Location

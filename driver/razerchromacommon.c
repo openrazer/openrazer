@@ -335,7 +335,6 @@ struct razer_report razer_chroma_standard_matrix_effect_starlight_dual(unsigned 
     report.arguments[4] = rgb1->g; // Green 1
     report.arguments[5] = rgb1->b; // Blue 1
 
-    // For now haven't seen any chroma using this, seen the extended version
     report.arguments[6] = rgb2->r; // Red 2
     report.arguments[7] = rgb2->g; // Green 2
     report.arguments[8] = rgb2->b; // Blue 2
@@ -548,7 +547,9 @@ struct razer_report razer_chroma_extended_matrix_effect_wave(unsigned char varia
 {
     struct razer_report report = razer_chroma_extended_matrix_effect_base(0x06, variable_storage, led_id, 0x04);
 
-    direction = clamp_u8(direction, 0x00, 0x01);
+    // Some devices use values 0x00, 0x01
+    // Others use values 0x01, 0x02
+    direction = clamp_u8(direction, 0x00, 0x02);
 
     report.arguments[3] = direction;
     report.arguments[4] = 0x28; // Unknown
@@ -1187,6 +1188,32 @@ struct razer_report razer_chroma_misc_set_orochi2011_poll_dpi(unsigned short pol
 
     report.arguments[3] = clamp_u8(dpi_x, 0x15, 0x9C);
     report.arguments[4] = clamp_u8(dpi_y, 0x15, 0x9C);
+
+    return report;
+}
+
+/**
+ * Set the Naga Trinity to "Static" effect
+ */
+struct razer_report razer_naga_trinity_effect_static(struct razer_rgb *rgb)
+{
+    struct razer_report report = get_razer_report(0x0f, 0x03, 0x0e);
+
+    report.arguments[0] = 0x00; // Variable storage
+    report.arguments[1] = 0x00; // LED ID
+    report.arguments[2] = 0x00; // Unknown
+    report.arguments[3] = 0x00; // Unknown
+    report.arguments[4] = 0x02; // Effect ID
+    report.arguments[5] = rgb->r; // RGB 3x
+    report.arguments[6] = rgb->g;
+    report.arguments[7] = rgb->b;
+    report.arguments[8] = rgb->r;
+    report.arguments[9] = rgb->g;
+    report.arguments[10] = rgb->b;
+    report.arguments[11] = rgb->r;
+    report.arguments[12] = rgb->g;
+    report.arguments[13] = rgb->b;
+    report.transaction_id.id = 0x1f;
 
     return report;
 }
