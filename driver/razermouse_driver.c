@@ -295,6 +295,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Lancehead Tournament Edition\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+        device_type = "Razer Mamba Elite\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         device_type = "Razer Deathadder Essential\n";
         break;
@@ -1273,6 +1277,7 @@ static ssize_t razer_attr_read_scroll_led_brightness(struct device *dev, struct 
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         report = razer_chroma_extended_matrix_get_brightness(VARSTORE, SCROLL_WHEEL_LED);
         break;
@@ -1305,6 +1310,7 @@ static ssize_t razer_attr_write_scroll_led_brightness(struct device *dev, struct
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         report = razer_chroma_extended_matrix_brightness(VARSTORE, SCROLL_WHEEL_LED, brightness);
         break;
@@ -1337,6 +1343,7 @@ static ssize_t razer_attr_read_logo_led_brightness(struct device *dev, struct de
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         report = razer_chroma_extended_matrix_get_brightness(VARSTORE, LOGO_LED);
         break;
@@ -1369,6 +1376,7 @@ static ssize_t razer_attr_write_logo_led_brightness(struct device *dev, struct d
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         report = razer_chroma_extended_matrix_brightness(VARSTORE, LOGO_LED, brightness);
         break;
@@ -1395,6 +1403,7 @@ static ssize_t razer_attr_read_left_led_brightness(struct device *dev, struct de
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_get_brightness(VARSTORE, LEFT_SIDE_LED);
         break;
 
@@ -1420,6 +1429,7 @@ static ssize_t razer_attr_write_left_led_brightness(struct device *dev, struct d
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_brightness(VARSTORE, LEFT_SIDE_LED, brightness);
         break;
 
@@ -1445,6 +1455,7 @@ static ssize_t razer_attr_read_right_led_brightness(struct device *dev, struct d
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_get_brightness(VARSTORE, RIGHT_SIDE_LED);
         break;
 
@@ -1470,6 +1481,7 @@ static ssize_t razer_attr_write_right_led_brightness(struct device *dev, struct 
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_brightness(VARSTORE, RIGHT_SIDE_LED, brightness);
         break;
 
@@ -1866,6 +1878,7 @@ static ssize_t razer_attr_write_scroll_mode_breath(struct device *dev, struct de
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         switch(count) {
         case 3: // Single colour mode
@@ -1910,6 +1923,7 @@ static ssize_t razer_attr_write_scroll_mode_static(struct device *dev, struct de
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
         case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
             break;
@@ -1942,6 +1956,7 @@ static ssize_t razer_attr_write_scroll_mode_none(struct device *dev, struct devi
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         report = razer_chroma_extended_matrix_effect_none(VARSTORE, SCROLL_WHEEL_LED);
         break;
@@ -2067,6 +2082,7 @@ static ssize_t razer_attr_write_logo_mode_breath(struct device *dev, struct devi
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         switch(count) {
         case 3: // Single colour mode
@@ -2110,6 +2126,7 @@ static ssize_t razer_attr_write_logo_mode_static(struct device *dev, struct devi
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
         case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
             break;
@@ -2142,6 +2159,7 @@ static ssize_t razer_attr_write_logo_mode_none(struct device *dev, struct device
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         report = razer_chroma_extended_matrix_effect_none(VARSTORE, LOGO_LED);
         break;
@@ -2165,6 +2183,7 @@ static ssize_t razer_attr_write_left_mode_wave(struct device *dev, struct device
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_effect_wave(VARSTORE, LEFT_SIDE_LED, direction);
         break;
     }
@@ -2187,6 +2206,7 @@ static ssize_t razer_attr_write_left_mode_spectrum(struct device *dev, struct de
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, LEFT_SIDE_LED);
         break;
     }
@@ -2211,6 +2231,7 @@ static ssize_t razer_attr_write_left_mode_reactive(struct device *dev, struct de
 
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
             report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, LEFT_SIDE_LED, speed, (struct razer_rgb*)&buf[1]);
             break;
         }
@@ -2236,6 +2257,7 @@ static ssize_t razer_attr_write_left_mode_breath(struct device *dev, struct devi
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         switch(count) {
         case 3: // Single colour mode
             report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, LEFT_SIDE_LED, (struct razer_rgb*)&buf[0]);
@@ -2272,6 +2294,7 @@ static ssize_t razer_attr_write_left_mode_static(struct device *dev, struct devi
     if(count == 3) {
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, LEFT_SIDE_LED, (struct razer_rgb*)&buf[0]);
             break;
         }
@@ -2297,6 +2320,7 @@ static ssize_t razer_attr_write_left_mode_none(struct device *dev, struct device
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_effect_none(VARSTORE, LEFT_SIDE_LED);
         break;
     }
@@ -2319,6 +2343,7 @@ static ssize_t razer_attr_write_right_mode_wave(struct device *dev, struct devic
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_effect_wave(VARSTORE, RIGHT_SIDE_LED, direction);
         break;
     }
@@ -2341,6 +2366,7 @@ static ssize_t razer_attr_write_right_mode_spectrum(struct device *dev, struct d
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, RIGHT_SIDE_LED);
         break;
     }
@@ -2365,6 +2391,7 @@ static ssize_t razer_attr_write_right_mode_reactive(struct device *dev, struct d
 
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
             report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, RIGHT_SIDE_LED, speed, (struct razer_rgb*)&buf[1]);
             break;
         }
@@ -2390,6 +2417,7 @@ static ssize_t razer_attr_write_right_mode_breath(struct device *dev, struct dev
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         switch(count) {
         case 3: // Single colour mode
             report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, RIGHT_SIDE_LED, (struct razer_rgb*)&buf[0]);
@@ -2426,6 +2454,7 @@ static ssize_t razer_attr_write_right_mode_static(struct device *dev, struct dev
     if(count == 3) {
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, RIGHT_SIDE_LED, (struct razer_rgb*)&buf[0]);
             break;
         }
@@ -2451,6 +2480,7 @@ static ssize_t razer_attr_write_right_mode_none(struct device *dev, struct devic
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+	case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_effect_none(VARSTORE, RIGHT_SIDE_LED);
         break;
     }
@@ -2939,6 +2969,41 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             break;
 
+        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_reactive);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_reactive);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_left_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_left_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_left_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_left_matrix_effect_reactive);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_left_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_left_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_left_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_right_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_right_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_right_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_right_matrix_effect_reactive);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_right_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_right_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_right_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
+            break;
+
         case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
@@ -3251,6 +3316,41 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             break;
 
+        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_reactive);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_reactive);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_left_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_left_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_left_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_left_matrix_effect_reactive);
+            device_remove_file(&hdev->dev, &dev_attr_left_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_left_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_left_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_right_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_right_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_right_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_right_matrix_effect_reactive);
+            device_remove_file(&hdev->dev, &dev_attr_right_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_right_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_right_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
+            break;
+
         case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
@@ -3313,6 +3413,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_3500) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_TRINITY) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_ELITE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL) },
     { }
 };
