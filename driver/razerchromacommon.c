@@ -740,19 +740,21 @@ struct razer_report razer_chroma_extended_matrix_get_brightness(unsigned char va
  */
 struct razer_report razer_chroma_extended_matrix_set_custom_frame(unsigned char row_index, unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data)
 {
-    struct razer_report report = get_razer_report(0x0F, 0x03, 0x47);
-    size_t row_length = (size_t) (((stop_col + 1) - start_col) * 3);
-    int index = 5 + (start_col * 3);
+	return razer_chroma_extended_matrix_set_custom_frame2(row_index, start_col, stop_col, rgb_data, 0x47);
+}
+
+struct razer_report razer_chroma_extended_matrix_set_custom_frame2(unsigned char row_index, unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data, size_t packetLength)
+{
+    const size_t row_length = (size_t) (((stop_col + 1) - start_col) * 3);
+	const size_t data_length = (0 != packetLength)?packetLength:row_length + 5;
+    const int index = 5 + (start_col * 3);
+    struct razer_report report = get_razer_report(0x0F, 0x03, data_length);
 
     report.transaction_id.id = 0x3F;
-
-    // printk(KERN_ALERT "razerkbd: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_index, start_col, stop_col, (unsigned char)row_length);
-
     report.arguments[2] = row_index;
     report.arguments[3] = start_col;
     report.arguments[4] = stop_col;
     memcpy(&report.arguments[index], rgb_data, row_length);
-
     return report;
 }
 

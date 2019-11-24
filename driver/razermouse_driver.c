@@ -384,6 +384,11 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
         report = razer_chroma_mouse_extended_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
         break;
+	case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+        report = razer_chroma_mouse_extended_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
+		// report = razer_chroma_extended_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
+        report.transaction_id.id = 0x1f;
+        break;
 
     default:
         report = razer_chroma_standard_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
@@ -1160,7 +1165,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
         stop_col = buf[offset++];
         row_length = ((stop_col+1) - start_col) * 3;
 
-        // printk(KERN_ALERT "razermouse: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
+        printk(KERN_ALERT "razermouse: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
 
         // Mouse only has 1 row, row0 (pseudo row as the command actually doesn't take rows)
         if(row_id != 0) {
@@ -1174,7 +1179,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
         }
 
         if(offset + row_length > count) {
-            printk(KERN_ALERT "razermouse: Not enough RGB to fill row\n");
+            printk(KERN_ALERT "razermouse: Not enough RGB to fill row (%d)\n", offset + row_length - count);
             break;
         }
 
@@ -1201,6 +1206,11 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
             report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
             break;
+
+		case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+            report = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
+        	report.transaction_id.id = 0x1f;
+        	break;
         }
         razer_send_payload(usb_dev, &report);
 
