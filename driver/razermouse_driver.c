@@ -67,8 +67,8 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
            response_report.command_class != request_report->command_class ||
            response_report.command_id.id != request_report->command_id.id) {
             print_erroneous_report(&response_report, "razermouse", "Response doesn't match request");
-//        } else if (response_report.status == RAZER_CMD_BUSY) {
-//            print_erroneous_report(&response_report, "razermouse", "Device is busy");
+//      } else if (response_report.status == RAZER_CMD_BUSY) {
+//          print_erroneous_report(&response_report, "razermouse", "Device is busy");
         } else if (response_report.status == RAZER_CMD_FAILURE) {
             print_erroneous_report(&response_report, "razermouse", "Command failed");
         } else if (response_report.status == RAZER_CMD_NOT_SUPPORTED) {
@@ -78,6 +78,7 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
         }
     } else {
         print_erroneous_report(&response_report, "razermouse", "Invalid Report Length");
+		response_report.status = -1;
     }
 
     return response_report;
@@ -899,7 +900,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         break;
 
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-        report = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
+        report = razer_chroma_extended_matrix_get_brightness(VARSTORE, 0x00);
         report.transaction_id.id = 0x1F;
         break;
 
@@ -913,6 +914,8 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         break;
     }
     response = razer_send_payload(usb_dev, &report);
+	if (response.status != RAZER_CMD_SUCCESSFUL)
+		return 0;
 
     // Brightness is at arg[0] for dock and arg[1] for led_brightness
     return sprintf(buf, "%d\n", response.arguments[brightness_index]);
@@ -1516,7 +1519,7 @@ static ssize_t razer_attr_read_left_led_brightness(struct device *dev, struct de
 static ssize_t razer_attr_write_left_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_side_led_brightness(dev, attr, buf, count, LEFT_SIDE_LED);
-}	
+}
 
 /**
  * Read device file "right_led_brightness"
@@ -2308,8 +2311,8 @@ static ssize_t razer_attr_write_side_mode_wave(struct device *dev, struct device
  */
 static ssize_t razer_attr_write_left_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-   return razer_attr_write_side_mode_wave(dev, attr, buf, count, LEFT_SIDE_LED); 
-}	
+   return razer_attr_write_side_mode_wave(dev, attr, buf, count, LEFT_SIDE_LED);
+}
 
 /**
  * Write device file "right_mode_wave" (for extended mouse matrix effects)
@@ -2318,8 +2321,8 @@ static ssize_t razer_attr_write_left_mode_wave(struct device *dev, struct device
  */
 static ssize_t razer_attr_write_right_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-   return razer_attr_write_side_mode_wave(dev, attr, buf, count, RIGHT_SIDE_LED); 
-}	
+   return razer_attr_write_side_mode_wave(dev, attr, buf, count, RIGHT_SIDE_LED);
+}
 
 static ssize_t razer_attr_write_side_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int side)
 {
@@ -2351,7 +2354,7 @@ static ssize_t razer_attr_write_side_mode_spectrum(struct device *dev, struct de
  */
 static ssize_t razer_attr_write_left_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-   return razer_attr_write_side_mode_spectrum(dev, attr, buf, count, LEFT_SIDE_LED); 
+   return razer_attr_write_side_mode_spectrum(dev, attr, buf, count, LEFT_SIDE_LED);
 }
 
 /**
@@ -2361,7 +2364,7 @@ static ssize_t razer_attr_write_left_mode_spectrum(struct device *dev, struct de
  */
 static ssize_t razer_attr_write_right_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-   return razer_attr_write_side_mode_spectrum(dev, attr, buf, count, RIGHT_SIDE_LED); 
+   return razer_attr_write_side_mode_spectrum(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
 
 static ssize_t razer_attr_write_side_mode_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int side)
@@ -2401,7 +2404,7 @@ static ssize_t razer_attr_write_side_mode_reactive(struct device *dev, struct de
  */
 static ssize_t razer_attr_write_left_mode_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-   return razer_attr_write_side_mode_reactive(dev, attr, buf, count, LEFT_SIDE_LED); 
+   return razer_attr_write_side_mode_reactive(dev, attr, buf, count, LEFT_SIDE_LED);
 }
 
 /**
@@ -2411,7 +2414,7 @@ static ssize_t razer_attr_write_left_mode_reactive(struct device *dev, struct de
  */
 static ssize_t razer_attr_write_right_mode_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-   return razer_attr_write_side_mode_reactive(dev, attr, buf, count, RIGHT_SIDE_LED); 
+   return razer_attr_write_side_mode_reactive(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
 
 static ssize_t razer_attr_write_side_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int side)
@@ -2455,7 +2458,7 @@ static ssize_t razer_attr_write_side_mode_breath(struct device *dev, struct devi
  */
 static ssize_t razer_attr_write_left_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-   return razer_attr_write_side_mode_breath(dev, attr, buf, count, LEFT_SIDE_LED); 
+   return razer_attr_write_side_mode_breath(dev, attr, buf, count, LEFT_SIDE_LED);
 }
 
 /**
@@ -2465,7 +2468,7 @@ static ssize_t razer_attr_write_left_mode_breath(struct device *dev, struct devi
  */
 static ssize_t razer_attr_write_right_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-   return razer_attr_write_side_mode_breath(dev, attr, buf, count, RIGHT_SIDE_LED); 
+   return razer_attr_write_side_mode_breath(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
 
 static ssize_t razer_attr_write_side_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int side)
@@ -2500,7 +2503,7 @@ static ssize_t razer_attr_write_side_mode_static(struct device *dev, struct devi
  */
 static ssize_t razer_attr_write_left_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-   return razer_attr_write_side_mode_static(dev, attr, buf, count, LEFT_SIDE_LED); 
+   return razer_attr_write_side_mode_static(dev, attr, buf, count, LEFT_SIDE_LED);
 }
 
 /**
@@ -2510,7 +2513,7 @@ static ssize_t razer_attr_write_left_mode_static(struct device *dev, struct devi
  */
 static ssize_t razer_attr_write_right_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-   return razer_attr_write_side_mode_static(dev, attr, buf, count, RIGHT_SIDE_LED); 
+   return razer_attr_write_side_mode_static(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
 
 static ssize_t razer_attr_write_side_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int side)
@@ -2540,7 +2543,7 @@ static ssize_t razer_attr_write_side_mode_none(struct device *dev, struct device
  */
 static ssize_t razer_attr_write_left_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-   return razer_attr_write_side_mode_none(dev, attr, buf, count, LEFT_SIDE_LED); 
+   return razer_attr_write_side_mode_none(dev, attr, buf, count, LEFT_SIDE_LED);
 }
 
 /**
@@ -2550,7 +2553,7 @@ static ssize_t razer_attr_write_left_mode_none(struct device *dev, struct device
  */
 static ssize_t razer_attr_write_right_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-   return razer_attr_write_side_mode_none(dev, attr, buf, count, RIGHT_SIDE_LED); 
+   return razer_attr_write_side_mode_none(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
 
 /**
