@@ -1298,13 +1298,17 @@ class RazerMambaElite(__RazerDeviceSpecialBrightnessSuspend):
         'get_poll_rate', 'set_poll_rate',
         # Logo logo_led_brightness/logo_matrix_effect_breath/...
         'get_logo_brightness', 'set_logo_brightness',
-        'set_logo_wave', 'set_logo_static', 'set_logo_spectrum',
+        'set_logo_wave',
+        'set_logo_static_mamba_elite',
+        'set_logo_spectrum_mamba_elite',
         'set_logo_none_mamba_elite',
         'set_logo_reactive_mamba_elite',
         'set_logo_breath_random_mamba_elite', 'set_logo_breath_single_mamba_elite', 'set_logo_breath_dual_mamba_elite',
         # Scroll wheel scroll_led_brightness/scroll_matrix_effect_breath/...
         'get_scroll_brightness', 'set_scroll_brightness',
-        'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum',
+        'set_scroll_wave',
+        'set_scroll_static_mamba_elite',
+        'set_scroll_spectrum_mamba_elite',
         'set_scroll_none_mamba_elite',
         'set_scroll_reactive_mamba_elite',
         'set_scroll_breath_random_mamba_elite', 'set_scroll_breath_single_mamba_elite', 'set_scroll_breath_dual_mamba_elite',
@@ -1316,8 +1320,18 @@ class RazerMambaElite(__RazerDeviceSpecialBrightnessSuspend):
         'get_right_brightness', 'set_right_brightness',
         'set_right_wave', 'set_right_static', 'set_right_spectrum', 'set_right_none', 'set_right_reactive',
         'set_right_breath_random', 'set_right_breath_single', 'set_right_breath_dual',
+
         # Can set all items (Logo,Scroll,Left and Right sides matrix_brightness/matrix_effect_custom/matrix_custom_frame
-        'set_brightness', 'get_brightness_mambaelite', 'set_custom_effect', 'set_key_row']
+        # emulate left/right effect
+        'set_brightness',
+        'set_custom_effect', 'set_key_row',
+        'get_brightness_mamba_elite',
+        'set_wave_effect_mamba_elite',
+        'set_static_effect_mamba_elite',
+        'set_spectrum_effect_mamba_elite',
+        'set_none_effect_mamba_elite',
+        'set_breath_random_effect_mamba_elite', 'set_breath_single_effect_mamba_elite', 'set_breath_dual_effect_mamba_elite',
+        'set_reactive_effect_mamba_elite']
 
     DPI_MAX = 16000
 
