@@ -1,14 +1,14 @@
 from openrazer_daemon.dbus_services import endpoint
 from openrazer_daemon.dbus_services.dbus_methods.lanceheadte import get_left_brightness as _get_left_brightness, \
-                                    get_right_brightness as _get_right_brightness, \
-                                    set_left_wave as _set_left_wave, set_right_wave as _set_right_wave, \
-                                    set_left_static as _set_left_static, set_right_static as _set_right_static, \
-                                    set_left_spectrum as _set_left_spectrum, set_right_spectrum as _set_right_spectrum, \
-                                    set_left_none as _set_left_none, set_right_none as _set_right_none, \
-                                    set_left_reactive as _set_left_reactive, set_right_reactive as _set_right_reactive, \
-                                    set_left_breath_random as _set_left_breath_random, set_right_breath_random as _set_right_breath_random, \
-                                    set_left_breath_single as _set_left_breath_single, set_right_breath_single as _set_right_breath_single, \
-                                    set_left_breath_dual as _set_left_breath_dual, set_right_breath_dual as _set_right_breath_dual
+    get_right_brightness as _get_right_brightness, \
+    set_left_wave as _set_left_wave, set_right_wave as _set_right_wave, \
+    set_left_static as _set_left_static, set_right_static as _set_right_static, \
+    set_left_spectrum as _set_left_spectrum, set_right_spectrum as _set_right_spectrum, \
+    set_left_none as _set_left_none, set_right_none as _set_right_none, \
+    set_left_reactive as _set_left_reactive, set_right_reactive as _set_right_reactive, \
+    set_left_breath_random as _set_left_breath_random, set_right_breath_random as _set_right_breath_random, \
+    set_left_breath_single as _set_left_breath_single, set_right_breath_single as _set_right_breath_single, \
+    set_left_breath_dual as _set_left_breath_dual, set_right_breath_dual as _set_right_breath_dual
 
 @endpoint('razer.device.lighting.logo', 'setLogoStatic', in_sig='yyy')
 def set_logo_static_mamba_elite(self, red, green, blue):
