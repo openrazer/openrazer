@@ -1290,7 +1290,7 @@ class RazerMambaElite(__RazerDeviceSpecialBrightnessSuspend):
     USB_PID = 0x006C
     HAS_MATRIX = True
     WAVE_DIRS = (1, 2)
-    MATRIX_DIMS = [1, 16]
+    MATRIX_DIMS = [1, 20]
     METHODS = [
         'get_device_type_mouse',
         'max_dpi',
