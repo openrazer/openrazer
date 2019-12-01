@@ -38,8 +38,8 @@
 #define RAZER_CORE_WAIT_MAX_US 1000
 
 struct razer_core_device {
-    struct usb_device *usb_dev;
-    struct mutex lock;
+	struct usb_device *usb_dev;
+	struct mutex lock;
 };
 
 
