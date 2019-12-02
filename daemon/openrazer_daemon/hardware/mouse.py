@@ -1357,7 +1357,7 @@ class RazerMambaElite(__RazerDeviceSpecialBrightnessSuspend):
 
         # Todo make it context?
         self.disable_notify = True
-        _set_brightness(self, 0)
+        _set_backlight_brightness(self, 0)
         _da_set_logo_brightness(self, 0)
         _da_set_scroll_brightness(self, 0)
         _set_left_brightness(self, 0)

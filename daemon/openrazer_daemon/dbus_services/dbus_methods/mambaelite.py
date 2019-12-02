@@ -460,8 +460,8 @@ def set_reactive_effect_mamba_elite(self, red, green, blue, speed):
     if speed not in (1, 2, 3, 4):
         speed = 4
 
-    _set_left_reactive(self)
-    _set_right_reactive(self)
+    _set_left_reactive(self, red, green, blue, speed)
+    _set_right_reactive(self, red, green, blue, speed)
 
 
 @endpoint('razer.device.lighting.chroma', 'setBreathRandom')
