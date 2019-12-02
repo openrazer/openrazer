@@ -19,11 +19,11 @@
 #define RAZER_MOUSEMAT_WAIT_MAX_US 1000
 
 struct razer_mousemat_device {
-	struct usb_device *usbdev;
-	struct hid_device *hiddev;
-	unsigned char effect;
-	char name[128];
-	char phys[64];
+    struct usb_device *usbdev;
+    struct hid_device *hiddev;
+    unsigned char effect;
+    char name[128];
+    char phys[64];
 };
 
 

@@ -54,26 +54,26 @@
 #define RAZER_MOUSE_WAIT_MAX_US 800
 
 struct razer_mouse_device {
-	struct usb_device *usb_dev;
-	struct mutex lock;
-	unsigned char usb_interface_protocol;
+    struct usb_device *usb_dev;
+    struct mutex lock;
+    unsigned char usb_interface_protocol;
 
-	unsigned short usb_vid;
-	unsigned short usb_pid;
+    unsigned short usb_vid;
+    unsigned short usb_pid;
 
-	char serial[23]; // Now storing a random serial to be used with old devices that don't support it
+    char serial[23]; // Now storing a random serial to be used with old devices that don't support it
 
-	unsigned char orochi2011_led;
-	unsigned char orochi2011_dpi;
-	unsigned short orochi2011_poll;
+    unsigned char orochi2011_led;
+    unsigned char orochi2011_dpi;
+    unsigned short orochi2011_poll;
 
-	// The DeathAdder 3.5G, uses OR logic so need to remember last values. Part of a 4byte payload
-	struct {
-		unsigned char poll;
-		unsigned char dpi;
-		unsigned char profile;
-		unsigned char leds;
-	} da3_5g;
+    // The DeathAdder 3.5G, uses OR logic so need to remember last values. Part of a 4byte payload
+    struct {
+        unsigned char poll;
+        unsigned char dpi;
+        unsigned char profile;
+        unsigned char leds;
+    } da3_5g;
 };
 
 // Mamba Key Location

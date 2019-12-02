@@ -103,15 +103,15 @@
 
 
 struct razer_kbd_device {
-	struct usb_device *usbdev;
-	struct hid_device *hiddev;
-	unsigned int fn_on;
-	char name[128];
-	char phys[64];
-	DECLARE_BITMAP(pressed_fn, KEY_CNT);
+    struct usb_device *usbdev;
+    struct hid_device *hiddev;
+    unsigned int fn_on;
+    char name[128];
+    char phys[64];
+    DECLARE_BITMAP(pressed_fn, KEY_CNT);
 
-	unsigned char block_keys[3];
-	unsigned char left_alt_on;
+    unsigned char block_keys[3];
+    unsigned char left_alt_on;
 };
 
 
