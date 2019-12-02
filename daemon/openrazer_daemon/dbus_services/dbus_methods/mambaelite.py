@@ -10,6 +10,7 @@ from openrazer_daemon.dbus_services.dbus_methods.lanceheadte import get_left_bri
     set_left_breath_single as _set_left_breath_single, set_right_breath_single as _set_right_breath_single, \
     set_left_breath_dual as _set_left_breath_dual, set_right_breath_dual as _set_right_breath_dual
 
+
 @endpoint('razer.device.lighting.logo', 'setLogoStatic', in_sig='yyy')
 def set_logo_static_mamba_elite(self, red, green, blue):
     """
@@ -319,6 +320,7 @@ def set_scroll_breath_single_mamba_elite(self, red, green, blue):
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
 
+
 @endpoint('razer.device.lighting.scroll', 'setScrollBreathDual', in_sig='yyyyyy')
 def set_scroll_breath_dual_mamba_elite(self, red1, green1, blue1, red2, green2, blue2):
     """
@@ -354,6 +356,7 @@ def set_scroll_breath_dual_mamba_elite(self, red1, green1, blue1, red2, green2, 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
 
+
 @endpoint('razer.device.lighting.brightness', 'getBrightness', out_sig='d')
 def get_brightness_mamba_elite(self):
     """
@@ -364,7 +367,8 @@ def get_brightness_mamba_elite(self):
     :rtype: float
     """
     self.logger.debug("DBus call get_brightness")
-    return (_get_left_brightness(self) + _get_right_brightness(self))/2
+    return (_get_left_brightness(self) + _get_right_brightness(self)) / 2
+
 
 @endpoint('razer.device.lighting.chroma', 'setWave', in_sig='i')
 def set_wave_effect_mamba_elite(self, direction):
@@ -379,6 +383,7 @@ def set_wave_effect_mamba_elite(self, direction):
     # direction
     _set_left_wave(self, direction)
     _set_right_wave(self, direction)
+
 
 @endpoint('razer.device.lighting.chroma', 'setStatic', in_sig='yyy')
 def set_static_effect_mamba_elite(self, red, green, blue):
@@ -402,6 +407,7 @@ def set_static_effect_mamba_elite(self, red, green, blue):
     _set_left_static(self, red, green, blue)
     _set_right_static(self, red, green, blue)
 
+
 @endpoint('razer.device.lighting.chroma', 'setSpectrum')
 def set_spectrum_effect_mamba_elite(self):
     """
@@ -415,6 +421,7 @@ def set_spectrum_effect_mamba_elite(self):
     _set_left_spectrum(self)
     _set_right_spectrum(self)
 
+
 @endpoint('razer.device.lighting.chroma', 'setNone')
 def set_none_effect_mamba_elite(self):
     """
@@ -426,6 +433,7 @@ def set_none_effect_mamba_elite(self):
     self.send_effect_event('setNone')
     _set_left_none(self)
     _set_right_none(self)
+
 
 @endpoint('razer.device.lighting.chroma', 'setReactive', in_sig='yyyy')
 def set_reactive_effect_mamba_elite(self, red, green, blue, speed):
@@ -455,6 +463,7 @@ def set_reactive_effect_mamba_elite(self, red, green, blue, speed):
     _set_left_reactive(self)
     _set_right_reactive(self)
 
+
 @endpoint('razer.device.lighting.chroma', 'setBreathRandom')
 def set_breath_random_effect_mamba_elite(self):
     """
@@ -466,6 +475,7 @@ def set_breath_random_effect_mamba_elite(self):
     self.send_effect_event('setBreathRandom')
     _set_left_breath_random(self)
     _set_right_breath_random(self)
+
 
 @endpoint('razer.device.lighting.chroma', 'setBreathSingle', in_sig='yyy')
 def set_breath_single_effect_mamba_elite(self, red, green, blue):
@@ -488,6 +498,7 @@ def set_breath_single_effect_mamba_elite(self, red, green, blue):
 
     _set_left_breath_single(self, red, green, blue)
     _set_right_breath_single(self, red, green, blue)
+
 
 @endpoint('razer.device.lighting.chroma', 'setBreathDual', in_sig='yyyyyy')
 def set_breath_dual_effect_mamba_elite(self, red1, green1, blue1, red2, green2, blue2):
@@ -521,4 +532,3 @@ def set_breath_dual_effect_mamba_elite(self, red1, green1, blue1, red2, green2, 
 
     _set_left_breath_dual(self, red1, green1, blue1, red2, green2, blue2)
     _set_right_breath_dual(self, red1, green1, blue1, red2, green2, blue2)
-
