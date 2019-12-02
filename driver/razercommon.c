@@ -21,7 +21,8 @@
  * USUALLY index = 0x02
  * FIREFLY is 0
  */
-int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint report_index, ulong wait_min, ulong wait_max)
+int razer_send_control_msg(struct usb_device *usb_dev, void const *data, uint report_index, ulong wait_min,
+                           ulong wait_max)
 {
     uint request = HID_REQ_SET_REPORT; // 0x09
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
@@ -48,7 +49,7 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
     usleep_range(wait_min, wait_max);
 
     kfree(buf);
-    if(len!=size)
+    if (len!=size)
         printk(KERN_WARNING "razer driver: Device data transfer failed.");
 
     return ((len < 0) ? len : ((len != size) ? -EIO : 0));
@@ -71,7 +72,8 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
  *
  * Returns 0 when successful, 1 if the report length is invalid.
  */
-int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, ulong wait_min, ulong wait_max)
+int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct razer_report *request_report,
+                           uint response_index, struct razer_report *response_report, ulong wait_min, ulong wait_max)
 {
     uint request = HID_REQ_GET_REPORT; // 0x01
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN; // 0xA1
@@ -105,7 +107,7 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
     kfree(buf);
 
     // Error if report is wrong length
-    if(len != 90) {
+    if (len != 90) {
         printk(KERN_WARNING "razer driver: Invalid USB response. USB Report length: %d\n", len);
         result = 1;
     }
@@ -125,12 +127,11 @@ unsigned char razer_calculate_crc(struct razer_report *report)
     /*second to last byte of report is a simple checksum*/
     /*just xor all bytes up with overflow and you are done*/
     unsigned char crc = 0;
-    unsigned char *_report = (unsigned char*)report;
+    unsigned char *_report = (unsigned char *)report;
 
     unsigned int i;
-    for(i = 2; i < 88; i++) {
+    for (i = 2; i < 88; i++)
         crc ^= _report[i];
-    }
 
     return crc;
 }
@@ -168,9 +169,10 @@ struct razer_report get_empty_razer_report(void)
 /**
  * Print report to syslog
  */
-void print_erroneous_report(struct razer_report* report, char* driver_name, char* message)
+void print_erroneous_report(struct razer_report *report, char *driver_name, char *message)
 {
-    printk(KERN_WARNING "%s: %s. Start Marker: %02x id: %02x Num Params: %02x Reserved: %02x Command: %02x Params: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x .\n",
+    printk(KERN_WARNING
+           "%s: %s. Start Marker: %02x id: %02x Num Params: %02x Reserved: %02x Command: %02x Params: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x .\n",
            driver_name,
            message,
            report->status,
@@ -178,8 +180,10 @@ void print_erroneous_report(struct razer_report* report, char* driver_name, char
            report->data_size,
            report->command_class,
            report->command_id.id,
-           report->arguments[0], report->arguments[1], report->arguments[2], report->arguments[3], report->arguments[4], report->arguments[5],
-           report->arguments[6], report->arguments[7], report->arguments[8], report->arguments[9], report->arguments[10], report->arguments[11],
+           report->arguments[0], report->arguments[1], report->arguments[2], report->arguments[3], report->arguments[4],
+           report->arguments[5],
+           report->arguments[6], report->arguments[7], report->arguments[8], report->arguments[9], report->arguments[10],
+           report->arguments[11],
            report->arguments[12], report->arguments[13], report->arguments[14], report->arguments[15]);
 }
 
@@ -188,23 +192,24 @@ void print_erroneous_report(struct razer_report* report, char* driver_name, char
  */
 unsigned char clamp_u8(unsigned char value, unsigned char min, unsigned char max)
 {
-    if(value > max)
+    if (value > max)
         return max;
-    if(value < min)
+    if (value < min)
         return min;
     return value;
 }
 unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned short max)
 {
-    if(value > max)
+    if (value > max)
         return max;
-    if(value < min)
+    if (value < min)
         return min;
     return value;
 }
 
 
-int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait_min, ulong wait_max)
+int razer_send_control_msg_old_device(struct usb_device *usb_dev, void const *data, uint report_value,
+                                      uint report_index, uint report_size, ulong wait_min, ulong wait_max)
 {
     uint request = HID_REQ_SET_REPORT; // 0x09
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
@@ -229,7 +234,7 @@ int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *dat
     usleep_range(wait_min, wait_max);
 
     kfree(buf);
-    if(len!=report_size)
+    if (len!=report_size)
         printk(KERN_WARNING "razer driver: Device data transfer failed.");
 
     return ((len < 0) ? len : ((len != report_size) ? -EIO : 0));

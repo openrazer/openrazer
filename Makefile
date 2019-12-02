@@ -6,7 +6,7 @@ KERNELDIR?=/lib/modules/$(shell uname -r)/build
 DRIVERDIR?=$(shell pwd)/driver
 
 # Where kernel drivers are going to be installed
-MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/hid
+MODULEDIR?=/lib/modules/$(shell uname -r)/extra
 
 # Python dir
 PYTHONDIR?=$(shell python3 -c 'import sys; print(sys.path[-1])')

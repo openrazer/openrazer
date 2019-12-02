@@ -45,9 +45,11 @@ static unsigned char saved_brightness = 0;
 /**
  * Send report to the mousemat
  */
-int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report)
+int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report,
+                     struct razer_report *response_report)
 {
-    return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, RAZER_MOUSEMAT_WAIT_MIN_US, RAZER_MOUSEMAT_WAIT_MAX_US);
+    return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, RAZER_MOUSEMAT_WAIT_MIN_US,
+                                  RAZER_MOUSEMAT_WAIT_MAX_US);
 }
 
 /**
@@ -62,24 +64,24 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
 
     retval = razer_get_report(usb_dev, request_report, &response_report);
 
-    if(retval == 0) {
+    if (retval == 0) {
         // Check the packet number, class and command are the same
-        if(response_report.remaining_packets != request_report->remaining_packets ||
-           response_report.command_class != request_report->command_class ||
-           response_report.command_id.id != request_report->command_id.id) {
+        if (response_report.remaining_packets != request_report->remaining_packets ||
+            response_report.command_class != request_report->command_class ||
+            response_report.command_id.id != request_report->command_id.id) {
             print_erroneous_report(&response_report, "razermousemat", "Response doesn't match request");
-//		} else if (response_report.status == RAZER_CMD_BUSY) {
-//			print_erroneous_report(&response_report, "razermousemat", "Device is busy");
-        } else if (response_report.status == RAZER_CMD_FAILURE) {
+            //		} else if (response_report.status == RAZER_CMD_BUSY) {
+            //			print_erroneous_report(&response_report, "razermousemat", "Device is busy");
+        } else if (response_report.status == RAZER_CMD_FAILURE)
             print_erroneous_report(&response_report, "razermousemat", "Command failed");
-        } else if (response_report.status == RAZER_CMD_NOT_SUPPORTED) {
+
+        else if (response_report.status == RAZER_CMD_NOT_SUPPORTED)
             print_erroneous_report(&response_report, "razermousemat", "Command not supported");
-        } else if (response_report.status == RAZER_CMD_TIMEOUT) {
+
+        else if (response_report.status == RAZER_CMD_TIMEOUT)
             print_erroneous_report(&response_report, "razermousemat", "Command timed out");
-        }
-    } else {
+    } else
         print_erroneous_report(&response_report, "razermousemat", "Invalid Report Length");
-    }
 
     return response_report;
 }
@@ -119,7 +121,8 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
  *
  * Sets the brightness to the ASCII number written to this file.
  */
-static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device_attribute *attr, const char *buf,
+        size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -224,7 +227,8 @@ static ssize_t razer_attr_read_version(struct device *dev, struct device_attribu
  *
  * No effect is activated whenever this file is written to
  */
-static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attribute *attr, const char *buf,
+        size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -252,7 +256,8 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
  * When 1 is written (as a character, 0x31) the wave effect is displayed moving anti clockwise
  * if 2 is written (0x32) then the wave effect goes clockwise
  */
-static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf,
+        size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -268,7 +273,8 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
  *
  * Specrum effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf,
+        size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -295,7 +301,8 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
  *
  * Sets reactive mode when this file is written to. A speed byte and 3 RGB bytes should be written
  */
-static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_attribute *attr, const char *buf,
+        size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -311,15 +318,14 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
             break;
 
         default:
-            report = razer_chroma_standard_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+            report = razer_chroma_standard_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb *)&buf[1]);
             break;
         }
 
         razer_send_payload(usb_dev, &report);
 
-    } else {
+    } else
         printk(KERN_WARNING "razermousemat: Reactive only accepts Speed, RGB (4byte)");
-    }
     return count;
 }
 
@@ -328,7 +334,8 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
  *
  * It triggers the mouse pad when written to
  */
-static ssize_t razer_attr_write_mode_reactive_trigger(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mode_reactive_trigger(struct device *dev, struct device_attribute *attr,
+        const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -356,7 +363,8 @@ static ssize_t razer_attr_write_mode_reactive_trigger(struct device *dev, struct
 /**
  * Write device file "mode_breath"
  */
-static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf,
+        size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -365,13 +373,14 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
-        switch(count) {
+        switch (count) {
         case 3: // Single colour mode
             report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
             break;
 
         case 6: // Dual colour mode
-            report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
+            report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0],
+                     (struct razer_rgb *)&buf[3]);
             break;
 
         default: // "Random" colour mode
@@ -381,13 +390,14 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
         break;
 
     default:
-        switch(count) {
+        switch (count) {
         case 3: // Single colour mode
-            report = razer_chroma_standard_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+            report = razer_chroma_standard_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb *)&buf[0]);
             break;
 
         case 6: // Dual colour mode
-            report = razer_chroma_standard_matrix_effect_breathing_dual(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            report = razer_chroma_standard_matrix_effect_breathing_dual(VARSTORE, BACKLIGHT_LED, (struct razer_rgb *)&buf[0],
+                     (struct razer_rgb *)&buf[3]);
             break;
 
         default: // "Random" colour mode
@@ -407,7 +417,8 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
  *
  * Sets the mousemat to custom mode whenever the file is written to
  */
-static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_attribute *attr, const char *buf,
+        size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -434,7 +445,8 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
  *
  * Set the mousemat to static mode when 3 RGB bytes are written
  */
-static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_attribute *attr, const char *buf,
+        size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -448,14 +460,13 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
             break;
 
         default:
-            report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+            report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb *)&buf[0]);
             break;
         }
 
         razer_send_payload(usb_dev, &report);
-    } else {
+    } else
         printk(KERN_WARNING "razermousemat: Static mode only accepts RGB (3byte)");
-    }
 
     return count;
 }
@@ -473,7 +484,8 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
  * Start is 0x00
  * Stop is 0x00
  */
-static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_attribute *attr, const char *buf,
+        size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -486,8 +498,8 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 
     //printk(KERN_ALERT "razermousemat: Total count: %d\n", (unsigned char)count);
 
-    while(offset < count) {
-        if(offset + 3 > count) {
+    while (offset < count) {
+        if (offset + 3 > count) {
             printk(KERN_ALERT "razermousemat: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
             break;
         }
@@ -499,29 +511,29 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 
         // printk(KERN_ALERT "razermousemat: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
 
-        if(row_id != 0) {
+        if (row_id != 0) {
             printk(KERN_ALERT "razermousemat: Row ID must be 0\n");
             break;
         }
 
-        if(start_col > stop_col) {
+        if (start_col > stop_col) {
             printk(KERN_ALERT "razermousemat: Start column is greater than end column\n");
             break;
         }
 
-        if(offset + row_length > count) {
+        if (offset + row_length > count) {
             printk(KERN_ALERT "razermousemat: Not enough RGB to fill row\n");
             break;
         }
 
-        switch(usb_dev->descriptor.idProduct) {
+        switch (usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
             report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char *)&buf[offset]);
             break;
 
         default:
-            report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
+            report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char *)&buf[offset]);
             break;
         }
 
@@ -538,18 +550,18 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 /**
  * Write device file "device_mode"
  */
-static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_attribute *attr, const char *buf,
+        size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
 
-    if(count == 2) {
+    if (count == 2) {
         report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
         razer_send_payload(usb_dev, &report);
-    } else {
+    } else
         printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.");
-    }
 
     return count;
 }
@@ -584,7 +596,8 @@ static DEVICE_ATTR(device_type,             0440, razer_attr_read_device_type,  
 static DEVICE_ATTR(device_serial,           0440, razer_attr_read_get_serial,           NULL);
 static DEVICE_ATTR(device_mode,             0660, razer_attr_read_device_mode,          razer_attr_write_device_mode);
 static DEVICE_ATTR(version,                 0440, razer_attr_read_version,              NULL);
-static DEVICE_ATTR(matrix_brightness,       0664, razer_attr_read_set_brightness,       razer_attr_write_set_brightness);
+static DEVICE_ATTR(matrix_brightness,       0664, razer_attr_read_set_brightness,
+                   razer_attr_write_set_brightness);
 static DEVICE_ATTR(matrix_effect_none,      0220, NULL,                                 razer_attr_write_mode_none);
 static DEVICE_ATTR(matrix_effect_wave,      0220, NULL,                                 razer_attr_write_mode_wave);
 static DEVICE_ATTR(matrix_effect_spectrum,  0220, NULL,                                 razer_attr_write_mode_spectrum);
@@ -593,7 +606,8 @@ static DEVICE_ATTR(matrix_effect_breath,    0220, NULL,                         
 static DEVICE_ATTR(matrix_effect_custom,    0220, NULL,                                 razer_attr_write_mode_custom);
 static DEVICE_ATTR(matrix_effect_static,    0220, NULL,                                 razer_attr_write_mode_static);
 static DEVICE_ATTR(matrix_custom_frame,     0220, NULL,                                 razer_attr_write_set_key_row);
-static DEVICE_ATTR(matrix_reactive_trigger,  0220, NULL,                                 razer_attr_write_mode_reactive_trigger);
+static DEVICE_ATTR(matrix_reactive_trigger,  0220, NULL,
+                   razer_attr_write_mode_reactive_trigger);
 
 
 
@@ -611,15 +625,15 @@ static int razer_mousemat_probe(struct hid_device *hdev, const struct hid_device
     struct razer_mousemat_device *dev = NULL;
 
     dev = kzalloc(sizeof(struct razer_mousemat_device), GFP_KERNEL);
-    if(dev == NULL) {
+    if (dev == NULL) {
         dev_err(&intf->dev, "out of memory\n");
         retval = -ENOMEM;
         goto exit;
     }
 
-    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+    if (intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
 
-        switch(usb_dev->descriptor.idProduct) {
+        switch (usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
@@ -666,7 +680,7 @@ static int razer_mousemat_probe(struct hid_device *hdev, const struct hid_device
 
 
     retval = hid_parse(hdev);
-    if(retval)    {
+    if (retval)    {
         hid_err(hdev, "parse failed\n");
         goto exit_free;
     }
@@ -697,9 +711,9 @@ static void razer_mousemat_disconnect(struct hid_device *hdev)
 
     dev = hid_get_drvdata(hdev);
 
-    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+    if (intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
 
-        switch(usb_dev->descriptor.idProduct) {
+        switch (usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
             device_remove_file(&hdev->dev, &dev_attr_version);
@@ -746,9 +760,9 @@ static void razer_mousemat_disconnect(struct hid_device *hdev)
  * Device ID mapping table
  */
 static const struct hid_device_id razer_devices[] = {
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_FIREFLY) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED) },
     { }
 };
 
