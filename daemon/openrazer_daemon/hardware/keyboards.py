@@ -228,7 +228,7 @@ class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
     USB_PID = 0x0207
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_device_type_keypad', 'set_breath_random_effect', 'set_breath_single_effect',
-               'set_breath_dual_effect', 'set_static_effect', 'set_spectrum_effect', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
+               'set_breath_dual_effect', 'set_static_effect', 'set_spectrum_effect', 'set_wave_effect', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
                'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/607/607_orbweaver_chroma.png"

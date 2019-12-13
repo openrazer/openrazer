@@ -21,7 +21,6 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer BlackWidow Chroma                       |  1532:0203  |
 | Razer DeathStalker Chroma                     |  1532:0204  |
 | Razer Blade Stealth                           |  1532:0205  |
-| Razer Orbweaver Chroma                        |  1532:0207  |
 | Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |
 | Razer Blade QHD                               |  1532:020F  |
 | Razer Blade Pro (Late 2016)                   |  1532:0210  |
@@ -105,6 +104,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Nostromo                                |  1532:0111  |
 | Razer Orbweaver                               |  1532:0113  |
 | Razer Tartarus                                |  1532:0201  |
+| Razer Orbweaver Chroma                        |  1532:0207  |
 | Razer Tartarus Chroma                         |  1532:0208  |
 | Razer Core                                    |  1532:0215  |
 | Razer Chroma Mug Holder                       |  1532:0F07  |
