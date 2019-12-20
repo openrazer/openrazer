@@ -30,6 +30,9 @@
 #include "razercommon.h"
 #include "razerchromacommon.h"
 
+#include "razermousecalibration.h"
+
+
 /*
  * Version Information
  */
@@ -2495,6 +2498,152 @@ static ssize_t razer_attr_read_backlight_led_state(struct device *dev, struct de
 
 
 /**
+ * Write Calibration Mode ON (SET)
+ *
+ * SET calibration is activated whenever this file is written to
+ */
+static ssize_t razer_attr_write_calib_mode_on(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = {0};
+
+    switch(usb_dev->descriptor.idProduct) {
+   /* case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+        // For Philips Twin Eye sensors
+        report = razer_calib_set_mode(PHILIPS, CALIB_SET);
+        //report.transaction_id.id = 0x3f;
+        break;
+   */
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+        // For Pixart 3389 Sensor
+        report = razer_calib_set_mode(PIXART, CALIB_SET);
+        report.transaction_id.id = 0x1f;
+        break;
+    }
+
+    razer_send_payload(usb_dev, &report);
+    return count;
+}
+
+/**
+ * Write Calibration Mode OFF (RESET)
+ *
+ * RESET calibration is activated whenever this file is written to
+ */
+static ssize_t razer_attr_write_calib_mode_off(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = {0};
+
+    switch(usb_dev->descriptor.idProduct) {
+   /* case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+        // For Philips Twin Eye sensors
+        report = razer_calib_set_mode(PHILIPS, CALIB_RESET);
+        //report.transaction_id.id = 0x3f;
+        break;
+  */
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+        // For Pixart 3389 Sensor
+        report = razer_calib_set_mode(PIXART, CALIB_RESET);
+        report.transaction_id.id = 0x1f;
+        break;
+    }
+
+    razer_send_payload(usb_dev, &report);
+    return count;
+}
+
+/**
+ * Write Calibration Parameters
+ *
+ * Sends calibration parameters whenever this file is written to
+ */
+static ssize_t razer_attr_write_calib_parameters(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    unsigned char calib_parameters[];
+    struct razer_report report = {0};
+
+    switch(usb_dev->descriptor.idProduct) {
+    /* case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+        // For Philips Twin Eye sensors
+        report = razer_calib_set_parameters(PHILIPS, unsigned char calib_parameters[]);
+        //report.transaction_id.id = 0x3f;
+        break;
+    */
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+        // For Pixart 3389 Sensor
+        report = razer_calib_set_parameters(PIXART, calib_parameters[]);
+        report.transaction_id.id = 0x1f;
+        break;
+    }
+
+    razer_send_payload(usb_dev, &report);
+    return count;
+}
+
+/**
+ * Write Calibration START surface data acquisition
+ *
+ * In Calibration, START surface data acq. is activated whenever this file is written to
+ */
+static ssize_t razer_attr_write_calib_start_sda(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = {0};
+
+    switch(usb_dev->descriptor.idProduct) {
+    /* case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+        // For Philips Twin Eye sensors
+        report = razer_calib_start_surface_data_acquisition(PHILIPS, PHILIPS1);
+        //report.transaction_id.id = 0x3f;
+        break;
+    */
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+        // For Pixart 3389 Sensor
+        report = razer_calib_start_surface_data_acquisition(PIXART, PIXART1);
+        report.transaction_id.id = 0x1f;
+        break;
+    }
+
+    razer_send_payload(usb_dev, &report);
+    return count;
+}
+
+/**
+ * Read Calibration recommended surface data
+ *
+ * Read recommended surface data whenever the file is written to
+ */
+static ssize_t razer_attr_read_calib_recommended_sd(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+
+    switch (usb_dev->descriptor.idProduct) {
+    /* case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+        struct razer_report report = razer_calib_get_surface_data_acquisition(PHILIPS);
+        struct razer_report response = {0};
+        report.transaction_id.id = 0x3F;
+        break;
+    */
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+        struct razer_report report = razer_calib_get_surface_data_acquisition(PIXART);
+        struct razer_report response = {0};
+        report.transaction_id.id = 0x1F;
+        response = razer_send_payload(device->usb_dev, &report);
+        break;
+    }
+
+    return sprintf(buf, "%d:%d:%d:%d\n", response.arguments[2], response.arguments[3], response.arguments[4], response.arguments[10]);
+}
+
+
+
+/**
  * Set up the device driver files
  *
  * Read-only is  0444
@@ -2577,6 +2726,12 @@ static DEVICE_ATTR(right_matrix_effect_none,        0220, NULL,                 
 // For old-school led commands
 static DEVICE_ATTR(backlight_led_state,            0660, razer_attr_read_backlight_led_state, razer_attr_write_backlight_led_state);
 
+// For calibration commands
+static DEVICE_ATTR(calib_mode_on,             0220, NULL,                                  razer_attr_write_calib_mode_on);
+static DEVICE_ATTR(calib_mode_off,            0220, NULL,                                  razer_attr_write_calib_mode_off);
+static DEVICE_ATTR(calib_params,              0220, NULL,                                  razer_attr_write_calib_parameters);
+static DEVICE_ATTR(calib_start_sda,           0220, NULL,                                  razer_attr_write_calib_start_sda);
+static DEVICE_ATTR(calib_read_rsd,            0440, razer_attr_read_calib_recommended_sd,  NULL);
 
 
 /**
@@ -2737,6 +2892,11 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_calib_mode_on);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_calib_mode_off);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_calib_params);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_calib_start_sda);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_calib_read_rsd);
             break;
 
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -3060,6 +3220,11 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
+            device_remove_file(&hdev->dev, &dev_attr_calib_mode_on);
+            device_remove_file(&hdev->dev, &dev_attr_calib_mode_off);
+            device_remove_file(&hdev->dev, &dev_attr_calib_params);
+            device_remove_file(&hdev->dev, &dev_attr_calib_start_sda);
+            device_remove_file(&hdev->dev, &dev_attr_calib_read_rsd);
             break;
 
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:

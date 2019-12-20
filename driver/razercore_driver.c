@@ -29,6 +29,7 @@
 #include "razercore_driver.h"
 #include "razerchromacommon.h"
 
+#include "razemousecalibration.h"
 
 /*
  * Version Information
@@ -434,6 +435,91 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
 }
 
 
+/**
+ * Write Calibration Mode ON (SET)
+ *
+ * Sets the core to enable calibration mode whenever the file is written to
+ */
+static ssize_t razer_attr_write_calib_mode_on(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_core_device *device = dev_get_drvdata(dev);
+    struct razer_report report = razer_calib_set_mode(PIXART, CALIB_SET);
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Write Calibration Mode OFF (RESET)
+ *
+ * Sets the core to disable calibration mode whenever the file is written to
+ */
+static ssize_t razer_attr_write_calib_mode_off(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_core_device *device = dev_get_drvdata(dev);
+    struct razer_report report = razer_calib_set_mode(PIXART, CALIB_RESET);
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Write Calibration Parameters
+ *
+ * Sets the core to send calibration parameters whenever the file is written to
+ */
+static ssize_t razer_attr_write_calib_parameters(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_core_device *device = dev_get_drvdata(dev);
+    struct razer_report report = razer_calib_set_parameters(PIXART, unsigned char calib_parameters[]);
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Write Calibration START surface data acquisition
+ *
+ * Sets the core to start surface data acquisition whenever the file is written to
+ */
+static ssize_t razer_attr_write_calib_start_sda(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_core_device *device = dev_get_drvdata(dev);
+    struct razer_report report = razer_calib_start_surface_data_acquisition(PIXART, PIXART1);
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Read Calibration recommended surface data
+ *
+ * Sets the core to read calibration surface data whenever the file is written to
+ */
+static ssize_t razer_attr_read_calib_recommended_sd(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_core_device *device = dev_get_drvdata(dev);
+    struct razer_report report = razer_calib_get_surface_data_acquisition(PIXART);
+
+    mutex_lock(&device->lock);
+    response = razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return sprintf(buf, "%d:%d:%d:%d\n", response.arguments[2], response.arguments[3], response.arguments[4], response.arguments[10]);
+}
+
 
 
 /**
@@ -457,8 +543,11 @@ static DEVICE_ATTR(matrix_effect_breath,    0220, NULL,                         
 static DEVICE_ATTR(matrix_effect_custom,    0220, NULL,                                 razer_attr_write_mode_custom);
 static DEVICE_ATTR(matrix_effect_static,    0220, NULL,                                 razer_attr_write_mode_static);
 static DEVICE_ATTR(matrix_custom_frame,     0220, NULL,                                 razer_attr_write_set_key_row);
-
-
+static DEVICE_ATTR(calib_mode_on,           0220, NULL,                                 razer_attr_write_calib_mode_on);
+static DEVICE_ATTR(calib_mode_off,          0220, NULL,                                 razer_attr_write_calib_mode_off);
+static DEVICE_ATTR(calib_params,            0220, NULL,                                 razer_attr_write_calib_parameters);
+static DEVICE_ATTR(calib_start_sda,         0220, NULL,                                 razer_attr_write_calib_start_sda);
+static DEVICE_ATTR(calib_read_rsd,          0440, razer_attr_read_calib_recommended_sd, NULL);
 
 
 /**
@@ -499,6 +588,11 @@ static int razer_core_probe(struct hid_device *hdev, const struct hid_device_id 
     CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
     CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
     CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_calib_mode_on);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_calib_mode_off);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_calib_params);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_calib_start_sda);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_calib_read_rsd);
 
     dev_set_drvdata(&hdev->dev, dev);
     hid_set_drvdata(hdev, dev);
@@ -550,6 +644,11 @@ static void razer_core_disconnect(struct hid_device *hdev)
     device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
     device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
     device_remove_file(&hdev->dev, &dev_attr_device_mode);
+    device_remove_file(&hdev->dev, &dev_attr_calib_mode_on);
+    device_remove_file(&hdev->dev, &dev_attr_calib_mode_off);
+    device_remove_file(&hdev->dev, &dev_attr_calib_params);
+    device_remove_file(&hdev->dev, &dev_attr_calib_start_sda);
+    device_remove_file(&hdev->dev, &dev_attr_calib_read_rsd);
 
     hid_hw_stop(hdev);
     kfree(dev);
