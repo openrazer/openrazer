@@ -280,8 +280,7 @@ class RazerDaemon(DBusService):
         self._config['Startup']['devices_off_on_screensaver'] = 'True' if self.get_off_on_screensaver() else 'False'
 
         for device in self._razer_devices:
-            self._config[device.dbus.storage_name] = {
-            }
+            self._config[device.dbus.storage_name] = {}
             for i in device.dbus.ZONES:
                 if device.dbus.zone[i]["present"]:
                     self._config[device.dbus.storage_name][i + '_active'] = str(device.dbus.zone[i]["active"])
