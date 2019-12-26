@@ -89,6 +89,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 ### Mousemats
 | Device                                        | USB VID:PID |
 | --------------------------------------------- | ----------- |
+| Razer Firefly Hyperflux                       |  1532:0068  |
 | Razer Firefly                                 |  1532:0C00  |
 | Razer Goliathus                               |  1532:0C01  |
 | Razer Goliathus Extended                      |  1532:0C02  |
