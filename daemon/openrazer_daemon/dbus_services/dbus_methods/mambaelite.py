@@ -10,6 +10,7 @@ from openrazer_daemon.dbus_services.dbus_methods.lanceheadte import get_left_bri
     set_left_breath_single as _set_left_breath_single, set_right_breath_single as _set_right_breath_single, \
     set_left_breath_dual as _set_left_breath_dual, set_right_breath_dual as _set_right_breath_dual
 
+
 @endpoint('razer.device.lighting.brightness', 'getBrightness', out_sig='d')
 def get_brightness_mamba_elite(self):
     """
