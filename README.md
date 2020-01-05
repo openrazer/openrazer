@@ -21,7 +21,6 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer BlackWidow Chroma                       |  1532:0203  |
 | Razer DeathStalker Chroma                     |  1532:0204  |
 | Razer Blade Stealth                           |  1532:0205  |
-| Razer Orbweaver Chroma                        |  1532:0207  |
 | Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |
 | Razer Blade QHD                               |  1532:020F  |
 | Razer Blade Pro (Late 2016)                   |  1532:0210  |
@@ -59,11 +58,13 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Abyssus 1800                            |  1532:0020  |
 | Razer Mamba 2012 (Wired)                      |  1532:0024  |
 | Razer Mamba 2012 (Wireless)                   |  1532:0025  |
+| Razer Naga 2012                               |  1532:002E  |
 | Razer Imperator 2012                          |  1532:002F  |
 | Razer Ouroboros 2012                          |  1532:0032  |
 | Razer Taipan                                  |  1532:0034  |
 | Razer Naga Hex (Red)                          |  1532:0036  |
 | Razer DeathAdder 2013                         |  1532:0037  |
+| Razer DeathAdder 1800                         |  1532:0038  |
 | Razer Orochi 2013                             |  1532:0039  |
 | Razer Naga 2014                               |  1532:0040  |
 | Razer Naga Hex                                |  1532:0041  |
@@ -105,6 +106,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Nostromo                                |  1532:0111  |
 | Razer Orbweaver                               |  1532:0113  |
 | Razer Tartarus                                |  1532:0201  |
+| Razer Orbweaver Chroma                        |  1532:0207  |
 | Razer Tartarus Chroma                         |  1532:0208  |
 | Razer Core                                    |  1532:0215  |
 | Razer Chroma Mug Holder                       |  1532:0F07  |
@@ -131,6 +133,7 @@ Packages are available for these distributions:
 * [Fedora](https://openrazer.github.io/#fedora)
 * [openSUSE](https://openrazer.github.io/#opensuse)
 * [Gentoo](https://openrazer.github.io/#gentoo)
+* [NixOS](https://openrazer.github.io/#nixos)
 * [Solus](https://openrazer.github.io/#solus)
 * [Void Linux](https://openrazer.github.io/#voidlinux)
 * [Red Hat / CentOS](https://openrazer.github.io/#redhat) (unofficial)

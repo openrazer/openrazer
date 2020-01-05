@@ -518,6 +518,62 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
         self.disable_notify = False
 
 
+class RazerNaga2012(__RazerDevice):
+    """
+    Class for the Razer Naga 2012
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Naga-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x002E
+    DEDICATED_MACRO_KEYS = True
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
+               'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active', 'set_backlight_active', 'get_backlight_active']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/39/razer-naga-gallery-1.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
+    RAZER_URLS = {
+        "top_img": "https://assets.razerzone.com/eeimages/products/39/razer-naga-gallery-4.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/39/razer-naga-gallery-3.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/39/razer-naga-gallery-1.png"
+    }
+
+    DPI_MAX = 5600
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self), _da_get_backlight_active(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_active(self, False)
+        _da_set_scroll_active(self, False)
+        _da_set_backlight_active(self, False)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_active = self.suspend_args.get('active', (True, True, True))[0]
+        scroll_active = self.suspend_args.get('active', (True, True, True))[1]
+        backlight_active = self.suspend_args.get('active', (True, True, True))[2]
+
+        self.disable_notify = True
+        _da_set_logo_active(self, logo_active)
+        _da_set_scroll_active(self, scroll_active)
+        _da_set_backlight_active(self, backlight_active)
+        self.disable_notify = False
+
+
 class RazerNagaChroma(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Naga Chroma
@@ -1281,3 +1337,21 @@ class RazerDeathAdderEssential(__RazerDeviceSpecialBrightnessSuspend):
         _da_set_logo_brightness(self, logo_brightness)
         _da_set_scroll_brightness(self, scroll_brightness)
         self.disable_notify = False
+
+
+class RazerDeathAdder1800(__RazerDevice):
+    """
+    Class for the Razer DeathAdder 1800
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0038
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
+               'get_logo_active', 'set_logo_active']
+
+    DPI_MAX = 1800
+
+    DEVICE_IMAGE = "https://rzrwarranty.s3.amazonaws.com/a7daf40ad78c9584a693e310effa956019cdcd081391f93f71a7cd36d3dc577e.png"
+
+    RAZER_URLS = {
+        "top_img": DEVICE_IMAGE
+    }

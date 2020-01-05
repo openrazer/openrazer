@@ -10,6 +10,7 @@ pylib/docs/_build
 *.ko
 *.obj
 *.elf
+*.o.d
 
 # Precompiled Headers
 *.gch
@@ -46,6 +47,7 @@ pylib/docs/_build
 
 # clion files
 cmake-build-debug/*
+compile_commands.json
 
 # Cached/Pre-compiled Python files
 *.pyc
