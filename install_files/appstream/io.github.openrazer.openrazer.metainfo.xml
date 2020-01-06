@@ -20,11 +20,13 @@
     <modalias>usb:v1532p0020d*</modalias>
     <modalias>usb:v1532p0024d*</modalias>
     <modalias>usb:v1532p0025d*</modalias>
+    <modalias>usb:v1532p002Ed*</modalias>
     <modalias>usb:v1532p002Fd*</modalias>
     <modalias>usb:v1532p0032d*</modalias>
     <modalias>usb:v1532p0034d*</modalias>
     <modalias>usb:v1532p0036d*</modalias>
     <modalias>usb:v1532p0037d*</modalias>
+    <modalias>usb:v1532p0038d*</modalias>
     <modalias>usb:v1532p0039d*</modalias>
     <modalias>usb:v1532p0040d*</modalias>
     <modalias>usb:v1532p0041d*</modalias>
@@ -43,6 +45,7 @@
     <modalias>usb:v1532p005Ed*</modalias>
     <modalias>usb:v1532p0060d*</modalias>
     <modalias>usb:v1532p0067d*</modalias>
+    <modalias>usb:v1532p0068d*</modalias>
     <modalias>usb:v1532p006Ed*</modalias>
     <modalias>usb:v1532p010Dd*</modalias>
     <modalias>usb:v1532p010Ed*</modalias>
@@ -74,6 +77,7 @@
     <modalias>usb:v1532p0224d*</modalias>
     <modalias>usb:v1532p0225d*</modalias>
     <modalias>usb:v1532p0226d*</modalias>
+    <modalias>usb:v1532p0227d*</modalias>
     <modalias>usb:v1532p0228d*</modalias>
     <modalias>usb:v1532p022Ad*</modalias>
     <modalias>usb:v1532p022Dd*</modalias>
