@@ -1123,7 +1123,7 @@ class RazerBlade2018Base(_RippleKeyboard):
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
 
     USB_VID = 0x1532
-    USB_PID = 0x023b
+    USB_PID = 0x023B
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 16]
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
@@ -1169,7 +1169,7 @@ class RazerBlade2019Adv(_RippleKeyboard):
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
 
     USB_VID = 0x1532
-    USB_PID = 0x023a
+    USB_PID = 0x023A
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 16]
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
