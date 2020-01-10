@@ -21,6 +21,9 @@ dir=$(dirname $0)
 # Check for duplicate fake driver serials
 ./$dir/test-duplicate-fake-driver-serials.sh
 
+# Check for hex casing issues
+./$dir/test-hex-casing.sh
+
 # Launch dbus
 eval $(dbus-launch --sh-syntax)
 
