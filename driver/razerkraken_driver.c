@@ -39,6 +39,11 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
 
+#if defined(WIN32) || defined(_WIN64)
+#undef DEVICE_ATTR
+#define DEVICE_ATTR(_name, _mode, _show, _store) DEVICE_ATTR1(kraken, _name, _mode, _show, _store)
+#endif
+
 /**
  * Print report to syslog
  */
