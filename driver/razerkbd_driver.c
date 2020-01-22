@@ -42,6 +42,11 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
 
+#if defined(WIN32) || defined(_WIN64)
+#undef DEVICE_ATTR
+#define DEVICE_ATTR(_name, _mode, _show, _store) DEVICE_ATTR1(kbd, _name, _mode, _show, _store)
+#endif
+
 // M1-M5 is F13-F17
 #define RAZER_MACRO_KEY 188 // 188 = KEY_F18
 #define RAZER_GAME_KEY 189 // 189 = KEY_F19
@@ -73,7 +78,7 @@ static const struct razer_key_translation chroma_keys[] = {
 
     // Custom bind
     { KEY_KPENTER, KEY_CALC },
-    { }
+    { 0 }
 };
 
 static const struct razer_key_translation chroma_keys_2[] = {
@@ -90,7 +95,7 @@ static const struct razer_key_translation chroma_keys_2[] = {
     { KEY_RIGHTALT,    RAZER_MACRO_KEY },
 
     { KEY_PAUSE, KEY_SLEEP },
-    { }
+    { 0 }
 };
 
 /**
