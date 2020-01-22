@@ -13,6 +13,7 @@
 #define __HID_RAZER_ACCESSORY_H
 
 #define USB_DEVICE_ID_RAZER_CHROMA_MUG 0x0f07
+#define USB_DEVICE_ID_RAZER_CHROMA_HDK 0x0F09
 
 struct razer_accessory_device {
     struct usb_device *usb_dev;
