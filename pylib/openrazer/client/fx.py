@@ -73,7 +73,7 @@ class RazerFX(BaseRazerFX):
         """
         Get current effect
 
-        :return: Effect name
+        :return: Effect name ("static", "spectrum", etc.)
         :rtype: str
         """
         return self._lighting_dbus.getEffect()
@@ -83,7 +83,7 @@ class RazerFX(BaseRazerFX):
         """
         Get current effect colors
 
-        :return: Effect colors
+        :return: Effect colors (an array of 9 bytes, for 3 colors in RGB format)
         :rtype: bytearray
         """
         return bytes(self._lighting_dbus.getEffectColors())
@@ -93,7 +93,7 @@ class RazerFX(BaseRazerFX):
         """
         Get current effect speed
 
-        :return: Effect speed
+        :return: Effect speed (a value between 0 and 3)
         :rtype: int
         """
         return self._lighting_dbus.getEffectSpeed()
@@ -103,7 +103,7 @@ class RazerFX(BaseRazerFX):
         """
         Get current wave direction
 
-        :return: Wave direction
+        :return: Wave direction (WAVE_LEFT or WAVE_RIGHT)
         :rtype: int
         """
         return self._lighting_dbus.getWaveDir()
@@ -689,7 +689,7 @@ class SingleLed(BaseRazerFX):
         """
         Get current effect
 
-        :return: Effect name
+        :return: Effect name ("static", "spectrum", etc.)
         :rtype: str
         """
         return self._getattr('get#Effect')
@@ -699,7 +699,7 @@ class SingleLed(BaseRazerFX):
         """
         Get current effect colors
 
-        :return: Effect colors
+        :return: Effect colors (an array of 9 bytes, for 3 colors in RGB format)
         :rtype: bytearray
         """
         return bytes(self._getattr('get#EffectColors'))
@@ -709,7 +709,7 @@ class SingleLed(BaseRazerFX):
         """
         Get current effect speed
 
-        :return: Effect speed
+        :return: Effect speed (a value between 0 and 3)
         :rtype: int
         """
         return self._getattr('get#EffectSpeed')
@@ -719,7 +719,7 @@ class SingleLed(BaseRazerFX):
         """
         Get current wave direction
 
-        :return: Wave direction
+        :return: Wave direction (WAVE_LEFT or WAVE_RIGHT)
         :rtype: int
         """
         return self._getattr('get#WaveDir')
