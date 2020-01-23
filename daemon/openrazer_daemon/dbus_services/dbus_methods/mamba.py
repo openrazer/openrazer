@@ -1,5 +1,6 @@
 """
 BlackWidow Chroma Effects
+Yeah the BlackWidow Chroma is a mouse
 """
 import math
 import struct
@@ -161,19 +162,6 @@ def set_dpi_xy(self, dpi_x, dpi_y):
 def get_dpi_xy(self):
     """
     get the DPI on the mouse
-
-    :return: List of X, Y DPI
-    :rtype: list of int
-    """
-    self.logger.debug("DBus call get_dpi_xy")
-
-    return self.dpi
-
-
-@endpoint('razer.device.dpi', 'getDPIHardware', out_sig='ai')
-def get_dpi_hardware_xy(self):
-    """
-    get the DPI on the mouse (hardware)
 
     :return: List of X, Y DPI
     :rtype: list of int
