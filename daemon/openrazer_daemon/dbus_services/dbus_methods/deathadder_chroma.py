@@ -11,11 +11,7 @@ def get_backlight_active(self):
     """
     self.logger.debug("DBus call get_backlight_active")
 
-    driver_path = self.get_driver_path('backlight_led_state')
-
-    with open(driver_path, 'r') as driver_file:
-        active = int(driver_file.read().strip())
-        return active == 1
+    return self.zone["backlight"]["active"]
 
 
 @endpoint('razer.device.lighting.backlight', 'setBacklightActive', in_sig='b')
@@ -50,11 +46,7 @@ def get_logo_active(self):
     """
     self.logger.debug("DBus call get_logo_active")
 
-    driver_path = self.get_driver_path('logo_led_state')
-
-    with open(driver_path, 'r') as driver_file:
-        active = int(driver_file.read().strip())
-        return active == 1
+    return self.zone["logo"]["active"]
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoActive', in_sig='b')
@@ -258,11 +250,7 @@ def get_scroll_active(self):
     """
     self.logger.debug("DBus call get_scroll_active")
 
-    driver_path = self.get_driver_path('scroll_led_state')
-
-    with open(driver_path, 'r') as driver_file:
-        active = int(driver_file.read().strip())
-        return active == 1
+    return self.zone["scroll"]["active"]
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollActive', in_sig='b')
