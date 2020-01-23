@@ -128,8 +128,17 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Base Station Chroma\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        device_type = "Razer Nommo Pro\n";
+        break;
+
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        device_type = "Razer Nommo Chroma\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
+        break;
     }
 
     return sprintf(buf, device_type);
@@ -172,6 +181,8 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
 
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
         break;
 
@@ -206,6 +217,8 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
 
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         report = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
         break;
 
@@ -269,6 +282,8 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
 
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         report = razer_chroma_extended_matrix_effect_custom_frame();
         break;
 
@@ -302,6 +317,8 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 
         case USB_DEVICE_ID_RAZER_CHROMA_HDK:
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
             break;
 
@@ -341,6 +358,8 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
 
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         report = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
         break;
 
@@ -377,6 +396,8 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 
         case USB_DEVICE_ID_RAZER_CHROMA_HDK:
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
             report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
             break;
 
@@ -394,6 +415,8 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 
         case USB_DEVICE_ID_RAZER_CHROMA_HDK:
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
             report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0], (struct razer_rgb*) & buf[3]);
             break;
 
@@ -411,6 +434,8 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 
         case USB_DEVICE_ID_RAZER_CHROMA_HDK:
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
             report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
             break;
 
@@ -485,6 +510,8 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 
         case USB_DEVICE_ID_RAZER_CHROMA_HDK:
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
             report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             break;
 
@@ -524,6 +551,8 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
 
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         response_report = razer_send_payload(device->usb_dev, &report);
         strncpy(&serial_string[0], &response_report.arguments[0], 22);
         serial_string[22] = '\0';
@@ -643,6 +672,8 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
 
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         report = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         break;
 
@@ -775,6 +806,7 @@ static int razer_input_mapping(struct hid_device *hdev, struct hid_input *hi, st
 static int razer_accessory_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
     int retval = 0;
+    unsigned char expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_accessory_device *dev = NULL;
@@ -791,7 +823,20 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     // Init data
     razer_accessory_init(dev, intf, hdev);
 
-    if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_CHROMA_MUG:
+    case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+    case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+        expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
+        break;
+
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        expected_protocol = USB_INTERFACE_PROTOCOL_KEYBOARD;
+        break;
+    }
+
+    if(dev->usb_interface_protocol == expected_protocol) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);                               // Get driver version
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);                                  // Test mode
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
@@ -847,13 +892,27 @@ exit_free:
  */
 static void razer_accessory_disconnect(struct hid_device *hdev)
 {
+    unsigned char expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
     struct razer_accessory_device *dev;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     dev = hid_get_drvdata(hdev);
 
-    if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_CHROMA_MUG:
+    case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+    case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+        expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
+        break;
+
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        expected_protocol = USB_INTERFACE_PROTOCOL_KEYBOARD;
+        break;
+    }
+
+    if(dev->usb_interface_protocol == expected_protocol) {
         device_remove_file(&hdev->dev, &dev_attr_version);                               // Get driver version
         device_remove_file(&hdev->dev, &dev_attr_test);                                  // Test mode
         device_remove_file(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
@@ -916,6 +975,8 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_MUG) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_HDK) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_BASE) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_PRO) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_CHROMA) },
     { 0 }
 };
 
