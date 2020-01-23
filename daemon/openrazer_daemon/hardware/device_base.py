@@ -199,14 +199,14 @@ class RazerDevice(DBusService):
         if self.config.has_section(self.storage_name):
             if 'set_dpi_xy' in self.METHODS:
                 try:
-                    self.dpi[0] = self.config[self.storage_name]['dpi_x']
-                    self.dpi[1] = self.config[self.storage_name]['dpi_y']
+                    self.dpi[0] = int(self.config[self.storage_name]['dpi_x'])
+                    self.dpi[1] = int(self.config[self.storage_name]['dpi_y'])
                 except KeyError:
                     pass
 
             if 'set_poll_rate' in self.METHODS:
                 try:
-                    self.poll_rate = self.config[self.storage_name]['poll_rate']
+                    self.poll_rate = int(self.config[self.storage_name]['poll_rate'])
                 except KeyError:
                     pass
 
@@ -805,6 +805,17 @@ class RazerDevice(DBusService):
         Close any resources opened by subclasses
         """
         if not self._is_closed:
+            # If this is a mouse, retrieve current DPI for local storage
+            # in case the user has changed the DPI on-the-fly
+            # (e.g. the DPI buttons)
+            if 'get_dpi_xy' in self.METHODS:
+                dpi_func = getattr(self, "getDPI", None)
+                if dpi_func is not None:
+                    self.logger.info("Getting DPI for %s", self.__class__.__name__)
+                    self.logger.info("Values before %s", self.dpi)
+                    self.dpi = dpi_func()
+                    self.logger.info("Values after %s", self.dpi)
+
             self._close()
 
             self._is_closed = True

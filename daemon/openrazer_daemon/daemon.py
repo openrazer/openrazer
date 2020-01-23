@@ -281,6 +281,13 @@ class RazerDaemon(DBusService):
 
         for device in self._razer_devices:
             self._config[device.dbus.storage_name] = {}
+            if 'set_dpi_xy' in device.dbus.METHODS:
+                self._config[device.dbus.storage_name]['dpi_x'] = str(device.dbus.dpi[0])
+                self._config[device.dbus.storage_name]['dpi_y'] = str(device.dbus.dpi[1])
+
+            if 'set_poll_rate' in device.dbus.METHODS:
+                self._config[device.dbus.storage_name]['poll_rate'] = str(device.dbus.poll_rate)
+
             for i in device.dbus.ZONES:
                 if device.dbus.zone[i]["present"]:
                     self._config[device.dbus.storage_name][i + '_active'] = str(device.dbus.zone[i]["active"])
