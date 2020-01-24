@@ -842,10 +842,7 @@ class RazerDevice(DBusService):
                 if dpi_func == None:
                     dpi_func = None
                 else:
-                    self.logger.info("Getting DPI for %s", self.__class__.__name__)
-                    self.logger.info("Values before %s", self.dpi)
                     self.dpi = dpi_func()
-                    self.logger.info("Values after %s", self.dpi)
 
             self._close()
 

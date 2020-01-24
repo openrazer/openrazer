@@ -170,9 +170,15 @@ def get_dpi_xy(self):
 
     driver_path = self.get_driver_path('dpi')
 
-    with open(driver_path, 'r') as driver_file:
-        result = driver_file.read()
-        dpi = [int(dpi) for dpi in result.strip().split(':')]
+    # try retrieving DPI from the hardware.
+    # if we can't (e.g. because the mouse has been disconnected)
+    # return the value in local storage.
+    try:
+        with open(driver_path, 'r') as driver_file:
+            result = driver_file.read()
+            dpi = [int(dpi) for dpi in result.strip().split(':')]
+    except FileNotFoundError:
+        return self.dpi
 
     return dpi
 
