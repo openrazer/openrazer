@@ -135,7 +135,7 @@ class RazerDevice(DBusService):
             ('razer.device.misc', 'getVidPid', self.get_vid_pid, None, 'ai'),
             ('razer.device.misc', 'getDriverVersion', openrazer_daemon.dbus_services.dbus_methods.version, None, 's'),
             ('razer.device.misc', 'hasDedicatedMacroKeys', self.dedicated_macro_keys, None, 'b'),
-            ('razer.device.misc', 'restoreLastEffect', self.restore_effect, None, None),
+            ('razer.device.lighting.chroma', 'restoreLastEffect', self.restore_effect, None, None),
         }
 
         effect_methods = {

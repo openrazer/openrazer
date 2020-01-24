@@ -652,6 +652,12 @@ class RazerAdvancedFX(BaseRazerFX):
             else:
                 raise ValueError("RGB must be an RGB tuple")
 
+    def restore(self):
+        """
+        Restore the device to the last effect
+        """
+        self._lighting_dbus.restoreLastEffect()
+
 
 class SingleLed(BaseRazerFX):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, led_name='logo'):
