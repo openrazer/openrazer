@@ -32,13 +32,14 @@ def set_brightness(self, brightness):
 
     self.method_args['brightness'] = brightness
 
+    if brightness > 100:
+        brightness = 100
+    elif brightness < 0:
+        brightness = 0
+
     self.zone["backlight"]["brightness"] = brightness
 
     brightness = int(round(brightness * (255.0 / 100.0)))
-    if brightness > 255:
-        brightness = 255
-    elif brightness < 0:
-        brightness = 0
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(brightness))

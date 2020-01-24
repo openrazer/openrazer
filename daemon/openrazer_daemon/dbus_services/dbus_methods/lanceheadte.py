@@ -76,13 +76,14 @@ def set_left_brightness(self, brightness):
 
     self.method_args['brightness'] = brightness
 
-    self.zone["left"]["brightness"] = brightness
-
-    brightness = int(round(brightness * (255.0 / 100.0)))
     if brightness > 255:
         brightness = 255
     elif brightness < 0:
         brightness = 0
+
+    self.zone["left"]["brightness"] = brightness
+
+    brightness = int(round(brightness * (255.0 / 100.0)))
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(brightness))
@@ -341,13 +342,14 @@ def set_right_brightness(self, brightness):
 
     self.method_args['brightness'] = brightness
 
-    self.zone["right"]["brightness"] = brightness
-
-    brightness = int(round(brightness * (255.0 / 100.0)))
     if brightness > 255:
         brightness = 255
     elif brightness < 0:
         brightness = 0
+
+    self.zone["right"]["brightness"] = brightness
+
+    brightness = int(round(brightness * (255.0 / 100.0)))
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(brightness))
