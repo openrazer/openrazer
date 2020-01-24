@@ -135,6 +135,7 @@ class RazerDevice(DBusService):
             ('razer.device.misc', 'getVidPid', self.get_vid_pid, None, 'ai'),
             ('razer.device.misc', 'getDriverVersion', openrazer_daemon.dbus_services.dbus_methods.version, None, 's'),
             ('razer.device.misc', 'hasDedicatedMacroKeys', self.dedicated_macro_keys, None, 'b'),
+            ('razer.device.misc', 'restoreLastEffect', self.restore_effect, None, None),
         }
 
         effect_methods = {
@@ -294,6 +295,56 @@ class RazerDevice(DBusService):
                     except KeyError:
                         pass
 
+                if 'set_' + i + '_active' in self.METHODS:
+                    active_func = getattr(self, "set" + self.capitalize_first_char(i) + "Active", None)
+                    if active_func is not None:
+                        active_func(self.zone[i]["active"])
+
+                # load brightness level
+                bright_func = None
+                if i == "backlight":
+                    bright_func = getattr(self, "setBrightness", None)
+                elif 'set_' + i + '_brightness' in self.METHODS:
+                    bright_func = getattr(self, "set" + self.capitalize_first_char(i) + "Brightness", None)
+
+                if bright_func is not None:
+                    bright_func(self.zone[i]["brightness"])
+
+        self.restore_effect()
+
+    def send_effect_event(self, effect_name, *args):
+        """
+        Send effect event
+
+        :param effect_name: Effect name
+        :type effect_name: str
+
+        :param args: Effect arguments
+        :type args: list
+        """
+        payload = ['effect', self, effect_name]
+        payload.extend(args)
+
+        self.notify_observers(tuple(payload))
+
+    def dedicated_macro_keys(self):
+        """
+        Returns if the device has dedicated macro keys
+
+        :return: Macro keys
+        :rtype: bool
+        """
+        return self.DEDICATED_MACRO_KEYS
+
+    def restore_effect(self):
+        """
+        Set the device to the current effect
+
+        This is used at launch time and can be called by applications
+        that use custom matrix frames after they exit
+        """
+        for i in self.ZONES:
+            if self.zone[i]["present"]:
                 # prepare the effect method name
                 # yes, we need to handle the backlight zone separately too.
                 # the backlight effect methods don't have a prefix.
@@ -355,45 +406,6 @@ class RazerDevice(DBusService):
                         effect_func(colors[0], colors[1], colors[2], colors[3], colors[4], colors[5], colors[6], colors[7], colors[8])
                     else:
                         self.logger.error("%s: Couldn't detect effect argument count!", self.__class__.__name__)
-
-                if 'set_' + i + '_active' in self.METHODS:
-                    active_func = getattr(self, "set" + self.capitalize_first_char(i) + "Active", None)
-                    if active_func is not None:
-                        active_func(self.zone[i]["active"])
-
-                # load brightness level
-                bright_func = None
-                if i == "backlight":
-                    bright_func = getattr(self, "setBrightness", None)
-                elif 'set_' + i + '_brightness' in self.METHODS:
-                    bright_func = getattr(self, "set" + self.capitalize_first_char(i) + "Brightness", None)
-
-                if bright_func is not None:
-                    bright_func(self.zone[i]["brightness"])
-
-    def send_effect_event(self, effect_name, *args):
-        """
-        Send effect event
-
-        :param effect_name: Effect name
-        :type effect_name: str
-
-        :param args: Effect arguments
-        :type args: list
-        """
-        payload = ['effect', self, effect_name]
-        payload.extend(args)
-
-        self.notify_observers(tuple(payload))
-
-    def dedicated_macro_keys(self):
-        """
-        Returns if the device has dedicated macro keys
-
-        :return: Macro keys
-        :rtype: bool
-        """
-        return self.DEDICATED_MACRO_KEYS
 
     def get_current_effect(self):
         """
