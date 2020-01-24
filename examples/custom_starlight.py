@@ -81,7 +81,7 @@ def starlight_effect(device):
         time.sleep(0.1)
 
         if quit:
-             break
+            break
 
     device.fx.advanced.restore()
 
