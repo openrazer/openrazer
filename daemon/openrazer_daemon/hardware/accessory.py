@@ -29,3 +29,25 @@ class RazerChromaMugHolder(_RazerDeviceBrightnessSuspend):
         "side_img": None,
         "perspective_img": "https://assets2.razerzone.com/images/mug-holder/e64e507b73e61c44789d996065fd9645-1500x1000mug_01.jpg"
     }
+
+
+class RazerChromaHDK(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Chroma Hardware Development Kit (HDK)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0F09
+    HAS_MATRIX = True
+    MATRIX_DIMS = [4, 15]
+    METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/chromahdk2017/788b689d471fedbc0c5a175592316657-gallery-08.jpg"
+
+    # Deprecated - RAZER_URLS be removed in future.
+    RAZER_URLS = {
+        "top_img": "https://assets2.razerzone.com/images/chromahdk2017/788b689d471fedbc0c5a175592316657-gallery-08.jpg",
+        "side_img": None,
+        "perspective_img": None
+    }
