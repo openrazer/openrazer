@@ -172,15 +172,15 @@ def get_device_type_headset(self):
 
 
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
-def get_device_type_mug(self):
+def get_device_type_accessory(self):
     """
     Get the device's type
 
-    :return:'mug'
+    :return:'accessory'
     :rtype: str
     """
     self.logger.debug("DBus call get_device_type")
-    return 'mug'
+    return 'accessory'
 
 
 @endpoint('razer.device.misc', 'hasMatrix', out_sig='b')

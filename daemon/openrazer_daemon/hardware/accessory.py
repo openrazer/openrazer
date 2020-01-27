@@ -16,7 +16,7 @@ class RazerChromaMugHolder(_RazerDeviceBrightnessSuspend):
     USB_PID = 0x0F07
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 15]
-    METHODS = ['get_device_type_mug',
+    METHODS = ['get_device_type_accessory',
                'set_static_effect', 'set_spectrum_effect', 'set_wave_effect', 'set_none_effect', 'set_breath_single_effect', 'set_breath_dual_effect', 'set_breath_random_effect', 'set_blinking_effect',
                'is_mug_present',
                'set_custom_effect', 'set_key_row']
