@@ -38,7 +38,7 @@ class RazerChromaHDK(_RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0F09
     HAS_MATRIX = True
-    MATRIX_DIMS = [4, 15]
+    MATRIX_DIMS = [4, 16]
     METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
                'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row']
