@@ -44,7 +44,7 @@ MODULE_LICENSE(DRIVER_LICENSE);
 /**
  * Send report to the mouse
  */
-int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report)
+static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report)
 {
     return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
 }
@@ -52,7 +52,7 @@ int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_re
 /**
  * Function to send to device, get response, and actually check the response
  */
-struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
+static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
     int retval = -1;
     struct razer_report response_report = {0};
@@ -87,7 +87,7 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
  * Specific functions for ancient devices
  *
  */
-void deathadder3_5g_set_scroll_led_state(struct razer_mouse_device *device, unsigned int enabled)
+static void deathadder3_5g_set_scroll_led_state(struct razer_mouse_device *device, unsigned int enabled)
 {
     if (enabled == 1) {
         device->da3_5g.leds |= 0x02;
@@ -100,7 +100,7 @@ void deathadder3_5g_set_scroll_led_state(struct razer_mouse_device *device, unsi
     mutex_unlock(&device->lock);
 }
 
-void deathadder3_5g_set_logo_led_state(struct razer_mouse_device *device, unsigned int enabled)
+static void deathadder3_5g_set_logo_led_state(struct razer_mouse_device *device, unsigned int enabled)
 {
     if (enabled == 1) {
         device->da3_5g.leds |= 0x01;
@@ -113,7 +113,7 @@ void deathadder3_5g_set_logo_led_state(struct razer_mouse_device *device, unsign
     mutex_unlock(&device->lock);
 }
 
-void deathadder3_5g_set_poll_rate(struct razer_mouse_device *device, unsigned short poll_rate)
+static void deathadder3_5g_set_poll_rate(struct razer_mouse_device *device, unsigned short poll_rate)
 {
     switch(poll_rate) {
     case 1000:
@@ -135,7 +135,7 @@ void deathadder3_5g_set_poll_rate(struct razer_mouse_device *device, unsigned sh
     mutex_unlock(&device->lock);
 }
 
-void deathadder3_5g_set_dpi(struct razer_mouse_device *device, unsigned short dpi)
+static void deathadder3_5g_set_dpi(struct razer_mouse_device *device, unsigned short dpi)
 {
     switch(dpi) {
     case 450:
@@ -2642,7 +2642,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 /**
  * Mouse init function
  */
-void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interface *intf, struct hid_device *hdev)
+static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interface *intf, struct hid_device *hdev)
 {
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned int rand_serial = 0;
@@ -3336,7 +3336,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_TRINITY) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_1800) },
-    { }
+    { 0 }
 };
 
 MODULE_DEVICE_TABLE(hid, razer_devices);
