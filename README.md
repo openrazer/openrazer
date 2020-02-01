@@ -34,12 +34,12 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Blade Stealth (Late 2016)               |  1532:0220  |
 | Razer BlackWidow Chroma V2                    |  1532:0221  |
 | Razer Blade (Late 2016)                       |  1532:0224  |
-| Razer Cynosa Chroma                           |  1532:022A  |
-| Razer Blade Stealth (Mid 2017)                |  1532:022D  |
 | Razer Blade Pro (2017)                        |  1532:0225  |
 | Razer Huntsman Elite                          |  1532:0226  |
 | Razer Huntsman                                |  1532:0227  |
 | Razer BlackWidow Elite                        |  1532:0228  |
+| Razer Cynosa Chroma                           |  1532:022A  |
+| Razer Blade Stealth (Mid 2017)                |  1532:022D  |
 | Razer Blade Pro FullHD (2017)                 |  1532:022F  |
 | Razer Blade Stealth (Late 2017)               |  1532:0232  |
 | Razer Blade 15 (2018)                         |  1532:0233  |
