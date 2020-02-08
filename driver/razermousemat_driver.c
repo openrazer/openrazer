@@ -45,7 +45,7 @@ static unsigned char saved_brightness = 0;
 /**
  * Send report to the mousemat
  */
-int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report)
+static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report)
 {
     return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, RAZER_MOUSEMAT_WAIT_MIN_US, RAZER_MOUSEMAT_WAIT_MAX_US);
 }
@@ -53,7 +53,7 @@ int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_re
 /**
  * Function to send to device, get response, and actually check the response
  */
-struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
+static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
     int retval = -1;
     struct razer_report response_report = {0};
@@ -781,7 +781,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED) },
-    { }
+    { 0 }
 };
 
 MODULE_DEVICE_TABLE(hid, razer_devices);

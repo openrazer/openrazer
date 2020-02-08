@@ -73,7 +73,7 @@ static const struct razer_key_translation chroma_keys[] = {
 
     // Custom bind
     { KEY_KPENTER, KEY_CALC },
-    { }
+    { 0 }
 };
 
 static const struct razer_key_translation chroma_keys_2[] = {
@@ -90,7 +90,7 @@ static const struct razer_key_translation chroma_keys_2[] = {
     { KEY_RIGHTALT,    RAZER_MACRO_KEY },
 
     { KEY_PAUSE, KEY_SLEEP },
-    { }
+    { 0 }
 };
 
 /**
@@ -207,7 +207,7 @@ static ssize_t razer_attr_read_kbd_layout(struct device *dev, struct device_attr
 /**
  * Device mode function
  */
-void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsigned char param)
+static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsigned char param)
 {
     struct razer_report report = razer_chroma_standard_set_device_mode(mode, param);
 
@@ -1631,6 +1631,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
         case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
             report.transaction_id.id = 0x80; // Fall into the 2016/blade/blade2016 to set device id
+        /* fall through */
         default:
             report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             break;

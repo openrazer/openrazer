@@ -43,7 +43,7 @@ MODULE_LICENSE(DRIVER_LICENSE);
 /**
  * Send report to the mouse
  */
-int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report)
+static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report)
 {
     return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, 600, 800);
 }
@@ -51,7 +51,7 @@ int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_re
 /**
  * Function to send to device, get response, and actually check the response
  */
-struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
+static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
 {
     int retval = -1;
     struct razer_report response_report = {0};
@@ -85,7 +85,7 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
 /**
  * Device mode function
  */
-void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsigned char param)
+static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsigned char param)
 {
     struct razer_report report = razer_chroma_standard_set_device_mode(mode, param);
     report.transaction_id.id = 0x3F;
@@ -738,7 +738,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
  */
 static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_MUG) },
-    { }
+    { 0 }
 };
 
 MODULE_DEVICE_TABLE(hid, razer_devices);
