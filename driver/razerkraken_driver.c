@@ -42,6 +42,7 @@ MODULE_LICENSE(DRIVER_LICENSE);
 /**
  * Print report to syslog
  */
+/*
 static void print_erroneous_kraken_request_report(struct razer_kraken_request_report* report, char* driver_name, char* message)
 {
     printk(KERN_WARNING "%s: %s. Report ID: %02x dest: %02x length: %02x ADDR: %02x%02x Args: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x .\n",
@@ -56,6 +57,7 @@ static void print_erroneous_kraken_request_report(struct razer_kraken_request_re
            report->arguments[6], report->arguments[7], report->arguments[8], report->arguments[9], report->arguments[10], report->arguments[11],
            report->arguments[12], report->arguments[13], report->arguments[14], report->arguments[15]);
 }
+*/
 
 static int razer_kraken_send_control_msg(struct usb_device *usb_dev,struct razer_kraken_request_report* report, unsigned char skip)
 {
