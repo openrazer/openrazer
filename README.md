@@ -88,6 +88,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Lancehead Tournament Edition            |  1532:0060  |
 | Razer Naga Trinity                            |  1532:0067  |
 | Razer DeathAdder Essential                    |  1532:006E  |
+| Razer DeathAdder V2                           |  1532:0084  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |
