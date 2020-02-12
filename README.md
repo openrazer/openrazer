@@ -115,6 +115,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Tartarus Chroma                         |  1532:0208  |
 | Razer Core                                    |  1532:0215  |
 | Razer Chroma Mug Holder                       |  1532:0F07  |
+| Razer Chroma Hardware Development Kit (HDK)   |  1532:0F09  |
 
 #### Determining the Device ID
 Razer devices use a USB VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:
