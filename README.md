@@ -119,6 +119,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Core                                    |  1532:0215  |
 | Razer Tartarus V2                             |  1532:022B  |
 | Razer Chroma Mug Holder                       |  1532:0F07  |
+| Razer Base Station Chroma                     |  1532:0F08  |
 | Razer Chroma Hardware Development Kit (HDK)   |  1532:0F09  |
 
 #### Determining the Device ID

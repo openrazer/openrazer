@@ -25,7 +25,7 @@ ATTRS{idProduct}=="0501|0504|0506|0510", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerkraken"
 
 # Accessories - Mug, Base Station, HDK
-ATTRS{idProduct}=="0f07|0f09", \
+ATTRS{idProduct}=="0f07|0f08|0f09", \
     ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razeraccessory"
 

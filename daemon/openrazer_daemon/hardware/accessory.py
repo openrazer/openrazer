@@ -48,3 +48,23 @@ class RazerChromaHDK(_RazerDeviceBrightnessSuspend):
     RAZER_URLS = {
         "top_img": "https://assets2.razerzone.com/images/chromahdk2017/788b689d471fedbc0c5a175592316657-gallery-08.jpg"
     }
+
+
+class RazerBaseStationChroma(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Base Station Chroma (Headphone Stand)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0F08
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 15]
+    METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://rzrwarranty.s3.amazonaws.com/145dcc47f9f9d33b0bd07b066364704160f45e87b756d690b203decec7d1e87c.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
+    RAZER_URLS = {
+        "top_img": DEVICE_IMAGE
+    }
