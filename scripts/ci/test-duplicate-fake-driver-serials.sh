@@ -19,6 +19,7 @@ if [ ! -z "$duplicates" ]; then
     echo -e "Duplicate: ${GREEN}$line${NC} in files:"
     grep -rl "$line" $searchfolder
   done <<< "$duplicates"
+  echo "If you need a new fake serial number, you can use ./scripts/get_next_fake_driver_serial.sh"
   exit 1
 fi
 
