@@ -48,6 +48,7 @@ struct razer_report razer_chroma_standard_matrix_effect_breathing_single(unsigne
 struct razer_report razer_chroma_standard_matrix_effect_breathing_dual(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1, struct razer_rgb *rgb2);
 struct razer_report razer_chroma_standard_matrix_effect_custom_frame(unsigned char variable_storage);
 struct razer_report razer_chroma_standard_matrix_set_custom_frame(unsigned char row_index, unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data);
+struct razer_report razer_chroma_standard_matrix_set_custom_frame_without_offset(unsigned char row_index, unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data);
 
 
 /*

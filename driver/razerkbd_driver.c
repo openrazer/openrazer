@@ -1607,6 +1607,10 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
             break;
 
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+            report = razer_chroma_standard_matrix_set_custom_frame_without_offset(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+            break;
+
         case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
             report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
