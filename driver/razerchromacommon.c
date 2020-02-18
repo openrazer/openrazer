@@ -471,7 +471,6 @@ struct razer_report razer_chroma_standard_matrix_set_custom_frame(unsigned char 
 {
     size_t row_length = (size_t) (((stop_col + 1) - start_col) * 3);
     struct razer_report report = get_razer_report(0x03, 0x0B, 0x46); // In theory should be able to leave data size at max as we have start/stop
-    int index = 4 + (start_col * 3);
 
     // printk(KERN_ALERT "razerkbd: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_index, start_col, stop_col, (unsigned char)row_length);
 
@@ -479,7 +478,7 @@ struct razer_report razer_chroma_standard_matrix_set_custom_frame(unsigned char 
     report.arguments[1] = row_index;
     report.arguments[2] = start_col;
     report.arguments[3] = stop_col;
-    memcpy(&report.arguments[index], rgb_data, row_length);
+    memcpy(&report.arguments[4], rgb_data, row_length);
 
     return report;
 }
@@ -742,7 +741,6 @@ struct razer_report razer_chroma_extended_matrix_set_custom_frame(unsigned char 
 {
     struct razer_report report = get_razer_report(0x0F, 0x03, 0x47);
     size_t row_length = (size_t) (((stop_col + 1) - start_col) * 3);
-    int index = 5 + (start_col * 3);
 
     report.transaction_id.id = 0x3F;
 
@@ -751,7 +749,7 @@ struct razer_report razer_chroma_extended_matrix_set_custom_frame(unsigned char 
     report.arguments[2] = row_index;
     report.arguments[3] = start_col;
     report.arguments[4] = stop_col;
-    memcpy(&report.arguments[index], rgb_data, row_length);
+    memcpy(&report.arguments[5], rgb_data, row_length);
 
     return report;
 }
@@ -936,12 +934,11 @@ struct razer_report razer_chroma_misc_one_row_set_custom_frame(unsigned char sta
 {
     struct razer_report report = get_razer_report(0x03, 0x0C, 0x32);
     size_t row_length = (size_t) (((stop_col + 1) - start_col) * 3);
-    int index = 2 + (start_col * 3);
 
     report.arguments[0] = start_col;
     report.arguments[1] = stop_col;
 
-    memcpy(&report.arguments[index], rgb_data, row_length);
+    memcpy(&report.arguments[2], rgb_data, row_length);
 
     return report;
 }
