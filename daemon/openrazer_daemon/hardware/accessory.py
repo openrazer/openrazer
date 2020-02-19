@@ -26,7 +26,6 @@ class RazerChromaMugHolder(_RazerDeviceBrightnessSuspend):
     # Deprecated - RAZER_URLS be removed in future.
     RAZER_URLS = {
         "top_img": "https://assets2.razerzone.com/images/mug-holder/e64e507b73e61c44789d996065fd9645-1500x1000mug_01.jpg",
-        "side_img": None,
         "perspective_img": "https://assets2.razerzone.com/images/mug-holder/e64e507b73e61c44789d996065fd9645-1500x1000mug_01.jpg"
     }
 
@@ -47,7 +46,5 @@ class RazerChromaHDK(_RazerDeviceBrightnessSuspend):
 
     # Deprecated - RAZER_URLS be removed in future.
     RAZER_URLS = {
-        "top_img": "https://assets2.razerzone.com/images/chromahdk2017/788b689d471fedbc0c5a175592316657-gallery-08.jpg",
-        "side_img": None,
-        "perspective_img": None
+        "top_img": "https://assets2.razerzone.com/images/chromahdk2017/788b689d471fedbc0c5a175592316657-gallery-08.jpg"
     }

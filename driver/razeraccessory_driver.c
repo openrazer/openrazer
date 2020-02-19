@@ -119,9 +119,11 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
         device_type = "Razer Chroma Mug Holder\n";
         break;
+
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
         device_type = "Razer Chroma HDK\n";
         break;
+
     default:
         device_type = "Unknown Device\n";
     }
@@ -504,7 +506,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        strncpy(&serial_string[0], &device->serial[0], 51);
+        strncpy(&serial_string[0], &device->serial[0], sizeof(serial_string));
         break;
 
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
