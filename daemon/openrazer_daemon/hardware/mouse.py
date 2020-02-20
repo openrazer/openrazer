@@ -1294,7 +1294,7 @@ class RazerViperUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Viper_Ultimate_000000000000-if0(1|2)-event-kbd')
 
     USB_VID = 0x1532
-    USB_PID = 0x007a
+    USB_PID = 0x007A
     HAS_MATRIX = True
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [1, 20]
@@ -1347,7 +1347,7 @@ class RazerViperUltimateWireless(__RazerDeviceBrightnessSuspend):
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Viper_Ultimate_Dongle-if0(1|2)-event-kbd')
 
     USB_VID = 0x1532
-    USB_PID = 0x007b
+    USB_PID = 0x007B
     HAS_MATRIX = True
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [1, 20]
