@@ -1292,14 +1292,14 @@ class RazerViperUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
     Class for the Razer Viper Ultimate (Wired)
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Viper_Ultimate_000000000000-if0(1|2)-event-kbd')
-    
+
     USB_VID = 0x1532
     USB_PID = 0x007a
     HAS_MATRIX = True
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [1, 20]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
-                # Logo
+               # Logo
                'get_logo_brightness', 'set_logo_brightness', 'set_logo_wave',
                'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2',
                'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2',
@@ -1352,7 +1352,7 @@ class RazerViperUltimateWireless(__RazerDeviceBrightnessSuspend):
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [1, 20]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
-                # Logo
+               # Logo
                'get_logo_brightness', 'set_logo_brightness', 'set_logo_wave',
                'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2',
                'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2',
