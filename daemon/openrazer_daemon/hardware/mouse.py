@@ -1287,6 +1287,112 @@ class RazerDeathAdder3500(__RazerDeviceSpecialBrightnessSuspend):
         self.disable_notify = False
 
 
+class RazerViperUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer Viper Ultimate (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Viper_Ultimate_000000000000-if0(1|2)-event-kbd')
+    
+    USB_VID = 0x1532
+    USB_PID = 0x007a
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [1, 20]
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+                # Logo
+               'get_logo_brightness', 'set_logo_brightness', 'set_logo_wave',
+               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2',
+               'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2',
+               'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1577/ee_photo.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
+    RAZER_URLS = {
+        "top_img": DEVICE_IMAGE
+    }
+
+    DPI_MAX = 20000
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', 100)[0]
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        self.disable_notify = False
+
+
+class RazerViperUltimateWireless(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Viper Ultimate (Wireless)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Viper_Ultimate_Dongle-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x007b
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [1, 20]
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+                # Logo
+               'get_logo_brightness', 'set_logo_brightness', 'set_logo_wave',
+               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2',
+               'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2',
+               'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1577/ee_photo.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
+    RAZER_URLS = {
+        "top_img": DEVICE_IMAGE
+    }
+
+    DPI_MAX = 20000
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', 100)[0]
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        self.disable_notify = False
+
+
 class RazerDeathAdderEssential(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer DeathAdder Essential

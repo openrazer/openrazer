@@ -89,6 +89,8 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Naga Trinity                            |  1532:0067  |
 | Razer Mamba Elite (Wired)                     |  1532:006C  |
 | Razer DeathAdder Essential                    |  1532:006E  |
+| Razer Viper Ultimate (Wired)                  |  1532:007A  |
+| Razer Viper Ultimate (Wirless)                |  1532:007B  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |
