@@ -52,6 +52,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Blade 15 (Mid 2019) Mercury             |  1532:0245  |
 | Razer Blade 15 (Mid 2019) Base                |  1532:0246  |
 | Razer Blade Stealth (Late 2019)               |  1532:024A  |
+| Razer Blade Pro (Late 2019)                   |  1532:024C  |
 | Razer Blade 15 Studio Edition (2019)          |  1532:024D  |
 
 ### Mice
