@@ -1243,7 +1243,7 @@ class RazerBlade2019Base(_RippleKeyboard):
 
 class RazerBladeProLate2019(_RippleKeyboard):
     """
-    Class for the Razer Blade Pro 17 (2019)
+    Class for the Razer Blade Pro (Late 2019)
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
 
