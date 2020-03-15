@@ -16,6 +16,8 @@ from openrazer_daemon.misc import effect_sync
 
 
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=E1102
+# See https://github.com/PyCQA/pylint/issues/1493
 class RazerDevice(DBusService):
     """
     Base class
@@ -211,29 +213,12 @@ class RazerDevice(DBusService):
                 except KeyError:
                     pass
 
-        # NOTE for z3ntu:
-        # before you complain about this code's ugliness, I have to tell you
-        # that this is on purpose. pylint has a bug when using "is not None"
-        # which makes it fail the check even though the safeguard is there!
-        #
-        # you can delete this note after reading.
-        # if you still tell me to go the "is not None" way though, then that
-        # means you simply have no desire to approve this pull request and
-        # just keep bugging me until the end of time :l
-        # maybe because you are jealous this will heavily improve OpenRazer -_-
-
         dpi_func = getattr(self, "setDPI", None)
-        if dpi_func == None:
-            # work around a problem with pylint.
-            dpi_func = None
-        else:
+        if dpi_func is not None:
             dpi_func(self.dpi[0], self.dpi[1])
 
         poll_rate_func = getattr(self, "setPollRate", None)
-        if poll_rate_func == None:
-            # work around a problem with pylint.
-            poll_rate_func = None
-        else:
+        if poll_rate_func is not None:
             poll_rate_func(self.poll_rate)
 
         # load last effects
@@ -839,9 +824,7 @@ class RazerDevice(DBusService):
             # (e.g. the DPI buttons)
             if 'get_dpi_xy' in self.METHODS:
                 dpi_func = getattr(self, "getDPI", None)
-                if dpi_func == None:
-                    dpi_func = None
-                else:
+                if dpi_func is not None:
                     self.dpi = dpi_func()
 
             self._close()
