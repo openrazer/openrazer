@@ -262,7 +262,7 @@ class RazerOuroboros(__RazerDevice):
 
         Get the last known brightness and then set the brightness
         """
-        scroll_brightness = self.suspend_args.get('brightness', 100)[0]
+        scroll_brightness = self.suspend_args.get('brightness', 100)
 
         self.disable_notify = True
         _da_set_scroll_brightness(self, scroll_brightness)
