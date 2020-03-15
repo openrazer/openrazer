@@ -1,7 +1,3 @@
-"""
-BlackWidow Chroma Effects
-Yeah the BlackWidow Chroma is a mouse
-"""
 import math
 import struct
 from openrazer_daemon.dbus_services import endpoint
