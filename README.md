@@ -43,7 +43,9 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Blade Pro FullHD (2017)                 |  1532:022F  |
 | Razer Blade Stealth (Late 2017)               |  1532:0232  |
 | Razer Blade 15 (2018)                         |  1532:0233  |
+| Razer Blade Pro 17 (2019)                     |  1532:0234  |
 | Razer BlackWidow Lite (2018)                  |  1532:0235  |
+| Razer BlackWidow Essential                    |  1532:0237  |
 | Razer Blade Stealth (2019)                    |  1532:0239  |
 | Razer Blade 15 (2019) Advanced                |  1532:023A  |
 | Razer Blade 15 (2018) Base Model              |  1532:023B  |
@@ -87,6 +89,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Abyssus 2000                            |  1532:005E  |
 | Razer Lancehead Tournament Edition            |  1532:0060  |
 | Razer Naga Trinity                            |  1532:0067  |
+| Razer Mamba Elite (Wired)                     |  1532:006C  |
 | Razer DeathAdder Essential                    |  1532:006E  |
 
 ### Mousemats
@@ -114,7 +117,10 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Orbweaver Chroma                        |  1532:0207  |
 | Razer Tartarus Chroma                         |  1532:0208  |
 | Razer Core                                    |  1532:0215  |
+| Razer Tartarus V2                             |  1532:022B  |
 | Razer Chroma Mug Holder                       |  1532:0F07  |
+| Razer Base Station Chroma                     |  1532:0F08  |
+| Razer Chroma Hardware Development Kit (HDK)   |  1532:0F09  |
 
 #### Determining the Device ID
 Razer devices use a USB VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:

@@ -1,5 +1,5 @@
 """
-Module for mug methods
+Module for accessory methods
 """
 from openrazer_daemon.dbus_services import endpoint
 
