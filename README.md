@@ -54,6 +54,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Blade 15 (Mid 2019) Mercury             |  1532:0245  |
 | Razer Blade 15 (Mid 2019) Base                |  1532:0246  |
 | Razer Blade Stealth (Late 2019)               |  1532:024A  |
+| Razer Blade Pro (Late 2019)                   |  1532:024C  |
 | Razer Blade 15 Studio Edition (2019)          |  1532:024D  |
 
 ### Mice
@@ -91,6 +92,8 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Naga Trinity                            |  1532:0067  |
 | Razer Mamba Elite (Wired)                     |  1532:006C  |
 | Razer DeathAdder Essential                    |  1532:006E  |
+| Razer Mamba Wireless (Receiver)               |  1532:0072  |
+| Razer Mamba Wireless (Wired)                  |  1532:0073  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |
