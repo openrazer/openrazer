@@ -182,7 +182,7 @@ class RazerDevice(DBusService):
             self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
 
         # this check is separate from the rest because backlight effects don't have prefixes in their names
-        if 'set_static_effect' in self.METHODS:
+        if 'set_static_effect' in self.METHODS or 'bw_set_static' in self.METHODS:
             self.zone["backlight"]["present"] = True
             for m in effect_methods["backlight"]:
                 self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
