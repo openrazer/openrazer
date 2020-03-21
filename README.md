@@ -98,6 +98,8 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Abyssus Essential                       |  1532:006B  |
 | Razer Mamba Elite (Wired)                     |  1532:006C  |
 | Razer DeathAdder Essential                    |  1532:006E  |
+| Razer Lancehead Wireless (Receiver)           |  1532:006F  |
+| Razer Lancehead Wireless (Wired)              |  1532:0070  |
 | Razer DeathAdder Essential (White Edition)    |  1532:0071  |
 | Razer Mamba Wireless (Receiver)               |  1532:0072  |
 | Razer Mamba Wireless (Wired)                  |  1532:0073  |
