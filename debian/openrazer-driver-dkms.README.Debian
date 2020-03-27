@@ -23,7 +23,7 @@ Your kernel headers for kernel 4.9.0-kali3-amd64 cannot be found at
 ##### plugdev
 The daemon requires the current user to be in the user group `plugdev`.
 You will get an error message while running `openrazer-daemon -Fv` to indicate that.
-To fix it, please run `sudo gpasswd -a <YOUR-USER> plugdev`.
+To fix it, please run `sudo gpasswd -a $USER plugdev`.
 
 
 ##### Secure Boot
