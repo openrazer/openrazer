@@ -26,9 +26,9 @@ class RazerFirefly(__RazerDeviceBrightnessSuspend):
     }
 
 
-class RazerFirefly_Hyperflux(__RazerDeviceBrightnessSuspend):
+class RazerFireflyHyperflux(__RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Firefly_Hyperflux (2018)
+    Class for the Razer Firefly Hyperflux (2018)
     """
     USB_VID = 0x1532
     USB_PID = 0x0068
