@@ -1176,6 +1176,21 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
         }
         break;
 
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+        if(count == 7) {
+            report = razer_chroma_standard_matrix_effect_starlight_dual(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
+            razer_send_payload(usb_dev, &report);
+        } else if(count == 4) {
+            report = razer_chroma_standard_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1]);
+            razer_send_payload(usb_dev, &report);
+        } else if(count == 1) {
+            report = razer_chroma_standard_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
+            razer_send_payload(usb_dev, &report);
+        } else {
+            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+        }
+        break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
         if(count == 7) {
             report = razer_chroma_standard_matrix_effect_starlight_dual(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
