@@ -1028,7 +1028,6 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
     case USB_DEVICE_ID_RAZER_TARTARUS:
     case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
-    case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
         if(count == 3) {
             report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
             razer_send_payload(usb_dev, &report);
@@ -1038,6 +1037,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
         if(count == 3) {
             report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
             report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
@@ -1460,6 +1460,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
         report = razer_chroma_standard_matrix_effect_custom_frame(VARSTORE); // Possibly could use VARSTORE
         report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
         break;
@@ -1744,6 +1745,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
         case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
+        case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
             report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
             break;
@@ -2165,6 +2167,8 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
@@ -2463,6 +2467,8 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
