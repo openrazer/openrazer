@@ -15,9 +15,12 @@ class RazerMouse(__RazerDevice):
         self._capabilities['poll_rate'] = self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate'))
         self._capabilities['dpi'] = self._has_feature('razer.device.dpi', ('getDPI', 'setDPI'))
         self._capabilities['available_dpi'] = self._has_feature('razer.device.dpi', 'availableDPI')
+        self._capabilities['battery'] = self._has_feature('razer.device.power', 'getBattery')
 
         if self.has('dpi'):
             self._dbus_interfaces['dpi'] = _dbus.Interface(self._dbus, "razer.device.dpi")
+        if self.has('battery'):
+            self._dbus_interfaces['power'] = _dbus.Interface(self._dbus, "razer.device.power")
 
     @property
     def max_dpi(self) -> int:
@@ -129,3 +132,42 @@ class RazerMouse(__RazerDevice):
 
         else:
             raise NotImplementedError()
+
+    @property
+    def battery_level(self) -> int:
+        """
+        Get battery level from device
+
+        :return: Battery level (0-100)
+        """
+        if self.has('battery'):
+            return int(self._dbus_interfaces['power'].getBattery())
+
+    @property
+    def is_charging(self) -> bool:
+        """
+        Get whether the device is charging or not
+
+        :return: Boolean
+        """
+        if self.has('battery'):
+            return bool(self._dbus_interfaces['power'].isCharging())
+
+    def set_idle_time(self, idle_time) -> None:
+        """
+        Sets the idle time on the device
+
+        :param idle_time: the time in seconds
+        """
+        if self.has('battery'):
+            self._dbus_interfaces['power'].setIdleTime(idle_time)
+
+    def set_low_battery_threshold(self, threshold) -> None:
+        """
+        Set the low battery threshold as a percentage
+
+        :param threshold: Battery threshold as a percentage
+        :type threshold: int
+        """
+        if self.has('battery'):
+            self._dbus_interfaces['power'].setLowBatteryThreshold(threshold)
