@@ -13,6 +13,7 @@ layoutids = {"01": "en_US",
              "05": "ru_RU",
              "06": "en_GB",
              "07": "Nordic",
+             "0A": "tr_TR",
              "0C": "ja_JP",
              "10": "es_ES",
              "11": "it_IT",
@@ -172,15 +173,15 @@ def get_device_type_headset(self):
 
 
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
-def get_device_type_mug(self):
+def get_device_type_accessory(self):
     """
     Get the device's type
 
-    :return:'mug'
+    :return:'accessory'
     :rtype: str
     """
     self.logger.debug("DBus call get_device_type")
-    return 'mug'
+    return 'accessory'
 
 
 @endpoint('razer.device.misc', 'hasMatrix', out_sig='b')
