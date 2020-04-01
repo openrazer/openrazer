@@ -1410,6 +1410,7 @@ class RazerViperUltimateWireless(RazerViperUltimateWired):
     USB_VID = 0x1532
     USB_PID = 0x007B
 
+
 class RazerDeathAdderEssential(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer DeathAdder Essential
