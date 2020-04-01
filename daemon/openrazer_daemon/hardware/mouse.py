@@ -15,6 +15,59 @@ from openrazer_daemon.dbus_services.dbus_methods.lanceheadte import get_left_bri
     set_left_brightness as _set_left_brightness, set_right_brightness as _set_right_brightness
 
 
+class RazerDeathAdderEssentialWhiteEdition(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer DeathAdder Essential (White Edition)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_DeathAdder_Essential_White_Edition-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0071
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_poll_rate', 'set_poll_rate',
+               'get_logo_brightness', 'set_logo_brightness',
+               'get_scroll_brightness', 'set_scroll_brightness',
+               # Logo
+               'set_logo_static_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2',
+               # Scroll wheel
+               'set_scroll_static_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/da10m/carousel/razer-death-adder-gallery-25.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
+    RAZER_URLS = {
+        "top_img": "https://assets2.razerzone.com/images/da10m/carousel/razer-death-adder-gallery-25.png"
+    }
+
+    DPI_MAX = 6400
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        _da_set_scroll_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
+        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        _da_set_scroll_brightness(self, scroll_brightness)
+        self.disable_notify = False
+
+
 class RazerAbyssusEliteDVaEdition(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Abyssus Elite (D.Va Edition)
