@@ -1394,7 +1394,7 @@ class RazerViperUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
 
         Get the last known brightness and then set the brightness
         """
-        logo_brightness = self.suspend_args.get('brightness', 100)[0]
+        logo_brightness = self.suspend_args.get('brightness', 100)
 
         self.disable_notify = True
         _da_set_logo_brightness(self, logo_brightness)
