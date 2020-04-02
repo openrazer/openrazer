@@ -40,7 +40,7 @@ def set_backlight_active(self, active):
 @endpoint('razer.device.lighting.logo', 'getLogoActive', out_sig='b')
 def get_logo_active(self):
     """
-    Get if the logo is light up
+    Get if the logo is lit up
 
     :return: Active
     :rtype: bool
@@ -57,7 +57,7 @@ def get_logo_active(self):
 @endpoint('razer.device.lighting.logo', 'setLogoActive', in_sig='b')
 def set_logo_active(self, active):
     """
-    Get if the logo is light up
+    Set if the logo is lit up
 
     :param active: Is active
     :type active: bool
