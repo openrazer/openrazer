@@ -329,6 +329,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
         device_type = "Razer Viper Ultimate (Wireless)\n";
+        break;
 
     default:
         device_type = "Unknown Device\n";
