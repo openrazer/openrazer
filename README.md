@@ -96,7 +96,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Mamba Wireless (Receiver)               |  1532:0072  |
 | Razer Mamba Wireless (Wired)                  |  1532:0073  |
 | Razer Viper Ultimate (Wired)                  |  1532:007A  |
-| Razer Viper Ultimate (Wirless)                |  1532:007B  |
+| Razer Viper Ultimate (Wireless)               |  1532:007B  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |
