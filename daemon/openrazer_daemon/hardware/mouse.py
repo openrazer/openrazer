@@ -15,6 +15,104 @@ from openrazer_daemon.dbus_services.dbus_methods.lanceheadte import get_left_bri
     set_left_brightness as _set_left_brightness, set_right_brightness as _set_right_brightness
 
 
+class RazerAbyssusEliteDVaEdition(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer Abyssus Elite (D.Va Edition)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_D.Va_Razer_Abyssus_Elite-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x006A
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_poll_rate', 'set_poll_rate',
+               'get_logo_brightness', 'set_logo_brightness',
+               # Underglow/Logo use LOGO_LED
+               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
+               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1288/d.va_abyssus_elite.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
+    RAZER_URLS = {
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/1288/d.va_abyssus_elite.png"
+    }
+
+    DPI_MAX = 7200
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', 100)
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        self.disable_notify = False
+
+
+class RazerAbyssusEssential(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer Abyssus Essential
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Abyssus_Essential-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x006B
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_poll_rate', 'set_poll_rate',
+               'get_logo_brightness', 'set_logo_brightness',
+               # Backlight/Logo...same
+               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
+               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1290/1290_abyssusessential.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
+    RAZER_URLS = {
+        "top_img": "https://assets.razerzone.com/eeimages/support/products/1290/1290_abyssusessential.png"
+    }
+
+    DPI_MAX = 7200
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', 100)
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        self.disable_notify = False
+
+
 class RazerLanceheadTE(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Lancehead Tournament Edition
