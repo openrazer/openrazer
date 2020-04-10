@@ -106,6 +106,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Viper                                   |  1532:0078  |
 | Razer Viper Ultimate (Wired)                  |  1532:007A  |
 | Razer Viper Ultimate (Wireless)               |  1532:007B  |
+| Razer DeathAdder V2                           |  1532:0084  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |

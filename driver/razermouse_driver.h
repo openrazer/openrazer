@@ -57,6 +57,7 @@
 #define USB_DEVICE_ID_RAZER_VIPER 0x0078
 #define USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED 0x007A
 #define USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS 0x007B
+#define USB_DEVICE_ID_RAZER_DEATHADDER_V2 0x0084
 
 /* Each keyboard report has 90 bytes*/
 #define RAZER_REPORT_LEN 0x5A
@@ -75,6 +76,7 @@ struct razer_mouse_device {
     struct usb_device *usb_dev;
     struct mutex lock;
     unsigned char usb_interface_protocol;
+    unsigned char usb_interface_subclass;
 
     unsigned short usb_vid;
     unsigned short usb_pid;
