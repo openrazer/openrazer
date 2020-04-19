@@ -268,7 +268,7 @@ class RazerOrbweaverChroma(_RippleKeyboard):
                'get_macros', 'delete_macro', 'add_macro',
                'keypad_get_mode_modifier', 'keypad_set_mode_modifier',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
-
+    
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/607/607_orbweaver_chroma.png"
 
     def __init__(self, *args, **kwargs):
