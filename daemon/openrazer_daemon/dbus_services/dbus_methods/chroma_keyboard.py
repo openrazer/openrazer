@@ -492,7 +492,7 @@ def set_custom_effect(self):
     Set the device to use custom LED matrix
     """
     # TODO uncomment
-    # self.logger.debug("DBus call set_custom_effect")
+    self.logger.debug("DBus call set_custom_effect")
 
     driver_path = self.get_driver_path('matrix_effect_custom')
 
@@ -518,7 +518,7 @@ def set_key_row(self, payload):
     """
 
     # TODO uncomment
-    # self.logger.debug("DBus call set_key_row")
+    self.logger.debug("DBus call set_key_row")
 
     driver_path = self.get_driver_path('matrix_custom_frame')
 

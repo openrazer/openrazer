@@ -166,7 +166,7 @@ class RazerDaemon(DBusService):
         """
         logger = logging.getLogger('razer')
         logger.setLevel(log_level)
-        formatter = logging.Formatter('%(asctime)s | %(name)-30s | %(levelname)-8s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        formatter = logging.Formatter('%(asctime)s | %(name)-30s | %(levelname)-8s | %(message)s')
         # Don't propagate to default logger
         logger.propagate = 0
 
