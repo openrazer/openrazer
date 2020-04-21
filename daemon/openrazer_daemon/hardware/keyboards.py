@@ -265,7 +265,7 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
         # self.key_manager.close()
 
 
-class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
+class RazerOrbweaverChroma(_RippleKeyboard):
     """
     Class for the Razer Orbweaver Chroma
     """
@@ -285,7 +285,8 @@ class RazerOrbweaverChroma(_RazerDeviceBrightnessSuspend):
                'keypad_get_profile_led_green', 'keypad_set_profile_led_green',
                'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
                'get_macros', 'delete_macro', 'add_macro',
-               'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
+               'keypad_get_mode_modifier', 'keypad_set_mode_modifier',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/607/607_orbweaver_chroma.png"
 
