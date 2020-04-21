@@ -388,7 +388,7 @@ class KeyboardKeyManager(object):
             # Convert event ID to key name
             key_name = self.EVENT_MAP[key_id]
 
-            # self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
+            self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
 
             # Key release
             if key_press == 'release':
@@ -712,7 +712,7 @@ class GamepadKeyManager(KeyboardKeyManager):
             try:
                 # Try and increment key in bucket
                 self._stats[storage_bucket][key_name] += 1
-                # self._logger.debug("Increased key %s", key_name)
+                self._logger.debug("Increased key %s", key_name)
             except KeyError:
                 # Create bucket
                 self._stats[storage_bucket] = dict.fromkeys(self.GAMEPAD_KEY_MAPPING, 0)
@@ -729,10 +729,10 @@ class GamepadKeyManager(KeyboardKeyManager):
                 self._temp_key_store.append((now + self._temp_expire_time, self.GAMEPAD_KEY_MAPPING[key_name], colour))
 
             # if self._testing:
-            # if key_press:
-                #self._logger.debug("Got Key: {0} Down".format(key_name))
-            # else:
-                #self._logger.debug("Got Key: {0} Up".format(key_name))
+            if key_press:
+                self._logger.debug("Got Key: {0} Down".format(key_name))
+            else:
+                self._logger.debug("Got Key: {0} Up".format(key_name))
 
             # Logic for mode switch modifier
             if self._mode_modifier:
@@ -787,3 +787,5 @@ class GamepadKeyManager(KeyboardKeyManager):
 class OrbweaverKeyManager(GamepadKeyManager):
     GAMEPAD_EVENT_MAPPING = ORBWEAVER_EVENT_MAPPING
     GAMEPAD_KEY_MAPPING = ORBWEAVER_KEY_MAPPING
+    EVENT_MAP = ORBWEAVER_EVENT_MAPPING
+    KEY_MAP = ORBWEAVER_KEY_MAPPING
