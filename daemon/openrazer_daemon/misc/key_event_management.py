@@ -760,6 +760,7 @@ class GamepadKeyManager(KeyboardKeyManager):
 
         except KeyError as err:
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
+            self._logger.debug("Bad Key: {0}".format(key_id)) 
 
         self._access_lock.release()
 
