@@ -138,10 +138,10 @@ class KeyWatcher(threading.Thread):
             # epoll is nice but it wasn't getting events properly :(
 
             try:  # Cheap hack until i merged new code
-                if self._use_epoll:
-                    self._poll_epoll(poll_object, event_file_map)
-                else:
-                    self._poll_read()
+            #     if self._use_epoll:
+            #         self._poll_epoll(poll_object, event_file_map)
+            #     else:
+                self._poll_read()
             except (IOError, OSError):  # Basically if there's an error, most likely device has been removed then it'll get deleted properly
                 pass
 
