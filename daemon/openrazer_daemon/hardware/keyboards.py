@@ -275,7 +275,7 @@ class RazerOrbweaverChroma(_RippleKeyboard):
         super(RazerOrbweaverChroma, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
-        # self.key_manager = _OrbweaverKeyManager(self._device_number, self.event_files, self, testing=self._testing)
+        self.key_manager = _OrbweaverKeyManager(self._device_number, self.event_files, self, testing=self._testing)
 
     def _close(self):
         """
