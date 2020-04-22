@@ -20,7 +20,7 @@ ATTRS{idProduct}=="0501|0504|0506|0510|0527", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerkraken"
 
 # Accessories (Speakers, Mousemats, Razer Core, etc)
-ATTRS{idProduct}=="0068|0215|0517|0518|0c00|0c01|0c02|0f07|0f08|0f09|0f19|0f1d|0f20", \
+ATTRS{idProduct}=="0068|0215|0517|0518|0c00|0c01|0c02|0c04|0f07|0f08|0f09|0f19|0f1d|0f20", \
     ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razeraccessory"
 
