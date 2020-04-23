@@ -22,6 +22,7 @@ import select
 import struct
 import threading
 import time
+from evdev import UInput, ecodes, InputDevice
 
 # pylint: disable=import-error
 from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_EVENT_MAPPING, ORBWEAVER_KEY_MAPPING
@@ -69,7 +70,7 @@ class KeyWatcher(threading.Thread):
     Thread to watch keyboard event files and return keypresses
     """
     @staticmethod
-    def parse_event_record(data):
+    def parse_event_record(event):
         """
         Parse Input event record
 
@@ -79,27 +80,25 @@ class KeyWatcher(threading.Thread):
         :return: Tuple of event time, key_action, key_code
         :rtype: tuple
         """
-        # Event Seconds, Event Microseconds, Event Type, Event Code, Event Value
-        ev_sec, ev_usec, ev_type, ev_code, ev_value = struct.unpack(EVENT_FORMAT, data)
 
-        if ev_type != 0x01:  # input-event-codes.h EV_KEY 0x01
+
+        if event.type != ecodes.ecodes['EV_KEY']:  # input-event-codes.h EV_KEY 0x01
             return None, None, None
 
-        if ev_value == 0:
+        if event.value == 0:
             key_action = 'release'
-        elif ev_value == 1:
+        elif event.value == 1:
             key_action = 'press'
-        elif ev_value == 2:
+        elif event.value == 2:
             key_action = 'autorepeat'
         else:
             key_action = 'unknown'
 
-        seconds = ev_sec + (ev_usec * 0.000001)
-        date = datetime.datetime.fromtimestamp(seconds)
+        date = datetime.datetime.fromtimestamp(event.timestamp())
 
-        result = (date, key_action, ev_code)
+        result = (date, key_action, event.code)
 
-        if ev_type == ev_code == ev_value == 0:
+        if event.type == event.code == event.value == 0:
             return None, None, None
 
         return result
@@ -110,62 +109,26 @@ class KeyWatcher(threading.Thread):
         self._logger = logging.getLogger('razer.device{0}.keywatcher'.format(device_id))
         self._event_files = event_files
         self._shutdown = False
-        self._use_epoll = use_epoll
         self._parent = parent
 
         self.open_event_files = [open(event_file, 'rb') for event_file in self._event_files]
-        # Set open files to non blocking mode
-        for event_file in self.open_event_files:
-            flags = fcntl.fcntl(event_file.fileno(), fcntl.F_GETFL)
-            fcntl.fcntl(event_file.fileno(), fcntl.F_SETFL, flags | os.O_NONBLOCK)
 
     def run(self):
         """
         Main event loop
         """
-        # Create dict of Event File Descriptor: Event File Object
-        event_file_map = {event_file.fileno(): event_file for event_file in self.open_event_files}
-
-        # Create epoll object
-        poll_object = select.epoll()
+        event_file_map = map(InputDevice, (self._event_files))
+        event_file_map = {event_file.fd: event_file for event_file in event_file_map}
 
         # Register files with select
-        for event_fd in event_file_map.keys():
-            poll_object.register(event_fd, select.EPOLLIN | select.EPOLLPRI)
+        for dev in event_file_map.values(): dev.grab()
 
         # Loop
         while not self._shutdown:
-            # epoll is nice but it wasn't getting events properly :(
-
-            try:  # Cheap hack until i merged new code
-            #     if self._use_epoll:
-            #         self._poll_epoll(poll_object, event_file_map)
-            #     else:
-                self._poll_read()
-            except (IOError, OSError):  # Basically if there's an error, most likely device has been removed then it'll get deleted properly
-                pass
-
-            time.sleep(SPIN_SLEEP)
-
-        # Unbind files and close them
-        for event_fd, event_file in event_file_map.items():
-            poll_object.unregister(event_fd)
-            event_file.close()
-
-        poll_object.close()
-
-    def _poll_epoll(self, poll_object, event_file_map):
-        events = poll_object.poll(EPOLL_TIMEOUT)
-
-        if len(events) != 0:
-            # pylint: disable=unused-variable
-            for event_fd, mask in events:
-                while True:
-                    key_data = event_file_map[event_fd].read(EVENT_SIZE)
-                    if not key_data:
-                        break
-
-                    date, key_action, key_code = self.parse_event_record(key_data)
+            r, w, x = select.select(event_file_map, [], [])
+            for fd in r:
+                for event in event_file_map[fd].read():
+                    date, key_action, key_code = self.parse_event_record(event)
 
                     # Skip if date, key_action and key_code is none as that's a spacer record
                     if date is None:
@@ -174,22 +137,11 @@ class KeyWatcher(threading.Thread):
                     # Now if key is pressed then we record
                     self._parent.key_action(date, key_code, key_action)
 
-    def _poll_read(self):
-        for event_file in self.open_event_files:
+#            time.sleep(SPIN_SLEEP)
 
-            key_data = event_file.read(EVENT_SIZE)
+        # Unbind files and close them
+        for dev in event_file_map.values(): dev.ungrab()
 
-            if key_data is None:
-                continue
-
-            date, key_action, key_code = self.parse_event_record(key_data)
-
-            # Skip if date, key_action and key_code is none as that's a spacer record
-            if date is None:
-                continue
-
-            # Now if key is pressed then we record
-            self._parent.key_action(date, key_code, key_action)
 
     @property
     def shutdown(self):
@@ -241,6 +193,8 @@ class KeyboardKeyManager(object):
         self._access_lock = threading.Lock()
         self._keywatcher = KeyWatcher(device_id, event_files, self, use_epoll=use_epoll)
         self._open_event_files = self._keywatcher.open_event_files
+        self._device = UInput(name="{0} (mapped)".format(self._parent.get_device_name()))
+
 
         if len(event_files) > 0:
             self._logger.debug("Starting KeyWatcher")
@@ -388,7 +342,7 @@ class KeyboardKeyManager(object):
             # Convert event ID to key name
             key_name = self.EVENT_MAP[key_id]
 
-#            self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
+            # self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
 
             # Key release
             if key_press == 'release':
@@ -712,7 +666,7 @@ class GamepadKeyManager(KeyboardKeyManager):
             try:
                 # Try and increment key in bucket
                 self._stats[storage_bucket][key_name] += 1
-                self._logger.debug("Increased key %s", key_name)
+                # self._logger.debug("Increased key %s", key_name)
             except KeyError:
                 # Create bucket
                 self._stats[storage_bucket] = dict.fromkeys(self.GAMEPAD_KEY_MAPPING, 0)
@@ -729,10 +683,10 @@ class GamepadKeyManager(KeyboardKeyManager):
                 self._temp_key_store.append((now + self._temp_expire_time, self.GAMEPAD_KEY_MAPPING[key_name], colour))
 
             # if self._testing:
-            if key_press:
-                self._logger.debug("Got Key: {0} Down".format(key_name))
-            else:
-                self._logger.debug("Got Key: {0} Up".format(key_name))
+            # if key_press:
+                #self._logger.debug("Got Key: {0} Down".format(key_name))
+            # else:
+                #self._logger.debug("Got Key: {0} Up".format(key_name))
 
             # Logic for mode switch modifier
             if self._mode_modifier:
@@ -760,7 +714,6 @@ class GamepadKeyManager(KeyboardKeyManager):
 
         except KeyError as err:
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
-            self._logger.debug("Bad Key: {0}".format(key_id)) 
 
         self._access_lock.release()
 

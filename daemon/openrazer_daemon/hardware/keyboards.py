@@ -284,7 +284,7 @@ class RazerOrbweaverChroma(_RippleKeyboard):
         super(RazerOrbweaverChroma, self)._close()
 
         # TODO look into saving stats in /var/run maybe
-        # self.key_manager.close()
+        self.key_manager.close()
 
 
 class RazerBlackWidowUltimate2012(_MacroKeyboard):
