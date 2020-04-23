@@ -27,6 +27,7 @@ from evdev import UInput, ecodes, InputDevice
 # pylint: disable=import-error
 from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_EVENT_MAPPING, ORBWEAVER_KEY_MAPPING
 from .macro import MacroKey, MacroRunner, macro_dict_to_obj
+from .key_binding_manager import KeyBindingManager
 
 EVENT_FORMAT = '@llHHI'
 EVENT_SIZE = struct.calcsize(EVENT_FORMAT)
@@ -111,7 +112,6 @@ class KeyWatcher(threading.Thread):
         self._shutdown = False
         self._parent = parent
 
-        self.open_event_files = [open(event_file, 'rb') for event_file in self._event_files]
 
     def run(self):
         """
@@ -139,7 +139,7 @@ class KeyWatcher(threading.Thread):
 
 #            time.sleep(SPIN_SLEEP)
 
-        # Unbind files and close them
+        # Ungrab files and close them
         for dev in event_file_map.values(): dev.ungrab()
 
 
@@ -192,8 +192,8 @@ class KeyboardKeyManager(object):
         self._event_files = event_files
         self._access_lock = threading.Lock()
         self._keywatcher = KeyWatcher(device_id, event_files, self, use_epoll=use_epoll)
-        self._open_event_files = self._keywatcher.open_event_files
-        self._device = UInput(name="{0} (mapped)".format(self._parent.get_device_name()))
+        self._fake_device = UInput(name="{0} (mapped)".format(self._parent.get_device_name()))
+        self._binding_manager = KeyBindingManager(device_id, self, self._fake_device)
 
 
         if len(event_files) > 0:
@@ -221,10 +221,7 @@ class KeyboardKeyManager(object):
         self._last_colour_choice = None
 
         self._should_grab_event_files = should_grab_event_files
-        self._event_files_locked = False
-
-        if self._should_grab_event_files:
-            self.grab_event_files(True)
+        self._event_files_locked = False  
 
     # TODO add property for enabling key stats?
 
@@ -273,18 +270,6 @@ class KeyboardKeyManager(object):
         """
         self._temp_key_store_active = value
 
-    def grab_event_files(self, grab):
-        """
-        Grab the event files exclusively
-
-        :param grab: True to grab, False to release
-        :type grab: bool
-        """
-        if not self._testing:
-            for event_file in self._open_event_files:
-                fcntl.ioctl(event_file.fileno(), EVIOCGRAB, int(grab))
-        self._event_files_locked = grab
-
     def key_action(self, event_time, key_id, key_press='press'):
         """
         Process a key press event
@@ -310,11 +295,7 @@ class KeyboardKeyManager(object):
         # Disable pylints complaining for this part, #PerformanceOverNeatness
         # pylint: disable=too-many-branches,too-many-statements
 
-        # Get event files if they arnt locked #nasty hack
-        if not self._event_files_locked and self._should_grab_event_files:
-            self.grab_event_files(True)
-
-        if key_press == 'autorepeat':  # TODO not done right yet
+        if key_press == 'autorepeat':  # TODO probably should go
             # If its brightness then convert autorepeat to key presses
             # 190 (KEY_F20) and 194 (KEY_F24) are defined in razerkbd_driver.c
             if key_id in (190, 194):
@@ -456,10 +437,14 @@ class KeyboardKeyManager(object):
                     else:
                         self._current_macro_combo.append((event_time, key_name, 'DOWN'))
                 # Not recording anything so if a macro key is pressed then run
-                else:
+                elif not self._recording_macro:
                     # If key has a macro, play it
                     if key_name in self._macros:
                         self.play_macro(key_name)
+
+                else:
+                    self._binding_manager.key_press(key_id)
+
 
         except KeyError as err:
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
