@@ -11,7 +11,7 @@ import struct
 import time
 from evdev import UInput, ecodes
 
-from openrazer_daemon.keyboard import EVENT_MAPPING
+from openrazer_daemon.dbus_services.dbus_methods import set_custom_effect, set_key_row  
 
 class KeyBindingManager(object):
     """
@@ -22,7 +22,7 @@ class KeyBindingManager(object):
     def __init__(self, device_id, parent, fake_device, testing=False):
 
         self._device_id = device_id
-        self._logger = logging.getLogger('razer.device{0}.keymanager'.format(device_id))
+        self._logger = logging.getLogger('razer.device{0}.bindingmanager'.format(device_id))
         self._parent = parent
         self._parent._parent.register_observer(self)
         self._testing = testing
@@ -30,8 +30,9 @@ class KeyBindingManager(object):
 
         self._profiles = {0:DEFAULT_PROFILE}
         self._current_profile = self._profiles[0]
-        self._current_map = self._current_profile[0]
-        self._current_binding = self._current_map["binding"]
+        self._current_mapping = self._current_profile[0]
+
+        self._current_keys = []
 
     def key_press(self, key_code):
         """
@@ -40,26 +41,62 @@ class KeyBindingManager(object):
         :param key_code: The key code of the pressed key.
         :type key_code: int
         """
+        
+        for action in self._current_mapping["binding"][key_code]:
+            if action["type"] == "key":
+                self._current_keys.append(action["code"])
+                self._fake_device.write(ecodes.EV_KEY, action["code"], 1)
+                self._fake_device.syn()
+            
+            elif action["type"] == "map":
+                self.current_mapping(action["value"])
 
-        binding = self._current_binding
-        current_key = binding[key_code]
-        for sequence in current_key:
-            operation_type = sequence["type"]
+            else:
+                self._current_keys.append(key_code)
+                self._fake_device.write(ecodes.EV_KEY, key_code, 1)
+                self._fake_device.syn()
 
-            if operation_type == "key":
-                self.press_key(sequence["code"])
-            if operation_type == "sleep":
-                time.sleep(operation_type["time"])
+        for key in self._current_keys:
+            self._fake_device.write(ecodes.EV_KEY, key, 0)
+            
+        self._fake_device.syn()
+        self._current_keys = []
 
-    def press_key(self, key_code):
+    @property
+    def current_mapping(self):
         """
-        do some evdev stuff to press key
+        
+        Returns the current mapping
 
-        :param key_code: The key code of the key we want to send to the system
-        :type key_code: int
+        :return: The current mapping
+        :rtype: dict
         """
 
+        return self._current_mapping
 
+    @current_mapping.setter
+    def current_mapping(self, value):
+        """
+
+        Sets the current mapping and changes the led matrix
+        Warning: this requires a full matrix
+
+        :param value: The new mapping
+        :type value: int
+        """
+
+        self._current_mapping = self._current_profile[value]
+
+        if self._current_mapping["matrix"]:
+            for row in self._current_mapping["matrix"]:
+                array = [self._current_mapping["matrix"].keys()[row]]
+                
+                for key in self._current_mapping["matrix"][row]:
+                    array.append(key[0], key[1], key[2])
+                
+                set_key_row(self._parent._parent, array)
+
+            set_custom_effect(self._parent._parent)
 
 DEFAULT_PROFILE = {
     "name": "Default",
@@ -70,7 +107,7 @@ DEFAULT_PROFILE = {
                  0: (255, 0, 255)
              }
         },
-        "binding" : {
+        "binding": {
             1: {
                 0: {
                     "type": "key",
