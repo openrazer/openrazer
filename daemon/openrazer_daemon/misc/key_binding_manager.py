@@ -116,7 +116,7 @@ class KeyBindingManager(object):
         :type map: int
         """
 
-        f = open(config_file, 'r'):
+        f = open(config_file, 'r')
         
         self._profiles = json.load(f)
         self._current_profile = self._profiles[profile]
@@ -125,6 +125,8 @@ class KeyBindingManager(object):
         self._current_binding = self.current_mapping["binding"]
         self._is_using_matrix = self._current_mapping["is_using_matrix"]
         f.close()
+
+    def write_key_binding_to_file()
 
 DEFAULT_PROFILE = {
     "name": "Default",
