@@ -43,6 +43,8 @@ class KeyBindingManager(object):
         :param key_code: The key code of the pressed key.
         :type key_code: int
         """
+        self._logger.debug("Key press: %s", key_code)
+
         current_binding = self.current_mapping["binding"]
         if key_code not in current_binding:
             self._current_keys.append(key_code)

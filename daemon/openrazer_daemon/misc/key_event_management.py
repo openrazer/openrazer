@@ -23,11 +23,13 @@ import struct
 import threading
 import time
 from evdev import UInput, ecodes, InputDevice
+from evdev.events import event_factory
 
 # pylint: disable=import-error
 from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_EVENT_MAPPING, ORBWEAVER_KEY_MAPPING
 from .macro import MacroKey, MacroRunner, macro_dict_to_obj
 from .key_binding_manager import KeyBindingManager
+from openrazer_daemon.dbus_services.dbus_methods import get_device_name
 
 EVENT_FORMAT = '@llHHI'
 EVENT_SIZE = struct.calcsize(EVENT_FORMAT)
@@ -80,17 +82,20 @@ class KeyWatcher(threading.Thread):
 
         :return: Tuple of event time, key_action, key_code
         :rtype: tuple
-        """
+        """  
+        ev_type = event.type
+        ev_value = event.value
+        ev_code = event.code
+        
 
-
-        if event.type != ecodes.ecodes['EV_KEY']:  # input-event-codes.h EV_KEY 0x01
+        if ev_type != ecodes.ecodes['EV_KEY']:  # input-event-codes.h EV_KEY 0x01
             return None, None, None
 
-        if event.value == 0:
+        if ev_value == 0:
             key_action = 'release'
-        elif event.value == 1:
+        elif ev_value == 1:
             key_action = 'press'
-        elif event.value == 2:
+        elif ev_value == 2:
             key_action = 'autorepeat'
         else:
             key_action = 'unknown'
@@ -99,7 +104,7 @@ class KeyWatcher(threading.Thread):
 
         result = (date, key_action, event.code)
 
-        if event.type == event.code == event.value == 0:
+        if ev_type == ev_code == ev_value == 0:
             return None, None, None
 
         return result
@@ -120,27 +125,34 @@ class KeyWatcher(threading.Thread):
         event_file_map = map(InputDevice, (self._event_files))
         event_file_map = {event_file.fd: event_file for event_file in event_file_map}
 
-        for dev in event_file_map.values(): dev.grab()
+        try:
+            for dev in event_file_map.values(): dev.grab()
+
+        except (IOError, OSError) as err:
+            self._logger.exception("Error grabbing device", exc_info=err)
 
         # Loop
         while not self._shutdown:
-            r, w, x = select.select(event_file_map, [], [])
-            for fd in r:
-                for event in event_file_map[fd].read():
-                    date, key_action, key_code = self.parse_event_record(event)
-
-                    # Skip if date, key_action and key_code is none as that's a spacer record
-                    if date is None:
-                        continue
-
-                    # Now if key is pressed then we record
-                    self._parent.key_action(date, key_code, key_action)
+            self.poll(event_file_map)
 
 #            time.sleep(SPIN_SLEEP)
 
         # Ungrab files and close them
         for dev in event_file_map.values(): dev.ungrab()
 
+    def poll(self, event_file_map):
+        r, w, x = select.select(event_file_map, [], [])
+        for fd in r:
+            event = event_file_map[fd].read_one()
+            date, key_action, key_code = self.parse_event_record(event)
+            self._logger.debug("Key record received: {0}".format(key_code))
+
+            # Skip if date, key_action and key_code is none as that's a spacer record
+            if date is None:
+                continue
+
+            # Now if key is pressed then we record
+            self._parent.key_action(date, key_code, key_action)
 
     @property
     def shutdown(self):
@@ -191,7 +203,7 @@ class KeyboardKeyManager(object):
         self._event_files = event_files
         self._access_lock = threading.Lock()
         self._keywatcher = KeyWatcher(device_id, event_files, self, use_epoll=use_epoll)
-        self._fake_device = UInput(name="{0} (mapped)".format(self._parent.get_device_name()))
+        self._fake_device = UInput(name="{0} (mapped)".format(get_device_name(self._parent)))
         self._binding_manager = KeyBindingManager(device_id, self, self._fake_device)
 
 
@@ -322,7 +334,7 @@ class KeyboardKeyManager(object):
             # Convert event ID to key name
             key_name = self.EVENT_MAP[key_id]
 
-            # self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
+            self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
 
             # Key release
             if key_press == 'release':
@@ -436,10 +448,10 @@ class KeyboardKeyManager(object):
                     else:
                         self._current_macro_combo.append((event_time, key_name, 'DOWN'))
                 # Not recording anything so if a macro key is pressed then run
-                elif not self._recording_macro:
-                    # If key has a macro, play it
-                    if key_name in self._macros:
-                        self.play_macro(key_name)
+#                elif not self._recording_macro:
+#                    # If key has a macro, play it
+#                    if key_name in self._macros:
+#                        self.play_macro(key_name)
 
                 else:
                     self._binding_manager.key_press(key_id)
