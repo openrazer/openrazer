@@ -31,6 +31,8 @@ class KeyBindingManager(object):
         self._profiles = {0:DEFAULT_PROFILE}
         self._current_profile = self._profiles[0]
         self._current_mapping = self._current_profile[0]
+        self._current_matrix  = self.current_mapping["matrix"]
+        self._current_binding = self.current_mapping["binding"]
 
         self._current_keys = []
 
@@ -42,7 +44,7 @@ class KeyBindingManager(object):
         :type key_code: int
         """
         
-        for action in self._current_mapping["binding"][key_code]:
+        for action in self._current_binding[key_code]:
             if action["type"] == "key":
                 self._current_keys.append(action["code"])
                 self._fake_device.write(ecodes.EV_KEY, action["code"], 1)
@@ -87,16 +89,39 @@ class KeyBindingManager(object):
 
         self._current_mapping = self._current_profile[value]
 
-        if self._current_mapping["matrix"]:
-            for row in self._current_mapping["matrix"]:
-                array = [self._current_mapping["matrix"].keys()[row]]
+        if self._current_matrix:
+            for row in self._current_matrix:
+                array = [self._current_matrix.keys()[row]]
                 
-                for key in self._current_mapping["matrix"][row]:
+                for key in self._current_matrix[row]:
                     array.append(key[0], key[1], key[2])
                 
                 set_key_row(self._parent._parent, array)
 
             set_custom_effect(self._parent._parent)
+
+    def read_config_file(self, config_file, profile, map):
+        """
+        Reads the configuration file and sets the variables accordingly
+
+        :param config_file: path to the configuration file
+        :type config_file: str
+
+        :param profile: The profile name to use
+        :type profile: str
+
+        :param map: The map number to use
+        :type map: int
+        """
+
+        f = open(config_file, 'r'):
+        
+        self._profiles = json.load(f)
+        self._current_profile = self._profiles[profile]
+        self._current_mapping = self._current_profile[map]
+        self._current_matrix  = self.current_mapping["matrix"]
+        self._current_binding = self.current_mapping["binding"]
+        f.close()
 
 DEFAULT_PROFILE = {
     "name": "Default",
