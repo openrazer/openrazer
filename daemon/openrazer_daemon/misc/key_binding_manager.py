@@ -45,19 +45,20 @@ class KeyBindingManager(object):
         :type key_code: int
         """
         
-        for action in self._current_binding[key_code]:
-            if action["type"] == "key":
-                self._current_keys.append(action["code"])
-                self._fake_device.write(ecodes.EV_KEY, action["code"], 1)
-                self._fake_device.syn()
-            
-            elif action["type"] == "map":
-                self.current_mapping(action["value"])
+        if key_code not in self._current_binding:
+            self._current_keys.append(key_code)
+            self._fake_device.write(ecodes.EV_KEY, key_code, 1)
+            self._fake_device.syn()
 
-            else:
-                self._current_keys.append(key_code)
-                self._fake_device.write(ecodes.EV_KEY, key_code, 1)
-                self._fake_device.syn()
+        else:
+            for action in self._current_binding[key_code]:
+                if action["type"] == "key":
+                    self._current_keys.append(action["code"])
+                    self._fake_device.write(ecodes.EV_KEY, action["code"], 1)
+                    self._fake_device.syn()
+                
+                elif action["type"] == "map":
+                    self.current_mapping(action["value"])
 
         for key in self._current_keys:
             self._fake_device.write(ecodes.EV_KEY, key, 0)
