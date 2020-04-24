@@ -904,7 +904,7 @@ class RazerBlackWidow2019(_RippleKeyboard):
     """
     Class for the Razer BlackWidow 2019
     """
-    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_2019(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow(-if01)?-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x0241
