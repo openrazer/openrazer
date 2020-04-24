@@ -25,7 +25,7 @@ class KeyBindingManager(object):
         self._device_id = device_id
         self._logger = logging.getLogger('razer.device{0}.bindingmanager'.format(device_id))
         self._parent = parent
-        self._parent._parent.register_observer(self)
+#        self._parent._parent.register_observer(self)
         self._testing = testing
         self._fake_device = fake_device
         self._device = self._parent._parent

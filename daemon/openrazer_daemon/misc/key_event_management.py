@@ -206,7 +206,6 @@ class KeyboardKeyManager(object):
         self._fake_device = UInput(name="{0} (mapped)".format(get_device_name(self._parent)))
         self._binding_manager = KeyBindingManager(device_id, self, self._fake_device)
 
-
         if len(event_files) > 0:
             self._logger.debug("Starting KeyWatcher")
             self._keywatcher.start()
@@ -254,6 +253,7 @@ class KeyboardKeyManager(object):
             while self._temp_key_store[0][0] < now:
                 self._temp_key_store.pop(0)
         except IndexError:
+
             pass
 
         # Creating a copy as then it doesn't mutate whilst iterating
@@ -280,6 +280,7 @@ class KeyboardKeyManager(object):
         :type value: bool
         """
         self._temp_key_store_active = value
+        self._logger.debug("temp_key_store_state changed to {0}".format(self._temp_key_store_active))
 
     def key_action(self, event_time, key_id, key_press='press'):
         """
@@ -303,6 +304,9 @@ class KeyboardKeyManager(object):
         :param key_press: Can either be press, release, autorepeat
         :type key_press: bool
         """
+        self._logger.debug("temp_key_store_state is {0}".format(self._temp_key_store_active))
+        self._logger.debug("temp_key_store_state is {0}".format(self.temp_key_store_state))
+
         # Disable pylints complaining for this part, #PerformanceOverNeatness
         # pylint: disable=too-many-branches,too-many-statements
 
@@ -353,21 +357,24 @@ class KeyboardKeyManager(object):
                 try:
                     # Try and increment key in bucket
                     self._stats[storage_bucket][key_name] += 1
-                    # self._logger.debug("Increased key %s", key_name)
+                #    self._logger.debug("Increased key %s", key_name)
                 except KeyError:
                     # Create bucket
                     self._stats[storage_bucket] = dict.fromkeys(self.KEY_MAP, 0)
                     try:
                         # Increment key
                         self._stats[storage_bucket][key_name] += 1
-                        # self._logger.debug("Increased key %s", key_name)
+                #        self._logger.debug("Increased key %s", key_name)
                     except KeyError as err:
                         self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
 
+                self._logger.debug("temp_key_store_state is {0}".format(self._temp_key_store_active))
+                self._logger.debug("temp_key_store_state is {0}".format(self.temp_key_store_state))
                 if self._temp_key_store_active:
                     colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
                     self._last_colour_choice = colour
                     self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_name], colour))
+                    self._logger.debug("Added key to temporary key store: {0}".format((now + self._temp_expire_time, self.KEY_MAP[key_name], colour)))
 
                 # Macro FN+F9 logic
                 if key_name == 'MACROMODE':
@@ -596,144 +603,9 @@ class NagaHexV2KeyManager(KeyboardKeyManager):
 
 
 class GamepadKeyManager(KeyboardKeyManager):
-    GAMEPAD_EVENT_MAPPING = TARTARUS_EVENT_MAPPING
-    GAMEPAD_KEY_MAPPING = TARTARUS_KEY_MAPPING
+    EVENT_MAP = TARTARUS_EVENT_MAPPING
+    KEY_MAP = TARTARUS_KEY_MAPPING
 
-    def __init__(self, device_id, event_files, parent, use_epoll=True, testing=False):
-        super(GamepadKeyManager, self).__init__(device_id, event_files, parent, use_epoll, testing=testing)
-
-        self._mode_modifier = False
-        self._mode_modifier_combo = []
-        self._mode_modifier_key_down = False
-
-    def key_action(self, event_time, key_id, key_press=True):
-        """
-        Process a key press event
-
-        Ok an attempt to explain the logic
-        * The function sets a value _fn_down depending on the state of FN.
-        * Adds keypress and release events to a macro list if recording a macro.
-        * Pressing FN+F9 starts recording a macro, then selecting any key marks that as a macro key,
-          then it will record keys, then pressing FN+F9 will save macro.
-        * Pressing any macro key will run macro.
-        * Pressing FN+F10 will toggle game mode.
-        * Pressing any key will increment a statistical number in a dictionary used for generating
-          heatmaps.
-        :param event_time: Time event occurred
-        :type event_time: datetime.datetime
-
-        :param key_id: Key Event ID
-        :type key_id: int
-
-        :param key_press: If true then its a press, else its a release
-        :type key_press: bool
-        """
-        # Disable pylints complaining for this part, #PerformanceOverNeatness
-        # pylint: disable=too-many-branches,too-many-statements
-        self._access_lock.acquire()
-
-        if not self._event_files_locked:
-            self.grab_event_files(True)
-
-        now = datetime.datetime.now()
-
-        # Remove expired keys from store
-        try:
-            # Get date and if its less than now its expired
-            while self._temp_key_store[0][0] < now:
-                self._temp_key_store.pop(0)
-        except IndexError:
-            pass
-
-        # Clean up any threads
-        if self._clean_counter > 20 and len(self._threads) > 0:
-            self._clean_counter = 0
-            self.clean_macro_threads()
-
-        try:
-            # Convert event ID to key name
-
-            key_name = self.GAMEPAD_EVENT_MAPPING[key_id]
-            # Key press
-
-            # This is the key for storing stats, by generating hour timestamps it will bucket data nicely.
-            storage_bucket = event_time.strftime('%Y%m%d%H')
-
-            try:
-                # Try and increment key in bucket
-                self._stats[storage_bucket][key_name] += 1
-                # self._logger.debug("Increased key %s", key_name)
-            except KeyError:
-                # Create bucket
-                self._stats[storage_bucket] = dict.fromkeys(self.GAMEPAD_KEY_MAPPING, 0)
-                try:
-                    # Increment key
-                    self._stats[storage_bucket][key_name] += 1
-                    # self._logger.debug("Increased key %s", key_name)
-                except KeyError as err:
-                    self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
-
-            if self._temp_key_store_active:
-                colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
-                self._last_colour_choice = colour
-                self._temp_key_store.append((now + self._temp_expire_time, self.GAMEPAD_KEY_MAPPING[key_name], colour))
-
-            # if self._testing:
-            # if key_press:
-                #self._logger.debug("Got Key: {0} Down".format(key_name))
-            # else:
-                #self._logger.debug("Got Key: {0} Up".format(key_name))
-
-            # Logic for mode switch modifier
-            if self._mode_modifier:
-                if key_name == 'MODE_SWITCH' and key_press:
-                    # Start the macro string
-                    self._mode_modifier_key_down = True
-                    self._mode_modifier_combo.clear()
-                    self._mode_modifier_combo.append('MODE')
-
-                elif key_name == 'MODE_SWITCH' and not key_press:
-                    # Release mode_switch
-                    self._mode_modifier_key_down = False
-
-                elif key_press and self._mode_modifier_key_down:
-                    # Any keys pressed whilst mode_switch is down
-                    self._mode_modifier_combo.append(key_name)
-
-                    # Override keyname so it now equals a macro
-                    key_name = '+'.join(self._mode_modifier_combo)
-
-            self._logger.debug("Macro String: {0}".format(key_name))
-
-            if key_name in self._macros and key_press:
-                self.play_macro(key_name)
-
-        except KeyError as err:
-            self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
-
-        self._access_lock.release()
-
-    @property
-    def mode_modifier(self):
-        """
-        Get if the MODE_SWTICH key is to act as a modifier
-
-        :return: True if a modifier, false if not
-        :rtype: bool
-        """
-        return self._mode_modifier
-
-    @mode_modifier.setter
-    def mode_modifier(self, value):
-        """
-        Set MODE_SWITCH modifier state
-
-        :param value: Modifier state
-        :type value: bool
-        """
-        self._mode_modifier = True if value else False
-
-
-class OrbweaverKeyManager(GamepadKeyManager):
-    GAMEPAD_EVENT_MAPPING = ORBWEAVER_EVENT_MAPPING
-    GAMEPAD_KEY_MAPPING = ORBWEAVER_KEY_MAPPING
+class OrbweaverKeyManager(KeyboardKeyManager):
+    EVENT_MAP = ORBWEAVER_EVENT_MAPPING
+    KEY_MAP = ORBWEAVER_KEY_MAPPING

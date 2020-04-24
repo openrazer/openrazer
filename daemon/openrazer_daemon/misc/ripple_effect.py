@@ -125,7 +125,7 @@ class RippleEffectThread(threading.Thread):
                     event_time = expire_time - expire_diff
 
                     now_diff = now - event_time
-
+                    self._logger.debug("Got press")
                     # Current radius is based off a time metric
                     if self._colour is not None:
                         colour = self._colour
@@ -182,6 +182,7 @@ class RippleManager(object):
 
         self._ripple_thread = RippleEffectThread(self, device_number)
         self._ripple_thread.start()
+        self._logger.debug("Start Ripple Manager")
 
     @property
     def key_list(self):
@@ -219,6 +220,7 @@ class RippleManager(object):
         :param msg: Notification
         :type msg: tuple
         """
+
         if not isinstance(msg, tuple):
             self._logger.warning("Got msg that was not a tuple")
         elif msg[0] == 'effect':
@@ -234,7 +236,7 @@ class RippleManager(object):
             else:
                 # Effect other than ripple so stop
                 self._ripple_thread.disable()
-
+                self._logger.debug("stop Ripple")
                 self._parent.key_manager.temp_key_store_state = False
 
     def close(self):
