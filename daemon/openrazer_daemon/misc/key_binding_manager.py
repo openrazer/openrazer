@@ -20,7 +20,7 @@ class KeyBindingManager(object):
     """
 
     def __init__(self, device_id, parent, fake_device, testing=False):
-        
+
         self._device_id = device_id
         self._logger = logging.getLogger('razer.device{0}.keymanager'.format(device_id))
         self._parent = parent
@@ -28,7 +28,8 @@ class KeyBindingManager(object):
         self._testing = testing
         self._fake_device = fake_device
 
-
+        self._profiles = {0:DEFAULT_PROFILE}
+        self._current_profile = self._profiles[0]
 
     def key_press(self, key_code):
         """
@@ -38,3 +39,25 @@ class KeyBindingManager(object):
         :type key_code: int
         """
         
+        print("stub")
+
+
+DEFAULT_PROFILE = {
+    "name": "Default",
+    0: {
+        "name": "Default",
+        "matrix": {
+             0: {
+                 0: (255, 0, 255)
+             }
+        },
+        "binding" : {
+            1: {
+                0: {
+                    "type": "key",
+                    "code": 1
+                }
+            }
+        }
+    }
+}

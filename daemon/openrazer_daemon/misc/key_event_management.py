@@ -70,7 +70,7 @@ class KeyWatcher(threading.Thread):
     """
     Thread to watch keyboard event files and return keypresses
     """
-    @staticmethod
+    @staticmethod #TODO remove
     def parse_event_record(event):
         """
         Parse Input event record
@@ -120,7 +120,6 @@ class KeyWatcher(threading.Thread):
         event_file_map = map(InputDevice, (self._event_files))
         event_file_map = {event_file.fd: event_file for event_file in event_file_map}
 
-        # Register files with select
         for dev in event_file_map.values(): dev.grab()
 
         # Loop
