@@ -31,8 +31,6 @@ class KeyBindingManager(object):
         self._profiles = {0:DEFAULT_PROFILE}
         self._current_profile = self._profiles[0]
         self._current_mapping = self._current_profile[0]
-        self._current_matrix  = self._current_mapping["matrix"]
-        self._current_binding = self._current_mapping["binding"]
         self._is_using_matrix = self._current_mapping["is_using_matrix"]
 
         self._current_keys = []
@@ -44,14 +42,14 @@ class KeyBindingManager(object):
         :param key_code: The key code of the pressed key.
         :type key_code: int
         """
-        
-        if key_code not in self._current_binding:
+        current_binding = self.current_mapping["binding"]
+        if key_code not in current_binding:
             self._current_keys.append(key_code)
             self._fake_device.write(ecodes.EV_KEY, key_code, 1)
             self._fake_device.syn()
 
         else:
-            for action in self._current_binding[key_code]:
+            for action in current_binding[key_code]:
                 if action["type"] == "key":
                     self._current_keys.append(action["code"])
                     self._fake_device.write(ecodes.EV_KEY, action["code"], 1)
@@ -90,12 +88,13 @@ class KeyBindingManager(object):
         """
 
         self._current_mapping = self._current_profile[value]
+        current_matrix  = self._current_mapping["matrix"]
 
-        if self._is_using_matrix:
-            for row in self._current_matrix:
-                array = [self._current_matrix.keys()[row]]
+        if self._current_mapping["is_using_matrix"]:
+            for row in current_matrix:
+                array = [current_matrix.keys()[row]]
                 
-                for key in self._current_matrix[row]:
+                for key in current_matrix[row]:
                     array.append(key[0], key[1], key[2])
                 
                 set_key_row(self._parent._parent, array)
@@ -121,12 +120,7 @@ class KeyBindingManager(object):
         self._profiles = json.load(f)
         self._current_profile = self._profiles[profile]
         self._current_mapping = self._current_profile[map]
-        self._current_matrix  = self.current_mapping["matrix"]
-        self._current_binding = self.current_mapping["binding"]
-        self._is_using_matrix = self._current_mapping["is_using_matrix"]
         f.close()
-
-    def write_key_binding_to_file()
 
 DEFAULT_PROFILE = {
     "name": "Default",
