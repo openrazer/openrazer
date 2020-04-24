@@ -49,7 +49,7 @@ class KeyBindingManager(object):
             if operation_type == "key":
                 self.press_key(sequence["code"])
             if operation_type == "sleep":
-                sleep(operation_type["time"])
+                time.sleep(operation_type["time"])
 
     def press_key(self, key_code):
         """
