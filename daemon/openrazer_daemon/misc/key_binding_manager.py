@@ -11,7 +11,8 @@ import struct
 import time
 from evdev import UInput, ecodes
 
-from openrazer_daemon.dbus_services.dbus_methods import set_custom_effect, set_key_row, keypad_set_profile_led_blue, keypad_set_profile_led_green, keypad_set_profile_led_red
+from openrazer_daemon.keyboard import KeyboardColour
+
 
 class KeyBindingManager(object):
     """
@@ -31,10 +32,15 @@ class KeyBindingManager(object):
 
         self._profiles = {0:DEFAULT_PROFILE}
         self._current_profile = self._profiles[0]
-        self._current_mapping = self._current_profile[0]
-        self._is_using_matrix = self._current_mapping["is_using_matrix"]
+        self._current_mapping = []
+        self._is_using_matrix = False
 
         self._current_keys = []
+
+        self._rows, self._cols = self._device.MATRIX_DIMS
+        self._keyboard_grid = KeyboardColour(self._rows, self._cols)
+
+        self.current_mapping = self._current_profile["default_map"]
 
     def key_press(self, key_code):
         """
@@ -53,13 +59,14 @@ class KeyBindingManager(object):
 
         else:
             for action in current_binding[key_code]:
+                action = current_binding[key_code][action]
                 if action["type"] == "key":
                     self._current_keys.append(action["code"])
                     self._fake_device.write(ecodes.EV_KEY, action["code"], 1)
                     self._fake_device.syn()
                 
                 elif action["type"] == "map":
-                    self.current_mapping(action["value"])
+                    self.current_mapping = action["value"]
 
         for key in self._current_keys:
             self._fake_device.write(ecodes.EV_KEY, key, 0)
@@ -84,37 +91,31 @@ class KeyBindingManager(object):
         """
 
         Sets the current mapping and changes the led matrix
-        Warning: this requires a full matrix
 
         :param value: The new mapping
         :type value: int
         """
-
+        self._logger.debug("Change mapping to {0}".format(value))
         self._current_mapping = self._current_profile[value]
-        current_matrix  = self._current_mapping["matrix"]
-        matrix_length = self._device.MATRIX_DIMS = [1]
 
         if self._current_mapping["is_using_matrix"]:
+            current_matrix  = self._current_mapping["matrix"]
             for row in current_matrix:
-                if row.len() == matrix_length:
-                    array = [current_matrix.keys()[row]]
-                
-                    for key in current_matrix[row]:
-                        array.append(key[0], key[1], key[2])
+                for key in current_matrix[row]:
+                    self._keyboard_grid.set_key_colour(row, key, current_matrix[row][key])
 
-                    set_key_row(self._device, array)
-                else:
-                    self._logger.error("Invalid row length, expected {0} but got {1}. Ignoring row.".format(matrix_length, row.len()))
+            payload = self._keyboard_grid.get_total_binary()
+            self._device.setKeyRow(payload)
+            self._device.setCustom()
 
-            set_custom_effect(self._device)
-        
+
         capabilities = self._device.METHODS
-        if capabilities['keypad_set_profile_led_red']:
-            keypad_set_profile_led_red(self._device, self.current_mapping["red_led"])
-        if capabilities['keypad_set_profile_led_green']:
-            keypad_set_profile_led_red(self._device, self.current_mapping["blue_led"])
-        if capabilities['keypad_set_profile_led_blue']:
-            keypad_set_profile_led_red(self._device, self.current_mapping["blue_led"])
+        if 'keypad_set_profile_led_red' in capabilities:
+            self._device.setRedLED(self.current_mapping["red_led"])
+        if 'keypad_set_profile_led_green' in capabilities:
+            self._device.setGreenLED(self.current_mapping["green_led"])
+        if 'keypad_set_profile_led_blue' in capabilities:
+            self._device.setBlueLED(self.current_mapping["blue_led"])
 
     def read_config_file(self, config_file, profile):
         """
@@ -139,20 +140,62 @@ DEFAULT_PROFILE = {
     "default_map": 0,
     0: {
         "name": "Default",
-        "is_using_matrix": False,
+        "is_using_matrix": True,
         "red_led": True,
         "green_led": False,
         "blue_led": False,
         "matrix": {
-             0: {
-                 0: (255, 0, 255)
+             1: {
+                 1: (255, 0, 255)
+             },
+             2: {
+                 1: (255, 0, 255)
              }
         },
         "binding": {
-            1: {
+            2: {
                 0: {
                     "type": "key",
-                    "code": 1
+                    "code": 2
+                },
+                1: {
+                    "type": "key",
+                    "code": 3
+                },
+                2: {
+                    "type": "map",
+                    "value": 1
+                }
+            }
+        }
+    },
+    1: {
+        "name": "Default",
+        "is_using_matrix": True,
+        "red_led": True,
+        "green_led": False,
+        "blue_led": True,
+        "matrix": {
+             1: {
+                 1: (255, 255, 0)
+             },
+             2: {
+                 1: (255, 255, 0)
+             }
+        },
+        "binding": {
+            2: {
+                0: {
+                    "type": "key",
+                    "code": 3
+                },
+                1: {
+                    "type": "key",
+                    "code": 2
+                },
+                2: {
+                    "type": "map",
+                    "value": 0
                 }
             }
         }
