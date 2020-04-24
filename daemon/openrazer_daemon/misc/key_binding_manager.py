@@ -31,8 +31,9 @@ class KeyBindingManager(object):
         self._profiles = {0:DEFAULT_PROFILE}
         self._current_profile = self._profiles[0]
         self._current_mapping = self._current_profile[0]
-        self._current_matrix  = self.current_mapping["matrix"]
-        self._current_binding = self.current_mapping["binding"]
+        self._current_matrix  = self._current_mapping["matrix"]
+        self._current_binding = self._current_mapping["binding"]
+        self._is_using_matrix = self._current_mapping["is_using_matrix"]
 
         self._current_keys = []
 
@@ -89,7 +90,7 @@ class KeyBindingManager(object):
 
         self._current_mapping = self._current_profile[value]
 
-        if self._current_matrix:
+        if self._is_using_matrix:
             for row in self._current_matrix:
                 array = [self._current_matrix.keys()[row]]
                 
@@ -121,12 +122,14 @@ class KeyBindingManager(object):
         self._current_mapping = self._current_profile[map]
         self._current_matrix  = self.current_mapping["matrix"]
         self._current_binding = self.current_mapping["binding"]
+        self._is_using_matrix = self._current_mapping["is_using_matrix"]
         f.close()
 
 DEFAULT_PROFILE = {
     "name": "Default",
     0: {
         "name": "Default",
+        "is_using_matrix": False,
         "matrix": {
              0: {
                  0: (255, 0, 255)
