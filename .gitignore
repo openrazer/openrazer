@@ -65,3 +65,6 @@ dist
 /driver/*.mod
 /driver/*.mod.c
 /driver/.*.cmd
+
+#vscode config files
+*.vscode
