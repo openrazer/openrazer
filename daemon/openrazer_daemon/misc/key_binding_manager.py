@@ -30,6 +30,8 @@ class KeyBindingManager(object):
 
         self._profiles = {0:DEFAULT_PROFILE}
         self._current_profile = self._profiles[0]
+        self._current_map = self._current_profile[0]
+        self._current_binding = self._current_map["binding"]
 
     def key_press(self, key_code):
         """
@@ -38,8 +40,25 @@ class KeyBindingManager(object):
         :param key_code: The key code of the pressed key.
         :type key_code: int
         """
-        
-        print("stub")
+
+        binding = self._current_binding
+        current_key = binding[key_code]
+        for sequence in current_key:
+            operation_type = sequence["type"]
+
+            if operation_type == "key":
+                self.press_key(sequence["code"])
+            if operation_type == "sleep":
+                sleep(operation_type["time"])
+
+    def press_key(self, key_code):
+        """
+        do some evdev stuff to press key
+
+        :param key_code: The key code of the key we want to send to the system
+        :type key_code: int
+        """
+
 
 
 DEFAULT_PROFILE = {
