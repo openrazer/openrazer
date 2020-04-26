@@ -160,7 +160,7 @@ class KeyWatcher(threading.Thread):
                 # Now if key is pressed then we record
                 self._parent.key_action(date, key_code, key_action)
             except (OSError, IOError) as err:
-                self._logger.exception("Error reading from device", exc_info=err)
+                self._logger.exception("Error reading from device, stopping", exc_info=err)
                 self._shutdown = True
 
     @property
@@ -313,19 +313,19 @@ class KeyboardKeyManager(object):
         now = datetime.datetime.now()
 
         # Remove expired keys from store
-        # try:
-        #     # Get date and if its less than now its expired
-        #     while self._temp_key_store[0][0] < now:
-        #         self._temp_key_store.pop(0)
-        # except IndexError:
-        #     pass
-
         try:
             # Get date and if its less than now its expired
-            while self._parent.ripple_manager.key_list[0][0] < now:
-                self._parent.ripple_manager.key_list.pop(0)
+            while self._temp_key_store[0][0] < now:
+                self._temp_key_store.pop(0)
         except IndexError:
             pass
+
+        # try:
+        #     # Get date and if its less than now its expired
+        #     while self._parent.ripple_manager.key_list[0][0] < now:
+        #         self._parent.ripple_manager.key_list.pop(0)
+        # except IndexError:
+        #     pass
 
         # Clean up any threads
         if self._clean_counter > 20 and len(self._threads) > 0:
@@ -359,7 +359,7 @@ class KeyboardKeyManager(object):
             if key_press == 'press' and self.temp_key_store_state:
                 colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
                 self._last_colour_choice = colour
-                self._parent.ripple_manager.key_list.append((now + self._temp_expire_time, self.KEY_MAP[key_name], colour))
+                self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_name], colour))
                 self._logger.debug("Added key to temporary key store: {0}".format((now + self._temp_expire_time, self.KEY_MAP[key_name], colour)))
 
             # Sets up game mode as when enabling macro keys it stops the key working
@@ -505,7 +505,7 @@ class KeyboardKeyManager(object):
             self._parent.remove_observer(self)
 
             self._logger.debug("Stopping key manager")
-            self._keywatcher._shutdown = True
+            self._keywatcher.shutdown = True
             self._keywatcher.join(timeout=2)
             if self._keywatcher.is_alive():
                 self._logger.error("Could not stop KeyWatcher thread")
@@ -529,9 +529,10 @@ class KeyboardKeyManager(object):
             # ('effect', Device, 'effectName', 'effectparams'...)
             # Device is the device the msg originated from (could be parent device)
             if msg[2] == 'setRipple':
-                self.temp_key_store_state = True
-            else:
-                self.temp_key_store_state = False
+            #     self.temp_key_store_state = True
+            # else:
+            #     self.temp_key_store_state = False
+                pass
 
 
 class NagaHexV2KeyManager(KeyboardKeyManager):

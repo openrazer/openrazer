@@ -277,7 +277,7 @@ class RazerOrbweaverChroma(_RippleKeyboard):
         super(RazerOrbweaverChroma, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
-        self.key_manager = _OrbweaverKeyManager(self._device_number, self.event_files, self, testing=self._testing)
+        #self.key_manager = _OrbweaverKeyManager(self._device_number, self.event_files, self, testing=self._testing)
 
     def _close(self):
         """
@@ -286,7 +286,7 @@ class RazerOrbweaverChroma(_RippleKeyboard):
         super(RazerOrbweaverChroma, self)._close()
 
         # TODO look into saving stats in /var/run maybe
-        self.key_manager.close()
+        #self.key_manager.close()
 
 
 class RazerBlackWidowUltimate2012(_MacroKeyboard):
