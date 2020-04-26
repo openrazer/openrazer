@@ -26,9 +26,6 @@ from evdev import UInput, ecodes, InputDevice
 from evdev.events import event_factory
 # pylint: disable=import-error
 from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_EVENT_MAPPING, ORBWEAVER_KEY_MAPPING
-from .macro import MacroKey, MacroRunner, macro_dict_to_obj
-from openrazer_daemon.dbus_services.dbus_methods import get_device_name
-
 EVENT_FORMAT = '@llHHI'
 EVENT_SIZE = struct.calcsize(EVENT_FORMAT)
 
@@ -322,11 +319,6 @@ class KeyboardKeyManager(object):
         except IndexError:
             pass
 
-        # Clean up any threads
-        if self._clean_counter > 20 and len(self._threads) > 0:
-            self._clean_counter = 0
-            self.clean_macro_threads()
-
         try:
             # Convert event ID to key name
             key_name = self.EVENT_MAP[key_id]
@@ -397,52 +389,6 @@ class KeyboardKeyManager(object):
         except KeyError as err:
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
 
-    def add_kb_macro(self):
-        """
-        Tidy up the recorded macro and add it to the store
-
-        Goes through the macro and generated relative delays between key events
-        """
-        new_macro = []
-
-        start_time = self._current_macro_combo[0][0]
-        for event_time, key, state in self._current_macro_combo:
-            delay = (event_time - start_time).microseconds
-            start_time = event_time
-            new_macro.append(MacroKey(key, delay, state))
-
-        self._macros[self._current_macro_bind_key] = new_macro
-
-    def clean_macro_threads(self):
-        """
-        Threadless-threadpool
-
-        Goes though the threads (macro play jobs) and removed the threads if they have finished.
-        #SetMagic
-        """
-        self._logger.debug("Cleaning up macro threads")
-        to_remove = set()
-
-        for macro_thread in self._threads:
-            macro_thread.join(timeout=0.05)
-            if not macro_thread.is_alive():
-                to_remove.add(macro_thread)
-
-        self._threads -= to_remove
-
-    def play_macro(self, macro_key):
-        """
-        Play macro for a given key
-
-        Launches a thread and adds it to the pool
-        :param macro_key: Macro Key
-        :type macro_key: str
-        """
-        self._logger.info("Running Macro %s:%s", macro_key, str(self._macros[macro_key]))
-        macro_thread = MacroRunner(self._device_id, macro_key, self._macros[macro_key])
-        macro_thread.start()
-        self._threads.add(macro_thread)
-
     # Methods to be used with DBus
     def dbus_delete_macro(self, key_name):
         """
@@ -487,7 +433,7 @@ class KeyboardKeyManager(object):
         :param macro_json: Macro JSON
         :type macro_json: str
         """
-        macro_list = [macro_dict_to_obj(macro_object_dict) for macro_object_dict in json.loads(macro_json)]
+        macro_list = [print(macro_object_dict) for macro_object_dict in json.loads(macro_json)]
         self._macros[macro_key] = macro_list
 
     def close(self):
