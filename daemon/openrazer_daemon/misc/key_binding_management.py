@@ -41,7 +41,7 @@ class KeybindingManager(object):
 
         self.current_mapping = self._current_profile["default_map"]
 
-    def key_press(self, key_code):
+    def key_press(self, key_code, key_press):
         """
         Check for a binding
 
@@ -51,7 +51,14 @@ class KeybindingManager(object):
         self._logger.debug("Key press: %s", key_code)
 
         current_binding = self.current_mapping["binding"]
-        if key_code not in current_binding:
+        if key_press == 'release':
+            for key in self._current_keys:
+                self._fake_device.write(ecodes.EV_KEY, key, 0)
+                
+            self._fake_device.syn()
+            self._current_keys = []
+        
+        elif key_code not in current_binding:
             self._current_keys.append(key_code)
             self._fake_device.write(ecodes.EV_KEY, key_code, 1)
             self._fake_device.syn()
@@ -59,6 +66,7 @@ class KeybindingManager(object):
         else:
             for action in current_binding[key_code]:
                 action = current_binding[key_code][action]
+
                 if action["type"] == "key":
                     self._current_keys.append(action["code"])
                     self._fake_device.write(ecodes.EV_KEY, action["code"], 1)
@@ -67,11 +75,11 @@ class KeybindingManager(object):
                 elif action["type"] == "map":
                     self.current_mapping = action["value"]
 
-        for key in self._current_keys:
-            self._fake_device.write(ecodes.EV_KEY, key, 0)
+        # for key in self._current_keys:
+        #     self._fake_device.write(ecodes.EV_KEY, key, 0)
             
-        self._fake_device.syn()
-        self._current_keys = []
+        # self._fake_device.syn()
+        # self._current_keys = []
 
     @property
     def current_mapping(self):

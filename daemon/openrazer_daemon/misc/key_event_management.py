@@ -278,7 +278,7 @@ class KeyboardKeyManager(object):
         self._temp_key_store_active = value
         self._logger.debug("temp_key_store_state changed to {0}".format(self._temp_key_store_active))
 
-    def key_action(self, event_time, key_id, key_press='press'):
+    def key_action(self, event_time, key_id, key_press):
         """
         Process a key press event
 
@@ -331,7 +331,7 @@ class KeyboardKeyManager(object):
             # Convert event ID to key name
             key_name = self.EVENT_MAP[key_id]
 
-            self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
+            self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press == 'press' else 'UP'))
 
 
             # This is the key for storing stats, by generating hour timestamps it will bucket data nicely.
@@ -393,7 +393,7 @@ class KeyboardKeyManager(object):
                     #self._parent.method_args['brightness'] = current_brightness
 
             else:
-                self._parent.binding_manager.key_press(key_id)
+                self._parent.binding_manager.key_press(key_id, key_press)
 
 
         except KeyError as err:
