@@ -295,9 +295,6 @@ class KeyboardKeyManager(object):
         # Disable pylints complaining for this part, #PerformanceOverNeatness
         # pylint: disable=too-many-branches,too-many-statements
 
-        if key_press == 'autorepeat':
-                key_press = 'press'
-
         now = datetime.datetime.now()
 
         # Remove expired keys from store
