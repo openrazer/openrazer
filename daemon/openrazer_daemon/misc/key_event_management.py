@@ -113,7 +113,7 @@ class KeyWatcher(threading.Thread):
         self._shutdown = False
         self._parent = parent
 
-        self._selector = selectors.SelectSelector()
+        self._selector = selectors.DefaultSelector()
         for event_file in event_files:
             device = InputDevice(event_file)
             self._selector.register(device, selectors.EVENT_READ)
@@ -134,7 +134,6 @@ class KeyWatcher(threading.Thread):
 
         # Loop
         while not self._shutdown:
-
             try:
                 self.poll(self._selector)
                 self._logger.debug("reset")
@@ -159,6 +158,9 @@ class KeyWatcher(threading.Thread):
         for key, mask in selector.select():
             device = key.fileobj
             event = device.read_one()
+            if event == None:
+                break
+
             date, key_action, key_code = self.parse_event_record(event)
 
             # Skip if date, key_action and key_code is none as that's a spacer record
