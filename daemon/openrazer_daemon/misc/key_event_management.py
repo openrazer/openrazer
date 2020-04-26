@@ -146,7 +146,7 @@ class KeyWatcher(threading.Thread):
         self._logger.debug("closing keywatcher")
 
         # Ungrab files and close them
-        for key, mask in self._selector.select():
+        for key, mask in self._selector.get_map():
             device = key.fileobj
             self._selector.unregister(device)
             device.ungrab()
@@ -155,7 +155,7 @@ class KeyWatcher(threading.Thread):
         self._selector.close()
 
     def poll(self, selector):
-        for key, mask in selector.select():
+        for key, mask in selector.select(EPOLL_TIMEOUT):
             device = key.fileobj
             event = device.read_one()
             if event == None:
