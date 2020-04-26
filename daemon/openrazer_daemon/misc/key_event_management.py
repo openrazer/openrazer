@@ -130,7 +130,7 @@ class KeyWatcher(threading.Thread):
         while not self._shutdown:
             self.poll(event_file_map)
 
-#            time.sleep(SPIN_SLEEP)
+            time.sleep(SPIN_SLEEP)
 
         # Ungrab files and close them
         for dev in event_file_map.values(): dev.ungrab()
@@ -138,15 +138,18 @@ class KeyWatcher(threading.Thread):
     def poll(self, event_file_map):
         r, w, x = select.select(event_file_map, [], [])
         for fd in r:
-            event = event_file_map[fd].read_one()
-            date, key_action, key_code = self.parse_event_record(event)
+            try:
+                event = event_file_map[fd].read_one()
+                date, key_action, key_code = self.parse_event_record(event)
 
-            # Skip if date, key_action and key_code is none as that's a spacer record
-            if date is None:
-                continue
+                # Skip if date, key_action and key_code is none as that's a spacer record
+                if date is None:
+                    continue
 
-            # Now if key is pressed then we record
-            self._parent.key_action(date, key_code, key_action)
+                # Now if key is pressed then we record
+                self._parent.key_action(date, key_code, key_action)
+            except (OSError, IOError) as err:
+                self._logger.exception("Error reading from device", exc_info=err)
 
     @property
     def shutdown(self):
@@ -490,7 +493,7 @@ class KeyboardKeyManager(object):
             self._parent.remove_observer(self)
 
             self._logger.debug("Stopping key manager")
-            self._keywatcher.shutdown = True
+            self._keywatcher._shutdown = True
             self._keywatcher.join(timeout=2)
             if self._keywatcher.is_alive():
                 self._logger.error("Could not stop KeyWatcher thread")
