@@ -300,9 +300,6 @@ class KeyboardKeyManager(object):
         :param key_press: Can either be press, release, autorepeat
         :type key_press: bool
         """
-        self._logger.debug("temp_key_store_state is {0}".format(self._temp_key_store_active))
-        self._logger.debug("temp_key_store_state is {0}".format(self.temp_key_store_state))
-
         # Disable pylints complaining for this part, #PerformanceOverNeatness
         # pylint: disable=too-many-branches,too-many-statements
 
@@ -336,128 +333,67 @@ class KeyboardKeyManager(object):
 
             self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press else 'UP'))
 
-            # Key release
-            if key_press == 'release':
-                if self._recording_macro:
-                    # Skip as don't care about releasing macro bind key
-                    if key_name not in (self._current_macro_bind_key, 'MACROMODE'):
-                        # Record key release events
-                        self._current_macro_combo.append((event_time, key_name, 'UP'))
+
+            # This is the key for storing stats, by generating hour timestamps it will bucket data nicely.
+            storage_bucket = event_time.strftime('%Y%m%d%H')
+
+            try:
+                # Try and increment key in bucket
+                self._stats[storage_bucket][key_name] += 1
+            #    self._logger.debug("Increased key %s", key_name)
+            except KeyError:
+                # Create bucket
+                self._stats[storage_bucket] = dict.fromkeys(self.KEY_MAP, 0)
+                try:
+                    # Increment key
+                    self._stats[storage_bucket][key_name] += 1
+            #        self._logger.debug("Increased key %s", key_name)
+                except KeyError as err:
+                    self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
+
+            if self._temp_key_store_active:
+                colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
+                self._last_colour_choice = colour
+                self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_name], colour))
+                self._logger.debug("Added key to temporary key store: {0}".format((now + self._temp_expire_time, self.KEY_MAP[key_name], colour)))
+
+            # Sets up game mode as when enabling macro keys it stops the key working
+            elif key_name == 'GAMEMODE':
+                self._logger.info("Got game mode combo")
+
+                game_mode = self._parent.getGameMode()
+                self._parent.setGameMode(not game_mode)
+
+            # Brightness logic
+            elif key_name == 'BRIGHTNESSDOWN':
+                # Get brightness value
+                current_brightness = self._parent.method_args.get('brightness', None)
+                if current_brightness is None:
+                    current_brightness = self._parent.getBrightness()
+
+                if current_brightness > 0:
+                    current_brightness -= 10
+                    if current_brightness < 0:
+                        current_brightness = 0
+
+                    self._parent.setBrightness(current_brightness)
+                        #self._parent.method_args['brightness'] = current_brightness
+            elif key_name == 'BRIGHTNESSUP':
+                # Get brightness value
+                current_brightness = self._parent.method_args.get('brightness', None)
+                if current_brightness is None:
+                    current_brightness = self._parent.getBrightness()
+
+                if current_brightness < 100:
+                    current_brightness += 10
+                    if current_brightness > 100:
+                        current_brightness = 100
+
+                    self._parent.setBrightness(current_brightness)
+                    #self._parent.method_args['brightness'] = current_brightness
 
             else:
-                # Key press
-
-                # This is the key for storing stats, by generating hour timestamps it will bucket data nicely.
-                storage_bucket = event_time.strftime('%Y%m%d%H')
-
-                try:
-                    # Try and increment key in bucket
-                    self._stats[storage_bucket][key_name] += 1
-                #    self._logger.debug("Increased key %s", key_name)
-                except KeyError:
-                    # Create bucket
-                    self._stats[storage_bucket] = dict.fromkeys(self.KEY_MAP, 0)
-                    try:
-                        # Increment key
-                        self._stats[storage_bucket][key_name] += 1
-                #        self._logger.debug("Increased key %s", key_name)
-                    except KeyError as err:
-                        self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
-
-                self._logger.debug("temp_key_store_state is {0}".format(self._temp_key_store_active))
-                self._logger.debug("temp_key_store_state is {0}".format(self.temp_key_store_state))
-                if self._temp_key_store_active:
-                    colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
-                    self._last_colour_choice = colour
-                    self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_name], colour))
-                    self._logger.debug("Added key to temporary key store: {0}".format((now + self._temp_expire_time, self.KEY_MAP[key_name], colour)))
-
-                # Macro FN+F9 logic
-                if key_name == 'MACROMODE':
-                    self._logger.info("Got macro combo")
-
-                    if not self._recording_macro:
-                        # Starting to record macro
-                        self._recording_macro = True
-                        self._current_macro_bind_key = None
-                        self._current_macro_combo = []
-
-                        self._parent.setMacroEffect(0x01)
-                        self._parent.setMacroMode(True)
-
-                    else:
-                        self._logger.debug("Finished recording macro")
-                        # Finish recording macro
-                        if self._current_macro_bind_key is not None:
-                            if len(self._current_macro_combo) > 0:
-                                self.add_kb_macro()
-                            else:
-                                # Clear macro
-                                self.dbus_delete_macro(self._current_macro_bind_key)
-                        self._recording_macro = False
-                        self._parent.setMacroMode(False)
-                # Sets up game mode as when enabling macro keys it stops the key working
-                elif key_name == 'GAMEMODE':
-                    self._logger.info("Got game mode combo")
-
-                    game_mode = self._parent.getGameMode()
-                    self._parent.setGameMode(not game_mode)
-
-                # Brightness logic
-                elif key_name == 'BRIGHTNESSDOWN':
-                    # Get brightness value
-                    current_brightness = self._parent.method_args.get('brightness', None)
-                    if current_brightness is None:
-                        current_brightness = self._parent.getBrightness()
-
-                    if current_brightness > 0:
-                        current_brightness -= 10
-                        if current_brightness < 0:
-                            current_brightness = 0
-
-                        self._parent.setBrightness(current_brightness)
-                        #self._parent.method_args['brightness'] = current_brightness
-                elif key_name == 'BRIGHTNESSUP':
-                    # Get brightness value
-                    current_brightness = self._parent.method_args.get('brightness', None)
-                    if current_brightness is None:
-                        current_brightness = self._parent.getBrightness()
-
-                    if current_brightness < 100:
-                        current_brightness += 10
-                        if current_brightness > 100:
-                            current_brightness = 100
-
-                        self._parent.setBrightness(current_brightness)
-                        #self._parent.method_args['brightness'] = current_brightness
-
-                elif self._recording_macro:
-
-                    if self._current_macro_bind_key is None:
-                        # Restrict macro bind keys to M1-M5
-                        if key_name not in ('M1', 'M2', 'M3', 'M4', 'M5'):
-                            self._logger.warning("Macros are only for M1-M5 for now.")
-                            self._recording_macro = False
-                            self._parent.setMacroMode(False)
-                        else:
-                            self._current_macro_bind_key = key_name
-                            self._parent.setMacroEffect(0x00)
-                    # Don't want no recursion, cancel macro, don't let one call macro in a macro
-                    elif key_name == self._current_macro_bind_key:
-                        self._logger.warning("Skipping macro assignment as would cause recursion")
-                        self._recording_macro = False
-                        self._parent.setMacroMode(False)
-                    # Anything else just record it
-                    else:
-                        self._current_macro_combo.append((event_time, key_name, 'DOWN'))
-                # Not recording anything so if a macro key is pressed then run
-#                elif not self._recording_macro:
-#                    # If key has a macro, play it
-#                    if key_name in self._macros:
-#                        self.play_macro(key_name)
-
-                else:
-                    self._parent.binding_manager.key_press(key_id)
+                self._parent.binding_manager.key_press(key_id)
 
 
         except KeyError as err:
