@@ -113,7 +113,7 @@ class KeyWatcher(threading.Thread):
         self._shutdown = False
         self._parent = parent
 
-        self._selector = selectors.DefaultSelector()
+        self._selector = selectors.SelectSelector()
         for event_file in event_files:
             device = InputDevice(event_file)
             self._selector.register(device, selectors.EVENT_READ)
@@ -134,34 +134,39 @@ class KeyWatcher(threading.Thread):
 
         # Loop
         while not self._shutdown:
-            self.poll(self._selector)
-            self._logger.debug("reset")
+
+            try:
+                self.poll(self._selector)
+                self._logger.debug("reset")
+            except (OSError, IOError) as err:
+                self._logger.exception("Error reading from device, stopping", exc_info=err)
+                # self._shutdown = True
 
             time.sleep(SPIN_SLEEP)
 
         self._logger.debug("closing keywatcher")
+
         # Ungrab files and close them
         for key, mask in self._selector.select():
             device = key.fileobj
+            self._selector.unregister(device)
             device.ungrab()
             device.close()
+
+        self._selector.close()
 
     def poll(self, selector):
         for key, mask in selector.select():
             device = key.fileobj
-            try:
-                event = device.read_one()
-                date, key_action, key_code = self.parse_event_record(event)
+            event = device.read_one()
+            date, key_action, key_code = self.parse_event_record(event)
 
-                # Skip if date, key_action and key_code is none as that's a spacer record
-                if date is None:
-                    continue
+            # Skip if date, key_action and key_code is none as that's a spacer record
+            if date is None:
+                continue
 
-                # Now if key is pressed then we record
-                self._parent.key_action(date, key_code, key_action)
-            except (OSError, IOError) as err:
-                self._logger.exception("Error reading from device, stopping", exc_info=err)
-                self._shutdown = True
+            # Now if key is pressed then we record
+            self._parent.key_action(date, key_code, key_action)
 
     @property
     def shutdown(self):
