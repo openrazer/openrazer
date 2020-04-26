@@ -6,6 +6,7 @@ import re
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
 from openrazer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
 from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
+from openrazer_daemon.misc.key_binding_management import KeybindingManager as _BindingManager
 
 
 class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
@@ -24,6 +25,7 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         # Methods are loaded into DBus by this point
 
         self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
+        self.binding_manager = _BindingManager(self._device_number, self, testing=self._testing)
 
         self.logger.info('Putting device into driver mode. Daemon will handle special functionality')
         self.set_device_mode(0x03, 0x00)  # Driver mode

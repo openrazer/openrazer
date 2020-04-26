@@ -14,21 +14,20 @@ from evdev import UInput, ecodes
 from openrazer_daemon.keyboard import KeyboardColour
 
 
-class KeyBindingManager(object):
+class KeybindingManager(object):
     """
     Key binding manager
 
     """
 
-    def __init__(self, device_id, parent, fake_device, testing=False):
+    def __init__(self, device_id, parent, testing=False):
 
         self._device_id = device_id
         self._logger = logging.getLogger('razer.device{0}.bindingmanager'.format(device_id))
         self._parent = parent
-#        self._parent._parent.register_observer(self)
+#        self._parent.register_observer(self)
         self._testing = testing
-        self._fake_device = fake_device
-        self._device = self._parent._parent
+        self._fake_device = UInput(name="{0} (mapped)".format(self._parent.getDeviceName))
 
         self._profiles = {0:DEFAULT_PROFILE}
         self._current_profile = self._profiles[0]
@@ -37,7 +36,7 @@ class KeyBindingManager(object):
 
         self._current_keys = []
 
-        self._rows, self._cols = self._device.MATRIX_DIMS
+        self._rows, self._cols = self._parent.MATRIX_DIMS
         self._keyboard_grid = KeyboardColour(self._rows, self._cols)
 
         self.current_mapping = self._current_profile["default_map"]
@@ -105,17 +104,17 @@ class KeyBindingManager(object):
                     self._keyboard_grid.set_key_colour(row, key, current_matrix[row][key])
 
             payload = self._keyboard_grid.get_total_binary()
-            self._device.setKeyRow(payload)
-            self._device.setCustom()
+            self._parent.setKeyRow(payload)
+            self._parent.setCustom()
 
 
-        capabilities = self._device.METHODS
+        capabilities = self._parent.METHODS
         if 'keypad_set_profile_led_red' in capabilities:
-            self._device.setRedLED(self.current_mapping["red_led"])
+            self._parent.setRedLED(self.current_mapping["red_led"])
         if 'keypad_set_profile_led_green' in capabilities:
-            self._device.setGreenLED(self.current_mapping["green_led"])
+            self._parent.setGreenLED(self.current_mapping["green_led"])
         if 'keypad_set_profile_led_blue' in capabilities:
-            self._device.setBlueLED(self.current_mapping["blue_led"])
+            self._parent.setBlueLED(self.current_mapping["blue_led"])
 
     def read_config_file(self, config_file, profile):
         """

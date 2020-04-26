@@ -28,7 +28,6 @@ from evdev.events import event_factory
 # pylint: disable=import-error
 from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_EVENT_MAPPING, ORBWEAVER_KEY_MAPPING
 from .macro import MacroKey, MacroRunner, macro_dict_to_obj
-from .key_binding_manager import KeyBindingManager
 from openrazer_daemon.dbus_services.dbus_methods import get_device_name
 
 EVENT_FORMAT = '@llHHI'
@@ -203,9 +202,6 @@ class KeyboardKeyManager(object):
         self._event_files = event_files
         self._access_lock = threading.Lock()
         self._keywatcher = KeyWatcher(device_id, event_files, self, use_epoll=use_epoll)
-        self._fake_device = UInput(name="{0} (mapped)".format(get_device_name(self._parent)))
-        self._binding_manager = KeyBindingManager(device_id, self, self._fake_device)
-
         if len(event_files) > 0:
             self._logger.debug("Starting KeyWatcher")
             self._keywatcher.start()
@@ -461,7 +457,7 @@ class KeyboardKeyManager(object):
 #                        self.play_macro(key_name)
 
                 else:
-                    self._binding_manager.key_press(key_id)
+                    self._parent.binding_manager.key_press(key_id)
 
 
         except KeyError as err:
