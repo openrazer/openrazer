@@ -18,12 +18,13 @@ import json
 import logging
 import os
 import random
-import select
 import struct
 import threading
 import time
 from evdev import UInput, ecodes, InputDevice
 from evdev.events import event_factory
+from selectors import DefaultSelector, EVENT_READ
+import selectors
 
 # pylint: disable=import-error
 from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_EVENT_MAPPING, ORBWEAVER_KEY_MAPPING
@@ -112,34 +113,42 @@ class KeyWatcher(threading.Thread):
         self._shutdown = False
         self._parent = parent
 
+        self._selector = selectors.DefaultSelector()
+        for event_file in event_files:
+            device = InputDevice(event_file)
+            self._selector.register(device, selectors.EVENT_READ)
+
 
     def run(self):
         """
         Main event loop
         """
-        event_file_map = map(InputDevice, (self._event_files))
-        event_file_map = {event_file.fd: event_file for event_file in event_file_map}
 
         try:
-            for dev in event_file_map.values(): dev.grab()
+           for key, mask in self._selector.select():
+            device = key.fileobj
+            device.grab()
 
         except (IOError, OSError) as err:
             self._logger.exception("Error grabbing device", exc_info=err)
 
         # Loop
         while not self._shutdown:
-            self.poll(event_file_map)
+            self.poll(self._selector)
 
             time.sleep(SPIN_SLEEP)
 
         # Ungrab files and close them
-        for dev in event_file_map.values(): dev.ungrab()
+        for key, mask in self._selector.select():
+            device = key.fileobj
+            device.ungrab()
+            device.close()
 
-    def poll(self, event_file_map):
-        r, w, x = select.select(event_file_map, [], [])
-        for fd in r:
+    def poll(self, selector):
+        for key, mask in selector.select():
+            device = key.fileobj
             try:
-                event = event_file_map[fd].read_one()
+                event = device.read_one()
                 date, key_action, key_code = self.parse_event_record(event)
 
                 # Skip if date, key_action and key_code is none as that's a spacer record
