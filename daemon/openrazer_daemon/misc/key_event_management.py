@@ -129,7 +129,7 @@ class KeyWatcher(threading.Thread):
                 device = key.fileobj
                 device.grab()
             except (IOError, OSError) as err:
-                self._logger.exception("Error grabbing device {0}".format(device), exc_info=err)
+                self._logger.exception("Error grabbing device {0}".format(device.path), exc_info=err)
 
 
         # Loop
@@ -309,7 +309,7 @@ class KeyboardKeyManager(object):
         """
         # Disable pylints complaining for this part, #PerformanceOverNeatness
         # pylint: disable=too-many-branches,too-many-statements
-        self._access_lock.acquire()
+
         now = datetime.datetime.now()
 
         # Remove expired keys from store
@@ -404,7 +404,6 @@ class KeyboardKeyManager(object):
         except KeyError as err:
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
 
-        self._access_lock.release()
     def add_kb_macro(self):
         """
         Tidy up the recorded macro and add it to the store
