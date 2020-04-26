@@ -68,3 +68,8 @@ dist
 
 #vscode config files
 *.vscode
+
+# Sourcetrail files
+*.srctrlbm
+*.srctrlprj
+*.srctrldb
