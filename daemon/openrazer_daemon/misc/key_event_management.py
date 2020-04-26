@@ -138,7 +138,7 @@ class KeyWatcher(threading.Thread):
 
 #            time.sleep(SPIN_SLEEP)
 
-        self._logger.debug("closing keywatcher")
+        self._logger.debug("Closing keywatcher")
 
         # Ungrab files and close them
         for device in self._event_file_map.values():
@@ -290,7 +290,6 @@ class KeyboardKeyManager(object):
         :type value: bool
         """
         self._temp_key_store_active = value
-        self._logger.debug("temp_key_store_state changed to {0}".format(self._temp_key_store_active))
 
     def key_action(self, event_time, key_id, key_press):
         """
@@ -323,13 +322,6 @@ class KeyboardKeyManager(object):
         except IndexError:
             pass
 
-        # try:
-        #     # Get date and if its less than now its expired
-        #     while self._parent.ripple_manager.key_list[0][0] < now:
-        #         self._parent.ripple_manager.key_list.pop(0)
-        # except IndexError:
-        #     pass
-
         # Clean up any threads
         if self._clean_counter > 20 and len(self._threads) > 0:
             self._clean_counter = 0
@@ -339,8 +331,7 @@ class KeyboardKeyManager(object):
             # Convert event ID to key name
             key_name = self.EVENT_MAP[key_id]
 
-            self._logger.info("Got key: {0}, state: {1}".format(key_name, key_press))
-
+            # self._logger.debug("Got key: {0}, state: {1}".format(key_name, key_press))
 
             # This is the key for storing stats, by generating hour timestamps it will bucket data nicely.
             storage_bucket = event_time.strftime('%Y%m%d%H')
