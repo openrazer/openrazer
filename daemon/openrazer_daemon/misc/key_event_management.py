@@ -18,14 +18,12 @@ import json
 import logging
 import os
 import random
+import select
 import struct
 import threading
 import time
 from evdev import UInput, ecodes, InputDevice
 from evdev.events import event_factory
-from selectors import DefaultSelector, EVENT_READ
-import selectors
-
 # pylint: disable=import-error
 from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_EVENT_MAPPING, ORBWEAVER_KEY_MAPPING
 from .macro import MacroKey, MacroRunner, macro_dict_to_obj
@@ -113,21 +111,19 @@ class KeyWatcher(threading.Thread):
         self._shutdown = False
         self._parent = parent
 
-        self._selector = selectors.DefaultSelector()
-        for event_file in event_files:
-            device = InputDevice(event_file)
-            self._selector.register(device, selectors.EVENT_READ)
+        event_file_map = map(InputDevice, (self._event_files))
+        self._event_file_map = {event_file.fd: event_file for event_file in event_file_map}
 
 
     def run(self):
         """
         Main event loop
         """
-        # Grab device event files
-        for key, mask in self._selector.select():
+        # Grab device event file
+        for device in self._event_file_map.values(): 
             try:
-                device = key.fileobj
                 device.grab()
+                self._logger.debug("Grabbed device {0}".format(device.path))
             except (IOError, OSError) as err:
                 self._logger.exception("Error grabbing device {0}".format(device.path), exc_info=err)
 
@@ -135,27 +131,31 @@ class KeyWatcher(threading.Thread):
         # Loop
         while not self._shutdown:
             try:
-                self.poll(self._selector)
-                self._logger.debug("reset")
+                self.poll(self._event_file_map)
             except (OSError, IOError) as err:
-                self._logger.exception("Error reading from device, stopping", exc_info=err)
-                # self._shutdown = True
+                self._logger.exception("Error reading from device, stopping key watcher", exc_info=err)
+                self._shutdown = True
 
 #            time.sleep(SPIN_SLEEP)
 
         self._logger.debug("closing keywatcher")
 
         # Ungrab files and close them
-        for key, mask in self._selector.get_map():
-            device = key.fileobj
-            self._selector.unregister(device)
-            device.ungrab()
-            device.close()
+        for device in self._event_file_map.values():
+            try:
+                device.ungrab()
+                device.close()
+            except:
+                pass # If the device is unplugged we don't care
+
 
     def poll(self, event_file_map):
         r, w, x = select.select(event_file_map, [], [], EPOLL_TIMEOUT)
         for fd in r:
             event = event_file_map[fd].read_one()
+            if not event:
+                break
+
             date, key_action, key_code = self.parse_event_record(event)
 
             # Skip if date, key_action and key_code is none as that's a spacer record
