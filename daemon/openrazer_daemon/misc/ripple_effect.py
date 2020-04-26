@@ -183,20 +183,21 @@ class RippleManager(object):
         self._ripple_thread = RippleEffectThread(self, device_number)
         self._ripple_thread.start()
         self._logger.debug("Start Ripple Manager")
+        self.key_list = [] # TODO: fix the invisible key manager
 
-    @property
-    def key_list(self):
-        """
-        Get the list of keys from the key manager
+    # @property
+    # def key_list(self):
+    #     """
+    #     Get the list of keys from the key manager
 
-        :return: List of tuples (expire_time, (key_row, key_col), random_colour)
-        :rtype: list of tuple
-        """
-        result = []
-        if hasattr(self._parent, 'key_manager'):
-            result = self._parent.key_manager.temp_key_store
+    #     :return: List of tuples (expire_time, (key_row, key_col), random_colour)
+    #     :rtype: list of tuple
+    #     """
+    #     result = []
+    #     if hasattr(self._parent, 'key_manager'):
+    #         result = self._parent.key_manager.temp_key_store
 
-        return result
+    #     return result
 
     def set_rgb_matrix(self, payload):
         """

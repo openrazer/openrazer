@@ -48,14 +48,14 @@ class KeybindingManager(object):
         :param key_code: The key code of the pressed key.
         :type key_code: int
         """
-        self._logger.debug("Key press: %s", key_code)
+        self._logger.debug("Key action: {0}, {1}".format(key_code, key_press))
 
         current_binding = self.current_mapping["binding"]
         if key_press == 'release':
             for key in self._current_keys:
-                self._fake_device.write(ecodes.EV_KEY, key, 0)
-                
+                self._fake_device.write(ecodes.EV_KEY, key, 0)  
             self._fake_device.syn()
+            
             self._current_keys = []
         
         elif key_code not in current_binding:
@@ -69,17 +69,13 @@ class KeybindingManager(object):
 
                 if action["type"] == "key":
                     self._current_keys.append(action["code"])
-                    self._fake_device.write(ecodes.EV_KEY, action["code"], 1)
-                    self._fake_device.syn()
                 
                 elif action["type"] == "map":
                     self.current_mapping = action["value"]
 
-        # for key in self._current_keys:
-        #     self._fake_device.write(ecodes.EV_KEY, key, 0)
-            
-        # self._fake_device.syn()
-        # self._current_keys = []
+            for key in self._current_keys:
+                self._fake_device.write(ecodes.EV_KEY, key, 1)    
+            self._fake_device.syn()
 
     @property
     def current_mapping(self):
@@ -90,7 +86,6 @@ class KeybindingManager(object):
         :return: The current mapping
         :rtype: dict
         """
-
         return self._current_mapping
 
     @current_mapping.setter
@@ -168,10 +163,6 @@ DEFAULT_PROFILE = {
                 1: {
                     "type": "key",
                     "code": 3
-                },
-                2: {
-                    "type": "map",
-                    "value": 1
                 }
             }
         }

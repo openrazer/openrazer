@@ -81,20 +81,16 @@ class KeyWatcher(threading.Thread):
 
         :return: Tuple of event time, key_action, key_code
         :rtype: tuple
-        """  
-        ev_type = event.type
-        ev_value = event.value
-        ev_code = event.code
-        
+        """
 
-        if ev_type != ecodes.ecodes['EV_KEY']:  # input-event-codes.h EV_KEY 0x01
+        if event.type != ecodes.ecodes['EV_KEY']:  # input-event-codes.h EV_KEY 0x01
             return None, None, None
 
-        if ev_value == 0:
+        if event.value == 0:
             key_action = 'release'
-        elif ev_value == 1:
+        elif event.value == 1:
             key_action = 'press'
-        elif ev_value == 2:
+        elif event.value == 2:
             key_action = 'autorepeat'
         else:
             key_action = 'unknown'
@@ -103,7 +99,7 @@ class KeyWatcher(threading.Thread):
 
         result = (date, key_action, event.code)
 
-        if ev_type == ev_code == ev_value == 0:
+        if event.type == event.code == event.value == 0:
             return None, None, None
 
         return result
@@ -144,7 +140,6 @@ class KeyWatcher(threading.Thread):
         for fd in r:
             event = event_file_map[fd].read_one()
             date, key_action, key_code = self.parse_event_record(event)
-            self._logger.debug("Key record received: {0}".format(key_code))
 
             # Skip if date, key_action and key_code is none as that's a spacer record
             if date is None:
@@ -211,6 +206,7 @@ class KeyboardKeyManager(object):
         self._record_stats = parent.config.get('Statistics', 'key_statistics')
         self._stats = {}
 
+        # TODO: get rid of all macro stuff
         self._recording_macro = False
         self._macros = {}
 
@@ -283,12 +279,8 @@ class KeyboardKeyManager(object):
         Process a key press event
 
         Ok an attempt to explain the logic
-        * The function sets a value _fn_down depending on the state of FN.
-        * Adds keypress and release events to a macro list if recording a macro.
-        * Pressing FN+F9 starts recording a macro, then selecting any key marks that as a macro key,
-          then it will record keys, then pressing FN+F9 will save macro.
-        * Pressing any macro key will run macro.
-        * Pressing FN+F10 will toggle game mode.
+        * Adds keypresses to the temporary key store (for ripple effect)
+        * Sends key to the binding manager
         * Pressing any key will increment a statistical number in a dictionary used for generating
           heatmaps.
         :param event_time: Time event occurred
@@ -303,22 +295,23 @@ class KeyboardKeyManager(object):
         # Disable pylints complaining for this part, #PerformanceOverNeatness
         # pylint: disable=too-many-branches,too-many-statements
 
-        if key_press == 'autorepeat':  # TODO probably should go
-            # If its brightness then convert autorepeat to key presses
-            # 190 (KEY_F20) and 194 (KEY_F24) are defined in razerkbd_driver.c
-            if key_id in (190, 194):
+        if key_press == 'autorepeat':
                 key_press = 'press'
-            else:
-                # Quit out early
-                return
 
         now = datetime.datetime.now()
 
         # Remove expired keys from store
+        # try:
+        #     # Get date and if its less than now its expired
+        #     while self._temp_key_store[0][0] < now:
+        #         self._temp_key_store.pop(0)
+        # except IndexError:
+        #     pass
+
         try:
             # Get date and if its less than now its expired
-            while self._temp_key_store[0][0] < now:
-                self._temp_key_store.pop(0)
+            while self._parent.ripple_manager.key_list[0][0] < now:
+                self._parent.ripple_manager.key_list.pop(0)
         except IndexError:
             pass
 
@@ -331,7 +324,7 @@ class KeyboardKeyManager(object):
             # Convert event ID to key name
             key_name = self.EVENT_MAP[key_id]
 
-            self._logger.info("Got key: {0}, state: {1}".format(key_name, 'DOWN' if key_press == 'press' else 'UP'))
+            self._logger.info("Got key: {0}, state: {1}".format(key_name, key_press))
 
 
             # This is the key for storing stats, by generating hour timestamps it will bucket data nicely.
@@ -351,14 +344,14 @@ class KeyboardKeyManager(object):
                 except KeyError as err:
                     self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
 
-            if self._temp_key_store_active:
+            if key_press == 'press' and self.temp_key_store_state:
                 colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
                 self._last_colour_choice = colour
-                self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_name], colour))
+                self._parent.ripple_manager.key_list.append((now + self._temp_expire_time, self.KEY_MAP[key_name], colour))
                 self._logger.debug("Added key to temporary key store: {0}".format((now + self._temp_expire_time, self.KEY_MAP[key_name], colour)))
 
             # Sets up game mode as when enabling macro keys it stops the key working
-            elif key_name == 'GAMEMODE':
+            if key_name == 'GAMEMODE':
                 self._logger.info("Got game mode combo")
 
                 game_mode = self._parent.getGameMode()
@@ -523,10 +516,10 @@ class KeyboardKeyManager(object):
             #  0         1       2             3
             # ('effect', Device, 'effectName', 'effectparams'...)
             # Device is the device the msg originated from (could be parent device)
-            if msg[2] != 'setRipple':
-                # If we are not doing ripple effect then disable the storing of keys
-                #self.temp_key_store_state = False
-                pass
+            if msg[2] == 'setRipple':
+                self.temp_key_store_state = True
+            else:
+                self.temp_key_store_state = False
 
 
 class NagaHexV2KeyManager(KeyboardKeyManager):
