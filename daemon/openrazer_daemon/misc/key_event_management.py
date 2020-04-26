@@ -105,7 +105,7 @@ class KeyWatcher(threading.Thread):
 
         return result
 
-    def __init__(self, device_id, event_files, parent, use_epoll=True):
+    def __init__(self, device_id, event_files, parent):
         super(KeyWatcher, self).__init__()
 
         self._logger = logging.getLogger('razer.device{0}.keywatcher'.format(device_id))
@@ -123,21 +123,23 @@ class KeyWatcher(threading.Thread):
         """
         Main event loop
         """
+        # Grab device event files
+        for key, mask in self._selector.select():
+            try:
+                device = key.fileobj
+                device.grab()
+            except (IOError, OSError) as err:
+                self._logger.exception("Error grabbing device {0}".format(device), exc_info=err)
 
-        try:
-           for key, mask in self._selector.select():
-            device = key.fileobj
-            device.grab()
-
-        except (IOError, OSError) as err:
-            self._logger.exception("Error grabbing device", exc_info=err)
 
         # Loop
         while not self._shutdown:
             self.poll(self._selector)
+            self._logger.debug("reset")
 
             time.sleep(SPIN_SLEEP)
 
+        self._logger.debug("closing keywatcher")
         # Ungrab files and close them
         for key, mask in self._selector.select():
             device = key.fileobj
@@ -159,6 +161,7 @@ class KeyWatcher(threading.Thread):
                 self._parent.key_action(date, key_code, key_action)
             except (OSError, IOError) as err:
                 self._logger.exception("Error reading from device", exc_info=err)
+                self._shutdown = True
 
     @property
     def shutdown(self):
@@ -198,7 +201,7 @@ class KeyboardKeyManager(object):
     EVENT_MAP = EVENT_MAPPING
 
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, device_id, event_files, parent, use_epoll=False, testing=False, should_grab_event_files=False):
+    def __init__(self, device_id, event_files, parent, testing=False, should_grab_event_files=False):
 
         self._device_id = device_id
         self._logger = logging.getLogger('razer.device{0}.keymanager'.format(device_id))
@@ -208,7 +211,7 @@ class KeyboardKeyManager(object):
 
         self._event_files = event_files
         self._access_lock = threading.Lock()
-        self._keywatcher = KeyWatcher(device_id, event_files, self, use_epoll=use_epoll)
+        self._keywatcher = KeyWatcher(device_id, event_files, self)
         if len(event_files) > 0:
             self._logger.debug("Starting KeyWatcher")
             self._keywatcher.start()
@@ -306,7 +309,7 @@ class KeyboardKeyManager(object):
         """
         # Disable pylints complaining for this part, #PerformanceOverNeatness
         # pylint: disable=too-many-branches,too-many-statements
-
+        self._access_lock.acquire()
         now = datetime.datetime.now()
 
         # Remove expired keys from store
@@ -401,6 +404,7 @@ class KeyboardKeyManager(object):
         except KeyError as err:
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
 
+        self._access_lock.release()
     def add_kb_macro(self):
         """
         Tidy up the recorded macro and add it to the store

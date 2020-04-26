@@ -580,7 +580,7 @@ class RazerDaemon(DBusService):
                 self._collecting_udev = True
                 t = threading.Thread(target=self._collecting_udev_method, args=(device,))
                 t.start()
-        elif device.action == 'remove':
+        elif device.action == 'remove' or device.action == 'unbind':
             self._remove_device(device)
 
     def _collecting_udev_method(self, device):
