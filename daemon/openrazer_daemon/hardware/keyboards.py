@@ -7,7 +7,7 @@ from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend a
 from openrazer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
 from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
 from openrazer_daemon.misc.key_binding_management import KeybindingManager as _BindingManager
-
+from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_EVENT_MAPPING, ORBWEAVER_KEY_MAPPING
 
 class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
     """
@@ -277,7 +277,8 @@ class RazerOrbweaverChroma(_RippleKeyboard):
         super(RazerOrbweaverChroma, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
-        #self.key_manager = _OrbweaverKeyManager(self._device_number, self.event_files, self, testing=self._testing)
+        self.key_manager.KEY_MAP = ORBWEAVER_KEY_MAPPING
+        self.key_manager.EVENT_MAP = ORBWEAVER_EVENT_MAPPING
 
     def _close(self):
         """

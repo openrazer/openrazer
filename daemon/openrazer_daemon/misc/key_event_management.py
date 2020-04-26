@@ -199,8 +199,6 @@ class KeyboardKeyManager(object):
     It will be used to store keypresses in a list (for at most 2 seconds) if enabled for the ripple effect, when I
     get round to making the effect.
     """
-    KEY_MAP = KEY_MAPPING
-    EVENT_MAP = EVENT_MAPPING
 
     # pylint: disable=too-many-instance-attributes
     def __init__(self, device_id, event_files, parent, testing=False, should_grab_event_files=False):
@@ -241,6 +239,9 @@ class KeyboardKeyManager(object):
 
         self._should_grab_event_files = should_grab_event_files
         self._event_files_locked = False  
+
+        self.KEY_MAP = KEY_MAPPING
+        self.EVENT_MAP = EVENT_MAPPING
 
     # TODO add property for enabling key stats?
 
@@ -362,7 +363,6 @@ class KeyboardKeyManager(object):
                 colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
                 self._last_colour_choice = colour
                 self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_name], colour))
-                self._logger.debug("Added key to temporary key store: {0}".format((now + self._temp_expire_time, self.KEY_MAP[key_name], colour)))
 
             # Sets up game mode as when enabling macro keys it stops the key working
             if key_name == 'GAMEMODE':
