@@ -59,7 +59,7 @@ class KeybindingManager(object):
         :param key_code: The key code of the pressed key.
         :type key_code: int
         """
-        self._logger.debug("Key action: {0}, {1}".format(key_code, key_press))
+        # self._logger.debug("Key action: {0}, {1}".format(key_code, key_press))
 
         current_binding = self.current_mapping["binding"]
         if key_press == 'release' and key_code not in current_binding: # Key released, but not bound
