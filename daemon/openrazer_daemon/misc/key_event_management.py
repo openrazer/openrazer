@@ -141,9 +141,13 @@ class KeyWatcher(threading.Thread):
         for device in self._event_file_map.values():
             try:
                 device.ungrab()
-                device.close()
             except:
                 pass # If the device is unplugged we don't care
+
+            try:  # Try once for each
+                device.close()
+            except:
+                pass
 
 
     def poll(self, event_file_map):

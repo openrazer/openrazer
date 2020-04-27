@@ -19,6 +19,16 @@ class KeybindingManager(object):
 
     """
 
+    def __key_up(self, key_code):
+        self._current_keys.remove(key_code)
+        self._fake_device.write(ecodes.EV_KEY, key_code, 0)    
+        self._fake_device.syn()
+
+    def __key_down(self, key_code):
+        self._current_keys.append(key_code)
+        self._fake_device.write(ecodes.EV_KEY, key_code, 1)    
+        self._fake_device.syn()
+
     def __init__(self, device_id, parent, testing=False):
 
         self._device_id = device_id
@@ -26,7 +36,7 @@ class KeybindingManager(object):
         self._parent = parent
 #        self._parent.register_observer(self)
         self._testing = testing
-        self._fake_device = UInput(name="{0} (mapped)".format(self._parent.getDeviceName))
+        self._fake_device = UInput(name="{0} (mapped)".format(self._parent.getDeviceName()))
 
         self._profiles = {0:DEFAULT_PROFILE}
         self._current_profile = self._profiles[0]
@@ -147,15 +157,11 @@ class KeybindingManager(object):
 
         return json.dumps(return_list)
 
-    def __key_up(self, key_code):
-        self._current_keys.remove(key_code)
-        self._fake_device.write(ecodes.EV_KEY, key_code, 0)    
-        self._fake_device.syn()
+    def close(self):
+        self._fake_device.close()
 
-    def __key_down(self, key_code):
-        self._current_keys.append(key_code)
-        self._fake_device.write(ecodes.EV_KEY, key_code, 1)    
-        self._fake_device.syn()
+    def __del__(self):
+        self.close()
 
 DEFAULT_PROFILE = {
     "name": "Default",

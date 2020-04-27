@@ -40,8 +40,8 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
             self.set_device_mode(0x00, 0x00)  # Device mode
         except FileNotFoundError:  # Could be called when daemon is stopping or device is removed.
             pass
-
-        # TODO look into saving stats in /var/run maybe
+        
+        self.binding_manager.close()
         self.key_manager.close()
 
 
