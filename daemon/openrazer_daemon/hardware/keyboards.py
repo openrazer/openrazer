@@ -24,8 +24,8 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         super(_MacroKeyboard, self).__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
-        self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, testing=self._testing)
         self.binding_manager = _BindingManager(self._device_number, self, testing=self._testing)
+        self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, testing=self._testing)
 
         self.logger.info('Putting device into driver mode. Daemon will handle special functionality')
         self.set_device_mode(0x03, 0x00)  # Driver mode
