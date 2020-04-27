@@ -175,45 +175,130 @@ DEFAULT_PROFILE = {
              }
         },
         "binding": {
-            2: {
+            41: {
                 0: {
                     "type": "key",
                     "code": 2
-                },
-                1: {
+                }
+            },
+            2: {
+                0: {
                     "type": "key",
                     "code": 3
                 }
-            }
-        }
-    },
-    1: {
-        "name": "Default",
-        "is_using_matrix": True,
-        "red_led": True,
-        "green_led": False,
-        "blue_led": True,
-        "matrix": {
-             1: {
-                 1: (255, 255, 0)
-             },
-             2: {
-                 1: (255, 255, 0)
-             }
-        },
-        "binding": {
-            2: {
+            },
+            3: {
                 0: {
                     "type": "key",
-                    "code": 3
-                },
-                1: {
+                    "code": 4
+                }
+            },
+            4: {
+                0: {
                     "type": "key",
-                    "code": 2
-                },
-                2: {
-                    "type": "map",
-                    "value": 0
+                    "code": 5
+                }
+            },
+            5: {
+                0: {
+                    "type": "key",
+                    "code": 6
+                }
+            },
+            15: {
+                0: {
+                    "type": "key",
+                    "code": 16
+                }
+            },
+            16: {
+                0: {
+                    "type": "key",
+                    "code": 17
+                }
+            },
+            17: {
+                0: {
+                    "type": "key",
+                    "code": 18
+                }
+            },
+            18: {
+                0: {
+                    "type": "key",
+                    "code": 19
+                }
+            },
+            19: {
+                0: {
+                    "type": "key",
+                    "code": 20
+                }
+            },
+            58: {
+                0: {
+                    "type": "key",
+                    "code": 30
+                }
+            },
+            30: {
+                0: {
+                    "type": "key",
+                    "code": 31
+                }
+            },
+            31: {
+                0: {
+                    "type": "key",
+                    "code": 32
+                }
+            },
+            32: {
+                0: {
+                    "type": "key",
+                    "code": 33
+                }
+            },
+            33: {
+                0: {
+                    "type": "key",
+                    "code": 34
+                }
+            },
+            42: {
+                0: {
+                    "type": "key",
+                    "code": 44
+                }
+            },
+            44: {
+                0: {
+                    "type": "key",
+                    "code": 45
+                }
+            },
+            45: {
+                0: {
+                    "type": "key",
+                    "code": 46
+                }
+            },
+            46: {
+                0: {
+                    "type": "key",
+                    "code": 47
+                }
+            },
+            47: {
+                0: {
+                    "type": "key",
+                    "code": 48
+                }
+            },
+            29: {
+                0: {
+                    "type": "key",
+                    "code": 14
                 }
             }
         }
