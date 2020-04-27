@@ -222,9 +222,6 @@ class KeyboardKeyManager(object):
         self._recording_macro = False
         self._macros = {}
 
-        self._current_macro_bind_key = None
-        self._current_macro_combo = []
-
         self._threads = set()
         self._clean_counter = 0
 

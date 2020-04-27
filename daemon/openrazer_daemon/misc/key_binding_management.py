@@ -13,7 +13,6 @@ from evdev import UInput, ecodes
 
 from openrazer_daemon.keyboard import KeyboardColour
 
-
 class KeybindingManager(object):
     """
     Key binding manager
@@ -51,31 +50,24 @@ class KeybindingManager(object):
         self._logger.debug("Key action: {0}, {1}".format(key_code, key_press))
 
         current_binding = self.current_mapping["binding"]
-        if key_press == 'release':
-            for key in self._current_keys:
-                self._fake_device.write(ecodes.EV_KEY, key, 0)  
-            self._fake_device.syn()
-            
-            self._current_keys = []
-        
-        elif key_code not in current_binding:
-            self._current_keys.append(key_code)
-            self._fake_device.write(ecodes.EV_KEY, key_code, 1)
-            self._fake_device.syn()
+        if key_press == 'release' and key_code not in current_binding: # Key released, but not bound
+            self.__key_up(key_code)
 
-        else:
-            for action in current_binding[key_code]:
+        elif key_code not in current_binding: # Ordinary key pressed
+            self.__key_down(key_code)
+
+        else: # Key bound
+            for action in current_binding[key_code]: 
                 action = current_binding[key_code][action]
-
-                if action["type"] == "key":
-                    self._current_keys.append(action["code"])
+                if key_press != 'release': # Key pressed (or autorepeat)
+                    if action["type"] == "key":
+                        self.__key_down(action["code"])
                 
-                elif action["type"] == "map":
-                    self.current_mapping = action["value"]
+                    elif action["type"] == "map":
+                        self.current_mapping = action["value"]
 
-            for key in self._current_keys:
-                self._fake_device.write(ecodes.EV_KEY, key, 1)    
-            self._fake_device.syn()
+                elif action["type"] == "key": # Key released
+                        self.__key_up(action["code"])
 
     @property
     def current_mapping(self):
@@ -154,6 +146,16 @@ class KeybindingManager(object):
             return_list.append(profile["name"])
 
         return json.dumps(return_list)
+
+    def __key_up(self, key_code):
+        self._current_keys.remove(key_code)
+        self._fake_device.write(ecodes.EV_KEY, key_code, 0)    
+        self._fake_device.syn()
+
+    def __key_down(self, key_code):
+        self._current_keys.append(key_code)
+        self._fake_device.write(ecodes.EV_KEY, key_code, 1)    
+        self._fake_device.syn()
 
 DEFAULT_PROFILE = {
     "name": "Default",
