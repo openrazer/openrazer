@@ -9,9 +9,11 @@ import os
 import random
 import struct
 import time
-from evdev import UInput, ecodes
-
+import sys
 from openrazer_daemon.keyboard import KeyboardColour
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))) # TODO: figure out a better way to handle this
+from evdev import UInput, ecodes # noqa: 402, isort:skip
 
 class KeybindingManager(object):
     """
