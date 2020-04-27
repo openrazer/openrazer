@@ -136,7 +136,7 @@ class KeyWatcher(threading.Thread):
                 self._logger.exception("Error reading from device, stopping key watcher", exc_info=err)
                 self._shutdown = True
 
-#            time.sleep(SPIN_SLEEP)
+            time.sleep(SPIN_SLEEP)
 
         self._logger.debug("Closing keywatcher")
 
@@ -156,18 +156,18 @@ class KeyWatcher(threading.Thread):
     def poll(self, event_file_map):
         r, w, x = select.select(event_file_map, [], [], EPOLL_TIMEOUT)
         for fd in r:
-            event = event_file_map[fd].read_one()
-            if not event:
+            events = event_file_map[fd].read()
+            if not events:
                 break
+            for event in events:
+                date, key_action, key_code = self.parse_event_record(event)
 
-            date, key_action, key_code = self.parse_event_record(event)
+                # Skip if date, key_action and key_code is none as that's a spacer record
+                if date is None:
+                    continue
 
-            # Skip if date, key_action and key_code is none as that's a spacer record
-            if date is None:
-                continue
-
-            # Now if key is pressed then we record
-            self._parent.key_action(date, key_code, key_action)
+                # Now if key is pressed then we record
+                self._parent.key_action(date, key_code, key_action)
 
     @property
     def shutdown(self):
