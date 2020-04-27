@@ -137,6 +137,24 @@ class KeybindingManager(object):
         self.current_mapping = self._current_profile["default_map"]
         f.close()
 
+    def dbus_get_profiles(self):
+        """
+        Get list of profiles in JSON format
+
+        Returns a JSON blob containing profiles by name
+        {0: "Profile"}
+
+        :return: JSON of profiles
+        :rtype: str
+        """
+        
+        return_list = []
+        for profile in self._profiles:
+            profile = self._profiles[profile]
+            return_list.append(profile["name"])
+
+        return json.dumps(return_list)
+
 DEFAULT_PROFILE = {
     "name": "Default",
     "default_map": 0,

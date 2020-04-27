@@ -5,6 +5,7 @@ All of these effects will be DBus methods
 # pylint: disable=wildcard-import
 from openrazer_daemon.dbus_services.dbus_methods.all import *
 from openrazer_daemon.dbus_services.dbus_methods.chroma_keyboard import *
+from openrazer_daemon.dbus_services.dbus_methods.bindings import *
 from openrazer_daemon.dbus_services.dbus_methods.bw2013 import *
 from openrazer_daemon.dbus_services.dbus_methods.mamba import *
 from openrazer_daemon.dbus_services.dbus_methods.macro import *
