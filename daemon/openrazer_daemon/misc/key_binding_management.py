@@ -158,7 +158,10 @@ class KeybindingManager(object):
         return json.dumps(return_list)
 
     def close(self):
-        self._fake_device.close()
+        try:
+            self._fake_device.close()
+        except RuntimeError as err:
+            self._logger.exception("Error closing fake device", exc_info=err)
 
     def __del__(self):
         self.close()
