@@ -159,6 +159,52 @@ class KeybindingManager(object):
 
         return json.dumps(return_list)
 
+    def dbus_get_maps(self, profile):
+        """
+        Get a list of maps in JSON format.
+
+        Returns a JSON blob containing the maps of the given profile by name
+        (0: "map") 
+
+        :param profile: The profile number
+        :type: int
+
+        :return: JSON of maps
+        :rtype: str
+        """
+
+        return_list = []
+        for mapping in self._profiles[profile]:
+            mapping = self._profiles[profile][mapping]
+            return_list.append(mapping["name"])
+
+        return json.dumps(return_list)
+
+    def dbus_get_actions(self, profile, map, key_code):
+        """
+        Get a list of actions for a given key.
+
+        Returns a JSON blob containing the actions for a given key
+        {0:{"type": "key", "code": 2}}
+
+        :param profile: The profile number
+        :type: int
+
+        :param map: The map number
+        :type: int
+
+        :param key_code: The key_code
+        :type: int
+
+        :return: JSON of actions
+        :rtype: str
+        """
+
+        return_list = self._profiles[profile][map]["bindings"][key_code]
+
+        return json.dumps(return_list)
+
+
     def close(self):
         try:
             self._fake_device.close()
