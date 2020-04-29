@@ -179,8 +179,7 @@ class KeybindingManager(object):
 
         return_list = []
         for mapping in self._profiles[profile]:
-            mapping = self._profiles[profile][mapping]
-            return_list.append(mapping["name"])
+            return_list.append(mapping)
 
         return json.dumps(return_list)
 
@@ -211,10 +210,10 @@ class KeybindingManager(object):
         :type: int
 
         :param map: The map number
-        :type: int
+        :type: str
 
         :param key_code: The key_code
-        :type: int
+        :type: str
 
         :return: JSON of actions
         :rtype: str
@@ -237,7 +236,7 @@ class KeybindingManager(object):
 
         self._profiles[profile].update({map_name: {"is_using_matrix": False, "binding": {}}})
 
-    def dbus_add_action(self, profile, map, key_code, action_type, value):
+    def dbus_add_action(self, profile, map, key_code, action_type, value, action_id=None):
         """
         Add a new action to the given key
 
@@ -255,13 +254,20 @@ class KeybindingManager(object):
 
         :param value: The value of the action (i.e. 2)
         :type: str
+
+        :param action_id: The ID of the action to edit (if unset adds a new action)
+        :type: str
         """
 
         if not self._profiles[profile][map]["bindings"][key_code]:
             self._profiles[profile][map]["bindings"].update({key_code: {}})
 
         key = self._profiles[profile][map]["bindings"][key_code]
-        key.update({len(key): {"type": action_type, "value": value}})
+
+        if action_id == None:
+            action_id == len(key)
+
+        key.update({action_id: {"type": action_type, "value": value}})
 
     def dbus_remove_action(self, profile, map, key_code, action_id):
         """
