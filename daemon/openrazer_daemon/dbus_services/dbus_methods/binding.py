@@ -49,6 +49,6 @@ def get_actions(self, profile, map, key_code):
     :return: JSON of actions
     :rtype: str
     """
-    self.logger.debug("DBus call get_profiles")
-
+    self.logger.debug("DBus call get_actions")
+  
     return self.binding_manager.dbus_get_actions(profile, map, key_code)
