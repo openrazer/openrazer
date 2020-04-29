@@ -312,5 +312,10 @@ class KeybindingManager(object):
 
         self._profiles[profile][map].update({'red_led': red, 'green_led': green, 'blue_led': blue})
 
+    def dbus_set_matrix(self, profile, map, frame):
+
+        self._profiles[profile][map].update({"matrix": frame})
+        self._profiles[profile][map]["is_using_matrix"] = True
+
 
 DEFAULT_PROFILE = {'name': 'Default', 'default_map': 'Default', 'Default': {'is_using_matrix': True, 'red_led': True, 'green_led': False, 'blue_led': False, 'matrix': {'1': {'1': [255, 0, 0], '2': [255, 0, 0], '3': [255, 0, 0], '4': [255, 0, 0], '5': [255, 0, 0]}, '2': {'1': [0, 255, 0], '2': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0]}, '3': {'1': [0, 255, 0], '2': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0]}, '4': {'1': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0], '6': [0, 255, 0]}}, 'binding': {'41': {'0': {'type': 'key', 'value': 2}}, '2': {'0': {'type': 'key', 'value': 3}}, '3': {'0': {'type': 'key', 'value': 4}}, '4': {'0': {'type': 'key', 'value': 5}}, '5': {'0': {'type': 'key', 'value': 6}}, '15': {'0': {'type': 'key', 'value': 16}}, '16': {'0': {'type': 'key', 'value': 17}}, '17': {'0': {'type': 'key', 'value': 18}}, '18': {'0': {'type': 'key', 'value': 19}}, '19': {'0': {'type': 'key', 'value': 20}}, '58': {'0': {'type': 'key', 'value': 30}}, '30': {'0': {'type': 'key', 'value': 31}}, '31': {'0': {'type': 'key', 'value': 32}}, '32': {'0': {'type': 'key', 'value': 33}}, '33': {'0': {'type': 'key', 'value': 34}}, '42': {'0': {'type': 'key', 'value': 44}}, '44': {'0': {'type': 'key', 'value': 45}}, '45': {'0': {'type': 'key', 'value': 46}}, '46': {'0': {'type': 'key', 'value': 47}}, '47': {'0': {'type': 'key', 'value': 48}}, '29': {'0': {'type': 'key', 'value': 14}}}}}
