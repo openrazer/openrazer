@@ -225,13 +225,6 @@ class KeyboardKeyManager(object):
         self._record_stats = parent.config.get('Statistics', 'key_statistics')
         self._stats = {}
 
-        # TODO: get rid of all macro stuff
-        self._recording_macro = False
-        self._macros = {}
-
-        self._threads = set()
-        self._clean_counter = 0
-
         self._temp_key_store_active = False
         self._temp_key_store = []
         self._temp_expire_time = datetime.timedelta(seconds=2)
@@ -389,56 +382,8 @@ class KeyboardKeyManager(object):
             else:
                 self._parent.binding_manager.key_press(key_id, key_press)
 
-
         except KeyError as err:
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
-
-    # Methods to be used with DBus
-    def dbus_delete_macro(self, key_name):
-        """
-        Delete a macro from a key
-
-        :param key_name: Key Name
-        :type key_name: str
-        """
-        try:
-            del self._macros[key_name]
-        except KeyError:
-            pass
-
-    def dbus_get_macros(self):
-        """
-        Get macros in JSON format
-
-        Returns a JSON blob of all active macros in the format of
-        {BIND_KEY: [MACRO_DICT...]}
-
-        MACRO_DICT is a dict representation of an action that can be performed. The dict will have a
-        type key which determines what type of action it will perform.
-        For example there are key press macros, URL opening macros, Script running macros etc...
-        :return: JSON of macros
-        :rtype: str
-        """
-        result_dict = {}
-        for macro_key, macro_combo in self._macros.items():
-            str_combo = [value.to_dict() for value in macro_combo]
-            result_dict[macro_key] = str_combo
-
-        return json.dumps(result_dict)
-
-    def dbus_add_macro(self, macro_key, macro_json):
-        """
-        Add macro from JSON
-
-        The macro_json will be a list of macro objects which is then converted into JSON
-        :param macro_key: Macro bind key
-        :type macro_key: str
-
-        :param macro_json: Macro JSON
-        :type macro_json: str
-        """
-        macro_list = [print(macro_object_dict) for macro_object_dict in json.loads(macro_json)]
-        self._macros[macro_key] = macro_list
 
     def close(self):
         """

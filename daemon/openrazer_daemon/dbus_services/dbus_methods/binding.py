@@ -3,7 +3,6 @@ Keyboard Binding methods
 """
 from openrazer_daemon.dbus_services import endpoint
 
-
 @endpoint('razer.device.binding', 'getProfiles', out_sig='s')
 def get_profiles(self):
     """
