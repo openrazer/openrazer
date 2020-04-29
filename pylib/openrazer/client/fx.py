@@ -646,7 +646,7 @@ class RazerAdvancedFX(BaseRazerFX):
         :return: dict of the frame
         :rtype: dict
         """
-        return dict(self.matrix)
+        return self.matrix.export()
 
     def draw_fb_or(self):
         self._draw(bytes(self.matrix.draw_with_fb_or()))
@@ -1095,9 +1095,9 @@ class Frame(object):
         """
         return b''.join([self.row_binary(row_id) for row_id in range(0, self._rows)])
 
-    def __dict__(self) -> dict:
+    def export(self) -> dict:
         """
-        When dict is ran on the class will return a dict for use with the binding system
+        When dict() is ran on the class will return a dict for use with the binding system
 
         :return: Dictionary of frame
         :rtype: dict

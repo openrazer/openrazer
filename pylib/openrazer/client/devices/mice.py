@@ -1,12 +1,10 @@
 import dbus as _dbus
 
 from openrazer.client.devices import RazerDevice as __RazerDevice
-from openrazer.client.macro import RazerMacro as _RazerMacro
 from openrazer.client import constants as _c
 
 
 class RazerMouse(__RazerDevice):
-    _MACRO_CLASS = _RazerMacro
 
     def __init__(self, serial, vid_pid=None, daemon_dbus=None):
         super(RazerMouse, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
