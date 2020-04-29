@@ -1,6 +1,7 @@
 """
 Keyboard Binding methods
 """
+import json
 from openrazer_daemon.dbus_services import endpoint
 
 @endpoint('razer.device.binding', 'getProfiles', out_sig='s')
@@ -161,3 +162,46 @@ def remove_action(self, profile, map, key_code, action_id):
   
     self.binding_manager.dbus_remove_action(profile, map, key_code, action_id)
 
+@endpoint('razer.device.binding', 'setProfileLEDs', in_sig='ysbbb')
+def set_profile_leds(self, profile, map, red, green, blue):
+    """
+    Set the profile LED state
+
+    :param profile: The profile number
+    :type: int
+
+    :param map: The map name
+    :type: str
+
+    :param red: The red LED state
+    :type: bool
+
+    :param green: The green LED state
+    :type: bool
+
+    :param blue: The blue LED state
+    :type: bool
+    """
+
+    self.logger.debug("DBus call set_profile_leds")
+
+    self.binding_manager.dbus_set_profile_leds(profile, map, red, green, blue)
+
+@endpoint('razer.device.binding', 'setMatrix', in_sig='yss')
+def set_matrix(self, profile, map, matrix):
+    """
+    Set the led matrix
+
+    :param profile: The profile number
+    :type: int
+
+    :param map: The map name
+    :type: str
+
+    :param matrix: The led matrix
+    :type: str
+    """
+
+    self.logger.debug("DBus call set_matrix")
+
+    self.binding_manager.dbus_set_matrix(profile, map, json.loads(matrix))

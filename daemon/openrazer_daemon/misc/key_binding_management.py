@@ -309,10 +309,40 @@ class KeybindingManager(object):
         binding = dict(OrderedDict(sorted(binding.items(), key=lambda t: t[0]))) # Sort
 
     def dbus_set_profile_leds(self, profile, map, red, green, blue):
+        """
+        Set the profile LED state for the given map
 
+        :param profile: The profile number
+        :type: int
+
+        :param map: The map name
+        :type: str
+
+        :param red: The red LED state
+        :type: bool
+
+        :param green: The green LED state
+        :type: bool
+
+        :param blue: The blue LED state
+        :type: bool
+        """
+        
         self._profiles[profile][map].update({'red_led': red, 'green_led': green, 'blue_led': blue})
 
     def dbus_set_matrix(self, profile, map, frame):
+        """
+        Set the LED matrix for the given map
+
+        :param profile: The profile number
+        :type: int
+        
+        :param map: The map name
+        :type: str
+
+        :param frame: The frame as a dict
+        :type: dict
+        """
 
         self._profiles[profile][map].update({"matrix": frame})
         self._profiles[profile][map]["is_using_matrix"] = True
