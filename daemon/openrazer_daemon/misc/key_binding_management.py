@@ -22,11 +22,13 @@ class KeybindingManager(object):
     """
 
     def __key_up(self, key_code):
+        key_code = int(key_code)
         self._current_keys.remove(key_code)
         self._fake_device.write(ecodes.EV_KEY, key_code, 0)    
         self._fake_device.syn()
 
     def __key_down(self, key_code):
+        key_code = int(key_code)
         self._current_keys.append(key_code)
         self._fake_device.write(ecodes.EV_KEY, key_code, 1)    
         self._fake_device.syn()
@@ -60,6 +62,8 @@ class KeybindingManager(object):
         :type key_code: int
         """
         # self._logger.debug("Key action: {0}, {1}".format(key_code, key_press))
+
+        key_code = str(key_code)
 
         current_binding = self.current_mapping["binding"]
         if key_press == 'release' and key_code not in current_binding: # Key released, but not bound
@@ -99,7 +103,7 @@ class KeybindingManager(object):
         Sets the current mapping and changes the led matrix
 
         :param value: The new mapping
-        :type value: int
+        :type value: str
         """
         self._logger.debug("Change mapping to {0}".format(value))
         self._current_mapping = self._current_profile[value]
@@ -108,7 +112,7 @@ class KeybindingManager(object):
             current_matrix  = self._current_mapping["matrix"]
             for row in current_matrix:
                 for key in current_matrix[row]:
-                    self._keyboard_grid.set_key_colour(row, key, current_matrix[row][key])
+                    self._keyboard_grid.set_key_colour(int(row), int(key), tuple(current_matrix[row][key]))
 
             payload = self._keyboard_grid.get_total_binary()
             self._parent.setKeyRow(payload)
@@ -164,7 +168,7 @@ class KeybindingManager(object):
         Get a list of maps in JSON format.
 
         Returns a JSON blob containing the maps of the given profile by name
-        (0: "map") 
+        ('0': 'map') 
 
         :param profile: The profile number
         :type: int
@@ -180,9 +184,21 @@ class KeybindingManager(object):
 
         return json.dumps(return_list)
 
-    def dbus_get_map(self, profile, map_id):
+    def dbus_get_map(self, profile, map):
+        """
+        Get the full map  for the given map id
 
-        return json.dumps(self._profiles[profile][map_id])
+        :param profile: The profile number
+        :type: int
+
+        :param map: The map name
+        :type: str
+
+        :return: JSON of the map
+        :rtype: str
+        """
+
+        return json.dumps(self._profiles[profile][map])
 
     def dbus_get_actions(self, profile, map, key_code):
         """
@@ -209,10 +225,37 @@ class KeybindingManager(object):
         return json.dumps(return_list)
 
     def dbus_add_map(self, profile, map_name):
+        """
+        Add a new map to the given profile.
+
+        :param profile: The profile number
+        :type: int
+
+        :param map_name: The name of the new map
+        :type: str
+        """
 
         self._profiles[profile].update({map_name: {"is_using_matrix": False, "binding": {}}})
 
     def dbus_add_action(self, profile, map, key_code, action_type, value):
+        """
+        Add a new action to the given key
+
+        :param profile: The profile number
+        :type: int
+
+        :param map: The map name
+        :type: str
+
+        :param key_code: The key code
+        :type: str
+
+        :param action_type: The action type (i.e. "key")
+        :type: str
+
+        :param value: The value of the action (i.e. 2)
+        :type: str
+        """
 
         if not self._profiles[profile][map]["bindings"][key_code]:
             self._profiles[profile][map]["bindings"].update({key_code: {}})
@@ -221,8 +264,30 @@ class KeybindingManager(object):
         key.update({len(key): {"type": action_type, "value": value}})
 
     def dbus_remove_action(self, profile, map, key_code, action_id):
+        """
+        Removes an action from the given key
+
+        :param profile: The profile number
+        :type: int
+
+        :param map: The map name
+        :type: str
+
+        :param key_code: The key code
+        :type: str
+
+        :param action_id: The id of the action
+        :type: str
+        """
+
+        key = self._profiles[profile][map]["bindings"][key_code]
+        key.pop(action_id)
         
-        self._profiles[profile][map]["bindings"][key_code].pop(action_id)
+        actions = 0
+        for action in key: # Reorder the actions to avoid overwrites
+            action = key[action]
+            key.update({str(actions): action})
+            actions += 1
 
     def close(self):
         try:
