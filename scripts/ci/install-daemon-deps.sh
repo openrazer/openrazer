@@ -11,9 +11,10 @@ apt-get -y install \
     python3 \
     python3-daemonize \
     python3-dbus \
+    python3-evdev \
     python3-gi \
     python3-notify2 \
     python3-numpy \
     python3-pyudev \
     python3-setproctitle \
-    xautomation
+    xautomation 

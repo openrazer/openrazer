@@ -10,6 +10,7 @@ import random
 import struct
 import time
 import sys
+from collections import OrderedDict
 from openrazer_daemon.keyboard import KeyboardColour
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))) # TODO: figure out a better way to handle this
@@ -145,6 +146,16 @@ class KeybindingManager(object):
         self.current_mapping = self._current_profile["default_map"]
         f.close()
 
+    def close(self):
+        try:
+            self._fake_device.close()
+        except RuntimeError as err:
+            self._logger.exception("Error closing fake device", exc_info=err)
+
+    def __del__(self):
+        self.close()
+
+    ### DBus Stuff
     def dbus_get_profiles(self):
         """
         Get list of profiles in JSON format
@@ -286,22 +297,20 @@ class KeybindingManager(object):
         :type: str
         """
 
-        key = self._profiles[profile][map]["bindings"][key_code]
-        key.pop(action_id)
+        binding = self._profiles[profile][map]["bindings"][key_code]
+        binding.pop(action_id)
         
         actions = 0
-        for action in key: # Reorder the actions to avoid overwrites
-            action = key[action]
-            key.update({str(actions): action})
+        for action in binding: # Reorder the actions to avoid overwrites
+            action = binding[action]
+            binding.update({str(actions): action})
             actions += 1
 
-    def close(self):
-        try:
-            self._fake_device.close()
-        except RuntimeError as err:
-            self._logger.exception("Error closing fake device", exc_info=err)
+        binding = dict(OrderedDict(sorted(binding.items(), key=lambda t: t[0]))) # Sort
 
-    def __del__(self):
-        self.close()
+    def dbus_set_profile_leds(self, profile, map, red, green, blue):
+
+        self._profiles[profile][map].update({'red_led': red, 'green_led': green, 'blue_led': blue})
+
 
 DEFAULT_PROFILE = {'name': 'Default', 'default_map': 'Default', 'Default': {'is_using_matrix': True, 'red_led': True, 'green_led': False, 'blue_led': False, 'matrix': {'1': {'1': [255, 0, 0], '2': [255, 0, 0], '3': [255, 0, 0], '4': [255, 0, 0], '5': [255, 0, 0]}, '2': {'1': [0, 255, 0], '2': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0]}, '3': {'1': [0, 255, 0], '2': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0]}, '4': {'1': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0], '6': [0, 255, 0]}}, 'binding': {'41': {'0': {'type': 'key', 'value': 2}}, '2': {'0': {'type': 'key', 'value': 3}}, '3': {'0': {'type': 'key', 'value': 4}}, '4': {'0': {'type': 'key', 'value': 5}}, '5': {'0': {'type': 'key', 'value': 6}}, '15': {'0': {'type': 'key', 'value': 16}}, '16': {'0': {'type': 'key', 'value': 17}}, '17': {'0': {'type': 'key', 'value': 18}}, '18': {'0': {'type': 'key', 'value': 19}}, '19': {'0': {'type': 'key', 'value': 20}}, '58': {'0': {'type': 'key', 'value': 30}}, '30': {'0': {'type': 'key', 'value': 31}}, '31': {'0': {'type': 'key', 'value': 32}}, '32': {'0': {'type': 'key', 'value': 33}}, '33': {'0': {'type': 'key', 'value': 34}}, '42': {'0': {'type': 'key', 'value': 44}}, '44': {'0': {'type': 'key', 'value': 45}}, '45': {'0': {'type': 'key', 'value': 46}}, '46': {'0': {'type': 'key', 'value': 47}}, '47': {'0': {'type': 'key', 'value': 48}}, '29': {'0': {'type': 'key', 'value': 14}}}}}
