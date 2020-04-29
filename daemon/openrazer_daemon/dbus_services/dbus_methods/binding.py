@@ -32,7 +32,7 @@ def get_maps(self, profile):
 
     return self.binding_manager.dbus_get_maps(profile)
 
-@endpoint('razer.device.binding', 'getActions', in_sig='yyy' out_sig='s')
+@endpoint('razer.device.binding', 'getActions', in_sig='yyy', out_sig='s')
 def get_actions(self, profile, map, key_code):
     """
     Get profiles
@@ -49,6 +49,6 @@ def get_actions(self, profile, map, key_code):
     :return: JSON of actions
     :rtype: str
     """
-    self.logger.debug("DBus call get_actions")
+    self.logger.debug("DBus call get_action")
   
     return self.binding_manager.dbus_get_actions(profile, map, key_code)

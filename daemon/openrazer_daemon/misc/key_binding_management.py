@@ -73,13 +73,13 @@ class KeybindingManager(object):
                 action = current_binding[key_code][action]
                 if key_press != 'release': # Key pressed (or autorepeat)
                     if action["type"] == "key":
-                        self.__key_down(action["code"])
+                        self.__key_down(action["value"])
                 
                     elif action["type"] == "map":
                         self.current_mapping = action["value"]
 
                 elif action["type"] == "key": # Key released
-                        self.__key_up(action["code"])
+                        self.__key_up(action["value"])
 
     @property
     def current_mapping(self):
@@ -180,12 +180,16 @@ class KeybindingManager(object):
 
         return json.dumps(return_list)
 
+    def dbus_get_map(self, profile, map_id):
+
+        return json.dumps(self._profiles[profile][map_id])
+
     def dbus_get_actions(self, profile, map, key_code):
         """
         Get a list of actions for a given key.
 
         Returns a JSON blob containing the actions for a given key
-        {0:{"type": "key", "code": 2}}
+        {0:{"type": "key", "value": 2}}
 
         :param profile: The profile number
         :type: int
@@ -204,6 +208,21 @@ class KeybindingManager(object):
 
         return json.dumps(return_list)
 
+    def dbus_add_map(self, profile, map_name):
+
+        self._profiles[profile].update({map_name: {"is_using_matrix": False, "binding": {}}})
+
+    def dbus_add_action(self, profile, map, key_code, action_type, value):
+
+        if not self._profiles[profile][map]["bindings"][key_code]:
+            self._profiles[profile][map]["bindings"].update({key_code: {}})
+
+        key = self._profiles[profile][map]["bindings"][key_code]
+        key.update({len(key): {"type": action_type, "value": value}})
+
+    def dbus_remove_action(self, profile, map, key_code, action_id):
+        
+        self._profiles[profile][map]["bindings"][key_code].pop(action_id)
 
     def close(self):
         try:
@@ -216,9 +235,8 @@ class KeybindingManager(object):
 
 DEFAULT_PROFILE = {
     "name": "Default",
-    "default_map": 0,
-    0: {
-        "name": "Default",
+    "default_map": "Default",
+    "Default": {
         "is_using_matrix": True,
         "red_led": True,
         "green_led": False,
@@ -257,127 +275,127 @@ DEFAULT_PROFILE = {
             41: {
                 0: {
                     "type": "key",
-                    "code": 2
+                    "value": 2
                 }
             },
             2: {
                 0: {
                     "type": "key",
-                    "code": 3
+                    "value": 3
                 }
             },
             3: {
                 0: {
                     "type": "key",
-                    "code": 4
+                    "value": 4
                 }
             },
             4: {
                 0: {
                     "type": "key",
-                    "code": 5
+                    "value": 5
                 }
             },
             5: {
                 0: {
                     "type": "key",
-                    "code": 6
+                    "value": 6
                 }
             },
             15: {
                 0: {
                     "type": "key",
-                    "code": 16
+                    "value": 16
                 }
             },
             16: {
                 0: {
                     "type": "key",
-                    "code": 17
+                    "value": 17
                 }
             },
             17: {
                 0: {
                     "type": "key",
-                    "code": 18
+                    "value": 18
                 }
             },
             18: {
                 0: {
                     "type": "key",
-                    "code": 19
+                    "value": 19
                 }
             },
             19: {
                 0: {
                     "type": "key",
-                    "code": 20
+                    "value": 20
                 }
             },
             58: {
                 0: {
                     "type": "key",
-                    "code": 30
+                    "value": 30
                 }
             },
             30: {
                 0: {
                     "type": "key",
-                    "code": 31
+                    "value": 31
                 }
             },
             31: {
                 0: {
                     "type": "key",
-                    "code": 32
+                    "value": 32
                 }
             },
             32: {
                 0: {
                     "type": "key",
-                    "code": 33
+                    "value": 33
                 }
             },
             33: {
                 0: {
                     "type": "key",
-                    "code": 34
+                    "value": 34
                 }
             },
             42: {
                 0: {
                     "type": "key",
-                    "code": 44
+                    "value": 44
                 }
             },
             44: {
                 0: {
                     "type": "key",
-                    "code": 45
+                    "value": 45
                 }
             },
             45: {
                 0: {
                     "type": "key",
-                    "code": 46
+                    "value": 46
                 }
             },
             46: {
                 0: {
                     "type": "key",
-                    "code": 47
+                    "value": 47
                 }
             },
             47: {
                 0: {
                     "type": "key",
-                    "code": 48
+                    "value": 48
                 }
             },
             29: {
                 0: {
                     "type": "key",
-                    "code": 14
+                    "value": 14
                 }
             }
         }
