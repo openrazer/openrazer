@@ -296,10 +296,10 @@ DEFAULT_PROFILE = {
     "name": "Default",
     "default_map": "Default",
     "Default": {
-        "is_using_matrix": true,
-        "red_led": true,
-        "green_led": false,
-        "blue_led": false,
+        "is_using_matrix": True,
+        "red_led": True,
+        "green_led": False,
+        "blue_led": False,
         "matrix": {
             "1": {
                 "1": [255, 0, 0],
