@@ -131,6 +131,10 @@ class RazerDevice(object):
 
             'lighting_backlight': self._has_feature('razer.device.lighting.backlight'),
             'lighting_backlight_active': self._has_feature('razer.device.lighting.backlight', 'setBacklightActive'),
+
+            'lighting_profile_led_red': self._has_feature('razer.device.lighting.profile_led', 'setRedLED'),
+            'lighting_profile_led_green': self._has_feature('razer.device.lighting.profile_led', 'setGreenLED'),
+            'lighting_profile_led_blue': self._has_feature('razer.device.lighting.profile_led', 'setBlueLED'),
         }
 
         # Nasty hack to convert dbus.Int32 into native

@@ -90,6 +90,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer DeathAdder Elite                        |  1532:005C  |
 | Razer Abyssus 2000                            |  1532:005E  |
 | Razer Lancehead Tournament Edition            |  1532:0060  |
+| Razer Basilisk                                |  1532:0064  |
 | Razer Naga Trinity                            |  1532:0067  |
 | Razer Abyssus Elite (D.Va Edition)            |  1532:006A  |
 | Razer Abyssus Essential                       |  1532:006B  |
@@ -98,6 +99,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer DeathAdder Essential (White Edition)    |  1532:0071  |
 | Razer Mamba Wireless (Receiver)               |  1532:0072  |
 | Razer Mamba Wireless (Wired)                  |  1532:0073  |
+| Razer Viper                                   |  1532:0078  |
 | Razer Viper Ultimate (Wired)                  |  1532:007A  |
 | Razer Viper Ultimate (Wireless)               |  1532:007B  |
 
