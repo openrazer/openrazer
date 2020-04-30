@@ -35,7 +35,9 @@ tasks:
       cd openrazer
 
       # Compile the kernel driver
-      ./scripts/ci/compile-driver.sh
+      echo "ccflags-y := -Wall -Werror" >> driver/Makefile
+      kerneldir=(/lib/modules/*/build)
+      make KERNELDIR="${kerneldir[0]}"
 
   - functional-test-setup: |
       # The daemon wants the user to be in the plugdev group
