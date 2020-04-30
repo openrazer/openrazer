@@ -1086,7 +1086,7 @@ class Frame(object):
         """
         return b''.join([self.row_binary(row_id) for row_id in range(0, self._rows)])
 
-    def export(self) -> dict:
+    def to_dict(self) -> dict:
         """
         Return a dict for use with the binding system
 
@@ -1102,6 +1102,17 @@ class Frame(object):
                 row.update({column_id: self.get(row_id, column_id)})
 
         return result
+
+    def from_dict(self, frame):
+        """
+        Convert a dict to a frame
+
+        :param frame: Dict of the frame
+        :type: dict
+        """
+        for row_id in frame:
+            for column_id in frame[row_id]:
+                self.set(int(row_id), int(column_id), tuple(frame[row_id][column_id]))
 
     def reset(self):
         """

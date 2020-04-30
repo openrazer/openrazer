@@ -139,11 +139,15 @@ class RazerDevice(object):
             'binding_set_active_profile': self._has_feature('razer.device.binding', 'setActiveProfile'),
             'binding_get_active_profile': self._has_feature('razer.device.binding', 'getActiveProfile'),
             'binding_get_profiles': self._has_feature('razer.device.binding', 'getProfiles'),
+            'binding_get_default_map': self._has_feature('razer.device.binding', 'getDefaultMap'),
+            'binding_set_default_map': self._has_feature('razer.device.binding', 'setDefaultMap'),
+
             'binding_get_maps': self._has_feature('razer.device.binding', 'getMaps'),
             'binding_get_map': self._has_feature('razer.device.binding', 'getMap'),
             'binding_set_active_map': self._has_feature('razer.device.binding', 'setActiveMap'),
             'binding_get_active_map': self._has_feature('razer.device.binding', 'getActiveMap'),
             'binding_add_map': self._has_feature('razer.device.binding', 'addMap'),
+            
             'binding_get_actions': self._has_feature('razer.device.binding', 'getActions'),
             'binding_add_action': self._has_feature('razer.device.binding', 'addAction'),
             'binding_remove_action': self._has_feature('razer.device.binding', 'removeAction'),

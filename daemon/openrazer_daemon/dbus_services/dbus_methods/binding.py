@@ -42,6 +42,37 @@ def set_active_profile(self, profile):
 
     self.binding_manager.current_profile = profile
 
+@endpoint('razer.device.binding', 'setDefaultMap', in_sig='ys')
+def set_default_map(self, profile, mapping):
+    """
+    Set the default map
+
+    :param profile: The profile number
+    :type: int
+
+    :param map: The map
+    :type: str
+    """
+    self.logger.debug("DBus call set_default_map")
+
+    self.binding_manager._profiles[profile]["default_map"] = mapping
+
+@endpoint('razer.device.binding', 'getDefaultMap', in_sig='y', out_sig='s')
+def get_default_map(self, profile):
+    """
+    Get the default map for a specific profile
+
+    :param profile: The profile number
+    :type: int
+
+    :return: The default map
+    :rtype: str
+    """
+    self.logger.debug("DBus call get_default_profile")
+
+    return self.binding_manager._profiles[profile]["default_map"] 
+
+
 @endpoint('razer.device.binding', 'getMaps', in_sig='y', out_sig='s')
 def get_maps(self, profile):
     """
