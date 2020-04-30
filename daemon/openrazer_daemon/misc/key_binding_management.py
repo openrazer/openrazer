@@ -188,6 +188,9 @@ class KeybindingManager(object):
         Gets the name of the config file
         (this currently uses a hardcoded value but I want to use
         the path to the config file currently used by the daemon)
+
+        :return: path to config file
+        :rtype: str
         """
 
         home = os.path.expanduser("~")
