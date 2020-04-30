@@ -135,6 +135,26 @@ class RazerDevice(object):
             'lighting_profile_led_red': self._has_feature('razer.device.lighting.profile_led', 'setRedLED'),
             'lighting_profile_led_green': self._has_feature('razer.device.lighting.profile_led', 'setGreenLED'),
             'lighting_profile_led_blue': self._has_feature('razer.device.lighting.profile_led', 'setBlueLED'),
+
+            'binding_set_active_profile': self._has_feature('razer.device.binding', 'setActiveProfile'),
+            'binding_get_active_profile': self._has_feature('razer.device.binding', 'getActiveProfile'),
+            'binding_get_profiles': self._has_feature('razer.device.binding', 'getProfiles'),
+            'binding_get_maps': self._has_feature('razer.device.binding', 'getMaps'),
+            'binding_get_map': self._has_feature('razer.device.binding', 'getMap'),
+            'binding_set_active_map': self._has_feature('razer.device.binding', 'setActiveMap'),
+            'binding_get_active_map': self._has_feature('razer.device.binding', 'getActiveMap'),
+            'binding_add_map': self._has_feature('razer.device.binding', 'addMap'),
+            'binding_get_actions': self._has_feature('razer.device.binding', 'getActions'),
+            'binding_add_action': self._has_feature('razer.device.binding', 'addAction'),
+            'binding_remove_action': self._has_feature('razer.device.binding', 'removeAction'),
+            'binding_update_action': self._has_feature('razer.device.binding', 'updateAction'),
+            'binding_clear_actions': self._has_feature('razer.device.binding', 'clearActions'),
+
+            'binding_lighting_get_profile_leds': self._has_feature('razer.device.binding.lighting', 'getProfileLEDs'),
+            'binding_lighting_set_profile_leds': self._has_feature('razer.device.binding.lighting', 'setProfileLEDs'),
+            'binding_lighting_get_matrix': self._has_feature('razer.device.binding.lighting', 'getMatrix'),
+            'binding_lighting_set_matrix': self._has_feature('razer.device.binding.lighting', 'setMatrix'),
+            
         }
 
         # Nasty hack to convert dbus.Int32 into native

@@ -45,8 +45,7 @@ class KeybindingManager(object):
 
         self._profiles = {0:DEFAULT_PROFILE}
         self._current_profile = self._profiles[0]
-        self._current_mapping = []
-        self._is_using_matrix = False
+        self._current_mapping = {}
 
         self._current_keys = []
 
@@ -128,6 +127,29 @@ class KeybindingManager(object):
         if 'keypad_set_profile_led_blue' in capabilities:
             self._parent.setBlueLED(self.current_mapping["blue_led"])
 
+    @property
+    def current_profile(self):
+        """
+        Returns the current profile
+
+        :return: the current profile name
+        :rtype: str
+        """
+
+        return self._current_profile["name"]
+
+    @current_profile.setter
+    def current_profile(self, value):
+        """
+        Sets the current profile
+
+        :param value: The profile number
+        :type: int
+        """
+
+        self._current_profile = self._profiles[value]
+        self.current_mapping = self._current_profile["default_map"]
+
     def read_config_file(self, config_file, profile):
         """
         Reads the configuration file and sets the variables accordingly
@@ -166,7 +188,6 @@ class KeybindingManager(object):
         :return: JSON of profiles
         :rtype: str
         """
-        
         return_list = []
         for profile in self._profiles:
             profile = self._profiles[profile]
@@ -187,7 +208,6 @@ class KeybindingManager(object):
         :return: JSON of maps
         :rtype: str
         """
-
         return_list = []
         for mapping in self._profiles[profile]:
             return_list.append(mapping)
@@ -207,7 +227,6 @@ class KeybindingManager(object):
         :return: JSON of the map
         :rtype: str
         """
-
         return json.dumps(self._profiles[profile][map])
 
     def dbus_get_actions(self, profile, map, key_code):
@@ -229,7 +248,6 @@ class KeybindingManager(object):
         :return: JSON of actions
         :rtype: str
         """
-
         return_list = self._profiles[profile][map]["bindings"][key_code]
 
         return json.dumps(return_list)
@@ -244,7 +262,6 @@ class KeybindingManager(object):
         :param map_name: The name of the new map
         :type: str
         """
-
         self._profiles[profile].update({map_name: {"is_using_matrix": False, "binding": {}}})
 
     def dbus_add_action(self, profile, map, key_code, action_type, value, action_id=None):
@@ -269,7 +286,6 @@ class KeybindingManager(object):
         :param action_id: The ID of the action to edit (if unset adds a new action)
         :type: str
         """
-
         if not self._profiles[profile][map]["bindings"][key_code]:
             self._profiles[profile][map]["bindings"].update({key_code: {}})
 
@@ -296,7 +312,6 @@ class KeybindingManager(object):
         :param action_id: The id of the action
         :type: str
         """
-
         binding = self._profiles[profile][map]["bindings"][key_code]
         binding.pop(action_id)
         
@@ -307,6 +322,45 @@ class KeybindingManager(object):
             actions += 1
 
         binding = dict(OrderedDict(sorted(binding.items(), key=lambda t: t[0]))) # Sort
+
+    def dbus_clear_actions(self, profile, map, key_code):
+        """
+        Clear all actions from the given key
+
+        :param profile: The profile number
+        :type: int
+
+        :param map: The map name
+        :type: str
+
+        :param key_code: The key code
+        :type: str
+        """
+        self._profiles[profile][map]["bindings"].pop(key_code)
+
+    def dbus_get_profile_leds(self, profile, map):
+        """
+        Gets the state of the profile LEDs for the given map
+
+        :param profile: The profile number
+        :type: int
+
+        :param map: The map name
+        :type: str
+
+        :return: The state of the Red profile LED
+        :type: bool
+
+        :return: The state of the Green profile LED
+        :type: bool
+
+        :return: The state of the Blue profile LED
+        :type: bool
+
+        """
+        map = self._profiles[profile][map]
+
+        return map["red_led"], map["green_led"], map["blue_led"]
 
     def dbus_set_profile_leds(self, profile, map, red, green, blue):
         """
@@ -326,8 +380,7 @@ class KeybindingManager(object):
 
         :param blue: The blue LED state
         :type: bool
-        """
-        
+        """        
         self._profiles[profile][map].update({'red_led': red, 'green_led': green, 'blue_led': blue})
 
     def dbus_set_matrix(self, profile, map, frame):
@@ -343,9 +396,23 @@ class KeybindingManager(object):
         :param frame: The frame as a dict
         :type: dict
         """
-
         self._profiles[profile][map].update({"matrix": frame})
         self._profiles[profile][map]["is_using_matrix"] = True
+
+    def dbus_get_matrix(self, profile, map):
+        """
+        Get the matrix for the given map
+
+        :param profile: The profile number
+        :type: int
+
+        :param map: The map name
+        :type: str
+
+        :return: JSON of the matrix
+        :rtype: str
+        """
+        return json.dumps(self._profiles[profile][map]["matrix"])
 
 
 DEFAULT_PROFILE = {'name': 'Default', 'default_map': 'Default', 'Default': {'is_using_matrix': True, 'red_led': True, 'green_led': False, 'blue_led': False, 'matrix': {'1': {'1': [255, 0, 0], '2': [255, 0, 0], '3': [255, 0, 0], '4': [255, 0, 0], '5': [255, 0, 0]}, '2': {'1': [0, 255, 0], '2': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0]}, '3': {'1': [0, 255, 0], '2': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0]}, '4': {'1': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0], '6': [0, 255, 0]}}, 'binding': {'41': {'0': {'type': 'key', 'value': 2}}, '2': {'0': {'type': 'key', 'value': 3}}, '3': {'0': {'type': 'key', 'value': 4}}, '4': {'0': {'type': 'key', 'value': 5}}, '5': {'0': {'type': 'key', 'value': 6}}, '15': {'0': {'type': 'key', 'value': 16}}, '16': {'0': {'type': 'key', 'value': 17}}, '17': {'0': {'type': 'key', 'value': 18}}, '18': {'0': {'type': 'key', 'value': 19}}, '19': {'0': {'type': 'key', 'value': 20}}, '58': {'0': {'type': 'key', 'value': 30}}, '30': {'0': {'type': 'key', 'value': 31}}, '31': {'0': {'type': 'key', 'value': 32}}, '32': {'0': {'type': 'key', 'value': 33}}, '33': {'0': {'type': 'key', 'value': 34}}, '42': {'0': {'type': 'key', 'value': 44}}, '44': {'0': {'type': 'key', 'value': 45}}, '45': {'0': {'type': 'key', 'value': 46}}, '46': {'0': {'type': 'key', 'value': 47}}, '47': {'0': {'type': 'key', 'value': 48}}, '29': {'0': {'type': 'key', 'value': 14}}}}}

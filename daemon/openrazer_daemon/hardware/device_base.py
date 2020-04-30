@@ -100,8 +100,9 @@ class RazerDevice(DBusService):
         self._is_closed = False
 
         # device methods available in all devices
-        self.methods_internal = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_profiles', 'get_maps', 'get_map', 'get_actions',
-            'add_map', 'add_action', 'update_action', 'remove_action']
+        self.methods_internal = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_profiles', 'get_active_profile', 'set_active_profile',
+            'get_maps', 'get_map', 'get_active_map', 'set_active_map',  'get_actions', 'clear_actions',
+            'add_map', 'add_action', 'update_action', 'remove_action', 'set_profile_leds', 'set_matrix']
         self.methods_internal.extend(additional_methods)
 
         # Find event files in /dev/input/by-id/ by matching against regex
