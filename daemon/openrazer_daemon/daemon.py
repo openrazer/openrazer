@@ -323,7 +323,6 @@ class RazerDaemon(DBusService):
         with open(persistence_file, 'w') as cf:
             self._persistence.write(cf)
 
-
     def get_off_on_screensaver(self):
         """
         Returns if turn off on screensaver
