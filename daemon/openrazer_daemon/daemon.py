@@ -255,7 +255,7 @@ class RazerDaemon(DBusService):
             self._config[section] = {}
 
         self._config['DEFAULT'] = {
-            'verbose_logging': True,
+            'verbose_logging': False,
             'sync_effects_enabled': True,
             'devices_off_on_screensaver': True,
             'key_statistics': False,
