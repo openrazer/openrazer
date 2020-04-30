@@ -22,18 +22,6 @@ class KeybindingManager(object):
 
     """
 
-    def __key_up(self, key_code):
-        key_code = int(key_code)
-        self._current_keys.remove(key_code)
-        self._fake_device.write(ecodes.EV_KEY, key_code, 0)    
-        self._fake_device.syn()
-
-    def __key_down(self, key_code):
-        key_code = int(key_code)
-        self._current_keys.append(key_code)
-        self._fake_device.write(ecodes.EV_KEY, key_code, 1)    
-        self._fake_device.syn()
-
     def __init__(self, device_id, parent, testing=False):
 
         self._device_id = device_id
@@ -53,6 +41,20 @@ class KeybindingManager(object):
         self._keyboard_grid = KeyboardColour(self._rows, self._cols)
 
         self.current_mapping = self._current_profile["default_map"]
+        
+        self._serial = self._parent.getSerial()
+
+    def __key_up(self, key_code):
+        key_code = int(key_code)
+        self._current_keys.remove(key_code)
+        self._fake_device.write(ecodes.EV_KEY, key_code, 0)    
+        self._fake_device.syn()
+
+    def __key_down(self, key_code):
+        key_code = int(key_code)
+        self._current_keys.append(key_code)
+        self._fake_device.write(ecodes.EV_KEY, key_code, 1)    
+        self._fake_device.syn()
 
     def key_press(self, key_code, key_press):
         """
@@ -290,4 +292,171 @@ class KeybindingManager(object):
         self._profiles[profile][map]["is_using_matrix"] = True
 
 
-DEFAULT_PROFILE = {'name': 'Default', 'default_map': 'Default', 'Default': {'is_using_matrix': True, 'red_led': True, 'green_led': False, 'blue_led': False, 'matrix': {'1': {'1': [255, 0, 0], '2': [255, 0, 0], '3': [255, 0, 0], '4': [255, 0, 0], '5': [255, 0, 0]}, '2': {'1': [0, 255, 0], '2': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0]}, '3': {'1': [0, 255, 0], '2': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0]}, '4': {'1': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0], '6': [0, 255, 0]}}, 'binding': {'41': {'0': {'type': 'key', 'value': 2}}, '2': {'0': {'type': 'key', 'value': 3}}, '3': {'0': {'type': 'key', 'value': 4}}, '4': {'0': {'type': 'key', 'value': 5}}, '5': {'0': {'type': 'key', 'value': 6}}, '15': {'0': {'type': 'key', 'value': 16}}, '16': {'0': {'type': 'key', 'value': 17}}, '17': {'0': {'type': 'key', 'value': 18}}, '18': {'0': {'type': 'key', 'value': 19}}, '19': {'0': {'type': 'key', 'value': 20}}, '58': {'0': {'type': 'key', 'value': 30}}, '30': {'0': {'type': 'key', 'value': 31}}, '31': {'0': {'type': 'key', 'value': 32}}, '32': {'0': {'type': 'key', 'value': 33}}, '33': {'0': {'type': 'key', 'value': 34}}, '42': {'0': {'type': 'key', 'value': 44}}, '44': {'0': {'type': 'key', 'value': 45}}, '45': {'0': {'type': 'key', 'value': 46}}, '46': {'0': {'type': 'key', 'value': 47}}, '47': {'0': {'type': 'key', 'value': 48}}, '29': {'0': {'type': 'key', 'value': 14}}}}}
+DEFAULT_PROFILE = {
+    "name": "Default",
+    "default_map": "Default",
+    "Default": {
+        "is_using_matrix": true,
+        "red_led": true,
+        "green_led": false,
+        "blue_led": false,
+        "matrix": {
+            "1": {
+                "1": [255, 0, 0],
+                "2": [255, 0, 0],
+                "3": [255, 0, 0],
+                "4": [255, 0, 0],
+                "5": [255, 0, 0]
+            },
+            "2": {
+                "1": [0, 255, 0],
+                "2": [0, 255, 0],
+                "3": [0, 255, 0],
+                "4": [0, 255, 0],
+                "5": [0, 255, 0]
+            },
+            "3": {
+                "1": [0, 255, 0],
+                "2": [0, 255, 0],
+                "3": [0, 255, 0],
+                "4": [0, 255, 0],
+                "5": [0, 255, 0]
+            },
+            "4": {
+                "1": [0, 255, 0],
+                "3": [0, 255, 0],
+                "4": [0, 255, 0],
+                "5": [0, 255, 0],
+                "6": [0, 255, 0]
+            }
+        },
+        "binding": {
+            "41": {
+                "0": {
+                    "type": "key",
+                    "value": 2
+                }
+            },
+            "2": {
+                "0": {
+                    "type": "key",
+                    "value": 3
+                }
+            },
+            "3": {
+                "0": {
+                    "type": "key",
+                    "value": 4
+                }
+            },
+            "4": {
+                "0": {
+                    "type": "key",
+                    "value": 5
+                }
+            },
+            "5": {
+                "0": {
+                    "type": "key",
+                    "value": 6
+                }
+            },
+            "15": {
+                "0": {
+                    "type": "key",
+                    "value": 16
+                }
+            },
+            "16": {
+                "0": {
+                    "type": "key",
+                    "value": 17
+                }
+            },
+            "17": {
+                "0": {
+                    "type": "key",
+                    "value": 18
+                }
+            },
+            "18": {
+                "0": {
+                    "type": "key",
+                    "value": 19
+                }
+            },
+            "19": {
+                "0": {
+                    "type": "key",
+                    "value": 20
+                }
+            },
+            "58": {
+                "0": {
+                    "type": "key",
+                    "value": 30
+                }
+            },
+            "30": {
+                "0": {
+                    "type": "key",
+                    "value": 31
+                }
+            },
+            "31": {
+                "0": {
+                    "type": "key",
+                    "value": 32
+                }
+            },
+            "32": {
+                "0": {
+                    "type": "key",
+                    "value": 33
+                }
+            },
+            "33": {
+                "0": {
+                    "type": "key",
+                    "value": 34
+                }
+            },
+            "42": {
+                "0": {
+                    "type": "key",
+                    "value": 44
+                }
+            },
+            "44": {
+                "0": {
+                    "type": "key",
+                    "value": 45
+                }
+            },
+            "45": {
+                "0": {
+                    "type": "key",
+                    "value": 46
+                }
+            },
+            "46": {
+                "0": {
+                    "type": "key",
+                    "value": 47
+                }
+            },
+            "47": {
+                "0": {
+                    "type": "key",
+                    "value": 48
+                }
+            },
+            "29": {
+                "0": {
+                    "type": "key",
+                    "value": 14
+                }
+            }
+        }
+    }
+}
