@@ -35,16 +35,16 @@ class KeybindingManager(object):
         self._current_profile = self._profiles[0]
         self._current_mapping = {}
 
-        self._serial_number = self._parent.getSerial()
-        self._config_file = get_config_file_name()
-        if os.path.exists(self._config_file)
-            read_config_file(self._config_file, self._current_profile)
-        self.current_mapping = self._current_profile["default_map"]
-
         self._current_keys = []
 
         self._rows, self._cols = self._parent.MATRIX_DIMS
         self._keyboard_grid = KeyboardColour(self._rows, self._cols)
+
+        self._serial_number = self._parent.getSerial()
+        self._config_file = self.get_config_file_name()
+        if os.path.exists(self._config_file):
+            self.read_config_file(self._config_file)
+        self.current_mapping = self._current_profile["default_map"]
 
     def __key_up(self, key_code):
         key_code = int(key_code)
@@ -167,7 +167,6 @@ class KeybindingManager(object):
 
         with open(config_file, 'r') as f:
             self._profiles = json.load(f)
-            self._current_profile = self._profiles[profile]
 
     def write_config_file(self, config_file):
         """
@@ -187,7 +186,7 @@ class KeybindingManager(object):
         the path to the config file currently used by the daemon)
         """
 
-        home = os.expanduser("~")
+        home = os.path.expanduser("~")
         config_path = os.path.join(home, ".config/openrazer/")
         return config_path + "keybinding_" + self._serial_number
 
