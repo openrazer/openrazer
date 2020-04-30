@@ -9,6 +9,7 @@ from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
 from openrazer_daemon.misc.key_binding_management import KeybindingManager as _BindingManager
 from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_EVENT_MAPPING, ORBWEAVER_KEY_MAPPING
 
+
 class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
     """
     Keyboard class
@@ -40,7 +41,7 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
             self.set_device_mode(0x00, 0x00)  # Device mode
         except FileNotFoundError:  # Could be called when daemon is stopping or device is removed.
             pass
-        
+
         self.binding_manager.close()
         self.key_manager.close()
 
@@ -193,7 +194,7 @@ class RazerTartarusV2(_RippleKeyboard):
                'keypad_get_profile_led_red', 'keypad_set_profile_led_red',
                'keypad_get_profile_led_green', 'keypad_set_profile_led_green',
                'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour',
                'get_game_mode', 'set_game_mode',
                'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
@@ -265,10 +266,10 @@ class RazerOrbweaverChroma(_RippleKeyboard):
                'keypad_get_profile_led_red', 'keypad_set_profile_led_red',
                'keypad_get_profile_led_green', 'keypad_set_profile_led_green',
                'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
-               
+
                'keypad_get_mode_modifier', 'keypad_set_mode_modifier',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
-    
+
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/607/607_orbweaver_chroma.png"
 
     def __init__(self, *args, **kwargs):
@@ -285,7 +286,7 @@ class RazerOrbweaverChroma(_RippleKeyboard):
         super(RazerOrbweaverChroma, self)._close()
 
         # TODO look into saving stats in /var/run maybe
-        #self.key_manager.close()
+        # self.key_manager.close()
 
 
 class RazerBlackWidowUltimate2012(_MacroKeyboard):
@@ -366,7 +367,7 @@ class RazerBlackWidowChroma(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
 
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
@@ -387,7 +388,7 @@ class RazerBlackWidowChromaV2(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
@@ -406,7 +407,7 @@ class RazerBlackWidowChromaTournamentEdition(_RippleKeyboard):
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
-               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode',
 
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
@@ -426,7 +427,7 @@ class RazerBlackWidowXChroma(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
 
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
@@ -446,7 +447,7 @@ class RazerBlackWidowXTournamentEditionChroma(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
 
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
@@ -601,7 +602,7 @@ class RazerOrnataChroma(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
@@ -643,7 +644,7 @@ class RazerHuntsmanElite(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
@@ -664,7 +665,7 @@ class RazerHuntsmanTournamentEdition(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
@@ -685,7 +686,7 @@ class RazerBlackWidowElite(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
@@ -706,7 +707,7 @@ class RazerHuntsman(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
@@ -727,7 +728,7 @@ class RazerCynosaChroma(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
@@ -782,7 +783,7 @@ class RazerBlackWidowLite(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_static_effect',
                'set_none_effect', 'set_breath_single_effect',
                'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
                ]
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1456/1456_blackwidowlite_-_2.png"
@@ -801,7 +802,7 @@ class RazerBlackWidow2019(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
@@ -840,7 +841,7 @@ class RazerOrnata(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_single_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode', 'set_breath_single_effect',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
                'set_starlight_single_effect', 'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/726/726_ornata.png"
@@ -910,7 +911,7 @@ class RazerBlackWidowChromaOverwatch(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 
+               'get_macro_effect', 'set_macro_effect',
 
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 

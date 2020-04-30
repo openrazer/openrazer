@@ -107,4 +107,3 @@ def keypad_set_profile_led_blue(self, enable):
             driver_file.write('1')
         else:
             driver_file.write('0')
-

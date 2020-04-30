@@ -147,7 +147,7 @@ class RazerDevice(object):
             'binding_set_active_map': self._has_feature('razer.device.binding', 'setActiveMap'),
             'binding_get_active_map': self._has_feature('razer.device.binding', 'getActiveMap'),
             'binding_add_map': self._has_feature('razer.device.binding', 'addMap'),
-            
+
             'binding_get_actions': self._has_feature('razer.device.binding', 'getActions'),
             'binding_add_action': self._has_feature('razer.device.binding', 'addAction'),
             'binding_remove_action': self._has_feature('razer.device.binding', 'removeAction'),
@@ -158,7 +158,7 @@ class RazerDevice(object):
             'binding_lighting_set_profile_leds': self._has_feature('razer.device.binding.lighting', 'setProfileLEDs'),
             'binding_lighting_get_matrix': self._has_feature('razer.device.binding.lighting', 'getMatrix'),
             'binding_lighting_set_matrix': self._has_feature('razer.device.binding.lighting', 'setMatrix'),
-            
+
         }
 
         # Nasty hack to convert dbus.Int32 into native
@@ -174,7 +174,6 @@ class RazerDevice(object):
             self.fx = None
         else:
             self.fx = self._FX(serial, capabilities=self._capabilities, daemon_dbus=daemon_dbus, matrix_dims=self._matrix_dimensions)
-
 
     def _get_available_features(self):
         introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')

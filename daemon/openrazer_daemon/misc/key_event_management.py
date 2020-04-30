@@ -25,7 +25,7 @@ import time
 import sys
 from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_EVENT_MAPPING, ORBWEAVER_KEY_MAPPING
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))) # TODO: figure out a better way to handle this
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # TODO: figure out a better way to handle this
 from evdev import UInput, ecodes, InputDevice
 from evdev.events import event_factory
 # pylint: disable=import-error
@@ -70,7 +70,7 @@ class KeyWatcher(threading.Thread):
     """
     Thread to watch keyboard event files and return keypresses
     """
-    @staticmethod #TODO remove
+    @staticmethod  # TODO remove
     def parse_event_record(event):
         """
         Parse Input event record
@@ -114,19 +114,17 @@ class KeyWatcher(threading.Thread):
         event_file_map = map(InputDevice, (self._event_files))
         self._event_file_map = {event_file.fd: event_file for event_file in event_file_map}
 
-
     def run(self):
         """
         Main event loop
         """
         # Grab device event file
-        for device in self._event_file_map.values(): 
+        for device in self._event_file_map.values():
             try:
                 device.grab()
                 self._logger.debug("Grabbed device {0}".format(device.path))
             except (IOError, OSError) as err:
                 self._logger.exception("Error grabbing device {0}".format(device.path), exc_info=err)
-
 
         # Loop
         while not self._shutdown:
@@ -145,13 +143,12 @@ class KeyWatcher(threading.Thread):
             try:
                 device.ungrab()
             except:
-                pass # If the device is unplugged we don't care
+                pass  # If the device is unplugged we don't care
 
             try:  # Try once for each
                 device.close()
             except:
                 pass
-
 
     def poll(self, event_file_map):
         r, w, x = select.select(event_file_map, [], [], EPOLL_TIMEOUT)
@@ -232,7 +229,7 @@ class KeyboardKeyManager(object):
         self._last_colour_choice = None
 
         self._should_grab_event_files = should_grab_event_files
-        self._event_files_locked = False  
+        self._event_files_locked = False
 
         self.KEY_MAP = KEY_MAPPING
         self.EVENT_MAP = EVENT_MAPPING
@@ -364,7 +361,7 @@ class KeyboardKeyManager(object):
                         current_brightness = 0
 
                     self._parent.setBrightness(current_brightness)
-                        #self._parent.method_args['brightness'] = current_brightness
+                    #self._parent.method_args['brightness'] = current_brightness
             elif key_name == 'BRIGHTNESSUP':
                 # Get brightness value
                 current_brightness = self._parent.method_args.get('brightness', None)
@@ -417,9 +414,9 @@ class KeyboardKeyManager(object):
             # ('effect', Device, 'effectName', 'effectparams'...)
             # Device is the device the msg originated from (could be parent device)
             if msg[2] == 'setRipple':
-            #     self.temp_key_store_state = True
-            # else:
-            #     self.temp_key_store_state = False
+                #     self.temp_key_store_state = True
+                # else:
+                #     self.temp_key_store_state = False
                 pass
 
 
@@ -431,6 +428,7 @@ class NagaHexV2KeyManager(KeyboardKeyManager):
 class GamepadKeyManager(KeyboardKeyManager):
     EVENT_MAP = TARTARUS_EVENT_MAPPING
     KEY_MAP = TARTARUS_KEY_MAPPING
+
 
 class OrbweaverKeyManager(KeyboardKeyManager):
     EVENT_MAP = ORBWEAVER_EVENT_MAPPING

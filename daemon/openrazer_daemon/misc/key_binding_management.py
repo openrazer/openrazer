@@ -13,8 +13,9 @@ import sys
 from collections import OrderedDict
 from openrazer_daemon.keyboard import KeyboardColour
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))) # TODO: figure out a better way to handle this
-from evdev import UInput, ecodes # noqa: 402, isort:skip
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # TODO: figure out a better way to handle this
+from evdev import UInput, ecodes  # noqa: 402, isort:skip
+
 
 class KeybindingManager(object):
     """
@@ -31,7 +32,7 @@ class KeybindingManager(object):
         self._testing = testing
         self._fake_device = UInput(name="{0} (mapped)".format(self._parent.getDeviceName()))
 
-        self._profiles = {0:DEFAULT_PROFILE}
+        self._profiles = {0: DEFAULT_PROFILE}
         self._current_profile = self._profiles[0]
         self._current_mapping = {}
 
@@ -46,16 +47,20 @@ class KeybindingManager(object):
             self.read_config_file(self._config_file)
         self.current_mapping = self._current_profile["default_map"]
 
+    #pylint: disable=no-member
+
     def __key_up(self, key_code):
         key_code = int(key_code)
         self._current_keys.remove(key_code)
-        self._fake_device.write(ecodes.EV_KEY, key_code, 0)    
+        self._fake_device.write(ecodes.EV_KEY, key_code, 0)
         self._fake_device.syn()
+
+    #pylint: disable=no-member
 
     def __key_down(self, key_code):
         key_code = int(key_code)
         self._current_keys.append(key_code)
-        self._fake_device.write(ecodes.EV_KEY, key_code, 1)    
+        self._fake_device.write(ecodes.EV_KEY, key_code, 1)
         self._fake_device.syn()
 
     def key_press(self, key_code, key_press):
@@ -70,29 +75,29 @@ class KeybindingManager(object):
         key_code = str(key_code)
 
         current_binding = self.current_mapping["binding"]
-        if key_press == 'release' and key_code not in current_binding: # Key released, but not bound
+        if key_press == 'release' and key_code not in current_binding:  # Key released, but not bound
             self.__key_up(key_code)
 
-        elif key_code not in current_binding: # Ordinary key pressed
+        elif key_code not in current_binding:  # Ordinary key pressed
             self.__key_down(key_code)
 
-        else: # Key bound
-            for action in current_binding[key_code]: 
+        else:  # Key bound
+            for action in current_binding[key_code]:
                 action = current_binding[key_code][action]
-                if key_press != 'release': # Key pressed (or autorepeat)
+                if key_press != 'release':  # Key pressed (or autorepeat)
                     if action["type"] == "key":
                         self.__key_down(action["value"])
-                
+
                     elif action["type"] == "map":
                         self.current_mapping = action["value"]
 
-                elif action["type"] == "key": # Key released
-                        self.__key_up(action["value"])
+                elif action["type"] == "key":  # Key released
+                    self.__key_up(action["value"])
 
     @property
     def current_mapping(self):
         """
-        
+
         Returns the current mapping
 
         :return: The current mapping
@@ -113,7 +118,7 @@ class KeybindingManager(object):
         self._current_mapping = self._current_profile[value]
 
         if self._current_mapping["is_using_matrix"]:
-            current_matrix  = self._current_mapping["matrix"]
+            current_matrix = self._current_mapping["matrix"]
             for row in current_matrix:
                 for key in current_matrix[row]:
                     self._keyboard_grid.set_key_colour(int(row), int(key), tuple(current_matrix[row][key]))
@@ -121,7 +126,6 @@ class KeybindingManager(object):
             payload = self._keyboard_grid.get_total_binary()
             self._parent.setKeyRow(payload)
             self._parent.setCustom()
-
 
         capabilities = self._parent.METHODS
         if 'keypad_set_profile_led_red' in capabilities:
@@ -199,7 +203,7 @@ class KeybindingManager(object):
     def __del__(self):
         self.close()
 
-    ### DBus Stuff
+    # DBus Stuff
     def dbus_get_profiles(self):
         """
         Get list of profiles in JSON format
@@ -286,14 +290,14 @@ class KeybindingManager(object):
         """
         binding = self._profiles[profile][map]["bindings"][key_code]
         binding.pop(action_id)
-        
+
         actions = 0
-        for action in binding: # Reorder the actions to avoid overwrites
+        for action in binding:  # Reorder the actions to avoid overwrites
             action = binding[action]
             binding.update({str(actions): action})
             actions += 1
 
-        binding = dict(OrderedDict(sorted(binding.items(), key=lambda t: t[0]))) # Sort
+        binding = dict(OrderedDict(sorted(binding.items(), key=lambda t: t[0])))  # Sort
 
     def dbus_set_matrix(self, profile, map, frame):
         """
@@ -301,7 +305,7 @@ class KeybindingManager(object):
 
         :param profile: The profile number
         :type: int
-        
+
         :param map: The map name
         :type: str
 

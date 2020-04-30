@@ -792,7 +792,7 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
                # Scroll wheel
                'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
                # #Macros
-               
+
                # Can set Logo, Scroll and thumbgrid with custom
                'set_custom_effect', 'set_key_row']
 
@@ -915,7 +915,7 @@ class RazerNagaChroma(__RazerDeviceSpecialBrightnessSuspend):
                # Scroll wheel
                'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
                # #Macros
-               
+
                # Can set Logo, Scroll and thumbgrid with custom
                'set_custom_effect', 'set_key_row']
 
