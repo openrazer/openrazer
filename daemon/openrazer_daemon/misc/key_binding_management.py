@@ -195,7 +195,7 @@ class KeybindingManager(object):
 
         home = os.path.expanduser("~")
         config_path = os.path.join(home, ".config/openrazer/")
-        return config_path + "keybinding_" + self._serial_number
+        return config_path + "keybinding_" + self._serial_number + ".conf"
 
     def close(self):
         try:
