@@ -46,7 +46,7 @@ class RazerDaemon(DBusService):
 
     BUS_NAME = 'org.razer'
 
-    def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None):
+    def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, persistence_file=None, test_dir=None):
 
         setproctitle.setproctitle('openrazer-daemon')  # pylint: disable=no-member
 
@@ -68,11 +68,22 @@ class RazerDaemon(DBusService):
                 print("Config file {} does not exist.".format(config_file), file=sys.stderr)
                 sys.exit(1)
 
+        if persistence_file is not None:
+            persistence_file = os.path.expanduser(persistence_file)
+            if not os.path.exists(persistence_file):
+                print("Persistence file {} does not exist.".format(persistence_file), file=sys.stderr)
+                sys.exit(1)
+
         self._test_dir = test_dir
         self._run_dir = run_dir
+
         self._config_file = config_file
         self._config = configparser.ConfigParser()
         self.read_config(config_file)
+
+        self._persistence_file = persistence_file
+        self._persistence = configparser.ConfigParser()
+        self.read_persistence(persistence_file)
 
         # Logging
         log_level = logging.INFO
@@ -269,38 +280,49 @@ class RazerDaemon(DBusService):
         if config_file is not None and os.path.exists(config_file):
             self._config.read(config_file)
 
-    def write_config(self, config_file):
+    def read_persistence(self, persistence_file):
         """
-        Write in the config file
+        Read the persistence file and set states into memory
 
-        :param config_file: Config file
-        :type config_file: str or None
+        :param persistence_file: Persistence file
+        :type persistence_file: str or None
         """
-        self.logger.debug('Writing config')
-        self._config['Startup']['sync_effects_enabled'] = 'True' if self.get_sync_effects() else 'False'
-        self._config['Startup']['devices_off_on_screensaver'] = 'True' if self.get_off_on_screensaver() else 'False'
+        if persistence_file is not None and os.path.exists(persistence_file):
+            self._persistence.read(persistence_file)
+
+    def write_persistence(self, persistence_file):
+        """
+        Write in the persistence file
+
+        :param persistence_file: Persistence file
+        :type persistence_file: str or None
+        """
+        if not persistence_file:
+            return
+
+        self.logger.debug('Updating persistence config')
 
         for device in self._razer_devices:
-            self._config[device.dbus.storage_name] = {}
+            self._persistence[device.dbus.storage_name] = {}
             if 'set_dpi_xy' in device.dbus.METHODS:
-                self._config[device.dbus.storage_name]['dpi_x'] = str(device.dbus.dpi[0])
-                self._config[device.dbus.storage_name]['dpi_y'] = str(device.dbus.dpi[1])
+                self._persistence[device.dbus.storage_name]['dpi_x'] = str(device.dbus.dpi[0])
+                self._persistence[device.dbus.storage_name]['dpi_y'] = str(device.dbus.dpi[1])
 
             if 'set_poll_rate' in device.dbus.METHODS:
-                self._config[device.dbus.storage_name]['poll_rate'] = str(device.dbus.poll_rate)
+                self._persistence[device.dbus.storage_name]['poll_rate'] = str(device.dbus.poll_rate)
 
             for i in device.dbus.ZONES:
                 if device.dbus.zone[i]["present"]:
-                    self._config[device.dbus.storage_name][i + '_active'] = str(device.dbus.zone[i]["active"])
-                    self._config[device.dbus.storage_name][i + '_brightness'] = str(device.dbus.zone[i]["brightness"])
-                    self._config[device.dbus.storage_name][i + '_effect'] = device.dbus.zone[i]["effect"]
-                    self._config[device.dbus.storage_name][i + '_colors'] = ' '.join(str(i) for i in device.dbus.zone[i]["colors"])
-                    self._config[device.dbus.storage_name][i + '_speed'] = str(device.dbus.zone[i]["speed"])
-                    self._config[device.dbus.storage_name][i + '_wave_dir'] = str(device.dbus.zone[i]["wave_dir"])
+                    self._persistence[device.dbus.storage_name][i + '_active'] = str(device.dbus.zone[i]["active"])
+                    self._persistence[device.dbus.storage_name][i + '_brightness'] = str(device.dbus.zone[i]["brightness"])
+                    self._persistence[device.dbus.storage_name][i + '_effect'] = device.dbus.zone[i]["effect"]
+                    self._persistence[device.dbus.storage_name][i + '_colors'] = ' '.join(str(i) for i in device.dbus.zone[i]["colors"])
+                    self._persistence[device.dbus.storage_name][i + '_speed'] = str(device.dbus.zone[i]["speed"])
+                    self._persistence[device.dbus.storage_name][i + '_wave_dir'] = str(device.dbus.zone[i]["wave_dir"])
 
-        if config_file is not None:
-            with open(config_file, 'w') as cf:
-                self._config.write(cf)
+        with open(persistence_file, 'w') as cf:
+            self._persistence.write(cf)
+
 
     def get_off_on_screensaver(self):
         """
@@ -436,7 +458,7 @@ class RazerDaemon(DBusService):
                         self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
                         break
 
-                    razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
+                    razer_device = device_class(sys_path, device_number, self._config, self._persistence, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
 
                     # Wireless devices sometimes don't listen
                     count = 0
@@ -472,7 +494,7 @@ class RazerDaemon(DBusService):
 
             if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
                 self.logger.info('Found valid device.%d: %s', device_number, sys_name)
-                razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None)
+                razer_device = device_class(sys_path, device_number, self._config, self._persistence, testing=self._test_dir is not None)
 
                 # Its a udev event so currently the device hasn't been chmodded yet
                 time.sleep(0.2)
@@ -509,7 +531,7 @@ class RazerDaemon(DBusService):
 
             device.dbus.close()
             device.dbus.remove_from_connection()
-            self.write_config(self._config_file)
+            self.write_persistence(self._persistence_file)
             self.logger.warning("Removing %s", device_id)
 
             # Delete device
@@ -588,4 +610,4 @@ class RazerDaemon(DBusService):
             device.dbus.close()
 
         # Write config
-        self.write_config(self._config_file)
+        self.write_persistence(self._persistence_file)

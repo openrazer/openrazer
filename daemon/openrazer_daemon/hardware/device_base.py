@@ -46,7 +46,7 @@ class RazerDevice(DBusService):
         "perspective_img": None
     }
 
-    def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None, additional_methods=[]):
+    def __init__(self, device_path, device_number, config, persistence, testing=False, additional_interfaces=None, additional_methods=[]):
 
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
@@ -65,6 +65,7 @@ class RazerDevice(DBusService):
             self.additional_interfaces.extend(additional_interfaces)
 
         self.config = config
+        self.persistence = persistence
         self._testing = testing
         self._parent = None
         self._device_path = device_path
@@ -199,17 +200,17 @@ class RazerDevice(DBusService):
         self.load_methods()
 
         # load last DPI/poll rate state
-        if self.config.has_section(self.storage_name):
+        if self.persistence.has_section(self.storage_name):
             if 'set_dpi_xy' in self.METHODS:
                 try:
-                    self.dpi[0] = int(self.config[self.storage_name]['dpi_x'])
-                    self.dpi[1] = int(self.config[self.storage_name]['dpi_y'])
+                    self.dpi[0] = int(self.persistence[self.storage_name]['dpi_x'])
+                    self.dpi[1] = int(self.persistence[self.storage_name]['dpi_y'])
                 except KeyError:
                     pass
 
             if 'set_poll_rate' in self.METHODS:
                 try:
-                    self.poll_rate = int(self.config[self.storage_name]['poll_rate'])
+                    self.poll_rate = int(self.persistence[self.storage_name]['poll_rate'])
                 except KeyError:
                     pass
 
@@ -224,30 +225,30 @@ class RazerDevice(DBusService):
         # load last effects
         for i in self.ZONES:
             if self.zone[i]["present"]:
-                # check if we have the device in the config file
-                if self.config.has_section(self.storage_name):
-                    # try reading the effect name from the config
+                # check if we have the device in the persistence file
+                if self.persistence.has_section(self.storage_name):
+                    # try reading the effect name from the persistence
                     try:
-                        self.zone[i]["effect"] = self.config[self.storage_name][i + '_effect']
+                        self.zone[i]["effect"] = self.persistence[self.storage_name][i + '_effect']
                     except KeyError:
                         pass
 
                     # zone active status
                     try:
-                        self.zone[i]["active"] = bool(self.config[self.storage_name][i + '_active'])
+                        self.zone[i]["active"] = bool(self.persistence[self.storage_name][i + '_active'])
                     except KeyError:
                         pass
 
                     # brightness
                     try:
-                        self.zone[i]["brightness"] = float(self.config[self.storage_name][i + '_brightness'])
+                        self.zone[i]["brightness"] = float(self.persistence[self.storage_name][i + '_brightness'])
                     except KeyError:
                         pass
 
                     # colors.
                     # these are stored as a string that must contain 9 numbers, separated with spaces.
                     try:
-                        for index, item in enumerate(self.config[self.storage_name][i + '_colors'].split(" ")):
+                        for index, item in enumerate(self.persistence[self.storage_name][i + '_colors'].split(" ")):
                             self.zone[i]["colors"][index] = int(item)
                             # check if the color is in range
                             if not 0 <= self.zone[i]["colors"][index] <= 255:
@@ -268,14 +269,14 @@ class RazerDevice(DBusService):
 
                     # speed
                     try:
-                        self.zone[i]["speed"] = int(self.config[self.storage_name][i + '_speed'])
+                        self.zone[i]["speed"] = int(self.persistence[self.storage_name][i + '_speed'])
 
                     except KeyError:
                         pass
 
                     # wave direction
                     try:
-                        self.zone[i]["wave_dir"] = int(self.config[self.storage_name][i + '_wave_dir'])
+                        self.zone[i]["wave_dir"] = int(self.persistence[self.storage_name][i + '_wave_dir'])
 
                     except KeyError:
                         pass
@@ -944,8 +945,8 @@ class RazerDeviceSpecialBrightnessSuspend(RazerDevice):
     Suspend functions
     """
 
-    def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None, additional_methods=[]):
-        super().__init__(device_path, device_number, config, testing, additional_interfaces, additional_methods)
+    def __init__(self, device_path, device_number, config, persistence, testing=False, additional_interfaces=None, additional_methods=[]):
+        super().__init__(device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods)
 
     def _suspend_device(self):
         """
@@ -980,6 +981,6 @@ class RazerDeviceBrightnessSuspend(RazerDeviceSpecialBrightnessSuspend):
     Inherits from RazerDeviceSpecialBrightnessSuspend
     """
 
-    def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None, additional_methods=[]):
+    def __init__(self, device_path, device_number, config, persistence, testing=False, additional_interfaces=None, additional_methods=[]):
         additional_methods.extend(['get_brightness', 'set_brightness'])
-        super().__init__(device_path, device_number, config, testing, additional_interfaces, additional_methods)
+        super().__init__(device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods)
