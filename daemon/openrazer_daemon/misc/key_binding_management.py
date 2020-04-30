@@ -35,14 +35,16 @@ class KeybindingManager(object):
         self._current_profile = self._profiles[0]
         self._current_mapping = {}
 
+        self._serial_number = self._parent.getSerial()
+        self._config_file = get_config_file_name()
+        if os.path.exists(self._config_file)
+            read_config_file(self._config_file, self._current_profile)
+        self.current_mapping = self._current_profile["default_map"]
+
         self._current_keys = []
 
         self._rows, self._cols = self._parent.MATRIX_DIMS
         self._keyboard_grid = KeyboardColour(self._rows, self._cols)
-
-        self.current_mapping = self._current_profile["default_map"]
-        
-        self._serial = self._parent.getSerial()
 
     def __key_up(self, key_code):
         key_code = int(key_code)
@@ -152,7 +154,7 @@ class KeybindingManager(object):
         self._current_profile = self._profiles[value]
         self.current_mapping = self._current_profile["default_map"]
 
-    def read_config_file(self, config_file, profile):
+    def read_config_file(self, config_file):
         """
         Reads the configuration file and sets the variables accordingly
 
@@ -163,12 +165,31 @@ class KeybindingManager(object):
         :type profile: str
         """
 
-        f = open(config_file, 'r')
-        
-        self._profiles = json.load(f)
-        self._current_profile = self._profiles[profile]
-        self.current_mapping = self._current_profile["default_map"]
-        f.close()
+        with open(config_file, 'r') as f:
+            self._profiles = json.load(f)
+            self._current_profile = self._profiles[profile]
+
+    def write_config_file(self, config_file):
+        """
+        Writes the _profiles dict to the config file
+
+        :param config_file: The path to the config file
+        :type config_file: str
+        """
+
+        with open(config_file, 'w') as f:
+            json.dump(self._profiles, f, indent=4)
+
+    def get_config_file_name(self):
+        """
+        Gets the name of the config file
+        (this currently uses a hardcoded value but I want to use
+        the path to the config file currently used by the daemon)
+        """
+
+        home = os.expanduser("~")
+        config_path = os.path.join(home, ".config/openrazer/")
+        return config_path + "keybinding_" + self._serial_number
 
     def close(self):
         try:
