@@ -214,56 +214,6 @@ class KeybindingManager(object):
 
         return json.dumps(return_list)
 
-    def dbus_get_map(self, profile, map):
-        """
-        Get the full map  for the given map id
-
-        :param profile: The profile number
-        :type: int
-
-        :param map: The map name
-        :type: str
-
-        :return: JSON of the map
-        :rtype: str
-        """
-        return json.dumps(self._profiles[profile][map])
-
-    def dbus_get_actions(self, profile, map, key_code):
-        """
-        Get a list of actions for a given key.
-
-        Returns a JSON blob containing the actions for a given key
-        {0:{"type": "key", "value": 2}}
-
-        :param profile: The profile number
-        :type: int
-
-        :param map: The map number
-        :type: str
-
-        :param key_code: The key_code
-        :type: str
-
-        :return: JSON of actions
-        :rtype: str
-        """
-        return_list = self._profiles[profile][map]["bindings"][key_code]
-
-        return json.dumps(return_list)
-
-    def dbus_add_map(self, profile, map_name):
-        """
-        Add a new map to the given profile.
-
-        :param profile: The profile number
-        :type: int
-
-        :param map_name: The name of the new map
-        :type: str
-        """
-        self._profiles[profile].update({map_name: {"is_using_matrix": False, "binding": {}}})
-
     def dbus_add_action(self, profile, map, key_code, action_type, value, action_id=None):
         """
         Add a new action to the given key
@@ -323,66 +273,6 @@ class KeybindingManager(object):
 
         binding = dict(OrderedDict(sorted(binding.items(), key=lambda t: t[0]))) # Sort
 
-    def dbus_clear_actions(self, profile, map, key_code):
-        """
-        Clear all actions from the given key
-
-        :param profile: The profile number
-        :type: int
-
-        :param map: The map name
-        :type: str
-
-        :param key_code: The key code
-        :type: str
-        """
-        self._profiles[profile][map]["bindings"].pop(key_code)
-
-    def dbus_get_profile_leds(self, profile, map):
-        """
-        Gets the state of the profile LEDs for the given map
-
-        :param profile: The profile number
-        :type: int
-
-        :param map: The map name
-        :type: str
-
-        :return: The state of the Red profile LED
-        :type: bool
-
-        :return: The state of the Green profile LED
-        :type: bool
-
-        :return: The state of the Blue profile LED
-        :type: bool
-
-        """
-        map = self._profiles[profile][map]
-
-        return map["red_led"], map["green_led"], map["blue_led"]
-
-    def dbus_set_profile_leds(self, profile, map, red, green, blue):
-        """
-        Set the profile LED state for the given map
-
-        :param profile: The profile number
-        :type: int
-
-        :param map: The map name
-        :type: str
-
-        :param red: The red LED state
-        :type: bool
-
-        :param green: The green LED state
-        :type: bool
-
-        :param blue: The blue LED state
-        :type: bool
-        """        
-        self._profiles[profile][map].update({'red_led': red, 'green_led': green, 'blue_led': blue})
-
     def dbus_set_matrix(self, profile, map, frame):
         """
         Set the LED matrix for the given map
@@ -398,21 +288,6 @@ class KeybindingManager(object):
         """
         self._profiles[profile][map].update({"matrix": frame})
         self._profiles[profile][map]["is_using_matrix"] = True
-
-    def dbus_get_matrix(self, profile, map):
-        """
-        Get the matrix for the given map
-
-        :param profile: The profile number
-        :type: int
-
-        :param map: The map name
-        :type: str
-
-        :return: JSON of the matrix
-        :rtype: str
-        """
-        return json.dumps(self._profiles[profile][map]["matrix"])
 
 
 DEFAULT_PROFILE = {'name': 'Default', 'default_map': 'Default', 'Default': {'is_using_matrix': True, 'red_led': True, 'green_led': False, 'blue_led': False, 'matrix': {'1': {'1': [255, 0, 0], '2': [255, 0, 0], '3': [255, 0, 0], '4': [255, 0, 0], '5': [255, 0, 0]}, '2': {'1': [0, 255, 0], '2': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0]}, '3': {'1': [0, 255, 0], '2': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0]}, '4': {'1': [0, 255, 0], '3': [0, 255, 0], '4': [0, 255, 0], '5': [0, 255, 0], '6': [0, 255, 0]}}, 'binding': {'41': {'0': {'type': 'key', 'value': 2}}, '2': {'0': {'type': 'key', 'value': 3}}, '3': {'0': {'type': 'key', 'value': 4}}, '4': {'0': {'type': 'key', 'value': 5}}, '5': {'0': {'type': 'key', 'value': 6}}, '15': {'0': {'type': 'key', 'value': 16}}, '16': {'0': {'type': 'key', 'value': 17}}, '17': {'0': {'type': 'key', 'value': 18}}, '18': {'0': {'type': 'key', 'value': 19}}, '19': {'0': {'type': 'key', 'value': 20}}, '58': {'0': {'type': 'key', 'value': 30}}, '30': {'0': {'type': 'key', 'value': 31}}, '31': {'0': {'type': 'key', 'value': 32}}, '32': {'0': {'type': 'key', 'value': 33}}, '33': {'0': {'type': 'key', 'value': 34}}, '42': {'0': {'type': 'key', 'value': 44}}, '44': {'0': {'type': 'key', 'value': 45}}, '45': {'0': {'type': 'key', 'value': 46}}, '46': {'0': {'type': 'key', 'value': 47}}, '47': {'0': {'type': 'key', 'value': 48}}, '29': {'0': {'type': 'key', 'value': 14}}}}}

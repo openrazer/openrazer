@@ -76,7 +76,7 @@ def get_map(self, profile, map):
 
     self.logger.debug("DBus call get_map")
 
-    return self.binding_manager.dbus_get_map(profile, map)
+    return json.dumps(self.binding_manager._profiles[profile][map])
 
 @endpoint('razer.device.binding', 'getActiveMap', out_sig='s')
 def get_active_map(self):
@@ -124,7 +124,7 @@ def get_actions(self, profile, map, key_code):
     """
     self.logger.debug("DBus call get_actions")
   
-    return self.binding_manager.dbus_get_actions(profile, map, key_code)
+    return json.dumps(self.binding_manager._profiles[profile][map]["bindings"][key_code])
 
 @endpoint('razer.device.binding', 'addMap', in_sig='ys')
 def add_map(self, profile, map):
@@ -140,7 +140,7 @@ def add_map(self, profile, map):
 
     self.logger.debug("DBus call add_map")
 
-    self.binding_manager.dbus_get_map(profile, map)
+    self.binding_manager._profiles[profile].update({map: {"is_using_matrix": False, "binding": {}}})
 
 @endpoint('razer.device.binding', 'addAction', in_sig='yssss')
 def add_action(self, profile, map, key_code, action_type, value):
@@ -231,7 +231,7 @@ def clear_actions(self, profile, map, key_code):
 
     self.logger.debug("DBus call clear_actions")
 
-    self.binding_manager.dbus_clear_actions(profile, map, key_code)
+    self.binding_manager._profiles[profile][map]["bindings"].pop(key_code)
 
 @endpoint('razer.device.binding.lighting', 'getProfileLEDs', in_sig='ys', out_sig='bbb')
 def get_profile_leds(self, profile, map):
@@ -254,8 +254,10 @@ def get_profile_leds(self, profile, map):
     :type: bool
     """
     self.logger.debug("DBus call get_profile_leds")
-    
-    return self.binding_manager.dbus_get_profile_leds(profile, map) 
+
+    map = self.binding_manager._profiles[profile][map]
+
+    return map["red_led"], map["green_led"], map["blue_led"]
 
 
 @endpoint('razer.device.binding.lighting', 'setProfileLEDs', in_sig='ysbbb')
@@ -281,7 +283,7 @@ def set_profile_leds(self, profile, map, red, green, blue):
 
     self.logger.debug("DBus call set_profile_leds")
 
-    self.binding_manager.dbus_set_profile_leds(profile, map, red, green, blue)
+    self.binding_manager._profiles[profile][map].update({'red_led': red, 'green_led': green, 'blue_led': blue})
 
 @endpoint('razer.device.binding.lighting', 'getMatrix', in_sig='ys', out_sig='s')
 def get_matrix(self, profile, map):
@@ -300,7 +302,7 @@ def get_matrix(self, profile, map):
 
     self.logger.debug("DBus call get_matrix")
 
-    return self.binding_manager.get_matrix(profile, map)
+    return json.dumps(self.key_manager._profiles[profile][map]["matrix"])
 
 @endpoint('razer.device.binding.lighting', 'setMatrix', in_sig='yss')
 def set_matrix(self, profile, map, matrix):
