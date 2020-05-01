@@ -168,6 +168,7 @@ class KeybindingManager(object):
         :param profile: The profile name to use
         :type profile: str
         """
+        self._logger.info("Reading config file from %s", config_file)
 
         with open(config_file, 'r') as f:
             self._profiles = json.load(f)
@@ -179,6 +180,7 @@ class KeybindingManager(object):
         :param config_file: The path to the config file
         :type config_file: str
         """
+        self._logger.debug("writing config file to %s", config_file)
 
         with open(config_file, 'w') as f:
             json.dump(self._profiles, f, indent=4)
@@ -275,6 +277,8 @@ class KeybindingManager(object):
 
         key.update({action_id: {"type": action_type, "value": value}})
 
+        self.write_config_file(self.get_config_file_name())
+
     def dbus_remove_action(self, profile, map, key_code, action_id):
         """
         Removes an action from the given key
@@ -300,7 +304,9 @@ class KeybindingManager(object):
             binding.update({str(actions): action})
             actions += 1
 
-        binding = dict(OrderedDict(sorted(binding.items(), key=lambda t: t[0])))  # Sort
+        binding.update(dict(OrderedDict(sorted(binding.items(), key=lambda t: t[0]))))  # Sort
+
+        self.write_config_file(self.get_config_file_name())
 
     def dbus_set_matrix(self, profile, map, frame):
         """
@@ -317,6 +323,8 @@ class KeybindingManager(object):
         """
         self._profiles[profile][map].update({"matrix": frame})
         self._profiles[profile][map]["is_using_matrix"] = True
+
+        self.write_config_file(self.get_config_file_name())
 
 
 DEFAULT_PROFILE = {
