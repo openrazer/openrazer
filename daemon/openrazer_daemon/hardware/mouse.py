@@ -1867,3 +1867,43 @@ class RazerDeathAdderV2(__RazerDeviceSpecialBrightnessSuspend):
         _da_set_logo_brightness(self, logo_brightness)
         _da_set_scroll_brightness(self, scroll_brightness)
         self.disable_notify = False
+
+
+class RazerBasiliskXHyperSpeed(__RazerDevice):
+    """
+    Class for the Razer Basilisk X HyperSpeed
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Basilisk_X_HyperSpeed-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0083
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_poll_rate', 'set_poll_rate', 'get_battery', 'is_charging',
+               'get_idle_time', 'set_idle_time', 'get_low_battery_threshold',
+               'set_low_battery_threshold']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1589/1589_basilisk_x__hyperspeed.png"
+
+    # Deprecated - RAZER_URLS be removed in future.
+    RAZER_URLS = {
+        "top_img": DEVICE_IMAGE
+    }
+
+    DPI_MAX = 16000
+
+    def __init__(self, *args, **kwargs):
+        super(RazerBasiliskXHyperSpeed, self).__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(
+            self, self._device_number, 'Razer Basilisk X HyperSpeed')
+
+        self._battery_manager.active = self.config.getboolean(
+            'Startup', 'mouse_battery_notifier', fallback=False)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerBasiliskXHyperSpeed, self)._close()
+
+        self._battery_manager.close()
