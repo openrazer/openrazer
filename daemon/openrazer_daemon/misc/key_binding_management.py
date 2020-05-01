@@ -14,13 +14,12 @@ from collections import OrderedDict
 from openrazer_daemon.keyboard import KeyboardColour
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # TODO: figure out a better way to handle this
-from evdev import UInput, ecodes  # noqa: 402, isort:skip
+from evdev import UInput, ecodes
 
 
 class KeybindingManager(object):
     """
     Key binding manager
-
     """
 
     def __init__(self, device_id, parent, testing=False):
@@ -28,7 +27,7 @@ class KeybindingManager(object):
         self._device_id = device_id
         self._logger = logging.getLogger('razer.device{0}.bindingmanager'.format(device_id))
         self._parent = parent
-#        self._parent.register_observer(self)
+        # self._parent.register_observer(self)
         self._testing = testing
         self._fake_device = UInput(name="{0} (mapped)".format(self._parent.getDeviceName()))
 
@@ -48,7 +47,6 @@ class KeybindingManager(object):
         self.current_mapping = self._current_profile["default_map"]
 
     #pylint: disable=no-member
-
     def __key_up(self, key_code):
         key_code = int(key_code)
         self._current_keys.remove(key_code)
@@ -56,7 +54,6 @@ class KeybindingManager(object):
         self._fake_device.syn()
 
     #pylint: disable=no-member
-
     def __key_down(self, key_code):
         key_code = int(key_code)
         self._current_keys.append(key_code)

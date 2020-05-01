@@ -85,9 +85,7 @@ class RazerNostromo(_RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0111
     DEDICATED_MACRO_KEYS = True
-    METHODS = ['get_device_type_keypad', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green', 'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
-               # ?
-               'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
+    METHODS = ['get_device_type_keypad', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green', 'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/564/564_tartarus_classic.png"
 
@@ -118,7 +116,7 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_device_type_keypad',
                'set_static_effect', 'bw_set_pulsate', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
-               'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
+               'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/228/228_tartarus.png"
 
@@ -149,7 +147,7 @@ class RazerTartarusChroma(_RazerDeviceBrightnessSuspend):
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_device_type_keypad', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_static_effect', 'set_spectrum_effect', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
-               'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
+               'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/598/598_tartarus_chroma.png"
 
@@ -196,8 +194,7 @@ class RazerTartarusV2(_RippleKeyboard):
                'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
                'get_macro_effect', 'set_macro_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour',
-               'get_game_mode', 'set_game_mode',
-               'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
+               'get_game_mode', 'set_game_mode']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1255/1255_tartarus_v2.png"
 
@@ -225,7 +222,6 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_device_type_keypad',
                'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green', 'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
-               'keypad_get_mode_modifier', 'keypad_set_mode_modifier',
 
                'bw_set_pulsate', 'bw_set_static']
 
@@ -267,7 +263,6 @@ class RazerOrbweaverChroma(_RippleKeyboard):
                'keypad_get_profile_led_green', 'keypad_set_profile_led_green',
                'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
 
-               'keypad_get_mode_modifier', 'keypad_set_mode_modifier',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/607/607_orbweaver_chroma.png"
