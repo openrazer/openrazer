@@ -20,13 +20,6 @@ class RazerKraken71(__RazerDevice):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/229/229_kraken_71.png"
 
-    # Deprecated - RAZER_URLS be removed in future.
-    RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/support/products/229/229_kraken_71.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/17519/03.png",
-        "perspective_img": "https://assets.razerzone.com/eeimages/products/17519/01.png"
-    }
-
     @staticmethod
     def decode_bitfield(bitfield):
         return {
@@ -94,13 +87,6 @@ class RazerKraken71Chroma(__RazerDevice):
                'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken', 'set_custom_kraken']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/280/280_kraken_71_chroma.png"
-
-    # Deprecated - RAZER_URLS be removed in future.
-    RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/support/products/280/280_kraken_71_chroma.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/17519/03.png",
-        "perspective_img": "https://assets.razerzone.com/eeimages/products/17519/01.png"
-    }
 
     @staticmethod
     def decode_bitfield(bitfield):
@@ -171,13 +157,6 @@ class RazerKraken71V2(__RazerDevice):
                'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken', 'set_custom_kraken']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/729/729_kraken_71_v2.png"
-
-    # Deprecated - RAZER_URLS be removed in future.
-    RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/support/products/729/729_kraken_71_v2.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/26005/kraken71v2_gallery01-v2.png",
-        "perspective_img": "https://assets.razerzone.com/eeimages/products/26005/kraken71v2_gallery03-v2.png"
-    }
 
     @staticmethod
     def decode_bitfield(bitfield):
@@ -259,13 +238,6 @@ class RazerKrakenUltimate(__RazerDevice):
                'get_static_effect_args_kraken', 'get_breath_effect_args_kraken', 'set_custom_kraken']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1603/rzr_kraken_ultimate_render01_2019_resized.png"
-
-    # Deprecated - RAZER_URLS be removed in future.
-    RAZER_URLS = {
-        "top_img": DEVICE_IMAGE,
-        "side_img": DEVICE_IMAGE,
-        "perspective_img": DEVICE_IMAGE
-    }
 
     @staticmethod
     def decode_bitfield(bitfield):

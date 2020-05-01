@@ -35,11 +35,7 @@ class RazerDevice(DBusService):
 
     WAVE_DIRS = (1, 2)
 
-    RAZER_URLS = {
-        "top_img": None,
-        "side_img": None,
-        "perspective_img": None
-    }
+    DEVICE_IMAGE = None
 
     def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None, additional_methods=[]):
 
@@ -96,12 +92,15 @@ class RazerDevice(DBusService):
             ('razer.device.misc', 'getSerial', self.get_serial, None, 's'),
             ('razer.device.misc', 'suspendDevice', self.suspend_device, None, None),
             ('razer.device.misc', 'getDeviceMode', self.get_device_mode, None, 's'),
-            ('razer.device.misc', 'getRazerUrls', self.get_image_json, None, 's'),
+            ('razer.device.misc', 'getDeviceImage', self.get_device_image, None, 's'),
             ('razer.device.misc', 'setDeviceMode', self.set_device_mode, 'yy', None),
             ('razer.device.misc', 'resumeDevice', self.resume_device, None, None),
             ('razer.device.misc', 'getVidPid', self.get_vid_pid, None, 'ai'),
             ('razer.device.misc', 'getDriverVersion', openrazer_daemon.dbus_services.dbus_methods.version, None, 's'),
             ('razer.device.misc', 'hasDedicatedMacroKeys', self.dedicated_macro_keys, None, 'b'),
+
+            # Deprecated API, but kept for backwards compatibility
+            ('razer.device.misc', 'getRazerUrls', self.get_image_json, None, 's')
         }
 
         for m in methods:
@@ -279,7 +278,15 @@ class RazerDevice(DBusService):
         return result
 
     def get_image_json(self):
-        return json.dumps(self.RAZER_URLS)
+        # Deprecated API, but kept for backwards compatibility
+        return json.dumps({
+            "top_img": self.get_device_image(),
+            "side_img": self.get_device_image(),
+            "perspective_img": self.get_device_image()
+        })
+
+    def get_device_image(self):
+        return self.DEVICE_IMAGE
 
     def load_methods(self):
         """

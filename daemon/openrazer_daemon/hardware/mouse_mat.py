@@ -18,13 +18,6 @@ class RazerFirefly(__RazerDeviceBrightnessSuspend):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/594/594_firefly_500x500.png"
 
-    # Deprecated - RAZER_URLS be removed in future.
-    RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/support/products/594/594_firefly_500x500.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/21936/fireflycloth-gallery-6.png",
-        "perspective_img": "https://assets.razerzone.com/eeimages/products/21936/fireflycloth-gallery-3.png"
-    }
-
 
 class RazerFireflyHyperflux(__RazerDeviceBrightnessSuspend):
     """
@@ -39,13 +32,6 @@ class RazerFireflyHyperflux(__RazerDeviceBrightnessSuspend):
                'set_key_row']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/594/594_firefly_500x500.png"
-
-    # Deprecated - RAZER_URLS be removed in future.
-    RAZER_URLS = {
-        "top_img": "https://assets.razerzone.com/eeimages/support/products/594/594_firefly_500x500.png",
-        "side_img": "https://assets.razerzone.com/eeimages/products/21936/fireflycloth-gallery-6.png",
-        "perspective_img": "https://assets.razerzone.com/eeimages/products/21936/fireflycloth-gallery-3.png"
-    }
 
 
 class RazerGoliathus(__RazerDeviceBrightnessSuspend):

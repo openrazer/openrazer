@@ -32,6 +32,9 @@ class RazerDevice(object):
         self._fw = str(self._dbus_interfaces['device'].getFirmware())
         self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
         self._has_dedicated_macro = None
+        self._device_image = None
+
+        # Deprecated API, but kept for backwards compatibility
         self._urls = None
 
         if vid_pid is None:
@@ -339,11 +342,21 @@ class RazerDevice(object):
         return self._has_dedicated_macro
 
     @property
-    def razer_urls(self) -> dict:
-        if self._urls is None:
-            self._urls = json.loads(str(self._dbus_interfaces['device'].getRazerUrls()))
+    def device_image(self) -> str:
+        if self._device_image is None:
+            self._device_image = str(self._dbus_interfaces['device'].getDeviceImage())
 
-        return self._urls
+        return self._device_image
+
+    @property
+    def razer_urls(self) -> dict:
+        # Deprecated API, but kept for backwards compatibility
+        return {
+            "DEPRECATED": True,
+            "top_img": self.device_image,
+            "side_img": self.device_image,
+            "perspective_img": self.device_image
+        }
 
     def __str__(self):
         return self._name
