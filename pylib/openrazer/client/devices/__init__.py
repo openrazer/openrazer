@@ -137,6 +137,8 @@ class RazerDevice(object):
             'lighting_profile_led_green': self._has_feature('razer.device.lighting.profile_led', 'setGreenLED'),
             'lighting_profile_led_blue': self._has_feature('razer.device.lighting.profile_led', 'setBlueLED'),
 
+            'binding_add_profile': self._has_feature('razer.device.binding', 'addProfile'),
+            'binding_remove_profile': self._has_feature('razer.device.binding', 'removeProfile'),
             'binding_set_active_profile': self._has_feature('razer.device.binding', 'setActiveProfile'),
             'binding_get_active_profile': self._has_feature('razer.device.binding', 'getActiveProfile'),
             'binding_get_profiles': self._has_feature('razer.device.binding', 'getProfiles'),

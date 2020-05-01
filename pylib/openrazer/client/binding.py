@@ -49,4 +49,4 @@ class Binding(object):
         :rtype: bool
         """
 
-        self._binding_dbus.addAction(int(profile), mapping, str(key_code), "key", str(value))
+        self._binding_dbus.addAction(profile, mapping, str(key_code), "key", str(value))

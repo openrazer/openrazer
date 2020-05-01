@@ -5,6 +5,32 @@ import json
 from openrazer_daemon.dbus_services import endpoint
 
 
+@endpoint('razer.device.binding', 'addProfile', in_sig='s')
+def add_profile(self, profile):
+    """
+    Add a new profile
+
+    :param profile: The profile name
+    :type: str
+    """
+    self.logger.debug("DBus call add_profile")
+
+    self.binding_manager._profiles.update({len(self.binding_manager._profiles): {"name": profile, "default_map": "Default", "Default": {"is_using_matrix": False, "binding": {}}}})
+
+
+@endpoint('razer.device.binding', 'removeProfile', in_sig='y')
+def remove_profile(self, profile):
+    """
+    Delete the specified profile
+
+    :param profile: The profile number
+    :type: int
+    """
+    self.logger.debug("DBus call remove_profile")
+
+    self.binding_manager._profiles.pop(str(profile))
+
+
 @endpoint('razer.device.binding', 'getProfiles', out_sig='s')
 def get_profiles(self):
     """
@@ -181,8 +207,7 @@ def add_map(self, profile, map):
 
     self.logger.debug("DBus call add_map")
 
-    self.binding_manager._profiles[profile].update(
-        {map: {"is_using_matrix": False, "binding": {}}})
+    self.binding_manager._profiles[profile].update({map: {"is_using_matrix": False, "binding": {}}})
 
     self.write_config_file(self.get_config_file_name())
 
