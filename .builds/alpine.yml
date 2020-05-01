@@ -12,7 +12,6 @@ packages:
   - py3-pylint
   - py3-setproctitle
   - py3-udev
-  - py3-pycodestyle # TODO Remove when https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/7319 is merged
 sources:
   - https://github.com/openrazer/openrazer
 tasks:
