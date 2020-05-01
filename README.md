@@ -123,6 +123,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Kraken 7.1 Chroma                       |  1532:0504  |
 | Razer Kraken 7.1                              |  1532:0506  |
 | Razer Kraken 7.1 V2                           |  1532:0510  |
+| Razer Kraken Ultimate                         |  1532:0527  |
 
 ### Misc
 | Device                                        | USB VID:PID |
