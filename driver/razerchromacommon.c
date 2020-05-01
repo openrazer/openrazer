@@ -1090,7 +1090,7 @@ struct razer_report razer_chroma_misc_get_dpi_xy(unsigned char variable_storage)
 {
     struct razer_report report = get_razer_report(0x04, 0x85, 0x07);
 
-    report.arguments[0] = VARSTORE;
+    report.arguments[0] = variable_storage;
 
     return report;
 }
