@@ -264,15 +264,15 @@ class KeybindingManager(object):
         :param action_id: The ID of the action to edit (if unset adds a new action)
         :type: str
         """
-        if not self._profiles[profile][map]["bindings"][key_code]:
-            self._profiles[profile][map]["bindings"].update({key_code: {}})
+        if not self._profiles[profile][map]["binding"][key_code]:
+            self._profiles[profile][map]["binding"].update({key_code: {}})
 
-        key = self._profiles[profile][map]["bindings"][key_code]
+        key = self._profiles[profile][map]["binding"][key_code]
 
         if action_id == None:
-            action_id == len(key)
+            action_id = len(key)
 
-        key.update({action_id: {"type": action_type, "value": value}})
+        key.update({str(action_id): {"type": action_type, "value": value}})
 
         self.write_config_file(self.get_config_file_name())
 
@@ -292,7 +292,7 @@ class KeybindingManager(object):
         :param action_id: The id of the action
         :type: str
         """
-        binding = self._profiles[profile][map]["bindings"][key_code]
+        binding = self._profiles[profile][map]["binding"][key_code]
         binding.pop(action_id)
 
         actions = 0

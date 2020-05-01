@@ -1,6 +1,7 @@
 import json
 import dbus as _dbus
 from openrazer.client.fx import RazerFX as _RazerFX
+from openrazer.client.binding import Binding as _Binding
 from xml.etree import ElementTree as _ET
 
 
@@ -175,6 +176,12 @@ class RazerDevice(object):
         else:
             self.fx = self._FX(serial, capabilities=self._capabilities, daemon_dbus=daemon_dbus, matrix_dims=self._matrix_dimensions)
 
+        # Setup Binding
+        if _Binding is None:
+            self.binding = None
+        else:
+            self.binding = _Binding(serial, capabilities=self._capabilities, daemon_dbus=daemon_dbus)
+
     def _get_available_features(self):
         introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')
         xml_spec = introspect_interface.Introspect()
@@ -235,7 +242,7 @@ class RazerDevice(object):
         :return: True or False
         :rtype: bool
         """
-        # Could do capability in self._capabilitys but they might be explicitly disabled
+        # Could do capability in self._capabilities but they might be explicitly disabled
         return self._capabilities.get(capability, False)
 
     @property

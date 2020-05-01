@@ -164,7 +164,7 @@ def get_actions(self, profile, map, key_code):
     """
     self.logger.debug("DBus call get_actions")
 
-    return json.dumps(self.binding_manager._profiles[profile][map]["bindings"][key_code])
+    return json.dumps(self.binding_manager._profiles[profile][map]["binding"][key_code])
 
 
 @endpoint('razer.device.binding', 'addMap', in_sig='ys')
@@ -181,7 +181,8 @@ def add_map(self, profile, map):
 
     self.logger.debug("DBus call add_map")
 
-    self.binding_manager._profiles[profile].update({map: {"is_using_matrix": False, "binding": {}}})
+    self.binding_manager._profiles[profile].update(
+        {map: {"is_using_matrix": False, "binding": {}}})
 
     self.write_config_file(self.get_config_file_name())
 
@@ -236,7 +237,8 @@ def update_action(self, profile, map, key_code, action_type, value, action_id):
     """
     self.logger.debug("DBus call update_action")
 
-    self.binding_manager.dbus_add_action(profile, map, key_code, action_type, value, action_id)
+    self.binding_manager.dbus_add_action(
+        profile, map, key_code, action_type, value, action_id)
 
 
 @endpoint('razer.device.binding', 'removeAction', in_sig='ysss')
@@ -278,7 +280,7 @@ def clear_actions(self, profile, map, key_code):
 
     self.logger.debug("DBus call clear_actions")
 
-    self.binding_manager._profiles[profile][map]["bindings"].pop(key_code)
+    self.binding_manager._profiles[profile][map]["binding"].pop(key_code)
 
     self.write_config_file(self.get_config_file_name())
 
@@ -333,7 +335,8 @@ def set_profile_leds(self, profile, map, red, green, blue):
 
     self.logger.debug("DBus call set_profile_leds")
 
-    self.binding_manager._profiles[profile][map].update({'red_led': red, 'green_led': green, 'blue_led': blue})
+    self.binding_manager._profiles[profile][map].update(
+        {'red_led': red, 'green_led': green, 'blue_led': blue})
 
     self.write_config_file(self.get_config_file_name())
 
