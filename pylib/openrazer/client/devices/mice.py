@@ -162,6 +162,16 @@ class RazerMouse(__RazerDevice):
         if self.has('battery'):
             self._dbus_interfaces['power'].setIdleTime(idle_time)
 
+    def get_idle_time(self) -> int:
+        """
+        Gets the idle time of the device
+
+        :return: Number of seconds before this device goes into powersave
+                 (60-900)
+        """
+        if self.has('battery'):
+            return int(self._dbus_interfaces['power'].getIdleTime())
+
     def set_low_battery_threshold(self, threshold) -> None:
         """
         Set the low battery threshold as a percentage
@@ -171,3 +181,12 @@ class RazerMouse(__RazerDevice):
         """
         if self.has('battery'):
             self._dbus_interfaces['power'].setLowBatteryThreshold(threshold)
+
+    def get_low_battery_threshold(self) -> int:
+        """
+        Get the low battery threshold as a percentage
+
+        :return: Battery threshold as a percentage
+        """
+        if self.has('battery'):
+            return int(self._dbus_interfaces['power'].getLowBatteryThreshold())

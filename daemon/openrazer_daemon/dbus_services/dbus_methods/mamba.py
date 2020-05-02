@@ -53,6 +53,25 @@ def set_idle_time(self, idle_time):
         driver_file.write(str(idle_time))
 
 
+@endpoint('razer.device.power', 'getIdleTime', out_sig='q')
+def get_idle_time(self):
+    """
+    Get the idle time of the mouse in seconds
+
+    :return: Idle time in seconds (unsigned short)
+    :rtype: int
+    """
+    self.logger.debug("DBus call get_idle_time")
+
+    driver_path = self.get_driver_path('device_idle_time')
+
+    with open(driver_path, 'r') as driver_file:
+        result = driver_file.read()
+        result = int(result.strip())
+
+    return result
+
+
 @endpoint('razer.device.power', 'setLowBatteryThreshold', in_sig='y')
 def set_low_battery_threshold(self, threshold):
     """
@@ -69,6 +88,25 @@ def set_low_battery_threshold(self, threshold):
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(threshold))
+
+
+@endpoint('razer.device.power', 'getLowBatteryThreshold', out_sig='y')
+def get_low_battery_threshold(self):
+    """
+    Get the low battery threshold as a percentage
+
+    :return: Battery threshold as a percentage
+    :rtype: int
+    """
+    self.logger.debug("DBus call get_low_battery_threshold")
+
+    driver_path = self.get_driver_path('charge_low_threshold')
+
+    with open(driver_path, 'r') as driver_file:
+        result = driver_file.read()
+        result = int(result.strip())
+
+    return round((result / 255) * 100)
 
 
 @endpoint('razer.device.lighting.power', 'setChargeEffect', in_sig='y')

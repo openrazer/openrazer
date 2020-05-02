@@ -1282,7 +1282,25 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
 }
 
 /**
- * Write device file "set_idle_time"
+ * Read device file "device_idle_time"
+ *
+ * Gets the time this device will go into powersave as a number of seconds.
+ */
+static ssize_t razer_attr_read_get_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report report = razer_chroma_misc_get_idle_time();
+    struct razer_report response = {0};
+    unsigned short idle_time = 0;
+
+    response = razer_send_payload(device->usb_dev, &report);
+
+    idle_time = (response.arguments[0] << 8) | (response.arguments[1] & 0xFF);
+    return sprintf(buf, "%u\n", idle_time);
+}
+
+/**
+ * Write device file "device_idle_time"
  *
  * Sets the idle time to the ASCII number written to this file.
  */
@@ -1298,7 +1316,21 @@ static ssize_t razer_attr_write_set_idle_time(struct device *dev, struct device_
 }
 
 /**
- * Write device file "set_low_battery_threshold"
+ * Read device file "charge_low_threshold"
+ */
+static ssize_t razer_attr_read_low_battery_threshold(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report report = razer_chroma_misc_get_low_battery_threshold();
+    struct razer_report response = {0};
+
+    response = razer_send_payload(device->usb_dev, &report);
+
+    return sprintf(buf, "%d\n", response.arguments[0]);
+}
+
+/**
+ * Write device file "charge_low_threshold"
  *
  * Sets the low battery blink threshold to the ASCII number written to this file.
  */
@@ -3042,13 +3074,13 @@ static DEVICE_ATTR(dpi,                       0660, razer_attr_read_mouse_dpi,  
 static DEVICE_ATTR(device_type,               0440, razer_attr_read_device_type,           NULL);
 static DEVICE_ATTR(device_mode,               0660, razer_attr_read_device_mode,           razer_attr_write_device_mode);
 static DEVICE_ATTR(device_serial,             0440, razer_attr_read_get_serial,            NULL);
-static DEVICE_ATTR(device_idle_time,          0220, NULL,                                  razer_attr_write_set_idle_time);
+static DEVICE_ATTR(device_idle_time,          0660, razer_attr_read_get_idle_time,         razer_attr_write_set_idle_time);
 
 static DEVICE_ATTR(charge_level,              0440, razer_attr_read_get_battery,           NULL);
 static DEVICE_ATTR(charge_status,             0440, razer_attr_read_is_charging,           NULL);
 static DEVICE_ATTR(charge_effect,             0220, NULL,                                  razer_attr_write_set_charging_effect);
 static DEVICE_ATTR(charge_colour,             0220, NULL,                                  razer_attr_write_set_charging_colour);
-static DEVICE_ATTR(charge_low_threshold,      0220, NULL,                                  razer_attr_write_set_low_battery_threshold);
+static DEVICE_ATTR(charge_low_threshold,      0660, razer_attr_read_low_battery_threshold, razer_attr_write_set_low_battery_threshold);
 
 static DEVICE_ATTR(matrix_brightness,         0660, razer_attr_read_matrix_brightness,     razer_attr_write_matrix_brightness);
 static DEVICE_ATTR(matrix_custom_frame,       0220, NULL,                                  razer_attr_write_set_key_row);
