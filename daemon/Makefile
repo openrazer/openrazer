@@ -12,7 +12,7 @@ install-resources: service
 	@install -m 644 -D -v resources/razer.conf $(DESTDIR)$(PREFIX)/share/openrazer/razer.conf.example
 	@install -m 755 -D -v run_openrazer_daemon.py $(DESTDIR)$(PREFIX)/bin/openrazer-daemon
 
-install-systemd:
+install-systemd: service
 	@install -m 644 -D -v org.razer.service $(DESTDIR)$(PREFIX)/share/dbus-1/services/org.razer.service
 	@install -m 644 -D -v openrazer-daemon.service $(DESTDIR)$(PREFIX)/lib/systemd/user/openrazer-daemon.service
 
