@@ -1,3 +1,9 @@
+openrazer (2.8.0) bionic; urgency=high
+
+  * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v2.8.0
+
+ -- Luca Weiss <luca@z3ntu.xyz>  Sat, 02 May 2020 13:20:33 +0200
+
 openrazer (2.7.0) bionic; urgency=high
 
   * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v2.7.0

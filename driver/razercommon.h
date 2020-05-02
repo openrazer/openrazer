@@ -14,7 +14,7 @@
 
 #include <linux/usb/input.h>
 
-#define DRIVER_VERSION "2.7.0"
+#define DRIVER_VERSION "2.8.0"
 #define DRIVER_LICENSE "GPL v2"
 #define DRIVER_AUTHOR "Terry Cain <terry@terrys-home.co.uk>"
 
