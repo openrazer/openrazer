@@ -90,7 +90,7 @@ def set_default_map(self, profile, mapping):
     self.write_config_file(self.get_config_file_name())
 
 
-@endpoint('razer.device.binding', 'getDefaultMap', in_sig='str', out_sig='s')
+@endpoint('razer.device.binding', 'getDefaultMap', in_sig='s', out_sig='s')
 def get_default_map(self, profile):
     """
     Get the default map for a specific profile
@@ -106,7 +106,7 @@ def get_default_map(self, profile):
     return self.binding_manager._profiles[profile]["default_map"]
 
 
-@endpoint('razer.device.binding', 'getMaps', in_sig='str', out_sig='s')
+@endpoint('razer.device.binding', 'getMaps', in_sig='s', out_sig='s')
 def get_maps(self, profile):
     """
     Get maps
@@ -237,7 +237,7 @@ def add_action(self, profile, map, key_code, action_type, value):
     self.binding_manager.dbus_add_action(profile, map, key_code, action_type, value)
 
 
-@endpoint('razer.device.binding', 'updateAction', in_sig='sssss')
+@endpoint('razer.device.binding', 'updateAction', in_sig='ssssss')
 def update_action(self, profile, map, key_code, action_type, value, action_id):
     """
     Add an action to the given key
@@ -280,7 +280,7 @@ def remove_action(self, profile, map, key_code, action_id):
     :param key_code: The key code
     :type: str
 
-    :param action_id: The action id
+    1:param action_id: The action id
     :type: str
     """
     self.logger.debug("DBus call remove_action")
