@@ -82,6 +82,8 @@
 #define RAZER_VIPER_MOUSE_RECEIVER_WAIT_MIN_US 59900
 #define RAZER_VIPER_MOUSE_RECEIVER_WAIT_MAX_US 60000
 
+#define RAZER_MOUSE_MAX_DPI_STAGES 5
+
 struct razer_mouse_device {
     struct usb_device *usb_dev;
     struct mutex lock;

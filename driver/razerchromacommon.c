@@ -1120,6 +1120,65 @@ struct razer_report razer_chroma_misc_get_dpi_xy_byte(void)
 }
 
 /**
+ * Set DPI stages of the device.
+ *
+ * count is the numer of stages to set.
+ * active_stage selected stage number.
+ * dpi is an array of size 2 * count containing pairs of dpi x and dpi y
+ * values, one pair for each stage.
+ *
+ * E.g.:
+ *   count = 3
+ *   active_stage = 1
+ *   dpi = [ 800, 800, 1800, 1800, 3200, 3200]
+ *         | stage 1*|  stage 2  |  stage 3  |
+ */
+struct razer_report razer_chroma_misc_set_dpi_stages(unsigned char variable_storage, unsigned char count, unsigned char active_stage, const unsigned short *dpi)
+{
+    struct razer_report report = get_razer_report(0x04, 0x06, 0x26);
+    unsigned int offset;
+    unsigned int i;
+
+    report.arguments[0] = variable_storage;
+    report.arguments[1] = active_stage;
+    report.arguments[2] = count;
+
+    offset = 3;
+    for (i = 0; i < count; i++) {
+        // Stage number
+        report.arguments[offset++] = i;
+
+        // DPI X
+        report.arguments[offset++] = (dpi[0] >> 8) & 0x00FF;
+        report.arguments[offset++] = dpi[0] & 0x00FF;
+
+        // DPI Y
+        report.arguments[offset++] = (dpi[1] >> 8) & 0x00FF;
+        report.arguments[offset++] = dpi[1] & 0x00FF;
+
+        // Reserved
+        report.arguments[offset++] = 0;
+        report.arguments[offset++] = 0;
+
+        dpi += 2;
+    }
+
+    return report;
+}
+
+/**
+ * Get the DPI stages of the device
+ */
+struct razer_report razer_chroma_misc_get_dpi_stages(unsigned char variable_storage)
+{
+    struct razer_report report = get_razer_report(0x04, 0x86, 0x26);
+
+    report.arguments[0] = variable_storage;
+
+    return report;
+}
+
+/**
  * Get device idle time
  */
 struct razer_report razer_chroma_misc_get_idle_time(void)

@@ -116,6 +116,9 @@ struct razer_report razer_chroma_misc_get_dpi_xy(unsigned char variable_storage)
 struct razer_report razer_chroma_misc_set_dpi_xy_byte(unsigned char dpi_x,unsigned char dpi_y);
 struct razer_report razer_chroma_misc_get_dpi_xy_byte(void);
 
+struct razer_report razer_chroma_misc_set_dpi_stages(unsigned char variable_storage, unsigned char count, unsigned char active_stage, const unsigned short *dpi);
+struct razer_report razer_chroma_misc_get_dpi_stages(unsigned char variable_storage);
+
 struct razer_report razer_chroma_misc_get_idle_time(void);
 struct razer_report razer_chroma_misc_set_idle_time(unsigned short idle_time);
 
