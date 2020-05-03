@@ -31,7 +31,7 @@ class KeybindingManager(object):
         self._testing = testing
         self._fake_device = UInput(name="{0} (mapped)".format(self._parent.getDeviceName()))
 
-        self._profiles = {"0":DEFAULT_PROFILE}
+        self._profiles = {"0": DEFAULT_PROFILE}
 
         self._current_keys = []
 
@@ -100,6 +100,7 @@ class KeybindingManager(object):
         :rtype: dict
         """
         return self._current_mapping
+
     @current_mapping.setter
     def current_mapping(self, value):
         """
