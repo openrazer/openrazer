@@ -15,16 +15,16 @@ def add_profile(self, profile):
     """
     self.logger.debug("DBus call add_profile")
 
-    self.binding_manager._profiles.update({len(self.binding_manager._profiles): {"name": profile, "default_map": "Default", "Default": {"is_using_matrix": False, "binding": {}}}})
+    self.binding_manager._profiles.update({str(len(self.binding_manager._profiles)): {"name": profile, "default_map": "Default", "Default": {"is_using_matrix": False, "binding": {}}}})
 
 
-@endpoint('razer.device.binding', 'removeProfile', in_sig='y')
+@endpoint('razer.device.binding', 'removeProfile', in_sig='s')
 def remove_profile(self, profile):
     """
     Delete the specified profile
 
     :param profile: The profile number
-    :type: int
+    :type: str
     """
     self.logger.debug("DBus call remove_profile")
 
@@ -58,13 +58,13 @@ def get_active_profile(self):
     return self.binding_manager.current_profile
 
 
-@endpoint('razer.device.binding', 'setActiveProfile', in_sig='y')
+@endpoint('razer.device.binding', 'setActiveProfile', in_sig='s')
 def set_active_profile(self, profile):
     """
     Set the active profile
 
     :param profile: The profile number
-    :type: int
+    :type: str
     """
 
     self.logger.debug("DBus call set_active_profile")
@@ -72,13 +72,13 @@ def set_active_profile(self, profile):
     self.binding_manager.current_profile = profile
 
 
-@endpoint('razer.device.binding', 'setDefaultMap', in_sig='ys')
+@endpoint('razer.device.binding', 'setDefaultMap', in_sig='ss')
 def set_default_map(self, profile, mapping):
     """
     Set the default map
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :param map: The map
     :type: str
@@ -90,13 +90,13 @@ def set_default_map(self, profile, mapping):
     self.write_config_file(self.get_config_file_name())
 
 
-@endpoint('razer.device.binding', 'getDefaultMap', in_sig='y', out_sig='s')
+@endpoint('razer.device.binding', 'getDefaultMap', in_sig='str', out_sig='s')
 def get_default_map(self, profile):
     """
     Get the default map for a specific profile
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :return: The default map
     :rtype: str
@@ -106,13 +106,13 @@ def get_default_map(self, profile):
     return self.binding_manager._profiles[profile]["default_map"]
 
 
-@endpoint('razer.device.binding', 'getMaps', in_sig='y', out_sig='s')
+@endpoint('razer.device.binding', 'getMaps', in_sig='str', out_sig='s')
 def get_maps(self, profile):
     """
     Get maps
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :return: JSON of maps
     :rtype: str
@@ -123,13 +123,13 @@ def get_maps(self, profile):
     return self.binding_manager.dbus_get_maps(profile)
 
 
-@endpoint('razer.device.binding', 'getMap', in_sig='ys', out_sig='s')
+@endpoint('razer.device.binding', 'getMap', in_sig='ss', out_sig='s')
 def get_map(self, profile, map):
     """
     Get map
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :param map: The map name
     :type: str
@@ -177,7 +177,7 @@ def get_actions(self, profile, map, key_code):
     Get profiles
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :param map: The map number
     :type: str
@@ -193,13 +193,13 @@ def get_actions(self, profile, map, key_code):
     return json.dumps(self.binding_manager._profiles[profile][map]["binding"][key_code])
 
 
-@endpoint('razer.device.binding', 'addMap', in_sig='ys')
+@endpoint('razer.device.binding', 'addMap', in_sig='ss')
 def add_map(self, profile, map):
     """
     Add a map
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :param map: The map name
     :type: str
@@ -212,13 +212,13 @@ def add_map(self, profile, map):
     self.write_config_file(self.get_config_file_name())
 
 
-@endpoint('razer.device.binding', 'addAction', in_sig='yssss')
+@endpoint('razer.device.binding', 'addAction', in_sig='sssss')
 def add_action(self, profile, map, key_code, action_type, value):
     """
     Add an action to the given key
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :param map: The map number
     :type: str
@@ -237,13 +237,13 @@ def add_action(self, profile, map, key_code, action_type, value):
     self.binding_manager.dbus_add_action(profile, map, key_code, action_type, value)
 
 
-@endpoint('razer.device.binding', 'updateAction', in_sig='ysssss')
+@endpoint('razer.device.binding', 'updateAction', in_sig='sssss')
 def update_action(self, profile, map, key_code, action_type, value, action_id):
     """
     Add an action to the given key
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :param map: The map number
     :type: str
@@ -266,13 +266,13 @@ def update_action(self, profile, map, key_code, action_type, value, action_id):
         profile, map, key_code, action_type, value, action_id)
 
 
-@endpoint('razer.device.binding', 'removeAction', in_sig='ysss')
+@endpoint('razer.device.binding', 'removeAction', in_sig='ssss')
 def remove_action(self, profile, map, key_code, action_id):
     """
     Remove the specified action
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :param map: The map number
     :type: str
@@ -288,13 +288,13 @@ def remove_action(self, profile, map, key_code, action_id):
     self.binding_manager.dbus_remove_action(profile, map, key_code, action_id)
 
 
-@endpoint('razer.device.binding', 'clearActions', in_sig='yss')
+@endpoint('razer.device.binding', 'clearActions', in_sig='sss')
 def clear_actions(self, profile, map, key_code):
     """
     Clear all actions for a given key
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :param map: The map name
     :type: str
@@ -310,13 +310,13 @@ def clear_actions(self, profile, map, key_code):
     self.write_config_file(self.get_config_file_name())
 
 
-@endpoint('razer.device.binding.lighting', 'getProfileLEDs', in_sig='ys', out_sig='bbb')
+@endpoint('razer.device.binding.lighting', 'getProfileLEDs', in_sig='ss', out_sig='bbb')
 def get_profile_leds(self, profile, map):
     """
     Get the state of the profile LEDs
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :param map: The map name
     :type: str
@@ -337,13 +337,13 @@ def get_profile_leds(self, profile, map):
     return map["red_led"], map["green_led"], map["blue_led"]
 
 
-@endpoint('razer.device.binding.lighting', 'setProfileLEDs', in_sig='ysbbb')
+@endpoint('razer.device.binding.lighting', 'setProfileLEDs', in_sig='ssbbb')
 def set_profile_leds(self, profile, map, red, green, blue):
     """
     Set the profile LED state
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :param map: The map name
     :type: str
@@ -366,13 +366,13 @@ def set_profile_leds(self, profile, map, red, green, blue):
     self.write_config_file(self.get_config_file_name())
 
 
-@endpoint('razer.device.binding.lighting', 'getMatrix', in_sig='ys', out_sig='s')
+@endpoint('razer.device.binding.lighting', 'getMatrix', in_sig='ss', out_sig='s')
 def get_matrix(self, profile, map):
     """
     Get the led matrix of the specified map
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :param map: The map name
     :type: str
@@ -386,13 +386,13 @@ def get_matrix(self, profile, map):
     return json.dumps(self.key_manager._profiles[profile][map]["matrix"])
 
 
-@endpoint('razer.device.binding.lighting', 'setMatrix', in_sig='yss')
+@endpoint('razer.device.binding.lighting', 'setMatrix', in_sig='sss')
 def set_matrix(self, profile, map, matrix):
     """
     Set the led matrix
 
     :param profile: The profile number
-    :type: int
+    :type: str
 
     :param map: The map name
     :type: str
