@@ -184,7 +184,7 @@ ORBWEAVER_EVENT_MAPPING = {
     45: '18',
     46: '19',
     47: '20',
-    29: 'MODE_SWITCH',
+    56: 'MODE_SWITCH',
     57: 'THUMB',
     103: 'UP',
     105: 'LEFT',

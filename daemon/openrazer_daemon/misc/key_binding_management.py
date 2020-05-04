@@ -263,7 +263,7 @@ class KeybindingManager(object):
         :param action_id: The ID of the action to edit (if unset adds a new action)
         :type: str
         """
-        if not self._profiles[profile][map]["binding"][key_code]:
+        if key_code not in self._profiles[profile][map]["binding"]:
             self._profiles[profile][map]["binding"].update({key_code: {}})
 
         key = self._profiles[profile][map]["binding"][key_code]
