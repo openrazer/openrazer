@@ -18,6 +18,7 @@ class Binding(object):
         self._dbus = daemon_dbus
 
         self._binding_dbus = _dbus.Interface(self._dbus, "razer.device.binding")
+        self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.binding.lighting")
 
     def has(self, capability: str) -> bool:
         """
@@ -199,7 +200,7 @@ class Binding(object):
         if not isinstance(mapping, str):
             raise ValueError("mapping must be a string")
 
-        return self._binding_dbus.getProfileLEDs(profile, mapping)
+        return self._lighting_dbus.getProfileLEDs(profile, mapping)
 
     def set_profile_leds(self, profile: str, mapping: str, red: bool, green: bool, blue: bool):
         """
@@ -234,7 +235,7 @@ class Binding(object):
         if not isinstance(blue, bool):
             raise ValueError("blue must be a bool")
 
-        self._binding_dbus.setProfileLEDs(profile, mapping, red, green, blue)
+        self._lighting_dbus.setProfileLEDs(profile, mapping, red, green, blue)
 
     def get_matrix(self, profile: str, mapping: str):
         """
@@ -257,8 +258,8 @@ class Binding(object):
         if not isinstance(mapping, str):
             raise ValueError("mapping must be a string")
 
-        return json.loads(self._binding_dbus.getMatrix(profile, mapping))
-        
+        return json.loads(self._lighting_dbus.getMatrix(profile, mapping))
+
     def set_matrix(self, profile: str, mapping: str, matrix: dict):
         """
         Set the custom matrix for the given map
@@ -282,4 +283,4 @@ class Binding(object):
         if not isinstance(matrix, dict):
             raise ValueError("matrix must be a dictionary")
 
-        self._binding_dbus.setMatrix(profile, mapping, json.dumps(matrix))
+        self._lighting_dbus.setMatrix(profile, mapping, json.dumps(matrix))
