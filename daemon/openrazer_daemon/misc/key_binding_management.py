@@ -263,10 +263,7 @@ class KeybindingManager(object):
         :param action_id: The ID of the action to edit (if unset adds a new action)
         :type: str
         """
-        if key_code not in self._profiles[profile][map]["binding"]:
-            self._profiles[profile][map]["binding"].update({key_code: {}})
-
-        key = self._profiles[profile][map]["binding"][key_code]
+        key = self._profiles[profile][map]["binding"].setdefault(key_code, {})
 
         if action_id == None:
             action_id = len(key)
@@ -295,12 +292,16 @@ class KeybindingManager(object):
         binding.pop(action_id)
 
         actions = 0
-        for action in binding:  # Reorder the actions to avoid overwrites
+        for action in list(binding):  # Reorder the actions to avoid overwrites
             action = binding[action]
             binding.update({str(actions): action})
             actions += 1
 
-        binding.update(dict(OrderedDict(sorted(binding.items(), key=lambda t: t[0]))))  # Sort
+        if str(actions) in binding:
+            binding.pop(str(actions))
+
+        if len(binding) >= 2:
+            self._profiles[profile][map]["binding"][key_code] = dict(OrderedDict(sorted(binding.items(), key=lambda t: t[0])))  # Sort
 
         self.write_config_file(self.get_config_file_name())
 
