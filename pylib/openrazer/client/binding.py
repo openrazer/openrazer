@@ -169,3 +169,117 @@ class Binding(object):
             raise ValueError("key_code must be an integer")
 
         self._binding_dbus.clearActions(profile, mapping, str(key_code))
+
+    ### Lighting Methods ###
+
+    def get_profile_leds(self, profile: str, mapping: str):
+        """
+        Returns the setting for the profile LEDs of a given map
+
+        :param profile: The profile number
+        :type: str
+
+        :param mapping: The map name
+        :type: str
+
+        :return: The state for the red profile LED
+        :type: bool
+
+        :return: The state for the green profile LED
+        :type: bool
+        
+        :return: The state for the blue profile LED
+        :type: bool
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        if not isinstance(profile, str):
+            raise ValueError("profile must be a string")
+        if not isinstance(mapping, str):
+            raise ValueError("mapping must be a string")
+
+        return self._binding_dbus.getProfileLEDs(profile, mapping)
+
+    def set_profile_leds(self, profile: str, mapping: str, red: bool, green: bool, blue: bool):
+        """
+        Set the setting for the profile LEDs of a given map
+
+        :param profile: The profile number
+        :type: str
+        
+        :param mapping: The map name
+        :type: str
+
+        :param red: The red profile LED state
+        :type: bool
+
+        :param green: The green profile LED state
+        :type: bool
+
+        :param blue: The blue profile LED state
+        :type: bool
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        if not isinstance(profile, str):
+            raise ValueError("profile must be a string")
+        if not isinstance(mapping, str):
+            raise ValueError("mapping must be a string")
+        if not isinstance(red, bool):
+            raise ValueError("red must be a bool")
+        if not isinstance(green, bool):
+            raise ValueError("green must be a bool")
+        if not isinstance(blue, bool):
+            raise ValueError("blue must be a bool")
+
+        self._binding_dbus.setProfileLEDs(profile, mapping, red, green, blue)
+
+    def get_matrix(self, profile: str, mapping: str):
+        """
+        Returns a dict of the custom matrix for the given map
+
+        :param profile: The profile number
+        :type: str
+
+        :param mapping: The map name
+        :type: str
+
+        :returns: A dict of the custom matrix
+        :rtype: dict
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        if not isinstance(profile, str):
+            raise ValueError("profile must be a string")
+        if not isinstance(mapping, str):
+            raise ValueError("mapping must be a string")
+
+        return json.loads(self._binding_dbus.getMatrix(profile, mapping))
+        
+    def set_matrix(self, profile: str, mapping: str, matrix: dict):
+        """
+        Set the custom matrix for the given map
+
+        :param profile: The profile number
+        :type: str
+
+        :param mapping: The map name
+        :type: str
+
+        :param matrix: The matrix, can be output by Frame.to_dict()
+        :type: dict
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        if not isinstance(profile, str):
+            raise ValueError("profile must be a string")
+        if not isinstance(mapping, str):
+            raise ValueError("mapping must be a string")
+        if not isinstance(matrix, dict):
+            raise ValueError("matrix must be a dictionary")
+
+        self._binding_dbus.setMatrix(profile, mapping, json.dumps(matrix))
