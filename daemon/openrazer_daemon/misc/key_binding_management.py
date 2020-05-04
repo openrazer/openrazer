@@ -36,6 +36,7 @@ class KeybindingManager(object):
         self._current_keys = []
         self._old_mapping_name = None
         self._current_mapping_name = None
+        self._shift_modifier = None
 
         self._rows, self._cols = self._parent.MATRIX_DIMS
         self._keyboard_grid = KeyboardColour(self._rows, self._cols)
@@ -74,7 +75,11 @@ class KeybindingManager(object):
 
         current_binding = self.current_mapping["binding"]
         if key_press == 'release' and key_code not in current_binding:  # Key released, but not bound
-            self.__key_up(key_code)
+            if key_code == self._shift_modifier: # Key is map shifted
+                self.current_mapping = self._old_mapping_name
+                self._shift_modifier = None
+            else:
+                self.__key_up(key_code)
 
         elif key_code not in current_binding:  # Ordinary key pressed
             self.__key_down(key_code)
@@ -91,13 +96,11 @@ class KeybindingManager(object):
 
                     elif action["type"] == "shift":
                         self.current_mapping = action["value"]
+                        self._shift_modifier = key_code # Set map shift key
 
                 elif key_press == 'release':
                     if action["type"] == "key":  # Key released
                         self.__key_up(action["value"])
-
-                    elif action["type"] == "shift":
-                        self.current_mapping = self._old_mapping_name
 
     @property
     def current_mapping(self):
