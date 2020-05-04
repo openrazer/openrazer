@@ -34,6 +34,8 @@ class KeybindingManager(object):
         self._profiles = {"0": DEFAULT_PROFILE}
 
         self._current_keys = []
+        self._old_mapping_name = None
+        self._current_mapping_name = None
 
         self._rows, self._cols = self._parent.MATRIX_DIMS
         self._keyboard_grid = KeyboardColour(self._rows, self._cols)
@@ -87,8 +89,15 @@ class KeybindingManager(object):
                     elif action["type"] == "map":
                         self.current_mapping = action["value"]
 
-                elif action["type"] == "key":  # Key released
-                    self.__key_up(action["value"])
+                    elif action["type"] == "shift":
+                        self.current_mapping = action["value"]
+
+                elif key_press == 'release':
+                    if action["type"] == "key":  # Key released
+                        self.__key_up(action["value"])
+
+                    elif action["type"] == "shift":
+                        self.current_mapping = self._old_mapping_name
 
     @property
     def current_mapping(self):
@@ -112,6 +121,8 @@ class KeybindingManager(object):
         """
         self._logger.debug("Change mapping to {0}".format(value))
         self._current_mapping = self._current_profile[value]
+        self._old_mapping_name = self._current_mapping_name
+        self._current_mapping_name = value
 
         if self._current_mapping["is_using_matrix"]:
             current_matrix = self._current_mapping["matrix"]
