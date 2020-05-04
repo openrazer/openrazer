@@ -75,7 +75,7 @@ class KeybindingManager(object):
 
         current_binding = self.current_mapping["binding"]
         if key_press == 'release' and key_code not in current_binding:  # Key released, but not bound
-            if key_code == self._shift_modifier: # Key is map shifted
+            if key_code == self._shift_modifier:  # Key is map shifted
                 self.current_mapping = self._old_mapping_name
                 self._shift_modifier = None
             else:
@@ -96,7 +96,7 @@ class KeybindingManager(object):
 
                     elif action["type"] == "shift":
                         self.current_mapping = action["value"]
-                        self._shift_modifier = key_code # Set map shift key
+                        self._shift_modifier = key_code  # Set map shift key
 
                 elif key_press == 'release':
                     if action["type"] == "key":  # Key released

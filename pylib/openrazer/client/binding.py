@@ -188,7 +188,7 @@ class Binding(object):
 
         :return: The state for the green profile LED
         :type: bool
-        
+
         :return: The state for the blue profile LED
         :type: bool
 
@@ -208,7 +208,7 @@ class Binding(object):
 
         :param profile: The profile number
         :type: str
-        
+
         :param mapping: The map name
         :type: str
 
