@@ -50,3 +50,38 @@ class Binding(object):
         """
 
         self._binding_dbus.addAction(profile, mapping, str(key_code), "key", str(value))
+
+    def remove_action(self, profile: str, mapping: str, key_code: int, action_id: int):
+        """
+        Remove the specified action
+
+        :param profile: The profile number
+        :type: str
+
+        :param mapping: The map name
+        :type: str
+
+        :param key_code: The key code
+        :type: int
+
+        :param action_id: The action id
+        :type: int
+        """
+
+        self._binding_dbus.removeAction(profile, mapping, str(key_code), str(action_id))
+
+    def clear_actions(self, profile: str, mapping: str, key_code: int):
+        """
+        Clear all actions for the given key
+
+        :param profile: The profile number
+        :type: str
+
+        :param mapping: The map name
+        :type: str
+
+        :param key_code: The key code to clear
+        :type: int
+        """
+
+        self._binding_dbus.clearActions(profile, mapping, str(key_code))

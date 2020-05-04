@@ -87,7 +87,7 @@ def set_default_map(self, profile, mapping):
 
     self.binding_manager._profiles[profile]["default_map"] = mapping
 
-    self.write_config_file(self.get_config_file_name())
+    self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
 
 
 @endpoint('razer.device.binding', 'getDefaultMap', in_sig='s', out_sig='s')
@@ -209,7 +209,7 @@ def add_map(self, profile, map):
 
     self.binding_manager._profiles[profile].update({map: {"is_using_matrix": False, "binding": {}}})
 
-    self.write_config_file(self.get_config_file_name())
+    self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
 
 
 @endpoint('razer.device.binding', 'addAction', in_sig='sssss')
@@ -280,7 +280,7 @@ def remove_action(self, profile, map, key_code, action_id):
     :param key_code: The key code
     :type: str
 
-    1:param action_id: The action id
+    :param action_id: The action id
     :type: str
     """
     self.logger.debug("DBus call remove_action")
@@ -307,7 +307,7 @@ def clear_actions(self, profile, map, key_code):
 
     self.binding_manager._profiles[profile][map]["binding"].pop(key_code)
 
-    self.write_config_file(self.get_config_file_name())
+    self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
 
 
 @endpoint('razer.device.binding.lighting', 'getProfileLEDs', in_sig='ss', out_sig='bbb')
@@ -363,7 +363,7 @@ def set_profile_leds(self, profile, map, red, green, blue):
     self.binding_manager._profiles[profile][map].update(
         {'red_led': red, 'green_led': green, 'blue_led': blue})
 
-    self.write_config_file(self.get_config_file_name())
+    self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
 
 
 @endpoint('razer.device.binding.lighting', 'getMatrix', in_sig='ss', out_sig='s')
