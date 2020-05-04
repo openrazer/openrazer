@@ -5,6 +5,8 @@ Client binding controls
 import dbus as _dbus
 import json
 
+action_types = ["key", "map", "shift"]
+
 
 class Binding(object):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None):
@@ -29,6 +31,10 @@ class Binding(object):
         :rtype: bool
         """
         return self._capabilities.get('binding_' + capability, False)
+
+    ### Map Methods ###
+
+    ### Action Methods ###
 
     def get_actions(self, profile: str, mapping: str, key_code: int) -> dict:
         """
@@ -57,9 +63,9 @@ class Binding(object):
 
         return json.loads(self._binding_dbus.getActions(profile, mapping, str(key_code)))
 
-    def add_key_action(self, profile: str, mapping: str, key_code: int, value: int) -> bool:
+    def add_action(self, profile: str, mapping: str, key_code: int, action_type: str, value: str):
         """
-        Add an key press action to the given key
+        Add an action to the given key
 
         :param profile: The profile number
         :type: str
@@ -70,11 +76,11 @@ class Binding(object):
         :param key_code: The key code
         :type: int
 
-        :param value: The key to press
-        :type: int
+        :param action_type: The type of action
+        :type: str, must be one of the following: "key", "map", "shift"
 
-        :return: True if success, False otherwise
-        :rtype: bool
+        :param value: The action value
+        :type: str
 
         :raises ValueError: If parameters are invalid
         """
@@ -84,10 +90,12 @@ class Binding(object):
             raise ValueError("mapping must be a string")
         if not isinstance(key_code, int):
             raise ValueError("key_code must be an integer")
-        if not isinstance(value, int):
-            raise ValueError("value must be an integer")
+        if action_type not in action_types:
+            raise ValueError("action_type must be on of the following values: {0}".format(action_types))
+        if not isinstance(value, str):
+            raise ValueError("value must be an string")
 
-        self._binding_dbus.addAction(profile, mapping, str(key_code), "key", str(value))
+        self._binding_dbus.addAction(profile, mapping, str(key_code), action_type, value)
 
     def remove_action(self, profile: str, mapping: str, key_code: int, action_id: int):
         """
