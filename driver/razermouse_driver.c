@@ -3185,6 +3185,12 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
             case 0x23: // Wheel Right
                 cur_value = 0x6B; // F16
                 break;
+            case 0x50: // Cycle Up Profile
+                cur_value = 0x6D; // F18
+                break;
+            case 0x51: // Sensitivity Clutch
+                cur_value = 0x6E; // F19
+                break;
             }
 
             data[index+1] = cur_value;
