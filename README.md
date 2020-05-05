@@ -125,6 +125,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer DeathAdder V2 Pro (Wireless)            |  1532:007D  |
 | Razer Basilisk X HyperSpeed                   |  1532:0083  |
 | Razer DeathAdder V2                           |  1532:0084  |
+| Razer Basilisk V2                             |  1532:0085  |
 | Razer Viper Mini                              |  1532:008A  |
 | Razer DeathAdder V2 Mini                      |  1532:008C  |
 | Razer Naga Left-Handed Edition                |  1532:008D  |

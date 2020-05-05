@@ -63,6 +63,7 @@
 #define USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS 0x007D
 #define USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED 0x0083
 #define USB_DEVICE_ID_RAZER_DEATHADDER_V2 0x0084
+#define USB_DEVICE_ID_RAZER_BASILISK_V2 0x0085
 #define USB_DEVICE_ID_RAZER_VIPER_MINI 0x008A
 #define USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI 0x008C
 #define USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020 0x008D
@@ -91,6 +92,16 @@
 struct razer_mouse_device {
     struct usb_device *usb_dev;
     struct mutex lock;
+
+    struct input_dev *input;
+    struct hrtimer repeat_timer;
+    unsigned int tilt_hwheel;
+    unsigned int tilt_repeat_delay;
+    unsigned int tilt_repeat;
+    __s32 hwheel_value;
+    u8 button_byte; // Previous value of mouse button byte in HID record
+    u8 rep4[16]; // Previous value of report 4 on the keyboard intf
+
     unsigned char usb_interface_protocol;
     unsigned char usb_interface_subclass;
 

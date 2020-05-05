@@ -71,6 +71,9 @@ declare -A files_metadata=(
     ["scroll_matrix_effect_spectrum"]="w;"
     ["scroll_matrix_effect_static"]="w;"
     ["scroll_matrix_effect_wave"]="w;"
+    ["tilt_hwheel"]="rw;0"
+    ["tilt_repeat"]="rw;0"
+    ["tilt_repeat_delay"]="rw;0"
     ["version"]="r;1.0.0"
 )
 
