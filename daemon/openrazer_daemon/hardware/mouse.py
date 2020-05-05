@@ -2101,8 +2101,9 @@ class RazerBasiliskXHyperSpeed(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x0083
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
-               'get_poll_rate', 'set_poll_rate', 'get_battery', 'is_charging',
-               'get_idle_time', 'set_idle_time', 'get_low_battery_threshold',
+               'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate',
+               'set_poll_rate', 'get_battery', 'is_charging', 'get_idle_time',
+               'set_idle_time', 'get_low_battery_threshold',
                'set_low_battery_threshold']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1589/1589_basilisk_x__hyperspeed.png"
