@@ -285,7 +285,9 @@ def remove_action(self, profile, map, key_code, action_id):
     """
     self.logger.debug("DBus call remove_action")
 
-    self.binding_manager.dbus_remove_action(profile, map, key_code, action_id)
+    del self.binding_manager._profiles[profile][map]["binding"][key_code][action_id]
+
+    self.binding_manager.write_config_file(self.get_config_file_name())
 
 
 @endpoint('razer.device.binding', 'clearActions', in_sig='sss')

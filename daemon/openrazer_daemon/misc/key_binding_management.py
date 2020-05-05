@@ -86,7 +86,6 @@ class KeybindingManager(object):
 
         else:  # Key bound
             for action in current_binding[key_code]:
-                action = current_binding[key_code][action]
                 if key_press != 'release':  # Key pressed (or autorepeat)
                     if action["type"] == "key":
                         self.__key_down(action["value"])
@@ -207,7 +206,7 @@ class KeybindingManager(object):
 
         home = os.path.expanduser("~")
         config_path = os.path.join(home, ".config/openrazer/")
-        return config_path + "keybinding_" + self._serial_number + ".conf"
+        return config_path + "keybinding_" + self._serial_number + ".json"
 
     def close(self):
         try:
@@ -277,45 +276,13 @@ class KeybindingManager(object):
         :param action_id: The ID of the action to edit (if unset adds a new action)
         :type: str
         """
-        key = self._profiles[profile][map]["binding"].setdefault(key_code, {})
+        key = self._profiles[profile][map]["binding"].setdefault(key_code, [])
 
-        if action_id == None:
-            action_id = len(key)
+        if action_id != None:
+            key[action_id] = {"type": action_type, "value": value}
 
-        key.update({str(action_id): {"type": action_type, "value": value}})
-
-        self.write_config_file(self.get_config_file_name())
-
-    def dbus_remove_action(self, profile, map, key_code, action_id):
-        """
-        Removes an action from the given key
-
-        :param profile: The profile number
-        :type: int
-
-        :param map: The map name
-        :type: str
-
-        :param key_code: The key code
-        :type: str
-
-        :param action_id: The id of the action
-        :type: str
-        """
-        binding = self._profiles[profile][map]["binding"][key_code]
-        binding.pop(action_id)
-
-        actions = 0
-        for action in list(binding):  # Reorder the actions to avoid overwrites
-            action = binding[action]
-            binding.update({str(actions): action})
-            actions += 1
-
-        if str(actions) in binding:
-            binding.pop(str(actions))
-
-        if len(binding) >= 2:
-            self._profiles[profile][map]["binding"][key_code] = dict(OrderedDict(sorted(binding.items(), key=lambda t: t[0])))  # Sort
+        else:
+            key.append({"type": action_type, "value": value})
 
         self.write_config_file(self.get_config_file_name())
 
