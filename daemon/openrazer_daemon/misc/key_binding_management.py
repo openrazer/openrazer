@@ -97,6 +97,9 @@ class KeybindingManager(object):
                         self.current_mapping = action["value"]
                         self._shift_modifier = key_code  # Set map shift key
 
+                    elif action["type"] == "sleep":
+                        time.sleep(action["value"])
+
                 elif key_press == 'release':
                     if action["type"] == "key":  # Key released
                         self.__key_up(action["value"])
