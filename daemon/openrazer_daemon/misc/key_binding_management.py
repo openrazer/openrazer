@@ -97,7 +97,7 @@ class KeybindingManager(object):
                     elif action["type"] == "shift":
                         self.current_mapping = action["value"]
                         self._shift_modifier = key_code  # Set map shift key
-                    
+
                     elif action["type"] == "execute":
                         subprocess.run(["/bin/sh", "-c", str(action["value"])])
 

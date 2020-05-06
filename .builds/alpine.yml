@@ -3,16 +3,21 @@ packages:
   - astyle
   - dbus-x11
   - gtk+3.0
+  - libevdev-dev
+  - libinput-dev
+  - linux-headers
   - linux-lts-dev
   - py3-autopep8
   - py3-daemonize
   - py3-dbus
   - py3-gobject3
   - py3-numpy
+  - py3-pip
   - py3-pylint
   - py3-setproctitle
   - py3-udev
   - sed
+  - python3-dev
 sources:
   - https://github.com/openrazer/openrazer
 tasks:
@@ -25,7 +30,7 @@ tasks:
 
   - check-misc: |
       cd openrazer
-
+      pip install evdev
       # Check with pylint for errors
       ./scripts/ci/check-pylint.sh
       # Check for duplicate fake driver serials
