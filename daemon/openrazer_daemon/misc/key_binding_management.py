@@ -10,6 +10,7 @@ import random
 import struct
 import time
 import sys
+import subprocess
 from collections import OrderedDict
 from openrazer_daemon.keyboard import KeyboardColour
 
@@ -96,6 +97,9 @@ class KeybindingManager(object):
                     elif action["type"] == "shift":
                         self.current_mapping = action["value"]
                         self._shift_modifier = key_code  # Set map shift key
+                    
+                    elif action["type"] == "execute":
+                        subprocess.run(["/bin/sh", "-c", str(action["value"])])
 
                     elif action["type"] == "sleep":
                         time.sleep(int(action["value"]))
