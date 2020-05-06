@@ -123,26 +123,6 @@ def get_maps(self, profile):
     return self.binding_manager.dbus_get_maps(profile)
 
 
-@endpoint('razer.device.binding', 'getMap', in_sig='ss', out_sig='s')
-def get_map(self, profile, map):
-    """
-    Get map
-
-    :param profile: The profile number
-    :type: str
-
-    :param map: The map name
-    :type: str
-
-    :return: JSON of maps
-    :rtype: str
-    """
-
-    self.logger.debug("DBus call get_map")
-
-    return json.dumps(self.binding_manager._profiles[profile][map])
-
-
 @endpoint('razer.device.binding', 'getActiveMap', out_sig='s')
 def get_active_map(self):
     """
