@@ -50,7 +50,6 @@ driver_uninstall:
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razerkbd.ko
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razermouse.ko
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razerfirefly.ko
-	@rm -fv $(DESTDIR)/$(MODULEDIR)/razercore.ko
 
 # Razer Daemon
 daemon_install:
