@@ -146,7 +146,7 @@ class RazerDevice(object):
             'binding_set_default_map': self._has_feature('razer.device.binding', 'setDefaultMap'),
 
             'binding_get_maps': self._has_feature('razer.device.binding', 'getMaps'),
-            'binding_get_map': self._has_feature('razer.device.binding', 'getMap'),
+            'binding_copy_map': self._has_feature('razer.device.binding', 'copyMap'),
             'binding_set_active_map': self._has_feature('razer.device.binding', 'setActiveMap'),
             'binding_get_active_map': self._has_feature('razer.device.binding', 'getActiveMap'),
             'binding_add_map': self._has_feature('razer.device.binding', 'addMap'),

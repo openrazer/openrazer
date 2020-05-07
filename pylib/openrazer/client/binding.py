@@ -55,6 +55,36 @@ class Binding(object):
 
         self._binding_dbus.addMap(profile, map_name)
 
+    def copy_map(self, profile: str, mapping: str, dest_profile: str, map_name: str):
+        """
+        Copy a mapping to the given profile
+
+        :param profile: The profile number
+        :type: str
+
+        :param mapping: The map to copy
+        :type: str
+
+        :dest_profile: The destination profile number
+        :type: str
+
+        :param map_name: The name of the new map
+        :type: str
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        if not isinstance(profile, str):
+            raise ValueError("profile must be a string")
+        if not isinstance(mapping, str):
+            raise ValueError("mapping must be a string")
+        if not isinstance(dest_profile, str):
+            raise ValueError("dest_profile must be a string")
+        if not isinstance(map_name, str):
+            raise ValueError("map_name must be a string")
+
+        self._binding_dbus.copyMap(profile, mapping, dest_profile, map_name)
+
     ### Action Methods ###
 
     def get_actions(self, profile: str, mapping: str, key_code: int) -> dict:

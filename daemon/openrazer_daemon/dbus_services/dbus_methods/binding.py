@@ -123,6 +123,29 @@ def get_maps(self, profile):
     return self.binding_manager.dbus_get_maps(profile)
 
 
+@endpoint('razer.device.binding', 'copyMap', in_sig='ssss')
+def copy_map(self, profile, mapping, dest_profile, map_name):
+    """
+    Copy a mapping to the specified destination profile with the specified name
+
+    :param profile: The profile to copy the mapping from
+    :type: str
+
+    :param mapping: The map to copy
+    :type: str
+
+    :param dest_profile: The destination profile
+    :type: str
+
+    :param map_name: The name to give the new mapping
+    :type: str
+    """
+
+    self.logger.debug("DBus call copy_map")
+
+    self.binding_manager._profiles[dest_profile].update({map_name: dict(self.binding_manager._profiles[profile][mapping])})
+
+
 @endpoint('razer.device.binding', 'getActiveMap', out_sig='s')
 def get_active_map(self):
     """
