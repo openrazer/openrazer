@@ -201,6 +201,24 @@ class Binding(object):
 
         self._binding_dbus.setActiveMap(mapping)
 
+    def get_maps(self, profile: str) -> list:
+        """
+        Returns a list of maps foe the given profile
+
+        :param profile: The profile number
+        :type: str
+
+        :returns: A list of maps
+        :rtype: list
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        if not isinstance(profile, str):
+            raise ValueError("profile must be a string")
+
+        return json.loads(self._binding_dbus.getMaps(profile))
+
     ### Action Methods ###
 
     def get_actions(self, profile: str, mapping: str, key_code: int) -> dict:
