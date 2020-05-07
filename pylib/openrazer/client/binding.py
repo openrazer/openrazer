@@ -69,6 +69,61 @@ class Binding(object):
 
         return json.loads(self._binding_dbus.getProfiles())
 
+    def get_active_profile(self) -> str:
+        """
+        Return the active profile
+
+        :return: The active profile name
+        :rtype: str
+        """
+
+        return self._binding_dbus.getActiveProfile()
+
+    def set_active_profile(self, profile: str):
+        """
+        Set the active profile
+
+        :param profile: The profile number
+        :type: str
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        if not isinstance(profile, str):
+            raise ValueError("profile must be a string")
+
+        self._binding_dbus.setActiveProfile(profile)
+
+    def get_default_map(self) -> str:
+        """
+        Get the name of the default map
+
+        :return: The name of the default map
+        :rtype: str
+        """
+
+        return self._binding_dbus.getDefaultMap()
+
+    def set_default_map(self, profile: str, mapping: str):
+        """
+        Set the default map
+
+        :param profile: The profile number
+        :type: str
+
+        :param mapping: The map name
+        :type: str
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        if not isinstance(profile, str):
+            raise ValueError("profile must be a string")
+        if not isinstance(mapping, str):
+            raise ValueError("mapping must be a string")
+
+        self._binding_dbus.setDefaultMap(profile, mapping)
+
     ### Map Methods ###
 
     def add_map(self, profile: str, map_name: str):

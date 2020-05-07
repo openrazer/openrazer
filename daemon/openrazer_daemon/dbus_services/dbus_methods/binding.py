@@ -59,7 +59,7 @@ def get_active_profile(self):
 
     self.logger.debug("DBus call get_active_profile")
 
-    return self.binding_manager.current_profile
+    return self.binding_manager._current_profile_name
 
 
 @endpoint('razer.device.binding', 'setActiveProfile', in_sig='s')
