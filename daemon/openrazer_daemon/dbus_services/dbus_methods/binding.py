@@ -157,13 +157,13 @@ def get_active_map(self):
 
     self.logger.debug("DBus call get_active_map")
 
-    return self.binding_manager.current_mapping
+    return self.binding_manager._current_mapping_name
 
 
 @endpoint('razer.device.binding', 'setActiveMap', in_sig='s')
 def set_active_map(self, map):
     """
-    Set the active map
+    Set the active map within the active profile
 
     :param map: The map name
     :type: str

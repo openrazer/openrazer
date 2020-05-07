@@ -85,6 +85,31 @@ class Binding(object):
 
         self._binding_dbus.copyMap(profile, mapping, dest_profile, map_name)
 
+    def get_active_map(self) -> str:
+        """
+        Returns the active map
+
+        :return: The active map name
+        :rtype: str
+        """
+
+        return str(self._binding_dbus.getActiveMap())
+
+    def set_active_map(self, mapping: str):
+        """
+        Sets the active map with in the active profile
+
+        :param mapping: The map name
+        :type: str
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        if not isinstance(mapping, str):
+            raise ValueError("mapping must be a string")
+
+        self._binding_dbus.setActiveMap(mapping)
+
     ### Action Methods ###
 
     def get_actions(self, profile: str, mapping: str, key_code: int) -> dict:
