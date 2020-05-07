@@ -33,6 +33,42 @@ class Binding(object):
         """
         return self._capabilities.get('binding_' + capability, False)
 
+    ### Profile Methods ###
+
+    def add_profile(self, profile_name: str):
+        """
+        Add a profile
+
+        :param profile_name: Name of the new profile
+        :type: str
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        self._binding_dbus.addProfile(profile_name)
+
+    def remove_profile(self, profile: str):
+        """
+        Remove a profile
+
+        :param profile: The profile number
+        :type: str
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        self._binding_dbus.removeProfile(profile)
+
+    def get_profiles(self) -> list:
+        """
+        Returns a list of the profiles
+
+        :return: A list of profiles
+        :rtype: list[str]
+        """
+
+        return json.loads(self._binding_dbus.getProfiles())
+
     ### Map Methods ###
 
     def add_map(self, profile: str, map_name: str):

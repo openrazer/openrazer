@@ -230,7 +230,7 @@ class KeybindingManager(object):
         Get list of profiles in JSON format
 
         Returns a JSON blob containing profiles by name
-        {0: "Profile"}
+        ["Profile"]
 
         :return: JSON of profiles
         :rtype: str
@@ -247,7 +247,7 @@ class KeybindingManager(object):
         Get a list of maps in JSON format.
 
         Returns a JSON blob containing the maps of the given profile by name
-        ('0': 'map') 
+        ['map'] 
 
         :param profile: The profile number
         :type: int
@@ -256,8 +256,8 @@ class KeybindingManager(object):
         :rtype: str
         """
         return_list = []
-        for mapping in self._profiles[profile]:
-            return_list.append(mapping)
+        for key, value in self._profiles[profile].items():
+            return_list.append(key)
 
         return json.dumps(return_list)
 
