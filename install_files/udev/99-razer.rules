@@ -14,18 +14,13 @@ ATTRS{idProduct}=="010d|010e|010f|0111|0113|011a|011b|0201|0202|0203|0204|0205|0
     ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerkbd"
 
-# Mouse Mats
-ATTRS{idProduct}=="0068|0c00|0c01|0c02", \
-    ATTRS{idVendor}=="1532", \
-    ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razermousemat"
-
 # Kraken
 ATTRS{idProduct}=="0501|0504|0506|0510|0527", \
     ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerkraken"
 
-# Accessories (Speakers, Razer Core, etc)
-ATTRS{idProduct}=="0215|0517|0518|0f07|0f08|0f09", \
+# Accessories (Speakers, Mousemats, Razer Core, etc)
+ATTRS{idProduct}=="0068|0215|0517|0518|0c00|0c01|0c02|0f07|0f08|0f09", \
     ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razeraccessory"
 
