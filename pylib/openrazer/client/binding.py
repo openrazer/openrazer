@@ -176,6 +176,26 @@ class Binding(object):
 
         self._binding_dbus.copyMap(profile, mapping, dest_profile, map_name)
 
+    def remove_map(self, profile: str, mapping: str):
+        """
+        Remove the given mapping
+
+        :param profile: The profile number
+        :type: str
+
+        :param mapping: The map to remove
+        :type: str
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        if not isinstance(profile, str):
+            raise ValueError("profile must be a string")
+        if not isinstance(mapping, str):
+            raise ValueError("mapping must be a string")
+
+        self._binding_dbus.removeMap(profile, mapping)
+
     def get_active_map(self) -> str:
         """
         Returns the active map

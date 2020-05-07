@@ -219,6 +219,25 @@ def add_map(self, profile, map):
     self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
 
 
+@endpoint('razer.device.binding', 'removeMap', in_sig='ss')
+def remove_map(self, profile, map):
+    """
+    Remove a map
+
+    :param profile: The profile number
+    :type: str
+
+    :param map: The map name
+    :type: str
+    """
+
+    self.logger.debug("DBus call remove_map")
+
+    self.binding_manager._profiles[profile].pop(map)
+
+    self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
+
+
 @endpoint('razer.device.binding', 'addAction', in_sig='sssss')
 def add_action(self, profile, map, key_code, action_type, value):
     """
