@@ -13,7 +13,6 @@ except ImportError:
 
 
 # TODO https://askubuntu.com/questions/110969/notify-send-ignores-timeout
-INTERVAL_FREQ = 60 * 10
 NOTIFY_TIMEOUT = 4000
 
 
@@ -28,6 +27,7 @@ class BatteryNotifier(threading.Thread):
         self._notify2 = notify2 is not None
 
         self.event = threading.Event()
+        self.frequency = 0
 
         if self._notify2:
             try:
@@ -68,7 +68,7 @@ class BatteryNotifier(threading.Thread):
     def notify_battery(self):
         now = datetime.datetime.now()
 
-        if (now - self._last_notify_time).seconds > INTERVAL_FREQ:
+        if (now - self._last_notify_time).seconds > self.frequency:
             # Update last notified
             self._last_notify_time = now
 
@@ -97,7 +97,7 @@ class BatteryNotifier(threading.Thread):
         """
 
         while not self._shutdown:
-            if self.event.is_set():
+            if self.event.is_set() and self.frequency > 0:
                 self.notify_battery()
 
             time.sleep(0.1)
@@ -145,3 +145,11 @@ class BatteryManager(object):
             self._battery_thread.event.set()
         else:
             self._battery_thread.event.clear()
+
+    @property
+    def frequency(self):
+        return self._battery_thread.frequency
+
+    @frequency.setter
+    def frequency(self, frequency):
+        self._battery_thread.frequency = frequency

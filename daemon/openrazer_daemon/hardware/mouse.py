@@ -95,6 +95,7 @@ class RazerLanceheadWirelessReceiver(RazerLanceheadWirelessWired):
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Lancehead Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'mouse_battery_notifier_freq', fallback=10 * 60)
 
     def _close(self):
         """
@@ -185,6 +186,7 @@ class RazerLanceheadWireless(RazerLanceheadWired):
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Lancehead')
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'mouse_battery_notifier_freq', fallback=10 * 60)
 
     def _close(self):
         """
@@ -441,6 +443,7 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'mouse_battery_notifier_freq', fallback=10 * 60)
 
     def _close(self):
         """
@@ -1315,6 +1318,7 @@ class RazerMamba2012Wireless(__RazerDeviceSpecialBrightnessSuspend):
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'mouse_battery_notifier_freq', fallback=10 * 60)
 
     def _close(self):
         """
@@ -1416,6 +1420,7 @@ class RazerMambaWirelessReceiver(RazerMambaWirelessWired):
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'mouse_battery_notifier_freq', fallback=10 * 60)
 
     def _close(self):
         """
