@@ -1302,6 +1302,38 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
     return sprintf(buf, "%u:%u\n", dpi_x, dpi_y);
 }
 
+static ssize_t razer_attr_write_tilt_repeat(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    unsigned int tilt_repeat;
+    if (kstrtouint(buf, 0, &tilt_repeat) < 0)
+        return -EINVAL;
+    device->tilt_repeat = tilt_repeat;
+    return count;
+}
+
+static ssize_t razer_attr_read_tilt_repeat(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%u\n", device->tilt_repeat);
+}
+
+static ssize_t razer_attr_write_tilt_repeat_delay(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    unsigned int tilt_repeat_delay;
+    if (kstrtouint(buf, 0, &tilt_repeat_delay) < 0)
+        return -EINVAL;
+    device->tilt_repeat_delay = tilt_repeat_delay;
+    return count;
+}
+
+static ssize_t razer_attr_read_tilt_repeat_delay(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%u\n", device->tilt_repeat_delay);
+}
+
 /**
  * Write device file "set_idle_time"
  *
@@ -3088,6 +3120,9 @@ static DEVICE_ATTR(device_mode,               0660, razer_attr_read_device_mode,
 static DEVICE_ATTR(device_serial,             0440, razer_attr_read_get_serial,            NULL);
 static DEVICE_ATTR(device_idle_time,          0220, NULL,                                  razer_attr_write_set_idle_time);
 
+static DEVICE_ATTR(tilt_repeat,               0660, razer_attr_read_tilt_repeat,           razer_attr_write_tilt_repeat);
+static DEVICE_ATTR(tilt_repeat_delay,         0660, razer_attr_read_tilt_repeat_delay,     razer_attr_write_tilt_repeat_delay);
+
 static DEVICE_ATTR(charge_level,              0440, razer_attr_read_get_battery,           NULL);
 static DEVICE_ATTR(charge_status,             0440, razer_attr_read_is_charging,           NULL);
 static DEVICE_ATTR(charge_effect,             0220, NULL,                                  razer_attr_write_set_charging_effect);
@@ -3296,7 +3331,8 @@ static enum hrtimer_restart wheel_tilt_repeat(struct hrtimer *timer)
         container_of(timer, struct razer_mouse_device, repeat_timer);
     input_report_rel(dev->input, REL_HWHEEL, dev->hwheel_value);
     input_sync(dev->input);
-    hrtimer_forward_now(timer, ms_to_ktime(33));
+    if (dev->tilt_repeat)
+        hrtimer_forward_now(timer, ms_to_ktime(dev->tilt_repeat));
     return HRTIMER_RESTART;
 }
 
@@ -3315,8 +3351,10 @@ static int translate_wheel_tilt_events(struct razer_mouse_device *dev,
     if (ev_is_btn_down(code, field, usage, btn_value)) {
         input_report_rel(dev->input, REL_HWHEEL, hwheel_value);
         dev->hwheel_value = hwheel_value;
-        hrtimer_start_range_ns(
-            &dev->repeat_timer, ms_to_ktime(250), 1000, HRTIMER_MODE_REL);
+        if (dev->tilt_repeat && dev->tilt_repeat_delay)
+            hrtimer_start_range_ns(
+                &dev->repeat_timer, ms_to_ktime(dev->tilt_repeat_delay),
+                1000, HRTIMER_MODE_REL);
         return 1;
     }
     if (ev_is_btn_up(code, field, usage, btn_value)) {
@@ -3386,6 +3424,9 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
     dev->da3_5g.dpi = 1; // 3500 DPI
     dev->da3_5g.profile = 1; // Profile 1
     dev->da3_5g.poll = 1; // Poll rate 1000
+
+    dev->tilt_repeat_delay = 250;
+    dev->tilt_repeat = 33;
 }
 
 /**
@@ -3484,9 +3525,12 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
             break;
 
+        case USB_DEVICE_ID_RAZER_BASILISK_V2:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat_delay);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat);
+            /* Fall through */
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
         case USB_DEVICE_ID_RAZER_BASILISK:
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
@@ -3921,9 +3965,12 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
             break;
 
+        case USB_DEVICE_ID_RAZER_BASILISK_V2:
+            device_remove_file(&hdev->dev, &dev_attr_tilt_repeat_delay);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_repeat);
+            /* Fall through */
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
         case USB_DEVICE_ID_RAZER_BASILISK:
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
