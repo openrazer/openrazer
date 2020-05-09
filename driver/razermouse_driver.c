@@ -24,6 +24,7 @@
 #include <linux/init.h>
 #include <linux/usb/input.h>
 #include <linux/hid.h>
+#include <linux/hrtimer.h>
 #include <linux/random.h>
 
 #include "razermouse_driver.h"
@@ -3212,6 +3213,9 @@ static int razer_input_configured(struct hid_device *hdev,
                                   struct hid_input *hidinput)
 {
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct razer_mouse_device *dev = hid_get_drvdata(hdev);
+
+    dev->input = hidinput->input;
 
     if (intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
         switch (hdev->product) {
@@ -3256,13 +3260,71 @@ __u8 *razer_report_fixup(struct hid_device *hdev, __u8 *buf,
 }
 
 /**
+ * Test whether an input event is from a particular button
+ */
+static int ev_is_btn(__u16 code, struct hid_usage *usage)
+{
+    return usage->type == EV_KEY && usage->code == code;
+}
+
+/**
  * Test whether an input event is a particular button being pushed
  */
 static int ev_is_btn_down(__u16 code, struct hid_field *field,
                           struct hid_usage *usage, __s32 value)
 {
-    return (usage->type == EV_KEY && usage->code == code
-            && value && !field->value[usage->usage_index]);
+    return (ev_is_btn(code, usage)
+            && !field->value[usage->usage_index] && value);
+}
+
+/**
+ * Test whether an input event is a particular button being released
+ */
+static int ev_is_btn_up(__u16 code, struct hid_field *field,
+                        struct hid_usage *usage, __s32 value)
+{
+    return (ev_is_btn(code, usage)
+            && field->value[usage->usage_index] && !value);
+}
+
+/**
+ * Timer callback for wheel tilt repeating
+ */
+static enum hrtimer_restart wheel_tilt_repeat(struct hrtimer *timer)
+{
+    struct razer_mouse_device *dev =
+        container_of(timer, struct razer_mouse_device, repeat_timer);
+    input_report_rel(dev->input, REL_HWHEEL, dev->hwheel_value);
+    input_sync(dev->input);
+    hrtimer_forward_now(timer, ms_to_ktime(33));
+    return HRTIMER_RESTART;
+}
+
+/**
+ * Translate wheel tilt press and release events into REL_HWHEEL events
+ */
+static int translate_wheel_tilt_events(struct razer_mouse_device *dev,
+                                       struct hid_field *field,
+                                       struct hid_usage *usage,
+                                       __s32 btn_value,
+                                       __u16 code,
+                                       __s32 hwheel_value)
+{
+    /* Convert the tilt wheel's button events to horizontal wheel
+     * events and set up a key repeat timer */
+    if (ev_is_btn_down(code, field, usage, btn_value)) {
+        input_report_rel(dev->input, REL_HWHEEL, hwheel_value);
+        dev->hwheel_value = hwheel_value;
+        hrtimer_start_range_ns(
+            &dev->repeat_timer, ms_to_ktime(250), 1000, HRTIMER_MODE_REL);
+        return 1;
+    }
+    if (ev_is_btn_up(code, field, usage, btn_value)) {
+        hrtimer_cancel(&dev->repeat_timer);
+        return 1;
+    }
+
+    return 0;
 }
 
 /**
@@ -3272,20 +3334,17 @@ int razer_event(struct hid_device *hdev, struct hid_field *field,
                 struct hid_usage *usage, __s32 value)
 {
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct razer_mouse_device *dev = hid_get_drvdata(hdev);
 
     if (intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
         switch (hdev->product) {
         case USB_DEVICE_ID_RAZER_BASILISK_V2:
-            /* Convert the tilt wheel's button events to horizontal
-             * wheel events */
-            if (ev_is_btn_down(BTN_MOUSE + 5, field, usage, value)) {
-                input_report_rel(field->hidinput->input, REL_HWHEEL, -1);
+            if (translate_wheel_tilt_events(
+                    dev, field, usage, value, BTN_MOUSE + 5, -1))
                 return 1;
-            }
-            if (ev_is_btn_down(BTN_MOUSE + 6, field, usage, value)) {
-                input_report_rel(field->hidinput->input, REL_HWHEEL, 1);
+            if (translate_wheel_tilt_events(
+                    dev, field, usage, value, BTN_MOUSE + 6, 1))
                 return 1;
-            }
             break;
         }
     }
@@ -3313,6 +3372,10 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
     // Get a "random" integer
     get_random_bytes(&rand_serial, sizeof(unsigned int));
     sprintf(&dev->serial[0], "PM%012u", rand_serial);
+
+    // Setup wheel tilt repeat timers
+    hrtimer_init(&dev->repeat_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+    dev->repeat_timer.function = wheel_tilt_repeat;
 
     // Setup orochi2011
     dev->orochi2011_dpi = 0x4c;
@@ -4181,6 +4244,8 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 
 
     hid_hw_stop(hdev);
+    hrtimer_cancel(&dev->repeat_timer);
+
     kfree(dev);
     dev_info(&intf->dev, "Razer Device disconnected\n");
 }

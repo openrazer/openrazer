@@ -77,6 +77,10 @@ struct razer_mouse_device {
     struct usb_device *usb_dev;
     struct mutex lock;
 
+    struct input_dev *input;
+    struct hrtimer repeat_timer;
+    __s32 hwheel_value;
+
     unsigned char usb_interface_protocol;
     unsigned char usb_interface_subclass;
 
