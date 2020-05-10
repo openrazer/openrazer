@@ -377,7 +377,8 @@ class KeyboardKeyManager(object):
                     #self._parent.method_args['brightness'] = current_brightness
 
             else:
-                self._parent.binding_manager.key_press(key_id, key_press)
+                x = threading.Thread(target=self._parent.binding_manager.key_press, args=(key_id, key_press))
+                x.start()
 
         except KeyError as err:
             self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
