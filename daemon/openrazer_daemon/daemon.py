@@ -515,7 +515,7 @@ class RazerDaemon(DBusService):
 
             if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
                 self.logger.info('Found valid device.%d: %s', device_number, sys_name)
-                razer_device = device_class(sys_path, device_number, self._config, self._persistence, testing=self._test_dir is not None)
+                razer_device = device_class(sys_path, device_number, self._config, self._config_file, self._persistence, testing=self._test_dir is not None)
 
                 # Its a udev event so currently the device hasn't been chmodded yet
                 time.sleep(0.2)

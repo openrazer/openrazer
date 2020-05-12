@@ -120,7 +120,7 @@ class KeybindingManager(object):
                         if action["type"] == "key":  # Key released
                             self.__key_up(action["value"])
 
-                        elif action["type"] == "sleep":
+                        elif action["type"] == "sleep":  # Wait for key to be added before removing it
                             time.sleep(int(action["value"]))
 
     @property
@@ -158,13 +158,16 @@ class KeybindingManager(object):
             self._parent.setKeyRow(payload)
             self._parent.setCustom()
 
-        capabilities = self._parent.METHODS
-        if 'keypad_set_profile_led_red' in capabilities:
-            self._parent.setRedLED(self.current_mapping["red_led"])
-        if 'keypad_set_profile_led_green' in capabilities:
-            self._parent.setGreenLED(self.current_mapping["green_led"])
-        if 'keypad_set_profile_led_blue' in capabilities:
-            self._parent.setBlueLED(self.current_mapping["blue_led"])
+        try:
+            capabilities = self._parent.METHODS
+            if 'keypad_set_profile_led_red' in capabilities:
+                self._parent.setRedLED(self.current_mapping["red_led"])
+            if 'keypad_set_profile_led_green' in capabilities:
+                self._parent.setGreenLED(self.current_mapping["green_led"])
+            if 'keypad_set_profile_led_blue' in capabilities:
+                self._parent.setBlueLED(self.current_mapping["blue_led"])
+        except:
+            pass
 
     @property
     def current_profile(self):
