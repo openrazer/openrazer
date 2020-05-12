@@ -3205,6 +3205,28 @@ static DEVICE_ATTR(right_matrix_effect_none,        0220, NULL,                 
 static DEVICE_ATTR(backlight_led_state,            0660, razer_attr_read_backlight_led_state, razer_attr_write_backlight_led_state);
 
 
+static int dev_is_hid(struct device *dev, void *data)
+{
+    if (dev->bus == &hid_bus_type)
+        return 1;
+    return 0;
+}
+
+struct usb_interface *find_intf_with_proto(struct usb_device *usbdev,
+                                           u8 proto)
+{
+    struct usb_interface *intf;
+    int i;
+
+    for (i = 0; i < usbdev->actconfig->desc.bNumInterfaces; i++) {
+        intf = usb_ifnum_to_if(usbdev, i);
+        if (intf && intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE)
+            return intf;
+    }
+
+    return NULL;
+}
+
 
 /**
  * Raw event function
@@ -3212,47 +3234,79 @@ static DEVICE_ATTR(backlight_led_state,            0660, razer_attr_read_backlig
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct usb_device *usbdev = interface_to_usbdev(intf);
+    struct usb_interface *m_intf = NULL;
+    struct device *m_dev;
+    struct razer_mouse_device *m_rdev;
+    unsigned char mask;
+    int index;
+    u8 cur_value;
 
     // The event were looking for is 16 bytes long and starts with 0x04
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
-        // Convert 04... to 0100...
-        int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
-        u8 cur_value = 0x00;
+        switch (hdev->product) {
+        case USB_DEVICE_ID_RAZER_BASILISK_V2:
+            mask = 0;
 
-        while(--index > 0) {
-            cur_value = data[index];
-            if(cur_value == 0x00) { // Skip 0x00
-                continue;
+            for (index = 1; index < size; index++) {
+                switch (data[index]) {
+                    case 0x20: mask |= 1u << 0; break;
+                    case 0x21: mask |= 1u << 1; break;
+                    case 0x50: mask |= 1u << 2; break;
+                    case 0x51: mask |= 1u << 3; break;
+                }
             }
 
-            switch(cur_value) {
-            case 0x20: // DPI Up
-                cur_value = 0x68; // F13
-                break;
-            case 0x21: // DPI Down
-                cur_value = 0x69; // F14
-                break;
-            case 0x22: // Wheel Left
-                cur_value = 0x6A; // F15
-                break;
-            case 0x23: // Wheel Right
-                cur_value = 0x6B; // F16
-                break;
-            case 0x50: // Cycle Up Profile
-                cur_value = 0x6D; // F18
-                break;
-            case 0x51: // Sensitivity Clutch
-                cur_value = 0x6E; // F19
-                break;
+            m_intf = find_intf_with_proto(usbdev, USB_INTERFACE_PROTOCOL_MOUSE);
+            m_dev = device_find_child(&m_intf->dev, NULL, dev_is_hid);
+            m_rdev = dev_get_drvdata(m_dev);
+            put_device(m_dev);
+            for (index = 0; index < 4; index++) {
+                unsigned int code = BTN_MOUSE + 7 + index;
+                int value = mask & (1u << index) ? 1 : 0;
+                input_report_key(m_rdev->input, code, value);
+                input_sync(m_rdev->input);
+            }
+            break;
+        default:
+            // Convert 04... to 0100...
+            index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
+            cur_value = 0x00;
+
+            while(--index > 0) {
+                cur_value = data[index];
+                if(cur_value == 0x00) { // Skip 0x00
+                    continue;
+                }
+
+                switch(cur_value) {
+                case 0x20: // DPI Up
+                    cur_value = 0x68; // F13
+                    break;
+                case 0x21: // DPI Down
+                    cur_value = 0x69; // F14
+                    break;
+                case 0x22: // Wheel Left
+                    cur_value = 0x6A; // F15
+                    break;
+                case 0x23: // Wheel Right
+                    cur_value = 0x6B; // F16
+                    break;
+                case 0x50: // Cycle Up Profile
+                    cur_value = 0x6D; // F18
+                    break;
+                case 0x51: // Sensitivity Clutch
+                    cur_value = 0x6E; // F19
+                    break;
+                }
+
+                data[index+1] = cur_value;
             }
 
-            data[index+1] = cur_value;
+            data[0] = 0x01;
+            data[1] = 0x00;
+            return 1;
         }
-
-
-        data[0] = 0x01;
-        data[1] = 0x00;
-        return 1;
     }
 
     return 0;
@@ -3275,6 +3329,10 @@ static int razer_input_configured(struct hid_device *hdev,
             /* Basilisk V2 has a tilt wheel but Linux HID doesn't
              * recognize it automatically. */
             input_set_capability(hidinput->input, EV_REL, REL_HWHEEL);
+            input_set_capability(hidinput->input, EV_KEY, BTN_MOUSE + 7);
+            input_set_capability(hidinput->input, EV_KEY, BTN_MOUSE + 8);
+            input_set_capability(hidinput->input, EV_KEY, BTN_MOUSE + 9);
+            input_set_capability(hidinput->input, EV_KEY, BTN_MOUSE + 10);
             break;
         }
     }
@@ -3390,8 +3448,11 @@ int razer_event(struct hid_device *hdev, struct hid_field *field,
 {
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct razer_mouse_device *dev = hid_get_drvdata(hdev);
+    /* __u16 new_button_code = 0x00; */
+    struct usb_interface_descriptor *desc = &intf->cur_altsetting->desc;
+    /* struct device *hiddev; */
 
-    if (intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+    if (desc->bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
         switch (hdev->product) {
         case USB_DEVICE_ID_RAZER_BASILISK_V2:
             if (dev->tilt_hwheel) {
@@ -3477,7 +3538,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     }
 
     if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE
-       && (expected_subclass == 0xFF || dev->usb_interface_subclass == expected_subclass)) {
+       && (expected_subclass == 0xFF || dev->usb_interface_subclass == expected_subclass)) { 
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);
