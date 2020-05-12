@@ -479,7 +479,7 @@ class RazerDaemon(DBusService):
                         self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
                         break
 
-                    razer_device = device_class(sys_path, device_number, self._config, self._persistence, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
+                    razer_device = device_class(sys_path, device_number, self._config, self._config_file, self._persistence, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
 
                     # Wireless devices sometimes don't listen
                     count = 0

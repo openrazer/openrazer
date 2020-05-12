@@ -40,9 +40,7 @@ class RazerDevice(DBusService):
 
     ZONES = ('backlight', 'logo', 'scroll', 'left', 'right')
 
-    DEVICE_IMAGE = None
-
-    def __init__(self, device_path, device_number, config, persistence, testing=False, additional_interfaces=None, additional_methods=[]):
+    def __init__(self, device_path, device_number, config, config_file, persistence, testing=False, additional_interfaces=None, additional_methods=[]):
 
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
@@ -62,6 +60,7 @@ class RazerDevice(DBusService):
 
         self.config = config
         self.persistence = persistence
+        self._config_file = config_file
         self._testing = testing
         self._parent = None
         self._device_path = device_path
@@ -974,8 +973,8 @@ class RazerDeviceSpecialBrightnessSuspend(RazerDevice):
     Suspend functions
     """
 
-    def __init__(self, device_path, device_number, config, persistence, testing=False, additional_interfaces=None, additional_methods=[]):
-        super().__init__(device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods)
+    def __init__(self, device_path, device_number, config, config_file, persistence, testing=False, additional_interfaces=None, additional_methods=[]):
+        super().__init__(device_path, device_number, config, config_file, persistence, testing, additional_interfaces, additional_methods)
 
     def _suspend_device(self):
         """
@@ -1010,6 +1009,6 @@ class RazerDeviceBrightnessSuspend(RazerDeviceSpecialBrightnessSuspend):
     Inherits from RazerDeviceSpecialBrightnessSuspend
     """
 
-    def __init__(self, device_path, device_number, config, persistence, testing=False, additional_interfaces=None, additional_methods=[]):
+    def __init__(self, device_path, device_number, config, config_file, persistence, testing=False, additional_interfaces=None, additional_methods=[]):
         additional_methods.extend(['get_brightness', 'set_brightness'])
-        super().__init__(device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods)
+        super().__init__(device_path, device_number, config, config_file, persistence, testing, additional_interfaces, additional_methods)

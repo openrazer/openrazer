@@ -28,7 +28,7 @@ class KeybindingManager(object):
         self._device_id = device_id
         self._serial_number = self._parent.getSerial()
         self._config_file = self.get_config_file_name()
-        
+
         self._logger = logging.getLogger('razer.device{0}.bindingmanager'.format(device_id))
         # self._parent.register_observer(self)
         self._testing = testing
@@ -281,9 +281,8 @@ class KeybindingManager(object):
         :rtype: str
         """
 
-        home = os.path.expanduser("~")
-        config_path = os.path.join(home, ".config/openrazer/")
-        return config_path + "keybinding_" + self._serial_number + ".json"
+        config_path = os.path.dirname(self._parent._config_file)
+        return config_path + "/keybinding_" + self._serial_number + ".json"
 
     def close(self):
         try:
