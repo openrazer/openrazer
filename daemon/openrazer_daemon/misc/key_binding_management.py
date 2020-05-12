@@ -51,10 +51,15 @@ class KeybindingManager(object):
 
     #pylint: disable=no-member
     def __key_up(self, key_code):
-        key_code = int(key_code)
-        self._current_keys.remove(key_code)
-        self._fake_device.write(ecodes.EV_KEY, key_code, 0)
-        self._fake_device.syn()
+        for _ in range(0, 5):
+            try:
+                key_code = int(key_code)
+                self._current_keys.remove(key_code)
+                self._fake_device.write(ecodes.EV_KEY, key_code, 0)
+                self._fake_device.syn()
+                return
+            except ValueError:
+                time.sleep(.005)
 
     #pylint: disable=no-member
     def __key_down(self, key_code):
