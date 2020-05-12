@@ -119,6 +119,8 @@ class KeybindingManager(object):
                     if key_code not in (183, 184, 185, 186, 187):  # Macro key released, skip it
                         if action["type"] == "key":  # Key released
                             self.__key_up(action["value"])
+                        elif action["type"] == "sleep":
+                            time.sleep(int(action["value"]))
 
     @property
     def current_mapping(self):
