@@ -151,7 +151,7 @@ class KeyWatcher(threading.Thread):
                 pass
 
     def poll(self, event_file_map):
-        r, w, x = select.select(event_file_map, [], [], EPOLL_TIMEOUT)
+        r, _, _ = select.select(event_file_map, [], [], EPOLL_TIMEOUT)
         for fd in r:
             events = event_file_map[fd].read()
             if not events:
