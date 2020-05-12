@@ -11,7 +11,6 @@ import struct
 import time
 import sys
 import subprocess
-from collections import OrderedDict
 from openrazer_daemon.keyboard import KeyboardColour
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # TODO: figure out a better way to handle this
@@ -25,9 +24,12 @@ class KeybindingManager(object):
 
     def __init__(self, device_id, parent, testing=False):
 
-        self._device_id = device_id
-        self._logger = logging.getLogger('razer.device{0}.bindingmanager'.format(device_id))
         self._parent = parent
+        self._device_id = device_id
+        self._serial_number = self._parent.getSerial()
+        self._config_file = self.get_config_file_name()
+        
+        self._logger = logging.getLogger('razer.device{0}.bindingmanager'.format(device_id))
         # self._parent.register_observer(self)
         self._testing = testing
         self._fake_device = UInput(name="{0} (mapped)".format(self._parent.getDeviceName()))
@@ -46,8 +48,6 @@ class KeybindingManager(object):
         self._macro_mode = False
         self._macro_key = None
 
-        self._serial_number = self._parent.getSerial()
-        self._config_file = self.get_config_file_name()
         if os.path.exists(self._config_file):
             self.read_config_file(self._config_file)
         self.current_profile = "0"
@@ -137,13 +137,13 @@ class KeybindingManager(object):
     @current_mapping.setter
     def current_mapping(self, value):
         """
-
         Sets the current mapping and changes the led matrix
 
         :param value: The new mapping
         :type value: str
         """
         self._logger.debug("Change mapping to {0}".format(value))
+
         self._current_mapping = self._current_profile[value]
         self._old_mapping_name = self._current_mapping_name
         self._current_mapping_name = value
@@ -174,7 +174,6 @@ class KeybindingManager(object):
         :return: the current profile name
         :rtype: str
         """
-
         return self._current_profile["name"]
 
     @current_profile.setter
@@ -198,7 +197,6 @@ class KeybindingManager(object):
         :return: the macro mode state
         :rtype: bool
         """
-
         return self._macro_mode
 
     @macro_mode.setter
@@ -228,7 +226,6 @@ class KeybindingManager(object):
         :return: the macro key
         :rtype: int
         """
-
         return self._macro_key
 
     @macro_key.setter
@@ -299,15 +296,6 @@ class KeybindingManager(object):
 
     # DBus Stuff
     def dbus_get_profiles(self):
-        """
-        Get list of profiles in JSON format
-
-        Returns a JSON blob containing profiles by name
-        ["Profile"]
-
-        :return: JSON of profiles
-        :rtype: str
-        """
         return_list = []
         for profile in self._profiles:
             profile = self._profiles[profile]
@@ -316,69 +304,22 @@ class KeybindingManager(object):
         return json.dumps(return_list)
 
     def dbus_get_maps(self, profile):
-        """
-        Get a list of maps in JSON format.
-
-        Returns a JSON blob containing the maps of the given profile by name
-        ['map'] 
-
-        :param profile: The profile number
-        :type: int
-
-        :return: JSON of maps
-        :rtype: str
-        """
         return_list = []
-        for key, value in self._profiles[profile].items():
+        for key, _ in self._profiles[profile].items():
             return_list.append(key)
 
         return json.dumps(return_list)
 
     def dbus_add_action(self, profile, map, key_code, action_type, value, action_id=None):
-        """
-        Add a new action to the given key
-
-        :param profile: The profile number
-        :type: int
-
-        :param map: The map name
-        :type: str
-
-        :param key_code: The key code
-        :type: str
-
-        :param action_type: The action type (i.e. "key")
-        :type: str
-
-        :param value: The value of the action (i.e. 2)
-        :type: str
-
-        :param action_id: The ID of the action to edit (if unset adds a new action)
-        :type: str
-        """
         key = self._profiles[profile][map]["binding"].setdefault(key_code, [])
-
         if action_id != None:
             key[action_id] = {"type": action_type, "value": value}
-
         else:
             key.append({"type": action_type, "value": value})
 
         self.write_config_file(self.get_config_file_name())
 
     def dbus_set_matrix(self, profile, map, frame):
-        """
-        Set the LED matrix for the given map
-
-        :param profile: The profile number
-        :type: int
-
-        :param map: The map name
-        :type: str
-
-        :param frame: The frame as a dict
-        :type: dict
-        """
         self._profiles[profile][map].update({"matrix": frame})
         self._profiles[profile][map]["is_using_matrix"] = True
 
