@@ -33,6 +33,7 @@ class KeybindingManager(object):
         self._fake_device = UInput(name="{0} (mapped)".format(self._parent.getDeviceName()))
 
         self._profiles = {"0": DEFAULT_PROFILE}
+        self._current_profile_id = None
 
         self._current_keys = []
         self._old_mapping_name = None
@@ -42,12 +43,14 @@ class KeybindingManager(object):
         self._rows, self._cols = self._parent.MATRIX_DIMS
         self._keyboard_grid = KeyboardColour(self._rows, self._cols)
 
+        self._macro_mode = False
+        self._macro_key = None
+
         self._serial_number = self._parent.getSerial()
         self._config_file = self.get_config_file_name()
         if os.path.exists(self._config_file):
             self.read_config_file(self._config_file)
         self.current_profile = "0"
-        self.current_mapping = self._current_profile["default_map"]
 
     #pylint: disable=no-member
     def __key_up(self, key_code):
@@ -109,9 +112,13 @@ class KeybindingManager(object):
                     elif action["type"] == "sleep":
                         time.sleep(int(action["value"]))
 
-                elif key_press == 'release':
-                    if action["type"] == "key":  # Key released
+                    elif action["type"] == "release":
                         self.__key_up(action["value"])
+
+                elif key_press == 'release':
+                    if key_code not in (183, 184, 185, 186, 187):  # Macro key released, skip it
+                        if action["type"] == "key":  # Key released
+                            self.__key_up(action["value"])
 
     @property
     def current_mapping(self):
@@ -177,7 +184,65 @@ class KeybindingManager(object):
         """
 
         self._current_profile = self._profiles[value]
+        self._current_profile_id = value
         self.current_mapping = self._current_profile["default_map"]
+
+    @property
+    def macro_mode(self):
+        """
+        Returns the state of macro mode
+
+        :return: the macro mode state
+        :rtype: bool
+        """
+
+        return self._macro_mode
+
+    @macro_mode.setter
+    def macro_mode(self, value):
+        """
+        Sets the state of macro mode
+
+        :param value: The state of macro mode
+        :type: bool
+        """
+
+        if value == True:
+            self._macro_mode = True
+            self._parent.setMacroEffect(0x01)
+            self._parent.setMacroMode(True)
+
+        elif value == False:
+            self._macro_mode = False
+            self.macro_key = None
+            self._parent.setMacroMode(False)
+
+    @property
+    def macro_key(self):
+        """
+        Return the macro key being recorded to
+
+        :return: the macro key
+        :rtype: int
+        """
+
+        return self._macro_key
+
+    @macro_key.setter
+    def macro_key(self, value):
+        """
+        Set the macro key being recorded to
+
+        :param value: The macro key
+        :type: int
+        """
+        if value is not None:
+            self._macro_key = value
+            self._parent.setMacroEffect(0x00)
+            self._parent.clearActions(self._current_profile_id, self._current_mapping_name, str(value))
+
+        else:
+            self._macro_key = None
 
     def read_config_file(self, config_file):
         """

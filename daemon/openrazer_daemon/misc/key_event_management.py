@@ -376,6 +376,33 @@ class KeyboardKeyManager(object):
                     self._parent.setBrightness(current_brightness)
                     #self._parent.method_args['brightness'] = current_brightness
 
+            elif key_name == 'MACROMODE':
+                if self._parent.binding_manager.macro_mode == False:
+                    self._parent.binding_manager.macro_mode = True
+                else:
+                    self._parent.binding_manager.macro_mode = False
+
+            elif self._parent.binding_manager.macro_mode == True:
+                if key_name in ('M1', 'M2', 'M3', 'M4', 'M5'):
+                    if not self._parent.binding_manager._macro_key:
+                        self._parent.binding_manager.macro_key = key_id
+                    else:
+                        self._logger.warning("Nested macros are not supported")
+
+                elif self._parent.binding_manager.macro_key:
+                    profile = self._parent.getActiveProfile()
+                    mapping = self._parent.getActiveMap()
+                    key = self._parent.binding_manager.macro_key
+
+                    if key_press == 'press':
+                        self._parent.addAction(profile, mapping, str(key), "key", str(key_id))
+                    elif key_press == 'release':
+                        self._parent.addAction(profile, mapping, str(key), "release", str(key_id))
+
+                else:
+                    self._logger.warning("On-the-fly macros are only supported for macro keys, please use a client for configuring other keys")
+                    self._parent.binding_manager.macro_mode = False
+
             else:
                 x = threading.Thread(target=self._parent.binding_manager.key_press, args=(key_id, key_press))
                 x.start()

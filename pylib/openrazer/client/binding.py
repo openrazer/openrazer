@@ -5,7 +5,7 @@ Client binding controls
 import dbus as _dbus
 import json
 
-action_types = ["key", "map", "shift", "sleep", "execute"]
+action_types = ["key", "map", "shift", "sleep", "execute", "release"]
 
 
 class Binding(object):
