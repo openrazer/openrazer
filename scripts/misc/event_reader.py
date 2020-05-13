@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 import struct
-from openrazer_daemon.keyboard import EVENT_MAPPING, TARTARUS_EVENT_MAPPING
+from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING
 
 EVENT_FORMAT = '@llHHI'
 EVENT_SIZE = struct.calcsize(EVENT_FORMAT)
@@ -50,7 +50,7 @@ def run():
         sys.exit(1)
 
     if args.tartarus:
-        mapping = TARTARUS_EVENT_MAPPING
+        mapping = TARTARUS_KEY_MAPPING
     else:
         #mapping = EVENT_MAPPING
         mapping = {}
