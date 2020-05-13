@@ -7,6 +7,7 @@ import json
 
 from openrazer.client.constants import ACTION_TYPES
 
+
 class Binding(object):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None):
         self._capabilities = capabilities

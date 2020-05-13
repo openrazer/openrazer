@@ -21,7 +21,6 @@ device_manager.sync_effects = False
 # Iterate over each device
 for device in device_manager.devices:
     print("Device Profiles: {}".format(device.binding.get_profiles()))
-
     print("Maps for Profile 0: {}".format(device.binding.get_maps("0")))
 
     # Add a new map named Example

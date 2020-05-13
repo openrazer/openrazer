@@ -16,6 +16,16 @@ from openrazer_daemon.keyboard import KeyboardColour
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # TODO: figure out a better way to handle this
 from evdev import UInput, ecodes
 
+DEFAULT_PROFILE = {
+    "name": "Default",
+    "default_map": "Default",
+    "Default": {
+        "is_using_matrix": False,
+        "binding": {
+        }
+    }
+}
+
 
 class KeybindingManager(object):
     """
@@ -327,14 +337,3 @@ class KeybindingManager(object):
         self._profiles[profile][map]["is_using_matrix"] = True
 
         self.write_config_file(self._config_file)
-
-
-DEFAULT_PROFILE = {
-    "name": "Default",
-    "default_map": "Default",
-    "Default": {
-        "is_using_matrix": False,
-        "binding": {
-        }
-    }
-}
