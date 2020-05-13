@@ -5,8 +5,7 @@ Client binding controls
 import dbus as _dbus
 import json
 
-action_types = ["key", "map", "shift", "sleep", "execute", "release"]
-
+from openrazer.client.constants import ACTION_TYPES
 
 class Binding(object):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None):
@@ -44,6 +43,8 @@ class Binding(object):
 
         :raises ValueError: If parameters are invalid
         """
+        if not isinstance(profile_name, str):
+            raise ValueError("profile_name must be a string")
 
         self._binding_dbus.addProfile(profile_name)
 
@@ -56,6 +57,8 @@ class Binding(object):
 
         :raises ValueError: If parameters are invalid
         """
+        if not isinstance(profile, str):
+            raise ValueError("profile must be a string")
 
         self._binding_dbus.removeProfile(profile)
 
@@ -88,7 +91,6 @@ class Binding(object):
 
         :raises ValueError: If parameters are invalid
         """
-
         if not isinstance(profile, str):
             raise ValueError("profile must be a string")
 
@@ -106,7 +108,7 @@ class Binding(object):
 
     def set_default_map(self, profile: str, mapping: str):
         """
-        Set the default map
+        Set the default map of the given profile
 
         :param profile: The profile number
         :type: str
@@ -116,7 +118,6 @@ class Binding(object):
 
         :raises ValueError: If parameters are invalid
         """
-
         if not isinstance(profile, str):
             raise ValueError("profile must be a string")
         if not isinstance(mapping, str):
@@ -138,7 +139,6 @@ class Binding(object):
 
         :raises ValueError: If parameters are invalid
         """
-
         if not isinstance(profile, str):
             raise ValueError("profile must be a string")
         if not isinstance(map_name, str):
@@ -164,7 +164,6 @@ class Binding(object):
 
         :raises ValueError: If parameters are invalid
         """
-
         if not isinstance(profile, str):
             raise ValueError("profile must be a string")
         if not isinstance(mapping, str):
@@ -188,7 +187,6 @@ class Binding(object):
 
         :raises ValueError: If parameters are invalid
         """
-
         if not isinstance(profile, str):
             raise ValueError("profile must be a string")
         if not isinstance(mapping, str):
@@ -215,7 +213,6 @@ class Binding(object):
 
         :raises ValueError: If parameters are invalid
         """
-
         if not isinstance(mapping, str):
             raise ValueError("mapping must be a string")
 
@@ -233,7 +230,6 @@ class Binding(object):
 
         :raises ValueError: If parameters are invalid
         """
-
         if not isinstance(profile, str):
             raise ValueError("profile must be a string")
 
@@ -295,8 +291,8 @@ class Binding(object):
             raise ValueError("mapping must be a string")
         if not isinstance(key_code, int):
             raise ValueError("key_code must be an integer")
-        if action_type not in action_types:
-            raise ValueError("action_type must be on of the following values: {0}".format(action_types))
+        if action_type not in ACTION_TYPES:
+            raise ValueError("action_type must be on of the following values: {0}".format(ACTION_TYPES))
         if not isinstance(value, str):
             raise ValueError("value must be an string")
 
@@ -378,7 +374,6 @@ class Binding(object):
 
         :raises ValueError: If parameters are invalid
         """
-
         if not isinstance(profile, str):
             raise ValueError("profile must be a string")
         if not isinstance(mapping, str):
@@ -407,7 +402,6 @@ class Binding(object):
 
         :raises ValueError: If parameters are invalid
         """
-
         if not isinstance(profile, str):
             raise ValueError("profile must be a string")
         if not isinstance(mapping, str):
@@ -436,7 +430,6 @@ class Binding(object):
 
         :raises ValueError: If parameters are invalid
         """
-
         if not isinstance(profile, str):
             raise ValueError("profile must be a string")
         if not isinstance(mapping, str):
@@ -459,7 +452,6 @@ class Binding(object):
 
         :raises ValueError: If parameters are invalid
         """
-
         if not isinstance(profile, str):
             raise ValueError("profile must be a string")
         if not isinstance(mapping, str):

@@ -23,3 +23,5 @@ RIPPLE_REFRESH_RATE = 0.05
 POLL_1000HZ = 1000
 POLL_500HZ = 500
 POLL_125HZ = 125
+
+ACTION_TYPES = ["execute", "key", "map", "release", "shift", "sleep"]

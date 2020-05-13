@@ -81,41 +81,41 @@ class KeybindingManager(object):
         # self._logger.debug("Key action: {0}, {1}".format(key_code, key_press))
 
         key_code = str(key_code)
-
         current_binding = self.current_mapping["binding"]
-        if key_press == 'release' and key_code not in current_binding:  # Key released, but not bound
-            if key_code == self._shift_modifier:  # Key is map shifted
-                self.current_mapping = self._old_mapping_name
-                self._shift_modifier = None
-            else:
-                self.__key_up(key_code)
 
-        elif key_code not in current_binding:  # Ordinary key pressed
-            self.__key_down(key_code)
+        if key_code not in current_binding:  # Ordinary key pressed
+            if key_press != 'release':
+                self.__key_down(key_code)
+            else:
+                if key_code == self._shift_modifier:  # Key is the shift modifier
+                    self.current_mapping = self._old_mapping_name
+                    self._shift_modifier = None
+                else:
+                    self.__key_up(key_code)
 
         else:  # Key bound
             for action in current_binding[key_code]:
                 if key_press != 'release':  # Key pressed (or autorepeat)
-                    if action["type"] == "key":
+                    if action["type"] == "execute":
+                        subprocess.run(["/bin/sh", "-c", action["value"]])
+
+                    elif action["type"] == "key":
                         self.__key_down(action["value"])
 
                     elif action["type"] == "map":
                         self.current_mapping = action["value"]
 
+                    elif action["type"] == "release":
+                        self.__key_up(action["value"])
+
                     elif action["type"] == "shift":
                         self.current_mapping = action["value"]
                         self._shift_modifier = key_code  # Set map shift key
 
-                    elif action["type"] == "execute":
-                        subprocess.run(["/bin/sh", "-c", str(action["value"])])
-
                     elif action["type"] == "sleep":
                         time.sleep(int(action["value"]))
 
-                    elif action["type"] == "release":
-                        self.__key_up(action["value"])
-
-                elif key_press == 'release':
+                else:
                     if key_code not in (183, 184, 185, 186, 187):  # Macro key released, skip it
                         if action["type"] == "key":  # Key released
                             self.__key_up(action["value"])
@@ -314,18 +314,19 @@ class KeybindingManager(object):
 
     def dbus_add_action(self, profile, map, key_code, action_type, value, action_id=None):
         key = self._profiles[profile][map]["binding"].setdefault(key_code, [])
+
         if action_id != None:
             key[action_id] = {"type": action_type, "value": value}
         else:
             key.append({"type": action_type, "value": value})
 
-        self.write_config_file(self.get_config_file_name())
+        self.write_config_file(self._config_file)
 
     def dbus_set_matrix(self, profile, map, frame):
         self._profiles[profile][map].update({"matrix": frame})
         self._profiles[profile][map]["is_using_matrix"] = True
 
-        self.write_config_file(self.get_config_file_name())
+        self.write_config_file(self._config_file)
 
 
 DEFAULT_PROFILE = {

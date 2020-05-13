@@ -17,7 +17,7 @@ def add_profile(self, profile):
 
     self.binding_manager._profiles.update({str(len(self.binding_manager._profiles)): {"name": profile, "default_map": "Default", "Default": {"is_using_matrix": False, "binding": {}}}})
 
-    self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
+    self.binding_manager.write_config_file(self.binding_manager._config_file)
 
 
 @endpoint('razer.device.binding', 'removeProfile', in_sig='s')
@@ -32,7 +32,7 @@ def remove_profile(self, profile):
 
     self.binding_manager._profiles.pop(str(profile))
 
-    self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
+    self.binding_manager.write_config_file(self.binding_manager._config_file)
 
 
 @endpoint('razer.device.binding', 'getProfiles', out_sig='s')
@@ -91,7 +91,7 @@ def set_default_map(self, profile, mapping):
 
     self.binding_manager._profiles[profile]["default_map"] = mapping
 
-    self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
+    self.binding_manager.write_config_file(self.binding_manager._config_file)
 
 
 @endpoint('razer.device.binding', 'getDefaultMap', in_sig='s', out_sig='s')
@@ -216,7 +216,7 @@ def add_map(self, profile, map):
 
     self.binding_manager._profiles[profile].update({map: {"is_using_matrix": False, "binding": {}}})
 
-    self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
+    self.binding_manager.write_config_file(self.binding_manager._config_file)
 
 
 @endpoint('razer.device.binding', 'removeMap', in_sig='ss')
@@ -235,7 +235,7 @@ def remove_map(self, profile, map):
 
     self.binding_manager._profiles[profile].pop(map)
 
-    self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
+    self.binding_manager.write_config_file(self.binding_manager._config_file)
 
 
 @endpoint('razer.device.binding', 'addAction', in_sig='sssss')
@@ -316,7 +316,7 @@ def remove_action(self, profile, map, key_code, action_id):
     else:
         del self.binding_manager._profiles[profile][map]["binding"][key_code][int(action_id)]
 
-    self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
+    self.binding_manager.write_config_file(self.binding_manager._config_file)
 
 
 @endpoint('razer.device.binding', 'clearActions', in_sig='sss')
@@ -338,7 +338,7 @@ def clear_actions(self, profile, map, key_code):
 
     self.binding_manager._profiles[profile][map]["binding"].pop(key_code)
 
-    self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
+    self.binding_manager.write_config_file(self.binding_manager._config_file)
 
 
 @endpoint('razer.device.binding.lighting', 'getProfileLEDs', in_sig='ss', out_sig='bbb')
@@ -394,7 +394,7 @@ def set_profile_leds(self, profile, map, red, green, blue):
     self.binding_manager._profiles[profile][map].update(
         {'red_led': red, 'green_led': green, 'blue_led': blue})
 
-    self.binding_manager.write_config_file(self.binding_manager.get_config_file_name())
+    self.binding_manager.write_config_file(self.binding_manager._config_file)
 
 
 @endpoint('razer.device.binding.lighting', 'getMatrix', in_sig='ss', out_sig='s')
