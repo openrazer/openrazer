@@ -16,7 +16,6 @@ import datetime
 import json
 import logging
 import os
-import random
 import select
 import threading
 import time
@@ -29,34 +28,6 @@ from evdev.events import event_factory
 
 EPOLL_TIMEOUT = 0.01
 SPIN_SLEEP = 0.005
-
-COLOUR_CHOICES = (
-    (255, 0, 0),    # Red
-    (0, 255, 0),    # Green
-    (0, 0, 255),    # Blue
-    (255, 255, 0),  # Yellow
-    (0, 255, 255),  # Cyan
-    (255, 0, 255),  # Magenta
-)
-
-
-def random_colour_picker(last_choice, iterable):
-    """
-    Chose a random choice but not the last one
-
-    :param last_choice: Last choice
-    :type last_choice: object
-
-    :param iterable: Iterable object
-    :type iterable: iterable
-
-    :return: Choice
-    :rtype: object
-    """
-    result = random.choice(iterable)
-    while result == last_choice:
-        result = random.choice(iterable)
-    return result
 
 
 class KeyWatcher(threading.Thread):
@@ -71,7 +42,7 @@ class KeyWatcher(threading.Thread):
         :param event: the event record
         :type: InputEvent
 
-        :return: Tuple of event time, key_action, key_code
+        :return: Tuple of key_action, key_code
         :rtype: tuple
         """
 
@@ -147,11 +118,10 @@ class KeyWatcher(threading.Thread):
             for event in events:
                 key_action, key_code = self.parse_event_record(event)
 
-                # Skip if date, key_action and key_code is none as that's a spacer record
+                # Skip if key_action and key_code is none as that's a spacer record
                 if key_action is None:
                     continue
 
-                # Now if key is pressed then we record
                 self._parent.key_action(key_code, key_action)
 
     @property
@@ -209,8 +179,6 @@ class KeyboardKeyManager(object):
         self._temp_key_store_active = False
         self._temp_key_store = []
         self._temp_expire_time = datetime.timedelta(seconds=2)
-
-        self._last_colour_choice = None
 
         self.KEY_MAP = KEY_MAPPING
 
@@ -292,9 +260,7 @@ class KeyboardKeyManager(object):
         # self._logger.debug("Got key: {0}, state: {1}".format(key_name, key_press))
 
         if key_press == 'press' and self.temp_key_store_state:
-            colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
-            self._last_colour_choice = colour
-            self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_id], colour))
+            self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_id]))
 
         # Sets up game mode as when enabling macro keys it stops the key working
         if key_id == 189:  # GAMEMODE
