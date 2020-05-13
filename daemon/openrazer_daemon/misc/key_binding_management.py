@@ -62,7 +62,7 @@ class KeybindingManager(object):
             self.read_config_file(self._config_file)
         self.current_profile = "0"
 
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     def __key_up(self, key_code):
         for _ in range(0, 5):
             try:
@@ -74,7 +74,7 @@ class KeybindingManager(object):
             except ValueError:
                 time.sleep(.005)
 
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     def __key_down(self, key_code):
         key_code = int(key_code)
         self._current_keys.append(key_code)

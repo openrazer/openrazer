@@ -40,7 +40,7 @@ for device in device_manager.devices:
     device.fx.advanced.matrix[1, 4] = (255, 0, 0)
     device.binding.set_matrix("0", "Example", device.fx.advanced.matrix.to_dict())
 
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     # Add an key action that changes the map when you press the 1 key
     device.binding.add_action("0", "Default", int(ecodes.KEY_1), "map", "Example")
     device.binding.add_action("0", "Example", int(ecodes.KEY_1), "map", "Default")
