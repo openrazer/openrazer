@@ -79,6 +79,7 @@ struct razer_mouse_device {
 
     struct input_dev *input;
     struct hrtimer repeat_timer;
+    unsigned int tilt_hwheel;
     unsigned int tilt_repeat_delay;
     unsigned int tilt_repeat;
     __s32 hwheel_value;
