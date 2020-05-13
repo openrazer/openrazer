@@ -23,19 +23,14 @@ import struct
 import threading
 import time
 import sys
-from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_EVENT_MAPPING, ORBWEAVER_KEY_MAPPING
+from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, ORBWEAVER_KEY_MAPPING, NAGA_HEX_V2_KEY_MAPPING
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # TODO: figure out a better way to handle this
 from evdev import UInput, ecodes, InputDevice
 from evdev.events import event_factory
-# pylint: disable=import-error
-EVENT_FORMAT = '@llHHI'
-EVENT_SIZE = struct.calcsize(EVENT_FORMAT)
 
 EPOLL_TIMEOUT = 0.01
 SPIN_SLEEP = 0.005
-
-EVIOCGRAB = 0x40044590
 
 COLOUR_CHOICES = (
     (255, 0, 0),    # Red
@@ -75,33 +70,30 @@ class KeyWatcher(threading.Thread):
         """
         Parse Input event record
 
-        :param data: Binary data
-        :type data: bytes
+        :param event: the event record
+        :type: InputEvent
 
         :return: Tuple of event time, key_action, key_code
         :rtype: tuple
         """
 
-        if event.type != ecodes.ecodes['EV_KEY']:  # input-event-codes.h EV_KEY 0x01
-            return None, None, None
+        if event.type == ecodes.ecodes['EV_KEY']:  # input-event-codes.h EV_KEY 0x01
 
-        if event.value == 0:
-            key_action = 'release'
-        elif event.value == 1:
-            key_action = 'press'
-        elif event.value == 2:
-            key_action = 'autorepeat'
+            if event.value == 0:
+                key_action = 'release'
+            elif event.value == 1:
+                key_action = 'press'
+            elif event.value == 2:
+                key_action = 'autorepeat'
+            else:
+                key_action = 'unknown'
+
+            date = datetime.datetime.fromtimestamp(event.timestamp())
+
+            return (date, key_action, event.code)
+        
         else:
-            key_action = 'unknown'
-
-        date = datetime.datetime.fromtimestamp(event.timestamp())
-
-        result = (date, key_action, event.code)
-
-        if event.type == event.code == event.value == 0:
             return None, None, None
-
-        return result
 
     def __init__(self, device_id, event_files, parent):
         super(KeyWatcher, self).__init__()
@@ -195,14 +187,13 @@ class KeyboardKeyManager(object):
     * Receiving keypresses from the KeyWatcher
     * Logic to deal with GameMode shortcut not working when macro's not enabled
     * Logic to deal with recording on the fly macros and replaying them
-    * Stores number of keypresses / key / hour, stats are used for heatmaps / time-series
 
     It will be used to store keypresses in a list (for at most 2 seconds) if enabled for the ripple effect, when I
     get round to making the effect.
     """
 
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, device_id, event_files, parent, testing=False, should_grab_event_files=False):
+    def __init__(self, device_id, event_files, parent, testing=False):
 
         self._device_id = device_id
         self._logger = logging.getLogger('razer.device{0}.keymanager'.format(device_id))
@@ -219,22 +210,13 @@ class KeyboardKeyManager(object):
         else:
             self._logger.warning("No event files for KeyWatcher")
 
-        self._record_stats = parent.config.get('Statistics', 'key_statistics')
-        self._stats = {}
-
         self._temp_key_store_active = False
         self._temp_key_store = []
         self._temp_expire_time = datetime.timedelta(seconds=2)
 
         self._last_colour_choice = None
 
-        self._should_grab_event_files = should_grab_event_files
-        self._event_files_locked = False
-
         self.KEY_MAP = KEY_MAPPING
-        self.EVENT_MAP = EVENT_MAPPING
-
-    # TODO add property for enabling key stats?
 
     @property
     def temp_key_store(self):
@@ -313,102 +295,79 @@ class KeyboardKeyManager(object):
         except IndexError:
             pass
 
-        try:
-            # Convert event ID to key name
-            key_name = self.EVENT_MAP[key_id]
+        # self._logger.debug("Got key: {0}, state: {1}".format(key_name, key_press))
 
-            # self._logger.debug("Got key: {0}, state: {1}".format(key_name, key_press))
+        if key_press == 'press' and self.temp_key_store_state:
+            colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
+            self._last_colour_choice = colour
+            self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_id], colour))
 
-            # This is the key for storing stats, by generating hour timestamps it will bucket data nicely.
-            storage_bucket = event_time.strftime('%Y%m%d%H')
+        # Sets up game mode as when enabling macro keys it stops the key working
+        if key_id == 189: # GAMEMODE
+            self._logger.debug("Got game mode combo")
 
-            try:
-                # Try and increment key in bucket
-                self._stats[storage_bucket][key_name] += 1
-            #    self._logger.debug("Increased key %s", key_name)
-            except KeyError:
-                # Create bucket
-                self._stats[storage_bucket] = dict.fromkeys(self.KEY_MAP, 0)
-                try:
-                    # Increment key
-                    self._stats[storage_bucket][key_name] += 1
-            #        self._logger.debug("Increased key %s", key_name)
-                except KeyError as err:
-                    self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
+            game_mode = self._parent.getGameMode()
+            self._parent.setGameMode(not game_mode)
 
-            if key_press == 'press' and self.temp_key_store_state:
-                colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
-                self._last_colour_choice = colour
-                self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_name], colour))
+        # Brightness logic
+        elif key_id == 190: # BRIGHTNESSDOWN
+            # Get brightness value
+            current_brightness = self._parent.method_args.get('brightness', None)
+            if current_brightness is None:
+                current_brightness = self._parent.getBrightness()
 
-            # Sets up game mode as when enabling macro keys it stops the key working
-            if key_name == 'GAMEMODE':
-                self._logger.info("Got game mode combo")
+            if current_brightness > 0:
+                current_brightness -= 10
+                if current_brightness < 0:
+                    current_brightness = 0
 
-                game_mode = self._parent.getGameMode()
-                self._parent.setGameMode(not game_mode)
+                self._parent.setBrightness(current_brightness)
+                # self._parent.method_args['brightness'] = current_brightness
 
-            # Brightness logic
-            elif key_name == 'BRIGHTNESSDOWN':
-                # Get brightness value
-                current_brightness = self._parent.method_args.get('brightness', None)
-                if current_brightness is None:
-                    current_brightness = self._parent.getBrightness()
+        elif key_id == 194: # BRIGHTNESSUP
+            # Get brightness value
+            current_brightness = self._parent.method_args.get('brightness', None)
+            if current_brightness is None:
+                current_brightness = self._parent.getBrightness()
 
-                if current_brightness > 0:
-                    current_brightness -= 10
-                    if current_brightness < 0:
-                        current_brightness = 0
+            if current_brightness < 100:
+                current_brightness += 10
+                if current_brightness > 100:
+                    current_brightness = 100
 
-                    self._parent.setBrightness(current_brightness)
-                    #self._parent.method_args['brightness'] = current_brightness
-            elif key_name == 'BRIGHTNESSUP':
-                # Get brightness value
-                current_brightness = self._parent.method_args.get('brightness', None)
-                if current_brightness is None:
-                    current_brightness = self._parent.getBrightness()
+                self._parent.setBrightness(current_brightness)
+                # self._parent.method_args['brightness'] = current_brightness
 
-                if current_brightness < 100:
-                    current_brightness += 10
-                    if current_brightness > 100:
-                        current_brightness = 100
+        elif key_id == 188: # MACROMODE
+            if self._parent.binding_manager.macro_mode == False:
+                self._parent.binding_manager.macro_mode = True
+            else:
+                self._parent.binding_manager.macro_mode = False
 
-                    self._parent.setBrightness(current_brightness)
-                    #self._parent.method_args['brightness'] = current_brightness
-
-            elif key_name == 'MACROMODE':
-                if self._parent.binding_manager.macro_mode == False:
-                    self._parent.binding_manager.macro_mode = True
+        elif self._parent.binding_manager.macro_mode == True:
+            if key_id in (183, 184, 185, 186, 187): # M1, M2, M3, M4, M5
+                if self._parent.binding_manager.macro_key == None:
+                    self._parent.binding_manager.macro_key = key_id
                 else:
-                    self._parent.binding_manager.macro_mode = False
+                    self._logger.warning("Nested macros are not supported")
 
-            elif self._parent.binding_manager.macro_mode == True:
-                if key_name in ('M1', 'M2', 'M3', 'M4', 'M5'):
-                    if not self._parent.binding_manager._macro_key:
-                        self._parent.binding_manager.macro_key = key_id
-                    else:
-                        self._logger.warning("Nested macros are not supported")
+            elif self._parent.binding_manager.macro_key:
+                profile = self._parent.getActiveProfile()
+                mapping = self._parent.getActiveMap()
+                key = self._parent.binding_manager.macro_key
 
-                elif self._parent.binding_manager.macro_key:
-                    profile = self._parent.getActiveProfile()
-                    mapping = self._parent.getActiveMap()
-                    key = self._parent.binding_manager.macro_key
-
-                    if key_press == 'press':
-                        self._parent.addAction(profile, mapping, str(key), "key", str(key_id))
-                    elif key_press == 'release':
-                        self._parent.addAction(profile, mapping, str(key), "release", str(key_id))
-
-                else:
-                    self._logger.warning("On-the-fly macros are only supported for macro keys, please use a client for configuring other keys")
-                    self._parent.binding_manager.macro_mode = False
+                if key_press == 'press':
+                    self._parent.addAction(profile, mapping, str(key), "key", str(key_id))
+                elif key_press == 'release':
+                    self._parent.addAction(profile, mapping, str(key), "release", str(key_id))
 
             else:
-                x = threading.Thread(target=self._parent.binding_manager.key_press, args=(key_id, key_press))
-                x.start()
+                self._logger.warning("On-the-fly macros are only supported for macro keys, please use a client for configuring other keys")
+                self._parent.binding_manager.macro_mode = False
 
-        except KeyError as err:
-            self._logger.exception("Got key error. Couldn't convert event to key name", exc_info=err)
+        else:
+            x = threading.Thread(target=self._parent.binding_manager.key_press, args=(key_id, key_press))
+            x.start()
 
     def close(self):
         """
@@ -450,14 +409,11 @@ class KeyboardKeyManager(object):
 
 class NagaHexV2KeyManager(KeyboardKeyManager):
     KEY_MAP = NAGA_HEX_V2_KEY_MAPPING
-    EVENT_MAP = NAGA_HEX_V2_EVENT_MAPPING
 
 
 class GamepadKeyManager(KeyboardKeyManager):
-    EVENT_MAP = TARTARUS_EVENT_MAPPING
     KEY_MAP = TARTARUS_KEY_MAPPING
 
 
 class OrbweaverKeyManager(KeyboardKeyManager):
-    EVENT_MAP = ORBWEAVER_EVENT_MAPPING
     KEY_MAP = ORBWEAVER_KEY_MAPPING
