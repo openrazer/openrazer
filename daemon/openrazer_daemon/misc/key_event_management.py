@@ -13,13 +13,11 @@ Each event is in the format of
 * signed int value
 """
 import datetime
-import fcntl
 import json
 import logging
 import os
 import random
 import select
-import struct
 import threading
 import time
 import sys
@@ -88,12 +86,10 @@ class KeyWatcher(threading.Thread):
             else:
                 key_action = 'unknown'
 
-            date = datetime.datetime.fromtimestamp(event.timestamp())
+            return (key_action, event.code)
 
-            return (date, key_action, event.code)
-        
         else:
-            return None, None, None
+            return None, None
 
     def __init__(self, device_id, event_files, parent):
         super(KeyWatcher, self).__init__()
@@ -149,14 +145,14 @@ class KeyWatcher(threading.Thread):
             if not events:
                 break
             for event in events:
-                date, key_action, key_code = self.parse_event_record(event)
+                key_action, key_code = self.parse_event_record(event)
 
                 # Skip if date, key_action and key_code is none as that's a spacer record
-                if date is None:
+                if key_action is None:
                     continue
 
                 # Now if key is pressed then we record
-                self._parent.key_action(date, key_code, key_action)
+                self._parent.key_action(key_code, key_action)
 
     @property
     def shutdown(self):
@@ -264,7 +260,7 @@ class KeyboardKeyManager(object):
         """
         self._temp_key_store_active = value
 
-    def key_action(self, event_time, key_id, key_press):
+    def key_action(self, key_id, key_press):
         """
         Process a key press event
 
@@ -273,8 +269,6 @@ class KeyboardKeyManager(object):
         * Sends key to the binding manager
         * Pressing any key will increment a statistical number in a dictionary used for generating
           heatmaps.
-        :param event_time: Time event occurred
-        :type event_time: datetime.datetime
 
         :param key_id: Key Event ID
         :type key_id: int
@@ -303,14 +297,14 @@ class KeyboardKeyManager(object):
             self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_id], colour))
 
         # Sets up game mode as when enabling macro keys it stops the key working
-        if key_id == 189: # GAMEMODE
+        if key_id == 189:  # GAMEMODE
             self._logger.debug("Got game mode combo")
 
             game_mode = self._parent.getGameMode()
             self._parent.setGameMode(not game_mode)
 
         # Brightness logic
-        elif key_id == 190: # BRIGHTNESSDOWN
+        elif key_id == 190:  # BRIGHTNESSDOWN
             # Get brightness value
             current_brightness = self._parent.method_args.get('brightness', None)
             if current_brightness is None:
@@ -324,7 +318,7 @@ class KeyboardKeyManager(object):
                 self._parent.setBrightness(current_brightness)
                 # self._parent.method_args['brightness'] = current_brightness
 
-        elif key_id == 194: # BRIGHTNESSUP
+        elif key_id == 194:  # BRIGHTNESSUP
             # Get brightness value
             current_brightness = self._parent.method_args.get('brightness', None)
             if current_brightness is None:
@@ -338,14 +332,14 @@ class KeyboardKeyManager(object):
                 self._parent.setBrightness(current_brightness)
                 # self._parent.method_args['brightness'] = current_brightness
 
-        elif key_id == 188: # MACROMODE
+        elif key_id == 188:  # MACROMODE
             if self._parent.binding_manager.macro_mode == False:
                 self._parent.binding_manager.macro_mode = True
             else:
                 self._parent.binding_manager.macro_mode = False
 
         elif self._parent.binding_manager.macro_mode == True:
-            if key_id in (183, 184, 185, 186, 187): # M1, M2, M3, M4, M5
+            if key_id in (183, 184, 185, 186, 187):  # M1, M2, M3, M4, M5
                 if self._parent.binding_manager.macro_key == None:
                     self._parent.binding_manager.macro_key = key_id
                 else:
