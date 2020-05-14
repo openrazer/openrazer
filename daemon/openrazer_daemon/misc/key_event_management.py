@@ -10,7 +10,6 @@ import threading
 import time
 import sys
 from openrazer_daemon.keyboard import KEY_MAPPING
-
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # TODO: figure out a better way to handle this
 from evdev import ecodes, InputDevice
 
@@ -85,10 +84,7 @@ class KeyWatcher(threading.Thread):
 
         # Ungrab files and close them
         for device in self._event_file_map.values():
-            try:  # Try once for each
-                device.close()
-            except:
-                pass
+            device.close()
 
     def _poll(self, event_file_map):
         r, _, _ = select.select(event_file_map, [], [], EPOLL_TIMEOUT)
