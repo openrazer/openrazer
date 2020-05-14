@@ -1,19 +1,17 @@
 """
-Recives key events from the key event manager and does stuff
+Recives key events from the key event manager and does stuff.
 """
 
-import datetime
 import json
 import logging
 import os
-import random
-import struct
 import time
 import sys
 import subprocess
 from openrazer_daemon.keyboard import KeyboardColour
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # TODO: figure out a better way to handle this
+# TODO: figure out a better way to handle this
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from evdev import UInput, ecodes
 
 DEFAULT_PROFILE = {
@@ -27,13 +25,13 @@ DEFAULT_PROFILE = {
 }
 
 
-class KeybindingManager(object):
+class KeybindingManager():
     """
     Key binding manager
     """
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, device_id, parent, testing=False):
-
         self._parent = parent
         self._device_id = device_id
         self._serial_number = self._parent.getSerial()
@@ -81,9 +79,10 @@ class KeybindingManager(object):
         self._fake_device.write(ecodes.EV_KEY, key_code, 1)
         self._fake_device.syn()
 
+    # pylint: disable=too-many-branches
     def key_press(self, key_code, key_press):
         """
-        Check for a binding
+        Check for a binding and act on it.
 
         :param key_code: The key code of the pressed key.
         :type key_code: int
@@ -107,7 +106,7 @@ class KeybindingManager(object):
             for action in current_binding[key_code]:
                 if key_press != 'release':  # Key pressed (or autorepeat)
                     if action["type"] == "execute":
-                        subprocess.run(["/bin/sh", "-c", action["value"]])
+                        subprocess.run(["/bin/sh", "-c", action["value"]], check=False)
 
                     elif action["type"] == "key":
                         self.__key_down(action["value"])
@@ -136,8 +135,7 @@ class KeybindingManager(object):
     @property
     def current_mapping(self):
         """
-
-        Returns the current mapping
+        Return the current mapping
 
         :return: The current mapping
         :rtype: dict
@@ -147,12 +145,12 @@ class KeybindingManager(object):
     @current_mapping.setter
     def current_mapping(self, value):
         """
-        Sets the current mapping and changes the led matrix
+        Set the current mapping and changes the led matrix
 
         :param value: The new mapping
         :type value: str
         """
-        self._logger.debug("Change mapping to {0}".format(value))
+        self._logger.debug("Change mapping to %s", str(value))
 
         self._current_mapping = self._current_profile[value]
         self._old_mapping_name = self._current_mapping_name
@@ -176,13 +174,13 @@ class KeybindingManager(object):
                 self._parent.setGreenLED(self.current_mapping["green_led"])
             if 'keypad_set_profile_led_blue' in capabilities:
                 self._parent.setBlueLED(self.current_mapping["blue_led"])
-        except:
+        except KeyError:
             pass
 
     @property
     def current_profile(self):
         """
-        Returns the current profile
+        Return the current profile
 
         :return: the current profile name
         :rtype: str
@@ -192,12 +190,11 @@ class KeybindingManager(object):
     @current_profile.setter
     def current_profile(self, value):
         """
-        Sets the current profile
+        Set the current profile
 
         :param value: The profile number
         :type: int
         """
-
         self._current_profile = self._profiles[value]
         self._current_profile_id = value
         self.current_mapping = self._current_profile["default_map"]
@@ -205,7 +202,7 @@ class KeybindingManager(object):
     @property
     def macro_mode(self):
         """
-        Returns the state of macro mode
+        Return the state of macro mode
 
         :return: the macro mode state
         :rtype: bool
@@ -215,18 +212,17 @@ class KeybindingManager(object):
     @macro_mode.setter
     def macro_mode(self, value):
         """
-        Sets the state of macro mode
+        Set the state of macro mode
 
         :param value: The state of macro mode
         :type: bool
         """
-
-        if value == True:
+        if value:
             self._macro_mode = True
             self._parent.setMacroEffect(0x01)
             self._parent.setMacroMode(True)
 
-        elif value == False:
+        elif not value:
             self._macro_mode = False
             self.macro_key = None
             self._parent.setMacroMode(False)
@@ -259,7 +255,7 @@ class KeybindingManager(object):
 
     def read_config_file(self, config_file):
         """
-        Reads the configuration file and sets the variables accordingly
+        Read the configuration file and sets the variables accordingly
 
         :param config_file: path to the configuration file
         :type config_file: str
@@ -269,31 +265,29 @@ class KeybindingManager(object):
         """
         self._logger.info("Reading config file from %s", config_file)
 
-        with open(config_file, 'r') as f:
-            self._profiles = json.load(f)
+        with open(config_file, 'r') as file:
+            self._profiles = json.load(file)
 
     def write_config_file(self, config_file):
         """
-        Writes the _profiles dict to the config file
+        Write the _profiles dict to the config file
 
         :param config_file: The path to the config file
         :type config_file: str
         """
         self._logger.debug("writing config file to %s", config_file)
 
-        with open(config_file, 'w') as f:
-            json.dump(self._profiles, f, indent=4)
+        with open(config_file, 'w') as file:
+            json.dump(self._profiles, file, indent=4)
 
     def get_config_file_name(self):
         """
-        Gets the name of the config file
-        (this currently uses a hardcoded value but I want to use
-        the path to the config file currently used by the daemon)
+        Get the name of the config file
 
         :return: path to config file
         :rtype: str
         """
-
+        # pylint: disable=protected-access
         config_path = os.path.dirname(self._parent._config_file)
         return config_path + "/keybinding_" + self._serial_number + ".json"
 
@@ -322,18 +316,19 @@ class KeybindingManager(object):
 
         return json.dumps(return_list)
 
-    def dbus_add_action(self, profile, map, key_code, action_type, value, action_id=None):
-        key = self._profiles[profile][map]["binding"].setdefault(key_code, [])
+    # pylint: disable=too-many-arguments
+    def dbus_add_action(self, profile, mapping, key_code, action_type, value, action_id=None):
+        key = self._profiles[profile][mapping]["binding"].setdefault(key_code, [])
 
-        if action_id != None:
+        if action_id is None:
             key[action_id] = {"type": action_type, "value": value}
         else:
             key.append({"type": action_type, "value": value})
 
         self.write_config_file(self._config_file)
 
-    def dbus_set_matrix(self, profile, map, frame):
-        self._profiles[profile][map].update({"matrix": frame})
-        self._profiles[profile][map]["is_using_matrix"] = True
+    def dbus_set_matrix(self, profile, mapping, frame):
+        self._profiles[profile][mapping].update({"matrix": frame})
+        self._profiles[profile][mapping]["is_using_matrix"] = True
 
         self.write_config_file(self._config_file)

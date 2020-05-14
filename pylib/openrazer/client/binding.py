@@ -2,13 +2,14 @@
 Client binding controls
 """
 
-import dbus as _dbus
 import json
+import dbus as _dbus
 
 from openrazer.client.constants import ACTION_TYPES
 
 
-class Binding(object):
+# pylint: disable=too-many-public-methods
+class Binding():
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None):
         self._capabilities = capabilities
 
@@ -265,6 +266,7 @@ class Binding(object):
 
         return json.loads(self._binding_dbus.getActions(profile, mapping, str(key_code)))
 
+    # pylint: disable=too-many-arguments
     def add_action(self, profile: str, mapping: str, key_code: int, action_type: str, value: str):
         """
         Add an action to the given key

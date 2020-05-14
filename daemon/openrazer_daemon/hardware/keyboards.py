@@ -4,7 +4,7 @@ Keyboards class
 import re
 
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
-from openrazer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
+from openrazer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager
 from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
 from openrazer_daemon.misc.key_binding_management import KeybindingManager as _BindingManager
 from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_KEY_MAPPING

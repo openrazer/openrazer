@@ -1,30 +1,18 @@
 """
 Receives events from /dev/input/by-id/somedevice
-
-Events are 24 bytes long and are emitted from a character device in 24 byte chunks.
-As the keyboards have "2" keyboard interfaces we need to listen on both of them in case some n00b
-switches to game mode.
-
-Each event is in the format of
-* signed int of seconds
-* signed int of microseconds
-* unsigned short of event type
-* unsigned short code
-* signed int value
 """
+
 import datetime
-import json
 import logging
 import os
 import select
 import threading
 import time
 import sys
-from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, ORBWEAVER_KEY_MAPPING, NAGA_HEX_V2_KEY_MAPPING
+from openrazer_daemon.keyboard import KEY_MAPPING
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # TODO: figure out a better way to handle this
-from evdev import UInput, ecodes, InputDevice
-from evdev.events import event_factory
+from evdev import ecodes, InputDevice
 
 EPOLL_TIMEOUT = 0.01
 SPIN_SLEEP = 0.005
@@ -34,6 +22,7 @@ class KeyWatcher(threading.Thread):
     """
     Thread to watch keyboard event files and return keypresses
     """
+
     @staticmethod  # TODO remove
     def parse_event_record(event):
         """
@@ -45,9 +34,7 @@ class KeyWatcher(threading.Thread):
         :return: Tuple of key_action, key_code
         :rtype: tuple
         """
-
-        if event.type == ecodes.ecodes['EV_KEY']:  # input-event-codes.h EV_KEY 0x01
-
+        if event.type is ecodes.ecodes['EV_KEY']:  # input-event-codes.h EV_KEY 0x01
             if event.value == 0:
                 key_action = 'release'
             elif event.value == 1:
@@ -59,8 +46,7 @@ class KeyWatcher(threading.Thread):
 
             return (key_action, event.code)
 
-        else:
-            return None, None
+        return None, None
 
     def __init__(self, device_id, event_files, parent):
         super(KeyWatcher, self).__init__()
@@ -81,14 +67,14 @@ class KeyWatcher(threading.Thread):
         for device in self._event_file_map.values():
             try:
                 device.grab()
-                self._logger.debug("Grabbed device {0}".format(device.path))
+                self._logger.debug("Grabbed device %s", str(device.path))
             except (IOError, OSError) as err:
-                self._logger.exception("Error grabbing device {0}".format(device.path), exc_info=err)
+                self._logger.exception("Error grabbing device %s", str(device.path), exc_info=err)
 
         # Loop
         while not self._shutdown:
             try:
-                self.poll(self._event_file_map)
+                self._poll(self._event_file_map)
             except (OSError, IOError) as err:
                 self._logger.exception("Error reading from device, stopping key watcher", exc_info=err)
                 self._shutdown = True
@@ -99,17 +85,12 @@ class KeyWatcher(threading.Thread):
 
         # Ungrab files and close them
         for device in self._event_file_map.values():
-            try:
-                device.ungrab()
-            except:
-                pass  # If the device is unplugged we don't care
-
             try:  # Try once for each
                 device.close()
             except:
                 pass
 
-    def poll(self, event_file_map):
+    def _poll(self, event_file_map):
         r, _, _ = select.select(event_file_map, [], [], EPOLL_TIMEOUT)
         for fd in r:
             events = event_file_map[fd].read()
@@ -145,7 +126,7 @@ class KeyWatcher(threading.Thread):
         self._shutdown = value
 
 
-class KeyboardKeyManager(object):
+class KeyboardKeyManager():
     """
     Key management class.
 
@@ -153,14 +134,10 @@ class KeyboardKeyManager(object):
     * Receiving keypresses from the KeyWatcher
     * Logic to deal with GameMode shortcut not working when macro's not enabled
     * Logic to deal with recording on the fly macros and replaying them
-
-    It will be used to store keypresses in a list (for at most 2 seconds) if enabled for the ripple effect, when I
-    get round to making the effect.
+    * Send key press to binding manager
     """
 
-    # pylint: disable=too-many-instance-attributes
     def __init__(self, device_id, event_files, parent, testing=False):
-
         self._device_id = device_id
         self._logger = logging.getLogger('razer.device{0}.keymanager'.format(device_id))
         self._parent = parent
@@ -232,21 +209,16 @@ class KeyboardKeyManager(object):
         """
         Process a key press event
 
-        Ok an attempt to explain the logic
         * Adds keypresses to the temporary key store (for ripple effect)
         * Sends key to the binding manager
-        * Pressing any key will increment a statistical number in a dictionary used for generating
-          heatmaps.
 
         :param key_id: Key Event ID
         :type key_id: int
 
         :param key_press: Can either be press, release, autorepeat
-        :type key_press: bool
+        :type key_press: str
         """
-        # Disable pylints complaining for this part, #PerformanceOverNeatness
-        # pylint: disable=too-many-branches,too-many-statements
-
+        # pylint: disable=too-many-branches
         now = datetime.datetime.now()
 
         # Remove expired keys from store
@@ -269,44 +241,23 @@ class KeyboardKeyManager(object):
             game_mode = self._parent.getGameMode()
             self._parent.setGameMode(not game_mode)
 
-        # Brightness logic
-        elif key_id == 190:  # BRIGHTNESSDOWN
-            # Get brightness value
-            current_brightness = self._parent.method_args.get('brightness', None)
-            if current_brightness is None:
-                current_brightness = self._parent.getBrightness()
+        elif key_id in (194, 190):  # BRIGHTNESSUP or BRIGHTNESSDOWN
+            current_brightness = self._parent.getBrightness()
 
-            if current_brightness > 0:
-                current_brightness -= 10
-                if current_brightness < 0:
-                    current_brightness = 0
-
-                self._parent.setBrightness(current_brightness)
-                # self._parent.method_args['brightness'] = current_brightness
-
-        elif key_id == 194:  # BRIGHTNESSUP
-            # Get brightness value
-            current_brightness = self._parent.method_args.get('brightness', None)
-            if current_brightness is None:
-                current_brightness = self._parent.getBrightness()
-
-            if current_brightness < 100:
+            if key_id == 194:
                 current_brightness += 10
-                if current_brightness > 100:
-                    current_brightness = 100
+            else:
+                current_brightness -= 10
 
-                self._parent.setBrightness(current_brightness)
-                # self._parent.method_args['brightness'] = current_brightness
+            current_brightness = max(min(current_brightness, 100), 0)
+            self._parent.setBrightness(current_brightness)
 
         elif key_id == 188:  # MACROMODE
-            if self._parent.binding_manager.macro_mode == False:
-                self._parent.binding_manager.macro_mode = True
-            else:
-                self._parent.binding_manager.macro_mode = False
+            self._parent.binding_manager.macro_mode = not self._parent.binding_manager.macro_mode
 
-        elif self._parent.binding_manager.macro_mode == True:
+        elif self._parent.binding_manager.macro_mode:
             if key_id in (183, 184, 185, 186, 187):  # M1, M2, M3, M4, M5
-                if self._parent.binding_manager.macro_key == None:
+                if self._parent.binding_manager.macro_key is None:
                     self._parent.binding_manager.macro_key = key_id
                 else:
                     self._logger.warning("Nested macros are not supported")
@@ -347,7 +298,7 @@ class KeyboardKeyManager(object):
 
     def notify(self, msg):
         """
-        Receive notificatons from the device (we only care about effects)
+        Receive notifications from the device (we only care about effects).
 
         :param msg: Notification
         :type msg: tuple
@@ -365,15 +316,3 @@ class KeyboardKeyManager(object):
                 # else:
                 #     self.temp_key_store_state = False
                 pass
-
-
-class NagaHexV2KeyManager(KeyboardKeyManager):
-    KEY_MAP = NAGA_HEX_V2_KEY_MAPPING
-
-
-class GamepadKeyManager(KeyboardKeyManager):
-    KEY_MAP = TARTARUS_KEY_MAPPING
-
-
-class OrbweaverKeyManager(KeyboardKeyManager):
-    KEY_MAP = ORBWEAVER_KEY_MAPPING

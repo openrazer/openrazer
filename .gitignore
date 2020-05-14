@@ -66,10 +66,13 @@ dist
 /driver/*.mod.c
 /driver/.*.cmd
 
-#vscode config files
+# VSCode config files
 *.vscode
 
 # Sourcetrail files
 *.srctrlbm
 *.srctrlprj
 *.srctrldb
+
+# mypy
+.mypy_cache/
