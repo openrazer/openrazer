@@ -1,5 +1,6 @@
 import numpy as _np
 import dbus as _dbus
+from ast import literal_eval
 #from openrazer.client.constants import WAVE_LEFT, WAVE_RIGHT, REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS, REACTIVE_2000MS
 from openrazer.client import constants as c
 
@@ -1101,7 +1102,7 @@ class Frame(object):
             for column_id in range(0, self._cols):
                 row.update({int(column_id): self.get(row_id, column_id)})
 
-        return result
+        return literal_eval(str(result))
 
     def from_dict(self, frame):
         """
