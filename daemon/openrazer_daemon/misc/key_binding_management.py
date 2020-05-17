@@ -118,10 +118,13 @@ class KeybindingManager():
                         self.current_mapping = action["value"]
                     
                     elif action["type"] == "profile":
-                        for profile in self._current_profiles:
-                            profile = self._current_profiles[profile]
+                        i = 0
+                        for profile in self._profiles:
+                            profile = self._profiles[profile]
                             if profile["name"] == action["value"]:
-                                self.current_profile = action["value"]
+                                self.current_profile = str(i)
+                                self._shift_modifier = None # No happy accidents
+                            i += 1
 
                     elif action["type"] == "release":
                         self.__key_up(action["value"])
@@ -330,7 +333,7 @@ class KeybindingManager():
     def dbus_add_action(self, profile, mapping, key_code, action_type, value, action_id=None):
         key = self._profiles[profile][mapping]["binding"].setdefault(key_code, [])
 
-        if action_id is None:
+        if action_id is not None:
             key[action_id] = {"type": action_type, "value": value}
         else:
             key.append({"type": action_type, "value": value})

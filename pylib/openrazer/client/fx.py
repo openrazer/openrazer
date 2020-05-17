@@ -1095,11 +1095,11 @@ class Frame(object):
         """
         result = {}
         for row_id in range(0, self._rows):
-            result.update({row_id: {}})
+            result.update({int(row_id): {}})
             row = result[row_id]
 
             for column_id in range(0, self._cols):
-                row.update({column_id: self.get(row_id, column_id)})
+                row.update({int(column_id): self.get(row_id, column_id)})
 
         return result
 

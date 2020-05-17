@@ -416,7 +416,7 @@ def get_matrix(self, profile, mapping):
 
     self.logger.debug("DBus call get_matrix")
 
-    return json.dumps(self.key_manager._profiles[profile][mapping]["matrix"])
+    return json.dumps(self.binding_manager._profiles[profile][mapping]["matrix"])
 
 
 @endpoint('razer.device.binding.lighting', 'setMatrix', in_sig='sss')
