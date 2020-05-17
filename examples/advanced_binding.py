@@ -42,5 +42,5 @@ for device in device_manager.devices:
 
     # pylint: disable=no-member
     # Add an key action that changes the map when you press the 1 key
-    device.binding.add_action("0", "Default", int(ecodes.KEY_1), "map", "Example")
-    device.binding.add_action("0", "Example", int(ecodes.KEY_1), "map", "Default")
+    device.binding.add_action("0", "Default", ecodes.KEY_1, "map", "Example")
+    device.binding.add_action("0", "Example", ecodes.KEY_1, "map", "Default")

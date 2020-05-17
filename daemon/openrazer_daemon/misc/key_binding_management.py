@@ -94,13 +94,13 @@ class KeybindingManager():
 
         if key_code not in current_binding:  # Ordinary key pressed
             if key_press != 'release':
-                if key_code != self._shift_modifier: # Prevents a peculiar bug where the shift key maintains is pressing state.
+                if key_code != self._shift_modifier:  # Prevents a peculiar bug where the shift key maintains is pressing state.
                     self.__key_down(key_code)
             else:
                 if key_code == self._shift_modifier:  # Key is the shift modifier
                     self.current_mapping = self._old_mapping_name
                     self._shift_modifier = None
-                    for key in self._current_keys: # If you forget to release a key before the shift modifier, release it now.
+                    for key in self._current_keys:  # If you forget to release a key before the shift modifier, release it now.
                         self.__key_up(key)
                 else:
                     self.__key_up(key_code)
@@ -116,14 +116,14 @@ class KeybindingManager():
 
                     elif action["type"] == "map":
                         self.current_mapping = action["value"]
-                    
+
                     elif action["type"] == "profile":
                         i = 0
                         for profile in self._profiles:
                             profile = self._profiles[profile]
                             if profile["name"] == action["value"]:
                                 self.current_profile = str(i)
-                                self._shift_modifier = None # No happy accidents
+                                self._shift_modifier = None  # No happy accidents
                             i += 1
 
                     elif action["type"] == "release":
