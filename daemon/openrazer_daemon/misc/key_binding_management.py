@@ -94,11 +94,14 @@ class KeybindingManager():
 
         if key_code not in current_binding:  # Ordinary key pressed
             if key_press != 'release':
-                self.__key_down(key_code)
+                if key_code != self._shift_modifier: # Prevents a peculiar bug where the shift key maintains is pressing state.
+                    self.__key_down(key_code)
             else:
                 if key_code == self._shift_modifier:  # Key is the shift modifier
                     self.current_mapping = self._old_mapping_name
                     self._shift_modifier = None
+                    for key in self._current_keys: # If you forget to release a key before the shift modifier, release it now.
+                        self.__key_up(key)
                 else:
                     self.__key_up(key_code)
 
@@ -312,7 +315,8 @@ class KeybindingManager():
     def dbus_get_maps(self, profile):
         return_list = []
         for key, _ in self._profiles[profile].items():
-            return_list.append(key)
+            if key not in ("name", "default_map"):
+                return_list.append(key)
 
         return json.dumps(return_list)
 
