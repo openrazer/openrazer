@@ -24,4 +24,4 @@ POLL_1000HZ = 1000
 POLL_500HZ = 500
 POLL_125HZ = 125
 
-ACTION_TYPES = ["execute", "key", "map", "release", "shift", "sleep"]
+ACTION_TYPES = ["execute", "key", "map", "profile", "release", "shift", "sleep"]

@@ -116,6 +116,12 @@ class KeybindingManager():
 
                     elif action["type"] == "map":
                         self.current_mapping = action["value"]
+                    
+                    elif action["type"] == "profile":
+                        for profile in self._current_profiles:
+                            profile = self._current_profiles[profile]
+                            if profile["name"] == action["value"]:
+                                self.current_profile = action["value"]
 
                     elif action["type"] == "release":
                         self.__key_up(action["value"])
