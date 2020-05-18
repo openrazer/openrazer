@@ -17,6 +17,7 @@ for device in device_manager.devices:
 
     print("Maps for Profile 0: {}".format(device.binding.get_maps("0")))
 
+    # pylint: disable=no-member
     # Add an key action that replaces the 1 key with 2
     device.binding.add_action("0", "Default", ecodes.KEY_1, "key", str(ecodes.KEY_2))
 

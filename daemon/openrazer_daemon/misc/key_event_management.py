@@ -11,7 +11,7 @@ import time
 import sys
 from openrazer_daemon.keyboard import KEY_MAPPING, KEY_UP, KEY_DOWN, KEY_HOLD
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # TODO: figure out a better way to handle this
-from evdev import InputDevice
+from evdev import ecodes, InputDevice
 
 EPOLL_TIMEOUT = 0.01
 SPIN_SLEEP = 0.005
@@ -61,6 +61,7 @@ class KeyWatcher(threading.Thread):
         for device in self._event_file_map.values():
             device.close()
 
+    # pylint: disable=no-member
     def _poll(self, event_file_map):
         r, _, _ = select.select(event_file_map, [], [], EPOLL_TIMEOUT)
         for fd in r:
@@ -68,14 +69,16 @@ class KeyWatcher(threading.Thread):
             if not events:
                 break
 
+            scan_code = None
             for event in events:
-                if event.value is None:  # Skip if event.value is None as that's a spacer record
-                    continue
+                if event.code == ecodes.MSC_SCAN:
+                    scan_code = event.value
 
                 if event.value not in (KEY_UP, KEY_DOWN, KEY_HOLD):  # Ignore weird key events
                     continue
 
-                self._parent.key_action(event.code, event.value)
+                self._parent.key_action(event.code, event.value, scan_code=scan_code)
+                scan_code = None
 
     @property
     def shutdown(self):
@@ -177,7 +180,7 @@ class KeyboardKeyManager():
         """
         self._temp_key_store_active = value
 
-    def key_action(self, key_code, key_action):
+    def key_action(self, key_code, key_action, scan_code=None):
         """
         Process a key press event
 
@@ -246,7 +249,7 @@ class KeyboardKeyManager():
                 self._parent.binding_manager.macro_mode = False
 
         else:
-            x = threading.Thread(target=self._parent.binding_manager.key_action, args=(key_code, key_action))
+            x = threading.Thread(target=self._parent.binding_manager.key_action, args=(key_code, key_action, scan_code))
             x.start()
 
     def close(self):

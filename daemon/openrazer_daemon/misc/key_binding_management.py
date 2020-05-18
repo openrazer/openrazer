@@ -24,6 +24,12 @@ DEFAULT_PROFILE = {
     }
 }
 
+# pylint: disable=no-member
+CAPABILITIES = {
+    ecodes.EV_KEY: ecodes.keys.keys(),
+    ecodes.EV_MSC: [ecodes.MSC_SCAN]
+}
+
 
 class KeybindingManager():
     """
@@ -40,7 +46,7 @@ class KeybindingManager():
         self._logger = logging.getLogger('razer.device{0}.bindingmanager'.format(device_id))
         # self._parent.register_observer(self)
         self._testing = testing
-        self._fake_device = UInput(name="{0} (mapped)".format(self._parent.getDeviceName()))
+        self._fake_device = UInput(CAPABILITIES, name="{0} (mapped)".format(self._parent.getDeviceName()))
 
         self._profiles = {"0": DEFAULT_PROFILE}
         self._current_profile_id = None
@@ -61,7 +67,7 @@ class KeybindingManager():
         self.current_profile = "0"
 
     # pylint: disable=no-member
-    def __key(self, key_code, key_action):
+    def __key(self, key_code, key_action, scan_code=None):
         key_code = int(key_code)
         if key_action == KEY_UP:
             for _ in range(0, 5):
@@ -74,11 +80,14 @@ class KeybindingManager():
         elif key_action == KEY_DOWN:
             self._current_keys.append(key_code)
 
+        if scan_code is not None:
+            self._fake_device.write(ecodes.EV_MSC, ecodes.MSC_SCAN, scan_code)
+
         self._fake_device.write(ecodes.EV_KEY, key_code, key_action)
         self._fake_device.syn()
 
     # pylint: disable=too-many-branches
-    def key_action(self, key_code, key_action):
+    def key_action(self, key_code, key_action, scan_code=None):
         """
         Check for a binding and act on it.
 
@@ -97,7 +106,7 @@ class KeybindingManager():
                         subprocess.run(["/bin/sh", "-c", action["value"]], check=False)
 
                     elif action["type"] == "key":
-                        self.__key(action["value"], key_action)
+                        self.__key(action["value"], key_action, scan_code=scan_code)
 
                     elif action["type"] == "map":
                         self.current_mapping = action["value"]
@@ -113,7 +122,7 @@ class KeybindingManager():
                             i += 1
 
                     elif action["type"] == "release":
-                        self.__key(action["value"], KEY_UP)
+                        self.__key(action["value"], KEY_UP, scan_code=scan_code)
 
                     elif action["type"] == "shift":
                         self.current_mapping = action["value"]
@@ -125,7 +134,7 @@ class KeybindingManager():
                 else:
                     if key_code not in (183, 184, 185, 186, 187):  # Macro key released, skip it
                         if action["type"] == "key":  # Key released
-                            self.__key(action["value"], KEY_UP)
+                            self.__key(action["value"], KEY_UP, scan_code=scan_code)
 
                         elif action["type"] == "sleep":  # Wait for key to be added before removing it
                             time.sleep(int(action["value"]))
@@ -136,9 +145,9 @@ class KeybindingManager():
                     self.current_mapping = self._old_mapping_name
                     self._shift_modifier = None
                     for key in self._current_keys:  # If you forget to release a key before the releasing shift modifier, release it now.
-                        self.__key(key, KEY_UP)
+                        self.__key(key, KEY_UP, scan_code=scan_code)
             else:
-                self.__key(key_code, key_action)
+                self.__key(key_code, key_action, scan_code=scan_code)
 
     @property
     def current_mapping(self):
