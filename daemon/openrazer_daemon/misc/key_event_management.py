@@ -9,9 +9,9 @@ import select
 import threading
 import time
 import sys
-from openrazer_daemon.keyboard import KEY_MAPPING
+from openrazer_daemon.keyboard import KEY_MAPPING, KEY_UP, KEY_DOWN, KEY_HOLD
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # TODO: figure out a better way to handle this
-from evdev import ecodes, InputDevice
+from evdev import InputDevice
 
 EPOLL_TIMEOUT = 0.01
 SPIN_SLEEP = 0.005
@@ -21,31 +21,6 @@ class KeyWatcher(threading.Thread):
     """
     Thread to watch keyboard event files and return keypresses
     """
-
-    @staticmethod  # TODO remove
-    def parse_event_record(event):
-        """
-        Parse Input event record
-
-        :param event: the event record
-        :type: InputEvent
-
-        :return: Tuple of key_action, key_code
-        :rtype: tuple
-        """
-        if event.type is ecodes.ecodes['EV_KEY']:  # input-event-codes.h EV_KEY 0x01
-            if event.value == 0:
-                key_action = 'release'
-            elif event.value == 1:
-                key_action = 'press'
-            elif event.value == 2:
-                key_action = 'autorepeat'
-            else:
-                key_action = 'unknown'
-
-            return (key_action, event.code)
-
-        return None, None
 
     def __init__(self, device_id, event_files, parent):
         super(KeyWatcher, self).__init__()
@@ -92,14 +67,15 @@ class KeyWatcher(threading.Thread):
             events = event_file_map[fd].read()
             if not events:
                 break
-            for event in events:
-                key_action, key_code = self.parse_event_record(event)
 
-                # Skip if key_action and key_code is none as that's a spacer record
-                if key_action is None:
+            for event in events:
+                if event.value is None:  # Skip if event.value is None as that's a spacer record
                     continue
 
-                self._parent.key_action(key_code, key_action)
+                if event.value not in (KEY_UP, KEY_DOWN, KEY_HOLD):  # Ignore weird key events
+                    continue
+
+                self._parent.key_action(event.code, event.value)
 
     @property
     def shutdown(self):
@@ -201,18 +177,18 @@ class KeyboardKeyManager():
         """
         self._temp_key_store_active = value
 
-    def key_action(self, key_id, key_press):
+    def key_action(self, key_code, key_action):
         """
         Process a key press event
 
         * Adds keypresses to the temporary key store (for ripple effect)
         * Sends key to the binding manager
 
-        :param key_id: Key Event ID
-        :type key_id: int
+        :param key_code: Key Event ID
+        :type key_code: int
 
-        :param key_press: Can either be press, release, autorepeat
-        :type key_press: str
+        :param key_action: Can either be press, release, autorepeat
+        :type key_action: str
         """
         # pylint: disable=too-many-branches
         now = datetime.datetime.now()
@@ -225,36 +201,33 @@ class KeyboardKeyManager():
         except IndexError:
             pass
 
-        # self._logger.debug("Got key: {0}, state: {1}".format(key_name, key_press))
+        # self._logger.debug("Got key: {0}, state: {1}".format(key_name, key_action))
 
-        if key_press == 'press' and self.temp_key_store_state:
-            self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_id]))
+        if key_action == KEY_DOWN and self.temp_key_store_state:
+            self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_code]))
 
         # Sets up game mode as when enabling macro keys it stops the key working
-        if key_id == 189:  # GAMEMODE
+        if key_code == 189:  # GAMEMODE
             self._logger.debug("Got game mode combo")
 
             game_mode = self._parent.getGameMode()
             self._parent.setGameMode(not game_mode)
 
-        elif key_id in (194, 190):  # BRIGHTNESSUP or BRIGHTNESSDOWN
-            current_brightness = self._parent.getBrightness()
-
-            if key_id == 194:
-                current_brightness += 10
-            else:
-                current_brightness -= 10
-
-            current_brightness = max(min(current_brightness, 100), 0)
+        elif key_code == 194 and key_action == KEY_DOWN:  # BRIGHTNESSUP
+            current_brightness = max((self._parent.getBrightness() + 10), 0)
             self._parent.setBrightness(current_brightness)
 
-        elif key_id == 188:  # MACROMODE
+        elif key_code == 190 and key_action == KEY_DOWN:  # BRIGHTNESSDOWN
+            current_brightness = max((self._parent.getBrightness() - 10), 0)
+            self._parent.setBrightness(current_brightness)
+
+        elif key_code == 188 and key_action == KEY_DOWN:  # MACROMODE
             self._parent.binding_manager.macro_mode = not self._parent.binding_manager.macro_mode
 
         elif self._parent.binding_manager.macro_mode:
-            if key_id in (183, 184, 185, 186, 187):  # M1, M2, M3, M4, M5
+            if key_code in (183, 184, 185, 186, 187) and key_action == KEY_DOWN:  # M1, M2, M3, M4, M5
                 if self._parent.binding_manager.macro_key is None:
-                    self._parent.binding_manager.macro_key = key_id
+                    self._parent.binding_manager.macro_key = key_code
                 else:
                     self._logger.warning("Nested macros are not supported")
 
@@ -263,17 +236,17 @@ class KeyboardKeyManager():
                 mapping = self._parent.getActiveMap()
                 key = self._parent.binding_manager.macro_key
 
-                if key_press == 'press':
-                    self._parent.addAction(profile, mapping, str(key), "key", str(key_id))
-                elif key_press == 'release':
-                    self._parent.addAction(profile, mapping, str(key), "release", str(key_id))
+                if key_action == KEY_DOWN:
+                    self._parent.addAction(profile, mapping, str(key), "key", str(key_code))
+                elif key_action == KEY_UP:
+                    self._parent.addAction(profile, mapping, str(key), "release", str(key_code))
 
             else:
                 self._logger.warning("On-the-fly macros are only supported for macro keys, please use a client for configuring other keys")
                 self._parent.binding_manager.macro_mode = False
 
         else:
-            x = threading.Thread(target=self._parent.binding_manager.key_press, args=(key_id, key_press))
+            x = threading.Thread(target=self._parent.binding_manager.key_action, args=(key_code, key_action))
             x.start()
 
     def close(self):

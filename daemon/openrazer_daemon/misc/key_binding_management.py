@@ -8,7 +8,7 @@ import os
 import time
 import sys
 import subprocess
-from openrazer_daemon.keyboard import KeyboardColour
+from openrazer_daemon.keyboard import KeyboardColour, KEY_UP, KEY_DOWN, KEY_HOLD
 
 # TODO: figure out a better way to handle this
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -61,73 +61,59 @@ class KeybindingManager():
         self.current_profile = "0"
 
     # pylint: disable=no-member
-    def __key_up(self, key_code):
-        for _ in range(0, 5):
-            try:
-                key_code = int(key_code)
-                self._current_keys.remove(key_code)
-                self._fake_device.write(ecodes.EV_KEY, key_code, 0)
-                self._fake_device.syn()
-                return
-            except ValueError:
-                time.sleep(.005)
-
-    # pylint: disable=no-member
-    def __key_down(self, key_code):
+    def __key(self, key_code, key_action):
         key_code = int(key_code)
-        self._current_keys.append(key_code)
-        self._fake_device.write(ecodes.EV_KEY, key_code, 1)
+        if key_action == KEY_UP:
+            for _ in range(0, 5):
+                try:
+                    self._current_keys.remove(key_code)
+                    break
+                except ValueError:
+                    time.sleep(.005)
+
+        elif key_action == KEY_DOWN:
+            self._current_keys.append(key_code)
+
+        self._fake_device.write(ecodes.EV_KEY, key_code, key_action)
         self._fake_device.syn()
 
     # pylint: disable=too-many-branches
-    def key_press(self, key_code, key_press):
+    def key_action(self, key_code, key_action):
         """
         Check for a binding and act on it.
 
         :param key_code: The key code of the pressed key.
         :type key_code: int
         """
-        # self._logger.debug("Key action: {0}, {1}".format(key_code, key_press))
+        # self._logger.debug("Key action: {0}, {1}".format(key_code, key_action))
 
         key_code = str(key_code)
         current_binding = self.current_mapping["binding"]
 
-        if key_code not in current_binding:  # Ordinary key pressed
-            if key_press != 'release':
-                if key_code != self._shift_modifier:  # Prevents a peculiar bug where the shift key maintains is pressing state.
-                    self.__key_down(key_code)
-            else:
-                if key_code == self._shift_modifier:  # Key is the shift modifier
-                    self.current_mapping = self._old_mapping_name
-                    self._shift_modifier = None
-                    for key in self._current_keys:  # If you forget to release a key before the shift modifier, release it now.
-                        self.__key_up(key)
-                else:
-                    self.__key_up(key_code)
-
-        else:  # Key bound
+        if key_code in current_binding:  # Key bound
             for action in current_binding[key_code]:
-                if key_press != 'release':  # Key pressed (or autorepeat)
+                if key_action != KEY_UP:  # Key pressed (or autorepeat)
                     if action["type"] == "execute":
                         subprocess.run(["/bin/sh", "-c", action["value"]], check=False)
 
                     elif action["type"] == "key":
-                        self.__key_down(action["value"])
+                        self.__key(action["value"], key_action)
 
                     elif action["type"] == "map":
                         self.current_mapping = action["value"]
+                        self._shift_modifier = None  # No happy accidents
 
                     elif action["type"] == "profile":
                         i = 0
-                        for profile in self._profiles:
-                            profile = self._profiles[profile]
+                        for _, profile in self._profiles.items():
                             if profile["name"] == action["value"]:
                                 self.current_profile = str(i)
                                 self._shift_modifier = None  # No happy accidents
+                                break
                             i += 1
 
                     elif action["type"] == "release":
-                        self.__key_up(action["value"])
+                        self.__key(action["value"], KEY_UP)
 
                     elif action["type"] == "shift":
                         self.current_mapping = action["value"]
@@ -139,10 +125,20 @@ class KeybindingManager():
                 else:
                     if key_code not in (183, 184, 185, 186, 187):  # Macro key released, skip it
                         if action["type"] == "key":  # Key released
-                            self.__key_up(action["value"])
+                            self.__key(action["value"], KEY_UP)
 
                         elif action["type"] == "sleep":  # Wait for key to be added before removing it
                             time.sleep(int(action["value"]))
+
+        else:  # Ordinary key action
+            if key_code == self._shift_modifier:  # Key is the shift modifier
+                if key_action == KEY_UP:
+                    self.current_mapping = self._old_mapping_name
+                    self._shift_modifier = None
+                    for key in self._current_keys:  # If you forget to release a key before the releasing shift modifier, release it now.
+                        self.__key(key, KEY_UP)
+            else:
+                self.__key(key_code, key_action)
 
     @property
     def current_mapping(self):
@@ -315,15 +311,14 @@ class KeybindingManager():
     # DBus Stuff
     def dbus_get_profiles(self):
         return_list = []
-        for profile in self._profiles:
-            profile = self._profiles[profile]
+        for _, profile in self._profiles:
             return_list.append(profile["name"])
 
         return json.dumps(return_list)
 
     def dbus_get_maps(self, profile):
         return_list = []
-        for key, _ in self._profiles[profile].items():
+        for key in self._profiles[profile]:
             if key not in ("name", "default_map"):
                 return_list.append(key)
 
