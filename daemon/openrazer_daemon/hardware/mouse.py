@@ -2071,6 +2071,117 @@ class RazerBasilisk(__RazerDeviceSpecialBrightnessSuspend):
         self.disable_notify = False
 
 
+class RazerBasiliskUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer Basilisk Ultimate
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Basilisk_Ultimate_000000000000-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0086
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 14]
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               # Battery
+               'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
+               # Logo
+               'get_logo_brightness', 'set_logo_brightness',
+               # Spectrum
+               'set_logo_spectrum_naga_hex_v2',
+               # Reactive
+               'set_logo_reactive_naga_hex_v2',
+               # Breath
+               'set_logo_breath_random_naga_hex_v2',
+               'set_logo_breath_single_naga_hex_v2',
+               'set_logo_breath_dual_naga_hex_v2',
+               # Static
+               'set_logo_static_naga_hex_v2',
+               # None
+               'set_logo_none_naga_hex_v2',
+               # Scroll wheel
+               'get_scroll_brightness', 'set_scroll_brightness',
+               # Spectrum
+               'set_scroll_spectrum_naga_hex_v2',
+               # Reactive
+               'set_scroll_reactive_naga_hex_v2',
+               # Breath
+               'set_scroll_breath_random_naga_hex_v2',
+               'set_scroll_breath_random_naga_hex_v2',
+               'set_scroll_breath_dual_naga_hex_v2',
+               # Static
+               'set_scroll_static_naga_hex_v2',
+               # None
+               'set_scroll_none_naga_hex_v2',
+               'get_left_brightness', 'set_left_brightness', 'get_right_brightness', 'set_right_brightness',
+               # Left side
+               'set_left_wave', 'set_left_static', 'set_left_spectrum', 'set_left_none', 'set_left_reactive', 'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
+               # Right side
+               'set_right_wave', 'set_right_static', 'set_right_spectrum', 'set_right_none', 'set_right_reactive', 'set_right_breath_random', 'set_right_breath_single', 'set_right_breath_dual',
+
+               # Can set LOGO and Scroll with custom
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1590/1590_basilisk_ultimate.png"
+
+    DPI_MAX = 20000
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(
+            self), _get_left_brightness(self), _get_right_brightness(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        _da_set_scroll_brightness(self, 0)
+        _set_left_brightness(self, 0)
+        _set_right_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[0]
+        scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[1]
+        left_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[2]
+        right_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[3]
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        _da_set_scroll_brightness(self, scroll_brightness)
+        _set_left_brightness(self, left_row_brightness)
+        _set_right_brightness(self, right_row_brightness)
+        self.disable_notify = False
+
+
+class RazerBasiliskUltimateReceiver(RazerBasiliskUltimateWired):
+    USB_PID = 0x0088
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Basilisk_Ultimate_Dongle-if0(1|2)-event-kbd')
+    METHODS = RazerBasiliskUltimateWired.METHODS + \
+        ['set_charge_effect', 'set_charge_colour']
+
+    def __init__(self, *args, **kwargs):
+        super(RazerBasiliskUltimateReceiver, self).__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(
+            self, self._device_number, 'Razer Basilisk Ultimate')
+        self._battery_manager.active = self.config.getboolean(
+            'Startup', 'mouse_battery_notifier', fallback=False)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerBasiliskUltimateReceiver, self)._close()
+
+        self._battery_manager.close()
+
+
 class RazerBasiliskV2(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Basilisk V2
