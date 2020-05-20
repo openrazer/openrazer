@@ -69,6 +69,8 @@ class RazerBaseStationChroma(_RazerDeviceBrightnessSuspend):
         "top_img": DEVICE_IMAGE
     }
 
+class RazerBasiliskUltimateStand(RazerBaseStationChroma):
+    USB_PID = 0x007E
 
 class RazerNommoChroma(_RazerDeviceBrightnessSuspend):
     """

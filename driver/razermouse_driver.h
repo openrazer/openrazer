@@ -44,7 +44,8 @@
 #define USB_DEVICE_ID_RAZER_ABYSSUS_2000 0x005E
 #define USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED 0x0060
 #define USB_DEVICE_ID_RAZER_BASILISK 0x0064
-#define USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE 0x0086
+#define USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED 0x0086
+#define USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER 0x0088
 #define USB_DEVICE_ID_RAZER_NAGA_TRINITY 0x0067
 #define USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION 0x006A
 #define USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL 0x006B
@@ -76,6 +77,14 @@
 struct razer_mouse_device {
     struct usb_device *usb_dev;
     struct mutex lock;
+
+    struct input_dev *input;
+    struct hrtimer repeat_timer;
+    unsigned int tilt_hwheel;
+    unsigned int tilt_repeat_delay;
+    unsigned int tilt_repeat;
+    __s32 hwheel_value;
+
     unsigned char usb_interface_protocol;
     unsigned char usb_interface_subclass;
 
