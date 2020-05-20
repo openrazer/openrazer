@@ -2018,7 +2018,7 @@ class RazerBasiliskUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Basilisk Ultimate
     """
-    EVENT_FILE_REGEX = re.compile(r'.*Razer_Basilisk_Ultimate-if0(1|2)-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Basilisk_Ultimate_000000000000-if0(1|2)-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x0086
@@ -2029,7 +2029,6 @@ class RazerBasiliskUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
                'get_logo_brightness', 'set_logo_brightness',
-               'set_logo_wave',
                # Static
                'set_logo_static_naga_hex_v2',
                # Breath
@@ -2044,7 +2043,6 @@ class RazerBasiliskUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
                'set_logo_spectrum_naga_hex_v2',
                # Scroll wheel
                'get_scroll_brightness', 'set_scroll_brightness',
-               'set_scroll_wave',
                # Breath
                'set_scroll_breath_random_naga_hex_v2',
                'set_scroll_breath_random_naga_hex_v2',
@@ -2108,6 +2106,7 @@ class RazerBasiliskUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
 
 class RazerBasiliskUltimateReceiver(RazerBasiliskUltimateWired):
     USB_PID = 0x0088
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Basilisk_Ultimate_Dongle-if0(1|2)-event-kbd')
     METHODS = RazerBasiliskUltimateWired.METHODS + \
         ['set_charge_effect', 'set_charge_colour']
 
