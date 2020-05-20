@@ -8,7 +8,7 @@ import os
 import time
 import sys
 import subprocess
-from openrazer_daemon.keyboard import KeyboardColour, KEY_UP, KEY_DOWN, KEY_HOLD
+from openrazer_daemon.keyboard import KeyboardColour
 
 # TODO: figure out a better way to handle this
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -69,7 +69,17 @@ class KeybindingManager():
     # pylint: disable=no-member
     def __key(self, key_code, key_action, scan_code=None):
         key_code = int(key_code)
-        if key_action == KEY_UP:
+        _fake_device = self._fake_device
+        _write = _fake_device.write
+        _ecodes = ecodes
+
+        if scan_code is not None:
+            _write(_ecodes.EV_MSC, _ecodes.MSC_SCAN, scan_code)
+
+        _write(_ecodes.EV_KEY, key_code, key_action)
+        _fake_device.syn()
+
+        if key_action == 0:
             for _ in range(0, 5):
                 try:
                     self._current_keys.remove(key_code)
@@ -77,16 +87,9 @@ class KeybindingManager():
                 except ValueError:
                     time.sleep(.005)
 
-        elif key_action == KEY_DOWN:
+        elif key_action == 1:
             self._current_keys.append(key_code)
 
-        if scan_code is not None:
-            self._fake_device.write(ecodes.EV_MSC, ecodes.MSC_SCAN, scan_code)
-
-        self._fake_device.write(ecodes.EV_KEY, key_code, key_action)
-        self._fake_device.syn()
-
-    # pylint: disable=too-many-branches
     def key_action(self, key_code, key_action, scan_code=None):
         """
         Check for a binding and act on it.
@@ -97,22 +100,24 @@ class KeybindingManager():
         # self._logger.debug("Key action: {0}, {1}".format(key_code, key_action))
 
         key_code = str(key_code)
-        current_binding = self.current_mapping["binding"]
+        _current_binding = self.current_mapping["binding"]
+        _key = self.__key
 
-        if key_code in current_binding:  # Key bound
-            for action in current_binding[key_code]:
-                if key_action != KEY_UP:  # Key pressed (or autorepeat)
-                    if action["type"] == "execute":
+        if key_code in _current_binding:  # Key bound
+            for action in _current_binding[key_code]:
+                _type = action["type"]
+                if key_action != 0:  # Key pressed (or autorepeat)
+                    if _type == "key":
+                        _key(action["value"], key_action, scan_code)
+
+                    elif _type == "execute":
                         subprocess.run(["/bin/sh", "-c", action["value"]], check=False)
 
-                    elif action["type"] == "key":
-                        self.__key(action["value"], key_action, scan_code=scan_code)
-
-                    elif action["type"] == "map":
+                    elif _type == "map":
                         self.current_mapping = action["value"]
                         self._shift_modifier = None  # No happy accidents
 
-                    elif action["type"] == "profile":
+                    elif _type == "profile":
                         i = 0
                         for _, profile in self._profiles.items():
                             if profile["name"] == action["value"]:
@@ -121,33 +126,33 @@ class KeybindingManager():
                                 break
                             i += 1
 
-                    elif action["type"] == "release":
-                        self.__key(action["value"], KEY_UP, scan_code=scan_code)
+                    elif _type == "release":
+                        _key(action["value"], 0, scan_code)
 
-                    elif action["type"] == "shift":
+                    elif _type == "shift":
                         self.current_mapping = action["value"]
                         self._shift_modifier = key_code  # Set map shift key
 
-                    elif action["type"] == "sleep":
+                    elif _type == "sleep":
                         time.sleep(int(action["value"]))
 
                 else:
                     if key_code not in (183, 184, 185, 186, 187):  # Macro key released, skip it
-                        if action["type"] == "key":  # Key released
-                            self.__key(action["value"], KEY_UP, scan_code=scan_code)
+                        if _type == "key":  # Key released
+                            _key(action["value"], 0, scan_code)
 
-                        elif action["type"] == "sleep":  # Wait for key to be added before removing it
+                        elif _type == "sleep":  # Wait for key to be added before removing it
                             time.sleep(int(action["value"]))
 
         else:  # Ordinary key action
             if key_code == self._shift_modifier:  # Key is the shift modifier
-                if key_action == KEY_UP:
+                if key_action == 0:
                     self.current_mapping = self._old_mapping_name
                     self._shift_modifier = None
                     for key in self._current_keys:  # If you forget to release a key before the releasing shift modifier, release it now.
-                        self.__key(key, KEY_UP, scan_code=scan_code)
+                        _key(key, 0, scan_code)
             else:
-                self.__key(key_code, key_action, scan_code=scan_code)
+                _key(key_code, key_action, scan_code)
 
     @property
     def current_mapping(self):

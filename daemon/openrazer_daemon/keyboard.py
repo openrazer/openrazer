@@ -9,9 +9,9 @@ import struct
 import subprocess
 
 
-KEY_UP = 0x0
-KEY_DOWN = 0x1
-KEY_HOLD = 0x2
+# KEY_UP = 0x0
+# KEY_DOWN = 0x1
+# KEY_HOLD = 0x2
 
 KEY_MAPPING = {
     # Row 0
