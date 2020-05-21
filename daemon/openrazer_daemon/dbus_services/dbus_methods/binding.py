@@ -16,8 +16,7 @@ def add_profile(self, profile):
     """
     self.logger.debug("DBus call add_profile")
 
-    self.binding_manager._profiles.update({str(len(self.binding_manager._profiles)):
-                                           {"name": profile, "default_map": "Default", "Default": {"is_using_matrix": False, "binding": {}}}})
+    self.binding_manager._profiles.update({profile: {"default_map": "Default", "Default": {"is_using_matrix": False, "binding": {}}}})
 
     self.binding_manager.write_config_file(self.binding_manager._config_file)
 
@@ -27,12 +26,12 @@ def remove_profile(self, profile):
     """
     Delete the specified profile
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
     """
     self.logger.debug("DBus call remove_profile")
 
-    self.binding_manager._profiles.pop(str(profile))
+    self.binding_manager._profiles.pop(profile)
 
     self.binding_manager.write_config_file(self.binding_manager._config_file)
 
@@ -61,7 +60,7 @@ def get_active_profile(self):
 
     self.logger.debug("DBus call get_active_profile")
 
-    return self.binding_manager._current_profile_id
+    return self.binding_manager._current_profile_name
 
 
 @endpoint('razer.device.binding', 'setActiveProfile', in_sig='s')
@@ -69,7 +68,7 @@ def set_active_profile(self, profile):
     """
     Set the active profile
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
     """
 
@@ -83,7 +82,7 @@ def set_default_map(self, profile, mapping):
     """
     Set the default map
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :param mapping: The map
@@ -101,7 +100,7 @@ def get_default_map(self, profile):
     """
     Get the default map for a specific profile
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :return: The default map
@@ -117,7 +116,7 @@ def get_maps(self, profile):
     """
     Get maps
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :return: JSON of maps
@@ -185,7 +184,7 @@ def get_actions(self, profile, mapping, key_code):
     """
     Get profiles
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :param mapping: The map number
@@ -207,7 +206,7 @@ def add_map(self, profile, mapping):
     """
     Add a map
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :param mapping: The map name
@@ -226,7 +225,7 @@ def remove_map(self, profile, mapping):
     """
     Remove a map
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :param mapping: The map name
@@ -245,7 +244,7 @@ def add_action(self, profile, mapping, key_code, action_type, value):
     """
     Add an action to the given key
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :param mapping: The map number
@@ -270,7 +269,7 @@ def update_action(self, profile, mapping, key_code, action_type, value, action_i
     """
     Add an action to the given key
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :param mapping: The map number
@@ -299,7 +298,7 @@ def remove_action(self, profile, mapping, key_code, action_id):
     """
     Remove the specified action
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :param mapping: The map number
@@ -326,7 +325,7 @@ def clear_actions(self, profile, mapping, key_code):
     """
     Clear all actions for a given key
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :param mapping: The map name
@@ -348,7 +347,7 @@ def get_profile_leds(self, profile, mapping):
     """
     Get the state of the profile LEDs
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :param mapping: The map name
@@ -375,7 +374,7 @@ def set_profile_leds(self, profile, mapping, red, green, blue):
     """
     Set the profile LED state
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :param mapping: The map name
@@ -404,7 +403,7 @@ def get_matrix(self, profile, mapping):
     """
     Get the led matrix of the specified map
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :param mapping: The map name
@@ -424,7 +423,7 @@ def set_matrix(self, profile, mapping, matrix):
     """
     Set the led matrix
 
-    :param profile: The profile number
+    :param profile: The profile name
     :type: str
 
     :param mapping: The map name

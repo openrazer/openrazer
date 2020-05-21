@@ -15,7 +15,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from evdev import UInput, ecodes
 
 DEFAULT_PROFILE = {
-    "name": "Default",
     "default_map": "Default",
     "Default": {
         "is_using_matrix": False,
@@ -48,8 +47,8 @@ class KeybindingManager():
         self._testing = testing
         self._fake_device = UInput(CAPABILITIES, name="{0} (mapped)".format(self._parent.getDeviceName()))
 
-        self._profiles = {"0": DEFAULT_PROFILE}
-        self._current_profile_id = None
+        self._profiles = {"Default": DEFAULT_PROFILE}
+        self._current_profile_name = None
 
         self._current_keys = []
         self._old_mapping_name = None
@@ -64,7 +63,7 @@ class KeybindingManager():
 
         if os.path.exists(self._config_file):
             self.read_config_file(self._config_file)
-        self.current_profile = "0"
+        self.current_profile = "Default"
 
     # pylint: disable=no-member
     def __key(self, key_code, key_action, scan_code=None):
@@ -118,13 +117,8 @@ class KeybindingManager():
                         self._shift_modifier = None  # No happy accidents
 
                     elif _type == "profile":
-                        i = 0
-                        for _, profile in self._profiles.items():
-                            if profile["name"] == action["value"]:
-                                self.current_profile = str(i)
-                                self._shift_modifier = None  # No happy accidents
-                                break
-                            i += 1
+                        self.current_profile = action["value"]
+                        self._shift_modifier = None  # No happy accidents
 
                     elif _type == "release":
                         _key(action["value"], 0, scan_code)
@@ -207,18 +201,18 @@ class KeybindingManager():
         :return: the current profile name
         :rtype: str
         """
-        return self._current_profile["name"]
+        return self._current_profile_name
 
     @current_profile.setter
     def current_profile(self, value):
         """
         Set the current profile
 
-        :param value: The profile number
+        :param value: The profile name
         :type: int
         """
         self._current_profile = self._profiles[value]
-        self._current_profile_id = value
+        self._current_profile_name = value
         self.current_mapping = self._current_profile["default_map"]
 
     @property
@@ -270,7 +264,7 @@ class KeybindingManager():
         if value is not None:
             self._macro_key = value
             self._parent.setMacroEffect(0x00)
-            self._parent.clearActions(self._current_profile_id, self._current_mapping_name, str(value))
+            self._parent.clearActions(self._current_profile_name, self._current_mapping_name, str(value))
 
         else:
             self._macro_key = None
@@ -325,8 +319,8 @@ class KeybindingManager():
     # DBus Stuff
     def dbus_get_profiles(self):
         return_list = []
-        for _, profile in self._profiles:
-            return_list.append(profile["name"])
+        for profile in self._profiles:
+            return_list.append(profile)
 
         return json.dumps(return_list)
 

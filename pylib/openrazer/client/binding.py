@@ -54,7 +54,7 @@ class Binding():
         """
         Remove a profile
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :raises ValueError: If parameters are invalid
@@ -88,7 +88,7 @@ class Binding():
         """
         Set the active profile
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :raises ValueError: If parameters are invalid
@@ -112,7 +112,7 @@ class Binding():
         """
         Set the default map of the given profile
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :param mapping: The map name
@@ -133,7 +133,7 @@ class Binding():
         """
         Add a map to the given profile
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :param map_name: The name of the map
@@ -152,7 +152,7 @@ class Binding():
         """
         Copy a mapping to the given profile
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :param mapping: The map to copy
@@ -181,7 +181,7 @@ class Binding():
         """
         Remove the given mapping
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :param mapping: The map to remove
@@ -224,7 +224,7 @@ class Binding():
         """
         Returns a list of maps foe the given profile
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :returns: A list of maps
@@ -243,7 +243,7 @@ class Binding():
         """
         Returns a dict of the actions for the given key
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :param mapping: The map name
@@ -271,7 +271,7 @@ class Binding():
         """
         Add an action to the given key
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :param mapping: The map name
@@ -305,7 +305,7 @@ class Binding():
         """
         Remove the specified action
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :param mapping: The map name
@@ -334,7 +334,7 @@ class Binding():
         """
         Clear all actions for the given key
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :param mapping: The map name
@@ -360,7 +360,7 @@ class Binding():
         """
         Returns the setting for the profile LEDs of a given map
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :param mapping: The map name
@@ -388,7 +388,7 @@ class Binding():
         """
         Set the setting for the profile LEDs of a given map
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :param mapping: The map name
@@ -422,7 +422,7 @@ class Binding():
         """
         Returns a dict of the custom matrix for the given map
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :param mapping: The map name
@@ -444,7 +444,7 @@ class Binding():
         """
         Set the custom matrix for the given map
 
-        :param profile: The profile number
+        :param profile: The profile name
         :type: str
 
         :param mapping: The map name
