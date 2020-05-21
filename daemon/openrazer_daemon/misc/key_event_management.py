@@ -133,6 +133,11 @@ class KeyboardKeyManager():
         self._temp_key_store = []
         self._temp_expire_time = datetime.timedelta(seconds=2)
 
+        self._macro_mode = False
+        self._macro_key = None
+        self._macro_profile = None
+        self._macro_map = None
+
         self.KEY_MAP = KEY_MAPPING
 
     @property
@@ -181,6 +186,67 @@ class KeyboardKeyManager():
         """
         self._temp_key_store_active = value
 
+    @property
+    def macro_mode(self):
+        """
+        Return the state of macro mode
+
+        :return: the macro mode state
+        :rtype: bool
+        """
+        return self._macro_mode
+
+    @macro_mode.setter
+    def macro_mode(self, value):
+        """
+        Set the state of macro mode
+
+        :param value: The state of macro mode
+        :type: bool
+        """
+        capabilities = self._parent.METHODS
+        if value:
+            self._macro_mode = True
+            if 'set_macro_effect' in capabilities:
+                self._parent.setMacroEffect(0x01)
+            if 'set_macro_mode' in capabilities:
+                self._parent.setMacroMode(True)
+
+        elif not value:
+            self._macro_mode = False
+            self.macro_key = None
+            if 'set_macro_mode' in capabilities:
+                self._parent.setMacroMode(False)
+
+    @property
+    def macro_key(self):
+        """
+        Return the macro key being recorded to
+
+        :return: the macro key
+        :rtype: int
+        """
+        return self._macro_key
+
+    @macro_key.setter
+    def macro_key(self, value):
+        """
+        Set the macro key being recorded to
+
+        :param value: The macro key
+        :type: int
+        """
+        capabilities = self._parent.METHODS
+
+        if value is not None:
+            self._macro_key = value
+            if 'set_macro_effect' in capabilities:
+                self._parent.setMacroEffect(0x00)
+            self._parent.clearActions(self._macro_profile, self._macro_map, value)
+
+        else:
+            self._macro_key = None
+
     def key_action(self, key_code, key_action, scan_code=None):
         """
         Process a key press event
@@ -216,28 +282,25 @@ class KeyboardKeyManager():
                 return
 
             if key_code == 188:  # MACROMODE
-                _binding_manager.macro_mode = not _binding_manager.macro_mode
+                self.macro_mode = not self.macro_mode
                 return
 
-        if _binding_manager.macro_mode:
+        if self.macro_mode:
             if key_code in (183, 184, 185, 186, 187):  # M1, M2, M3, M4, M5
-                if _binding_manager.macro_key is None:
-                    _binding_manager.macro_key = key_code
+                if self.macro_key is None:
+                    self._parent.startMacroRecording(self._parent.getActiveProfile(), self._parent.getActiveMap(), key_code)
 
             elif _binding_manager.macro_key:
-                profile = self._parent.getActiveProfile()
-                mapping = self._parent.getActiveMap()
-                key = _binding_manager.macro_key
                 _str = str
 
                 if key_action == 1:
-                    self._parent.addAction(profile, mapping, _str(key), "key", _str(key_code))
+                    self._parent.addAction(self._macro_profile, self._macro_map, self.macro_key, "key", _str(key_code))
                 elif key_action == 0:
-                    self._parent.addAction(profile, mapping, _str(key), "release", _str(key_code))
+                    self._parent.addAction(self._macro_profile, self._macro_map, self.macro_key, "key", _str(key_code))
 
             else:
                 self._logger.warning("On-the-fly macros are only supported for macro keys, please use a client for configuring other keys")
-                _binding_manager.macro_mode = False
+                self.macro_mode = False
 
         else:
             x = self._thread(target=_binding_manager.key_action, args=(key_code, key_action, scan_code))

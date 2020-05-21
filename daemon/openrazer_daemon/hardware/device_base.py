@@ -99,9 +99,11 @@ class RazerDevice(DBusService):
         self._is_closed = False
 
         # device methods available in all devices
-        self.methods_internal = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_profiles', 'get_active_profile', 'set_active_profile', 'add_profile', 'remove_profile',
-                                 'get_maps', 'copy_map', 'remove_map', 'get_active_map', 'set_active_map', 'get_actions', 'clear_actions', 'get_default_map', 'set_default_map',
-                                 'add_map', 'add_action', 'update_action', 'remove_action', 'get_actions', 'get_profile_leds', 'set_profile_leds', 'get_matrix', 'set_matrix']
+        self.methods_internal = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_profiles', 'get_active_profile', 'set_active_profile',
+                                 'add_profile', 'remove_profile', 'get_maps', 'copy_map', 'remove_map', 'get_active_map', 'set_active_map', 'get_actions',
+                                 'clear_actions', 'get_default_map', 'set_default_map', 'add_map', 'add_action', 'update_action', 'remove_action',
+                                 'get_actions', 'get_profile_leds', 'set_profile_leds', 'get_matrix', 'set_matrix', 'start_macro_recording',
+                                 'stop_macro_recording', 'get_macro_recording_state', 'get_macro_key']
         self.methods_internal.extend(additional_methods)
 
         # Find event files in /dev/input/by-id/ by matching against regex

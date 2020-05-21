@@ -58,9 +58,6 @@ class KeybindingManager():
         self._rows, self._cols = self._parent.MATRIX_DIMS
         self._keyboard_grid = KeyboardColour(self._rows, self._cols)
 
-        self._macro_mode = False
-        self._macro_key = None
-
         if os.path.exists(self._config_file):
             self.read_config_file(self._config_file)
         self.current_profile = "Default"
@@ -166,7 +163,7 @@ class KeybindingManager():
         :param value: The new mapping
         :type value: str
         """
-        self._logger.debug("Change mapping to %s", str(value))
+        # self._logger.debug("Change mapping to %s", str(value))
 
         self._current_mapping = self._current_profile[value]
         self._old_mapping_name = self._current_mapping_name
@@ -214,60 +211,6 @@ class KeybindingManager():
         self._current_profile = self._profiles[value]
         self._current_profile_name = value
         self.current_mapping = self._current_profile["default_map"]
-
-    @property
-    def macro_mode(self):
-        """
-        Return the state of macro mode
-
-        :return: the macro mode state
-        :rtype: bool
-        """
-        return self._macro_mode
-
-    @macro_mode.setter
-    def macro_mode(self, value):
-        """
-        Set the state of macro mode
-
-        :param value: The state of macro mode
-        :type: bool
-        """
-        if value:
-            self._macro_mode = True
-            self._parent.setMacroEffect(0x01)
-            self._parent.setMacroMode(True)
-
-        elif not value:
-            self._macro_mode = False
-            self.macro_key = None
-            self._parent.setMacroMode(False)
-
-    @property
-    def macro_key(self):
-        """
-        Return the macro key being recorded to
-
-        :return: the macro key
-        :rtype: int
-        """
-        return self._macro_key
-
-    @macro_key.setter
-    def macro_key(self, value):
-        """
-        Set the macro key being recorded to
-
-        :param value: The macro key
-        :type: int
-        """
-        if value is not None:
-            self._macro_key = value
-            self._parent.setMacroEffect(0x00)
-            self._parent.clearActions(self._current_profile_name, self._current_mapping_name, str(value))
-
-        else:
-            self._macro_key = None
 
     def read_config_file(self, config_file):
         """
@@ -334,7 +277,7 @@ class KeybindingManager():
 
     # pylint: disable=too-many-arguments
     def dbus_add_action(self, profile, mapping, key_code, action_type, value, action_id=None):
-        key = self._profiles[profile][mapping]["binding"].setdefault(key_code, [])
+        key = self._profiles[profile][mapping]["binding"].setdefault(str(key_code), [])
 
         if action_id is not None:
             key[action_id] = {"type": action_type, "value": value}

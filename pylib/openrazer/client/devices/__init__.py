@@ -163,6 +163,11 @@ class RazerDevice(object):
             'binding_lighting_get_matrix': self._has_feature('razer.device.binding.lighting', 'getMatrix'),
             'binding_lighting_set_matrix': self._has_feature('razer.device.binding.lighting', 'setMatrix'),
 
+            'binding_start_macro_recording': self._has_feature('razer.device.macro', 'startMacroRecording'),
+            'binding_stop_macro_recording': self._has_feature('razer.device.macro', 'stopMacroRecording'),
+            'binding_get_macro_recording_state': self._has_feature('razer.device.macro', 'getMacroRecordingState'),
+            'binding_get_macro_key': self._has_feature('razer.device.macro', 'getMacroKey'),
+
         }
 
         # Nasty hack to convert dbus.Int32 into native

@@ -57,7 +57,6 @@ def get_active_profile(self):
     :return: Name of active profile
     :rtype: str
     """
-
     self.logger.debug("DBus call get_active_profile")
 
     return self.binding_manager._current_profile_name
@@ -71,7 +70,6 @@ def set_active_profile(self, profile):
     :param profile: The profile name
     :type: str
     """
-
     self.logger.debug("DBus call set_active_profile")
 
     self.binding_manager.current_profile = profile
@@ -122,7 +120,6 @@ def get_maps(self, profile):
     :return: JSON of maps
     :rtype: str
     """
-
     self.logger.debug("DBus call get_maps")
 
     return self.binding_manager.dbus_get_maps(profile)
@@ -145,7 +142,6 @@ def copy_map(self, profile, mapping, dest_profile, map_name):
     :param map_name: The name to give the new mapping
     :type: str
     """
-
     self.logger.debug("DBus call copy_map")
 
     self.binding_manager._profiles[dest_profile].update({map_name: dict(self.binding_manager._profiles[profile][mapping])})
@@ -159,7 +155,6 @@ def get_active_map(self):
     :return: The active map
     :rtype: str
     """
-
     self.logger.debug("DBus call get_active_map")
 
     return self.binding_manager._current_mapping_name
@@ -173,7 +168,6 @@ def set_active_map(self, mapping):
     :param mapping: The map name
     :type: str
     """
-
     self.logger.debug("DBus call set_active_map")
 
     self.binding_manager.current_mapping = mapping
@@ -212,7 +206,6 @@ def add_map(self, profile, mapping):
     :param mapping: The map name
     :type: str
     """
-
     self.logger.debug("DBus call add_map")
 
     self.binding_manager._profiles[profile].update({mapping: {"is_using_matrix": False, "binding": {}}})
@@ -231,7 +224,6 @@ def remove_map(self, profile, mapping):
     :param mapping: The map name
     :type: str
     """
-
     self.logger.debug("DBus call remove_map")
 
     self.binding_manager._profiles[profile].pop(mapping)
@@ -239,7 +231,7 @@ def remove_map(self, profile, mapping):
     self.binding_manager.write_config_file(self.binding_manager._config_file)
 
 
-@endpoint('razer.device.binding', 'addAction', in_sig='sssss')
+@endpoint('razer.device.binding', 'addAction', in_sig='ssyss')
 def add_action(self, profile, mapping, key_code, action_type, value):
     """
     Add an action to the given key
@@ -247,11 +239,11 @@ def add_action(self, profile, mapping, key_code, action_type, value):
     :param profile: The profile name
     :type: str
 
-    :param mapping: The map number
+    :param mapping: The map name
     :type: str
 
     :param key_code: The key code
-    :type: str
+    :type: int
 
     :param action_type: The action type
     :type: str
@@ -264,7 +256,7 @@ def add_action(self, profile, mapping, key_code, action_type, value):
     self.binding_manager.dbus_add_action(profile, mapping, key_code, action_type, value)
 
 
-@endpoint('razer.device.binding', 'updateAction', in_sig='ssssss')
+@endpoint('razer.device.binding', 'updateAction', in_sig='ssyssy')
 def update_action(self, profile, mapping, key_code, action_type, value, action_id):
     """
     Add an action to the given key
@@ -272,11 +264,11 @@ def update_action(self, profile, mapping, key_code, action_type, value, action_i
     :param profile: The profile name
     :type: str
 
-    :param mapping: The map number
+    :param mapping: The map name
     :type: str
 
     :param key_code: The key code
-    :type: str
+    :type: int
 
     :param action_type: The action type
     :type: str
@@ -285,7 +277,7 @@ def update_action(self, profile, mapping, key_code, action_type, value, action_i
     :type: str
 
     :param action_id: The action to update
-    :type: str
+    :type: int
     """
     self.logger.debug("DBus call update_action")
 
@@ -293,7 +285,7 @@ def update_action(self, profile, mapping, key_code, action_type, value, action_i
         profile, mapping, key_code, action_type, value, action_id)
 
 
-@endpoint('razer.device.binding', 'removeAction', in_sig='ssss')
+@endpoint('razer.device.binding', 'removeAction', in_sig='ssys')
 def remove_action(self, profile, mapping, key_code, action_id):
     """
     Remove the specified action
@@ -301,8 +293,8 @@ def remove_action(self, profile, mapping, key_code, action_id):
     :param profile: The profile name
     :type: str
 
-    :param mapping: The map number
-    :type: str
+    :param mapping: The map name
+    :type: int
 
     :param key_code: The key code
     :type: str
@@ -312,15 +304,15 @@ def remove_action(self, profile, mapping, key_code, action_id):
     """
     self.logger.debug("DBus call remove_action")
 
-    if len(self.binding_manager._profiles[profile][mapping]["binding"][key_code]) == 1:
+    if len(self.binding_manager._profiles[profile][mapping]["binding"][str(key_code)]) == 1:
         self.clearActions(profile, mapping, key_code)
     else:
-        del self.binding_manager._profiles[profile][mapping]["binding"][key_code][int(action_id)]
+        del self.binding_manager._profiles[profile][mapping]["binding"][str(key_code)][int(action_id)]
 
     self.binding_manager.write_config_file(self.binding_manager._config_file)
 
 
-@endpoint('razer.device.binding', 'clearActions', in_sig='sss')
+@endpoint('razer.device.binding', 'clearActions', in_sig='ssy')
 def clear_actions(self, profile, mapping, key_code):
     """
     Clear all actions for a given key
@@ -332,12 +324,11 @@ def clear_actions(self, profile, mapping, key_code):
     :type: str
 
     :param key_code: The key code
-    :type: str
+    :type: int
     """
-
     self.logger.debug("DBus call clear_actions")
 
-    self.binding_manager._profiles[profile][mapping]["binding"].pop(key_code)
+    self.binding_manager._profiles[profile][mapping]["binding"].pop(str(key_code))
 
     self.binding_manager.write_config_file(self.binding_manager._config_file)
 
@@ -389,7 +380,6 @@ def set_profile_leds(self, profile, mapping, red, green, blue):
     :param blue: The blue LED state
     :type: bool
     """
-
     self.logger.debug("DBus call set_profile_leds")
 
     self.binding_manager._profiles[profile][mapping].update(
@@ -412,7 +402,6 @@ def get_matrix(self, profile, mapping):
     :return: JSON of matrix
     :rtype: str
     """
-
     self.logger.debug("DBus call get_matrix")
 
     return json.dumps(self.binding_manager._profiles[profile][mapping]["matrix"])
@@ -432,7 +421,6 @@ def set_matrix(self, profile, mapping, matrix):
     :param matrix: The led matrix
     :type: str
     """
-
     self.logger.debug("DBus call set_matrix")
 
     self.binding_manager.dbus_set_matrix(profile, mapping, json.loads(matrix))

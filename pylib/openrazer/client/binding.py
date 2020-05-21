@@ -20,6 +20,7 @@ class Binding():
 
         self._binding_dbus = _dbus.Interface(self._dbus, "razer.device.binding")
         self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.binding.lighting")
+        self._macro_dbus = _dbus.Interface(self._dbus, "razer.device.macro")
 
     def has(self, capability: str) -> bool:
         """
@@ -61,6 +62,8 @@ class Binding():
         """
         if not isinstance(profile, str):
             raise ValueError("profile must be a string")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
 
         self._binding_dbus.removeProfile(profile)
 
@@ -95,6 +98,8 @@ class Binding():
         """
         if not isinstance(profile, str):
             raise ValueError("profile must be a string")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
 
         self._binding_dbus.setActiveProfile(profile)
 
@@ -124,6 +129,10 @@ class Binding():
             raise ValueError("profile must be a string")
         if not isinstance(mapping, str):
             raise ValueError("mapping must be a string")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
+        if mapping not in self.get_maps(profile):
+            raise ValueError("Map {0} does not exist".format(map))
 
         self._binding_dbus.setDefaultMap(profile, mapping)
 
@@ -174,6 +183,12 @@ class Binding():
             raise ValueError("dest_profile must be a string")
         if not isinstance(map_name, str):
             raise ValueError("map_name must be a string")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
+        if mapping not in self.get_maps(profile):
+            raise ValueError("Map {0} does not exist".format(map))
+        if dest_profile not in self.get_profiles():
+            raise ValueError("Destination profile {0} does not exist".format(dest_profile))
 
         self._binding_dbus.copyMap(profile, mapping, dest_profile, map_name)
 
@@ -193,6 +208,10 @@ class Binding():
             raise ValueError("profile must be a string")
         if not isinstance(mapping, str):
             raise ValueError("mapping must be a string")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
+        if mapping not in self.get_maps(profile):
+            raise ValueError("Map {0} does not exist".format(map))
 
         self._binding_dbus.removeMap(profile, mapping)
 
@@ -217,6 +236,8 @@ class Binding():
         """
         if not isinstance(mapping, str):
             raise ValueError("mapping must be a string")
+        if mapping not in self.get_maps(self.get_active_profile()):
+            raise ValueError("Map {0} does not exist".format(map))
 
         self._binding_dbus.setActiveMap(mapping)
 
@@ -234,6 +255,8 @@ class Binding():
         """
         if not isinstance(profile, str):
             raise ValueError("profile must be a string")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
 
         return json.loads(self._binding_dbus.getMaps(profile))
 
@@ -263,6 +286,10 @@ class Binding():
             raise ValueError("mapping must be a string")
         if not isinstance(key_code, int):
             raise ValueError("key_code must be an integer")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
+        if mapping not in self.get_maps(profile):
+            raise ValueError("Map {0} does not exist".format(map))
 
         return json.loads(self._binding_dbus.getActions(profile, mapping, str(key_code)))
 
@@ -281,7 +308,7 @@ class Binding():
         :type: int
 
         :param action_type: The type of action
-        :type: str, must be one of the following: "key", "map", "shift"
+        :type: str, must be defined by openrazer.client.constants.ACTION_TYPES
 
         :param value: The action value
         :type: str
@@ -298,8 +325,12 @@ class Binding():
             raise ValueError("action_type must be on of the following values: {0}".format(ACTION_TYPES))
         if not isinstance(value, str):
             raise ValueError("value must be an string")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
+        if mapping not in self.get_maps(profile):
+            raise ValueError("Map {0} does not exist".format(map))
 
-        self._binding_dbus.addAction(profile, mapping, str(key_code), action_type, value)
+        self._binding_dbus.addAction(profile, mapping, key_code, action_type, value)
 
     def remove_action(self, profile: str, mapping: str, key_code: int, action_id: int):
         """
@@ -327,6 +358,10 @@ class Binding():
             raise ValueError("key_code must be an integer")
         if not isinstance(action_id, int):
             raise ValueError("action_id must be an integer")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
+        if mapping not in self.get_maps(profile):
+            raise ValueError("Map {0} does not exist".format(map))
 
         self._binding_dbus.removeAction(profile, mapping, str(key_code), str(action_id))
 
@@ -351,6 +386,10 @@ class Binding():
             raise ValueError("mapping must be a string")
         if not isinstance(key_code, int):
             raise ValueError("key_code must be an integer")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
+        if mapping not in self.get_maps(profile):
+            raise ValueError("Map {0} does not exist".format(map))
 
         self._binding_dbus.clearActions(profile, mapping, str(key_code))
 
@@ -381,6 +420,10 @@ class Binding():
             raise ValueError("profile must be a string")
         if not isinstance(mapping, str):
             raise ValueError("mapping must be a string")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
+        if mapping not in self.get_maps(profile):
+            raise ValueError("Map {0} does not exist".format(map))
 
         return self._lighting_dbus.getProfileLEDs(profile, mapping)
 
@@ -415,6 +458,10 @@ class Binding():
             raise ValueError("green must be a bool")
         if not isinstance(blue, bool):
             raise ValueError("blue must be a bool")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
+        if mapping not in self.get_maps(profile):
+            raise ValueError("Map {0} does not exist".format(map))
 
         self._lighting_dbus.setProfileLEDs(profile, mapping, red, green, blue)
 
@@ -437,6 +484,10 @@ class Binding():
             raise ValueError("profile must be a string")
         if not isinstance(mapping, str):
             raise ValueError("mapping must be a string")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
+        if mapping not in self.get_maps(profile):
+            raise ValueError("Map {0} does not exist".format(map))
 
         return json.loads(self._lighting_dbus.getMatrix(profile, mapping))
 
@@ -461,5 +512,63 @@ class Binding():
             raise ValueError("mapping must be a string")
         if not isinstance(matrix, dict):
             raise ValueError("matrix must be a dictionary")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
+        if mapping not in self.get_maps(profile):
+            raise ValueError("Map {0} does not exist".format(map))
 
         self._lighting_dbus.setMatrix(profile, mapping, json.dumps(matrix))
+
+    ### Macro Methods ###
+
+    def start_macro_recording(self, profile: str, mapping: str, key_code: int):
+        """
+        Start recording a macro to the given key
+
+        :param profile: The profile name
+        :type: str
+
+        :param mapping: The map name
+        :type: str
+
+        :param key_code: The key to record to
+        :type: int
+
+        :raises ValueError: If parameters are invalid
+        """
+        if not isinstance(profile, str):
+            raise ValueError("profile must be a string")
+        if not isinstance(mapping, str):
+            raise ValueError("mapping must be a string")
+        if not isinstance(key_code, int):
+            raise ValueError("key_code must be an integer")
+        if profile not in self.get_profiles():
+            raise ValueError("Profile {0} does not exist".format(profile))
+        if mapping not in self.get_maps(profile):
+            raise ValueError("Map {0} does not exist".format(map))
+
+        self._macro_dbus.startMacroRecording(profile, mapping, key_code)
+
+    def stop_macro_recording(self):
+        """
+        Stop recording a macro
+        """
+        self._macro_dbus.stopMacroRecording()
+
+    def get_macro_recording_state(self) -> bool:
+        """
+        Returns True if a macro is currently being recorded, False otherwise.
+
+        :return: True if a macro is currently being recorded, False otherwise
+        :rtype: bool
+        """
+        return self._macro_dbus.getMacroRecordingState()
+
+    def get_macro_key(self) -> int:
+        """
+        Returns the key being recorded to
+
+        :return: The key being recorded to or None
+        :rtype: int or None
+        """
+        return self._macro_dbus.getMacroKey()
