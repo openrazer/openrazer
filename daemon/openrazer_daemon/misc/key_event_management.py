@@ -254,7 +254,7 @@ class KeyboardKeyManager():
         * Adds keypresses to the temporary key store (for ripple effect)
         * Sends key to the binding manager
 
-        :param key_code: Key Event ID
+        :param key_code: Key Event Code
         :type key_code: int
 
         :param key_action: Can either be 0, 1, 2: Up, Down, Autorepeat
@@ -264,52 +264,50 @@ class KeyboardKeyManager():
         :type scan_code: int
         """
         # self._logger.debug("Got key: {0}, state: {1}".format(key_name, key_action))
-        _binding_manager = self._parent.binding_manager
 
-        # Sets up game mode as when enabling macro keys it stops the key working
+        # pylint: disable=no-else-return
         if key_action == 1:
+            # Sets up game mode as when enabling macro keys it stops the key working
             if key_code == 189:  # GAMEMODE
                 self._logger.debug("Got gamemode combo")
                 self._parent.setGameMode(not self._parent.getGameMode())
                 return
 
-            if key_code == 194:  # BRIGHTNESSUP
+            elif key_code == 194:  # BRIGHTNESSUP
                 self._parent.setBrightness(max((self._parent.getBrightness() + 10), 0))
                 return
 
-            if key_code == 190:  # BRIGHTNESSDOWN
+            elif key_code == 190:  # BRIGHTNESSDOWN
                 self._parent.setBrightness(max((self._parent.getBrightness() - 10), 0))
                 return
 
-            if key_code == 188:  # MACROMODE
+            elif key_code == 188:  # MACROMODE
                 self.macro_mode = not self.macro_mode
                 return
 
-        if self.macro_mode:
+        if self._macro_mode:
             if key_code in (183, 184, 185, 186, 187):  # M1, M2, M3, M4, M5
-                if self.macro_key is None:
+                if self._macro_key is None:
                     self._parent.startMacroRecording(self._parent.getActiveProfile(), self._parent.getActiveMap(), key_code)
 
-            elif _binding_manager.macro_key:
-                _str = str
-
+            elif self._macro_key:
                 if key_action == 1:
-                    self._parent.addAction(self._macro_profile, self._macro_map, self.macro_key, "key", _str(key_code))
+                    self._parent.addAction(self._macro_profile, self._macro_map, self.macro_key, "key", str(key_code))
                 elif key_action == 0:
-                    self._parent.addAction(self._macro_profile, self._macro_map, self.macro_key, "key", _str(key_code))
+                    self._parent.addAction(self._macro_profile, self._macro_map, self.macro_key, "release", str(key_code))
 
             else:
                 self._logger.warning("On-the-fly macros are only supported for macro keys, please use a client for configuring other keys")
                 self.macro_mode = False
 
         else:
-            x = self._thread(target=_binding_manager.key_action, args=(key_code, key_action, scan_code))
+            x = self._thread(target=self._parent.binding_manager.key_action, args=(key_code, key_action, scan_code))
             x.start()
 
         now = datetime.datetime.now()
         # Remove expired keys from store
         try:
-            # Get date and if its less than now its expired
+            # Get date and if its less than now, it's expired
             while self._temp_key_store[0][0] < now:
                 self._temp_key_store.pop(0)
         except IndexError:
