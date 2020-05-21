@@ -72,15 +72,13 @@ class KeyWatcher(threading.Thread):
             scan_code = None
             _ecodes = ecodes
             for event in events:
-                if event.code == _ecodes.MSC_SCAN:
+                if event.type == event.code == _ecodes.MSC_SCAN:  # Both EV_MSC and MSC_SCAN are 0x4, lucky us
                     scan_code = event.value  # Grab the scan code of the key
                     continue  # Skip that event
 
-                if event.type != _ecodes.EV_KEY:  # Ignore other non-key events
-                    continue
-
-                self._parent.key_action(event.code, event.value, scan_code)
-                scan_code = None
+                if event.type == _ecodes.EV_KEY:  # Ignore other non-key events
+                    self._parent.key_action(event.code, event.value, scan_code)
+                    scan_code = None
 
     @property
     def shutdown(self):
