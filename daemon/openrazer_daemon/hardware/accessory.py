@@ -16,7 +16,7 @@ class RazerChromaMugHolder(_RazerDeviceBrightnessSuspend):
     USB_PID = 0x0F07
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 15]
-    METHODS = ['get_device_type_accessory', 'set_brightness',
+    METHODS = ['get_device_type_accessory',
                'set_static_effect', 'set_spectrum_effect', 'set_wave_effect', 'set_none_effect', 'set_breath_single_effect', 'set_breath_dual_effect', 'set_breath_random_effect', 'set_blinking_effect',
                'is_mug_present',
                'set_custom_effect', 'set_key_row']
@@ -73,7 +73,7 @@ class RazerMouseDock(RazerBaseStationChroma):
     HAS_MATRIX = False
     USB_PID = 0x007E
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Mouse_Dock-if0(1|2)-event-kbd')
-    METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_spectrum_effect', 'set_brightness',
             'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
             'set_custom_effect', 'set_key_row']
 
