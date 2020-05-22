@@ -2115,21 +2115,21 @@ class RazerBasiliskUltimateReceiver(RazerBasiliskUltimateWired):
     METHODS = RazerBasiliskUltimateWired.METHODS + \
         ['set_charge_effect', 'set_charge_colour']
 
-    # def __init__(self, *args, **kwargs):
-    #     super(RazerBasiliskUltimateReceiver, self).__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super(RazerBasiliskUltimateReceiver, self).__init__(*args, **kwargs)
 
-    #     self._battery_manager = _BatteryManager(
-    #         self, self._device_number, 'Razer Basilisk Ultimate Wireless')
-    #     self._battery_manager.active = self.config.getboolean(
-    #         'Startup', 'mouse_battery_notifier', fallback=False)
+        self._battery_manager = _BatteryManager(
+            self, self._device_number, 'Razer Basilisk Ultimate')
+        self._battery_manager.active = self.config.getboolean(
+            'Startup', 'mouse_battery_notifier', fallback=False)
 
-    # def _close(self):
-    #     """
-    #     Close the key manager
-    #     """
-    #     super(RazerBasiliskUltimateReceiver, self)._close()
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerBasiliskUltimateReceiver, self)._close()
 
-    #     self._battery_manager.close()
+        self._battery_manager.close()
 
 
 class RazerDeathAdderV2(__RazerDeviceSpecialBrightnessSuspend):

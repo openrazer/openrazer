@@ -5,6 +5,7 @@ import logging
 import threading
 import datetime
 import time
+import math
 
 try:
     import notify2
@@ -41,6 +42,7 @@ class BatteryNotifier(threading.Thread):
 
         # Could save reference to parent but only need battery level function
         self._get_battery_func = parent.getBattery
+        self._is_charging = parent.isCharging
 
         if self._notify2:
             self._notification = notify2.Notification(summary="{0}")
@@ -78,15 +80,40 @@ class BatteryNotifier(threading.Thread):
             if battery_level == -1.0:
                 time.sleep(0.2)
                 battery_level = self._get_battery_func()
+            is_charging = self._is_charging()
+            if self._notify2 == False:
+                return
+            
+            level_group = int(math.ceil(battery_level / 10.0)) * 10
 
-            if battery_level < 10.0:
-                if self._notify2:
-                    self._notification.update(summary="{0} Battery at {1:.1f}%".format(self._device_name, battery_level), message='Please charge your device', icon='notification-battery-low')
-                    self._notification.show()
+            if is_charging:
+                self._notification.update(
+                    summary="{0} is charging".format(self._device_name),
+                    message="Now {0:.1f}%".format(battery_level),
+                    icon="battery-level-{0}-charging".format(level_group)
+                )
             else:
-                if self._notify2:
-                    self._notification.update(summary="{0} Battery at {1:.1f}%".format(self._device_name, battery_level))
-                    self._notification.show()
+                if battery_level == -1.0:
+                    # This works for some scenarios related inability to read battery level after some cases
+                    self._notification.update(
+                        summary="{0} has problem".format(self._device_name),
+                        message="Please reconnect your device".format(battery_level),
+                        icon="battery-emoty"
+                    )
+                else:
+                    if battery_level < 10.0:
+                        self._notification.update(
+                            summary="{0} has low battery".format(self._device_name),
+                            message="Now {0:.1f}%. Please charge your device".format(battery_level),
+                            icon="battery-level-{0}".format(level_group)
+                        )
+                    else:
+                        self._notification.update(
+                            summary="{0} battery status".format(self._device_name),
+                            message="Now {0:.1f}%.".format(battery_level),
+                            icon="battery-level-{0}".format(level_group)
+                        )
+            self._notification.show()
 
             if self._notify2:
                 self._logger.debug("{0} Battery at {1:.1f}%".format(self._device_name, battery_level))
