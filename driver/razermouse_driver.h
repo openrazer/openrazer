@@ -83,6 +83,8 @@ struct razer_mouse_device {
     unsigned int tilt_repeat_delay;
     unsigned int tilt_repeat;
     __s32 hwheel_value;
+    u8 button_byte; // Previous value of mouse button byte in HID record
+    u8 rep4[16]; // Previous value of report 4 on the keyboard intf
 
     unsigned char usb_interface_protocol;
     unsigned char usb_interface_subclass;

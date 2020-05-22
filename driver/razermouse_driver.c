@@ -1308,7 +1308,7 @@ static ssize_t razer_attr_write_tilt_hwheel(struct device *dev, struct device_at
     unsigned int tilt_hwheel;
     if (kstrtouint(buf, 0, &tilt_hwheel) < 0)
         return -EINVAL;
-    device->tilt_hwheel = tilt_hwheel;
+    device->tilt_hwheel = !!tilt_hwheel;
     return count;
 }
 
@@ -3205,28 +3205,198 @@ static DEVICE_ATTR(right_matrix_effect_none,        0220, NULL,                 
 static DEVICE_ATTR(backlight_led_state,            0660, razer_attr_read_backlight_led_state, razer_attr_write_backlight_led_state);
 
 
-static int dev_is_hid(struct device *dev, void *data)
+#define REP4_DPI_UP  0x20
+#define REP4_DPI_DN  0x21
+#define REP4_TILT_L  0x22
+#define REP4_TILT_R  0x23
+#define REP4_PROFILE 0x50
+#define REP4_SNIPER  0x51
+
+#define BIT_TILT_L 5
+#define BIT_TILT_R 6
+
+/**
+ * Map "Report 4" codes to evdev key codes
+ */
+static const __u16 rep4_key_codes[] = {
+    [REP4_TILT_L]  = BTN_BACK,          /* BTN_MOUSE + 6 */
+    [REP4_TILT_R]  = BTN_FORWARD,       /* BTN_MOUSE + 5 */
+    [REP4_SNIPER]  = BTN_TASK,          /* BTN_MOUSE + 7 */
+    [REP4_DPI_UP]  = BTN_MOUSE + 8,
+    [REP4_DPI_DN]  = BTN_MOUSE + 9,
+    [REP4_PROFILE] = BTN_MOUSE + 10,
+    /* NOTE: Highest legal mouse button is BTN_MOUSE + 15 */
+};
+
+struct button_mapping {
+    u8 bit;
+    __u16 code;          /* when tilt_hwheel == 0 */
+    __s32 hwheel_value;         /* when tilt_hwheel == 1 */
+};
+
+/**
+ * Map bits in the first byte of the mouse report to evdev keycodes
+ * and REL_HWHEEL values
+ */
+static const struct button_mapping button_mappings[] = {
+    {BIT_TILT_L, BTN_BACK, -1},
+    {BIT_TILT_R, BTN_FORWARD, 1},
+};
+
+/**
+ * Convert an evdev mouse button code to the corresponding HID usage
+ */
+u32 mouse_button_to_usage(__u16 code)
 {
-    if (dev->bus == &hid_bus_type)
-        return 1;
-    return 0;
+    return HID_UP_BUTTON + (code - BTN_MOUSE) + 1;
 }
 
-struct usb_interface *find_intf_with_proto(struct usb_device *usbdev,
-                                           u8 proto)
+/**
+ * Send the MSC_SCAN event for the usage code associated with an evdev
+ * mouse button code
+ */
+void input_button_msc_scan(struct input_dev *input, __u16 button)
+{
+    input_event(input, EV_MSC, MSC_SCAN, mouse_button_to_usage(button));
+}
+
+/**
+ * Look up and send the evdev key associated with the Razer "report 4"
+ * code
+ */
+void input_rep4_code(struct input_dev *input, u8 code, __s32 value)
+{
+    if (code < ARRAY_SIZE(rep4_key_codes) && rep4_key_codes[code]) {
+        unsigned int button = rep4_key_codes[code];
+        input_button_msc_scan(input, button);
+        input_report_key(input, button, value);
+        input_sync(input);
+    }
+}
+
+/**
+ * Timer callback for wheel tilt repeating
+ */
+static enum hrtimer_restart wheel_tilt_repeat(struct hrtimer *timer)
+{
+    struct razer_mouse_device *dev =
+        container_of(timer, struct razer_mouse_device, repeat_timer);
+    input_report_rel(dev->input, REL_HWHEEL, dev->hwheel_value);
+    input_sync(dev->input);
+    if (dev->tilt_repeat)
+        hrtimer_forward_now(timer, ms_to_ktime(dev->tilt_repeat));
+    return HRTIMER_RESTART;
+}
+
+/**
+ * Send a tilt-wheel event and, if configured, start the key-repeat timer
+ */
+static void tilt_hwheel_start(struct razer_mouse_device *rdev,
+                              __s32 rel_value)
+{
+    input_report_rel(rdev->input, REL_HWHEEL, rel_value);
+    input_sync(rdev->input);
+
+    if (rdev->tilt_repeat && rdev->tilt_repeat_delay) {
+        rdev->hwheel_value = rel_value;
+        hrtimer_start_range_ns(
+            &rdev->repeat_timer, ms_to_ktime(rdev->tilt_repeat_delay),
+            1000, HRTIMER_MODE_REL);
+    }
+}
+
+/**
+ * Stop the tilt wheel key-repeat timer
+ */
+static void tilt_hwheel_stop(struct razer_mouse_device *rdev)
+{
+    hrtimer_cancel(&rdev->repeat_timer);
+}
+
+/**
+ * Test if a device is a HID device
+ */
+static int dev_is_hid(struct device *dev, void *data)
+{
+    return (dev->bus == &hid_bus_type);
+}
+
+/**
+ * Find an interface on a usb_device with the specified protocol
+ */
+struct usb_interface *find_intf_with_proto(struct usb_device *usbdev, u8 proto)
 {
     struct usb_interface *intf;
     int i;
 
     for (i = 0; i < usbdev->actconfig->desc.bNumInterfaces; i++) {
         intf = usb_ifnum_to_if(usbdev, i);
-        if (intf && intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE)
+        if (intf && intf->cur_altsetting->desc.bInterfaceProtocol == proto)
             return intf;
     }
 
     return NULL;
 }
 
+/**
+ * Walk up the device tree from an interface to the device it is a
+ * part of, then back down through the interface with protocol == MOUSE
+ * to the razer_mouse_device associated with it
+ */
+static struct razer_mouse_device *find_mouse(struct usb_interface *intf)
+{
+    struct usb_device *usbdev = interface_to_usbdev(intf);
+    struct usb_interface *m_intf = find_intf_with_proto(usbdev, USB_INTERFACE_PROTOCOL_MOUSE);
+    struct device *dev;
+    struct razer_mouse_device *rdev;
+
+    if (!m_intf)
+        return NULL;
+
+    dev = device_find_child(&m_intf->dev, NULL, dev_is_hid);
+    if (!dev)
+        return NULL;
+
+    rdev = dev_get_drvdata(dev);
+    put_device(dev);
+    return rdev;
+}
+
+/**
+ * Test if a bit is cleared in 'prev' and set in 'cur'
+ */
+static int rising_bit(u8 prev, u8 cur, u8 mask)
+{
+    return !(prev & mask) && cur & mask;
+}
+
+/**
+ * Test if a bit is set in 'prev' and cleared in 'cur'
+ */
+static int falling_bit(u8 prev, u8 cur, u8 mask)
+{
+    return prev & mask && !(cur & mask);
+}
+
+/**
+ * Test if a bit is different between 'prev' and 'cur'
+ */
+static int edge_bit(u8 prev, u8 cur, u8 mask)
+{
+    return (prev & mask) != (cur & mask);
+}
+
+/**
+ * Search a byte array for a value
+ */
+static int search(u8 *array, u8 value, unsigned n)
+{
+    while (n--) {
+        if (*array++ == value)
+            return 1;
+    }
+    return 0;
+}
 
 /**
  * Raw event function
@@ -3234,44 +3404,56 @@ struct usb_interface *find_intf_with_proto(struct usb_device *usbdev,
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    struct usb_device *usbdev = interface_to_usbdev(intf);
-    struct usb_interface *m_intf = NULL;
-    struct device *m_dev;
-    struct razer_mouse_device *m_rdev;
-    unsigned char mask;
-    int index;
-    u8 cur_value;
+    struct razer_mouse_device *rdev = hid_get_drvdata(hdev);
 
-    // The event were looking for is 16 bytes long and starts with 0x04
-    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
-        switch (hdev->product) {
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
-            mask = 0;
-
-            for (index = 1; index < size; index++) {
-                switch (data[index]) {
-                    case 0x20: mask |= 1u << 0; break;
-                    case 0x21: mask |= 1u << 1; break;
-                    case 0x50: mask |= 1u << 2; break;
-                    case 0x51: mask |= 1u << 3; break;
+    switch (hdev->product) {
+    case USB_DEVICE_ID_RAZER_BASILISK_V2:
+        /* Detect wheel tilt edges */
+        if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+            int i;
+            for (i = 0; i < ARRAY_SIZE(button_mappings); i++) {
+                const struct button_mapping *mapping = &button_mappings[i];
+                u8 mask = 1 << mapping->bit;
+                if (mapping->hwheel_value && rdev->tilt_hwheel) {
+                    __s32 rel_value = mapping->hwheel_value;
+                    if (rising_bit(rdev->button_byte, data[0], mask))
+                        tilt_hwheel_start(rdev, rel_value);
+                    if (falling_bit(rdev->button_byte, data[0], mask))
+                        tilt_hwheel_stop(rdev);
+                } else if (edge_bit(rdev->button_byte, data[0], mask)) {
+                    unsigned int code = mapping->code;
+                    input_button_msc_scan(rdev->input, code);
+                    input_report_key(rdev->input, code, !!(data[0] & mask));
+                    input_sync(rdev->input);
                 }
             }
+            rdev->button_byte = data[0];
+        }
 
-            m_intf = find_intf_with_proto(usbdev, USB_INTERFACE_PROTOCOL_MOUSE);
-            m_dev = device_find_child(&m_intf->dev, NULL, dev_is_hid);
-            m_rdev = dev_get_drvdata(m_dev);
-            put_device(m_dev);
-            for (index = 0; index < 4; index++) {
-                unsigned int code = BTN_MOUSE + 7 + index;
-                int value = mask & (1u << index) ? 1 : 0;
-                input_report_key(m_rdev->input, code, value);
-                input_sync(m_rdev->input);
+        /* Detect buttons reported on the keyboard interface */
+        if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
+            struct razer_mouse_device *m_rdev = find_mouse(intf);
+            int i;
+
+            if (!m_rdev)
+                return 1;
+
+            for (i = 1; i < size; i++) {
+                if (!search(rdev->rep4 + 1, data[i], size - 1))
+                    input_rep4_code(m_rdev->input, data[i], 1);
+                if (!search(data + 1, rdev->rep4[i], size - 1))
+                    input_rep4_code(m_rdev->input, rdev->rep4[i], 0);
             }
-            break;
-        default:
+            memcpy(rdev->rep4, data, 16);
+            return 1;
+        }
+        break;
+    default:
+        // The event were looking for is 16 bytes long and starts with 0x04
+        if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
             // Convert 04... to 0100...
-            index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
-            cur_value = 0x00;
+            int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
+            u8 cur_value = 0x00;
 
             while(--index > 0) {
                 cur_value = data[index];
@@ -3292,23 +3474,38 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
                 case 0x23: // Wheel Right
                     cur_value = 0x6B; // F16
                     break;
-                case 0x50: // Cycle Up Profile
-                    cur_value = 0x6D; // F18
-                    break;
-                case 0x51: // Sensitivity Clutch
-                    cur_value = 0x6E; // F19
-                    break;
                 }
 
                 data[index+1] = cur_value;
             }
 
+
             data[0] = 0x01;
             data[1] = 0x00;
             return 1;
         }
+        break;
     }
 
+    return 0;
+}
+
+/**
+ * Input mapping function
+ */
+static int
+razer_input_mapping(struct hid_device *hdev, struct hid_input *hidinput,
+                    struct hid_field *field, struct hid_usage *usage,
+                    unsigned long **bit, int *max)
+{
+    /* Some higher nonstandard mouse buttons are reported in
+     * 15-element arrays on reports 4 and 5 with usage 0x10003. If
+     * hid-core tries to interpret this misshapen descriptor it will
+     * botch it and add spurious event codes to input->evkey. */
+    if (field->application == HID_UP_GENDESK
+        && usage->hid == (HID_UP_GENDESK | 0x0003)) {
+        return -1;
+    }
     return 0;
 }
 
@@ -3326,143 +3523,15 @@ static int razer_input_configured(struct hid_device *hdev,
     if (intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
         switch (hdev->product) {
         case USB_DEVICE_ID_RAZER_BASILISK_V2:
-            /* Basilisk V2 has a tilt wheel but Linux HID doesn't
-             * recognize it automatically. */
+            /* Linux HID doesn't detect the Basilisk V2's tilt wheel
+             * or buttons beyond the first 5 */
             input_set_capability(hidinput->input, EV_REL, REL_HWHEEL);
-            input_set_capability(hidinput->input, EV_KEY, BTN_MOUSE + 7);
+            input_set_capability(hidinput->input, EV_KEY, BTN_FORWARD);
+            input_set_capability(hidinput->input, EV_KEY, BTN_BACK);
+            input_set_capability(hidinput->input, EV_KEY, BTN_TASK);
             input_set_capability(hidinput->input, EV_KEY, BTN_MOUSE + 8);
             input_set_capability(hidinput->input, EV_KEY, BTN_MOUSE + 9);
             input_set_capability(hidinput->input, EV_KEY, BTN_MOUSE + 10);
-            break;
-        }
-    }
-
-    return 0;
-}
-
-/**
- * Report fixup function
- */
-__u8 *razer_report_fixup(struct hid_device *hdev, __u8 *buf,
-                         unsigned int *size)
-{
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-
-    if (intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
-        switch (hdev->product) {
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
-            /* Basilisk V2 defines 5 buttons in bits 0-4, but in
-             * driver mode it reports the tilt wheel events in bits 5
-             * and 6. Increase the Usage Maximum and Report Size for
-             * the buttons to 7, and reduce the Report Size for the
-             * alignment padding down 1. */
-            if (*size >= 94 && buf[0x0e] == 0x29 && buf[0x16] == 0x95
-                && buf[0x1c] == 0x95) {
-                buf[0x0f] = 0x07;
-                buf[0x17] = 0x07;
-                buf[0x1d] = 0x01;
-            }
-            break;
-        }
-    }
-
-    return buf;
-}
-
-/**
- * Test whether an input event is from a particular button
- */
-static int ev_is_btn(__u16 code, struct hid_usage *usage)
-{
-    return usage->type == EV_KEY && usage->code == code;
-}
-
-/**
- * Test whether an input event is a particular button being pushed
- */
-static int ev_is_btn_down(__u16 code, struct hid_field *field,
-                          struct hid_usage *usage, __s32 value)
-{
-    return (ev_is_btn(code, usage)
-            && !field->value[usage->usage_index] && value);
-}
-
-/**
- * Test whether an input event is a particular button being released
- */
-static int ev_is_btn_up(__u16 code, struct hid_field *field,
-                        struct hid_usage *usage, __s32 value)
-{
-    return (ev_is_btn(code, usage)
-            && field->value[usage->usage_index] && !value);
-}
-
-/**
- * Timer callback for wheel tilt repeating
- */
-static enum hrtimer_restart wheel_tilt_repeat(struct hrtimer *timer)
-{
-    struct razer_mouse_device *dev =
-        container_of(timer, struct razer_mouse_device, repeat_timer);
-    input_report_rel(dev->input, REL_HWHEEL, dev->hwheel_value);
-    input_sync(dev->input);
-    if (dev->tilt_repeat)
-        hrtimer_forward_now(timer, ms_to_ktime(dev->tilt_repeat));
-    return HRTIMER_RESTART;
-}
-
-/**
- * Translate wheel tilt press and release events into REL_HWHEEL events
- */
-static int translate_wheel_tilt_events(struct razer_mouse_device *dev,
-                                       struct hid_field *field,
-                                       struct hid_usage *usage,
-                                       __s32 btn_value,
-                                       __u16 code,
-                                       __s32 hwheel_value)
-{
-    /* Convert the tilt wheel's button events to horizontal wheel
-     * events and set up a key repeat timer */
-    if (ev_is_btn_down(code, field, usage, btn_value)) {
-        input_report_rel(dev->input, REL_HWHEEL, hwheel_value);
-        dev->hwheel_value = hwheel_value;
-        if (dev->tilt_repeat && dev->tilt_repeat_delay)
-            hrtimer_start_range_ns(
-                &dev->repeat_timer, ms_to_ktime(dev->tilt_repeat_delay),
-                1000, HRTIMER_MODE_REL);
-        return 1;
-    }
-    if (ev_is_btn_up(code, field, usage, btn_value)) {
-        hrtimer_cancel(&dev->repeat_timer);
-        return 1;
-    }
-
-    return 0;
-}
-
-/**
- * Event function
- */
-int razer_event(struct hid_device *hdev, struct hid_field *field,
-                struct hid_usage *usage, __s32 value)
-{
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    struct razer_mouse_device *dev = hid_get_drvdata(hdev);
-    /* __u16 new_button_code = 0x00; */
-    struct usb_interface_descriptor *desc = &intf->cur_altsetting->desc;
-    /* struct device *hiddev; */
-
-    if (desc->bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
-        switch (hdev->product) {
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
-            if (dev->tilt_hwheel) {
-                if (translate_wheel_tilt_events(
-                        dev, field, usage, value, BTN_MOUSE + 5, -1))
-                    return 1;
-                if (translate_wheel_tilt_events(
-                        dev, field, usage, value, BTN_MOUSE + 6, 1))
-                    return 1;
-            }
             break;
         }
     }
@@ -3491,10 +3560,6 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
     get_random_bytes(&rand_serial, sizeof(unsigned int));
     sprintf(&dev->serial[0], "PM%012u", rand_serial);
 
-    // Setup wheel tilt repeat timers
-    hrtimer_init(&dev->repeat_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
-    dev->repeat_timer.function = wheel_tilt_repeat;
-
     // Setup orochi2011
     dev->orochi2011_dpi = 0x4c;
     dev->orochi2011_poll = 500;
@@ -3505,6 +3570,9 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
     dev->da3_5g.profile = 1; // Profile 1
     dev->da3_5g.poll = 1; // Poll rate 1000
 
+    // Setup tilt wheel HWHEEL emulation
+    hrtimer_init(&dev->repeat_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+    dev->repeat_timer.function = wheel_tilt_repeat;
     dev->tilt_hwheel = 1;
     dev->tilt_repeat_delay = 250;
     dev->tilt_repeat = 33;
@@ -3538,7 +3606,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     }
 
     if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE
-       && (expected_subclass == 0xFF || dev->usb_interface_subclass == expected_subclass)) { 
+       && (expected_subclass == 0xFF || dev->usb_interface_subclass == expected_subclass)) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);
@@ -3613,7 +3681,6 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         /* Fall through */
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
         case USB_DEVICE_ID_RAZER_BASILISK:
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
@@ -4055,7 +4122,6 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         /* Fall through */
         case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
         case USB_DEVICE_ID_RAZER_BASILISK:
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
@@ -4450,9 +4516,8 @@ static struct hid_driver razer_mouse_driver = {
     .remove    = razer_mouse_disconnect,
 
     .raw_event = razer_raw_event,
+    .input_mapping = razer_input_mapping,
     .input_configured = razer_input_configured,
-    .report_fixup = razer_report_fixup,
-    .event = razer_event,
 };
 
 module_hid_driver(razer_mouse_driver);
