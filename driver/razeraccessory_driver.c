@@ -45,7 +45,14 @@ MODULE_LICENSE(DRIVER_LICENSE);
  */
 static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report)
 {
-    return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, 600, 800);
+    switch (usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+        return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, RAZER_NEW_DEVICE_WAIT_MIN_US, RAZER_NEW_DEVICE_WAIT_MAX_US);
+        break;
+
+    default:
+        return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, 600, 800);
+    }
 }
 
 /**
@@ -712,8 +719,19 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
 static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
+    struct razer_report report = {0};
     struct razer_report response = {0};
+
+    switch(device->usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+        report = razer_chroma_extended_matrix_get_brightness(VARSTORE, ZERO_LED);
+        // report = razer_chroma_misc_get_dock_brightness();
+        break;
+    
+    default:
+        report = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
+        break;
+    }
 
     mutex_lock(&device->lock);
     response = razer_send_payload(device->usb_dev, &report);
@@ -721,9 +739,6 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
 
     return sprintf(buf, "%d\n", response.arguments[2]);
 }
-
-
-
 
 
 /**

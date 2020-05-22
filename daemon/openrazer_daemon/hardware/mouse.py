@@ -2029,32 +2029,37 @@ class RazerBasiliskUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
                'get_logo_brightness', 'set_logo_brightness',
-               # Static
-               'set_logo_static_naga_hex_v2',
+               # Spectrum
+               'set_logo_spectrum_naga_hex_v2',
+               # Reactive
+               'set_logo_reactive_naga_hex_v2',
                # Breath
                'set_logo_breath_random_naga_hex_v2',
                'set_logo_breath_single_naga_hex_v2',
                'set_logo_breath_dual_naga_hex_v2',
+               # Static
+               'set_logo_static_naga_hex_v2',
                # None
                'set_logo_none_naga_hex_v2',
-               # Reactive
-               'set_logo_reactive_naga_hex_v2',
-               # Spectrum
-               'set_logo_spectrum_naga_hex_v2',
                # Scroll wheel
                'get_scroll_brightness', 'set_scroll_brightness',
+               # Spectrum
+               'set_scroll_spectrum_naga_hex_v2',
+               # Reactive
+               'set_scroll_reactive_naga_hex_v2',
                # Breath
                'set_scroll_breath_random_naga_hex_v2',
                'set_scroll_breath_random_naga_hex_v2',
                'set_scroll_breath_dual_naga_hex_v2',
-               # None
-               'set_scroll_none_naga_hex_v2',
-               # Reactive
-               'set_scroll_reactive_naga_hex_v2',
-               # Spectrum
-               'set_scroll_spectrum_naga_hex_v2',
                # Static
                'set_scroll_static_naga_hex_v2',
+               # None
+               'set_scroll_none_naga_hex_v2',
+'get_left_brightness', 'set_left_brightness', 'get_right_brightness', 'set_right_brightness',
+                # Left side
+               'set_left_wave', 'set_left_static', 'set_left_spectrum', 'set_left_none', 'set_left_reactive', 'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
+               # Right side
+               'set_right_wave', 'set_right_static', 'set_right_spectrum', 'set_right_none', 'set_right_reactive', 'set_right_breath_random', 'set_right_breath_single', 'set_right_breath_dual',
 
                # Can set LOGO and Scroll with custom
                'set_custom_effect', 'set_key_row']
@@ -2110,21 +2115,21 @@ class RazerBasiliskUltimateReceiver(RazerBasiliskUltimateWired):
     METHODS = RazerBasiliskUltimateWired.METHODS + \
         ['set_charge_effect', 'set_charge_colour']
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBasiliskUltimateReceiver, self).__init__(*args, **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     super(RazerBasiliskUltimateReceiver, self).__init__(*args, **kwargs)
 
-        self._battery_manager = _BatteryManager(
-            self, self._device_number, 'Razer Basilisk Ultimate Wireless')
-        self._battery_manager.active = self.config.getboolean(
-            'Startup', 'mouse_battery_notifier', fallback=False)
+    #     self._battery_manager = _BatteryManager(
+    #         self, self._device_number, 'Razer Basilisk Ultimate Wireless')
+    #     self._battery_manager.active = self.config.getboolean(
+    #         'Startup', 'mouse_battery_notifier', fallback=False)
 
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBasiliskUltimateReceiver, self)._close()
+    # def _close(self):
+    #     """
+    #     Close the key manager
+    #     """
+    #     super(RazerBasiliskUltimateReceiver, self)._close()
 
-        self._battery_manager.close()
+    #     self._battery_manager.close()
 
 
 class RazerDeathAdderV2(__RazerDeviceSpecialBrightnessSuspend):

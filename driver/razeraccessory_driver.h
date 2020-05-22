@@ -19,6 +19,10 @@
 #define USB_DEVICE_ID_RAZER_CHROMA_HDK 0x0F09
 #define USB_DEVICE_ID_RAZER_MOUSE_DOCK 0x007E
 
+#define RAZER_NEW_DEVICE_WAIT_MIN_US 31000
+#define RAZER_NEW_DEVICE_WAIT_MAX_US 31100
+
+
 struct razer_accessory_device {
     struct usb_device *usb_dev;
     struct input_dev *input;
