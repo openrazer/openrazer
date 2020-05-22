@@ -69,13 +69,14 @@ class RazerBaseStationChroma(_RazerDeviceBrightnessSuspend):
         "top_img": DEVICE_IMAGE
     }
 
+
 class RazerMouseDock(RazerBaseStationChroma):
     HAS_MATRIX = False
     USB_PID = 0x007E
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Mouse_Dock-if0(1|2)-event-kbd')
     METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_spectrum_effect', 'set_brightness',
-            'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
-            'set_custom_effect', 'set_key_row']
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row']
 
 
 class RazerNommoChroma(_RazerDeviceBrightnessSuspend):

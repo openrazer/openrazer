@@ -83,7 +83,7 @@ class BatteryNotifier(threading.Thread):
             is_charging = self._is_charging()
             if self._notify2 == False:
                 return
-            
+
             level_group = int(math.ceil(battery_level / 10.0)) * 10
 
             if is_charging:

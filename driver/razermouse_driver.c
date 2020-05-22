@@ -2930,8 +2930,8 @@ static ssize_t razer_attr_write_side_mode_reactive(struct device *dev, struct de
             report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, side, speed, (struct razer_rgb*)&buf[1]);
             break;
 
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
             report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, side, speed, (struct razer_rgb*)&buf[1]);
             report.transaction_id.id = 0x1f;
@@ -3052,7 +3052,7 @@ static ssize_t razer_attr_write_side_mode_static(struct device *dev, struct devi
         case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, side, (struct razer_rgb*)&buf[0]);
             break;
-        
+
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
@@ -4079,7 +4079,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_tilt_hwheel);
             device_remove_file(&hdev->dev, &dev_attr_tilt_repeat_delay);
             device_remove_file(&hdev->dev, &dev_attr_tilt_repeat);
-            
+
             device_remove_file(&hdev->dev, &dev_attr_left_led_brightness);
             device_remove_file(&hdev->dev, &dev_attr_left_matrix_effect_wave);
             device_remove_file(&hdev->dev, &dev_attr_left_matrix_effect_spectrum);

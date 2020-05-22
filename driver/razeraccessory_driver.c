@@ -727,7 +727,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
         report = razer_chroma_extended_matrix_get_brightness(VARSTORE, ZERO_LED);
         // report = razer_chroma_misc_get_dock_brightness();
         break;
-    
+
     default:
         report = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
         break;

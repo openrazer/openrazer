@@ -2055,8 +2055,8 @@ class RazerBasiliskUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
                'set_scroll_static_naga_hex_v2',
                # None
                'set_scroll_none_naga_hex_v2',
-'get_left_brightness', 'set_left_brightness', 'get_right_brightness', 'set_right_brightness',
-                # Left side
+               'get_left_brightness', 'set_left_brightness', 'get_right_brightness', 'set_right_brightness',
+               # Left side
                'set_left_wave', 'set_left_static', 'set_left_spectrum', 'set_left_none', 'set_left_reactive', 'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
                # Right side
                'set_right_wave', 'set_right_static', 'set_right_spectrum', 'set_right_none', 'set_right_reactive', 'set_right_breath_random', 'set_right_breath_single', 'set_right_breath_dual',
