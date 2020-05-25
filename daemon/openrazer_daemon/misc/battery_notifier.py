@@ -99,18 +99,24 @@ class BatteryNotifier(threading.Thread):
                     icon="battery-level-{0}-charging".format(level_group)
                 )
             else:
-                if battery_level < 10.0:
+                if battery_level == 0.0:
                     self._notification.update(
-                        summary="{0} is low battery".format(self._device_name),
-                        message="Now {0:.1f}%. Please charge your device".format(battery_level),
-                        icon="battery-level-{0}".format(level_group)
+                        summary="{0} is in sleep mode".format(self._device_name),
+                        icon="battery-missing"
                     )
                 else:
-                    self._notification.update(
-                        summary="{0} battery status".format(self._device_name),
-                        message="Now {0:.1f}%.".format(battery_level),
-                        icon="battery-level-{0}".format(level_group)
-                    )
+                    if battery_level < 10.0:
+                        self._notification.update(
+                            summary="{0} is low battery".format(self._device_name),
+                            message="Now {0:.1f}%. Please charge your device".format(battery_level),
+                            icon="battery-level-{0}".format(level_group)
+                        )
+                    else:
+                        self._notification.update(
+                            summary="{0} battery status".format(self._device_name),
+                            message="Now {0:.1f}%.".format(battery_level),
+                            icon="battery-level-{0}".format(level_group)
+                        )
             self._notification.show()
 
             self._logger.debug("{0} Battery at {1:.1f}%".format(self._device_name, battery_level))
