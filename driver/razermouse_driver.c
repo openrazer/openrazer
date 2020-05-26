@@ -3316,9 +3316,9 @@ static void tilt_hwheel_stop(struct razer_mouse_device *rdev)
 /**
  * Test if a device is a HID device
  */
-static int dev_is_hid(struct device *dev, void *data)
+static int dev_is_on_bus(struct device *dev, void *data)
 {
-    return (dev->bus == &hid_bus_type);
+    return (dev->bus == data);
 }
 
 /**
@@ -3343,8 +3343,10 @@ struct usb_interface *find_intf_with_proto(struct usb_device *usbdev, u8 proto)
  * part of, then back down through the interface with protocol == MOUSE
  * to the razer_mouse_device associated with it
  */
-static struct razer_mouse_device *find_mouse(struct usb_interface *intf)
+static struct razer_mouse_device *find_mouse(struct hid_device *hdev)
 {
+    struct bus_type *hid_bus_type = hdev->dev.bus;
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usbdev = interface_to_usbdev(intf);
     struct usb_interface *m_intf = find_intf_with_proto(usbdev, USB_INTERFACE_PROTOCOL_MOUSE);
     struct device *dev;
@@ -3353,7 +3355,7 @@ static struct razer_mouse_device *find_mouse(struct usb_interface *intf)
     if (!m_intf)
         return NULL;
 
-    dev = device_find_child(&m_intf->dev, NULL, dev_is_hid);
+    dev = device_find_child(&m_intf->dev, hid_bus_type, dev_is_on_bus);
     if (!dev)
         return NULL;
 
@@ -3432,11 +3434,13 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 
         /* Detect buttons reported on the keyboard interface */
         if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
-            struct razer_mouse_device *m_rdev = find_mouse(intf);
+            struct razer_mouse_device *m_rdev = find_mouse(hdev);
             int i;
 
-            if (!m_rdev)
+            if (!m_rdev) {
+                printk(KERN_WARNING "razermouse: Couldn't find mouse intf from kbd intf");
                 return 1;
+            }
 
             for (i = 1; i < size; i++) {
                 if (!search(rdev->rep4 + 1, data[i], size - 1))
