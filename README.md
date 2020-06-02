@@ -114,6 +114,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Viper Ultimate (Wireless)               |  1532:007B  |
 | Razer Basilisk X HyperSpeed                   |  1532:0083  |
 | Razer DeathAdder V2                           |  1532:0084  |
+| Razer Viper Mini                              |  1532:008A  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |
