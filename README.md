@@ -60,6 +60,7 @@ The below devices are fully feature supported by OpenRazer which means all avail
 | Razer Blade 15 Studio Edition (2019)          |  1532:024D  |
 | Razer Blade Stealth (Early 2020)              |  1532:0252  |
 | Razer Blade 15 Advanced (2020)                |  1532:0253  |
+| Razer Blade 15 (Early 2020) Base              |  1532:0255  |
 
 ### Mice
 | Device                                        | USB VID:PID |
