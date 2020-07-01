@@ -294,9 +294,9 @@ class Binding():
         return json.loads(self._binding_dbus.getActions(profile, mapping, str(key_code)))
 
     # pylint: disable=too-many-arguments
-    def add_action(self, profile: str, mapping: str, key_code: int, action_type: str, value: str):
+    def add_action(self, profile: str, mapping: str, key_code: int, action_type: str, value: str, action_id: int = None):
         """
-        Add an action to the given key
+        Add (or update) an action to the given key
 
         :param profile: The profile name
         :type: str
@@ -313,6 +313,9 @@ class Binding():
         :param value: The action value
         :type: str
 
+        :param action_id: The action to update
+        :type: int
+
         :raises ValueError: If parameters are invalid
         """
         if not isinstance(profile, str):
@@ -325,12 +328,19 @@ class Binding():
             raise ValueError("action_type must be on of the following values: {0}".format(ACTION_TYPES))
         if not isinstance(value, str):
             raise ValueError("value must be an string")
+        if not isinstance(action_id, int) and action_id is not None:
+            raise ValueError("action_id must be an integer")
         if profile not in self.get_profiles():
             raise ValueError("Profile {0} does not exist".format(profile))
         if mapping not in self.get_maps(profile):
             raise ValueError("Map {0} does not exist".format(map))
+        if action_id is not None and action_id not in self.get_actions(profile, mapping, key_code):
+            raise ValueError("Action {0} does not exist".format(action_id))
 
-        self._binding_dbus.addAction(profile, mapping, key_code, action_type, value)
+        if action_id is not None:
+            self._binding_dbus.addAction(profile, mapping, key_code, action_type, value)
+        else:
+            self._binding_dbus.updateAction(profile, mapping, key_code, action_type, value, action_id)
 
     def remove_action(self, profile: str, mapping: str, key_code: int, action_id: int):
         """
@@ -362,6 +372,8 @@ class Binding():
             raise ValueError("Profile {0} does not exist".format(profile))
         if mapping not in self.get_maps(profile):
             raise ValueError("Map {0} does not exist".format(map))
+        if action_id not in self.get_actions(profile, mapping, key_code):
+            raise ValueError("Action {0} does not exist".format(action_id))
 
         self._binding_dbus.removeAction(profile, mapping, str(key_code), str(action_id))
 
@@ -520,7 +532,6 @@ class Binding():
         self._lighting_dbus.setMatrix(profile, mapping, json.dumps(matrix))
 
     ### Macro Methods ###
-
     def start_macro_recording(self, profile: str, mapping: str, key_code: int):
         """
         Start recording a macro to the given key
@@ -561,6 +572,7 @@ class Binding():
 
         :return: True if a macro is currently being recorded, False otherwise
         :rtype: bool
+
         """
         return self._macro_dbus.getMacroRecordingState()
 

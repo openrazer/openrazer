@@ -327,8 +327,9 @@ def clear_actions(self, profile, mapping, key_code):
     :type: int
     """
     self.logger.debug("DBus call clear_actions")
-
-    self.binding_manager._profiles[profile][mapping]["binding"].pop(str(key_code))
+    if self.binding_manager._profiles[profile]:
+        if self.binding_manager._profiles[profile][mapping]:
+            self.binding_manager._profiles[profile][mapping]["binding"].pop(str(key_code))
 
     self.binding_manager.write_config_file(self.binding_manager._config_file)
 

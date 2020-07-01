@@ -9,8 +9,6 @@ import time
 import sys
 import subprocess
 from openrazer_daemon.keyboard import KeyboardColour
-
-# TODO: figure out a better way to handle this
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from evdev import UInput, ecodes
 
@@ -96,11 +94,11 @@ class KeybindingManager():
         # self._logger.debug("Key action: {0}, {1}".format(key_code, key_action))
 
         key_code = str(key_code)
-        _current_binding = self.current_mapping["binding"]
+        current_binding = self.current_mapping["binding"]
         _key = self.__key
 
-        if key_code in _current_binding:  # Key bound
-            for action in _current_binding[key_code]:
+        if key_code in current_binding:  # Key bound
+            for action in current_binding[key_code]:
                 _type = action["type"]
                 if key_action != 0:  # Key pressed (or autorepeat)
                     if _type == "key":

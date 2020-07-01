@@ -11,7 +11,7 @@ import time
 import sys
 from openrazer_daemon.keyboard import KEY_MAPPING
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # TODO: figure out a better way to handle this
-from evdev import ecodes, InputDevice
+from evdev import InputDevice
 
 EPOLL_TIMEOUT = 0.01
 SPIN_SLEEP = 0.005
@@ -66,19 +66,14 @@ class KeyWatcher(threading.Thread):
         r, _, _ = select.select(event_file_map, [], [], EPOLL_TIMEOUT)
         for fd in r:
             events = event_file_map[fd].read()
-            if not events:
-                break
-
-            scan_code = None
-            _ecodes = ecodes
-            for event in events:
-                if event.type == event.code == _ecodes.MSC_SCAN:  # Both EV_MSC and MSC_SCAN are 0x4, lucky us
-                    scan_code = event.value  # Grab the scan code of the key
-                    continue  # Skip that event
-
-                if event.type == _ecodes.EV_KEY:  # Ignore other non-key events
-                    self._parent.key_action(event.code, event.value, scan_code)
-                    scan_code = None
+            if events:
+                scan_code = None
+                for event in events:
+                    if event.type == event.code == 4:  # Both EV_MSC and MSC_SCAN are 0x4, lucky us
+                        scan_code = event.value  # Grab the scan code of the key
+                    elif event.type == 1:  # Ignore other non-key events, 0x1 is EV_KEY, but we need every ns of performance
+                        self._parent.key_action(event.code, event.value, scan_code)
+                        scan_code = None
 
     @property
     def shutdown(self):
@@ -266,29 +261,29 @@ class KeyboardKeyManager():
         # self._logger.debug("Got key: {0}, state: {1}".format(key_name, key_action))
 
         # pylint: disable=no-else-return
+        # Cover some edge actions that should only happen on press
         if key_action == 1:
             # Sets up game mode as when enabling macro keys it stops the key working
             if key_code == 189:  # GAMEMODE
                 self._logger.debug("Got gamemode combo")
                 self._parent.setGameMode(not self._parent.getGameMode())
                 return
-
             elif key_code == 194:  # BRIGHTNESSUP
                 self._parent.setBrightness(max((self._parent.getBrightness() + 10), 0))
                 return
-
             elif key_code == 190:  # BRIGHTNESSDOWN
                 self._parent.setBrightness(max((self._parent.getBrightness() - 10), 0))
                 return
-
             elif key_code == 188:  # MACROMODE
                 self.macro_mode = not self.macro_mode
                 return
 
         if self._macro_mode:
+
             if key_code in (183, 184, 185, 186, 187):  # M1, M2, M3, M4, M5
-                if self._macro_key is None:
-                    self._parent.startMacroRecording(self._parent.getActiveProfile(), self._parent.getActiveMap(), key_code)
+                if key_action == 1:
+                    if self._macro_key is None:
+                        self._parent.startMacroRecording(self._parent.getActiveProfile(), self._parent.getActiveMap(), key_code)
 
             elif self._macro_key:
                 if key_action == 1:
@@ -321,7 +316,7 @@ class KeyboardKeyManager():
         Cleanup function
         """
         if self._keywatcher.is_alive():
-            self._parent.remove_observer(self)
+            # self._parent.remove_observer(self)
 
             self._logger.debug("Stopping key manager")
             self._keywatcher.shutdown = True
