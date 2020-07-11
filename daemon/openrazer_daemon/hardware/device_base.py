@@ -8,6 +8,7 @@ import logging
 import time
 import json
 import random
+from typing import Dict, Optional, List
 
 from openrazer_daemon.dbus_services.service import DBusService
 import openrazer_daemon.dbus_services.dbus_methods
@@ -23,19 +24,19 @@ class RazerDevice(DBusService):
     """
     BUS_PATH = 'org.razer'
     OBJECT_PATH = '/org/razer/device/'
-    METHODS = []
+    METHODS: List[str] = []
 
-    EVENT_FILE_REGEX = None
+    EVENT_FILE_REGEX: Optional[re.Pattern] = None
 
-    USB_VID = None
-    USB_PID = None
+    USB_VID: int = None
+    USB_PID: int = None
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [-1, -1]
 
     WAVE_DIRS = (1, 2)
 
-    RAZER_URLS = {
+    RAZER_URLS: Dict[str, Optional[str]] = {
         "top_img": None,
         "side_img": None,
         "perspective_img": None
