@@ -22,6 +22,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Anansi                                  |  1532:010F  |
 | Razer BlackWidow Ultimate 2013                |  1532:011A  |
 | Razer BlackWidow Stealth                      |  1532:011B  |
+| Razer BlackWidow Tournament Edition 2014      |  1532:011C  |
 | Razer DeathStalker Expert                     |  1532:0202  |
 | Razer BlackWidow Chroma                       |  1532:0203  |
 | Razer DeathStalker Chroma                     |  1532:0204  |
