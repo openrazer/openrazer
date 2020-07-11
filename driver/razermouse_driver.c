@@ -323,7 +323,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
-        device_type = "Razer Deathadder Essential\n";
+        device_type = "Razer DeathAdder Essential\n";
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
@@ -331,7 +331,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
-        device_type = "Razer Deathadder 1800\n";
+        device_type = "Razer DeathAdder 1800\n";
         break;
 
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
@@ -379,7 +379,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-        device_type = "Razer Deathadder V2\n";
+        device_type = "Razer DeathAdder V2\n";
         break;
 
     default:
