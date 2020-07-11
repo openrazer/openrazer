@@ -382,6 +382,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer DeathAdder V2\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+        device_type = "Razer DeathAdder 2000\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
     }
@@ -3514,6 +3518,17 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_effect);
             break;
 
+        case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_effect);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_effect);
+            break;
+
         case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
@@ -4129,6 +4144,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_2000) },
     { 0 }
 };
 

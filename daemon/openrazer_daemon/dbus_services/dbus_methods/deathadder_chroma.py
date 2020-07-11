@@ -172,6 +172,19 @@ def set_logo_static(self, red, green, blue):
     set_led_effect_color_common(self, 'logo', '0', red, green, blue)
 
 
+@endpoint('razer.device.lighting.logo', 'setLogoStaticMono')
+def set_logo_static_mono(self):
+    """
+    Set the device to static colour
+    """
+    self.logger.debug("DBus call set_logo_static_mono")
+
+    # Notify others
+    self.send_effect_event('setStatic')
+
+    set_led_effect_common(self, 'logo', '0')
+
+
 @endpoint('razer.device.lighting.logo', 'setLogoBlinking', in_sig='yyy')
 def set_logo_blinking(self, red, green, blue):
     """
@@ -214,6 +227,19 @@ def set_logo_pulsate(self, red, green, blue):
     self.send_effect_event('setPulsate', red, green, blue)
 
     set_led_effect_color_common(self, 'logo', '2', red, green, blue)
+
+
+@endpoint('razer.device.lighting.logo', 'setLogoPulsateMono')
+def set_logo_pulsate_mono(self):
+    """
+    Set the device to pulsate
+    """
+    self.logger.debug("DBus call set_logo_pulsate_mono")
+
+    # Notify others
+    self.send_effect_event('setPulsate')
+
+    set_led_effect_common(self, 'logo', '2')
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoSpectrum')
@@ -355,6 +381,19 @@ def set_scroll_static(self, red, green, blue):
     set_led_effect_color_common(self, 'scroll', '0', red, green, blue)
 
 
+@endpoint('razer.device.lighting.scroll', 'setScrollStaticMono')
+def set_scroll_static_mono(self):
+    """
+    Set the device to static colour
+    """
+    self.logger.debug("DBus call set_scroll_static_mono")
+
+    # Notify others
+    self.send_effect_event('setStatic')
+
+    set_led_effect_common(self, 'scroll', '0')
+
+
 @endpoint('razer.device.lighting.scroll', 'setScrollBlinking', in_sig='yyy')
 def set_scroll_blinking(self, red, green, blue):
     """
@@ -397,6 +436,19 @@ def set_scroll_pulsate(self, red, green, blue):
     self.send_effect_event('setPulsate', red, green, blue)
 
     set_led_effect_color_common(self, 'scroll', '2', red, green, blue)
+
+
+@endpoint('razer.device.lighting.scroll', 'setScrollPulsateMono')
+def set_scroll_pulsate_mono(self):
+    """
+    Set the device to pulsate
+    """
+    self.logger.debug("DBus call set_scroll_pulsate_mono")
+
+    # Notify others
+    self.send_effect_event('setPulsate')
+
+    set_led_effect_common(self, 'scroll', '2')
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollSpectrum')
