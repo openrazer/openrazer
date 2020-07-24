@@ -27,6 +27,13 @@ do { \
     } \
 } while (0)
 
+#define CREATE_DEVICE_ATTR_GROUP(dev,group) \
+do { \
+    if(devm_device_add_group(dev, group)) { \
+        goto exit_free; \
+    } \
+} while (0)
+
 
 #define USB_VENDOR_ID_RAZER 0x1532
 
