@@ -988,28 +988,36 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_2019:
     case USB_DEVICE_ID_RAZER_HUNTSMAN:
     case USB_DEVICE_ID_RAZER_CYNOSA_CHROMA:
-        if(count == 7) {
+        switch(count) {
+        case 7:
             report = razer_chroma_extended_matrix_effect_starlight_dual(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
             razer_send_payload(usb_dev, &report);
-        } else if(count == 4) {
+            break;
+        case 4:
             report = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1]);
             razer_send_payload(usb_dev, &report);
-        } else if(count == 1) {
+            break;
+        case 1:
             report = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
             razer_send_payload(usb_dev, &report);
-        } else {
+            break;
+        default:
             printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
         }
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
-        if (count == 7) {
+        switch(count) {
+        case 7:
             report = razer_chroma_extended_matrix_effect_starlight_dual(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
-        } else if(count == 4) {
+            break;
+        case 4:
             report = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1]);
-        } else if(count == 1) {
+            break;
+        case 1:
             report = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
-        } else {
+            break;
+        default:
             printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
             break;
         }
@@ -1018,52 +1026,64 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
         break;
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
-        if(count == 7) {
+        switch(count) {
+        case 7:
             report = razer_chroma_extended_matrix_effect_starlight_dual(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
             report.transaction_id.id = 0x1F;  // TODO move to a usb_device variable
             razer_send_payload(usb_dev, &report);
-        } else if(count == 4) {
+            break;
+        case 4:
             report = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1]);
             report.transaction_id.id = 0x1F;  // TODO move to a usb_device variable
             razer_send_payload(usb_dev, &report);
-        } else if(count == 1) {
+            break;
+        case 1:
             report = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
             report.transaction_id.id = 0x1F;  // TODO move to a usb_device variable
             razer_send_payload(usb_dev, &report);
-        } else {
+            break;
+        default:
             printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
         }
         break;
 
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
-        if(count == 7) {
+        switch(count) {
+        case 7:
             report = razer_chroma_standard_matrix_effect_starlight_dual(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
             razer_send_payload(usb_dev, &report);
-        } else if(count == 4) {
+            break;
+        case 4:
             report = razer_chroma_standard_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1]);
             razer_send_payload(usb_dev, &report);
-        } else if(count == 1) {
+            break;
+        case 1:
             report = razer_chroma_standard_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
             razer_send_payload(usb_dev, &report);
-        } else {
+            break;
+        default:
             printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
         }
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
-        if(count == 7) {
+        switch(count) {
+        case 7:
             report = razer_chroma_standard_matrix_effect_starlight_dual(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
             report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
             razer_send_payload(usb_dev, &report);
-        } else if(count == 4) {
+            break;
+        case 4:
             report = razer_chroma_standard_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1]);
             report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
             razer_send_payload(usb_dev, &report);
-        } else if(count == 1) {
+            break;
+        case 1:
             report = razer_chroma_standard_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
             report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
             razer_send_payload(usb_dev, &report);
-        } else {
+            break;
+        default:
             printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
         }
         break;
@@ -1159,13 +1179,20 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
-        if (count == 3) { // Single colour mode
+        switch(count) {
+        case 3: // Single colour mode
             report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-        } else if (count == 6) { // Dual colour mode
+            break;
+
+        case 6: // Dual colour mode
             report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
-        } else if (count == 1) { // "Random" colour mode
+            break;
+
+        case 1: // "Random" colour mode
             report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
-        } else {
+            break;
+
+        default:
             printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)");
             break;
         }
