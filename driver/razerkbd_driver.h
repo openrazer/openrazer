@@ -116,6 +116,7 @@ struct razer_kbd_device {
     struct usb_device *usbdev;
     struct hid_device *hiddev;
     unsigned int fn_on;
+    char *type;
     char name[128];
     char phys[64];
     DECLARE_BITMAP(pressed_fn, KEY_CNT);
