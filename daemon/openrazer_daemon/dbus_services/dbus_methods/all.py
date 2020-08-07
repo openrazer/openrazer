@@ -203,3 +203,86 @@ def get_matrix_dims(self):
     self.logger.debug("DBus call has_matrix")
 
     return list(self.MATRIX_DIMS)
+
+
+@endpoint('razer.device.misc', 'setFanSpeed', in_sig='yy')
+def set_fan_speed(self, fan_id, fan_speed):
+    """
+     set fan speed
+     :param fan_id: might change fans separately if more than one available (ususally 0x00)
+     :param fan_speed: speed in RPM/100
+     Values appear to be RPM/100, observed were 0x2b - 0x36, i.e. 4300RPM - 5400RPM
+    """
+
+    self.logger.debug("DBus call set_fan_speed")
+
+    driver_path = self.get_driver_path('fan_{0:d}_speed'.format(int(fan_id)))
+
+    payload = bytes([fan_speed])
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(payload)
+
+
+@endpoint('razer.device.misc', 'getFanSpeed', in_sig='y', out_sig='y')
+def get_fan_speed(self, fan_id):
+    """
+     get fan speed
+     :return fan_speed: speed in RPM/100
+     Values appear to be RPM/100, observed were 0x2b - 0x36, i.e. 4300RPM - 5400RPM
+    """
+
+    self.logger.debug("DBus call get_fan_speed")
+
+    driver_path = self.get_driver_path('fan_{0:d}_speed'.format(int(fan_id)))
+
+    with open(driver_path, 'rb') as driver_file:
+        result_string = driver_file.read()
+        return int.from_bytes(result_string, 'little')
+
+
+@endpoint('razer.device.misc', 'setFanMode', in_sig='yyy')
+def set_fan_mode(self, fan_id, fan_mode, game_mode):
+    """
+     set fan mode
+     :param fan_id: might change fans separately if more than one available (ususally 0x00)
+     :param fan_mode: 0x00: automatic 0x01: manual
+     :param game_mode: This argument is for power mode of the CPU,
+        0 - balanced
+        1 - gaming
+        2 - creator
+        4 - custom
+        with 4 goes CPU boost and GPU boost power
+    """
+
+    self.logger.debug("DBus call set_fan_mode")
+
+    driver_path = self.get_driver_path('fan_{0:d}_mode'.format(int(fan_id)))
+
+    payload = bytes([fan_mode, game_mode])
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(payload)
+
+
+@endpoint('razer.device.misc', 'getFanMode', in_sig='y', out_sig='yy')
+def get_fan_mode(self, fan_id):
+    """
+     get fan mode
+     :return fan_id: might change fans separately if more than one available (ususally 0x00)
+     :return fan_mode: 0x00: automatic 0x01: manual
+     :return game_mode: This argument is for power mode of the CPU,
+        0 - balanced
+        1 - gaming
+        2 - creator
+        4 - custom
+        with 4 goes CPU boost and GPU boost power
+    """
+
+    self.logger.debug("DBus call get_fan_mode")
+
+    driver_path = self.get_driver_path('fan_{0:d}_mode'.format(int(fan_id)))
+
+    with open(driver_path, 'rb') as driver_file:
+        result = driver_file.read()
+        return (int.from_bytes(result[:1], 'little'), int.from_bytes(result[1:], 'little'),)

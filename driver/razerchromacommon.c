@@ -137,8 +137,61 @@ struct razer_report razer_chroma_standard_get_led_rgb(unsigned char variable_sto
     return report;
 }
 
+/*
+ * sets fan speed
+ */
+struct razer_report razer_chroma_set_fan_speed(unsigned char fan_id, unsigned char fan_speed)
+{
+    struct razer_report report = get_razer_report(0x0d, 0x01, 0x03);
+    report.arguments[0] = 0x00;
+    report.arguments[1] = fan_id;
+    report.arguments[2] = fan_speed;
+
+    return report;
+}
 
 
+struct razer_report razer_chroma_get_fan_speed(unsigned char fan_id)
+{
+    struct razer_report report = get_razer_report(0x0d, 0x81, 0x03);
+    report.transaction_id.id = 0x1F;
+
+    report.arguments[0] = 0x00;
+    report.arguments[1] = fan_id;
+
+    return report;
+}
+
+/*
+ * sets fan mode - manual or automatic
+ *
+ * fan_mode:
+ *   0x0: balanced
+ *   0x1: gaming
+ *   0x2: creator
+ *   0x4: custom
+ */
+struct razer_report razer_chroma_set_fan_mode(unsigned char fan_id, unsigned char fan_mode, unsigned char game_mode )
+{
+    struct razer_report report = get_razer_report(0x0d, 0x02, 0x04);
+    report.arguments[0] = 0x00;
+    report.arguments[1] = fan_id;
+    report.arguments[2] = game_mode;
+    report.arguments[3] = fan_mode;
+
+    return report;
+}
+
+struct razer_report razer_chroma_get_fan_mode(unsigned char fan_id)
+{
+    struct razer_report report = get_razer_report(0x0d, 0x82, 0x04);
+    report.transaction_id.id = 0x1F;
+
+    report.arguments[0] = 0x00;
+    report.arguments[1] = fan_id;
+
+    return report;
+}
 
 
 /**

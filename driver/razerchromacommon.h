@@ -33,6 +33,7 @@ struct razer_report razer_chroma_standard_get_led_brightness(unsigned char varia
 
 /*
  * Standard Matrix Effects Functions
+ * class 0x03
  */
 struct razer_report razer_chroma_standard_matrix_effect_none(unsigned char variable_storage, unsigned char led_id);
 struct razer_report razer_chroma_standard_matrix_effect_wave(unsigned char variable_storage, unsigned char led_id, unsigned char wave_direction);
@@ -87,6 +88,14 @@ struct razer_report razer_chroma_mouse_extended_matrix_effect_breathing_random(u
 struct razer_report razer_chroma_mouse_extended_matrix_effect_breathing_single(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1);
 struct razer_report razer_chroma_mouse_extended_matrix_effect_breathing_dual(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1, struct razer_rgb *rgb2);
 
+/*
+ * Fan control
+ * class 0x0d as well
+*/
+struct razer_report razer_chroma_set_fan_speed(unsigned char fan_id, unsigned char fan_speed);
+struct razer_report razer_chroma_set_fan_mode(unsigned char fan_id, unsigned char fan_mode, unsigned char game_mode);
+struct razer_report razer_chroma_get_fan_mode(unsigned char fan_id);
+struct razer_report razer_chroma_get_fan_speed(unsigned char fan_id);
 
 /*
  * Misc Functions

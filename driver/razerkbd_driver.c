@@ -957,6 +957,137 @@ static ssize_t razer_attr_write_mode_macro_effect(struct device *dev, struct dev
     return count;
 }
 
+
+/**
+ * read device file "fan_speed"
+ *
+ * return fan_id, fan_speed: speed in RPM/100
+ * Values appear to be RPM/100, observed were  0x2b - 0x36, i.e. 4300RPM - 5400RPM
+ */
+static ssize_t razer_attr_read_fan_speed(struct device *dev, struct device_attribute *attr, char *buf, unsigned char fan_id)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report;
+    struct razer_report response;
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+    default:
+        report = razer_chroma_get_fan_speed(fan_id);
+        response = razer_send_payload(usb_dev, &report);
+        buf[0] = response.arguments[2];
+        // printk(KERN_WARNING "read fan:%d, speed:0x%02x\n", fan_id, buf[0]);
+        return 1;
+    }
+}
+static ssize_t razer_attr_read_fan_speed_1(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_fan_speed(dev, attr, buf, 0x01);
+}
+static ssize_t razer_attr_read_fan_speed_2(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_fan_speed(dev, attr, buf, 0x02);
+}
+
+/**
+ * write device file "fan_speed"
+ *
+ * fan_id: might allow to change fans separately if more than one exists
+ * fan_speed: speed in RPM/100
+ * Values appear to be RPM/100, observed were  0x2b - 0x36, i.e. 4300RPM - 5400RPM
+ */
+static ssize_t razer_attr_write_fan_speed(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char fan_id)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report;
+    struct razer_report response;
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+    default:
+        if (count < 1) printk(KERN_WARNING "razerkbd: fan speed expects 1 byte: fan_speed");
+        // printk(KERN_WARNING "write fan:%d, speed:0x%02x\n", fan_id, buf[0]);
+        report = razer_chroma_set_fan_speed(fan_id, buf[0]);
+        break;
+    }
+    response = razer_send_payload(usb_dev, &report);
+    return count;
+}
+static ssize_t razer_attr_write_fan_speed_1(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_fan_speed(dev, attr, buf, count, 0x01);
+}
+static ssize_t razer_attr_write_fan_speed_2(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_fan_speed(dev, attr, buf, count, 0x02);
+}
+/**
+ * Read device file "fan_mode"
+ * Returns  fan_mode, game_mode
+ */
+static ssize_t razer_attr_read_fan_mode(struct device *dev, struct device_attribute *attr, char *buf, unsigned char fan_id)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report;
+    struct razer_report response;
+
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+    default:
+        report = razer_chroma_get_fan_mode(fan_id);
+        response = razer_send_payload(usb_dev, &report);
+        buf[0] = response.arguments[3];
+        buf[1] = response.arguments[2];
+        // printk(KERN_WARNING "read fan mode:%d, fan:0x%02x, power:0x%02x\n", fan_id, buf[0], buf[1]);
+        return 2;
+    }
+}
+static ssize_t razer_attr_read_fan_mode_1(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_fan_mode(dev, attr, buf, 0x01);
+}
+static ssize_t razer_attr_read_fan_mode_2(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_fan_mode(dev, attr, buf, 0x02);
+}
+
+/**
+ * Write device file "fan_mode"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_write_fan_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char fan_id)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report;
+    struct razer_report response;
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+    default:
+        if (count < 2) printk(KERN_WARNING "razerkbd: fan mode expects 2 bytes: fan_mode, game_mode");
+        // printk(KERN_WARNING "write fan mode:%d, fan:0x%02x, power:0x%02x\n", fan_id, buf[0], buf[1]);
+        report = razer_chroma_set_fan_mode(fan_id, buf[0], buf[1]);
+        break;
+    }
+    response = razer_send_payload(usb_dev, &report);
+    return count;
+}
+static ssize_t razer_attr_write_fan_mode_1(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_fan_mode(dev, attr, buf, count, 0x01);
+}
+static ssize_t razer_attr_write_fan_mode_2(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_fan_mode(dev, attr, buf, count, 0x02);
+}
+
+
 /**
  * Read device file "macro_mode_effect"
  *
@@ -2539,6 +2670,11 @@ static DEVICE_ATTR(charge_effect,           0220, NULL,                         
 static DEVICE_ATTR(charge_colour,           0220, NULL,                                       razer_attr_write_set_charging_colour);
 static DEVICE_ATTR(charge_low_threshold,    0660, razer_attr_read_low_battery_threshold,      razer_attr_write_set_low_battery_threshold);
 
+static DEVICE_ATTR(fan_1_speed,             0660, razer_attr_read_fan_speed_1,                razer_attr_write_fan_speed_1);
+static DEVICE_ATTR(fan_1_mode,              0660, razer_attr_read_fan_mode_1,                 razer_attr_write_fan_mode_1);
+static DEVICE_ATTR(fan_2_speed,             0660, razer_attr_read_fan_speed_2,                razer_attr_write_fan_speed_2);
+static DEVICE_ATTR(fan_2_mode,              0660, razer_attr_read_fan_mode_2,                 razer_attr_write_fan_mode_2);
+
 
 
 /**
@@ -3039,6 +3175,10 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fan_1_speed);                   // set fan speed
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fan_2_speed);                   // set fan speed
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fan_1_mode);                    // set fan mode
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fan_2_mode);                    // set fan mode
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
@@ -3419,6 +3559,10 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            device_remove_file(&hdev->dev, &dev_attr_fan_1_speed);                   // set fan speed
+            device_remove_file(&hdev->dev, &dev_attr_fan_2_speed);                   // set fan speed
+            device_remove_file(&hdev->dev, &dev_attr_fan_1_mode);                    // set fan mode
+            device_remove_file(&hdev->dev, &dev_attr_fan_2_mode);                    // set fan mode
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:

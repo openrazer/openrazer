@@ -70,6 +70,9 @@ class RazerDevice(object):
             'dpi_stages': self._has_feature('razer.device.dpi', ('getDPIStages', 'setDPIStages')),
             'available_dpi': self._has_feature('razer.device.dpi', 'availableDPI'),
 
+            'fan_speed': self._has_feature('razer.device.misc', 'setFanSpeed'),
+            'fan_mode': self._has_feature('razer.device.misc', 'setFanMode'),
+
             # Default device is a chroma so lighting capabilities
             'lighting': self._has_feature('razer.device.lighting.chroma'),
             'lighting_breath_single': self._has_feature('razer.device.lighting.chroma', 'setBreathSingle'),
@@ -263,6 +266,7 @@ class RazerDevice(object):
         :return: True if method/s exist
         :rtype: bool
         """
+
         if method_name is None:
             return object_path in self._available_features
         elif isinstance(method_name, str):
@@ -482,6 +486,49 @@ class RazerDevice(object):
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self._serial)
+
+    def get_fan_speed(self, fan_id: int) -> str:
+        return self._dbus_interfaces['device'].getFanSpeed(fan_id)
+
+    def set_fan_speed(self, fan_id: int, fan_speed: int) -> bool:
+        """
+        Fan Speed
+
+        :param fan_id: usually 0x00
+        :param fan_speed: values observed: 0x2b - 0x36
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        self._dbus_interfaces['device'].setFanSpeed(fan_id, fan_speed)
+        return True
+
+    def get_fan_mode(self, fan_id: int) -> str:
+        return self._dbus_interfaces['device'].getFanMode(fan_id)
+
+    def set_fan_mode(self, fan_id: int, fan_mode: int, game_mode: int) -> bool:
+        """
+        Fan Mode
+
+        :param fan_id: usually 0x00
+        :param fan_mode: 0x00: automatic 0x01: manual
+        :param game_mode: This argument is for power mode of the CPU,
+            0 - balanced
+            1 - gaming
+            2 - creator
+            4 - custom
+            with 4 goes CPU boost and GPU boost power
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        self._dbus_interfaces['device'].setFanMode(fan_id, fan_mode, game_mode)
+        return True
 
 
 class BaseDeviceFactory(object):
