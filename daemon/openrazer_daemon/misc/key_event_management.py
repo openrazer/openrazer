@@ -291,7 +291,7 @@ class KeyboardKeyManager():
                 elif key_action == 0:
                     self._parent.addAction(self._macro_profile, self._macro_map, self.macro_key, "release", str(key_code))
 
-            else:
+            elif key_code != 188: # This key needs to be ignored
                 self._logger.warning("On-the-fly macros are only supported for macro keys, please use a client for configuring other keys")
                 self.macro_mode = False
 
