@@ -37,3 +37,6 @@ SUBSYSTEM!="hid|usb", GOTO="razer_end"
 SUBSYSTEM=="hid|usb", RUN+="razer_mount $env{RAZER_DRIVER} $kernel"
 
 LABEL="razer_end"
+
+# Add uinput permissions to plugdev
+KERNEL=="uinput", GROUP="plugdev"
