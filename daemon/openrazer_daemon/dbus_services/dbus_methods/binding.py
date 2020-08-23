@@ -329,7 +329,7 @@ def clear_actions(self, profile, mapping, key_code):
     self.logger.debug("DBus call clear_actions")
     if self.binding_manager._profiles[profile]:
         if self.binding_manager._profiles[profile][mapping]:
-            if self.binding_manager._profiles[profile][mapping]["binding"][str(key_code)]:
+            if self.binding_manager._profiles[profile][mapping]["binding"].has_key(str(key_code)):
                 self.binding_manager._profiles[profile][mapping]["binding"].pop(str(key_code))
 
     self.binding_manager.write_config_file(self.binding_manager._config_file)
