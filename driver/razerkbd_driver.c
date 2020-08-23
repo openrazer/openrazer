@@ -435,7 +435,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
-        device_type = "Razer Blade Pro (Late 2019)";
+        device_type = "Razer Blade Pro (Late 2019)\n";
         break;
 
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
