@@ -337,7 +337,7 @@ class Binding():
         if action_id is not None and action_id not in self.get_actions(profile, mapping, key_code):
             raise ValueError("Action {0} does not exist".format(action_id))
 
-        if action_id is not None:
+        if action_id is None:
             self._binding_dbus.addAction(profile, mapping, key_code, action_type, value)
         else:
             self._binding_dbus.updateAction(profile, mapping, key_code, action_type, value, action_id)
@@ -375,7 +375,7 @@ class Binding():
         if action_id not in self.get_actions(profile, mapping, key_code):
             raise ValueError("Action {0} does not exist".format(action_id))
 
-        self._binding_dbus.removeAction(profile, mapping, str(key_code), str(action_id))
+        self._binding_dbus.removeAction(profile, mapping, key_code, action_id)
 
     def clear_actions(self, profile: str, mapping: str, key_code: int):
         """
@@ -403,7 +403,7 @@ class Binding():
         if mapping not in self.get_maps(profile):
             raise ValueError("Map {0} does not exist".format(map))
 
-        self._binding_dbus.clearActions(profile, mapping, str(key_code))
+        self._binding_dbus.clearActions(profile, mapping, key_code)
 
     ### Lighting Methods ###
 

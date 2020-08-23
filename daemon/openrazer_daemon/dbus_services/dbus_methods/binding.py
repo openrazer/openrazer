@@ -285,7 +285,7 @@ def update_action(self, profile, mapping, key_code, action_type, value, action_i
         profile, mapping, key_code, action_type, value, action_id)
 
 
-@endpoint('razer.device.binding', 'removeAction', in_sig='ssys')
+@endpoint('razer.device.binding', 'removeAction', in_sig='ssyy')
 def remove_action(self, profile, mapping, key_code, action_id):
     """
     Remove the specified action
@@ -294,20 +294,20 @@ def remove_action(self, profile, mapping, key_code, action_id):
     :type: str
 
     :param mapping: The map name
-    :type: int
+    :type: str
 
     :param key_code: The key code
-    :type: str
+    :type: int
 
     :param action_id: The action id
-    :type: str
+    :type: int
     """
     self.logger.debug("DBus call remove_action")
 
     if len(self.binding_manager._profiles[profile][mapping]["binding"][str(key_code)]) == 1:
         self.clearActions(profile, mapping, key_code)
     else:
-        del self.binding_manager._profiles[profile][mapping]["binding"][str(key_code)][int(action_id)]
+        del self.binding_manager._profiles[profile][mapping]["binding"][str(key_code)][action_id]
 
     self.binding_manager.write_config_file(self.binding_manager._config_file)
 

@@ -15,11 +15,11 @@ device_manager.sync_effects = False
 for device in device_manager.devices:
     print("Device Profiles: {}".format(device.binding.get_profiles()))
 
-    print("Maps for Profile 0: {}".format(device.binding.get_maps("0")))
+    print("Maps for Profile Default: {}".format(device.binding.get_maps("Default")))
 
     # pylint: disable=no-member
     # Add an key action that replaces the 1 key with 2
-    device.binding.add_action("0", "Default", ecodes.KEY_1, "key", str(ecodes.KEY_2))
+    device.binding.add_action("Default", "Default", ecodes.KEY_1, "key", str(ecodes.KEY_2))
 
     # Clear all actions for that key
-    # device.binding.clear_actions("0", "Default", 2)
+    # device.binding.clear_actions("Default", "Default", 2)
