@@ -148,7 +148,11 @@ class FakeDevicePrompt(cmd.Cmd):
         Where state in 'up' 'down' and 'repeat'
         """
         if self._current_device is not None:
-            event_file, key_id, value = arg.split(' ')
+            try:
+                event_file, key_id, value = arg.split(' ')
+            except ValueError:
+                print("Usage: event event_file key_id value")
+                return
 
             if event_file not in self._device_map[self._current_device].events:
                 print("Event ID {0} is invalid".format(event_file))
