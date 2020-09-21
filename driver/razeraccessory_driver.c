@@ -156,6 +156,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Nommo Chroma\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        device_type = "Razer Kraken Kitty Edition\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
         break;
@@ -308,6 +312,7 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
         report = razer_chroma_standard_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
+        report.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -318,14 +323,18 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         report = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
+        report.transaction_id.id = 0x3F;
+        break;
+
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        report = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
+        report.transaction_id.id = 0x1F;
         break;
 
     default:
         printk(KERN_WARNING "razeraccessory: Unknown device\n");
         break;
     }
-
-    report.transaction_id.id = 0x3F;
 
     mutex_lock(&device->lock);
     razer_send_payload(device->usb_dev, &report);
@@ -390,6 +399,11 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
         report = razer_chroma_extended_matrix_effect_custom_frame();
         break;
 
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        report = razer_chroma_extended_matrix_effect_custom_frame();
+        report.transaction_id.id = 0x1F;
+        break;
+
     default:
         printk(KERN_WARNING "razeraccessory: Unknown device\n");
         break;
@@ -418,6 +432,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_CORE:
         case USB_DEVICE_ID_RAZER_CHROMA_MUG:
             report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*) & buf[0]);
+            report.transaction_id.id = 0x3F;
             break;
 
         case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -428,14 +443,18 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_NOMMO_PRO:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
+            report.transaction_id.id = 0x3F;
+            break;
+
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+            report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
+            report.transaction_id.id = 0x1F;
             break;
 
         default:
             printk(KERN_WARNING "razeraccessory: Unknown device\n");
             break;
         }
-
-        report.transaction_id.id = 0x3F;
 
         mutex_lock(&device->lock);
         razer_send_payload(device->usb_dev, &report);
@@ -510,14 +529,36 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
         switch(count) {
         case 3: // Single colour mode
             report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
+            report.transaction_id.id = 0x3F;
             break;
 
         case 6: // Dual colour mode
             report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
+            report.transaction_id.id = 0x3F;
             break;
 
         default: // "Random" colour mode
             report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
+            report.transaction_id.id = 0x3F;
+            break;
+        }
+        break;
+
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        switch(count) {
+        case 3: // Single colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
+            report.transaction_id.id = 0x1F;
+            break;
+
+        case 6: // Dual colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
+            report.transaction_id.id = 0x1F;
+            break;
+
+        default: // "Random" colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
+            report.transaction_id.id = 0x1F;
             break;
         }
         break;
@@ -528,14 +569,17 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
         switch(count) {
         case 3: // Single colour mode
             report = razer_chroma_standard_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+            report.transaction_id.id = 0x3F;
             break;
 
         case 6: // Dual colour mode
             report = razer_chroma_standard_matrix_effect_breathing_dual(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            report.transaction_id.id = 0x3F;
             break;
 
         default: // "Random" colour mode
             report = razer_chroma_standard_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
+            report.transaction_id.id = 0x3F;
             break;
         }
         break;
@@ -544,8 +588,6 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
         printk(KERN_WARNING "razeraccessory: Unknown device\n");
         break;
     }
-    // Set device id
-    report.transaction_id.id = 0x3F;
 
     mutex_lock(&device->lock);
     razer_send_payload(device->usb_dev, &report);
@@ -621,6 +663,11 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
             report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             break;
 
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+            report = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
+            report.transaction_id.id = 0x1F;
+            break;
+
         default:
             printk(KERN_WARNING "razeraccessory: Unknown device\n");
             break;
@@ -669,6 +716,13 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
         serial_string[22] = '\0';
         break;
 
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        report.transaction_id.id = 0x1F;
+        response_report = razer_send_payload(device->usb_dev, &report);
+        strncpy(&serial_string[0], &response_report.arguments[0], 22);
+        serial_string[22] = '\0';
+        break;
+
     default:
         printk(KERN_WARNING "razeraccessory: Unknown device\n");
         break;
@@ -687,7 +741,16 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_standard_get_firmware_version();
     struct razer_report response_report = {0};
-    report.transaction_id.id = 0x3F;
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        report.transaction_id.id = 0x1F;
+        break;
+
+    default:
+        report.transaction_id.id = 0x3F;
+        break;
+    }
 
     // Basically some simple caching
     if(device->firmware_version[0] != 1) {
@@ -719,6 +782,12 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     } else {
 
         report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
+
+        switch(device->usb_pid) {
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+            report.transaction_id.id = 0x1F;
+            break;
+        }
 
         mutex_lock(&device->lock);
         razer_send_payload(device->usb_dev, &report);
@@ -752,6 +821,12 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     struct razer_report report = razer_chroma_standard_get_device_mode();
     struct razer_report response = {0};
 
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        report.transaction_id.id = 0x1F;
+        break;
+    }
+
     mutex_lock(&device->lock);
     response = razer_send_payload(device->usb_dev, &report);
     mutex_unlock(&device->lock);
@@ -781,6 +856,12 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
         report = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
+        device->saved_brightness = brightness;
+        break;
+
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        report = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
+        report.transaction_id.id = 0x1F;
         device->saved_brightness = brightness;
         break;
 
@@ -825,6 +906,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         brightness = device->saved_brightness;
         break;
 
@@ -959,6 +1041,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CORE:
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         expected_protocol = 0;
         break;
 
@@ -988,7 +1071,6 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
 
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);                   // Custom effect frame
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);                    // No effect
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);                // Spectrum effect
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);                  // Static effect
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);                  // Breathing effect
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);                  // Custom effect
@@ -1001,6 +1083,20 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             // Device initial brightness is always 100% anyway
             dev->saved_brightness = 0xFF;
             break;
+        }
+
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
+        case USB_DEVICE_ID_RAZER_CORE:
+        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        case USB_DEVICE_ID_RAZER_FIREFLY:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
+        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
+        case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+        case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
         }
 
         switch(usb_dev->descriptor.idProduct) {
@@ -1033,8 +1129,15 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             break;
         }
 
-        // Needs to be in "Driver" mode just to function
-        razer_set_device_mode(dev->usb_dev, 0x03, 0x00);
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+            break;
+
+        default:
+            // Needs to be in "Driver" mode just to function
+            razer_set_device_mode(dev->usb_dev, 0x03, 0x00);
+            break;
+        }
     }
 
     hid_set_drvdata(hdev, dev);
@@ -1076,6 +1179,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CORE:
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         expected_protocol = 0;
         break;
 
@@ -1105,11 +1209,24 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
 
         device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);                   // Custom effect frame
         device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);                    // No effect
-        device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);                // Spectrum effect
         device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);                  // Static effect
         device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);                  // Breathing effect
         device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);                  // Custom effect
         device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);                     // Brightness
+
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
+        case USB_DEVICE_ID_RAZER_CORE:
+        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        case USB_DEVICE_ID_RAZER_FIREFLY:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
+        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
+        case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+        case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
+        }
 
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_FIREFLY:
@@ -1186,6 +1303,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_BASE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION) },
     { 0 }
 };
 

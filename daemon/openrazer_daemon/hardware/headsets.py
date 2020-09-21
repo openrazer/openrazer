@@ -3,7 +3,7 @@ Headsets class
 """
 import re
 
-from openrazer_daemon.hardware.device_base import RazerDevice as __RazerDevice
+from openrazer_daemon.hardware.device_base import RazerDevice as __RazerDevice, RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend
 from openrazer_daemon.dbus_services.dbus_methods import kraken as _dbus_kraken, chroma_keyboard as _dbus_chroma
 
 
@@ -303,3 +303,22 @@ class RazerKrakenUltimate(__RazerDevice):
             _dbus_chroma.set_breath_triple_effect(self, *args)
 
         self.disable_notify = False
+
+
+class RazerKrakenKittyEdition(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Kraken Kitty Edition
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Kraken_Kitty_Chroma_Control-event-if00')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0F19
+    METHODS = ['get_device_type_headset',
+               'set_none_effect', 'set_static_effect', 'set_breath_random_effect', 'set_breath_single_effect',
+               'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row',
+               'set_brightness', 'get_brightness']
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 4]
+
+    DEVICE_IMAGE = "https://hybrismediaprod.blob.core.windows.net/sys-master-phoenix-images-container/hda/h57/9055450103838/Kraken-Kitty-Edition-Black-gallery-Hero.jpg "
