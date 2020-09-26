@@ -1891,11 +1891,6 @@ class RazerBasiliskXHyperSpeed(__RazerDevice):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1589/1589_basilisk_x__hyperspeed.png"
 
-    # Deprecated - RAZER_URLS be removed in future.
-    RAZER_URLS = {
-        "top_img": DEVICE_IMAGE
-    }
-
     DPI_MAX = 16000
 
     def __init__(self, *args, **kwargs):
