@@ -2473,7 +2473,11 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
             break;
 
-        default: // BlackWidow Chroma...
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
@@ -2787,7 +2791,11 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
             break;
 
-        default: // BlackWidow Chroma...
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
