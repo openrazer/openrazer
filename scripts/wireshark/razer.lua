@@ -89,7 +89,7 @@ function razer_proto.dissector(buffer, pinfo, tree)
         offset = offset + 1
         -- Add Number of parameters bytes
         local num_params = buffer(offset, 1):le_uint()
-        t_razer:add(f.f_number_parameter_bytes, buffer(offset, 1)) -- specifid buffer here instead of num params so it highlights in wireshark
+        t_razer:add(f.f_number_parameter_bytes, buffer(offset, 1)) -- specified buffer here instead of num params so it highlights in wireshark
         offset = offset + 1
         -- Add Command class
         t_razer:add(f.f_command_class, buffer(offset, 1))

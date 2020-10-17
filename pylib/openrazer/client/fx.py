@@ -386,7 +386,7 @@ class RazerFX(BaseRazerFX):
         :return: True if success, False otherwise
         :rtype: bool
 
-        :raises ValueError: If arguemnts are invalid
+        :raises ValueError: If arguments are invalid
         """
         if not isinstance(refreshrate, float):
             raise ValueError("Refresh rate is not a float")
@@ -418,7 +418,7 @@ class RazerFX(BaseRazerFX):
         :return: True if success, False otherwise
         :rtype: bool
 
-        :raises ValueError: If arguemnts are invalid
+        :raises ValueError: If arguments are invalid
         """
         if not isinstance(refreshrate, float):
             raise ValueError("Refresh rate is not a float")
