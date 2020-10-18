@@ -6,6 +6,7 @@ import os
 import shutil
 import sys
 import tempfile
+import time
 
 PYLIB = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'pylib')
 sys.path.insert(1, PYLIB)
@@ -236,7 +237,9 @@ def run():
 
     try:
         if not args.interactive:
-            input()
+            print("Sleeping forever, use Ctrl-C to exit...")
+            while True:
+                time.sleep(99999999)
         else:
             FakeDevicePrompt(device_map).cmdloop()
     except KeyboardInterrupt:
