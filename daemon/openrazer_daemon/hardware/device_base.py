@@ -213,9 +213,9 @@ class RazerDevice(DBusService):
                     serial = ''
 
                 count += 1
-                time.sleep(0.1)
 
                 if len(serial) == 0:
+                    time.sleep(0.1)
                     self.logger.debug('getting serial: {0} count:{1}'.format(serial, count))
 
             if serial == '' or serial == 'Default string' or serial == 'empty (NULL)' or serial == 'As printed in the D cover':
