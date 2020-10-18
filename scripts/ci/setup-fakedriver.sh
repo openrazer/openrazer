@@ -5,7 +5,7 @@ mkdir /tmp/daemon_test
 ./scripts/create_fake_device.py \
     --dest /tmp/daemon_test \
     --non-interactive \
-    razernaga2014 &
+    --all &
 
 # wait a bit for the previous script to settle
 sleep 0.5
