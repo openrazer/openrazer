@@ -211,7 +211,13 @@ def run():
     device_map = {}
     for device in args.device:
         # Device name: FakeDriver
-        device_map[device] = create_envionment(device, destination)
+        fake_device = create_envionment(device, destination)
+        if fake_device is not None:
+            device_map[device] = fake_device
+
+    if len(device_map) == 0:
+        print("ERROR: No valid devices passed to script, you either need to pass devices as arguments or use '--all'")
+        sys.exit(1)
 
     if not args.create_only:
 
