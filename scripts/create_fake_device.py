@@ -193,7 +193,6 @@ def parse_args():
     parser.add_argument('--all', action='store_true', help='Create all possible fake devices')
     parser.add_argument('--non-interactive', dest='interactive', action='store_false', help='Dont display prompt, just hang until killed')
     parser.add_argument('--clear-dest', action='store_true', help='Clear the destination folder if it exists before starting')
-    parser.add_argument('--create-only', action='store_true', help='Create the target structure and then exit')
 
     return parser.parse_args()
 
@@ -225,25 +224,23 @@ def run():
         print("ERROR: No valid devices passed to script, you either need to pass devices as arguments or use '--all'")
         sys.exit(1)
 
-    if not args.create_only:
+    # Register cleanup
+    if args.dest is None:
+        atexit.register(lambda: shutil.rmtree(destination, ignore_errors=True))
+    else:
+        for device in device_map.values():
+            # device = FakeDriver
+            atexit.register(device.close)
 
-        # Register cleanup
-        if args.dest is None:
-            atexit.register(lambda: shutil.rmtree(destination, ignore_errors=True))
+    print("Device test directory: {0}".format(destination))
+
+    try:
+        if not args.interactive:
+            input()
         else:
-            for device in device_map.values():
-                # device = FakeDriver
-                atexit.register(device.close)
-
-        print("Device test directory: {0}".format(destination))
-
-        try:
-            if not args.interactive:
-                input()
-            else:
-                FakeDevicePrompt(device_map).cmdloop()
-        except KeyboardInterrupt:
-            pass
+            FakeDevicePrompt(device_map).cmdloop()
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == '__main__':
