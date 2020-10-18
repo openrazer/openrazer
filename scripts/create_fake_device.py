@@ -188,8 +188,9 @@ def create_envionment(device_name, destination):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('device', metavar='DEVICE', nargs='+', help='Device config name')
+    parser.add_argument('device', metavar='DEVICE', nargs='*', help='Device config name')
     parser.add_argument('--dest', metavar='DESTDIR', required=False, default=None, help='Directory to create driver files in. If omitted then a tmp directory is used')
+    parser.add_argument('--all', action='store_true', help='Create all possible fake devices')
     parser.add_argument('--non-interactive', dest='interactive', action='store_false', help='Dont display prompt, just hang until killed')
     parser.add_argument('--clear-dest', action='store_true', help='Clear the destination folder if it exists before starting')
     parser.add_argument('--create-only', action='store_true', help='Create the target structure and then exit')
@@ -208,8 +209,13 @@ def run():
         if args.clear_dest and os.path.exists(destination):
             shutil.rmtree(destination, ignore_errors=True)
 
+    if args.all:
+        devices = fake_driver.SPECS
+    else:
+        devices = args.device
+
     device_map = {}
-    for device in args.device:
+    for device in devices:
         # Device name: FakeDriver
         fake_device = create_envionment(device, destination)
         if fake_device is not None:
