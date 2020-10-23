@@ -941,7 +941,7 @@ class RazerNagaTrinity(__RazerDeviceSpecialBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x0067
-    HAS_MATRIX = True
+    HAS_MATRIX = False  # TODO Device supports matrix, driver missing
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [1, 3]
     METHODS = ['get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
@@ -1682,6 +1682,7 @@ class RazerViperUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x007A
+    HAS_MATRIX = False  # TODO device probably has matrix support
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
                # Battery
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
@@ -1752,6 +1753,8 @@ class RazerViper(__RazerDeviceSpecialBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x0078
+    HAS_MATRIX = False  # TODO Device should have matrix support
+    MATRIX_DIMS = [1, 1]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
                # Logo
                'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
