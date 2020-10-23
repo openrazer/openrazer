@@ -1,14 +1,19 @@
 # [OpenRazer](https://openrazer.github.io/)
 
-A collection of Linux drivers for the Razer devices, providing kernel drivers, DBus services and python bindings to interact with the DBus interface.
+A collection of Linux drivers for Razer devices - providing kernel drivers, DBus services and Python bindings to interact with the DBus interface.
 
-**Before raising an issue** saying something doesn't work, read [the troubleshooting wiki page](https://github.com/openrazer/openrazer/wiki/Troubleshooting), try not to create new issues if one exists.
+## Something not working?
 
-Also this is the master branch, devices may appear in the tables below but might not be released in package form yet. Check out the stable branch for what _should_ be in the packages.
+Sometimes there are problems with the driver installation due to missing kernel modules or secure boot. Please refer to the [Troubleshooting wiki page](https://github.com/openrazer/openrazer/wiki/Troubleshooting) for guidance.
 
-The below devices are fully feature supported by OpenRazer which means all available USB controllable functions for that product are made available by the library.
+If the troubleshooting guide did not pinpoint the problem, [try searching open/closed issues](https://github.com/openrazer/openrazer/issues?q=is%3Aissue+) before creating a new one.
 
 ## Device Support
+
+The list below contains latest devices supported on this branch (usually **master**). These might not be released yet, so check the [stable branch](https://github.com/openrazer/openrazer/tree/stable) for what should be available in the packages for your distribution.
+
+The devices below are fully feature supported by OpenRazer, which means all available USB controllable functions for that product are made available by the library.
+
 ### Keyboards
 | Device                                        | USB VID:PID |
 | --------------------------------------------- | ----------- |
