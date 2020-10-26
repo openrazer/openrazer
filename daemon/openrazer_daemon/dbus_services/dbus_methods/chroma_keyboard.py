@@ -18,7 +18,7 @@ def get_brightness(self):
     driver_path = self.get_driver_path('matrix_brightness')
 
     with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
+        brightness = round(float(driver_file.read() or 0) * (100.0 / 255.0), 2)
 
         self.method_args['brightness'] = brightness
 
