@@ -385,6 +385,14 @@ class RazerDaemon(DBusService):
                     device_match = sys_name.split('.')[0]
                     additional_interfaces = []
                     if not test_mode:
+                        double_device = False
+                        for alt_device in self._razer_devices:
+                            if device_match in alt_device.device_id and alt_device.device_id != sys_name and sys_path in alt_device.dbus.additional_interfaces:
+                                self.logger.warning('BUG: Device %s has already been found with interface %s. Skipping', sys_name, alt_device.device_id)
+                                double_device = True
+                        if double_device:
+                            continue
+
                         for alt_device in device_list:
                             if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
                                 additional_interfaces.append(alt_device.sys_path)
