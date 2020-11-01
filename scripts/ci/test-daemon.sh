@@ -11,3 +11,5 @@ if [ "$all_devices" != "$daemon_devices" ]; then
     echo
     exit 1
 fi
+
+PYTHONPATH="pylib:daemon" python3 scripts/ci/test-daemon.py
