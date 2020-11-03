@@ -533,6 +533,10 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
         report = razer_chroma_extended_matrix_effect_custom_frame();
         break;
 
@@ -1461,6 +1465,10 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK:
         case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
+        case USB_DEVICE_ID_RAZER_VIPER:
+        case USB_DEVICE_ID_RAZER_VIPER_MINI:
+        case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+        case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
             report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             break;
 
@@ -3725,6 +3733,8 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
             break;
 
         case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
@@ -4167,6 +4177,8 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
             break;
 
         case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:

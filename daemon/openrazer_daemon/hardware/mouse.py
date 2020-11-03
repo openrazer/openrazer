@@ -23,10 +23,14 @@ class RazerViperMini(__RazerDeviceSpecialBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x008A
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
                # Underglow/Logo use LOGO_LED
                'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
-               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2']
+               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               # Custom frame
+               'set_custom_effect', 'set_key_row']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1634/vipermini.png"
 
@@ -1682,13 +1686,16 @@ class RazerViperUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x007A
-    HAS_MATRIX = False  # TODO device probably has matrix support
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
                # Battery
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
                'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
-               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2']
+               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               # Custom frame
+               'set_custom_effect', 'set_key_row']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1577/ee_photo.png"
 
@@ -1726,7 +1733,6 @@ class RazerViperUltimateWireless(RazerViperUltimateWired):
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Viper_Ultimate_Dongle-if0(1|2)-event-kbd')
 
-    USB_VID = 0x1532
     USB_PID = 0x007B
     METHODS = RazerViperUltimateWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
@@ -1753,12 +1759,14 @@ class RazerViper(__RazerDeviceSpecialBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x0078
-    HAS_MATRIX = False  # TODO Device should have matrix support
+    HAS_MATRIX = True
     MATRIX_DIMS = [1, 1]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
                # Logo
                'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
-               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2']
+               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               # Custom frame
+               'set_custom_effect', 'set_key_row']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1539/1539_viper.png"
 
