@@ -11,6 +11,7 @@ declare -A files_metadata=(
     ["device_serial"]="r;XX0000000000" # default value will get overwritten
     ["device_type"]="r;%(name)s"
     ["dpi"]="rw;800:800"
+    ["dpi_stages"]="rw;0x010320032005dc05dc"
     ["firmware_version"]="r;v1.0"
     ["game_led_state"]="rw;0"
     ["is_mug_present"]="r;0"
