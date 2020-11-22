@@ -67,6 +67,8 @@ class RazerDevice(DBusService):
         self._device_number = device_number
         self.serial = self.get_serial()
 
+        self.DEVICE_IMAGE = ""
+
         if self.USB_PID == 0x0f07:
             self.storage_name = "ChromaMug"
         elif self.USB_PID == 0x0013:
