@@ -176,6 +176,7 @@ class RazerTartarusV2(_RippleKeyboard):
 
     USB_VID = 0x1532
     USB_PID = 0x022B
+    HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [4, 6]
 
