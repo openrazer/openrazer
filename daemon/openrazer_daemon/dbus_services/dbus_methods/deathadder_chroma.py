@@ -118,7 +118,7 @@ def set_logo_brightness(self, brightness):
     elif brightness < 0:
         brightness = 0
 
-    self.set_persistence("logo", "brightness", brightness)
+    self.set_persistence("logo", "brightness", int(brightness))
 
     brightness = int(round(brightness * (255.0 / 100.0)))
 
@@ -322,7 +322,7 @@ def set_scroll_brightness(self, brightness):
     elif brightness < 0:
         brightness = 0
 
-    self.set_persistence("scroll", "brightness", brightness)
+    self.set_persistence("scroll", "brightness", int(brightness))
 
     brightness = int(round(brightness * (255.0 / 100.0)))
 

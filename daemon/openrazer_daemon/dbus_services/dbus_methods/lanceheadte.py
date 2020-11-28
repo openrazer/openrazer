@@ -81,7 +81,7 @@ def set_left_brightness(self, brightness):
     elif brightness < 0:
         brightness = 0
 
-    self.set_persistence("left", "brightness", brightness)
+    self.set_persistence("left", "brightness", int(brightness))
 
     brightness = int(round(brightness * (255.0 / 100.0)))
 
@@ -347,7 +347,7 @@ def set_right_brightness(self, brightness):
     elif brightness < 0:
         brightness = 0
 
-    self.set_persistence("right", "brightness", brightness)
+    self.set_persistence("right", "brightness", int(brightness))
 
     brightness = int(round(brightness * (255.0 / 100.0)))
 

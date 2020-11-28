@@ -37,7 +37,7 @@ def set_brightness(self, brightness):
     elif brightness < 0:
         brightness = 0
 
-    self.set_persistence("backlight", "brightness", brightness)
+    self.set_persistence("backlight", "brightness", int(brightness))
 
     brightness = int(round(brightness * (255.0 / 100.0)))
 
@@ -587,7 +587,7 @@ def set_starlight_random_effect(self, speed):
 
     # remember effect
     self.set_persistence("backlight", "effect", 'starlightRandom')
-    self.set_persistence("backlight", "speed", speed)
+    self.set_persistence("backlight", "speed", int(speed))
 
 
 @endpoint('razer.device.lighting.chroma', 'setStarlightSingle', in_sig='yyyy')
@@ -607,7 +607,7 @@ def set_starlight_single_effect(self, red, green, blue, speed):
 
     # remember effect
     self.set_persistence("backlight", "effect", 'starlightSingle')
-    self.set_persistence("backlight", "speed", speed)
+    self.set_persistence("backlight", "speed", int(speed))
     self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
 
 
@@ -628,5 +628,5 @@ def set_starlight_dual_effect(self, red1, green1, blue1, red2, green2, blue2, sp
 
     # remember effect
     self.set_persistence("backlight", "effect", 'starlightDual')
-    self.set_persistence("backlight", "speed", speed)
+    self.set_persistence("backlight", "speed", int(speed))
     self.zone["backlight"]["colors"][0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
