@@ -318,7 +318,7 @@ class RazerDaemon(DBusService):
 
         for device in self._razer_devices:
             self._persistence[device.dbus.storage_name] = {}
-            if 'set_dpi_xy' in device.dbus.METHODS:
+            if 'set_dpi_xy' in device.dbus.METHODS or 'set_dpi_xy_byte' in device.dbus.METHODS:
                 self._persistence[device.dbus.storage_name]['dpi_x'] = str(device.dbus.dpi[0])
                 self._persistence[device.dbus.storage_name]['dpi_y'] = str(device.dbus.dpi[1])
 

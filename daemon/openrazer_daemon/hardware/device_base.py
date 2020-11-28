@@ -200,7 +200,7 @@ class RazerDevice(DBusService):
 
         # load last DPI/poll rate state
         if self.persistence.has_section(self.storage_name):
-            if 'set_dpi_xy' in self.METHODS:
+            if 'set_dpi_xy' in self.METHODS or 'set_dpi_xy_byte' in self.METHODS:
                 try:
                     self.dpi[0] = int(self.persistence[self.storage_name]['dpi_x'])
                     self.dpi[1] = int(self.persistence[self.storage_name]['dpi_y'])
