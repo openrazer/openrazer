@@ -551,7 +551,7 @@ struct razer_report razer_chroma_extended_matrix_effect_wave(unsigned char varia
     direction = clamp_u8(direction, 0x00, 0x02);
 
     report.arguments[3] = direction;
-    report.arguments[4] = 0x28; // Unknown
+    report.arguments[4] = 0x28; // Speed, lower values are faster
     return report;
 }
 

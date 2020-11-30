@@ -82,3 +82,20 @@ class RazerNommoPro(_RazerDeviceBrightnessSuspend):
                'set_custom_effect', 'set_key_row']
 
     DEVICE_IMAGE = "https://d4kkpd69xt9l7.cloudfront.net/sys-master/root/h89/hc4/9003754717214/razer-nommo-pro-audio-04.jpg"
+
+
+class RazerMouseBungeeV3Chroma(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Mouse Bungee V3 Chroma
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Mouse_Bungee_V3_Chroma-if01-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0F1D
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 8]
+    METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/03970e1bd220f3d2985c5e0060fb3bbf/razer-mouse-bungee-v3-chroma.png"
