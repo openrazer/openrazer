@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 // USB HID keycodes
 // http://www.freebsddiary.org/APC/usb_hid_usages.php
 

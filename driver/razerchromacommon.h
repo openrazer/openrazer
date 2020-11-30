@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 #ifndef DRIVER_RAZERCHROMACOMMON_H_
 #define DRIVER_RAZERCHROMACOMMON_H_
 

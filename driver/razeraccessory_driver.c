@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1323,5 +1324,3 @@ static struct hid_driver razer_accessory_driver = {
 };
 
 module_hid_driver(razer_accessory_driver);
-
-
