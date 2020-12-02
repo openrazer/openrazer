@@ -1912,6 +1912,72 @@ class RazerMambaElite(__RazerDeviceSpecialBrightnessSuspend):
         _set_right_brightness(self, right_row_brightness)
         self.disable_notify = False
 
+class RazerNagaLeftHanded2020(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer Naga Left Handed Edition 2020
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x008D
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [6, 22]
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_poll_rate', 'set_poll_rate',
+               # Logo logo_led_brightness/logo_matrix_effect_breath/...
+               'get_logo_brightness', 'set_logo_brightness',
+               'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               # Scroll wheel scroll_led_brightness/scroll_matrix_effect_breath/...
+               'get_scroll_brightness', 'set_scroll_brightness',
+               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               # Left side left_led_brightness/left_matrix_effect_breath/...
+               'get_left_brightness', 'set_left_brightness',
+               'set_left_wave', 'set_left_static', 'set_left_spectrum', 'set_left_none', 'set_left_reactive', 'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
+               # Right side right_led_brightness/right_matrix_effect_breath/...
+               'get_right_brightness', 'set_right_brightness',
+               'set_right_wave', 'set_right_static', 'set_right_spectrum', 'set_right_none', 'set_right_reactive', 'set_right_breath_random', 'set_right_breath_single', 'set_right_breath_dual',
+               # Custom frame
+               'set_custom_effect', 'set_key_row']
+
+    DPI_MAX = 20000
+
+    DEVICE_IMAGE = "https://rzrwarranty.s3.amazonaws.com/cee694cd7526df413008167b7566af310985321b20c57f3dc42e5cbd773f2417.png"
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = (
+            _da_get_logo_brightness(self),
+            _da_get_scroll_brightness(self),
+            _get_left_brightness(self),
+            _get_right_brightness(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        _da_set_scroll_brightness(self, 0)
+        _set_left_brightness(self, 0)
+        _set_right_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[0]
+        scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[1]
+        left_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[2]
+        right_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[3]
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        _da_set_scroll_brightness(self, scroll_brightness)
+        _set_left_brightness(self, left_row_brightness)
+        _set_right_brightness(self, right_row_brightness)
+        self.disable_notify = False
 
 class RazerDeathAdder1800(__RazerDevice):
     """
