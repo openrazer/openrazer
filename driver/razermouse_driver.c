@@ -419,7 +419,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-        device_type = "Razer Naga Left-Handed Edition 2020";
+        device_type = "Razer Naga Left-Handed Edition 2020\n";
         break;
 
     default:

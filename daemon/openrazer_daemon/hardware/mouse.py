@@ -1912,6 +1912,7 @@ class RazerMambaElite(__RazerDeviceSpecialBrightnessSuspend):
         _set_right_brightness(self, right_row_brightness)
         self.disable_notify = False
 
+
 class RazerNagaLeftHanded2020(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Naga Left Handed Edition 2020
@@ -1978,6 +1979,7 @@ class RazerNagaLeftHanded2020(__RazerDeviceSpecialBrightnessSuspend):
         _set_left_brightness(self, left_row_brightness)
         _set_right_brightness(self, right_row_brightness)
         self.disable_notify = False
+
 
 class RazerDeathAdder1800(__RazerDevice):
     """
