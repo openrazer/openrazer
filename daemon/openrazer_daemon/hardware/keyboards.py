@@ -1060,6 +1060,20 @@ class RazerBladeStealthEarly2020(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-stealth-13/shop/sl25p-fhd-4.jpg"
 
 
+class RazerBladeStealthLate2020(_RippleKeyboard):
+    """
+    Class for the Razer Blade Stealth (Late 2020)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade_Stealth(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0259
+    METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-stealth-13/shop/sl25p-fhd-4.jpg"
+
+
 class RazerBlade2019Adv(_RippleKeyboard):
     """
     Class for the Razer Blade 15 (2019) Advanced
