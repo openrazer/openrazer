@@ -1310,6 +1310,23 @@ class RazerBladeProLate2019(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/razer-blade-pro-17/razer-blade-pro-17-2019-OGimage-1200x630.jpg"
 
 
+class RazerBladeProEarly2020(_RippleKeyboard):
+    """
+    Class for the Razer Blade Pro (Early 2020)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0256
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 16]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_custom_effect', 'set_key_row',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1654/blade-pro-17-2020-2.png"
+
+
 class RazerBlade2019StudioEdition(_RippleKeyboard):
     """
     Class for the Razer Blade 15 Studio Edition (2019)
