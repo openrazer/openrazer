@@ -2056,6 +2056,79 @@ class RazerDeathAdderV2(__RazerDeviceSpecialBrightnessSuspend):
         self.disable_notify = False
 
 
+class RazerDeathAdderV2ProWired(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer DeathAdder V2 Pro (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*1532_Razer_DeathAdder_V2_Pro_000000000000-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x007C
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
+               # Battery
+               'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
+               # Logo
+               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
+               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               # Custom frame
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1714/comp_1_00000.png"
+
+    DPI_MAX = 20000
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', 100)
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        self.disable_notify = False
+
+
+class RazerDeathAdderV2ProWireless(RazerDeathAdderV2ProWired):
+    """
+    Class for the Razer DeathAdder V2 Pro (Wireless)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_DeathAdder_V2_Pro_000000000000-if0(1|2)-event-kbd')
+
+    USB_PID = 0x007D
+    METHODS = RazerDeathAdderV2ProWired.METHODS + ['set_charge_effect', 'set_charge_colour']
+
+    def __init__(self, *args, **kwargs):
+        super(RazerDeathAdderV2ProWireless, self).__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer DeathAdder V2 Pro Wireless')
+        self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super(RazerDeathAdderV2ProWireless, self)._close()
+
+        self._battery_manager.close()
+
+
 class RazerAtherisReceiver(__RazerDevice):
     """
     Class for the Razer Atheris (Receiver)
