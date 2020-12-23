@@ -2161,6 +2161,12 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
             case 0x24: // M5
                 cur_value = USB_HID_KEY_F17; // F17
                 break;
+            case 0x50: // Volume Down
+                cur_value = USB_HID_KEY_MEDIA_VOLUMEDOWN; // F17
+                break;
+            case 0x51: // Volume Up
+                cur_value =  USB_HID_KEY_MEDIA_VOLUMEUP; // F17
+                break;
             case 0x52: // Mute
                 cur_value = USB_HID_KEY_MEDIA_MUTE;
                 break;
