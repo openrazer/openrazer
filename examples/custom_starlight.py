@@ -48,16 +48,15 @@ def starlight_key(device, row, col, active):
 
     elapsed = 0
     while elapsed < fade_time:
-        elapsed = time.time() - start_time
         value = 1 - elapsed / fade_time
         rgb = colorsys.hsv_to_rgb(hue, 1, value)
         color = tuple(map(lambda x: int(256 * x), rgb))
 
         device.fx.advanced.matrix[row, col] = color
 
-        value -= 0.01
         # print(device, color)
         time.sleep(1 / 60)
+        elapsed = time.time() - start_time
 
     device.fx.advanced.matrix[row, col] = (0, 0, 0)
     active[(row, col)] = False
