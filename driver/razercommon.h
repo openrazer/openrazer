@@ -54,6 +54,12 @@ do { \
 #define BLUE_PROFILE_LED  0x0E
 #define RIGHT_SIDE_LED    0x10
 #define LEFT_SIDE_LED     0x11
+#define ARGB_CH_1_LED     0x1A
+#define ARGB_CH_2_LED     0x1B
+#define ARGB_CH_3_LED     0x1C
+#define ARGB_CH_4_LED     0x1D
+#define ARGB_CH_5_LED     0x1E
+#define ARGB_CH_6_LED     0x1F
 
 // LED Effect definitions
 #define LED_STATIC           0x00
@@ -120,6 +126,15 @@ struct razer_report {
     unsigned char reserved; /*0x0*/
 };
 
+struct razer_argb_report {
+    unsigned char report_id;
+    unsigned char channel_1;
+    unsigned char channel_2;
+    unsigned char pad;
+    unsigned char last_idx;
+    unsigned char color_data[315];
+};
+
 struct razer_key_translation {
     u16 from;
     u16 to;
@@ -129,6 +144,7 @@ struct razer_key_translation {
 int razer_send_control_msg(struct usb_device *usb_dev,void const *data, unsigned int report_index, unsigned long wait_min, unsigned long wait_max);
 int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait_min, ulong wait_max);
 int razer_get_usb_response(struct usb_device *usb_dev, unsigned int report_index, struct razer_report* request_report, unsigned int response_index, struct razer_report* response_report, unsigned long wait_min, unsigned long wait_max);
+int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, unsigned char size, void const* data);
 unsigned char razer_calculate_crc(struct razer_report *report);
 struct razer_report get_razer_report(unsigned char command_class, unsigned char command_id, unsigned char data_size);
 struct razer_report get_empty_razer_report(void);
