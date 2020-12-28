@@ -2198,4 +2198,3 @@ class RazerBasiliskXHyperSpeed(__RazerDevice):
 
     def _suspend_device(self):
         self.logger.debug("Device doesn't have suspend/resume")
-

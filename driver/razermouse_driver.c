@@ -4519,4 +4519,4 @@ static struct hid_driver razer_mouse_driver = {
 };
 
 module_hid_driver(razer_mouse_driver);
-                                       
+
