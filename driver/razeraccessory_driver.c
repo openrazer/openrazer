@@ -406,12 +406,12 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
-        report = razer_chroma_extended_matrix_effect_custom_frame();
+        report = razer_chroma_extended_matrix_effect_custom_frame(0,0);
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
-        report = razer_chroma_extended_matrix_effect_custom_frame();
+        report = razer_chroma_extended_matrix_effect_custom_frame(0,0);
         report.transaction_id.id = 0x1F;
         break;
 
@@ -683,7 +683,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
-            report = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
+            report = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0, 0);
             report.transaction_id.id = 0x1F;
             break;
 

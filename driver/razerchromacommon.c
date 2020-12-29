@@ -692,9 +692,9 @@ struct razer_report razer_chroma_extended_matrix_effect_breathing_dual(unsigned 
  * Status Trans Packet Proto DataSize Class CMD Args
  * 00     3f    0000   00    0c       0f    02  000008000000000000000000   | DRAW LED MATRIX Frame
  */
-struct razer_report razer_chroma_extended_matrix_effect_custom_frame(void)
+struct razer_report razer_chroma_extended_matrix_effect_custom_frame(unsigned char var_store,unsigned char led_id)
 {
-    return razer_chroma_extended_matrix_effect_base(0x0C, 0x00, 0x00, 0x08);
+    return razer_chroma_extended_matrix_effect_base(0x0C, var_store, led_id, 0x08);
 }
 
 /**
@@ -739,10 +739,10 @@ struct razer_report razer_chroma_extended_matrix_get_brightness(unsigned char va
  */
 struct razer_report razer_chroma_extended_matrix_set_custom_frame(unsigned char row_index, unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data)
 {
-    return razer_chroma_extended_matrix_set_custom_frame2(row_index, start_col, stop_col, rgb_data, 0x47);
+    return razer_chroma_extended_matrix_set_custom_frame2(row_index, start_col, stop_col, rgb_data, 0x47, 0x05);
 }
 
-struct razer_report razer_chroma_extended_matrix_set_custom_frame2(unsigned char row_index, unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data, size_t packetLength)
+struct razer_report razer_chroma_extended_matrix_set_custom_frame2(unsigned char row_index, unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data, size_t packetLength, unsigned char led_id)
 {
     const size_t row_length = (size_t) (((stop_col + 1) - start_col) * 3);
     // Some devices need a specific packet length, most devices are happy with 0x47
@@ -753,7 +753,7 @@ struct razer_report razer_chroma_extended_matrix_set_custom_frame2(unsigned char
     report.transaction_id.id = 0x3F;
 
     // printk(KERN_ALERT "razerkbd: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_index, start_col, stop_col, (unsigned char)row_length);
-
+    report.arguments[1] = led_id;
     report.arguments[2] = row_index;
     report.arguments[3] = start_col;
     report.arguments[4] = stop_col;

@@ -74,6 +74,9 @@ class RazerDevice(object):
             'lighting_ripple_random': self._has_feature('razer.device.lighting.custom', 'setRippleRandomColour'),
 
             'lighting_pulsate': self._has_feature('razer.device.lighting.bw2013', 'setPulsate'),
+            'lighting_extended_custom': self._has_feature('razer.device.lighting.chroma', 'setExtendedCustom'),
+            'lighting_extended_custom_frame': self._has_feature('razer.device.lighting.chroma', 'setExtendedCustomFrame'),
+
 
             # Get if the device has an LED Matrix, == True as its a DBus boolean otherwise, so for consistency sake we coerce it into a native bool
             'lighting_led_matrix': self._dbus_interfaces['device'].hasMatrix() == True,

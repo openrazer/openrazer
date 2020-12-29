@@ -1,5 +1,6 @@
 import numpy as _np
 import dbus as _dbus
+from typing import List
 #from openrazer.client.constants import WAVE_LEFT, WAVE_RIGHT, REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS, REACTIVE_2000MS
 from openrazer.client import constants as c
 
@@ -151,6 +152,45 @@ class RazerFX(BaseRazerFX):
 
         if self.has('wave'):
             self._lighting_dbus.setWave(direction)
+
+            return True
+        return False
+
+    def extended_custom(self, frame_id: int) -> bool:
+        """
+        Play extended custom frame
+
+
+        :param frame_id: frame_id that was use to store the frame. usuayll 0x00
+        :type frame_id: int
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If direction is invalid
+        """
+        if self.has('lighting_extended_custom'):
+            self._lighting_dbus.setExtendedCustom(frame_id)
+
+            return True
+        return False
+
+    def extended_custom_frame(self, row_id: int, start_col: int, end_col: int, colors: List[int]) -> bool:
+        """
+        Set custom frame
+
+        :param row_id: which row, ususally 0x00
+        :param start_col: the start column to change, 0x00 is unused in my device
+        :param end_col: the last column to change
+        :param colors: list of RGB tripel for each affected column
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If direction is invalid
+        """
+        if self.has('lighting_extended_custom_frame'):
+            self._lighting_dbus.setExtendedCustomFrame([row_id, start_col, end_col] + colors)
 
             return True
         return False

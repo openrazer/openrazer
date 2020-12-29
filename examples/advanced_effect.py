@@ -25,6 +25,7 @@ effects = [
     'spectrum',
     'static',
     'wave',
+    'extended_custom'
 ]
 
 # Helper function to generate interesting colors
@@ -85,3 +86,11 @@ for device in device_manager.devices:
     elif effect == 'wave':
         directions = [razer_constants.WAVE_LEFT, razer_constants.WAVE_RIGHT]
         device.fx.wave(random.choice(directions))
+
+    elif effect == 'extended_custom':
+        device.fx.extended_custom_frame(0, 1, 15, [0xff, 0, 0] * 16)
+        device.fx.extended_custom(0)
+        device.fx.extended_custom_frame(0, 7, 15, [0x0, 0xff, 0] * 9)
+        device.fx.extended_custom(0)
+        device.fx.extended_custom_frame(0, 12, 15, [0x0, 0x0, 0xff] * 4)
+        device.fx.extended_custom(0)
