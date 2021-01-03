@@ -1042,6 +1042,26 @@ static int razer_input_mapping(struct hid_device *hdev, struct hid_input *hi, st
 }
 
 /**
+ * Match method checks whether this driver should be used for a given HID device
+ */
+static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_driver)
+{
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    switch (usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+    case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
+        if (intf->cur_altsetting->desc.bInterfaceNumber != 0) {
+            dev_info(&intf->dev, "skipping secondary interface\n");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
  * Probe method is ran whenever a device is binded to the driver
  */
 static int razer_accessory_probe(struct hid_device *hdev, const struct hid_device_id *id)
@@ -1348,6 +1368,7 @@ MODULE_DEVICE_TABLE(hid, razer_devices);
 static struct hid_driver razer_accessory_driver = {
     .name = "razeraccessory",
     .id_table = razer_devices,
+    .match = razer_accessory_match,
     .probe = razer_accessory_probe,
     .remove = razer_accessory_disconnect,
     .raw_event = razer_raw_event,
