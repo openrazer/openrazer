@@ -161,6 +161,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Base Station Chroma                     |  1532:0F08  |
 | Razer Chroma Hardware Development Kit (HDK)   |  1532:0F09  |
 | Razer Mouse Bungee V3 Chroma                  |  1532:0F1D  |
+| Razer Base Station V2 Chroma                  |  1532:0F20  |
 
 #### Determining the Device ID
 Razer devices use a USB VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:

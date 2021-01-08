@@ -99,3 +99,20 @@ class RazerMouseBungeeV3Chroma(_RazerDeviceBrightnessSuspend):
                'set_custom_effect', 'set_key_row']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/03970e1bd220f3d2985c5e0060fb3bbf/razer-mouse-bungee-v3-chroma.png"
+
+
+class RazerBaseStationV2Chroma(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Base Station V2 Chroma
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*RAZER_Razer_Base_Station_V2_Chroma-if01-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0F20
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 8]
+    METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/3897-1-EN-v2.png"
