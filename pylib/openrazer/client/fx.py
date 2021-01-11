@@ -999,6 +999,21 @@ class MiscLighting(BaseRazerFX):
         else:
             self._right = None
 
+        if self.has('charging'):
+            self._charging = SingleLed(serial, capabilities, daemon_dbus, 'charging')
+        else:
+            self._charging = None
+
+        if self.has('fast_charging'):
+            self._fast_charging = SingleLed(serial, capabilities, daemon_dbus, 'fast_charging')
+        else:
+            self._fast_charging = None
+
+        if self.has('fully_charged'):
+            self._fully_charged = SingleLed(serial, capabilities, daemon_dbus, 'fully_charged')
+        else:
+            self._fully_charged = None
+
         if self.has('backlight'):
             self._backlight = SingleLed(serial, capabilities, daemon_dbus, 'backlight')
         else:
@@ -1019,6 +1034,18 @@ class MiscLighting(BaseRazerFX):
     @property
     def right(self):
         return self._right
+
+    @property
+    def charging(self):
+        return self._charging
+
+    @property
+    def fast_charging(self):
+        return self._fast_charging
+
+    @property
+    def fully_charged(self):
+        return self._fully_charged
 
     @property
     def backlight(self):

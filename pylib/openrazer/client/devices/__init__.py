@@ -138,6 +138,40 @@ class RazerDevice(object):
             'lighting_profile_led_red': self._has_feature('razer.device.lighting.profile_led', 'setRedLED'),
             'lighting_profile_led_green': self._has_feature('razer.device.lighting.profile_led', 'setGreenLED'),
             'lighting_profile_led_blue': self._has_feature('razer.device.lighting.profile_led', 'setBlueLED'),
+
+            # Charging Pad attrs
+            'lighting_charging': self._has_feature('razer.device.lighting.charging'),
+            'lighting_charging_active': self._has_feature('razer.device.lighting.charging', 'setChargingActive'),
+            'lighting_charging_brightness': self._has_feature('razer.device.lighting.charging', 'setChargingBrightness'),
+            'lighting_charging_spectrum': self._has_feature('razer.device.lighting.charging', 'setChargingSpectrum'),
+            'lighting_charging_static': self._has_feature('razer.device.lighting.charging', 'setChargingStatic'),
+            'lighting_charging_none': self._has_feature('razer.device.lighting.charging', 'setChargingNone'),
+            'lighting_charging_wave': self._has_feature('razer.device.lighting.charging', 'setChargingWave'),
+            'lighting_charging_breath_single': self._has_feature('razer.device.lighting.charging', 'setChargingBreathSingle'),
+            'lighting_charging_breath_dual': self._has_feature('razer.device.lighting.charging', 'setChargingBreathDual'),
+            'lighting_charging_breath_random': self._has_feature('razer.device.lighting.charging', 'setChargingBreathRandom'),
+
+            'lighting_fast_charging': self._has_feature('razer.device.lighting.fast_charging'),
+            'lighting_fast_charging_active': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingActive'),
+            'lighting_fast_charging_brightness': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingBrightness'),
+            'lighting_fast_charging_spectrum': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingSpectrum'),
+            'lighting_fast_charging_static': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingStatic'),
+            'lighting_fast_charging_none': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingNone'),
+            'lighting_fast_charging_wave': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingWave'),
+            'lighting_fast_charging_breath_single': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingBreathSingle'),
+            'lighting_fast_charging_breath_dual': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingBreathDual'),
+            'lighting_fast_charging_breath_random': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingBreathRandom'),
+
+            'lighting_fully_charged': self._has_feature('razer.device.lighting.fully_charged'),
+            'lighting_fully_charged_active': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedActive'),
+            'lighting_fully_charged_brightness': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedBrightness'),
+            'lighting_fully_charged_spectrum': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedSpectrum'),
+            'lighting_fully_charged_static': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedStatic'),
+            'lighting_fully_charged_none': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedNone'),
+            'lighting_fully_charged_wave': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedWave'),
+            'lighting_fully_charged_breath_single': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedBreathSingle'),
+            'lighting_fully_charged_breath_dual': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedBreathDual'),
+            'lighting_fully_charged_breath_random': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedBreathRandom'),
         }
 
         # Nasty hack to convert dbus.Int32 into native

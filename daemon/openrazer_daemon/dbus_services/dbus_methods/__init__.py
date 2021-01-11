@@ -15,3 +15,4 @@ from openrazer_daemon.dbus_services.dbus_methods.nagahex import *
 from openrazer_daemon.dbus_services.dbus_methods.lanceheadte import *
 from openrazer_daemon.dbus_services.dbus_methods.kraken import *
 from openrazer_daemon.dbus_services.dbus_methods.accessory import *
+from openrazer_daemon.dbus_services.dbus_methods.charging_pad_chroma import *

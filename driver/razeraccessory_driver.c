@@ -179,6 +179,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Mouse Bungee V3 Chroma\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        device_type = "Razer Charging Pad Chroma\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
         device_type = "Razer Mouse Dock\n";
         break;
@@ -214,7 +218,7 @@ static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute 
 /**
  * Write device file "mode_spectrum"
  *
- * Specrum effect mode is activated whenever the file is written to
+ * Spectrum effect mode is activated whenever the file is written to
  */
 static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
@@ -244,6 +248,13 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
 
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
+        report.transaction_id.id = 0x1F;
+        break;
+
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        // Must be in normal mode for hardware effects
+        razer_set_device_mode(device->usb_dev, 0x00, 0x00);
         report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
         report.transaction_id.id = 0x1F;
         break;
@@ -368,6 +379,13 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
         report.transaction_id.id = 0x1F;
         break;
 
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        // Must be in normal mode for hardware effects
+        razer_set_device_mode(device->usb_dev, 0x00, 0x00);
+        report = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
+        report.transaction_id.id = 0x1F;
+        break;
+
     default:
         printk(KERN_WARNING "razeraccessory: Unknown device\n");
         break;
@@ -441,6 +459,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         report = razer_chroma_extended_matrix_effect_custom_frame();
         report.transaction_id.id = 0x1F;
         break;
@@ -492,6 +511,40 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+            report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
+            report.transaction_id.id = 0x1F;
+            break;
+
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+            // Must be in normal mode for hardware effects
+            razer_set_device_mode(device->usb_dev, 0x00, 0x00);
+            /**
+             * Mode switcher required after setting static color effect once and before setting a second time.
+             * Similar to Naga Trinity?
+             *
+             * If the color is not set twice with the mode switch inbetween, each subsequent
+             * setting of the static effect actually sets the previous color...
+             */
+            report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
+            report.transaction_id.id = 0x1F;
+
+            mutex_lock(&device->lock);
+            razer_send_payload(device->usb_dev, &report);
+            mutex_unlock(&device->lock);
+
+            report = get_razer_report(0x0f, 0x02, 0x06);
+            report.arguments[0] = 0x00;
+            report.arguments[1] = 0x00;
+            report.arguments[2] = 0x08;
+            report.arguments[3] = 0x00;
+            report.arguments[4] = 0x00;
+            report.arguments[5] = 0x00;
+            report.transaction_id.id = 0x1F;
+
+            mutex_lock(&device->lock);
+            razer_send_payload(device->usb_dev, &report);
+            mutex_unlock(&device->lock);
+
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
             report.transaction_id.id = 0x1F;
             break;
@@ -549,6 +602,15 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
         report.transaction_id.id = 0x1F;
         break;
 
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        // Must be in normal mode for hardware effects
+        razer_set_device_mode(device->usb_dev, 0x00, 0x00);
+        // Direction values are flipped compared to other devices
+        direction ^= ((1<<0) | (1<<1));
+        report = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
+        report.transaction_id.id = 0x1F;
+        break;
+
     default:
         printk(KERN_WARNING "razeraccessory: Unknown device\n");
         break;
@@ -602,6 +664,27 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        switch(count) {
+        case 3: // Single colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
+            report.transaction_id.id = 0x1F;
+            break;
+
+        case 6: // Dual colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
+            report.transaction_id.id = 0x1F;
+            break;
+
+        default: // "Random" colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
+            report.transaction_id.id = 0x1F;
+            break;
+        }
+        break;
+
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        // Must be in normal mode for hardware effects
+        razer_set_device_mode(device->usb_dev, 0x00, 0x00);
         switch(count) {
         case 3: // Single colour mode
             report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
@@ -729,6 +812,13 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
             report.transaction_id.id = 0x1F;
             break;
 
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+            // Must be in driver mode for custom effects
+            razer_set_device_mode(device->usb_dev, 0x03, 0x00);
+            report = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
+            report.transaction_id.id = 0x1F;
+            break;
+
         default:
             printk(KERN_WARNING "razeraccessory: Unknown device\n");
             break;
@@ -741,7 +831,6 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
         // *3 as its 3 bytes per col (RGB)
         offset += row_length;
     }
-
 
     return count;
 }
@@ -782,6 +871,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         report.transaction_id.id = 0x1F;
         response_report = razer_send_payload(device->usb_dev, &report);
         strncpy(&serial_string[0], &response_report.arguments[0], 22);
@@ -811,6 +901,7 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         report.transaction_id.id = 0x1F;
         break;
 
@@ -854,6 +945,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
             report.transaction_id.id = 0x1F;
             break;
         }
@@ -894,6 +986,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         report.transaction_id.id = 0x1F;
         break;
     }
@@ -935,6 +1028,7 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         report = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         report.transaction_id.id = 0x1F;
         device->saved_brightness = brightness;
@@ -985,6 +1079,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
         brightness = device->saved_brightness;
         break;
@@ -1000,6 +1095,401 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
     return sprintf(buf, "%d\n", brightness);
 }
 
+/**
+ * Write charge brightness device files
+ *
+ * Sets the brightness to the ASCII number written to this file.
+ */
+static ssize_t razer_attr_write_set_charge_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int led)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    unsigned char brightness = 0;
+    struct razer_report report = {0};
+
+    if(count > 0) {
+        brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
+    } else {
+        printk(KERN_WARNING "razeraccessory: Brightness takes an ascii number\n");
+    }
+
+    switch (device->usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        report = razer_chroma_extended_matrix_brightness(VARSTORE, led, brightness);
+        report.transaction_id.id = 0x1F;
+        device->saved_brightness = brightness;
+        break;
+
+    default:
+        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        break;
+    }
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Read charge brightness device files
+ *
+ * Returns brightness or -1 if the initial brightness is not known
+ */
+static ssize_t razer_attr_read_set_charge_brightness(struct device *dev, struct device_attribute *attr, char *buf, int led)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report report = razer_chroma_standard_get_led_brightness(VARSTORE, led);
+    struct razer_report response = {0};
+    unsigned char brightness = 0;
+
+    switch (device->usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        brightness = device->saved_brightness;
+        break;
+
+    default:
+        mutex_lock(&device->lock);
+        response = razer_send_payload(device->usb_dev, &report);
+        mutex_unlock(&device->lock);
+        brightness = response.arguments[2];
+        break;
+    }
+
+    return sprintf(buf, "%d\n", brightness);
+}
+
+/**
+ * Read device file "charging_led_brightness"
+ */
+static ssize_t razer_attr_read_charging_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_set_charge_brightness(dev, attr, buf, CHARGING_LED);
+}
+
+/**
+ * Write device file "charging_led_brightness"
+ */
+static ssize_t razer_attr_write_charging_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_set_charge_brightness(dev, attr, buf, count, CHARGING_LED);
+}
+
+/**
+ * Read device file "fast_charging_led_brightness"
+ */
+static ssize_t razer_attr_read_fast_charging_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_set_charge_brightness(dev, attr, buf, FAST_CHARGING_LED);
+}
+
+/**
+ * Write device file "fast_charging_led_brightness"
+ */
+static ssize_t razer_attr_write_fast_charging_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_set_charge_brightness(dev, attr, buf, count, FAST_CHARGING_LED);
+}
+
+/**
+ * Read device file "fully_charged_led_brightness"
+ */
+static ssize_t razer_attr_read_fully_charged_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_set_charge_brightness(dev, attr, buf, FULLY_CHARGED_LED);
+}
+
+/**
+ * Write device file "fully_charged_led_brightness"
+ */
+static ssize_t razer_attr_write_fully_charged_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_set_charge_brightness(dev, attr, buf, count, FULLY_CHARGED_LED);
+}
+
+/**
+ * Write device file "mode_spectrum"
+ *
+ * Spectrum effect mode is activated whenever the file is written to
+ */
+static ssize_t razer_attr_write_charge_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int led)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report report = { 0 };
+
+    switch (device->usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, led);
+        report.transaction_id.id = 0x1F;
+        break;
+
+    default:
+        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        break;
+    }
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Write device file "charging_mode_spectrum"
+ */
+static ssize_t razer_attr_write_charging_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_spectrum(dev, attr, buf, count, CHARGING_LED);
+}
+
+/**
+ * Write device file "fast_charging_mode_spectrum"
+ */
+static ssize_t razer_attr_write_fast_charging_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_spectrum(dev, attr, buf, count, FAST_CHARGING_LED);
+}
+
+/**
+ * Write device file "fully_charged_mode_spectrum"
+ */
+static ssize_t razer_attr_write_fully_charged_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_spectrum(dev, attr, buf, count, FULLY_CHARGED_LED);
+}
+
+/**
+ * Write device file "mode_none"
+ *
+ * None effect mode is activated whenever the file is written to
+ */
+static ssize_t razer_attr_write_charge_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int led)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report report = { 0 };
+
+    switch (device->usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        report = razer_chroma_extended_matrix_effect_none(VARSTORE, led);
+        report.transaction_id.id = 0x1F;
+        break;
+
+    default:
+        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        break;
+    }
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Write device file "charging_mode_none"
+ */
+static ssize_t razer_attr_write_charging_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_none(dev, attr, buf, count, CHARGING_LED);
+}
+
+/**
+ * Write device file "fast_charging_mode_none"
+ */
+static ssize_t razer_attr_write_fast_charging_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_none(dev, attr, buf, count, FAST_CHARGING_LED);
+}
+
+/**
+ * Write device file "fully_charged_mode_none"
+ */
+static ssize_t razer_attr_write_fully_charged_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_none(dev, attr, buf, count, FULLY_CHARGED_LED);
+}
+
+/**
+ * Write device file "mode_static"
+ *
+ * Static effect mode is activated whenever the file is written to with 3 bytes
+ */
+static ssize_t razer_attr_write_charge_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int led)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report report = {0};
+
+    if(count == 3) {
+        switch (device->usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+            report = razer_chroma_extended_matrix_effect_static(VARSTORE, led, (struct razer_rgb*) & buf[0]);
+            report.transaction_id.id = 0x1F;
+            break;
+
+        default:
+            printk(KERN_WARNING "razeraccessory: Unknown device\n");
+            break;
+        }
+
+        mutex_lock(&device->lock);
+        razer_send_payload(device->usb_dev, &report);
+        mutex_unlock(&device->lock);
+
+    } else {
+        printk(KERN_WARNING "razeraccessory: Static mode only accepts RGB (3byte)\n");
+    }
+
+    return count;
+}
+
+/**
+ * Write device file "charging_mode_static"
+ */
+static ssize_t razer_attr_write_charging_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_static(dev, attr, buf, count, CHARGING_LED);
+}
+
+/**
+ * Write device file "fast_charging_mode_static"
+ */
+static ssize_t razer_attr_write_fast_charging_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_static(dev, attr, buf, count, FAST_CHARGING_LED);
+}
+
+/**
+ * Write device file "fully_charged_mode_static"
+ */
+static ssize_t razer_attr_write_fully_charged_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_static(dev, attr, buf, count, FULLY_CHARGED_LED);
+}
+
+/**
+ * Write device file "mode_wave"
+ *
+ * When 1 is written (0x01) the wave effect is displayed moving anti clockwise
+ * if 2 is written (0x02) then the wave effect goes clockwise
+ */
+static ssize_t razer_attr_write_charge_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int led)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
+    struct razer_report report = { 0 };
+
+    switch (device->usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        // Direction values are flipped compared to other devices
+        direction ^= ((1<<0) | (1<<1));
+        report = razer_chroma_extended_matrix_effect_wave(VARSTORE, led, direction);
+        report.transaction_id.id = 0x1F;
+        break;
+
+    default:
+        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        break;
+    }
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Write device file "charging_mode_wave"
+ */
+static ssize_t razer_attr_write_charging_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_wave(dev, attr, buf, count, CHARGING_LED);
+}
+
+/**
+ * Write device file "fast_charging_mode_wave"
+ */
+static ssize_t razer_attr_write_fast_charging_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_wave(dev, attr, buf, count, FAST_CHARGING_LED);
+}
+
+/**
+ * Write device file "fully_charged_mode_wave"
+ */
+static ssize_t razer_attr_write_fully_charged_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_wave(dev, attr, buf, count, FULLY_CHARGED_LED);
+}
+
+/**
+ * Write device file "mode_breath"
+ *
+ * Breathing effect mode is activated whenever the file is written to with 1, 3, or 6 bytes
+ */
+static ssize_t razer_attr_write_charge_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int led)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report report = {0};
+
+    switch (device->usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        switch(count) {
+        case 3: // Single colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, led, (struct razer_rgb *)&buf[0]);
+            report.transaction_id.id = 0x1F;
+            break;
+
+        case 6: // Dual colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, led, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
+            report.transaction_id.id = 0x1F;
+            break;
+
+        default: // "Random" colour mode
+            report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, led);
+            report.transaction_id.id = 0x1F;
+            break;
+        }
+        break;
+
+    default:
+        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        break;
+    }
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Write device file "charging_mode_breath"
+ */
+static ssize_t razer_attr_write_charging_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_breath(dev, attr, buf, count, CHARGING_LED);
+}
+
+/**
+ * Write device file "fast_charging_mode_breath"
+ */
+static ssize_t razer_attr_write_fast_charging_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_breath(dev, attr, buf, count, FAST_CHARGING_LED);
+}
+
+/**
+ * Write device file "fully_charged_mode_breath"
+ */
+static ssize_t razer_attr_write_fully_charged_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_charge_mode_breath(dev, attr, buf, count, FULLY_CHARGED_LED);
+}
+
 
 
 
@@ -1013,26 +1503,47 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
  * Read and write is 0664
  */
 
-static DEVICE_ATTR(test,                    0660, razer_attr_read_test,                       razer_attr_write_test);
-static DEVICE_ATTR(version,                 0440, razer_attr_read_version,                    NULL);
-static DEVICE_ATTR(device_type,             0440, razer_attr_read_device_type,                NULL);
-static DEVICE_ATTR(device_mode,             0660, razer_attr_read_device_mode,                razer_attr_write_device_mode);
-static DEVICE_ATTR(device_serial,           0440, razer_attr_read_get_serial,                 NULL);
-static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_get_firmware_version,       NULL);
+static DEVICE_ATTR(test,                                    0660, razer_attr_read_test,                           razer_attr_write_test);
+static DEVICE_ATTR(version,                                 0440, razer_attr_read_version,                        NULL);
+static DEVICE_ATTR(device_type,                             0440, razer_attr_read_device_type,                    NULL);
+static DEVICE_ATTR(device_mode,                             0660, razer_attr_read_device_mode,                    razer_attr_write_device_mode);
+static DEVICE_ATTR(device_serial,                           0440, razer_attr_read_get_serial,                     NULL);
+static DEVICE_ATTR(firmware_version,                        0440, razer_attr_read_get_firmware_version,           NULL);
 
-static DEVICE_ATTR(matrix_effect_none,      0220, NULL,                                       razer_attr_write_mode_none);
-static DEVICE_ATTR(matrix_effect_spectrum,  0220, NULL,                                       razer_attr_write_mode_spectrum);
-static DEVICE_ATTR(matrix_effect_static,    0220, NULL,                                       razer_attr_write_mode_static);
-static DEVICE_ATTR(matrix_effect_reactive,  0220, NULL,                                       razer_attr_write_mode_reactive);
-static DEVICE_ATTR(matrix_effect_breath,    0220, NULL,                                       razer_attr_write_mode_breath);
-static DEVICE_ATTR(matrix_effect_custom,    0220, NULL,                                       razer_attr_write_mode_custom);
-static DEVICE_ATTR(matrix_effect_wave,      0220, NULL,                                       razer_attr_write_mode_wave);
-static DEVICE_ATTR(matrix_effect_blinking,  0220, NULL,                                       razer_attr_write_mode_blinking);
-static DEVICE_ATTR(matrix_brightness,       0660, razer_attr_read_set_brightness,             razer_attr_write_set_brightness);
-static DEVICE_ATTR(matrix_custom_frame,     0220, NULL,                                       razer_attr_write_set_key_row);
-static DEVICE_ATTR(matrix_reactive_trigger, 0220, NULL,                                       razer_attr_write_mode_reactive_trigger);
+static DEVICE_ATTR(matrix_effect_none,                      0220, NULL,                                           razer_attr_write_mode_none);
+static DEVICE_ATTR(matrix_effect_spectrum,                  0220, NULL,                                           razer_attr_write_mode_spectrum);
+static DEVICE_ATTR(matrix_effect_static,                    0220, NULL,                                           razer_attr_write_mode_static);
+static DEVICE_ATTR(matrix_effect_reactive,                  0220, NULL,                                           razer_attr_write_mode_reactive);
+static DEVICE_ATTR(matrix_effect_breath,                    0220, NULL,                                           razer_attr_write_mode_breath);
+static DEVICE_ATTR(matrix_effect_custom,                    0220, NULL,                                           razer_attr_write_mode_custom);
+static DEVICE_ATTR(matrix_effect_wave,                      0220, NULL,                                           razer_attr_write_mode_wave);
+static DEVICE_ATTR(matrix_effect_blinking,                  0220, NULL,                                           razer_attr_write_mode_blinking);
+static DEVICE_ATTR(matrix_brightness,                       0660, razer_attr_read_set_brightness,                 razer_attr_write_set_brightness);
+static DEVICE_ATTR(matrix_custom_frame,                     0220, NULL,                                           razer_attr_write_set_key_row);
+static DEVICE_ATTR(matrix_reactive_trigger,                 0220, NULL,                                           razer_attr_write_mode_reactive_trigger);
 
-static DEVICE_ATTR(is_mug_present,          0440, razer_attr_read_get_cup_state,              NULL);
+static DEVICE_ATTR(charging_led_brightness,                 0660, razer_attr_read_charging_led_brightness,        razer_attr_write_charging_led_brightness);
+static DEVICE_ATTR(charging_matrix_effect_wave,             0220, NULL,                                           razer_attr_write_charging_mode_wave);
+static DEVICE_ATTR(charging_matrix_effect_spectrum,         0220, NULL,                                           razer_attr_write_charging_mode_spectrum);
+static DEVICE_ATTR(charging_matrix_effect_breath,           0220, NULL,                                           razer_attr_write_charging_mode_breath);
+static DEVICE_ATTR(charging_matrix_effect_static,           0220, NULL,                                           razer_attr_write_charging_mode_static);
+static DEVICE_ATTR(charging_matrix_effect_none,             0220, NULL,                                           razer_attr_write_charging_mode_none);
+
+static DEVICE_ATTR(fast_charging_led_brightness,            0660, razer_attr_read_fast_charging_led_brightness,   razer_attr_write_fast_charging_led_brightness);
+static DEVICE_ATTR(fast_charging_matrix_effect_wave,        0220, NULL,                                           razer_attr_write_fast_charging_mode_wave);
+static DEVICE_ATTR(fast_charging_matrix_effect_spectrum,    0220, NULL,                                           razer_attr_write_fast_charging_mode_spectrum);
+static DEVICE_ATTR(fast_charging_matrix_effect_breath,      0220, NULL,                                           razer_attr_write_fast_charging_mode_breath);
+static DEVICE_ATTR(fast_charging_matrix_effect_static,      0220, NULL,                                           razer_attr_write_fast_charging_mode_static);
+static DEVICE_ATTR(fast_charging_matrix_effect_none,        0220, NULL,                                           razer_attr_write_fast_charging_mode_none);
+
+static DEVICE_ATTR(fully_charged_led_brightness,            0660, razer_attr_read_fully_charged_led_brightness,   razer_attr_write_fully_charged_led_brightness);
+static DEVICE_ATTR(fully_charged_matrix_effect_wave,        0220, NULL,                                           razer_attr_write_fully_charged_mode_wave);
+static DEVICE_ATTR(fully_charged_matrix_effect_spectrum,    0220, NULL,                                           razer_attr_write_fully_charged_mode_spectrum);
+static DEVICE_ATTR(fully_charged_matrix_effect_breath,      0220, NULL,                                           razer_attr_write_fully_charged_mode_breath);
+static DEVICE_ATTR(fully_charged_matrix_effect_static,      0220, NULL,                                           razer_attr_write_fully_charged_mode_static);
+static DEVICE_ATTR(fully_charged_matrix_effect_none,        0220, NULL,                                           razer_attr_write_fully_charged_mode_none);
+
+static DEVICE_ATTR(is_mug_present,                          0440, razer_attr_read_get_cup_state,                  NULL);
 
 void razer_accessory_init(struct razer_accessory_device *dev, struct usb_interface *intf, struct hid_device *hdev)
 {
@@ -1108,6 +1619,7 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         if (intf->cur_altsetting->desc.bInterfaceNumber != 0) {
             dev_info(&intf->dev, "skipping secondary interface\n");
             return false;
@@ -1144,6 +1656,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         expected_protocol = 0;
         break;
 
@@ -1180,6 +1693,32 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);                     // Brightness
 
         switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+            // Razer has also added a "Fast Wave" effect for at least this device
+            // which uses the same effect command but a speed parameter of 0x10.
+            // It has not been implemented.
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charging_led_brightness);           // Charging effects
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charging_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charging_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charging_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charging_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charging_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fast_charging_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fast_charging_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fast_charging_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fast_charging_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fast_charging_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fast_charging_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_none);
+            break;
+        }
+
+        switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
         case USB_DEVICE_ID_RAZER_FIREFLY_V2:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
@@ -1203,6 +1742,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_CHROMA_HDK:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
             break;
@@ -1219,6 +1759,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);                // Wave effect
             break;
         }
@@ -1244,6 +1785,8 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
 
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        // Needs to be in "Normal" mode for idle effects to function properly
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
             break;
 
         default:
@@ -1296,6 +1839,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         expected_protocol = 0;
         break;
 
@@ -1332,6 +1876,29 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);                     // Brightness
 
         switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+            device_remove_file(&hdev->dev, &dev_attr_charging_led_brightness);           // Charging effects
+            device_remove_file(&hdev->dev, &dev_attr_charging_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_charging_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_charging_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_charging_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_charging_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_fast_charging_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_fast_charging_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_fast_charging_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_fast_charging_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_fast_charging_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_fast_charging_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_fully_charged_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_none);
+            break;
+        }
+
+        switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
         case USB_DEVICE_ID_RAZER_FIREFLY_V2:
         case USB_DEVICE_ID_RAZER_CORE:
@@ -1345,6 +1912,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_CHROMA_HDK:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
             break;
@@ -1361,6 +1929,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);                // Wave effect
             break;
         }
@@ -1434,6 +2003,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MOUSE_DOCK) },
     { 0 }
 };

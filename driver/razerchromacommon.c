@@ -550,6 +550,8 @@ struct razer_report razer_chroma_extended_matrix_effect_wave(unsigned char varia
     // Others use values 0x01, 0x02
     direction = clamp_u8(direction, 0x00, 0x02);
 
+    // Razer has also added a "Fast Wave" effect for at least one device
+    // which uses the same effect command but a speed parameter of 0x10
     report.arguments[3] = direction;
     report.arguments[4] = 0x28; // Speed, lower values are faster
     return report;

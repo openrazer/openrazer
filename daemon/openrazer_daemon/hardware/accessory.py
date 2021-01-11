@@ -132,3 +132,27 @@ class RazerBaseStationV2Chroma(_RazerDeviceBrightnessSuspend):
                'set_custom_effect', 'set_key_row']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/3897-1-EN-v2.png"
+
+
+class RazerChargingPadChroma(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Charging Pad Chroma
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*RAZER_Razer_Charging_Pad_Chroma-event-if01')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0F26
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [1, 10]
+    METHODS = ['get_device_type_accessory', 'set_custom_effect', 'set_key_row', 'get_charging_brightness', 'set_charging_brightness', 'get_fast_charging_brightness', 'set_fast_charging_brightness', 'get_fully_charged_brightness', 'set_fully_charged_brightness',
+               # Idle
+               'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               # Charging
+               'set_charging_wave', 'set_charging_static', 'set_charging_spectrum', 'set_charging_none', 'set_charging_breath_random', 'set_charging_breath_single', 'set_charging_breath_dual',
+               # Fast Charging
+               'set_fast_charging_wave', 'set_fast_charging_static', 'set_fast_charging_spectrum', 'set_fast_charging_none', 'set_fast_charging_breath_random', 'set_fast_charging_breath_single', 'set_fast_charging_breath_dual',
+               # Fully Charged
+               'set_fully_charged_wave', 'set_fully_charged_static', 'set_fully_charged_spectrum', 'set_fully_charged_none', 'set_fully_charged_breath_random', 'set_fully_charged_breath_single', 'set_fully_charged_breath_dual']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/Images/ChargingPadChroma/CPC-ProductImage.png"
