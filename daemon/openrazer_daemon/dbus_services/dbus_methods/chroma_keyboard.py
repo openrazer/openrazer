@@ -164,6 +164,49 @@ def set_macro_effect(self, effect):
         driver_file.write(str(int(effect)))
 
 
+@endpoint('razer.device.lighting.chroma', 'setExtendedCustomFrame', in_sig='ay', byte_arrays=True)
+def set_extended_custom_frame(self, payload):
+    """
+    Set the RGB matrix on the device using the extended_custom_frame command
+    Byte array like
+    [x, y, z,
+     255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00,
+     255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 00, 00]
+
+    Where:
+    x: row_id (probably 0x00 on my BLADE_EARLY_2020_BASE model, see 'has_matrix' property)
+    y: start_column (on BLADE_EARLY_2020_BASE: 0x00 is unused)
+    z: stop_col (on BLADE_EARLY_2020_BASE max. is 0xf) 
+
+    Then its 3byte groups of RGB, expect (stop_col+1) - start_col) * 3 values
+    :param payload: Binary payload
+    :type payload: bytes
+    """
+
+    self.logger.debug("DBus call set_extended_custom_frame")
+
+    driver_path = self.get_driver_path('matrix_extended_custom_frame')
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(payload)
+
+
+@endpoint('razer.device.lighting.chroma', 'setExtendedCustom')
+def set_extended_custom_effect(self):
+    """
+    Set the device to use mode "extended custom frame" LED matrix
+    """
+
+    self.logger.debug("DBus call set_extended_custom_effect")
+
+    driver_path = self.get_driver_path('matrix_effect_extended_custom')
+
+    payload = b'1'
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(payload)
+
+
 @endpoint('razer.device.lighting.chroma', 'setWave', in_sig='i')
 def set_wave_effect(self, direction):
     """

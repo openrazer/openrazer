@@ -1558,6 +1558,44 @@ static ssize_t razer_attr_write_set_logo(struct device *dev, struct device_attri
 }
 
 /**
+ * Write device file "mode_extended_custom"
+ *
+ * Sets the keyboard to extended custom mode whenever the file is written to
+ */
+static ssize_t razer_attr_write_mode_extended_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = {0};
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_ORNATA:
+    case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_TE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_2019:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN:
+    case USB_DEVICE_ID_RAZER_CYNOSA_CHROMA:
+    default:
+        report = razer_chroma_extended_matrix_effect_custom_frame(0,0);
+        break;
+    case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
+        report = razer_chroma_extended_matrix_effect_custom_frame(0,0);
+        report.transaction_id.id = 0x1F;
+        break;
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+        if (count != 1)  printk(KERN_WARNING "razerkbd: mode_extended_custom only takes 1 bytes.");
+
+        report = razer_chroma_extended_matrix_effect_custom_frame(buf[0],0x05); // trace shows 0x05 here
+        report.transaction_id.id = 0x0c;  // TODO move to a usb_device variable
+        break;
+
+    }
+    razer_send_payload(usb_dev, &report);
+    return count;
+}
+/**
  * Write device file "mode_custom"
  *
  * Sets the keyboard to custom mode whenever the file is written to
@@ -1576,14 +1614,14 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_2019:
     case USB_DEVICE_ID_RAZER_HUNTSMAN:
     case USB_DEVICE_ID_RAZER_CYNOSA_CHROMA:
-        report = razer_chroma_extended_matrix_effect_custom_frame();
+        report = razer_chroma_extended_matrix_effect_custom_frame(0,0);
         break;
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_CYNOSA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_CHROMA_V2:
-        report = razer_chroma_extended_matrix_effect_custom_frame();
+        report = razer_chroma_extended_matrix_effect_custom_frame(0,0);
         report.transaction_id.id = 0x1F;
         break;
 
@@ -1592,7 +1630,10 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
         report = razer_chroma_standard_matrix_effect_custom_frame(VARSTORE); // Possibly could use VARSTORE
         report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
         break;
-
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+        report = razer_chroma_standard_matrix_effect_custom_frame(0); // trace shows 0x0 here
+        report.transaction_id.id = 0x1F;  // TODO move to a usb_device variable
+        break;
     default:
         report = razer_chroma_standard_matrix_effect_custom_frame(VARSTORE); // Possibly could use VARSTORE
         break;
@@ -1885,7 +1926,12 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
             break;
+        case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+            printk(KERN_ALERT "razerkbd: matrix for early2020: %lu\n", count);
 
+            report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+            report.transaction_id.id = 0x1F;
+            break;
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
         case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
@@ -1922,6 +1968,68 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 }
 
 
+/**
+ * Write device file "matrix_extended_custom_frame"
+ *
+ * Format unknown!
+ * ROW_ID START_COL STOP_COL RGB...
+ */
+static ssize_t razer_attr_write_matrix_extended_custom_frame(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = {0};
+    size_t offset = 0;
+    unsigned char row_id;
+    unsigned char start_col;
+    unsigned char stop_col;
+    unsigned char row_length;
+
+    printk(KERN_ALERT "razerkbd: Total count: %d\n", (unsigned char)count);
+
+    while(offset < count) {
+        if(offset + 3 > count) {
+            printk(KERN_ALERT "razerkbd: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
+            break;
+        }
+
+        row_id = buf[offset++];
+        start_col = buf[offset++];
+        stop_col = buf[offset++];
+        row_length = ((stop_col+1) - start_col) * 3;
+
+        printk(KERN_ALERT "razerkbd: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
+
+        if(start_col > stop_col) {
+            printk(KERN_ALERT "razerkbd: Start column is greater than end column\n");
+            break;
+        }
+
+        if(offset + row_length > count) {
+            printk(KERN_ALERT "razerkbd: Not enough RGB to fill row\n");
+            break;
+        }
+
+        // Offset now at beginning of RGB data
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+        default:
+            printk(KERN_ALERT "razerkbd: extended for early2020: %lu\n", count);
+
+            report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+            report.transaction_id.id = 0x1F;
+            break;
+
+        }
+        razer_send_payload(usb_dev, &report);
+
+        // *3 as its 3 bytes per col (RGB)
+        offset += row_length;
+    }
+
+
+    return count;
+}
 
 static ssize_t razer_attr_write_key_super(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
@@ -2023,8 +2131,9 @@ static DEVICE_ATTR(matrix_effect_breath,    0220, NULL,                         
 static DEVICE_ATTR(matrix_effect_pulsate,   0660, razer_attr_read_mode_pulsate,               razer_attr_write_mode_pulsate);
 static DEVICE_ATTR(matrix_brightness,       0660, razer_attr_read_set_brightness,             razer_attr_write_set_brightness);
 static DEVICE_ATTR(matrix_effect_custom,    0220, NULL,                                       razer_attr_write_mode_custom);
+static DEVICE_ATTR(matrix_effect_extended_custom,    0220, NULL,                              razer_attr_write_mode_extended_custom);
 static DEVICE_ATTR(matrix_custom_frame,     0220, NULL,                                       razer_attr_write_matrix_custom_frame);
-
+static DEVICE_ATTR(matrix_extended_custom_frame,     0220, NULL,                              razer_attr_write_matrix_extended_custom_frame);
 
 static DEVICE_ATTR(key_super,               0660, razer_attr_read_key_super,                  razer_attr_write_key_super);
 static DEVICE_ATTR(key_alt_tab,             0660, razer_attr_read_key_alt_tab,                razer_attr_write_key_alt_tab);
@@ -2356,6 +2465,8 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_extended_custom); // Extended Custom effect. needs extended custom frame
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_extended_custom_frame);  // Set LED matrix
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
@@ -2676,6 +2787,8 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_extended_custom); // Extended Custom effect. needs extended custom frame
+            device_remove_file(&hdev->dev, &dev_attr_matrix_extended_custom_frame);  // Set LED matrix
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:

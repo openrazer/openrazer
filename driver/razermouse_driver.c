@@ -557,11 +557,11 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_VIPER_MINI:
     case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
-        report = razer_chroma_extended_matrix_effect_custom_frame();
+        report = razer_chroma_extended_matrix_effect_custom_frame(0,0);
         break;
 
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-        report = razer_chroma_extended_matrix_effect_custom_frame();
+        report = razer_chroma_extended_matrix_effect_custom_frame(0,0);
         report.transaction_id.id = 0x1f;
         break;
 
@@ -1670,7 +1670,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
             break;
 
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-            report = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
+            report = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0, 0x0);
             report.transaction_id.id = 0x1f;
             break;
         }
