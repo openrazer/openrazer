@@ -625,7 +625,7 @@ class RazerOrnataChromaV2(_RippleKeyboard):
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
-    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/727/727_ornata_chroma.png"
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1672/ornata-v2.png"
 
 
 class RazerHuntsmanElite(_RippleKeyboard):
