@@ -66,7 +66,7 @@ class RazerNommoChroma(_RazerDeviceBrightnessSuspend):
                'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row']
 
-    DEVICE_IMAGE = "https://d4kkpd69xt9l7.cloudfront.net/sys-master/root/he6/h1a/8939927175198/nommo-gallery-1500x1000-11.jpg"
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1275/1275_nommo_chroma.png"
 
 
 class RazerNommoPro(_RazerDeviceBrightnessSuspend):
@@ -81,7 +81,7 @@ class RazerNommoPro(_RazerDeviceBrightnessSuspend):
                'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row']
 
-    DEVICE_IMAGE = "https://d4kkpd69xt9l7.cloudfront.net/sys-master/root/h89/hc4/9003754717214/razer-nommo-pro-audio-04.jpg"
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1419/1419_nommo_pro.png"
 
 
 class RazerMouseBungeeV3Chroma(_RazerDeviceBrightnessSuspend):
