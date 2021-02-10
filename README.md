@@ -69,6 +69,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade Stealth (Late 2020)               |  1532:0259  |
 | Razer Ornata Chroma V2                        |  1532:025D  |
 | Razer Cynosa V2                               |  1532:025E  |
+| Razer Book 13 (2020)                          |  1532:026A  |
 
 ### Mice
 | Device                                        | USB VID:PID |
