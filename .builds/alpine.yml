@@ -11,6 +11,7 @@ packages:
   - py3-numpy
   - py3-pylint
   - py3-setproctitle
+  - py3-setuptools
   - py3-udev
   - sed
 sources:
