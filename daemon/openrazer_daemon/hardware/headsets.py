@@ -210,7 +210,7 @@ class RazerKrakenUltimate(__RazerDevice):
     METHODS = ['get_device_type_headset',
                'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_breath_triple_effect',
-               'get_static_effect_args_kraken', 'set_custom_kraken']
+               'set_custom_kraken']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1603/rzr_kraken_ultimate_render01_2019_resized.png"
 
