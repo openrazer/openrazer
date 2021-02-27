@@ -806,8 +806,7 @@ class RazerDevice(DBusService):
                 self.logger.debug("Adding %s.%s method to DBus", new_function.interface, new_function.name)
                 self.add_dbus_method(new_function.interface, new_function.name, new_function, new_function.in_sig, new_function.out_sig, new_function.byte_arrays)
             except KeyError as e:
-                self.logger.warning("Couldn't add method to DBus: %s", e)
-                pass
+                raise RuntimeError("Couldn't add method to DBus: " + str(e)) from None
 
     def suspend_device(self):
         """
