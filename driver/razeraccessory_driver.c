@@ -1182,6 +1182,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
+            break;
         }
 
         switch(usb_dev->descriptor.idProduct) {
@@ -1321,6 +1322,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
+            break;
         }
 
         switch(usb_dev->descriptor.idProduct) {
