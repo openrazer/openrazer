@@ -21,6 +21,7 @@ DBUS_SCREENSAVER_INTERFACES = (
     'org.xfce.ScreenSaver',
 )
 
+
 def signal_callback(active):
     if active:
         print("Lock screen/screensaver activated")
@@ -30,6 +31,7 @@ def signal_callback(active):
         print("Lock screen/screensaver deactivated")
         # Set to green
         device.fx.static(0, 255, 0)
+
 
 DBusGMainLoop(set_as_default=True)
 bus = dbus.SessionBus()
