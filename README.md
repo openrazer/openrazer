@@ -67,6 +67,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade Stealth (Early 2020)              |  1532:0252  |
 | Razer Blade 15 Advanced (2020)                |  1532:0253  |
 | Razer Blade 15 (Early 2020) Base              |  1532:0255  |
+| Razer Huntsman Mini                           |  1532:0257  |
 | Razer Blade Stealth (Late 2020)               |  1532:0259  |
 | Razer Ornata Chroma V2                        |  1532:025D  |
 | Razer Cynosa V2                               |  1532:025E  |
