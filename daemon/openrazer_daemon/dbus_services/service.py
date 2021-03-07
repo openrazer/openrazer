@@ -55,7 +55,7 @@ class DBusService(dbus.service.Object):
         else:
             bus_object = dbus.service.BusName(bus_name, bus=dbus.SystemBus())
 
-        super(DBusService, self).__init__(bus_object, object_path)
+        super().__init__(bus_object, object_path)
 
     def add_dbus_method(self, interface_name, function_name, function, in_signature=None, out_signature=None, byte_arrays=False):
         """

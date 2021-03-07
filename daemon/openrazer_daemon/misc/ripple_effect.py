@@ -19,7 +19,7 @@ class RippleEffectThread(threading.Thread):
     """
 
     def __init__(self, parent, device_number):
-        super(RippleEffectThread, self).__init__()
+        super().__init__()
 
         self._logger = logging.getLogger('razer.device{0}.ripplethread'.format(device_number))
         self._parent = parent

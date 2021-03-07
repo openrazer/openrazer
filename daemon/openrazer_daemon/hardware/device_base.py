@@ -117,7 +117,7 @@ class RazerDevice(DBusService):
                     self.event_files.append(os.path.join(search_dir, event_file))
 
         object_path = os.path.join(self.OBJECT_PATH, self.serial)
-        DBusService.__init__(self, self.BUS_PATH, object_path)
+        super().__init__(self.BUS_PATH, object_path)
 
         # Set up methods to suspend and restore device operation
         self.suspend_args = {}

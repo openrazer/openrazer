@@ -147,7 +147,7 @@ class MacroRunner(threading.Thread):
     """
 
     def __init__(self, device_id, macro_bind, macro_data):
-        super(MacroRunner, self).__init__()
+        super().__init__()
 
         self._logger = logging.getLogger('razer.device{0}.macro{1}'.format(device_id, macro_bind))
         self._macro_data = macro_data

@@ -17,7 +17,7 @@ import openrazer._fake_driver as fake_driver
 class FakeDevicePrompt(cmd.Cmd):
 
     def __init__(self, device_map, *args, **kwargs):
-        super(FakeDevicePrompt, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._device_map = device_map
         self._current_device = None

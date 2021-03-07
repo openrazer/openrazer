@@ -22,7 +22,7 @@ class BatteryNotifier(threading.Thread):
     """
 
     def __init__(self, parent, device_id, device_name):
-        super(BatteryNotifier, self).__init__()
+        super().__init__()
         self._logger = logging.getLogger('razer.device{0}.batterynotifier'.format(device_id))
         self._notify2 = notify2 is not None
 

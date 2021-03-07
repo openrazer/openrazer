@@ -105,7 +105,7 @@ class KeyWatcher(threading.Thread):
         return result
 
     def __init__(self, device_id, event_files, parent, use_epoll=True):
-        super(KeyWatcher, self).__init__()
+        super().__init__()
 
         self._logger = logging.getLogger('razer.device{0}.keywatcher'.format(device_id))
         self._event_files = event_files
@@ -625,7 +625,7 @@ class GamepadKeyManager(KeyboardKeyManager):
     GAMEPAD_KEY_MAPPING = TARTARUS_KEY_MAPPING
 
     def __init__(self, device_id, event_files, parent, use_epoll=True, testing=False):
-        super(GamepadKeyManager, self).__init__(device_id, event_files, parent, use_epoll, testing=testing)
+        super().__init__(device_id, event_files, parent, use_epoll, testing=testing)
 
         self._mode_modifier = False
         self._mode_modifier_combo = []

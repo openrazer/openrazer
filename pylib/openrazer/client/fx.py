@@ -50,7 +50,7 @@ class BaseRazerFX(object):
 
 class RazerFX(BaseRazerFX):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, matrix_dims=(-1, -1)):
-        super(RazerFX, self).__init__(serial, capabilities, daemon_dbus)
+        super().__init__(serial, capabilities, daemon_dbus)
 
         self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.chroma")
 
@@ -591,7 +591,7 @@ class RazerFX(BaseRazerFX):
 
 class RazerAdvancedFX(BaseRazerFX):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, matrix_dims=(-1, -1)):
-        super(RazerAdvancedFX, self).__init__(serial, capabilities, daemon_dbus)
+        super().__init__(serial, capabilities, daemon_dbus)
 
         # Only init'd when there's a matrix
         self._capabilities = capabilities
@@ -661,7 +661,7 @@ class RazerAdvancedFX(BaseRazerFX):
 
 class SingleLed(BaseRazerFX):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, led_name='logo'):
-        super(SingleLed, self).__init__(serial, capabilities, daemon_dbus)
+        super().__init__(serial, capabilities, daemon_dbus)
 
         self._led_name = led_name
         self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.{0}".format(led_name))
@@ -975,7 +975,7 @@ class SingleLed(BaseRazerFX):
 
 class MiscLighting(BaseRazerFX):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None):
-        super(MiscLighting, self).__init__(serial, capabilities, daemon_dbus)
+        super().__init__(serial, capabilities, daemon_dbus)
 
         self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.logo")
 

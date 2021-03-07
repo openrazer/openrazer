@@ -9,7 +9,7 @@ from openrazer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFac
 
 class RazerKeyboard(__RazerDevice):
     def __init__(self, serial, vid_pid=None, daemon_dbus=None):
-        super(RazerKeyboard, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
+        super().__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
 
         # Capabilities
         self._capabilities['game_mode_led'] = self._has_feature('razer.device.led.gamemode')

@@ -133,7 +133,7 @@ class RazerLanceheadWirelessReceiver(RazerLanceheadWirelessWired):
     METHODS = RazerLanceheadWirelessWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
     def __init__(self, *args, **kwargs):
-        super(RazerLanceheadWirelessReceiver, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Lancehead Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
@@ -143,7 +143,7 @@ class RazerLanceheadWirelessReceiver(RazerLanceheadWirelessWired):
         """
         Close the key manager
         """
-        super(RazerLanceheadWirelessReceiver, self)._close()
+        super()._close()
 
         self._battery_manager.close()
 
@@ -219,7 +219,7 @@ class RazerLanceheadWireless(RazerLanceheadWired):
     METHODS = RazerLanceheadWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
     def __init__(self, *args, **kwargs):
-        super(RazerLanceheadWireless, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Lancehead')
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
@@ -229,7 +229,7 @@ class RazerLanceheadWireless(RazerLanceheadWired):
         """
         Close the key manager
         """
-        super(RazerLanceheadWireless, self)._close()
+        super()._close()
 
         self._battery_manager.close()
 
@@ -449,7 +449,7 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
     DPI_MAX = 16000
 
     def __init__(self, *args, **kwargs):
-        super(RazerMambaChromaWireless, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
@@ -459,7 +459,7 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
         """
         Close the key manager
         """
-        super(RazerMambaChromaWireless, self)._close()
+        super()._close()
 
         self._battery_manager.close()
 
@@ -629,7 +629,7 @@ class RazerDeathAdderChroma(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 10000
 
     def __init__(self, *args, **kwargs):
-        super(RazerDeathAdderChroma, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Set brightness to max and LEDs to on, on startup
         _da_set_logo_brightness(self, 100)
@@ -683,7 +683,7 @@ class RazerDeathAdder2000(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 2000
 
     def __init__(self, *args, **kwargs):
-        super(RazerDeathAdder2000, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Set brightness to max and LEDs to on, on startup
         _da_set_logo_brightness(self, 100)
@@ -736,7 +736,7 @@ class RazerDeathAdder2013(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 6400
 
     def __init__(self, *args, **kwargs):
-        super(RazerDeathAdder2013, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Set brightness to max and LEDs to on, on startup
         _da_set_logo_active(self, True)
@@ -801,7 +801,7 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
     DPI_MAX = 16000
 
     def __init__(self, *args, **kwargs):
-        super(RazerNagaHexV2, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # self.key_manager = _NagaHexV2KeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing, should_grab_event_files=True)
 
@@ -809,7 +809,7 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
         """
         Close the key manager
         """
-        super(RazerNagaHexV2, self)._close()
+        super()._close()
 
         # self.key_manager.close()
 
@@ -924,7 +924,7 @@ class RazerNagaChroma(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 16000
 
     def __init__(self, *args, **kwargs):
-        super(RazerNagaChroma, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # self.key_manager = _NagaHexV2KeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing, should_grab_event_files=True)
 
@@ -932,7 +932,7 @@ class RazerNagaChroma(__RazerDeviceSpecialBrightnessSuspend):
         """
         Close the key manager
         """
-        super(RazerNagaChroma, self)._close()
+        super()._close()
 
         # self.key_manager.close()
 
@@ -956,7 +956,7 @@ class RazerNagaTrinity(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 16000
 
     def __init__(self, *args, **kwargs):
-        super(RazerNagaTrinity, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # self.key_manager = _NagaHexV2KeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing, should_grab_event_files=True)
 
@@ -964,7 +964,7 @@ class RazerNagaTrinity(__RazerDeviceSpecialBrightnessSuspend):
         """
         Close the key manager
         """
-        super(RazerNagaTrinity, self)._close()
+        super()._close()
 
         # self.key_manager.close()
 
@@ -1239,7 +1239,7 @@ class RazerMamba2012Wireless(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 6400
 
     def __init__(self, *args, **kwargs):
-        super(RazerMamba2012Wireless, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
@@ -1249,7 +1249,7 @@ class RazerMamba2012Wireless(__RazerDeviceSpecialBrightnessSuspend):
         """
         Close the key manager
         """
-        super(RazerMamba2012Wireless, self)._close()
+        super()._close()
 
         self._battery_manager.close()
 
@@ -1381,7 +1381,7 @@ class RazerMambaWirelessReceiver(RazerMambaWirelessWired):
     METHODS = RazerMambaWirelessWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
     def __init__(self, *args, **kwargs):
-        super(RazerMambaWirelessReceiver, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
@@ -1391,7 +1391,7 @@ class RazerMambaWirelessReceiver(RazerMambaWirelessWired):
         """
         Close the key manager
         """
-        super(RazerMambaWirelessReceiver, self)._close()
+        super()._close()
 
         self._battery_manager.close()
 
@@ -1506,7 +1506,7 @@ class RazerAbyssusV2(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 5000
 
     def __init__(self, *args, **kwargs):
-        super(RazerAbyssusV2, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Set brightness to max and LEDs to on, on startup
         _da_set_logo_brightness(self, 100)
@@ -1640,7 +1640,7 @@ class RazerDeathAdder3500(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 3500
 
     def __init__(self, *args, **kwargs):
-        super(RazerDeathAdder3500, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Set brightness to max and LEDs to on, on startup
         _da_set_logo_brightness(self, 100)
@@ -1737,7 +1737,7 @@ class RazerViperUltimateWireless(RazerViperUltimateWired):
     METHODS = RazerViperUltimateWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
     def __init__(self, *args, **kwargs):
-        super(RazerViperUltimateWireless, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Viper Ultimate Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
@@ -1746,7 +1746,7 @@ class RazerViperUltimateWireless(RazerViperUltimateWired):
         """
         Close the key manager
         """
-        super(RazerViperUltimateWireless, self)._close()
+        super()._close()
 
         self._battery_manager.close()
 
@@ -2344,7 +2344,7 @@ class RazerDeathAdderV2ProWireless(RazerDeathAdderV2ProWired):
     METHODS = RazerDeathAdderV2ProWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
     def __init__(self, *args, **kwargs):
-        super(RazerDeathAdderV2ProWireless, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer DeathAdder V2 Pro Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
@@ -2353,7 +2353,7 @@ class RazerDeathAdderV2ProWireless(RazerDeathAdderV2ProWired):
         """
         Close the key manager
         """
-        super(RazerDeathAdderV2ProWireless, self)._close()
+        super()._close()
 
         self._battery_manager.close()
 
@@ -2375,7 +2375,7 @@ class RazerAtherisReceiver(__RazerDevice):
     DPI_MAX = 7200
 
     def __init__(self, *args, **kwargs):
-        super(RazerAtherisReceiver, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Atheris (Receiver)')
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
@@ -2384,7 +2384,7 @@ class RazerAtherisReceiver(__RazerDevice):
         """
         Close the key manager
         """
-        super(RazerAtherisReceiver, self)._close()
+        super()._close()
 
         self._battery_manager.close()
 
@@ -2414,7 +2414,7 @@ class RazerBasiliskXHyperSpeed(__RazerDevice):
     DPI_MAX = 16000
 
     def __init__(self, *args, **kwargs):
-        super(RazerBasiliskXHyperSpeed, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._battery_manager = _BatteryManager(
             self, self._device_number, 'Razer Basilisk X HyperSpeed')
@@ -2426,7 +2426,7 @@ class RazerBasiliskXHyperSpeed(__RazerDevice):
         """
         Close the key manager
         """
-        super(RazerBasiliskXHyperSpeed, self)._close()
+        super()._close()
 
         self._battery_manager.close()
 

@@ -9,7 +9,7 @@ class RazerMouse(__RazerDevice):
     _MACRO_CLASS = _RazerMacro
 
     def __init__(self, serial, vid_pid=None, daemon_dbus=None):
-        super(RazerMouse, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
+        super().__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
 
         # Capabilities
         self._capabilities['poll_rate'] = self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate'))
