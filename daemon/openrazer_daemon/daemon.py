@@ -42,8 +42,6 @@ class RazerDaemon(DBusService):
     * disableTurnOffOnScreensaver - Pauses the run loop on the screensaver thread
     """
 
-    BUS_NAME = 'org.razer'
-
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, persistence_file=None, test_dir=None):
 
         setproctitle.setproctitle('openrazer-daemon')  # pylint: disable=no-member
@@ -99,7 +97,7 @@ class RazerDaemon(DBusService):
         # Setup DBus to use gobject main loop
         dbus.mainloop.glib.threads_init()
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-        super().__init__(self.BUS_NAME, '/org/razer')
+        super().__init__('/org/razer')
 
         self._init_signals()
         self._main_loop = GLib.MainLoop()

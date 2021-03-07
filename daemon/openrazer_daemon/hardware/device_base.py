@@ -24,7 +24,6 @@ class RazerDevice(DBusService):
 
     Sets up the logger, sets up DBus
     """
-    BUS_PATH = 'org.razer'
     OBJECT_PATH = '/org/razer/device/'
     METHODS = []
 
@@ -117,7 +116,7 @@ class RazerDevice(DBusService):
                     self.event_files.append(os.path.join(search_dir, event_file))
 
         object_path = os.path.join(self.OBJECT_PATH, self.serial)
-        super().__init__(self.BUS_PATH, object_path)
+        super().__init__(object_path)
 
         # Set up methods to suspend and restore device operation
         self.suspend_args = {}

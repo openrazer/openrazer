@@ -36,24 +36,21 @@ class DBusService(dbus.service.Object):
     Allows for dynamic method adding
     """
     BUS_TYPE = 'session'
+    BUS_NAME = 'org.razer'
 
-    def __init__(self, bus_name, object_path):
+    def __init__(self, object_path):
         """
         Init the object
-
-        :param bus_name: DBus bus name
-        :type bus_name: str
 
         :param object_path: DBus Object name
         :type object_path: str
         """
-        self.bus_name = bus_name
         self.object_path = object_path
 
         if DBusService.BUS_TYPE == 'session':
-            bus_object = dbus.service.BusName(bus_name, bus=dbus.SessionBus())
+            bus_object = dbus.service.BusName(self.BUS_NAME, bus=dbus.SessionBus())
         else:
-            bus_object = dbus.service.BusName(bus_name, bus=dbus.SystemBus())
+            bus_object = dbus.service.BusName(self.BUS_NAME, bus=dbus.SystemBus())
 
         super().__init__(bus_object, object_path)
 
