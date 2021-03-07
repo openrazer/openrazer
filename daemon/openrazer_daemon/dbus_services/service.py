@@ -29,35 +29,6 @@ def copy_func(function_reference, name=None):
         return types.FunctionType(function_reference.__code__, function_reference.__globals__, name or function_reference.func_name, function_reference.__defaults__, function_reference.__closure__)
 
 
-class DBusServiceFactory(object):
-    """
-    Factory object to create different service objects.
-
-    Different service objects are useful, as the DBus service table is stored in the class which would be shared
-    between all class instances.
-    """
-    service_number = 0
-
-    @staticmethod
-    def get_service(bus_name, object_path):
-        """
-        Get an instance of the service history
-
-        :param bus_name: DBus bus name
-        :type bus_name: str
-
-        :param object_path: DBus Object name
-        :type object_path: str
-
-        :return: New object
-        :rtype: DBusService
-        """
-        new_service = type("DBUSService{0:04}".format(DBusServiceFactory.service_number), (DBusService,), {})
-        DBusServiceFactory.service_number += 1
-
-        return new_service(bus_name, object_path)
-
-
 class DBusService(dbus.service.Object):
     """
     DBus Service object
