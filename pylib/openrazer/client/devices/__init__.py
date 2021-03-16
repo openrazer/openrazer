@@ -60,6 +60,7 @@ class RazerDevice(object):
             'macro_mode_modifier': self._has_feature('razer.device.macro', 'setModeModifier'),
 
             'poll_rate': self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate')),
+            'supported_poll_rates': self._has_feature('razer.device.misc', 'getSupportedPollRates'),
             'dpi': self._has_feature('razer.device.dpi', ('getDPI', 'setDPI')),
             'dpi_stages': self._has_feature('razer.device.dpi', ('getDPIStages', 'setDPIStages')),
             'available_dpi': self._has_feature('razer.device.dpi', 'availableDPI'),

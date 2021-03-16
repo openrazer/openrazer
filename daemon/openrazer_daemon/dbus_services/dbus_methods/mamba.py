@@ -299,7 +299,12 @@ def set_poll_rate(self, rate):
     """
     self.logger.debug("DBus call set_poll_rate")
 
-    if rate in (1000, 500, 125):
+    if hasattr(self, 'POLL_RATES'):
+        supported_poll_rates = self.POLL_RATES
+    else:
+        supported_poll_rates = (125, 500, 1000)
+
+    if rate in supported_poll_rates:
         driver_path = self.get_driver_path('poll_rate')
 
         # remember poll rate
@@ -322,3 +327,19 @@ def get_poll_rate(self):
     self.logger.debug("DBus call get_poll_rate")
 
     return int(self.poll_rate)
+
+
+@endpoint('razer.device.misc', 'getSupportedPollRates', out_sig='aq')
+def get_supported_poll_rates(self):
+    """
+    Get the polling rates supported by the device
+
+    :return: Supported poll rates
+    :rtype: list of int
+    """
+    self.logger.debug("DBus call get_supported_poll_rates")
+
+    if hasattr(self, 'POLL_RATES'):
+        return self.POLL_RATES
+    else:
+        return [125, 500, 1000]

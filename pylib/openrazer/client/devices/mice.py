@@ -206,10 +206,27 @@ class RazerMouse(__RazerDevice):
         if self.has('poll_rate'):
             if not isinstance(poll_rate, int):
                 raise ValueError("Poll rate is not an integer: {0}".format(poll_rate))
-            if poll_rate not in (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ):
-                raise ValueError('Poll rate "{0}" is not one of {1}'.format(poll_rate, (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ)))
+            if poll_rate not in (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ, _c.POLL_2000HZ, _c.POLL_4000HZ, _c.POLL_8000HZ):
+                raise ValueError('Poll rate "{0}" is not one of {1}'.format(poll_rate, (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ, _c.POLL_2000HZ, _c.POLL_4000HZ, _c.POLL_8000HZ)))
 
             self._dbus_interfaces['device'].setPollRate(poll_rate)
 
+        else:
+            raise NotImplementedError()
+
+    @property
+    def supported_poll_rates(self) -> list:
+        """
+        Get poll rates supported by the device
+
+        :return: Supported poll rates
+        :rtype: list
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('supported_poll_rates'):
+            dbuslist = self._dbus_interfaces['device'].getSupportedPollRates()
+            # Repack list from dbus ints to normal ints
+            return [int(d) for d in dbuslist]
         else:
             raise NotImplementedError()
