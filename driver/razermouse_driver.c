@@ -431,6 +431,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Naga Left-Handed Edition 2020\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
+        device_type = "Razer Viper 8KHz\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
     }
@@ -967,6 +971,11 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
         return sprintf(buf, "%d\n", polling_rate);
         break;
 
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
+        // FIXME
+        return sprintf(buf, "%d\n", 1);
+        break;
+
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
@@ -1033,6 +1042,11 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
         device->orochi2011_poll = polling_rate;
         report = razer_chroma_misc_set_orochi2011_poll_dpi(device->orochi2011_poll, device->orochi2011_dpi, device->orochi2011_dpi);
+        break;
+
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
+        report = razer_chroma_misc_set_polling_rate2(polling_rate);
+        report.transaction_id.id = 0x1f;
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -4450,6 +4464,12 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
             break;
+
+        case USB_DEVICE_ID_RAZER_VIPER_8K:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            break;
         }
 
     }
@@ -4948,6 +4968,12 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
             device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
             break;
+
+        case USB_DEVICE_ID_RAZER_VIPER_8K:
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
+            break;
         }
 
     }
@@ -5020,6 +5046,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_8K) },
     { 0 }
 };
 

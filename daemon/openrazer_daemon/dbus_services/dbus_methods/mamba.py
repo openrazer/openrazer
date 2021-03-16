@@ -322,3 +322,38 @@ def get_poll_rate(self):
     self.logger.debug("DBus call get_poll_rate")
 
     return int(self.poll_rate)
+
+
+@endpoint('razer.device.misc', 'setPollRate', in_sig='q')
+def set_poll_rate2(self, rate):
+    """
+    Set the DPI on the mouse, Takes in 4 bytes big-endian
+
+    :param rate: Poll rate
+    :type rate: int
+    """
+    self.logger.debug("DBus call set_poll_rate2")
+
+    if rate == 8000:
+        rate_byte = 0x01
+    elif rate == 4000:
+        rate_byte = 0x02
+    elif rate == 2000:
+        rate_byte = 0x04
+    elif rate == 1000:
+        rate_byte = 0x08
+    elif rate == 500:
+        rate_byte = 0x10
+    elif rate == 125:
+        rate_byte = 0x40
+    else:
+        self.logger.error("Poll rate %d is invalid", rate)
+        raise RuntimeError("Poll rate " + rate + " is invalid")
+
+    driver_path = self.get_driver_path('poll_rate')
+
+    # remember poll rate
+    self.poll_rate = rate
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write(str(rate))

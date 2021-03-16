@@ -1041,6 +1041,26 @@ struct razer_report razer_chroma_misc_set_polling_rate(unsigned short polling_ra
 }
 
 /**
+ * Set the polling rate of the device
+ *
+ * 0x40 =  125 Hz
+ * 0x10 =  500 Hz
+ * 0x08 = 1000 Hz
+ * 0x04 = 2000 Hz
+ * 0x02 = 4000 Hz
+ * 0x01 = 8000 Hz
+ */
+struct razer_report razer_chroma_misc_set_polling_rate2(unsigned char polling_rate)
+{
+    struct razer_report report = get_razer_report(0x00, 0x40, 0x02);
+
+    report.arguments[0] = 0x00; // TODO Razer sends each request once with 0x00 and once with 0x01 - maybe varstore?
+    report.arguments[1] = polling_rate;
+
+    return report;
+}
+
+/**
  * Get brightness of charging dock
  */
 struct razer_report razer_chroma_misc_get_dock_brightness(void)

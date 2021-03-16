@@ -2372,3 +2372,18 @@ class RazerDeathAdderV2Mini(__RazerDeviceSpecialBrightnessSuspend):
         self.disable_notify = True
         _da_set_logo_brightness(self, logo_brightness)
         self.disable_notify = False
+
+
+class RazerViper8KHz(__RazerDevice):
+    """
+    Class for the Razer Viper 8KHz
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Viper_8KHz-if0(1|2)-event-kbd')
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate2']
+    USB_VID = 0x1532
+    USB_PID = 0x0091
+    # DEVICE_IMAGE = "" # FIXME
+
+    DPI_MAX = 20000
