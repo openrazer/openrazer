@@ -27,7 +27,7 @@ def write_string(driver_path, device_file, payload):
 
 def find_devices(vid, pid):
     driver_paths = glob.glob(os.path.join(
-        '/sys/bus/hid/drivers/razermousemat', '*:{0:04X}:{1:04X}.*'.format(vid, pid)))
+        '/sys/bus/hid/drivers/razeraccessory', '*:{0:04X}:{1:04X}.*'.format(vid, pid)))
 
     for driver_path in driver_paths:
         device_type_path = os.path.join(driver_path, 'device_type')

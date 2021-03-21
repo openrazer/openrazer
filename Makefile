@@ -12,7 +12,7 @@ MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/hid
 PYTHONDIR?=$(shell python3 -c 'import sys; print(sys.path[-1])')
 
 DKMS_NAME?=openrazer-driver
-DKMS_VER?=2.5.0
+DKMS_VER?=2.9.0
 
 
 # Build all target
@@ -50,7 +50,6 @@ driver_uninstall:
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razerkbd.ko
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razermouse.ko
 	@rm -fv $(DESTDIR)/$(MODULEDIR)/razerfirefly.ko
-	@rm -fv $(DESTDIR)/$(MODULEDIR)/razercore.ko
 
 # Razer Daemon
 daemon_install:
@@ -111,7 +110,7 @@ setup_dkms:
 	rm -fv $(DESTDIR)/usr/src/$(DKMS_NAME)-$(DKMS_VER)/driver/*.mod.c
 
 remove_dkms:
-	@echo "\n::\033[34m Removing DKMS files\033[0m"
+	@echo -e "\n::\033[34m Removing DKMS files\033[0m"
 	@echo "====================================================="
 	rm -rf $(DESTDIR)/usr/src/$(DKMS_NAME)-$(DKMS_VER)
 

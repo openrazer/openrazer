@@ -2,6 +2,7 @@
 
 apt-get -y install \
     astyle \
+    git \
     python3-pip
 
 pip3 install autopep8

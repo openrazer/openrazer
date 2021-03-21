@@ -20,6 +20,10 @@ def set_logo_static_naga_hex_v2(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
+    # remember effect
+    self.set_persistence("logo", "effect", 'static')
+    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('logo_matrix_effect_static')
 
     payload = bytes([red, green, blue])
@@ -31,21 +35,15 @@ def set_logo_static_naga_hex_v2(self, red, green, blue):
 @endpoint('razer.device.lighting.logo', 'setLogoSpectrum')
 def set_logo_spectrum_naga_hex_v2(self):
     """
-    Set the device to pulsate
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
+    Set the device to spectrum mode
     """
     self.logger.debug("DBus call set_logo_spectrum")
 
     # Notify others
     self.send_effect_event('setSpectrum')
+
+    # remember effect
+    self.set_persistence("logo", "effect", 'spectrum')
 
     effect_driver_path = self.get_driver_path('logo_matrix_effect_spectrum')
 
@@ -56,12 +54,15 @@ def set_logo_spectrum_naga_hex_v2(self):
 @endpoint('razer.device.lighting.logo', 'setLogoNone')
 def set_logo_none_naga_hex_v2(self):
     """
-    Set the device to spectrum mode
+    Set the device to effect none
     """
     self.logger.debug("DBus call set_none_effect")
 
     # Notify others
     self.send_effect_event('setNone')
+
+    # remember effect
+    self.set_persistence("logo", "effect", 'none')
 
     driver_path = self.get_driver_path('logo_matrix_effect_none')
 
@@ -93,6 +94,11 @@ def set_logo_reactive_naga_hex_v2(self, red, green, blue, speed):
     # Notify others
     self.send_effect_event('setReactive', red, green, blue, speed)
 
+    # remember effect
+    self.set_persistence("logo", "effect", 'reactive')
+    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
+    self.set_persistence("logo", "speed", int(speed))
+
     if speed not in (1, 2, 3, 4):
         speed = 4
 
@@ -111,6 +117,9 @@ def set_logo_breath_random_naga_hex_v2(self):
 
     # Notify others
     self.send_effect_event('setBreathRandom')
+
+    # remember effect
+    self.set_persistence("logo", "effect", 'breathRandom')
 
     driver_path = self.get_driver_path('logo_matrix_effect_breath')
 
@@ -138,6 +147,10 @@ def set_logo_breath_single_naga_hex_v2(self, red, green, blue):
 
     # Notify others
     self.send_effect_event('setBreathSingle', red, green, blue)
+
+    # remember effect
+    self.set_persistence("logo", "effect", 'breathSingle')
+    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
 
     driver_path = self.get_driver_path('logo_matrix_effect_breath')
 
@@ -175,6 +188,10 @@ def set_logo_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, bl
     # Notify others
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
 
+    # remember effect
+    self.set_persistence("logo", "effect", 'breathDual')
+    self.zone["logo"]["colors"][0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
+
     driver_path = self.get_driver_path('logo_matrix_effect_breath')
 
     payload = bytes([red1, green1, blue1, red2, green2, blue2])
@@ -202,6 +219,10 @@ def set_scroll_static_naga_hex_v2(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
+    # remember effect
+    self.set_persistence("scroll", "effect", 'static')
+    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('scroll_matrix_effect_static')
 
     payload = bytes([red, green, blue])
@@ -213,21 +234,14 @@ def set_scroll_static_naga_hex_v2(self, red, green, blue):
 @endpoint('razer.device.lighting.scroll', 'setScrollSpectrum')
 def set_scroll_spectrum_naga_hex_v2(self):
     """
-    Set the device to pulsate
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
+    Set the device to spectrum mode
     """
     self.logger.debug("DBus call set_scroll_spectrum")
 
     # Notify others
     self.send_effect_event('setSpectrum')
+
+    self.set_persistence("scroll", "effect", 'spectrum')
 
     effect_driver_path = self.get_driver_path('scroll_matrix_effect_spectrum')
 
@@ -238,12 +252,14 @@ def set_scroll_spectrum_naga_hex_v2(self):
 @endpoint('razer.device.lighting.scroll', 'setScrollNone')
 def set_scroll_none_naga_hex_v2(self):
     """
-    Set the device to spectrum mode
+    Set the device to effect none
     """
     self.logger.debug("DBus call set_none_effect")
 
     # Notify others
     self.send_effect_event('setNone')
+
+    self.set_persistence("scroll", "effect", 'none')
 
     driver_path = self.get_driver_path('scroll_matrix_effect_none')
 
@@ -275,6 +291,11 @@ def set_scroll_reactive_naga_hex_v2(self, red, green, blue, speed):
     # Notify others
     self.send_effect_event('setReactive', red, green, blue, speed)
 
+    # remember effect
+    self.set_persistence("scroll", "effect", 'reactive')
+    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
+    self.set_persistence("scroll", "speed", int(speed))
+
     if speed not in (1, 2, 3, 4):
         speed = 4
 
@@ -293,6 +314,9 @@ def set_scroll_breath_random_naga_hex_v2(self):
 
     # Notify others
     self.send_effect_event('setBreathRandom')
+
+    # remember effect
+    self.set_persistence("scroll", "effect", 'breathRandom')
 
     driver_path = self.get_driver_path('scroll_matrix_effect_breath')
 
@@ -320,6 +344,10 @@ def set_scroll_breath_single_naga_hex_v2(self, red, green, blue):
 
     # Notify others
     self.send_effect_event('setBreathSingle', red, green, blue)
+
+    # remember effect
+    self.set_persistence("scroll", "effect", 'breathSingle')
+    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
 
     driver_path = self.get_driver_path('scroll_matrix_effect_breath')
 
@@ -356,6 +384,10 @@ def set_scroll_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, 
 
     # Notify others
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
+
+    # remember effect
+    self.set_persistence("scroll", "effect", 'breathDual')
+    self.zone["scroll"]["colors"][0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
 
     driver_path = self.get_driver_path('scroll_matrix_effect_breath')
 

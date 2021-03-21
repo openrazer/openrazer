@@ -68,6 +68,46 @@ class RazerFX(BaseRazerFX):
 
         self.misc = MiscLighting(serial, capabilities, self._dbus)
 
+    @property
+    def effect(self) -> str:
+        """
+        Get current effect
+
+        :return: Effect name ("static", "spectrum", etc.)
+        :rtype: str
+        """
+        return self._lighting_dbus.getEffect()
+
+    @property
+    def colors(self) -> bytearray:
+        """
+        Get current effect colors
+
+        :return: Effect colors (an array of 9 bytes, for 3 colors in RGB format)
+        :rtype: bytearray
+        """
+        return bytes(self._lighting_dbus.getEffectColors())
+
+    @property
+    def speed(self) -> int:
+        """
+        Get current effect speed
+
+        :return: Effect speed (a value between 0 and 3)
+        :rtype: int
+        """
+        return self._lighting_dbus.getEffectSpeed()
+
+    @property
+    def wave_dir(self) -> int:
+        """
+        Get current wave direction
+
+        :return: Wave direction (WAVE_LEFT or WAVE_RIGHT)
+        :rtype: int
+        """
+        return self._lighting_dbus.getWaveDir()
+
     def none(self) -> bool:
         """
         No effect
@@ -117,7 +157,7 @@ class RazerFX(BaseRazerFX):
 
     def static(self, red: int, green: int, blue: int) -> bool:
         """
-        Wave effect
+        Static effect
 
         :param red: Red component. Must be 0->255
         :type red: int
@@ -386,7 +426,7 @@ class RazerFX(BaseRazerFX):
         :return: True if success, False otherwise
         :rtype: bool
 
-        :raises ValueError: If arguemnts are invalid
+        :raises ValueError: If arguments are invalid
         """
         if not isinstance(refreshrate, float):
             raise ValueError("Refresh rate is not a float")
@@ -418,7 +458,7 @@ class RazerFX(BaseRazerFX):
         :return: True if success, False otherwise
         :rtype: bool
 
-        :raises ValueError: If arguemnts are invalid
+        :raises ValueError: If arguments are invalid
         """
         if not isinstance(refreshrate, float):
             raise ValueError("Refresh rate is not a float")
@@ -464,7 +504,7 @@ class RazerFX(BaseRazerFX):
             green = clamp_ubyte(green)
             blue = clamp_ubyte(blue)
 
-            self._lighting_dbus.setStarlightSingle(time, red, green, blue)
+            self._lighting_dbus.setStarlightSingle(red, green, blue, time)
 
             return True
         return False
@@ -522,7 +562,7 @@ class RazerFX(BaseRazerFX):
             green2 = clamp_ubyte(green2)
             blue2 = clamp_ubyte(blue2)
 
-            self._lighting_dbus.setStarlightDual(time, red, green, blue, red2, green2, blue2)
+            self._lighting_dbus.setStarlightDual(red, green, blue, red2, green2, blue2, time)
 
             return True
         return False
@@ -612,6 +652,12 @@ class RazerAdvancedFX(BaseRazerFX):
             else:
                 raise ValueError("RGB must be an RGB tuple")
 
+    def restore(self):
+        """
+        Restore the device to the last effect
+        """
+        self._lighting_dbus.restoreLastEffect()
+
 
 class SingleLed(BaseRazerFX):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, led_name='logo'):
@@ -643,6 +689,46 @@ class SingleLed(BaseRazerFX):
                 func(True)
             else:
                 func(False)
+
+    @property
+    def effect(self) -> str:
+        """
+        Get current effect
+
+        :return: Effect name ("static", "spectrum", etc.)
+        :rtype: str
+        """
+        return str(self._getattr('get#Effect')())
+
+    @property
+    def colors(self) -> bytearray:
+        """
+        Get current effect colors
+
+        :return: Effect colors (an array of 9 bytes, for 3 colors in RGB format)
+        :rtype: bytearray
+        """
+        return bytes(self._getattr('get#EffectColors')())
+
+    @property
+    def speed(self) -> int:
+        """
+        Get current effect speed
+
+        :return: Effect speed (a value between 0 and 3)
+        :rtype: int
+        """
+        return int(self._getattr('get#EffectSpeed')())
+
+    @property
+    def wave_dir(self) -> int:
+        """
+        Get current wave direction
+
+        :return: Wave direction (WAVE_LEFT or WAVE_RIGHT)
+        :rtype: int
+        """
+        return int(self._getattr('get#WaveDir')())
 
     @property
     def brightness(self):
@@ -713,6 +799,16 @@ class SingleLed(BaseRazerFX):
             blue = clamp_ubyte(blue)
 
             self._getattr('set#Static')(red, green, blue)
+
+            return True
+        return False
+
+    def wave(self, direction: int) -> bool:
+        if direction not in (c.WAVE_LEFT, c.WAVE_RIGHT):
+            raise ValueError("Direction must be WAVE_RIGHT (0x01) or WAVE_LEFT (0x02)")
+
+        if self._shas('wave'):
+            self._getattr('set#Wave')(direction)
 
             return True
         return False
@@ -893,6 +989,31 @@ class MiscLighting(BaseRazerFX):
         else:
             self._scroll = None
 
+        if self.has('left'):
+            self._left = SingleLed(serial, capabilities, daemon_dbus, 'left')
+        else:
+            self._left = None
+
+        if self.has('right'):
+            self._right = SingleLed(serial, capabilities, daemon_dbus, 'right')
+        else:
+            self._right = None
+
+        if self.has('charging'):
+            self._charging = SingleLed(serial, capabilities, daemon_dbus, 'charging')
+        else:
+            self._charging = None
+
+        if self.has('fast_charging'):
+            self._fast_charging = SingleLed(serial, capabilities, daemon_dbus, 'fast_charging')
+        else:
+            self._fast_charging = None
+
+        if self.has('fully_charged'):
+            self._fully_charged = SingleLed(serial, capabilities, daemon_dbus, 'fully_charged')
+        else:
+            self._fully_charged = None
+
         if self.has('backlight'):
             self._backlight = SingleLed(serial, capabilities, daemon_dbus, 'backlight')
         else:
@@ -905,6 +1026,26 @@ class MiscLighting(BaseRazerFX):
     @property
     def scroll_wheel(self):
         return self._scroll
+
+    @property
+    def left(self):
+        return self._left
+
+    @property
+    def right(self):
+        return self._right
+
+    @property
+    def charging(self):
+        return self._charging
+
+    @property
+    def fast_charging(self):
+        return self._fast_charging
+
+    @property
+    def fully_charged(self):
+        return self._fully_charged
 
     @property
     def backlight(self):

@@ -32,6 +32,9 @@ class RazerDevice(object):
         self._fw = str(self._dbus_interfaces['device'].getFirmware())
         self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
         self._has_dedicated_macro = None
+        self._device_image = None
+
+        # Deprecated API, but kept for backwards compatibility
         self._urls = None
 
         if vid_pid is None:
@@ -105,8 +108,70 @@ class RazerDevice(object):
             'lighting_scroll_breath_dual': self._has_feature('razer.device.lighting.scroll', 'setScrollBreathDual'),
             'lighting_scroll_breath_random': self._has_feature('razer.device.lighting.scroll', 'setScrollBreathRandom'),
 
+            'lighting_left': self._has_feature('razer.device.lighting.left'),
+            'lighting_left_active': self._has_feature('razer.device.lighting.left', 'setLeftActive'),
+            'lighting_left_brightness': self._has_feature('razer.device.lighting.left', 'setLeftBrightness'),
+            'lighting_left_spectrum': self._has_feature('razer.device.lighting.left', 'setLeftSpectrum'),
+            'lighting_left_static': self._has_feature('razer.device.lighting.left', 'setLeftStatic'),
+            'lighting_left_none': self._has_feature('razer.device.lighting.left', 'setLeftNone'),
+            'lighting_left_reactive': self._has_feature('razer.device.lighting.left', 'setLeftReactive'),
+            'lighting_left_wave': self._has_feature('razer.device.lighting.left', 'setLeftWave'),
+            'lighting_left_breath_single': self._has_feature('razer.device.lighting.left', 'setLeftBreathSingle'),
+            'lighting_left_breath_dual': self._has_feature('razer.device.lighting.left', 'setLeftBreathDual'),
+            'lighting_left_breath_random': self._has_feature('razer.device.lighting.left', 'setLeftBreathRandom'),
+
+            'lighting_right': self._has_feature('razer.device.lighting.right'),
+            'lighting_right_active': self._has_feature('razer.device.lighting.right', 'setRightActive'),
+            'lighting_right_brightness': self._has_feature('razer.device.lighting.right', 'setRightBrightness'),
+            'lighting_right_spectrum': self._has_feature('razer.device.lighting.right', 'setRightSpectrum'),
+            'lighting_right_static': self._has_feature('razer.device.lighting.right', 'setRightStatic'),
+            'lighting_right_none': self._has_feature('razer.device.lighting.right', 'setRightNone'),
+            'lighting_right_reactive': self._has_feature('razer.device.lighting.right', 'setRightReactive'),
+            'lighting_right_wave': self._has_feature('razer.device.lighting.right', 'setRightWave'),
+            'lighting_right_breath_single': self._has_feature('razer.device.lighting.right', 'setRightBreathSingle'),
+            'lighting_right_breath_dual': self._has_feature('razer.device.lighting.right', 'setRightBreathDual'),
+            'lighting_right_breath_random': self._has_feature('razer.device.lighting.right', 'setRightBreathRandom'),
+
             'lighting_backlight': self._has_feature('razer.device.lighting.backlight'),
             'lighting_backlight_active': self._has_feature('razer.device.lighting.backlight', 'setBacklightActive'),
+
+            'lighting_profile_led_red': self._has_feature('razer.device.lighting.profile_led', 'setRedLED'),
+            'lighting_profile_led_green': self._has_feature('razer.device.lighting.profile_led', 'setGreenLED'),
+            'lighting_profile_led_blue': self._has_feature('razer.device.lighting.profile_led', 'setBlueLED'),
+
+            # Charging Pad attrs
+            'lighting_charging': self._has_feature('razer.device.lighting.charging'),
+            'lighting_charging_active': self._has_feature('razer.device.lighting.charging', 'setChargingActive'),
+            'lighting_charging_brightness': self._has_feature('razer.device.lighting.charging', 'setChargingBrightness'),
+            'lighting_charging_spectrum': self._has_feature('razer.device.lighting.charging', 'setChargingSpectrum'),
+            'lighting_charging_static': self._has_feature('razer.device.lighting.charging', 'setChargingStatic'),
+            'lighting_charging_none': self._has_feature('razer.device.lighting.charging', 'setChargingNone'),
+            'lighting_charging_wave': self._has_feature('razer.device.lighting.charging', 'setChargingWave'),
+            'lighting_charging_breath_single': self._has_feature('razer.device.lighting.charging', 'setChargingBreathSingle'),
+            'lighting_charging_breath_dual': self._has_feature('razer.device.lighting.charging', 'setChargingBreathDual'),
+            'lighting_charging_breath_random': self._has_feature('razer.device.lighting.charging', 'setChargingBreathRandom'),
+
+            'lighting_fast_charging': self._has_feature('razer.device.lighting.fast_charging'),
+            'lighting_fast_charging_active': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingActive'),
+            'lighting_fast_charging_brightness': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingBrightness'),
+            'lighting_fast_charging_spectrum': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingSpectrum'),
+            'lighting_fast_charging_static': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingStatic'),
+            'lighting_fast_charging_none': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingNone'),
+            'lighting_fast_charging_wave': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingWave'),
+            'lighting_fast_charging_breath_single': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingBreathSingle'),
+            'lighting_fast_charging_breath_dual': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingBreathDual'),
+            'lighting_fast_charging_breath_random': self._has_feature('razer.device.lighting.fast_charging', 'setFastChargingBreathRandom'),
+
+            'lighting_fully_charged': self._has_feature('razer.device.lighting.fully_charged'),
+            'lighting_fully_charged_active': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedActive'),
+            'lighting_fully_charged_brightness': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedBrightness'),
+            'lighting_fully_charged_spectrum': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedSpectrum'),
+            'lighting_fully_charged_static': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedStatic'),
+            'lighting_fully_charged_none': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedNone'),
+            'lighting_fully_charged_wave': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedWave'),
+            'lighting_fully_charged_breath_single': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedBreathSingle'),
+            'lighting_fully_charged_breath_dual': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedBreathDual'),
+            'lighting_fully_charged_breath_random': self._has_feature('razer.device.lighting.fully_charged', 'setFullyChargedBreathRandom'),
         }
 
         # Nasty hack to convert dbus.Int32 into native
@@ -311,11 +376,21 @@ class RazerDevice(object):
         return self._has_dedicated_macro
 
     @property
-    def razer_urls(self) -> dict:
-        if self._urls is None:
-            self._urls = json.loads(str(self._dbus_interfaces['device'].getRazerUrls()))
+    def device_image(self) -> str:
+        if self._device_image is None:
+            self._device_image = str(self._dbus_interfaces['device'].getDeviceImage())
 
-        return self._urls
+        return self._device_image
+
+    @property
+    def razer_urls(self) -> dict:
+        # Deprecated API, but kept for backwards compatibility
+        return {
+            "DEPRECATED": True,
+            "top_img": self.device_image,
+            "side_img": self.device_image,
+            "perspective_img": self.device_image
+        }
 
     def __str__(self):
         return self._name

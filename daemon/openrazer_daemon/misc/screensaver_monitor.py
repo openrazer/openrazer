@@ -5,7 +5,13 @@ import logging
 import dbus
 import dbus.exceptions
 
-DBUS_SCREENSAVER_INTERFACES = ('org.freedesktop.ScreenSaver', 'org.gnome.ScreenSaver', 'org.mate.ScreenSaver')
+DBUS_SCREENSAVER_INTERFACES = (
+    'org.cinnamon.ScreenSaver',
+    'org.freedesktop.ScreenSaver',
+    'org.gnome.ScreenSaver',
+    'org.mate.ScreenSaver',
+    'org.xfce.ScreenSaver',
+)
 
 
 class ScreensaverMonitor(object):

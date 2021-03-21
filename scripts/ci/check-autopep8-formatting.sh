@@ -20,8 +20,7 @@ done
 
 if [ $RETURN -eq 1 ]; then
         echo "" >&2
-        echo "Make sure you have run autopep8 with the following options:" >&2
-        echo $OPTIONS >&2
+        echo "You can run ./scripts/format_source.sh to automatically format those files." >&2
 fi
 
 exit $RETURN

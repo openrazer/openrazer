@@ -16,20 +16,20 @@ local req_types = {
 }
 
 local f = razer_proto.fields
-f.f_reqtype = ProtoField.uint8("razer.request_type", "Request Type", base.HEX, req_types)           -- 1b
+f.f_status = ProtoField.uint8("razer.status", "Request Type", base.HEX, req_types)                  -- 1b
 f.f_id = ProtoField.uint8("razer.id", "ID", base.HEX)                                               -- 1b Possibly I2C range
-f.f_reserved1 = ProtoField.bytes("razer.reserved1", "Reserved 1", base.HEX)                         -- 3b
+f.f_remaining_packets = ProtoField.uint16("razer.remaining_packets", "Remaining Packets", base.DEC) -- 2b
+f.f_protocol_type = ProtoField.uint8("razer.protocol_type", "Protocol Type", base.HEX)              -- 1b
 f.f_number_parameter_bytes = ProtoField.uint8("razer.num_params", "Number of parameters", base.HEX) -- 1b Number of bytes after command byte
-f.f_reserved2 = ProtoField.uint8("razer.reserver2", "Reserved 2", base.HEX)                         -- 1b Possibly I2C range also
-f.f_command = ProtoField.uint8("razer.command", "Command", base.HEX)                                -- 1b Command byte
-f.f_sub_command = ProtoField.uint8("razer.sub_command", "Sub Command", base.HEX)                    -- 1b Sub Command byte
-f.f_command_params = ProtoField.bytes("razer.command_params", "Command parameters", base.HEX)       -- 79b Params (has been known to be 80 including sub_cmd e.g. razermouse)
+f.f_command_class = ProtoField.uint8("razer.command_class", "Command Class", base.HEX)              -- 1b Command byte
+f.f_command_id = ProtoField.uint8("razer.command_id", "Command ID", base.HEX)                       -- 1b Sub Command byte
+f.f_command_params = ProtoField.bytes("razer.command_params", "Command parameters", base.SPACE)     -- 80b Params
 f.f_crc = ProtoField.uint8("razer.crc", "CRC", base.HEX)                                            -- 1b CRC checksum
 f.f_end_marker = ProtoField.uint8("razer.end", "End", base.HEX)                                     -- 1b End marker
 
 
-local f_usb_ep_num = Field.new("usb.endpoint_number.endpoint") -- should be 0  
-local f_usb_ep_dir = Field.new("usb.endpoint_number.direction") -- 1 IN, 0 OUT
+local f_usb_ep_num = Field.new("usb.endpoint_address.number")    -- should be 0
+local f_usb_ep_dir = Field.new("usb.endpoint_address.direction") -- 1 IN, 0 OUT
 local f_data_len = Field.new("usb.data_len") -- should be 90
 local f_urb_len = Field.new("usb.urb_len") -- should be 90
 
@@ -45,13 +45,11 @@ local responses = {
     WRITEMEM32 = 5,
     TRACECOUNT = 6
 }
-    
+
 local expected = responses.NOTSET
 
 function razer_proto.dissector(buffer, pinfo, tree)
-    
 
-        
     --[[This was very helpful for working out the field names I could use with Field.new()
     local fields = { all_field_infos() }
     for ix, finfo in ipairs(fields) do
@@ -67,48 +65,44 @@ function razer_proto.dissector(buffer, pinfo, tree)
     if (data_length.value == 90 and urb_length.value == 90) then
         pinfo.cols["protocol"] = "Razer"
 
-        local offset = 0
+        -- seek to the last 90 bytes
+        local offset = buffer:len() - 90
         local t_razer = tree:add(razer_proto, buffer())
-        
+
         if (data_direction.value == 0) then
             pinfo.cols["info"]:append("Request")
         else
             pinfo.cols["info"]:append("Response")
         end
-        
+
         -- Add REQ,RES byte
-        t_razer:add(f.f_reqtype, buffer(offset, 1))
+        t_razer:add(f.f_status, buffer(offset, 1))
         offset = offset + 1
         -- Add ID
         t_razer:add(f.f_id, buffer(offset, 1))
         offset = offset + 1
-        -- Add Reserved 1
-        t_razer:add(f.f_reserved1, buffer(offset, 3))
-        offset = offset + 3
+        -- Add Remaining packets
+        t_razer:add(f.f_remaining_packets, buffer(offset, 2))
+        offset = offset + 2
+        -- Add Protocol Type
+        t_razer:add(f.f_protocol_type, buffer(offset, 1))
+        offset = offset + 1
         -- Add Number of parameters bytes
         local num_params = buffer(offset, 1):le_uint()
-        t_razer:add(f.f_number_parameter_bytes, buffer(offset, 1)) -- specifid buffer here instead of num params so it highlights in wireshark
+        t_razer:add(f.f_number_parameter_bytes, buffer(offset, 1)) -- specified buffer here instead of num params so it highlights in wireshark
         offset = offset + 1
-        -- Add Reserved 2
-        t_razer:add(f.f_reserved2, buffer(offset, 1))
+        -- Add Command class
+        t_razer:add(f.f_command_class, buffer(offset, 1))
         offset = offset + 1
-        
-        -- Add Command
-        t_razer:add(f.f_command, buffer(offset, 1))
+        -- Add Command ID
+        t_razer:add(f.f_command_id, buffer(offset, 1))
         offset = offset + 1
-
-        -- Add sub command
-        t_razer:add(f.f_sub_command, buffer(offset, 1))
-        offset = offset + 1
-        
         -- Add command params
-        t_razer:add(f.f_command_params, buffer(offset, num_params - 1))
-        offset = offset + 79 -- skip to the end
-        
+        t_razer:add(f.f_command_params, buffer(offset, num_params))
+        offset = offset + 80 -- skip to the end
         -- Add CRC
         t_razer:add(f.f_crc, buffer(offset, 1))
         offset = offset + 1
-        
         -- Add end
         t_razer:add(f.f_end_marker, buffer(offset, 1))
         offset = offset + 1

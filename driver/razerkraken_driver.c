@@ -42,7 +42,8 @@ MODULE_LICENSE(DRIVER_LICENSE);
 /**
  * Print report to syslog
  */
-void print_erroneous_kraken_request_report(struct razer_kraken_request_report* report, char* driver_name, char* message)
+/*
+static void print_erroneous_kraken_request_report(struct razer_kraken_request_report* report, char* driver_name, char* message)
 {
     printk(KERN_WARNING "%s: %s. Report ID: %02x dest: %02x length: %02x ADDR: %02x%02x Args: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x .\n",
            driver_name,
@@ -56,8 +57,9 @@ void print_erroneous_kraken_request_report(struct razer_kraken_request_report* r
            report->arguments[6], report->arguments[7], report->arguments[8], report->arguments[9], report->arguments[10], report->arguments[11],
            report->arguments[12], report->arguments[13], report->arguments[14], report->arguments[15]);
 }
+*/
 
-int razer_kraken_send_control_msg(struct usb_device *usb_dev,struct razer_kraken_request_report* report, unsigned char skip)
+static int razer_kraken_send_control_msg(struct usb_device *usb_dev,struct razer_kraken_request_report* report, unsigned char skip)
 {
     uint request = HID_REQ_SET_REPORT; // 0x09
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
@@ -101,7 +103,7 @@ int razer_kraken_send_control_msg(struct usb_device *usb_dev,struct razer_kraken
  * length - amount of data
  * address - where to write data to
  */
-struct razer_kraken_request_report get_kraken_request_report(unsigned char report_id, unsigned char destination, unsigned char length, unsigned short address)
+static struct razer_kraken_request_report get_kraken_request_report(unsigned char report_id, unsigned char destination, unsigned char length, unsigned short address)
 {
     struct razer_kraken_request_report report;
     memset(&report, 0, sizeof(struct razer_kraken_request_report));
@@ -118,7 +120,7 @@ struct razer_kraken_request_report get_kraken_request_report(unsigned char repor
 /**
  * Get a union containing the effect bitfield
  */
-union razer_kraken_effect_byte get_kraken_effect_byte(void)
+static union razer_kraken_effect_byte get_kraken_effect_byte(void)
 {
     union razer_kraken_effect_byte effect_byte;
     memset(&effect_byte, 0, sizeof(union razer_kraken_effect_byte));
@@ -129,7 +131,7 @@ union razer_kraken_effect_byte get_kraken_effect_byte(void)
 /**
  * Get the current effect
  */
-unsigned char get_current_effect(struct device *dev)
+static unsigned char get_current_effect(struct device *dev)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x00, 0x01, device->led_mode_address);
@@ -160,7 +162,7 @@ unsigned char get_current_effect(struct device *dev)
     return result;
 }
 
-unsigned int get_rgb_from_addr(struct device *dev, unsigned short address, unsigned char len, char* buf)
+static unsigned int get_rgb_from_addr(struct device *dev, unsigned short address, unsigned char len, char* buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x00, len, address);
@@ -226,6 +228,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:
         device_type = "Razer Kraken 7.1 V2\n"; // Kylie
+        break;
+
+    case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
+        device_type = "Razer Kraken Ultimate\n";
         break;
 
     default:
@@ -335,10 +341,11 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         // Lock sending of the 2 commands
         mutex_lock(&device->lock);
 
-        // Basically Kraken Classic doesn't take RGB arguments so only do it for the KrakenV1,V2
+        // Basically Kraken Classic doesn't take RGB arguments so only do it for the KrakenV1,V2,Ultimate
         switch(device->usb_pid) {
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
+        case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
             razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 0);
             break;
         }
@@ -526,8 +533,10 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 static ssize_t razer_attr_read_mode_breath(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-    union razer_kraken_effect_byte effect_byte = (union razer_kraken_effect_byte)get_current_effect(dev);
+    union razer_kraken_effect_byte effect_byte;
     unsigned char num_colours = 1;
+
+    effect_byte.value = get_current_effect(dev);
 
     if(effect_byte.bits.two_colour_breathing == 1) {
         num_colours = 2;
@@ -537,6 +546,7 @@ static ssize_t razer_attr_read_mode_breath(struct device *dev, struct device_att
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:
+    case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
         switch(num_colours) {
         case 3:
             return get_rgb_from_addr(dev, device->breathing_address[2], 0x0C, buf);
@@ -584,10 +594,10 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
         } else {
             printk(KERN_CRIT "razerkraken: Did not manage to get serial from device, using XX01 instead\n");
             device->serial[0] = 'X';
-            device->serial[0] = 'X';
-            device->serial[0] = '0';
-            device->serial[0] = '1';
-            device->serial[0] = '\0';
+            device->serial[1] = 'X';
+            device->serial[2] = '0';
+            device->serial[3] = '1';
+            device->serial[4] = '\0';
         }
         mutex_unlock(&device->lock);
 
@@ -686,7 +696,7 @@ static DEVICE_ATTR(matrix_effect_static,    0660, razer_attr_read_mode_static,  
 static DEVICE_ATTR(matrix_effect_custom,    0660, razer_attr_read_mode_custom,                razer_attr_write_mode_custom);
 static DEVICE_ATTR(matrix_effect_breath,    0660, razer_attr_read_mode_breath,                razer_attr_write_mode_breath);
 
-void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf)
+static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf)
 {
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned int rand_serial = 0;
@@ -701,6 +711,7 @@ void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *in
 
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:
+    case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
         dev->led_mode_address = KYLIE_SET_LED_ADDRESS;
         dev->custom_address = KYLIE_CUSTOM_ADDRESS_START;
         dev->breathing_address[0] = KYLIE_BREATHING1_ADDRESS_START;
@@ -758,11 +769,12 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             break;
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
+        case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Brething effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
             break;
         }
@@ -818,11 +830,12 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
 
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
+        case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Brething effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
             break;
         }
@@ -857,7 +870,8 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC_ALT) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_V2) },
-    { }
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE) },
+    { 0 }
 };
 
 MODULE_DEVICE_TABLE(hid, razer_devices);

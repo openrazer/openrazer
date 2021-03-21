@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-<!-- Note, that you can also join our community chat, either via Telegram (https://t.me/joinchat/A1E4RT9TxhnxyetdQCSj7Q) or via Matrix (https://matrix.to/#/#openrazer:matrix.org) for questions -->
+<!-- Note, that you can also join our community chat, either via Telegram (https://t.me/joinchat/AMhHjj9Txhkhn8JM5_LeMg) or via Matrix (https://matrix.to/#/#openrazer:matrix.org) for questions -->
 
 ### Distribution
 

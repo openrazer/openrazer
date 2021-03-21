@@ -26,6 +26,7 @@ RAZER_RUNTIME_DIR = XDG_RUNTIME_DIR
 EXAMPLE_CONF_FILE = '/usr/share/openrazer/razer.conf.example'
 
 CONF_FILE = os.path.join(RAZER_CONFIG_HOME, 'razer.conf')
+PERSISTENCE_FILE = os.path.join(RAZER_CONFIG_HOME, 'persistence.conf')
 LOG_PATH = os.path.join(RAZER_DATA_HOME, 'logs')
 
 args = None
@@ -45,6 +46,7 @@ def parse_args():
     parser.add_argument('--as-root', action='store_true', help='Allow the daemon to be started as root')
 
     parser.add_argument('--config', type=str, help='Location of the config file', default=CONF_FILE)
+    parser.add_argument('--persistence', type=str, help='Location to file for storing device persistence data', default=PERSISTENCE_FILE)
     parser.add_argument('--run-dir', type=str, help='Location of the run directory', default=RAZER_RUNTIME_DIR)
     parser.add_argument('--log-dir', type=str, help='Location of the log directory', default=LOG_PATH)
 
@@ -116,12 +118,30 @@ def install_example_config_file(config_file):
         sys.exit(1)
 
 
+def init_persistence_config(persistence_file):
+    """
+    Creates a new file for persistence, if it does not exist.
+    """
+    if os.path.exists(persistence_file):
+        return
+
+    try:
+        os.makedirs(os.path.dirname(persistence_file), exist_ok=True)
+        with open(persistence_file, "w") as f:
+            f.writelines("")
+
+    except NotADirectoryError as e:
+        print("Failed to create {}".format(e.filename), file=sys.stderr)
+        sys.exit(1)
+
+
 def run_daemon():
     global args
     daemon = RazerDaemon(verbose=args.verbose,
                          log_dir=args.log_dir,
                          console_log=args.foreground,
                          config_file=args.config,
+                         persistence_file=args.persistence,
                          test_dir=args.test_dir)
     try:
         daemon.run()
@@ -161,6 +181,7 @@ def run():
             logger.setLevel(logging.DEBUG)
 
     install_example_config_file(args.config)
+    init_persistence_config(args.persistence)
 
     os.makedirs(args.run_dir, exist_ok=True)
     daemon = Daemonize(app="openrazer-daemon",
