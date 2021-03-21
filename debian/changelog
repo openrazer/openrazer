@@ -1,3 +1,9 @@
+openrazer (3.0.0) bionic; urgency=high
+
+  * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v3.0.0
+
+ -- Luca Weiss <luca@z3ntu.xyz>  Sun, 21 Mar 2021 17:26:04 +0100
+
 openrazer (2.9.0) bionic; urgency=high
 
   * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v2.9.0
