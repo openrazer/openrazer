@@ -93,6 +93,48 @@ static const struct razer_key_translation chroma_keys_2[] = {
     { 0 }
 };
 
+// Huntsman Mini Fn keys
+static const struct razer_key_translation chroma_keys_3[] = {
+    { KEY_ESC, KEY_GRAVE },
+    { KEY_1, KEY_F1 },
+    { KEY_2, KEY_F2 },
+    { KEY_3, KEY_F3 },
+    { KEY_4, KEY_F4 },
+    { KEY_5, KEY_F5 },
+    { KEY_6, KEY_F6 },
+    { KEY_7, KEY_F7 },
+    { KEY_8, KEY_F8 },
+    { KEY_9, KEY_F9 },
+    { KEY_0, KEY_F10 },
+    { KEY_MINUS, KEY_F11 },
+    { KEY_EQUAL, KEY_F12 },
+    { KEY_BACKSPACE, KEY_DELETE },
+    { KEY_TAB, KEY_MUTE },
+    { KEY_Q, KEY_VOLUMEDOWN },
+    { KEY_W, KEY_VOLUMEUP },
+    { KEY_E, KEY_PREVIOUSSONG },
+    { KEY_R, KEY_PLAYPAUSE },
+    { KEY_T, KEY_NEXTSONG },
+    { KEY_Y, RAZER_MACRO_KEY },
+    { KEY_U, RAZER_GAME_KEY },
+    { KEY_I, KEY_UP },
+    { KEY_O, KEY_SCROLLLOCK },
+    { KEY_P, KEY_SYSRQ },
+    { KEY_LEFTBRACE, KEY_PAGEUP },
+    { KEY_RIGHTBRACE, KEY_HOME },
+    { KEY_G, RAZER_BRIGHTNESS_DOWN },
+    { KEY_H, RAZER_BRIGHTNESS_UP },
+    { KEY_J, KEY_LEFT },
+    { KEY_K, KEY_DOWN },
+    { KEY_L, KEY_RIGHT },
+    { KEY_SEMICOLON, KEY_PAGEDOWN },
+    { KEY_APOSTROPHE, KEY_END },
+    { KEY_Z, KEY_SLEEP },
+    { KEY_DOT, KEY_PAUSE },
+    { KEY_SLASH, KEY_INSERT },
+    { 0 }
+};
+
 /**
  * Essentially search through the struct array above.
  */
@@ -2116,6 +2158,10 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH_EDITION:
         translation = find_translation(chroma_keys_2, usage->code);
+        break;
+
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI:
+        translation = find_translation(chroma_keys_3, usage->code);
         break;
 
     default:
