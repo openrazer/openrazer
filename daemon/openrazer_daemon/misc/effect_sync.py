@@ -213,8 +213,8 @@ class EffectSync(object):
                         pargs = (0x00, 0xFF, 0x00)  # Green
                     else:
                         pargs = args[0:3]  # limit args to first 3, as setBreathDual gives 6 args and setBreathTriple gives 9 args
-                    
-                    if effect_name in ('setBreathRandom', 'setScrollBreathRandom', 'setLogoBreathRandom', 'setLeftBreathRandom', 'setRightBreathRandom', 'setBacklightBreathRandom'):    
+
+                    if effect_name in ('setBreathRandom', 'setScrollBreathRandom', 'setLogoBreathRandom', 'setLeftBreathRandom', 'setRightBreathRandom', 'setBacklightBreathRandom'):
                         effect_func = getattr(self._parent, 'setPulsate', None)
                         if effect_func is not None:
                             # setPulsate doesn't take any argument
@@ -294,7 +294,7 @@ class EffectSync(object):
                 elif effect_name in ('setBrightness', 'setScrollBrightness', 'setLogoBrightness', 'setLeftBrightness', 'setRightBrightness', 'setBacklightBrightness'):
                     effect_func = getattr(self._parent, 'setScrollBrightness', None)
                     if effect_func is not None:
-                           effect_func(*args)
+                        effect_func(*args)
                     effect_func = getattr(self._parent, 'setLogoBrightness', None)
                     if effect_func is not None:
                         effect_func(*args)
