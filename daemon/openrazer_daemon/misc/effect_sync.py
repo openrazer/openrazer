@@ -37,9 +37,9 @@ class EffectSync(object):
             #  0         1       2             3
             # ('effect', Device, 'effectName', 'effectparams'...)
             # Device is the device the msg originated from (could be parent device)
-            if msg[1] is not self._parent:
-                # Msg from another device
-                self.run_effect(msg[2], *msg[3:])
+            # Need to run it regardless of whether it is the parent device
+            # Some devices have multiple zones that need setting such as mice
+            self.run_effect(msg[2], *msg[3:])
 
     def run_effect(self, effect_name, *args):
         """
