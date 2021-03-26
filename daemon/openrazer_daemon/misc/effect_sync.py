@@ -82,9 +82,31 @@ class EffectSync(object):
                     effect_func = getattr(self._parent, 'setLogoActive', None)
                     if effect_func is not None:
                         effect_func(True)
+                    effect_func = getattr(self._parent, 'setLeftActive', None)
+                    if effect_func is not None:
+                        effect_func(True)
+                    effect_func = getattr(self._parent, 'setRightActive', None)
+                    if effect_func is not None:
+                        effect_func(True)
                     effect_func = getattr(self._parent, 'setBacklightActive', None)
                     if effect_func is not None:
                         effect_func(True)
+                else:
+                    effect_func = getattr(self._parent, 'setScrollNone', None)
+                    if effect_func is not None:
+                        effect_func()
+                    effect_func = getattr(self._parent, 'setLogoNone', None)
+                    if effect_func is not None:
+                        effect_func()
+                    effect_func = getattr(self._parent, 'setLeftNone', None)
+                    if effect_func is not None:
+                        effect_func()
+                    effect_func = getattr(self._parent, 'setRightNone', None)
+                    if effect_func is not None:
+                        effect_func()
+                    effect_func = getattr(self._parent, 'setBacklightNone', None)
+                    if effect_func is not None:
+                        effect_func()
 
                 # The target device doesn't have these methods, use similar ones
 
@@ -94,6 +116,18 @@ class EffectSync(object):
                     effect_func = getattr(self._parent, 'setBreathSingle', None)
                     if effect_func is not None:
                         effect_func(*pargs)
+                    effect_func = getattr(self._parent, 'setScrollBreathSingle', None)
+                    if effect_func is not None:
+                        effect_func(*pargs)
+                    effect_func = getattr(self._parent, 'setLogoBreathSingle', None)
+                    if effect_func is not None:
+                        effect_func(*pargs)
+                    effect_func = getattr(self._parent, 'setLeftBreathSingle', None)
+                    if effect_func is not None:
+                        effect_func(*pargs)
+                    effect_func = getattr(self._parent, 'setRightBreathSingle', None)
+                    if effect_func is not None:
+                        effect_func(*pargs)
                     effect_func = getattr(self._parent, 'setScrollPulsate', None)
                     if effect_func is not None:
                         effect_func(*pargs)
@@ -103,43 +137,18 @@ class EffectSync(object):
                     effect_func = getattr(self._parent, 'setBacklightPulsate', None)
                     if effect_func is not None:
                         effect_func(*pargs)
-
-                elif effect_name in ('setBreathSingle', 'setBreathRandom', 'setBreathDual', 'setBreathTriple'):
-                    if effect_name == 'setBreathRandom':
-                        pargs = (0x00, 0xFF, 0x00)  # Green
-                    else:
-                        pargs = args[0:3]  # limit args to first 3, as setBreathDual gives 6 args and setBreathTriple gives 9 args
-                    effect_func = getattr(self._parent, 'setPulsate', None)
-                    if effect_func is not None:
-                        # setPulsate doesn't take any argument
-                        effect_func()
-                    effect_func = getattr(self._parent, 'setScrollPulsate', None)
-                    if effect_func is not None:
-                        effect_func(*pargs)
-                    effect_func = getattr(self._parent, 'setLogoPulsate', None)
-                    if effect_func is not None:
-                        effect_func(*pargs)
-                    effect_func = getattr(self._parent, 'setBacklightPulsate', None)
-                    if effect_func is not None:
-                        effect_func(*pargs)
-
-                elif effect_name == 'setNone':
-                    #print("setNone stub")
-                    effect_func = getattr(self._parent, 'setScrollActive', None)
-                    if effect_func is not None:
-                        effect_func(False)
-                    effect_func = getattr(self._parent, 'setLogoActive', None)
-                    if effect_func is not None:
-                        effect_func(False)
-                    effect_func = getattr(self._parent, 'setBacklightActive', None)
-                    if effect_func is not None:
-                        effect_func(False)
 
                 elif effect_name == 'setSpectrum':
                     effect_func = getattr(self._parent, 'setScrollSpectrum', None)
                     if effect_func is not None:
                         effect_func()
                     effect_func = getattr(self._parent, 'setLogoSpectrum', None)
+                    if effect_func is not None:
+                        effect_func()
+                    effect_func = getattr(self._parent, 'setLeftSpectrum', None)
+                    if effect_func is not None:
+                        effect_func()
+                    effect_func = getattr(self._parent, 'setRightSpectrum', None)
                     if effect_func is not None:
                         effect_func()
                     effect_func = getattr(self._parent, 'setBacklightSpectrum', None)
@@ -153,7 +162,147 @@ class EffectSync(object):
                     effect_func = getattr(self._parent, 'setLogoStatic', None)
                     if effect_func is not None:
                         effect_func(*args)
+                    effect_func = getattr(self._parent, 'setLeftStatic', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setRightStatic', None)
+                    if effect_func is not None:
+                        effect_func(*args)
                     effect_func = getattr(self._parent, 'setBacklightStatic', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+
+                elif effect_name == 'setWave':
+                    effect_func = getattr(self._parent, 'setScrollWave', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setLogoWave', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setLeftWave', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setRightWave', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setBacklightWave', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+
+                elif effect_name == 'setReactive':
+                    effect_func = getattr(self._parent, 'setScrollReactive', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setLogoReactive', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setLeftReactive', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setRightReactive', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setBacklightReactive', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+
+                elif effect_name in ('setBreathRandom', 'setBreathSingle', 'setBreathDual', 'setBreathTriple'):
+                    if effect_name in ('setBreathRandom', 'setBreathSingle'):
+                        pargs = (0x00, 0xFF, 0x00)  # Green
+                    else:
+                        pargs = args[0:3]  # limit args to first 3, as setBreathDual gives 6 args and setBreathTriple gives 9 args
+
+                    if effect_name == 'setBreathRandom':
+                        effect_func = getattr(self._parent, 'setPulsate', None)
+                        if effect_func is not None:
+                            # setPulsate doesn't take any argument
+                            effect_func()
+                        effect_func = getattr(self._parent, 'setScrollPulsate', None)
+                        if effect_func is not None:
+                            effect_func(*pargs)
+                        effect_func = getattr(self._parent, 'setLogoPulsate', None)
+                        if effect_func is not None:
+                            effect_func(*pargs)
+                        effect_func = getattr(self._parent, 'setBacklightPulsate', None)
+                        if effect_func is not None:
+                            effect_func(*pargs)
+
+                        effect_func = getattr(self._parent, 'setScrollBreathRandom', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+                        effect_func = getattr(self._parent, 'setLogoBreathRandom', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+                        effect_func = getattr(self._parent, 'setLeftBreathRandom', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+                        effect_func = getattr(self._parent, 'setRightBreathRandom', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+                        effect_func = getattr(self._parent, 'setBacklightBreathRandom', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+
+                    if effect_name == 'setBreathSingle':
+                        if effect_func is not None:
+                            effect_func(*pargs)
+                        effect_func = getattr(self._parent, 'setScrollPulsate', None)
+                        if effect_func is not None:
+                            effect_func(*pargs)
+                        effect_func = getattr(self._parent, 'setLogoPulsate', None)
+                        if effect_func is not None:
+                            effect_func(*pargs)
+                        effect_func = getattr(self._parent, 'setBacklightPulsate', None)
+                        if effect_func is not None:
+                            effect_func(*pargs)
+
+                        effect_func = getattr(self._parent, 'setScrollBreathSingle', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+                        effect_func = getattr(self._parent, 'setLogoBreathSingle', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+                        effect_func = getattr(self._parent, 'setLeftBreathSingle', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+                        effect_func = getattr(self._parent, 'setRightBreathSingle', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+                        effect_func = getattr(self._parent, 'setBacklightBreathSingle', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+
+                    if effect_name == 'setBreathDual':
+                        effect_func = getattr(self._parent, 'setScrollBreathDual', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+                        effect_func = getattr(self._parent, 'setLogoBreathDual', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+                        effect_func = getattr(self._parent, 'setLeftBreathDual', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+                        effect_func = getattr(self._parent, 'setRightBreathDual', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+                        effect_func = getattr(self._parent, 'setBacklightBreathDual', None)
+                        if effect_func is not None:
+                            effect_func(*args)
+
+                elif effect_name == 'setBrightness':
+                    effect_func = getattr(self._parent, 'setScrollBrightness', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setLogoBrightness', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setLeftBrightness', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setRightBrightness', None)
+                    if effect_func is not None:
+                        effect_func(*args)
+                    effect_func = getattr(self._parent, 'setBacklightBrightness', None)
                     if effect_func is not None:
                         effect_func(*args)
 
