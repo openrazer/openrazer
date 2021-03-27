@@ -286,4 +286,4 @@ class RazerKrakenKittyEdition(__RazerDeviceBrightnessSuspend):
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 4]
 
-    DEVICE_IMAGE = "https://hybrismediaprod.blob.core.windows.net/sys-master-phoenix-images-container/hda/h57/9055450103838/Kraken-Kitty-Edition-Black-gallery-Hero.jpg "
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/1c503aa176bc82d999299aba0d6c7d2c/kraken-kitty-quartz.png"

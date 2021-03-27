@@ -1042,7 +1042,7 @@ class RazerBlade2018Mercury(_RippleKeyboard):
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
-    DEVICE_IMAGE = "https://d4kkpd69xt9l7.cloudfront.net/sys-master/images/h97/h78/9088805240862/RZ09-02386EM2-R3U1.png_300Wx300H"
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1552/1552-blade-stealth-mercury-white.png"
 
 
 class RazerBlade2018Base(_RippleKeyboard):
