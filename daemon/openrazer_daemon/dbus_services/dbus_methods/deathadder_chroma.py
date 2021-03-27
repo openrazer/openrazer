@@ -113,8 +113,8 @@ def set_logo_brightness(self, brightness):
 
     self.method_args['brightness'] = brightness
 
-    if brightness > 255:
-        brightness = 255
+    if brightness > 100:
+        brightness = 100
     elif brightness < 0:
         brightness = 0
 
@@ -317,8 +317,8 @@ def set_scroll_brightness(self, brightness):
 
     self.method_args['brightness'] = brightness
 
-    if brightness > 255:
-        brightness = 255
+    if brightness > 100:
+        brightness = 100
     elif brightness < 0:
         brightness = 0
 

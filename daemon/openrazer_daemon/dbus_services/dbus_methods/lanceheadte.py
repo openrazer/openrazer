@@ -80,8 +80,8 @@ def set_left_brightness(self, brightness):
 
     self.method_args['brightness'] = brightness
 
-    if brightness > 255:
-        brightness = 255
+    if brightness > 100:
+        brightness = 100
     elif brightness < 0:
         brightness = 0
 
@@ -348,8 +348,8 @@ def set_right_brightness(self, brightness):
 
     self.method_args['brightness'] = brightness
 
-    if brightness > 255:
-        brightness = 255
+    if brightness > 100:
+        brightness = 100
     elif brightness < 0:
         brightness = 0
 
