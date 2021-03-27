@@ -15,9 +15,6 @@ import time
 import setproctitle
 import dbus.mainloop.glib
 import dbus.service
-import gi
-gi.require_version('Gdk', '3.0')
-import gi.repository
 from gi.repository import GLib
 from pyudev import Context, Monitor, MonitorObserver
 import grp

@@ -2,9 +2,6 @@
 Module to handle custom colours
 """
 
-import gi
-gi.require_version('Gdk', '3.0')
-from gi.repository import Gdk
 import struct
 import subprocess
 
@@ -404,28 +401,6 @@ class KeyboardColour(object):
     Keyboard class which represents the colour state of the keyboard.
     """
 
-    @staticmethod
-    def gdk_colour_to_rgb(gdk_color):
-        """
-        Converts GDK colour to (R,G,B) tuple
-
-        :param gdk_color: GDK colour
-        :type gdk_color: Gdk.Color or tuple
-
-        :return: Tuple of 3 ints
-        :rtype: tuple
-        """
-        if isinstance(gdk_color, (list, tuple)):
-            return gdk_color
-
-        assert type(gdk_color) is Gdk.Color, "Is not of type Gdk.Color"
-
-        red = int(gdk_color.red_float * 255)
-        green = int(gdk_color.green_float * 255)
-        blue = int(gdk_color.blue_float * 255)
-
-        return red, green, blue
-
     def __init__(self, rows, columns):
         self.rows = rows
         self.columns = columns
@@ -486,11 +461,11 @@ class KeyboardColour(object):
         :type col: int
 
         :param colour: Colour to set
-        :type colour: Gdk.Color or tuple
+        :type colour: tuple
 
         :raises KeyDoesNotExistError: If given key does not exist
         """
-        self.colors[row][col].set(KeyboardColour.gdk_colour_to_rgb(colour))
+        self.colors[row][col].set(colour)
 
     def get_key_colour(self, key):
         """
