@@ -5,6 +5,7 @@ from openrazer_daemon.dbus_services import endpoint
 def set_logo_wave(self, direction):
     """
     Set the wave effect on the device
+
     :param direction: (0|1) - down to up, (1|2) up to down
     :type direction: int
     """
@@ -30,6 +31,7 @@ def set_logo_wave(self, direction):
 def set_scroll_wave(self, direction):
     """
     Set the wave effect on the device
+
     :param direction: (0|1) - down to up, (1|2) up to down
     :type direction: int
     """
@@ -55,6 +57,7 @@ def set_scroll_wave(self, direction):
 def get_left_brightness(self):
     """
     Get the device's brightness
+
     :return: Brightness
     :rtype: float
     """
@@ -67,6 +70,7 @@ def get_left_brightness(self):
 def set_left_brightness(self, brightness):
     """
     Set the device's brightness
+
     :param brightness: Brightness
     :type brightness: int
     """
@@ -96,6 +100,7 @@ def set_left_brightness(self, brightness):
 def set_left_wave(self, direction):
     """
     Set the wave effect on the device
+
     :param direction: (0|1) - down to up, (1|2) up to down
     :type direction: int
     """
@@ -333,6 +338,7 @@ def get_right_brightness(self):
 def set_right_brightness(self, brightness):
     """
     Set the device's brightness
+
     :param brightness: Brightness
     :type brightness: int
     """
@@ -362,6 +368,7 @@ def set_right_brightness(self, brightness):
 def set_right_wave(self, direction):
     """
     Set the wave effect on the device
+
     :param direction: (0|1) - down to up, (1|2) up to down
     :type direction: int
     """
