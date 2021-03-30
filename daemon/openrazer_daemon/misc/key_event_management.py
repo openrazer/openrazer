@@ -781,7 +781,7 @@ class GamepadKeyManager(KeyboardKeyManager):
         :param value: Modifier state
         :type value: bool
         """
-        self._mode_modifier = True if value else False
+        self._mode_modifier = bool(value)
 
 
 class OrbweaverKeyManager(GamepadKeyManager):

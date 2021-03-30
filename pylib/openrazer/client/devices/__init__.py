@@ -76,7 +76,7 @@ class RazerDevice(object):
             'lighting_pulsate': self._has_feature('razer.device.lighting.bw2013', 'setPulsate'),
 
             # Get if the device has an LED Matrix, == True as its a DBus boolean otherwise, so for consistency sake we coerce it into a native bool
-            'lighting_led_matrix': self._dbus_interfaces['device'].hasMatrix() == True,
+            'lighting_led_matrix': self._dbus_interfaces['device'].hasMatrix() is True,
             'lighting_led_single': self._has_feature('razer.device.lighting.chroma', 'setKey'),
 
             # Mouse lighting attrs
