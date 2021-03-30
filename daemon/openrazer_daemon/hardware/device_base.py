@@ -41,7 +41,7 @@ class RazerDevice(DBusService):
 
     DEVICE_IMAGE = None
 
-    def __init__(self, device_path, device_number, config, persistence, testing=False, additional_interfaces=None, additional_methods=[]):
+    def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods):
 
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
@@ -1128,9 +1128,6 @@ class RazerDeviceSpecialBrightnessSuspend(RazerDevice):
     Suspend functions
     """
 
-    def __init__(self, device_path, device_number, config, persistence, testing=False, additional_interfaces=None, additional_methods=[]):
-        super().__init__(device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods)
-
     def _suspend_device(self):
         """
         Suspend the device
@@ -1164,6 +1161,9 @@ class RazerDeviceBrightnessSuspend(RazerDeviceSpecialBrightnessSuspend):
     Inherits from RazerDeviceSpecialBrightnessSuspend
     """
 
-    def __init__(self, device_path, device_number, config, persistence, testing=False, additional_interfaces=None, additional_methods=[]):
-        additional_methods.extend(['get_brightness', 'set_brightness'])
-        super().__init__(device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods)
+    def __init__(self, *args, **kwargs):
+        if 'additional_methods' in kwargs:
+            kwargs['additional_methods'].extend(['get_brightness', 'set_brightness'])
+        else:
+            kwargs['additional_methods'] = ['get_brightness', 'set_brightness']
+        super().__init__(*args, **kwargs)
