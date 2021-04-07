@@ -283,6 +283,7 @@ class RazerDaemon(DBusService):
             'sync_effects_enabled': True,
             'devices_off_on_screensaver': True,
             'mouse_battery_notifier': True,
+            'restore_persistence': True,
         }
         self._config['Statistics'] = {
             'key_statistics': True,

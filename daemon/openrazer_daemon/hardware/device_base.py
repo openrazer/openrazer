@@ -316,7 +316,8 @@ class RazerDevice(DBusService):
                 if bright_func is not None:
                     bright_func(self.zone[i]["brightness"])
 
-        self.restore_effect()
+        if self.config.getboolean('Startup', "restore_persistence") is True:
+            self.restore_effect()
 
     def send_effect_event(self, effect_name, *args):
         """
