@@ -273,7 +273,7 @@ class RazerDaemon(DBusService):
         :type config_file: str or None
         """
         # Generate sections as trying to access a value even if a default exists will die if the section does not
-        for section in ('General', 'Startup', 'Statistics'):
+        for section in ('General', 'Startup'):
             self._config[section] = {}
 
         self._config['General'] = {
@@ -284,9 +284,6 @@ class RazerDaemon(DBusService):
             'devices_off_on_screensaver': True,
             'mouse_battery_notifier': True,
             'restore_persistence': True,
-        }
-        self._config['Statistics'] = {
-            'key_statistics': True,
         }
 
         if config_file is not None and os.path.exists(config_file):

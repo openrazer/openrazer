@@ -39,7 +39,6 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         except FileNotFoundError:  # Could be called when daemon is stopping or device is removed.
             pass
 
-        # TODO look into saving stats in /var/run maybe
         self.key_manager.close()
 
 
@@ -102,7 +101,6 @@ class RazerNostromo(_RazerDeviceBrightnessSuspend):
         """
         super(RazerNostromo, self)._close()
 
-        # TODO look into saving stats in /var/run maybe
         # self.key_manager.close()
 
 
@@ -133,7 +131,6 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
         """
         super(RazerTartarus, self)._close()
 
-        # TODO look into saving stats in /var/run maybe
         # self.key_manager.close()
 
 
@@ -164,7 +161,6 @@ class RazerTartarusChroma(_RazerDeviceBrightnessSuspend):
         """
         super(RazerTartarusChroma, self)._close()
 
-        # TODO look into saving stats in /var/run maybe
         # self.key_manager.close()
 
 
@@ -209,7 +205,6 @@ class RazerTartarusV2(_RippleKeyboard):
         """
         super(RazerTartarusV2, self)._close()
 
-        # TODO look into saving stats in /var/run maybe
         # self.key_manager.close()
 
 
@@ -242,7 +237,6 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
         """
         super(RazerOrbweaver, self)._close()
 
-        # TODO look into saving stats in /var/run maybe
         # self.key_manager.close()
 
 
@@ -283,7 +277,6 @@ class RazerOrbweaverChroma(_RippleKeyboard):
         """
         super(RazerOrbweaverChroma, self)._close()
 
-        # TODO look into saving stats in /var/run maybe
         # self.key_manager.close()
 
 

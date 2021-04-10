@@ -39,14 +39,6 @@ The *[Startup]* section in the configuration file contains values to be used dur
 *restore_persistence* _bool_
 	This flag specifies whether effects saved in persistence.conf should be applied when the daemon starts.
 
-## STATISTICS
-
-The *[Statistics]* section in the configuration file contains options to control how and when statistics will be collected.
-
-*key_statistics* _bool_
-	This flag specifies if the daemon is to collect key statistics. Currently this is only collecting the key count per hour per key.
-
-
 # SEE ALSO
 
 *openrazer-daemon*(8)

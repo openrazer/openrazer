@@ -220,7 +220,6 @@ class KeyboardKeyManager(object):
     * Receiving keypresses from the KeyWatcher
     * Logic to deal with GameMode shortcut not working when macro's not enabled
     * Logic to deal with recording on the fly macros and replaying them
-    * Stores number of keypresses / key / hour, stats are used for heatmaps / time-series
 
     It will be used to store keypresses in a list (for at most 2 seconds) if enabled for the ripple effect, when I
     get round to making the effect.
@@ -248,9 +247,6 @@ class KeyboardKeyManager(object):
         else:
             self._logger.warning("No event files for KeyWatcher")
 
-        self._record_stats = parent.config.get('Statistics', 'key_statistics')
-        self._stats = {}
-
         self._recording_macro = False
         self._macros = {}
 
@@ -271,8 +267,6 @@ class KeyboardKeyManager(object):
 
         if self._should_grab_event_files:
             self.grab_event_files(True)
-
-    # TODO add property for enabling key stats?
 
     @property
     def temp_key_store(self):
@@ -342,8 +336,6 @@ class KeyboardKeyManager(object):
           then it will record keys, then pressing FN+F9 will save macro.
         * Pressing any macro key will run macro.
         * Pressing FN+F10 will toggle game mode.
-        * Pressing any key will increment a statistical number in a dictionary used for generating
-          heatmaps.
         :param event_time: Time event occurred
         :type event_time: datetime.datetime
 
@@ -400,23 +392,6 @@ class KeyboardKeyManager(object):
 
             else:
                 # Key press
-
-                # This is the key for storing stats, by generating hour timestamps it will bucket data nicely.
-                storage_bucket = event_time.strftime('%Y%m%d%H')
-
-                try:
-                    # Try and increment key in bucket
-                    self._stats[storage_bucket][key_name] += 1
-                    # self._logger.debug("Increased key %s", key_name)
-                except KeyError:
-                    # Create bucket
-                    self._stats[storage_bucket] = dict.fromkeys(self.KEY_MAP, 0)
-                    try:
-                        # Increment key
-                        self._stats[storage_bucket][key_name] += 1
-                        # self._logger.debug("Increased key %s", key_name)
-                    except KeyError as err:
-                        self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
 
                 if self._temp_key_store_active:
                     colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
@@ -667,8 +642,6 @@ class GamepadKeyManager(KeyboardKeyManager):
           then it will record keys, then pressing FN+F9 will save macro.
         * Pressing any macro key will run macro.
         * Pressing FN+F10 will toggle game mode.
-        * Pressing any key will increment a statistical number in a dictionary used for generating
-          heatmaps.
         :param event_time: Time event occurred
         :type event_time: datetime.datetime
 
@@ -705,23 +678,6 @@ class GamepadKeyManager(KeyboardKeyManager):
 
             key_name = self.GAMEPAD_EVENT_MAPPING[key_id]
             # Key press
-
-            # This is the key for storing stats, by generating hour timestamps it will bucket data nicely.
-            storage_bucket = event_time.strftime('%Y%m%d%H')
-
-            try:
-                # Try and increment key in bucket
-                self._stats[storage_bucket][key_name] += 1
-                # self._logger.debug("Increased key %s", key_name)
-            except KeyError:
-                # Create bucket
-                self._stats[storage_bucket] = dict.fromkeys(self.GAMEPAD_KEY_MAPPING, 0)
-                try:
-                    # Increment key
-                    self._stats[storage_bucket][key_name] += 1
-                    # self._logger.debug("Increased key %s", key_name)
-                except KeyError as err:
-                    self._logger.exception("Got key error. Couldn't store in bucket", exc_info=err)
 
             if self._temp_key_store_active:
                 colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
