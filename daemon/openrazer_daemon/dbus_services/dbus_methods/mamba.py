@@ -6,7 +6,7 @@ from openrazer_daemon.dbus_services import endpoint
 @endpoint('razer.device.power', 'getBattery', out_sig='d')
 def get_battery(self):
     """
-    Get mouse's battery level
+    Get device's battery level
     """
     self.logger.debug("DBus call get_battery")
 
