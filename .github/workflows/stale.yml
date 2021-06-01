@@ -21,4 +21,3 @@ jobs:
         days-before-issue-close: 30
         stale-issue-label: 'wontfix'
         exempt-issue-labels: 'Device Support,not stale'
-        operations-per-run: 2
