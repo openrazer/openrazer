@@ -280,7 +280,8 @@ class RazerKrakenKittyEdition(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x0F19
     METHODS = ['get_device_type_headset',
                'set_none_effect', 'set_static_effect', 'set_breath_random_effect', 'set_breath_single_effect',
-               'set_breath_dual_effect',
+               'set_breath_dual_effect', 'set_starlight_random_effect', 'set_starlight_single_effect',
+               'set_starlight_dual_effect', 'set_wave_effect', 'set_spectrum_effect',
                'set_custom_effect', 'set_key_row',
                'set_brightness', 'get_brightness']
     HAS_MATRIX = True

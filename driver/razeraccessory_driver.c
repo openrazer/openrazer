@@ -246,6 +246,7 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
         report.transaction_id.id = 0x3F;
         break;
 
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
         report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
@@ -596,6 +597,7 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
         report.transaction_id.id = 0x3F;
         break;
 
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
         report = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
@@ -720,6 +722,50 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
         default: // "Random" colour mode
             report = razer_chroma_standard_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
             report.transaction_id.id = 0x3F;
+            break;
+        }
+        break;
+
+    default:
+        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        break;
+    }
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report report = {0};
+    unsigned char speed = 0;
+
+    if (count != 1 && count != 4 && count != 7) {
+        printk(KERN_WARNING "razeraccessory: Starlight accepts only 1, 4 or 7 bytes input (speed, [RGB], [RGB])");
+        return count;
+    }
+    speed = buf[0];
+
+    switch (device->usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        switch(count) {
+        case 4: // Single colour mode
+            report = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, ZERO_LED, speed, (struct razer_rgb *)&buf[1]);
+            report.transaction_id.id = 0x1F;
+            break;
+
+        case 7: // Dual colour mode
+            report = razer_chroma_extended_matrix_effect_starlight_dual(VARSTORE, ZERO_LED, speed, (struct razer_rgb *)&buf[1], (struct razer_rgb *)&buf[4]);
+            report.transaction_id.id = 0x1F;
+            break;
+
+        default: // "Random" colour mode
+            report = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, ZERO_LED, speed);
+            report.transaction_id.id = 0x1F;
             break;
         }
         break;
@@ -1518,6 +1564,7 @@ static DEVICE_ATTR(matrix_effect_breath,                    0220, NULL,         
 static DEVICE_ATTR(matrix_effect_custom,                    0220, NULL,                                           razer_attr_write_mode_custom);
 static DEVICE_ATTR(matrix_effect_wave,                      0220, NULL,                                           razer_attr_write_mode_wave);
 static DEVICE_ATTR(matrix_effect_blinking,                  0220, NULL,                                           razer_attr_write_mode_blinking);
+static DEVICE_ATTR(matrix_effect_starlight,                 0220, NULL,                                           razer_attr_write_mode_starlight);
 static DEVICE_ATTR(matrix_brightness,                       0660, razer_attr_read_set_brightness,                 razer_attr_write_set_brightness);
 static DEVICE_ATTR(matrix_custom_frame,                     0220, NULL,                                           razer_attr_write_set_key_row);
 static DEVICE_ATTR(matrix_reactive_trigger,                 0220, NULL,                                           razer_attr_write_mode_reactive_trigger);
@@ -1740,6 +1787,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_CHROMA_MUG:
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
         case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
@@ -1757,6 +1805,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
         case USB_DEVICE_ID_RAZER_NOMMO_PRO:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
@@ -1780,6 +1829,12 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_CHROMA_MUG:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_is_mug_present);                    // Is cup present
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_blinking);            // Blinking effect
+            break;
+        }
+
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);
             break;
         }
 
@@ -1910,6 +1965,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_CHROMA_MUG:
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
         case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
@@ -1927,6 +1983,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
         case USB_DEVICE_ID_RAZER_NOMMO_PRO:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
@@ -1950,6 +2007,12 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_CHROMA_MUG:
             device_remove_file(&hdev->dev, &dev_attr_is_mug_present);                    // Is cup present
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_blinking);            // Blinking effect
+            break;
+        }
+
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);
             break;
         }
     }
