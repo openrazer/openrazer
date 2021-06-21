@@ -111,6 +111,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Lancehead Tournament Edition            |  1532:0060  |
 | Razer Atheris (Receiver)                      |  1532:0062  |
 | Razer Basilisk                                |  1532:0064  |
+| Razer Basilisk Essential                      |  1532:0065  |
 | Razer Naga Trinity                            |  1532:0067  |
 | Razer Abyssus Elite (D.Va Edition)            |  1532:006A  |
 | Razer Abyssus Essential                       |  1532:006B  |

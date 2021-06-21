@@ -2071,6 +2071,54 @@ class RazerBasilisk(__RazerDeviceSpecialBrightnessSuspend):
         self.disable_notify = False
 
 
+class RazerBasiliskEssential(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer Basilisk Essential
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Basilisk_Essential-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0065
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
+    DEDICATED_MACRO_KEYS = True
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate',
+               # Logo
+               'get_logo_brightness', 'set_logo_brightness', 'set_logo_spectrum_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2', 'set_logo_static_naga_hex_v2', 'set_logo_none_naga_hex_v2',
+               # Can set LOGO with custom
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://hybrismediaprod.blob.core.windows.net/sys-master-phoenix-images-container/h19/h61/9080617500702/Basilisk-Essential-500x500.png"
+
+    DPI_MAX = 6400
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', 100)
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        self.disable_notify = False
+
+
 class RazerBasiliskUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Basilisk Ultimate
