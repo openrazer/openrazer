@@ -1,5 +1,5 @@
 ---
-name: ⌨️🖱️New Device Support
+name: ⌨️🖱️ New Device Support
 about: Provide information to add support for a new device
 title: Support for [device name here]
 labels: Device Support

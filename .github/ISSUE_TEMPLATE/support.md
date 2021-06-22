@@ -1,5 +1,5 @@
 ---
-name: ❓Support
+name: ❓ Support
 about: Questions and requests for support
 title: 
 labels: support
