@@ -211,10 +211,6 @@ The following applications complement and interact with this driver:
 * [Snake](http://bithatch.co.uk/snake.html) - a stylised tool and tray applet for configuring Razer devices on Linux, written in Java.
 * [Chroma Feedback](https://github.com/redaxmedia/chroma-feedback) - Turn your Razer keyboard, mouse or headphone into a extreme feedback device
 
-## Contributions
-
-You can donate to [@terrycain](https://github.com/terrycain) with PayPal to terry@terrys-home.co.uk .
-
 ---
 
 The project is licensed under the GPL and is not officially endorsed by [Razer, Inc](http://www.razerzone.com/).
