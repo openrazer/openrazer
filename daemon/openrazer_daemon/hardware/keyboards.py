@@ -1307,6 +1307,7 @@ class RazerBlade15AdvancedEarly2021(_RippleKeyboard):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1761/blade-15-advanced-2021-rz09-0367x.png"
 
+
 class RazerBlade15BaseEarly2021(_RippleKeyboard):
     """
     Class for the Razer Blade 15 Base (Early 2021)
