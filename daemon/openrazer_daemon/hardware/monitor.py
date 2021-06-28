@@ -1,5 +1,5 @@
 """
-Mug class
+Monitor class
 """
 
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
