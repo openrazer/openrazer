@@ -4,6 +4,7 @@ Monitor class
 
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
 
+
 class RazerBaseStationChroma(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Raptor 27" 2560x1440
