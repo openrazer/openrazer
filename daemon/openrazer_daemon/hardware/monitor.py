@@ -7,7 +7,7 @@ from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend a
 
 class RazerBaseStationChroma(_RazerDeviceBrightnessSuspend):
     """
-    Class for the Razer Raptor 27" 2560x1440
+    Class for the Razer Raptor 27 2560x1440
     """
     USB_VID = 0x1532
     USB_PID = 0x0F12

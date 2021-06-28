@@ -188,7 +188,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
-        device_type = "Razer Raptor 27\"\n";
+        device_type = "Razer Raptor 27\n";
         break;
 
     default:
