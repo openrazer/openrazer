@@ -155,6 +155,11 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Kraken Ultimate                         |  1532:0527  |
 | Razer Kraken Kitty Edition                    |  1532:0F19  |
 
+### Displays
+| Device                                        | USB VID:PID |
+| --------------------------------------------- | ----------- |
+| Razer Raptor 27" 2560x1440                    |  1532:0F12  |
+
 ### Misc
 | Device                                        | USB VID:PID |
 | --------------------------------------------- | ----------- |
