@@ -614,11 +614,11 @@ class RazerOrnataChroma(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/727/727_ornata_chroma.png"
 
 
-class RazerOrnataChromaV2(_RippleKeyboard):
+class RazerOrnataV2(_RippleKeyboard):
     """
-    Class for the Razer Ornata Chroma
+    Class for the Razer Ornata V2
     """
-    EVENT_FILE_REGEX = re.compile(r'.*Ornata_Chroma_V2(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Ornata_V2(-if01)?-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x025D
