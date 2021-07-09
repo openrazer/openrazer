@@ -439,6 +439,25 @@ class RazerBlackWidowXChroma(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/716/716_blackwidow_x_chroma.png"
 
 
+# TODO Should become _RippleKeyboard once kernel support for driver mode is implemented
+class RazerHuntsmanV2Analog(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Huntsman V2 Analog
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Huntsman_V2_Analog(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0266
+    HAS_MATRIX = True
+    MATRIX_DIMS = [8, 22]
+    # TODO Remove get_keyboard_layout once not _RazerDeviceBrightnessSuspend anymore
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_keyboard_layout']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/4023-1-EN-v1.png"
+
+
 class RazerBlackWidowXTournamentEditionChroma(_RippleKeyboard):
     """
     Class for the Razer BlackWidow X Tournament Edition Chroma
