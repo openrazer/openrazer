@@ -670,7 +670,7 @@ class SingleLed(BaseRazerFX):
         return self.has('{0}_{1}'.format(self._led_name, item))
 
     def _getattr(self, name):
-        attr = name.replace('#', self._led_name.title())
+        attr = name.replace('#', self._led_name.title().replace("_", ""))
         return getattr(self._lighting_dbus, attr, None)
 
     @property
