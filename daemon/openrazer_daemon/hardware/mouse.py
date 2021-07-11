@@ -2535,6 +2535,55 @@ class RazerBasiliskXHyperSpeed(__RazerDevice):
         self.logger.debug("Device doesn't have suspend/resume")
 
 
+class RazerOrochiV2Receiver(__RazerDevice):
+    """
+    Class for the Razer Orochi V2 (Receiver)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Orochi_V2_000000000000-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0094
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate',
+               'set_poll_rate', 'get_battery', 'is_charging', 'get_idle_time',
+               'set_idle_time', 'get_low_battery_threshold',
+               'set_low_battery_threshold']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/OrochiV2-1-en-v1.png"
+
+    DPI_MAX = 18000
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(
+            self, self._device_number, 'Razer Orochi V2')
+
+        self._battery_manager.active = self.config.getboolean(
+            'Startup', 'mouse_battery_notifier', fallback=False)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
+
+    def _resume_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+    def _suspend_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+
+class RazerOrochiV2Bluetooth(RazerOrochiV2Receiver):
+    """
+    Class for the Razer Orochi V2 (Bluetooth)
+    """
+    USB_PID = 0x0095
+
+
 class RazerDeathAdderV2Mini(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer DeathAdder V2 Mini
