@@ -312,8 +312,11 @@ class RazerDaemon(DBusService):
         for device in self._razer_devices:
             self._persistence[device.dbus.storage_name] = {}
             if 'set_dpi_xy' in device.dbus.METHODS or 'set_dpi_xy_byte' in device.dbus.METHODS:
-                self._persistence[device.dbus.storage_name]['dpi_x'] = str(device.dbus.dpi[0])
-                self._persistence[device.dbus.storage_name]['dpi_y'] = str(device.dbus.dpi[1])
+                dpi_x = int(device.dbus.dpi[0])
+                dpi_y = int(device.dbus.dpi[1])
+                if dpi_x > 0 and dpi_y > 0:
+                    self._persistence[device.dbus.storage_name]['dpi_x'] = str(dpi_x)
+                    self._persistence[device.dbus.storage_name]['dpi_y'] = str(dpi_y)
 
             if 'set_poll_rate' in device.dbus.METHODS:
                 self._persistence[device.dbus.storage_name]['poll_rate'] = str(device.dbus.poll_rate)
