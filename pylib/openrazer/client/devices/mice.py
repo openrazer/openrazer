@@ -62,7 +62,10 @@ class RazerMouse(__RazerDevice):
 
         :raises NotImplementedError: If function is not supported
         """
-        if self.has('dpi'):
+        if self.has('available_dpi'):
+            dpi_x = self._dbus_interfaces['dpi'].getDPI()[0]
+            return int(dpi_x), 0
+        elif self.has('dpi'):
             dpi_x, dpi_y = self._dbus_interfaces['dpi'].getDPI()
             # Converting to integers to remove the dbus types
             return int(dpi_x), int(dpi_y)
