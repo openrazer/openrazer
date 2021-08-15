@@ -240,17 +240,6 @@ class RazerTartarusPro(_RippleKeyboard):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1255/1255_tartarus_v2.png"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        # self.key_manager.close()
-
 
 class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
     """
