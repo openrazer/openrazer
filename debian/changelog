@@ -1,3 +1,9 @@
+openrazer (3.1.0) focal; urgency=high
+
+  * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v3.1.0
+
+ -- Luca Weiss <luca@z3ntu.xyz>  Sun, 15 Aug 2021 11:42:45 +0200
+
 openrazer (3.0.1) bionic; urgency=high
 
   * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v3.0.1
