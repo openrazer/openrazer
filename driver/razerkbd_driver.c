@@ -1712,12 +1712,12 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
-        report = razer_chroma_standard_matrix_effect_custom_frame(VARSTORE); // Possibly could use VARSTORE
+        report = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
         report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
         break;
 
     default:
-        report = razer_chroma_standard_matrix_effect_custom_frame(VARSTORE); // Possibly could use VARSTORE
+        report = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
         break;
     }
     razer_send_payload(usb_dev, &report);
