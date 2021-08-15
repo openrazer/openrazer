@@ -1124,7 +1124,7 @@ struct razer_report razer_chroma_misc_get_dpi_xy_byte(void)
 /**
  * Set DPI stages of the device.
  *
- * count is the numer of stages to set.
+ * count is the number of stages to set.
  * active_stage selected stage number.
  * dpi is an array of size 2 * count containing pairs of dpi x and dpi y
  * values, one pair for each stage.

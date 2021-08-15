@@ -523,7 +523,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
              * Mode switcher required after setting static color effect once and before setting a second time.
              * Similar to Naga Trinity?
              *
-             * If the color is not set twice with the mode switch inbetween, each subsequent
+             * If the color is not set twice with the mode switch in-between, each subsequent
              * setting of the static effect actually sets the previous color...
              */
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
