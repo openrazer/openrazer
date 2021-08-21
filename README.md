@@ -75,6 +75,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Huntsman V2 Analog                      |  1532:0266  |
 | Razer Book 13 (2020)                          |  1532:026A  |
 | Razer Blade 15 Advanced (Early 2021)          |  1532:026D  |
+| Razer Blade 14 (2021)                         |  1532:0270  |
 | Razer Blade 15 Advanced (Mid 2021)            |  1532:0276  |
 | Razer BlackWidow V3 Tenkeyless                |  1532:0A24  |
 
