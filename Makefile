@@ -1,3 +1,15 @@
+# ********************************* WARNING *********************************
+# This Makefile is not supposed to be used outside of certain usecases like
+# compiling the driver ("make driver") in this repository or installing the
+# files as part of distribution packaging.
+#
+# Please never run the install targets manually (unless you really know what
+# you're doing) as they're not intended to be used like that!
+#
+# You're in nearly all cases better off following the build instructions
+# that you can find in the wiki.
+# ***************************************************************************
+
 # DESTDIR is used to install into a different root directory
 DESTDIR?=/
 # Specify the kernel directory to use
@@ -147,6 +159,7 @@ appstream_uninstall:
 	rm -f $(DESTDIR)/usr/share/metainfo/io.github.openrazer.openrazer.metainfo.xml
 
 # Install for Ubuntu
+# WARNING: do not use this target manually, it is just meant for Debian packaging! Read the warning on top of the file!
 ubuntu_install: setup_dkms ubuntu_udev_install ubuntu_daemon_install ubuntu_python_library_install appstream_install
 	@echo -e "\n::\033[34m Installing for Ubuntu\033[0m"
 	@echo "====================================================="
