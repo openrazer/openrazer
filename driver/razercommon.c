@@ -144,7 +144,7 @@ struct razer_report get_razer_report(unsigned char command_class, unsigned char 
     memset(&new_report, 0, sizeof(struct razer_report));
 
     new_report.status = 0x00;
-    new_report.transaction_id.id = 0x1F;
+    new_report.transaction_id.id = 0xFF;
     new_report.remaining_packets = 0x00;
     new_report.protocol_type = 0x00;
     new_report.command_class = command_class;
