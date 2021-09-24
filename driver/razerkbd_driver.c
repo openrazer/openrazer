@@ -651,6 +651,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Huntsman V2 Analog\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
+        device_type = "Razer BlackWidow V3 Mini\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
     }
@@ -685,6 +689,7 @@ static ssize_t razer_attr_write_mode_macro_effect(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_CYNOSA_LITE:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
         report = razer_chroma_standard_set_led_effect(NOSTORE, MACRO_LED, enabled);
         report.transaction_id.id = 0x3F;
         break;
