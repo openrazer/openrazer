@@ -761,9 +761,9 @@ class RazerBlackWidowV3TK(_RippleKeyboard):
 
 class RazerBlackWidowV3MINI(_RippleKeyboard):
     """
-    Class for the Razer BlackWidow V3 TK
+    Class for the Razer BlackWidow V3 Mini
     """
-    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_V3_MINI(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_V3_Mini(-if01)?-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x0258
