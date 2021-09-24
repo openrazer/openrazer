@@ -203,7 +203,6 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
         report_index = 0x02;
         response_index = 0x02;
         break;
@@ -286,6 +285,7 @@ static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode
         report.transaction_id.id = 0x3F;
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
         report.transaction_id.id = 0x1F;
         break;
     }
