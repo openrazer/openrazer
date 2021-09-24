@@ -195,6 +195,7 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     uint response_index;
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
         report_index = 0x03;
         response_index = 0x03;
         break;
