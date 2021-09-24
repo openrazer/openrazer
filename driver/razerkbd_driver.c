@@ -200,8 +200,8 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
         response_index = 0x03;
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
-        report_index = 0x04;
-        response_index = 0x04;
+        report_index = 0x01;
+        response_index = 0x01;
         break;
     case USB_DEVICE_ID_RAZER_ANANSI:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_TE:
@@ -291,8 +291,10 @@ static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
         report.transaction_id.id = 0x1F;
+        break;
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
+        report.transaction_id.id = 0x9F;
         break;
     }
 
@@ -1324,7 +1326,6 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
         if(count == 3) {
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
             report.transaction_id.id = 0x1F;
@@ -1333,6 +1334,16 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
             printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)");
         }
         break;
+
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
+            if(count == 3) {
+                report = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+                report.transaction_id.id = 0x9F;
+                razer_send_payload(usb_dev, &report);
+            } else {
+                printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)");
+            }
+            break;
 
     case USB_DEVICE_ID_RAZER_ANANSI:
         if(count == 3) {
