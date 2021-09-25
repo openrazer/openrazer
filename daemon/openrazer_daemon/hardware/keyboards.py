@@ -6,6 +6,7 @@ import re
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
 from openrazer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
 from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
+from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 
 
 class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
@@ -757,6 +758,49 @@ class RazerBlackWidowV3TK(_RippleKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1709/1709-blackwidow-v3-tkl.png"
+
+
+class RazerBlackWidowV3MiniHyperspeed(_RippleKeyboard):
+    """
+    Class for the Razer BlackWidow V3 Mini Hyperspeed
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_V3_Mini(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0258
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [5, 16]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_battery']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1777/500x500-blackwidowv3mini.png"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer BlackWidow V3 Mini Hyperspeed')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
+
+
+class RazerBlackWidowV3MiniHyperspeedWireless(RazerBlackWidowV3MiniHyperspeed):
+    """
+    Class for the Razer BlackWidow V3 Mini Hyperspeed (Wireless)
+    """
+    USB_PID = 0x0271
 
 
 class RazerCynosaChroma(_RippleKeyboard):
