@@ -358,6 +358,7 @@ class RazerBlackWidowTournamentEdition2014(_MacroKeyboard):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/17564/razer-blackwidow-te-stealth-hero-01.png"
 
+
 class RazerBlackWidowV3ProWired(_RippleKeyboard):
     """
     Class for the Razer BlackWidow V3 Pro Wired
@@ -387,6 +388,7 @@ class RazerBlackWidowV3ProWired(_RippleKeyboard):
         self._battery_manager = _BatteryManager(self, self._device_number, self.DEVICE_NAME)
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'mouse_battery_notifier_freq', fallback=10 * 60)
+
 
 class RazerBlackWidowChroma(_RippleKeyboard):
     """
