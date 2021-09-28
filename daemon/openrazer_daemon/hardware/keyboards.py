@@ -390,6 +390,14 @@ class RazerBlackWidowV3ProWired(_RippleKeyboard):
         self._battery_manager.frequency = self.config.getint('Startup', 'mouse_battery_notifier_freq', fallback=10 * 60)
 
 
+class RazerBlackWidowV3ProWireless(RazerBlackWidowV3ProWired):
+    """
+    Class for the Razer BlackWidow v3 Pro 2.4 Ghz Wireless
+    """
+    DEVICE_NAME = 'Razer BlackWidow V3 Pro 2.4 Ghz Wireless'
+    USB_PID = 0x025C
+
+
 class RazerBlackWidowChroma(_RippleKeyboard):
     """
     Class for the Razer BlackWidow Chroma
