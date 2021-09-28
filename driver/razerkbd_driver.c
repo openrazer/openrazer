@@ -2154,8 +2154,6 @@ static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_att
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_BLUETOOTH:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
         report.transaction_id.id = 0x3f;
         break;
     default:
