@@ -4,11 +4,6 @@
 # This value is default but we need it below
 DEB_DESTDIR=$(CURDIR)/debian/tmp
 
-# Use XDG autostart for 16.04 as a workaround for https://bugs.launchpad.net/ubuntu/+source/chromium-browser/+bug/1689825
-# All occurrences of "ifeq ($(release_ver),16.04)"
-# Remove when support for 16.04 can be dropped.
-release_ver := $(shell lsb_release --release --short)
-
 %:
 	dh $@ --with python3,dkms
 
@@ -21,27 +16,12 @@ override_dh_auto_build:
 	echo "DKMS modules are built at packages installation time."
 
 override_dh_auto_install:
-ifeq ($(release_ver),16.04)
-	$(MAKE) ubuntu_install xdg_install DESTDIR=$(DEB_DESTDIR)
-else
 	$(MAKE) ubuntu_install install-systemd DESTDIR=$(DEB_DESTDIR)
-endif
 
 override_dh_install:
-ifeq ($(release_ver),16.04)
-	dh_install --package=openrazer-daemon etc/xdg/autostart/openrazer-daemon.desktop
-else
 	dh_install --package=openrazer-daemon usr/share/dbus-1/services/org.razer.service
 	dh_install --package=openrazer-daemon usr/lib/systemd/user/openrazer-daemon.service
-endif
 	dh_install --remaining-packages
 
 override_dh_dkms:
 	dh_dkms -p openrazer-driver-dkms -- install_files/dkms/dkms.conf
-
-override_dh_gencontrol:
-ifeq ($(release_ver),16.04)
-	dh_gencontrol -- -Vopenrazer:dbus-user-session=
-else
-	dh_gencontrol -- -Vopenrazer:dbus-user-session=dbus-user-session
-endif
