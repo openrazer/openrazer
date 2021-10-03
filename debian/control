@@ -6,10 +6,8 @@ Build-Depends: debhelper (>= 9),
                dh-python,
                dkms,
                python3,
-               python3-setuptools,
-# Following can be removed when support for 16.04 will be dropped
-               lsb-release
-Standards-Version: 4.2.1
+               python3-setuptools
+Standards-Version: 4.6.0
 Vcs-Browser: https://github.com/openrazer/openrazer/
 Vcs-Git: https://github.com/openrazer/openrazer.git
 Homepage: https://openrazer.github.io/
@@ -70,7 +68,7 @@ Depends: ${misc:Depends},
          python3-daemonize (>= 2.4.0),
          gir1.2-gtk-3.0,
          xautomation,
-         ${openrazer:dbus-user-session}
+         dbus-session-bus
 Recommends: python3-openrazer (= ${binary:Version})
 Conflicts: razer-daemon
 Provides: razer-daemon
