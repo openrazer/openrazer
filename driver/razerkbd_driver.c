@@ -2199,11 +2199,11 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_CYNOSA_V2:
         case USB_DEVICE_ID_RAZER_ORNATA_V2:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
-<<<<<<< HEAD
+            <<<<<<< HEAD
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
-=======
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
->>>>>>> origin/master
+            =======
+            case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
+            >>>>>>> origin/master
         case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
             report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             report.transaction_id.id = 0x1F;
@@ -2508,13 +2508,13 @@ static DEVICE_ATTR(charge_colour,           0220, NULL,                         
 static DEVICE_ATTR(charge_low_threshold,    0660, razer_attr_read_low_battery_threshold,      razer_attr_write_set_low_battery_threshold);
 =======
 
->>>>>>> origin/master
+    >>>>>>> origin/master
 
 
-/**
- * Deal with FN toggle
- */
-static int razer_event(struct hid_device *hdev, struct hid_field *field, struct hid_usage *usage, __s32 value)
+    /**
+     * Deal with FN toggle
+     */
+    static int razer_event(struct hid_device *hdev, struct hid_field *field, struct hid_usage *usage, __s32 value)
 {
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
