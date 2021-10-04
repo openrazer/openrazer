@@ -52,6 +52,15 @@ MODULE_LICENSE(DRIVER_LICENSE);
 
 #define KEY_FLAG_BLOCK 0b00000001
 
+// KEY_MACRO* has been added in Linux 5.5, so define ourselves for older kernels.
+// See also https://git.kernel.org/torvalds/c/b5625db
+#ifndef KEY_MACRO1
+#define KEY_MACRO1 0x290
+#define KEY_MACRO2 0x291
+#define KEY_MACRO3 0x292
+#define KEY_MACRO4 0x293
+#endif
+
 /**
  * List of keys to swap
  */
