@@ -47,6 +47,7 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
 {
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, RAZER_NEW_DEVICE_WAIT_MIN_US, RAZER_NEW_DEVICE_WAIT_MAX_US);
         break;
 
@@ -187,6 +188,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Mouse Dock\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
+        device_type = "Razer Thunderbolt 4 Dock Chroma\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
         break;
@@ -249,6 +254,7 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
         report.transaction_id.id = 0x1F;
         break;
@@ -376,6 +382,7 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         report = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
         report.transaction_id.id = 0x1F;
         break;
@@ -460,6 +467,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         report = razer_chroma_extended_matrix_effect_custom_frame();
         report.transaction_id.id = 0x1F;
@@ -512,6 +520,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
             report.transaction_id.id = 0x1F;
             break;
@@ -607,6 +616,8 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         // Must be in normal mode for hardware effects
         razer_set_device_mode(device->usb_dev, 0x00, 0x00);
+    /* Fall through */
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         // Direction values are flipped compared to other devices
         direction ^= ((1<<0) | (1<<1));
         report = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
@@ -666,6 +677,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         switch(count) {
         case 3: // Single colour mode
             report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
@@ -752,6 +764,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         switch(count) {
         case 4: // Single colour mode
             report = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, ZERO_LED, speed, (struct razer_rgb *)&buf[1]);
@@ -854,6 +867,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
             report = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
             report.transaction_id.id = 0x1F;
             break;
@@ -917,6 +931,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         report.transaction_id.id = 0x1F;
         response_report = razer_send_payload(device->usb_dev, &report);
@@ -947,6 +962,7 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         report.transaction_id.id = 0x1F;
         break;
@@ -991,6 +1007,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
             report.transaction_id.id = 0x1F;
             break;
@@ -1032,6 +1049,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         report.transaction_id.id = 0x1F;
         break;
@@ -1074,6 +1092,7 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         report = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         report.transaction_id.id = 0x1F;
@@ -1125,6 +1144,7 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
         brightness = device->saved_brightness;
@@ -1703,6 +1723,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         expected_protocol = 0;
         break;
@@ -1790,6 +1811,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
@@ -1808,6 +1830,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);                // Wave effect
             break;
@@ -1834,6 +1857,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
 
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);
             break;
         }
@@ -1894,6 +1918,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         expected_protocol = 0;
         break;
@@ -1968,6 +1993,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
@@ -1986,6 +2012,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);                // Wave effect
             break;
@@ -2065,6 +2092,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MOUSE_DOCK) },
