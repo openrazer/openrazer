@@ -384,7 +384,7 @@ class RazerBlackWidowV3ProWired(_RippleKeyboard):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._battery_manager = _BatteryManager(self, self._device_number, self.DEVICE_NAME)
+        self._battery_manager = _BatteryManager(self, self._device_number, "Razer BlackWidow V3 Pro (Wired)")
         self._battery_manager.active = self.config.getboolean('Startup', 'mouse_battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'mouse_battery_notifier_freq', fallback=10 * 60)
 
