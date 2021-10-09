@@ -367,6 +367,7 @@ static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
         report.transaction_id.id = 0x9f;
+        break;
     default:
         report.transaction_id.id = 0x1f;
         break;
