@@ -363,7 +363,6 @@ class RazerBlackWidowV3ProWired(_RippleKeyboard):
     """
     Class for the Razer BlackWidow V3 Pro Wired
     """
-    DEVICE_NAME = 'Razer BlackWidow V3 Pro Wired'
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_BlackWidow_V3_Pro(-if01)?-event-kbd')
 
     USB_VID = 0x1532
