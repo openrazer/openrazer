@@ -839,7 +839,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
-        device_type = "Razer BlackWidow V3 Pro(Wireless)\n";
+        device_type = "Razer BlackWidow V3 Pro (Wireless)\n";
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
