@@ -364,6 +364,9 @@ static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
         report.transaction_id.id = 0x3f;
         break;
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
+        report.transaction_id.id = 0x9f;
     default:
         report.transaction_id.id = 0x1f;
         break;
@@ -1207,6 +1210,7 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
         report.transaction_id.id = 0x1F;
         break;
 
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
         report = razer_chroma_extended_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
         report.transaction_id.id = 0x9F;
@@ -1219,11 +1223,6 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
         report = razer_chroma_standard_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
         report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
-        break;
-
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
-        report = razer_chroma_extended_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
-        report.transaction_id.id = 0x9F;
         break;
 
     default:
