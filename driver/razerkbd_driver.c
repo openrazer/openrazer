@@ -347,6 +347,134 @@ static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode
 }
 
 /**
+ * Read device file "get_battery"
+ *
+ * Returns an integer which needs to be scaled from 0-255 -> 0-100
+ */
+static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = razer_chroma_misc_get_battery_level();
+    struct razer_report response_report = {0};
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
+        report.transaction_id.id = 0x3f;
+        break;
+    default:
+        report.transaction_id.id = 0x1f;
+        break;
+    }
+
+    response_report = razer_send_payload(usb_dev, &report);
+
+    return sprintf(buf, "%d\n", response_report.arguments[1]);
+}
+
+/**
+ * Read device file "is_charging"
+ *
+ * Returns 0 when not charging, 1 when charging
+ */
+static ssize_t razer_attr_read_is_charging(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = razer_chroma_misc_get_charging_status();
+    struct razer_report response_report = {0};
+
+    switch(usb_dev->descriptor.idProduct) {
+
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
+        report.transaction_id.id = 0x3f;
+        break;
+    default:
+        report.transaction_id.id = 0x1f;
+        break;
+    }
+
+    response_report = razer_send_payload(usb_dev, &report);
+
+    return sprintf(buf, "%d\n", response_report.arguments[1]);
+}
+
+/**
+ * Write device file "set_charging_effect"
+ *
+ * Sets charging effect.
+ */
+static ssize_t razer_attr_write_set_charging_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = {0};
+
+    if(count == 1) {
+        report = razer_chroma_misc_set_dock_charge_type(buf[0]);
+        razer_send_payload(usb_dev, &report);
+    } else {
+        printk(KERN_WARNING "razerkbd: Incorrect number of bytes for setting the charging effect\n");
+    }
+    return count;
+}
+
+/**
+ * Write device file "set_charging_colour"
+ *
+ * Sets charging colour using 3 RGB bytes
+ */
+static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    // First enable static charging effect
+    struct razer_report report = razer_chroma_misc_set_dock_charge_type(0x01);
+    razer_send_payload(usb_dev, &report);
+
+
+    if(count == 3) {
+        report = razer_chroma_standard_set_led_rgb(NOSTORE, BATTERY_LED, (struct razer_rgb*)&buf[0]);
+        razer_send_payload(usb_dev, &report);
+    } else {
+        printk(KERN_WARNING "razerkbd: Charging colour mode only accepts RGB (3byte)");
+    }
+
+    return count;
+}
+
+/**
+ * Read device file "charge_low_threshold"
+ */
+static ssize_t razer_attr_read_low_battery_threshold(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+    struct razer_report report = razer_chroma_misc_get_low_battery_threshold();
+    struct razer_report response = {0};
+
+    response = razer_send_payload(device->usbdev, &report);
+
+    return sprintf(buf, "%d\n", response.arguments[0]);
+}
+
+/**
+ * Write device file "charge_low_threshold"
+ *
+ * Sets the low battery blink threshold to the ASCII number written to this file.
+ */
+static ssize_t razer_attr_write_set_low_battery_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    unsigned char threshold = (unsigned char)simple_strtoul(buf, NULL, 10);
+    struct razer_report report = razer_chroma_misc_set_low_battery_threshold(threshold);
+
+    razer_send_payload(usb_dev, &report);
+    return count;
+}
+
+/**
  * Write device file "mode_game"
  *
  * When 1 is written (as a character, 0x31) Game mode will be enabled, if 0 is written (0x30)
@@ -702,7 +830,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
-        device_type = "Razer BlackWidow V3 Pro(Wired)\n";
+        device_type = "Razer BlackWidow V3 Pro (Wired)\n";
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
@@ -2296,134 +2424,6 @@ static ssize_t razer_attr_read_key_alt_f4(struct device *dev, struct device_attr
     buf[0] = device->block_keys[2];
 
     return 1;
-}
-
-/**
- * Read device file "get_battery"
- *
- * Returns an integer which needs to be scaled from 0-255 -> 0-100
- */
-static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report = razer_chroma_misc_get_battery_level();
-    struct razer_report response_report = {0};
-
-    switch(usb_dev->descriptor.idProduct) {
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
-        report.transaction_id.id = 0x3f;
-        break;
-    default:
-        report.transaction_id.id = 0x1f;
-        break;
-    }
-
-    response_report = razer_send_payload(usb_dev, &report);
-
-    return sprintf(buf, "%d\n", response_report.arguments[1]);
-}
-
-/**
- * Read device file "is_charging"
- *
- * Returns 0 when not charging, 1 when charging
- */
-static ssize_t razer_attr_read_is_charging(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report = razer_chroma_misc_get_charging_status();
-    struct razer_report response_report = {0};
-
-    switch(usb_dev->descriptor.idProduct) {
-
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
-        report.transaction_id.id = 0x3f;
-        break;
-    default:
-        report.transaction_id.id = 0x1f;
-        break;
-    }
-
-    response_report = razer_send_payload(usb_dev, &report);
-
-    return sprintf(buf, "%d\n", response_report.arguments[1]);
-}
-
-/**
- * Write device file "set_charging_effect"
- *
- * Sets charging effect.
- */
-static ssize_t razer_attr_write_set_charging_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report report = {0};
-
-    if(count == 1) {
-        report = razer_chroma_misc_set_dock_charge_type(buf[0]);
-        razer_send_payload(usb_dev, &report);
-    } else {
-        printk(KERN_WARNING "razerkbd: Incorrect number of bytes for setting the charging effect\n");
-    }
-    return count;
-}
-
-/**
- * Write device file "set_charging_colour"
- *
- * Sets charging colour using 3 RGB bytes
- */
-static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-
-    // First enable static charging effect
-    struct razer_report report = razer_chroma_misc_set_dock_charge_type(0x01);
-    razer_send_payload(usb_dev, &report);
-
-
-    if(count == 3) {
-        report = razer_chroma_standard_set_led_rgb(NOSTORE, BATTERY_LED, (struct razer_rgb*)&buf[0]);
-        razer_send_payload(usb_dev, &report);
-    } else {
-        printk(KERN_WARNING "razerkbd: Charging colour mode only accepts RGB (3byte)");
-    }
-
-    return count;
-}
-
-/**
- * Read device file "charge_low_threshold"
- */
-static ssize_t razer_attr_read_low_battery_threshold(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    struct razer_kbd_device *device = dev_get_drvdata(dev);
-    struct razer_report report = razer_chroma_misc_get_low_battery_threshold();
-    struct razer_report response = {0};
-
-    response = razer_send_payload(device->usbdev, &report);
-
-    return sprintf(buf, "%d\n", response.arguments[0]);
-}
-
-/**
- * Write device file "charge_low_threshold"
- *
- * Sets the low battery blink threshold to the ASCII number written to this file.
- */
-static ssize_t razer_attr_write_set_low_battery_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    unsigned char threshold = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report report = razer_chroma_misc_set_low_battery_threshold(threshold);
-
-    razer_send_payload(usb_dev, &report);
-    return count;
 }
 
 /**
