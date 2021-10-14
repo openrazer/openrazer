@@ -1848,6 +1848,53 @@ class RazerDeathAdderEssential(__RazerDeviceSpecialBrightnessSuspend):
         self.disable_notify = False
 
 
+class RazerDeathAdderEssential2021(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer DeathAdder Essential (2021)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0098
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               # Logo
+               'get_logo_brightness', 'set_logo_brightness',
+               'set_logo_static_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2',
+               # Scroll wheel
+               'get_scroll_brightness', 'set_scroll_brightness',
+               'set_scroll_static_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2']
+
+    DPI_MAX = 6400
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1385/1385_deathadderessential.png"
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        _da_set_scroll_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
+        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        _da_set_scroll_brightness(self, scroll_brightness)
+        self.disable_notify = False
+
+
 class RazerMambaElite(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Mamba Elite
