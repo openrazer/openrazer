@@ -166,14 +166,14 @@ def set_dpi_xy(self, dpi_x, dpi_y):
 
     if self._testing:
         with open(driver_path, 'w') as driver_file:
-            if dpi_y == -1:
+            if dpi_y <= 0:
                 driver_file.write("{}".format(dpi_x))
             else:
                 driver_file.write("{}:{}".format(dpi_x, dpi_y))
         return
 
     # If the application requests just one value to be written
-    if dpi_y == -1:
+    if dpi_y <= 0:
         dpi_bytes = struct.pack('>H', dpi_x)
     else:
         dpi_bytes = struct.pack('>HH', dpi_x, dpi_y)

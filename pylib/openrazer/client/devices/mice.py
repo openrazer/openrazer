@@ -89,13 +89,17 @@ class RazerMouse(__RazerDevice):
                 raise ValueError("DPI tuple is not of length 2. Length: {0}".format(len(value)))
             max_dpi = self.max_dpi
             dpi_x, dpi_y = value
+            dpi_x_only = self.has('available_dpi')
 
             if not isinstance(dpi_x, int) or not isinstance(dpi_y, int):
                 raise ValueError("DPI X or Y is not an integer, X:{0} Y:{1}".format(type(dpi_x), type(dpi_y)))
 
             if dpi_x < 0 or dpi_x > max_dpi:
                 raise ValueError("DPI X either too small or too large, X:{0}".format(dpi_x))
-            if dpi_y < 0 or dpi_y > max_dpi:
+
+            if dpi_x_only and not dpi_y == 0:
+                raise ValueError("DPI Y is not supported for this device")
+            elif dpi_y < 0 or dpi_y > max_dpi:
                 raise ValueError("DPI Y either too small or too large, Y:{0}".format(dpi_y))
 
             self._dbus_interfaces['dpi'].setDPI(dpi_x, dpi_y)
