@@ -381,6 +381,32 @@ static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_att
 }
 
 /**
+ * Read device file "is_charging"
+ *
+ * Returns 0 when not charging, 1 when charging
+ */
+static ssize_t razer_attr_read_is_charging(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_report report = razer_chroma_misc_get_charging_status();
+    struct razer_report response_report = {0};
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
+        report.transaction_id.id = 0x1f;
+        break;
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
+        report.transaction_id.id = 0x9f;
+        break;
+    }
+
+    response_report = razer_send_payload(usb_dev, &report);
+
+    return sprintf(buf, "%d\n", response_report.arguments[1]);
+}
+
+/**
  * Write device file "mode_game"
  *
  * When 1 is written (as a character, 0x31) Game mode will be enabled, if 0 is written (0x30)
@@ -2362,6 +2388,7 @@ static DEVICE_ATTR(key_alt_tab,             0660, razer_attr_read_key_alt_tab,  
 static DEVICE_ATTR(key_alt_f4,              0660, razer_attr_read_key_alt_f4,                 razer_attr_write_key_alt_f4);
 
 static DEVICE_ATTR(charge_level,            0440, razer_attr_read_get_battery,                NULL);
+static DEVICE_ATTR(charge_status,           0440, razer_attr_read_is_charging,                NULL);
 
 
 
@@ -2777,6 +2804,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);                  // Battery charge level
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);                 // Battery charge status
             break;
 
         case USB_DEVICE_ID_RAZER_CYNOSA_LITE:
@@ -3141,6 +3169,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
             device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
             device_remove_file(&hdev->dev, &dev_attr_charge_level);                  // Battery charge level
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);                 // Battery charge status
             break;
 
         case USB_DEVICE_ID_RAZER_CYNOSA_LITE:
