@@ -8,21 +8,6 @@ from openrazer.client import constants as _c
 class RazerMouse(__RazerDevice):
     _MACRO_CLASS = _RazerMacro
 
-    def __init__(self, serial, vid_pid=None, daemon_dbus=None):
-        super().__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
-
-        # Capabilities
-        self._capabilities['poll_rate'] = self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate'))
-        self._capabilities['dpi'] = self._has_feature('razer.device.dpi', ('getDPI', 'setDPI'))
-        self._capabilities['dpi_stages'] = self._has_feature('razer.device.dpi', ('getDPIStages', 'setDPIStages'))
-        self._capabilities['available_dpi'] = self._has_feature('razer.device.dpi', 'availableDPI')
-        self._capabilities['battery'] = self._has_feature('razer.device.power', 'getBattery')
-
-        if self.has('dpi'):
-            self._dbus_interfaces['dpi'] = _dbus.Interface(self._dbus, "razer.device.dpi")
-        if self.has('battery'):
-            self._dbus_interfaces['power'] = _dbus.Interface(self._dbus, "razer.device.power")
-
     @property
     def max_dpi(self) -> int:
         """

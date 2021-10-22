@@ -50,9 +50,19 @@ class RazerDevice(object):
             'firmware_version': True,
             'serial': True,
             'brightness': self._has_feature('razer.device.lighting.brightness'),
+            'battery': self._has_feature('razer.device.power', 'getBattery'),
 
             'macro_logic': self._has_feature('razer.device.macro'),
             'keyboard_layout': self._has_feature('razer.device.misc', 'getKeyboardLayout'),
+            'game_mode_led': self._has_feature('razer.device.led.gamemode'),
+            'macro_mode_led': self._has_feature('razer.device.led.macromode', 'setMacroMode'),
+            'macro_mode_led_effect': self._has_feature('razer.device.led.macromode', 'setMacroEffect'),
+            'macro_mode_modifier': self._has_feature('razer.device.macro', 'setModeModifier'),
+
+            'poll_rate': self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate')),
+            'dpi': self._has_feature('razer.device.dpi', ('getDPI', 'setDPI')),
+            'dpi_stages': self._has_feature('razer.device.dpi', ('getDPIStages', 'setDPIStages')),
+            'available_dpi': self._has_feature('razer.device.dpi', 'availableDPI'),
 
             # Default device is a chroma so lighting capabilities
             'lighting': self._has_feature('razer.device.lighting.chroma'),
@@ -197,6 +207,17 @@ class RazerDevice(object):
                 self.macro = None
         else:
             self.macro = None
+
+        if self.has('dpi'):
+            self._dbus_interfaces['dpi'] = _dbus.Interface(self._dbus, "razer.device.dpi")
+        if self.has('battery'):
+            self._dbus_interfaces['power'] = _dbus.Interface(self._dbus, "razer.device.power")
+        if self.has('game_mode_led'):
+            self._dbus_interfaces['game_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.gamemode")
+        if self.has('macro_mode_led'):
+            self._dbus_interfaces['macro_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.macromode")
+        if self.has('lighting_profile_led_red') or self.has('lighting_profile_led_green') or self.has('lighting_profile_led_blue'):
+            self._dbus_interfaces['profile_led'] = _dbus.Interface(self._dbus, "razer.device.lighting.profile_led")
 
     def _get_available_features(self):
         introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')
