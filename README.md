@@ -80,6 +80,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade 14 (2021)                         |  1532:0270  |
 | Razer BlackWidow V3 Mini Hyperspeed (Wireless)|  1532:0271  |
 | Razer Blade 15 Advanced (Mid 2021)            |  1532:0276  |
+| Razer Blade 17 Pro (Mid 2021)                 |  1532:0279  |
 | Razer BlackWidow V3 Tenkeyless                |  1532:0A24  |
 
 ### Mice
