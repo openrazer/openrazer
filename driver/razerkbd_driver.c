@@ -2886,6 +2886,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
+    case USB_DEVICE_ID_RAZER_ORNATA_V2:
         return razer_raw_event_bitfield(hdev, asc, intf, report, data, size);
     default:
         return razer_raw_event_standard(hdev, asc, intf, report, data, size);
