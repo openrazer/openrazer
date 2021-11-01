@@ -54,21 +54,21 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer BlackWidow Lite (2018)                  |  1532:0235  |
 | Razer BlackWidow Essential                    |  1532:0237  |
 | Razer Blade Stealth (2019)                    |  1532:0239  |
-| Razer Blade 15 (2019) Advanced                |  1532:023A  |
-| Razer Blade 15 (2018) Base Model              |  1532:023B  |
+| Razer Blade 15 Advanced (2019)                |  1532:023A  |
+| Razer Blade 15 Base (2018)                    |  1532:023B  |
 | Razer Cynosa Lite                             |  1532:023F  |
-| Razer Blade 15 (2018) Mercury                 |  1532:0240  |
+| Razer Blade 15 Mercury (2018)                 |  1532:0240  |
 | Razer BlackWidow (2019)                       |  1532:0241  |
 | Razer Huntsman Tournament Edition             |  1532:0243  |
-| Razer Blade 15 (Mid 2019) Mercury             |  1532:0245  |
-| Razer Blade 15 (Mid 2019) Base                |  1532:0246  |
+| Razer Blade 15 Mercury (Mid 2019)             |  1532:0245  |
+| Razer Blade 15 Base (Mid 2019)                |  1532:0246  |
 | Razer Blade Stealth (Late 2019)               |  1532:024A  |
 | Razer Blade Pro (Late 2019)                   |  1532:024C  |
 | Razer Blade 15 Studio Edition (2019)          |  1532:024D  |
 | Razer BlackWidow V3                           |  1532:024E  |
 | Razer Blade Stealth (Early 2020)              |  1532:0252  |
 | Razer Blade 15 Advanced (2020)                |  1532:0253  |
-| Razer Blade 15 (Early 2020) Base              |  1532:0255  |
+| Razer Blade 15 Base (Early 2020)              |  1532:0255  |
 | Razer Blade Pro 17 (Early 2020)               |  1532:0256  |
 | Razer Huntsman Mini                           |  1532:0257  |
 | Razer BlackWidow V3 Mini Hyperspeed           |  1532:0258  |
@@ -78,6 +78,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Huntsman V2 Analog                      |  1532:0266  |
 | Razer Book 13 (2020)                          |  1532:026A  |
 | Razer Blade 15 Advanced (Early 2021)          |  1532:026D  |
+| Razer Blade 15 Base (Early 2021)              |  1532:026F  |
 | Razer Blade 14 (2021)                         |  1532:0270  |
 | Razer BlackWidow V3 Mini Hyperspeed (Wireless)|  1532:0271  |
 | Razer Blade 15 Advanced (Mid 2021)            |  1532:0276  |
