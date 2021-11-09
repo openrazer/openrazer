@@ -31,7 +31,7 @@ class BatteryNotifier(threading.Thread):
 
         if self._notify2:
             try:
-                notify2.init('openrazer_daemon')
+                notify2.init('OpenRazer')
             except Exception as err:
                 self._logger.warning("Failed to init notification daemon, err: {0}".format(err))
                 self._notify2 = False
@@ -43,7 +43,7 @@ class BatteryNotifier(threading.Thread):
         self._get_battery_func = parent.getBattery
 
         if self._notify2:
-            self._notification = notify2.Notification(summary="{0}")
+            self._notification = notify2.Notification(summary=device_name)
             self._notification.set_timeout(NOTIFY_TIMEOUT)
 
         self._last_notify_time = datetime.datetime(1970, 1, 1)
@@ -79,21 +79,32 @@ class BatteryNotifier(threading.Thread):
                 time.sleep(0.2)
                 battery_level = self._get_battery_func()
 
-            if battery_level < 10.0:
-                if battery_level == 0.0:
-                    # Do nothing
-                    pass
-                else:
-                    if self._notify2:
-                        self._notification.update(summary="{0} Battery at {1:.1f}%".format(self._device_name, battery_level), message='Please charge your device', icon='notification-battery-low')
-                        self._notification.show()
-            else:
-                if self._notify2:
-                    self._notification.update(summary="{0} Battery at {1:.1f}%".format(self._device_name, battery_level))
-                    self._notification.show()
+            title = self._device_name
+            battery_percent = int(round(battery_level, 0))
+            message = "Battery is {0}%".format(battery_percent)
+            icon = "battery-full"
+
+            if battery_level == 0.0:
+                # Do nothing
+                pass
+
+            elif battery_level <= 10.0:
+                message = "Battery is low ({0}%). Please charge your device".format(battery_percent)
+                icon = "battery-empty"
+
+            elif battery_level <= 30.0:
+                icon = "battery-low"
+
+            elif battery_level <= 70.0:
+                icon = "battery-good"
+
+            elif battery_level == 100.0:
+                message = "Battery is fully charged ({0}%)".format(battery_percent)
 
             if self._notify2:
-                self._logger.debug("{0} Battery at {1:.1f}%".format(self._device_name, battery_level))
+                self._notification.update(summary=title, message=message, icon=icon)
+                self._notification.show()
+                self._logger.debug("{0} Battery at {1}%".format(self._device_name, battery_percent))
 
     def run(self):
         """
