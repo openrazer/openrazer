@@ -28,6 +28,7 @@ class BatteryNotifier(threading.Thread):
 
         self.event = threading.Event()
         self.frequency = 0
+        self.percent = 0
 
         if self._notify2:
             try:
@@ -73,6 +74,7 @@ class BatteryNotifier(threading.Thread):
             self._last_notify_time = now
 
             battery_level = self._get_battery_func()
+            battery_percent = int(round(battery_level, 0))
 
             # Sometimes on wifi don't get batt
             if battery_level == -1.0:
@@ -80,7 +82,6 @@ class BatteryNotifier(threading.Thread):
                 battery_level = self._get_battery_func()
 
             title = self._device_name
-            battery_percent = int(round(battery_level, 0))
             message = "Battery is {0}%".format(battery_percent)
             icon = "battery-full"
 
@@ -102,9 +103,11 @@ class BatteryNotifier(threading.Thread):
                 message = "Battery is fully charged ({0}%)".format(battery_percent)
 
             if self._notify2:
-                self._notification.update(summary=title, message=message, icon=icon)
-                self._notification.show()
                 self._logger.debug("{0} Battery at {1}%".format(self._device_name, battery_percent))
+
+                if battery_level <= self.percent:
+                    self._notification.update(summary=title, message=message, icon=icon)
+                    self._notification.show()
 
     def run(self):
         """
@@ -168,3 +171,11 @@ class BatteryManager(object):
     @frequency.setter
     def frequency(self, frequency):
         self._battery_thread.frequency = frequency
+
+    @property
+    def percent(self):
+        return self._battery_thread.percent
+
+    @percent.setter
+    def percent(self, percent):
+        self._battery_thread.percent = percent

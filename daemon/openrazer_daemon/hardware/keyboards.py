@@ -387,6 +387,7 @@ class RazerBlackWidowV3ProWired(_RippleKeyboard):
         self._battery_manager = _BatteryManager(self, self._device_number, "Razer BlackWidow V3 Pro (Wired)")
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         super()._close()
@@ -842,6 +843,7 @@ class RazerBlackWidowV3MiniHyperspeed(_RippleKeyboard):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer BlackWidow V3 Mini Hyperspeed')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """

@@ -138,6 +138,7 @@ class RazerLanceheadWirelessReceiver(RazerLanceheadWirelessWired):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Lancehead Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -224,6 +225,7 @@ class RazerLanceheadWireless(RazerLanceheadWired):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Lancehead')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -454,6 +456,7 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -1247,6 +1250,7 @@ class RazerMamba2012Wireless(__RazerDeviceSpecialBrightnessSuspend):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -1389,6 +1393,7 @@ class RazerMambaWirelessReceiver(RazerMambaWirelessWired):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -1745,6 +1750,7 @@ class RazerViperUltimateWireless(RazerViperUltimateWired):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Viper Ultimate Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -2270,6 +2276,7 @@ class RazerBasiliskUltimateReceiver(RazerBasiliskUltimateWired):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Basilisk Ultimate')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -2447,6 +2454,7 @@ class RazerDeathAdderV2ProWireless(RazerDeathAdderV2ProWired):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer DeathAdder V2 Pro Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -2479,6 +2487,7 @@ class RazerAtherisReceiver(__RazerDevice):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Atheris (Receiver)')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -2519,6 +2528,7 @@ class RazerBasiliskXHyperSpeed(__RazerDevice):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Basilisk X HyperSpeed')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -2556,11 +2566,10 @@ class RazerOrochiV2Receiver(__RazerDevice):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._battery_manager = _BatteryManager(
-            self, self._device_number, 'Razer Orochi V2')
-
-        self._battery_manager.active = self.config.getboolean(
-            'Startup', 'mouse_battery_notifier', fallback=False)
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Orochi V2')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """

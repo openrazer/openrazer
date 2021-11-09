@@ -39,6 +39,9 @@ The *[Startup]* section in the configuration file contains values to be used dur
 *battery_notifier_freq* _int_
 	This flag specifies how often the notification with the remaining battery level should be shown.
 
+*battery_notifier_percent* _int_
+	This flag specifies what battery percentage the device should reach before sending notifications.
+
 *restore_persistence* _bool_
 	This flag specifies whether effects saved in persistence.conf should be applied when the daemon starts.
 
