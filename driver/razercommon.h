@@ -18,6 +18,15 @@
 #define DRIVER_LICENSE "GPL v2"
 #define DRIVER_AUTHOR "Terry Cain <terry@terrys-home.co.uk>"
 
+// Compatbility for fallthrough pseudo keyword for Linux versions older than v5.4
+// See also https://git.kernel.org/torvalds/c/294f69e
+#ifndef fallthrough
+#if __has_attribute(__fallthrough__)
+# define fallthrough                    __attribute__((__fallthrough__))
+#else
+# define fallthrough                    do {} while (0)  /* fallthrough */
+#endif
+#endif
 
 // Macro to create device files
 #define CREATE_DEVICE_FILE(dev, type) \

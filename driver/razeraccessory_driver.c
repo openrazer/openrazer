@@ -616,7 +616,7 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         // Must be in normal mode for hardware effects
         razer_set_device_mode(device->usb_dev, 0x00, 0x00);
-    /* Fall through */
+        fallthrough;
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         // Direction values are flipped compared to other devices
         direction ^= ((1<<0) | (1<<1));
