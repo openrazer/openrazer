@@ -64,3 +64,8 @@ tasks:
 
       # Run a simple check to see if the daemon is alive
       ./scripts/ci/test-daemon.sh
+
+      # Clean up background processes
+      pkill -f openrazer-daemon
+      pkill -f create_fake_dev
+      pkill -f dbus-daemon
