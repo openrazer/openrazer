@@ -292,7 +292,7 @@ def available_dpi(self):
 @endpoint('razer.device.misc', 'setPollRate', in_sig='q')
 def set_poll_rate(self, rate):
     """
-    Set the DPI on the mouse, Takes in 4 bytes big-endian
+    Set the polling rate on the device, Takes in 4 bytes big-endian
 
     :param rate: Poll rate
     :type rate: int
