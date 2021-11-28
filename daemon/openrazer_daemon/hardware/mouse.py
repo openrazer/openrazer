@@ -2035,6 +2035,96 @@ class RazerNagaLeftHanded2020(__RazerDeviceSpecialBrightnessSuspend):
         self.disable_notify = False
 
 
+class RazerNagaProWired(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer Naga Pro (Wired)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x008F
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [1, 3]
+
+    DEDICATED_MACRO_KEYS = True
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_dpi_stages', 'set_dpi_stages',
+               # Macros
+               'get_macros', 'delete_macro', 'add_macro',
+               # Battery
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold',
+               # Logo
+               'get_logo_brightness', 'set_logo_brightness',
+               'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               # Scroll wheel
+               'get_scroll_brightness', 'set_scroll_brightness',
+               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               # Thumbgrid
+               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               # Custom frame
+               'set_custom_effect', 'set_key_row']
+
+    DPI_MAX = 20000
+
+    DEVICE_IMAGE = "https://hybrismediaprod.blob.core.windows.net/sys-master-phoenix-images-container/hfd/ha6/9080569528350/razer-naga-pro-500x500.png"
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = (
+            _da_get_logo_brightness(self),
+            _da_get_scroll_brightness(self),
+            _get_backlight_brightness(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        _da_set_scroll_brightness(self, 0)
+        _set_backlight_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+        Get the last known brightness and then set the brightness
+        """
+
+        logo_brightness = self.suspend_args.get('brightness', (100, 100, 100))[0]
+        scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100))[1]
+        backlight_brightness = self.suspend_args.get('brightness', (100, 100, 100))[2]
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        _da_set_scroll_brightness(self, scroll_brightness)
+        _set_backlight_brightness(self, backlight_brightness)
+        self.disable_notify = False
+
+
+class RazerNagaProWireless(RazerNagaProWired):
+    """
+    Class for the Razer Naga Pro (Wireless)
+    """
+    USB_PID = 0x0090
+    METHODS = RazerNagaProWired.METHODS + ['set_charge_effect', 'set_charge_colour']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Naga Pro (Wireless)')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
+
+
 class RazerDeathAdder1800(__RazerDevice):
     """
     Class for the Razer DeathAdder 1800
