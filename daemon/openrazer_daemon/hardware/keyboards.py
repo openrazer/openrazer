@@ -1519,6 +1519,26 @@ class RazerHuntsmanMini(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1689/1689-huntsmanmini.png"
 
 
+class RazerHuntsmanMiniJP(_RippleKeyboard):
+    """
+    Class for the Razer Huntsman Mini JP
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Huntsman_Mini_00000000001A(-if01)?-event-kbd')
+    USB_VID = 0x1532
+    USB_PID = 0x0269
+    HAS_MATRIX = True
+    WAVE_DIRS = (0, 1)
+    MATRIX_DIMS = [5, 15]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
+
+    DEVICE_IMAGE = "https://rzrwarranty.s3.amazonaws.com/4403e5e6b96d59dc95a278e257688e64a68f7b24945617653d68e3273877c01e.png"
+
+
 class RazerBlade15AdvancedEarly2021(_RippleKeyboard):
     """
     Class for the Razer Blade 15 Advanced (Early 2021)
