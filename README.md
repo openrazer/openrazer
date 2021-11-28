@@ -145,7 +145,9 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Viper Mini                              |  1532:008A  |
 | Razer DeathAdder V2 Mini                      |  1532:008C  |
 | Razer Naga Left-Handed Edition                |  1532:008D  |
+| Razer Nage Pro (Wired)                        |  1532:008F  |
 | Razer Viper 8KHz                              |  1532:0091  |
+
 
 ### Mousemats
 | Device                                        | USB VID:PID |
