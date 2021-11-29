@@ -455,6 +455,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Naga Pro (Wired)\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+        device_type = "Razer Naga Pro (Wireless)\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_VIPER_8K:
         device_type = "Razer Viper 8KHz\n";
         break;
@@ -488,6 +492,7 @@ static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct d
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
@@ -606,6 +611,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -649,6 +655,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 
         case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
             // Some sort of mode switcher required after initialization and before color switching
             report = get_razer_report(0x0f, 0x02, 0x06);
@@ -713,6 +720,7 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         report = razer_chroma_mouse_extended_matrix_effect_spectrum(VARSTORE, BACKLIGHT_LED);
         report.transaction_id.id = 0x1f;
         break;
@@ -748,6 +756,7 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
             break;
 
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
             report = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
             report.transaction_id.id = 0x1f;
             break;
@@ -795,6 +804,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         switch(count) {
         case 3: // Single colour mode
             report = razer_chroma_mouse_extended_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
@@ -876,6 +886,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -916,6 +927,7 @@ static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
@@ -960,6 +972,7 @@ static ssize_t razer_attr_read_is_charging(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
@@ -980,12 +993,19 @@ static ssize_t razer_attr_read_is_charging(struct device *dev, struct device_att
  */
 static ssize_t razer_attr_write_set_charging_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
 
     if(count == 1) {
         report = razer_chroma_misc_set_dock_charge_type(buf[0]);
+        switch(device->usb_pid) {
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+            report.transaction_id.id = 0x1f;
+            break;
+        }
+
         razer_send_payload(usb_dev, &report);
     } else {
         printk(KERN_WARNING "razermouse: Incorrect number of bytes for setting the charging effect\n");
@@ -1000,6 +1020,7 @@ static ssize_t razer_attr_write_set_charging_effect(struct device *dev, struct d
  */
 static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
@@ -1010,6 +1031,11 @@ static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct d
 
     if(count == 3) {
         report = razer_chroma_standard_set_led_rgb(NOSTORE, BATTERY_LED, (struct razer_rgb*)&buf[0]);
+        switch(device->usb_pid) {
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+            report.transaction_id.id = 0x1f;
+            break;
+        }
         razer_send_payload(usb_dev, &report);
     } else {
         printk(KERN_WARNING "razermouse: Charging colour mode only accepts RGB (3byte)");
@@ -1066,6 +1092,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_V2:
         report.transaction_id.id = 0x1f;
@@ -1169,6 +1196,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -1219,6 +1247,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_brightness(VARSTORE, 0x00, brightness);
         report.transaction_id.id = 0x1F;
@@ -1270,6 +1299,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_get_brightness(VARSTORE, 0x00);
         report.transaction_id.id = 0x1F;
@@ -1364,6 +1394,7 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
     case USB_DEVICE_ID_RAZER_IMPERATOR:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
@@ -1413,6 +1444,7 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
 
         case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
@@ -1477,6 +1509,7 @@ static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attri
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
@@ -1651,6 +1684,7 @@ static ssize_t razer_attr_write_mouse_dpi_stages(struct device *dev, struct devi
     report = razer_chroma_misc_set_dpi_stages(VARSTORE, stages_count, active_stage, dpi);
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         report.transaction_id.id = 0x1f;
         break;
     }
@@ -1692,6 +1726,7 @@ static ssize_t razer_attr_read_mouse_dpi_stages(struct device *dev, struct devic
     report = razer_chroma_misc_get_dpi_stages(VARSTORE);
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         report.transaction_id.id = 0x1f;
         break;
     }
@@ -1749,6 +1784,7 @@ static ssize_t razer_attr_read_get_idle_time(struct device *dev, struct device_a
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         report.transaction_id.id = 0x1f;
         break;
     }
@@ -1773,6 +1809,7 @@ static ssize_t razer_attr_write_set_idle_time(struct device *dev, struct device_
     struct razer_report report = razer_chroma_misc_set_idle_time(idle_time);
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         report.transaction_id.id = 0x1f;
         break;
     }
@@ -1791,6 +1828,7 @@ static ssize_t razer_attr_read_low_battery_threshold(struct device *dev, struct 
     struct razer_report response = {0};
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         report.transaction_id.id = 0x1f;
         break;
     }
@@ -1814,6 +1852,7 @@ static ssize_t razer_attr_write_set_low_battery_threshold(struct device *dev, st
     struct razer_report report = razer_chroma_misc_set_low_battery_threshold(threshold);
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         report.transaction_id.id = 0x1f;
         break;
     }
@@ -1923,6 +1962,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 
         case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
             report = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
             report.transaction_id.id = 0x1f;
@@ -1957,6 +1997,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
 
         case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
@@ -2031,6 +2072,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
@@ -2065,6 +2107,7 @@ static ssize_t razer_attr_read_scroll_led_brightness(struct device *dev, struct 
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -2116,6 +2159,7 @@ static ssize_t razer_attr_write_scroll_led_brightness(struct device *dev, struct
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -2168,6 +2212,7 @@ static ssize_t razer_attr_read_logo_led_brightness(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_VIPER_8K:
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -2230,6 +2275,7 @@ static ssize_t razer_attr_write_logo_led_brightness(struct device *dev, struct d
     case USB_DEVICE_ID_RAZER_VIPER_8K:
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -2291,6 +2337,7 @@ static ssize_t razer_attr_read_side_led_brightness(struct device *dev, struct de
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -2326,6 +2373,7 @@ static ssize_t razer_attr_write_side_led_brightness(struct device *dev, struct d
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -2664,6 +2712,7 @@ static ssize_t razer_attr_write_scroll_mode_wave(struct device *dev, struct devi
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_effect_wave(VARSTORE, SCROLL_WHEEL_LED, direction);
         report.transaction_id.id = 0x1f;
@@ -2711,6 +2760,7 @@ static ssize_t razer_attr_write_scroll_mode_spectrum(struct device *dev, struct 
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -2764,6 +2814,7 @@ static ssize_t razer_attr_write_scroll_mode_reactive(struct device *dev, struct 
 
         case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -2817,6 +2868,7 @@ static ssize_t razer_attr_write_scroll_mode_breath(struct device *dev, struct de
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
@@ -2852,6 +2904,7 @@ static ssize_t razer_attr_write_scroll_mode_breath(struct device *dev, struct de
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -2904,6 +2957,7 @@ static ssize_t razer_attr_write_scroll_mode_static(struct device *dev, struct de
 
         case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -2961,6 +3015,7 @@ static ssize_t razer_attr_write_scroll_mode_none(struct device *dev, struct devi
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -3001,6 +3056,7 @@ static ssize_t razer_attr_write_logo_mode_wave(struct device *dev, struct device
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         report = razer_chroma_extended_matrix_effect_wave(VARSTORE, LOGO_LED, direction);
         report.transaction_id.id = 0x1f;
@@ -3058,6 +3114,7 @@ static ssize_t razer_attr_write_logo_mode_spectrum(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_VIPER_8K:
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -3121,6 +3178,7 @@ static ssize_t razer_attr_write_logo_mode_reactive(struct device *dev, struct de
         case USB_DEVICE_ID_RAZER_VIPER_8K:
         case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -3175,6 +3233,7 @@ static ssize_t razer_attr_write_logo_mode_breath(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_VIPER_8K:
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
@@ -3221,6 +3280,7 @@ static ssize_t razer_attr_write_logo_mode_breath(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_VIPER_8K:
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -3283,6 +3343,7 @@ static ssize_t razer_attr_write_logo_mode_static(struct device *dev, struct devi
         case USB_DEVICE_ID_RAZER_VIPER_8K:
         case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -3349,6 +3410,7 @@ static ssize_t razer_attr_write_logo_mode_none(struct device *dev, struct device
     case USB_DEVICE_ID_RAZER_VIPER_8K:
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -3384,6 +3446,7 @@ static ssize_t razer_attr_write_side_mode_wave(struct device *dev, struct device
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -3438,6 +3501,7 @@ static ssize_t razer_attr_write_side_mode_spectrum(struct device *dev, struct de
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -3494,6 +3558,7 @@ static ssize_t razer_attr_write_side_mode_reactive(struct device *dev, struct de
 
         case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -3543,6 +3608,7 @@ static ssize_t razer_attr_write_side_mode_breath(struct device *dev, struct devi
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
@@ -3570,6 +3636,7 @@ static ssize_t razer_attr_write_side_mode_breath(struct device *dev, struct devi
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -3623,6 +3690,7 @@ static ssize_t razer_attr_write_side_mode_static(struct device *dev, struct devi
 
         case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -3676,6 +3744,7 @@ static ssize_t razer_attr_write_side_mode_none(struct device *dev, struct device
 
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
@@ -4679,6 +4748,10 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
             break;
 
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_effect);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_colour);
+            fallthrough;
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
@@ -5292,6 +5365,10 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
             break;
 
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+            device_remove_file(&hdev->dev, &dev_attr_charge_effect);
+            device_remove_file(&hdev->dev, &dev_attr_charge_colour);
+            fallthrough;
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
@@ -5544,6 +5621,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_8K) },
     { 0 }
 };

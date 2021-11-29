@@ -1996,7 +1996,7 @@ class RazerNagaProWired(__RazerDeviceSpecialBrightnessSuspend):
                # Macros
                'get_macros', 'delete_macro', 'add_macro',
                # Battery
-               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold'
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold',
                # Logo
                'get_logo_brightness', 'set_logo_brightness',
                'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
@@ -2012,20 +2012,6 @@ class RazerNagaProWired(__RazerDeviceSpecialBrightnessSuspend):
 
     DEVICE_IMAGE = "https://assets3.razerzone.com/M5ZjPrqn9o9RJqJtX476JvKCmWk=/500x500/https%3A%2F%2Fhybrismediaprod.blob.core.windows.net%2Fsys-master-phoenix-images-container%2Fhfd%2Fha6%2F9080569528350%2Frazer-naga-pro-500x500.png"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Naga Pro (Wired)')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
     def _suspend_device(self):
         """
         Suspend the device
@@ -2035,13 +2021,13 @@ class RazerNagaProWired(__RazerDeviceSpecialBrightnessSuspend):
         self.suspend_args['brightness'] = (
             _da_get_logo_brightness(self),
             _da_get_scroll_brightness(self),
-            _get_left_brightness(self))
+            _get_backlight_brightness(self))
 
         # Todo make it context?
         self.disable_notify = True
         _da_set_logo_brightness(self, 0)
         _da_set_scroll_brightness(self, 0)
-        _set_left_brightness(self, 0)
+        _set_backlight_brightness(self, 0)
         self.disable_notify = False
 
     def _resume_device(self):
@@ -2052,13 +2038,35 @@ class RazerNagaProWired(__RazerDeviceSpecialBrightnessSuspend):
 
         logo_brightness = self.suspend_args.get('brightness', (100, 100, 100))[0]
         scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100))[1]
-        left_row_brightness = self.suspend_args.get('brightness', (100, 100, 100))[2]
+        backlight_brightness = self.suspend_args.get('brightness', (100, 100, 100))[2]
 
         self.disable_notify = True
         _da_set_logo_brightness(self, logo_brightness)
         _da_set_scroll_brightness(self, scroll_brightness)
-        _set_left_brightness(self, left_row_brightness)
+        _set_backlight_brightness(self, backlight_brightness)
         self.disable_notify = False
+
+
+class RazerNagaProWireless(RazerNagaProWired):
+    """
+    Class for the Razer Naga Pro (Wireless)
+    """
+    USB_PID = 0x0090
+    METHODS = RazerNagaProWired.METHODS + ['set_charge_effect', 'set_charge_colour']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Naga Pro (Wireless)')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
 
 
 class RazerDeathAdder1800(__RazerDevice):
