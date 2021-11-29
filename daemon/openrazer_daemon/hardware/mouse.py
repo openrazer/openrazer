@@ -2001,9 +2001,8 @@ class RazerNagaProWired(__RazerDeviceSpecialBrightnessSuspend):
                # Scroll wheel
                'get_scroll_brightness', 'set_scroll_brightness',
                'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
-               # Left side = thumbgrid
-               'get_left_brightness', 'set_left_brightness',
-               'set_left_wave', 'set_left_static', 'set_left_spectrum', 'set_left_none', 'set_left_reactive', 'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
+               # Thumbgrid is backlight?
+               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                # Custom frame
                'set_custom_effect', 'set_key_row']
 
