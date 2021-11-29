@@ -914,6 +914,8 @@ static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
         report.transaction_id.id = 0x3f;
         break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
@@ -956,6 +958,8 @@ static ssize_t razer_attr_read_is_charging(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
         report.transaction_id.id = 0x3f;
         break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
@@ -1743,6 +1747,12 @@ static ssize_t razer_attr_read_get_idle_time(struct device *dev, struct device_a
     struct razer_report response = {0};
     unsigned short idle_time = 0;
 
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        report.transaction_id.id = 0x1f;
+        break;
+    }
+
     response = razer_send_payload(device->usb_dev, &report);
 
     idle_time = (response.arguments[0] << 8) | (response.arguments[1] & 0xFF);
@@ -1756,10 +1766,16 @@ static ssize_t razer_attr_read_get_idle_time(struct device *dev, struct device_a
  */
 static ssize_t razer_attr_write_set_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned short idle_time = (unsigned short)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_misc_set_idle_time(idle_time);
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        report.transaction_id.id = 0x1f;
+        break;
+    }
 
     razer_send_payload(usb_dev, &report);
     return count;
@@ -1773,6 +1789,11 @@ static ssize_t razer_attr_read_low_battery_threshold(struct device *dev, struct 
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_misc_get_low_battery_threshold();
     struct razer_report response = {0};
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        report.transaction_id.id = 0x1f;
+        break;
+    }
 
     response = razer_send_payload(device->usb_dev, &report);
 
@@ -1786,10 +1807,16 @@ static ssize_t razer_attr_read_low_battery_threshold(struct device *dev, struct 
  */
 static ssize_t razer_attr_write_set_low_battery_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char threshold = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_misc_set_low_battery_threshold(threshold);
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+        report.transaction_id.id = 0x1f;
+        break;
+    }
 
     razer_send_payload(usb_dev, &report);
     return count;
@@ -1879,7 +1906,6 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
 
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
             report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             report.transaction_id.id = 0x1f;
             break;
@@ -1896,6 +1922,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
             break;
 
         case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
             report = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
             report.transaction_id.id = 0x1f;
@@ -4657,6 +4684,11 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
 
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
@@ -5263,6 +5295,11 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);
+            device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
+            device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
 
             device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_wave);

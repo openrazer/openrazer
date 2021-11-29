@@ -1995,6 +1995,8 @@ class RazerNagaProWired(__RazerDeviceSpecialBrightnessSuspend):
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_dpi_stages', 'set_dpi_stages',
                # Macros
                'get_macros', 'delete_macro', 'add_macro',
+               # Battery
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold'
                # Logo
                'get_logo_brightness', 'set_logo_brightness',
                'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
@@ -2009,6 +2011,20 @@ class RazerNagaProWired(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 20000
 
     DEVICE_IMAGE = "https://assets3.razerzone.com/M5ZjPrqn9o9RJqJtX476JvKCmWk=/500x500/https%3A%2F%2Fhybrismediaprod.blob.core.windows.net%2Fsys-master-phoenix-images-container%2Fhfd%2Fha6%2F9080569528350%2Frazer-naga-pro-500x500.png"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Naga Pro (Wired)')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
 
     def _suspend_device(self):
         """
