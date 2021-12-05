@@ -50,7 +50,12 @@ class RazerDevice(object):
             'firmware_version': True,
             'serial': True,
             'brightness': self._has_feature('razer.device.lighting.brightness'),
+
             'battery': self._has_feature('razer.device.power', 'getBattery'),
+            'get_idle_time': self._has_feature('razer.device.power', 'getIdleTime'),
+            'set_idle_time': self._has_feature('razer.device.power', 'setIdleTime'),
+            'get_low_battery_threshold': self._has_feature('razer.device.power', 'getLowBatteryThreshold'),
+            'set_low_battery_threshold': self._has_feature('razer.device.power', 'setLowBatteryThreshold'),
 
             'macro_logic': self._has_feature('razer.device.macro'),
             'keyboard_layout': self._has_feature('razer.device.misc', 'getKeyboardLayout'),
