@@ -133,4 +133,13 @@ struct razer_report razer_chroma_misc_set_orochi2011_poll_dpi(unsigned short pol
 
 struct razer_report razer_naga_trinity_effect_static(struct razer_rgb* rgb);
 
+struct razer_report razer_chroma_misc_set_scroll_mode(unsigned int scroll_mode);
+struct razer_report razer_chroma_misc_get_scroll_mode(void);
+
+struct razer_report razer_chroma_misc_set_scroll_acceleration(bool acceleration);
+struct razer_report razer_chroma_misc_get_scroll_acceleration(void);
+
+struct razer_report razer_chroma_misc_set_scroll_smart_reel(bool smart_reel);
+struct razer_report razer_chroma_misc_get_scroll_smart_reel(void);
+
 #endif

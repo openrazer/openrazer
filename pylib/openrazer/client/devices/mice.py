@@ -230,3 +230,93 @@ class RazerMouse(__RazerDevice):
             return [int(d) for d in dbuslist]
         else:
             raise NotImplementedError()
+
+    @property
+    def scroll_mode(self) -> int:
+        """
+        Get the scroll wheel mode of the device
+
+        :return: The device's current scroll mode (0 = tactile, 1 = free spin)
+        :rtype: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_mode'):
+            return int(self._dbus_interfaces['scroll'].getScrollMode())
+        else:
+            raise NotImplementedError()
+
+    @scroll_mode.setter
+    def scroll_mode(self, mode: int):
+        """
+        Set the scroll mode of the device
+
+        :param mode: The mode to set (0 = tactile, 1 = free spin)
+        :type mode: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_mode'):
+            self._dbus_interfaces['scroll'].setScrollMode(mode)
+        else:
+            raise NotImplementedError()
+
+    @property
+    def scroll_acceleration(self) -> bool:
+        """
+        Get the device's scroll acceleration state
+
+        :return: true if acceleration enabled, false otherwise
+        :rtype: bool
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_acceleration'):
+            return bool(int(self._dbus_interfaces['scroll'].getScrollAcceleration()))
+        else:
+            raise NotImplementedError()
+
+    @scroll_acceleration.setter
+    def scroll_acceleration(self, enabled: bool):
+        """
+        Set the device's scroll acceleration state
+
+        :param enabled: true to enable acceleration, false to disable it
+        :type enabled: bool
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_acceleration'):
+            self._dbus_interfaces['scroll'].setScrollAcceleration(enabled)
+        else:
+            raise NotImplementedError()
+
+    @property
+    def scroll_smart_reel(self) -> bool:
+        """
+        Get the device's "smart reel" state
+
+        :return: true if smart reel enabled, false otherwise
+        :rtype: bool
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_smart_reel'):
+            return bool(int(self._dbus_interfaces['scroll'].getScrollSmartReel()))
+        else:
+            raise NotImplementedError()
+
+    @scroll_smart_reel.setter
+    def scroll_smart_reel(self, enabled: bool):
+        """
+        Set the device's "smart reel" state
+
+        :param enabled: true to enable smart reel, false to disable it
+        :type enabled: bool
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_smart_reel'):
+            self._dbus_interfaces['scroll'].setScrollSmartReel(enabled)
+        else:
+            raise NotImplementedError()

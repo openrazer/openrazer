@@ -69,6 +69,9 @@ class RazerDevice(object):
             'dpi': self._has_feature('razer.device.dpi', ('getDPI', 'setDPI')),
             'dpi_stages': self._has_feature('razer.device.dpi', ('getDPIStages', 'setDPIStages')),
             'available_dpi': self._has_feature('razer.device.dpi', 'availableDPI'),
+            'scroll_mode': self._has_feature('razer.device.scroll', ('getScrollMode', 'setScrollMode')),
+            'scroll_acceleration': self._has_feature('razer.device.scroll', ('getScrollAcceleration', 'setScrollAcceleration')),
+            'scroll_smart_reel': self._has_feature('razer.device.scroll', ('getScrollSmartReel', 'setScrollSmartReel')),
 
             # Default device is a chroma so lighting capabilities
             'lighting': self._has_feature('razer.device.lighting.chroma'),
@@ -224,6 +227,8 @@ class RazerDevice(object):
             self._dbus_interfaces['macro_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.macromode")
         if self.has('lighting_profile_led_red') or self.has('lighting_profile_led_green') or self.has('lighting_profile_led_blue'):
             self._dbus_interfaces['profile_led'] = _dbus.Interface(self._dbus, "razer.device.lighting.profile_led")
+        if self.has('scroll_mode') or self.has('scroll_acceleration') or self.has('scroll_smart_reel'):
+            self._dbus_interfaces['scroll'] = _dbus.Interface(self._dbus, "razer.device.scroll")
 
     def _get_available_features(self):
         introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')

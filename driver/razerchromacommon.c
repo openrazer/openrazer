@@ -1359,14 +1359,93 @@ struct razer_report razer_naga_trinity_effect_static(struct razer_rgb *rgb)
     return report;
 }
 
+/**
+ * Set scroll wheel mode on the device
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    02       02    14  0100    | SET SCROLL WHEEL MODE (VARSTR, TACTILE)
+ * 00     1f    0000   00    02       02    14  0101    | SET SCROLL WHEEL MODE (VARSTR, FREESPIN)
+ */
+struct razer_report razer_chroma_misc_set_scroll_mode(unsigned int scroll_mode)
+{
+    struct razer_report report = get_razer_report(0x02, 0x14, 0x02);
 
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = scroll_mode;
 
+    return report;
+}
 
+/**
+ * Get scroll wheel mode from the device
+ */
+struct razer_report razer_chroma_misc_get_scroll_mode(void)
+{
+    struct razer_report report = get_razer_report(0x02, 0x94, 0x02);
 
+    report.arguments[0] = VARSTORE;
 
+    return report;
+}
 
+/**
+ * Set scroll wheel acceleration on/off on the device
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    02       02    16  0101    | SET SCROLL WHEEL ACCELERATION (VARSTR, ON)
+ * 00     1f    0000   00    02       02    16  0100    | SET SCROLL WHEEL ACCELERATION (VARSTR, OFF)
+ */
+struct razer_report razer_chroma_misc_set_scroll_acceleration(bool acceleration)
+{
+    struct razer_report report = get_razer_report(0x02, 0x16, 0x02);
 
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = acceleration;
 
+    return report;
+}
+
+/**
+ * Get scroll wheel acceleration state from the device
+ */
+struct razer_report razer_chroma_misc_get_scroll_acceleration(void)
+{
+    struct razer_report report = get_razer_report(0x02, 0x96, 0x02);
+
+    report.arguments[0] = VARSTORE;
+
+    return report;
+}
+
+/**
+ * Set scroll wheel "smart reel" on/off on the device.
+ * Smart reel automatically changes scroll wheel mode from tactile to free spin and back depending on scroll speed.
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    02       02    17  0101    | SET SCROLL WHEEL SMART REEL (VARSTR, ON)
+ * 00     1f    0000   00    02       02    17  0100    | SET SCROLL WHEEL SMART REEL (VARSTR, OFF)
+ */
+struct razer_report razer_chroma_misc_set_scroll_smart_reel(bool smart_reel)
+{
+    struct razer_report report = get_razer_report(0x02, 0x17, 0x02);
+
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = smart_reel;
+
+    return report;
+}
+
+/**
+ * Get scroll wheel "smart reel" state from the device
+ */
+struct razer_report razer_chroma_misc_get_scroll_smart_reel(void)
+{
+    struct razer_report report = get_razer_report(0x02, 0x97, 0x02);
+
+    report.arguments[0] = VARSTORE;
+
+    return report;
+}
 
 
 
