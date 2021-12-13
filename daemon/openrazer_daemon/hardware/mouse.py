@@ -2587,6 +2587,8 @@ class RazerNagaEpicChromaWired(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Naga Epic Chroma (Wired)
     """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Naga_Epic_Chroma-if0(1|2)-event-kbd')
+
     USB_VID = 0x1532
     USB_PID = 0x003E
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_battery', 'is_charging',
@@ -2617,4 +2619,6 @@ class RazerNagaEpicChromaWireless(RazerNagaEpicChromaWired):
     """
     Class for the Razer Naga Epic Chroma (Wireless)
     """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Naga_Epic_Chroma_Dock-if0(1|2)-event-kbd')
+
     USB_PID = 0x003F

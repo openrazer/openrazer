@@ -59,12 +59,12 @@ def get_backlight_effect(self):
     """
     Get backlight effect
 
-    :return: Active
-    :rtype: bool
+    :return: Effect
+    :rtype: int
     """
     self.logger.debug("DBus call get_backlight_effect")
 
-    driver_path = self.get_driver_path('scroll_led_effect')
+    driver_path = self.get_driver_path('backlight_led_effect')
 
     with open(driver_path, 'r') as driver_file:
         effect = int(driver_file.read().strip())
