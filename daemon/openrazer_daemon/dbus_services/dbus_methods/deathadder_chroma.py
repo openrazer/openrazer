@@ -145,8 +145,8 @@ def set_backlight_static(self, red, green, blue):
         effect_driver_file.write('0')
 
 
-@endpoint('razer.device.lighting.backlight', 'setBacklightSpectrum')
-def set_backlight_spectrum(self):
+@endpoint('razer.device.lighting.backlight', 'setBacklightPulsate', in_sig='yyy')
+def set_backlight_pulsate(self, red, green, blue):
     """
     Set the device to pulsate
 
@@ -158,6 +158,26 @@ def set_backlight_spectrum(self):
 
     :param blue: Blue component
     :type blue: int
+    """
+    self.logger.debug("DBus call set_backlight_pulsing")
+
+    # Notify others
+    self.send_effect_event('setPulsate', red, green, blue)
+
+    rgb_driver_path = self.get_driver_path('backlight_led_rgb')
+    effect_driver_path = self.get_driver_path('backlight_led_effect')
+
+    payload = bytes([red, green, blue])
+
+    with open(rgb_driver_path, 'wb') as rgb_driver_file, open(effect_driver_path, 'w') as effect_driver_file:
+        rgb_driver_file.write(payload)
+        effect_driver_file.write('2')
+
+
+@endpoint('razer.device.lighting.backlight', 'setBacklightSpectrum')
+def set_backlight_spectrum(self):
+    """
+    Set the device to spectrum mode
     """
     self.logger.debug("DBus call set_backlight_spectrum")
 
@@ -404,6 +424,23 @@ def set_scroll_active(self, active):
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write('1' if active else '0')
+
+
+@endpoint('razer.device.lighting.scroll', 'getScrollEffect', out_sig='y')
+def get_scroll_effect(self):
+    """
+    Get scroll effect
+
+    :return: Effect
+    :rtype: int
+    """
+    self.logger.debug("DBus call get_scroll_effect")
+
+    driver_path = self.get_driver_path('scroll_led_effect')
+
+    with open(driver_path, 'r') as driver_file:
+        effect = int(driver_file.read().strip())
+        return effect
 
 
 @endpoint('razer.device.lighting.scroll', 'getScrollBrightness', out_sig='d')
