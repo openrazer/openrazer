@@ -71,7 +71,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade 15 Base (Early 2020)              |  1532:0255  |
 | Razer Blade Pro 17 (Early 2020)               |  1532:0256  |
 | Razer Huntsman Mini                           |  1532:0257  |
-| Razer BlackWidow V3 Mini Hyperspeed           |  1532:0258  |
+| Razer BlackWidow V3 Mini Hyperspeed (Wired)   |  1532:0258  |
 | Razer Blade Stealth (Late 2020)               |  1532:0259  |
 | Razer BlackWidow V3 Pro (Wired)               |  1532:025A  |
 | Razer Ornata V2                               |  1532:025D  |
