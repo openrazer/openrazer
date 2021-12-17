@@ -1744,6 +1744,7 @@ class RazerViperUltimateWireless(RazerViperUltimateWired):
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Viper Ultimate Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
 
     def _close(self):
         """
@@ -2266,10 +2267,9 @@ class RazerBasiliskUltimateReceiver(RazerBasiliskUltimateWired):
     def __init__(self, *args, **kwargs):
         super(RazerBasiliskUltimateReceiver, self).__init__(*args, **kwargs)
 
-        self._battery_manager = _BatteryManager(
-            self, self._device_number, 'Razer Basilisk Ultimate')
-        self._battery_manager.active = self.config.getboolean(
-            'Startup', 'battery_notifier', fallback=False)
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Basilisk Ultimate')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
 
     def _close(self):
         """
@@ -2446,6 +2446,7 @@ class RazerDeathAdderV2ProWireless(RazerDeathAdderV2ProWired):
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer DeathAdder V2 Pro Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
 
     def _close(self):
         """
@@ -2477,6 +2478,7 @@ class RazerAtherisReceiver(__RazerDevice):
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Atheris (Receiver)')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
 
     def _close(self):
         """
@@ -2514,11 +2516,9 @@ class RazerBasiliskXHyperSpeed(__RazerDevice):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._battery_manager = _BatteryManager(
-            self, self._device_number, 'Razer Basilisk X HyperSpeed')
-
-        self._battery_manager.active = self.config.getboolean(
-            'Startup', 'battery_notifier', fallback=False)
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Basilisk X HyperSpeed')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
 
     def _close(self):
         """
