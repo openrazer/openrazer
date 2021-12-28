@@ -443,6 +443,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer DeathAdder 2000\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_CYNOSA_PRO_BUNDLE:
+        device_type = "Razer DeathAdder 2000 (Cynosa Pro bundle)\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
         device_type = "Razer Atheris (Receiver)\n";
         break;
@@ -2559,6 +2563,46 @@ static ssize_t razer_attr_read_logo_led_effect(struct device *dev, struct device
 }
 
 /**
+ * Write device file "scroll_led_pulsate_effect_colors"
+ */
+static ssize_t razer_attr_write_scroll_led_pulsate_effect_colors(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    unsigned char colorCount = buf[0]; 
+    struct razer_report report;
+    if(count == colorCount * 3 + 1) {
+        report = razer_chroma_misc_set_led_pulsate_effect_colors(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb *)&buf[1], colorCount);
+        report.transaction_id.id = 0x3F;
+        razer_send_payload(usb_dev, &report);
+    } else {
+        printk(KERN_WARNING "razermouse: Input value size don't match RGB count");
+    }
+
+    return count;
+}
+
+/**
+ * Write device file "logo_led_pulsate_effect_colors"
+ */
+static ssize_t razer_attr_write_logo_led_pulsate_effect_colors(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    unsigned char colorCount = buf[0]; 
+    struct razer_report report;
+    if(count == colorCount * 3 + 1) {
+        report = razer_chroma_misc_set_led_pulsate_effect_colors(VARSTORE, LOGO_LED, (struct razer_rgb *)&buf[1], colorCount);
+        report.transaction_id.id = 0x3F;
+        razer_send_payload(usb_dev, &report);
+    } else {
+        printk(KERN_WARNING "razermouse: Input value size don't match RGB count");
+    }
+
+    return count;
+}
+
+/**
  * Write device file "scroll_mode_wave" (for extended mouse matrix effects)
  *
  * Wave effect mode is activated whenever the file is written to
@@ -3708,6 +3752,9 @@ static DEVICE_ATTR(logo_led_brightness,       0660, razer_attr_read_logo_led_bri
 static DEVICE_ATTR(logo_led_state,            0660, razer_attr_read_logo_led_state,        razer_attr_write_logo_led_state);
 static DEVICE_ATTR(logo_led_rgb,              0660, razer_attr_read_logo_led_rgb,          razer_attr_write_logo_led_rgb);
 static DEVICE_ATTR(logo_led_effect,           0660, razer_attr_read_logo_led_effect,       razer_attr_write_logo_led_effect);
+// ??
+static DEVICE_ATTR(scroll_led_pulsate_effect_colors,    0220, NULL, razer_attr_write_scroll_led_pulsate_effect_colors);
+static DEVICE_ATTR(logo_led_pulsate_effect_colors,    0220, NULL, razer_attr_write_logo_led_pulsate_effect_colors);
 // For "extended" matrix effects
 static DEVICE_ATTR(logo_matrix_effect_wave,        0220, NULL,                             razer_attr_write_logo_mode_wave);
 static DEVICE_ATTR(logo_matrix_effect_spectrum,    0220, NULL,                             razer_attr_write_logo_mode_spectrum);
@@ -4510,15 +4557,20 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_effect);
             break;
 
+        case USB_DEVICE_ID_RAZER_DEATHADDER_2000_CYNOSA_PRO_BUNDLE:
         case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_rgb);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_effect);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_pulsate_effect_colors);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_rgb);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_effect);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_pulsate_effect_colors);
             break;
 
         case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
@@ -5097,6 +5149,22 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_logo_led_rgb);
             device_remove_file(&hdev->dev, &dev_attr_logo_led_effect);
             break;
+            
+        case USB_DEVICE_ID_RAZER_DEATHADDER_2000_CYNOSA_PRO_BUNDLE:
+        case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_rgb);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_effect);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_pulsate_effect_colors);
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_rgb);
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_effect);
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_pulsate_effect_colors);
+            break;
 
         case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
@@ -5371,6 +5439,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_2000) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_2000_CYNOSA_PRO_BUNDLE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020) },

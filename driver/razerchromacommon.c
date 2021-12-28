@@ -138,9 +138,6 @@ struct razer_report razer_chroma_standard_get_led_rgb(unsigned char variable_sto
 }
 
 
-
-
-
 /**
  * Set the effect of an LED on the device
  *
@@ -967,6 +964,28 @@ struct razer_report razer_chroma_misc_matrix_reactive_trigger(void)
 
     return report;
 }
+
+/**
+ * Set pulsate effect colors
+ * 
+ * Max color count 5?
+ */
+struct razer_report razer_chroma_misc_set_led_pulsate_effect_colors(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb, size_t count)
+{
+    struct razer_report report = get_razer_report(0x03, 0x0E, 0x3 + count * 3);
+    int i;
+    report.arguments[0] = variable_storage;
+    report.arguments[1] = led_id;
+    report.arguments[2] = count;
+    for(i = 0; i < count; i++, rgb++){
+        report.arguments[3 + i * 3] = rgb->r;
+        report.arguments[4 + i * 3] = rgb->g;
+        report.arguments[5 + i * 3] = rgb->b;
+    }
+
+    return report;
+}
+
 
 /**
  * Gets battery level

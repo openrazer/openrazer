@@ -721,6 +721,60 @@ class RazerDeathAdder2000(__RazerDeviceSpecialBrightnessSuspend):
         self.disable_notify = False
 
 
+class RazerDeathAdder2000CynosaProBundle(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer DeathAdder 2000 (Cynosa Pro bundle)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x004D
+    METHODS = ['get_device_type_mouse',
+               'set_logo_active', 'get_logo_active', 'get_logo_brightness', 'set_logo_brightness', 'set_logo_static_mono', 'set_logo_pulsate_mono',
+               'set_scroll_active', 'get_scroll_active', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static_mono', 'set_scroll_pulsate_mono',
+               'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
+
+    DEVICE_IMAGE = "http://cn.razerzone.com/assets/product/gallery/deathadder-2000-gallery-1.png"
+
+    DPI_MAX = 2000
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Set brightness to max and LEDs to on, on startup
+        _da_set_logo_brightness(self, 100)
+        _da_set_scroll_brightness(self, 100)
+        _da_set_logo_active(self, True)
+        _da_set_scroll_active(self, True)
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        _da_set_scroll_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
+        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        _da_set_scroll_brightness(self, scroll_brightness)
+        self.disable_notify = False
+
+
 class RazerDeathAdder2013(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer DeathAdder 2013

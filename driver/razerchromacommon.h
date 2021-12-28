@@ -87,10 +87,18 @@ struct razer_report razer_chroma_mouse_extended_matrix_effect_breathing_random(u
 struct razer_report razer_chroma_mouse_extended_matrix_effect_breathing_single(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1);
 struct razer_report razer_chroma_mouse_extended_matrix_effect_breathing_dual(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1, struct razer_rgb *rgb2);
 
+/*
+ * ???
+ *
+ * Class 0x0E
+ * Trans 0xFF
+ */
+struct razer_report razer_chroma_misc_set_led_pulsate_effect_colors(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb, size_t count);
 
 /*
  * Misc Functions
  */
+
 struct razer_report razer_chroma_misc_fn_key_toggle(unsigned char state);
 
 struct razer_report razer_chroma_misc_set_blade_brightness(unsigned char brightness);
