@@ -2569,7 +2569,7 @@ static ssize_t razer_attr_write_scroll_led_pulsate_effect_colors(struct device *
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    unsigned char colorCount = buf[0]; 
+    unsigned char colorCount = buf[0];
     struct razer_report report;
     if(count == colorCount * 3 + 1) {
         report = razer_chroma_misc_set_led_pulsate_effect_colors(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb *)&buf[1], colorCount);
@@ -2589,7 +2589,7 @@ static ssize_t razer_attr_write_logo_led_pulsate_effect_colors(struct device *de
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    unsigned char colorCount = buf[0]; 
+    unsigned char colorCount = buf[0];
     struct razer_report report;
     if(count == colorCount * 3 + 1) {
         report = razer_chroma_misc_set_led_pulsate_effect_colors(VARSTORE, LOGO_LED, (struct razer_rgb *)&buf[1], colorCount);
@@ -5149,7 +5149,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_logo_led_rgb);
             device_remove_file(&hdev->dev, &dev_attr_logo_led_effect);
             break;
-            
+
         case USB_DEVICE_ID_RAZER_DEATHADDER_2000_CYNOSA_PRO_BUNDLE:
         case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
             device_remove_file(&hdev->dev, &dev_attr_dpi);
