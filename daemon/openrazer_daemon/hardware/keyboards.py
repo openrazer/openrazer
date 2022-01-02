@@ -1551,6 +1551,7 @@ class RazerBladeEarly2021Base(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour',
+               'set_fan_speed', 'set_fan_mode', 'get_fan_speed', 'get_fan_mode']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1756/blade-15-base-2021-rz09-0369x.png"
