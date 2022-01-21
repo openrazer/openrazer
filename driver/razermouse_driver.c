@@ -2563,40 +2563,44 @@ static ssize_t razer_attr_read_logo_led_effect(struct device *dev, struct device
 }
 
 /**
- * Write device file "scroll_led_pulsate_effect_colors"
+ * Write device file "scroll_led_color_table"
  */
-static ssize_t razer_attr_write_scroll_led_pulsate_effect_colors(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_scroll_led_color_table(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char colorCount = buf[0];
     struct razer_report report;
-    if(count == colorCount * 3 + 1) {
-        report = razer_chroma_misc_set_led_pulsate_effect_colors(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb *)&buf[1], colorCount);
+    if(colorCount > 5) {
+        printk(KERN_WARNING "razermouse: RGB count too big");
+    } else if(count != colorCount * 3 + 1) {
+        printk(KERN_WARNING "razermouse: Input value size doesn't match RGB count");
+    } else {
+        report = razer_chroma_standard_set_led_color_table(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb *)&buf[1], colorCount);
         report.transaction_id.id = 0x3F;
         razer_send_payload(usb_dev, &report);
-    } else {
-        printk(KERN_WARNING "razermouse: Input value size don't match RGB count");
     }
 
     return count;
 }
 
 /**
- * Write device file "logo_led_pulsate_effect_colors"
+ * Write device file "logo_led_color_table"
  */
-static ssize_t razer_attr_write_logo_led_pulsate_effect_colors(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_logo_led_color_table(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned char colorCount = buf[0];
     struct razer_report report;
-    if(count == colorCount * 3 + 1) {
-        report = razer_chroma_misc_set_led_pulsate_effect_colors(VARSTORE, LOGO_LED, (struct razer_rgb *)&buf[1], colorCount);
+    if(colorCount > 5) {
+        printk(KERN_WARNING "razermouse: RGB count too big");
+    } else if(count != colorCount * 3 + 1) {
+        printk(KERN_WARNING "razermouse: Input value size doesn't match RGB count");
+    } else {
+        report = razer_chroma_standard_set_led_color_table(VARSTORE, LOGO_LED, (struct razer_rgb *)&buf[1], colorCount);
         report.transaction_id.id = 0x3F;
         razer_send_payload(usb_dev, &report);
-    } else {
-        printk(KERN_WARNING "razermouse: Input value size don't match RGB count");
     }
 
     return count;
@@ -3753,8 +3757,8 @@ static DEVICE_ATTR(logo_led_state,            0660, razer_attr_read_logo_led_sta
 static DEVICE_ATTR(logo_led_rgb,              0660, razer_attr_read_logo_led_rgb,          razer_attr_write_logo_led_rgb);
 static DEVICE_ATTR(logo_led_effect,           0660, razer_attr_read_logo_led_effect,       razer_attr_write_logo_led_effect);
 // ??
-static DEVICE_ATTR(scroll_led_pulsate_effect_colors,    0220, NULL, razer_attr_write_scroll_led_pulsate_effect_colors);
-static DEVICE_ATTR(logo_led_pulsate_effect_colors,    0220, NULL, razer_attr_write_logo_led_pulsate_effect_colors);
+static DEVICE_ATTR(scroll_led_color_table,    0220, NULL, razer_attr_write_scroll_led_color_table);
+static DEVICE_ATTR(logo_led_color_table,    0220, NULL, razer_attr_write_logo_led_color_table);
 // For "extended" matrix effects
 static DEVICE_ATTR(logo_matrix_effect_wave,        0220, NULL,                             razer_attr_write_logo_mode_wave);
 static DEVICE_ATTR(logo_matrix_effect_spectrum,    0220, NULL,                             razer_attr_write_logo_mode_spectrum);
@@ -4565,12 +4569,12 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_rgb);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_effect);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_pulsate_effect_colors);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_color_table);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_rgb);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_effect);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_pulsate_effect_colors);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_color_table);
             break;
 
         case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
@@ -5158,12 +5162,12 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
             device_remove_file(&hdev->dev, &dev_attr_scroll_led_rgb);
             device_remove_file(&hdev->dev, &dev_attr_scroll_led_effect);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_led_pulsate_effect_colors);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_color_table);
             device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
             device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
             device_remove_file(&hdev->dev, &dev_attr_logo_led_rgb);
             device_remove_file(&hdev->dev, &dev_attr_logo_led_effect);
-            device_remove_file(&hdev->dev, &dev_attr_logo_led_pulsate_effect_colors);
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_color_table);
             break;
 
         case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
