@@ -138,6 +138,7 @@ class RazerLanceheadWirelessReceiver(RazerLanceheadWirelessWired):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Lancehead Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -224,6 +225,7 @@ class RazerLanceheadWireless(RazerLanceheadWired):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Lancehead')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -454,6 +456,7 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -1301,6 +1304,7 @@ class RazerMamba2012Wireless(__RazerDeviceSpecialBrightnessSuspend):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -1443,6 +1447,7 @@ class RazerMambaWirelessReceiver(RazerMambaWirelessWired):
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -1798,6 +1803,8 @@ class RazerViperUltimateWireless(RazerViperUltimateWired):
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Viper Ultimate Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -2320,10 +2327,10 @@ class RazerBasiliskUltimateReceiver(RazerBasiliskUltimateWired):
     def __init__(self, *args, **kwargs):
         super(RazerBasiliskUltimateReceiver, self).__init__(*args, **kwargs)
 
-        self._battery_manager = _BatteryManager(
-            self, self._device_number, 'Razer Basilisk Ultimate')
-        self._battery_manager.active = self.config.getboolean(
-            'Startup', 'battery_notifier', fallback=False)
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Basilisk Ultimate')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -2384,6 +2391,68 @@ class RazerBasiliskV2(__RazerDeviceSpecialBrightnessSuspend):
         self.disable_notify = True
         _da_set_logo_brightness(self, logo_brightness)
         _da_set_scroll_brightness(self, scroll_brightness)
+        self.disable_notify = False
+
+
+class RazerBasiliskV3(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer Basilisk V3
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Basilisk_V3-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0099
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 11]
+    METHODS = ['get_device_type_mouse',
+               'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               'get_brightness', 'set_brightness',
+               'get_logo_brightness', 'set_logo_brightness',
+               'get_scroll_brightness', 'set_scroll_brightness',
+               # All LEDs (partial support)
+               'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
+               # Logo (partial support)
+               'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2',
+               # Scroll wheel (partial support)
+               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2',
+               # Can set custom matrix effects
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/pages/basilisk-v3-4D578898E8144Le8da21dde32b7a9f5f/basilisk.png"
+
+    DPI_MAX = 26000
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self), _get_backlight_brightness(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_logo_brightness(self, 0)
+        _da_set_scroll_brightness(self, 0)
+        _set_backlight_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        logo_brightness = self.suspend_args.get('brightness', (100, 100, 100))[0]
+        scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100))[1]
+        backlight_brightness = self.suspend_args.get('brightness', (100, 100, 100))[2]
+
+        self.disable_notify = True
+        _da_set_logo_brightness(self, logo_brightness)
+        _da_set_scroll_brightness(self, scroll_brightness)
+        _set_backlight_brightness(self, backlight_brightness)
         self.disable_notify = False
 
 
@@ -2500,6 +2569,8 @@ class RazerDeathAdderV2ProWireless(RazerDeathAdderV2ProWired):
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer DeathAdder V2 Pro Wireless')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -2531,6 +2602,8 @@ class RazerAtherisReceiver(__RazerDevice):
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Atheris (Receiver)')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -2568,11 +2641,10 @@ class RazerBasiliskXHyperSpeed(__RazerDevice):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._battery_manager = _BatteryManager(
-            self, self._device_number, 'Razer Basilisk X HyperSpeed')
-
-        self._battery_manager.active = self.config.getboolean(
-            'Startup', 'battery_notifier', fallback=False)
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Basilisk X HyperSpeed')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
@@ -2587,6 +2659,54 @@ class RazerBasiliskXHyperSpeed(__RazerDevice):
 
     def _suspend_device(self):
         self.logger.debug("Device doesn't have suspend/resume")
+
+
+class RazerOrochiV2Receiver(__RazerDevice):
+    """
+    Class for the Razer Orochi V2 (Receiver)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Orochi_V2_000000000000-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0094
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate',
+               'set_poll_rate', 'get_battery', 'is_charging', 'get_idle_time',
+               'set_idle_time', 'get_low_battery_threshold',
+               'set_low_battery_threshold']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/OrochiV2-1-en-v1.png"
+
+    DPI_MAX = 18000
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Orochi V2')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
+
+    def _resume_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+    def _suspend_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+
+class RazerOrochiV2Bluetooth(RazerOrochiV2Receiver):
+    """
+    Class for the Razer Orochi V2 (Bluetooth)
+    """
+    USB_PID = 0x0095
 
 
 class RazerDeathAdderV2Mini(__RazerDeviceSpecialBrightnessSuspend):
