@@ -2614,6 +2614,7 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
         translation = find_translation(chroma_keys_5, usage->code);
         break;
 
@@ -2905,6 +2906,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
         return razer_raw_event_bitfield(hdev, asc, intf, report, data, size);
     default:
         return razer_raw_event_standard(hdev, asc, intf, report, data, size);
@@ -2921,6 +2923,7 @@ static int razer_kbd_input_mapping(struct hid_device *hdev, struct hid_input *hi
 {
     switch (hdev->product) {
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
