@@ -91,6 +91,33 @@ class RazerKeyboard(__RazerDevice):
             self._dbus_interfaces['macro_mode_led'].setMacroEffect(value)
 
     @property
+    def keyswitch_optimization(self) -> bool:
+        """
+        Get keyswitch optimization state
+
+        :return: Keyswitch optimization state
+        :rtype: bool
+        """
+        if self.has('keyswitch_optimization'):
+            return self._dbus_interfaces['keyswitch_optimization'].getKeyswitchOptimization()
+        else:
+            return False
+
+    @keyswitch_optimization.setter
+    def keyswitch_optimization(self, value: bool):
+        """
+        Set keyswitch optimization state
+
+        :param value: Keyswitch optimization state
+        :type value: bool
+        """
+        if self.has('keyswitch_optimization'):
+            if value:
+                self._dbus_interfaces['keyswitch_optimization'].setKeyswitchOptimization(True)
+            else:
+                self._dbus_interfaces['keyswitch_optimization'].setKeyswitchOptimization(False)
+
+    @property
     def profile_led_red(self) -> bool:
         """
          Get red profile LED state

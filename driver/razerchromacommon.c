@@ -931,6 +931,75 @@ struct razer_report razer_chroma_misc_fn_key_toggle(unsigned char state)
 }
 
 /**
+ * Set the keyswitch optimization on the device (first of two commands)
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    04       02    02  001400280000               | SET KEY OPTIMIZATION STATE (TYPING SET)
+ * 00     1f    0000   00    04       02    02  000000000000               | SET KEY OPTIMIZATION STATE (GAMING SET)
+ */
+struct razer_report razer_chroma_misc_set_keyswitch_optimization_command1(unsigned char optimization_mode)
+{
+    struct razer_report report = report = get_razer_report(0x02, 0x02, 0x04); // class, id, data size
+
+    // 0x00 -> Typing (Set)
+    // 0x01 -> Gaming (Set) - Same report, doesn't include any arguments
+    if(optimization_mode == 0x00) {
+        report.arguments[0] = 0x00;
+        report.arguments[1] = 0x14;
+        report.arguments[2] = 0x00;
+        report.arguments[3] = 0x28;
+        report.arguments[4] = 0x00;
+    }
+
+    return report;
+}
+
+/**
+* Set the keyswitch optimization on the device (second of two commands)
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    05       02    15  010014002800               | SET KEY OPTIMIZATION STATE (TYPING VARSTORE) ????
+ * 00     1f    0000   00    05       02    15  010000000000               | SET KEY OPTIMIZATION STATE (GAMING VARSTORE) ????
+ */
+struct razer_report razer_chroma_misc_set_keyswitch_optimization_command2(unsigned char optimization_mode)
+{
+    struct razer_report report = get_razer_report(0x02, 0x15, 0x05); // class, id, data size
+
+    // 0x00 -> Typing (Store)
+    // 0x01 -> Gaming (Store)
+    switch(optimization_mode) {
+    case 0x00:
+        report.arguments[0] = 0x01;
+        report.arguments[1] = 0x00;
+        report.arguments[2] = 0x14;
+        report.arguments[3] = 0x00;
+        report.arguments[4] = 0x28;
+        report.arguments[5] = 0x00;
+        break;
+    case 0x01:
+        report.arguments[0] = 0x01;
+        break;
+    }
+
+    return report;
+}
+
+/**
+ * Get the keyswitch optimization on the device
+ *
+ * Identifiers in arg[1] and arg[3]
+ *
+ * 0x00<->0x14 is in arg[1]
+ * 0x00<->0x28 is in arg[3]
+ */
+struct razer_report razer_chroma_misc_get_keyswitch_optimization(void)
+{
+    struct razer_report report = get_razer_report(0x02, 0x82, 0x04); // class, id, data size
+
+    return report;
+}
+
+/**
  * Set the brightness of an LED on the device
  *
  * Status Trans Packet Proto DataSize Class CMD Args
@@ -1117,6 +1186,9 @@ struct razer_report razer_chroma_misc_set_polling_rate2(unsigned short polling_r
         break;
     case  500:
         report.arguments[1] = 0x10;
+        break;
+    case  250:
+        report.arguments[1] = 0x20;
         break;
     case  125:
         report.arguments[1] = 0x40;
