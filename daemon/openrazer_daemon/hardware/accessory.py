@@ -24,6 +24,36 @@ class RazerChromaMugHolder(_RazerDeviceBrightnessSuspend):
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/mug-holder/e64e507b73e61c44789d996065fd9645-1500x1000mug_01.jpg"
 
 
+class RazerChromaARGB(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Chroma Addressable RGB Controller
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0F1F
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 80]
+    WAVE_DIRS = (1, 2)
+    METHODS = ['get_device_type_accessory',
+               'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row',
+               'get_channel1_brightness', 'set_channel1_brightness',
+               'get_channel2_brightness', 'set_channel2_brightness',
+               'get_channel3_brightness', 'set_channel3_brightness',
+               'get_channel4_brightness', 'set_channel4_brightness',
+               'get_channel5_brightness', 'set_channel5_brightness',
+               'get_channel6_brightness', 'set_channel6_brightness',
+               'get_channel1_size', 'set_channel1_size',
+               'get_channel2_size', 'set_channel2_size',
+               'get_channel3_size', 'set_channel3_size',
+               'get_channel4_size', 'set_channel4_size',
+               'get_channel5_size', 'set_channel5_size',
+               'get_channel6_size', 'set_channel6_size'
+               ]
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/3903-1-EN-v1.png"
+
+
 class RazerChromaHDK(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Chroma Hardware Development Kit (HDK)

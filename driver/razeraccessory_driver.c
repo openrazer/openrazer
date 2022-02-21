@@ -192,6 +192,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Thunderbolt 4 Dock Chroma\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+        device_type = "Razer Chroma Addressable RGB Controller\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
         break;
@@ -247,6 +251,7 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
         report.transaction_id.id = 0x3F;
         break;
@@ -375,6 +380,7 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         report = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
         report.transaction_id.id = 0x3F;
         break;
@@ -461,6 +467,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         report = razer_chroma_extended_matrix_effect_custom_frame();
         break;
 
@@ -513,6 +520,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
         case USB_DEVICE_ID_RAZER_NOMMO_PRO:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
             report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
             report.transaction_id.id = 0x3F;
             break;
@@ -602,6 +610,7 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         report = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
         report.transaction_id.id = 0x3F;
         break;
@@ -656,6 +665,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         switch(count) {
         case 3: // Single colour mode
             report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
@@ -864,6 +874,11 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
             report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             break;
 
+        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+            razer_send_argb_msg(device->usb_dev, row_id, (stop_col - start_col) + 1, (unsigned char*)&buf[offset]);
+            return count;
+            break;
+
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
@@ -923,6 +938,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         response_report = razer_send_payload(device->usb_dev, &report);
         strncpy(&serial_string[0], &response_report.arguments[0], 22);
         serial_string[22] = '\0';
@@ -1112,6 +1128,35 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
         report = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         break;
 
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+        report = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_1_LED, brightness);
+        mutex_lock(&device->lock);
+        razer_send_payload(device->usb_dev, &report);
+        mutex_unlock(&device->lock);
+
+        report = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_2_LED, brightness);
+        mutex_lock(&device->lock);
+        razer_send_payload(device->usb_dev, &report);
+        mutex_unlock(&device->lock);
+
+        report = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_3_LED, brightness);
+        mutex_lock(&device->lock);
+        razer_send_payload(device->usb_dev, &report);
+        mutex_unlock(&device->lock);
+
+        report = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_4_LED, brightness);
+        mutex_lock(&device->lock);
+        razer_send_payload(device->usb_dev, &report);
+        mutex_unlock(&device->lock);
+
+        report = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_5_LED, brightness);
+        mutex_lock(&device->lock);
+        razer_send_payload(device->usb_dev, &report);
+        mutex_unlock(&device->lock);
+
+        report = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_6_LED, brightness);
+        break;
+
     default:
         printk(KERN_WARNING "razeraccessory: Unknown device\n");
         break;
@@ -1132,9 +1177,11 @@ static ssize_t razer_attr_write_set_brightness(struct device *dev, struct device
 static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
     struct razer_report response = {0};
     unsigned char brightness = 0;
+    struct razer_report report;
+    size_t i;
+    size_t tot = 0;
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -1149,8 +1196,18 @@ static ssize_t razer_attr_read_set_brightness(struct device *dev, struct device_
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
         brightness = device->saved_brightness;
         break;
-
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+        for(i = ARGB_CH_1_LED ; i <= ARGB_CH_6_LED ; i++) {
+            report = razer_chroma_extended_matrix_get_brightness(VARSTORE, i);
+            mutex_lock(&device->lock);
+            response = razer_send_payload(device->usb_dev, &report);
+            mutex_unlock(&device->lock);
+            tot += response.arguments[2];
+        }
+        brightness = tot / 6;
+        break;
     default:
+        report = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
         mutex_lock(&device->lock);
         response = razer_send_payload(device->usb_dev, &report);
         mutex_unlock(&device->lock);
@@ -1556,9 +1613,278 @@ static ssize_t razer_attr_write_fully_charged_mode_breath(struct device *dev, st
     return razer_attr_write_charge_mode_breath(dev, attr, buf, count, FULLY_CHARGED_LED);
 }
 
+/**
+ * Write device file "set_brightness"
+ *
+ * Sets the brightness to the ASCII number written to this file.
+ */
+static ssize_t razer_attr_write_channel_led_brightness(unsigned char led, struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    unsigned char brightness = 0;
+    struct razer_report report = {0};
 
+    if(count > 0) {
+        brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
+    } else {
+        printk(KERN_WARNING "razeraccessory: Brightness takes an ascii number\n");
+    }
 
+    report = razer_chroma_extended_matrix_brightness(VARSTORE, led, brightness);
 
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+static ssize_t razer_attr_write_channel1_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_channel_led_brightness(ARGB_CH_1_LED, dev, attr, buf, count);
+}
+
+static ssize_t razer_attr_write_channel2_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_channel_led_brightness(ARGB_CH_2_LED, dev, attr, buf, count);
+}
+
+static ssize_t razer_attr_write_channel3_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_channel_led_brightness(ARGB_CH_3_LED, dev, attr, buf, count);
+}
+
+static ssize_t razer_attr_write_channel4_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_channel_led_brightness(ARGB_CH_4_LED, dev, attr, buf, count);
+}
+
+static ssize_t razer_attr_write_channel5_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_channel_led_brightness(ARGB_CH_5_LED, dev, attr, buf, count);
+}
+
+static ssize_t razer_attr_write_channel6_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_channel_led_brightness(ARGB_CH_6_LED, dev, attr, buf, count);
+}
+
+/**
+ * Read device file "channel_sizes"
+ */
+static ssize_t razer_attr_read_channel_size(unsigned int channel, struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report report = get_razer_report(0x0f, 0x88, 0x0d);
+    struct razer_report response;
+    report.transaction_id.id = 0x1F;
+    report.arguments[0] = 0x06;
+
+    mutex_lock(&device->lock);
+    response = razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return sprintf(buf, "%d\n", response.arguments[channel * 2]);
+}
+
+static ssize_t razer_attr_read_channel1_size(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_channel_size(1, dev, attr, buf);
+}
+
+static ssize_t razer_attr_read_channel2_size(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_channel_size(2, dev, attr, buf);
+}
+
+static ssize_t razer_attr_read_channel3_size(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_channel_size(3, dev, attr, buf);
+}
+
+static ssize_t razer_attr_read_channel4_size(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_channel_size(4, dev, attr, buf);
+}
+
+static ssize_t razer_attr_read_channel5_size(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_channel_size(5, dev, attr, buf);
+}
+
+static ssize_t razer_attr_read_channel6_size(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_channel_size(6, dev, attr, buf);
+}
+
+/**
+ * Write device file "channel_sizes"
+ */
+static ssize_t razer_attr_write_channel_size(unsigned int channel, struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_report response;
+    unsigned char sz;
+    struct razer_report report;
+    struct razer_accessory_device *device;
+
+    device = dev_get_drvdata(dev);
+
+    /* Get existing sizes */
+    report = get_razer_report(0x0f, 0x88, 0x0d);
+    report.transaction_id.id = 0x1F;
+    report.arguments[0] = 0x06;
+
+    mutex_lock(&device->lock);
+    response = razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    /* Set new sizes */
+    if(count > 0) {
+        sz = (unsigned char)simple_strtoul(buf, NULL, 10);
+    } else {
+        printk(KERN_WARNING "razeraccessory: Size takes an ascii number\n");
+        sz = 0;
+    }
+
+    report = get_razer_report(0x0f, 0x08, 0x0d);
+    report.arguments[0] = 0x06;
+    report.arguments[1] = 0x01;
+    report.arguments[2] = channel == 1 ? sz : response.arguments[2];
+    report.arguments[3] = 0x02;
+    report.arguments[4] = channel == 2 ? sz : response.arguments[4];
+    report.arguments[5] = 0x03;
+    report.arguments[6] = channel == 3 ? sz : response.arguments[6];
+    report.arguments[7] = 0x04;
+    report.arguments[8] = channel == 4 ? sz : response.arguments[8];
+    report.arguments[9] = 0x05;
+    report.arguments[10] = channel == 5 ? sz : response.arguments[10];
+    report.arguments[11] = 0x06;
+    report.arguments[12] = channel == 6 ? sz : response.arguments[12];
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+static ssize_t razer_attr_write_channel1_size(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_channel_size(1, dev, attr, buf, count);
+}
+
+static ssize_t razer_attr_write_channel2_size(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_channel_size(2, dev, attr, buf, count);
+}
+
+static ssize_t razer_attr_write_channel3_size(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_channel_size(3, dev, attr, buf, count);
+}
+
+static ssize_t razer_attr_write_channel4_size(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_channel_size(4, dev, attr, buf, count);
+}
+
+static ssize_t razer_attr_write_channel5_size(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_channel_size(5, dev, attr, buf, count);
+}
+
+static ssize_t razer_attr_write_channel6_size(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_channel_size(6, dev, attr, buf, count);
+}
+
+static ssize_t razer_attr_reset_channels(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+
+    /* Get existing sizes */
+    struct razer_report report;
+    struct razer_report response = {0};
+    unsigned int i;
+
+    for(i = 0; i < 6; i++) {
+        report = get_razer_report(0x0f, 0x04, 0x03);
+        report.transaction_id.id = 0x1F;
+        report.arguments[0] = 0x01;
+        report.arguments[1] = ARGB_CH_1_LED + i;
+        report.arguments[2] = 0xff;
+
+        mutex_lock(&device->lock);
+        response = razer_send_payload(device->usb_dev, &report);
+        mutex_unlock(&device->lock);
+    }
+
+    report = get_razer_report(0x00, 0xb7, 0x01);
+    report.transaction_id.id = 0x1F;
+    report.arguments[0] = 0x00;
+    mutex_lock(&device->lock);
+    response = razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    report = get_razer_report(0x00, 0x36, 0x01);
+    report.transaction_id.id = 0x1F;
+    report.arguments[0] = 0x01;
+    mutex_lock(&device->lock);
+    response = razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Read device file "set_brightness"
+ *
+ * Returns brightness or -1 if the initial brightness is not known
+ */
+static ssize_t razer_attr_read_channel_led_brightness(unsigned char led, struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report report = razer_chroma_extended_matrix_get_brightness(VARSTORE, led);
+    struct razer_report response = {0};
+    unsigned char brightness = 0;
+
+    mutex_lock(&device->lock);
+    response = razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+    brightness = response.arguments[2];
+
+    return sprintf(buf, "%d\n", brightness);
+}
+
+static ssize_t razer_attr_read_channel1_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_channel_led_brightness(ARGB_CH_1_LED, dev, attr, buf);
+}
+
+static ssize_t razer_attr_read_channel2_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_channel_led_brightness(ARGB_CH_2_LED, dev, attr, buf);
+}
+
+static ssize_t razer_attr_read_channel3_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_channel_led_brightness(ARGB_CH_3_LED, dev, attr, buf);
+}
+
+static ssize_t razer_attr_read_channel4_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_channel_led_brightness(ARGB_CH_4_LED, dev, attr, buf);
+}
+
+static ssize_t razer_attr_read_channel5_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_channel_led_brightness(ARGB_CH_5_LED, dev, attr, buf);
+}
+
+static ssize_t razer_attr_read_channel6_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_channel_led_brightness(ARGB_CH_6_LED, dev, attr, buf);
+}
 
 /**
  * Set up the device driver files
@@ -1609,6 +1935,20 @@ static DEVICE_ATTR(fully_charged_matrix_effect_spectrum,    0220, NULL,         
 static DEVICE_ATTR(fully_charged_matrix_effect_breath,      0220, NULL,                                           razer_attr_write_fully_charged_mode_breath);
 static DEVICE_ATTR(fully_charged_matrix_effect_static,      0220, NULL,                                           razer_attr_write_fully_charged_mode_static);
 static DEVICE_ATTR(fully_charged_matrix_effect_none,        0220, NULL,                                           razer_attr_write_fully_charged_mode_none);
+
+static DEVICE_ATTR(reset_channels,							0220, NULL,	 		  		  						  razer_attr_reset_channels);
+static DEVICE_ATTR(channel1_size,							0660, razer_attr_read_channel1_size, 		  		  razer_attr_write_channel1_size);
+static DEVICE_ATTR(channel2_size,							0660, razer_attr_read_channel2_size, 		  		  razer_attr_write_channel2_size);
+static DEVICE_ATTR(channel3_size,							0660, razer_attr_read_channel3_size, 		  		  razer_attr_write_channel3_size);
+static DEVICE_ATTR(channel4_size,							0660, razer_attr_read_channel4_size, 		  		  razer_attr_write_channel4_size);
+static DEVICE_ATTR(channel5_size,							0660, razer_attr_read_channel5_size, 		  		  razer_attr_write_channel5_size);
+static DEVICE_ATTR(channel6_size,							0660, razer_attr_read_channel6_size, 		  		  razer_attr_write_channel6_size);
+static DEVICE_ATTR(channel1_led_brightness,     			0660, razer_attr_read_channel1_led_brightness, 		  razer_attr_write_channel1_led_brightness);
+static DEVICE_ATTR(channel2_led_brightness,     			0660, razer_attr_read_channel2_led_brightness, 		  razer_attr_write_channel2_led_brightness);
+static DEVICE_ATTR(channel3_led_brightness,     			0660, razer_attr_read_channel3_led_brightness, 		  razer_attr_write_channel3_led_brightness);
+static DEVICE_ATTR(channel4_led_brightness,     			0660, razer_attr_read_channel4_led_brightness, 		  razer_attr_write_channel4_led_brightness);
+static DEVICE_ATTR(channel5_led_brightness,     			0660, razer_attr_read_channel5_led_brightness, 		  razer_attr_write_channel5_led_brightness);
+static DEVICE_ATTR(channel6_led_brightness,     			0660, razer_attr_read_channel6_led_brightness, 		  razer_attr_write_channel6_led_brightness);
 
 static DEVICE_ATTR(is_mug_present,                          0440, razer_attr_read_get_cup_state,                  NULL);
 
@@ -1687,6 +2027,7 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         if (intf->cur_altsetting->desc.bInterfaceNumber != 0) {
             dev_info(&intf->dev, "skipping secondary interface\n");
             return false;
@@ -1701,6 +2042,7 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
  */
 static int razer_accessory_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
+
     int retval = 0;
     unsigned char expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
@@ -1725,6 +2067,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         expected_protocol = 0;
         break;
 
@@ -1808,6 +2151,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_CHROMA_MUG:
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
         case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
@@ -1824,6 +2168,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_CORE:
         case USB_DEVICE_ID_RAZER_CHROMA_MUG:
         case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
         case USB_DEVICE_ID_RAZER_NOMMO_PRO:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
@@ -1859,6 +2204,24 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);
+            break;
+        }
+
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_reset_channels);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel1_size);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel2_size);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel3_size);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel4_size);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel5_size);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel6_size);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel1_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel2_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel3_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel4_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel5_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel6_led_brightness);
             break;
         }
 
@@ -1920,6 +2283,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         expected_protocol = 0;
         break;
 
@@ -1990,6 +2354,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_CHROMA_MUG:
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
         case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
@@ -2009,6 +2374,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
         case USB_DEVICE_ID_RAZER_NOMMO_PRO:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
@@ -2040,6 +2406,24 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);
+            break;
+        }
+
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+            device_remove_file(&hdev->dev, &dev_attr_reset_channels);
+            device_remove_file(&hdev->dev, &dev_attr_channel1_size);
+            device_remove_file(&hdev->dev, &dev_attr_channel2_size);
+            device_remove_file(&hdev->dev, &dev_attr_channel3_size);
+            device_remove_file(&hdev->dev, &dev_attr_channel4_size);
+            device_remove_file(&hdev->dev, &dev_attr_channel5_size);
+            device_remove_file(&hdev->dev, &dev_attr_channel6_size);
+            device_remove_file(&hdev->dev, &dev_attr_channel1_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_channel2_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_channel3_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_channel4_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_channel5_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_channel6_led_brightness);
             break;
         }
     }
@@ -2091,6 +2475,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA) },
