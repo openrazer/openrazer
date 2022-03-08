@@ -681,7 +681,7 @@ class RazerDeathAdder2000(__RazerDeviceSpecialBrightnessSuspend):
                'set_scroll_active', 'get_scroll_active', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static_mono', 'set_scroll_pulsate_mono',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
-    DEVICE_IMAGE = "http://cn.razerzone.com/assets/product/gallery/deathadder-2000-gallery-1.png"
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/da10m/carousel/razer-death-adder-gallery-09.png"
 
     DPI_MAX = 2000
 
