@@ -2932,3 +2932,35 @@ class RazerProClickWired(RazerProClickReceiver):
     """
     EVENT_FILE_REGEX = re.compile(r'.*1532_Razer_Pro_Click_000000000000-if0(1|2)-event-kbd')
     USB_PID = 0x0080
+
+
+class RazerDeathAdderV2XHyperSpeed(__RazerDevice):
+    """
+    Class for the Razer DeathAdder V2 X HyperSpeed
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_DeathAdder_V2_X_HyperSpeed_000000000000-if0(1|2)-event-kbd')
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time']
+
+    USB_VID = 0x1532
+    USB_PID = 0x009C
+    DEVICE_IMAGE = "https://hybrismediaprod.blob.core.windows.net/sys-master-phoenix-images-container/he8/h51/9250345058334/deathadder-v2-x-hyperspeed-500x500.png"
+
+    DPI_MAX = 14000
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer DeathAdder V2 X HyperSpeed')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()

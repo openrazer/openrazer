@@ -162,6 +162,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Orochi V2 (Bluetooth)                   |  1532:0095  |
 | Razer DeathAdder Essential (2021)             |  1532:0098  |
 | Razer Basilisk V3                             |  1532:0099  |
+| Razer DeathAdder V2 X HyperSpeed              |  1532:009C  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |
