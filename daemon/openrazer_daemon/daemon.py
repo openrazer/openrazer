@@ -77,16 +77,16 @@ class RazerDaemon(DBusService):
         self._config = configparser.ConfigParser()
         self.read_config(config_file)
 
-        self._persistence_file = persistence_file
-        self._persistence = configparser.ConfigParser()
-        self._persistence.status = {"changed": False}
-        self.read_persistence(persistence_file)
-
         # Logging
         log_level = logging.INFO
         if verbose or self._config.getboolean('General', 'verbose_logging'):
             log_level = logging.DEBUG
         self.logger = self._create_logger(log_dir, log_level, console_log)
+
+        self._persistence_file = persistence_file
+        self._persistence = configparser.ConfigParser()
+        self._persistence.status = {"changed": False}
+        self.read_persistence(persistence_file)
 
         # Check for plugdev group
         if not self._check_plugdev_group():
@@ -300,7 +300,12 @@ class RazerDaemon(DBusService):
         :type persistence_file: str or None
         """
         if persistence_file is not None and os.path.exists(persistence_file):
-            self._persistence.read(persistence_file)
+            try:
+                self._persistence.read(persistence_file)
+            except configparser.Error:
+                self.logger.warning('Failed to read persistence config, resetting!', exc_info=True)
+                with open(persistence_file, "w") as f:
+                    f.writelines("")
 
     def write_persistence(self, persistence_file):
         """
