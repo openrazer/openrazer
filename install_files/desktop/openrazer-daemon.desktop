@@ -5,6 +5,7 @@ Keywords=razer;keyboard;chroma;
 NoDisplay=false
 Exec=/usr/bin/openrazer-daemon --foreground --verbose
 Icon=/usr/share/pixmaps/python3.xpm
+Categories=System;HardwareSettings;
 Terminal=false
 Type=Application
 X-GNOME-Autostart-Phase=Applications
