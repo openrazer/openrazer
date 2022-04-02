@@ -208,18 +208,23 @@ This will output something similar to this:
 
 ## Installation
 
-Packages are available for these distributions:
+Official packages are available for these distributions (and their derivatives):
 
-* [Ubuntu / Linux Mint](https://openrazer.github.io/#ubuntu)
+* [Ubuntu](https://openrazer.github.io/#ubuntu)
 * [Debian](https://openrazer.github.io/#debian)
 * [Arch Linux](https://openrazer.github.io/#arch)
 * [Fedora](https://openrazer.github.io/#fedora)
 * [openSUSE](https://openrazer.github.io/#opensuse)
+* [Mageia](https://openrazer.github.io/#mageia)
+
+Community supported packages are available for:
+
 * [Gentoo](https://openrazer.github.io/#gentoo)
 * [NixOS](https://openrazer.github.io/#nixos)
+* [Red Hat / CentOS](https://openrazer.github.io/#redhat)
 * [Solus](https://openrazer.github.io/#solus)
+* [Slackware](https://openrazer.github.io/#slackware)
 * [Void Linux](https://openrazer.github.io/#voidlinux)
-* [Red Hat / CentOS](https://openrazer.github.io/#redhat) (unofficial)
 
 ## Applications
 
