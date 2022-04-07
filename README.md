@@ -140,11 +140,13 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer DeathAdder Essential (White Edition)    |  1532:0071  |
 | Razer Mamba Wireless (Receiver)               |  1532:0072  |
 | Razer Mamba Wireless (Wired)                  |  1532:0073  |
+| Razer Pro Click (Receiver)                    |  1532:0077  |
 | Razer Viper                                   |  1532:0078  |
 | Razer Viper Ultimate (Wired)                  |  1532:007A  |
 | Razer Viper Ultimate (Wireless)               |  1532:007B  |
 | Razer DeathAdder V2 Pro (Wired)               |  1532:007C  |
 | Razer DeathAdder V2 Pro (Wireless)            |  1532:007D  |
+| Razer Pro Click (Wired)                       |  1532:0080  |
 | Razer Basilisk X HyperSpeed                   |  1532:0083  |
 | Razer DeathAdder V2                           |  1532:0084  |
 | Razer Basilisk V2                             |  1532:0085  |

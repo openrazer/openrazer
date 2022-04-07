@@ -2883,3 +2883,54 @@ class RazerNagaEpicChromaWireless(RazerNagaEpicChromaWired):
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Naga_Epic_Chroma_Dock-if0(1|2)-event-kbd')
 
     USB_PID = 0x003F
+
+
+class RazerProClickReceiver(__RazerDevice):
+    """
+    Class for the Razer Pro Click (Receiver)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Pro_Click-if0(1|2)-event-kbd')
+    USB_VID = 0x1532
+    USB_PID = 0x0077
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               'get_idle_time', 'set_idle_time',
+
+               'get_battery', 'is_charging',
+               'get_low_battery_threshold', 'set_low_battery_threshold']
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/3802-0-en-v1.png"
+
+    DPI_MAX = 16000
+
+    POLL_RATES = [125, 500, 1000]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Pro Click')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
+
+    def _resume_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+    def _suspend_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+
+class RazerProClickWired(RazerProClickReceiver):
+    """
+    Class for the Razer Pro Click (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*1532_Razer_Pro_Click_000000000000-if0(1|2)-event-kbd')
+    USB_PID = 0x0080
