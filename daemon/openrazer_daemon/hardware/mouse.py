@@ -2866,6 +2866,8 @@ class RazerNagaEpicChromaWired(__RazerDeviceBrightnessSuspend):
 
         self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Naga Epic Chroma')
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
     def _close(self):
         """
