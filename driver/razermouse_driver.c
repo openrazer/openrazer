@@ -518,7 +518,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
  *
  * Returns a string
  */
-static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_standard_get_firmware_version();
@@ -597,7 +597,7 @@ static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute
  *
  * No effect is activated whenever this file is written to
  */
-static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -628,7 +628,7 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
  *
  * Sets the mouse to custom mode whenever the file is written to
  */
-static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -690,7 +690,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
  *
  * Set the mouse to static mode when 3 RGB bytes are written
  */
-static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -751,7 +751,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
  * When 1 is written (as a character, 0x31) the wave effect is displayed moving up the mouse
  * if 2 is written (0x32) then the wave effect goes down
  */
-static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -778,7 +778,7 @@ static ssize_t razer_attr_write_mode_wave(struct device *dev, struct device_attr
  *
  * Spectrum effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -816,7 +816,7 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
  *
  * Sets reactive mode when this file is written to. A speed byte and 3 RGB bytes should be written
  */
-static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -857,7 +857,7 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
  *
  * Sets breathing mode by writing 1, 3 or 6 bytes
  */
-static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -929,7 +929,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
  *
  * Returns a string
  */
-static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     char serial_string[23];
@@ -992,7 +992,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
  *
  * Returns an integer which needs to be scaled from 0-255 -> 0-100
  */
-static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -1034,7 +1034,7 @@ static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_att
  *
  * Returns 0 when not charging, 1 when charging
  */
-static ssize_t razer_attr_read_is_charging(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -1082,7 +1082,7 @@ static ssize_t razer_attr_read_is_charging(struct device *dev, struct device_att
  *
  * Sets charging effect.
  */
-static ssize_t razer_attr_write_set_charging_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_charge_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct usb_interface *intf = to_usb_interface(dev->parent);
@@ -1111,7 +1111,7 @@ static ssize_t razer_attr_write_set_charging_effect(struct device *dev, struct d
  *
  * Sets charging colour using 3 RGB bytes
  */
-static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_charge_colour(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct usb_interface *intf = to_usb_interface(dev->parent);
@@ -1433,7 +1433,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
  *
  * Sets the mouse DPI to the unsigned short integer written to this file.
  */
-static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = {0};
@@ -1575,7 +1575,7 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
  *
  * Gets the mouse DPI to the unsigned short integer written to this file.
  */
-static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = {0};
@@ -1885,7 +1885,7 @@ static ssize_t razer_attr_read_tilt_repeat_delay(struct device *dev, struct devi
  *   DPIs:          | 800 | 800 | 1800 | 1800 | 3600 | 3200
  *   Bytes (hex): 02 03 20 03 02 07 08  07 08  0e 10  0c 80
  */
-static ssize_t razer_attr_write_mouse_dpi_stages(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = {0};
@@ -1962,7 +1962,7 @@ static ssize_t razer_attr_write_mouse_dpi_stages(struct device *dev, struct devi
  *   - 1 byte: active DPI stage number, >= 0 and <= n.
  *   - n*4 bytes: n DPI stages.
  */
-static ssize_t razer_attr_read_mouse_dpi_stages(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = {0};
@@ -2030,7 +2030,7 @@ static ssize_t razer_attr_read_mouse_dpi_stages(struct device *dev, struct devic
  *
  * Gets the time this device will go into powersave as a number of seconds.
  */
-static ssize_t razer_attr_read_get_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_misc_get_idle_time();
@@ -2055,7 +2055,7 @@ static ssize_t razer_attr_read_get_idle_time(struct device *dev, struct device_a
  *
  * Sets the idle time to the ASCII number written to this file.
  */
-static ssize_t razer_attr_write_set_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct usb_interface *intf = to_usb_interface(dev->parent);
@@ -2098,7 +2098,7 @@ static ssize_t razer_attr_read_low_battery_threshold(struct device *dev, struct 
  *
  * Sets the low battery blink threshold to the ASCII number written to this file.
  */
-static ssize_t razer_attr_write_set_low_battery_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct usb_interface *intf = to_usb_interface(dev->parent);
@@ -2121,7 +2121,7 @@ static ssize_t razer_attr_write_set_low_battery_threshold(struct device *dev, st
  *
  * Writes the colour segments on the mouse.
  */
-static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -3072,7 +3072,7 @@ static ssize_t razer_attr_read_backlight_led_effect(struct device *dev, struct d
  *
  * Wave effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_scroll_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_scroll_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -3112,7 +3112,7 @@ static ssize_t razer_attr_write_scroll_mode_wave(struct device *dev, struct devi
  *
  * Spectrum effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_scroll_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_scroll_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -3164,7 +3164,7 @@ static ssize_t razer_attr_write_scroll_mode_spectrum(struct device *dev, struct 
  *
  * Sets reactive mode when this file is written to. A speed byte and 3 RGB bytes should be written
  */
-static ssize_t razer_attr_write_scroll_mode_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_scroll_matrix_effect_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -3223,7 +3223,7 @@ static ssize_t razer_attr_write_scroll_mode_reactive(struct device *dev, struct 
  *
  * Sets breathing mode by writing 1, 3 or 6 bytes
  */
-static ssize_t razer_attr_write_scroll_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_scroll_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -3309,7 +3309,7 @@ static ssize_t razer_attr_write_scroll_mode_breath(struct device *dev, struct de
  *
  * Set the mouse to static mode when 3 RGB bytes are written
  */
-static ssize_t razer_attr_write_scroll_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_scroll_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -3369,7 +3369,7 @@ static ssize_t razer_attr_write_scroll_mode_static(struct device *dev, struct de
  *
  * No effect is activated whenever this file is written to
  */
-static ssize_t razer_attr_write_scroll_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_scroll_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -3425,7 +3425,7 @@ static ssize_t razer_attr_write_scroll_mode_none(struct device *dev, struct devi
  *
  * Wave effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_logo_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_logo_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -3464,7 +3464,7 @@ static ssize_t razer_attr_write_logo_mode_wave(struct device *dev, struct device
  *
  * Spectrum effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_logo_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_logo_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -3526,7 +3526,7 @@ static ssize_t razer_attr_write_logo_mode_spectrum(struct device *dev, struct de
  *
  * Sets reactive mode when this file is written to. A speed byte and 3 RGB bytes should be written
  */
-static ssize_t razer_attr_write_logo_mode_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_logo_matrix_effect_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -3596,7 +3596,7 @@ static ssize_t razer_attr_write_logo_mode_reactive(struct device *dev, struct de
  *
  * Sets breathing mode by writing 1, 3 or 6 bytes
  */
-static ssize_t razer_attr_write_logo_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_logo_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -3694,7 +3694,7 @@ static ssize_t razer_attr_write_logo_mode_breath(struct device *dev, struct devi
  *
  * Set the mouse to static mode when 3 RGB bytes are written
  */
-static ssize_t razer_attr_write_logo_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_logo_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -3765,7 +3765,7 @@ static ssize_t razer_attr_write_logo_mode_static(struct device *dev, struct devi
  *
  * No effect is activated whenever this file is written to
  */
-static ssize_t razer_attr_write_logo_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_logo_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -3866,7 +3866,7 @@ static ssize_t razer_attr_write_side_mode_wave(struct device *dev, struct device
  *
  * Wave effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_left_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_left_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_side_mode_wave(dev, attr, buf, count, LEFT_SIDE_LED);
 }
@@ -3876,7 +3876,7 @@ static ssize_t razer_attr_write_left_mode_wave(struct device *dev, struct device
  *
  * Wave effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_right_mode_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_right_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_side_mode_wave(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
@@ -3920,7 +3920,7 @@ static ssize_t razer_attr_write_side_mode_spectrum(struct device *dev, struct de
  *
  * Spectrum effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_left_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_left_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_side_mode_spectrum(dev, attr, buf, count, LEFT_SIDE_LED);
 }
@@ -3930,7 +3930,7 @@ static ssize_t razer_attr_write_left_mode_spectrum(struct device *dev, struct de
  *
  * Spectrum effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_right_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_right_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_side_mode_spectrum(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
@@ -3983,7 +3983,7 @@ static ssize_t razer_attr_write_side_mode_reactive(struct device *dev, struct de
  *
  * Sets reactive mode when this file is written to. A speed byte and 3 RGB bytes should be written
  */
-static ssize_t razer_attr_write_left_mode_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_left_matrix_effect_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_side_mode_reactive(dev, attr, buf, count, LEFT_SIDE_LED);
 }
@@ -3993,7 +3993,7 @@ static ssize_t razer_attr_write_left_mode_reactive(struct device *dev, struct de
  *
  * Sets reactive mode when this file is written to. A speed byte and 3 RGB bytes should be written
  */
-static ssize_t razer_attr_write_right_mode_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_right_matrix_effect_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_side_mode_reactive(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
@@ -4056,7 +4056,7 @@ static ssize_t razer_attr_write_side_mode_breath(struct device *dev, struct devi
  *
  * Sets breathing mode by writing 1, 3 or 6 bytes
  */
-static ssize_t razer_attr_write_left_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_left_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_side_mode_breath(dev, attr, buf, count, LEFT_SIDE_LED);
 }
@@ -4066,7 +4066,7 @@ static ssize_t razer_attr_write_left_mode_breath(struct device *dev, struct devi
  *
  * Sets breathing mode by writing 1, 3 or 6 bytes
  */
-static ssize_t razer_attr_write_right_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_right_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_side_mode_breath(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
@@ -4112,7 +4112,7 @@ static ssize_t razer_attr_write_side_mode_static(struct device *dev, struct devi
  *
  * Set the mouse to static mode when 3 RGB bytes are written
  */
-static ssize_t razer_attr_write_left_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_left_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_side_mode_static(dev, attr, buf, count, LEFT_SIDE_LED);
 }
@@ -4122,7 +4122,7 @@ static ssize_t razer_attr_write_left_mode_static(struct device *dev, struct devi
  *
  * Set the mouse to static mode when 3 RGB bytes are written
  */
-static ssize_t razer_attr_write_right_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_right_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_side_mode_static(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
@@ -4166,7 +4166,7 @@ static ssize_t razer_attr_write_side_mode_none(struct device *dev, struct device
  *
  * No effect is activated whenever this file is written to
  */
-static ssize_t razer_attr_write_left_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_left_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_side_mode_none(dev, attr, buf, count, LEFT_SIDE_LED);
 }
@@ -4176,7 +4176,7 @@ static ssize_t razer_attr_write_left_mode_none(struct device *dev, struct device
  *
  * No effect is activated whenever this file is written to
  */
-static ssize_t razer_attr_write_right_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_right_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_side_mode_none(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
@@ -4225,16 +4225,16 @@ static ssize_t razer_attr_read_backlight_led_state(struct device *dev, struct de
  */
 
 static DEVICE_ATTR(version,                   0440, razer_attr_read_version,               NULL);
-static DEVICE_ATTR(firmware_version,          0440, razer_attr_read_get_firmware_version,  NULL);
+static DEVICE_ATTR(firmware_version,          0440, razer_attr_read_firmware_version,      NULL);
 static DEVICE_ATTR(test,                      0220, NULL,                                  razer_attr_write_test);
 static DEVICE_ATTR(poll_rate,                 0660, razer_attr_read_poll_rate,             razer_attr_write_poll_rate);
-static DEVICE_ATTR(dpi,                       0660, razer_attr_read_mouse_dpi,             razer_attr_write_mouse_dpi);
-static DEVICE_ATTR(dpi_stages,                0660, razer_attr_read_mouse_dpi_stages,      razer_attr_write_mouse_dpi_stages);
+static DEVICE_ATTR(dpi,                       0660, razer_attr_read_dpi,                   razer_attr_write_dpi);
+static DEVICE_ATTR(dpi_stages,                0660, razer_attr_read_dpi_stages,            razer_attr_write_dpi_stages);
 
 static DEVICE_ATTR(device_type,               0440, razer_attr_read_device_type,           NULL);
 static DEVICE_ATTR(device_mode,               0660, razer_attr_read_device_mode,           razer_attr_write_device_mode);
-static DEVICE_ATTR(device_serial,             0440, razer_attr_read_get_serial,            NULL);
-static DEVICE_ATTR(device_idle_time,          0660, razer_attr_read_get_idle_time,         razer_attr_write_set_idle_time);
+static DEVICE_ATTR(device_serial,             0440, razer_attr_read_device_serial,         NULL);
+static DEVICE_ATTR(device_idle_time,          0660, razer_attr_read_device_idle_time,      razer_attr_write_device_idle_time);
 
 static DEVICE_ATTR(scroll_mode,               0660, razer_attr_read_scroll_mode,           razer_attr_write_scroll_mode);
 static DEVICE_ATTR(scroll_acceleration,       0660, razer_attr_read_scroll_acceleration,   razer_attr_write_scroll_acceleration);
@@ -4244,21 +4244,21 @@ static DEVICE_ATTR(tilt_hwheel,               0660, razer_attr_read_tilt_hwheel,
 static DEVICE_ATTR(tilt_repeat,               0660, razer_attr_read_tilt_repeat,           razer_attr_write_tilt_repeat);
 static DEVICE_ATTR(tilt_repeat_delay,         0660, razer_attr_read_tilt_repeat_delay,     razer_attr_write_tilt_repeat_delay);
 
-static DEVICE_ATTR(charge_level,              0440, razer_attr_read_get_battery,           NULL);
-static DEVICE_ATTR(charge_status,             0440, razer_attr_read_is_charging,           NULL);
-static DEVICE_ATTR(charge_effect,             0220, NULL,                                  razer_attr_write_set_charging_effect);
-static DEVICE_ATTR(charge_colour,             0220, NULL,                                  razer_attr_write_set_charging_colour);
-static DEVICE_ATTR(charge_low_threshold,      0660, razer_attr_read_low_battery_threshold, razer_attr_write_set_low_battery_threshold);
+static DEVICE_ATTR(charge_level,              0440, razer_attr_read_charge_level,          NULL);
+static DEVICE_ATTR(charge_status,             0440, razer_attr_read_charge_status,         NULL);
+static DEVICE_ATTR(charge_effect,             0220, NULL,                                  razer_attr_write_charge_effect);
+static DEVICE_ATTR(charge_colour,             0220, NULL,                                  razer_attr_write_charge_colour);
+static DEVICE_ATTR(charge_low_threshold,      0660, razer_attr_read_low_battery_threshold, razer_attr_write_charge_low_threshold);
 
 static DEVICE_ATTR(matrix_brightness,         0660, razer_attr_read_matrix_brightness,     razer_attr_write_matrix_brightness);
-static DEVICE_ATTR(matrix_custom_frame,       0220, NULL,                                  razer_attr_write_set_key_row);
-static DEVICE_ATTR(matrix_effect_none,        0220, NULL,                                  razer_attr_write_mode_none);   // Matrix
-static DEVICE_ATTR(matrix_effect_custom,      0220, NULL,                                  razer_attr_write_mode_custom);   // Matrix
-static DEVICE_ATTR(matrix_effect_static,      0220, NULL,                                  razer_attr_write_mode_static);   // Matrix
-static DEVICE_ATTR(matrix_effect_wave,        0220, NULL,                                  razer_attr_write_mode_wave);   // Matrix
-static DEVICE_ATTR(matrix_effect_spectrum,    0220, NULL,                                  razer_attr_write_mode_spectrum);   // Matrix
-static DEVICE_ATTR(matrix_effect_reactive,    0220, NULL,                                  razer_attr_write_mode_reactive);   // Matrix
-static DEVICE_ATTR(matrix_effect_breath,      0220, NULL,                                  razer_attr_write_mode_breath);   // Matrix
+static DEVICE_ATTR(matrix_custom_frame,       0220, NULL,                                  razer_attr_write_matrix_custom_frame);
+static DEVICE_ATTR(matrix_effect_none,        0220, NULL,                                  razer_attr_write_matrix_effect_none);
+static DEVICE_ATTR(matrix_effect_custom,      0220, NULL,                                  razer_attr_write_matrix_effect_custom);
+static DEVICE_ATTR(matrix_effect_static,      0220, NULL,                                  razer_attr_write_matrix_effect_static);
+static DEVICE_ATTR(matrix_effect_wave,        0220, NULL,                                  razer_attr_write_matrix_effect_wave);
+static DEVICE_ATTR(matrix_effect_spectrum,    0220, NULL,                                  razer_attr_write_matrix_effect_spectrum);
+static DEVICE_ATTR(matrix_effect_reactive,    0220, NULL,                                  razer_attr_write_matrix_effect_reactive);
+static DEVICE_ATTR(matrix_effect_breath,      0220, NULL,                                  razer_attr_write_matrix_effect_breath);
 
 
 static DEVICE_ATTR(scroll_led_brightness,     0660, razer_attr_read_scroll_led_brightness, razer_attr_write_scroll_led_brightness);
@@ -4267,12 +4267,12 @@ static DEVICE_ATTR(scroll_led_state,          0660, razer_attr_read_scroll_led_s
 static DEVICE_ATTR(scroll_led_rgb,            0660, razer_attr_read_scroll_led_rgb,        razer_attr_write_scroll_led_rgb);
 static DEVICE_ATTR(scroll_led_effect,         0660, razer_attr_read_scroll_led_effect,     razer_attr_write_scroll_led_effect);
 // For "extended" matrix effects
-static DEVICE_ATTR(scroll_matrix_effect_wave,        0220, NULL,                           razer_attr_write_scroll_mode_wave);
-static DEVICE_ATTR(scroll_matrix_effect_spectrum,    0220, NULL,                           razer_attr_write_scroll_mode_spectrum);
-static DEVICE_ATTR(scroll_matrix_effect_reactive,    0220, NULL,                           razer_attr_write_scroll_mode_reactive);
-static DEVICE_ATTR(scroll_matrix_effect_breath,      0220, NULL,                           razer_attr_write_scroll_mode_breath);
-static DEVICE_ATTR(scroll_matrix_effect_static,      0220, NULL,                           razer_attr_write_scroll_mode_static);
-static DEVICE_ATTR(scroll_matrix_effect_none,        0220, NULL,                           razer_attr_write_scroll_mode_none);
+static DEVICE_ATTR(scroll_matrix_effect_wave,        0220, NULL,                           razer_attr_write_scroll_matrix_effect_wave);
+static DEVICE_ATTR(scroll_matrix_effect_spectrum,    0220, NULL,                           razer_attr_write_scroll_matrix_effect_spectrum);
+static DEVICE_ATTR(scroll_matrix_effect_reactive,    0220, NULL,                           razer_attr_write_scroll_matrix_effect_reactive);
+static DEVICE_ATTR(scroll_matrix_effect_breath,      0220, NULL,                           razer_attr_write_scroll_matrix_effect_breath);
+static DEVICE_ATTR(scroll_matrix_effect_static,      0220, NULL,                           razer_attr_write_scroll_matrix_effect_static);
+static DEVICE_ATTR(scroll_matrix_effect_none,        0220, NULL,                           razer_attr_write_scroll_matrix_effect_none);
 
 static DEVICE_ATTR(logo_led_brightness,       0660, razer_attr_read_logo_led_brightness,   razer_attr_write_logo_led_brightness);
 // For old-school led commands
@@ -4280,30 +4280,30 @@ static DEVICE_ATTR(logo_led_state,            0660, razer_attr_read_logo_led_sta
 static DEVICE_ATTR(logo_led_rgb,              0660, razer_attr_read_logo_led_rgb,          razer_attr_write_logo_led_rgb);
 static DEVICE_ATTR(logo_led_effect,           0660, razer_attr_read_logo_led_effect,       razer_attr_write_logo_led_effect);
 // For "extended" matrix effects
-static DEVICE_ATTR(logo_matrix_effect_wave,        0220, NULL,                             razer_attr_write_logo_mode_wave);
-static DEVICE_ATTR(logo_matrix_effect_spectrum,    0220, NULL,                             razer_attr_write_logo_mode_spectrum);
-static DEVICE_ATTR(logo_matrix_effect_reactive,    0220, NULL,                             razer_attr_write_logo_mode_reactive);
-static DEVICE_ATTR(logo_matrix_effect_breath,      0220, NULL,                             razer_attr_write_logo_mode_breath);
-static DEVICE_ATTR(logo_matrix_effect_static,      0220, NULL,                             razer_attr_write_logo_mode_static);
-static DEVICE_ATTR(logo_matrix_effect_none,        0220, NULL,                             razer_attr_write_logo_mode_none);
+static DEVICE_ATTR(logo_matrix_effect_wave,        0220, NULL,                             razer_attr_write_logo_matrix_effect_wave);
+static DEVICE_ATTR(logo_matrix_effect_spectrum,    0220, NULL,                             razer_attr_write_logo_matrix_effect_spectrum);
+static DEVICE_ATTR(logo_matrix_effect_reactive,    0220, NULL,                             razer_attr_write_logo_matrix_effect_reactive);
+static DEVICE_ATTR(logo_matrix_effect_breath,      0220, NULL,                             razer_attr_write_logo_matrix_effect_breath);
+static DEVICE_ATTR(logo_matrix_effect_static,      0220, NULL,                             razer_attr_write_logo_matrix_effect_static);
+static DEVICE_ATTR(logo_matrix_effect_none,        0220, NULL,                             razer_attr_write_logo_matrix_effect_none);
 
 static DEVICE_ATTR(left_led_brightness,       0660, razer_attr_read_left_led_brightness,   razer_attr_write_left_led_brightness);
 // For "extended" matrix effects
-static DEVICE_ATTR(left_matrix_effect_wave,        0220, NULL,                             razer_attr_write_left_mode_wave);
-static DEVICE_ATTR(left_matrix_effect_spectrum,    0220, NULL,                             razer_attr_write_left_mode_spectrum);
-static DEVICE_ATTR(left_matrix_effect_reactive,    0220, NULL,                             razer_attr_write_left_mode_reactive);
-static DEVICE_ATTR(left_matrix_effect_breath,      0220, NULL,                             razer_attr_write_left_mode_breath);
-static DEVICE_ATTR(left_matrix_effect_static,      0220, NULL,                             razer_attr_write_left_mode_static);
-static DEVICE_ATTR(left_matrix_effect_none,        0220, NULL,                             razer_attr_write_left_mode_none);
+static DEVICE_ATTR(left_matrix_effect_wave,        0220, NULL,                             razer_attr_write_left_matrix_effect_wave);
+static DEVICE_ATTR(left_matrix_effect_spectrum,    0220, NULL,                             razer_attr_write_left_matrix_effect_spectrum);
+static DEVICE_ATTR(left_matrix_effect_reactive,    0220, NULL,                             razer_attr_write_left_matrix_effect_reactive);
+static DEVICE_ATTR(left_matrix_effect_breath,      0220, NULL,                             razer_attr_write_left_matrix_effect_breath);
+static DEVICE_ATTR(left_matrix_effect_static,      0220, NULL,                             razer_attr_write_left_matrix_effect_static);
+static DEVICE_ATTR(left_matrix_effect_none,        0220, NULL,                             razer_attr_write_left_matrix_effect_none);
 
 static DEVICE_ATTR(right_led_brightness,       0660, razer_attr_read_right_led_brightness,   razer_attr_write_right_led_brightness);
 // For "extended" matrix effects
-static DEVICE_ATTR(right_matrix_effect_wave,        0220, NULL,                             razer_attr_write_right_mode_wave);
-static DEVICE_ATTR(right_matrix_effect_spectrum,    0220, NULL,                             razer_attr_write_right_mode_spectrum);
-static DEVICE_ATTR(right_matrix_effect_reactive,    0220, NULL,                             razer_attr_write_right_mode_reactive);
-static DEVICE_ATTR(right_matrix_effect_breath,      0220, NULL,                             razer_attr_write_right_mode_breath);
-static DEVICE_ATTR(right_matrix_effect_static,      0220, NULL,                             razer_attr_write_right_mode_static);
-static DEVICE_ATTR(right_matrix_effect_none,        0220, NULL,                             razer_attr_write_right_mode_none);
+static DEVICE_ATTR(right_matrix_effect_wave,        0220, NULL,                             razer_attr_write_right_matrix_effect_wave);
+static DEVICE_ATTR(right_matrix_effect_spectrum,    0220, NULL,                             razer_attr_write_right_matrix_effect_spectrum);
+static DEVICE_ATTR(right_matrix_effect_reactive,    0220, NULL,                             razer_attr_write_right_matrix_effect_reactive);
+static DEVICE_ATTR(right_matrix_effect_breath,      0220, NULL,                             razer_attr_write_right_matrix_effect_breath);
+static DEVICE_ATTR(right_matrix_effect_static,      0220, NULL,                             razer_attr_write_right_matrix_effect_static);
+static DEVICE_ATTR(right_matrix_effect_none,        0220, NULL,                             razer_attr_write_right_matrix_effect_none);
 
 // For old-school led commands
 // matrix_brightness should mostly be called backlight_led_brightness (but it's too much work now for old devices)
