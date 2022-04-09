@@ -2530,6 +2530,8 @@ class RazerDeathAdderV2(__RazerDeviceSpecialBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x0084
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1612/1612_razerdeathadderv2.png"
 
     DPI_MAX = 20000
@@ -2841,6 +2843,8 @@ class RazerDeathAdderV2Mini(__RazerDeviceSpecialBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x008C
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1692/deathadder-v2-mini.png"
 
     DPI_MAX = 8500
