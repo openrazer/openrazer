@@ -324,39 +324,38 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
     union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
-    if(count == 3 || count == 4) {
-
-        rgb_report.arguments[0] = buf[0];
-        rgb_report.arguments[1] = buf[1];
-        rgb_report.arguments[2] = buf[2];
-
-        if(count == 4) {
-            rgb_report.arguments[3] = buf[3];
-        }
-
-        // ON/Static
-        effect_byte.bits.on_off_static = 1;
-        effect_report.arguments[0] = effect_byte.value;
-
-        // Lock sending of the 2 commands
-        mutex_lock(&device->lock);
-
-        // Basically Kraken Classic doesn't take RGB arguments so only do it for the KrakenV1,V2,Ultimate
-        switch(device->usb_pid) {
-        case USB_DEVICE_ID_RAZER_KRAKEN:
-        case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-        case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
-            razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 0);
-            break;
-        }
-
-        // Send Set static command
-        razer_kraken_send_control_msg(device->usb_dev, &effect_report, 0);
-        mutex_unlock(&device->lock);
-
-    } else {
+    if (count != 3 && count != 4) {
         printk(KERN_WARNING "razerkraken: Static mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
+        return -EINVAL;
     }
+
+    rgb_report.arguments[0] = buf[0];
+    rgb_report.arguments[1] = buf[1];
+    rgb_report.arguments[2] = buf[2];
+
+    if(count == 4) {
+        rgb_report.arguments[3] = buf[3];
+    }
+
+    // ON/Static
+    effect_byte.bits.on_off_static = 1;
+    effect_report.arguments[0] = effect_byte.value;
+
+    // Lock sending of the 2 commands
+    mutex_lock(&device->lock);
+
+    // Basically Kraken Classic doesn't take RGB arguments so only do it for the KrakenV1,V2,Ultimate
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_KRAKEN:
+    case USB_DEVICE_ID_RAZER_KRAKEN_V2:
+    case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
+        razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 0);
+        break;
+    }
+
+    // Send Set static command
+    razer_kraken_send_control_msg(device->usb_dev, &effect_report, 0);
+    mutex_unlock(&device->lock);
 
     return count;
 }
@@ -373,30 +372,29 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
     struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
     union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
-    if(count == 3 || count == 4) {
-
-        rgb_report.arguments[0] = buf[0];
-        rgb_report.arguments[1] = buf[1];
-        rgb_report.arguments[2] = buf[2];
-
-        if(count == 4) {
-            rgb_report.arguments[3] = buf[3];
-        }
-
-        // ON/Static
-        effect_byte.bits.on_off_static = 1;
-        effect_report.arguments[0] = 1; //effect_byte.value;
-
-        // Lock sending of the 2 commands
-        mutex_lock(&device->lock);
-        razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 1);
-
-        razer_kraken_send_control_msg(device->usb_dev, &effect_report, 1);
-        mutex_unlock(&device->lock);
-
-    } else {
+    if(count != 3 && count != 4) {
         printk(KERN_WARNING "razerkraken: Custom mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
+        return -EINVAL;
     }
+
+    rgb_report.arguments[0] = buf[0];
+    rgb_report.arguments[1] = buf[1];
+    rgb_report.arguments[2] = buf[2];
+
+    if(count == 4) {
+        rgb_report.arguments[3] = buf[3];
+    }
+
+    // ON/Static
+    effect_byte.bits.on_off_static = 1;
+    effect_report.arguments[0] = 1; //effect_byte.value;
+
+    // Lock sending of the 2 commands
+    mutex_lock(&device->lock);
+    razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 1);
+
+    razer_kraken_send_control_msg(device->usb_dev, &effect_report, 1);
+    mutex_unlock(&device->lock);
 
     return count;
 }
@@ -437,7 +435,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
     // Short circuit here as rainie only does breathing1
     if(device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN && count != 3) {
         printk(KERN_WARNING "razerkraken: Breathing mode only accepts RGB (3byte)\n");
-        return count;
+        return -EINVAL;
     }
 
 
@@ -520,6 +518,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 
     } else {
         printk(KERN_WARNING "razerkraken: Breathing mode only accepts RGB (3byte), RGB RGB (6byte) or RGB RGB RGB (9byte)\n");
+        return -EINVAL;
     }
 
     return count;
