@@ -147,7 +147,7 @@ class RazerTartarusChroma(_RazerDeviceBrightnessSuspend):
     USB_PID = 0x0208
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_device_type_keypad', 'set_breath_random_effect', 'set_breath_single_effect',
-               'set_breath_dual_effect', 'set_static_effect', 'set_spectrum_effect', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
+               'set_breath_dual_effect', 'set_none_effect', 'set_static_effect', 'set_spectrum_effect', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
                'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/598/598_tartarus_chroma.png"
@@ -192,7 +192,8 @@ class RazerTartarusV2(_RippleKeyboard):
                'keypad_get_profile_led_red', 'keypad_set_profile_led_red',
                'keypad_get_profile_led_green', 'keypad_set_profile_led_green',
                'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
-               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
+               'get_macro_mode', 'set_macro_mode', 'get_macro_effect', 'set_macro_effect',
+               'get_macros', 'delete_macro', 'add_macro',
                'set_ripple_effect', 'set_ripple_effect_random_colour',
                'get_game_mode', 'set_game_mode',
                'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
@@ -223,8 +224,7 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
     METHODS = ['get_device_type_keypad',
                'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green', 'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
                'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier',
-
-               'bw_set_pulsate', 'bw_set_static']
+               'set_none_effect', 'bw_set_pulsate', 'bw_set_static']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/56/56_orbweaver.png"
 
@@ -258,7 +258,7 @@ class RazerOrbweaverChroma(_RippleKeyboard):
     METHODS = ['get_device_type_keypad',
                'set_key_row',
                'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
-               'set_static_effect', 'set_spectrum_effect', 'set_wave_effect', 'set_custom_effect',
+               'set_none_effect', 'set_static_effect', 'set_spectrum_effect', 'set_wave_effect', 'set_custom_effect',
                'keypad_get_profile_led_red', 'keypad_set_profile_led_red',
                'keypad_get_profile_led_green', 'keypad_set_profile_led_green',
                'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
@@ -452,7 +452,7 @@ class RazerBlackWidowChromaTournamentEdition(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macros', 'delete_macro', 'add_macro',
-
+               'get_macro_mode', 'set_macro_mode', 'get_macro_effect', 'set_macro_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/571/571_blackwidow_tournament_edition_chroma.png"
@@ -536,6 +536,7 @@ class RazerHuntsmanV2Analog(_RazerDeviceBrightnessSuspend):
     # TODO Remove get_keyboard_layout once not _RazerDeviceBrightnessSuspend anymore
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'get_macro_mode', 'set_macro_mode', 'get_macro_effect', 'set_macro_effect', 'get_game_mode', 'set_game_mode',
                'set_custom_effect', 'set_key_row', 'get_keyboard_layout']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/4023-1-EN-v1.png"
@@ -1477,7 +1478,8 @@ class RazerBladePro2019(_RippleKeyboard):
     USB_PID = 0x0234
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 16]
-    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'get_logo_active', 'set_logo_active',
+               'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
