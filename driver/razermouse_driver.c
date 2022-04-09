@@ -2394,7 +2394,6 @@ static ssize_t razer_attr_read_scroll_led_brightness(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
@@ -2448,7 +2447,6 @@ static ssize_t razer_attr_write_scroll_led_brightness(struct device *dev, struct
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
@@ -3262,7 +3260,6 @@ static ssize_t razer_attr_write_scroll_matrix_effect_breath(struct device *dev, 
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
@@ -3336,7 +3333,6 @@ static ssize_t razer_attr_write_scroll_matrix_effect_static(struct device *dev, 
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
@@ -3391,7 +3387,6 @@ static ssize_t razer_attr_write_scroll_matrix_effect_none(struct device *dev, st
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
@@ -5297,7 +5292,6 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
         case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
@@ -5309,6 +5303,15 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            break;
+
+        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
             break;
 
         case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
@@ -5970,7 +5973,6 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
         case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
@@ -5982,6 +5984,15 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            break;
+
+        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
             break;
 
         case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
