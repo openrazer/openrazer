@@ -1051,6 +1051,8 @@ class RazerBlackWidowEssential(_RippleKeyboard):
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_none_effect',
+               'set_spectrum_effect', 'set_wave_effect', 'set_reactive_effect',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_breath_single_effect', 'set_key_row', 'set_custom_effect', 'get_game_mode',
                'set_game_mode', 'get_macro_mode', 'set_macro_mode', 'get_macro_effect',
                'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro']
