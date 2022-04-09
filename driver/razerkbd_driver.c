@@ -443,12 +443,14 @@ static ssize_t razer_attr_write_set_charging_effect(struct device *dev, struct d
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
 
-    if(count == 1) {
-        report = razer_chroma_misc_set_dock_charge_type(buf[0]);
-        razer_send_payload(usb_dev, &report);
-    } else {
+    if (count != 1) {
         printk(KERN_WARNING "razerkbd: Incorrect number of bytes for setting the charging effect\n");
+        return -EINVAL;
     }
+
+    report = razer_chroma_misc_set_dock_charge_type(buf[0]);
+    razer_send_payload(usb_dev, &report);
+
     return count;
 }
 
@@ -466,13 +468,13 @@ static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct d
     struct razer_report report = razer_chroma_misc_set_dock_charge_type(0x01);
     razer_send_payload(usb_dev, &report);
 
-
-    if(count == 3) {
-        report = razer_chroma_standard_set_led_rgb(NOSTORE, BATTERY_LED, (struct razer_rgb*)&buf[0]);
-        razer_send_payload(usb_dev, &report);
-    } else {
+    if (count != 3) {
         printk(KERN_WARNING "razerkbd: Charging colour mode only accepts RGB (3byte)");
+        return -EINVAL;
     }
+
+    report = razer_chroma_standard_set_led_rgb(NOSTORE, BATTERY_LED, (struct razer_rgb*)&buf[0]);
+    razer_send_payload(usb_dev, &report);
 
     return count;
 }
@@ -1455,56 +1457,58 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
+    unsigned char speed;
 
-    if(count == 4) {
-        unsigned char speed = (unsigned char)buf[0];
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_ORNATA:
-        case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
-        case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
-        case USB_DEVICE_ID_RAZER_HUNTSMAN_TE:
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_2019:
-        case USB_DEVICE_ID_RAZER_HUNTSMAN:
-        case USB_DEVICE_ID_RAZER_CYNOSA_CHROMA:
-        case USB_DEVICE_ID_RAZER_CYNOSA_CHROMA_PRO:
-        case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI:
-        case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_JP:
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
-            report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
-            break;
-
-        case USB_DEVICE_ID_RAZER_TARTARUS_V2:
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
-        case USB_DEVICE_ID_RAZER_CYNOSA_V2:
-        case USB_DEVICE_ID_RAZER_ORNATA_V2:
-        case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
-        case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
-            report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
-            report.transaction_id.id = 0x1F;
-            break;
-
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
-            report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
-            report.transaction_id.id = 0x9F;
-            break;
-
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
-            report = razer_chroma_standard_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
-            report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
-            break;
-        default:
-            report = razer_chroma_standard_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
-            break;
-        }
-        razer_send_payload(usb_dev, &report);
-
-    } else {
+    if (count != 4) {
         printk(KERN_WARNING "razerkbd: Reactive only accepts Speed, RGB (4byte)");
+        return -EINVAL;
     }
+
+    speed = (unsigned char)buf[0];
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_ORNATA:
+    case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_TE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_2019:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN:
+    case USB_DEVICE_ID_RAZER_CYNOSA_CHROMA:
+    case USB_DEVICE_ID_RAZER_CYNOSA_CHROMA_PRO:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_JP:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
+        report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+        break;
+
+    case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
+    case USB_DEVICE_ID_RAZER_CYNOSA_V2:
+    case USB_DEVICE_ID_RAZER_ORNATA_V2:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
+        report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+        report.transaction_id.id = 0x1F;
+        break;
+
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
+        report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+        report.transaction_id.id = 0x9F;
+        break;
+
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
+        report = razer_chroma_standard_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+        report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
+        break;
+    default:
+        report = razer_chroma_standard_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+        break;
+    }
+    razer_send_payload(usb_dev, &report);
+
     return count;
 }
 
@@ -1585,23 +1589,23 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
     case USB_DEVICE_ID_RAZER_BLADE_17_2022:
     case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
-        if(count == 3) {
-            report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-            razer_send_payload(usb_dev, &report);
-        } else {
-            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)");
+        if (count != 3) {
+            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            return -EINVAL;
         }
+        report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+        razer_send_payload(usb_dev, &report);
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
-        if(count == 3) {
-            report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-            report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
-            razer_send_payload(usb_dev, &report);
-        } else {
-            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)");
+        if (count != 3) {
+            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            return -EINVAL;
         }
+        report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+        report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
+        razer_send_payload(usb_dev, &report);
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
@@ -1620,12 +1624,12 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
-        if(count == 3) {
-            report = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-            razer_send_payload(usb_dev, &report);
-        } else {
-            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)");
+        if (count != 3) {
+            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            return -EINVAL;
         }
+        report = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+        razer_send_payload(usb_dev, &report);
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
@@ -1634,40 +1638,41 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
-        if(count == 3) {
-            report = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-            report.transaction_id.id = 0x1F;
-            razer_send_payload(usb_dev, &report);
-        } else {
-            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)");
+        if (count != 3) {
+            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            return -EINVAL;
         }
+        report = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+        report.transaction_id.id = 0x1F;
+        razer_send_payload(usb_dev, &report);
         break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
-        if(count == 3) {
-            report = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-            report.transaction_id.id = 0x9F;
-            razer_send_payload(usb_dev, &report);
-        } else {
-            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)");
+        if (count != 3) {
+            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            return -EINVAL;
         }
+        report = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+        report.transaction_id.id = 0x9F;
+        razer_send_payload(usb_dev, &report);
         break;
 
     case USB_DEVICE_ID_RAZER_ANANSI:
-        if(count == 3) {
-            report = razer_chroma_standard_set_led_state(VARSTORE, BACKLIGHT_LED, ON);
-            razer_send_payload(usb_dev, &report);
-            report = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, LED_STATIC);
-            razer_send_payload(usb_dev, &report);
-            report = razer_chroma_standard_set_led_rgb(VARSTORE, BACKLIGHT_LED, (struct razer_rgb *) &buf[0]);
-            razer_send_payload(usb_dev, &report);
-        } else
+        if (count != 3) {
             printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            return -EINVAL;
+        }
+        report = razer_chroma_standard_set_led_state(VARSTORE, BACKLIGHT_LED, ON);
+        razer_send_payload(usb_dev, &report);
+        report = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, LED_STATIC);
+        razer_send_payload(usb_dev, &report);
+        report = razer_chroma_standard_set_led_rgb(VARSTORE, BACKLIGHT_LED, (struct razer_rgb *) &buf[0]);
+        razer_send_payload(usb_dev, &report);
         break;
 
     default:
         printk(KERN_WARNING "razerkbd: Cannot set static mode for this device\n");
-        break;
-
+        return -EINVAL;
     }
 
     return count;
@@ -1692,14 +1697,13 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_ORNATA:
-        if(count == 4) {
-            report = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1]);
-            razer_send_payload(usb_dev, &report);
-        } else {
+        if (count != 4) {
             printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+            return -EINVAL;
         }
+        report = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1]);
+        razer_send_payload(usb_dev, &report);
         break;
-
 
     case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
@@ -1724,6 +1728,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
             razer_send_payload(usb_dev, &report);
         } else {
             printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+            return -EINVAL;
         }
         break;
 
@@ -1740,7 +1745,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
             report = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
         } else {
             printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
-            break;
+            return -EINVAL;
         }
         report.transaction_id.id = 0x1F;
         razer_send_payload(usb_dev, &report);
@@ -1755,7 +1760,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
             report = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
         } else {
             printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
-            break;
+            return -EINVAL;
         }
         report.transaction_id.id = 0x9F;
         razer_send_payload(usb_dev, &report);
@@ -1776,6 +1781,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
             razer_send_payload(usb_dev, &report);
         } else {
             printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+            return -EINVAL;
         }
         break;
 
@@ -1791,6 +1797,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
             razer_send_payload(usb_dev, &report);
         } else {
             printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+            return -EINVAL;
         }
         break;
 
@@ -1809,6 +1816,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
             razer_send_payload(usb_dev, &report);
         } else {
             printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+            return -EINVAL;
         }
         break;
 
@@ -1842,7 +1850,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 
         default:
             printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)");
-            break;
+            return -EINVAL;
         }
         break;
 
@@ -1868,7 +1876,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 
         default:
             printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)");
-            break;
+            return -EINVAL;
         }
         break;
 
@@ -1904,7 +1912,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 
         default:
             printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)");
-            break;
+            return -EINVAL;
         }
         break;
 
@@ -1922,7 +1930,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
             report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
         } else {
             printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)");
-            break;
+            return -EINVAL;
         }
         report.transaction_id.id = 0x1F;
         razer_send_payload(usb_dev, &report);
@@ -1937,7 +1945,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
             report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
         } else {
             printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)");
-            break;
+            return -EINVAL;
         }
         report.transaction_id.id = 0x9F;
         razer_send_payload(usb_dev, &report);
@@ -2331,17 +2339,17 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
 
     if (count != 2) {
         printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.");
-        goto out;
+        return -EINVAL;
     }
 
+    // No-op on Blades
     if (is_blade_laptop(usb_dev)) {
-        goto out;
+        return count;
     }
 
     report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
     razer_send_payload(usb_dev, &report);
 
-out:
     return count;
 }
 
@@ -2382,7 +2390,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
     while(offset < count) {
         if(offset + 3 > count) {
             printk(KERN_ALERT "razerkbd: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
-            break;
+            return -EINVAL;
         }
 
         row_id = buf[offset++];
@@ -2394,12 +2402,12 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
         if(start_col > stop_col) {
             printk(KERN_ALERT "razerkbd: Start column is greater than end column\n");
-            break;
+            return -EINVAL;
         }
 
         if(offset + row_length > count) {
             printk(KERN_ALERT "razerkbd: Not enough RGB to fill row\n");
-            break;
+            return -EINVAL;
         }
 
         // Offset now at beginning of RGB data
@@ -2493,9 +2501,12 @@ static ssize_t razer_attr_write_key_super(struct device *dev, struct device_attr
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
-    if (count >= 1) {
-        device->block_keys[0] = buf[0];
+    if (count < 1) {
+        printk(KERN_ALERT "razerkbd: Failed to provide argument\n");
+        return -EINVAL;
     }
+
+    device->block_keys[0] = buf[0];
 
     return count;
 }
@@ -2514,10 +2525,13 @@ static ssize_t razer_attr_write_key_alt_tab(struct device *dev, struct device_at
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
-    if (count >= 1) {
-        printk(KERN_WARNING "razerkbd: Settings block_keys[1] to %u\n", buf[0]);
-        device->block_keys[1] = buf[0];
+    if (count < 1) {
+        printk(KERN_ALERT "razerkbd: Failed to provide argument\n");
+        return -EINVAL;
     }
+
+    printk(KERN_WARNING "razerkbd: Settings block_keys[1] to %u\n", buf[0]);
+    device->block_keys[1] = buf[0];
 
     return count;
 }
@@ -2535,9 +2549,12 @@ static ssize_t razer_attr_write_key_alt_f4(struct device *dev, struct device_att
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
-    if (count >= 1) {
-        device->block_keys[2] = buf[0];
+    if (count < 1) {
+        printk(KERN_ALERT "razerkbd: Failed to provide argument\n");
+        return -EINVAL;
     }
+
+    device->block_keys[2] = buf[0];
 
     return count;
 }
