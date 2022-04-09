@@ -1,3 +1,9 @@
+openrazer (3.3.0) focal; urgency=high
+
+  * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v3.3.0
+
+ -- Luca Weiss <luca@z3ntu.xyz>  Sat, 09 Apr 2022 15:57:47 +0200
+
 openrazer (3.2.0) focal; urgency=high
 
   * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v3.2.0
