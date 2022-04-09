@@ -696,50 +696,51 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
 
-    if(count == 3) {
-        switch (usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-            report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-            break;
+    if (count != 3) {
+        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
+        return -EINVAL;
+    }
 
-        case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
-            report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-            report.transaction_id.id = 0xff;
-            break;
+    switch (usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+        report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+        break;
 
-        case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
-            // Some sort of mode switcher required after initialization and before color switching
-            report = get_razer_report(0x0f, 0x02, 0x06);
-            report.arguments[0] = 0x00;
-            report.arguments[1] = 0x00;
-            report.arguments[2] = 0x08;
-            report.arguments[3] = 0x00;
-            report.arguments[4] = 0x00;
-            report.arguments[5] = 0x00;
-            report.transaction_id.id = 0x1f;
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+        report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+        report.transaction_id.id = 0xff;
+        break;
 
-            razer_send_payload(usb_dev, &report);
-
-            report = razer_naga_trinity_effect_static((struct razer_rgb*)&buf[0]);
-            break;
-
-        case USB_DEVICE_ID_RAZER_BASILISK_V3:
-            report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
-            report.transaction_id.id = 0x1f;
-            break;
-
-        default:
-            report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-            break;
-        }
+    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
+        // Some sort of mode switcher required after initialization and before color switching
+        report = get_razer_report(0x0f, 0x02, 0x06);
+        report.arguments[0] = 0x00;
+        report.arguments[1] = 0x00;
+        report.arguments[2] = 0x08;
+        report.arguments[3] = 0x00;
+        report.arguments[4] = 0x00;
+        report.arguments[5] = 0x00;
+        report.transaction_id.id = 0x1f;
 
         razer_send_payload(usb_dev, &report);
-    } else {
-        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
+
+        report = razer_naga_trinity_effect_static((struct razer_rgb*)&buf[0]);
+        break;
+
+    case USB_DEVICE_ID_RAZER_BASILISK_V3:
+        report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
+        report.transaction_id.id = 0x1f;
+        break;
+
+    default:
+        report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+        break;
     }
+
+    razer_send_payload(usb_dev, &report);
 
     return count;
 }
@@ -820,32 +821,34 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
+    unsigned char speed;
 
-    if(count == 4) {
-        unsigned char speed = (unsigned char)buf[0];
-
-        switch (usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-        case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
-            report = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
-            break;
-
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-            report = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
-            report.transaction_id.id = 0x1f;
-            break;
-
-        default:
-            report = razer_chroma_standard_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
-            break;
-        }
-
-        razer_send_payload(usb_dev, &report);
-
-    } else {
+    if (count != 4) {
         printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
+        return -EINVAL;
     }
+
+    speed = (unsigned char)buf[0];
+
+    switch (usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+        report = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+        break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+        report = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+        report.transaction_id.id = 0x1f;
+        break;
+
+    default:
+        report = razer_chroma_standard_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+        break;
+    }
+
+    razer_send_payload(usb_dev, &report);
+
     return count;
 }
 
@@ -1086,18 +1089,20 @@ static ssize_t razer_attr_write_set_charging_effect(struct device *dev, struct d
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
 
-    if(count == 1) {
-        report = razer_chroma_misc_set_dock_charge_type(buf[0]);
-        switch(device->usb_pid) {
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-            report.transaction_id.id = 0x1f;
-            break;
-        }
-
-        razer_send_payload(usb_dev, &report);
-    } else {
+    if (count != 1) {
         printk(KERN_WARNING "razermouse: Incorrect number of bytes for setting the charging effect\n");
+        return -EINVAL;
     }
+
+    report = razer_chroma_misc_set_dock_charge_type(buf[0]);
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+        report.transaction_id.id = 0x1f;
+        break;
+    }
+
+    razer_send_payload(usb_dev, &report);
+
     return count;
 }
 
@@ -1116,18 +1121,18 @@ static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct d
     struct razer_report report = razer_chroma_misc_set_dock_charge_type(0x01);
     razer_send_payload(usb_dev, &report);
 
-
-    if(count == 3) {
-        report = razer_chroma_standard_set_led_rgb(NOSTORE, BATTERY_LED, (struct razer_rgb*)&buf[0]);
-        switch(device->usb_pid) {
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-            report.transaction_id.id = 0x1f;
-            break;
-        }
-        razer_send_payload(usb_dev, &report);
-    } else {
+    if (count != 3) {
         printk(KERN_WARNING "razermouse: Charging colour mode only accepts RGB (3byte)\n");
+        return -EINVAL;
     }
+
+    report = razer_chroma_standard_set_led_rgb(NOSTORE, BATTERY_LED, (struct razer_rgb*)&buf[0]);
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+        report.transaction_id.id = 0x1f;
+        break;
+    }
+    razer_send_payload(usb_dev, &report);
 
     return count;
 }
@@ -1447,6 +1452,7 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
             deathadder3_5g_set_dpi(device, dpi_x);
         } else {
             printk(KERN_WARNING "razermouse: DPI requires 2 bytes\n");
+            return -EINVAL;
         }
         return count;
         break;
@@ -1466,7 +1472,7 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
             dpi_y_byte = buf[1];
         } else {
             printk(KERN_WARNING "razermouse: DPI requires 1 byte or 2 bytes\n");
-            return count;
+            return -EINVAL;
         }
 
         report = razer_chroma_misc_set_dpi_xy_byte(dpi_x_byte, dpi_y_byte);
@@ -1483,7 +1489,7 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
             dpi_y_byte = buf[1];
         } else {
             printk(KERN_WARNING "razermouse: DPI requires 1 byte or 2 bytes\n");
-            return count;
+            return -EINVAL;
         }
         device->orochi2011_dpi = dpi_x_byte;
 
@@ -1507,60 +1513,59 @@ static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attr
         break;
     }
 
-
-    if(count != 2 && count != 4) {
+    if (count != 2 && count != 4) {
         printk(KERN_WARNING "razermouse: DPI requires 2 bytes or 4 bytes\n");
-    } else {
-
-        if(count == 2) {
-            dpi_x = (buf[0] << 8) | (buf[1] & 0xFF); // TODO make convenience function
-            report = razer_chroma_misc_set_dpi_xy(varstore, dpi_x, dpi_x);
-
-        } else if(count == 4) {
-            dpi_x = (buf[0] << 8) | (buf[1] & 0xFF); // Apparently the char buffer is rubbish, as buf[1] somehow can equal FFFFFF80????
-            dpi_y = (buf[2] << 8) | (buf[3] & 0xFF);
-
-            report = razer_chroma_misc_set_dpi_xy(varstore, dpi_x, dpi_y);
-        }
-
-        switch(device->usb_pid) { // New devices set the device ID properly
-        case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_BASILISK:
-        case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
-            report.transaction_id.id = 0x3f;
-            break;
-
-        case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-        case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
-        case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
-        case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
-        case USB_DEVICE_ID_RAZER_BASILISK_V3:
-        case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
-        case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
-            report.transaction_id.id = 0x1f;
-            break;
-        }
-
-        razer_send_payload(device->usb_dev, &report);
+        return -EINVAL;
     }
+
+    if (count == 2) {
+        dpi_x = (buf[0] << 8) | (buf[1] & 0xFF); // TODO make convenience function
+        report = razer_chroma_misc_set_dpi_xy(varstore, dpi_x, dpi_x);
+
+    } else if(count == 4) {
+        dpi_x = (buf[0] << 8) | (buf[1] & 0xFF); // Apparently the char buffer is rubbish, as buf[1] somehow can equal FFFFFF80????
+        dpi_y = (buf[2] << 8) | (buf[3] & 0xFF);
+
+        report = razer_chroma_misc_set_dpi_xy(varstore, dpi_x, dpi_y);
+    }
+
+    switch(device->usb_pid) { // New devices set the device ID properly
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK:
+    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
+        report.transaction_id.id = 0x3f;
+        break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+    case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V2:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
+        report.transaction_id.id = 0x1f;
+        break;
+    }
+
+    razer_send_payload(device->usb_dev, &report);
 
     return count;
 }
@@ -2133,7 +2138,7 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
     while(offset < count) {
         if(offset + 3 > count) {
             printk(KERN_ALERT "razermouse: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
-            break;
+            return -EINVAL;
         }
 
         row_id = buf[offset++];
@@ -2146,17 +2151,17 @@ static ssize_t razer_attr_write_set_key_row(struct device *dev, struct device_at
         // Mouse only has 1 row, row0 (pseudo row as the command actually doesn't take rows)
         if(row_id != 0) {
             printk(KERN_ALERT "razermouse: Row ID must be 0\n");
-            break;
+            return -EINVAL;
         }
 
         if(start_col > stop_col) {
             printk(KERN_ALERT "razermouse: Start column is greater than end column\n");
-            break;
+            return -EINVAL;
         }
 
         if(offset + row_length > count) {
             printk(KERN_ALERT "razermouse: Not enough RGB to fill row (%d)\n", (int)(offset + row_length - count));
-            break;
+            return -EINVAL;
         }
 
         // Offset now at beginning of RGB data
@@ -2237,56 +2242,57 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = {0};
 
-    if(count == 2) {
-        report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
-
-        switch(device->usb_pid) {
-        case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Doesn't have device mode
-        case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G: // Doesn't support device mode, exit early
-            return count;
-            break;
-
-        case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-        case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
-        case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
-        case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
-        case USB_DEVICE_ID_RAZER_BASILISK_V3:
-        case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
-        case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
-            report.transaction_id.id = 0x1f;
-            break;
-
-        case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_BASILISK:
-        case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
-            report.transaction_id.id = 0x3f;
-            break;
-        }
-
-        mutex_lock(&device->lock);
-        razer_send_payload(device->usb_dev, &report);
-        mutex_unlock(&device->lock);
-    } else {
+    if (count != 2) {
         printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.\n");
+        return -EINVAL;
     }
+
+    report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Doesn't have device mode
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G: // Doesn't support device mode, exit early
+        return count;
+        break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+    case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V2:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
+        report.transaction_id.id = 0x1f;
+        break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK:
+    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
+        report.transaction_id.id = 0x3f;
+        break;
+    }
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
 
     return count;
 }
@@ -2865,13 +2871,14 @@ static ssize_t razer_attr_write_scroll_led_rgb(struct device *dev, struct device
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
 
-    if(count == 3) {
-        report = razer_chroma_standard_set_led_rgb(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
-        report.transaction_id.id = 0x3F;
-        razer_send_payload(usb_dev, &report);
-    } else {
+    if (count != 3) {
         printk(KERN_WARNING "razermouse: Scroll wheel LED mode only accepts RGB (3byte)\n");
+        return -EINVAL;
     }
+
+    report = razer_chroma_standard_set_led_rgb(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
+    report.transaction_id.id = 0x3F;
+    razer_send_payload(usb_dev, &report);
 
     return count;
 }
@@ -2901,13 +2908,14 @@ static ssize_t razer_attr_write_logo_led_rgb(struct device *dev, struct device_a
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
 
-    if(count == 3) {
-        report = razer_chroma_standard_set_led_rgb(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
-        report.transaction_id.id = 0x3F;
-        razer_send_payload(usb_dev, &report);
-    } else {
+    if (count != 3) {
         printk(KERN_WARNING "razermouse: Logo LED mode only accepts RGB (3byte)\n");
+        return -EINVAL;
     }
+
+    report = razer_chroma_standard_set_led_rgb(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
+    report.transaction_id.id = 0x3F;
+    razer_send_payload(usb_dev, &report);
 
     return count;
 }
@@ -2938,12 +2946,13 @@ static ssize_t razer_attr_write_backlight_led_rgb(struct device *dev, struct dev
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report;
 
-    if(count == 3) {
-        report = razer_chroma_standard_set_led_rgb(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-        razer_send_payload(usb_dev, &report);
-    } else {
+    if (count != 3) {
         printk(KERN_WARNING "razermouse: Backlight LED mode only accepts RGB (3 bytes)\n");
+        return -EINVAL;
     }
+
+    report = razer_chroma_standard_set_led_rgb(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+    razer_send_payload(usb_dev, &report);
 
     return count;
 }
@@ -3090,7 +3099,7 @@ static ssize_t razer_attr_write_scroll_mode_wave(struct device *dev, struct devi
 
     default:
         printk(KERN_WARNING "razermouse: scroll_mode_wave not supported for this model\n");
-        return count;
+        return -EINVAL;
     }
 
     razer_send_payload(usb_dev, &report);
@@ -3142,7 +3151,7 @@ static ssize_t razer_attr_write_scroll_mode_spectrum(struct device *dev, struct 
 
     default:
         printk(KERN_WARNING "razermouse: scroll_mode_spectrum not supported for this model\n");
-        return count;
+        return -EINVAL;
     }
 
     razer_send_payload(usb_dev, &report);
@@ -3160,50 +3169,52 @@ static ssize_t razer_attr_write_scroll_mode_reactive(struct device *dev, struct 
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
+    unsigned char speed;
 
-    if(count == 4) {
-        unsigned char speed = (unsigned char)buf[0];
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-        case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
-            report = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, SCROLL_WHEEL_LED, speed, (struct razer_rgb*)&buf[1]);
-            break;
-
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_BASILISK:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-            report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, SCROLL_WHEEL_LED, speed, (struct razer_rgb*)&buf[1]);
-            break;
-
-        case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
-            report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, SCROLL_WHEEL_LED, speed, (struct razer_rgb*)&buf[1]);
-            report.transaction_id.id = 0x1f;
-            break;
-
-        default:
-            printk(KERN_WARNING "razermouse: scroll_mode_reactive not supported for this model\n");
-            return count;
-        }
-
-        razer_send_payload(usb_dev, &report);
-
-    } else {
+    if (count != 4) {
         printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
+        return -EINVAL;
     }
+
+    speed = (unsigned char)buf[0];
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+        report = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, SCROLL_WHEEL_LED, speed, (struct razer_rgb*)&buf[1]);
+        break;
+
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
+        report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, SCROLL_WHEEL_LED, speed, (struct razer_rgb*)&buf[1]);
+        break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V2:
+        report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, SCROLL_WHEEL_LED, speed, (struct razer_rgb*)&buf[1]);
+        report.transaction_id.id = 0x1f;
+        break;
+
+    default:
+        printk(KERN_WARNING "razermouse: scroll_mode_reactive not supported for this model\n");
+        return -EINVAL;
+    }
+
+    razer_send_payload(usb_dev, &report);
+
     return count;
 }
 
@@ -3304,51 +3315,51 @@ static ssize_t razer_attr_write_scroll_mode_static(struct device *dev, struct de
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
 
-    if(count == 3) {
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
-        case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-            report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
-            break;
-
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_BASILISK:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-            report = razer_chroma_extended_matrix_effect_static(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
-            break;
-
-        case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
-        case USB_DEVICE_ID_RAZER_BASILISK_V3:
-            report = razer_chroma_extended_matrix_effect_static(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
-            report.transaction_id.id = 0x1f;
-            break;
-
-        default:
-            printk(KERN_WARNING "razermouse: scroll_mode_static not supported for this model\n");
-            return count;
-        }
-
-        razer_send_payload(usb_dev, &report);
-    } else {
+    if (count != 3) {
         printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
+        return -EINVAL;
     }
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+        report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
+        break;
+
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
+        report = razer_chroma_extended_matrix_effect_static(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
+        break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V2:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3:
+        report = razer_chroma_extended_matrix_effect_static(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
+        report.transaction_id.id = 0x1f;
+        break;
+
+    default:
+        printk(KERN_WARNING "razermouse: scroll_mode_static not supported for this model\n");
+        return count;
+    }
+
+    razer_send_payload(usb_dev, &report);
 
     return count;
 }
@@ -3402,7 +3413,7 @@ static ssize_t razer_attr_write_scroll_mode_none(struct device *dev, struct devi
 
     default:
         printk(KERN_WARNING "razermouse: scroll_mode_static not supported for this model\n");
-        return count;
+        return -EINVAL;
     }
 
     razer_send_payload(usb_dev, &report);
@@ -3441,7 +3452,7 @@ static ssize_t razer_attr_write_logo_mode_wave(struct device *dev, struct device
 
     default:
         printk(KERN_WARNING "razermouse: logo_mode_wave not supported for this model\n");
-        return count;
+        return -EINVAL;
     }
 
     razer_send_payload(usb_dev, &report);
@@ -3503,7 +3514,7 @@ static ssize_t razer_attr_write_logo_mode_spectrum(struct device *dev, struct de
 
     default:
         printk(KERN_WARNING "razermouse: logo_mode_spectrum not supported for this model\n");
-        return count;
+        return -EINVAL;
     }
 
     razer_send_payload(usb_dev, &report);
@@ -3520,61 +3531,63 @@ static ssize_t razer_attr_write_logo_mode_reactive(struct device *dev, struct de
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
+    unsigned char speed;
 
-    if(count == 4) {
-        unsigned char speed = (unsigned char)buf[0];
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
-        case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-            report = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, LOGO_LED, speed, (struct razer_rgb*)&buf[1]);
-            break;
-
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
-        case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
-        case USB_DEVICE_ID_RAZER_VIPER:
-        case USB_DEVICE_ID_RAZER_VIPER_MINI:
-        case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
-        case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
-        case USB_DEVICE_ID_RAZER_BASILISK:
-        case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
-            report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, LOGO_LED, speed, (struct razer_rgb*)&buf[1]);
-            break;
-
-        case USB_DEVICE_ID_RAZER_VIPER_8K:
-        case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
-            report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, LOGO_LED, speed, (struct razer_rgb*)&buf[1]);
-            report.transaction_id.id = 0x1f;
-            break;
-
-        default:
-            printk(KERN_WARNING "razermouse: logo_mode_reactive not supported for this model\n");
-            return count;
-        }
-
-        razer_send_payload(usb_dev, &report);
-
-    } else {
+    if (count != 4) {
         printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
+        return -EINVAL;
     }
+
+    speed = (unsigned char)buf[0];
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+        report = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, LOGO_LED, speed, (struct razer_rgb*)&buf[1]);
+        break;
+
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK:
+    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
+        report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, LOGO_LED, speed, (struct razer_rgb*)&buf[1]);
+        break;
+
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
+    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V2:
+        report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, LOGO_LED, speed, (struct razer_rgb*)&buf[1]);
+        report.transaction_id.id = 0x1f;
+        break;
+
+    default:
+        printk(KERN_WARNING "razermouse: logo_mode_reactive not supported for this model\n");
+        return -EINVAL;
+    }
+
+    razer_send_payload(usb_dev, &report);
+
     return count;
 }
 
@@ -3687,61 +3700,62 @@ static ssize_t razer_attr_write_logo_mode_static(struct device *dev, struct devi
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
 
-    if(count == 3) {
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
-        case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-            report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
-            break;
-
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
-        case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
-        case USB_DEVICE_ID_RAZER_VIPER:
-        case USB_DEVICE_ID_RAZER_VIPER_MINI:
-        case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
-        case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
-        case USB_DEVICE_ID_RAZER_BASILISK:
-        case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
-            report = razer_chroma_extended_matrix_effect_static(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
-            break;
-
-        case USB_DEVICE_ID_RAZER_VIPER_8K:
-        case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
-        case USB_DEVICE_ID_RAZER_BASILISK_V3:
-            report = razer_chroma_extended_matrix_effect_static(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
-            report.transaction_id.id = 0x1f;
-            break;
-
-        default:
-            printk(KERN_WARNING "razermouse: logo_mode_static not supported for this model\n");
-            return count;
-        }
-
-        razer_send_payload(usb_dev, &report);
-    } else {
+    if (count != 3) {
         printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
+        return -EINVAL;
     }
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+        report = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
+        break;
+
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK:
+    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
+        report = razer_chroma_extended_matrix_effect_static(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
+        break;
+
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
+    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V2:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3:
+        report = razer_chroma_extended_matrix_effect_static(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
+        report.transaction_id.id = 0x1f;
+        break;
+
+    default:
+        printk(KERN_WARNING "razermouse: logo_mode_static not supported for this model\n");
+        return -EINVAL;
+    }
+
+    razer_send_payload(usb_dev, &report);
 
     return count;
 }
@@ -3804,7 +3818,7 @@ static ssize_t razer_attr_write_logo_mode_none(struct device *dev, struct device
 
     default:
         printk(KERN_WARNING "razermouse: logo_mode_none not supported for this model\n");
-        return count;
+        return -EINVAL;
     }
 
     razer_send_payload(usb_dev, &report);
@@ -3839,7 +3853,7 @@ static ssize_t razer_attr_write_side_mode_wave(struct device *dev, struct device
 
     default:
         printk(KERN_WARNING "razermouse: left/right mode_wave not supported for this model\n");
-        return count;
+        return -EINVAL;
     }
 
     razer_send_payload(usb_dev, &report);
@@ -3894,7 +3908,7 @@ static ssize_t razer_attr_write_side_mode_spectrum(struct device *dev, struct de
 
     default:
         printk(KERN_WARNING "razermouse: left/right mode_spectrum not supported for this model\n");
-        return count;
+        return -EINVAL;
     }
 
     razer_send_payload(usb_dev, &report);
@@ -3926,39 +3940,41 @@ static ssize_t razer_attr_write_side_mode_reactive(struct device *dev, struct de
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
+    unsigned char speed;
 
-    if(count == 4) {
-        unsigned char speed = (unsigned char)buf[0];
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-            report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, side, speed, (struct razer_rgb*)&buf[1]);
-            break;
-
-        case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-            report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, side, speed, (struct razer_rgb*)&buf[1]);
-            report.transaction_id.id = 0x1f;
-            break;
-
-        default:
-            printk(KERN_WARNING "razermouse: left/right mode_reactive not supported for this model\n");
-            return count;
-        }
-
-        razer_send_payload(usb_dev, &report);
-
-    } else {
+    if (count != 4) {
         printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
+        return -EINVAL;
     }
+
+    speed = (unsigned char)buf[0];
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+        report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, side, speed, (struct razer_rgb*)&buf[1]);
+        break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+        report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, side, speed, (struct razer_rgb*)&buf[1]);
+        report.transaction_id.id = 0x1f;
+        break;
+
+    default:
+        printk(KERN_WARNING "razermouse: left/right mode_reactive not supported for this model\n");
+        return count;
+    }
+
+    razer_send_payload(usb_dev, &report);
+
     return count;
 }
 
@@ -4061,31 +4077,32 @@ static ssize_t razer_attr_write_side_mode_static(struct device *dev, struct devi
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_report report = {0};
 
-    if(count == 3) {
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-            report = razer_chroma_extended_matrix_effect_static(VARSTORE, side, (struct razer_rgb*)&buf[0]);
-            break;
-
-        case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-            report = razer_chroma_extended_matrix_effect_static(VARSTORE, side, (struct razer_rgb*)&buf[0]);
-            report.transaction_id.id = 0x1f;
-            break;
-        }
-
-        razer_send_payload(usb_dev, &report);
-    } else {
+    if (count != 3) {
         printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
+        return -EINVAL;
     }
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+        report = razer_chroma_extended_matrix_effect_static(VARSTORE, side, (struct razer_rgb*)&buf[0]);
+        break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+        report = razer_chroma_extended_matrix_effect_static(VARSTORE, side, (struct razer_rgb*)&buf[0]);
+        report.transaction_id.id = 0x1f;
+        break;
+    }
+
+    razer_send_payload(usb_dev, &report);
 
     return count;
 }
@@ -4137,7 +4154,7 @@ static ssize_t razer_attr_write_side_mode_none(struct device *dev, struct device
 
     default:
         printk(KERN_WARNING "razermouse: left/right mode_none not supported for this model\n");
-        return count;
+        return -EINVAL;
     }
 
     razer_send_payload(usb_dev, &report);
