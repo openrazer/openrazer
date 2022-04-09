@@ -2053,7 +2053,7 @@ class RazerNagaLeftHanded2020(__RazerDeviceSpecialBrightnessSuspend):
         self.disable_notify = False
 
 
-class RazerNagaProWired(__RazerDeviceSpecialBrightnessSuspend):
+class RazerNagaProWired(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Naga Pro (Wired)
     """
@@ -2923,7 +2923,7 @@ class RazerViper8KHz(__RazerDevice):
         self.disable_notify = False
 
 
-class RazerNagaEpicChromaWired(__RazerDeviceBrightnessSuspend):
+class RazerNagaEpicChromaWired(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Naga Epic Chroma (Wired)
     """
