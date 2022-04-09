@@ -57,6 +57,11 @@ tasks:
   - functional-test: |
       cd openrazer
 
+      # Clean up background processes on exit
+      trap "pkill -f openrazer-daemon;
+            pkill -f create_fake_dev;
+            pkill -f dbus-daemon" EXIT
+
       # Launch dbus
       eval $(dbus-launch --sh-syntax)
 
@@ -67,12 +72,7 @@ tasks:
       ./scripts/ci/launch-daemon.sh
 
       # Wait for the daemon to be ready
-      sleep 2
+      sleep 5
 
       # Run a simple check to see if the daemon is alive
       ./scripts/ci/test-daemon.sh
-
-      # Clean up background processes
-      pkill -f openrazer-daemon
-      pkill -f create_fake_dev
-      pkill -f dbus-daemon
