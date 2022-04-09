@@ -2367,7 +2367,10 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     struct razer_report report = razer_chroma_standard_get_device_mode();
     struct razer_report response = razer_send_payload(usb_dev, &report);
 
-    return sprintf(buf, "%d:%d\n", response.arguments[0], response.arguments[1]);
+    buf[0] = response.arguments[0];
+    buf[1] = response.arguments[1];
+
+    return 2;
 }
 
 /**
@@ -2578,7 +2581,6 @@ static ssize_t razer_attr_read_key_alt_f4(struct device *dev, struct device_attr
  * Write only is 0220
  * Read and write is 0664
  */
-// TODO device_mode endpoint
 static DEVICE_ATTR(game_led_state,          0660, razer_attr_read_game_led_state,             razer_attr_write_game_led_state);
 static DEVICE_ATTR(macro_led_state,         0660, razer_attr_read_macro_led_state,            razer_attr_write_macro_led_state);
 static DEVICE_ATTR(macro_led_effect,        0660, razer_attr_read_macro_led_effect,           razer_attr_write_macro_led_effect);

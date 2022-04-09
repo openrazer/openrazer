@@ -2353,7 +2353,10 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     response = razer_send_payload(device->usb_dev, &report);
     mutex_unlock(&device->lock);
 
-    return sprintf(buf, "%d:%d\n", response.arguments[0], response.arguments[1]);
+    buf[0] = response.arguments[0];
+    buf[1] = response.arguments[1];
+
+    return 2;
 }
 
 /**

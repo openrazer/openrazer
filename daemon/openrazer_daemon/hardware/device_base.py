@@ -884,7 +884,7 @@ class RazerDevice(DBusService):
         :rtype: str
         """
         device_mode_path = os.path.join(self._device_path, 'device_mode')
-        with open(device_mode_path, 'r') as mode_file:
+        with open(device_mode_path, 'rb') as mode_file:
             count = 0
             mode = mode_file.read().strip()
             while len(mode) == 0:
@@ -895,7 +895,7 @@ class RazerDevice(DBusService):
                 count += 1
                 time.sleep(0.1)
 
-            return mode
+            return "{0}:{1}".format(mode[0], mode[1])
 
     def set_device_mode(self, mode_id, param):
         """

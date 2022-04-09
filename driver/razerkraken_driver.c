@@ -668,7 +668,10 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
  */
 static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "0:0\n");
+    buf[0] = 0x00;
+    buf[1] = 0x00;
+
+    return 2;
 }
 
 
