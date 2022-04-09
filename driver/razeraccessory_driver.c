@@ -315,7 +315,7 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
         mutex_unlock(&device->lock);
 
     } else {
-        printk(KERN_WARNING "razeraccessory: Reactive only accepts Speed, RGB (4byte)");
+        printk(KERN_WARNING "razeraccessory: Reactive only accepts Speed, RGB (4byte)\n");
     }
     return count;
 }
@@ -767,7 +767,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
     unsigned char speed = 0;
 
     if (count != 1 && count != 4 && count != 7) {
-        printk(KERN_WARNING "razeraccessory: Starlight accepts only 1, 4 or 7 bytes input (speed, [RGB], [RGB])");
+        printk(KERN_WARNING "razeraccessory: Starlight accepts only 1, 4 or 7 bytes input (speed, [RGB], [RGB])\n");
         return count;
     }
     speed = buf[0];
@@ -1010,7 +1010,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     struct razer_report report = {0};
 
     if (count != 2) {
-        printk(KERN_WARNING "razeraccessory: Device mode only takes 2 bytes.");
+        printk(KERN_WARNING "razeraccessory: Device mode only takes 2 bytes.\n");
     } else {
 
         report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);

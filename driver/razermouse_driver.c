@@ -738,7 +738,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 
         razer_send_payload(usb_dev, &report);
     } else {
-        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)");
+        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
     }
 
     return count;
@@ -844,7 +844,7 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
         razer_send_payload(usb_dev, &report);
 
     } else {
-        printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)");
+        printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
     }
     return count;
 }
@@ -1126,7 +1126,7 @@ static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct d
         }
         razer_send_payload(usb_dev, &report);
     } else {
-        printk(KERN_WARNING "razermouse: Charging colour mode only accepts RGB (3byte)");
+        printk(KERN_WARNING "razermouse: Charging colour mode only accepts RGB (3byte)\n");
     }
 
     return count;
@@ -2285,7 +2285,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
         razer_send_payload(device->usb_dev, &report);
         mutex_unlock(&device->lock);
     } else {
-        printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.");
+        printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.\n");
     }
 
     return count;
@@ -2870,7 +2870,7 @@ static ssize_t razer_attr_write_scroll_led_rgb(struct device *dev, struct device
         report.transaction_id.id = 0x3F;
         razer_send_payload(usb_dev, &report);
     } else {
-        printk(KERN_WARNING "razermouse: Scroll wheel LED mode only accepts RGB (3byte)");
+        printk(KERN_WARNING "razermouse: Scroll wheel LED mode only accepts RGB (3byte)\n");
     }
 
     return count;
@@ -2906,7 +2906,7 @@ static ssize_t razer_attr_write_logo_led_rgb(struct device *dev, struct device_a
         report.transaction_id.id = 0x3F;
         razer_send_payload(usb_dev, &report);
     } else {
-        printk(KERN_WARNING "razermouse: Logo LED mode only accepts RGB (3byte)");
+        printk(KERN_WARNING "razermouse: Logo LED mode only accepts RGB (3byte)\n");
     }
 
     return count;
@@ -2942,7 +2942,7 @@ static ssize_t razer_attr_write_backlight_led_rgb(struct device *dev, struct dev
         report = razer_chroma_standard_set_led_rgb(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
         razer_send_payload(usb_dev, &report);
     } else {
-        printk(KERN_WARNING "razermouse: Backlight LED mode only accepts RGB (3 bytes)");
+        printk(KERN_WARNING "razermouse: Backlight LED mode only accepts RGB (3 bytes)\n");
     }
 
     return count;
@@ -3089,7 +3089,7 @@ static ssize_t razer_attr_write_scroll_mode_wave(struct device *dev, struct devi
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: scroll_mode_wave not supported for this model");
+        printk(KERN_WARNING "razermouse: scroll_mode_wave not supported for this model\n");
         return count;
     }
 
@@ -3141,7 +3141,7 @@ static ssize_t razer_attr_write_scroll_mode_spectrum(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: scroll_mode_spectrum not supported for this model");
+        printk(KERN_WARNING "razermouse: scroll_mode_spectrum not supported for this model\n");
         return count;
     }
 
@@ -3195,14 +3195,14 @@ static ssize_t razer_attr_write_scroll_mode_reactive(struct device *dev, struct 
             break;
 
         default:
-            printk(KERN_WARNING "razermouse: scroll_mode_reactive not supported for this model");
+            printk(KERN_WARNING "razermouse: scroll_mode_reactive not supported for this model\n");
             return count;
         }
 
         razer_send_payload(usb_dev, &report);
 
     } else {
-        printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)");
+        printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
     }
     return count;
 }
@@ -3341,13 +3341,13 @@ static ssize_t razer_attr_write_scroll_mode_static(struct device *dev, struct de
             break;
 
         default:
-            printk(KERN_WARNING "razermouse: scroll_mode_static not supported for this model");
+            printk(KERN_WARNING "razermouse: scroll_mode_static not supported for this model\n");
             return count;
         }
 
         razer_send_payload(usb_dev, &report);
     } else {
-        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)");
+        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
     }
 
     return count;
@@ -3401,7 +3401,7 @@ static ssize_t razer_attr_write_scroll_mode_none(struct device *dev, struct devi
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: scroll_mode_static not supported for this model");
+        printk(KERN_WARNING "razermouse: scroll_mode_static not supported for this model\n");
         return count;
     }
 
@@ -3440,7 +3440,7 @@ static ssize_t razer_attr_write_logo_mode_wave(struct device *dev, struct device
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: logo_mode_wave not supported for this model");
+        printk(KERN_WARNING "razermouse: logo_mode_wave not supported for this model\n");
         return count;
     }
 
@@ -3502,7 +3502,7 @@ static ssize_t razer_attr_write_logo_mode_spectrum(struct device *dev, struct de
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: logo_mode_spectrum not supported for this model");
+        printk(KERN_WARNING "razermouse: logo_mode_spectrum not supported for this model\n");
         return count;
     }
 
@@ -3566,14 +3566,14 @@ static ssize_t razer_attr_write_logo_mode_reactive(struct device *dev, struct de
             break;
 
         default:
-            printk(KERN_WARNING "razermouse: logo_mode_reactive not supported for this model");
+            printk(KERN_WARNING "razermouse: logo_mode_reactive not supported for this model\n");
             return count;
         }
 
         razer_send_payload(usb_dev, &report);
 
     } else {
-        printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)");
+        printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
     }
     return count;
 }
@@ -3734,13 +3734,13 @@ static ssize_t razer_attr_write_logo_mode_static(struct device *dev, struct devi
             break;
 
         default:
-            printk(KERN_WARNING "razermouse: logo_mode_static not supported for this model");
+            printk(KERN_WARNING "razermouse: logo_mode_static not supported for this model\n");
             return count;
         }
 
         razer_send_payload(usb_dev, &report);
     } else {
-        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)");
+        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
     }
 
     return count;
@@ -3803,7 +3803,7 @@ static ssize_t razer_attr_write_logo_mode_none(struct device *dev, struct device
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: logo_mode_none not supported for this model");
+        printk(KERN_WARNING "razermouse: logo_mode_none not supported for this model\n");
         return count;
     }
 
@@ -3838,7 +3838,7 @@ static ssize_t razer_attr_write_side_mode_wave(struct device *dev, struct device
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: left/right mode_wave not supported for this model");
+        printk(KERN_WARNING "razermouse: left/right mode_wave not supported for this model\n");
         return count;
     }
 
@@ -3893,7 +3893,7 @@ static ssize_t razer_attr_write_side_mode_spectrum(struct device *dev, struct de
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: left/right mode_spectrum not supported for this model");
+        printk(KERN_WARNING "razermouse: left/right mode_spectrum not supported for this model\n");
         return count;
     }
 
@@ -3950,14 +3950,14 @@ static ssize_t razer_attr_write_side_mode_reactive(struct device *dev, struct de
             break;
 
         default:
-            printk(KERN_WARNING "razermouse: left/right mode_reactive not supported for this model");
+            printk(KERN_WARNING "razermouse: left/right mode_reactive not supported for this model\n");
             return count;
         }
 
         razer_send_payload(usb_dev, &report);
 
     } else {
-        printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)");
+        printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
     }
     return count;
 }
@@ -4084,7 +4084,7 @@ static ssize_t razer_attr_write_side_mode_static(struct device *dev, struct devi
 
         razer_send_payload(usb_dev, &report);
     } else {
-        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)");
+        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
     }
 
     return count;
@@ -4136,7 +4136,7 @@ static ssize_t razer_attr_write_side_mode_none(struct device *dev, struct device
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: left/right mode_none not supported for this model");
+        printk(KERN_WARNING "razermouse: left/right mode_none not supported for this model\n");
         return count;
     }
 
@@ -4542,7 +4542,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
             int i;
 
             if (!m_rdev) {
-                printk(KERN_WARNING "razermouse: Couldn't find mouse intf from kbd intf");
+                printk(KERN_WARNING "razermouse: Couldn't find mouse intf from kbd intf\n");
                 return 1;
             }
 

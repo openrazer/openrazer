@@ -90,7 +90,7 @@ static int razer_kraken_send_control_msg(struct usb_device *usb_dev,struct razer
 
     kfree(buf);
     if(len!=size)
-        printk(KERN_WARNING "razer driver: Device data transfer failed.");
+        printk(KERN_WARNING "razer driver: Device data transfer failed.\n");
 
     return ((len < 0) ? len : ((len != size) ? -EIO : 0));
 }

@@ -469,7 +469,7 @@ static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct d
     razer_send_payload(usb_dev, &report);
 
     if (count != 3) {
-        printk(KERN_WARNING "razerkbd: Charging colour mode only accepts RGB (3byte)");
+        printk(KERN_WARNING "razerkbd: Charging colour mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -1460,7 +1460,7 @@ static ssize_t razer_attr_write_mode_reactive(struct device *dev, struct device_
     unsigned char speed;
 
     if (count != 4) {
-        printk(KERN_WARNING "razerkbd: Reactive only accepts Speed, RGB (4byte)");
+        printk(KERN_WARNING "razerkbd: Reactive only accepts Speed, RGB (4byte)\n");
         return -EINVAL;
     }
 
@@ -1698,7 +1698,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_ORNATA:
         if (count != 4) {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         report = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1]);
@@ -1727,7 +1727,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
             report = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
             razer_send_payload(usb_dev, &report);
         } else {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         break;
@@ -1744,7 +1744,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
         } else if(count == 1) {
             report = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
         } else {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         report.transaction_id.id = 0x1F;
@@ -1759,7 +1759,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
         } else if(count == 1) {
             report = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
         } else {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         report.transaction_id.id = 0x9F;
@@ -1780,7 +1780,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
             report.transaction_id.id = 0x1F;  // TODO move to a usb_device variable
             razer_send_payload(usb_dev, &report);
         } else {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         break;
@@ -1796,7 +1796,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
             report = razer_chroma_standard_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
             razer_send_payload(usb_dev, &report);
         } else {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         break;
@@ -1815,7 +1815,7 @@ static ssize_t razer_attr_write_mode_starlight(struct device *dev, struct device
             report.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
             razer_send_payload(usb_dev, &report);
         } else {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)");
+            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         break;
@@ -1849,7 +1849,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
             break;
 
         default:
-            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)");
+            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
             return -EINVAL;
         }
         break;
@@ -1875,7 +1875,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
             break;
 
         default:
-            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)");
+            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
             return -EINVAL;
         }
         break;
@@ -1911,7 +1911,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
             break;
 
         default:
-            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)");
+            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
             return -EINVAL;
         }
         break;
@@ -1929,7 +1929,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
         } else if (count == 1) { // "Random" colour mode
             report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
         } else {
-            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)");
+            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
             return -EINVAL;
         }
         report.transaction_id.id = 0x1F;
@@ -1944,7 +1944,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
         } else if (count == 1) { // "Random" colour mode
             report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
         } else {
-            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)");
+            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
             return -EINVAL;
         }
         report.transaction_id.id = 0x9F;
@@ -2338,7 +2338,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     struct razer_report report = {0};
 
     if (count != 2) {
-        printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.");
+        printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.\n");
         return -EINVAL;
     }
 
