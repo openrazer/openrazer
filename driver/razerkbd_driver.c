@@ -484,11 +484,13 @@ static ssize_t razer_attr_write_charge_colour(struct device *dev, struct device_
  */
 static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct razer_kbd_device *device = dev_get_drvdata(dev);
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
     struct razer_report report = razer_chroma_misc_get_low_battery_threshold();
     struct razer_report response = {0};
 
-    response = razer_send_payload(device->usbdev, &report);
+    response = razer_send_payload(usb_dev, &report);
 
     return sprintf(buf, "%d\n", response.arguments[0]);
 }

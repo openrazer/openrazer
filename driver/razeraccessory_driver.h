@@ -46,7 +46,6 @@ struct razer_accessory_device {
     unsigned short usb_vid;
     unsigned short usb_pid;
 
-    unsigned char mug_present_poll;
     unsigned char saved_brightness;
 
     char serial[23];
