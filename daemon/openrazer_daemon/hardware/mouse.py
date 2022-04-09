@@ -2321,7 +2321,7 @@ class RazerBasiliskUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
                'set_scroll_reactive_naga_hex_v2',
                # Breath
                'set_scroll_breath_random_naga_hex_v2',
-               'set_scroll_breath_random_naga_hex_v2',
+               'set_scroll_breath_single_naga_hex_v2',
                'set_scroll_breath_dual_naga_hex_v2',
                # Static
                'set_scroll_static_naga_hex_v2',
