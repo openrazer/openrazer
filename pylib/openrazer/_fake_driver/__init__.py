@@ -87,6 +87,9 @@ class FakeDevice(object):
         if serial is not None:
             self.set('device_serial', serial)
 
+        # Disallow write in directory, so disallow creating new files after setup is done.
+        os.chmod(self._tmp_dir, 0o555)
+
     def _get_endpoint_path(self, endpoint):
         return os.path.join(self._tmp_dir, endpoint)
 
@@ -192,6 +195,9 @@ class FakeDevice(object):
             for endpoint in self.endpoints:
                 path = os.path.join(self._tmp_dir, endpoint)
                 os.chmod(path, 0o660)
+
+            # Allow write in directory again for cleanup
+            os.chmod(self._tmp_dir, 0o755)
 
             shutil.rmtree(self._tmp_dir)
 
