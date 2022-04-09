@@ -124,9 +124,11 @@ struct razer_mouse_device {
 
     char serial[23]; // Now storing a random serial to be used with old devices that don't support it
 
-    unsigned char orochi2011_led;
-    unsigned char orochi2011_dpi;
-    unsigned short orochi2011_poll;
+    struct {
+        unsigned char led;
+        unsigned char dpi;
+        unsigned short poll;
+    } orochi2011;
 
     // The DeathAdder 3.5G, uses OR logic so need to remember last values. Part of a 4byte payload
     struct {

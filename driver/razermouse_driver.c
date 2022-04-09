@@ -1229,7 +1229,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     }
 
     if(device->usb_pid == USB_DEVICE_ID_RAZER_OROCHI_2011) {
-        response_report.arguments[0] = device->orochi2011_poll;
+        response_report.arguments[0] = device->orochi2011.poll;
     } else {
         mutex_lock(&device->lock);
         response_report = razer_send_payload(device->usb_dev, &report);
@@ -1268,8 +1268,8 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
         return count;
 
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        device->orochi2011_poll = polling_rate;
-        report = razer_chroma_misc_set_orochi2011_poll_dpi(device->orochi2011_poll, device->orochi2011_dpi, device->orochi2011_dpi);
+        device->orochi2011.poll = polling_rate;
+        report = razer_chroma_misc_set_orochi2011_poll_dpi(device->orochi2011.poll, device->orochi2011.dpi, device->orochi2011.dpi);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1491,9 +1491,9 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
             printk(KERN_WARNING "razermouse: DPI requires 1 byte or 2 bytes\n");
             return -EINVAL;
         }
-        device->orochi2011_dpi = dpi_x_byte;
+        device->orochi2011.dpi = dpi_x_byte;
 
-        report = razer_chroma_misc_set_orochi2011_poll_dpi(device->orochi2011_poll, dpi_x_byte, dpi_y_byte);
+        report = razer_chroma_misc_set_orochi2011_poll_dpi(device->orochi2011.poll, dpi_x_byte, dpi_y_byte);
         razer_send_payload(device->usb_dev, &report);
         return count;
         break;
@@ -1605,7 +1605,7 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
         break;
 
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        return sprintf(buf, "%u:%u\n", device->orochi2011_dpi, device->orochi2011_dpi);
+        return sprintf(buf, "%u:%u\n", device->orochi2011.dpi, device->orochi2011.dpi);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
@@ -2745,11 +2745,11 @@ static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct devi
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
         if(enabled) {
-            device->orochi2011_led |= 0b00000001;
+            device->orochi2011.led |= 0b00000001;
         } else {
-            device->orochi2011_led &= 0b11111110;
+            device->orochi2011.led &= 0b11111110;
         }
-        report = razer_chroma_misc_set_orochi2011_led(device->orochi2011_led);
+        report = razer_chroma_misc_set_orochi2011_led(device->orochi2011.led);
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
@@ -2777,7 +2777,7 @@ static ssize_t razer_attr_read_scroll_led_state(struct device *dev, struct devic
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        return sprintf(buf, "%d\n", device->orochi2011_led & 0b00000001);
+        return sprintf(buf, "%d\n", device->orochi2011.led & 0b00000001);
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
@@ -2810,11 +2810,11 @@ static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
         if(enabled) {
-            device->orochi2011_led |= 0b00000010;
+            device->orochi2011.led |= 0b00000010;
         } else {
-            device->orochi2011_led &= 0b11111101;
+            device->orochi2011.led &= 0b11111101;
         }
-        report = razer_chroma_misc_set_orochi2011_led(device->orochi2011_led);
+        report = razer_chroma_misc_set_orochi2011_led(device->orochi2011.led);
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
@@ -2842,7 +2842,7 @@ static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        return sprintf(buf, "%d\n", (device->orochi2011_led & 0b00000010) >> 1);
+        return sprintf(buf, "%d\n", (device->orochi2011.led & 0b00000010) >> 1);
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
@@ -4693,8 +4693,8 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
     sprintf(&dev->serial[0], "PM%012u", rand_serial);
 
     // Setup orochi2011
-    dev->orochi2011_dpi = 0x4c;
-    dev->orochi2011_poll = 500;
+    dev->orochi2011.dpi = 0x4c;
+    dev->orochi2011.poll = 500;
 
     // Setup default values for DeathAdder 3.5G
     dev->da3_5g.leds = 3; // Lights up all lights
