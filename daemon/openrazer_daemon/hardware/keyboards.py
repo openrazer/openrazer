@@ -1270,7 +1270,7 @@ class RazerBlade2018Base(_RippleKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x023B
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1418/1418_blade_2018__base.png"
 
@@ -1284,7 +1284,7 @@ class RazerBladeStealth2019(_RippleKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0239
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1475/1475_bladestealth13(2019).png"
 
@@ -1298,7 +1298,7 @@ class RazerBladeStealthLate2019(_RippleKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x024A
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-stealth-13/shop/stealth-l2p-1.jpg"
 
@@ -1312,7 +1312,7 @@ class RazerBladeStealthEarly2020(_RippleKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0252
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-stealth-13/shop/sl25p-fhd-4.jpg"
 
@@ -1326,7 +1326,7 @@ class RazerBladeStealthLate2020(_RippleKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0259
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-stealth-13/shop/sl25p-fhd-4.jpg"
 
@@ -1340,7 +1340,7 @@ class RazerBook2020(_RippleKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x026A
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1743/razerbook132020.png"
 
@@ -1392,7 +1392,7 @@ class RazerBlade2019Base(_RippleKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0246
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1518/1518_blade15_mid2019-base.png"
 
