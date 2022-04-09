@@ -67,6 +67,7 @@ class RazerDevice(object):
             'macro_mode_led': self._has_feature('razer.device.led.macromode', 'setMacroMode'),
             'macro_mode_led_effect': self._has_feature('razer.device.led.macromode', 'setMacroEffect'),
             'macro_mode_modifier': self._has_feature('razer.device.macro', 'setModeModifier'),
+            'reactive_trigger': self._has_feature('razer.device.misc', 'triggerReactive'),
 
             'poll_rate': self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate')),
             'supported_poll_rates': self._has_feature('razer.device.misc', 'getSupportedPollRates'),
@@ -88,6 +89,7 @@ class RazerDevice(object):
             'lighting_none': self._has_feature('razer.device.lighting.chroma', 'setNone'),
             'lighting_spectrum': self._has_feature('razer.device.lighting.chroma', 'setSpectrum'),
             'lighting_static': self._has_feature('razer.device.lighting.chroma', 'setStatic'),
+            'lighting_blinking': self._has_feature('razer.device.lighting.chroma', 'setBlinking'),
 
             'lighting_starlight_single': self._has_feature('razer.device.lighting.chroma', 'setStarlightSingle'),
             'lighting_starlight_dual': self._has_feature('razer.device.lighting.chroma', 'setStarlightDual'),
