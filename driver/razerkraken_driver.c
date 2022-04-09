@@ -266,7 +266,7 @@ static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute 
  *
  * Specrum effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
@@ -291,7 +291,7 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
  *
  * None effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
@@ -317,7 +317,7 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
  *
  * Static effect mode is activated whenever the file is written to with 3 bytes
  */
-static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report rgb_report = get_kraken_request_report(0x04, 0x40, count, device->breathing_address[0]);
@@ -365,7 +365,7 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
  *
  * Custom effect mode is activated whenever the file is written to with 3 bytes
  */
-static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report rgb_report = get_kraken_request_report(0x04, 0x40, count, device->custom_address);
@@ -404,7 +404,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
  *
  * Returns 4 bytes for config
  */
-static ssize_t razer_attr_read_mode_static(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_matrix_effect_static(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     return get_rgb_from_addr(dev, device->breathing_address[0], 0x04, buf);
@@ -415,7 +415,7 @@ static ssize_t razer_attr_read_mode_static(struct device *dev, struct device_att
  *
  * Returns 4 bytes for config
  */
-static ssize_t razer_attr_read_mode_custom(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_matrix_effect_custom(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     return get_rgb_from_addr(dev, device->custom_address, 0x04, buf);
@@ -426,7 +426,7 @@ static ssize_t razer_attr_read_mode_custom(struct device *dev, struct device_att
  *
  * Breathing effect mode is activated whenever the file is written to with 3,6 or 9 bytes
  */
-static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
@@ -529,7 +529,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
  *
  * Returns 4, 8, 12 bytes for config
  */
-static ssize_t razer_attr_read_mode_breath(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_matrix_effect_breath(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     union razer_kraken_effect_byte effect_byte;
@@ -571,7 +571,7 @@ static ssize_t razer_attr_read_mode_breath(struct device *dev, struct device_att
  *
  * Returns a string
  */
-static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x20, 0x16, 0x7f00);
@@ -610,7 +610,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
  *
  * Returns a string
  */
-static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x20, 0x02, 0x0030);
@@ -684,16 +684,16 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
 static DEVICE_ATTR(test,                    0660, razer_attr_read_test,                       razer_attr_write_test);
 static DEVICE_ATTR(version,                 0440, razer_attr_read_version,                    NULL);
 static DEVICE_ATTR(device_type,             0440, razer_attr_read_device_type,                NULL);
-static DEVICE_ATTR(device_serial,           0440, razer_attr_read_get_serial,                 NULL);
+static DEVICE_ATTR(device_serial,           0440, razer_attr_read_device_serial,              NULL);
 static DEVICE_ATTR(device_mode,             0660, razer_attr_read_device_mode,                razer_attr_write_device_mode);
-static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_get_firmware_version,       NULL);
+static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_firmware_version,           NULL);
 
-static DEVICE_ATTR(matrix_current_effect,	0440, razer_attr_read_matrix_current_effect,      NULL);
-static DEVICE_ATTR(matrix_effect_none,      0220, NULL,                                       razer_attr_write_mode_none);
-static DEVICE_ATTR(matrix_effect_spectrum,  0220, NULL,                                       razer_attr_write_mode_spectrum);
-static DEVICE_ATTR(matrix_effect_static,    0660, razer_attr_read_mode_static,                razer_attr_write_mode_static);
-static DEVICE_ATTR(matrix_effect_custom,    0660, razer_attr_read_mode_custom,                razer_attr_write_mode_custom);
-static DEVICE_ATTR(matrix_effect_breath,    0660, razer_attr_read_mode_breath,                razer_attr_write_mode_breath);
+static DEVICE_ATTR(matrix_current_effect,   0440, razer_attr_read_matrix_current_effect,      NULL);
+static DEVICE_ATTR(matrix_effect_none,      0220, NULL,                                       razer_attr_write_matrix_effect_none);
+static DEVICE_ATTR(matrix_effect_spectrum,  0220, NULL,                                       razer_attr_write_matrix_effect_spectrum);
+static DEVICE_ATTR(matrix_effect_static,    0660, razer_attr_read_matrix_effect_static,       razer_attr_write_matrix_effect_static);
+static DEVICE_ATTR(matrix_effect_custom,    0660, razer_attr_read_matrix_effect_custom,       razer_attr_write_matrix_effect_custom);
+static DEVICE_ATTR(matrix_effect_breath,    0660, razer_attr_read_matrix_effect_breath,       razer_attr_write_matrix_effect_breath);
 
 static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf)
 {
