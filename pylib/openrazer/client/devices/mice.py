@@ -8,21 +8,6 @@ from openrazer.client import constants as _c
 class RazerMouse(__RazerDevice):
     _MACRO_CLASS = _RazerMacro
 
-    def __init__(self, serial, vid_pid=None, daemon_dbus=None):
-        super().__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
-
-        # Capabilities
-        self._capabilities['poll_rate'] = self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate'))
-        self._capabilities['dpi'] = self._has_feature('razer.device.dpi', ('getDPI', 'setDPI'))
-        self._capabilities['dpi_stages'] = self._has_feature('razer.device.dpi', ('getDPIStages', 'setDPIStages'))
-        self._capabilities['available_dpi'] = self._has_feature('razer.device.dpi', 'availableDPI')
-        self._capabilities['battery'] = self._has_feature('razer.device.power', 'getBattery')
-
-        if self.has('dpi'):
-            self._dbus_interfaces['dpi'] = _dbus.Interface(self._dbus, "razer.device.dpi")
-        if self.has('battery'):
-            self._dbus_interfaces['power'] = _dbus.Interface(self._dbus, "razer.device.power")
-
     @property
     def max_dpi(self) -> int:
         """
@@ -221,8 +206,8 @@ class RazerMouse(__RazerDevice):
         if self.has('poll_rate'):
             if not isinstance(poll_rate, int):
                 raise ValueError("Poll rate is not an integer: {0}".format(poll_rate))
-            if poll_rate not in (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ):
-                raise ValueError('Poll rate "{0}" is not one of {1}'.format(poll_rate, (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ)))
+            if poll_rate not in (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ, _c.POLL_2000HZ, _c.POLL_4000HZ, _c.POLL_8000HZ):
+                raise ValueError('Poll rate "{0}" is not one of {1}'.format(poll_rate, (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ, _c.POLL_2000HZ, _c.POLL_4000HZ, _c.POLL_8000HZ)))
 
             self._dbus_interfaces['device'].setPollRate(poll_rate)
 
@@ -230,59 +215,108 @@ class RazerMouse(__RazerDevice):
             raise NotImplementedError()
 
     @property
-    def battery_level(self) -> int:
+    def supported_poll_rates(self) -> list:
         """
-        Get battery level from device
+        Get poll rates supported by the device
 
-        :return: Battery level (0-100)
+        :return: Supported poll rates
+        :rtype: list
+
+        :raises NotImplementedError: If function is not supported
         """
-        if self.has('battery'):
-            return int(self._dbus_interfaces['power'].getBattery())
+        if self.has('supported_poll_rates'):
+            dbuslist = self._dbus_interfaces['device'].getSupportedPollRates()
+            # Repack list from dbus ints to normal ints
+            return [int(d) for d in dbuslist]
+        else:
+            raise NotImplementedError()
 
     @property
-    def is_charging(self) -> bool:
+    def scroll_mode(self) -> int:
         """
-        Get whether the device is charging or not
+        Get the scroll wheel mode of the device
 
-        :return: Boolean
-        """
-        if self.has('battery'):
-            return bool(self._dbus_interfaces['power'].isCharging())
+        :return: The device's current scroll mode (0 = tactile, 1 = free spin)
+        :rtype: int
 
-    def set_idle_time(self, idle_time) -> None:
+        :raises NotImplementedError: If function is not supported
         """
-        Sets the idle time on the device
+        if self.has('scroll_mode'):
+            return int(self._dbus_interfaces['scroll'].getScrollMode())
+        else:
+            raise NotImplementedError()
 
-        :param idle_time: the time in seconds
+    @scroll_mode.setter
+    def scroll_mode(self, mode: int):
         """
-        if self.has('battery'):
-            self._dbus_interfaces['power'].setIdleTime(idle_time)
+        Set the scroll mode of the device
 
-    def get_idle_time(self) -> int:
-        """
-        Gets the idle time of the device
+        :param mode: The mode to set (0 = tactile, 1 = free spin)
+        :type mode: int
 
-        :return: Number of seconds before this device goes into powersave
-                 (60-900)
+        :raises NotImplementedError: If function is not supported
         """
-        if self.has('battery'):
-            return int(self._dbus_interfaces['power'].getIdleTime())
+        if self.has('scroll_mode'):
+            self._dbus_interfaces['scroll'].setScrollMode(mode)
+        else:
+            raise NotImplementedError()
 
-    def set_low_battery_threshold(self, threshold) -> None:
+    @property
+    def scroll_acceleration(self) -> bool:
         """
-        Set the low battery threshold as a percentage
+        Get the device's scroll acceleration state
 
-        :param threshold: Battery threshold as a percentage
-        :type threshold: int
-        """
-        if self.has('battery'):
-            self._dbus_interfaces['power'].setLowBatteryThreshold(threshold)
+        :return: true if acceleration enabled, false otherwise
+        :rtype: bool
 
-    def get_low_battery_threshold(self) -> int:
+        :raises NotImplementedError: If function is not supported
         """
-        Get the low battery threshold as a percentage
+        if self.has('scroll_acceleration'):
+            return bool(int(self._dbus_interfaces['scroll'].getScrollAcceleration()))
+        else:
+            raise NotImplementedError()
 
-        :return: Battery threshold as a percentage
+    @scroll_acceleration.setter
+    def scroll_acceleration(self, enabled: bool):
         """
-        if self.has('battery'):
-            return int(self._dbus_interfaces['power'].getLowBatteryThreshold())
+        Set the device's scroll acceleration state
+
+        :param enabled: true to enable acceleration, false to disable it
+        :type enabled: bool
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_acceleration'):
+            self._dbus_interfaces['scroll'].setScrollAcceleration(enabled)
+        else:
+            raise NotImplementedError()
+
+    @property
+    def scroll_smart_reel(self) -> bool:
+        """
+        Get the device's "smart reel" state
+
+        :return: true if smart reel enabled, false otherwise
+        :rtype: bool
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_smart_reel'):
+            return bool(int(self._dbus_interfaces['scroll'].getScrollSmartReel()))
+        else:
+            raise NotImplementedError()
+
+    @scroll_smart_reel.setter
+    def scroll_smart_reel(self, enabled: bool):
+        """
+        Set the device's "smart reel" state
+
+        :param enabled: true to enable smart reel, false to disable it
+        :type enabled: bool
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_smart_reel'):
+            self._dbus_interfaces['scroll'].setScrollSmartReel(enabled)
+        else:
+            raise NotImplementedError()

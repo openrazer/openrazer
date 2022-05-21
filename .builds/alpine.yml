@@ -37,10 +37,17 @@ tasks:
   - compile-driver: |
       cd openrazer
 
+      kerneldirs=(/lib/modules/*/build)
+      kerneldir="${kerneldirs[0]}"
+
+      # Work around the following error by disabling gcc plugins
+      #   cc1: error: incompatible gcc/plugin versions
+      #   cc1: error: failed to initialize plugin ./scripts/gcc-plugins/stackleak_plugin.so
+      sudo truncate -s 0 "$kerneldir"/scripts/Makefile.gcc-plugins
+
       # Compile the kernel driver
       echo "ccflags-y := -Wall -Werror" >> driver/Makefile
-      kerneldir=(/lib/modules/*/build)
-      make KERNELDIR="${kerneldir[0]}"
+      make KERNELDIR="$kerneldir"
 
   - functional-test-setup: |
       # The daemon wants the user to be in the plugdev group
@@ -49,6 +56,11 @@ tasks:
 
   - functional-test: |
       cd openrazer
+
+      # Clean up background processes on exit
+      trap "pkill -f openrazer-daemon;
+            pkill -f create_fake_dev;
+            pkill -f dbus-daemon" EXIT
 
       # Launch dbus
       eval $(dbus-launch --sh-syntax)
@@ -60,7 +72,7 @@ tasks:
       ./scripts/ci/launch-daemon.sh
 
       # Wait for the daemon to be ready
-      sleep 2
+      sleep 5
 
       # Run a simple check to see if the daemon is alive
       ./scripts/ci/test-daemon.sh

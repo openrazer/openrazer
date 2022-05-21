@@ -95,7 +95,7 @@ for device in devices:
 
 # If there are still threads, update each device.
 try:
-    while any(t.isAlive() for t in threads):
+    while any(t.is_alive() for t in threads):
         for device in devices:
             device.fx.advanced.draw()
         time.sleep(1 / 60)

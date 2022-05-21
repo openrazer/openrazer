@@ -30,4 +30,4 @@ Please post the output of
 <https://github.com/openrazer/openrazer/wiki/Reverse-Engineering-USB-Protocol>
 
 ### Synapse Screenshots
-<Screenshots of all available options as seen on Razer Synapse>
+<Screenshots of all available options as seen on **Razer Synapse** in a Windows Environment>

@@ -90,7 +90,7 @@ static int razer_kraken_send_control_msg(struct usb_device *usb_dev,struct razer
 
     kfree(buf);
     if(len!=size)
-        printk(KERN_WARNING "razer driver: Device data transfer failed.");
+        printk(KERN_WARNING "razer driver: Device data transfer failed.\n");
 
     return ((len < 0) ? len : ((len != size) ? -EIO : 0));
 }
@@ -266,7 +266,7 @@ static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute 
  *
  * Specrum effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
@@ -291,7 +291,7 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
  *
  * None effect mode is activated whenever the file is written to
  */
-static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
@@ -317,46 +317,45 @@ static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attr
  *
  * Static effect mode is activated whenever the file is written to with 3 bytes
  */
-static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report rgb_report = get_kraken_request_report(0x04, 0x40, count, device->breathing_address[0]);
     struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
     union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
-    if(count == 3 || count == 4) {
-
-        rgb_report.arguments[0] = buf[0];
-        rgb_report.arguments[1] = buf[1];
-        rgb_report.arguments[2] = buf[2];
-
-        if(count == 4) {
-            rgb_report.arguments[3] = buf[3];
-        }
-
-        // ON/Static
-        effect_byte.bits.on_off_static = 1;
-        effect_report.arguments[0] = effect_byte.value;
-
-        // Lock sending of the 2 commands
-        mutex_lock(&device->lock);
-
-        // Basically Kraken Classic doesn't take RGB arguments so only do it for the KrakenV1,V2,Ultimate
-        switch(device->usb_pid) {
-        case USB_DEVICE_ID_RAZER_KRAKEN:
-        case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-        case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
-            razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 0);
-            break;
-        }
-
-        // Send Set static command
-        razer_kraken_send_control_msg(device->usb_dev, &effect_report, 0);
-        mutex_unlock(&device->lock);
-
-    } else {
+    if (count != 3 && count != 4) {
         printk(KERN_WARNING "razerkraken: Static mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
+        return -EINVAL;
     }
+
+    rgb_report.arguments[0] = buf[0];
+    rgb_report.arguments[1] = buf[1];
+    rgb_report.arguments[2] = buf[2];
+
+    if(count == 4) {
+        rgb_report.arguments[3] = buf[3];
+    }
+
+    // ON/Static
+    effect_byte.bits.on_off_static = 1;
+    effect_report.arguments[0] = effect_byte.value;
+
+    // Lock sending of the 2 commands
+    mutex_lock(&device->lock);
+
+    // Basically Kraken Classic doesn't take RGB arguments so only do it for the KrakenV1,V2,Ultimate
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_KRAKEN:
+    case USB_DEVICE_ID_RAZER_KRAKEN_V2:
+    case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
+        razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 0);
+        break;
+    }
+
+    // Send Set static command
+    razer_kraken_send_control_msg(device->usb_dev, &effect_report, 0);
+    mutex_unlock(&device->lock);
 
     return count;
 }
@@ -366,37 +365,36 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
  *
  * Custom effect mode is activated whenever the file is written to with 3 bytes
  */
-static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report rgb_report = get_kraken_request_report(0x04, 0x40, count, device->custom_address);
     struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
     union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
-    if(count == 3 || count == 4) {
-
-        rgb_report.arguments[0] = buf[0];
-        rgb_report.arguments[1] = buf[1];
-        rgb_report.arguments[2] = buf[2];
-
-        if(count == 4) {
-            rgb_report.arguments[3] = buf[3];
-        }
-
-        // ON/Static
-        effect_byte.bits.on_off_static = 1;
-        effect_report.arguments[0] = 1; //effect_byte.value;
-
-        // Lock sending of the 2 commands
-        mutex_lock(&device->lock);
-        razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 1);
-
-        razer_kraken_send_control_msg(device->usb_dev, &effect_report, 1);
-        mutex_unlock(&device->lock);
-
-    } else {
+    if(count != 3 && count != 4) {
         printk(KERN_WARNING "razerkraken: Custom mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
+        return -EINVAL;
     }
+
+    rgb_report.arguments[0] = buf[0];
+    rgb_report.arguments[1] = buf[1];
+    rgb_report.arguments[2] = buf[2];
+
+    if(count == 4) {
+        rgb_report.arguments[3] = buf[3];
+    }
+
+    // ON/Static
+    effect_byte.bits.on_off_static = 1;
+    effect_report.arguments[0] = 1; //effect_byte.value;
+
+    // Lock sending of the 2 commands
+    mutex_lock(&device->lock);
+    razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 1);
+
+    razer_kraken_send_control_msg(device->usb_dev, &effect_report, 1);
+    mutex_unlock(&device->lock);
 
     return count;
 }
@@ -406,7 +404,7 @@ static ssize_t razer_attr_write_mode_custom(struct device *dev, struct device_at
  *
  * Returns 4 bytes for config
  */
-static ssize_t razer_attr_read_mode_static(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_matrix_effect_static(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     return get_rgb_from_addr(dev, device->breathing_address[0], 0x04, buf);
@@ -417,7 +415,7 @@ static ssize_t razer_attr_read_mode_static(struct device *dev, struct device_att
  *
  * Returns 4 bytes for config
  */
-static ssize_t razer_attr_read_mode_custom(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_matrix_effect_custom(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     return get_rgb_from_addr(dev, device->custom_address, 0x04, buf);
@@ -428,7 +426,7 @@ static ssize_t razer_attr_read_mode_custom(struct device *dev, struct device_att
  *
  * Breathing effect mode is activated whenever the file is written to with 3,6 or 9 bytes
  */
-static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
@@ -437,7 +435,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
     // Short circuit here as rainie only does breathing1
     if(device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN && count != 3) {
         printk(KERN_WARNING "razerkraken: Breathing mode only accepts RGB (3byte)\n");
-        return count;
+        return -EINVAL;
     }
 
 
@@ -520,6 +518,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
 
     } else {
         printk(KERN_WARNING "razerkraken: Breathing mode only accepts RGB (3byte), RGB RGB (6byte) or RGB RGB RGB (9byte)\n");
+        return -EINVAL;
     }
 
     return count;
@@ -530,7 +529,7 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
  *
  * Returns 4, 8, 12 bytes for config
  */
-static ssize_t razer_attr_read_mode_breath(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_matrix_effect_breath(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     union razer_kraken_effect_byte effect_byte;
@@ -572,7 +571,7 @@ static ssize_t razer_attr_read_mode_breath(struct device *dev, struct device_att
  *
  * Returns a string
  */
-static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x20, 0x16, 0x7f00);
@@ -611,7 +610,7 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
  *
  * Returns a string
  */
-static ssize_t razer_attr_read_get_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x20, 0x02, 0x0030);
@@ -669,7 +668,10 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
  */
 static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "0:0\n");
+    buf[0] = 0x00;
+    buf[1] = 0x00;
+
+    return 2;
 }
 
 
@@ -685,16 +687,16 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
 static DEVICE_ATTR(test,                    0660, razer_attr_read_test,                       razer_attr_write_test);
 static DEVICE_ATTR(version,                 0440, razer_attr_read_version,                    NULL);
 static DEVICE_ATTR(device_type,             0440, razer_attr_read_device_type,                NULL);
-static DEVICE_ATTR(device_serial,           0440, razer_attr_read_get_serial,                 NULL);
+static DEVICE_ATTR(device_serial,           0440, razer_attr_read_device_serial,              NULL);
 static DEVICE_ATTR(device_mode,             0660, razer_attr_read_device_mode,                razer_attr_write_device_mode);
-static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_get_firmware_version,       NULL);
+static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_firmware_version,           NULL);
 
-static DEVICE_ATTR(matrix_current_effect,	0440, razer_attr_read_matrix_current_effect,      NULL);
-static DEVICE_ATTR(matrix_effect_none,      0220, NULL,                                       razer_attr_write_mode_none);
-static DEVICE_ATTR(matrix_effect_spectrum,  0220, NULL,                                       razer_attr_write_mode_spectrum);
-static DEVICE_ATTR(matrix_effect_static,    0660, razer_attr_read_mode_static,                razer_attr_write_mode_static);
-static DEVICE_ATTR(matrix_effect_custom,    0660, razer_attr_read_mode_custom,                razer_attr_write_mode_custom);
-static DEVICE_ATTR(matrix_effect_breath,    0660, razer_attr_read_mode_breath,                razer_attr_write_mode_breath);
+static DEVICE_ATTR(matrix_current_effect,   0440, razer_attr_read_matrix_current_effect,      NULL);
+static DEVICE_ATTR(matrix_effect_none,      0220, NULL,                                       razer_attr_write_matrix_effect_none);
+static DEVICE_ATTR(matrix_effect_spectrum,  0220, NULL,                                       razer_attr_write_matrix_effect_spectrum);
+static DEVICE_ATTR(matrix_effect_static,    0660, razer_attr_read_matrix_effect_static,       razer_attr_write_matrix_effect_static);
+static DEVICE_ATTR(matrix_effect_custom,    0660, razer_attr_read_matrix_effect_custom,       razer_attr_write_matrix_effect_custom);
+static DEVICE_ATTR(matrix_effect_breath,    0660, razer_attr_read_matrix_effect_breath,       razer_attr_write_matrix_effect_breath);
 
 static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf)
 {

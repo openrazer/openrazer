@@ -134,6 +134,22 @@ class RazerBaseStationV2Chroma(_RazerDeviceBrightnessSuspend):
     DEVICE_IMAGE = "https://dl.razerzone.com/src/3897-1-EN-v2.png"
 
 
+class RazerThunderbolt4DockChroma(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Thunderbolt 4 Dock Chroma
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0F21
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 12]
+    METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/4030-1-EN-v1.png"
+
+
 class RazerChargingPadChroma(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Charging Pad Chroma

@@ -51,8 +51,27 @@ class RazerDevice(object):
             'serial': True,
             'brightness': self._has_feature('razer.device.lighting.brightness'),
 
+            'battery': self._has_feature('razer.device.power', 'getBattery'),
+            'get_idle_time': self._has_feature('razer.device.power', 'getIdleTime'),
+            'set_idle_time': self._has_feature('razer.device.power', 'setIdleTime'),
+            'get_low_battery_threshold': self._has_feature('razer.device.power', 'getLowBatteryThreshold'),
+            'set_low_battery_threshold': self._has_feature('razer.device.power', 'setLowBatteryThreshold'),
+
             'macro_logic': self._has_feature('razer.device.macro'),
             'keyboard_layout': self._has_feature('razer.device.misc', 'getKeyboardLayout'),
+            'game_mode_led': self._has_feature('razer.device.led.gamemode'),
+            'macro_mode_led': self._has_feature('razer.device.led.macromode', 'setMacroMode'),
+            'macro_mode_led_effect': self._has_feature('razer.device.led.macromode', 'setMacroEffect'),
+            'macro_mode_modifier': self._has_feature('razer.device.macro', 'setModeModifier'),
+
+            'poll_rate': self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate')),
+            'supported_poll_rates': self._has_feature('razer.device.misc', 'getSupportedPollRates'),
+            'dpi': self._has_feature('razer.device.dpi', ('getDPI', 'setDPI')),
+            'dpi_stages': self._has_feature('razer.device.dpi', ('getDPIStages', 'setDPIStages')),
+            'available_dpi': self._has_feature('razer.device.dpi', 'availableDPI'),
+            'scroll_mode': self._has_feature('razer.device.scroll', ('getScrollMode', 'setScrollMode')),
+            'scroll_acceleration': self._has_feature('razer.device.scroll', ('getScrollAcceleration', 'setScrollAcceleration')),
+            'scroll_smart_reel': self._has_feature('razer.device.scroll', ('getScrollSmartReel', 'setScrollSmartReel')),
 
             # Default device is a chroma so lighting capabilities
             'lighting': self._has_feature('razer.device.lighting.chroma'),
@@ -197,6 +216,19 @@ class RazerDevice(object):
                 self.macro = None
         else:
             self.macro = None
+
+        if self.has('dpi'):
+            self._dbus_interfaces['dpi'] = _dbus.Interface(self._dbus, "razer.device.dpi")
+        if self.has('battery'):
+            self._dbus_interfaces['power'] = _dbus.Interface(self._dbus, "razer.device.power")
+        if self.has('game_mode_led'):
+            self._dbus_interfaces['game_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.gamemode")
+        if self.has('macro_mode_led'):
+            self._dbus_interfaces['macro_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.macromode")
+        if self.has('lighting_profile_led_red') or self.has('lighting_profile_led_green') or self.has('lighting_profile_led_blue'):
+            self._dbus_interfaces['profile_led'] = _dbus.Interface(self._dbus, "razer.device.lighting.profile_led")
+        if self.has('scroll_mode') or self.has('scroll_acceleration') or self.has('scroll_smart_reel'):
+            self._dbus_interfaces['scroll'] = _dbus.Interface(self._dbus, "razer.device.scroll")
 
     def _get_available_features(self):
         introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')
@@ -391,6 +423,64 @@ class RazerDevice(object):
             "side_img": self.device_image,
             "perspective_img": self.device_image
         }
+
+    @property
+    def battery_level(self) -> int:
+        """
+        Get battery level from device
+
+        :return: Battery level (0-100)
+        """
+        if self.has('battery'):
+            return int(self._dbus_interfaces['power'].getBattery())
+
+    @property
+    def is_charging(self) -> bool:
+        """
+        Get whether the device is charging or not
+
+        :return: Boolean
+        """
+        if self.has('battery'):
+            return bool(self._dbus_interfaces['power'].isCharging())
+
+    def set_idle_time(self, idle_time) -> None:
+        """
+        Sets the idle time on the device
+
+        :param idle_time: the time in seconds
+        """
+        if self.has('battery'):
+            self._dbus_interfaces['power'].setIdleTime(idle_time)
+
+    def get_idle_time(self) -> int:
+        """
+        Gets the idle time of the device
+
+        :return: Number of seconds before this device goes into powersave
+                 (60-900)
+        """
+        if self.has('battery'):
+            return int(self._dbus_interfaces['power'].getIdleTime())
+
+    def set_low_battery_threshold(self, threshold) -> None:
+        """
+        Set the low battery threshold as a percentage
+
+        :param threshold: Battery threshold as a percentage
+        :type threshold: int
+        """
+        if self.has('battery'):
+            self._dbus_interfaces['power'].setLowBatteryThreshold(threshold)
+
+    def get_low_battery_threshold(self) -> int:
+        """
+        Get the low battery threshold as a percentage
+
+        :return: Battery threshold as a percentage
+        """
+        if self.has('battery'):
+            return int(self._dbus_interfaces['power'].getLowBatteryThreshold())
 
     def __str__(self):
         return self._name

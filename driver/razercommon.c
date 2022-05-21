@@ -49,7 +49,7 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
 
     kfree(buf);
     if(len!=size)
-        printk(KERN_WARNING "razer driver: Device data transfer failed.");
+        printk(KERN_WARNING "razer driver: Device data transfer failed.\n");
 
     return ((len < 0) ? len : ((len != size) ? -EIO : 0));
 }
@@ -230,7 +230,7 @@ int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *dat
 
     kfree(buf);
     if(len!=report_size)
-        printk(KERN_WARNING "razer driver: Device data transfer failed.");
+        printk(KERN_WARNING "razer driver: Device data transfer failed.\n");
 
     return ((len < 0) ? len : ((len != report_size) ? -EIO : 0));
 }

@@ -24,9 +24,11 @@
 #define USB_DEVICE_ID_RAZER_CHROMA_MUG 0x0F07
 #define USB_DEVICE_ID_RAZER_CHROMA_BASE 0x0F08
 #define USB_DEVICE_ID_RAZER_CHROMA_HDK 0x0F09
+#define USB_DEVICE_ID_RAZER_RAPTOR_27 0x0F12
 #define USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION 0x0F19
 #define USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA 0x0F1D
 #define USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA 0x0F20
+#define USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA 0x0F21
 #define USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA 0x0F26
 
 #define RAZER_ACCESSORY_WAIT_MIN_US 600
@@ -44,7 +46,6 @@ struct razer_accessory_device {
     unsigned short usb_vid;
     unsigned short usb_pid;
 
-    unsigned char mug_present_poll;
     unsigned char saved_brightness;
 
     char serial[23];
