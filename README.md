@@ -79,6 +79,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Huntsman V2 Analog                      |  1532:0266  |
 | Razer Huntsman Mini (JP)                      |  1532:0269  |
 | Razer Book 13 (2020)                          |  1532:026A  |
+| Razer Huntsman V2 TKL                         |  1532:026B  |
 | Razer Huntsman V2                             |  1532:026C  |
 | Razer Blade 15 Advanced (Early 2021)          |  1532:026D  |
 | Razer Blade 15 Base (Early 2021)              |  1532:026F  |
