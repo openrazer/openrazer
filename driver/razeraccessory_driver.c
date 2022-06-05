@@ -2131,5 +2131,3 @@ static struct hid_driver razer_accessory_driver = {
 };
 
 module_hid_driver(razer_accessory_driver);
-
-

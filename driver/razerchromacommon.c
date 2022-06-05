@@ -1469,10 +1469,3 @@ struct razer_report razer_chroma_misc_get_scroll_smart_reel(void)
 
     return report;
 }
-
-
-
-
-
-
-
