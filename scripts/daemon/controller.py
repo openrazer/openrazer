@@ -95,7 +95,7 @@ def _get_devices_by_type() -> dict:
             devices[dev_type] = [device]
 
     # Sort devices
-    for key in devices:
+    for key in devices.copy():
         devices[key] = sorted(devices[key], key=lambda x: str(x.serial))
 
     return devices
