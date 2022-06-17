@@ -212,3 +212,21 @@ class RazerLaptopStandChroma(_RazerDeviceBrightnessSuspend):
                'set_custom_effect', 'set_key_row', 'set_reactive_effect', 'trigger_reactive_effect']
 
     DEVICE_IMAGE = "https://hybrismediaprod.blob.core.windows.net/sys-master-phoenix-images-container/hfe/hbc/9081459376158/Razer-Laptop-Stand-Chroma-04.jpg"
+
+
+class RazerLaptopStandChromaV2(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Laptop Stand Chroma V2
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*RAZER_Razer_Laptop_Stand_Chroma_V2-event-if01')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0F2B
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [1, 15]
+    METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/272c328913c00c6f584fe3dead2ca2a6/razer-laptop-stand-chroma-v2-hero-mobile-v2.jpg"
