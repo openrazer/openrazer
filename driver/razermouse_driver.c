@@ -6063,6 +6063,8 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
         case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
         case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
+        case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
+        case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
         case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
