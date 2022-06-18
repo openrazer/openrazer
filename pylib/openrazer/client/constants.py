@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 # Macro LED effect ID's
 MACRO_LED_STATIC = 0x00
 MACRO_LED_BLINK = 0x01

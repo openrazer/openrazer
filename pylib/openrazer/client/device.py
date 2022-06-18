@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 import dbus as _dbus
 from openrazer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFactory as __BaseDeviceFactory
 from openrazer.client.devices.mousemat import RazerMousemat as __RazerMousemat

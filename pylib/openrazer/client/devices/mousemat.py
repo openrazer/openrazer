@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 from openrazer.client.devices import RazerDevice as __RazerDevice
 
 

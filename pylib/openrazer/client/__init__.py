@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 import json
 import dbus as _dbus
 from openrazer.client.device import RazerDeviceFactory as _RazerDeviceFactory
