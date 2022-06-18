@@ -1,5 +1,8 @@
-// USB HID keycodes
-// http://www.freebsddiary.org/APC/usb_hid_usages.php
+/* SPDX-License-Identifier: GPL-2.0-or-later */
+/*
+ * USB HID keycodes
+ * http://www.freebsddiary.org/APC/usb_hid_usages.php
+ */
 
 #ifndef __USB_HID_KEYS_H
 #define __USB_HID_KEYS_H

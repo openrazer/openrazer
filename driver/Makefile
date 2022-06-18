@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 obj-m := razerkbd.o razermouse.o razerkraken.o razeraccessory.o
 
 razerkbd-y := razerkbd_driver.o razercommon.o razerchromacommon.o
