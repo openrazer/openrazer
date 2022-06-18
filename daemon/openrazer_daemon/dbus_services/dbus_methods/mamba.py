@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 import math
 import struct
 from openrazer_daemon.dbus_services import endpoint

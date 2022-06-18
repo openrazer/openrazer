@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """
 Screensaver class which watches dbus signals to see if screensaver is active
 """

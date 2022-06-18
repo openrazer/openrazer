@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """
 This will do until I can be bothered to create indicator applet to do battery level
 """

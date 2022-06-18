@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """
 A class that writes persistence data to disk when device state is updated.
 
