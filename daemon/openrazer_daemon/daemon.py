@@ -326,7 +326,8 @@ class RazerDaemon(DBusService):
             if 'set_dpi_xy' in device.dbus.METHODS or 'set_dpi_xy_byte' in device.dbus.METHODS:
                 dpi_x = int(device.dbus.dpi[0])
                 dpi_y = int(device.dbus.dpi[1])
-                if dpi_x > 0 and dpi_y > 0:
+                # When Y is not greater than 0 check for a DPI X only device, a device with 'available_dpi' and a Y value of 0
+                if dpi_x > 0 and (dpi_y > 0 or ('available_dpi' in device.dbus.METHODS and dpi_y == 0)):
                     self._persistence[device.dbus.storage_name]['dpi_x'] = str(dpi_x)
                     self._persistence[device.dbus.storage_name]['dpi_y'] = str(dpi_y)
 
