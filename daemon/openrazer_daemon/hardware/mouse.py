@@ -1232,6 +1232,28 @@ class RazerDeathAdder3_5G(__RazerDevice):
         self.disable_notify = False
 
 
+class RazerDeathAdder3_5GBlack(__RazerDevice):
+    """
+    Class for the Razer DeathAdder 3.5G Black
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0029
+    DEDICATED_MACRO_KEYS = True
+    METHODS = ['get_device_type_mouse',
+               'get_poll_rate', 'set_poll_rate', 'get_dpi_xy', 'set_dpi_xy', 'available_dpi', 'max_dpi']
+
+    AVAILABLE_DPI = [450, 900, 1800, 3500]
+    DPI_MAX = 3500
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/33/razer-deathadder-be-gallery-3.png"
+
+    def _resume_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+    def _suspend_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+
 class RazerMamba2012Wireless(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Mamba 2012 (Wireless)

@@ -222,6 +222,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer DeathAdder 3.5G\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
+        device_type = "Razer DeathAdder 3.5G Black\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
         device_type = "Razer Mamba 2012 (Wired)\n";
         break;
@@ -530,6 +534,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G: // DA don't think supports fw, its proper old
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
         return sprintf(buf, "v%d.%d\n", 0x01, 0x00);
         break;
 
@@ -942,6 +947,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED: // Doesn't have proper serial
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
         return sprintf(buf, "%s\n", &device->serial[0]);
@@ -1163,6 +1169,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
         switch(device->da3_5g.poll) {
         case 0x01:
             polling_rate = 1000;
@@ -1279,6 +1286,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
         deathadder3_5g_set_poll_rate(device, polling_rate);
         return count;
 
@@ -1465,6 +1473,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     // So far I think imperator uses varstore
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
         if(count == 2) {
             dpi_x = (buf[0] << 8) | (buf[1] & 0xFF); // TODO make convenience function
             deathadder3_5g_set_dpi(device, dpi_x);
@@ -1607,6 +1616,7 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
     // So far I think imperator uses varstore
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
         switch(device->da3_5g.dpi) {
         case 0x04:
             dpi_x = 450;
@@ -2288,6 +2298,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Doesn't have device mode
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G: // Doesn't support device mode, exit early
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
         return count;
         break;
 
@@ -2349,6 +2360,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G: // Doesn't support device mode, exit early
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
         return sprintf(buf, "%d:%d\n", 0, 0);
         break;
@@ -5162,6 +5174,11 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             break;
 
+        case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            break;
+
         case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
         case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
@@ -5857,6 +5874,11 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_charge_status);
             break;
 
+        case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            break;
+
         case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
         case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
         case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
@@ -6149,6 +6171,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_1800) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_2000) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_3_5G) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX_RED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_2012) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_2014) },

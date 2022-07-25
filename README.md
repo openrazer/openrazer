@@ -99,6 +99,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Abyssus 1800                            |  1532:0020  |
 | Razer Mamba 2012 (Wired)                      |  1532:0024  |
 | Razer Mamba 2012 (Wireless)                   |  1532:0025  |
+| Razer DeathAdder 3.5G Black                   |  1532:0029  |
 | Razer Naga 2012                               |  1532:002E  |
 | Razer Imperator 2012                          |  1532:002F  |
 | Razer Ouroboros 2012                          |  1532:0032  |
