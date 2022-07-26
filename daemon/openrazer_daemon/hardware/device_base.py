@@ -93,7 +93,12 @@ class RazerDevice(DBusService):
                 "wave_dir": 1,
             }
 
-        self.dpi = [1800, 1800]
+        # Check for a DPI X only device since they need a Y value of 0
+        if 'available_dpi' in self.METHODS:
+            self.dpi = [1800, 0]
+        else:
+            self.dpi = [1800, 1800]
+
         self.poll_rate = 500
 
         self._effect_sync = effect_sync.EffectSync(self, device_number)
