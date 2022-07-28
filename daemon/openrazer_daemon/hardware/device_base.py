@@ -241,6 +241,9 @@ class RazerDevice(DBusService):
 
         poll_rate_func = getattr(self, "setPollRate", None)
         if poll_rate_func is not None:
+            # Check if DPI was set and delay for successive DBus call
+            if dpi_func is not None:
+                time.sleep(0.5)
             poll_rate_func(self.poll_rate)
 
         # load last effects
