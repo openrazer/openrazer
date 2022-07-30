@@ -360,7 +360,7 @@ static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode
 }
 
 /**
- * Read device file "get_battery"
+ * Read device file "charge_level"
  *
  * Returns an integer which needs to be scaled from 0-255 -> 0-100
  */
@@ -389,7 +389,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
 }
 
 /**
- * Read device file "is_charging"
+ * Read device file "charge_status"
  *
  * Returns 0 when not charging, 1 when charging
  */
@@ -418,7 +418,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
 }
 
 /**
- * Write device file "set_charging_effect"
+ * Write device file "charge_effect"
  *
  * Sets charging effect.
  */
@@ -440,7 +440,7 @@ static ssize_t razer_attr_write_charge_effect(struct device *dev, struct device_
 }
 
 /**
- * Write device file "set_charging_colour"
+ * Write device file "charge_colour"
  *
  * Sets charging colour using 3 RGB bytes
  */
@@ -497,7 +497,7 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
 }
 
 /**
- * Write device file "mode_game"
+ * Write device file "game_led_state"
  *
  * When 1 is written (as a character, 0x31) Game mode will be enabled, if 0 is written (0x30)
  * then game mode will be disabled
@@ -528,7 +528,7 @@ static ssize_t razer_attr_write_game_led_state(struct device *dev, struct device
 }
 
 /**
- * Read device file "game_mode"
+ * Read device file "game_led_state"
  *
  * Returns a string
  */
@@ -553,7 +553,7 @@ static ssize_t razer_attr_read_game_led_state(struct device *dev, struct device_
 }
 
 /**
- * Write device file "mode_macro"
+ * Write device file "macro_led_state"
  *
  * When 1 is written (as a character, 0x31) Macro mode will be enabled, if 0 is written (0x30)
  * then game mode will be disabled
@@ -571,7 +571,7 @@ static ssize_t razer_attr_write_macro_led_state(struct device *dev, struct devic
 }
 
 /**
- * Read device file "mode_macro"
+ * Read device file "macro_led_state"
  *
  * Returns a string
  */
@@ -929,7 +929,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 }
 
 /**
- * Write device file "mode_macro_effect"
+ * Write device file "macro_led_effect"
  *
  * When 1 is written the LED will blink, 0 will static
  */
@@ -986,7 +986,7 @@ static ssize_t razer_attr_write_macro_led_effect(struct device *dev, struct devi
 }
 
 /**
- * Read device file "macro_mode_effect"
+ * Read device file "macro_led_effect"
  *
  * Returns a string
  */
@@ -1001,7 +1001,7 @@ static ssize_t razer_attr_read_macro_led_effect(struct device *dev, struct devic
 }
 
 /**
- * Write device file "mode_pulsate"
+ * Write device file "matrix_effect_pulsate"
  *
  * The brightness oscillates between fully on and fully off generating a pulsing effect
  */
@@ -1027,7 +1027,7 @@ static ssize_t razer_attr_write_matrix_effect_pulsate(struct device *dev, struct
 }
 
 /**
- * Read device file "mode_pulsate"
+ * Read device file "matrix_effect_pulsate"
  *
  * Returns a string
  */
@@ -1198,7 +1198,7 @@ static ssize_t razer_attr_write_profile_led_blue(struct device *dev, struct devi
 }
 
 /**
- * Read device file "get_serial"
+ * Read device file "device_serial"
  *
  * Returns a string
  */
@@ -1222,7 +1222,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 }
 
 /**
- * Read device file "get_firmware_version"
+ * Read device file "firmware_version"
  *
  * Returns a string
  */
@@ -1237,7 +1237,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
 }
 
 /**
- * Write device file "mode_none"
+ * Write device file "matrix_effect_none"
  *
  * No keyboard effect is activated whenever this file is written to
  */
@@ -1303,7 +1303,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
 }
 
 /**
- * Write device file "mode_wave"
+ * Write device file "matrix_effect_wave"
  *
  * When 1 is written (as a character, 0x31) the wave effect is displayed moving left across the keyboard
  * if 2 is written (0x32) then the wave effect goes right
@@ -1366,7 +1366,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
 }
 
 /**
- * Write device file "mode_spectrum"
+ * Write device file "matrix_effect_spectrum"
  *
  * Specrum effect mode is activated whenever the file is written to
  */
@@ -1435,7 +1435,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
 }
 
 /**
- * Write device file "mode_reactive"
+ * Write device file "matrix_effect_reactive"
  *
  * Sets reactive mode when this file is written to. A speed byte and 3 RGB bytes should be written
  */
@@ -1500,7 +1500,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
 }
 
 /**
- * Write device file "mode_static"
+ * Write device file "matrix_effect_state"
  *
  * Set the keyboard to static mode when 3 RGB bytes are written
  */
@@ -1666,7 +1666,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
 }
 
 /**
- * Write device file "mode_starlight"
+ * Write device file "matrix_effect_starlight"
  *
  * Starlight keyboard effect is activated whenever this file is written to (for bw2016)
  *
@@ -1818,7 +1818,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
 }
 
 /**
- * Write device file "mode_breath"
+ * Write device file "matrix_effect_breath"
  */
 static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
@@ -2003,7 +2003,7 @@ static int has_inverted_led_state(struct device *dev)
 }
 
 /**
- * Reads device file "set_logo"
+ * Reads device file "logo_led_state"
  *
  * Reads the logo lighting state (the ASCII number) written to this file.
  */
@@ -2029,7 +2029,7 @@ static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_
 }
 
 /**
- * Write device file "set_logo"
+ * Write device file "logo_led_state"
  *
  * Sets the logo lighting state to the ASCII number written to this file.
  */
@@ -2057,7 +2057,7 @@ static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device
 }
 
 /**
- * Write device file "mode_custom"
+ * Write device file "matrix_effect_custom"
  *
  * Sets the keyboard to custom mode whenever the file is written to
  */
@@ -2115,7 +2115,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
 }
 
 /**
- * Write device file "set_fn_toggle"
+ * Write device file "fn_toggle"
  *
  * Sets the logo lighting state to the ASCII number written to this file.
  */
@@ -2157,7 +2157,7 @@ static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute 
 }
 
 /**
- * Write device file "set_brightness"
+ * Write device file "matrix_brightness"
  *
  * Sets the brightness to the ASCII number written to this file.
  */
@@ -2232,7 +2232,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
 }
 
 /**
- * Read device file "set_brightness"
+ * Read device file "matrix_brightness"
  *
  * Returns a string
  */
@@ -2486,7 +2486,9 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
     return count;
 }
 
-
+/**
+ * Write device file "key_super"
+ */
 static ssize_t razer_attr_write_key_super(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
@@ -2501,6 +2503,9 @@ static ssize_t razer_attr_write_key_super(struct device *dev, struct device_attr
     return count;
 }
 
+/**
+ * Read device file "key_super"
+ */
 static ssize_t razer_attr_read_key_super(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
@@ -2510,7 +2515,9 @@ static ssize_t razer_attr_read_key_super(struct device *dev, struct device_attri
     return 1;
 }
 
-
+/**
+ * Write device file "key_alt_tab"
+ */
 static ssize_t razer_attr_write_key_alt_tab(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
@@ -2526,6 +2533,9 @@ static ssize_t razer_attr_write_key_alt_tab(struct device *dev, struct device_at
     return count;
 }
 
+/**
+ * Read device file "read_key_alt_tab"
+ */
 static ssize_t razer_attr_read_key_alt_tab(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
@@ -2535,6 +2545,9 @@ static ssize_t razer_attr_read_key_alt_tab(struct device *dev, struct device_att
     return 1;
 }
 
+/**
+ * Write device file "write_key_alt_f4"
+ */
 static ssize_t razer_attr_write_key_alt_f4(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
@@ -2549,6 +2562,9 @@ static ssize_t razer_attr_write_key_alt_f4(struct device *dev, struct device_att
     return count;
 }
 
+/**
+ * Read device file "read_key_alt_f4"
+ */
 static ssize_t razer_attr_read_key_alt_f4(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
