@@ -5,6 +5,7 @@ import dbus as _dbus
 from openrazer.client.fx import RazerFX as _RazerFX
 from xml.etree import ElementTree as _ET
 from openrazer.client.macro import RazerMacro as _RazerMacro
+from openrazer.client import constants as _c
 
 
 class RazerDevice(object):
@@ -483,6 +484,59 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             return int(self._dbus_interfaces['power'].getLowBatteryThreshold())
+
+    @property
+    def poll_rate(self) -> int:
+        """
+        Get poll rate from device
+
+        :return: Poll rate
+        :rtype: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('poll_rate'):
+            return int(self._dbus_interfaces['device'].getPollRate())
+        else:
+            raise NotImplementedError()
+
+    @poll_rate.setter
+    def poll_rate(self, poll_rate: int):
+        """
+        Set poll rate of device
+
+        :param poll_rate: Polling rate
+        :type poll_rate: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('poll_rate'):
+            if not isinstance(poll_rate, int):
+                raise ValueError("Poll rate is not an integer: {0}".format(poll_rate))
+            if poll_rate not in (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ, _c.POLL_2000HZ, _c.POLL_4000HZ, _c.POLL_8000HZ):
+                raise ValueError('Poll rate "{0}" is not one of {1}'.format(poll_rate, (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ, _c.POLL_2000HZ, _c.POLL_4000HZ, _c.POLL_8000HZ)))
+
+            self._dbus_interfaces['device'].setPollRate(poll_rate)
+
+        else:
+            raise NotImplementedError()
+
+    @property
+    def supported_poll_rates(self) -> list:
+        """
+        Get poll rates supported by the device
+
+        :return: Supported poll rates
+        :rtype: list
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('supported_poll_rates'):
+            dbuslist = self._dbus_interfaces['device'].getSupportedPollRates()
+            # Repack list from dbus ints to normal ints
+            return [int(d) for d in dbuslist]
+        else:
+            raise NotImplementedError()
 
     def __str__(self):
         return self._name
