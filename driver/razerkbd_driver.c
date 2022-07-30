@@ -785,6 +785,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Tartarus V2\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
+        device_type = "Razer Tartarus Pro\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
         device_type = "Razer BlackWidow Chroma (Overwatch)\n";
         break;
@@ -963,6 +967,7 @@ static ssize_t razer_attr_write_macro_led_effect(struct device *dev, struct devi
         break;
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
         report = razer_chroma_standard_set_led_effect(NOSTORE, MACRO_LED, enabled);
@@ -1268,6 +1273,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
         break;
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_CYNOSA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
@@ -1341,6 +1347,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
         break;
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_CYNOSA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
@@ -1416,6 +1423,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
         break;
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
         report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, BACKLIGHT_LED);
         report.transaction_id.id = 0x1F;  // TODO move to a usb_device variable
         break;
@@ -1453,6 +1461,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
 
     speed = (unsigned char)buf[0];
 
+
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_ORNATA:
     case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
@@ -1471,6 +1480,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
         break;
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_CYNOSA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
@@ -1513,6 +1523,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     switch(usb_dev->descriptor.idProduct) {
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
         report = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
         razer_send_payload(usb_dev, &report);
         report.transaction_id.id = 0x1F;
@@ -1754,6 +1765,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
         break;
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
         if(count == 7) {
             report = razer_chroma_extended_matrix_effect_starlight_dual(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
             report.transaction_id.id = 0x1F;  // TODO move to a usb_device variable
@@ -1842,6 +1854,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         break;
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
         switch(count) {
         case 3: // Single colour mode
             report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
@@ -2085,6 +2098,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
         break;
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_CYNOSA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
@@ -2171,6 +2185,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     switch(usb_dev->descriptor.idProduct) {
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
         report = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         report.transaction_id.id = 0x1F;
         break;
@@ -2247,6 +2262,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     switch(usb_dev->descriptor.idProduct) {
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
         report = razer_chroma_extended_matrix_get_brightness(VARSTORE, ZERO_LED);
         report.transaction_id.id = 0x1F;
         break;
@@ -2416,6 +2432,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             break;
 
         case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+        case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
         case USB_DEVICE_ID_RAZER_CYNOSA_V2:
         case USB_DEVICE_ID_RAZER_ORNATA_V2:
@@ -3243,6 +3260,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             break;
 
         case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+        case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
@@ -3644,6 +3662,23 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
             break;
 
+        case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
+            device_remove_file(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
+            device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
+            device_remove_file(&hdev->dev, &dev_attr_game_led_state);                // Enable game mode & LED
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            device_remove_file(&hdev->dev, &dev_attr_profile_led_red);               // Profile/Macro LED Red
+            device_remove_file(&hdev->dev, &dev_attr_profile_led_green);             // Profile/Macro LED Green
+            device_remove_file(&hdev->dev, &dev_attr_profile_led_blue);              // Profile/Macro LED Blue
+            break;
         case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
         case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
         case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
@@ -3786,6 +3821,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS_V2) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TARTARUS_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_EXPERT) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH) },
