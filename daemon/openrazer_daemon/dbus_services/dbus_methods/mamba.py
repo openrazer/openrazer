@@ -219,6 +219,11 @@ def get_dpi_xy(self):
     except FileNotFoundError:
         return self.dpi
 
+    if 'available_dpi' in self.METHODS:
+        if len(dpi) != 1:
+            raise RuntimeError("Devices with available_dpi are expected to have only one DPI value returned from driver, got " + str(dpi))
+        dpi = dpi[0], 0
+
     return dpi
 
 
