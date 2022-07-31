@@ -2987,6 +2987,12 @@ class RazerDeathAdderV2XHyperSpeed(__RazerDevice):
 
         self._battery_manager.close()
 
+    def _resume_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+    def _suspend_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
 
 class RazerViperV2ProWired(__RazerDevice):
     """
@@ -3019,6 +3025,12 @@ class RazerViperV2ProWired(__RazerDevice):
         super()._close()
 
         self._battery_manager.close()
+
+    def _resume_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+    def _suspend_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
 
 
 class RazerViperV2ProWireless(RazerViperV2ProWired):
