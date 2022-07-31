@@ -1,6 +1,7 @@
 #!/bin/bash
 
 declare -A files_metadata=(
+    ["analog_threshold"]="rw;0"
     ["backlight_led_brightness"]="rw;0"
     ["backlight_led_effect"]="rw;0"
     ["backlight_led_rgb"]="rw;0xFF00FF"
