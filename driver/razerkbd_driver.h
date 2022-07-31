@@ -139,9 +139,13 @@
 struct razer_kbd_device {
     unsigned int fn_on;
     DECLARE_BITMAP(pressed_fn, KEY_CNT);
+    DECLARE_BITMAP(pressed_key, 256);
 
     unsigned char block_keys[3];
     unsigned char left_alt_on;
+    struct input_dev *input_dev;
+
+    u8 analog_threshold;
 };
 
 

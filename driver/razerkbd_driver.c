@@ -180,6 +180,178 @@ static const struct razer_key_translation chroma_keys_5[] = {
     { 0 }
 };
 
+// find key codes using: usbhid-dump -m 1532:0282 -ea
+static const struct razer_key_translation analog_keys[] = {
+    { 110, KEY_ESC },
+    { 2, KEY_1 },
+    { 3, KEY_2 },
+    { 4, KEY_3 },
+    { 5, KEY_4 },
+    { 6, KEY_5 },
+    { 7, KEY_6 },
+    { 8, KEY_7 },
+    { 9, KEY_8 },
+    { 10, KEY_9 },
+    { 11, KEY_0 },
+    { 12, KEY_MINUS },
+    { 13, KEY_EQUAL },
+    { 15, KEY_BACKSPACE },
+    { 16, KEY_TAB },
+    { 17, KEY_Q },
+    { 18, KEY_W },
+    { 19, KEY_E },
+    { 20, KEY_R },
+    { 21, KEY_T },
+    { 22, KEY_Y },
+    { 23, KEY_U },
+    { 24, KEY_I },
+    { 25, KEY_O },
+    { 26, KEY_P },
+    { 27, KEY_LEFTBRACE },
+    { 28, KEY_RIGHTBRACE },
+    { 29, KEY_BACKSLASH },
+    { 30, KEY_CAPSLOCK },
+    { 31, KEY_A },
+    { 32, KEY_S },
+    { 33, KEY_D },
+    { 34, KEY_F },
+    { 35, KEY_G },
+    { 36, KEY_H },
+    { 37, KEY_J },
+    { 38, KEY_K },
+    { 39, KEY_L },
+    { 40, KEY_SEMICOLON },
+    { 41, KEY_APOSTROPHE },
+    { 43, KEY_ENTER },
+    { 44, KEY_LEFTSHIFT },
+    { 46, KEY_Z },
+    { 47, KEY_X },
+    { 48, KEY_C },
+    { 49, KEY_V },
+    { 50, KEY_B },
+    { 51, KEY_N },
+    { 52, KEY_M },
+    { 53, KEY_COMMA },
+    { 54, KEY_DOT },
+    { 55, KEY_SLASH },
+    { 57, KEY_RIGHTSHIFT },
+    { 58, KEY_LEFTCTRL },
+    { 127, KEY_LEFTMETA },
+    { 60, KEY_LEFTALT },
+    { 61, KEY_SPACE },
+    { 62, KEY_RIGHTALT },
+    { 59, KEY_FN },
+    { 129, KEY_COMPOSE },
+    { 64, KEY_RIGHTCTRL },
+    { 0 }
+};
+
+static const struct razer_key_translation analog_keys_fn[] = {
+    { 110, KEY_GRAVE },
+    { 2, KEY_F1 },
+    { 3, KEY_F2 },
+    { 4, KEY_F3 },
+    { 5, KEY_F4 },
+    { 6, KEY_F5 },
+    { 7, KEY_F6 },
+    { 8, KEY_F7 },
+    { 9, KEY_F8 },
+    { 10, KEY_F9 },
+    { 11, KEY_F10 },
+    { 12, KEY_F11 },
+    { 13, KEY_F12 },
+    { 15, KEY_DELETE },
+    { 16, KEY_MUTE },
+    { 17, KEY_VOLUMEDOWN },
+    { 18, KEY_VOLUMEUP },
+    { 19, KEY_REWIND },
+    { 20, KEY_PLAYPAUSE },
+    { 21, KEY_FASTFORWARD },
+    // { 22, MACRO },
+    // { 23, MACRO },
+    { 24, KEY_UP },
+    { 25, KEY_SCROLLLOCK },
+    { 26, KEY_SYSRQ },
+    { 27, KEY_PAGEUP },
+    { 28, KEY_HOME },
+    { 37, KEY_LEFT },
+    { 38, KEY_DOWN },
+    { 39, KEY_RIGHT },
+    { 40, KEY_PAGEDOWN },
+    { 41, KEY_END },
+    { 53, KEY_SLEEP },
+    { 54, KEY_PAUSE },
+    { 55, KEY_INSERT },
+    { 0 }
+};
+
+// ABS_MAX is 0x3F but we want to map more keys
+// So I picked the most important keys (IMHO) and reused the codes
+// for LEFT/RIGHT SHIFT/CTRL/ALT and omitted KEY_COMPOSE
+static const struct razer_key_translation analog_keys_abs[] = {
+    { 110, 0x00 },
+    { 2, 0x01 },
+    { 3, 0x02 },
+    { 4, 0x03 },
+    { 5, 0x04 },
+    { 6, 0x05 },
+    { 7, 0x06 },
+    { 8, 0x07 },
+    { 9, 0x08 },
+    { 10, 0x09 },
+    { 11, 0x0A },
+    { 12, 0x0B },
+    { 13, 0x0C },
+    { 15, 0x0D },
+    { 16, 0x0E },
+    { 17, 0x0F },
+    { 18, 0x10 },
+    { 19, 0x11 },
+    { 20, 0x12 },
+    { 21, 0x13 },
+    { 22, 0x14 },
+    { 23, 0x15 },
+    { 24, 0x16 },
+    { 25, 0x17 },
+    { 26, 0x18 },
+    { 27, 0x19 },
+    { 28, 0x20 },
+    { 29, 0x21 },
+    { 30, 0x22 },
+    { 31, 0x23 },
+    { 32, 0x24 },
+    { 33, 0x25 },
+    { 34, 0x26 },
+    { 35, 0x27 },
+    { 36, 0x28 },
+    { 37, 0x29 },
+    { 38, 0x2A },
+    { 39, 0x2B },
+    { 40, 0x2C },
+    { 41, 0x2D },
+    { 43, 0x2F }, // skipped ABS_RESERVED
+    { 44, 0x30 },
+    { 46, 0x31 },
+    { 47, 0x32 },
+    { 48, 0x33 },
+    { 49, 0x34 },
+    { 50, 0x35 },
+    { 51, 0x36 },
+    { 52, 0x37 },
+    { 53, 0x38 },
+    { 54, 0x39 },
+    { 55, 0x3A },
+    { 57, 0x30 }, // Shift (same as 44)
+    { 58, 0x3B },
+    { 127, 0x3C },
+    { 60, 0x3D },
+    { 61, 0x3E },
+    { 62, 0x3D }, // Alt (same as 60)
+    { 59, 0x3F },
+    { 64, 0x3A }, // Ctrl (same as 58)
+    { 0 }
+};
+
 /**
  * Essentially search through the struct array above.
  */
@@ -641,6 +813,31 @@ static ssize_t razer_attr_read_macro_led_state(struct device *dev, struct device
 
     response = razer_send_payload(usb_dev, &report);
     return sprintf(buf, "%d\n", response.arguments[2]);
+}
+
+/**
+ * Write device file "analog_threshold"
+ *
+ * TBD
+ */
+static ssize_t razer_attr_write_analog_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+    device->analog_threshold = (unsigned char)simple_strtoul(buf, NULL, 10);
+
+    return count;
+}
+
+/**
+ * Read device file "analog_threshold"
+ *
+ * Returns a string
+ */
+static ssize_t razer_attr_read_analog_threshold(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+    return sprintf(buf, "%d\n", device->analog_threshold);
 }
 
 /**
@@ -2725,6 +2922,7 @@ static ssize_t razer_attr_read_key_alt_f4(struct device *dev, struct device_attr
  * Write only is 0220
  * Read and write is 0664
  */
+static DEVICE_ATTR(analog_threshold,        0660, razer_attr_read_analog_threshold,           razer_attr_write_analog_threshold);
 static DEVICE_ATTR(game_led_state,          0660, razer_attr_read_game_led_state,             razer_attr_write_game_led_state);
 static DEVICE_ATTR(macro_led_state,         0660, razer_attr_read_macro_led_state,            razer_attr_write_macro_led_state);
 static DEVICE_ATTR(macro_led_effect,        0660, razer_attr_read_macro_led_effect,           razer_attr_write_macro_led_effect);
@@ -2963,6 +3161,51 @@ static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_de
     return 0;
 }
 
+static int razer_raw_event_analog(struct hid_device *hdev, struct razer_kbd_device *asc, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
+{
+    const struct razer_key_translation *translation;
+    int n_key, value;
+
+    if (size > 3) {
+        // handle n-key rollover
+        for (n_key = 0; n_key * 2 < size; n_key++) {
+            u8 key = data[1 + n_key * 2], analog = data[2 + n_key * 2];
+            if (key == 0) break;
+
+            translation = find_translation(analog_keys_abs, key);
+            if (translation) {
+                input_report_abs(asc->input_dev, translation->to, analog);
+                input_sync(asc->input_dev);
+            }
+
+            // Check if fn is pressed
+            if (test_bit(59, asc->pressed_key)) {
+                translation = find_translation(analog_keys_fn, key);
+            } else {
+                translation = find_translation(analog_keys, key);
+            }
+
+            value = -1; // unchanged
+            if (analog > asc->analog_threshold) {
+                if (!test_bit(key, asc->pressed_key)) {
+                    value = 1;
+                    set_bit(key, asc->pressed_key);
+                }
+            } else {
+                if (test_bit(key, asc->pressed_key)) {
+                    value = 0;
+                    clear_bit(key, asc->pressed_key);
+                }
+            }
+
+            if (translation && value >= 0) {
+                input_report_key(asc->input_dev, translation->to, value);
+            }
+        }
+    }
+    return 0;
+}
+
 /**
  * Bitfield raw event function
  *
@@ -3124,6 +3367,11 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
         return razer_raw_event_bitfield(hdev, asc, intf, report, data, size);
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
+        if (intf->cur_altsetting->desc.bInterfaceNumber == 1) {
+            return razer_raw_event_analog(hdev, asc, intf, report, data, size);
+        }
+        return 0;
     default:
         return razer_raw_event_standard(hdev, asc, intf, report, data, size);
     }
@@ -3172,6 +3420,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         retval = -ENOMEM;
         goto exit;
     }
+    dev->analog_threshold = 128;
 
     // Other interfaces are actual key-emitting devices
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
@@ -3521,6 +3770,15 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_super);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_tab);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_f4);
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
+            printk (KERN_WARNING "bInterfaceNumber %i\n", intf->cur_altsetting->desc.bInterfaceNumber);
+            if (intf->cur_altsetting->desc.bInterfaceNumber == 1) {
+                printk(KERN_WARNING "create device file analog threshold\n");
+                CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_analog_threshold);          // Threshold for keypresses
+            }
+            break;
+        }
     }
 
 
@@ -3551,6 +3809,36 @@ exit:
 exit_free:
     kfree(dev);
     return retval;
+}
+
+static int razer_kbd_input_configured(struct hid_device *hdev,
+                                      struct hid_input *hi)
+{
+    struct razer_kbd_device *dev;
+    struct input_dev *input = hi->input;
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
+        if (intf->cur_altsetting->desc.bInterfaceNumber == 1) {
+            const struct razer_key_translation *ti;
+
+            dev = hid_get_drvdata(hdev);
+            dev->input_dev = input;
+
+            set_bit(EV_ABS, input->evbit);
+
+            for (ti = analog_keys_abs; ti->from; ti++) {
+                set_bit(ti->to, input->absbit);
+                input_set_capability(input, EV_ABS, ti->to);
+                input_set_abs_params(input, ti->to, 0, 255, 0, 0);
+            }
+
+        }
+        break;
+    }
+    return 0;
 }
 
 /**
@@ -3908,6 +4196,11 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_key_super);
         device_remove_file(&hdev->dev, &dev_attr_key_alt_tab);
         device_remove_file(&hdev->dev, &dev_attr_key_alt_f4);
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
+            device_remove_file(&hdev->dev, &dev_attr_analog_threshold);              // Threshold for keypresses
+            break;
+        }
     }
 
     hid_hw_stop(hdev);
@@ -4010,6 +4303,7 @@ static struct hid_driver razer_kbd_driver = {
     .name = "razerkbd",
     .id_table = razer_devices,
     .input_mapping = razer_kbd_input_mapping,
+    .input_configured = razer_kbd_input_configured,
     .probe = razer_kbd_probe,
     .remove = razer_kbd_disconnect,
     .event = razer_event,

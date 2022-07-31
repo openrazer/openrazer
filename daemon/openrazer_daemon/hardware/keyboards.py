@@ -519,8 +519,7 @@ class RazerHuntsmanV2Analog(_RazerDeviceBrightnessSuspend):
     DEVICE_IMAGE = "https://dl.razerzone.com/src/4023-1-EN-v1.png"
 
 
-# TODO Should become _RippleKeyboard once kernel support for driver mode is implemented
-class RazerHuntsmanMiniAnalog(_RazerDeviceBrightnessSuspend):
+class RazerHuntsmanMiniAnalog(_RippleKeyboard):
     """
     Class for the Razer Huntsman Mini Analog
     """
@@ -530,10 +529,11 @@ class RazerHuntsmanMiniAnalog(_RazerDeviceBrightnessSuspend):
     USB_PID = 0x0282
     HAS_MATRIX = True
     MATRIX_DIMS = [5, 15]
-    # TODO Remove get_keyboard_layout once not _RazerDeviceBrightnessSuspend anymore
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
-               'set_custom_effect', 'set_key_row', 'get_keyboard_layout']
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1689/1689-huntsmanmini.png"
 
