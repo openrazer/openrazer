@@ -2767,6 +2767,63 @@ class RazerOrochiV2Bluetooth(RazerOrochiV2Receiver):
     USB_PID = 0x0095
 
 
+class RazerNagaX(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer Naga X
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0096
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [1, 2]
+
+    DEDICATED_MACRO_KEYS = True
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               # Macros
+               'get_macros', 'delete_macro', 'add_macro',
+               # Scroll wheel
+               'get_scroll_brightness', 'set_scroll_brightness',
+               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               # Left side = thumbgrid
+               'get_left_brightness', 'set_left_brightness',
+               'set_left_wave', 'set_left_static', 'set_left_spectrum', 'set_left_none', 'set_left_reactive', 'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
+               # Custom frame
+               'set_custom_effect', 'set_key_row']
+
+    DPI_MAX = 18000
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/3993-1-EN-V2.png"
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = (_da_get_scroll_brightness(self), _get_left_brightness(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_scroll_brightness(self, 0)
+        _set_left_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+        Get the last known brightness and then set the brightness
+        """
+        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[0]
+        left_row_brightness = self.suspend_args.get('brightness', (100, 100))[1]
+
+        self.disable_notify = True
+        _da_set_scroll_brightness(self, scroll_brightness)
+        _set_left_brightness(self, left_row_brightness)
+        self.disable_notify = False
+
+
 class RazerDeathAdderV2Mini(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer DeathAdder V2 Mini

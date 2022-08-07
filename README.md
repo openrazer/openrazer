@@ -162,6 +162,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Viper 8KHz                              |  1532:0091  |
 | Razer Orochi V2 (Receiver)                    |  1532:0094  |
 | Razer Orochi V2 (Bluetooth)                   |  1532:0095  |
+| Razer Naga X                                  |  1532:0096  |
 | Razer DeathAdder Essential (2021)             |  1532:0098  |
 | Razer Basilisk V3                             |  1532:0099  |
 | Razer DeathAdder V2 X HyperSpeed              |  1532:009C  |
