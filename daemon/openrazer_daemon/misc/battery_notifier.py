@@ -51,6 +51,9 @@ class BatteryNotifier(threading.Thread):
 
         self._last_notify_time = datetime.datetime(1970, 1, 1)
 
+        self._logger.info("BatteryNotifier - device_name: {0}".format(device_name))
+        self.lastLevel = 0.0
+
     @property
     def shutdown(self):
         """
@@ -105,11 +108,55 @@ class BatteryNotifier(threading.Thread):
                 message = "Battery is fully charged ({0}%)".format(battery_percent)
 
             if self._notify2:
-                self._logger.debug("{0} Battery at {1}%".format(self._device_name, battery_percent))
+                if self.percent == 0:
+                    self.percent = 100
 
-                if battery_level <= self.percent:
+                # 3.0 as lower bound filters out 'noise' caused when changing settings from RazerGenie
+                if 3.0 < battery_percent <= self.percent:
                     self._notification.update(summary=title, message=message, icon=icon)
                     self._notification.show()
+
+                    # graduates frequency of messages/notifications bothering the user
+                    if battery_percent >= 80:
+                        self.percent = 70
+                    elif battery_percent >= 70:
+                        self.percent = ((battery_percent - 9) // 10) * 10
+                    elif battery_percent >= 60:
+                        self.percent = ((battery_percent - 9) // 10) * 10
+                    elif battery_percent >= 40:
+                        self.percent = battery_percent - 5
+                    elif battery_percent >= 30:
+                        self.percent = battery_percent - 3
+                    elif battery_percent >= 21:
+                        self.percent = battery_percent - 2
+                    elif battery_percent >= 15:
+                        self.percent = battery_percent - 1
+
+            if 3.0 < battery_level < self.lastLevel:
+                # logging for discharging
+                self.lastLevel = battery_level
+                self._logger.info("{0} battery and next message levels are | {1:.2f} | {2}".format(self._device_name, battery_level, self.percent))
+
+            elif 3.0 < battery_level > self.lastLevel:
+                # ratchet the trigger level back up if charging
+                if battery_percent >= 80:
+                    self.percent = 70
+                elif battery_percent >= 70:
+                    self.percent = ((battery_percent - 9) // 10) * 10
+                elif battery_percent >= 60:
+                    self.percent = ((battery_percent - 9) // 10) * 10
+                elif battery_percent >= 40:
+                    self.percent = battery_percent - 5
+                elif battery_percent >= 30:
+                    self.percent = battery_percent - 3
+                elif battery_percent >= 21:
+                    self.percent = battery_percent - 2
+                elif battery_percent >= 15:
+                    self.percent = battery_percent - 1
+
+                # logging for charging
+                self.lastLevel = battery_level
+                self._logger.info("{0} battery and next message levels are | {1:.2f} | {2}".format(self._device_name, battery_level, self.percent))
 
     def run(self):
         """
@@ -120,7 +167,7 @@ class BatteryNotifier(threading.Thread):
             if self.event.is_set() and self.frequency > 0:
                 self.notify_battery()
 
-            time.sleep(0.1)
+            time.sleep(1)
 
         self._logger.debug("Shutting down battery notifier")
 
