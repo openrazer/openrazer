@@ -7,6 +7,7 @@ import logging
 import threading
 import datetime
 import time
+import os  # reduces some syslog noise Linux Mint 21
 
 try:
     import notify2
@@ -27,6 +28,11 @@ class BatteryNotifier(threading.Thread):
         super().__init__()
         self._logger = logging.getLogger('razer.device{0}.batterynotifier'.format(device_id))
         self._notify2 = notify2 is not None
+
+        # reduces some syslog noise Linux Mint 21
+        if 'DISPLAY' not in os.environ:
+            os.environ['DISPLAY'] = ':0'
+            time.sleep(30)
 
         self.event = threading.Event()
         self.frequency = 0
@@ -167,7 +173,9 @@ class BatteryNotifier(threading.Thread):
             if self.event.is_set() and self.frequency > 0:
                 self.notify_battery()
 
-            time.sleep(1)
+            # apparently I'm overlooking something in the conditional immediately above
+            self.notify_battery()
+            time.sleep(10)
 
         self._logger.debug("Shutting down battery notifier")
 
