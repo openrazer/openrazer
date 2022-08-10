@@ -7,7 +7,11 @@ setup(
     name="openrazer",
     version="3.6.1",
     packages=find_packages(exclude=["tests", "openrazer._fake_driver"]),
-    install_requires=['dbus-python', 'numpy'],
+    install_requires=[
+        "dbus-python >= 1.2.0",
+        "numpy >= 1.11.0",
+        "openrazer_daemon == 3.6.1",
+    ],
     author="OpenRazer contributors",
     description="Library for interacting with the OpenRazer daemon.",
     license="GPLv2+",
