@@ -3102,3 +3102,50 @@ class RazerViperV2ProWireless(RazerViperV2ProWired):
     """
 
     USB_PID = 0x00A6
+
+
+class RazerDeathAdderV3ProWired(__RazerDevice):
+    """
+    Class for the Razer DeathAdder V3 Pro (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_DeathAdder_V3_Pro_000000000000-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00B6
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/6130/6130-1-en-v2.png"
+
+    DPI_MAX = 30000
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer DeathAdder V3 Pro')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
+
+    def _resume_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+    def _suspend_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+
+class RazerDeathAdderV3ProWireless(RazerDeathAdderV3ProWired):
+    """
+    Class for the Razer DeathAdder V3 Pro (Wireless)
+    """
+
+    USB_PID = 0x00B7
