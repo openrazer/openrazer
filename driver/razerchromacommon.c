@@ -1166,11 +1166,11 @@ struct razer_report razer_chroma_misc_get_polling_rate2(void)
  * 0x02 = 4000 Hz
  * 0x01 = 8000 Hz
  */
-struct razer_report razer_chroma_misc_set_polling_rate2(unsigned short polling_rate)
+struct razer_report razer_chroma_misc_set_polling_rate2(unsigned short polling_rate, unsigned short argument)
 {
     struct razer_report report = get_razer_report(0x00, 0x40, 0x02);
 
-    report.arguments[0] = 0x00; // TODO Razer sends each request once with 0x00 and once with 0x01 - maybe varstore?
+    report.arguments[0] = argument; // For some devices Razer sends each request once with 0x00 and once with 0x01 - maybe varstore?
     switch(polling_rate) {
     case 8000:
         report.arguments[1] = 0x01;
@@ -1543,6 +1543,76 @@ struct razer_report razer_chroma_misc_get_scroll_smart_reel(void)
     struct razer_report report = get_razer_report(0x02, 0x97, 0x02);
 
     report.arguments[0] = VARSTORE;
+
+    return report;
+}
+
+/**
+ * Set LED mode for HyperPolling Wireless Dongle
+ * 1 = Connection Status
+ * 2 = Battery Status
+ * 3 = Battery Warning Only
+ */
+struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_indicator_led_mode(unsigned char mode)
+{
+    struct razer_report report = get_razer_report(0x07, 0x10, 0x01);
+
+    if(mode < 0x01 || mode > 0x03) {
+        mode = 0x01;
+    }
+
+    report.arguments[0] = mode;
+
+    return report;
+}
+
+/**
+ * Get LED mode for HyperPolling Wireless Dongle
+ */
+struct razer_report razer_chroma_misc_get_hyperpolling_wireless_dongle_indicator_led_mode(void)
+{
+    struct razer_report report = get_razer_report(0x07, 0x90, 0x01);
+
+    return report;
+}
+
+/**
+ * Set pairing mode for HyperPolling Wireless Dongle (step 1 of pairing)
+ */
+struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(unsigned short pid)
+{
+    struct razer_report report;
+
+    report = get_razer_report(0x00, 0x46, 0x01);
+    report.arguments[0] = 0x01;
+
+    return report;
+}
+
+/**
+ * Pair HyperPolling Wireless Dongle with PID (step 2 of pairing)
+ */
+struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step2(unsigned short pid)
+{
+    struct razer_report report;
+
+    report = get_razer_report(0x00, 0x41, 0x03);
+    report.arguments[0] = 0x01;
+    report.arguments[1] = (pid >> 8) & 0xFF;
+    report.arguments[2] = pid & 0xFF;
+
+    return report;
+}
+
+/**
+ * Set unpairing mode for HyperPolling Wireless Dongle
+ */
+struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(unsigned short pid)
+{
+    struct razer_report report = get_razer_report(0x00, 0x42, 0x02);
+
+    report.arguments[0] = (pid >> 8) & 0xFF;
+    report.arguments[1] = pid & 0xFF;
 
     return report;
 }

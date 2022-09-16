@@ -117,7 +117,7 @@ struct razer_report razer_chroma_misc_get_polling_rate(void);
 struct razer_report razer_chroma_misc_set_polling_rate(unsigned short polling_rate);
 
 struct razer_report razer_chroma_misc_get_polling_rate2(void);
-struct razer_report razer_chroma_misc_set_polling_rate2(unsigned short polling_rate);
+struct razer_report razer_chroma_misc_set_polling_rate2(unsigned short polling_rate, unsigned short argument);
 
 struct razer_report razer_chroma_misc_get_dock_brightness(void);
 struct razer_report razer_chroma_misc_set_dock_brightness(unsigned char brightness);
@@ -150,5 +150,10 @@ struct razer_report razer_chroma_misc_get_scroll_acceleration(void);
 
 struct razer_report razer_chroma_misc_set_scroll_smart_reel(bool smart_reel);
 struct razer_report razer_chroma_misc_get_scroll_smart_reel(void);
+
+struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_indicator_led_mode(unsigned char mode);
+struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(unsigned short pid);
+struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step2(unsigned short pid);
+struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(unsigned short pid);
 
 #endif

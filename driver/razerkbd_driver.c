@@ -2770,7 +2770,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
-        request = razer_chroma_misc_set_polling_rate2(polling_rate);
+        request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x00);
         request.transaction_id.id = 0x1f;
         break;
     }

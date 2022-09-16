@@ -1819,3 +1819,44 @@ class RazerBasiliskV3ProWireless(RazerBasiliskV3ProWired):
     """
 
     USB_PID = 0x00AB
+
+
+class RazerHyperPollingWirelessDongle(__RazerDevice):
+    """
+    Class for the Razer HyperPolling Wireless Dongle
+    """
+
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_HyperPolling_Wireless_Dongle-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00B3
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
+               'set_hyperpolling_wireless_dongle_indicator_led_mode', 'set_hyperpolling_wireless_dongle_pair', 'set_hyperpolling_wireless_dongle_unpair']
+
+    POLL_RATES = [125, 500, 1000, 2000, 4000]
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/6141/6141-1-en-v1.png"  # HyperPolling Wireless Dongle
+
+    # TODO: After pairing, should find a way to use the image of the mouse instead of the dongle
+    # DEVICE_IMAGE_DAV3PRO = "https://dl.razerzone.com/src/6130/6130-1-en-v2.png"  # DeathAdder V3 Pro
+    # DEVICE_IMAGE_VIPERV2PRO = "https://dl.razerzone.com/src/6048-1-en-v10.png"  # Viper V2 Pro
+
+    DPI_MAX = 30000
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer HyperPolling Wireless Dongle')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
