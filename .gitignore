@@ -62,4 +62,6 @@ dist
 /driver/.tmp_versions
 /driver/Module.symvers
 /driver/modules.order
+/driver/*.mod
 /driver/*.mod.c
+/driver/.*.cmd

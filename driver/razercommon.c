@@ -1,12 +1,9 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
 /*
  * Copyright (c) 2015 Tim Theede <pez2001@voyagerproject.de>
  *               2015 Terry Cain <terry@terrys-home.co.uk>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
  */
+
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -49,7 +46,7 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
 
     kfree(buf);
     if(len!=size)
-        printk(KERN_WARNING "razer driver: Device data transfer failed.");
+        printk(KERN_WARNING "razer driver: Device data transfer failed.\n");
 
     return ((len < 0) ? len : ((len != size) ? -EIO : 0));
 }
@@ -230,23 +227,7 @@ int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *dat
 
     kfree(buf);
     if(len!=report_size)
-        printk(KERN_WARNING "razer driver: Device data transfer failed.");
+        printk(KERN_WARNING "razer driver: Device data transfer failed.\n");
 
     return ((len < 0) ? len : ((len != report_size) ? -EIO : 0));
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

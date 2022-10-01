@@ -1,5 +1,5 @@
 ---
-name: ⌨️🖱️New Device Support
+name: ⌨️🖱️ New Device Support
 about: Provide information to add support for a new device
 title: Support for [device name here]
 labels: Device Support
@@ -30,4 +30,4 @@ Please post the output of
 <https://github.com/openrazer/openrazer/wiki/Reverse-Engineering-USB-Protocol>
 
 ### Synapse Screenshots
-<Screenshots of all available options as seen on Razer Synapse>
+<Screenshots of all available options as seen on **Razer Synapse** in a Windows Environment>

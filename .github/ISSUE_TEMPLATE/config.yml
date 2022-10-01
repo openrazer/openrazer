@@ -1,0 +1,13 @@
+blank_issues_enabled: true
+contact_links:
+  - name: ⚠️ Installation not working?
+    url: https://github.com/openrazer/openrazer/wiki/Troubleshooting
+    about: The troubleshooting guide covers most common problems
+
+  - name: 🗨️ Ask the Community Chat on Telegram
+    url: https://t.me/joinchat/AMhHjj9Txhkhn8JM5_LeMg
+    about: OpenRazer General
+
+  - name: 🗨️ Ask the Community Chat on Matrix
+    url: https://matrix.to/#/#openrazer:matrix.org
+    about: Bridged with the Telegram chat

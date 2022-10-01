@@ -22,8 +22,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Set the mouse DPI")
     parser.add_argument('-d', '--device', type=str, help="Device string like \"0003:1532:0045.000C\"")
 
-    parser.add_argument('--dpi_x', required=True, type=int, help="DPI on the X axis (100, 16000)")
-    parser.add_argument('--dpi_y', type=int, help="DPI on the Y axis (if omitted, dpi_x is used), (100, 16000)")
+    parser.add_argument('--dpi_x', required=True, type=int, help="DPI on the X axis (100, 26000)")
+    parser.add_argument('--dpi_y', type=int, help="DPI on the Y axis (if omitted, dpi_x is used), (100, 26000)")
 
     args = parser.parse_args()
     return args
@@ -50,11 +50,11 @@ def run():
         print("Multiple mouse directories found. Rerun with -d", file=sys.stderr)
         sys.exit(1)
 
-    dpi_x = clamp_to_min_max(args.dpi_x, 100, 16000)
+    dpi_x = clamp_to_min_max(args.dpi_x, 100, 26000)
     if args.dpi_y is None:
         byte_string = struct.pack(">H", dpi_x)
     else:
-        dpi_y = clamp_to_min_max(args.dpi_y, 100, 16000)
+        dpi_y = clamp_to_min_max(args.dpi_y, 100, 26000)
         byte_string = struct.pack(">HH", dpi_x, dpi_y)
 
     set_mouse_dpi_filepath = os.path.join(mouse_dir, "dpi")

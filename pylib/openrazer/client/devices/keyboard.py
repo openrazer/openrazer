@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """
 Contains functionality specific to keyboard-like devices
 """
@@ -8,25 +10,6 @@ from openrazer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFac
 
 
 class RazerKeyboard(__RazerDevice):
-    def __init__(self, serial, vid_pid=None, daemon_dbus=None):
-        super(RazerKeyboard, self).__init__(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
-
-        # Capabilities
-        self._capabilities['game_mode_led'] = self._has_feature('razer.device.led.gamemode')
-        self._capabilities['macro_mode_led'] = self._has_feature('razer.device.led.macromode', 'setMacroMode')
-        self._capabilities['macro_mode_led_effect'] = self._has_feature('razer.device.led.macromode', 'setMacroEffect')
-        self._capabilities['macro_mode_modifier'] = self._has_feature('razer.device.macro', 'setModeModifier')
-
-        # Setup base stuff if need be
-        if self.has('game_mode_led'):
-            self._dbus_interfaces['game_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.gamemode")
-
-        if self.has('macro_mode_led'):
-            self._dbus_interfaces['macro_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.macromode")
-
-        if self.has('lighting_profile_led_red') or self.has('lighting_profile_led_green') or self.has('lighting_profile_led_blue'):
-            self._dbus_interfaces['profile_led'] = _dbus.Interface(self._dbus, "razer.device.lighting.profile_led")
-
     @property
     def game_mode_led(self) -> bool:
         """
@@ -106,6 +89,33 @@ class RazerKeyboard(__RazerDevice):
         """
         if self.has('macro_mode_led_effect') and value in (MACRO_LED_STATIC, MACRO_LED_BLINK):
             self._dbus_interfaces['macro_mode_led'].setMacroEffect(value)
+
+    @property
+    def keyswitch_optimization(self) -> bool:
+        """
+        Get keyswitch optimization state
+
+        :return: Keyswitch optimization state
+        :rtype: bool
+        """
+        if self.has('keyswitch_optimization'):
+            return self._dbus_interfaces['keyswitch_optimization'].getKeyswitchOptimization()
+        else:
+            return False
+
+    @keyswitch_optimization.setter
+    def keyswitch_optimization(self, value: bool):
+        """
+        Set keyswitch optimization state
+
+        :param value: Keyswitch optimization state
+        :type value: bool
+        """
+        if self.has('keyswitch_optimization'):
+            if value:
+                self._dbus_interfaces['keyswitch_optimization'].setKeyswitchOptimization(True)
+            else:
+                self._dbus_interfaces['keyswitch_optimization'].setKeyswitchOptimization(False)
 
     @property
     def profile_led_red(self) -> bool:

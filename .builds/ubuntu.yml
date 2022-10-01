@@ -1,0 +1,13 @@
+image: ubuntu/oldlts
+packages:
+  - linux-headers-generic
+sources:
+  - https://github.com/openrazer/openrazer
+tasks:
+  - compile-driver: |
+      cd openrazer
+
+      # Compile the kernel driver
+      echo "ccflags-y := -Wall -Werror" >> driver/Makefile
+      kerneldir=(/lib/modules/*/build)
+      make KERNELDIR="${kerneldir[0]}"

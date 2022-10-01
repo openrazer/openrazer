@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """
 Screensaver class which watches dbus signals to see if screensaver is active
 """
@@ -6,10 +8,11 @@ import dbus
 import dbus.exceptions
 
 DBUS_SCREENSAVER_INTERFACES = (
+    'org.cinnamon.ScreenSaver',
     'org.freedesktop.ScreenSaver',
     'org.gnome.ScreenSaver',
     'org.mate.ScreenSaver',
-    'org.cinnamon.ScreenSaver',
+    'org.xfce.ScreenSaver',
 )
 
 

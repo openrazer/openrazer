@@ -42,15 +42,17 @@ if [ ! -d /sys/bus/hid/drivers/"$DRIVER" ] ; then
 	mesg "Modprobed $DRIVER"
 fi
 
-if [ -d /sys/bus/hid/drivers/hid-generic/"$DEVICE_ID" ] ; then
-	# Unbind from hid
-	mesg "Unbinding $DEVICE_ID from hid-generic"
-	printf '%s' "$DEVICE_ID" > /sys/bus/hid/drivers/hid-generic/unbind
-	mesg "Binding $DEVICE_ID to $DRIVER"
-	printf '%s' "$DEVICE_ID" > /sys/bus/hid/drivers/"$DRIVER"/bind
-	sleep 0.1
-	mesg "Finished binding $DEVICE_ID"
-fi
+for GENERIC_DRIVER in "razer" "hid-generic"; do
+	if [ -d /sys/bus/hid/drivers/"$GENERIC_DRIVER"/"$DEVICE_ID" ] ; then
+		# Unbind from hid
+		mesg "Unbinding $DEVICE_ID from $GENERIC_DRIVER"
+		printf '%s' "$DEVICE_ID" > /sys/bus/hid/drivers/"$GENERIC_DRIVER"/unbind
+		mesg "Binding $DEVICE_ID to $DRIVER"
+		printf '%s' "$DEVICE_ID" > /sys/bus/hid/drivers/"$DRIVER"/bind
+		sleep 0.1
+		mesg "Finished binding $DEVICE_ID"
+	fi
+done
 
 if [ -d /sys/bus/hid/drivers/"$DRIVER"/"$DEVICE_ID" ] ; then
 	mesg "Changing group /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/"

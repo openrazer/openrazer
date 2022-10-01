@@ -1,12 +1,7 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * Copyright (c) 2015 Tim Theede <pez2001@voyagerproject.de>
  *               2015 Terry Cain <terry@terrys-home.co.uk>
- *
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
  */
 
 #ifndef DRIVER_RAZERCOMMON_H_
@@ -14,10 +9,19 @@
 
 #include <linux/usb/input.h>
 
-#define DRIVER_VERSION "2.8.0"
+#define DRIVER_VERSION "3.4.0"
 #define DRIVER_LICENSE "GPL v2"
 #define DRIVER_AUTHOR "Terry Cain <terry@terrys-home.co.uk>"
 
+// Compatbility for fallthrough pseudo keyword for Linux versions older than v5.4
+// See also https://git.kernel.org/torvalds/c/294f69e
+#ifndef fallthrough
+#if __has_attribute(__fallthrough__)
+# define fallthrough                    __attribute__((__fallthrough__))
+#else
+# define fallthrough                    do {} while (0)  /* fallthrough */
+#endif
+#endif
 
 // Macro to create device files
 #define CREATE_DEVICE_FILE(dev, type) \
@@ -42,7 +46,7 @@ do { \
 #define VARSTORE         0x01
 
 // LED definitions
-#define ZERO_LED      0x00
+#define ZERO_LED          0x00
 #define SCROLL_WHEEL_LED  0x01
 #define BATTERY_LED       0x03
 #define LOGO_LED          0x04
@@ -54,6 +58,9 @@ do { \
 #define BLUE_PROFILE_LED  0x0E
 #define RIGHT_SIDE_LED    0x10
 #define LEFT_SIDE_LED     0x11
+#define CHARGING_LED      0x20
+#define FAST_CHARGING_LED 0x21
+#define FULLY_CHARGED_LED 0x22
 
 // LED Effect definitions
 #define LED_STATIC           0x00

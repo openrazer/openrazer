@@ -33,16 +33,17 @@ The *[Startup]* section in the configuration file contains values to be used dur
 *devices_off_on_screensaver* _bool_
 	This flag specifies if the functionality to turn off razer devices when the screensaver is activated is active when the daemon starts.
 
-*mouse_battery_notifier* _bool_
-	This flag specifies that notifications should be shown every ten minutes with the remaining battery level.
+*battery_notifier* _bool_
+	This flag specifies that notifications should be shown regularly with the remaining battery level.
 
-## STATISTICS
+*battery_notifier_freq* _int_
+	This flag specifies how often the notification with the remaining battery level should be shown.
 
-The *[Statistics]* section in the configuration file contains options to control how and when statistics will be collected.
+*battery_notifier_percent* _int_
+	This flag specifies what battery percentage the device should reach before sending notifications.
 
-*key_statistics* _bool_
-	This flag specifies if the daemon is to collect key statistics. Currently this is only collecting the key count per hour per key.
-
+*restore_persistence* _bool_
+	This flag specifies whether effects saved in persistence.conf should be applied when the daemon starts.
 
 # SEE ALSO
 

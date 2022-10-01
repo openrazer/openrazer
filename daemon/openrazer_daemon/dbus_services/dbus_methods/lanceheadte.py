@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 from openrazer_daemon.dbus_services import endpoint
 
 
@@ -5,6 +7,7 @@ from openrazer_daemon.dbus_services import endpoint
 def set_logo_wave(self, direction):
     """
     Set the wave effect on the device
+
     :param direction: (0|1) - down to up, (1|2) up to down
     :type direction: int
     """
@@ -12,6 +15,10 @@ def set_logo_wave(self, direction):
 
     # Notify others
     self.send_effect_event('setWave', direction)
+
+    # remember effect
+    self.set_persistence("logo", "effect", 'wave')
+    self.set_persistence("logo", "wave_dir", int(direction))
 
     driver_path = self.get_driver_path('logo_matrix_effect_wave')
 
@@ -26,6 +33,7 @@ def set_logo_wave(self, direction):
 def set_scroll_wave(self, direction):
     """
     Set the wave effect on the device
+
     :param direction: (0|1) - down to up, (1|2) up to down
     :type direction: int
     """
@@ -33,6 +41,10 @@ def set_scroll_wave(self, direction):
 
     # Notify others
     self.send_effect_event('setWave', direction)
+
+    # remember effect
+    self.set_persistence("scroll", "effect", 'wave')
+    self.set_persistence("scroll", "wave_dir", int(direction))
 
     driver_path = self.get_driver_path('scroll_matrix_effect_wave')
 
@@ -47,23 +59,20 @@ def set_scroll_wave(self, direction):
 def get_left_brightness(self):
     """
     Get the device's brightness
+
     :return: Brightness
     :rtype: float
     """
     self.logger.debug("DBus call get_left_brightness")
 
-    driver_path = self.get_driver_path('left_led_brightness')
-
-    with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
-
-        return brightness
+    return self.zone["left"]["brightness"]
 
 
 @endpoint('razer.device.lighting.left', 'setLeftBrightness', in_sig='d')
 def set_left_brightness(self, brightness):
     """
     Set the device's brightness
+
     :param brightness: Brightness
     :type brightness: int
     """
@@ -73,11 +82,14 @@ def set_left_brightness(self, brightness):
 
     self.method_args['brightness'] = brightness
 
-    brightness = int(round(brightness * (255.0 / 100.0)))
-    if brightness > 255:
-        brightness = 255
+    if brightness > 100:
+        brightness = 100
     elif brightness < 0:
         brightness = 0
+
+    self.set_persistence("left", "brightness", int(brightness))
+
+    brightness = int(round(brightness * (255.0 / 100.0)))
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(brightness))
@@ -90,6 +102,7 @@ def set_left_brightness(self, brightness):
 def set_left_wave(self, direction):
     """
     Set the wave effect on the device
+
     :param direction: (0|1) - down to up, (1|2) up to down
     :type direction: int
     """
@@ -97,6 +110,10 @@ def set_left_wave(self, direction):
 
     # Notify others
     self.send_effect_event('setWave', direction)
+
+    # remember effect
+    self.set_persistence("left", "effect", 'wave')
+    self.set_persistence("left", "wave_dir", int(direction))
 
     driver_path = self.get_driver_path('left_matrix_effect_wave')
 
@@ -126,6 +143,10 @@ def set_left_static(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
+    # remember effect
+    self.set_persistence("left", "effect", 'static')
+    self.zone["left"]["colors"][0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('left_matrix_effect_static')
 
     payload = bytes([red, green, blue])
@@ -144,6 +165,9 @@ def set_left_spectrum(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
+    # remember effect
+    self.set_persistence("left", "effect", 'spectrum')
+
     effect_driver_path = self.get_driver_path('left_matrix_effect_spectrum')
 
     with open(effect_driver_path, 'w') as effect_driver_file:
@@ -159,6 +183,9 @@ def set_left_none(self):
 
     # Notify others
     self.send_effect_event('setNone')
+
+    # remember effect
+    self.set_persistence("left", "effect", 'none')
 
     driver_path = self.get_driver_path('left_matrix_effect_none')
 
@@ -190,8 +217,14 @@ def set_left_reactive(self, red, green, blue, speed):
     # Notify others
     self.send_effect_event('setReactive', red, green, blue, speed)
 
+    # remember effect
+    self.set_persistence("left", "effect", 'reactive')
+    self.zone["left"]["colors"][0:3] = int(red), int(green), int(blue)
+
     if speed not in (1, 2, 3, 4):
         speed = 4
+
+    self.set_persistence("left", "speed", int(speed))
 
     payload = bytes([speed, red, green, blue])
 
@@ -208,6 +241,9 @@ def set_left_breath_random(self):
 
     # Notify others
     self.send_effect_event('setBreathRandom')
+
+    # remember effect
+    self.set_persistence("left", "effect", 'breathRandom')
 
     driver_path = self.get_driver_path('left_matrix_effect_breath')
 
@@ -235,6 +271,10 @@ def set_left_breath_single(self, red, green, blue):
 
     # Notify others
     self.send_effect_event('setBreathSingle', red, green, blue)
+
+    # remember effect
+    self.set_persistence("left", "effect", 'breathSingle')
+    self.zone["left"]["colors"][0:3] = int(red), int(green), int(blue)
 
     driver_path = self.get_driver_path('left_matrix_effect_breath')
 
@@ -272,6 +312,10 @@ def set_left_breath_dual(self, red1, green1, blue1, red2, green2, blue2):
     # Notify others
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
 
+    # remember effect
+    self.set_persistence("left", "effect", 'breathDual')
+    self.zone["left"]["colors"][0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
+
     driver_path = self.get_driver_path('left_matrix_effect_breath')
 
     payload = bytes([red1, green1, blue1, red2, green2, blue2])
@@ -289,18 +333,14 @@ def get_right_brightness(self):
     """
     self.logger.debug("DBus call get_right_brightness")
 
-    driver_path = self.get_driver_path('right_led_brightness')
-
-    with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
-
-        return brightness
+    return self.zone["right"]["brightness"]
 
 
 @endpoint('razer.device.lighting.right', 'setRightBrightness', in_sig='d')
 def set_right_brightness(self, brightness):
     """
     Set the device's brightness
+
     :param brightness: Brightness
     :type brightness: int
     """
@@ -310,11 +350,14 @@ def set_right_brightness(self, brightness):
 
     self.method_args['brightness'] = brightness
 
-    brightness = int(round(brightness * (255.0 / 100.0)))
-    if brightness > 255:
-        brightness = 255
+    if brightness > 100:
+        brightness = 100
     elif brightness < 0:
         brightness = 0
+
+    self.set_persistence("right", "brightness", int(brightness))
+
+    brightness = int(round(brightness * (255.0 / 100.0)))
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(brightness))
@@ -327,6 +370,7 @@ def set_right_brightness(self, brightness):
 def set_right_wave(self, direction):
     """
     Set the wave effect on the device
+
     :param direction: (0|1) - down to up, (1|2) up to down
     :type direction: int
     """
@@ -334,6 +378,10 @@ def set_right_wave(self, direction):
 
     # Notify others
     self.send_effect_event('setWave', direction)
+
+    # remember effect
+    self.set_persistence("right", "effect", 'wave')
+    self.set_persistence("right", "wave_dir", int(direction))
 
     driver_path = self.get_driver_path('right_matrix_effect_wave')
 
@@ -363,6 +411,10 @@ def set_right_static(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
+    # remember effect
+    self.set_persistence("right", "effect", 'static')
+    self.zone["right"]["colors"][0:3] = int(red), int(green), int(blue)
+
     rgb_driver_path = self.get_driver_path('right_matrix_effect_static')
 
     payload = bytes([red, green, blue])
@@ -381,6 +433,9 @@ def set_right_spectrum(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
+    # remember effect
+    self.set_persistence("right", "effect", 'spectrum')
+
     effect_driver_path = self.get_driver_path('right_matrix_effect_spectrum')
 
     with open(effect_driver_path, 'w') as effect_driver_file:
@@ -396,6 +451,9 @@ def set_right_none(self):
 
     # Notify others
     self.send_effect_event('setNone')
+
+    # remember effect
+    self.set_persistence("right", "effect", 'none')
 
     driver_path = self.get_driver_path('right_matrix_effect_none')
 
@@ -427,8 +485,14 @@ def set_right_reactive(self, red, green, blue, speed):
     # Notify others
     self.send_effect_event('setReactive', red, green, blue, speed)
 
+    # remember effect
+    self.set_persistence("right", "effect", 'reactive')
+    self.zone["right"]["colors"][0:3] = int(red), int(green), int(blue)
+
     if speed not in (1, 2, 3, 4):
         speed = 4
+
+    self.set_persistence("right", "speed", int(speed))
 
     payload = bytes([speed, red, green, blue])
 
@@ -445,6 +509,9 @@ def set_right_breath_random(self):
 
     # Notify others
     self.send_effect_event('setBreathRandom')
+
+    # remember effect
+    self.set_persistence("right", "effect", 'breathRandom')
 
     driver_path = self.get_driver_path('right_matrix_effect_breath')
 
@@ -472,6 +539,10 @@ def set_right_breath_single(self, red, green, blue):
 
     # Notify others
     self.send_effect_event('setBreathSingle', red, green, blue)
+
+    # remember effect
+    self.set_persistence("right", "effect", 'breathSingle')
+    self.zone["right"]["colors"][0:3] = int(red), int(green), int(blue)
 
     driver_path = self.get_driver_path('right_matrix_effect_breath')
 
@@ -508,6 +579,10 @@ def set_right_breath_dual(self, red1, green1, blue1, red2, green2, blue2):
 
     # Notify others
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
+
+    # remember effect
+    self.set_persistence("right", "effect", 'breathDual')
+    self.zone["right"]["colors"][0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
 
     driver_path = self.get_driver_path('right_matrix_effect_breath')
 

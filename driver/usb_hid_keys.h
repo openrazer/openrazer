@@ -1,5 +1,8 @@
-// USB HID keycodes
-// http://www.freebsddiary.org/APC/usb_hid_usages.php
+/* SPDX-License-Identifier: GPL-2.0-or-later */
+/*
+ * USB HID keycodes
+ * http://www.freebsddiary.org/APC/usb_hid_usages.php
+ */
 
 #ifndef __USB_HID_KEYS_H
 #define __USB_HID_KEYS_H
@@ -24,5 +27,13 @@
 #define USB_HID_KEY_MEDIA_VOLUMEDOWN 0xEE
 #define USB_HID_KEY_MEDIA_MUTE 0xEF
 #define USB_HID_KEY_MEDIA_SLEEP 0xF8
+
+// https://usb.org/sites/default/files/hut1_22.pdf
+#define USB_HID_USAGE_MEDIA_PLAYPAUSE 0xCD
+#define USB_HID_USAGE_MEDIA_PREVIOUSSONG 0xB6
+#define USB_HID_USAGE_MEDIA_NEXTSONG 0xB5
+#define USB_HID_USAGE_MEDIA_VOLUMEUP 0xE9
+#define USB_HID_USAGE_MEDIA_VOLUMEDOWN 0xEA
+#define USB_HID_USAGE_MEDIA_MUTE 0xE2
 
 #endif // __USB_HID_KEYS_H
