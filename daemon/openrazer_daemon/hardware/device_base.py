@@ -39,7 +39,7 @@ class RazerDevice(DBusService):
 
     WAVE_DIRS = (1, 2)
 
-    ZONES = ('backlight', 'logo', 'scroll', 'left', 'right', 'charging', 'fast_charging', 'fully_charged')
+    ZONES = ('backlight', 'logo', 'scroll', 'left', 'right', 'charging', 'fast_charging', 'fully_charged', 'channel1', 'channel2', 'channel3', 'channel4', 'channel5', 'channel6')
 
     DEVICE_IMAGE = None
 
