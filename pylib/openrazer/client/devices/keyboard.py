@@ -189,6 +189,40 @@ class RazerKeyboard(__RazerDevice):
         if self.has('lighting_profile_led_blue'):
             self._dbus_interfaces['profile_led'].setBlueLED(enable)
 
+    @property
+    def lighting_pulsate(self) -> bool:
+        """
+        Get pulsate
+
+        :return: Pulsate
+        :rtype: bool
+        """
+        if self.has('lighting_pulsate'):
+            return self._dbus_interfaces['lighting_pulsate'].getPulsate()
+        else:
+            return False
+
+    @lighting_pulsate.setter
+    def lighting_pulsate(self, value: bool):
+        """
+        Set pulsate
+
+        :param value: Status of pulsate lighting
+        :type value: bool
+        """
+        if self.has('lighting_pulsate'):
+            self._dbus_interfaces['lighting_pulsate'].setPulsate(value)
+
+    def lighting_static(self, value: bool):
+        """
+        Set static
+
+        :param value: Status of static lighting
+        :type value: bool
+        """
+        if self.has('lighting_pulsate'):
+            self._dbus_interfaces['lighting_pulsate'].setStatic(value)
+
 
 DEVICE_PID_MAP = {
 

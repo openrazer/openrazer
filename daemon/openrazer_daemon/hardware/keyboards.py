@@ -117,7 +117,7 @@ class RazerTartarus(_RazerDeviceBrightnessSuspend):
     USB_PID = 0x0201
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_device_type_keypad',
-               'set_static_effect', 'bw_set_pulsate', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
+               'set_static_effect', 'bw_set_pulsate', 'bw_get_pulsate', 'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green',
                'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue', 'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/228/228_tartarus.png"
@@ -224,7 +224,7 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
                'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green', 'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
                'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier',
 
-               'bw_set_pulsate', 'bw_set_static']
+               'bw_set_pulsate', 'bw_get_pulsate', 'bw_set_static',]
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/56/56_orbweaver.png"
 
@@ -294,7 +294,7 @@ class RazerBlackWidowUltimate2012(_MacroKeyboard):
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
+               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_get_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/563/563_blackwidow_ultimate_classic.png"
 
@@ -310,7 +310,7 @@ class RazerBlackWidowStealth(_MacroKeyboard):
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
+               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_get_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-01.png"
 
@@ -326,7 +326,7 @@ class RazerBlackWidowStealthEdition(_MacroKeyboard):
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
+               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_get_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/17559/razer-blackwidow-gallery-01.png"
 
@@ -342,7 +342,7 @@ class RazerBlackWidowUltimate2013(_MacroKeyboard):
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
+               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_get_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/245/438_blackwidow_ultimate_2014.png"
 
@@ -356,7 +356,7 @@ class RazerBlackWidowTournamentEdition2014(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x011C
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
+               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_get_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/17564/razer-blackwidow-te-stealth-hero-01.png"
 
@@ -1082,7 +1082,7 @@ class RazerDeathStalkerExpert(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0202
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
+               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_get_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/49/49_razer_deathstalker.png"
 

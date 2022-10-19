@@ -235,6 +235,8 @@ class RazerDevice(object):
             self._dbus_interfaces['profile_led'] = _dbus.Interface(self._dbus, "razer.device.lighting.profile_led")
         if self.has('scroll_mode') or self.has('scroll_acceleration') or self.has('scroll_smart_reel'):
             self._dbus_interfaces['scroll'] = _dbus.Interface(self._dbus, "razer.device.scroll")
+        if self.has('lighting_pulsate'):
+            self._dbus_interfaces['lighting_pulsate'] = _dbus.Interface(self._dbus, "razer.device.lighting.bw2013")
 
     def _get_available_features(self):
         introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')
