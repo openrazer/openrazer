@@ -224,7 +224,7 @@ class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
                'keypad_get_profile_led_red', 'keypad_set_profile_led_red', 'keypad_get_profile_led_green', 'keypad_set_profile_led_green', 'keypad_get_profile_led_blue', 'keypad_set_profile_led_blue',
                'get_macros', 'delete_macro', 'add_macro', 'keypad_get_mode_modifier', 'keypad_set_mode_modifier',
 
-               'bw_set_pulsate', 'bw_get_pulsate', 'bw_set_static',]
+               'bw_set_pulsate', 'bw_get_pulsate', 'bw_set_static', ]
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/56/56_orbweaver.png"
 

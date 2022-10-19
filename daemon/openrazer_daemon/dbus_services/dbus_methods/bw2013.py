@@ -5,6 +5,7 @@ BlackWidow Ultimate 2013 effects
 """
 from openrazer_daemon.dbus_services import endpoint
 
+
 @endpoint('razer.device.lighting.bw2013', 'getPulsate', out_sig='b')
 def bw_get_pulsate(self):
     """
