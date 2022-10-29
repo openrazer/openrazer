@@ -733,6 +733,7 @@ class RazerOrnataV2(_RippleKeyboard):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1672/ornata-v2.png"
 
+
 class RazerOrnataV3(_RippleKeyboard):
     """
     Class for the Razer Ornata V3
