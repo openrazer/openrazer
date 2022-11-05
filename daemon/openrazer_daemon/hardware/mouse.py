@@ -3026,7 +3026,7 @@ class RazerDeathAdderV2XHyperSpeed(__RazerDevice):
     EVENT_FILE_REGEX = re.compile(r'.*Razer_DeathAdder_V2_X_HyperSpeed_000000000000-if0(1|2)-event-kbd')
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
                'get_poll_rate', 'set_poll_rate',
-               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time']
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
 
     USB_VID = 0x1532
     USB_PID = 0x009C
@@ -3067,7 +3067,7 @@ class RazerViperV2ProWired(__RazerDevice):
     USB_PID = 0x00A5
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
                'get_poll_rate', 'set_poll_rate',
-               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time']
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6048-1-en-v10.png"
 
