@@ -106,7 +106,7 @@ def test_sysfs_consistency(d):
         check_sysfs("keyboard_layout", "kbd_layout")
 
     # Devices with a matrix defined should have a suitable "custom" sysfs. Krakens are a special case.
-    if d._matrix_dimensions != (-1, -1):
+    if d._matrix_dimensions != (-1, -1) and d.name.find("Kraken") == -1:
         check_sysfs("lighting_led_matrix", "matrix_custom_frame")
         check_sysfs("lighting_led_matrix", "matrix_effect_custom")
 
@@ -136,9 +136,17 @@ def test_sysfs_consistency(d):
         check_sysfs(f"lighting_{prefix}_breath_single", f"{prefix}_matrix_effect_breath")
 
 
+def test_ripple_capable(d):
+    # Check that the device has a matrix for a software ripple effect
+    if d.has("lighting_ripple") or d.has("lighting_ripple_random"):
+        if d._matrix_dimensions == (-1, -1):
+            _test_failed(d.name, "Cannot have a ripple capability without a matrix")
+
+
 for d in devmgr.devices:
     test_sanity_check_matrix_capabilities(d)
     test_sysfs_consistency(d)
+    test_ripple_capable(d)
 test_wired_wireless_naming()
 
 if not passed:
