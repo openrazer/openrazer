@@ -1409,7 +1409,7 @@ class RazerBladeEarly2020Base(_RippleKeyboard):
     USB_PID = 0x0255
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
-               'set_breath_dual_effect', 'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_breath_dual_effect']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-15/blade-15-base-model-spec-image-v2.png"
 
@@ -1634,7 +1634,7 @@ class RazerBladeEarly2021Base(_RippleKeyboard):
     USB_PID = 0x026F
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
-               'set_breath_dual_effect', 'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_breath_dual_effect']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1756/blade-15-base-2021-rz09-0369x.png"
 
