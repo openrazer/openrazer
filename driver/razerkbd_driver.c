@@ -228,6 +228,7 @@ static bool is_blade_laptop(struct usb_device *usb_dev)
     case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
     case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
     case USB_DEVICE_ID_RAZER_BLADE_15_BASE_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
     case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
     case USB_DEVICE_ID_RAZER_BLADE_14_2021:
     case USB_DEVICE_ID_RAZER_BLADE_17_2022:
@@ -825,6 +826,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     case USB_DEVICE_ID_RAZER_BLADE_15_BASE_EARLY_2021:
         device_type = "Razer Blade 15 Base (Early 2021)\n";
+        break;
+
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+        device_type = "Razer Blade 17 Pro (Early 2021)\n";
         break;
 
     case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
@@ -1646,6 +1651,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
     case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
     case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
     case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
     case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
     case USB_DEVICE_ID_RAZER_BLADE_15_BASE_EARLY_2021:
@@ -1854,6 +1860,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
         break;
 
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
         if(count == 7) {
             report = razer_chroma_standard_matrix_effect_starlight_dual(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
             razer_send_payload(usb_dev, &report);
@@ -2556,6 +2563,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+        case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
         case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
         case USB_DEVICE_ID_RAZER_BLADE_14_2021:
@@ -3490,6 +3498,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+        case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
         case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
         case USB_DEVICE_ID_RAZER_BLADE_14_2021:
@@ -3883,6 +3892,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+        case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
         case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
         case USB_DEVICE_ID_RAZER_BLADE_14_2021:
@@ -4013,6 +4023,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_15_BASE_EARLY_2021) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_14_2021) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_V3) },

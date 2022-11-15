@@ -82,6 +82,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Huntsman V2 TKL                         |  1532:026B  |
 | Razer Huntsman V2                             |  1532:026C  |
 | Razer Blade 15 Advanced (Early 2021)          |  1532:026D  |
+| Razer Blade 17 Pro (Early 2021)               |  1532:026E  |
 | Razer Blade 15 Base (Early 2021)              |  1532:026F  |
 | Razer Blade 14 (2021)                         |  1532:0270  |
 | Razer BlackWidow V3 Mini Hyperspeed (Wireless)|  1532:0271  |
