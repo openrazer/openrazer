@@ -91,6 +91,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Huntsman Mini Analog                    |  1532:0282  |
 | Razer Blade 15 Advanced (Early 2022)          |  1532:028A  |
 | Razer Blade 17 (2022)                         |  1532:028B  |
+| Razer DeathStalker V2                         |  1532:0295  |
 | Razer BlackWidow V3 Tenkeyless                |  1532:0A24  |
 
 ### Mice
