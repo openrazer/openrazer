@@ -167,11 +167,13 @@ struct razer_report get_empty_razer_report(void)
  */
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message)
 {
-    printk(KERN_WARNING "%s: %s. Start Marker: %02x id: %02x Num Params: %02x Reserved: %02x Command: %02x Params: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x .\n",
+    printk(KERN_WARNING "%s: %s. status: %02x transaction_id.id: %02x remaining_packets: %02x protocol_type: %02x data_size: %02x, command_class: %02x, command_id.id: %02x Params: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x .\n",
            driver_name,
            message,
            report->status,
            report->transaction_id.id,
+           report->remaining_packets,
+           report->protocol_type,
            report->data_size,
            report->command_class,
            report->command_id.id,

@@ -27,7 +27,7 @@ class RazerViperMini(__RazerDeviceSpecialBrightnessSuspend):
     USB_PID = 0x008A
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 1]
-    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
                # Underglow/Logo use LOGO_LED
                'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
                'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
@@ -75,7 +75,7 @@ class RazerLanceheadWirelessWired(__RazerDeviceSpecialBrightnessSuspend):
     HAS_MATRIX = True
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [1, 16]
-    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                'get_left_brightness', 'set_left_brightness', 'get_right_brightness', 'set_right_brightness',
                # Battery
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
@@ -162,7 +162,7 @@ class RazerLanceheadWired(__RazerDeviceSpecialBrightnessSuspend):
     HAS_MATRIX = True
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [1, 16]
-    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                'get_left_brightness', 'set_left_brightness', 'get_right_brightness', 'set_right_brightness',
                # Battery
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
@@ -385,7 +385,7 @@ class RazerLanceheadTE(__RazerDeviceSpecialBrightnessSuspend):
     HAS_MATRIX = True
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [1, 16]
-    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                'get_left_brightness', 'set_left_brightness', 'get_right_brightness', 'set_right_brightness',
                # Logo
                'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
@@ -611,7 +611,9 @@ class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x0048
     METHODS = ['get_device_type_mouse',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
-               'set_breath_single_effect', 'set_breath_dual_effect', 'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'set_scroll_active', 'get_scroll_active']
+               'set_breath_single_effect', 'set_breath_dual_effect', 'set_idle_time', 'set_low_battery_threshold',
+               'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'set_scroll_active', 'get_scroll_active',
+               'get_poll_rate', 'set_poll_rate']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/612/612_orochi_2015.png"
 
@@ -1663,8 +1665,8 @@ class RazerDeathAdder3500(__RazerDeviceSpecialBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x0054
     METHODS = ['get_device_type_mouse',
-               'get_logo_brightness', 'set_logo_brightness', 'set_logo_static', 'set_logo_pulsate', 'set_logo_blinking',
-               'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_pulsate', 'set_scroll_blinking',
+               'get_logo_brightness', 'set_logo_brightness', 'set_logo_active', 'get_logo_active', 'set_logo_static', 'set_logo_pulsate', 'set_logo_blinking',
+               'get_scroll_brightness', 'set_scroll_active', 'get_scroll_active', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_pulsate', 'set_scroll_blinking',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/561/561_deathadder_classic.png"
@@ -1720,7 +1722,7 @@ class RazerViperUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
     USB_PID = 0x007A
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 1]
-    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
                # Battery
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
@@ -1795,7 +1797,7 @@ class RazerViper(__RazerDeviceSpecialBrightnessSuspend):
     USB_PID = 0x0078
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 1]
-    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
                # Logo
                'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
                'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
@@ -2053,7 +2055,7 @@ class RazerNagaLeftHanded2020(__RazerDeviceSpecialBrightnessSuspend):
         self.disable_notify = False
 
 
-class RazerNagaProWired(__RazerDeviceSpecialBrightnessSuspend):
+class RazerNagaProWired(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Naga Pro (Wired)
     """
@@ -2319,7 +2321,7 @@ class RazerBasiliskUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
                'set_scroll_reactive_naga_hex_v2',
                # Breath
                'set_scroll_breath_random_naga_hex_v2',
-               'set_scroll_breath_random_naga_hex_v2',
+               'set_scroll_breath_single_naga_hex_v2',
                'set_scroll_breath_dual_naga_hex_v2',
                # Static
                'set_scroll_static_naga_hex_v2',
@@ -2530,6 +2532,8 @@ class RazerDeathAdderV2(__RazerDeviceSpecialBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x0084
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1612/1612_razerdeathadderv2.png"
 
     DPI_MAX = 20000
@@ -2574,7 +2578,7 @@ class RazerDeathAdderV2ProWired(__RazerDeviceSpecialBrightnessSuspend):
     USB_PID = 0x007C
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 1]
-    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
                # Battery
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
@@ -2767,6 +2771,63 @@ class RazerOrochiV2Bluetooth(RazerOrochiV2Receiver):
     USB_PID = 0x0095
 
 
+class RazerNagaX(__RazerDeviceSpecialBrightnessSuspend):
+    """
+    Class for the Razer Naga X
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0096
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [1, 2]
+
+    DEDICATED_MACRO_KEYS = True
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               # Macros
+               'get_macros', 'delete_macro', 'add_macro',
+               # Scroll wheel
+               'get_scroll_brightness', 'set_scroll_brightness',
+               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               # Left side = thumbgrid
+               'get_left_brightness', 'set_left_brightness',
+               'set_left_wave', 'set_left_static', 'set_left_spectrum', 'set_left_none', 'set_left_reactive', 'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
+               # Custom frame
+               'set_custom_effect', 'set_key_row']
+
+    DPI_MAX = 18000
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/3993-1-EN-V2.png"
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = (_da_get_scroll_brightness(self), _get_left_brightness(self))
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_scroll_brightness(self, 0)
+        _set_left_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+        Get the last known brightness and then set the brightness
+        """
+        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[0]
+        left_row_brightness = self.suspend_args.get('brightness', (100, 100))[1]
+
+        self.disable_notify = True
+        _da_set_scroll_brightness(self, scroll_brightness)
+        _set_left_brightness(self, left_row_brightness)
+        self.disable_notify = False
+
+
 class RazerDeathAdderV2Mini(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer DeathAdder V2 Mini
@@ -2784,6 +2845,8 @@ class RazerDeathAdderV2Mini(__RazerDeviceSpecialBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x008C
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1692/deathadder-v2-mini.png"
 
     DPI_MAX = 8500
@@ -2862,7 +2925,7 @@ class RazerViper8KHz(__RazerDevice):
         self.disable_notify = False
 
 
-class RazerNagaEpicChromaWired(__RazerDeviceBrightnessSuspend):
+class RazerNagaEpicChromaWired(__RazerDeviceSpecialBrightnessSuspend):
     """
     Class for the Razer Naga Epic Chroma (Wired)
     """
@@ -2963,7 +3026,7 @@ class RazerDeathAdderV2XHyperSpeed(__RazerDevice):
     EVENT_FILE_REGEX = re.compile(r'.*Razer_DeathAdder_V2_X_HyperSpeed_000000000000-if0(1|2)-event-kbd')
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
                'get_poll_rate', 'set_poll_rate',
-               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time']
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
 
     USB_VID = 0x1532
     USB_PID = 0x009C
@@ -3004,7 +3067,7 @@ class RazerViperV2ProWired(__RazerDevice):
     USB_PID = 0x00A5
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
                'get_poll_rate', 'set_poll_rate',
-               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time']
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6048-1-en-v10.png"
 
@@ -3039,3 +3102,50 @@ class RazerViperV2ProWireless(RazerViperV2ProWired):
     """
 
     USB_PID = 0x00A6
+
+
+class RazerDeathAdderV3ProWired(__RazerDevice):
+    """
+    Class for the Razer DeathAdder V3 Pro (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_DeathAdder_V3_Pro_000000000000-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00B6
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/6130/6130-1-en-v2.png"
+
+    DPI_MAX = 30000
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer DeathAdder V3 Pro')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
+
+    def _resume_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+    def _suspend_device(self):
+        self.logger.debug("Device doesn't have suspend/resume")
+
+
+class RazerDeathAdderV3ProWireless(RazerDeathAdderV3ProWired):
+    """
+    Class for the Razer DeathAdder V3 Pro (Wireless)
+    """
+
+    USB_PID = 0x00B7

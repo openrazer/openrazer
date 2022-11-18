@@ -119,7 +119,7 @@ byte_dpi_devices=(
 
 
 get_attr_from_create_device_file() {
-    sed -n 's/[[:space:]]\+CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_\([[:lower:]_]\+\));.*/\1/p'
+    sed -n 's/[[:space:]]\+CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_\([[:lower:][:digit:]_]\+\));.*/\1/p'
 }
 
 driver=$1

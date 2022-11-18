@@ -24,6 +24,15 @@ Please post the output of
     ls -lah /dev/input/by-id/
 ```
 
+<details>
+
+```
+Please post the output of
+    usbhid-dump -m 1532 -ed
+```
+
+</details>
+
 ### Packet Captures
 
 <Please see here as we probably need packet captures>

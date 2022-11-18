@@ -13,11 +13,14 @@ jobs:
       pull-requests: write
 
     steps:
-    - uses: actions/stale@v3
+    - uses: actions/stale@v5.1.1
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
         days-before-issue-stale: 120
         days-before-issue-close: 30
+        days-before-pr-stale: -1
+        days-before-pr-close: -1
         stale-issue-label: 'wontfix'
         exempt-issue-labels: 'Device Support,not stale'
+        close-issue-reason: 'not_planned'
