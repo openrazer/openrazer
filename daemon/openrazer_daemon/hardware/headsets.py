@@ -23,33 +23,15 @@ class RazerKraken71(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/229/229_kraken_71.png"
 
     def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
         self.suspend_args.clear()
-
         self.suspend_args['effect'] = self.zone["backlight"]["effect"]
 
-        self.disable_notify = True
         _dbus_chroma.set_none_effect(self)
-        self.disable_notify = False
 
     def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-
         effect = self.suspend_args.get('effect', '')
-
-        self.disable_notify = True
         if effect == 'static':  # Static on classic is only 1 colour
             _dbus_chroma.set_static_effect(self, 0x00, 0x00, 0x00)
-
-        self.disable_notify = False
 
 
 class RazerKraken71Alternate(RazerKraken71):
@@ -74,39 +56,22 @@ class RazerKraken71Chroma(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/280/280_kraken_71_chroma.png"
 
     def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
         self.suspend_args.clear()
-
         self.suspend_args['effect'] = self.zone["backlight"]["effect"]
         self.suspend_args['args'] = self.zone["backlight"]["colors"][0:3]
 
-        self.disable_notify = True
         _dbus_chroma.set_none_effect(self)
-        self.disable_notify = False
 
     def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-
         effect = self.suspend_args.get('effect', '')
         args = self.suspend_args.get('args', [])
 
-        self.disable_notify = True
         if effect == 'spectrum':
             _dbus_chroma.set_spectrum_effect(self)
         elif effect == 'static':
             _dbus_chroma.set_static_effect(self, *args)
         elif effect == 'breathSingle':
             _dbus_chroma.set_breath_single_effect(self, *args)
-
-        self.disable_notify = False
 
 
 class RazerKraken71V2(__RazerDevice):
@@ -124,13 +89,7 @@ class RazerKraken71V2(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/729/729_kraken_71_v2.png"
 
     def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
         self.suspend_args.clear()
-
         self.suspend_args['effect'] = self.zone["backlight"]["effect"]
         if self.suspend_args['effect'] == "breathDual":
             self.suspend_args['args'] = self.zone["backlight"]["colors"][0:6]
@@ -139,21 +98,12 @@ class RazerKraken71V2(__RazerDevice):
         else:
             self.suspend_args['args'] = self.zone["backlight"]["colors"][0:3]
 
-        self.disable_notify = True
         _dbus_chroma.set_none_effect(self)
-        self.disable_notify = False
 
     def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-
         effect = self.suspend_args.get('effect', '')
         args = self.suspend_args.get('args', [])
 
-        self.disable_notify = True
         if effect == 'spectrum':
             _dbus_chroma.set_spectrum_effect(self)
         elif effect == 'static':
@@ -164,8 +114,6 @@ class RazerKraken71V2(__RazerDevice):
             _dbus_chroma.set_breath_dual_effect(self, *args)
         elif effect == 'breathTriple':
             _dbus_chroma.set_breath_triple_effect(self, *args)
-
-        self.disable_notify = False
 
 
 class RazerKrakenUltimate(__RazerDevice):
@@ -184,13 +132,7 @@ class RazerKrakenUltimate(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1603/rzr_kraken_ultimate_render01_2019_resized.png"
 
     def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
         self.suspend_args.clear()
-
         self.suspend_args['effect'] = self.zone["backlight"]["effect"]
         if self.suspend_args['effect'] == "breathDual":
             self.suspend_args['args'] = self.zone["backlight"]["colors"][0:6]
@@ -199,21 +141,12 @@ class RazerKrakenUltimate(__RazerDevice):
         else:
             self.suspend_args['args'] = self.zone["backlight"]["colors"][0:3]
 
-        self.disable_notify = True
         _dbus_chroma.set_none_effect(self)
-        self.disable_notify = False
 
     def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-
         effect = self.suspend_args.get('effect', '')
         args = self.suspend_args.get('args', [])
 
-        self.disable_notify = True
         if effect == 'spectrum':
             _dbus_chroma.set_spectrum_effect(self)
         elif effect == 'static':
@@ -224,8 +157,6 @@ class RazerKrakenUltimate(__RazerDevice):
             _dbus_chroma.set_breath_dual_effect(self, *args)
         elif effect == 'breathTriple':
             _dbus_chroma.set_breath_triple_effect(self, *args)
-
-        self.disable_notify = False
 
 
 class RazerKrakenKittyEdition(__RazerDeviceBrightnessSuspend):

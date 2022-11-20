@@ -1042,6 +1042,7 @@ class RazerDevice(DBusService):
         self.disable_persistence = True
 
         self.disable_brightness()
+        self._suspend_device()
 
         self.disable_notify = False
         self.disable_persistence = False
@@ -1055,21 +1056,20 @@ class RazerDevice(DBusService):
         self.disable_persistence = True
 
         self.restore_brightness()
+        self._resume_device()
 
         self.disable_notify = False
         self.disable_persistence = False
 
     def _suspend_device(self):
         """
-        Suspend device
+        Override to implement custom suspend behavior
         """
-        raise NotImplementedError()
 
     def _resume_device(self):
         """
-        Resume device
+        Override to implement custom resume behavior
         """
-        raise NotImplementedError()
 
     def _close(self):
         """
