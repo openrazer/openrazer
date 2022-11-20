@@ -368,6 +368,28 @@ class RazerDevice(DBusService):
                 if bright_func is not None:
                     bright_func(self.zone[i]["brightness"])
 
+    def disable_brightness(self):
+        """
+        Set brightness to 0 and/or active state to false.
+        """
+        for i in self.ZONES:
+            if self.zone[i]["present"]:
+                # set active state
+                if 'set_' + i + '_active' in self.METHODS:
+                    active_func = getattr(self, "set" + self.capitalize_first_char(i) + "Active", None)
+                    if active_func is not None:
+                        active_func(False)
+
+                # set brightness level
+                bright_func = None
+                if i == "backlight":
+                    bright_func = getattr(self, "setBrightness", None)
+                elif 'set_' + i + '_brightness' in self.METHODS:
+                    bright_func = getattr(self, "set" + self.capitalize_first_char(i) + "Brightness", None)
+
+                if bright_func is not None:
+                    bright_func(0)
+
     def restore_effect(self):
         """
         Set the device to the current effect
