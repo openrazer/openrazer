@@ -242,14 +242,6 @@ class RazerDevice(DBusService):
                 except KeyError:
                     pass
 
-        dpi_func = getattr(self, "setDPI", None)
-        if dpi_func is not None:
-            dpi_func(self.dpi[0], self.dpi[1])
-
-        poll_rate_func = getattr(self, "setPollRate", None)
-        if poll_rate_func is not None:
-            poll_rate_func(self.poll_rate)
-
         # load last effects
         for i in self.ZONES:
             if self.zone[i]["present"]:
@@ -309,6 +301,7 @@ class RazerDevice(DBusService):
                     except KeyError:
                         pass
 
+        self.restore_dpi_poll_rate()
         self.restore_brightness()
 
         if self.config.getboolean('Startup', "restore_persistence") is True:
@@ -337,6 +330,18 @@ class RazerDevice(DBusService):
         :rtype: bool
         """
         return self.DEDICATED_MACRO_KEYS
+
+    def restore_dpi_poll_rate(self):
+        """
+        Set the device DPI & poll rate to the saved value
+        """
+        dpi_func = getattr(self, "setDPI", None)
+        if dpi_func is not None:
+            dpi_func(self.dpi[0], self.dpi[1])
+
+        poll_rate_func = getattr(self, "setPollRate", None)
+        if poll_rate_func is not None:
+            poll_rate_func(self.poll_rate)
 
     def restore_brightness(self):
         """
