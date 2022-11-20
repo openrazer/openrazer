@@ -22,17 +22,6 @@ class RazerKraken71(__RazerDevice):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/229/229_kraken_71.png"
 
-    @staticmethod
-    def decode_bitfield(bitfield):
-        return {
-            'state': (bitfield & 0x01) == 0x01,
-            'breathing1': (bitfield & 0x02) == 0x02,
-            'spectrum': (bitfield & 0x04) == 0x04,
-            'sync': (bitfield & 0x08) == 0x08,
-            'breathing2': (bitfield & 0x10) == 0x10,
-            'breathing3': (bitfield & 0x20) == 0x20,
-        }
-
     def _suspend_device(self):
         """
         Suspend the device
@@ -84,17 +73,6 @@ class RazerKraken71Chroma(__RazerDevice):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/280/280_kraken_71_chroma.png"
 
-    @staticmethod
-    def decode_bitfield(bitfield):
-        return {
-            'state': (bitfield & 0x01) == 0x01,
-            'breathing1': (bitfield & 0x02) == 0x02,
-            'spectrum': (bitfield & 0x04) == 0x04,
-            'sync': (bitfield & 0x08) == 0x08,
-            'breathing2': (bitfield & 0x10) == 0x10,
-            'breathing3': (bitfield & 0x20) == 0x20,
-        }
-
     def _suspend_device(self):
         """
         Suspend the device
@@ -144,17 +122,6 @@ class RazerKraken71V2(__RazerDevice):
                'set_custom_kraken']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/729/729_kraken_71_v2.png"
-
-    @staticmethod
-    def decode_bitfield(bitfield):
-        return {
-            'state': (bitfield & 0x01) == 0x01,
-            'breathing1': (bitfield & 0x02) == 0x02,
-            'spectrum': (bitfield & 0x04) == 0x04,
-            'sync': (bitfield & 0x08) == 0x08,
-            'breathing2': (bitfield & 0x10) == 0x10,
-            'breathing3': (bitfield & 0x20) == 0x20,
-        }
 
     def _suspend_device(self):
         """
@@ -215,17 +182,6 @@ class RazerKrakenUltimate(__RazerDevice):
                'set_custom_kraken']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1603/rzr_kraken_ultimate_render01_2019_resized.png"
-
-    @staticmethod
-    def decode_bitfield(bitfield):
-        return {
-            'state': (bitfield & 0x01) == 0x01,
-            'breathing1': (bitfield & 0x02) == 0x02,
-            'spectrum': (bitfield & 0x04) == 0x04,
-            'sync': (bitfield & 0x08) == 0x08,
-            'breathing2': (bitfield & 0x10) == 0x10,
-            'breathing3': (bitfield & 0x20) == 0x20,
-        }
 
     def _suspend_device(self):
         """
