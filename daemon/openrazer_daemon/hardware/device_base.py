@@ -451,6 +451,8 @@ class RazerDevice(DBusService):
         :param value: Value
         :type value: string
         """
+        self.logger.debug("Set persistence (%s, %s, %s)", zone, key, value)
+
         self.persistence.status["changed"] = True
 
         if zone:
