@@ -1038,14 +1038,26 @@ class RazerDevice(DBusService):
         Suspend device
         """
         self.logger.info("Suspending %s", self.__class__.__name__)
-        self._suspend_device()
+        self.disable_notify = True
+        self.disable_persistence = True
+
+        self.disable_brightness()
+
+        self.disable_notify = False
+        self.disable_persistence = False
 
     def resume_device(self):
         """
         Resume device
         """
         self.logger.info("Resuming %s", self.__class__.__name__)
-        self._resume_device()
+        self.disable_notify = True
+        self.disable_persistence = True
+
+        self.restore_brightness()
+
+        self.disable_notify = False
+        self.disable_persistence = False
 
     def _suspend_device(self):
         """
