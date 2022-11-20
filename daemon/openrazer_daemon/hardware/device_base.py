@@ -1212,32 +1212,6 @@ class RazerDeviceSpecialBrightnessSuspend(RazerDevice):
     Suspend functions
     """
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = openrazer_daemon.dbus_services.dbus_methods.get_brightness(self)
-
-        # Todo make it context?
-        self.disable_notify = True
-        openrazer_daemon.dbus_services.dbus_methods.set_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        openrazer_daemon.dbus_services.dbus_methods.set_brightness(self, brightness)
-        self.disable_notify = False
-
 
 class RazerDeviceBrightnessSuspend(RazerDeviceSpecialBrightnessSuspend):
     """

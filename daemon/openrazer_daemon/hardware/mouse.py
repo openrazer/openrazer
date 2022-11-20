@@ -38,31 +38,6 @@ class RazerViperMini(__RazerDeviceSpecialBrightnessSuspend):
 
     DPI_MAX = 8500
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        self.disable_notify = False
-
 
 class RazerLanceheadWirelessWired(__RazerDeviceSpecialBrightnessSuspend):
     """
@@ -93,38 +68,6 @@ class RazerLanceheadWirelessWired(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1205/1205_lancehead.png"
 
     DPI_MAX = 16000
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self), _get_left_brightness(self), _get_right_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        _set_left_brightness(self, 0)
-        _set_right_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[1]
-        left_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[2]
-        right_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[3]
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        _set_left_brightness(self, left_row_brightness)
-        _set_right_brightness(self, right_row_brightness)
-        self.disable_notify = False
 
 
 class RazerLanceheadWirelessReceiver(RazerLanceheadWirelessWired):
@@ -181,38 +124,6 @@ class RazerLanceheadWired(__RazerDeviceSpecialBrightnessSuspend):
 
     DPI_MAX = 16000
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self), _get_left_brightness(self), _get_right_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        _set_left_brightness(self, 0)
-        _set_right_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[1]
-        left_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[2]
-        right_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[3]
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        _set_left_brightness(self, left_row_brightness)
-        _set_right_brightness(self, right_row_brightness)
-        self.disable_notify = False
-
 
 class RazerLanceheadWireless(RazerLanceheadWired):
     """
@@ -259,32 +170,6 @@ class RazerDeathAdderEssentialWhiteEdition(__RazerDeviceSpecialBrightnessSuspend
 
     DPI_MAX = 6400
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
-
 
 class RazerAbyssusEliteDVaEdition(__RazerDeviceSpecialBrightnessSuspend):
     """
@@ -305,31 +190,6 @@ class RazerAbyssusEliteDVaEdition(__RazerDeviceSpecialBrightnessSuspend):
 
     DPI_MAX = 7200
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        self.disable_notify = False
-
 
 class RazerAbyssusEssential(__RazerDeviceSpecialBrightnessSuspend):
     """
@@ -349,29 +209,6 @@ class RazerAbyssusEssential(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1290/1290_abyssusessential.png"
 
     DPI_MAX = 7200
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        self.disable_notify = False
 
 
 class RazerLanceheadTE(__RazerDeviceSpecialBrightnessSuspend):
@@ -401,38 +238,6 @@ class RazerLanceheadTE(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1203/1206_lanceheadte.png"
 
     DPI_MAX = 16000
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self), _get_left_brightness(self), _get_right_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        _set_left_brightness(self, 0)
-        _set_right_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[1]
-        left_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[2]
-        right_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[3]
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        _set_left_brightness(self, left_row_brightness)
-        _set_right_brightness(self, right_row_brightness)
-        self.disable_notify = False
 
 
 class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
@@ -515,12 +320,6 @@ class RazerAbyssus(__RazerDevice):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/274/abyssus2014_500x500.png"
 
-    def _resume_device(self):
-        self.logger.debug("Abyssus doesn't have suspend/resume")
-
-    def _suspend_device(self):
-        self.logger.debug("Abyssus doesn't have suspend/resume")
-
 
 class RazerImperator(__RazerDevice):
     """
@@ -534,12 +333,6 @@ class RazerImperator(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/215/215_imperator.png"
 
     DPI_MAX = 6400
-
-    def _resume_device(self):
-        self.logger.debug("Imperator doesn't have suspend/resume")
-
-    def _suspend_device(self):
-        self.logger.debug("Imperator doesn't have suspend/resume")
 
 
 class RazerOuroboros(__RazerDevice):
@@ -556,32 +349,6 @@ class RazerOuroboros(__RazerDevice):
 
     DPI_MAX = 8200
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = _da_get_scroll_brightness(self)
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        scroll_brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
-
 
 class RazerOrochi2013(__RazerDevice):
     """
@@ -595,12 +362,6 @@ class RazerOrochi2013(__RazerDevice):
     DPI_MAX = 6400
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/612/612_orochi_2015.png"
-
-    def _resume_device(self):
-        self.logger.debug("Orochi doesn't have suspend/resume")
-
-    def _suspend_device(self):
-        self.logger.debug("Orochi doesn't have suspend/resume")
 
 
 class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
@@ -635,44 +396,6 @@ class RazerDeathAdderChroma(__RazerDeviceSpecialBrightnessSuspend):
 
     DPI_MAX = 10000
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Set brightness to max and LEDs to on, on startup
-        _da_set_logo_brightness(self, 100)
-        _da_set_scroll_brightness(self, 100)
-        _da_set_logo_active(self, True)
-        _da_set_scroll_active(self, True)
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
-
 
 class RazerDeathAdder2000(__RazerDeviceSpecialBrightnessSuspend):
     """
@@ -689,44 +412,6 @@ class RazerDeathAdder2000(__RazerDeviceSpecialBrightnessSuspend):
 
     DPI_MAX = 2000
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Set brightness to max and LEDs to on, on startup
-        _da_set_logo_brightness(self, 100)
-        _da_set_scroll_brightness(self, 100)
-        _da_set_logo_active(self, True)
-        _da_set_scroll_active(self, True)
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
-
 
 class RazerDeathAdder2013(__RazerDeviceSpecialBrightnessSuspend):
     """
@@ -741,42 +426,6 @@ class RazerDeathAdder2013(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/561/561_deathadder_classic.png"
 
     DPI_MAX = 6400
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Set brightness to max and LEDs to on, on startup
-        _da_set_logo_active(self, True)
-        _da_set_scroll_active(self, True)
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_active(self, False)
-        _da_set_scroll_active(self, False)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_active = self.suspend_args.get('active', (True, True))[0]
-        scroll_active = self.suspend_args.get('active', (True, True))[1]
-
-        self.disable_notify = True
-        _da_set_logo_active(self, logo_active)
-        _da_set_scroll_active(self, scroll_active)
-        self.disable_notify = False
 
 
 class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
@@ -820,38 +469,6 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
 
         # self.key_manager.close()
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self), _get_backlight_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        _set_backlight_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100))[1]
-        backlight_brightness = self.suspend_args.get('brightness', (100, 100, 100))[2]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        _set_backlight_brightness(self, backlight_brightness)
-        self.disable_notify = False
-
 
 class RazerNaga2012(__RazerDevice):
     """
@@ -868,38 +485,6 @@ class RazerNaga2012(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/39/razer-naga-gallery-4.png"
 
     DPI_MAX = 5600
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self), _da_get_backlight_active(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_active(self, False)
-        _da_set_scroll_active(self, False)
-        _da_set_backlight_active(self, False)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_active = self.suspend_args.get('active', (True, True, True))[0]
-        scroll_active = self.suspend_args.get('active', (True, True, True))[1]
-        backlight_active = self.suspend_args.get('active', (True, True, True))[2]
-
-        self.disable_notify = True
-        _da_set_logo_active(self, logo_active)
-        _da_set_scroll_active(self, scroll_active)
-        _da_set_backlight_active(self, backlight_active)
-        self.disable_notify = False
 
 
 class RazerNagaChroma(__RazerDeviceSpecialBrightnessSuspend):
@@ -995,35 +580,6 @@ class RazerNagaHex(__RazerDevice):
 
     DPI_MAX = 5600
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_active(self, False)
-        _da_set_scroll_active(self, False)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_active = self.suspend_args.get('active', (True, True))[0]
-        scroll_active = self.suspend_args.get('active', (True, True))[1]
-
-        self.disable_notify = True
-        _da_set_logo_active(self, logo_active)
-        _da_set_scroll_active(self, scroll_active)
-        self.disable_notify = False
-
 
 class RazerNagaHexRed(__RazerDevice):
     """
@@ -1041,35 +597,6 @@ class RazerNagaHexRed(__RazerDevice):
 
     DPI_MAX = 5600
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_active(self, False)
-        _da_set_scroll_active(self, False)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_active = self.suspend_args.get('active', (True, True))[0]
-        scroll_active = self.suspend_args.get('active', (True, True))[1]
-
-        self.disable_notify = True
-        _da_set_logo_active(self, logo_active)
-        _da_set_scroll_active(self, scroll_active)
-        self.disable_notify = False
-
 
 class RazerTaipan(__RazerDevice):
     """
@@ -1086,35 +613,6 @@ class RazerTaipan(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/19/19_taipan.png"
 
     DPI_MAX = 8200
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_active(self, False)
-        _da_set_scroll_active(self, False)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_active = self.suspend_args.get('active', (True, True))[0]
-        scroll_active = self.suspend_args.get('active', (True, True))[1]
-
-        self.disable_notify = True
-        _da_set_logo_active(self, logo_active)
-        _da_set_scroll_active(self, scroll_active)
-        self.disable_notify = False
 
 
 class RazerDeathAdderElite(__RazerDeviceSpecialBrightnessSuspend):
@@ -1139,35 +637,6 @@ class RazerDeathAdderElite(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/724/724_deathadderelite_500x500.png"
 
     DPI_MAX = 16000
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
 
 
 class RazerDiamondbackChroma(__RazerDeviceBrightnessSuspend):
@@ -1204,35 +673,6 @@ class RazerDeathAdder3_5G(__RazerDevice):
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/da10m/carousel/razer-death-adder-gallery-04.png"
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_active(self, False)
-        _da_set_scroll_active(self, False)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_active = self.suspend_args.get('active', (True, True))[0]
-        scroll_active = self.suspend_args.get('active', (True, True))[1]
-
-        self.disable_notify = True
-        _da_set_logo_active(self, logo_active)
-        _da_set_scroll_active(self, scroll_active)
-        self.disable_notify = False
-
 
 class RazerDeathAdder3_5GBlack(__RazerDevice):
     """
@@ -1248,12 +688,6 @@ class RazerDeathAdder3_5GBlack(__RazerDevice):
     DPI_MAX = 3500
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/33/razer-deathadder-be-gallery-3.png"
-
-    def _resume_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
-
-    def _suspend_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
 
 
 class RazerMamba2012Wireless(__RazerDeviceSpecialBrightnessSuspend):
@@ -1286,32 +720,6 @@ class RazerMamba2012Wireless(__RazerDeviceSpecialBrightnessSuspend):
 
         self._battery_manager.close()
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = _da_get_scroll_brightness(self)
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        scroll_brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
-
 
 class RazerMamba2012Wired(__RazerDevice):
     """
@@ -1327,32 +735,6 @@ class RazerMamba2012Wired(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/192/192_mamba_2012.png"
 
     DPI_MAX = 6400
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = _da_get_scroll_brightness(self)
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        scroll_brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
 
 
 class RazerMambaWirelessWired(__RazerDeviceSpecialBrightnessSuspend):
@@ -1377,32 +759,6 @@ class RazerMambaWirelessWired(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1404/1404_mamba_wireless.png"
 
     DPI_MAX = 16000
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
 
 
 class RazerMambaWirelessReceiver(RazerMambaWirelessWired):
@@ -1446,38 +802,6 @@ class RazerNaga2014(__RazerDevice):
 
     DPI_MAX = 8200
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self), _da_get_backlight_active(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_active(self, False)
-        _da_set_scroll_active(self, False)
-        _da_set_backlight_active(self, False)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_active = self.suspend_args.get('active', (True, True, True))[0]
-        scroll_active = self.suspend_args.get('active', (True, True, True))[1]
-        backlight_active = self.suspend_args.get('active', (True, True, True))[2]
-
-        self.disable_notify = True
-        _da_set_logo_active(self, logo_active)
-        _da_set_scroll_active(self, scroll_active)
-        _da_set_backlight_active(self, backlight_active)
-        self.disable_notify = False
-
 
 class RazerOrochi2011(__RazerDeviceSpecialBrightnessSuspend):
     """
@@ -1493,35 +817,6 @@ class RazerOrochi2011(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/612/612_orochi_2015.png"
 
     DPI_MAX = 4000
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['active'] = (_da_get_logo_active(self), _da_get_scroll_active(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_active(self, False)
-        _da_set_scroll_active(self, False)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_active = self.suspend_args.get('active', (True, True))[0]
-        scroll_active = self.suspend_args.get('active', (True, True))[1]
-
-        self.disable_notify = True
-        _da_set_logo_active(self, logo_active)
-        _da_set_scroll_active(self, scroll_active)
-        self.disable_notify = False
 
 
 class RazerAbyssusV2(__RazerDeviceSpecialBrightnessSuspend):
@@ -1539,44 +834,6 @@ class RazerAbyssusV2(__RazerDeviceSpecialBrightnessSuspend):
 
     DPI_MAX = 5000
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Set brightness to max and LEDs to on, on startup
-        _da_set_logo_brightness(self, 100)
-        _da_set_scroll_brightness(self, 100)
-        _da_set_logo_active(self, True)
-        _da_set_scroll_active(self, True)
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
-
 
 class RazerAbyssus1800(__RazerDevice):
     """
@@ -1591,32 +848,6 @@ class RazerAbyssus1800(__RazerDevice):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1277/1277_abyssus_2000.png"
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current logo state, store it for later and then set the logo to off
-        """
-        self.suspend_args.clear()
-        self.suspend_args['active'] = _da_get_logo_active(self)
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_active(self, False)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known logo state and then set it
-        """
-        logo_active = self.suspend_args.get('active', True)
-
-        self.disable_notify = True
-        _da_set_logo_active(self, logo_active)
-        self.disable_notify = False
-
 
 class RazerAbyssus2000(__RazerDevice):
     """
@@ -1630,32 +861,6 @@ class RazerAbyssus2000(__RazerDevice):
     DPI_MAX = 2000
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1277/1277_abyssus_2000.png"
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current logo state, store it for later and then set the logo to off
-        """
-        self.suspend_args.clear()
-        self.suspend_args['active'] = _da_get_logo_active(self)
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_active(self, False)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known logo state and then set it
-        """
-        logo_active = self.suspend_args.get('active', True)
-
-        self.disable_notify = True
-        _da_set_logo_active(self, logo_active)
-        self.disable_notify = False
 
 
 class RazerDeathAdder3500(__RazerDeviceSpecialBrightnessSuspend):
@@ -1672,44 +877,6 @@ class RazerDeathAdder3500(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/561/561_deathadder_classic.png"
 
     DPI_MAX = 3500
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Set brightness to max and LEDs to on, on startup
-        _da_set_logo_brightness(self, 100)
-        _da_set_scroll_brightness(self, 100)
-        _da_set_logo_active(self, True)
-        _da_set_scroll_active(self, True)
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
 
 
 class RazerViperUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
@@ -1734,31 +901,6 @@ class RazerViperUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1577/ee_photo.png"
 
     DPI_MAX = 20000
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        self.disable_notify = False
 
 
 class RazerViperUltimateWireless(RazerViperUltimateWired):
@@ -1808,31 +950,6 @@ class RazerViper(__RazerDeviceSpecialBrightnessSuspend):
 
     DPI_MAX = 16000
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        self.disable_notify = False
-
 
 class RazerDeathAdderEssential(__RazerDeviceSpecialBrightnessSuspend):
     """
@@ -1852,34 +969,6 @@ class RazerDeathAdderEssential(__RazerDeviceSpecialBrightnessSuspend):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1385/1385_deathadderessential.png"
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
-
 
 class RazerDeathAdderEssential2021(__RazerDeviceSpecialBrightnessSuspend):
     """
@@ -1895,31 +984,6 @@ class RazerDeathAdderEssential2021(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 6400
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1385/1385_deathadderessential.png"
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        self.disable_notify = False
 
 
 class RazerMambaElite(__RazerDeviceSpecialBrightnessSuspend):
@@ -1951,43 +1015,6 @@ class RazerMambaElite(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 16000
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1390/1390_mamba_elite.png"
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (
-            _da_get_logo_brightness(self),
-            _da_get_scroll_brightness(self),
-            _get_left_brightness(self),
-            _get_right_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        _set_left_brightness(self, 0)
-        _set_right_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[1]
-        left_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[2]
-        right_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[3]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        _set_left_brightness(self, left_row_brightness)
-        _set_right_brightness(self, right_row_brightness)
-        self.disable_notify = False
 
 
 class RazerNagaLeftHanded2020(__RazerDeviceSpecialBrightnessSuspend):
@@ -2021,39 +1048,6 @@ class RazerNagaLeftHanded2020(__RazerDeviceSpecialBrightnessSuspend):
 
     DEVICE_IMAGE = "https://rzrwarranty.s3.amazonaws.com/cee694cd7526df413008167b7566af310985321b20c57f3dc42e5cbd773f2417.png"
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (
-            _da_get_logo_brightness(self),
-            _da_get_scroll_brightness(self),
-            _get_right_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        _set_right_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100))[1]
-        right_row_brightness = self.suspend_args.get('brightness', (100, 100, 100))[2]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        _set_right_brightness(self, right_row_brightness)
-        self.disable_notify = False
-
 
 class RazerNagaProWired(__RazerDeviceBrightnessSuspend):
     """
@@ -2085,40 +1079,6 @@ class RazerNagaProWired(__RazerDeviceBrightnessSuspend):
     DPI_MAX = 20000
 
     DEVICE_IMAGE = "https://hybrismediaprod.blob.core.windows.net/sys-master-phoenix-images-container/hfd/ha6/9080569528350/razer-naga-pro-500x500.png"
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (
-            _da_get_logo_brightness(self),
-            _da_get_scroll_brightness(self),
-            _get_backlight_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        _set_backlight_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-        Get the last known brightness and then set the brightness
-        """
-
-        logo_brightness = self.suspend_args.get('brightness', (100, 100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100))[1]
-        backlight_brightness = self.suspend_args.get('brightness', (100, 100, 100))[2]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        _set_backlight_brightness(self, backlight_brightness)
-        self.disable_notify = False
 
 
 class RazerNagaProWireless(RazerNagaProWired):
@@ -2158,32 +1118,6 @@ class RazerDeathAdder1800(__RazerDevice):
 
     DEVICE_IMAGE = "https://rzrwarranty.s3.amazonaws.com/a7daf40ad78c9584a693e310effa956019cdcd081391f93f71a7cd36d3dc577e.png"
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current logo state, store it for later and then set the logo to off
-        """
-        self.suspend_args.clear()
-        self.suspend_args['active'] = _da_get_logo_active(self)
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_active(self, False)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known logo state and then set it
-        """
-        logo_active = self.suspend_args.get('active', True)
-
-        self.disable_notify = True
-        _da_set_logo_active(self, logo_active)
-        self.disable_notify = False
-
 
 class RazerBasilisk(__RazerDeviceSpecialBrightnessSuspend):
     """
@@ -2208,35 +1142,6 @@ class RazerBasilisk(__RazerDeviceSpecialBrightnessSuspend):
 
     DPI_MAX = 16000
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
-
 
 class RazerBasiliskEssential(__RazerDeviceSpecialBrightnessSuspend):
     """
@@ -2258,32 +1163,6 @@ class RazerBasiliskEssential(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://hybrismediaprod.blob.core.windows.net/sys-master-phoenix-images-container/h19/h61/9080617500702/Basilisk-Essential-500x500.png"
 
     DPI_MAX = 6400
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        self.disable_notify = False
 
 
 class RazerBasiliskUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
@@ -2340,39 +1219,6 @@ class RazerBasiliskUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
 
     DPI_MAX = 20000
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(
-            self), _get_left_brightness(self), _get_right_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        _set_left_brightness(self, 0)
-        _set_right_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[1]
-        left_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[2]
-        right_row_brightness = self.suspend_args.get('brightness', (100, 100, 100, 100))[3]
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        _set_left_brightness(self, left_row_brightness)
-        _set_right_brightness(self, right_row_brightness)
-        self.disable_notify = False
-
 
 class RazerBasiliskUltimateReceiver(RazerBasiliskUltimateWired):
     USB_PID = 0x0088
@@ -2420,35 +1266,6 @@ class RazerBasiliskV2(__RazerDeviceSpecialBrightnessSuspend):
 
     DPI_MAX = 20000
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
-
 
 class RazerBasiliskV3(__RazerDeviceSpecialBrightnessSuspend):
     """
@@ -2483,38 +1300,6 @@ class RazerBasiliskV3(__RazerDeviceSpecialBrightnessSuspend):
 
     DPI_MAX = 26000
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self), _get_backlight_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        _set_backlight_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100, 100))[1]
-        backlight_brightness = self.suspend_args.get('brightness', (100, 100, 100))[2]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        _set_backlight_brightness(self, backlight_brightness)
-        self.disable_notify = False
-
 
 class RazerDeathAdderV2(__RazerDeviceSpecialBrightnessSuspend):
     """
@@ -2537,35 +1322,6 @@ class RazerDeathAdderV2(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1612/1612_razerdeathadderv2.png"
 
     DPI_MAX = 20000
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_logo_brightness(self), _da_get_scroll_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        _da_set_scroll_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', (100, 100))[0]
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[1]
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        _da_set_scroll_brightness(self, scroll_brightness)
-        self.disable_notify = False
 
 
 class RazerDeathAdderV2ProWired(__RazerDeviceSpecialBrightnessSuspend):
@@ -2590,31 +1346,6 @@ class RazerDeathAdderV2ProWired(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1714/comp_1_00000.png"
 
     DPI_MAX = 20000
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        self.disable_notify = False
 
 
 class RazerDeathAdderV2ProWireless(RazerDeathAdderV2ProWired):
@@ -2675,12 +1406,6 @@ class RazerAtherisReceiver(__RazerDevice):
 
         self._battery_manager.close()
 
-    def _resume_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
-
-    def _suspend_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
-
 
 class RazerBasiliskXHyperSpeed(__RazerDevice):
     """
@@ -2716,12 +1441,6 @@ class RazerBasiliskXHyperSpeed(__RazerDevice):
 
         self._battery_manager.close()
 
-    def _resume_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
-
-    def _suspend_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
-
 
 class RazerOrochiV2Receiver(__RazerDevice):
     """
@@ -2756,12 +1475,6 @@ class RazerOrochiV2Receiver(__RazerDevice):
         super()._close()
 
         self._battery_manager.close()
-
-    def _resume_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
-
-    def _suspend_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
 
 
 class RazerOrochiV2Bluetooth(RazerOrochiV2Receiver):
@@ -2800,33 +1513,6 @@ class RazerNagaX(__RazerDeviceSpecialBrightnessSuspend):
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/3993-1-EN-V2.png"
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = (_da_get_scroll_brightness(self), _get_left_brightness(self))
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_scroll_brightness(self, 0)
-        _set_left_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-        Get the last known brightness and then set the brightness
-        """
-        scroll_brightness = self.suspend_args.get('brightness', (100, 100))[0]
-        left_row_brightness = self.suspend_args.get('brightness', (100, 100))[1]
-
-        self.disable_notify = True
-        _da_set_scroll_brightness(self, scroll_brightness)
-        _set_left_brightness(self, left_row_brightness)
-        self.disable_notify = False
-
 
 class RazerDeathAdderV2Mini(__RazerDeviceSpecialBrightnessSuspend):
     """
@@ -2851,32 +1537,6 @@ class RazerDeathAdderV2Mini(__RazerDeviceSpecialBrightnessSuspend):
 
     DPI_MAX = 8500
 
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        self.disable_notify = False
-
 
 class RazerViper8KHz(__RazerDevice):
     """
@@ -2897,32 +1557,6 @@ class RazerViper8KHz(__RazerDevice):
     DPI_MAX = 20000
 
     POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
-
-    def _suspend_device(self):
-        """
-        Suspend the device
-
-        Get the current brightness level, store it for later and then set the brightness to 0
-        """
-        self.suspend_args.clear()
-        self.suspend_args['brightness'] = _da_get_logo_brightness(self)
-
-        # Todo make it context?
-        self.disable_notify = True
-        _da_set_logo_brightness(self, 0)
-        self.disable_notify = False
-
-    def _resume_device(self):
-        """
-        Resume the device
-
-        Get the last known brightness and then set the brightness
-        """
-        logo_brightness = self.suspend_args.get('brightness', 100)
-
-        self.disable_notify = True
-        _da_set_logo_brightness(self, logo_brightness)
-        self.disable_notify = False
 
 
 class RazerNagaEpicChromaWired(__RazerDeviceSpecialBrightnessSuspend):
@@ -3004,12 +1638,6 @@ class RazerProClickReceiver(__RazerDevice):
 
         self._battery_manager.close()
 
-    def _resume_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
-
-    def _suspend_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
-
 
 class RazerProClickWired(RazerProClickReceiver):
     """
@@ -3050,12 +1678,6 @@ class RazerDeathAdderV2XHyperSpeed(__RazerDevice):
 
         self._battery_manager.close()
 
-    def _resume_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
-
-    def _suspend_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
-
 
 class RazerViperV2ProWired(__RazerDevice):
     """
@@ -3088,12 +1710,6 @@ class RazerViperV2ProWired(__RazerDevice):
         super()._close()
 
         self._battery_manager.close()
-
-    def _resume_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
-
-    def _suspend_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
 
 
 class RazerViperV2ProWireless(RazerViperV2ProWired):
@@ -3135,12 +1751,6 @@ class RazerDeathAdderV3ProWired(__RazerDevice):
         super()._close()
 
         self._battery_manager.close()
-
-    def _resume_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
-
-    def _suspend_device(self):
-        self.logger.debug("Device doesn't have suspend/resume")
 
 
 class RazerDeathAdderV3ProWireless(RazerDeathAdderV3ProWired):
