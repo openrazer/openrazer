@@ -57,6 +57,7 @@ class RazerDevice(DBusService):
         self._observer_list = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
+        self._disable_persistence = False
         self.additional_interfaces = []
         if additional_interfaces is not None:
             self.additional_interfaces.extend(additional_interfaces)
@@ -451,6 +452,8 @@ class RazerDevice(DBusService):
         :param value: Value
         :type value: string
         """
+        if self._disable_persistence:
+            return
         self.logger.debug("Set persistence (%s, %s, %s)", zone, key, value)
 
         self.persistence.status["changed"] = True
@@ -851,6 +854,26 @@ class RazerDevice(DBusService):
         :type value: bool
         """
         self._disable_notifications = value
+
+    @property
+    def disable_persistence(self):
+        """
+        Disable persistence flag
+
+        :return: Flag
+        :rtype: bool
+        """
+        return self._disable_persistence
+
+    @disable_persistence.setter
+    def disable_persistence(self, value):
+        """
+        Set the disable persistence flag
+
+        :param value: Disable
+        :type value: bool
+        """
+        self._disable_persistence = value
 
     def get_driver_path(self, driver_filename):
         """
