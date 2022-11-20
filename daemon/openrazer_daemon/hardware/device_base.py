@@ -1205,18 +1205,9 @@ class RazerDevice(DBusService):
         return "{0}:{1}".format(self.__class__.__name__, self.serial)
 
 
-class RazerDeviceSpecialBrightnessSuspend(RazerDevice):
-    """
-    Class for suspend using brightness
-
-    Suspend functions
-    """
-
-
-class RazerDeviceBrightnessSuspend(RazerDeviceSpecialBrightnessSuspend):
+class RazerDeviceBrightnessSuspend(RazerDevice):
     """
     Class for devices that have get_brightness and set_brightness
-    Inherits from RazerDeviceSpecialBrightnessSuspend
     """
 
     def __init__(self, *args, **kwargs):

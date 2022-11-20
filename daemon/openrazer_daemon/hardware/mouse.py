@@ -4,7 +4,7 @@
 Mouse class
 """
 import re
-from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDeviceSpecialBrightnessSuspend as __RazerDeviceSpecialBrightnessSuspend, RazerDevice as __RazerDevice
+from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice
 from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 # TODO replace with plain import
 from openrazer_daemon.dbus_services.dbus_methods.deathadder_chroma import get_logo_brightness as _da_get_logo_brightness, set_logo_brightness as _da_set_logo_brightness, \
@@ -17,7 +17,7 @@ from openrazer_daemon.dbus_services.dbus_methods.lanceheadte import get_left_bri
     set_left_brightness as _set_left_brightness, set_right_brightness as _set_right_brightness
 
 
-class RazerViperMini(__RazerDeviceSpecialBrightnessSuspend):
+class RazerViperMini(__RazerDevice):
     """
     Class for the Razer Viper Mini
     """
@@ -39,7 +39,7 @@ class RazerViperMini(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 8500
 
 
-class RazerLanceheadWirelessWired(__RazerDeviceSpecialBrightnessSuspend):
+class RazerLanceheadWirelessWired(__RazerDevice):
     """
     Class for the Razer Lancehead Wireless (Wired)
     """
@@ -94,7 +94,7 @@ class RazerLanceheadWirelessReceiver(RazerLanceheadWirelessWired):
         self._battery_manager.close()
 
 
-class RazerLanceheadWired(__RazerDeviceSpecialBrightnessSuspend):
+class RazerLanceheadWired(__RazerDevice):
     """
     Class for the Razer Lancehead (Wired)
     """
@@ -149,7 +149,7 @@ class RazerLanceheadWireless(RazerLanceheadWired):
         self._battery_manager.close()
 
 
-class RazerDeathAdderEssentialWhiteEdition(__RazerDeviceSpecialBrightnessSuspend):
+class RazerDeathAdderEssentialWhiteEdition(__RazerDevice):
     """
     Class for the Razer DeathAdder Essential (White Edition)
     """
@@ -171,7 +171,7 @@ class RazerDeathAdderEssentialWhiteEdition(__RazerDeviceSpecialBrightnessSuspend
     DPI_MAX = 6400
 
 
-class RazerAbyssusEliteDVaEdition(__RazerDeviceSpecialBrightnessSuspend):
+class RazerAbyssusEliteDVaEdition(__RazerDevice):
     """
     Class for the Razer Abyssus Elite (D.Va Edition)
     """
@@ -191,7 +191,7 @@ class RazerAbyssusEliteDVaEdition(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 7200
 
 
-class RazerAbyssusEssential(__RazerDeviceSpecialBrightnessSuspend):
+class RazerAbyssusEssential(__RazerDevice):
     """
     Class for the Razer Abyssus Essential
     """
@@ -211,7 +211,7 @@ class RazerAbyssusEssential(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 7200
 
 
-class RazerLanceheadTE(__RazerDeviceSpecialBrightnessSuspend):
+class RazerLanceheadTE(__RazerDevice):
     """
     Class for the Razer Lancehead Tournament Edition
     """
@@ -381,7 +381,7 @@ class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
     DPI_MAX = 8200
 
 
-class RazerDeathAdderChroma(__RazerDeviceSpecialBrightnessSuspend):
+class RazerDeathAdderChroma(__RazerDevice):
     """
     Class for the Razer DeathAdder Chroma
     """
@@ -397,7 +397,7 @@ class RazerDeathAdderChroma(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 10000
 
 
-class RazerDeathAdder2000(__RazerDeviceSpecialBrightnessSuspend):
+class RazerDeathAdder2000(__RazerDevice):
     """
     Class for the Razer DeathAdder 2000
     """
@@ -413,7 +413,7 @@ class RazerDeathAdder2000(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 2000
 
 
-class RazerDeathAdder2013(__RazerDeviceSpecialBrightnessSuspend):
+class RazerDeathAdder2013(__RazerDevice):
     """
     Class for the Razer DeathAdder 2013
     """
@@ -487,7 +487,7 @@ class RazerNaga2012(__RazerDevice):
     DPI_MAX = 5600
 
 
-class RazerNagaChroma(__RazerDeviceSpecialBrightnessSuspend):
+class RazerNagaChroma(__RazerDevice):
     """
     Class for the Razer Naga Chroma
     """
@@ -532,7 +532,7 @@ class RazerNagaChroma(__RazerDeviceSpecialBrightnessSuspend):
         # self.key_manager.close()
 
 
-class RazerNagaTrinity(__RazerDeviceSpecialBrightnessSuspend):
+class RazerNagaTrinity(__RazerDevice):
     """
     Class for the Razer Naga Trinity
     """
@@ -615,7 +615,7 @@ class RazerTaipan(__RazerDevice):
     DPI_MAX = 8200
 
 
-class RazerDeathAdderElite(__RazerDeviceSpecialBrightnessSuspend):
+class RazerDeathAdderElite(__RazerDevice):
     """
     Class for the Razer DeathAdder Elite
     """
@@ -690,7 +690,7 @@ class RazerDeathAdder3_5GBlack(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/33/razer-deathadder-be-gallery-3.png"
 
 
-class RazerMamba2012Wireless(__RazerDeviceSpecialBrightnessSuspend):
+class RazerMamba2012Wireless(__RazerDevice):
     """
     Class for the Razer Mamba 2012 (Wireless)
     """
@@ -737,7 +737,7 @@ class RazerMamba2012Wired(__RazerDevice):
     DPI_MAX = 6400
 
 
-class RazerMambaWirelessWired(__RazerDeviceSpecialBrightnessSuspend):
+class RazerMambaWirelessWired(__RazerDevice):
     """
     Class for the Razer Mamba Wireless (Wired)
     """
@@ -803,7 +803,7 @@ class RazerNaga2014(__RazerDevice):
     DPI_MAX = 8200
 
 
-class RazerOrochi2011(__RazerDeviceSpecialBrightnessSuspend):
+class RazerOrochi2011(__RazerDevice):
     """
     Class for the Razer Orochi 2011
     """
@@ -819,7 +819,7 @@ class RazerOrochi2011(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 4000
 
 
-class RazerAbyssusV2(__RazerDeviceSpecialBrightnessSuspend):
+class RazerAbyssusV2(__RazerDevice):
     """
     Class for the Razer Abyssus V2
     """
@@ -863,7 +863,7 @@ class RazerAbyssus2000(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1277/1277_abyssus_2000.png"
 
 
-class RazerDeathAdder3500(__RazerDeviceSpecialBrightnessSuspend):
+class RazerDeathAdder3500(__RazerDevice):
     """
     Class for the Razer DeathAdder 3500
     """
@@ -879,7 +879,7 @@ class RazerDeathAdder3500(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 3500
 
 
-class RazerViperUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
+class RazerViperUltimateWired(__RazerDevice):
     """
     Class for the Razer Viper Ultimate (Wired)
     """
@@ -929,7 +929,7 @@ class RazerViperUltimateWireless(RazerViperUltimateWired):
         self._battery_manager.close()
 
 
-class RazerViper(__RazerDeviceSpecialBrightnessSuspend):
+class RazerViper(__RazerDevice):
     """
     Class for the Razer Viper
     """
@@ -951,7 +951,7 @@ class RazerViper(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 16000
 
 
-class RazerDeathAdderEssential(__RazerDeviceSpecialBrightnessSuspend):
+class RazerDeathAdderEssential(__RazerDevice):
     """
     Class for the Razer DeathAdder Essential
     """
@@ -970,7 +970,7 @@ class RazerDeathAdderEssential(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1385/1385_deathadderessential.png"
 
 
-class RazerDeathAdderEssential2021(__RazerDeviceSpecialBrightnessSuspend):
+class RazerDeathAdderEssential2021(__RazerDevice):
     """
     Class for the Razer DeathAdder Essential (2021)
     """
@@ -986,7 +986,7 @@ class RazerDeathAdderEssential2021(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1385/1385_deathadderessential.png"
 
 
-class RazerMambaElite(__RazerDeviceSpecialBrightnessSuspend):
+class RazerMambaElite(__RazerDevice):
     """
     Class for the Razer Mamba Elite
     """
@@ -1017,7 +1017,7 @@ class RazerMambaElite(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1390/1390_mamba_elite.png"
 
 
-class RazerNagaLeftHanded2020(__RazerDeviceSpecialBrightnessSuspend):
+class RazerNagaLeftHanded2020(__RazerDevice):
     """
     Class for the Razer Naga Left Handed Edition 2020
     """
@@ -1119,7 +1119,7 @@ class RazerDeathAdder1800(__RazerDevice):
     DEVICE_IMAGE = "https://rzrwarranty.s3.amazonaws.com/a7daf40ad78c9584a693e310effa956019cdcd081391f93f71a7cd36d3dc577e.png"
 
 
-class RazerBasilisk(__RazerDeviceSpecialBrightnessSuspend):
+class RazerBasilisk(__RazerDevice):
     """
     Class for the Razer Basilisk
     """
@@ -1143,7 +1143,7 @@ class RazerBasilisk(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 16000
 
 
-class RazerBasiliskEssential(__RazerDeviceSpecialBrightnessSuspend):
+class RazerBasiliskEssential(__RazerDevice):
     """
     Class for the Razer Basilisk Essential
     """
@@ -1165,7 +1165,7 @@ class RazerBasiliskEssential(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 6400
 
 
-class RazerBasiliskUltimateWired(__RazerDeviceSpecialBrightnessSuspend):
+class RazerBasiliskUltimateWired(__RazerDevice):
     """
     Class for the Razer Basilisk Ultimate
     """
@@ -1243,7 +1243,7 @@ class RazerBasiliskUltimateReceiver(RazerBasiliskUltimateWired):
         self._battery_manager.close()
 
 
-class RazerBasiliskV2(__RazerDeviceSpecialBrightnessSuspend):
+class RazerBasiliskV2(__RazerDevice):
     """
     Class for the Razer Basilisk V2
     """
@@ -1267,7 +1267,7 @@ class RazerBasiliskV2(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 20000
 
 
-class RazerBasiliskV3(__RazerDeviceSpecialBrightnessSuspend):
+class RazerBasiliskV3(__RazerDevice):
     """
     Class for the Razer Basilisk V3
     """
@@ -1301,7 +1301,7 @@ class RazerBasiliskV3(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 26000
 
 
-class RazerDeathAdderV2(__RazerDeviceSpecialBrightnessSuspend):
+class RazerDeathAdderV2(__RazerDevice):
     """
     Class for the Razer DeathAdder V2
     """
@@ -1324,7 +1324,7 @@ class RazerDeathAdderV2(__RazerDeviceSpecialBrightnessSuspend):
     DPI_MAX = 20000
 
 
-class RazerDeathAdderV2ProWired(__RazerDeviceSpecialBrightnessSuspend):
+class RazerDeathAdderV2ProWired(__RazerDevice):
     """
     Class for the Razer DeathAdder V2 Pro (Wired)
     """
@@ -1484,7 +1484,7 @@ class RazerOrochiV2Bluetooth(RazerOrochiV2Receiver):
     USB_PID = 0x0095
 
 
-class RazerNagaX(__RazerDeviceSpecialBrightnessSuspend):
+class RazerNagaX(__RazerDevice):
     """
     Class for the Razer Naga X
     """
@@ -1514,7 +1514,7 @@ class RazerNagaX(__RazerDeviceSpecialBrightnessSuspend):
     DEVICE_IMAGE = "https://dl.razerzone.com/src/3993-1-EN-V2.png"
 
 
-class RazerDeathAdderV2Mini(__RazerDeviceSpecialBrightnessSuspend):
+class RazerDeathAdderV2Mini(__RazerDevice):
     """
     Class for the Razer DeathAdder V2 Mini
     """
@@ -1559,7 +1559,7 @@ class RazerViper8KHz(__RazerDevice):
     POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
 
-class RazerNagaEpicChromaWired(__RazerDeviceSpecialBrightnessSuspend):
+class RazerNagaEpicChromaWired(__RazerDevice):
     """
     Class for the Razer Naga Epic Chroma (Wired)
     """
