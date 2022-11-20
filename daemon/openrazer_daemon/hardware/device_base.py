@@ -309,20 +309,7 @@ class RazerDevice(DBusService):
                     except KeyError:
                         pass
 
-                if 'set_' + i + '_active' in self.METHODS:
-                    active_func = getattr(self, "set" + self.capitalize_first_char(i) + "Active", None)
-                    if active_func is not None:
-                        active_func(self.zone[i]["active"])
-
-                # load brightness level
-                bright_func = None
-                if i == "backlight":
-                    bright_func = getattr(self, "setBrightness", None)
-                elif 'set_' + i + '_brightness' in self.METHODS:
-                    bright_func = getattr(self, "set" + self.capitalize_first_char(i) + "Brightness", None)
-
-                if bright_func is not None:
-                    bright_func(self.zone[i]["brightness"])
+        self.restore_brightness()
 
         if self.config.getboolean('Startup', "restore_persistence") is True:
             self.restore_effect()
@@ -350,6 +337,30 @@ class RazerDevice(DBusService):
         :rtype: bool
         """
         return self.DEDICATED_MACRO_KEYS
+
+    def restore_brightness(self):
+        """
+        Set the device to the current brightness/active state.
+
+        This is used at launch time.
+        """
+        for i in self.ZONES:
+            if self.zone[i]["present"]:
+                # load active state
+                if 'set_' + i + '_active' in self.METHODS:
+                    active_func = getattr(self, "set" + self.capitalize_first_char(i) + "Active", None)
+                    if active_func is not None:
+                        active_func(self.zone[i]["active"])
+
+                # load brightness level
+                bright_func = None
+                if i == "backlight":
+                    bright_func = getattr(self, "setBrightness", None)
+                elif 'set_' + i + '_brightness' in self.METHODS:
+                    bright_func = getattr(self, "set" + self.capitalize_first_char(i) + "Brightness", None)
+
+                if bright_func is not None:
+                    bright_func(self.zone[i]["brightness"])
 
     def restore_effect(self):
         """
