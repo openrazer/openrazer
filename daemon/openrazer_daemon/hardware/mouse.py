@@ -1759,3 +1759,63 @@ class RazerDeathAdderV3ProWireless(RazerDeathAdderV3ProWired):
     """
 
     USB_PID = 0x00B7
+
+
+class RazerBasiliskV3ProWired(__RazerDevice):
+    """
+    Class for the Razer Basilisk V3 Pro (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Basilisk_V3_Pro_000000000000-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00AA
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 13]
+    METHODS = ['get_device_type_mouse',
+               'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               'get_brightness', 'set_brightness',
+               'get_logo_brightness', 'set_logo_brightness',
+               'get_scroll_brightness', 'set_scroll_brightness',
+               # Scroll wheel controls
+               'get_scroll_mode', 'set_scroll_mode',
+               'get_scroll_acceleration', 'set_scroll_acceleration',
+               'get_scroll_smart_reel', 'set_scroll_smart_reel',
+               # All LEDs (partial support)
+               'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
+               # Logo (partial support)
+               'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2',
+               # Scroll wheel (partial support)
+               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2',
+               # Can set custom matrix effects
+               'set_custom_effect', 'set_key_row',
+               # Battery
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/6220/6220-4-en-v1.png"
+
+    DPI_MAX = 26000
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Basilisk V3 Pro')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
+
+
+class RazerBasiliskV3ProWireless(RazerBasiliskV3ProWired):
+    """
+    Class for the Razer Basilisk V3 Pro (Wireless)
+    """
+
+    USB_PID = 0x00AB
