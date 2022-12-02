@@ -28,51 +28,51 @@ MODULE_LICENSE(DRIVER_LICENSE);
 /**
  * Send report to the device
  */
-static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request_report, struct razer_report *response_report)
+static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request, struct razer_report *response)
 {
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
-        return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, RAZER_NEW_DEVICE_WAIT_MIN_US, RAZER_NEW_DEVICE_WAIT_MAX_US);
+        return razer_get_usb_response(usb_dev, 0x00, request, 0x00, response, RAZER_NEW_DEVICE_WAIT_MIN_US, RAZER_NEW_DEVICE_WAIT_MAX_US);
         break;
 
     default:
-        return razer_get_usb_response(usb_dev, 0x00, request_report, 0x00, response_report, RAZER_ACCESSORY_WAIT_MIN_US, RAZER_ACCESSORY_WAIT_MAX_US);
+        return razer_get_usb_response(usb_dev, 0x00, request, 0x00, response, RAZER_ACCESSORY_WAIT_MIN_US, RAZER_ACCESSORY_WAIT_MAX_US);
     }
 }
 
 /**
  * Function to send to device, get response, and actually check the response
  */
-static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request_report)
+static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_report *request)
 {
     int retval = -1;
-    struct razer_report response_report = {0};
+    struct razer_report response = {0};
 
-    request_report->crc = razer_calculate_crc(request_report);
+    request->crc = razer_calculate_crc(request);
 
-    retval = razer_get_report(usb_dev, request_report, &response_report);
+    retval = razer_get_report(usb_dev, request, &response);
 
     if(retval == 0) {
         // Check the packet number, class and command are the same
-        if(response_report.remaining_packets != request_report->remaining_packets ||
-           response_report.command_class != request_report->command_class ||
-           response_report.command_id.id != request_report->command_id.id) {
-            print_erroneous_report(&response_report, "razeraccessory", "Response doesn't match request");
-//        } else if (response_report.status == RAZER_CMD_BUSY) {
-//            print_erroneous_report(&response_report, "razermouse", "Device is busy");
-        } else if (response_report.status == RAZER_CMD_FAILURE) {
-            print_erroneous_report(&response_report, "razeraccessory", "Command failed");
-        } else if (response_report.status == RAZER_CMD_NOT_SUPPORTED) {
-            print_erroneous_report(&response_report, "razeraccessory", "Command not supported");
-        } else if (response_report.status == RAZER_CMD_TIMEOUT) {
-            print_erroneous_report(&response_report, "razeraccessory", "Command timed out");
+        if(response.remaining_packets != request->remaining_packets ||
+           response.command_class != request->command_class ||
+           response.command_id.id != request->command_id.id) {
+            print_erroneous_report(&response, "razeraccessory", "Response doesn't match request");
+//        } else if (response.status == RAZER_CMD_BUSY) {
+//            print_erroneous_report(&response, "razermouse", "Device is busy");
+        } else if (response.status == RAZER_CMD_FAILURE) {
+            print_erroneous_report(&response, "razeraccessory", "Command failed");
+        } else if (response.status == RAZER_CMD_NOT_SUPPORTED) {
+            print_erroneous_report(&response, "razeraccessory", "Command not supported");
+        } else if (response.status == RAZER_CMD_TIMEOUT) {
+            print_erroneous_report(&response, "razeraccessory", "Command timed out");
         }
     } else {
-        print_erroneous_report(&response_report, "razeraccessory", "Invalid Report Length");
+        print_erroneous_report(&response, "razeraccessory", "Invalid Report Length");
     }
 
-    return response_report;
+    return response;
 }
 
 /**
@@ -80,10 +80,10 @@ static struct razer_report razer_send_payload(struct usb_device *usb_dev, struct
  */
 static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsigned char param)
 {
-    struct razer_report report = razer_chroma_standard_set_device_mode(mode, param);
-    report.transaction_id.id = 0x3F;
+    struct razer_report request = razer_chroma_standard_set_device_mode(mode, param);
+    request.transaction_id.id = 0x3F;
 
-    razer_send_payload(usb_dev, &report);
+    razer_send_payload(usb_dev, &request);
 }
 
 
@@ -221,14 +221,14 @@ static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute 
 static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = { 0 };
+    struct razer_report request = {0};
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        report = razer_chroma_standard_matrix_effect_spectrum(VARSTORE, BACKLIGHT_LED);
-        report.transaction_id.id = 0x3F;
+        request = razer_chroma_standard_matrix_effect_spectrum(VARSTORE, BACKLIGHT_LED);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -241,8 +241,8 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-        report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
-        report.transaction_id.id = 0x3F;
+        request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
@@ -250,15 +250,15 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
-        report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
+        request.transaction_id.id = 0x1F;
         break;
 
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         // Must be in normal mode for hardware effects
         razer_set_device_mode(device->usb_dev, 0x00, 0x00);
-        report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
+        request.transaction_id.id = 0x1F;
         break;
 
     default:
@@ -267,7 +267,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -281,7 +281,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
 static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = {0};
+    struct razer_report request = {0};
     unsigned char speed;
 
     if (count != 4) {
@@ -296,12 +296,12 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
-        report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, ZERO_LED, speed, (struct razer_rgb *)&buf[1]);
+        request = razer_chroma_extended_matrix_effect_reactive(VARSTORE, ZERO_LED, speed, (struct razer_rgb *)&buf[1]);
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_CORE:
-        report = razer_chroma_standard_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+        request = razer_chroma_standard_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
         break;
 
     default:
@@ -310,7 +310,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -324,7 +324,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
 static ssize_t razer_attr_write_matrix_reactive_trigger(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = {0};
+    struct razer_report request = {0};
     struct razer_rgb rgb = {0};
 
     switch (device->usb_dev->descriptor.idProduct) {
@@ -333,12 +333,12 @@ static ssize_t razer_attr_write_matrix_reactive_trigger(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
         // TODO: Fix reactive trigger for Goliathus
-        report = razer_chroma_extended_matrix_effect_reactive(VARSTORE, ZERO_LED, 0, &rgb);
+        request = razer_chroma_extended_matrix_effect_reactive(VARSTORE, ZERO_LED, 0, &rgb);
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY:
         // TODO: Issue zeroed out razer_chroma_standard_matrix_effect_reactive report
-        report = razer_chroma_misc_matrix_reactive_trigger();
+        request = razer_chroma_misc_matrix_reactive_trigger();
         break;
 
     default:
@@ -347,7 +347,7 @@ static ssize_t razer_attr_write_matrix_reactive_trigger(struct device *dev, stru
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -361,14 +361,14 @@ static ssize_t razer_attr_write_matrix_reactive_trigger(struct device *dev, stru
 static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = { 0 };
+    struct razer_report request = {0};
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        report = razer_chroma_standard_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
-        report.transaction_id.id = 0x3F;
+        request = razer_chroma_standard_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -381,8 +381,8 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-        report = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
-        report.transaction_id.id = 0x3F;
+        request = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
@@ -390,15 +390,15 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
-        report = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
+        request.transaction_id.id = 0x1F;
         break;
 
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         // Must be in normal mode for hardware effects
         razer_set_device_mode(device->usb_dev, 0x00, 0x00);
-        report = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
+        request.transaction_id.id = 0x1F;
         break;
 
     default:
@@ -407,7 +407,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -421,22 +421,22 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
 static ssize_t razer_attr_write_matrix_effect_blinking(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report_rgb = {0};
-    struct razer_report report_effect = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x01);
-    report_effect.transaction_id.id = 0x3F;
+    struct razer_report request_rgb = {0};
+    struct razer_report request_effect = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x01);
+    request_effect.transaction_id.id = 0x3F;
 
     if (count != 3) {
         printk(KERN_WARNING "razeraccessory: Blinking mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
-    report_rgb = razer_chroma_standard_set_led_rgb(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-    report_rgb.transaction_id.id = 0x3F;
+    request_rgb = razer_chroma_standard_set_led_rgb(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+    request_rgb.transaction_id.id = 0x3F;
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report_rgb);
+    razer_send_payload(device->usb_dev, &request_rgb);
     msleep(5);
-    razer_send_payload(device->usb_dev, &report_effect);
+    razer_send_payload(device->usb_dev, &request_effect);
     mutex_unlock(&device->lock);
 
     return count;
@@ -450,13 +450,13 @@ static ssize_t razer_attr_write_matrix_effect_blinking(struct device *dev, struc
 static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = { 0 };
+    struct razer_report request = {0};
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        report = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
+        request = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -469,7 +469,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-        report = razer_chroma_extended_matrix_effect_custom_frame();
+        request = razer_chroma_extended_matrix_effect_custom_frame();
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
@@ -478,8 +478,8 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
-        report = razer_chroma_extended_matrix_effect_custom_frame();
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_custom_frame();
+        request.transaction_id.id = 0x1F;
         break;
 
     default:
@@ -488,7 +488,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -502,7 +502,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
 static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = {0};
+    struct razer_report request = {0};
 
     if (count != 3) {
         printk(KERN_WARNING "razeraccessory: Static mode only accepts RGB (3byte)\n");
@@ -513,8 +513,8 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        report = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*) & buf[0]);
-        report.transaction_id.id = 0x3F;
+        request = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*) & buf[0]);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -527,8 +527,8 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-        report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
-        report.transaction_id.id = 0x3F;
+        request = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
@@ -536,8 +536,8 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
-        report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
+        request.transaction_id.id = 0x1F;
         break;
 
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
@@ -550,28 +550,28 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
             * If the color is not set twice with the mode switch in-between, each subsequent
             * setting of the static effect actually sets the previous color...
             */
-        report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
+        request.transaction_id.id = 0x1F;
 
         mutex_lock(&device->lock);
-        razer_send_payload(device->usb_dev, &report);
+        razer_send_payload(device->usb_dev, &request);
         mutex_unlock(&device->lock);
 
-        report = get_razer_report(0x0f, 0x02, 0x06);
-        report.arguments[0] = 0x00;
-        report.arguments[1] = 0x00;
-        report.arguments[2] = 0x08;
-        report.arguments[3] = 0x00;
-        report.arguments[4] = 0x00;
-        report.arguments[5] = 0x00;
-        report.transaction_id.id = 0x1F;
+        request = get_razer_report(0x0f, 0x02, 0x06);
+        request.arguments[0] = 0x00;
+        request.arguments[1] = 0x00;
+        request.arguments[2] = 0x08;
+        request.arguments[3] = 0x00;
+        request.arguments[4] = 0x00;
+        request.arguments[5] = 0x00;
+        request.transaction_id.id = 0x1F;
 
         mutex_lock(&device->lock);
-        razer_send_payload(device->usb_dev, &report);
+        razer_send_payload(device->usb_dev, &request);
         mutex_unlock(&device->lock);
 
-        report = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
+        request.transaction_id.id = 0x1F;
         break;
 
     default:
@@ -580,7 +580,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -596,14 +596,14 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report report = { 0 };
+    struct razer_report request = {0};
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        report = razer_chroma_standard_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, direction);
-        report.transaction_id.id = 0x3F;
+        request = razer_chroma_standard_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, direction);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -614,16 +614,16 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-        report = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
-        report.transaction_id.id = 0x3F;
+        request = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
-        report = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
+        request.transaction_id.id = 0x1F;
         break;
 
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
@@ -633,8 +633,8 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         // Direction values are flipped compared to other devices
         direction ^= ((1<<0) | (1<<1));
-        report = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
+        request.transaction_id.id = 0x1F;
         break;
 
     default:
@@ -643,7 +643,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -657,7 +657,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
 static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = {0};
+    struct razer_report request = {0};
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -672,18 +672,18 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         switch(count) {
         case 3: // Single colour mode
-            report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
-            report.transaction_id.id = 0x3F;
+            request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
+            request.transaction_id.id = 0x3F;
             break;
 
         case 6: // Dual colour mode
-            report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
-            report.transaction_id.id = 0x3F;
+            request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
+            request.transaction_id.id = 0x3F;
             break;
 
         default: // "Random" colour mode
-            report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
-            report.transaction_id.id = 0x3F;
+            request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
+            request.transaction_id.id = 0x3F;
             break;
         }
         break;
@@ -695,18 +695,18 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
         switch(count) {
         case 3: // Single colour mode
-            report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
+            request.transaction_id.id = 0x1F;
             break;
 
         case 6: // Dual colour mode
-            report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
+            request.transaction_id.id = 0x1F;
             break;
 
         default: // "Random" colour mode
-            report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
+            request.transaction_id.id = 0x1F;
             break;
         }
         break;
@@ -716,18 +716,18 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         razer_set_device_mode(device->usb_dev, 0x00, 0x00);
         switch(count) {
         case 3: // Single colour mode
-            report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
+            request.transaction_id.id = 0x1F;
             break;
 
         case 6: // Dual colour mode
-            report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
+            request.transaction_id.id = 0x1F;
             break;
 
         default: // "Random" colour mode
-            report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
+            request.transaction_id.id = 0x1F;
             break;
         }
         break;
@@ -737,18 +737,18 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
         switch(count) {
         case 3: // Single colour mode
-            report = razer_chroma_standard_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-            report.transaction_id.id = 0x3F;
+            request = razer_chroma_standard_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+            request.transaction_id.id = 0x3F;
             break;
 
         case 6: // Dual colour mode
-            report = razer_chroma_standard_matrix_effect_breathing_dual(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
-            report.transaction_id.id = 0x3F;
+            request = razer_chroma_standard_matrix_effect_breathing_dual(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            request.transaction_id.id = 0x3F;
             break;
 
         default: // "Random" colour mode
-            report = razer_chroma_standard_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
-            report.transaction_id.id = 0x3F;
+            request = razer_chroma_standard_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
+            request.transaction_id.id = 0x3F;
             break;
         }
         break;
@@ -759,7 +759,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -768,7 +768,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
 static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = {0};
+    struct razer_report request = {0};
     unsigned char speed = 0;
 
     if (count != 1 && count != 4 && count != 7) {
@@ -782,18 +782,18 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         switch(count) {
         case 4: // Single colour mode
-            report = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, ZERO_LED, speed, (struct razer_rgb *)&buf[1]);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, ZERO_LED, speed, (struct razer_rgb *)&buf[1]);
+            request.transaction_id.id = 0x1F;
             break;
 
         case 7: // Dual colour mode
-            report = razer_chroma_extended_matrix_effect_starlight_dual(VARSTORE, ZERO_LED, speed, (struct razer_rgb *)&buf[1], (struct razer_rgb *)&buf[4]);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_effect_starlight_dual(VARSTORE, ZERO_LED, speed, (struct razer_rgb *)&buf[1], (struct razer_rgb *)&buf[4]);
+            request.transaction_id.id = 0x1F;
             break;
 
         default: // "Random" colour mode
-            report = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, ZERO_LED, speed);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, ZERO_LED, speed);
+            request.transaction_id.id = 0x1F;
             break;
         }
         break;
@@ -804,7 +804,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -824,7 +824,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
 static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = {0};
+    struct razer_report request = {0};
 
     size_t offset = 0;
     unsigned char row_id;
@@ -859,12 +859,12 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
         switch (device->usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_CORE:
-            report = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+            request = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             break;
 
         case USB_DEVICE_ID_RAZER_FIREFLY:
         case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-            report = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
+            request = razer_chroma_misc_one_row_set_custom_frame(start_col, stop_col, (unsigned char*)&buf[offset]);
             break;
 
         case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -876,7 +876,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_NOMMO_PRO:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
-            report = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+            request = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             break;
 
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
@@ -884,15 +884,15 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
         case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         case USB_DEVICE_ID_RAZER_RAPTOR_27:
-            report = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
+            request.transaction_id.id = 0x1F;
             break;
 
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
             // Must be in driver mode for custom effects
             razer_set_device_mode(device->usb_dev, 0x03, 0x00);
-            report = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
+            request.transaction_id.id = 0x1F;
             break;
 
         case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
@@ -905,7 +905,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         }
 
         mutex_lock(&device->lock);
-        razer_send_payload(device->usb_dev, &report);
+        razer_send_payload(device->usb_dev, &request);
         mutex_unlock(&device->lock);
 
         // *3 as its 3 bytes per col (RGB)
@@ -923,8 +923,8 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = razer_chroma_standard_get_serial();
-    struct razer_report response_report = {0};
+    struct razer_report request = razer_chroma_standard_get_serial();
+    struct razer_report response = {0};
     char serial_string[51];
 
     switch (device->usb_dev->descriptor.idProduct) {
@@ -944,8 +944,8 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-        response_report = razer_send_payload(device->usb_dev, &report);
-        strncpy(&serial_string[0], &response_report.arguments[0], 22);
+        response = razer_send_payload(device->usb_dev, &request);
+        strncpy(&serial_string[0], &response.arguments[0], 22);
         serial_string[22] = '\0';
         break;
 
@@ -955,9 +955,9 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
-        report.transaction_id.id = 0x1F;
-        response_report = razer_send_payload(device->usb_dev, &report);
-        strncpy(&serial_string[0], &response_report.arguments[0], 22);
+        request.transaction_id.id = 0x1F;
+        response = razer_send_payload(device->usb_dev, &request);
+        strncpy(&serial_string[0], &response.arguments[0], 22);
         serial_string[22] = '\0';
         break;
 
@@ -977,8 +977,8 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 static ssize_t razer_attr_read_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = razer_chroma_standard_get_firmware_version();
-    struct razer_report response_report = {0};
+    struct razer_report request = razer_chroma_standard_get_firmware_version();
+    struct razer_report response = {0};
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
@@ -986,11 +986,11 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-        report.transaction_id.id = 0x1F;
+        request.transaction_id.id = 0x1F;
         break;
 
     default:
-        report.transaction_id.id = 0x3F;
+        request.transaction_id.id = 0x3F;
         break;
     }
 
@@ -999,11 +999,11 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
 
         mutex_lock(&device->lock);
 
-        response_report = razer_send_payload(device->usb_dev, &report);
+        response = razer_send_payload(device->usb_dev, &request);
 
         device->firmware_version[0] = 1;
-        device->firmware_version[1] = response_report.arguments[0];
-        device->firmware_version[2] = response_report.arguments[1];
+        device->firmware_version[1] = response.arguments[0];
+        device->firmware_version[2] = response.arguments[1];
 
         mutex_unlock(&device->lock);
     }
@@ -1017,14 +1017,14 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
 static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = {0};
+    struct razer_report request = {0};
 
     if (count != 2) {
         printk(KERN_WARNING "razeraccessory: Device mode only takes 2 bytes.\n");
         return -EINVAL;
     }
 
-    report = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
+    request = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
@@ -1032,12 +1032,12 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-        report.transaction_id.id = 0x1F;
+        request.transaction_id.id = 0x1F;
         break;
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -1046,11 +1046,11 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
 static ssize_t razer_attr_read_is_mug_present(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = get_razer_report(0x02, 0x81, 0x02);
+    struct razer_report request = get_razer_report(0x02, 0x81, 0x02);
     struct razer_report response = {0};
 
     mutex_lock(&device->lock);
-    response = razer_send_payload(device->usb_dev, &report);
+    response = razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return sprintf(buf, "%u\n", response.arguments[1]);
@@ -1064,7 +1064,7 @@ static ssize_t razer_attr_read_is_mug_present(struct device *dev, struct device_
 static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = razer_chroma_standard_get_device_mode();
+    struct razer_report request = razer_chroma_standard_get_device_mode();
     struct razer_report response = {0};
 
     switch(device->usb_pid) {
@@ -1073,12 +1073,12 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-        report.transaction_id.id = 0x1F;
+        request.transaction_id.id = 0x1F;
         break;
     }
 
     mutex_lock(&device->lock);
-    response = razer_send_payload(device->usb_dev, &report);
+    response = razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     buf[0] = response.arguments[0];
@@ -1096,7 +1096,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     unsigned char brightness = 0;
-    struct razer_report report = {0};
+    struct razer_report request = {0};
 
     if (count < 1) {
         printk(KERN_WARNING "razeraccessory: Brightness takes an ascii number\n");
@@ -1111,7 +1111,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
-        report = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
+        request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         device->saved_brightness = brightness;
         break;
 
@@ -1121,52 +1121,52 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
-        report = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
+        request.transaction_id.id = 0x1F;
         device->saved_brightness = brightness;
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        report = razer_chroma_standard_set_led_brightness(VARSTORE, BACKLIGHT_LED, brightness);
+        request = razer_chroma_standard_set_led_brightness(VARSTORE, BACKLIGHT_LED, brightness);
         break;
 
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
-        report = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
+        request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         break;
 
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         /* Set the brightness for all channels to the requested value */
-        report = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_1_LED, brightness);
+        request = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_1_LED, brightness);
         mutex_lock(&device->lock);
-        razer_send_payload(device->usb_dev, &report);
+        razer_send_payload(device->usb_dev, &request);
         mutex_unlock(&device->lock);
 
-        report = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_2_LED, brightness);
+        request = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_2_LED, brightness);
         mutex_lock(&device->lock);
-        razer_send_payload(device->usb_dev, &report);
+        razer_send_payload(device->usb_dev, &request);
         mutex_unlock(&device->lock);
 
-        report = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_3_LED, brightness);
+        request = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_3_LED, brightness);
         mutex_lock(&device->lock);
-        razer_send_payload(device->usb_dev, &report);
+        razer_send_payload(device->usb_dev, &request);
         mutex_unlock(&device->lock);
 
-        report = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_4_LED, brightness);
+        request = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_4_LED, brightness);
         mutex_lock(&device->lock);
-        razer_send_payload(device->usb_dev, &report);
+        razer_send_payload(device->usb_dev, &request);
         mutex_unlock(&device->lock);
 
-        report = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_5_LED, brightness);
+        request = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_5_LED, brightness);
         mutex_lock(&device->lock);
-        razer_send_payload(device->usb_dev, &report);
+        razer_send_payload(device->usb_dev, &request);
         mutex_unlock(&device->lock);
 
-        report = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_6_LED, brightness);
+        request = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_6_LED, brightness);
         break;
 
     default:
@@ -1175,7 +1175,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -1190,8 +1190,8 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report response = {0};
+    struct razer_report request = {0};
     unsigned char brightness = 0;
-    struct razer_report report;
     size_t sum = 0;
     size_t i;
 
@@ -1213,9 +1213,9 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         /* Get the average brightness of all channels */
         for (i = ARGB_CH_1_LED; i <= ARGB_CH_6_LED; i++) {
-            report = razer_chroma_extended_matrix_get_brightness(VARSTORE, i);
+            request = razer_chroma_extended_matrix_get_brightness(VARSTORE, i);
             mutex_lock(&device->lock);
-            response = razer_send_payload(device->usb_dev, &report);
+            response = razer_send_payload(device->usb_dev, &request);
             mutex_unlock(&device->lock);
             sum += response.arguments[2];
         }
@@ -1223,9 +1223,9 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         break;
 
     default:
-        report = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
+        request = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
         mutex_lock(&device->lock);
-        response = razer_send_payload(device->usb_dev, &report);
+        response = razer_send_payload(device->usb_dev, &request);
         mutex_unlock(&device->lock);
         brightness = response.arguments[2];
         break;
@@ -1243,7 +1243,7 @@ static ssize_t razer_attr_write_set_charge_brightness(struct device *dev, struct
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     unsigned char brightness = 0;
-    struct razer_report report = {0};
+    struct razer_report request = {0};
 
     if (count < 1) {
         printk(KERN_WARNING "razeraccessory: Brightness takes an ascii number\n");
@@ -1254,8 +1254,8 @@ static ssize_t razer_attr_write_set_charge_brightness(struct device *dev, struct
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-        report = razer_chroma_extended_matrix_brightness(VARSTORE, led, brightness);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_brightness(VARSTORE, led, brightness);
+        request.transaction_id.id = 0x1F;
         device->saved_brightness = brightness;
         break;
 
@@ -1265,7 +1265,7 @@ static ssize_t razer_attr_write_set_charge_brightness(struct device *dev, struct
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -1279,7 +1279,7 @@ static ssize_t razer_attr_write_set_charge_brightness(struct device *dev, struct
 static ssize_t razer_attr_read_set_charge_brightness(struct device *dev, struct device_attribute *attr, char *buf, int led)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = razer_chroma_standard_get_led_brightness(VARSTORE, led);
+    struct razer_report request = razer_chroma_standard_get_led_brightness(VARSTORE, led);
     struct razer_report response = {0};
     unsigned char brightness = 0;
 
@@ -1290,7 +1290,7 @@ static ssize_t razer_attr_read_set_charge_brightness(struct device *dev, struct 
 
     default:
         mutex_lock(&device->lock);
-        response = razer_send_payload(device->usb_dev, &report);
+        response = razer_send_payload(device->usb_dev, &request);
         mutex_unlock(&device->lock);
         brightness = response.arguments[2];
         break;
@@ -1355,12 +1355,12 @@ static ssize_t razer_attr_write_fully_charged_led_brightness(struct device *dev,
 static ssize_t razer_attr_write_charge_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int led)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = { 0 };
+    struct razer_report request = {0};
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-        report = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, led);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, led);
+        request.transaction_id.id = 0x1F;
         break;
 
     default:
@@ -1369,7 +1369,7 @@ static ssize_t razer_attr_write_charge_mode_spectrum(struct device *dev, struct 
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -1402,12 +1402,12 @@ static ssize_t razer_attr_write_fully_charged_matrix_effect_spectrum(struct devi
 static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int led)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = { 0 };
+    struct razer_report request = {0};
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-        report = razer_chroma_extended_matrix_effect_none(VARSTORE, led);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_none(VARSTORE, led);
+        request.transaction_id.id = 0x1F;
         break;
 
     default:
@@ -1416,7 +1416,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -1449,7 +1449,7 @@ static ssize_t razer_attr_write_fully_charged_matrix_effect_none(struct device *
 static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int led)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = {0};
+    struct razer_report request = {0};
 
     if (count != 3) {
         printk(KERN_WARNING "razeraccessory: Static mode only accepts RGB (3byte)\n");
@@ -1458,8 +1458,8 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-        report = razer_chroma_extended_matrix_effect_static(VARSTORE, led, (struct razer_rgb*) & buf[0]);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_static(VARSTORE, led, (struct razer_rgb*) & buf[0]);
+        request.transaction_id.id = 0x1F;
         break;
 
     default:
@@ -1468,7 +1468,7 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -1502,14 +1502,14 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report report = { 0 };
+    struct razer_report request = {0};
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         // Direction values are flipped compared to other devices
         direction ^= ((1<<0) | (1<<1));
-        report = razer_chroma_extended_matrix_effect_wave(VARSTORE, led, direction);
-        report.transaction_id.id = 0x1F;
+        request = razer_chroma_extended_matrix_effect_wave(VARSTORE, led, direction);
+        request.transaction_id.id = 0x1F;
         break;
 
     default:
@@ -1518,7 +1518,7 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -1551,24 +1551,24 @@ static ssize_t razer_attr_write_fully_charged_matrix_effect_wave(struct device *
 static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int led)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = {0};
+    struct razer_report request = {0};
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         switch(count) {
         case 3: // Single colour mode
-            report = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, led, (struct razer_rgb *)&buf[0]);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, led, (struct razer_rgb *)&buf[0]);
+            request.transaction_id.id = 0x1F;
             break;
 
         case 6: // Dual colour mode
-            report = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, led, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, led, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
+            request.transaction_id.id = 0x1F;
             break;
 
         default: // "Random" colour mode
-            report = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, led);
-            report.transaction_id.id = 0x1F;
+            request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, led);
+            request.transaction_id.id = 0x1F;
             break;
         }
         break;
@@ -1579,7 +1579,7 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     }
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -1616,7 +1616,7 @@ static ssize_t razer_attr_write_channel_led_brightness(unsigned char led, struct
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     unsigned char brightness = 0;
-    struct razer_report report = {0};
+    struct razer_report request = {0};
 
     if (count < 1) {
         printk(KERN_WARNING "razeraccessory: Brightness takes an ascii number\n");
@@ -1625,10 +1625,10 @@ static ssize_t razer_attr_write_channel_led_brightness(unsigned char led, struct
 
     brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
 
-    report = razer_chroma_extended_matrix_brightness(VARSTORE, led, brightness);
+    request = razer_chroma_extended_matrix_brightness(VARSTORE, led, brightness);
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -1670,13 +1670,13 @@ static ssize_t razer_attr_write_channel6_led_brightness(struct device *dev, stru
 static ssize_t razer_attr_read_channel_size(unsigned int channel, struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = get_razer_report(0x0f, 0x88, 0x0d);
-    struct razer_report response;
-    report.transaction_id.id = 0x1F;
-    report.arguments[0] = 0x06;
+    struct razer_report request = get_razer_report(0x0f, 0x88, 0x0d);
+    struct razer_report response = {0};
+    request.transaction_id.id = 0x1F;
+    request.arguments[0] = 0x06;
 
     mutex_lock(&device->lock);
-    response = razer_send_payload(device->usb_dev, &report);
+    response = razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return sprintf(buf, "%d\n", response.arguments[channel * 2]);
@@ -1717,9 +1717,9 @@ static ssize_t razer_attr_read_channel6_size(struct device *dev, struct device_a
  */
 static ssize_t razer_attr_write_channel_size(unsigned int channel, struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct razer_report response;
     unsigned char sz;
-    struct razer_report report;
+    struct razer_report request = {0};
+    struct razer_report response = {0};
     struct razer_accessory_device *device;
 
     if (count < 1) {
@@ -1730,34 +1730,34 @@ static ssize_t razer_attr_write_channel_size(unsigned int channel, struct device
     device = dev_get_drvdata(dev);
 
     /* Get existing sizes */
-    report = get_razer_report(0x0f, 0x88, 0x0d);
-    report.transaction_id.id = 0x1F;
-    report.arguments[0] = 0x06;
+    request = get_razer_report(0x0f, 0x88, 0x0d);
+    request.transaction_id.id = 0x1F;
+    request.arguments[0] = 0x06;
 
     mutex_lock(&device->lock);
-    response = razer_send_payload(device->usb_dev, &report);
+    response = razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     /* Set new sizes */
     sz = (unsigned char)simple_strtoul(buf, NULL, 10);
 
-    report = get_razer_report(0x0f, 0x08, 0x0d);
-    report.arguments[0] = 0x06;
-    report.arguments[1] = 0x01;
-    report.arguments[2] = channel == 1 ? sz : response.arguments[2];
-    report.arguments[3] = 0x02;
-    report.arguments[4] = channel == 2 ? sz : response.arguments[4];
-    report.arguments[5] = 0x03;
-    report.arguments[6] = channel == 3 ? sz : response.arguments[6];
-    report.arguments[7] = 0x04;
-    report.arguments[8] = channel == 4 ? sz : response.arguments[8];
-    report.arguments[9] = 0x05;
-    report.arguments[10] = channel == 5 ? sz : response.arguments[10];
-    report.arguments[11] = 0x06;
-    report.arguments[12] = channel == 6 ? sz : response.arguments[12];
+    request = get_razer_report(0x0f, 0x08, 0x0d);
+    request.arguments[0] = 0x06;
+    request.arguments[1] = 0x01;
+    request.arguments[2] = channel == 1 ? sz : response.arguments[2];
+    request.arguments[3] = 0x02;
+    request.arguments[4] = channel == 2 ? sz : response.arguments[4];
+    request.arguments[5] = 0x03;
+    request.arguments[6] = channel == 3 ? sz : response.arguments[6];
+    request.arguments[7] = 0x04;
+    request.arguments[8] = channel == 4 ? sz : response.arguments[8];
+    request.arguments[9] = 0x05;
+    request.arguments[10] = channel == 5 ? sz : response.arguments[10];
+    request.arguments[11] = 0x06;
+    request.arguments[12] = channel == 6 ? sz : response.arguments[12];
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &report);
+    razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -1798,34 +1798,34 @@ static ssize_t razer_attr_write_reset_channels(struct device *dev, struct device
     struct razer_accessory_device *device = dev_get_drvdata(dev);
 
     /* Get existing sizes */
-    struct razer_report report;
+    struct razer_report request = {0};
     struct razer_report response = {0};
     unsigned int i;
 
     for (i = 0; i < 6; i++) {
-        report = get_razer_report(0x0f, 0x04, 0x03);
-        report.transaction_id.id = 0x1F;
-        report.arguments[0] = 0x01;
-        report.arguments[1] = ARGB_CH_1_LED + i;
-        report.arguments[2] = 0xff;
+        request = get_razer_report(0x0f, 0x04, 0x03);
+        request.transaction_id.id = 0x1F;
+        request.arguments[0] = 0x01;
+        request.arguments[1] = ARGB_CH_1_LED + i;
+        request.arguments[2] = 0xff;
 
         mutex_lock(&device->lock);
-        response = razer_send_payload(device->usb_dev, &report);
+        response = razer_send_payload(device->usb_dev, &request);
         mutex_unlock(&device->lock);
     }
 
-    report = get_razer_report(0x00, 0xb7, 0x01);
-    report.transaction_id.id = 0x1F;
-    report.arguments[0] = 0x00;
+    request = get_razer_report(0x00, 0xb7, 0x01);
+    request.transaction_id.id = 0x1F;
+    request.arguments[0] = 0x00;
     mutex_lock(&device->lock);
-    response = razer_send_payload(device->usb_dev, &report);
+    response = razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
-    report = get_razer_report(0x00, 0x36, 0x01);
-    report.transaction_id.id = 0x1F;
-    report.arguments[0] = 0x01;
+    request = get_razer_report(0x00, 0x36, 0x01);
+    request.transaction_id.id = 0x1F;
+    request.arguments[0] = 0x01;
     mutex_lock(&device->lock);
-    response = razer_send_payload(device->usb_dev, &report);
+    response = razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
 
     return count;
@@ -1839,12 +1839,12 @@ static ssize_t razer_attr_write_reset_channels(struct device *dev, struct device
 static ssize_t razer_attr_read_channel_led_brightness(unsigned char led, struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report report = razer_chroma_extended_matrix_get_brightness(VARSTORE, led);
+    struct razer_report request = razer_chroma_extended_matrix_get_brightness(VARSTORE, led);
     struct razer_report response = {0};
     unsigned char brightness = 0;
 
     mutex_lock(&device->lock);
-    response = razer_send_payload(device->usb_dev, &report);
+    response = razer_send_payload(device->usb_dev, &request);
     mutex_unlock(&device->lock);
     brightness = response.arguments[2];
 
