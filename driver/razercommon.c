@@ -107,6 +107,14 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
         result = 1;
     }
 
+    if (WARN_ONCE(response_report->data_size > ARRAY_SIZE(response_report->arguments),
+                  "Field data_size %d in response is bigger than arguments\n",
+                  response_report->data_size)) {
+        /* Sanitize the value since at the moment callers don't respect the return code */
+        response_report->data_size = ARRAY_SIZE(response_report->arguments);
+        return -EINVAL;
+    }
+
     return result;
 }
 
