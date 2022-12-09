@@ -164,6 +164,12 @@ def set_dpi_xy(self, dpi_x, dpi_y):
     """
     self.logger.debug("DBus call set_dpi_xy")
 
+    if 'available_dpi' in self.METHODS:
+        if dpi_y > 0:
+            raise RuntimeError("Devices with available_dpi are expected to have only one DPI value set, got " + str(dpi_x) + ", " + str(dpi_y))
+        if dpi_x not in self.AVAILABLE_DPI:
+            raise RuntimeError("Provided DPI " + str(dpi_x) + " is not in available_dpi values: " + str(self.AVAILABLE_DPI))
+
     driver_path = self.get_driver_path('dpi')
 
     if self._testing:
