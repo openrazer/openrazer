@@ -157,6 +157,15 @@ class RazerDevice(DBusService):
                 ('razer.device.lighting.chroma', 'getWaveDir', self.get_current_wave_dir, None, 'i'),
             },
 
+            "backlight": {
+                # Intentionally using the same underlying methods as backlight_chroma.
+                # Both refer to the 'backlight' LED internally but partially exist separately due to historical reasons.
+                ('razer.device.lighting.backlight', 'getBacklightEffect', self.get_current_effect, None, 's'),
+                ('razer.device.lighting.backlight', 'getBacklightEffectColors', self.get_current_effect_colors, None, 'ay'),
+                ('razer.device.lighting.backlight', 'getBacklightEffectSpeed', self.get_current_effect_speed, None, 'i'),
+                ('razer.device.lighting.backlight', 'getBacklightWaveDir', self.get_current_wave_dir, None, 'i'),
+            },
+
             "logo": {
                 ('razer.device.lighting.logo', 'getLogoEffect', self.get_current_logo_effect, None, 's'),
                 ('razer.device.lighting.logo', 'getLogoEffectColors', self.get_current_logo_effect_colors, None, 'ay'),
@@ -218,7 +227,7 @@ class RazerDevice(DBusService):
                 self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
                 self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
 
-        for i in self.ZONES[1:]:
+        for i in self.ZONES:
             if 'set_' + i + '_static' in self.METHODS or 'set_' + i + '_static_naga_hex_v2' in self.METHODS or 'set_' + i + '_active' in self.METHODS:
                 self.zone[i]["present"] = True
                 for m in effect_methods[i]:
