@@ -55,6 +55,10 @@ class _RippleKeyboard(_MacroKeyboard):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        if not self.HAS_MATRIX:
+            # You can use _MacroKeyboard instead if the keyboard doesn't support matrix
+            raise RuntimeError("Cannot use RippleKeyboard without matrix capabilities")
+
         self.ripple_manager = _RippleManager(self, self._device_number)
 
         # we need to set the effect to ripple (if needed) after the ripple manager has started
@@ -292,7 +296,6 @@ class RazerBlackWidowUltimate2012(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x010D
     DEDICATED_MACRO_KEYS = True
-    MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
@@ -308,7 +311,6 @@ class RazerBlackWidowStealth(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x011B
     DEDICATED_MACRO_KEYS = True
-    MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
@@ -324,7 +326,6 @@ class RazerBlackWidowStealthEdition(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x010E
     DEDICATED_MACRO_KEYS = True
-    MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
@@ -340,7 +341,6 @@ class RazerBlackWidowUltimate2013(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x011A
     DEDICATED_MACRO_KEYS = True
-    MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
 
@@ -990,7 +990,7 @@ class RazerCynosaV2(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1694/1694-2.png"
 
 
-class RazerCynosaLite(_RippleKeyboard):
+class RazerCynosaLite(_MacroKeyboard):
     """
     Class for the Razer Cynosa Lite
     """
@@ -1006,7 +1006,7 @@ class RazerCynosaLite(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/og-image/cynosa-lite-OGimage.jpg"
 
 
-class RazerBlackWidowLite(_RippleKeyboard):
+class RazerBlackWidowLite(_MacroKeyboard):
     """
     Class for the Razer BlackWidow Lite
     """
@@ -1283,7 +1283,7 @@ class RazerBlade2018Mercury(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1552/1552-blade-stealth-mercury-white.png"
 
 
-class RazerBlade2018Base(_RippleKeyboard):
+class RazerBlade2018Base(_MacroKeyboard):
     """
     Class for the Razer Blade 15 (2018) Base Model
     """
@@ -1297,7 +1297,7 @@ class RazerBlade2018Base(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1418/1418_blade_2018__base.png"
 
 
-class RazerBladeStealth2019(_RippleKeyboard):
+class RazerBladeStealth2019(_MacroKeyboard):
     """
     Class for the Razer Blade Stealth (2019)
     """
@@ -1311,7 +1311,7 @@ class RazerBladeStealth2019(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1475/1475_bladestealth13(2019).png"
 
 
-class RazerBladeStealthLate2019(_RippleKeyboard):
+class RazerBladeStealthLate2019(_MacroKeyboard):
     """
     Class for the Razer Blade Stealth (Late 2019)
     """
@@ -1325,7 +1325,7 @@ class RazerBladeStealthLate2019(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-stealth-13/shop/stealth-l2p-1.jpg"
 
 
-class RazerBladeStealthEarly2020(_RippleKeyboard):
+class RazerBladeStealthEarly2020(_MacroKeyboard):
     """
     Class for the Razer Blade Stealth (Early 2020)
     """
@@ -1339,7 +1339,7 @@ class RazerBladeStealthEarly2020(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-stealth-13/shop/sl25p-fhd-4.jpg"
 
 
-class RazerBladeStealthLate2020(_RippleKeyboard):
+class RazerBladeStealthLate2020(_MacroKeyboard):
     """
     Class for the Razer Blade Stealth (Late 2020)
     """
@@ -1353,7 +1353,7 @@ class RazerBladeStealthLate2020(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-stealth-13/shop/sl25p-fhd-4.jpg"
 
 
-class RazerBook2020(_RippleKeyboard):
+class RazerBook2020(_MacroKeyboard):
     """
     Class for the Razer Book (2020)
     """
@@ -1405,7 +1405,7 @@ class RazerBladeMid2019Mercury(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-15/shop/blade15-mercury-1.jpg"
 
 
-class RazerBlade2019Base(_RippleKeyboard):
+class RazerBlade2019Base(_MacroKeyboard):
     """
     Class for the Razer Blade 15 (Mid 2019) Base Model
     """
@@ -1419,7 +1419,7 @@ class RazerBlade2019Base(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1518/1518_blade15_mid2019-base.png"
 
 
-class RazerBladeEarly2020Base(_RippleKeyboard):
+class RazerBladeEarly2020Base(_MacroKeyboard):
     """
     Class for the Razer Blade Base (Early 2020)
     """
@@ -1663,7 +1663,7 @@ class RazerBlade17ProEarly2021(_RippleKeyboard):
     DEVICE_IMAGE = "https://dl.razerzone.com/src/4025-16-EN-v1.png"
 
 
-class RazerBladeEarly2021Base(_RippleKeyboard):
+class RazerBladeEarly2021Base(_MacroKeyboard):
     """
     Class for the Razer Blade Base (Early 2021)
     """
