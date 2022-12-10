@@ -200,7 +200,10 @@ class RazerDevice(object):
         }
 
         # Nasty hack to convert dbus.Int32 into native
-        self._matrix_dimensions = tuple([int(dim) for dim in self._dbus_interfaces['device'].getMatrixDimensions()])
+        if self.has('lighting_led_matrix'):
+            self._matrix_dimensions = tuple([int(dim) for dim in self._dbus_interfaces['device'].getMatrixDimensions()])
+        else:
+            self._matrix_dimensions = None
 
         if self.has('keyboard_layout'):
             self._kbd_layout = str(self._dbus_interfaces['device'].getKeyboardLayout())
