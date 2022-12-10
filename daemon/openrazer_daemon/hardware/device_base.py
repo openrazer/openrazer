@@ -35,7 +35,7 @@ class RazerDevice(DBusService):
     USB_PID = None
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = False
-    MATRIX_DIMS = [-1, -1]
+    MATRIX_DIMS = None
 
     WAVE_DIRS = (1, 2)
 
