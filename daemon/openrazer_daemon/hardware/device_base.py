@@ -36,6 +36,7 @@ class RazerDevice(DBusService):
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = None
+    POLL_RATES = None
 
     WAVE_DIRS = (1, 2)
 
@@ -103,6 +104,8 @@ class RazerDevice(DBusService):
             self.dpi = [1800, 1800]
 
         self.poll_rate = 500
+        if 'set_poll_rate' in self.METHODS and not self.POLL_RATES:
+            self.POLL_RATES = [125, 500, 1000]
 
         self._effect_sync = effect_sync.EffectSync(self, device_number)
 

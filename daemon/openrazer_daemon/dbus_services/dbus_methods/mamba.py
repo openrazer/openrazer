@@ -312,12 +312,7 @@ def set_poll_rate(self, rate):
     """
     self.logger.debug("DBus call set_poll_rate")
 
-    if hasattr(self, 'POLL_RATES'):
-        supported_poll_rates = self.POLL_RATES
-    else:
-        supported_poll_rates = (125, 500, 1000)
-
-    if rate in supported_poll_rates:
+    if rate in self.POLL_RATES:
         driver_path = self.get_driver_path('poll_rate')
 
         # remember poll rate
@@ -352,7 +347,4 @@ def get_supported_poll_rates(self):
     """
     self.logger.debug("DBus call get_supported_poll_rates")
 
-    if hasattr(self, 'POLL_RATES'):
-        return self.POLL_RATES
-    else:
-        return [125, 500, 1000]
+    return self.POLL_RATES
