@@ -542,7 +542,7 @@ class RazerNagaTrinity(__RazerDevice):
     USB_PID = 0x0067
     HAS_MATRIX = False  # TODO Device supports matrix, driver missing
     DEDICATED_MACRO_KEYS = True
-    MATRIX_DIMS = [1, 3]
+    # MATRIX_DIMS = [1, 3]
     METHODS = ['get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_brightness', 'set_brightness', 'set_static_effect', 'max_dpi']
 
