@@ -312,16 +312,16 @@ def set_poll_rate(self, rate):
     """
     self.logger.debug("DBus call set_poll_rate")
 
-    if rate in self.POLL_RATES:
-        driver_path = self.get_driver_path('poll_rate')
+    if rate not in self.POLL_RATES:
+        raise RuntimeError("Poll rate " + str(rate) + " is not allowed. Allowed values: " + str(self.POLL_RATES))
 
-        # remember poll rate
-        self.poll_rate = rate
+    driver_path = self.get_driver_path('poll_rate')
 
-        with open(driver_path, 'w') as driver_file:
-            driver_file.write(str(rate))
-    else:
-        self.logger.error("Poll rate %d is invalid", rate)
+    # remember poll rate
+    self.poll_rate = rate
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write(str(rate))
 
 
 @endpoint('razer.device.misc', 'getPollRate', out_sig='i')
