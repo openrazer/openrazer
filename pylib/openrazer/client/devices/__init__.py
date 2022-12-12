@@ -67,6 +67,7 @@ class RazerDevice(object):
             'macro_mode_led': self._has_feature('razer.device.led.macromode', 'setMacroMode'),
             'macro_mode_led_effect': self._has_feature('razer.device.led.macromode', 'setMacroEffect'),
             'macro_mode_modifier': self._has_feature('razer.device.macro', 'setModeModifier'),
+            'reactive_trigger': self._has_feature('razer.device.misc', 'triggerReactive'),
 
             'poll_rate': self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate')),
             'supported_poll_rates': self._has_feature('razer.device.misc', 'getSupportedPollRates'),
@@ -88,6 +89,7 @@ class RazerDevice(object):
             'lighting_none': self._has_feature('razer.device.lighting.chroma', 'setNone'),
             'lighting_spectrum': self._has_feature('razer.device.lighting.chroma', 'setSpectrum'),
             'lighting_static': self._has_feature('razer.device.lighting.chroma', 'setStatic'),
+            'lighting_blinking': self._has_feature('razer.device.lighting.chroma', 'setBlinking'),
 
             'lighting_starlight_single': self._has_feature('razer.device.lighting.chroma', 'setStarlightSingle'),
             'lighting_starlight_dual': self._has_feature('razer.device.lighting.chroma', 'setStarlightDual'),
@@ -516,8 +518,8 @@ class RazerDevice(object):
         if self.has('poll_rate'):
             if not isinstance(poll_rate, int):
                 raise ValueError("Poll rate is not an integer: {0}".format(poll_rate))
-            if poll_rate not in (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ, _c.POLL_2000HZ, _c.POLL_4000HZ, _c.POLL_8000HZ):
-                raise ValueError('Poll rate "{0}" is not one of {1}'.format(poll_rate, (_c.POLL_125HZ, _c.POLL_500HZ, _c.POLL_1000HZ, _c.POLL_2000HZ, _c.POLL_4000HZ, _c.POLL_8000HZ)))
+            if poll_rate not in (_c.POLL_125HZ, _c.POLL_250HZ, _c.POLL_500HZ, _c.POLL_1000HZ, _c.POLL_2000HZ, _c.POLL_4000HZ, _c.POLL_8000HZ):
+                raise ValueError('Poll rate "{0}" is not one of {1}'.format(poll_rate, (_c.POLL_125HZ, _c.POLL_250HZ, _c.POLL_500HZ, _c.POLL_1000HZ, _c.POLL_2000HZ, _c.POLL_4000HZ, _c.POLL_8000HZ)))
 
             self._dbus_interfaces['device'].setPollRate(poll_rate)
 

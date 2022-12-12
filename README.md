@@ -71,7 +71,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade 15 Base (Early 2020)              |  1532:0255  |
 | Razer Blade Pro 17 (Early 2020)               |  1532:0256  |
 | Razer Huntsman Mini                           |  1532:0257  |
-| Razer BlackWidow V3 Mini Hyperspeed           |  1532:0258  |
+| Razer BlackWidow V3 Mini Hyperspeed (Wired)   |  1532:0258  |
 | Razer Blade Stealth (Late 2020)               |  1532:0259  |
 | Razer BlackWidow V3 Pro (Wired)               |  1532:025A  |
 | Razer Ornata V2                               |  1532:025D  |
@@ -80,8 +80,10 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Huntsman V2 Analog                      |  1532:0266  |
 | Razer Huntsman Mini (JP)                      |  1532:0269  |
 | Razer Book 13 (2020)                          |  1532:026A  |
+| Razer Huntsman V2 TKL                         |  1532:026B  |
 | Razer Huntsman V2                             |  1532:026C  |
 | Razer Blade 15 Advanced (Early 2021)          |  1532:026D  |
+| Razer Blade 17 Pro (Early 2021)               |  1532:026E  |
 | Razer Blade 15 Base (Early 2021)              |  1532:026F  |
 | Razer Blade 14 (2021)                         |  1532:0270  |
 | Razer BlackWidow V3 Mini Hyperspeed (Wireless)|  1532:0271  |
@@ -90,6 +92,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Huntsman Mini Analog                    |  1532:0282  |
 | Razer Blade 15 Advanced (Early 2022)          |  1532:028A  |
 | Razer Blade 17 (2022)                         |  1532:028B  |
+| Razer DeathStalker V2                         |  1532:0295  |
 | Razer BlackWidow V3 Tenkeyless                |  1532:0A24  |
 
 ### Mice
@@ -169,6 +172,8 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer DeathAdder V2 X HyperSpeed              |  1532:009C  |
 | Razer Viper V2 Pro (Wired)                    |  1532:00A5  |
 | Razer Viper V2 Pro (Wireless)                 |  1532:00A6  |
+| Razer DeathAdder V3 Pro (Wired)               |  1532:00B6  |
+| Razer DeathAdder V3 Pro (Wireless)            |  1532:00B7  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |
