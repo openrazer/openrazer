@@ -1,3 +1,5 @@
-usr/lib/python3/dist-packages/openrazer_daemon
 usr/bin/openrazer-daemon
-usr/share/openrazer
+usr/lib/python3/dist-packages/openrazer_daemon/
+usr/lib/systemd/user/openrazer-daemon.service
+usr/share/dbus-1/services/org.razer.service
+usr/share/openrazer/
