@@ -121,8 +121,6 @@ appstream_install:
 ubuntu_install: setup_dkms udev_install ubuntu_daemon_install ubuntu_python_library_install appstream_install
 	@echo -e "\n::\033[34m Installing for Ubuntu\033[0m"
 	@echo "====================================================="
-	mv $(DESTDIR)$(PREFIX)/lib/python3.* $(DESTDIR)$(PREFIX)/lib/python3
-	mv $(DESTDIR)$(PREFIX)/lib/python3/site-packages $(DESTDIR)$(PREFIX)/lib/python3/dist-packages
 
 install_i_know_what_i_am_doing: all driver_install udev_install python_library_install
 	@make --no-print-directory -C daemon install DESTDIR=$(DESTDIR)

@@ -22,7 +22,7 @@ install: purge_pycache manpages install-resources install-systemd
 	python3 setup.py install --prefix=$(PREFIX) --root=$(DESTDIR)
 
 ubuntu_install: purge_pycache manpages install-resources
-	python3 setup.py install --prefix=$(PREFIX) --root=$(DESTDIR) --no-compile
+	python3 setup.py install --prefix=$(PREFIX) --root=$(DESTDIR) --no-compile --install-layout=deb
 
 manpages:
 	@install -m 644 -D -v resources/man/razer.conf.5 $(DESTDIR)$(PREFIX)/share/man/man5/razer.conf.5

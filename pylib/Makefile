@@ -9,4 +9,4 @@ install: purge_pycache
 	python3 setup.py install --prefix=/usr --root=$(DESTDIR)
 
 ubuntu_install: purge_pycache
-	python3 setup.py install --prefix=/usr --root=$(DESTDIR) --no-compile
+	python3 setup.py install --prefix=/usr --root=$(DESTDIR) --no-compile --install-layout=deb
