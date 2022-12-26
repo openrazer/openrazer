@@ -423,6 +423,7 @@ class KeyboardKeyManager(object):
                                 # Clear macro
                                 self.dbus_delete_macro(self._current_macro_bind_key)
                         self._recording_macro = False
+                        self._parent.setMacroEffect(0x00)
                         self._parent.setMacroMode(False)
                 # Sets up game mode as when enabling macro keys it stops the key working
                 elif key_name == 'GAMEMODE':
