@@ -444,7 +444,7 @@ class KeyboardKeyManager(object):
                             current_brightness = 0
 
                         self._parent.setBrightness(current_brightness)
-                        #self._parent.method_args['brightness'] = current_brightness
+                        # self._parent.method_args['brightness'] = current_brightness
                 elif key_name == 'BRIGHTNESSUP':
                     # Get brightness value
                     current_brightness = self._parent.method_args.get('brightness', None)
@@ -457,7 +457,7 @@ class KeyboardKeyManager(object):
                             current_brightness = 100
 
                         self._parent.setBrightness(current_brightness)
-                        #self._parent.method_args['brightness'] = current_brightness
+                        # self._parent.method_args['brightness'] = current_brightness
 
                 elif self._recording_macro:
 
@@ -613,7 +613,7 @@ class KeyboardKeyManager(object):
             # Device is the device the msg originated from (could be parent device)
             if msg[2] != 'setRipple':
                 # If we are not doing ripple effect then disable the storing of keys
-                #self.temp_key_store_state = False
+                # self.temp_key_store_state = False
                 pass
 
 
@@ -688,9 +688,9 @@ class GamepadKeyManager(KeyboardKeyManager):
 
             # if self._testing:
             # if key_press:
-                #self._logger.debug("Got Key: {0} Down".format(key_name))
+                # self._logger.debug("Got Key: {0} Down".format(key_name))
             # else:
-                #self._logger.debug("Got Key: {0} Up".format(key_name))
+                # self._logger.debug("Got Key: {0} Up".format(key_name))
 
             # Logic for mode switch modifier
             if self._mode_modifier:

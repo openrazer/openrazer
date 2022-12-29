@@ -1152,6 +1152,46 @@ class RazerDeathStalkerV2(_RippleKeyboard):
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6118/6118-1-en-v1.png"
 
 
+class RazerDeathStalkerV2ProTKLWireless(_RippleKeyboard):
+    """
+    Class for the Razer DeathStalker V2 Pro TKL (Wireless)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*DSV2Pro_TKL(_\d*)?(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0296
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 18]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/d426040c23f4eccf4b4510f4fd9d5b80/deathstalker-v2-line-usp-deathstalker-v2-pro-tkl.jpg"
+
+
+class RazerDeathStalkerV2ProTKLWired(_RippleKeyboard):
+    """
+    Class for the Razer DeathStalker V2 Pro TKL (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*DSV2Pro_TKL-(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0298
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 18]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/d426040c23f4eccf4b4510f4fd9d5b80/deathstalker-v2-line-usp-deathstalker-v2-pro-tkl.jpg"
+
+
 class RazerBlackWidowChromaOverwatch(_RippleKeyboard):
     """
     Class for the Razer BlackWidow Chroma (Overwatch)
