@@ -214,6 +214,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Chroma Mug Holder                       |  1532:0F07  |
 | Razer Base Station Chroma                     |  1532:0F08  |
 | Razer Chroma Hardware Development Kit (HDK)   |  1532:0F09  |
+| Razer Laptop Stand Chroma                     |  1532:0F0D  |
 | Razer Raptor 27                               |  1532:0F12  |
 | Razer Core X Chroma                           |  1532:0F1A  |
 | Razer Mouse Bungee V3 Chroma                  |  1532:0F1D  |
