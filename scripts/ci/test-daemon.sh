@@ -13,3 +13,4 @@ if [ "$all_devices" != "$daemon_devices" ]; then
 fi
 
 PYTHONPATH="pylib:daemon" python3 scripts/ci/test-daemon.py
+PYTHONPATH="pylib:daemon" python3 scripts/ci/test-pids.py
