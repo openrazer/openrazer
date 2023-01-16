@@ -218,6 +218,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Raptor 27                               |  1532:0F12  |
 | Razer Core X Chroma                           |  1532:0F1A  |
 | Razer Mouse Bungee V3 Chroma                  |  1532:0F1D  |
+| Razer Chroma Addressable RGB Controller       |  1532:0F1F  |
 | Razer Base Station V2 Chroma                  |  1532:0F20  |
 | Razer Thunderbolt 4 Dock Chroma               |  1532:0F21  |
 | Razer Charging Pad Chroma                     |  1532:0F26  |
