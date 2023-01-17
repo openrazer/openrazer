@@ -1730,7 +1730,7 @@ class RazerDeathAdderV3ProWired(__RazerDevice):
     USB_PID = 0x00B6
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
                'get_poll_rate', 'set_poll_rate',
-               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time']
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6130/6130-1-en-v2.png"
 
@@ -1790,7 +1790,7 @@ class RazerBasiliskV3ProWired(__RazerDevice):
                # Can set custom matrix effects
                'set_custom_effect', 'set_key_row',
                # Battery
-               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time']
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6220/6220-4-en-v1.png"
 
