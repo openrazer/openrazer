@@ -268,7 +268,7 @@ class RazerDevice(DBusService):
 
                     # zone active status
                     try:
-                        self.zone[i]["active"] = bool(self.persistence[self.storage_name][i + '_active'])
+                        self.zone[i]["active"] = self.persistence.getboolean(self.storage_name, i + '_active')
                     except KeyError:
                         pass
 
