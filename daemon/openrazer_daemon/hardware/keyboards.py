@@ -1193,6 +1193,7 @@ class RazerDeathStalkerV2ProWireless(RazerDeathStalkerV2ProWired):
     """
     USB_PID = 0x0290
 
+
 class RazerDeathStalkerV2ProTenkeylessWired(RazerDeathStalkerV2ProWired):
     """
     Class for the Razer DeathStalker V2 Pro Tenkeyless (Wired)
@@ -1201,11 +1202,13 @@ class RazerDeathStalkerV2ProTenkeylessWired(RazerDeathStalkerV2ProWired):
     MATRIX_DIMS = [6, 17]
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/a54bdf79abdfc0d42a0fff19047725a3/deathstalker-v2-pro-tenkeyless-500x500.png"
 
+
 class RazerDeathStalkerV2ProTenkeylessWireless(RazerDeathStalkerV2ProTenkeylessWired):
     """
     Class for the Razer DeathStalker V2 Pro Tenkeyless (Wireless)
     """
     USB_PID = 0x0296
+
 
 class RazerBlackWidowChromaOverwatch(_RippleKeyboard):
     """
