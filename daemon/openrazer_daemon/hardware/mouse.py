@@ -1252,7 +1252,7 @@ class RazerBasiliskV2(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x0085
     HAS_MATRIX = True
-    MATRIX_DIMS = [1, 1]
+    MATRIX_DIMS = [1, 2]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Logo
