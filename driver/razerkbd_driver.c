@@ -256,6 +256,7 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         report_index = 0x03;
         response_index = 0x03;
         return razer_get_usb_response(usb_dev, report_index, request, response_index, response, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
@@ -374,6 +375,7 @@ static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         request.transaction_id.id = 0x1F;
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
@@ -400,6 +402,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         request.transaction_id.id = 0x1f;
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
@@ -431,6 +434,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         request.transaction_id.id = 0x1f;
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
@@ -1049,6 +1053,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer DeathStalker V2 Pro (Wireless)\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
+        device_type = "Razer DeathStalker V2 Pro TKL (Wired)\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
     }
@@ -1406,6 +1414,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         request = razer_chroma_extended_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
         break;
 
@@ -1480,6 +1489,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, direction);
         break;
 
@@ -1545,6 +1555,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, BACKLIGHT_LED);
         break;
 
@@ -1628,6 +1639,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         request = razer_chroma_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
         break;
 
@@ -1781,6 +1793,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         if (count != 3) {
             printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
             return -EINVAL;
@@ -1881,6 +1894,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         if(count == 7) {
             request = razer_chroma_extended_matrix_effect_starlight_dual(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
             razer_send_payload(usb_dev, &request, &response);
@@ -2065,6 +2079,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         switch(count) {
         case 3: // Single colour mode
             request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
@@ -2272,6 +2287,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         request = razer_chroma_extended_matrix_effect_custom_frame();
         break;
 
@@ -2392,6 +2408,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, BACKLIGHT_LED, brightness);
         break;
 
@@ -2473,6 +2490,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         request = razer_chroma_extended_matrix_get_brightness(VARSTORE, BACKLIGHT_LED);
         break;
 
@@ -2626,6 +2644,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_CYNOSA_CHROMA_PRO:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
             request = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             break;
 
@@ -2984,6 +3003,7 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         translation = find_translation(chroma_keys_5, usage->code);
         break;
 
@@ -3302,6 +3322,7 @@ static int razer_kbd_input_mapping(struct hid_device *hdev, struct hid_input *hi
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         if (hdev->type == HID_TYPE_USBMOUSE && usage->hid == HID_GD_WHEEL) {
             hid_map_usage(hidinput, usage, bit, max, EV_ABS, ABS_VOLUME);
             return 1;
@@ -3469,6 +3490,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
+        case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_super);                     // Super Key
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_tab);                   // Alt + Tab
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_f4);                    // Alt + F4
@@ -3887,6 +3909,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
+        case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
             device_remove_file(&hdev->dev, &dev_attr_key_super);                     // Super Key
             device_remove_file(&hdev->dev, &dev_attr_key_alt_tab);                   // Alt + Tab
             device_remove_file(&hdev->dev, &dev_attr_key_alt_f4);                    // Alt + F4
@@ -4216,6 +4239,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED) },
     { 0 }
 };
 
