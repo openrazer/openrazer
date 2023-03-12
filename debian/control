@@ -2,7 +2,7 @@ Source: openrazer
 Maintainer: Terry Cain <terry@terrys-home.co.uk>
 Section: misc
 Priority: optional
-Build-Depends: debhelper (>= 12),
+Build-Depends: debhelper (>= 11),
                dh-python,
                python3,
                python3-setuptools
