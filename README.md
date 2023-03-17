@@ -101,6 +101,8 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer DeathStalker V2 Pro TKL (Wired)         |  1532:0298  |
 | Razer DeathStalker V2                         |  1532:0295  |
 | Razer Blade 15 (2023)                         |  1532:029E  |
+| Razer Blade 16 (2023)                         |  1532:029F  |
+| Razer Blade 18 (2023)                         |  1532:02A0  |
 | Razer BlackWidow V3 Tenkeyless                |  1532:0A24  |
 
 ### Mice
