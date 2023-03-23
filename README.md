@@ -75,7 +75,6 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade Stealth (Late 2020)               |  1532:0259  |
 | Razer BlackWidow V3 Pro (Wired)               |  1532:025A  |
 | Razer Ornata V2                               |  1532:025D  |
-| Razer Ornata V3                               |  1532:028F  |
 | Razer Cynosa V2                               |  1532:025E  |
 | Razer Huntsman V2 Analog                      |  1532:0266  |
 | Razer Huntsman Mini (JP)                      |  1532:0269  |
@@ -94,6 +93,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade 15 Advanced (Early 2022)          |  1532:028A  |
 | Razer Blade 17 (2022)                         |  1532:028B  |
 | Razer Blade 14 (2022)                         |  1532:028C  |
+| Razer Ornata V3                               |  1532:028F  |
 | Razer DeathStalker V2 Pro (Wireless)          |  1532:0290  |
 | Razer DeathStalker V2 Pro (Wired)             |  1532:0292  |
 | Razer DeathStalker V2                         |  1532:0295  |

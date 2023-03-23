@@ -54,6 +54,7 @@ compile_commands.json
 __pycache__
 
 dist
+.vscode
 .idea
 .project
 .cproject

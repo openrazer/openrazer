@@ -946,6 +946,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_ORNATA_V3:
         device_type = "Razer Ornata V3\n";
         break;
+
     case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
         device_type = "Razer Huntsman Elite\n";
         break;
