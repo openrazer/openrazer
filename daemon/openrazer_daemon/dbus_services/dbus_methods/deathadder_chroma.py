@@ -56,23 +56,6 @@ def set_backlight_active(self, active):
             driver_file.write('0')
 
 
-@endpoint('razer.device.lighting.backlight', 'getBacklightEffect', out_sig='y')
-def get_backlight_effect(self):
-    """
-    Get backlight effect
-
-    :return: Effect
-    :rtype: int
-    """
-    self.logger.debug("DBus call get_backlight_effect")
-
-    driver_path = self.get_driver_path('backlight_led_effect')
-
-    with open(driver_path, 'r') as driver_file:
-        effect = int(driver_file.read().strip())
-        return effect
-
-
 @endpoint('razer.device.lighting.backlight', 'getBacklightBrightness', out_sig='d')
 def get_backlight_brightness(self):
     """
@@ -83,12 +66,7 @@ def get_backlight_brightness(self):
     """
     self.logger.debug("DBus call get_backlight_brightness")
 
-    driver_path = self.get_driver_path('backlight_led_brightness')
-
-    with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0 / 255.0), 2)
-
-        return brightness
+    return self.zone["backlight"]["brightness"]
 
 
 @endpoint('razer.device.lighting.backlight', 'setBacklightBrightness', in_sig='d')
@@ -161,7 +139,7 @@ def set_backlight_pulsate(self, red, green, blue):
     :param blue: Blue component
     :type blue: int
     """
-    self.logger.debug("DBus call set_backlight_pulsing")
+    self.logger.debug("DBus call set_backlight_pulsate")
 
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
@@ -281,7 +259,7 @@ def set_logo_static(self, red, green, blue):
     :param blue: Blue component
     :type blue: int
     """
-    self.logger.debug("DBus call set_static_effect")
+    self.logger.debug("DBus call set_logo_static")
 
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
@@ -428,23 +406,6 @@ def set_scroll_active(self, active):
         driver_file.write('1' if active else '0')
 
 
-@endpoint('razer.device.lighting.scroll', 'getScrollEffect', out_sig='y')
-def get_scroll_effect(self):
-    """
-    Get scroll effect
-
-    :return: Effect
-    :rtype: int
-    """
-    self.logger.debug("DBus call get_scroll_effect")
-
-    driver_path = self.get_driver_path('scroll_led_effect')
-
-    with open(driver_path, 'r') as driver_file:
-        effect = int(driver_file.read().strip())
-        return effect
-
-
 @endpoint('razer.device.lighting.scroll', 'getScrollBrightness', out_sig='d')
 def get_scroll_brightness(self):
     """
@@ -541,7 +502,7 @@ def set_scroll_blinking(self, red, green, blue):
     :param blue: Blue component
     :type blue: int
     """
-    self.logger.debug("DBus call set_scroll_pulsate")
+    self.logger.debug("DBus call set_scroll_blinking")
 
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
@@ -567,7 +528,7 @@ def set_scroll_pulsate(self, red, green, blue):
     :param blue: Blue component
     :type blue: int
     """
-    self.logger.debug("DBus call set_scroll_breathing")
+    self.logger.debug("DBus call set_scroll_pulsate")
 
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)

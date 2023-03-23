@@ -89,9 +89,13 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer BlackWidow V3 Mini Hyperspeed (Wireless)|  1532:0271  |
 | Razer Blade 15 Advanced (Mid 2021)            |  1532:0276  |
 | Razer Blade 17 Pro (Mid 2021)                 |  1532:0279  |
+| Razer Blade 15 Base (2022)                    |  1432:027A  |
 | Razer Huntsman Mini Analog                    |  1532:0282  |
 | Razer Blade 15 Advanced (Early 2022)          |  1532:028A  |
 | Razer Blade 17 (2022)                         |  1532:028B  |
+| Razer Blade 14 (2022)                         |  1532:028C  |
+| Razer DeathStalker V2 Pro (Wireless)          |  1532:0290  |
+| Razer DeathStalker V2 Pro (Wired)             |  1532:0292  |
 | Razer DeathStalker V2                         |  1532:0295  |
 | Razer BlackWidow V3 Tenkeyless                |  1532:0A24  |
 
@@ -172,6 +176,9 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer DeathAdder V2 X HyperSpeed              |  1532:009C  |
 | Razer Viper V2 Pro (Wired)                    |  1532:00A5  |
 | Razer Viper V2 Pro (Wireless)                 |  1532:00A6  |
+| Razer Basilisk V3 Pro (Wired)                 |  1532:00AA  |
+| Razer Basilisk V3 Pro (Wireless)              |  1532:00AB  |
+| Razer HyperPolling Wireless Dongle            |  1532:00B3  |
 | Razer DeathAdder V3 Pro (Wired)               |  1532:00B6  |
 | Razer DeathAdder V3 Pro (Wireless)            |  1532:00B7  |
 
@@ -210,8 +217,11 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Chroma Mug Holder                       |  1532:0F07  |
 | Razer Base Station Chroma                     |  1532:0F08  |
 | Razer Chroma Hardware Development Kit (HDK)   |  1532:0F09  |
+| Razer Laptop Stand Chroma                     |  1532:0F0D  |
 | Razer Raptor 27                               |  1532:0F12  |
+| Razer Core X Chroma                           |  1532:0F1A  |
 | Razer Mouse Bungee V3 Chroma                  |  1532:0F1D  |
+| Razer Chroma Addressable RGB Controller       |  1532:0F1F  |
 | Razer Base Station V2 Chroma                  |  1532:0F20  |
 | Razer Thunderbolt 4 Dock Chroma               |  1532:0F21  |
 | Razer Charging Pad Chroma                     |  1532:0F26  |

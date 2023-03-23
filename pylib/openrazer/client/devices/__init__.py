@@ -200,7 +200,10 @@ class RazerDevice(object):
         }
 
         # Nasty hack to convert dbus.Int32 into native
-        self._matrix_dimensions = tuple([int(dim) for dim in self._dbus_interfaces['device'].getMatrixDimensions()])
+        if self.has('lighting_led_matrix'):
+            self._matrix_dimensions = tuple([int(dim) for dim in self._dbus_interfaces['device'].getMatrixDimensions()])
+        else:
+            self._matrix_dimensions = None
 
         if self.has('keyboard_layout'):
             self._kbd_layout = str(self._dbus_interfaces['device'].getKeyboardLayout())
@@ -518,8 +521,6 @@ class RazerDevice(object):
         if self.has('poll_rate'):
             if not isinstance(poll_rate, int):
                 raise ValueError("Poll rate is not an integer: {0}".format(poll_rate))
-            if poll_rate not in (_c.POLL_125HZ, _c.POLL_250HZ, _c.POLL_500HZ, _c.POLL_1000HZ, _c.POLL_2000HZ, _c.POLL_4000HZ, _c.POLL_8000HZ):
-                raise ValueError('Poll rate "{0}" is not one of {1}'.format(poll_rate, (_c.POLL_125HZ, _c.POLL_250HZ, _c.POLL_500HZ, _c.POLL_1000HZ, _c.POLL_2000HZ, _c.POLL_4000HZ, _c.POLL_8000HZ)))
 
             self._dbus_interfaces['device'].setPollRate(poll_rate)
 

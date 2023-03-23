@@ -1,3 +1,4 @@
-lib/udev/
-usr/src/
+lib/udev/razer_mount
+lib/udev/rules.d/99-razer.rules
 usr/share/metainfo/io.github.openrazer.openrazer.metainfo.xml
+usr/src/openrazer-driver-*/

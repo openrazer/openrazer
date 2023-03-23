@@ -35,7 +35,8 @@ class RazerDevice(DBusService):
     USB_PID = None
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = False
-    MATRIX_DIMS = [-1, -1]
+    MATRIX_DIMS = None
+    POLL_RATES = None
 
     WAVE_DIRS = (1, 2)
 
@@ -103,6 +104,8 @@ class RazerDevice(DBusService):
             self.dpi = [1800, 1800]
 
         self.poll_rate = 500
+        if 'set_poll_rate' in self.METHODS and not self.POLL_RATES:
+            self.POLL_RATES = [125, 500, 1000]
 
         self._effect_sync = effect_sync.EffectSync(self, device_number)
 
@@ -150,11 +153,20 @@ class RazerDevice(DBusService):
         }
 
         effect_methods = {
-            "backlight": {
+            "backlight_chroma": {
                 ('razer.device.lighting.chroma', 'getEffect', self.get_current_effect, None, 's'),
                 ('razer.device.lighting.chroma', 'getEffectColors', self.get_current_effect_colors, None, 'ay'),
                 ('razer.device.lighting.chroma', 'getEffectSpeed', self.get_current_effect_speed, None, 'i'),
                 ('razer.device.lighting.chroma', 'getWaveDir', self.get_current_wave_dir, None, 'i'),
+            },
+
+            "backlight": {
+                # Intentionally using the same underlying methods as backlight_chroma.
+                # Both refer to the 'backlight' LED internally but partially exist separately due to historical reasons.
+                ('razer.device.lighting.backlight', 'getBacklightEffect', self.get_current_effect, None, 's'),
+                ('razer.device.lighting.backlight', 'getBacklightEffectColors', self.get_current_effect_colors, None, 'ay'),
+                ('razer.device.lighting.backlight', 'getBacklightEffectSpeed', self.get_current_effect_speed, None, 'i'),
+                ('razer.device.lighting.backlight', 'getBacklightWaveDir', self.get_current_wave_dir, None, 'i'),
             },
 
             "logo": {
@@ -214,11 +226,11 @@ class RazerDevice(DBusService):
         # this check is separate from the rest because backlight effects don't have prefixes in their names
         if 'set_static_effect' in self.METHODS or 'bw_set_static' in self.METHODS:
             self.zone["backlight"]["present"] = True
-            for m in effect_methods["backlight"]:
+            for m in effect_methods["backlight_chroma"]:
                 self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
                 self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
 
-        for i in self.ZONES[1:]:
+        for i in self.ZONES:
             if 'set_' + i + '_static' in self.METHODS or 'set_' + i + '_static_naga_hex_v2' in self.METHODS or 'set_' + i + '_active' in self.METHODS:
                 self.zone[i]["present"] = True
                 for m in effect_methods[i]:
@@ -256,7 +268,7 @@ class RazerDevice(DBusService):
 
                     # zone active status
                     try:
-                        self.zone[i]["active"] = bool(self.persistence[self.storage_name][i + '_active'])
+                        self.zone[i]["active"] = self.persistence.getboolean(self.storage_name, i + '_active')
                     except KeyError:
                         pass
 

@@ -11,7 +11,7 @@ device_manager = DeviceManager()
 print("Found {} Razer devices".format(len(device_manager.devices)))
 
 devices = device_manager.devices
-for device in devices:
+for device in list(devices):
     if not device.fx.advanced:
         print("Skipping device " + device.name + " (" + device.serial + ")")
         devices.remove(device)
@@ -32,6 +32,7 @@ def random_color():
 
 # Set random colors for each zone of each device
 for device in devices:
+    print("Drawing to device " + device.name + " (" + device.serial + ")")
     rows, cols = device.fx.advanced.rows, device.fx.advanced.cols
 
     for row in range(rows):

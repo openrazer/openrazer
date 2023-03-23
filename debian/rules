@@ -16,12 +16,7 @@ override_dh_auto_build:
 	echo "DKMS modules are built at packages installation time."
 
 override_dh_auto_install:
-	$(MAKE) ubuntu_install install-systemd DESTDIR=$(DEB_DESTDIR)
-
-override_dh_install:
-	dh_install --package=openrazer-daemon usr/share/dbus-1/services/org.razer.service
-	dh_install --package=openrazer-daemon usr/lib/systemd/user/openrazer-daemon.service
-	dh_install --remaining-packages
+	$(MAKE) ubuntu_install install-systemd UDEV_PREFIX=/ DESTDIR=$(DEB_DESTDIR)
 
 override_dh_dkms:
 	dh_dkms -p openrazer-driver-dkms -- install_files/dkms/dkms.conf

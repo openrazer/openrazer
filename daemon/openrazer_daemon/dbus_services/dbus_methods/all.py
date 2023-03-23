@@ -204,4 +204,9 @@ def get_matrix_dims(self):
     """
     self.logger.debug("DBus call has_matrix")
 
+    if not self.HAS_MATRIX:
+        raise RuntimeError("Device does not have matrix capabilities")
+    if self.HAS_MATRIX and self.MATRIX_DIMS is None:
+        raise RuntimeError("HAS_MATRIX is set but no MATRIX_DIMS set!")
+
     return list(self.MATRIX_DIMS)

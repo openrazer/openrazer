@@ -22,6 +22,7 @@ STARLIGHT_SLOW = 0x03
 # Ripple
 RIPPLE_REFRESH_RATE = 0.05
 
+# NOTE: These constants are deprecated. Use values from supported_poll_rates instead
 POLL_8000HZ = 8000
 POLL_4000HZ = 4000
 POLL_2000HZ = 2000

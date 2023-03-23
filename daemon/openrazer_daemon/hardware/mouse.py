@@ -542,7 +542,7 @@ class RazerNagaTrinity(__RazerDevice):
     USB_PID = 0x0067
     HAS_MATRIX = False  # TODO Device supports matrix, driver missing
     DEDICATED_MACRO_KEYS = True
-    MATRIX_DIMS = [1, 3]
+    # MATRIX_DIMS = [1, 3]
     METHODS = ['get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_brightness', 'set_brightness', 'set_static_effect', 'max_dpi']
 
@@ -1252,7 +1252,7 @@ class RazerBasiliskV2(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x0085
     HAS_MATRIX = True
-    MATRIX_DIMS = [1, 1]
+    MATRIX_DIMS = [1, 2]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Logo
@@ -1569,8 +1569,8 @@ class RazerNagaEpicChromaWired(__RazerDevice):
     USB_PID = 0x003E
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_battery', 'is_charging',
                'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
-               'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'set_scroll_static', 'set_scroll_pulsate', 'set_scroll_spectrum', 'get_scroll_brightness', 'set_scroll_brightness',
-               'set_backlight_active', 'get_backlight_active', 'get_backlight_effect', 'set_backlight_static', 'set_backlight_pulsate', 'set_backlight_spectrum', 'get_backlight_brightness', 'set_backlight_brightness']
+               'set_scroll_active', 'get_scroll_active', 'set_scroll_static', 'set_scroll_pulsate', 'set_scroll_spectrum', 'get_scroll_brightness', 'set_scroll_brightness',
+               'set_backlight_active', 'get_backlight_active', 'set_backlight_static', 'set_backlight_pulsate', 'set_backlight_spectrum', 'get_backlight_brightness', 'set_backlight_brightness']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/20776/rzrnagaepicchroma_04.png"
 
@@ -1730,7 +1730,7 @@ class RazerDeathAdderV3ProWired(__RazerDevice):
     USB_PID = 0x00B6
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
                'get_poll_rate', 'set_poll_rate',
-               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time']
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6130/6130-1-en-v2.png"
 
@@ -1759,3 +1759,104 @@ class RazerDeathAdderV3ProWireless(RazerDeathAdderV3ProWired):
     """
 
     USB_PID = 0x00B7
+
+
+class RazerBasiliskV3ProWired(__RazerDevice):
+    """
+    Class for the Razer Basilisk V3 Pro (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Basilisk_V3_Pro_000000000000-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00AA
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 13]
+    METHODS = ['get_device_type_mouse',
+               'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               'get_brightness', 'set_brightness',
+               'get_logo_brightness', 'set_logo_brightness',
+               'get_scroll_brightness', 'set_scroll_brightness',
+               # Scroll wheel controls
+               'get_scroll_mode', 'set_scroll_mode',
+               'get_scroll_acceleration', 'set_scroll_acceleration',
+               'get_scroll_smart_reel', 'set_scroll_smart_reel',
+               # All LEDs (partial support)
+               'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
+               # Logo (partial support)
+               'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2',
+               # Scroll wheel (partial support)
+               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2',
+               # Can set custom matrix effects
+               'set_custom_effect', 'set_key_row',
+               # Battery
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/6220/6220-4-en-v1.png"
+
+    DPI_MAX = 26000
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Basilisk V3 Pro')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
+
+
+class RazerBasiliskV3ProWireless(RazerBasiliskV3ProWired):
+    """
+    Class for the Razer Basilisk V3 Pro (Wireless)
+    """
+
+    USB_PID = 0x00AB
+
+
+class RazerHyperPollingWirelessDongle(__RazerDevice):
+    """
+    Class for the Razer HyperPolling Wireless Dongle
+    """
+
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_HyperPolling_Wireless_Dongle-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00B3
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
+               'set_hyperpolling_wireless_dongle_indicator_led_mode', 'set_hyperpolling_wireless_dongle_pair', 'set_hyperpolling_wireless_dongle_unpair']
+
+    POLL_RATES = [125, 500, 1000, 2000, 4000]
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/6141/6141-1-en-v1.png"  # HyperPolling Wireless Dongle
+
+    # TODO: After pairing, should find a way to use the image of the mouse instead of the dongle
+    # DEVICE_IMAGE_DAV3PRO = "https://dl.razerzone.com/src/6130/6130-1-en-v2.png"  # DeathAdder V3 Pro
+    # DEVICE_IMAGE_VIPERV2PRO = "https://dl.razerzone.com/src/6048-1-en-v10.png"  # Viper V2 Pro
+
+    DPI_MAX = 30000
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer HyperPolling Wireless Dongle')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()

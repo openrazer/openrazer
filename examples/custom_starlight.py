@@ -18,7 +18,7 @@ device_manager = DeviceManager()
 print("Found {} Razer devices".format(len(device_manager.devices)))
 
 devices = device_manager.devices
-for device in devices:
+for device in list(devices):
     if not device.fx.advanced:
         print("Skipping device " + device.name + " (" + device.serial + ")")
         devices.remove(device)
@@ -88,6 +88,7 @@ def starlight_effect(device):
 # Spawn a manager thread for each device and wait on all of them.
 threads = []
 for device in devices:
+    print("Starting starlight for device " + device.name + " (" + device.serial + ")")
     t = threading.Thread(target=starlight_effect, args=(device,), daemon=True)
     t.start()
     threads.append(t)

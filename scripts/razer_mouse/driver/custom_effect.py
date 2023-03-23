@@ -48,7 +48,7 @@ def run():
         print("Multiple mouse directories found. Rerun with -d", file=sys.stderr)
         sys.exit(1)
 
-    #choices = [b'\xff\x00\x00', b'\xff\xff\x00', b'\x00\xff\x00', b'\x00\xff\xff', b'\x00\x00\xff', b'\xff\x00\xff']
+    # choices = [b'\xff\x00\x00', b'\xff\xff\x00', b'\x00\xff\x00', b'\x00\xff\xff', b'\x00\x00\xff', b'\xff\x00\xff']
     choices = [b'\xff\x00\x00']
 
     for repeat in range(0, 10):
