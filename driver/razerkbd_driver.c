@@ -1494,10 +1494,10 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
         request = razer_chroma_standard_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, direction);
         request.transaction_id.id = 0x3F;  // TODO move to a usb_device variable
         break;
-    
+
     case USB_DEVICE_ID_RAZER_ORNATA_V3:
-        // Direction values are flipped compared to other devices 
-        direction ^= ((1<<0) | (1<<1)); 
+        // Direction values are flipped compared to other devices
+        direction ^= ((1<<0) | (1<<1));
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, direction);
         request.transaction_id.id = 0x1F;
         break;
