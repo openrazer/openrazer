@@ -118,6 +118,35 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
     return result;
 }
 
+int razer_get_hid_response(struct hid_device *hdev, struct razer_report* request_report, struct razer_report* response_report, ulong wait_min, ulong wait_max)
+{
+    char *buf;
+    int result = 0;
+
+    uint size = RAZER_USB_REPORT_LEN;
+
+    buf = kmemdup(request_report, size, GFP_KERNEL);
+
+    hid_hw_raw_request(hdev, 0, buf, size + 1, HID_FEATURE_REPORT, HID_REQ_SET_REPORT);
+
+    kfree(buf);
+
+    // Wait
+    usleep_range(wait_min, wait_max);
+
+    buf = kzalloc(sizeof(struct razer_report), GFP_KERNEL);
+    if (buf == NULL)
+        return -ENOMEM;
+
+    hid_hw_raw_request(hdev, 0, buf, size + 1, HID_FEATURE_REPORT, HID_REQ_GET_REPORT);
+
+    memcpy(response_report, buf, sizeof(struct razer_report));
+
+    kfree(buf);
+
+    return result;
+}
+
 /**
  * Calculate the checksum for the usb message
  *
