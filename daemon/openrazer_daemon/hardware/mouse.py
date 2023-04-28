@@ -1896,3 +1896,27 @@ class RazerProClickMiniReceiver(__RazerDevice):
         super()._close()
 
         self._battery_manager.close()
+
+
+class RazerDeathAdderV2Lite(__RazerDevice):
+    """
+    Class for the Razer DeathAdder V2 Lite
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_DeathAdder_V2_Lite-if0(1|2)-event-kbd')
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               'get_logo_brightness', 'set_logo_brightness',
+               # Logo
+               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
+               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               # Custom frame
+               'set_custom_effect', 'set_key_row']
+
+    USB_VID = 0x1532
+    USB_PID = 0x00A1
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1692/deathadder-v2-mini.png"
+
+    DPI_MAX = 8500

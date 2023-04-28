@@ -177,6 +177,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Basilisk V3                             |  1532:0099  |
 | Razer Pro Click Mini (Receiver)               |  1532:009A  |
 | Razer DeathAdder V2 X HyperSpeed              |  1532:009C  |
+| Razer DeathAdder V2 Lite                      |  1532:00A1  |
 | Razer Viper V2 Pro (Wired)                    |  1532:00A5  |
 | Razer Viper V2 Pro (Wireless)                 |  1532:00A6  |
 | Razer Basilisk V3 Pro (Wired)                 |  1532:00AA  |
