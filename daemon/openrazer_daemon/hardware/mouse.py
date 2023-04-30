@@ -1713,6 +1713,24 @@ class RazerViperV2ProWireless(RazerViperV2ProWired):
     USB_PID = 0x00A6
 
 
+class RazerDeathAdderV3(__RazerDevice):
+    """
+    Class for the Razer DeathAdder V3
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_DeathAdder_V3-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00B2
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates']
+
+    POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/6124/6124-1-en-v2.png"
+
+    DPI_MAX = 30000
+
+
 class RazerDeathAdderV3ProWired(__RazerDevice):
     """
     Class for the Razer DeathAdder V3 Pro (Wired)
