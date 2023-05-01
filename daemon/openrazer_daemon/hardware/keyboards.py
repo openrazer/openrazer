@@ -386,7 +386,7 @@ class RazerBlackWidowV3ProWired(_RippleKeyboard):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._battery_manager = _BatteryManager(self, self._device_number, "Razer BlackWidow V3 Pro (Wired)")
+        self._battery_manager = _BatteryManager(self, self._device_number, "Razer BlackWidow V3 Pro")
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
         self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
@@ -408,19 +408,6 @@ class RazerBlackWidowV3ProWireless(RazerBlackWidowV3ProWired):
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_charge_effect', 'set_charge_colour', 'get_battery', 'is_charging', 'set_low_battery_threshold']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, "Razer BlackWidow V3 Pro (Wireless)")
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        super()._close()
-
-        self._battery_manager.close()
 
 
 class RazerBlackWidowChroma(_RippleKeyboard):
