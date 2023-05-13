@@ -2614,21 +2614,22 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
 }
 
 /**
- * Read device file "scroll_led_brightness"
+ * Common function to handle sysfs read LED brightness for a given led
  */
-static ssize_t razer_attr_read_scroll_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_attribute *attr, char *buf, unsigned char led_id)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = razer_chroma_standard_get_led_brightness(VARSTORE, SCROLL_WHEEL_LED);
+    struct razer_report request = {0};
     struct razer_report response = {0};
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-        request = razer_chroma_standard_get_led_brightness(VARSTORE, SCROLL_WHEEL_LED);
+        request = razer_chroma_standard_get_led_brightness(VARSTORE, led_id);
         request.transaction_id.id = 0x3F;
         break;
 
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
     case USB_DEVICE_ID_RAZER_NAGA_X:
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
@@ -2640,7 +2641,8 @@ static ssize_t razer_attr_read_scroll_led_brightness(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BASILISK_V3:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
-        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, SCROLL_WHEEL_LED);
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
+        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, led_id);
         request.transaction_id.id = 0x1f;
         break;
 
@@ -2651,16 +2653,27 @@ static ssize_t razer_attr_read_scroll_led_brightness(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK:
+    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, SCROLL_WHEEL_LED);
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
+        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, led_id);
         break;
 
     default:
-        request = razer_chroma_standard_get_led_brightness(VARSTORE, SCROLL_WHEEL_LED);
+        request = razer_chroma_standard_get_led_brightness(VARSTORE, led_id);
         break;
     }
 
@@ -2727,72 +2740,19 @@ static ssize_t razer_attr_write_scroll_led_brightness(struct device *dev, struct
 }
 
 /**
+ * Read device file "scroll_led_brightness"
+ */
+static ssize_t razer_attr_read_scroll_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_led_brightness(dev, attr, buf, SCROLL_WHEEL_LED);
+}
+
+/**
  * Read device file "logo_led_brightness"
  */
 static ssize_t razer_attr_read_logo_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    switch(usb_dev->descriptor.idProduct) {
-    case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-        request = razer_chroma_standard_get_led_brightness(VARSTORE, LOGO_LED);
-        request.transaction_id.id = 0x3F;
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_8K:
-    case USB_DEVICE_ID_RAZER_NAGA_X:
-    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-    case USB_DEVICE_ID_RAZER_BASILISK_V2:
-    case USB_DEVICE_ID_RAZER_BASILISK_V3:
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
-        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, LOGO_LED);
-        request.transaction_id.id = 0x1f;
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
-    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_VIPER:
-    case USB_DEVICE_ID_RAZER_VIPER_MINI:
-    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
-    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
-    case USB_DEVICE_ID_RAZER_BASILISK:
-    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
-        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, LOGO_LED);
-        break;
-
-    default:
-        request = razer_chroma_standard_get_led_brightness(VARSTORE, LOGO_LED);
-        break;
-    }
-
-    razer_send_payload(usb_dev, &request, &response);
-
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return razer_attr_read_led_brightness(dev, attr, buf, LOGO_LED);
 }
 
 /**
@@ -2865,43 +2825,6 @@ static ssize_t razer_attr_write_logo_led_brightness(struct device *dev, struct d
     return count;
 }
 
-static ssize_t razer_attr_read_side_led_brightness(struct device *dev, struct device_attribute *attr, char *buf, int side)
-{
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    switch(usb_dev->descriptor.idProduct) {
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, side);
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_X:
-    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, side);
-        request.transaction_id.id = 0x1f;
-        break;
-
-    default:
-        request = razer_chroma_standard_get_led_brightness(VARSTORE, side);
-        break;
-    }
-
-    razer_send_payload(usb_dev, &request, &response);
-
-    return sprintf(buf, "%d\n", response.arguments[2]);
-}
-
 static ssize_t razer_attr_write_side_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int side)
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
@@ -2945,7 +2868,7 @@ static ssize_t razer_attr_write_side_led_brightness(struct device *dev, struct d
  */
 static ssize_t razer_attr_read_left_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return razer_attr_read_side_led_brightness(dev, attr, buf, LEFT_SIDE_LED);
+    return razer_attr_read_led_brightness(dev, attr, buf, LEFT_SIDE_LED);
 }
 
 /**
@@ -2961,7 +2884,7 @@ static ssize_t razer_attr_write_left_led_brightness(struct device *dev, struct d
  */
 static ssize_t razer_attr_read_right_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return razer_attr_read_side_led_brightness(dev, attr, buf, RIGHT_SIDE_LED);
+    return razer_attr_read_led_brightness(dev, attr, buf, RIGHT_SIDE_LED);
 }
 
 /**
@@ -2977,16 +2900,7 @@ static ssize_t razer_attr_write_right_led_brightness(struct device *dev, struct 
  */
 static ssize_t razer_attr_read_backlight_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    request = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
-
-    razer_send_payload(usb_dev, &request, &response);
-
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return razer_attr_read_led_brightness(dev, attr, buf, BACKLIGHT_LED);
 }
 
 /**
