@@ -3367,36 +3367,33 @@ static ssize_t razer_attr_write_scroll_matrix_effect_reactive(struct device *dev
 }
 
 /**
- * Write device file "scroll_mode_breath" (for extended mouse matrix effects)
- *
- * Sets breathing mode by writing 1, 3 or 6 bytes
+ * Common function to handle sysfs write matrix_effect_breath for a given led
  */
-static ssize_t razer_attr_write_scroll_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    // TODO refactor main breathing matrix function, add in LED ID field and this nastiness goes away too!
 
-    switch(usb_dev->descriptor.idProduct) {
+    switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         switch(count) {
         case 3: // Single colour mode
-            request = razer_chroma_mouse_extended_matrix_effect_breathing_single(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
+            request = razer_chroma_mouse_extended_matrix_effect_breathing_single(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
             break;
 
         case 6: // Dual colour mode
-            request = razer_chroma_mouse_extended_matrix_effect_breathing_dual(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            request = razer_chroma_mouse_extended_matrix_effect_breathing_dual(VARSTORE, led_id, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
             break;
 
         default: // "Random" colour mode
-            request = razer_chroma_mouse_extended_matrix_effect_breathing_random(VARSTORE, SCROLL_WHEEL_LED);
+            request = razer_chroma_mouse_extended_matrix_effect_breathing_random(VARSTORE, led_id);
             break;
         }
         break;
 
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
     case USB_DEVICE_ID_RAZER_NAGA_X:
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
@@ -3409,31 +3406,44 @@ static ssize_t razer_attr_write_scroll_matrix_effect_breath(struct device *dev, 
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK:
+    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
     case USB_DEVICE_ID_RAZER_BASILISK_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
         switch(count) {
         case 3: // Single colour mode
-            request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
+            request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
             break;
 
         case 6: // Dual colour mode
-            request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, led_id, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
             break;
 
         default: // "Random" colour mode
-            request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, SCROLL_WHEEL_LED);
+            request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, led_id);
             break;
         }
         break;
     }
 
-    switch(usb_dev->descriptor.idProduct) {
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
     case USB_DEVICE_ID_RAZER_NAGA_X:
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
@@ -3442,6 +3452,7 @@ static ssize_t razer_attr_write_scroll_matrix_effect_breath(struct device *dev, 
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V2:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -3450,8 +3461,21 @@ static ssize_t razer_attr_write_scroll_matrix_effect_breath(struct device *dev, 
         break;
     }
 
-    razer_send_payload(usb_dev, &request, &response);
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &request, &response);
+    mutex_unlock(&device->lock);
+
     return count;
+}
+
+/**
+ * Write device file "scroll_mode_breath" (for extended mouse matrix effects)
+ *
+ * Sets breathing mode by writing 1, 3 or 6 bytes
+ */
+static ssize_t razer_attr_write_scroll_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_matrix_effect_breath_common(dev, attr, buf, count, SCROLL_WHEEL_LED);
 }
 
 /**
@@ -3613,100 +3637,7 @@ static ssize_t razer_attr_write_logo_matrix_effect_reactive(struct device *dev, 
  */
 static ssize_t razer_attr_write_logo_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-    // TODO refactor main breathing matrix function, add in LED ID field and this nastiness goes away too!
-
-    switch(usb_dev->descriptor.idProduct) {
-    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
-    case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-        switch(count) {
-        case 3: // Single colour mode
-            request = razer_chroma_mouse_extended_matrix_effect_breathing_single(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
-            break;
-
-        case 6: // Dual colour mode
-            request = razer_chroma_mouse_extended_matrix_effect_breathing_dual(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
-            break;
-
-        default: // "Random" colour mode
-            request = razer_chroma_mouse_extended_matrix_effect_breathing_random(VARSTORE, LOGO_LED);
-            break;
-        }
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_8K:
-    case USB_DEVICE_ID_RAZER_NAGA_X:
-    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
-    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_VIPER:
-    case USB_DEVICE_ID_RAZER_VIPER_MINI:
-    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
-    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
-    case USB_DEVICE_ID_RAZER_BASILISK:
-    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_BASILISK_V2:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
-        switch(count) {
-        case 3: // Single colour mode
-            request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
-            break;
-
-        case 6: // Dual colour mode
-            request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
-            break;
-
-        default: // "Random" colour mode
-            request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, LOGO_LED);
-            break;
-        }
-        break;
-    }
-
-    switch(usb_dev->descriptor.idProduct) {
-    case USB_DEVICE_ID_RAZER_VIPER_8K:
-    case USB_DEVICE_ID_RAZER_NAGA_X:
-    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-    case USB_DEVICE_ID_RAZER_BASILISK_V2:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
-        request.transaction_id.id = 0x1f;
-        break;
-
-    default:
-        request.transaction_id.id = 0x3f;
-        break;
-    }
-
-    razer_send_payload(usb_dev, &request, &response);
-    return count;
+    return razer_attr_write_matrix_effect_breath_common(dev, attr, buf, count, LOGO_LED);
 }
 
 /**
@@ -3915,62 +3846,6 @@ static ssize_t razer_attr_write_right_matrix_effect_reactive(struct device *dev,
     return razer_attr_write_matrix_effect_reactive_common(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
 
-static ssize_t razer_attr_write_side_mode_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int side)
-{
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    switch(usb_dev->descriptor.idProduct) {
-    case USB_DEVICE_ID_RAZER_NAGA_X:
-    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-        switch(count) {
-        case 3: // Single colour mode
-            request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, side, (struct razer_rgb*)&buf[0]);
-            break;
-
-        case 6: // Dual colour mode
-            request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, side, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
-            break;
-
-        default: // "Random" colour mode
-            request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, side);
-            break;
-        }
-        break;
-    }
-
-    switch(usb_dev->descriptor.idProduct) {
-    case USB_DEVICE_ID_RAZER_NAGA_X:
-    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-        request.transaction_id.id = 0x1f;
-        break;
-
-    default:
-        request.transaction_id.id = 0x3f;
-        break;
-    }
-
-    razer_send_payload(usb_dev, &request, &response);
-    return count;
-}
-
 /**
  * Write device file "left_mode_breath" (for extended mouse matrix effects)
  *
@@ -3978,7 +3853,7 @@ static ssize_t razer_attr_write_side_mode_breath(struct device *dev, struct devi
  */
 static ssize_t razer_attr_write_left_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_side_mode_breath(dev, attr, buf, count, LEFT_SIDE_LED);
+    return razer_attr_write_matrix_effect_breath_common(dev, attr, buf, count, LEFT_SIDE_LED);
 }
 
 /**
@@ -3988,7 +3863,7 @@ static ssize_t razer_attr_write_left_matrix_effect_breath(struct device *dev, st
  */
 static ssize_t razer_attr_write_right_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_side_mode_breath(dev, attr, buf, count, RIGHT_SIDE_LED);
+    return razer_attr_write_matrix_effect_breath_common(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
 
 static ssize_t razer_attr_write_side_mode_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int side)
