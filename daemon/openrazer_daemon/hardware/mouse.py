@@ -364,13 +364,14 @@ class RazerOrochi2013(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/612/612_orochi_2015.png"
 
 
-class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
+class RazerOrochiWired(__RazerDevice):
     """
     Class for the Razer Orochi (Wired)
     """
     USB_VID = 0x1532
     USB_PID = 0x0048
     METHODS = ['get_device_type_mouse',
+               'get_scroll_brightness', 'set_scroll_brightness',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_idle_time', 'set_low_battery_threshold',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'set_scroll_active', 'get_scroll_active',
