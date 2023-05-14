@@ -292,7 +292,7 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
     DPI_MAX = 16000
 
 
-class RazerMambaTE(__RazerDeviceBrightnessSuspend):
+class RazerMambaTE(__RazerDevice):
     """
     Class for the Razer Mamba Tournament Edition
     """
@@ -300,7 +300,7 @@ class RazerMambaTE(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x0046
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 16]
-    METHODS = ['get_device_type_mouse', 'set_wave_effect',
+    METHODS = ['get_device_type_mouse', 'get_backlight_brightness', 'set_backlight_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'max_dpi',
                'get_dpi_xy', 'set_dpi_xy']
@@ -502,7 +502,7 @@ class RazerNagaChroma(__RazerDevice):
     MATRIX_DIMS = [1, 3]
     METHODS = ['get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'max_dpi',
                'get_poll_rate', 'set_poll_rate',
-               'get_brightness', 'set_brightness',
+               'get_backlight_brightness', 'set_backlight_brightness',
                'get_logo_brightness', 'set_logo_brightness',
                'get_scroll_brightness', 'set_scroll_brightness',
                # Thumbgrid is technically backlight ID
@@ -641,7 +641,7 @@ class RazerDeathAdderElite(__RazerDevice):
     DPI_MAX = 16000
 
 
-class RazerDiamondbackChroma(__RazerDeviceBrightnessSuspend):
+class RazerDiamondbackChroma(__RazerDevice):
     """
     Class for the Razer Diamondback Chroma
     """
@@ -649,7 +649,7 @@ class RazerDiamondbackChroma(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x004C
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 21]
-    METHODS = ['get_device_type_mouse', 'set_wave_effect',
+    METHODS = ['get_device_type_mouse', 'get_backlight_brightness', 'set_backlight_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy']
