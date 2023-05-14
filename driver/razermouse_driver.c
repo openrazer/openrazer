@@ -3208,21 +3208,18 @@ static ssize_t razer_attr_write_scroll_matrix_effect_wave(struct device *dev, st
 }
 
 /**
- * Write device file "scroll_mode_spectrum" (for extended mouse matrix effects)
- *
- * Spectrum effect mode is activated whenever the file is written to
+ * Common function to handle sysfs write matrix_effect_spectrum for a given led
  */
-static ssize_t razer_attr_write_scroll_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
 
-    switch(usb_dev->descriptor.idProduct) {
+    switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
-        request = razer_chroma_mouse_extended_matrix_effect_spectrum(VARSTORE, SCROLL_WHEEL_LED);
+        request = razer_chroma_mouse_extended_matrix_effect_spectrum(VARSTORE, led_id);
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
@@ -3233,11 +3230,22 @@ static ssize_t razer_attr_write_scroll_matrix_effect_spectrum(struct device *dev
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK:
+    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-        request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, SCROLL_WHEEL_LED);
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
+        request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, led_id);
         break;
 
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
     case USB_DEVICE_ID_RAZER_NAGA_X:
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
@@ -3249,18 +3257,31 @@ static ssize_t razer_attr_write_scroll_matrix_effect_spectrum(struct device *dev
     case USB_DEVICE_ID_RAZER_BASILISK_V3:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
-        request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, SCROLL_WHEEL_LED);
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
+        request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, led_id);
         request.transaction_id.id = 0x1f;
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: scroll_mode_spectrum not supported for this model\n");
+        printk(KERN_WARNING "razermouse: matrix_effect_spectrum not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(usb_dev, &request, &response);
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &request, &response);
+    mutex_unlock(&device->lock);
 
     return count;
+}
+
+/**
+ * Write device file "scroll_mode_spectrum" (for extended mouse matrix effects)
+ *
+ * Spectrum effect mode is activated whenever the file is written to
+ */
+static ssize_t razer_attr_write_scroll_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_matrix_effect_spectrum_common(dev, attr, buf, count, SCROLL_WHEEL_LED);
 }
 
 /**
@@ -3551,64 +3572,7 @@ static ssize_t razer_attr_write_logo_matrix_effect_wave(struct device *dev, stru
  */
 static ssize_t razer_attr_write_logo_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    switch(usb_dev->descriptor.idProduct) {
-    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
-    case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-        request = razer_chroma_mouse_extended_matrix_effect_spectrum(VARSTORE, LOGO_LED);
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
-    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_VIPER:
-    case USB_DEVICE_ID_RAZER_VIPER_MINI:
-    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
-    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
-    case USB_DEVICE_ID_RAZER_BASILISK:
-    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
-        request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, LOGO_LED);
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_8K:
-    case USB_DEVICE_ID_RAZER_NAGA_X:
-    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-    case USB_DEVICE_ID_RAZER_BASILISK_V2:
-    case USB_DEVICE_ID_RAZER_BASILISK_V3:
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
-        request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, LOGO_LED);
-        request.transaction_id.id = 0x1f;
-        break;
-
-    default:
-        printk(KERN_WARNING "razermouse: logo_mode_spectrum not supported for this model\n");
-        return -EINVAL;
-    }
-
-    razer_send_payload(usb_dev, &request, &response);
-    return count;
+    return razer_attr_write_matrix_effect_spectrum_common(dev, attr, buf, count, LOGO_LED);
 }
 
 /**
@@ -3953,42 +3917,6 @@ static ssize_t razer_attr_write_right_matrix_effect_wave(struct device *dev, str
     return razer_attr_write_matrix_effect_wave_common(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
 
-static ssize_t razer_attr_write_side_mode_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int side)
-{
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    switch(usb_dev->descriptor.idProduct) {
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-        request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, side);
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_X:
-    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-        request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, side);
-        request.transaction_id.id = 0x1f;
-        break;
-
-    default:
-        printk(KERN_WARNING "razermouse: left/right mode_spectrum not supported for this model\n");
-        return -EINVAL;
-    }
-
-    razer_send_payload(usb_dev, &request, &response);
-    return count;
-}
-
 /**
  * Write device file "left_mode_spectrum" (for extended mouse matrix effects)
  *
@@ -3996,7 +3924,7 @@ static ssize_t razer_attr_write_side_mode_spectrum(struct device *dev, struct de
  */
 static ssize_t razer_attr_write_left_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_side_mode_spectrum(dev, attr, buf, count, LEFT_SIDE_LED);
+    return razer_attr_write_matrix_effect_spectrum_common(dev, attr, buf, count, LEFT_SIDE_LED);
 }
 
 /**
@@ -4006,7 +3934,7 @@ static ssize_t razer_attr_write_left_matrix_effect_spectrum(struct device *dev, 
  */
 static ssize_t razer_attr_write_right_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_side_mode_spectrum(dev, attr, buf, count, RIGHT_SIDE_LED);
+    return razer_attr_write_matrix_effect_spectrum_common(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
 
 static ssize_t razer_attr_write_side_mode_reactive(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int side)
