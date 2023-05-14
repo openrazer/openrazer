@@ -1478,19 +1478,17 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
 
 static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
 
-    switch(usb_dev->descriptor.idProduct) {
+    switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
         request = razer_chroma_misc_set_dock_brightness(brightness);
         break;
 
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
-        // Orochi sets brightness of scroll wheel apparently
         request = razer_chroma_standard_set_led_brightness(VARSTORE, SCROLL_WHEEL_LED, brightness);
         break;
 
@@ -1507,20 +1505,22 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_BASILISK_V3:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
-        request = razer_chroma_extended_matrix_brightness(VARSTORE, 0x00, brightness);
+        request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         request.transaction_id.id = 0x1F;
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
-        // Naga Trinity uses the LED 0x00 and Matrix Brightness
-        request = razer_chroma_extended_matrix_brightness(VARSTORE, 0x00, brightness);
+        request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         break;
 
     default:
         request = razer_chroma_standard_set_led_brightness(VARSTORE, BACKLIGHT_LED, brightness);
         break;
     }
-    razer_send_payload(usb_dev, &request, &response);
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &request, &response);
+    mutex_unlock(&device->lock);
 
     return count;
 }
@@ -1532,25 +1532,22 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
  */
 static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
     unsigned char brightness_index = 0x02;
 
-    switch(usb_dev->descriptor.idProduct) {
+    switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
         request = razer_chroma_misc_get_dock_brightness();
         brightness_index = 0x00;
         break;
 
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
-        // Orochi sets brightness of scroll wheel apparently
         request = razer_chroma_standard_get_led_brightness(VARSTORE, SCROLL_WHEEL_LED);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-        // Orochi sets brightness of scroll wheel apparently
         request = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
         request.transaction_id.id = 0x3f;
         break;
@@ -1563,20 +1560,22 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BASILISK_V3:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
-        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, 0x00);
+        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, ZERO_LED);
         request.transaction_id.id = 0x1F;
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
-        // Naga Trinity uses the LED 0x00 and Matrix Brightness
-        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, 0x00);
+        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, ZERO_LED);
         break;
 
     default:
         request = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
         break;
     }
-    razer_send_payload(usb_dev, &request, &response);
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &request, &response);
+    mutex_unlock(&device->lock);
 
     if (response.status != RAZER_CMD_SUCCESSFUL) {
         return 0;
@@ -2618,12 +2617,11 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
  */
 static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_attribute *attr, char *buf, unsigned char led_id)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
 
-    switch(usb_dev->descriptor.idProduct) {
+    switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         request = razer_chroma_standard_get_led_brightness(VARSTORE, led_id);
         request.transaction_id.id = 0x3F;
@@ -2677,7 +2675,9 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
         break;
     }
 
-    razer_send_payload(usb_dev, &request, &response);
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &request, &response);
+    mutex_unlock(&device->lock);
 
     return sprintf(buf, "%d\n", response.arguments[2]);
 }
@@ -2687,13 +2687,12 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
  */
 static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
 
-    switch(usb_dev->descriptor.idProduct) {
+    switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         request = razer_chroma_standard_set_led_brightness(VARSTORE, led_id, brightness);
         request.transaction_id.id = 0x3F;
@@ -2747,7 +2746,9 @@ static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device
         break;
     }
 
-    razer_send_payload(usb_dev, &request, &response);
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &request, &response);
+    mutex_unlock(&device->lock);
 
     return count;
 }
