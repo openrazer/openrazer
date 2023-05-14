@@ -2835,7 +2835,7 @@ static ssize_t razer_attr_write_backlight_led_brightness(struct device *dev, str
 /**
  * Write device file "scroll_led_state"
  */
-static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
@@ -2844,20 +2844,44 @@ static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct devi
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
-        deathadder3_5g_set_scroll_led_state(device, enabled);
+        switch (led_id) {
+        case SCROLL_WHEEL_LED:
+            deathadder3_5g_set_scroll_led_state(device, enabled);
+            break;
+        case LOGO_LED:
+            deathadder3_5g_set_logo_led_state(device, enabled);
+            break;
+        default:
+            printk(KERN_WARNING "razermouse: Invalid led_id for led_state on this model\n");
+            return -EINVAL;
+        }
         return count;
 
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        if(enabled) {
-            device->orochi2011.led |= 0b00000001;
-        } else {
-            device->orochi2011.led &= 0b11111110;
+        switch (led_id) {
+        case SCROLL_WHEEL_LED:
+            if (enabled) {
+                device->orochi2011.led |= 0b00000001;
+            } else {
+                device->orochi2011.led &= 0b11111110;
+            }
+            break;
+        case LOGO_LED:
+            if (enabled) {
+                device->orochi2011.led |= 0b00000010;
+            } else {
+                device->orochi2011.led &= 0b11111101;
+            }
+            break;
+        default:
+            printk(KERN_WARNING "razermouse: Invalid led_id for led_state on this model\n");
+            return -EINVAL;
         }
         request = razer_chroma_misc_set_orochi2011_led(device->orochi2011.led);
         break;
 
     default:
-        request = razer_chroma_standard_set_led_state(VARSTORE, SCROLL_WHEEL_LED, enabled);
+        request = razer_chroma_standard_set_led_state(VARSTORE, led_id, enabled);
         request.transaction_id.id = 0x3F;
         break;
     }
@@ -2867,6 +2891,69 @@ static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct devi
     mutex_unlock(&device->lock);
 
     return count;
+}
+
+/**
+ * Write device file "scroll_led_state"
+ */
+static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_led_state(dev, attr, buf, count, SCROLL_WHEEL_LED);
+}
+
+/**
+ * Common function to handle sysfs read led_state for a given led
+ */
+static ssize_t razer_attr_read_led_state(struct device *dev, struct device_attribute *attr, char *buf, unsigned char led_id)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
+        switch (led_id) {
+        case SCROLL_WHEEL_LED:
+            if((device->da3_5g.leds & 0x02) == 0x02) {
+                return sprintf(buf, "1\n");
+            } else {
+                return sprintf(buf, "0\n");
+            }
+            break;
+        case LOGO_LED:
+            if((device->da3_5g.leds & 0x01) == 0x01) {
+                return sprintf(buf, "1\n");
+            } else {
+                return sprintf(buf, "0\n");
+            }
+            break;
+        default:
+            printk(KERN_WARNING "razermouse: Invalid led_id for led_state on this model\n");
+            return -EINVAL;
+        }
+
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
+        switch (led_id) {
+        case SCROLL_WHEEL_LED:
+            return sprintf(buf, "%d\n", device->orochi2011.led & 0b00000001);
+        case LOGO_LED:
+            return sprintf(buf, "%d\n", (device->orochi2011.led & 0b00000010) >> 1);
+        default:
+            printk(KERN_WARNING "razermouse: Invalid led_id for led_state on this model\n");
+            return -EINVAL;
+        }
+
+    default:
+        request = razer_chroma_standard_get_led_state(VARSTORE, led_id);
+        request.transaction_id.id = 0x3F;
+        break;
+    }
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &request, &response);
+    mutex_unlock(&device->lock);
+
+    return sprintf(buf, "%d\n", response.arguments[2]);
 }
 
 /**
@@ -2874,33 +2961,7 @@ static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct devi
  */
 static ssize_t razer_attr_read_scroll_led_state(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    switch (device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
-        if((device->da3_5g.leds & 0x02) == 0x02) {
-            return sprintf(buf, "1\n");
-        } else {
-            return sprintf(buf, "0\n");
-        }
-        break;
-
-    case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        return sprintf(buf, "%d\n", device->orochi2011.led & 0b00000001);
-
-    default:
-        request = razer_chroma_standard_get_led_state(VARSTORE, SCROLL_WHEEL_LED);
-        request.transaction_id.id = 0x3F;
-        break;
-    }
-
-    mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &request, &response);
-    mutex_unlock(&device->lock);
-
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return razer_attr_read_led_state(dev, attr, buf, SCROLL_WHEEL_LED);
 }
 
 /**
@@ -2908,36 +2969,7 @@ static ssize_t razer_attr_read_scroll_led_state(struct device *dev, struct devic
  */
 static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    switch (device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
-        deathadder3_5g_set_logo_led_state(device, enabled);
-        return count;
-
-    case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        if(enabled) {
-            device->orochi2011.led |= 0b00000010;
-        } else {
-            device->orochi2011.led &= 0b11111101;
-        }
-        request = razer_chroma_misc_set_orochi2011_led(device->orochi2011.led);
-        break;
-
-    default:
-        request = razer_chroma_standard_set_led_state(VARSTORE, LOGO_LED, enabled);
-        request.transaction_id.id = 0x3F;
-        break;
-    }
-
-    mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &request, &response);
-    mutex_unlock(&device->lock);
-
-    return count;
+    return razer_attr_write_led_state(dev, attr, buf, count, LOGO_LED);
 }
 
 /**
@@ -2945,33 +2977,7 @@ static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device
  */
 static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    switch (device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
-        if((device->da3_5g.leds & 0x01) == 0x01) {
-            return sprintf(buf, "1\n");
-        } else {
-            return sprintf(buf, "0\n");
-        }
-        break;
-
-    case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        return sprintf(buf, "%d\n", (device->orochi2011.led & 0b00000010) >> 1);
-
-    default:
-        request = razer_chroma_standard_get_led_state(VARSTORE, LOGO_LED);
-        request.transaction_id.id = 0x3F;
-        break;
-    }
-
-    mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &request, &response);
-    mutex_unlock(&device->lock);
-
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return razer_attr_read_led_state(dev, attr, buf, LOGO_LED);
 }
 
 /**
@@ -3830,19 +3836,7 @@ static ssize_t razer_attr_write_right_matrix_effect_none(struct device *dev, str
  */
 static ssize_t razer_attr_write_backlight_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    request = razer_chroma_standard_set_led_state(VARSTORE, BACKLIGHT_LED, enabled);
-    request.transaction_id.id = 0x3F;
-
-    mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &request, &response);
-    mutex_unlock(&device->lock);
-
-    return count;
+    return razer_attr_write_led_state(dev, attr, buf, count, BACKLIGHT_LED);
 }
 
 /**
@@ -3850,18 +3844,7 @@ static ssize_t razer_attr_write_backlight_led_state(struct device *dev, struct d
  */
 static ssize_t razer_attr_read_backlight_led_state(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    request = razer_chroma_standard_get_led_state(VARSTORE, BACKLIGHT_LED);
-    request.transaction_id.id = 0x3F;
-
-    mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &request, &response);
-    mutex_unlock(&device->lock);
-
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return razer_attr_read_led_state(dev, attr, buf, BACKLIGHT_LED);
 }
 
 /**
