@@ -2975,12 +2975,11 @@ static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_
 }
 
 /**
- * Write device file "scroll_led_rgb"
+ * Common function to handle sysfs write rgb for a given led
  */
-static ssize_t razer_attr_write_scroll_led_rgb(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_led_rgb(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
 
@@ -2989,11 +2988,41 @@ static ssize_t razer_attr_write_scroll_led_rgb(struct device *dev, struct device
         return -EINVAL;
     }
 
-    request = razer_chroma_standard_set_led_rgb(VARSTORE, SCROLL_WHEEL_LED, (struct razer_rgb*)&buf[0]);
+    request = razer_chroma_standard_set_led_rgb(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
     request.transaction_id.id = 0x3F;
-    razer_send_payload(usb_dev, &request, &response);
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &request, &response);
+    mutex_unlock(&device->lock);
 
     return count;
+}
+
+/**
+ * Common function to handle sysfs read rgb for a given led
+ */
+static ssize_t razer_attr_read_led_rgb(struct device *dev, struct device_attribute *attr, char *buf, unsigned char led_id)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_standard_get_led_rgb(VARSTORE, led_id);
+    request.transaction_id.id = 0x3F;
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &request, &response);
+    mutex_unlock(&device->lock);
+
+    return sprintf(buf, "%u%u%u\n", response.arguments[2], response.arguments[3], response.arguments[4]);
+}
+
+/**
+ * Write device file "scroll_led_rgb"
+ */
+static ssize_t razer_attr_write_scroll_led_rgb(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_led_rgb(dev, attr, buf, count, SCROLL_WHEEL_LED);
 }
 
 /**
@@ -3001,14 +3030,7 @@ static ssize_t razer_attr_write_scroll_led_rgb(struct device *dev, struct device
  */
 static ssize_t razer_attr_read_scroll_led_rgb(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = razer_chroma_standard_get_led_rgb(VARSTORE, SCROLL_WHEEL_LED);
-    struct razer_report response = {0};
-    request.transaction_id.id = 0x3F;
-    razer_send_payload(usb_dev, &request, &response);
-
-    return sprintf(buf, "%u%u%u\n", response.arguments[2], response.arguments[3], response.arguments[4]);
+    return razer_attr_read_led_rgb(dev, attr, buf, SCROLL_WHEEL_LED);
 }
 
 /**
@@ -3016,21 +3038,7 @@ static ssize_t razer_attr_read_scroll_led_rgb(struct device *dev, struct device_
  */
 static ssize_t razer_attr_write_logo_led_rgb(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    if (count != 3) {
-        printk(KERN_WARNING "razermouse: Logo LED mode only accepts RGB (3byte)\n");
-        return -EINVAL;
-    }
-
-    request = razer_chroma_standard_set_led_rgb(VARSTORE, LOGO_LED, (struct razer_rgb*)&buf[0]);
-    request.transaction_id.id = 0x3F;
-    razer_send_payload(usb_dev, &request, &response);
-
-    return count;
+    return razer_attr_write_led_rgb(dev, attr, buf, count, LOGO_LED);
 }
 
 /**
@@ -3038,15 +3046,7 @@ static ssize_t razer_attr_write_logo_led_rgb(struct device *dev, struct device_a
  */
 static ssize_t razer_attr_read_logo_led_rgb(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = razer_chroma_standard_get_led_rgb(VARSTORE, LOGO_LED);
-    struct razer_report response = {0};
-
-    request.transaction_id.id = 0x3F;
-    razer_send_payload(usb_dev, &request, &response);
-
-    return sprintf(buf, "%u%u%u\n", response.arguments[2], response.arguments[3], response.arguments[4]);
+    return razer_attr_read_led_rgb(dev, attr, buf, LOGO_LED);
 }
 
 /**
@@ -3054,20 +3054,7 @@ static ssize_t razer_attr_read_logo_led_rgb(struct device *dev, struct device_at
  */
 static ssize_t razer_attr_write_backlight_led_rgb(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    if (count != 3) {
-        printk(KERN_WARNING "razermouse: Backlight LED mode only accepts RGB (3 bytes)\n");
-        return -EINVAL;
-    }
-
-    request = razer_chroma_standard_set_led_rgb(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-    razer_send_payload(usb_dev, &request, &response);
-
-    return count;
+    return razer_attr_write_led_rgb(dev, attr, buf, count, BACKLIGHT_LED);
 }
 
 /**
@@ -3075,14 +3062,7 @@ static ssize_t razer_attr_write_backlight_led_rgb(struct device *dev, struct dev
  */
 static ssize_t razer_attr_read_backlight_led_rgb(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = razer_chroma_standard_get_led_rgb(VARSTORE, BACKLIGHT_LED);
-    struct razer_report response = {0};
-
-    razer_send_payload(usb_dev, &request, &response);
-
-    return sprintf(buf, "%u%u%u\n", response.arguments[2], response.arguments[3], response.arguments[4]);
+    return razer_attr_read_led_rgb(dev, attr, buf, BACKLIGHT_LED);
 }
 
 /**
