@@ -3066,20 +3066,50 @@ static ssize_t razer_attr_read_backlight_led_rgb(struct device *dev, struct devi
 }
 
 /**
+ * Common function to handle sysfs write effect for a given led
+ */
+static ssize_t razer_attr_write_led_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    unsigned char effect = (unsigned char)simple_strtoul(buf, NULL, 10);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_standard_set_led_effect(VARSTORE, led_id, effect);
+    request.transaction_id.id = 0x3F;
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &request, &response);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Common function to handle sysfs read effect for a given led
+ */
+static ssize_t razer_attr_read_led_effect(struct device *dev, struct device_attribute *attr, char *buf, unsigned char led_id)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_standard_get_led_effect(VARSTORE, led_id);
+    request.transaction_id.id = 0x3F;
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &request, &response);
+    mutex_unlock(&device->lock);
+
+    return sprintf(buf, "%d\n", response.arguments[2]);
+}
+
+/**
  * Write device file "scroll_led_effect"
  */
 static ssize_t razer_attr_write_scroll_led_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    unsigned char effect = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report request = razer_chroma_standard_set_led_effect(VARSTORE, SCROLL_WHEEL_LED, effect);
-    struct razer_report response = {0};
-    request.transaction_id.id = 0x3F;
-
-    razer_send_payload(usb_dev, &request, &response);
-
-    return count;
+    return razer_attr_write_led_effect(dev, attr, buf, count, SCROLL_WHEEL_LED);
 }
 
 /**
@@ -3087,14 +3117,7 @@ static ssize_t razer_attr_write_scroll_led_effect(struct device *dev, struct dev
  */
 static ssize_t razer_attr_read_scroll_led_effect(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = razer_chroma_standard_get_led_effect(VARSTORE, SCROLL_WHEEL_LED);
-    struct razer_report response = {0};
-    request.transaction_id.id = 0x3F;
-    razer_send_payload(usb_dev, &request, &response);
-
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return razer_attr_read_led_effect(dev, attr, buf, SCROLL_WHEEL_LED);
 }
 
 /**
@@ -3102,16 +3125,7 @@ static ssize_t razer_attr_read_scroll_led_effect(struct device *dev, struct devi
  */
 static ssize_t razer_attr_write_logo_led_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    unsigned char effect = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report request = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, effect);
-    struct razer_report response = {0};
-    request.transaction_id.id = 0x3F;
-
-    razer_send_payload(usb_dev, &request, &response);
-
-    return count;
+    return razer_attr_write_led_effect(dev, attr, buf, count, LOGO_LED);
 }
 
 /**
@@ -3119,15 +3133,7 @@ static ssize_t razer_attr_write_logo_led_effect(struct device *dev, struct devic
  */
 static ssize_t razer_attr_read_logo_led_effect(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = razer_chroma_standard_get_led_effect(VARSTORE, LOGO_LED);
-    struct razer_report response = {0};
-
-    request.transaction_id.id = 0x3F;
-    razer_send_payload(usb_dev, &request, &response);
-
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return razer_attr_read_led_effect(dev, attr, buf, LOGO_LED);
 }
 
 /**
@@ -3135,16 +3141,7 @@ static ssize_t razer_attr_read_logo_led_effect(struct device *dev, struct device
  */
 static ssize_t razer_attr_write_backlight_led_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    unsigned char effect = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report request = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, effect);
-    struct razer_report response = {0};
-    request.transaction_id.id = 0x3F;
-
-    razer_send_payload(usb_dev, &request, &response);
-
-    return count;
+    return razer_attr_write_led_effect(dev, attr, buf, count, BACKLIGHT_LED);
 }
 
 /**
@@ -3152,15 +3149,7 @@ static ssize_t razer_attr_write_backlight_led_effect(struct device *dev, struct 
  */
 static ssize_t razer_attr_read_backlight_led_effect(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-    struct razer_report request = razer_chroma_standard_get_led_effect(VARSTORE, BACKLIGHT_LED);
-    struct razer_report response = {0};
-
-    request.transaction_id.id = 0x3F;
-    razer_send_payload(usb_dev, &request, &response);
-
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return razer_attr_read_led_effect(dev, attr, buf, BACKLIGHT_LED);
 }
 
 /**
