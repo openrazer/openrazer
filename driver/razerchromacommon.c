@@ -905,7 +905,7 @@ struct razer_report razer_chroma_misc_fn_key_toggle(unsigned char state)
  */
 struct razer_report razer_chroma_misc_set_keyswitch_optimization_command1(unsigned char optimization_mode)
 {
-    struct razer_report report = report = get_razer_report(0x02, 0x02, 0x04); // class, id, data size
+    struct razer_report report = get_razer_report(0x02, 0x02, 0x04); // class, id, data size
 
     // 0x00 -> Typing (Set)
     // 0x01 -> Gaming (Set) - Same report, doesn't include any arguments
