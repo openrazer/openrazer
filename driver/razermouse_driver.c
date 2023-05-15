@@ -4348,11 +4348,10 @@ static int dev_is_on_bus(struct device *dev, void *data)
  */
 struct usb_interface *find_intf_with_proto(struct usb_device *usbdev, u8 proto)
 {
-    struct usb_interface *intf;
     int i;
 
     for (i = 0; i < usbdev->actconfig->desc.bNumInterfaces; i++) {
-        intf = usb_ifnum_to_if(usbdev, i);
+        struct usb_interface *intf = usb_ifnum_to_if(usbdev, i);
         if (intf && intf->cur_altsetting->desc.bInterfaceProtocol == proto)
             return intf;
     }
@@ -4487,10 +4486,9 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
         if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
             // Convert 04... to 0100...
             int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
-            u8 cur_value = 0x00;
 
             while(--index > 0) {
-                cur_value = data[index];
+                u8 cur_value = data[index];
                 if(cur_value == 0x00) { // Skip 0x00
                     continue;
                 }

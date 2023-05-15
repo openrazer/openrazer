@@ -3208,11 +3208,10 @@ static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_de
        ((size == 22) || (size == 16)) && data[0] == 0x04) {
         // Convert 04... to 0100...
         int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
-        u8 cur_value = 0x00;
         int found_fn = 0x00;
 
         while(--index > 0) {
-            cur_value = data[index];
+            u8 cur_value = data[index];
             if(cur_value == 0x00) { // Skip 0x00
                 continue;
             }
@@ -3292,12 +3291,11 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_de
        ((size == 22) || (size == 16)) && data[0] == 0x04) {
         // Convert 04... to 0100...
         int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
-        u8 cur_value = 0x00;
         int found_fn = 0x00;
 
         while(--index > 0) {
             bool write_bitfield = true;
-            cur_value = data[index];
+            u8 cur_value = data[index];
             if(cur_value == 0x00) { // Skip 0x00
                 continue;
             }
