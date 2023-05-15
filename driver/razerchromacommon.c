@@ -29,9 +29,8 @@ struct razer_report razer_chroma_standard_set_device_mode(unsigned char mode, un
     if(mode != 0x00 && mode != 0x03) { // Explicitly blocking the 0x02 mode
         mode = 0x00;
     }
-    if(param != 0x00) {
-        param = 0x00;
-    }
+    // Only allow 0x00 as param
+    param = 0x00;
 
     report.arguments[0] = mode;
     report.arguments[1] = param;
