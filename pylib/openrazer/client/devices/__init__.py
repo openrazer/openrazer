@@ -159,6 +159,15 @@ class RazerDevice(object):
 
             'lighting_backlight': self._has_feature('razer.device.lighting.backlight'),
             'lighting_backlight_active': self._has_feature('razer.device.lighting.backlight', 'setBacklightActive'),
+            'lighting_backlight_brightness': self._has_feature('razer.device.lighting.backlight', 'setBacklightBrightness'),
+            'lighting_backlight_spectrum': self._has_feature('razer.device.lighting.backlight', 'setBacklightSpectrum'),
+            'lighting_backlight_static': self._has_feature('razer.device.lighting.backlight', 'setBacklightStatic'),
+            'lighting_backlight_none': self._has_feature('razer.device.lighting.backlight', 'setBacklightNone'),
+            'lighting_backlight_reactive': self._has_feature('razer.device.lighting.backlight', 'setBacklightReactive'),
+            'lighting_backlight_wave': self._has_feature('razer.device.lighting.backlight', 'setBacklightWave'),
+            'lighting_backlight_breath_single': self._has_feature('razer.device.lighting.backlight', 'setBacklightBreathSingle'),
+            'lighting_backlight_breath_dual': self._has_feature('razer.device.lighting.backlight', 'setBacklightBreathDual'),
+            'lighting_backlight_breath_random': self._has_feature('razer.device.lighting.backlight', 'setBacklightBreathRandom'),
 
             'lighting_profile_led_red': self._has_feature('razer.device.lighting.profile_led', 'setRedLED'),
             'lighting_profile_led_green': self._has_feature('razer.device.lighting.profile_led', 'setGreenLED'),
