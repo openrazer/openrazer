@@ -50,10 +50,7 @@ def set_backlight_active(self, active):
     driver_path = self.get_driver_path('backlight_led_state')
 
     with open(driver_path, 'w') as driver_file:
-        if active:
-            driver_file.write('1')
-        else:
-            driver_file.write('0')
+        driver_file.write('1' if active else '0')
 
 
 @endpoint('razer.device.lighting.backlight', 'getBacklightBrightness', out_sig='d')
@@ -83,11 +80,14 @@ def set_backlight_brightness(self, brightness):
 
     self.method_args['brightness'] = brightness
 
-    brightness = int(round(brightness * (255.0 / 100.0)))
-    if brightness > 255:
-        brightness = 255
+    if brightness > 100:
+        brightness = 100
     elif brightness < 0:
         brightness = 0
+
+    self.set_persistence("scroll", "brightness", int(brightness))
+
+    brightness = int(round(brightness * (255.0 / 100.0)))
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(brightness))
@@ -115,14 +115,11 @@ def set_backlight_static(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
-    rgb_driver_path = self.get_driver_path('backlight_led_rgb')
-    effect_driver_path = self.get_driver_path('backlight_led_effect')
+    # remember effect
+    self.set_persistence("backlight", "effect", 'static')
+    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
 
-    payload = bytes([red, green, blue])
-
-    with open(rgb_driver_path, 'wb') as rgb_driver_file, open(effect_driver_path, 'w') as effect_driver_file:
-        rgb_driver_file.write(payload)
-        effect_driver_file.write('0')
+    set_led_effect_color_common(self, 'backlight', '0', red, green, blue)
 
 
 @endpoint('razer.device.lighting.backlight', 'setBacklightPulsate', in_sig='yyy')
@@ -144,14 +141,11 @@ def set_backlight_pulsate(self, red, green, blue):
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
 
-    rgb_driver_path = self.get_driver_path('backlight_led_rgb')
-    effect_driver_path = self.get_driver_path('backlight_led_effect')
+    # remember effect
+    self.set_persistence("backlight", "effect", 'pulsate')
+    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
 
-    payload = bytes([red, green, blue])
-
-    with open(rgb_driver_path, 'wb') as rgb_driver_file, open(effect_driver_path, 'w') as effect_driver_file:
-        rgb_driver_file.write(payload)
-        effect_driver_file.write('2')
+    set_led_effect_color_common(self, 'backlight', '2', red, green, blue)
 
 
 @endpoint('razer.device.lighting.backlight', 'setBacklightSpectrum')
@@ -164,10 +158,10 @@ def set_backlight_spectrum(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
-    effect_driver_path = self.get_driver_path('backlight_led_effect')
+    # remember effect
+    self.set_persistence("backlight", "effect", 'spectrum')
 
-    with open(effect_driver_path, 'w') as effect_driver_file:
-        effect_driver_file.write('4')
+    set_led_effect_common(self, 'backlight', '4')
 
 
 @endpoint('razer.device.lighting.logo', 'getLogoActive', out_sig='b')
