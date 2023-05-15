@@ -25,9 +25,6 @@ def set_led_effect_common(self, zone: str, effect: str) -> None:
 def get_backlight_active(self):
     """
     Get if the backlight is lit up
-
-    :return: Active
-    :rtype: bool
     """
     self.logger.debug("DBus call get_backlight_active")
 
@@ -38,9 +35,6 @@ def get_backlight_active(self):
 def set_backlight_active(self, active):
     """
     Get if the backlight is lit up
-
-    :param active: Is active
-    :type active: bool
     """
     self.logger.debug("DBus call set_backlight_active")
 
@@ -57,9 +51,6 @@ def set_backlight_active(self, active):
 def get_backlight_brightness(self):
     """
     Get the device's brightness
-
-    :return: Brightness
-    :rtype: float
     """
     self.logger.debug("DBus call get_backlight_brightness")
 
@@ -70,9 +61,6 @@ def get_backlight_brightness(self):
 def set_backlight_brightness(self, brightness):
     """
     Set the device's brightness
-
-    :param brightness: Brightness
-    :type brightness: int
     """
     self.logger.debug("DBus call set_backlight_brightness")
 
@@ -100,15 +88,6 @@ def set_backlight_brightness(self, brightness):
 def set_backlight_static(self, red, green, blue):
     """
     Set the device to static colour
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
     """
     self.logger.debug("DBus call set_backlight_static")
 
@@ -126,15 +105,6 @@ def set_backlight_static(self, red, green, blue):
 def set_backlight_pulsate(self, red, green, blue):
     """
     Set the device to pulsate
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
     """
     self.logger.debug("DBus call set_backlight_pulsate")
 
@@ -168,9 +138,6 @@ def set_backlight_spectrum(self):
 def get_logo_active(self):
     """
     Get if the logo is lit up
-
-    :return: Active
-    :rtype: bool
     """
     self.logger.debug("DBus call get_logo_active")
 
@@ -181,9 +148,6 @@ def get_logo_active(self):
 def set_logo_active(self, active):
     """
     Set if the logo is lit up
-
-    :param active: Is active
-    :type active: bool
     """
     self.logger.debug("DBus call set_logo_active")
 
@@ -200,9 +164,6 @@ def set_logo_active(self, active):
 def get_logo_brightness(self):
     """
     Get the device's brightness
-
-    :return: Brightness
-    :rtype: float
     """
     self.logger.debug("DBus call get_logo_brightness")
 
@@ -213,9 +174,6 @@ def get_logo_brightness(self):
 def set_logo_brightness(self, brightness):
     """
     Set the device's brightness
-
-    :param brightness: Brightness
-    :type brightness: int
     """
     self.logger.debug("DBus call set_logo_brightness")
 
@@ -243,15 +201,6 @@ def set_logo_brightness(self, brightness):
 def set_logo_static(self, red, green, blue):
     """
     Set the device to static colour
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
     """
     self.logger.debug("DBus call set_logo_static")
 
@@ -282,15 +231,6 @@ def set_logo_static_mono(self):
 def set_logo_blinking(self, red, green, blue):
     """
     Set the device to blinking
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
     """
     self.logger.debug("DBus call set_logo_blinking")
 
@@ -308,15 +248,6 @@ def set_logo_blinking(self, red, green, blue):
 def set_logo_pulsate(self, red, green, blue):
     """
     Set the device to pulsate
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
     """
     self.logger.debug("DBus call set_logo_pulsing")
 
@@ -347,15 +278,6 @@ def set_logo_pulsate_mono(self):
 def set_logo_spectrum(self):
     """
     Set the device to spectrum
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
     """
     self.logger.debug("DBus call set_logo_spectrum")
 
@@ -372,9 +294,6 @@ def set_logo_spectrum(self):
 def get_scroll_active(self):
     """
     Get if the scroll is light up
-
-    :return: Active
-    :rtype: bool
     """
     self.logger.debug("DBus call get_scroll_active")
 
@@ -385,9 +304,6 @@ def get_scroll_active(self):
 def set_scroll_active(self, active):
     """
     Get if the scroll is light up
-
-    :param active: Is active
-    :type active: bool
     """
     self.logger.debug("DBus call set_scroll_active")
 
@@ -404,9 +320,6 @@ def set_scroll_active(self, active):
 def get_scroll_brightness(self):
     """
     Get the device's brightness
-
-    :return: Brightness
-    :rtype: float
     """
     self.logger.debug("DBus call get_scroll_brightness")
 
@@ -417,9 +330,6 @@ def get_scroll_brightness(self):
 def set_scroll_brightness(self, brightness):
     """
     Set the device's brightness
-
-    :param brightness: Brightness
-    :type brightness: int
     """
     self.logger.debug("DBus call set_scroll_brightness")
 
@@ -447,15 +357,6 @@ def set_scroll_brightness(self, brightness):
 def set_scroll_static(self, red, green, blue):
     """
     Set the device to static colour
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
     """
     self.logger.debug("DBus call set_scroll_static")
 
@@ -486,15 +387,6 @@ def set_scroll_static_mono(self):
 def set_scroll_blinking(self, red, green, blue):
     """
     Set the device to blinking
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
     """
     self.logger.debug("DBus call set_scroll_blinking")
 
@@ -512,15 +404,6 @@ def set_scroll_blinking(self, red, green, blue):
 def set_scroll_pulsate(self, red, green, blue):
     """
     Set the device to pulsate
-
-    :param red: Red component
-    :type red: int
-
-    :param green: Green component
-    :type green: int
-
-    :param blue: Blue component
-    :type blue: int
     """
     self.logger.debug("DBus call set_scroll_pulsate")
 
