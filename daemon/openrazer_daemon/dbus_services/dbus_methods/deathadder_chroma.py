@@ -85,11 +85,11 @@ def set_backlight_brightness(self, brightness):
 
 
 @endpoint('razer.device.lighting.backlight', 'setBacklightStatic', in_sig='yyy')
-def set_backlight_static(self, red, green, blue):
+def set_backlight_static_classic(self, red, green, blue):
     """
     Set the device to static colour
     """
-    self.logger.debug("DBus call set_backlight_static")
+    self.logger.debug("DBus call set_backlight_static_classic")
 
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
@@ -119,11 +119,11 @@ def set_backlight_pulsate(self, red, green, blue):
 
 
 @endpoint('razer.device.lighting.backlight', 'setBacklightSpectrum')
-def set_backlight_spectrum(self):
+def set_backlight_spectrum_classic(self):
     """
     Set the device to spectrum mode
     """
-    self.logger.debug("DBus call set_backlight_spectrum")
+    self.logger.debug("DBus call set_backlight_spectrum_classic")
 
     # Notify others
     self.send_effect_event('setSpectrum')
@@ -198,11 +198,11 @@ def set_logo_brightness(self, brightness):
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoStatic', in_sig='yyy')
-def set_logo_static(self, red, green, blue):
+def set_logo_static_classic(self, red, green, blue):
     """
     Set the device to static colour
     """
-    self.logger.debug("DBus call set_logo_static")
+    self.logger.debug("DBus call set_logo_static_classic")
 
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
@@ -275,11 +275,11 @@ def set_logo_pulsate_mono(self):
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoSpectrum')
-def set_logo_spectrum(self):
+def set_logo_spectrum_classic(self):
     """
     Set the device to spectrum
     """
-    self.logger.debug("DBus call set_logo_spectrum")
+    self.logger.debug("DBus call set_logo_spectrum_classic")
 
     # Notify others
     self.send_effect_event('setSpectrum')
@@ -354,11 +354,11 @@ def set_scroll_brightness(self, brightness):
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollStatic', in_sig='yyy')
-def set_scroll_static(self, red, green, blue):
+def set_scroll_static_classic(self, red, green, blue):
     """
     Set the device to static colour
     """
-    self.logger.debug("DBus call set_scroll_static")
+    self.logger.debug("DBus call set_scroll_static_classic")
 
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
@@ -431,11 +431,11 @@ def set_scroll_pulsate_mono(self):
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollSpectrum')
-def set_scroll_spectrum(self):
+def set_scroll_spectrum_classic(self):
     """
     Set the device to spectrum
     """
-    self.logger.debug("DBus call set_scroll_spectrum")
+    self.logger.debug("DBus call set_scroll_spectrum_classic")
 
     # Notify others
     self.send_effect_event('setSpectrum')
