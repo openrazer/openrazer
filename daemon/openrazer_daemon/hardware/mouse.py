@@ -29,8 +29,8 @@ class RazerViperMini(__RazerDevice):
     MATRIX_DIMS = [1, 1]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
                # Underglow/Logo use LOGO_LED
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
-               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive',
+               'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Custom frame
                'set_custom_effect', 'set_key_row']
 
@@ -55,9 +55,9 @@ class RazerLanceheadWirelessWired(__RazerDevice):
                # Battery
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
-               'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
-               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # Left side
                'set_left_wave', 'set_left_static', 'set_left_spectrum', 'set_left_none', 'set_left_reactive', 'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
                # Right side
@@ -110,9 +110,9 @@ class RazerLanceheadWired(__RazerDevice):
                # Battery
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
-               'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
-               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # Left side
                'set_left_wave', 'set_left_static', 'set_left_spectrum', 'set_left_none', 'set_left_reactive', 'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
                # Right side
@@ -162,9 +162,9 @@ class RazerDeathAdderEssentialWhiteEdition(__RazerDevice):
                'get_logo_brightness', 'set_logo_brightness',
                'get_scroll_brightness', 'set_scroll_brightness',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2',
+               'set_logo_static', 'set_logo_none', 'set_logo_breath_single',
                # Scroll wheel
-               'set_scroll_static_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2']
+               'set_scroll_static', 'set_scroll_none', 'set_scroll_breath_single']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/da10m/carousel/razer-death-adder-gallery-25.png"
 
@@ -183,8 +183,8 @@ class RazerAbyssusEliteDVaEdition(__RazerDevice):
                'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness',
                # Underglow/Logo use LOGO_LED
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
-               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2']
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive',
+               'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1288/d.va_abyssus_elite.png"
 
@@ -203,8 +203,8 @@ class RazerAbyssusEssential(__RazerDevice):
                'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness',
                # Backlight/Logo...same
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
-               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2']
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive',
+               'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1290/1290_abyssusessential.png"
 
@@ -225,9 +225,9 @@ class RazerLanceheadTE(__RazerDevice):
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                'get_left_brightness', 'set_left_brightness', 'get_right_brightness', 'set_right_brightness',
                # Logo
-               'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
-               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # Left side
                'set_left_wave', 'set_left_static', 'set_left_spectrum', 'set_left_none', 'set_left_reactive', 'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
                # Right side
@@ -446,9 +446,9 @@ class RazerNagaHexV2(__RazerDevice):
                'get_backlight_brightness', 'set_backlight_brightness',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
-               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # #Macros
                'get_macros', 'delete_macro', 'add_macro',
                # Can set Logo, Scroll and thumbgrid with custom
@@ -508,9 +508,9 @@ class RazerNagaChroma(__RazerDevice):
                # Thumbgrid is technically backlight ID
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
-               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # #Macros
                'get_macros', 'delete_macro', 'add_macro',
                # Can set Logo, Scroll and thumbgrid with custom
@@ -630,9 +630,9 @@ class RazerDeathAdderElite(__RazerDevice):
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
-               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # Can set LOGO and Scroll with custom
                'set_custom_effect', 'set_key_row']
 
@@ -752,9 +752,9 @@ class RazerMambaWirelessWired(__RazerDevice):
                # Battery
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
-               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # Can set LOGO and Scroll with custom
                'set_custom_effect', 'set_key_row']
 
@@ -895,8 +895,8 @@ class RazerViperUltimateWired(__RazerDevice):
                # Battery
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
-               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive',
+               'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Custom frame
                'set_custom_effect', 'set_key_row']
 
@@ -943,8 +943,8 @@ class RazerViper(__RazerDevice):
     MATRIX_DIMS = [1, 1]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
-               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive',
+               'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Custom frame
                'set_custom_effect', 'set_key_row']
 
@@ -962,10 +962,10 @@ class RazerDeathAdderEssential(__RazerDevice):
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                # Logo
                'get_logo_brightness', 'set_logo_brightness',
-               'set_logo_static_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2',
+               'set_logo_static', 'set_logo_none', 'set_logo_breath_single',
                # Scroll wheel
                'get_scroll_brightness', 'set_scroll_brightness',
-               'set_scroll_static_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2']
+               'set_scroll_static', 'set_scroll_none', 'set_scroll_breath_single']
 
     DPI_MAX = 6400
 
@@ -981,7 +981,7 @@ class RazerDeathAdderEssential2021(__RazerDevice):
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                # Logo
                'get_logo_brightness', 'set_logo_brightness',
-               'set_logo_static_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2']
+               'set_logo_static', 'set_logo_none', 'set_logo_breath_single']
 
     DPI_MAX = 6400
 
@@ -1001,10 +1001,10 @@ class RazerMambaElite(__RazerDevice):
                'get_poll_rate', 'set_poll_rate',
                # Logo logo_led_brightness/logo_matrix_effect_breath/...
                'get_logo_brightness', 'set_logo_brightness',
-               'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel scroll_led_brightness/scroll_matrix_effect_breath/...
                'get_scroll_brightness', 'set_scroll_brightness',
-               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # Left side left_led_brightness/left_matrix_effect_breath/...
                'get_left_brightness', 'set_left_brightness',
                'set_left_wave', 'set_left_static', 'set_left_spectrum', 'set_left_none', 'set_left_reactive', 'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
@@ -1036,10 +1036,10 @@ class RazerNagaLeftHanded2020(__RazerDevice):
                'get_macros', 'delete_macro', 'add_macro',
                # Logo
                'get_logo_brightness', 'set_logo_brightness',
-               'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
                'get_scroll_brightness', 'set_scroll_brightness',
-               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # Right side = thumbgrid
                'get_right_brightness', 'set_right_brightness',
                'set_right_wave', 'set_right_static', 'set_right_spectrum', 'set_right_none', 'set_right_reactive', 'set_right_breath_random', 'set_right_breath_single', 'set_right_breath_dual',
@@ -1069,10 +1069,10 @@ class RazerNagaProWired(__RazerDeviceBrightnessSuspend):
                'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold',
                # Logo
                'get_logo_brightness', 'set_logo_brightness',
-               'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
                'get_scroll_brightness', 'set_scroll_brightness',
-               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # Thumbgrid
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                # Custom frame
@@ -1134,9 +1134,9 @@ class RazerBasilisk(__RazerDevice):
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
-               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # Can set LOGO and Scroll with custom
                'set_custom_effect', 'set_key_row']
 
@@ -1158,7 +1158,7 @@ class RazerBasiliskEssential(__RazerDevice):
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate',
                # Logo
-               'get_logo_brightness', 'set_logo_brightness', 'set_logo_spectrum_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2', 'set_logo_static_naga_hex_v2', 'set_logo_none_naga_hex_v2',
+               'get_logo_brightness', 'set_logo_brightness', 'set_logo_spectrum', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual', 'set_logo_static', 'set_logo_none',
                # Can set LOGO with custom
                'set_custom_effect', 'set_key_row']
 
@@ -1183,31 +1183,31 @@ class RazerBasiliskUltimateWired(__RazerDevice):
                # Logo
                'get_logo_brightness', 'set_logo_brightness',
                # Spectrum
-               'set_logo_spectrum_naga_hex_v2',
+               'set_logo_spectrum',
                # Reactive
-               'set_logo_reactive_naga_hex_v2',
+               'set_logo_reactive',
                # Breath
-               'set_logo_breath_random_naga_hex_v2',
-               'set_logo_breath_single_naga_hex_v2',
-               'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_breath_random',
+               'set_logo_breath_single',
+               'set_logo_breath_dual',
                # Static
-               'set_logo_static_naga_hex_v2',
+               'set_logo_static',
                # None
-               'set_logo_none_naga_hex_v2',
+               'set_logo_none',
                # Scroll wheel
                'get_scroll_brightness', 'set_scroll_brightness',
                # Spectrum
-               'set_scroll_spectrum_naga_hex_v2',
+               'set_scroll_spectrum',
                # Reactive
-               'set_scroll_reactive_naga_hex_v2',
+               'set_scroll_reactive',
                # Breath
-               'set_scroll_breath_random_naga_hex_v2',
-               'set_scroll_breath_single_naga_hex_v2',
-               'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_breath_random',
+               'set_scroll_breath_single',
+               'set_scroll_breath_dual',
                # Static
-               'set_scroll_static_naga_hex_v2',
+               'set_scroll_static',
                # None
-               'set_scroll_none_naga_hex_v2',
+               'set_scroll_none',
                'get_left_brightness', 'set_left_brightness', 'get_right_brightness', 'set_right_brightness',
                # Left side
                'set_left_wave', 'set_left_static', 'set_left_spectrum', 'set_left_none', 'set_left_reactive', 'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
@@ -1258,9 +1258,9 @@ class RazerBasiliskV2(__RazerDevice):
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
-               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # Can set LOGO and Scroll with custom
                'set_custom_effect', 'set_key_row']
 
@@ -1292,9 +1292,9 @@ class RazerBasiliskV3(__RazerDevice):
                # All LEDs (partial support)
                'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
                # Logo (partial support)
-               'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2',
+               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none',
                # Scroll wheel (partial support)
-               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2',
+               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none',
                # Can set custom matrix effects
                'set_custom_effect', 'set_key_row']
 
@@ -1311,9 +1311,9 @@ class RazerDeathAdderV2(__RazerDevice):
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
-               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # Can set LOGO and Scroll with custom
                'set_custom_effect', 'set_key_row']
 
@@ -1340,8 +1340,8 @@ class RazerDeathAdderV2ProWired(__RazerDevice):
                # Battery
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
-               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive',
+               'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Custom frame
                'set_custom_effect', 'set_key_row']
 
@@ -1504,7 +1504,7 @@ class RazerNagaX(__RazerDevice):
                'get_macros', 'delete_macro', 'add_macro',
                # Scroll wheel
                'get_scroll_brightness', 'set_scroll_brightness',
-               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
                # Left side = thumbgrid
                'get_left_brightness', 'set_left_brightness',
                'set_left_wave', 'set_left_static', 'set_left_spectrum', 'set_left_none', 'set_left_reactive', 'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
@@ -1526,8 +1526,8 @@ class RazerDeathAdderV2Mini(__RazerDevice):
                'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
-               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive',
+               'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Custom frame
                'set_custom_effect', 'set_key_row']
 
@@ -1550,8 +1550,8 @@ class RazerViper8KHz(__RazerDevice):
                'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
                'get_logo_brightness', 'set_logo_brightness',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
-               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2']
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive',
+               'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual']
     USB_VID = 0x1532
     USB_PID = 0x0091
     DEVICE_IMAGE = "https://dl.razerzone.com/Images/Viper%208KHz/Viper8khz.png"
@@ -1786,9 +1786,9 @@ class RazerBasiliskV3ProWired(__RazerDevice):
                # All LEDs (partial support)
                'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
                # Logo (partial support)
-               'set_logo_wave', 'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2',
+               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none',
                # Scroll wheel (partial support)
-               'set_scroll_wave', 'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2',
+               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none',
                # Can set custom matrix effects
                'set_custom_effect', 'set_key_row',
                # Battery
@@ -1910,8 +1910,8 @@ class RazerDeathAdderV2Lite(__RazerDevice):
                'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness',
                # Logo
-               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
-               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive',
+               'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Custom frame
                'set_custom_effect', 'set_key_row']
 
