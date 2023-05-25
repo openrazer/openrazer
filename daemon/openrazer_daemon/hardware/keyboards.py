@@ -776,6 +776,24 @@ class RazerOrnataV3(_RippleKeyboard):
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6075-1-en-v1.png"
 
 
+class RazerOrnataV3X(_MacroKeyboard):
+    """
+    Class for the Razer Ornata V3 X
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Ornata_V3_X(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0294
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
+    METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/6071-1-en-v1.png"
+
+
 class RazerHuntsmanElite(_RippleKeyboard):
     """
     Class for the Razer Huntsman Elite
@@ -1210,6 +1228,48 @@ class RazerDeathStalkerV2ProWireless(RazerDeathStalkerV2ProWired):
     Class for the Razer DeathStalker V2 Pro (Wireless)
     """
     USB_PID = 0x0290
+
+
+class RazerDeathStalkerV2ProTKLWired(_RippleKeyboard):
+    """
+    Class for the Razer DeathStalker V2 Pro TKL (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*DSV2_Pro_000000000000-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0298
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 17]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour',
+               # Battery
+               'get_battery', 'is_charging']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/6117/6117-1-en-v1.png"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, "Razer DeathStalker V2 Pro TKL")
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        super()._close()
+
+        self._battery_manager.close()
+
+
+class RazerDeathStalkerV2ProTKLWireless(RazerDeathStalkerV2ProTKLWired):
+    """
+    Class for the Razer DeathStalker V2 Pro TKL (Wireless)
+    """
+    USB_PID = 0x0296
 
 
 class RazerBlackWidowChromaOverwatch(_RippleKeyboard):

@@ -3,6 +3,7 @@
 """
 Hardware base class
 """
+import configparser
 import re
 import os
 import types
@@ -246,14 +247,14 @@ class RazerDevice(DBusService):
                 try:
                     self.dpi[0] = int(self.persistence[self.storage_name]['dpi_x'])
                     self.dpi[1] = int(self.persistence[self.storage_name]['dpi_y'])
-                except KeyError:
-                    pass
+                except (KeyError, configparser.NoOptionError):
+                    self.logger.info("Failed to get DPI from persistence storage, using default.")
 
             if 'set_poll_rate' in self.METHODS:
                 try:
                     self.poll_rate = int(self.persistence[self.storage_name]['poll_rate'])
-                except KeyError:
-                    pass
+                except (KeyError, configparser.NoOptionError):
+                    self.logger.info("Failed to get poll rate from persistence storage, using default.")
 
         # load last effects
         for i in self.ZONES:
@@ -263,20 +264,20 @@ class RazerDevice(DBusService):
                     # try reading the effect name from the persistence
                     try:
                         self.zone[i]["effect"] = self.persistence[self.storage_name][i + '_effect']
-                    except KeyError:
-                        pass
+                    except (KeyError, configparser.NoOptionError):
+                        self.logger.info("Failed to get " + i + " effect from persistence storage, using default.")
 
                     # zone active status
                     try:
                         self.zone[i]["active"] = self.persistence.getboolean(self.storage_name, i + '_active')
-                    except KeyError:
-                        pass
+                    except (KeyError, configparser.NoOptionError):
+                        self.logger.info("Failed to get " + i + " active from persistence storage, using default.")
 
                     # brightness
                     try:
                         self.zone[i]["brightness"] = float(self.persistence[self.storage_name][i + '_brightness'])
-                    except KeyError:
-                        pass
+                    except (KeyError, configparser.NoOptionError):
+                        self.logger.info("Failed to get " + i + " brightness from persistence storage, using default.")
 
                     # colors.
                     # these are stored as a string that must contain 9 numbers, separated with spaces.
@@ -290,29 +291,24 @@ class RazerDevice(DBusService):
                         # check if we have exactly 9 colors
                         if len(self.zone[i]["colors"]) != 9:
                             raise ValueError('There must be exactly 9 colors')
-
                     except ValueError:
                         # invalid colors. reinitialize
                         self.zone[i]["colors"] = [0, 255, 0, 0, 255, 255, 0, 0, 255]
                         self.logger.info("%s: Invalid colors; restoring to defaults.", self.__class__.__name__)
-                        pass
-
-                    except KeyError:
-                        pass
+                    except (KeyError, configparser.NoOptionError):
+                        self.logger.info("Failed to get " + i + " colors from persistence storage, using default.")
 
                     # speed
                     try:
                         self.zone[i]["speed"] = int(self.persistence[self.storage_name][i + '_speed'])
-
-                    except KeyError:
-                        pass
+                    except (KeyError, configparser.NoOptionError):
+                        self.logger.info("Failed to get " + i + " speed from persistence storage, using default.")
 
                     # wave direction
                     try:
                         self.zone[i]["wave_dir"] = int(self.persistence[self.storage_name][i + '_wave_dir'])
-
-                    except KeyError:
-                        pass
+                    except (KeyError, configparser.NoOptionError):
+                        self.logger.info("Failed to get " + i + " wave direction from persistence storage, using default.")
 
         self.restore_dpi_poll_rate()
         self.restore_brightness()

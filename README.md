@@ -96,6 +96,9 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Ornata V3                               |  1532:028F  |
 | Razer DeathStalker V2 Pro (Wireless)          |  1532:0290  |
 | Razer DeathStalker V2 Pro (Wired)             |  1532:0292  |
+| Razer Ornata V3 X                             |  1532:0294  |
+| Razer DeathStalker V2 Pro TKL (Wireless)      |  1532:0296  |
+| Razer DeathStalker V2 Pro TKL (Wired)         |  1532:0298  |
 | Razer DeathStalker V2                         |  1532:0295  |
 | Razer BlackWidow V3 Tenkeyless                |  1532:0A24  |
 
@@ -173,7 +176,9 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Naga X                                  |  1532:0096  |
 | Razer DeathAdder Essential (2021)             |  1532:0098  |
 | Razer Basilisk V3                             |  1532:0099  |
+| Razer Pro Click Mini (Receiver)               |  1532:009A  |
 | Razer DeathAdder V2 X HyperSpeed              |  1532:009C  |
+| Razer DeathAdder V2 Lite                      |  1532:00A1  |
 | Razer Viper V2 Pro (Wired)                    |  1532:00A5  |
 | Razer Viper V2 Pro (Wireless)                 |  1532:00A6  |
 | Razer Basilisk V3 Pro (Wired)                 |  1532:00AA  |

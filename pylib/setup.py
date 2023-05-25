@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="openrazer",
-    version="3.5.1",
+    version="3.6.1",
     packages=find_packages(exclude=["tests", "openrazer._fake_driver"]),
     install_requires=['dbus-python', 'numpy'],
     author="OpenRazer contributors",

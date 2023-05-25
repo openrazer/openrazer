@@ -1860,3 +1860,63 @@ class RazerHyperPollingWirelessDongle(__RazerDevice):
         super()._close()
 
         self._battery_manager.close()
+
+
+class RazerProClickMiniReceiver(__RazerDevice):
+    """
+    Class for the Razer Pro Click Mini (Receiver)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_ProClickM-if0(1|2)-event-kbd')
+    USB_VID = 0x1532
+    USB_PID = 0x009A
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               'get_idle_time', 'set_idle_time',
+               'get_battery', 'is_charging',
+               'get_low_battery_threshold', 'set_low_battery_threshold']
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/5763/5763-1-en-v1.png"
+
+    DPI_MAX = 12000
+
+    POLL_RATES = [125, 500, 1000]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Pro Click Mini')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
+
+
+class RazerDeathAdderV2Lite(__RazerDevice):
+    """
+    Class for the Razer DeathAdder V2 Lite
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_DeathAdder_V2_Lite-if0(1|2)-event-kbd')
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               'get_logo_brightness', 'set_logo_brightness',
+               # Logo
+               'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2',
+               'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
+               # Custom frame
+               'set_custom_effect', 'set_key_row']
+
+    USB_VID = 0x1532
+    USB_PID = 0x00A1
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1692/deathadder-v2-mini.png"
+
+    DPI_MAX = 8500
