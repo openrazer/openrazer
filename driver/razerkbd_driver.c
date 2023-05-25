@@ -378,6 +378,7 @@ static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
         request.transaction_id.id = 0x1F;
         break;
@@ -1119,6 +1120,7 @@ static ssize_t razer_attr_write_macro_led_effect(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
         request = razer_chroma_standard_set_led_effect(NOSTORE, MACRO_LED, enabled);
         request.transaction_id.id = 0x1F;
