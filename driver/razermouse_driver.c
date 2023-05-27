@@ -3180,6 +3180,7 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
 
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
         request = razer_chroma_standard_matrix_effect_wave(VARSTORE, led_id, direction);
         break;
 
@@ -3262,6 +3263,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev
 
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
         request = razer_chroma_standard_matrix_effect_spectrum(VARSTORE, led_id);
         break;
 
@@ -3349,6 +3351,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive_common(struct device *dev
 
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
         request = razer_chroma_standard_matrix_effect_reactive(VARSTORE, led_id, speed, (struct razer_rgb*)&buf[1]);
         break;
 
@@ -3451,6 +3454,7 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
 
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
         switch(count) {
         case 3: // Single colour mode
             request = razer_chroma_standard_matrix_effect_breathing_single(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
@@ -3574,6 +3578,7 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
 
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
         request = razer_chroma_standard_matrix_effect_static(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
         break;
 
@@ -3659,6 +3664,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
 
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
         request = razer_chroma_standard_matrix_effect_none(VARSTORE, led_id);
         break;
 
@@ -4878,12 +4884,12 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_reactive);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_none);
             break;
 
         case USB_DEVICE_ID_RAZER_OROCHI_2011:
@@ -5706,13 +5712,12 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_backlight_led_brightness);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);
-            device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_reactive);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_none);
             break;
 
         case USB_DEVICE_ID_RAZER_OROCHI_2011:

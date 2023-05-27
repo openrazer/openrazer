@@ -300,9 +300,9 @@ class RazerMambaTE(__RazerDevice):
     USB_PID = 0x0046
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 16]
-    METHODS = ['get_device_type_mouse', 'get_backlight_brightness', 'set_backlight_brightness', 'set_wave_effect',
-               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
-               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'max_dpi',
+    METHODS = ['get_device_type_mouse', 'get_backlight_brightness', 'set_backlight_brightness', 'set_backlight_wave',
+               'set_backlight_static', 'set_backlight_spectrum', 'set_backlight_reactive', 'set_backlight_none', 'set_backlight_breath_random',
+               'set_backlight_breath_single', 'set_backlight_breath_dual', 'set_custom_effect', 'set_key_row', 'max_dpi',
                'get_dpi_xy', 'set_dpi_xy']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/606/606_mambate_500x500.png"
