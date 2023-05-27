@@ -453,24 +453,28 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
 static ssize_t razer_attr_write_matrix_effect_blinking(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report request_rgb = {0};
-    struct razer_report request_effect = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x01);
+    struct razer_report request = {0};
     struct razer_report response = {0};
-
-    request_effect.transaction_id.id = 0x3F;
 
     if (count != 3) {
         printk(KERN_WARNING "razeraccessory: Blinking mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
-    request_rgb = razer_chroma_standard_set_led_rgb(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-    request_rgb.transaction_id.id = 0x3F;
+    request = razer_chroma_standard_set_led_rgb(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+    request.transaction_id.id = 0x3F;
 
     mutex_lock(&device->lock);
-    razer_send_payload(device->usb_dev, &request_rgb, &response);
+    razer_send_payload(device->usb_dev, &request, &response);
+    mutex_unlock(&device->lock);
+
     msleep(5);
-    razer_send_payload(device->usb_dev, &request_effect, &response);
+
+    request = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x01);
+    request.transaction_id.id = 0x3F;
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &request, &response);
     mutex_unlock(&device->lock);
 
     return count;
