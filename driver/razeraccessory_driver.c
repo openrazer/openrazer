@@ -1279,6 +1279,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         /* Get the average brightness of all channels */
         for (i = ARGB_CH_1_LED; i <= ARGB_CH_6_LED; i++) {
             request = razer_chroma_extended_matrix_get_brightness(VARSTORE, i);
+            request.transaction_id.id = 0x3F;
             mutex_lock(&device->lock);
             razer_send_payload(device->usb_dev, &request, &response);
             mutex_unlock(&device->lock);
@@ -1915,6 +1916,8 @@ static ssize_t razer_attr_read_channel_led_brightness(unsigned char led, struct 
     struct razer_report request = razer_chroma_extended_matrix_get_brightness(VARSTORE, led);
     struct razer_report response = {0};
     unsigned char brightness = 0;
+
+    request.transaction_id.id = 0x3F;
 
     mutex_lock(&device->lock);
     razer_send_payload(device->usb_dev, &request, &response);
