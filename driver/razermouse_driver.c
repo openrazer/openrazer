@@ -697,7 +697,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
 static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
+    struct razer_report request = {0};
     struct razer_report response = {0};
 
     switch (device->usb_pid) {
@@ -747,6 +747,10 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
         request = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
         request.transaction_id.id = 0x80;
+        break;
+
+    default:
+        request = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
         break;
     }
 
