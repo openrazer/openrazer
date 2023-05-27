@@ -1712,8 +1712,8 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-        razer_send_payload(usb_dev, &request, &response);
         request.transaction_id.id = 0x1F;
+        razer_send_payload(usb_dev, &request, &response);
         break;
 
     case USB_DEVICE_ID_RAZER_ORBWEAVER:
