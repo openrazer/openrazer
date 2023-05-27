@@ -672,9 +672,14 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS: // TODO: this is probably wrong?
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED: // TODO: this is probably wrong?
         request = razer_chroma_standard_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: matrix_effect_none not supported for this model\n");
+        return -EINVAL;
     }
 
     mutex_lock(&device->lock);
@@ -769,8 +774,6 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     }
 
     switch (device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_NAGA_X:
-    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
@@ -799,8 +802,8 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         break;
 
     default:
-        request = razer_chroma_standard_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-        break;
+        printk(KERN_WARNING "razermouse: matrix_effect_static not supported for this model\n");
+        return -EINVAL;
     }
 
     mutex_lock(&device->lock);
@@ -832,8 +835,8 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
         break;
 
     default:
-        request = razer_chroma_standard_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, direction);
-        break;
+        printk(KERN_WARNING "razermouse: matrix_effect_wave not supported for this model\n");
+        return -EINVAL;
     }
 
     mutex_lock(&device->lock);
@@ -869,8 +872,8 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
         break;
 
     default:
-        request = razer_chroma_standard_matrix_effect_spectrum(VARSTORE, BACKLIGHT_LED);
-        break;
+        printk(KERN_WARNING "razermouse: matrix_effect_spectrum not supported for this model\n");
+        return -EINVAL;
     }
 
     mutex_lock(&device->lock);
@@ -907,8 +910,8 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
         break;
 
     default:
-        request = razer_chroma_standard_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
-        break;
+        printk(KERN_WARNING "razermouse: matrix_effect_reactive not supported for this model\n");
+        return -EINVAL;
     }
 
     mutex_lock(&device->lock);
@@ -951,20 +954,8 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         break;
 
     default:
-        switch(count) {
-        case 3: // Single colour mode
-            request = razer_chroma_standard_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-            break;
-
-        case 6: // Dual colour mode
-            request = razer_chroma_standard_matrix_effect_breathing_dual(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
-            break;
-
-        default: // "Random" colour mode
-            request = razer_chroma_standard_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
-            break;
-        }
-        break;
+        printk(KERN_WARNING "razermouse: matrix_effect_breath not supported for this model\n");
+        return -EINVAL;
     }
 
     mutex_lock(&device->lock);
