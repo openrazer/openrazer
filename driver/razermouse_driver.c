@@ -568,8 +568,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 static ssize_t razer_attr_read_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_standard_get_firmware_version();
+    struct razer_report request = {0};
     struct razer_report response = {0};
+
+    request = razer_chroma_standard_get_firmware_version();
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Orochi 2011 doesn't have FW
@@ -647,9 +649,10 @@ static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report request = razer_chroma_standard_set_led_state(VARSTORE, LOGO_LED, enabled);
+    struct razer_report request = {0};
     struct razer_report response = {0};
 
+    request = razer_chroma_standard_set_led_state(VARSTORE, LOGO_LED, enabled);
     request.transaction_id.id = 0xFF;
 
     mutex_lock(&device->lock);
@@ -988,8 +991,10 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     char serial_string[23];
-    struct razer_report request = razer_chroma_standard_get_serial();
+    struct razer_report request = {0};
     struct razer_report response = {0};
+
+    request = razer_chroma_standard_get_serial();
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
@@ -1069,8 +1074,10 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_misc_get_battery_level();
+    struct razer_report request = {0};
     struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_battery_level();
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
@@ -1125,8 +1132,10 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
 static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_misc_get_charging_status();
+    struct razer_report request = {0};
     struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_charging_status();
 
     switch (device->usb_pid) {
     // Wireless mice that don't support is_charging
@@ -1221,11 +1230,11 @@ static ssize_t razer_attr_write_charge_effect(struct device *dev, struct device_
 static ssize_t razer_attr_write_charge_colour(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-
-    // First enable static charging effect
-    struct razer_report request = razer_chroma_misc_set_dock_charge_type(0x01);
+    struct razer_report request = {0};
     struct razer_report response = {0};
 
+    // First enable static charging effect
+    request = razer_chroma_misc_set_dock_charge_type(0x01);
     request.transaction_id.id = 0xFF;
 
     mutex_lock(&device->lock);
@@ -1263,9 +1272,11 @@ static ssize_t razer_attr_write_charge_colour(struct device *dev, struct device_
 static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_misc_get_polling_rate();
+    struct razer_report request = {0};
     struct razer_report response = {0};
     unsigned short polling_rate = 0;
+
+    request = razer_chroma_misc_get_polling_rate();
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
@@ -1394,8 +1405,10 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     unsigned short polling_rate = (unsigned short)simple_strtoul(buf, NULL, 10);
-    struct razer_report request = razer_chroma_misc_set_polling_rate(polling_rate);
+    struct razer_report request = {0};
     struct razer_report response = {0};
+
+    request = razer_chroma_misc_set_polling_rate(polling_rate);
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
@@ -1917,9 +1930,10 @@ static ssize_t razer_attr_write_scroll_mode(struct device *dev, struct device_at
 static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_misc_get_scroll_mode();
+    struct razer_report request = {0};
     struct razer_report response = {0};
 
+    request = razer_chroma_misc_get_scroll_mode();
     request.transaction_id.id = 0x1f;
 
     mutex_lock(&device->lock);
@@ -1962,9 +1976,10 @@ static ssize_t razer_attr_write_scroll_acceleration(struct device *dev, struct d
 static ssize_t razer_attr_read_scroll_acceleration(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_misc_get_scroll_acceleration();
+    struct razer_report request = {0};
     struct razer_report response = {0};
 
+    request = razer_chroma_misc_get_scroll_acceleration();
     request.transaction_id.id = 0x1f;
 
     mutex_lock(&device->lock);
@@ -2007,9 +2022,10 @@ static ssize_t razer_attr_write_scroll_smart_reel(struct device *dev, struct dev
 static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_misc_get_scroll_smart_reel();
+    struct razer_report request = {0};
     struct razer_report response = {0};
 
+    request = razer_chroma_misc_get_scroll_smart_reel();
     request.transaction_id.id = 0x1f;
 
     mutex_lock(&device->lock);
@@ -2273,9 +2289,11 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
 static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_misc_get_idle_time();
+    struct razer_report request = {0};
     struct razer_report response = {0};
     unsigned short idle_time = 0;
+
+    request = razer_chroma_misc_get_idle_time();
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
@@ -2314,8 +2332,11 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     unsigned short idle_time = (unsigned short)simple_strtoul(buf, NULL, 10);
-    struct razer_report request = razer_chroma_misc_set_idle_time(idle_time);
+    struct razer_report request = {0};
     struct razer_report response = {0};
+
+    request = razer_chroma_misc_set_idle_time(idle_time);
+
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
@@ -2349,8 +2370,11 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
 static ssize_t razer_attr_read_low_battery_threshold(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_misc_get_low_battery_threshold();
+    struct razer_report request = {0};
     struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_low_battery_threshold();
+
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
@@ -2379,8 +2403,11 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     unsigned char threshold = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report request = razer_chroma_misc_set_low_battery_threshold(threshold);
+    struct razer_report request = {0};
     struct razer_report response = {0};
+
+    request = razer_chroma_misc_set_low_battery_threshold(threshold);
+
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
@@ -2613,8 +2640,10 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
 static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_standard_get_device_mode();
+    struct razer_report request = {0};
     struct razer_report response = {0};
+
+    request = razer_chroma_standard_get_device_mode();
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G: // Doesn't support device mode, exit early

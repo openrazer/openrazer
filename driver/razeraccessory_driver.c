@@ -88,8 +88,10 @@ static int razer_send_payload(struct usb_device *usb_dev, struct razer_report *r
  */
 static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode, unsigned char param)
 {
-    struct razer_report request = razer_chroma_standard_set_device_mode(mode, param);
+    struct razer_report request = {0};
     struct razer_report response = {0};
+
+    request = razer_chroma_standard_set_device_mode(mode, param);
     request.transaction_id.id = 0x3F;
 
     razer_send_payload(usb_dev, &request, &response);
@@ -977,9 +979,11 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_standard_get_serial();
+    struct razer_report request = {0};
     struct razer_report response = {0};
     char serial_string[51];
+
+    request = razer_chroma_standard_get_serial();
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
@@ -1034,8 +1038,10 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 static ssize_t razer_attr_read_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_standard_get_firmware_version();
+    struct razer_report request = {0};
     struct razer_report response = {0};
+
+    request = razer_chroma_standard_get_firmware_version();
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
@@ -1112,9 +1118,10 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
 static ssize_t razer_attr_read_is_mug_present(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report request = get_razer_report(0x02, 0x81, 0x02);
+    struct razer_report request = {0};
     struct razer_report response = {0};
 
+    request = get_razer_report(0x02, 0x81, 0x02);
     request.transaction_id.id = 0xFF;
 
     mutex_lock(&device->lock);
@@ -1132,8 +1139,10 @@ static ssize_t razer_attr_read_is_mug_present(struct device *dev, struct device_
 static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_standard_get_device_mode();
+    struct razer_report request = {0};
     struct razer_report response = {0};
+
+    request = razer_chroma_standard_get_device_mode();
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
@@ -1368,7 +1377,7 @@ static ssize_t razer_attr_write_set_charge_brightness(struct device *dev, struct
 static ssize_t razer_attr_read_set_charge_brightness(struct device *dev, struct device_attribute *attr, char *buf, int led)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_standard_get_led_brightness(VARSTORE, led);
+    struct razer_report request = {0};
     struct razer_report response = {0};
     unsigned char brightness = 0;
 
@@ -1378,6 +1387,7 @@ static ssize_t razer_attr_read_set_charge_brightness(struct device *dev, struct 
         break;
 
     default:
+        request = razer_chroma_standard_get_led_brightness(VARSTORE, led);
         request.transaction_id.id = 0xFF;
         mutex_lock(&device->lock);
         razer_send_payload(device->usb_dev, &request, &response);
@@ -1767,8 +1777,10 @@ static ssize_t razer_attr_write_channel6_led_brightness(struct device *dev, stru
 static ssize_t razer_attr_read_channel_size(unsigned int channel, struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report request = get_razer_report(0x0f, 0x88, 0x0d);
+    struct razer_report request = {0};
     struct razer_report response = {0};
+
+    request = get_razer_report(0x0f, 0x88, 0x0d);
     request.transaction_id.id = 0x1F;
     request.arguments[0] = 0x06;
 
@@ -1937,10 +1949,11 @@ static ssize_t razer_attr_write_reset_channels(struct device *dev, struct device
 static ssize_t razer_attr_read_channel_led_brightness(unsigned char led, struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report request = razer_chroma_extended_matrix_get_brightness(VARSTORE, led);
+    struct razer_report request = {0};
     struct razer_report response = {0};
     unsigned char brightness = 0;
 
+    request = razer_chroma_extended_matrix_get_brightness(VARSTORE, led);
     request.transaction_id.id = 0x3F;
 
     mutex_lock(&device->lock);
