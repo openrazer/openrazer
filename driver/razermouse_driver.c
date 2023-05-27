@@ -1458,6 +1458,9 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
         request = razer_chroma_misc_set_dock_brightness(brightness);
         break;
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED: // TODO: Migrate to backlight_led_brightness
+        request = razer_chroma_standard_set_led_brightness(VARSTORE, BACKLIGHT_LED, brightness);
+        break;
 
     case USB_DEVICE_ID_RAZER_NAGA_X:
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
@@ -1473,10 +1476,6 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
 
     case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
-        break;
-
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRED: // TODO: Migrate to backlight_led_brightness
-        request = razer_chroma_standard_set_led_brightness(VARSTORE, BACKLIGHT_LED, brightness);
         break;
 
     default:
@@ -1508,6 +1507,9 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         request = razer_chroma_misc_get_dock_brightness();
         brightness_index = 0x00;
         break;
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED: // TODO: Migrate to backlight_led_brightness
+        request = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
+        break;
 
     case USB_DEVICE_ID_RAZER_NAGA_X:
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
@@ -1523,10 +1525,6 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
 
     case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
         request = razer_chroma_extended_matrix_get_brightness(VARSTORE, ZERO_LED);
-        break;
-
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRED: // TODO: Migrate to backlight_led_brightness
-        request = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
         break;
 
     default:
