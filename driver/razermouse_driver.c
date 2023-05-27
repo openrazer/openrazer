@@ -3219,6 +3219,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
         request = razer_chroma_mouse_extended_matrix_effect_spectrum(VARSTORE, led_id);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
@@ -3312,6 +3313,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive_common(struct device *dev
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
         request = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, led_id, speed, (struct razer_rgb*)&buf[1]);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
@@ -3537,6 +3539,7 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         request = razer_chroma_mouse_extended_matrix_effect_static(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
@@ -3625,6 +3628,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         request = razer_chroma_mouse_extended_matrix_effect_none(VARSTORE, led_id);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
