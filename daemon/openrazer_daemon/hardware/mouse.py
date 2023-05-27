@@ -248,9 +248,9 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x0045
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 15]
-    METHODS = ['get_device_type_mouse', 'get_battery', 'is_charging', 'set_wave_effect',
-               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
-               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
+    METHODS = ['get_device_type_mouse', 'get_battery', 'is_charging', 'set_backlight_wave',
+               'set_backlight_static', 'set_backlight_spectrum', 'set_backlight_reactive', 'set_backlight_none', 'set_backlight_breath_random',
+               'set_backlight_breath_single', 'set_backlight_breath_dual', 'set_custom_effect', 'set_key_row',
                'set_charge_effect', 'set_charge_colour', 'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/609/609_mamba_500x500.png"
@@ -282,9 +282,9 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x0044
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 15]
-    METHODS = ['get_device_type_mouse', 'set_wave_effect',
-               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
-               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'max_dpi',
+    METHODS = ['get_device_type_mouse', 'set_backlight_wave',
+               'set_backlight_static', 'set_backlight_spectrum', 'set_backlight_reactive', 'set_backlight_none', 'set_backlight_breath_random',
+               'set_backlight_breath_single', 'set_backlight_breath_dual', 'set_custom_effect', 'set_key_row', 'max_dpi',
                'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'set_idle_time', 'set_low_battery_threshold', 'get_battery', 'is_charging']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/609/609_mamba_500x500.png"
