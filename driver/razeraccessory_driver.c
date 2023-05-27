@@ -317,6 +317,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
         request = razer_chroma_extended_matrix_effect_reactive(VARSTORE, ZERO_LED, speed, (struct razer_rgb *)&buf[1]);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY:
@@ -357,6 +358,7 @@ static ssize_t razer_attr_write_matrix_reactive_trigger(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
         // TODO: Fix reactive trigger for Goliathus
         request = razer_chroma_extended_matrix_effect_reactive(VARSTORE, ZERO_LED, 0, &rgb);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY:
@@ -499,6 +501,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request = razer_chroma_extended_matrix_effect_custom_frame();
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:

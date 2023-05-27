@@ -726,6 +726,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
         request = razer_chroma_extended_matrix_effect_custom_frame();
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_X:
@@ -3161,6 +3162,7 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, led_id, direction);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_X:
@@ -3243,6 +3245,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, led_id);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_VIPER_8K:
@@ -3337,6 +3340,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive_common(struct device *dev
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
         request = razer_chroma_extended_matrix_effect_reactive(VARSTORE, led_id, speed, (struct razer_rgb*)&buf[1]);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_VIPER_8K:
@@ -3566,6 +3570,7 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_VIPER_8K:
@@ -3655,6 +3660,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
         request = razer_chroma_extended_matrix_effect_none(VARSTORE, led_id);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_VIPER_8K:

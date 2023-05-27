@@ -499,7 +499,6 @@ struct razer_report razer_chroma_standard_matrix_set_custom_frame(unsigned char 
 struct razer_report razer_chroma_extended_matrix_effect_base(unsigned char arg_size, unsigned char variable_storage, unsigned char led_id, unsigned char effect_id)
 {
     struct razer_report report = get_razer_report(0x0F, 0x02, arg_size);
-    report.transaction_id.id = 0x3F;
 
     report.arguments[0] = variable_storage;
     report.arguments[1] = led_id;
