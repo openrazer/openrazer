@@ -3433,6 +3433,10 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
             break;
         }
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: matrix_effect_breath not supported for this model\n");
+        return -EINVAL;
     }
 
     switch (device->usb_pid) {
@@ -3538,7 +3542,7 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
 
     default:
         printk(KERN_WARNING "razermouse: matrix_effect_static not supported for this model\n");
-        return count;
+        return -EINVAL;
     }
 
     mutex_lock(&device->lock);
