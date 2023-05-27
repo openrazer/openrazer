@@ -1167,6 +1167,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
+        request.transaction_id.id = 0x3F;
         device->saved_brightness = brightness;
         break;
 
@@ -1194,36 +1195,43 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
+        request.transaction_id.id = 0x3F;
         break;
 
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         /* Set the brightness for all channels to the requested value */
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_1_LED, brightness);
+        request.transaction_id.id = 0x3F;
         mutex_lock(&device->lock);
         razer_send_payload(device->usb_dev, &request, &response);
         mutex_unlock(&device->lock);
 
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_2_LED, brightness);
+        request.transaction_id.id = 0x3F;
         mutex_lock(&device->lock);
         razer_send_payload(device->usb_dev, &request, &response);
         mutex_unlock(&device->lock);
 
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_3_LED, brightness);
+        request.transaction_id.id = 0x3F;
         mutex_lock(&device->lock);
         razer_send_payload(device->usb_dev, &request, &response);
         mutex_unlock(&device->lock);
 
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_4_LED, brightness);
+        request.transaction_id.id = 0x3F;
         mutex_lock(&device->lock);
         razer_send_payload(device->usb_dev, &request, &response);
         mutex_unlock(&device->lock);
 
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_5_LED, brightness);
+        request.transaction_id.id = 0x3F;
         mutex_lock(&device->lock);
         razer_send_payload(device->usb_dev, &request, &response);
         mutex_unlock(&device->lock);
 
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ARGB_CH_6_LED, brightness);
+        request.transaction_id.id = 0x3F;
         break;
 
     default:
@@ -1690,6 +1698,7 @@ static ssize_t razer_attr_write_channel_led_brightness(unsigned char led, struct
     brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
 
     request = razer_chroma_extended_matrix_brightness(VARSTORE, led, brightness);
+    request.transaction_id.id = 0x3F;
 
     mutex_lock(&device->lock);
     razer_send_payload(device->usb_dev, &request, &response);

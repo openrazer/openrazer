@@ -1476,6 +1476,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
 
     case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
+        request.transaction_id.id = 0x3F;
         break;
 
     default:
@@ -2718,6 +2719,7 @@ static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, led_id, brightness);
+        request.transaction_id.id = 0x3F;
         break;
 
     default:
