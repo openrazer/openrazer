@@ -796,6 +796,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         mutex_unlock(&device->lock);
 
         request = razer_naga_trinity_effect_static((struct razer_rgb*)&buf[0]);
+        request.transaction_id.id = 0x1f;
         break;
 
     case USB_DEVICE_ID_RAZER_BASILISK_V3:

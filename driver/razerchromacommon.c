@@ -1439,7 +1439,6 @@ struct razer_report razer_naga_trinity_effect_static(struct razer_rgb *rgb)
     report.arguments[11] = rgb->r;
     report.arguments[12] = rgb->g;
     report.arguments[13] = rgb->b;
-    report.transaction_id.id = 0x1f;
 
     return report;
 }
