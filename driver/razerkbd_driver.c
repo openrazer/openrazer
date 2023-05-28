@@ -3504,6 +3504,19 @@ static int razer_kbd_input_mapping(struct hid_device *hdev, struct hid_input *hi
     }
 }
 
+static void razer_kbd_init(struct razer_kbd_device *dev, struct usb_interface *intf, struct hid_device *hdev)
+{
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    // Initialise mutex
+    mutex_init(&dev->lock);
+    // Setup values
+    dev->usb_dev = usb_dev;
+    dev->usb_vid = usb_dev->descriptor.idVendor;
+    dev->usb_pid = usb_dev->descriptor.idProduct;
+    dev->usb_interface_protocol = intf->cur_altsetting->desc.bInterfaceProtocol;
+}
+
 /**
  * Probe method is ran whenever a device is binded to the driver
  */
@@ -3519,6 +3532,9 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         dev_err(&intf->dev, "out of memory\n");
         return -ENOMEM;
     }
+
+    // Init data
+    razer_kbd_init(dev, intf, hdev);
 
     // Other interfaces are actual key-emitting devices
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
