@@ -1794,6 +1794,10 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     switch(usb_dev->descriptor.idProduct) {
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+        if (count != 3) {
+            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            return -EINVAL;
+        }
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
         request.transaction_id.id = 0x1F;
         razer_send_payload(usb_dev, &request, &response);
