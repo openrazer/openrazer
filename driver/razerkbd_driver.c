@@ -1413,17 +1413,21 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     struct razer_report request = {0};
     struct razer_report response = {0};
 
+    /* For Blade laptops we get the serial number from DMI */
+    if (is_blade_laptop(device)) {
+        strncpy(&serial_string[0], dmi_get_system_info(DMI_PRODUCT_SERIAL), 50);
+        goto exit;
+    }
+
     request = razer_chroma_standard_get_serial();
     request.transaction_id.id = 0xFF;
 
-    if (is_blade_laptop(device)) {
-        strncpy(&serial_string[0], dmi_get_system_info(DMI_PRODUCT_SERIAL), 50);
-    } else {
-        razer_send_payload(device, &request, &response);
-        strncpy(&serial_string[0], &response.arguments[0], 22);
-        serial_string[22] = '\0';
-    }
+    razer_send_payload(device, &request, &response);
 
+    strncpy(&serial_string[0], &response.arguments[0], 22);
+    serial_string[22] = '\0';
+
+exit:
     return sprintf(buf, "%s\n", &serial_string[0]);
 }
 
