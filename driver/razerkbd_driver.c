@@ -3517,8 +3517,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
     dev = kzalloc(sizeof(struct razer_kbd_device), GFP_KERNEL);
     if(dev == NULL) {
         dev_err(&intf->dev, "out of memory\n");
-        retval = -ENOMEM;
-        goto exit;
+        return -ENOMEM;
     }
 
     // Other interfaces are actual key-emitting devices
@@ -3933,8 +3932,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
     //razer_activate_macro_keys(usb_dev);
     //msleep(3000);
     return 0;
-exit:
-    return retval;
+
 exit_free:
     kfree(dev);
     return retval;

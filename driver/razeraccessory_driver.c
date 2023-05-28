@@ -2163,8 +2163,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     dev = kzalloc(sizeof(struct razer_accessory_device), GFP_KERNEL);
     if(dev == NULL) {
         dev_err(&intf->dev, "out of memory\n");
-        retval = -ENOMEM;
-        goto exit;
+        return -ENOMEM;
     }
 
     // Init data
@@ -2377,8 +2376,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     usb_disable_autosuspend(usb_dev);
 
     return 0;
-exit:
-    return retval;
+
 exit_free:
     kfree(dev);
     return retval;
