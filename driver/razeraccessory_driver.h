@@ -46,8 +46,6 @@ struct razer_accessory_device {
     unsigned char saved_brightness;
 
     char serial[23];
-    // 3 Bytes, first byte is whether fw version is collected, 2nd byte is major version, 3rd is minor, should be printed out in hex form as are bcd
-    unsigned char firmware_version[3];
 };
 
 /*

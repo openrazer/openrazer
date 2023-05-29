@@ -1027,16 +1027,9 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
         break;
     }
 
-    // Basically some simple caching
-    if(device->firmware_version[0] != 1) {
-        razer_send_payload(device, &request, &response);
+    razer_send_payload(device, &request, &response);
 
-        device->firmware_version[0] = 1;
-        device->firmware_version[1] = response.arguments[0];
-        device->firmware_version[2] = response.arguments[1];
-    }
-
-    return sprintf(buf, "v%u.%u\n", device->firmware_version[1], device->firmware_version[2]);
+    return sprintf(buf, "v%u.%u\n", response.arguments[0], response.arguments[1]);
 }
 
 /**
@@ -2298,8 +2291,6 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     dev = hid_get_drvdata(hdev);
-
-    dev->firmware_version[0] = 0;
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CORE:
