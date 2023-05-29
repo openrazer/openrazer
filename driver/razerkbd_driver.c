@@ -1202,12 +1202,12 @@ static ssize_t razer_attr_write_matrix_effect_pulsate(struct device *dev, struct
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_TE_2014:
-        request = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, 0x02);
+        request = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, CLASSIC_EFFECT_BREATHING);
         request.transaction_id.id = 0xFF;
         break;
 
     default:
-        request = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x02);
+        request = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, CLASSIC_EFFECT_BREATHING);
         request.transaction_id.id = 0xFF;
         break;
     }
@@ -1658,7 +1658,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
         request = razer_chroma_standard_set_led_state(VARSTORE, BACKLIGHT_LED, ON);
         request.transaction_id.id = 0xFF;
         razer_send_payload(device, &request, &response);
-        request = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, LED_SPECTRUM_CYCLING);
+        request = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, CLASSIC_EFFECT_SPECTRUM);
         request.transaction_id.id = 0xFF;
         break;
 
@@ -1784,7 +1784,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
 
     case USB_DEVICE_ID_RAZER_ORBWEAVER:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_EXPERT:
-        request = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x00);
+        request = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, CLASSIC_EFFECT_STATIC);
         request.transaction_id.id = 0xFF;
         razer_send_payload(device, &request, &response);
         break;
@@ -1794,7 +1794,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013: // Doesn't need any parameters as can only do one type of static
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_TE_2014:
-        request = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, 0x00);
+        request = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, CLASSIC_EFFECT_STATIC);
         request.transaction_id.id = 0xFF;
         razer_send_payload(device, &request, &response);
         break;
@@ -1931,7 +1931,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         request = razer_chroma_standard_set_led_state(VARSTORE, BACKLIGHT_LED, ON);
         request.transaction_id.id = 0xFF;
         razer_send_payload(device, &request, &response);
-        request = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, LED_STATIC);
+        request = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, CLASSIC_EFFECT_STATIC);
         request.transaction_id.id = 0xFF;
         razer_send_payload(device, &request, &response);
         request = razer_chroma_standard_set_led_rgb(VARSTORE, BACKLIGHT_LED, (struct razer_rgb *) &buf[0]);

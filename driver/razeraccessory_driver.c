@@ -462,7 +462,7 @@ static ssize_t razer_attr_write_matrix_effect_blinking(struct device *dev, struc
 
     msleep(5);
 
-    request = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, 0x01);
+    request = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, CLASSIC_EFFECT_BLINKING);
     request.transaction_id.id = 0x3F;
 
     razer_send_payload(device, &request, &response);

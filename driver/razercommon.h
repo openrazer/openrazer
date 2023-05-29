@@ -68,10 +68,12 @@ do { \
 #define FULLY_CHARGED_LED 0x22
 
 // LED Effect definitions
-#define LED_STATIC           0x00
-#define LED_BLINKING         0x01
-#define LED_PULSATING        0x02
-#define LED_SPECTRUM_CYCLING 0x04
+enum razer_classic_effect_id {
+    CLASSIC_EFFECT_STATIC = 0x00,
+    CLASSIC_EFFECT_BLINKING = 0x01,
+    CLASSIC_EFFECT_BREATHING = 0x02, // also called pulsating
+    CLASSIC_EFFECT_SPECTRUM = 0x04,
+};
 
 // Report Responses
 #define RAZER_CMD_BUSY          0x01
