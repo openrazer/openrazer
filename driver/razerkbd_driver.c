@@ -182,16 +182,15 @@ static const struct razer_key_translation chroma_keys_5[] = {
 
 // Razer DeathStalker V2 Pro TKL
   static const struct razer_key_translation chroma_keys_6[] = {
-      { KEY_F9, RAZER_MACRO_KEY },
-      { KEY_F10, RAZER_GAME_KEY },
-      { KEY_F11, RAZER_BRIGHTNESS_DOWN },
-      { KEY_F12, RAZER_BRIGHTNESS_UP },
-      { KEY_INSERT, KEY_SYSRQ },
-      { KEY_HOME, KEY_SCROLLLOCK },
-      { KEY_PAGEUP, KEY_PAUSE },
-      { KEY_PAGEDOWN, KEY_SLEEP },
-      // TODO - Add KEY_CONTEXT_MENU when we figure out what it is supposed to be doing
-      { 0 }
+    { KEY_F9, RAZER_MACRO_KEY },
+    { KEY_F10, RAZER_GAME_KEY },
+    { KEY_F11, RAZER_BRIGHTNESS_DOWN },
+    { KEY_F12, RAZER_BRIGHTNESS_UP },
+    { KEY_INSERT, KEY_SYSRQ },
+    { KEY_HOME, KEY_SCROLLLOCK },
+    { KEY_PAGEUP, KEY_PAUSE },
+    { KEY_PAGEDOWN, KEY_SLEEP },
+    { 0 }
   };
 
 /**
