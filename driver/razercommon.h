@@ -75,6 +75,17 @@ enum razer_classic_effect_id {
     CLASSIC_EFFECT_SPECTRUM = 0x04,
 };
 
+enum razer_matrix_effect_id {
+    MATRIX_EFFECT_OFF = 0x00,
+    MATRIX_EFFECT_WAVE = 0x01,
+    MATRIX_EFFECT_REACTIVE = 0x02, // afterglow
+    MATRIX_EFFECT_BREATHING = 0x03,
+    MATRIX_EFFECT_SPECTRUM = 0x04,
+    MATRIX_EFFECT_CUSTOMFRAME = 0x05,
+    MATRIX_EFFECT_STATIC = 0x06,
+    MATRIX_EFFECT_STARLIGHT = 0x19
+};
+
 // Report Responses
 #define RAZER_CMD_BUSY          0x01
 #define RAZER_CMD_SUCCESSFUL    0x02
