@@ -681,7 +681,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
 
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS: // TODO: this is probably wrong?
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED: // TODO: this is probably wrong?
-        request = razer_chroma_standard_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
+        request = razer_chroma_standard_matrix_effect_none();
         request.transaction_id.id = 0xFF;
         break;
 
@@ -3206,7 +3206,7 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
-        request = razer_chroma_standard_matrix_effect_wave(VARSTORE, led_id, direction);
+        request = razer_chroma_standard_matrix_effect_wave(direction);
         request.transaction_id.id = 0xFF;
         break;
 
@@ -3292,7 +3292,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev
     case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
-        request = razer_chroma_standard_matrix_effect_spectrum(VARSTORE, led_id);
+        request = razer_chroma_standard_matrix_effect_spectrum();
         request.transaction_id.id = 0xFF;
         break;
 
@@ -3383,7 +3383,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive_common(struct device *dev
     case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
-        request = razer_chroma_standard_matrix_effect_reactive(VARSTORE, led_id, speed, (struct razer_rgb*)&buf[1]);
+        request = razer_chroma_standard_matrix_effect_reactive(speed, (struct razer_rgb*)&buf[1]);
         request.transaction_id.id = 0xFF;
         break;
 
@@ -3489,15 +3489,15 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
         switch(count) {
         case 3: // Single colour mode
-            request = razer_chroma_standard_matrix_effect_breathing_single(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
+            request = razer_chroma_standard_matrix_effect_breathing_single((struct razer_rgb*)&buf[0]);
             break;
 
         case 6: // Dual colour mode
-            request = razer_chroma_standard_matrix_effect_breathing_dual(VARSTORE, led_id, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            request = razer_chroma_standard_matrix_effect_breathing_dual((struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
             break;
 
         default: // "Random" colour mode
-            request = razer_chroma_standard_matrix_effect_breathing_random(VARSTORE, led_id);
+            request = razer_chroma_standard_matrix_effect_breathing_random();
             break;
         }
         break;
@@ -3613,7 +3613,7 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
-        request = razer_chroma_standard_matrix_effect_static(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
+        request = razer_chroma_standard_matrix_effect_static((struct razer_rgb*)&buf[0]);
         request.transaction_id.id = 0xFF;
         break;
 
@@ -3702,7 +3702,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
-        request = razer_chroma_standard_matrix_effect_none(VARSTORE, led_id);
+        request = razer_chroma_standard_matrix_effect_none();
         request.transaction_id.id = 0xFF;
         break;
 
