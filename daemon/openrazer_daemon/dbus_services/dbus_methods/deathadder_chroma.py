@@ -228,11 +228,11 @@ def set_logo_static_mono(self):
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoBlinking', in_sig='yyy')
-def set_logo_blinking(self, red, green, blue):
+def set_logo_blinking_classic(self, red, green, blue):
     """
     Set the device to blinking
     """
-    self.logger.debug("DBus call set_logo_blinking")
+    self.logger.debug("DBus call set_logo_blinking_classic")
 
     # Notify others
     self.send_effect_event('setLogoBlinking', red, green, blue)
@@ -384,11 +384,11 @@ def set_scroll_static_mono(self):
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollBlinking', in_sig='yyy')
-def set_scroll_blinking(self, red, green, blue):
+def set_scroll_blinking_classic(self, red, green, blue):
     """
     Set the device to blinking
     """
-    self.logger.debug("DBus call set_scroll_blinking")
+    self.logger.debug("DBus call set_scroll_blinking_classic")
 
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
