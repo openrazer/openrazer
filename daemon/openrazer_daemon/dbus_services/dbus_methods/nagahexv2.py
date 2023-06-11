@@ -202,6 +202,37 @@ def set_logo_breath_dual(self, red1, green1, blue1, red2, green2, blue2):
         driver_file.write(payload)
 
 
+@endpoint('razer.device.lighting.logo', 'setLogoBlinking', in_sig='yyy')
+def set_logo_blinking(self, red, green, blue):
+    """
+    Set the device to blinking mode
+
+    :param red: Red component
+    :type red: int
+
+    :param green: Green component
+    :type green: int
+
+    :param blue: Blue component
+    :type blue: int
+    """
+    self.logger.debug("DBus call set_logo_blinking")
+
+    # Notify others
+    self.send_effect_event('setBlinking', red, green, blue)
+
+    # remember effect
+    self.set_persistence("logo", "effect", 'blinking')
+    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
+
+    rgb_driver_path = self.get_driver_path('logo_matrix_effect_blinking')
+
+    payload = bytes([red, green, blue])
+
+    with open(rgb_driver_path, 'wb') as rgb_driver_file:
+        rgb_driver_file.write(payload)
+
+
 @endpoint('razer.device.lighting.scroll', 'setScrollStatic', in_sig='yyy')
 def set_scroll_static(self, red, green, blue):
     """
@@ -397,3 +428,34 @@ def set_scroll_breath_dual(self, red1, green1, blue1, red2, green2, blue2):
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
+
+@endpoint('razer.device.lighting.scroll', 'setScrollBlinking', in_sig='yyy')
+def set_scroll_blinking(self, red, green, blue):
+    """
+    Set the device to blinking mode
+
+    :param red: Red component
+    :type red: int
+
+    :param green: Green component
+    :type green: int
+
+    :param blue: Blue component
+    :type blue: int
+    """
+    self.logger.debug("DBus call set_scroll_blinking")
+
+    # Notify others
+    self.send_effect_event('setBlinking', red, green, blue)
+
+    # remember effect
+    self.set_persistence("scroll", "effect", 'blinking')
+    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
+
+    rgb_driver_path = self.get_driver_path('scroll_matrix_effect_blinking')
+
+    payload = bytes([red, green, blue])
+
+    with open(rgb_driver_path, 'wb') as rgb_driver_file:
+        rgb_driver_file.write(payload)

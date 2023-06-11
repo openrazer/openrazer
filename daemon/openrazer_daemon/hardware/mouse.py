@@ -389,8 +389,8 @@ class RazerDeathAdderChroma(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x0043
     METHODS = ['get_device_type_mouse',
-               'set_logo_active', 'get_logo_active', 'get_logo_brightness', 'set_logo_brightness', 'set_logo_static_classic', 'set_logo_pulsate', 'set_logo_blinking_classic', 'set_logo_spectrum_classic',
-               'set_scroll_active', 'get_scroll_active', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static_classic', 'set_scroll_pulsate', 'set_scroll_blinking_classic', 'set_scroll_spectrum_classic',
+               'get_logo_brightness', 'set_logo_brightness', 'set_logo_none', 'set_logo_static', 'set_logo_breath_single', 'set_logo_blinking', 'set_logo_spectrum',
+               'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_none', 'set_scroll_static', 'set_scroll_breath_single', 'set_scroll_blinking', 'set_scroll_spectrum',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/278/278_deathadder_chroma.png"
@@ -828,8 +828,8 @@ class RazerAbyssusV2(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x005B
     METHODS = ['get_device_type_mouse',
-               'set_logo_active', 'get_logo_active', 'get_logo_brightness', 'set_logo_brightness', 'set_logo_static_classic', 'set_logo_pulsate', 'set_logo_blinking_classic', 'set_logo_spectrum_classic',
-               'set_scroll_active', 'get_scroll_active', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static_classic', 'set_scroll_pulsate', 'set_scroll_blinking_classic', 'set_scroll_spectrum_classic',
+               'get_logo_brightness', 'set_logo_brightness', 'set_logo_none', 'set_logo_static', 'set_logo_breath_single', 'set_logo_blinking', 'set_logo_spectrum',
+               'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_none', 'set_scroll_static', 'set_scroll_breath_single', 'set_scroll_blinking', 'set_scroll_spectrum',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/721/721_abyssusv2.png"
@@ -872,8 +872,8 @@ class RazerDeathAdder3500(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x0054
     METHODS = ['get_device_type_mouse',
-               'get_logo_brightness', 'set_logo_brightness', 'set_logo_active', 'get_logo_active', 'set_logo_static_classic', 'set_logo_pulsate', 'set_logo_blinking_classic',
-               'get_scroll_brightness', 'set_scroll_active', 'get_scroll_active', 'set_scroll_brightness', 'set_scroll_static_classic', 'set_scroll_pulsate', 'set_scroll_blinking_classic',
+               'get_logo_brightness', 'set_logo_brightness', 'set_logo_none', 'set_logo_static', 'set_logo_breath_single', 'set_logo_blinking',
+               'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_none', 'set_scroll_static', 'set_scroll_breath_single', 'set_scroll_blinking',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/561/561_deathadder_classic.png"
