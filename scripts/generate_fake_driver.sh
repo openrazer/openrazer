@@ -60,7 +60,6 @@ declare -A files_metadata=(
     ["left_matrix_effect_wave"]="w;"
     ["logo_led_brightness"]="rw;0"
     ["logo_led_effect"]="rw;0"
-    ["logo_led_rgb"]="rw;0xFF00FF"
     ["logo_led_state"]="rw;0"
     ["logo_matrix_effect_blinking"]="w;"
     ["logo_matrix_effect_breath"]="w;"

@@ -3054,22 +3054,6 @@ static ssize_t razer_attr_read_scroll_led_rgb(struct device *dev, struct device_
 }
 
 /**
- * Write device file "logo_led_rgb"
- */
-static ssize_t razer_attr_write_logo_led_rgb(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    return razer_attr_write_led_rgb(dev, attr, buf, count, LOGO_LED);
-}
-
-/**
- * Read device file "logo_led_rgb"
- */
-static ssize_t razer_attr_read_logo_led_rgb(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    return razer_attr_read_led_rgb(dev, attr, buf, LOGO_LED);
-}
-
-/**
  * Write device file "backlight_led_rgb"
  */
 static ssize_t razer_attr_write_backlight_led_rgb(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -3430,6 +3414,7 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
         if (count != 3) {
             printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
             return -EINVAL;
@@ -3588,6 +3573,7 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
         razer_send_payload(device, &request, &response);
@@ -3697,6 +3683,7 @@ static ssize_t razer_attr_write_matrix_effect_blinking_common(struct device *dev
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
         razer_send_payload(device, &request, &response);
@@ -3748,6 +3735,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, false);
         request.transaction_id.id = 0x3F;
         break;
@@ -4209,7 +4197,6 @@ static DEVICE_ATTR(scroll_matrix_effect_none,        0220, NULL,                
 static DEVICE_ATTR(logo_led_brightness,       0660, razer_attr_read_logo_led_brightness,   razer_attr_write_logo_led_brightness);
 // For old-school led commands
 static DEVICE_ATTR(logo_led_state,            0660, razer_attr_read_logo_led_state,        razer_attr_write_logo_led_state);
-static DEVICE_ATTR(logo_led_rgb,              0660, razer_attr_read_logo_led_rgb,          razer_attr_write_logo_led_rgb);
 static DEVICE_ATTR(logo_led_effect,           0660, razer_attr_read_logo_led_effect,       razer_attr_write_logo_led_effect);
 // For "extended" matrix effects
 static DEVICE_ATTR(logo_matrix_effect_wave,        0220, NULL,                             razer_attr_write_logo_matrix_effect_wave);
@@ -5060,12 +5047,14 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_rgb);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_effect);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_rgb);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_effect);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_blinking);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_blinking);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
             break;
 
         case USB_DEVICE_ID_RAZER_OROCHI_2013:
@@ -5900,6 +5889,19 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_charge_level);
             device_remove_file(&hdev->dev, &dev_attr_charge_status);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            break;
+
+        case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_blinking);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_blinking);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
             break;
 
         case USB_DEVICE_ID_RAZER_OROCHI_2013:

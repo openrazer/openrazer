@@ -421,8 +421,8 @@ class RazerDeathAdder2013(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x0037
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
-               'get_scroll_active', 'set_scroll_active', 'set_scroll_static_classic', 'set_scroll_pulsate', 'set_scroll_blinking_classic',
-               'get_logo_active', 'set_logo_active', 'set_logo_static_classic', 'set_logo_pulsate', 'set_logo_blinking_classic']
+               'set_scroll_none', 'set_scroll_static', 'set_scroll_breath_single', 'set_scroll_blinking',
+               'set_logo_none', 'set_logo_static', 'set_logo_breath_single', 'set_logo_blinking']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/561/561_deathadder_classic.png"
 
