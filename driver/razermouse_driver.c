@@ -2999,77 +2999,6 @@ static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_
 }
 
 /**
- * Common function to handle sysfs write rgb for a given led
- */
-static ssize_t razer_attr_write_led_rgb(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
-{
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    if (count != 3) {
-        printk(KERN_WARNING "razermouse: Scroll wheel LED mode only accepts RGB (3byte)\n");
-        return -EINVAL;
-    }
-
-    request = razer_chroma_standard_set_led_rgb(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
-    request.transaction_id.id = 0x3F;
-
-    razer_send_payload(device, &request, &response);
-
-    return count;
-}
-
-/**
- * Common function to handle sysfs read rgb for a given led
- */
-static ssize_t razer_attr_read_led_rgb(struct device *dev, struct device_attribute *attr, char *buf, unsigned char led_id)
-{
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    request = razer_chroma_standard_get_led_rgb(VARSTORE, led_id);
-    request.transaction_id.id = 0x3F;
-
-    razer_send_payload(device, &request, &response);
-
-    return sprintf(buf, "%u%u%u\n", response.arguments[2], response.arguments[3], response.arguments[4]);
-}
-
-/**
- * Write device file "scroll_led_rgb"
- */
-static ssize_t razer_attr_write_scroll_led_rgb(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    return razer_attr_write_led_rgb(dev, attr, buf, count, SCROLL_WHEEL_LED);
-}
-
-/**
- * Read device file "scroll_led_rgb"
- */
-static ssize_t razer_attr_read_scroll_led_rgb(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    return razer_attr_read_led_rgb(dev, attr, buf, SCROLL_WHEEL_LED);
-}
-
-/**
- * Write device file "backlight_led_rgb"
- */
-static ssize_t razer_attr_write_backlight_led_rgb(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    return razer_attr_write_led_rgb(dev, attr, buf, count, BACKLIGHT_LED);
-}
-
-/**
- * Read device file "backlight_led_rgb"
- */
-static ssize_t razer_attr_read_backlight_led_rgb(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    return razer_attr_read_led_rgb(dev, attr, buf, BACKLIGHT_LED);
-}
-
-/**
  * Common function to handle sysfs write effect for a given led
  */
 static ssize_t razer_attr_write_led_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
@@ -3134,22 +3063,6 @@ static ssize_t razer_attr_write_logo_led_effect(struct device *dev, struct devic
 static ssize_t razer_attr_read_logo_led_effect(struct device *dev, struct device_attribute *attr, char *buf)
 {
     return razer_attr_read_led_effect(dev, attr, buf, LOGO_LED);
-}
-
-/**
- * Write device file "backlight_led_effect"
- */
-static ssize_t razer_attr_write_backlight_led_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    return razer_attr_write_led_effect(dev, attr, buf, count, BACKLIGHT_LED);
-}
-
-/**
- * Read device file "backlight_led_effect"
- */
-static ssize_t razer_attr_read_backlight_led_effect(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    return razer_attr_read_led_effect(dev, attr, buf, BACKLIGHT_LED);
 }
 
 /**
@@ -4189,7 +4102,6 @@ static DEVICE_ATTR(matrix_effect_breath,      0220, NULL,                       
 static DEVICE_ATTR(scroll_led_brightness,     0660, razer_attr_read_scroll_led_brightness, razer_attr_write_scroll_led_brightness);
 // For old-school led commands
 static DEVICE_ATTR(scroll_led_state,          0660, razer_attr_read_scroll_led_state,      razer_attr_write_scroll_led_state);
-static DEVICE_ATTR(scroll_led_rgb,            0660, razer_attr_read_scroll_led_rgb,        razer_attr_write_scroll_led_rgb);
 static DEVICE_ATTR(scroll_led_effect,         0660, razer_attr_read_scroll_led_effect,     razer_attr_write_scroll_led_effect);
 // For "extended" matrix effects
 static DEVICE_ATTR(scroll_matrix_effect_wave,        0220, NULL,                           razer_attr_write_scroll_matrix_effect_wave);
@@ -4235,8 +4147,6 @@ static DEVICE_ATTR(right_matrix_effect_none,        0220, NULL,                 
 // matrix_brightness should mostly be called backlight_led_brightness (but it's too much work now for old devices)
 static DEVICE_ATTR(backlight_led_brightness,        0660, razer_attr_read_backlight_led_brightness, razer_attr_write_backlight_led_brightness);
 static DEVICE_ATTR(backlight_led_state,             0660, razer_attr_read_backlight_led_state,      razer_attr_write_backlight_led_state);
-static DEVICE_ATTR(backlight_led_rgb,               0660, razer_attr_read_backlight_led_rgb,        razer_attr_write_backlight_led_rgb);
-static DEVICE_ATTR(backlight_led_effect,            0660, razer_attr_read_backlight_led_effect,     razer_attr_write_backlight_led_effect);
 // For "extended" matrix effects
 static DEVICE_ATTR(backlight_matrix_effect_wave,        0220, NULL,                         razer_attr_write_backlight_matrix_effect_wave);
 static DEVICE_ATTR(backlight_matrix_effect_spectrum,    0220, NULL,                         razer_attr_write_backlight_matrix_effect_spectrum);
@@ -5117,13 +5027,15 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_rgb);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_effect);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_state);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_rgb);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_effect);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_spectrum);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
@@ -5964,13 +5876,15 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_led_rgb);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_led_effect);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
             device_remove_file(&hdev->dev, &dev_attr_backlight_led_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_backlight_led_state);
-            device_remove_file(&hdev->dev, &dev_attr_backlight_led_rgb);
-            device_remove_file(&hdev->dev, &dev_attr_backlight_led_effect);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_spectrum);
             device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
             device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
             device_remove_file(&hdev->dev, &dev_attr_charge_level);

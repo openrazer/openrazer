@@ -2,8 +2,6 @@
 
 declare -A files_metadata=(
     ["backlight_led_brightness"]="rw;0"
-    ["backlight_led_effect"]="rw;0"
-    ["backlight_led_rgb"]="rw;0xFF00FF"
     ["backlight_led_state"]="rw;0"
     ["backlight_matrix_effect_breath"]="w;"
     ["backlight_matrix_effect_none"]="w;"
@@ -98,7 +96,6 @@ declare -A files_metadata=(
     ["right_matrix_effect_wave"]="w;"
     ["scroll_led_brightness"]="rw;0"
     ["scroll_led_effect"]="rw;0"
-    ["scroll_led_rgb"]="rw;0xFF00FF"
     ["scroll_led_state"]="rw;0"
     ["scroll_matrix_effect_blinking"]="w;"
     ["scroll_matrix_effect_breath"]="w;"

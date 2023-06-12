@@ -1571,8 +1571,8 @@ class RazerNagaEpicChromaWired(__RazerDevice):
     USB_PID = 0x003E
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_battery', 'is_charging',
                'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
-               'set_scroll_active', 'get_scroll_active', 'set_scroll_static_classic', 'set_scroll_pulsate', 'set_scroll_spectrum_classic', 'get_scroll_brightness', 'set_scroll_brightness',
-               'set_backlight_active', 'get_backlight_active', 'set_backlight_static_classic', 'set_backlight_pulsate', 'set_backlight_spectrum_classic', 'get_backlight_brightness', 'set_backlight_brightness']
+               'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_none', 'set_scroll_static', 'set_scroll_breath_single', 'set_scroll_spectrum',
+               'get_backlight_brightness', 'set_backlight_brightness', 'set_backlight_none', 'set_backlight_static', 'set_backlight_breath_single', 'set_backlight_spectrum']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/20776/rzrnagaepicchroma_04.png"
 
