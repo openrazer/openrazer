@@ -3,17 +3,6 @@
 from openrazer_daemon.dbus_services import endpoint
 
 
-def set_led_effect_color_common(self, zone: str, effect: str, red: int, green: int, blue: int) -> None:
-    rgb_driver_path = self.get_driver_path(zone + '_led_rgb')
-    effect_driver_path = self.get_driver_path(zone + '_led_effect')
-
-    payload = bytes([red, green, blue])
-
-    with open(rgb_driver_path, 'wb') as rgb_driver_file, open(effect_driver_path, 'w') as effect_driver_file:
-        rgb_driver_file.write(payload)
-        effect_driver_file.write(effect)
-
-
 def set_led_effect_common(self, zone: str, effect: str) -> None:
     driver_path = self.get_driver_path(zone + '_led_effect')
 
@@ -84,56 +73,6 @@ def set_backlight_brightness(self, brightness):
     self.send_effect_event('setBrightness', brightness)
 
 
-@endpoint('razer.device.lighting.backlight', 'setBacklightStatic', in_sig='yyy')
-def set_backlight_static_classic(self, red, green, blue):
-    """
-    Set the device to static colour
-    """
-    self.logger.debug("DBus call set_backlight_static_classic")
-
-    # Notify others
-    self.send_effect_event('setStatic', red, green, blue)
-
-    # remember effect
-    self.set_persistence("backlight", "effect", 'static')
-    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
-
-    set_led_effect_color_common(self, 'backlight', '0', red, green, blue)
-
-
-@endpoint('razer.device.lighting.backlight', 'setBacklightPulsate', in_sig='yyy')
-def set_backlight_pulsate(self, red, green, blue):
-    """
-    Set the device to pulsate
-    """
-    self.logger.debug("DBus call set_backlight_pulsate")
-
-    # Notify others
-    self.send_effect_event('setPulsate', red, green, blue)
-
-    # remember effect
-    self.set_persistence("backlight", "effect", 'pulsate')
-    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
-
-    set_led_effect_color_common(self, 'backlight', '2', red, green, blue)
-
-
-@endpoint('razer.device.lighting.backlight', 'setBacklightSpectrum')
-def set_backlight_spectrum_classic(self):
-    """
-    Set the device to spectrum mode
-    """
-    self.logger.debug("DBus call set_backlight_spectrum_classic")
-
-    # Notify others
-    self.send_effect_event('setSpectrum')
-
-    # remember effect
-    self.set_persistence("backlight", "effect", 'spectrum')
-
-    set_led_effect_common(self, 'backlight', '4')
-
-
 @endpoint('razer.device.lighting.logo', 'getLogoActive', out_sig='b')
 def get_logo_active(self):
     """
@@ -197,23 +136,6 @@ def set_logo_brightness(self, brightness):
     self.send_effect_event('setBrightness', brightness)
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoStatic', in_sig='yyy')
-def set_logo_static_classic(self, red, green, blue):
-    """
-    Set the device to static colour
-    """
-    self.logger.debug("DBus call set_logo_static_classic")
-
-    # Notify others
-    self.send_effect_event('setStatic', red, green, blue)
-
-    # remember effect
-    self.set_persistence("logo", "effect", 'static')
-    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
-
-    set_led_effect_color_common(self, 'logo', '0', red, green, blue)
-
-
 @endpoint('razer.device.lighting.logo', 'setLogoStaticMono')
 def set_logo_static_mono(self):
     """
@@ -227,40 +149,6 @@ def set_logo_static_mono(self):
     set_led_effect_common(self, 'logo', '0')
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoBlinking', in_sig='yyy')
-def set_logo_blinking_classic(self, red, green, blue):
-    """
-    Set the device to blinking
-    """
-    self.logger.debug("DBus call set_logo_blinking_classic")
-
-    # Notify others
-    self.send_effect_event('setLogoBlinking', red, green, blue)
-
-    # remember effect
-    self.set_persistence("logo", "effect", 'blinking')
-    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
-
-    set_led_effect_color_common(self, 'logo', '1', red, green, blue)
-
-
-@endpoint('razer.device.lighting.logo', 'setLogoPulsate', in_sig='yyy')
-def set_logo_pulsate(self, red, green, blue):
-    """
-    Set the device to pulsate
-    """
-    self.logger.debug("DBus call set_logo_pulsing")
-
-    # Notify others
-    self.send_effect_event('setPulsate', red, green, blue)
-
-    # remember effect
-    self.set_persistence("logo", "effect", 'pulsate')
-    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
-
-    set_led_effect_color_common(self, 'logo', '2', red, green, blue)
-
-
 @endpoint('razer.device.lighting.logo', 'setLogoPulsateMono')
 def set_logo_pulsate_mono(self):
     """
@@ -272,22 +160,6 @@ def set_logo_pulsate_mono(self):
     self.send_effect_event('setPulsate')
 
     set_led_effect_common(self, 'logo', '2')
-
-
-@endpoint('razer.device.lighting.logo', 'setLogoSpectrum')
-def set_logo_spectrum_classic(self):
-    """
-    Set the device to spectrum
-    """
-    self.logger.debug("DBus call set_logo_spectrum_classic")
-
-    # Notify others
-    self.send_effect_event('setSpectrum')
-
-    # remember effect
-    self.set_persistence("logo", "effect", 'spectrum')
-
-    set_led_effect_common(self, 'logo', '4')
 
 
 @endpoint('razer.device.lighting.scroll', 'getScrollActive', out_sig='b')
@@ -353,23 +225,6 @@ def set_scroll_brightness(self, brightness):
     self.send_effect_event('setBrightness', brightness)
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollStatic', in_sig='yyy')
-def set_scroll_static_classic(self, red, green, blue):
-    """
-    Set the device to static colour
-    """
-    self.logger.debug("DBus call set_scroll_static_classic")
-
-    # Notify others
-    self.send_effect_event('setStatic', red, green, blue)
-
-    # remember effect
-    self.set_persistence("scroll", "effect", 'static')
-    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
-
-    set_led_effect_color_common(self, 'scroll', '0', red, green, blue)
-
-
 @endpoint('razer.device.lighting.scroll', 'setScrollStaticMono')
 def set_scroll_static_mono(self):
     """
@@ -383,40 +238,6 @@ def set_scroll_static_mono(self):
     set_led_effect_common(self, 'scroll', '0')
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollBlinking', in_sig='yyy')
-def set_scroll_blinking_classic(self, red, green, blue):
-    """
-    Set the device to blinking
-    """
-    self.logger.debug("DBus call set_scroll_blinking_classic")
-
-    # Notify others
-    self.send_effect_event('setPulsate', red, green, blue)
-
-    # remember effect
-    self.set_persistence("scroll", "effect", 'blinking')
-    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
-
-    set_led_effect_color_common(self, 'scroll', '1', red, green, blue)
-
-
-@endpoint('razer.device.lighting.scroll', 'setScrollPulsate', in_sig='yyy')
-def set_scroll_pulsate(self, red, green, blue):
-    """
-    Set the device to pulsate
-    """
-    self.logger.debug("DBus call set_scroll_pulsate")
-
-    # Notify others
-    self.send_effect_event('setPulsate', red, green, blue)
-
-    # remember effect
-    self.set_persistence("scroll", "effect", 'pulsate')
-    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
-
-    set_led_effect_color_common(self, 'scroll', '2', red, green, blue)
-
-
 @endpoint('razer.device.lighting.scroll', 'setScrollPulsateMono')
 def set_scroll_pulsate_mono(self):
     """
@@ -428,19 +249,3 @@ def set_scroll_pulsate_mono(self):
     self.send_effect_event('setPulsate')
 
     set_led_effect_common(self, 'scroll', '2')
-
-
-@endpoint('razer.device.lighting.scroll', 'setScrollSpectrum')
-def set_scroll_spectrum_classic(self):
-    """
-    Set the device to spectrum
-    """
-    self.logger.debug("DBus call set_scroll_spectrum_classic")
-
-    # Notify others
-    self.send_effect_event('setSpectrum')
-
-    # remember effect
-    self.set_persistence("scroll", "effect", 'spectrum')
-
-    set_led_effect_common(self, 'scroll', '4')
