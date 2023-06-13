@@ -6,15 +6,6 @@ Mouse class
 import re
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice
 from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
-# TODO replace with plain import
-from openrazer_daemon.dbus_services.dbus_methods.deathadder_chroma import get_logo_brightness as _da_get_logo_brightness, set_logo_brightness as _da_set_logo_brightness, \
-    get_scroll_brightness as _da_get_scroll_brightness, set_scroll_brightness as _da_set_scroll_brightness, set_logo_active as _da_set_logo_active, \
-    set_scroll_active as _da_set_scroll_active, get_scroll_active as _da_get_scroll_active, get_logo_active as _da_get_logo_active, set_backlight_active as _da_set_backlight_active, \
-    get_backlight_active as _da_get_backlight_active
-from openrazer_daemon.dbus_services.dbus_methods.chroma_keyboard import get_brightness as _get_backlight_brightness, set_brightness as _set_backlight_brightness
-from openrazer_daemon.misc.key_event_management import NagaHexV2KeyManager as _NagaHexV2KeyManager
-from openrazer_daemon.dbus_services.dbus_methods.lanceheadte import get_left_brightness as _get_left_brightness, get_right_brightness as _get_right_brightness, \
-    set_left_brightness as _set_left_brightness, set_right_brightness as _set_right_brightness
 
 
 class RazerViperMini(__RazerDevice):
