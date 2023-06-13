@@ -4054,22 +4054,6 @@ static ssize_t razer_attr_write_right_matrix_effect_none(struct device *dev, str
 }
 
 /**
- * Write device file "backlight_led_state"
- */
-static ssize_t razer_attr_write_backlight_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    return razer_attr_write_led_state(dev, attr, buf, count, BACKLIGHT_LED);
-}
-
-/**
- * Read device file "backlight_led_state"
- */
-static ssize_t razer_attr_read_backlight_led_state(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    return razer_attr_read_led_state(dev, attr, buf, BACKLIGHT_LED);
-}
-
-/**
  * Write device file "backlight_mode_wave" (for extended mouse matrix effects)
  *
  * Wave effect mode is activated whenever the file is written to
@@ -4292,7 +4276,6 @@ static DEVICE_ATTR(right_matrix_effect_none,        0220, NULL,                 
 // For old-school led commands
 // matrix_brightness should mostly be called backlight_led_brightness (but it's too much work now for old devices)
 static DEVICE_ATTR(backlight_led_brightness,        0660, razer_attr_read_backlight_led_brightness, razer_attr_write_backlight_led_brightness);
-static DEVICE_ATTR(backlight_led_state,             0660, razer_attr_read_backlight_led_state,      razer_attr_write_backlight_led_state);
 // For "extended" matrix effects
 static DEVICE_ATTR(backlight_matrix_effect_wave,        0220, NULL,                         razer_attr_write_backlight_matrix_effect_wave);
 static DEVICE_ATTR(backlight_matrix_effect_spectrum,    0220, NULL,                         razer_attr_write_backlight_matrix_effect_spectrum);
@@ -5160,9 +5143,6 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         case USB_DEVICE_ID_RAZER_NAGA_2012:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state); // TODO: remove
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state); // TODO: remove
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_state); // TODO: remove
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
@@ -6095,9 +6075,6 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_NAGA_2012:
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_led_state); // TODO: remove
-            device_remove_file(&hdev->dev, &dev_attr_logo_led_state); // TODO: remove
-            device_remove_file(&hdev->dev, &dev_attr_backlight_led_state); // TODO: remove
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
