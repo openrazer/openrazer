@@ -687,6 +687,25 @@ def set_backlight_none(self):
         driver_file.write('1')
 
 
+@endpoint('razer.device.lighting.backlight', 'setBacklightOn')
+def set_backlight_on(self):
+    """
+    Set the device to effect on
+    """
+    self.logger.debug("DBus call set_backlight_on")
+
+    # Notify others
+    self.send_effect_event('setOn')
+
+    # remember effect
+    self.set_persistence("backlight", "effect", 'on')
+
+    driver_path = self.get_driver_path('backlight_matrix_effect_on')
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write('1')
+
+
 @endpoint('razer.device.lighting.backlight', 'setBacklightReactive', in_sig='yyyy')
 def set_backlight_reactive(self, red, green, blue, speed):
     """

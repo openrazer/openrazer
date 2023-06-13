@@ -822,6 +822,13 @@ class SingleLed(BaseRazerFX):
             return True
         return False
 
+    def on(self) -> bool:
+        if self._shas('on'):
+            self._getattr('set#On')()
+
+            return True
+        return False
+
     def spectrum(self) -> bool:
         if self._shas('spectrum'):
             self._getattr('set#Spectrum')()

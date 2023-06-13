@@ -3655,6 +3655,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_2012:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, false);
         request.transaction_id.id = 0x3F;
         break;
@@ -3736,6 +3737,46 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
 static ssize_t razer_attr_write_scroll_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_matrix_effect_none_common(dev, attr, buf, count, SCROLL_WHEEL_LED);
+}
+
+/**
+ * Common function to handle sysfs write matrix_effect_on for a given led
+ */
+static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NAGA_2012:
+        request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
+        request.transaction_id.id = 0x3F;
+        break;
+
+    default:
+        printk(KERN_WARNING "razermouse: matrix_effect_none not supported for this model\n");
+        return -EINVAL;
+    }
+
+    razer_send_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_write_logo_matrix_effect_on(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_matrix_effect_on_common(dev, attr, buf, count, LOGO_LED);
+}
+
+static ssize_t razer_attr_write_scroll_matrix_effect_on(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_matrix_effect_on_common(dev, attr, buf, count, SCROLL_WHEEL_LED);
+}
+
+static ssize_t razer_attr_write_backlight_matrix_effect_on(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_matrix_effect_on_common(dev, attr, buf, count, BACKLIGHT_LED);
 }
 
 /**
@@ -4111,6 +4152,7 @@ static DEVICE_ATTR(scroll_matrix_effect_breath,      0220, NULL,                
 static DEVICE_ATTR(scroll_matrix_effect_static,      0220, NULL,                           razer_attr_write_scroll_matrix_effect_static);
 static DEVICE_ATTR(scroll_matrix_effect_blinking,    0220, NULL,                           razer_attr_write_scroll_matrix_effect_blinking);
 static DEVICE_ATTR(scroll_matrix_effect_none,        0220, NULL,                           razer_attr_write_scroll_matrix_effect_none);
+static DEVICE_ATTR(scroll_matrix_effect_on,          0220, NULL,                           razer_attr_write_scroll_matrix_effect_on);
 
 static DEVICE_ATTR(logo_led_brightness,       0660, razer_attr_read_logo_led_brightness,   razer_attr_write_logo_led_brightness);
 // For old-school led commands
@@ -4124,6 +4166,7 @@ static DEVICE_ATTR(logo_matrix_effect_breath,      0220, NULL,                  
 static DEVICE_ATTR(logo_matrix_effect_static,      0220, NULL,                             razer_attr_write_logo_matrix_effect_static);
 static DEVICE_ATTR(logo_matrix_effect_blinking,    0220, NULL,                             razer_attr_write_logo_matrix_effect_blinking);
 static DEVICE_ATTR(logo_matrix_effect_none,        0220, NULL,                             razer_attr_write_logo_matrix_effect_none);
+static DEVICE_ATTR(logo_matrix_effect_on,          0220, NULL,                             razer_attr_write_logo_matrix_effect_on);
 
 static DEVICE_ATTR(left_led_brightness,       0660, razer_attr_read_left_led_brightness,   razer_attr_write_left_led_brightness);
 // For "extended" matrix effects
@@ -4154,6 +4197,7 @@ static DEVICE_ATTR(backlight_matrix_effect_reactive,    0220, NULL,             
 static DEVICE_ATTR(backlight_matrix_effect_breath,      0220, NULL,                         razer_attr_write_backlight_matrix_effect_breath);
 static DEVICE_ATTR(backlight_matrix_effect_static,      0220, NULL,                         razer_attr_write_backlight_matrix_effect_static);
 static DEVICE_ATTR(backlight_matrix_effect_none,        0220, NULL,                         razer_attr_write_backlight_matrix_effect_none);
+static DEVICE_ATTR(backlight_matrix_effect_on,          0220, NULL,                         razer_attr_write_backlight_matrix_effect_on);
 
 // For HyperPolling Wireless Dongle
 static DEVICE_ATTR(hyperpolling_wireless_dongle_indicator_led_mode,             0220, NULL, razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode);
@@ -5010,9 +5054,15 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         case USB_DEVICE_ID_RAZER_NAGA_2012:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state); // TODO: remove
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state); // TODO: remove
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_state); // TODO: remove
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_on);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_on);
             break;
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
@@ -5859,9 +5909,15 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_NAGA_2012:
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
-            device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
-            device_remove_file(&hdev->dev, &dev_attr_backlight_led_state);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_state); // TODO: remove
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_state); // TODO: remove
+            device_remove_file(&hdev->dev, &dev_attr_backlight_led_state); // TODO: remove
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_on);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_on);
             break;
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:

@@ -72,6 +72,25 @@ def set_logo_none(self):
         driver_file.write('1')
 
 
+@endpoint('razer.device.lighting.logo', 'setLogoOn')
+def set_logo_on(self):
+    """
+    Set the device to effect on
+    """
+    self.logger.debug("DBus call set_logo_on")
+
+    # Notify others
+    self.send_effect_event('setOn')
+
+    # remember effect
+    self.set_persistence("logo", "effect", 'on')
+
+    driver_path = self.get_driver_path('logo_matrix_effect_on')
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write('1')
+
+
 @endpoint('razer.device.lighting.logo', 'setLogoReactive', in_sig='yyyy')
 def set_logo_reactive(self, red, green, blue, speed):
     """
@@ -295,6 +314,24 @@ def set_scroll_none(self):
     self.set_persistence("scroll", "effect", 'none')
 
     driver_path = self.get_driver_path('scroll_matrix_effect_none')
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write('1')
+
+
+@endpoint('razer.device.lighting.scroll', 'setScrollOn')
+def set_scroll_on(self):
+    """
+    Set the device to effect on
+    """
+    self.logger.debug("DBus call set_scroll_on")
+
+    # Notify others
+    self.send_effect_event('setOn')
+
+    self.set_persistence("scroll", "effect", 'on')
+
+    driver_path = self.get_driver_path('scroll_matrix_effect_on')
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write('1')
