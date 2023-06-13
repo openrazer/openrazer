@@ -461,6 +461,8 @@ class RazerDevice(DBusService):
                             effect_func(speed)
                         elif effect == 'wave':
                             effect_func(wave_dir)
+                        elif effect == 'wheel':
+                            effect_func(wave_dir)
                         elif effect == 'rippleRandomColour':
                             # do nothing. this is handled in the ripple manager.
                             pass

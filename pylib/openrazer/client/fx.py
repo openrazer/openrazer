@@ -157,6 +157,27 @@ class RazerFX(BaseRazerFX):
             return True
         return False
 
+    def wheel(self, direction: int) -> bool:
+        """
+        Wheel effect
+
+        :param direction: Wheel direction either WHEEL_RIGHT or WHEEL_LEFT
+        :type direction: int
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If direction is invalid
+        """
+        if direction not in (c.WHEEL_LEFT, c.WHEEL_RIGHT):
+            raise ValueError("Direction must be WHEEL_RIGHT (0x01) or WHEEL_LEFT (0x02)")
+
+        if self.has('wheel'):
+            self._lighting_dbus.setWheel(direction)
+
+            return True
+        return False
+
     def static(self, red: int, green: int, blue: int) -> bool:
         """
         Static effect

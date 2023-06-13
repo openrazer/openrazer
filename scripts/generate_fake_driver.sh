@@ -83,6 +83,7 @@ declare -A files_metadata=(
     ["matrix_effect_starlight"]="w;"
     ["matrix_effect_static"]="w;"
     ["matrix_effect_wave"]="w;"
+    ["matrix_effect_wheel"]="w;"
     ["matrix_reactive_trigger"]="w;"
     ["poll_rate"]="rw;500"
     ["profile_led_blue"]="rw;0"

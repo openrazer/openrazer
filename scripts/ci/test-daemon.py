@@ -120,6 +120,7 @@ def test_sysfs_consistency(d):
     if d._pid not in [0x010d, 0x010e, 0x0113, 0x0118, 0x011a, 0x011b, 0x011c, 0x0202]:
         check_sysfs("lighting_static", "matrix_effect_static")
     check_sysfs("lighting_wave", "matrix_effect_wave")
+    check_sysfs("lighting_wheel", "matrix_effect_wheel")
     check_sysfs("lighting_pulsate", "matrix_effect_pulsate")
     check_sysfs("lighting_blinking", "matrix_effect_blinking")
 
