@@ -2024,7 +2024,6 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
         }
         break;
 
-
     default: // BW2016 can do normal starlight
         request = razer_chroma_standard_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, 0x01, &rgb1);
         razer_send_payload(usb_dev, &request, &response);
@@ -2187,7 +2186,6 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
             // TODO move default to case 1:. Then default: printk(warning). Also remove pointless buffer
         }
         break;
-
 
     default:
         switch(count) {
@@ -2568,7 +2566,6 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         brightness = response.arguments[2];
     }
 
-
     return sprintf(buf, "%d\n", brightness);
 }
 
@@ -2751,7 +2748,6 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         // *3 as its 3 bytes per col (RGB)
         offset += row_length;
     }
-
 
     return count;
 }
@@ -2936,7 +2932,6 @@ static DEVICE_ATTR(profile_led_red,         0660, razer_attr_read_profile_led_re
 static DEVICE_ATTR(profile_led_green,       0660, razer_attr_read_profile_led_green,          razer_attr_write_profile_led_green);
 static DEVICE_ATTR(profile_led_blue,        0660, razer_attr_read_profile_led_blue,           razer_attr_write_profile_led_blue);
 
-
 static DEVICE_ATTR(test,                    0660, razer_attr_read_test,                       razer_attr_write_test);
 static DEVICE_ATTR(version,                 0440, razer_attr_read_version,                    NULL);
 static DEVICE_ATTR(kbd_layout,              0440, razer_attr_read_kbd_layout,                 NULL);
@@ -2962,7 +2957,6 @@ static DEVICE_ATTR(matrix_brightness,       0660, razer_attr_read_matrix_brightn
 static DEVICE_ATTR(matrix_effect_custom,    0220, NULL,                                       razer_attr_write_matrix_effect_custom);
 static DEVICE_ATTR(matrix_custom_frame,     0220, NULL,                                       razer_attr_write_matrix_custom_frame);
 
-
 static DEVICE_ATTR(key_super,               0660, razer_attr_read_key_super,                  razer_attr_write_key_super);
 static DEVICE_ATTR(key_alt_tab,             0660, razer_attr_read_key_alt_tab,                razer_attr_write_key_alt_tab);
 static DEVICE_ATTR(key_alt_f4,              0660, razer_attr_read_key_alt_f4,                 razer_attr_write_key_alt_f4);
@@ -2972,8 +2966,6 @@ static DEVICE_ATTR(charge_status,           0440, razer_attr_read_charge_status,
 static DEVICE_ATTR(charge_effect,           0220, NULL,                                       razer_attr_write_charge_effect);
 static DEVICE_ATTR(charge_colour,           0220, NULL,                                       razer_attr_write_charge_colour);
 static DEVICE_ATTR(charge_low_threshold,    0660, razer_attr_read_charge_low_threshold,       razer_attr_write_charge_low_threshold);
-
-
 
 /**
  * Deal with FN toggle
@@ -2990,7 +2982,6 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     if (is_blade_laptop(usb_dev)) {
         return 0;
     }
-
 
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
         // Skip this if its control (mouse) interface
@@ -3065,10 +3056,8 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
         }
     }
 
-
     return 0;
 }
-
 
 /**
  * Standard raw event function
@@ -3776,8 +3765,6 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_tab);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_f4);
     }
-
-
 
     hid_set_drvdata(hdev, dev);
     dev_set_drvdata(&hdev->dev, dev);

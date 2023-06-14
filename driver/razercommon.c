@@ -10,7 +10,6 @@
 #include <linux/init.h>
 #include <linux/hid.h>
 
-
 #include "razercommon.h"
 
 /**
@@ -209,7 +208,6 @@ unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned shor
         return min;
     return value;
 }
-
 
 int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait_min, ulong wait_max)
 {

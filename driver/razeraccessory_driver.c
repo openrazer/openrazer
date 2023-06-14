@@ -95,7 +95,6 @@ static void razer_set_device_mode(struct usb_device *usb_dev, unsigned char mode
     razer_send_payload(usb_dev, &request, &response);
 }
 
-
 /**
  * Read device file "version"
  *

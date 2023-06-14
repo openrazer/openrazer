@@ -32,7 +32,6 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
 
-
 /**
  * Send report to the mouse
  */
@@ -204,11 +203,9 @@ static void deathadder3_5g_set_dpi(struct razer_mouse_device *device, unsigned s
     mutex_unlock(&device->lock);
 }
 
-
 /*
  * New functions
  */
-
 
 /**
  * Read device file "version"
@@ -985,7 +982,6 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         }
         break;
 
-
     default:
         switch(count) {
         case 3: // Single colour mode
@@ -1604,7 +1600,6 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     unsigned char dpi_x_byte;
     unsigned char dpi_y_byte;
     unsigned char varstore;
-
 
     // So far I think imperator uses varstore
     switch(device->usb_pid) {
@@ -2466,7 +2461,6 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         offset += row_length;
     }
 
-
     return count;
 }
 
@@ -3179,7 +3173,6 @@ static ssize_t razer_attr_read_scroll_led_rgb(struct device *dev, struct device_
     request.transaction_id.id = 0x3F;
     razer_send_payload(usb_dev, &request, &response);
 
-
     return sprintf(buf, "%u%u%u\n", response.arguments[2], response.arguments[3], response.arguments[4]);
 }
 
@@ -3217,7 +3210,6 @@ static ssize_t razer_attr_read_logo_led_rgb(struct device *dev, struct device_at
 
     request.transaction_id.id = 0x3F;
     razer_send_payload(usb_dev, &request, &response);
-
 
     return sprintf(buf, "%u%u%u\n", response.arguments[2], response.arguments[3], response.arguments[4]);
 }
@@ -4670,7 +4662,6 @@ static DEVICE_ATTR(matrix_effect_spectrum,    0220, NULL,                       
 static DEVICE_ATTR(matrix_effect_reactive,    0220, NULL,                                  razer_attr_write_matrix_effect_reactive);
 static DEVICE_ATTR(matrix_effect_breath,      0220, NULL,                                  razer_attr_write_matrix_effect_breath);
 
-
 static DEVICE_ATTR(scroll_led_brightness,     0660, razer_attr_read_scroll_led_brightness, razer_attr_write_scroll_led_brightness);
 // For old-school led commands
 static DEVICE_ATTR(scroll_led_state,          0660, razer_attr_read_scroll_led_state,      razer_attr_write_scroll_led_state);
@@ -5020,7 +5011,6 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 
                 data[index+1] = cur_value;
             }
-
 
             data[0] = 0x01;
             data[1] = 0x00;
@@ -5954,7 +5944,6 @@ exit_free:
     return retval;
 }
 
-
 /**
  * Unbind function
  */
@@ -6713,14 +6702,12 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 
     }
 
-
     hid_hw_stop(hdev);
     hrtimer_cancel(&dev->repeat_timer);
 
     kfree(dev);
     dev_info(&intf->dev, "Razer Device disconnected\n");
 }
-
 
 /**
  * Device ID mapping table
@@ -6811,7 +6798,6 @@ static const struct hid_device_id razer_devices[] = {
 };
 
 MODULE_DEVICE_TABLE(hid, razer_devices);
-
 
 /**
  * Describes the contents of the driver
