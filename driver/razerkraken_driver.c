@@ -296,7 +296,6 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     return count;
 }
 
-
 /**
  * Write device file "mode_static"
  *
@@ -422,7 +421,6 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         printk(KERN_WARNING "razerkraken: Breathing mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
-
 
     if(count == 3) {
         struct razer_kraken_request_report rgb_report = get_kraken_request_report(0x04, 0x40, 0x03, device->breathing_address[0]);
@@ -659,7 +657,6 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     return 2;
 }
 
-
 /**
  * Set up the device driver files
 
@@ -732,8 +729,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
     dev = kzalloc(sizeof(struct razer_kraken_device), GFP_KERNEL);
     if(dev == NULL) {
         dev_err(&intf->dev, "out of memory\n");
-        retval = -ENOMEM;
-        goto exit;
+        return -ENOMEM;
     }
 
     // Init data
@@ -782,8 +778,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
     usb_disable_autosuspend(usb_dev);
 
     return 0;
-exit:
-    return retval;
+
 exit_free:
     kfree(dev);
     return retval;

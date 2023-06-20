@@ -143,7 +143,6 @@ union razer_kraken_effect_byte {
 #define KYLIE_BREATHING2_ADDRESS_START 0x1745
 #define KYLIE_BREATHING3_ADDRESS_START 0x174D
 
-
 struct razer_kraken_request_report {
     unsigned char report_id;
     unsigned char destination;
@@ -157,11 +156,5 @@ struct razer_kraken_response_report {
     unsigned char report_id;
     unsigned char arguments[36];
 };
-
-
-
-
-
-
 
 #endif

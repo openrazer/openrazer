@@ -10,7 +10,6 @@
 #include <linux/init.h>
 #include <linux/hid.h>
 
-
 #include "razercommon.h"
 
 /**
@@ -79,6 +78,10 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
     int retval;
     int result = 0;
     char *buf;
+
+    if (WARN_ON(request_report->transaction_id.id == 0x00)) {
+        request_report->transaction_id.id = 0xFF;
+    }
 
     buf = kzalloc(sizeof(struct razer_report), GFP_KERNEL);
     if (buf == NULL)
@@ -149,7 +152,7 @@ struct razer_report get_razer_report(unsigned char command_class, unsigned char 
     memset(&new_report, 0, sizeof(struct razer_report));
 
     new_report.status = 0x00;
-    new_report.transaction_id.id = 0xFF;
+    new_report.transaction_id.id = 0x00;
     new_report.remaining_packets = 0x00;
     new_report.protocol_type = 0x00;
     new_report.command_class = command_class;
@@ -209,7 +212,6 @@ unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned shor
         return min;
     return value;
 }
-
 
 int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait_min, ulong wait_max)
 {

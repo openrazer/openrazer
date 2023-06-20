@@ -230,6 +230,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Base Station V2 Chroma                  |  1532:0F20  |
 | Razer Thunderbolt 4 Dock Chroma               |  1532:0F21  |
 | Razer Charging Pad Chroma                     |  1532:0F26  |
+| Razer Laptop Stand Chroma V2                  |  1532:0F2B  |
 
 #### Determining the Device ID
 Razer devices use a USB VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:

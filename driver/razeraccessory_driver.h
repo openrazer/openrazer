@@ -27,6 +27,7 @@
 #define USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA 0x0F20
 #define USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA 0x0F21
 #define USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA 0x0F26
+#define USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2 0x0F2B
 
 #define RAZER_ACCESSORY_WAIT_MIN_US 600
 #define RAZER_ACCESSORY_WAIT_MAX_US 1000
@@ -46,8 +47,6 @@ struct razer_accessory_device {
     unsigned char saved_brightness;
 
     char serial[23];
-    // 3 Bytes, first byte is whether fw version is collected, 2nd byte is major version, 3rd is minor, should be printed out in hex form as are bcd
-    unsigned char firmware_version[3];
 };
 
 /*

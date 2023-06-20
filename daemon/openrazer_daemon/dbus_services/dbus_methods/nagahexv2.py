@@ -4,7 +4,7 @@ from openrazer_daemon.dbus_services import endpoint
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoStatic', in_sig='yyy')
-def set_logo_static_naga_hex_v2(self, red, green, blue):
+def set_logo_static(self, red, green, blue):
     """
     Set the device to static colour
 
@@ -35,7 +35,7 @@ def set_logo_static_naga_hex_v2(self, red, green, blue):
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoSpectrum')
-def set_logo_spectrum_naga_hex_v2(self):
+def set_logo_spectrum(self):
     """
     Set the device to spectrum mode
     """
@@ -54,7 +54,7 @@ def set_logo_spectrum_naga_hex_v2(self):
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoNone')
-def set_logo_none_naga_hex_v2(self):
+def set_logo_none(self):
     """
     Set the device to effect none
     """
@@ -72,8 +72,27 @@ def set_logo_none_naga_hex_v2(self):
         driver_file.write('1')
 
 
+@endpoint('razer.device.lighting.logo', 'setLogoOn')
+def set_logo_on(self):
+    """
+    Set the device to effect on
+    """
+    self.logger.debug("DBus call set_logo_on")
+
+    # Notify others
+    self.send_effect_event('setOn')
+
+    # remember effect
+    self.set_persistence("logo", "effect", 'on')
+
+    driver_path = self.get_driver_path('logo_matrix_effect_on')
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write('1')
+
+
 @endpoint('razer.device.lighting.logo', 'setLogoReactive', in_sig='yyyy')
-def set_logo_reactive_naga_hex_v2(self, red, green, blue, speed):
+def set_logo_reactive(self, red, green, blue, speed):
     """
     Set the device to reactive effect
 
@@ -111,7 +130,7 @@ def set_logo_reactive_naga_hex_v2(self, red, green, blue, speed):
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoBreathRandom')
-def set_logo_breath_random_naga_hex_v2(self):
+def set_logo_breath_random(self):
     """
     Set the device to random colour breathing effect
     """
@@ -132,7 +151,7 @@ def set_logo_breath_random_naga_hex_v2(self):
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoBreathSingle', in_sig='yyy')
-def set_logo_breath_single_naga_hex_v2(self, red, green, blue):
+def set_logo_breath_single(self, red, green, blue):
     """
     Set the device to single colour breathing effect
 
@@ -163,7 +182,7 @@ def set_logo_breath_single_naga_hex_v2(self, red, green, blue):
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoBreathDual', in_sig='yyyyyy')
-def set_logo_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, blue2):
+def set_logo_breath_dual(self, red1, green1, blue1, red2, green2, blue2):
     """
     Set the device to dual colour breathing effect
 
@@ -202,8 +221,39 @@ def set_logo_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, bl
         driver_file.write(payload)
 
 
+@endpoint('razer.device.lighting.logo', 'setLogoBlinking', in_sig='yyy')
+def set_logo_blinking(self, red, green, blue):
+    """
+    Set the device to blinking mode
+
+    :param red: Red component
+    :type red: int
+
+    :param green: Green component
+    :type green: int
+
+    :param blue: Blue component
+    :type blue: int
+    """
+    self.logger.debug("DBus call set_logo_blinking")
+
+    # Notify others
+    self.send_effect_event('setBlinking', red, green, blue)
+
+    # remember effect
+    self.set_persistence("logo", "effect", 'blinking')
+    self.zone["logo"]["colors"][0:3] = int(red), int(green), int(blue)
+
+    rgb_driver_path = self.get_driver_path('logo_matrix_effect_blinking')
+
+    payload = bytes([red, green, blue])
+
+    with open(rgb_driver_path, 'wb') as rgb_driver_file:
+        rgb_driver_file.write(payload)
+
+
 @endpoint('razer.device.lighting.scroll', 'setScrollStatic', in_sig='yyy')
-def set_scroll_static_naga_hex_v2(self, red, green, blue):
+def set_scroll_static(self, red, green, blue):
     """
     Set the device to static colour
 
@@ -234,7 +284,7 @@ def set_scroll_static_naga_hex_v2(self, red, green, blue):
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollSpectrum')
-def set_scroll_spectrum_naga_hex_v2(self):
+def set_scroll_spectrum(self):
     """
     Set the device to spectrum mode
     """
@@ -252,7 +302,7 @@ def set_scroll_spectrum_naga_hex_v2(self):
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollNone')
-def set_scroll_none_naga_hex_v2(self):
+def set_scroll_none(self):
     """
     Set the device to effect none
     """
@@ -269,8 +319,26 @@ def set_scroll_none_naga_hex_v2(self):
         driver_file.write('1')
 
 
+@endpoint('razer.device.lighting.scroll', 'setScrollOn')
+def set_scroll_on(self):
+    """
+    Set the device to effect on
+    """
+    self.logger.debug("DBus call set_scroll_on")
+
+    # Notify others
+    self.send_effect_event('setOn')
+
+    self.set_persistence("scroll", "effect", 'on')
+
+    driver_path = self.get_driver_path('scroll_matrix_effect_on')
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write('1')
+
+
 @endpoint('razer.device.lighting.scroll', 'setScrollReactive', in_sig='yyyy')
-def set_scroll_reactive_naga_hex_v2(self, red, green, blue, speed):
+def set_scroll_reactive(self, red, green, blue, speed):
     """
     Set the device to reactive effect
 
@@ -308,7 +376,7 @@ def set_scroll_reactive_naga_hex_v2(self, red, green, blue, speed):
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollBreathRandom')
-def set_scroll_breath_random_naga_hex_v2(self):
+def set_scroll_breath_random(self):
     """
     Set the device to random colour breathing effect
     """
@@ -329,7 +397,7 @@ def set_scroll_breath_random_naga_hex_v2(self):
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollBreathSingle', in_sig='yyy')
-def set_scroll_breath_single_naga_hex_v2(self, red, green, blue):
+def set_scroll_breath_single(self, red, green, blue):
     """
     Set the device to single colour breathing effect
 
@@ -360,7 +428,7 @@ def set_scroll_breath_single_naga_hex_v2(self, red, green, blue):
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollBreathDual', in_sig='yyyyyy')
-def set_scroll_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, blue2):
+def set_scroll_breath_dual(self, red1, green1, blue1, red2, green2, blue2):
     """
     Set the device to dual colour breathing effect
 
@@ -397,3 +465,34 @@ def set_scroll_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, 
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
+
+@endpoint('razer.device.lighting.scroll', 'setScrollBlinking', in_sig='yyy')
+def set_scroll_blinking(self, red, green, blue):
+    """
+    Set the device to blinking mode
+
+    :param red: Red component
+    :type red: int
+
+    :param green: Green component
+    :type green: int
+
+    :param blue: Blue component
+    :type blue: int
+    """
+    self.logger.debug("DBus call set_scroll_blinking")
+
+    # Notify others
+    self.send_effect_event('setBlinking', red, green, blue)
+
+    # remember effect
+    self.set_persistence("scroll", "effect", 'blinking')
+    self.zone["scroll"]["colors"][0:3] = int(red), int(green), int(blue)
+
+    rgb_driver_path = self.get_driver_path('scroll_matrix_effect_blinking')
+
+    payload = bytes([red, green, blue])
+
+    with open(rgb_driver_path, 'wb') as rgb_driver_file:
+        rgb_driver_file.write(payload)

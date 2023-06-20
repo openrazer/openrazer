@@ -5,7 +5,6 @@
 
 #include "razerchromacommon.h"
 
-
 static unsigned char orochi2011_led[]  = { 0x01, 0x00, 0x00, 0x06, 0x48, 0x00, 0x00, 0x00, 0x01, 0xFF, 0x03, 0x05, 0x06, 0x06, 0x10, 0x10, 0x10, 0x10, 0x24, 0x24, 0x4c, 0x4c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x01, 0x01, 0x03, 0x03, 0x04, 0x01, 0x04, 0x04, 0x01, 0x01, 0x05, 0x05, 0x01, 0x01, 0x06, 0x31, 0x88, 0x00, 0x07, 0x31, 0x87, 0x00, 0x08, 0x08, 0x01, 0x01, 0x09, 0x09, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x44, 0x01 };
 static unsigned char orochi2011_dpi[] = { 0x01, 0x00, 0x00, 0x05, 0x05, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x4c, 0x4c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
 
@@ -115,7 +114,6 @@ struct razer_report razer_chroma_standard_get_led_state(unsigned char variable_s
     return report;
 }
 
-
 /**
  * Set LED RGB parameters
  */
@@ -141,10 +139,6 @@ struct razer_report razer_chroma_standard_get_led_rgb(unsigned char variable_sto
     report.arguments[1] = led_id;
     return report;
 }
-
-
-
-
 
 /**
  * Set the effect of an LED on the device
@@ -208,24 +202,26 @@ struct razer_report razer_chroma_standard_get_led_brightness(unsigned char varia
     return report;
 }
 
-
 /*
  * Standard Matrix Effects Functions
  */
 
-// TODO remove varstore and led_id
+struct razer_report razer_chroma_standard_matrix_effect_base(unsigned char arg_size, unsigned char effect_id)
+{
+    struct razer_report report = get_razer_report(0x03, 0x0A, arg_size);
+    report.arguments[0] = effect_id;
+    return report;
+}
+
 /**
  * Set the effect of the LED matrix to None
  *
  * Status Trans Packet Proto DataSize Class CMD Args
  * ? TODO fill this
  */
-struct razer_report razer_chroma_standard_matrix_effect_none(unsigned char variable_storage, unsigned char led_id)
+struct razer_report razer_chroma_standard_matrix_effect_none(void)
 {
-    struct razer_report report = get_razer_report(0x03, 0x0A, 0x01);
-    report.arguments[0] = 0x00; // Effect ID
-
-    return report;
+    return razer_chroma_standard_matrix_effect_base(0x01, MATRIX_EFFECT_OFF);
 }
 
 /**
@@ -234,10 +230,9 @@ struct razer_report razer_chroma_standard_matrix_effect_none(unsigned char varia
  * Status Trans Packet Proto DataSize Class CMD Args
  * ? TODO fill this
  */
-struct razer_report razer_chroma_standard_matrix_effect_wave(unsigned char variable_storage, unsigned char led_id, unsigned char wave_direction)
+struct razer_report razer_chroma_standard_matrix_effect_wave(unsigned char wave_direction)
 {
-    struct razer_report report = get_razer_report(0x03, 0x0A, 0x02);
-    report.arguments[0] = 0x01; // Effect ID
+    struct razer_report report = razer_chroma_standard_matrix_effect_base(0x02, MATRIX_EFFECT_WAVE);
     report.arguments[1] = clamp_u8(wave_direction, 0x01, 0x02);
 
     return report;
@@ -249,12 +244,9 @@ struct razer_report razer_chroma_standard_matrix_effect_wave(unsigned char varia
  * Status Trans Packet Proto DataSize Class CMD Args
  * ? TODO fill this
  */
-struct razer_report razer_chroma_standard_matrix_effect_spectrum(unsigned char variable_storage, unsigned char led_id)
+struct razer_report razer_chroma_standard_matrix_effect_spectrum(void)
 {
-    struct razer_report report = get_razer_report(0x03, 0x0A, 0x01);
-    report.arguments[0] = 0x04; // Effect ID
-
-    return report;
+    return razer_chroma_standard_matrix_effect_base(0x01, MATRIX_EFFECT_SPECTRUM);
 }
 
 /**
@@ -263,10 +255,9 @@ struct razer_report razer_chroma_standard_matrix_effect_spectrum(unsigned char v
  * Status Trans Packet Proto DataSize Class CMD Args
  * ? TODO fill this
  */
-struct razer_report razer_chroma_standard_matrix_effect_reactive(unsigned char variable_storage, unsigned char led_id, unsigned char speed, struct razer_rgb *rgb1)
+struct razer_report razer_chroma_standard_matrix_effect_reactive(unsigned char speed, struct razer_rgb *rgb1)
 {
-    struct razer_report report = get_razer_report(0x03, 0x0A, 0x05);
-    report.arguments[0] = 0x02; // Effect ID
+    struct razer_report report = razer_chroma_standard_matrix_effect_base(0x05, MATRIX_EFFECT_REACTIVE);
     report.arguments[1] = clamp_u8(speed, 0x01, 0x04); // Time
     report.arguments[2] = rgb1->r; /*rgb color definition*/
     report.arguments[3] = rgb1->g;
@@ -281,10 +272,9 @@ struct razer_report razer_chroma_standard_matrix_effect_reactive(unsigned char v
  * Status Trans Packet Proto DataSize Class CMD Args
  * ? TODO fill this
  */
-struct razer_report razer_chroma_standard_matrix_effect_static(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1)
+struct razer_report razer_chroma_standard_matrix_effect_static(struct razer_rgb *rgb1)
 {
-    struct razer_report report = get_razer_report(0x03, 0x0A, 0x04);
-    report.arguments[0] = 0x06; // Effect ID
+    struct razer_report report = razer_chroma_standard_matrix_effect_base(0x04, MATRIX_EFFECT_STATIC);
     report.arguments[1] = rgb1->r; /*rgb color definition*/
     report.arguments[2] = rgb1->g;
     report.arguments[3] = rgb1->b;
@@ -298,15 +288,12 @@ struct razer_report razer_chroma_standard_matrix_effect_static(unsigned char var
  * Status Trans Packet Proto DataSize Class CMD Args
  * ? TODO fill this
  */
-struct razer_report razer_chroma_standard_matrix_effect_starlight_single(unsigned char variable_storage, unsigned char led_id, unsigned char speed, struct razer_rgb *rgb1)
+struct razer_report razer_chroma_standard_matrix_effect_starlight_single(unsigned char speed, struct razer_rgb *rgb1)
 {
-    struct razer_report report = get_razer_report(0x03, 0x0A, 0x01);
+    struct razer_report report = razer_chroma_standard_matrix_effect_base(0x01, MATRIX_EFFECT_STARLIGHT);
 
-    speed = clamp_u8(speed, 0x01, 0x03); // For now only seen
-
-    report.arguments[0] = 0x19; // Effect ID
     report.arguments[1] = 0x01; // Type one color
-    report.arguments[2] = speed; // Speed
+    report.arguments[2] = clamp_u8(speed, 0x01, 0x03); // Speed
 
     report.arguments[3] = rgb1->r; // Red 1
     report.arguments[4] = rgb1->g; // Green 1
@@ -326,15 +313,12 @@ struct razer_report razer_chroma_standard_matrix_effect_starlight_single(unsigne
  * Status Trans Packet Proto DataSize Class CMD Args
  * ? TODO fill this
  */
-struct razer_report razer_chroma_standard_matrix_effect_starlight_dual(unsigned char variable_storage, unsigned char led_id, unsigned char speed, struct razer_rgb *rgb1, struct razer_rgb *rgb2)
+struct razer_report razer_chroma_standard_matrix_effect_starlight_dual(unsigned char speed, struct razer_rgb *rgb1, struct razer_rgb *rgb2)
 {
-    struct razer_report report = get_razer_report(0x03, 0x0A, 0x01);
+    struct razer_report report = razer_chroma_standard_matrix_effect_base(0x01, MATRIX_EFFECT_STARLIGHT);
 
-    speed = clamp_u8(speed, 0x01, 0x03); // For now only seen
-
-    report.arguments[0] = 0x19; // Effect ID
     report.arguments[1] = 0x02; // Type two color
-    report.arguments[2] = speed; // Speed
+    report.arguments[2] = clamp_u8(speed, 0x01, 0x03); // Speed
 
     report.arguments[3] = rgb1->r; // Red 1
     report.arguments[4] = rgb1->g; // Green 1
@@ -347,15 +331,12 @@ struct razer_report razer_chroma_standard_matrix_effect_starlight_dual(unsigned 
     return report;
 }
 
-struct razer_report razer_chroma_standard_matrix_effect_starlight_random(unsigned char variable_storage, unsigned char led_id, unsigned char speed)
+struct razer_report razer_chroma_standard_matrix_effect_starlight_random(unsigned char speed)
 {
-    struct razer_report report = get_razer_report(0x03, 0x0A, 0x01);
+    struct razer_report report = razer_chroma_standard_matrix_effect_base(0x01, MATRIX_EFFECT_STARLIGHT);
 
-    speed = clamp_u8(speed, 0x01, 0x03); // For now only seen
-
-    report.arguments[0] = 0x19; // Effect ID
     report.arguments[1] = 0x03; // Type random color
-    report.arguments[2] = speed; // Speed
+    report.arguments[2] = clamp_u8(speed, 0x01, 0x03); // Speed
 
     return report;
 }
@@ -368,18 +349,16 @@ struct razer_report razer_chroma_standard_matrix_effect_starlight_random(unsigne
  * ??
  * ??
  */
-struct razer_report razer_chroma_standard_matrix_effect_breathing_random(unsigned char variable_storage, unsigned char led_id)
+struct razer_report razer_chroma_standard_matrix_effect_breathing_random(void)
 {
-    struct razer_report report = get_razer_report(0x03, 0x0A, 0x08);
-    report.arguments[0] = 0x03; // Effect ID
+    struct razer_report report = razer_chroma_standard_matrix_effect_base(0x08, MATRIX_EFFECT_BREATHING);
     report.arguments[1] = 0x03; // Breathing type
 
     return report;
 }
-struct razer_report razer_chroma_standard_matrix_effect_breathing_single(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1)
+struct razer_report razer_chroma_standard_matrix_effect_breathing_single(struct razer_rgb *rgb1)
 {
-    struct razer_report report = get_razer_report(0x03, 0x0A, 0x08);
-    report.arguments[0] = 0x03; // Effect ID
+    struct razer_report report = razer_chroma_standard_matrix_effect_base(0x08, MATRIX_EFFECT_BREATHING);
     report.arguments[1] = 0x01; // Breathing type
     report.arguments[2] = rgb1->r;
     report.arguments[3] = rgb1->g;
@@ -387,10 +366,9 @@ struct razer_report razer_chroma_standard_matrix_effect_breathing_single(unsigne
 
     return report;
 }
-struct razer_report razer_chroma_standard_matrix_effect_breathing_dual(unsigned char variable_storage, unsigned char led_id, struct razer_rgb *rgb1, struct razer_rgb *rgb2)
+struct razer_report razer_chroma_standard_matrix_effect_breathing_dual(struct razer_rgb *rgb1, struct razer_rgb *rgb2)
 {
-    struct razer_report report = get_razer_report(0x03, 0x0A, 0x08);
-    report.arguments[0] = 0x03; // Effect ID
+    struct razer_report report = razer_chroma_standard_matrix_effect_base(0x08, MATRIX_EFFECT_BREATHING);
     report.arguments[1] = 0x02; // Breathing type
     report.arguments[2] = rgb1->r;
     report.arguments[3] = rgb1->g;
@@ -412,10 +390,8 @@ struct razer_report razer_chroma_standard_matrix_effect_breathing_dual(unsigned 
  */
 struct razer_report razer_chroma_standard_matrix_effect_custom_frame(unsigned char variable_storage)
 {
-    struct razer_report report = get_razer_report(0x03, 0x0A, 0x02);
-    report.arguments[0] = 0x05; // Effect ID
+    struct razer_report report = razer_chroma_standard_matrix_effect_base(0x02, MATRIX_EFFECT_CUSTOMFRAME);
     report.arguments[1] = variable_storage; // Data frame ID
-    // report.arguments[1] = 0x01; // Data frame ID
 
     return report;
 }
@@ -496,7 +472,6 @@ struct razer_report razer_chroma_standard_matrix_set_custom_frame(unsigned char 
     return report;
 }
 
-
 /*
  * Extended Matrix Effects
  */
@@ -507,7 +482,6 @@ struct razer_report razer_chroma_standard_matrix_set_custom_frame(unsigned char 
 struct razer_report razer_chroma_extended_matrix_effect_base(unsigned char arg_size, unsigned char variable_storage, unsigned char led_id, unsigned char effect_id)
 {
     struct razer_report report = get_razer_report(0x0F, 0x02, arg_size);
-    report.transaction_id.id = 0x3F;
 
     report.arguments[0] = variable_storage;
     report.arguments[1] = led_id;
@@ -721,7 +695,6 @@ struct razer_report razer_chroma_extended_matrix_effect_custom_frame(void)
 struct razer_report razer_chroma_extended_matrix_brightness(unsigned char variable_storage, unsigned char led_id, unsigned char brightness)
 {
     struct razer_report report = get_razer_report(0x0F, 0x04, 0x03);
-    report.transaction_id.id = 0x3F;
 
     report.arguments[0] = variable_storage;
     report.arguments[1] = led_id;
@@ -739,7 +712,6 @@ struct razer_report razer_chroma_extended_matrix_brightness(unsigned char variab
 struct razer_report razer_chroma_extended_matrix_get_brightness(unsigned char variable_storage, unsigned char led_id)
 {
     struct razer_report report = get_razer_report(0x0F, 0x84, 0x03);
-    report.transaction_id.id = 0x3F;
 
     report.arguments[0] = variable_storage;
     report.arguments[1] = led_id;
@@ -774,8 +746,6 @@ struct razer_report razer_chroma_extended_matrix_set_custom_frame2(unsigned char
     data_length = (packetLength != 0) ? packetLength : row_length + 5;
     report = get_razer_report(0x0F, 0x03, data_length);
 
-    report.transaction_id.id = 0x3F;
-
     // printk(KERN_ALERT "razerkbd: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_index, start_col, stop_col, (unsigned char)row_length);
 
     report.arguments[2] = row_index;
@@ -795,7 +765,6 @@ struct razer_report razer_chroma_extended_matrix_set_custom_frame2(unsigned char
 struct razer_report razer_chroma_mouse_extended_matrix_effect_base(unsigned char arg_size, unsigned char variable_storage, unsigned char led_id, unsigned char effect_id)
 {
     struct razer_report report = get_razer_report(0x03, 0x0D, arg_size);
-    report.transaction_id.id = 0x3F;
 
     report.arguments[0] = variable_storage;
     report.arguments[1] = led_id;
@@ -908,9 +877,6 @@ struct razer_report razer_chroma_mouse_extended_matrix_effect_breathing_dual(uns
 
     return report;
 }
-
-
-
 
 /*
  * Misc Functions
@@ -1055,8 +1021,7 @@ struct razer_report razer_chroma_misc_one_row_set_custom_frame(unsigned char sta
  */
 struct razer_report razer_chroma_misc_matrix_reactive_trigger(void)
 {
-    struct razer_report report = get_razer_report(0x03, 0x0A, 0x05);
-    report.arguments[0] = 0x02; // Effect ID
+    struct razer_report report = razer_chroma_standard_matrix_effect_base(0x05, MATRIX_EFFECT_REACTIVE);
     report.arguments[1] = 0; // this speed triggers reactive
     report.arguments[2] = 0;
     report.arguments[3] = 0;
@@ -1454,7 +1419,6 @@ struct razer_report razer_naga_trinity_effect_static(struct razer_rgb *rgb)
     report.arguments[11] = rgb->r;
     report.arguments[12] = rgb->g;
     report.arguments[13] = rgb->b;
-    report.transaction_id.id = 0x1f;
 
     return report;
 }
