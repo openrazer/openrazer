@@ -356,8 +356,8 @@ class KeyboardKeyManager(object):
 
         if key_press == 'autorepeat':  # TODO not done right yet
             # If its brightness then convert autorepeat to key presses
-            # 190 (KEY_F20) and 194 (KEY_F24) are defined in razerkbd_driver.c
-            if key_id in (190, 194):
+            # Brightness keys are defined in keyboard.py and razerkbd_driver.c
+            if key_id in (0x2ab, 0x2aa):
                 key_press = 'press'
             else:
                 # Quit out early
