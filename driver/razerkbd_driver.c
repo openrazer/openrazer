@@ -322,6 +322,21 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
 }
 
 /**
+ * Send report to the keyboard, but without even reading the response
+ */
+static int razer_send_payload_no_response(struct razer_kbd_device *device, struct razer_report *request)
+{
+    uint report_index, response_index;
+    ulong wait_min, wait_max;
+
+    /* Except the caller to have set the transaction_id */
+    WARN_ON(request->transaction_id.id == 0x00);
+
+    razer_get_report_params(device->usb_dev, &report_index, &response_index, &wait_min, &wait_max);
+    return razer_send_control_msg(device->usb_dev, request, report_index, wait_min, wait_max);
+}
+
+/**
  * Function to send to device, get response, and actually check the response
  */
 static int razer_send_payload(struct razer_kbd_device *device, struct razer_report *request, struct razer_report *response)
@@ -2473,6 +2488,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     struct razer_kbd_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    bool want_response = true;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORNATA:
@@ -2506,9 +2522,14 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
+        request = razer_chroma_extended_matrix_effect_custom_frame();
+        request.transaction_id.id = 0x1F;
+        break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
         request = razer_chroma_extended_matrix_effect_custom_frame();
         request.transaction_id.id = 0x1F;
+        want_response = false;
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
@@ -2529,7 +2550,13 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
         request.transaction_id.id = 0xFF;
         break;
     }
-    razer_send_payload(device, &request, &response);
+
+    /* See comment in razer_attr_write_matrix_custom_frame for want_response */
+    if (want_response)
+        razer_send_payload(device, &request, &response);
+    else
+        razer_send_payload_no_response(device, &request);
+
     return count;
 }
 
@@ -2830,6 +2857,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
     unsigned char start_col;
     unsigned char stop_col;
     unsigned char row_length;
+    bool want_response = true;
 
     //printk(KERN_ALERT "razerkbd: Total count: %d\n", (unsigned char)count);
 
@@ -2889,9 +2917,14 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
         case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
         case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
+            request = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+            request.transaction_id.id = 0x1F;
+            break;
+
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
             request = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             request.transaction_id.id = 0x1F;
+            want_response = false;
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
@@ -2947,7 +2980,17 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             request.transaction_id.id = 0xFF;
             break;
         }
-        razer_send_payload(device, &request, &response);
+
+        /*
+         * Some devices don't like us asking for responses for custom frame
+         * requests. And in any case it shouldn't be necessary for most devices
+         * but let's keep it enabled by default for now to not potentially
+         * break anything.
+         */
+        if (want_response)
+            razer_send_payload(device, &request, &response);
+        else
+            razer_send_payload_no_response(device, &request);
 
         // *3 as its 3 bytes per col (RGB)
         offset += row_length;
