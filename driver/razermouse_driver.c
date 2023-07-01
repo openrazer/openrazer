@@ -2974,148 +2974,6 @@ static ssize_t razer_attr_write_backlight_led_brightness(struct device *dev, str
 }
 
 /**
- * Write device file "scroll_led_state"
- */
-static ssize_t razer_attr_write_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
-{
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    switch (device->usb_pid) {
-    default:
-        request = razer_chroma_standard_set_led_state(VARSTORE, led_id, enabled);
-        request.transaction_id.id = 0x3F;
-        break;
-    }
-
-    razer_send_payload(device, &request, &response);
-
-    return count;
-}
-
-/**
- * Write device file "scroll_led_state"
- */
-static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    return razer_attr_write_led_state(dev, attr, buf, count, SCROLL_WHEEL_LED);
-}
-
-/**
- * Common function to handle sysfs read led_state for a given led
- */
-static ssize_t razer_attr_read_led_state(struct device *dev, struct device_attribute *attr, char *buf, unsigned char led_id)
-{
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    switch (device->usb_pid) {
-    default:
-        request = razer_chroma_standard_get_led_state(VARSTORE, led_id);
-        request.transaction_id.id = 0x3F;
-        break;
-    }
-
-    razer_send_payload(device, &request, &response);
-
-    return sprintf(buf, "%d\n", response.arguments[2]);
-}
-
-/**
- * Read device file "scroll_led_state"
- */
-static ssize_t razer_attr_read_scroll_led_state(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    return razer_attr_read_led_state(dev, attr, buf, SCROLL_WHEEL_LED);
-}
-
-/**
- * Write device file "logo_led_state"
- */
-static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    return razer_attr_write_led_state(dev, attr, buf, count, LOGO_LED);
-}
-
-/**
- * Read device file "logo_led_state"
- */
-static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    return razer_attr_read_led_state(dev, attr, buf, LOGO_LED);
-}
-
-/**
- * Common function to handle sysfs write effect for a given led
- */
-static ssize_t razer_attr_write_led_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
-{
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char effect = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    request = razer_chroma_standard_set_led_effect(VARSTORE, led_id, effect);
-    request.transaction_id.id = 0x3F;
-
-    razer_send_payload(device, &request, &response);
-
-    return count;
-}
-
-/**
- * Common function to handle sysfs read effect for a given led
- */
-static ssize_t razer_attr_read_led_effect(struct device *dev, struct device_attribute *attr, char *buf, unsigned char led_id)
-{
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    request = razer_chroma_standard_get_led_effect(VARSTORE, led_id);
-    request.transaction_id.id = 0x3F;
-
-    razer_send_payload(device, &request, &response);
-
-    return sprintf(buf, "%d\n", response.arguments[2]);
-}
-
-/**
- * Write device file "scroll_led_effect"
- */
-static ssize_t razer_attr_write_scroll_led_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    return razer_attr_write_led_effect(dev, attr, buf, count, SCROLL_WHEEL_LED);
-}
-
-/**
- * Read device file "scroll_led_effect"
- */
-static ssize_t razer_attr_read_scroll_led_effect(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    return razer_attr_read_led_effect(dev, attr, buf, SCROLL_WHEEL_LED);
-}
-
-/**
- * Write device file "logo_led_effect"
- */
-static ssize_t razer_attr_write_logo_led_effect(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    return razer_attr_write_led_effect(dev, attr, buf, count, LOGO_LED);
-}
-
-/**
- * Read device file "logo_led_effect"
- */
-static ssize_t razer_attr_read_logo_led_effect(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    return razer_attr_read_led_effect(dev, attr, buf, LOGO_LED);
-}
-
-/**
  * Common function to handle sysfs write matrix_effect_wave for a given led
  */
 static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
@@ -3391,6 +3249,16 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
         razer_send_payload(device, &request, &response);
 
         request = razer_chroma_standard_set_led_rgb(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
+        request.transaction_id.id = 0x3F;
+        razer_send_payload(device, &request, &response);
+
+        request = razer_chroma_standard_set_led_effect(VARSTORE, led_id, CLASSIC_EFFECT_BREATHING);
+        request.transaction_id.id = 0x3F;
+        break;
+
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+        /* Mono-color breath effect */
+        request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
         razer_send_payload(device, &request, &response);
 
@@ -3729,6 +3597,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
     case USB_DEVICE_ID_RAZER_OUROBOROS:
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, false);
         request.transaction_id.id = 0x3F;
         break;
@@ -3855,6 +3724,16 @@ static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
+        request.transaction_id.id = 0x3F;
+        break;
+
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+        /* Could also be called a mono-color static effect */
+        request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
+        request.transaction_id.id = 0x3F;
+        razer_send_payload(device, &request, &response);
+
+        request = razer_chroma_standard_set_led_effect(VARSTORE, led_id, CLASSIC_EFFECT_STATIC);
         request.transaction_id.id = 0x3F;
         break;
 
@@ -4238,9 +4117,6 @@ static DEVICE_ATTR(matrix_effect_reactive,    0220, NULL,                       
 static DEVICE_ATTR(matrix_effect_breath,      0220, NULL,                                  razer_attr_write_matrix_effect_breath);
 
 static DEVICE_ATTR(scroll_led_brightness,     0660, razer_attr_read_scroll_led_brightness, razer_attr_write_scroll_led_brightness);
-// For old-school led commands
-static DEVICE_ATTR(scroll_led_state,          0660, razer_attr_read_scroll_led_state,      razer_attr_write_scroll_led_state);
-static DEVICE_ATTR(scroll_led_effect,         0660, razer_attr_read_scroll_led_effect,     razer_attr_write_scroll_led_effect);
 // For "extended" matrix effects
 static DEVICE_ATTR(scroll_matrix_effect_wave,        0220, NULL,                           razer_attr_write_scroll_matrix_effect_wave);
 static DEVICE_ATTR(scroll_matrix_effect_spectrum,    0220, NULL,                           razer_attr_write_scroll_matrix_effect_spectrum);
@@ -4252,9 +4128,6 @@ static DEVICE_ATTR(scroll_matrix_effect_none,        0220, NULL,                
 static DEVICE_ATTR(scroll_matrix_effect_on,          0220, NULL,                           razer_attr_write_scroll_matrix_effect_on);
 
 static DEVICE_ATTR(logo_led_brightness,       0660, razer_attr_read_logo_led_brightness,   razer_attr_write_logo_led_brightness);
-// For old-school led commands
-static DEVICE_ATTR(logo_led_state,            0660, razer_attr_read_logo_led_state,        razer_attr_write_logo_led_state);
-static DEVICE_ATTR(logo_led_effect,           0660, razer_attr_read_logo_led_effect,       razer_attr_write_logo_led_effect);
 // For "extended" matrix effects
 static DEVICE_ATTR(logo_matrix_effect_wave,        0220, NULL,                             razer_attr_write_logo_matrix_effect_wave);
 static DEVICE_ATTR(logo_matrix_effect_spectrum,    0220, NULL,                             razer_attr_write_logo_matrix_effect_spectrum);
@@ -5242,11 +5115,13 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_effect);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_effect);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_on);
             break;
 
         case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
@@ -6188,11 +6063,13 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_led_effect);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
             device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
-            device_remove_file(&hdev->dev, &dev_attr_logo_led_effect);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_on);
             break;
 
         case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
