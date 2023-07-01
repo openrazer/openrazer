@@ -567,7 +567,7 @@ class RazerNagaHex(__RazerDevice):
     USB_PID = 0x0041
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
-               'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active']
+               'set_logo_none', 'set_logo_on', 'set_scroll_none', 'set_scroll_on']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/23/23_naga_hex.png"
 
@@ -584,7 +584,7 @@ class RazerNagaHexRed(__RazerDevice):
     USB_PID = 0x0036
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
-               'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active']
+               'set_logo_none', 'set_logo_on', 'set_scroll_none', 'set_scroll_on']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-12.png"
 
@@ -601,7 +601,7 @@ class RazerTaipan(__RazerDevice):
     USB_PID = 0x0034
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
-               'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active']
+               'set_logo_none', 'set_logo_on', 'set_scroll_none', 'set_scroll_on']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/19/19_taipan.png"
 
