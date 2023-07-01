@@ -3726,6 +3726,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_TAIPAN:
     case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
     case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, false);
         request.transaction_id.id = 0x3F;
         break;
@@ -3838,6 +3839,7 @@ static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_TAIPAN:
     case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
     case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
         break;
@@ -5252,7 +5254,8 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
 
         case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_on);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             break;
@@ -6194,7 +6197,8 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
-            device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_on);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             break;

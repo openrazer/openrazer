@@ -849,7 +849,7 @@ class RazerAbyssus2000(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x005E
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
-               'get_logo_active', 'set_logo_active']
+               'set_logo_none', 'set_logo_on']
 
     DPI_MAX = 2000
 
