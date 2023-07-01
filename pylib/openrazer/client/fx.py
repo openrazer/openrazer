@@ -981,6 +981,22 @@ class SingleLed(BaseRazerFX):
             return True
         return False
 
+    def breath_mono(self) -> bool:
+        """
+        Breath effect - mono colour
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If parameters are invalid
+        """
+
+        if self._shas('breath_mono'):
+            self._getattr('set#BreathMono')()
+
+            return True
+        return False
+
 
 class MiscLighting(BaseRazerFX):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None):

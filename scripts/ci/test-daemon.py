@@ -133,7 +133,7 @@ def test_sysfs_consistency(d):
             # There are two implementations with different sysfs files
             check_any_sysfs([f"lighting_{prefix}_{effect}"], [f"{prefix}_matrix_effect_{effect}", f"{prefix}_led_effect"])
 
-        check_sysfs(f"lighting_{prefix}_breath_single", f"{prefix}_matrix_effect_breath")
+        check_any_sysfs([f"lighting_{prefix}_breath_single", f"lighting_{prefix}_breath_mono"], [f"{prefix}_matrix_effect_breath"])
 
 
 def test_ripple_capable(d):
