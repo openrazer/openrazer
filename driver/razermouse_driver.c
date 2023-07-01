@@ -3733,6 +3733,16 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
         request.transaction_id.id = 0x3F;
         break;
 
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+        if (led_id == SCROLL_WHEEL_LED) {
+            request = razer_chroma_standard_set_led_state(VARSTORE, led_id, false);
+            request.transaction_id.id = 0x3F;
+        } else {
+            request = razer_chroma_standard_matrix_effect_none();
+            request.transaction_id.id = 0xFF;
+        }
+        break;
+
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         request = razer_chroma_mouse_extended_matrix_effect_none(VARSTORE, led_id);
@@ -3787,7 +3797,6 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
-    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
         request = razer_chroma_standard_matrix_effect_none();
         request.transaction_id.id = 0xFF;
@@ -3844,6 +3853,7 @@ static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
     case USB_DEVICE_ID_RAZER_OUROBOROS:
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
         break;
@@ -5120,7 +5130,8 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
 
         case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
@@ -6065,7 +6076,8 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
-            device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
