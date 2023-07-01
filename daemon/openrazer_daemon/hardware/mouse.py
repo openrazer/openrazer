@@ -307,7 +307,7 @@ class RazerAbyssus(__RazerDevice):
     """
     USB_VID = 0x1532
     USB_PID = 0x0042
-    METHODS = ['get_device_type_mouse', 'set_logo_active', 'get_logo_active', 'get_poll_rate', 'set_poll_rate']
+    METHODS = ['get_device_type_mouse', 'set_logo_none', 'set_logo_on', 'get_poll_rate', 'set_poll_rate']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/274/abyssus2014_500x500.png"
 
