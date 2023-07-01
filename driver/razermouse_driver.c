@@ -2954,20 +2954,6 @@ static ssize_t razer_attr_write_led_state(struct device *dev, struct device_attr
     struct razer_report response = {0};
 
     switch (device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
-        switch (led_id) {
-        case SCROLL_WHEEL_LED:
-            deathadder3_5g_set_scroll_led_state(device, enabled);
-            break;
-        case LOGO_LED:
-            deathadder3_5g_set_logo_led_state(device, enabled);
-            break;
-        default:
-            printk(KERN_WARNING "razermouse: Invalid led_id for led_state on this model\n");
-            return -EINVAL;
-        }
-        return count;
-
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
         switch (led_id) {
         case SCROLL_WHEEL_LED:
@@ -3021,27 +3007,6 @@ static ssize_t razer_attr_read_led_state(struct device *dev, struct device_attri
     struct razer_report response = {0};
 
     switch (device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
-        switch (led_id) {
-        case SCROLL_WHEEL_LED:
-            if((device->da3_5g.leds & 0x02) == 0x02) {
-                return sprintf(buf, "1\n");
-            } else {
-                return sprintf(buf, "0\n");
-            }
-            break;
-        case LOGO_LED:
-            if((device->da3_5g.leds & 0x01) == 0x01) {
-                return sprintf(buf, "1\n");
-            } else {
-                return sprintf(buf, "0\n");
-            }
-            break;
-        default:
-            printk(KERN_WARNING "razermouse: Invalid led_id for led_state on this model\n");
-            return -EINVAL;
-        }
-
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
         switch (led_id) {
         case SCROLL_WHEEL_LED:
@@ -3742,6 +3707,20 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     struct razer_report response = {0};
 
     switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
+        switch (led_id) {
+        case SCROLL_WHEEL_LED:
+            deathadder3_5g_set_scroll_led_state(device, false);
+            break;
+        case LOGO_LED:
+            deathadder3_5g_set_logo_led_state(device, false);
+            break;
+        default:
+            printk(KERN_WARNING "razermouse: Invalid led_id on this model\n");
+            return -EINVAL;
+        }
+        return count;
+
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
@@ -3848,6 +3827,20 @@ static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, stru
     struct razer_report response = {0};
 
     switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
+        switch (led_id) {
+        case SCROLL_WHEEL_LED:
+            deathadder3_5g_set_scroll_led_state(device, true);
+            break;
+        case LOGO_LED:
+            deathadder3_5g_set_logo_led_state(device, true);
+            break;
+        default:
+            printk(KERN_WARNING "razermouse: Invalid led_id on this model\n");
+            return -EINVAL;
+        }
+        return count;
+
     case USB_DEVICE_ID_RAZER_NAGA_2012:
     case USB_DEVICE_ID_RAZER_ABYSSUS:
     case USB_DEVICE_ID_RAZER_IMPERATOR:
@@ -5169,8 +5162,10 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_on);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             break;
 
         case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
@@ -6106,8 +6101,10 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
-            device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_on);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             break;
 
         case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:

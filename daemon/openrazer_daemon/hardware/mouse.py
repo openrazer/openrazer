@@ -659,7 +659,7 @@ class RazerDeathAdder3_5G(__RazerDevice):
     DEDICATED_MACRO_KEYS = True
     METHODS = ['get_device_type_mouse',
                'get_poll_rate', 'set_poll_rate', 'get_dpi_xy', 'set_dpi_xy', 'available_dpi', 'max_dpi',
-               'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active']
+               'set_logo_none', 'set_logo_on', 'set_scroll_none', 'set_scroll_on']
 
     AVAILABLE_DPI = [450, 900, 1800, 3500]
     DPI_MAX = 3500
