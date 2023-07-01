@@ -804,8 +804,8 @@ class RazerOrochi2011(__RazerDevice):
     USB_PID = 0x0013
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Orochi-if01-event-kbd')
 
-    METHODS = ['get_device_type_mouse', 'set_logo_active', 'get_logo_active', 'set_scroll_active', 'get_scroll_active',
-               'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate']
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
+               'set_logo_none', 'set_logo_on', 'set_scroll_none', 'set_scroll_on']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/612/612_orochi_2015.png"
 

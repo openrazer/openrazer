@@ -213,6 +213,31 @@ static void deathadder3_5g_set_dpi(struct razer_mouse_device *device, unsigned s
     mutex_unlock(&device->lock);
 }
 
+static int orochi_2011_set_led_state(struct razer_mouse_device *device, unsigned char led_id, bool enabled)
+{
+    switch (led_id) {
+    case SCROLL_WHEEL_LED:
+        if (enabled) {
+            device->orochi2011.led |= 0b00000001;
+        } else {
+            device->orochi2011.led &= 0b11111110;
+        }
+        break;
+    case LOGO_LED:
+        if (enabled) {
+            device->orochi2011.led |= 0b00000010;
+        } else {
+            device->orochi2011.led &= 0b11111101;
+        }
+        break;
+    default:
+        printk(KERN_WARNING "razermouse: Invalid led_id on Orochi 2011\n");
+        return -EINVAL;
+    }
+
+    return 0;
+}
+
 /*
  * New functions
  */
@@ -2959,30 +2984,6 @@ static ssize_t razer_attr_write_led_state(struct device *dev, struct device_attr
     struct razer_report response = {0};
 
     switch (device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        switch (led_id) {
-        case SCROLL_WHEEL_LED:
-            if (enabled) {
-                device->orochi2011.led |= 0b00000001;
-            } else {
-                device->orochi2011.led &= 0b11111110;
-            }
-            break;
-        case LOGO_LED:
-            if (enabled) {
-                device->orochi2011.led |= 0b00000010;
-            } else {
-                device->orochi2011.led &= 0b11111101;
-            }
-            break;
-        default:
-            printk(KERN_WARNING "razermouse: Invalid led_id for led_state on this model\n");
-            return -EINVAL;
-        }
-        request = razer_chroma_misc_set_orochi2011_led(device->orochi2011.led);
-        request.transaction_id.id = 0xFF;
-        break;
-
     default:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, enabled);
         request.transaction_id.id = 0x3F;
@@ -3012,17 +3013,6 @@ static ssize_t razer_attr_read_led_state(struct device *dev, struct device_attri
     struct razer_report response = {0};
 
     switch (device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        switch (led_id) {
-        case SCROLL_WHEEL_LED:
-            return sprintf(buf, "%d\n", device->orochi2011.led & 0b00000001);
-        case LOGO_LED:
-            return sprintf(buf, "%d\n", (device->orochi2011.led & 0b00000010) >> 1);
-        default:
-            printk(KERN_WARNING "razermouse: Invalid led_id for led_state on this model\n");
-            return -EINVAL;
-        }
-
     default:
         request = razer_chroma_standard_get_led_state(VARSTORE, led_id);
         request.transaction_id.id = 0x3F;
@@ -3716,6 +3706,12 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
         deathadder3_5g_set_led_state(device, led_id, false);
         return count;
 
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
+        orochi_2011_set_led_state(device, led_id, false);
+        request = razer_chroma_misc_set_orochi2011_led(device->orochi2011.led);
+        request.transaction_id.id = 0xFF;
+        break;
+
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
@@ -3825,6 +3821,12 @@ static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
         deathadder3_5g_set_led_state(device, led_id, true);
         return count;
+
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
+        orochi_2011_set_led_state(device, led_id, true);
+        request = razer_chroma_misc_set_orochi2011_led(device->orochi2011.led);
+        request.transaction_id.id = 0xFF;
+        break;
 
     case USB_DEVICE_ID_RAZER_NAGA_2012:
     case USB_DEVICE_ID_RAZER_ABYSSUS:
@@ -5052,8 +5054,10 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
 
         case USB_DEVICE_ID_RAZER_OROCHI_2011:
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_on);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             break;
@@ -5991,8 +5995,10 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_OROCHI_2011:
-            device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_on);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             break;
