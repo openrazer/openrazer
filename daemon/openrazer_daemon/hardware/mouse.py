@@ -347,8 +347,8 @@ class RazerOrochi2013(__RazerDevice):
     """
     USB_VID = 0x1532
     USB_PID = 0x0039
-    METHODS = ['get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy',
-               'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active', 'max_dpi']
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_poll_rate', 'set_poll_rate', 'set_scroll_none', 'set_scroll_on']
 
     DPI_MAX = 6400
 
