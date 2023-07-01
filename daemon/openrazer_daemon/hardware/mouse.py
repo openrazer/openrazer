@@ -835,7 +835,7 @@ class RazerAbyssus1800(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x0020
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
-               'get_logo_active', 'set_logo_active']
+               'set_logo_none', 'set_logo_on']
 
     DPI_MAX = 1800
 
@@ -1105,7 +1105,7 @@ class RazerDeathAdder1800(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x0038
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
-               'get_logo_active', 'set_logo_active']
+               'set_logo_none', 'set_logo_on']
 
     DPI_MAX = 1800
 
