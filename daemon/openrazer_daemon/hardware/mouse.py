@@ -318,8 +318,8 @@ class RazerImperator(__RazerDevice):
     """
     USB_VID = 0x1532
     USB_PID = 0x002F
-    METHODS = ['get_device_type_mouse', 'set_logo_active', 'get_logo_active', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
-               'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active']
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               'set_logo_none', 'set_logo_on', 'set_scroll_none', 'set_scroll_on']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/215/215_imperator.png"
 
