@@ -137,30 +137,35 @@ static int razer_send_payload(struct razer_mouse_device *device, struct razer_re
  * Specific functions for ancient devices
  *
  */
-static void deathadder3_5g_set_scroll_led_state(struct razer_mouse_device *device, unsigned int enabled)
+static int deathadder3_5g_set_led_state(struct razer_mouse_device *device, unsigned char led_id, bool enabled)
 {
-    if (enabled == 1) {
-        device->da3_5g.leds |= 0x02;
-    } else {
-        device->da3_5g.leds &= ~(0x02);
+    switch (led_id) {
+    case SCROLL_WHEEL_LED:
+        if (enabled) {
+            device->da3_5g.leds |= 0x02;
+        } else {
+            device->da3_5g.leds &= ~(0x02);
+        }
+        break;
+
+    case LOGO_LED:
+        if (enabled) {
+            device->da3_5g.leds |= 0x01;
+        } else {
+            device->da3_5g.leds &= ~(0x01);
+        }
+        break;
+
+    default:
+        printk(KERN_WARNING "razermouse: Invalid led_id on DeathAdder 3.5G\n");
+        return -EINVAL;
     }
 
     mutex_lock(&device->lock);
     razer_send_control_msg_old_device(device->usb_dev, &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
     mutex_unlock(&device->lock);
-}
 
-static void deathadder3_5g_set_logo_led_state(struct razer_mouse_device *device, unsigned int enabled)
-{
-    if (enabled == 1) {
-        device->da3_5g.leds |= 0x01;
-    } else {
-        device->da3_5g.leds &= ~(0x01);
-    }
-
-    mutex_lock(&device->lock);
-    razer_send_control_msg_old_device(device->usb_dev, &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
-    mutex_unlock(&device->lock);
+    return 0;
 }
 
 static void deathadder3_5g_set_poll_rate(struct razer_mouse_device *device, unsigned short poll_rate)
@@ -3708,17 +3713,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
-        switch (led_id) {
-        case SCROLL_WHEEL_LED:
-            deathadder3_5g_set_scroll_led_state(device, false);
-            break;
-        case LOGO_LED:
-            deathadder3_5g_set_logo_led_state(device, false);
-            break;
-        default:
-            printk(KERN_WARNING "razermouse: Invalid led_id on this model\n");
-            return -EINVAL;
-        }
+        deathadder3_5g_set_led_state(device, led_id, false);
         return count;
 
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
@@ -3828,17 +3823,7 @@ static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, stru
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
-        switch (led_id) {
-        case SCROLL_WHEEL_LED:
-            deathadder3_5g_set_scroll_led_state(device, true);
-            break;
-        case LOGO_LED:
-            deathadder3_5g_set_logo_led_state(device, true);
-            break;
-        default:
-            printk(KERN_WARNING "razermouse: Invalid led_id on this model\n");
-            return -EINVAL;
-        }
+        deathadder3_5g_set_led_state(device, led_id, true);
         return count;
 
     case USB_DEVICE_ID_RAZER_NAGA_2012:
