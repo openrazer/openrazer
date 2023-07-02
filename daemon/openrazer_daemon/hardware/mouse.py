@@ -1552,6 +1552,53 @@ class RazerViper8KHz(__RazerDevice):
     POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
 
+class RazerViperMiniSEWired(__RazerDevice):
+    """
+    Class for the Razer Viper Mini SE (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Viper_Mini_Signature_Edition_000000000000-if0(1|2)-event-kbd')
+    USB_VID = 0x1532
+    USB_PID = 0x009E
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/9682/9682-1-en-v1.png"
+
+    DPI_MAX = 30000
+
+    POLL_RATES = [125, 500, 1000]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Viper Mini Signature Edition')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
+
+
+class RazerViperMiniSEWireless(RazerViperMiniSEWired):
+    """
+    Class for the Razer Viper Mini SE (Wireless)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Viper_Mini_Signature_Edition-if0(1|2)-event-kbd')
+    USB_PID = 0x009F
+
+    METHODS = RazerViperMiniSEWired.METHODS + ['set_hyperpolling_wireless_dongle_indicator_led_mode']
+
+    POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
+
+
 class RazerNagaEpicChromaWired(__RazerDevice):
     """
     Class for the Razer Naga Epic Chroma (Wired)
