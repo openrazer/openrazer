@@ -413,6 +413,10 @@ class KeyboardColour(object):
         # Backup object (currently not used)
         self.backup = None
 
+        # Brightness colour of every key
+        # This is only for self made effects like ripple
+        self.brightness = RGB(20, 20, 20)
+
         # Initialize array with empty values
         self.reset_rows()
 
@@ -450,7 +454,10 @@ class KeyboardColour(object):
 
         for row in range(0, self.rows):
             # Create 22 rgb values
-            self.colors.append([RGB() for _ in range(0, self.columns)])
+            self.colors.append([
+                RGB(self.brightness.red, self.brightness.green, self.brightness.blue)
+                for _ in range(0, self.columns)
+            ])
 
     def set_key_colour(self, row, col, colour):
         """
