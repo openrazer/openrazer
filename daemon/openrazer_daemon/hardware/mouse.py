@@ -884,7 +884,7 @@ class RazerViperUltimateWired(__RazerDevice):
     MATRIX_DIMS = [1, 1]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
                # Battery
-               'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold',
                # Logo
                'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive',
                'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
