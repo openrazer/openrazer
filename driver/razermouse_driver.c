@@ -1313,8 +1313,6 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     struct razer_report response = {0};
     unsigned short polling_rate = 0;
 
-    request = razer_chroma_misc_get_polling_rate();
-
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
@@ -1347,6 +1345,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
+        request = razer_chroma_misc_get_polling_rate();
         request.transaction_id.id = 0x3f;
         break;
 
@@ -1371,6 +1370,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
+        request = razer_chroma_misc_get_polling_rate();
         request.transaction_id.id = 0x1f;
         break;
 
@@ -1408,6 +1408,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
         return sprintf(buf, "%d\n", polling_rate);
 
     default:
+        request = razer_chroma_misc_get_polling_rate();
         request.transaction_id.id = 0xFF;
         break;
     }
@@ -1445,8 +1446,6 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     struct razer_report request = {0};
     struct razer_report response = {0};
 
-    request = razer_chroma_misc_set_polling_rate(polling_rate);
-
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
@@ -1476,6 +1475,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
+        request = razer_chroma_misc_set_polling_rate(polling_rate);
         request.transaction_id.id = 0x3f;
         break;
 
@@ -1502,6 +1502,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
+        request = razer_chroma_misc_set_polling_rate(polling_rate);
         request.transaction_id.id = 0x1f;
         break;
 
@@ -1515,6 +1516,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
         break;
 
     default:
+        request = razer_chroma_misc_set_polling_rate(polling_rate);
         request.transaction_id.id = 0xFF;
         break;
     }
@@ -2576,6 +2578,10 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             request = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
             request.transaction_id.id = 0x1f;
             break;
+
+        default:
+            printk(KERN_WARNING "razermouse: matrix_custom_frame not supported for this model\n");
+            return -EINVAL;
         }
 
         razer_send_payload(device, &request, &response);
