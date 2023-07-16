@@ -1131,6 +1131,20 @@ class RazerDeathStalkerExpert(_MacroKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/49/49_razer_deathstalker.png"
 
 
+class RazerDeathStalkerEssential(_MacroKeyboard):
+    """
+    Class for the Razer DeathStalker/DeathStalker Essential
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_DeathStalker(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0118
+    METHODS = ['get_device_type_keyboard', 'get_game_mode', 'set_game_mode', 'set_macro_mode', 'get_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'bw_set_pulsate', 'bw_set_static', 'get_macros', 'delete_macro', 'add_macro']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/49/49_razer_deathstalker.png"
+
+
 class RazerDeathStalkerChroma(_RippleKeyboard):
     """
     Class for the Razer DeathStalker Chroma

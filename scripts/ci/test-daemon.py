@@ -117,7 +117,7 @@ def test_sysfs_consistency(d):
     check_sysfs("lighting_spectrum", "matrix_effect_spectrum")
     check_any_sysfs(["lighting_starlight_random", "lighting_starlight_single", "lighting_starlight_dual"], ["matrix_effect_starlight"])
     # Ignore devices that have mono-color razer.device.lighting.bw2013.setStatic()
-    if d._pid not in [0x010d, 0x010e, 0x0113, 0x011a, 0x011b, 0x011c, 0x0202]:
+    if d._pid not in [0x010d, 0x010e, 0x0113, 0x0118, 0x011a, 0x011b, 0x011c, 0x0202]:
         check_sysfs("lighting_static", "matrix_effect_static")
     check_sysfs("lighting_wave", "matrix_effect_wave")
     check_sysfs("lighting_pulsate", "matrix_effect_pulsate")
