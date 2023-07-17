@@ -1594,6 +1594,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_CYNOSA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
@@ -3761,8 +3762,11 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             break;
 
         case USB_DEVICE_ID_RAZER_ORNATA_V3:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
