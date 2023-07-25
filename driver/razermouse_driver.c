@@ -4433,6 +4433,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     switch (hdev->product) {
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_BASILISK_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
@@ -4569,6 +4570,7 @@ static int razer_input_configured(struct hid_device *hdev,
             fallthrough;
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_NAGA_2014:
+        case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
             input_set_capability(hidinput->input, EV_REL, REL_HWHEEL);
             input_set_capability(hidinput->input, EV_REL, REL_HWHEEL_HI_RES);
             input_set_capability(hidinput->input, EV_KEY, BTN_FORWARD);
@@ -4915,6 +4917,9 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
 
         case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_hwheel);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat_delay);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_brightness);
@@ -5776,6 +5781,9 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+            device_remove_file(&hdev->dev, &dev_attr_tilt_hwheel);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_repeat_delay);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_repeat);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_backlight_led_brightness);
