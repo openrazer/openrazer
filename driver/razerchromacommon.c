@@ -1351,7 +1351,7 @@ struct razer_report razer_chroma_misc_set_low_battery_threshold(unsigned char ba
 {
     struct razer_report report = get_razer_report(0x07, 0x01, 0x01);
 
-    // Keep the idle time within bounds
+    // Keep the battery threshold within bounds
     battery_threshold = clamp_u8(battery_threshold, 0x0C, 0x3F);
 
     report.arguments[0] = battery_threshold;
@@ -1364,7 +1364,6 @@ struct razer_report razer_chroma_misc_set_orochi2011_led(unsigned char led_bitfi
     struct razer_report report = {0};
     memcpy(&report, &orochi2011_led, sizeof(orochi2011_led));
 
-    // Keep the idle time within bounds
     report.arguments[1] = led_bitfield;
 
     return report;
