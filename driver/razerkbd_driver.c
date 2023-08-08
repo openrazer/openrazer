@@ -3097,7 +3097,6 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
 {
     struct razer_kbd_device *device = hid_get_drvdata(hdev);
     const struct razer_key_translation *translation;
-    int do_translate = 0;
 
     // No translations needed on the Blades
     if (is_blade_laptop(device)) {
@@ -3159,14 +3158,8 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     }
 
     if(translation) {
-        if(test_bit(usage->code, device->pressed_fn)) {
-            do_translate = 1;
-        } else {
-            do_translate = device->fn_on;
-        }
-
-        if(do_translate) {
-            if(value) {
+        if (test_bit(usage->code, device->pressed_fn) || device->fn_on) {
+            if (value) {
                 set_bit(usage->code, device->pressed_fn);
             } else {
                 clear_bit(usage->code, device->pressed_fn);
