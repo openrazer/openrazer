@@ -33,9 +33,6 @@ MODULE_LICENSE(DRIVER_LICENSE);
 #define RAZER_BRIGHTNESS_DOWN 190 // 190 = KEY_F20
 // F21 is used for touchpad disable, F22,F23 is touchpad enable
 #define RAZER_BRIGHTNESS_UP 194 // 194 = KEY_F24
-#define RAZER_FN 195
-
-#define KEY_FLAG_BLOCK 0b00000001
 
 // KEY_MACRO* has been added in Linux 5.5, so define ourselves for older kernels.
 // See also https://git.kernel.org/torvalds/c/b5625db
