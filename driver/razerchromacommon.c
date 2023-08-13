@@ -608,6 +608,26 @@ struct razer_report razer_chroma_extended_matrix_effect_spectrum(unsigned char v
 }
 
 /**
+ * Set the device to "Wheel" effect
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    06       0f    02  01050a022800 | SET LED MATRIX Effect (VARSTR, Backlight, Wheel 0x0A, Dir 0x02, Speed 0x28, ? 0x00)
+ */
+struct razer_report razer_chroma_extended_matrix_effect_wheel(unsigned char variable_storage, unsigned char led_id, unsigned char direction)
+{
+    struct razer_report report = razer_chroma_extended_matrix_effect_base(0x06, variable_storage, led_id, 0x0a);
+
+    // BlackWidow V4 Pro uses 0x01 and 0x02 for directions
+    // Commands with direction 0x00 seem to be ignored
+    direction = clamp_u8(direction, 0x01, 0x02);
+
+    report.arguments[3] = direction;
+    report.arguments[4] = 0x28; // Speed, lower values are faster
+
+    return report;
+}
+
+/**
  * Set the device to "Reactive" effect
  *
  * Status Trans Packet Proto DataSize Class CMD Args

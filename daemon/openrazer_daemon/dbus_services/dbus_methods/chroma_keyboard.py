@@ -100,14 +100,18 @@ def set_game_mode(self, enable):
             alt_tab = os.path.join(kb_int, 'key_alt_tab')
             alt_f4 = os.path.join(kb_int, 'key_alt_f4')
 
-            if enable:
-                open(super_file, 'wb').write(b'\x01')
-                open(alt_tab, 'wb').write(b'\x01')
-                open(alt_f4, 'wb').write(b'\x01')
-            else:
-                open(super_file, 'wb').write(b'\x00')
-                open(alt_tab, 'wb').write(b'\x00')
-                open(alt_f4, 'wb').write(b'\x00')
+            # Some keyboards such as BlackWidow V4 provide additional interfaces
+            # without key_super, key_alt_tab and key_alt_f4 files. We have to go
+            # through all interfaces and check if these files are actually available
+            if os.path.exists(super_file):
+                if enable:
+                    open(super_file, 'wb').write(b'\x01')
+                    open(alt_tab, 'wb').write(b'\x01')
+                    open(alt_f4, 'wb').write(b'\x01')
+                else:
+                    open(super_file, 'wb').write(b'\x00')
+                    open(alt_tab, 'wb').write(b'\x00')
+                    open(alt_f4, 'wb').write(b'\x00')
 
     with open(driver_path, 'w') as driver_file:
         if enable:
