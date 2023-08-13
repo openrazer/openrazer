@@ -19,6 +19,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>
     </p>
   </description>
   <url type="homepage">https://openrazer.github.io/</url>
+  <custom>
+    <value key="KDE::matrix">#openrazer:matrix.org</value>
+    <value key="KDE::mastodon">https://fosstodon.org/@openrazer</value>
+  </custom>
   <provides>' > ${output_appstream_file}
 
 # Autogeneration of supported devices list
