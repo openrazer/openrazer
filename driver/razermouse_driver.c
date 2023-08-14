@@ -560,7 +560,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
         device_type = "Razer DeathAdder V2 Lite\n";
         break;
-    
+
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
         device_type = "Razer Naga V2 Pro (Wired)\n";
         break;

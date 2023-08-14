@@ -1097,6 +1097,7 @@ class RazerNagaProWireless(RazerNagaProWired):
 
         self._battery_manager.close()
 
+
 class RazerNagaV2ProWired(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Naga V2 Pro (Wired)
