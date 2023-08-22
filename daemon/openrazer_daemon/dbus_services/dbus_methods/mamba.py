@@ -285,11 +285,7 @@ def get_dpi_stages(self):
 def max_dpi(self):
     self.logger.debug("DBus call max_dpi")
 
-    if hasattr(self, 'DPI_MAX'):
-        return self.DPI_MAX
-
-    else:
-        return 500
+    return self.DPI_MAX
 
 
 @endpoint('razer.device.dpi', 'availableDPI', out_sig='ai')
