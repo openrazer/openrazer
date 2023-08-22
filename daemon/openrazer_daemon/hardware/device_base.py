@@ -38,6 +38,7 @@ class RazerDevice(DBusService):
     DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = None
     POLL_RATES = None
+    DPI_MAX = None
 
     WAVE_DIRS = (1, 2)
 
@@ -349,10 +350,23 @@ class RazerDevice(DBusService):
         """
         dpi_func = getattr(self, "setDPI", None)
         if dpi_func is not None:
+            # Constrain value in case the max has changed, e.g. wired/wireless might different maximums
+            if self.dpi[0] > self.DPI_MAX:
+                self.logger.warning("Constraining DPI X to maximum of " + str(self.DPI_MAX) + " because stored value " + str(self.dpi[0]) + " is larger.")
+                self.dpi[0] = self.DPI_MAX
+            if self.dpi[1] > self.DPI_MAX:
+                self.logger.warning("Constraining DPI Y to maximum of " + str(self.DPI_MAX) + " because stored value " + str(self.dpi[1]) + " is larger.")
+                self.dpi[1] = self.DPI_MAX
+
             dpi_func(self.dpi[0], self.dpi[1])
 
         poll_rate_func = getattr(self, "setPollRate", None)
         if poll_rate_func is not None:
+            # Constrain value in case the available values have changed, e.g. wired/wireless might different values available
+            if self.poll_rate not in self.POLL_RATES:
+                self.logger.warning("Constraining poll rate because stored value " + str(self.poll_rate) + " is not available.")
+                self.poll_rate = min(self.POLL_RATES, key=lambda x: abs(x - self.poll_rate))
+
             poll_rate_func(self.poll_rate)
 
     def restore_brightness(self):
