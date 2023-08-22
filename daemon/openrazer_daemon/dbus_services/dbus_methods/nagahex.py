@@ -19,6 +19,12 @@ def set_dpi_xy_byte(self, dpi_x, dpi_y):
     """
     self.logger.debug("DBus call set_dpi_xy_byte")
 
+    # check that DPI is not more than the maximum
+    if dpi_x > self.DPI_MAX:
+        raise RuntimeError("Provided DPI " + str(dpi_x) + " is larger than maximum of " + str(self.DPI_MAX))
+    if dpi_y > self.DPI_MAX:
+        raise RuntimeError("Provided DPI " + str(dpi_x) + " is larger than maximum of " + str(self.DPI_MAX))
+
     driver_path = self.get_driver_path('dpi')
 
     if dpi_x > 6750:
