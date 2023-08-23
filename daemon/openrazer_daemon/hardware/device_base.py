@@ -1015,6 +1015,39 @@ class RazerDevice(DBusService):
 
             mode_file.write(bytes([mode_id, param]))
 
+    def _set_custom_effect(self):
+        """
+        Set the device to use custom LED matrix
+        """
+        # self.logger.debug("DBus call _set_custom_effect")
+
+        driver_path = self.get_driver_path('matrix_effect_custom')
+
+        payload = b'1'
+
+        with open(driver_path, 'wb') as driver_file:
+            driver_file.write(payload)
+
+    def _set_key_row(self, payload):
+        """
+        Set the RGB matrix on the device
+
+        Byte array like
+        [1, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00,
+            255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 255, 00, 255, 00, 00]
+
+        First byte is row, on firefly its always 1, on keyboard its 0-5
+        Then its 3byte groups of RGB
+        :param payload: Binary payload
+        :type payload: bytes
+        """
+        # self.logger.debug("DBus call set_key_row")
+
+        driver_path = self.get_driver_path('matrix_custom_frame')
+
+        with open(driver_path, 'wb') as driver_file:
+            driver_file.write(payload)
+
     def get_vid_pid(self):
         """
         Get the usb VID PID

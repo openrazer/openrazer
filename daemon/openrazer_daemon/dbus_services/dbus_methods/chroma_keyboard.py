@@ -545,15 +545,9 @@ def set_custom_effect(self):
     """
     Set the device to use custom LED matrix
     """
-    # TODO uncomment
-    # self.logger.debug("DBus call set_custom_effect")
+    self.send_effect_event('setCustom')
 
-    driver_path = self.get_driver_path('matrix_effect_custom')
-
-    payload = b'1'
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+    self._set_custom_effect()
 
 
 @endpoint('razer.device.lighting.chroma', 'setKeyRow', in_sig='ay', byte_arrays=True)
@@ -570,14 +564,9 @@ def set_key_row(self, payload):
     :param payload: Binary payload
     :type payload: bytes
     """
+    self.send_effect_event('setCustom')
 
-    # TODO uncomment
-    # self.logger.debug("DBus call set_key_row")
-
-    driver_path = self.get_driver_path('matrix_custom_frame')
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+    self._set_key_row(payload)
 
 
 @endpoint('razer.device.lighting.custom', 'setRipple', in_sig='yyyd')
