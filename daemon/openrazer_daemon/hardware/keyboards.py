@@ -794,6 +794,13 @@ class RazerOrnataV3X(_MacroKeyboard):
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6071-1-en-v1.png"
 
 
+class RazerOrnataV3X_Alternate(RazerOrnataV3X):
+    """
+    Class for the Razer Ornata V3 X (Alternate)
+    """
+    USB_PID = 0x02A2
+
+
 class RazerHuntsmanElite(_RippleKeyboard):
     """
     Class for the Razer Huntsman Elite

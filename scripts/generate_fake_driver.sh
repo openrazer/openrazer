@@ -196,6 +196,10 @@ while IFS= read -r device_raw; do
         filename=${filename%.cfg}_2.cfg
     fi
 
+    # There are two "Razer Ornata V3 X"
+    if [ "$device_pid" = "02A2" ]; then
+        filename=${filename%.cfg}_2.cfg
+    fi
 
     if [ -f "$filename" ]; then
         echo "Error: File $filename already exists!"
