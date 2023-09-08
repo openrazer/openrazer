@@ -29,9 +29,8 @@ struct razer_report razer_chroma_standard_set_device_mode(unsigned char mode, un
     if(mode != 0x00 && mode != 0x03) { // Explicitly blocking the 0x02 mode
         mode = 0x00;
     }
-    if(param != 0x00) {
-        param = 0x00;
-    }
+    // Only allow 0x00 as param
+    param = 0x00;
 
     report.arguments[0] = mode;
     report.arguments[1] = param;
@@ -905,7 +904,7 @@ struct razer_report razer_chroma_misc_fn_key_toggle(unsigned char state)
  */
 struct razer_report razer_chroma_misc_set_keyswitch_optimization_command1(unsigned char optimization_mode)
 {
-    struct razer_report report = report = get_razer_report(0x02, 0x02, 0x04); // class, id, data size
+    struct razer_report report = get_razer_report(0x02, 0x02, 0x04); // class, id, data size
 
     // 0x00 -> Typing (Set)
     // 0x01 -> Gaming (Set) - Same report, doesn't include any arguments

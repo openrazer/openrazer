@@ -44,6 +44,24 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
 
         self.key_manager.close()
 
+    def _resume_device(self):
+        """
+        Restore device mode
+
+        Set device back to driver mode after e.g. suspend which resets the
+        device to default device mode.
+
+        NOTE: This is really the wrong place to put this, since this callback
+        is for screensaver unlock, and not for 'wake up from suspend' or
+        similar. Nevertheless for now this seems to be the best place for this
+        and should resolve some issues with macro keys not working after
+        suspend.
+        """
+        super()._resume_device()
+
+        self.logger.info('Putting device back into driver mode.')
+        self.set_device_mode(0x03, 0x00)  # Driver mode
+
 
 class _RippleKeyboard(_MacroKeyboard):
     """
@@ -774,6 +792,13 @@ class RazerOrnataV3X(_MacroKeyboard):
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6071-1-en-v1.png"
+
+
+class RazerOrnataV3X_Alternate(RazerOrnataV3X):
+    """
+    Class for the Razer Ornata V3 X (Alternate)
+    """
+    USB_PID = 0x02A2
 
 
 class RazerHuntsmanElite(_RippleKeyboard):
@@ -1883,3 +1908,41 @@ class RazerBlade152023(_RippleKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/9696/9696-1-en-v2.png"
+
+
+class RazerBlade162023(_RippleKeyboard):
+    """
+    Class for the Razer Blade 16 (2023)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x029F
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 16]
+    METHODS = ['get_device_type_keyboard', 'get_logo_active', 'set_logo_active', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
+               'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/9668/9668-1-en-v2.png"
+
+
+class RazerBlade182023(_RippleKeyboard):
+    """
+    Class for the Razer Blade 18 (2023)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02A0
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 16]
+    METHODS = ['get_device_type_keyboard', 'get_logo_active', 'set_logo_active', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
+               'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/9676/9676-1-en-v1.png"

@@ -206,13 +206,13 @@ class RippleManager(object):
         :param payload: Binary payload
         :type payload: bytes
         """
-        self._parent.setKeyRow(payload)
+        self._parent._set_key_row(payload)
 
     def refresh_keyboard(self):
         """
         Refresh the keyboard
         """
-        self._parent.setCustom()
+        self._parent._set_custom_effect()
 
     def notify(self, msg):
         """

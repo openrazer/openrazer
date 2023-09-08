@@ -170,6 +170,12 @@ def set_dpi_xy(self, dpi_x, dpi_y):
         if dpi_x not in self.AVAILABLE_DPI:
             raise RuntimeError("Provided DPI " + str(dpi_x) + " is not in available_dpi values: " + str(self.AVAILABLE_DPI))
 
+    # check that DPI is not more than the maximum
+    if dpi_x > self.DPI_MAX:
+        raise RuntimeError("Provided DPI " + str(dpi_x) + " is larger than maximum of " + str(self.DPI_MAX))
+    if dpi_y > self.DPI_MAX:
+        raise RuntimeError("Provided DPI " + str(dpi_x) + " is larger than maximum of " + str(self.DPI_MAX))
+
     driver_path = self.get_driver_path('dpi')
 
     if self._testing:
@@ -186,18 +192,12 @@ def set_dpi_xy(self, dpi_x, dpi_y):
     else:
         dpi_bytes = struct.pack('>HH', dpi_x, dpi_y)
 
+    # store to local variable (TODO: can we replace this by getting from persistence?)
     self.dpi[0] = dpi_x
     self.dpi[1] = dpi_y
 
     self.set_persistence(None, "dpi_x", dpi_x)
     self.set_persistence(None, "dpi_y", dpi_y)
-
-    # constrain DPI to maximum
-    if hasattr(self, 'DPI_MAX'):
-        if self.dpi[0] > self.DPI_MAX:
-            self.dpi[0] = self.DPI_MAX
-        if self.dpi[1] > self.DPI_MAX:
-            self.dpi[1] = self.DPI_MAX
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(dpi_bytes)
@@ -285,11 +285,7 @@ def get_dpi_stages(self):
 def max_dpi(self):
     self.logger.debug("DBus call max_dpi")
 
-    if hasattr(self, 'DPI_MAX'):
-        return self.DPI_MAX
-
-    else:
-        return 500
+    return self.DPI_MAX
 
 
 @endpoint('razer.device.dpi', 'availableDPI', out_sig='ai')
