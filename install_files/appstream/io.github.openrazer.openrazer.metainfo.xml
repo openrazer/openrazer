@@ -21,6 +21,7 @@
   <provides>
     <modalias>usb:v1532p0013d*</modalias>
     <modalias>usb:v1532p0016d*</modalias>
+    <modalias>usb:v1532p001Fd*</modalias>
     <modalias>usb:v1532p0020d*</modalias>
     <modalias>usb:v1532p0024d*</modalias>
     <modalias>usb:v1532p0025d*</modalias>
