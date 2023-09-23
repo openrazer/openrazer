@@ -273,12 +273,14 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_JP:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRED:
         report_index = 0x02;
         response_index = 0x02;
         return razer_get_usb_response(usb_dev, report_index, request, response_index, response, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
         break;
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRELESS:
         report_index = 0x02;
         response_index = 0x02;
         return razer_get_usb_response(usb_dev, report_index, request, response_index, response, RAZER_DEATHSTALKER_V2_WIRELESS_WAIT_MIN_US, RAZER_DEATHSTALKER_V2_WIRELESS_WAIT_MAX_US);
@@ -1116,6 +1118,14 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Blade 18 (2023)\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRED:
+        device_type = "Razer Pro Type Ultra (Wired)\n";
+        break;
+
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRELESS:
+        device_type = "Razer Pro Type Ultra (Wireless)\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
     }
@@ -1793,16 +1803,6 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
 
     switch (device->usb_pid) {
 
-    case USB_DEVICE_ID_RAZER_TARTARUS_V2:
-        if (count != 3) {
-            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
-            return -EINVAL;
-        }
-        request = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
-        request.transaction_id.id = 0x1F;
-        razer_send_payload(device, &request, &response);
-        break;
-
     case USB_DEVICE_ID_RAZER_ORBWEAVER:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_ESSENTIAL:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_EXPERT:
@@ -1917,6 +1917,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         razer_send_payload(device, &request, &response);
         break;
 
+    case USB_DEVICE_ID_RAZER_TARTARUS_V2:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_CYNOSA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
@@ -1962,6 +1963,17 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         razer_send_payload(device, &request, &response);
         request = razer_chroma_standard_set_led_rgb(VARSTORE, BACKLIGHT_LED, (struct razer_rgb *) &buf[0]);
         request.transaction_id.id = 0xFF;
+        razer_send_payload(device, &request, &response);
+        break;
+
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRELESS:
+        if (count != 1) {
+            printk(KERN_WARNING "razerkbd: Static mode only accepts '1' (1byte).\n");
+            return -EINVAL;
+        }
+        request = razer_pro_type_matrix_effect_static(VARSTORE, BACKLIGHT_LED);
+        request.transaction_id.id = 0x1F;
         razer_send_payload(device, &request, &response);
         break;
 
@@ -2300,6 +2312,17 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         }
         break;
 
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRELESS:
+        if (count != 1) {
+            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte).\n");
+            return -EINVAL;
+        }
+        request = razer_pro_type_matrix_effect_breathing(VARSTORE, BACKLIGHT_LED);
+        request.transaction_id.id = 0x1F;
+        razer_send_payload(device, &request, &response);
+        break;
+
     default:
         switch(count) {
         case 3: // Single colour mode
@@ -2573,6 +2596,8 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRELESS:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, BACKLIGHT_LED, brightness);
         request.transaction_id.id = 0x1F;
         break;
@@ -2659,6 +2684,8 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRELESS:
         request = razer_chroma_extended_matrix_get_brightness(VARSTORE, BACKLIGHT_LED);
         request.transaction_id.id = 0x1F;
         break;
@@ -3909,6 +3936,14 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
             break;
+
+        case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRED:
+        case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRELESS:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);                  // Battery charge level
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);                 // Battery charge status
+            break;
         }
 
         // Set device to regular mode, not driver mode
@@ -4343,6 +4378,14 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
             device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
             break;
+
+        case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRED:
+        case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRELESS:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);                  // Battery charge level
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);                 // Battery charge status
+            break;
         }
     } else if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD) {
         device_remove_file(&hdev->dev, &dev_attr_key_super);
@@ -4453,6 +4496,8 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_16_2023) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_18_2023) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRED) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRELESS) },
     { 0 }
 };
 
