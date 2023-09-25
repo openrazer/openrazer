@@ -755,23 +755,23 @@ struct razer_report razer_chroma_extended_matrix_set_custom_frame2(unsigned char
     return report;
 }
 
-struct razer_report razer_pro_type_matrix_effect_static(unsigned char variable_storage, unsigned char led_id)
+struct razer_report razer_pro_type_matrix_effect_static(unsigned char variable_storage, unsigned char led_id, unsigned char brightness)
 {
     struct razer_report report = razer_chroma_extended_matrix_effect_base(0x09, variable_storage, led_id, 0x01);
 
     report.arguments[4] = 0x01;
     report.arguments[5] = 0x01;
-    report.arguments[6] = 0xff;     // brightness level
+    report.arguments[6] = brightness;
     return report;
 }
 
-struct razer_report razer_pro_type_matrix_effect_breathing(unsigned char variable_storage, unsigned char led_id)
+struct razer_report razer_pro_type_matrix_effect_breathing(unsigned char variable_storage, unsigned char led_id, unsigned char brightness)
 {
     struct razer_report report = razer_chroma_extended_matrix_effect_base(0x09, variable_storage, led_id, 0x02);
 
     report.arguments[4] = 0x01;
     report.arguments[5] = 0x01;
-    report.arguments[6] = 0xff;     // brightness level
+    report.arguments[6] = brightness;
 
     return report;
 }

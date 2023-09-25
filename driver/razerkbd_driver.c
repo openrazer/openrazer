@@ -1969,10 +1969,10 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRELESS:
         if (count != 1) {
-            printk(KERN_WARNING "razerkbd: Static mode only accepts '1' (1byte).\n");
+            printk(KERN_WARNING "razerkbd: Static mode only accepts brightness level (1byte).\n");
             return -EINVAL;
         }
-        request = razer_pro_type_matrix_effect_static(VARSTORE, BACKLIGHT_LED);
+        request = razer_pro_type_matrix_effect_static(VARSTORE, BACKLIGHT_LED, buf[0]);
         request.transaction_id.id = 0x1F;
         razer_send_payload(device, &request, &response);
         break;
@@ -2315,10 +2315,10 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_TYPE_ULTRA_WIRELESS:
         if (count != 1) {
-            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte).\n");
+            printk(KERN_WARNING "razerkbd: Breathing only accepts brightness level (1byte).\n");
             return -EINVAL;
         }
-        request = razer_pro_type_matrix_effect_breathing(VARSTORE, BACKLIGHT_LED);
+        request = razer_pro_type_matrix_effect_breathing(VARSTORE, BACKLIGHT_LED, buf[0]);
         request.transaction_id.id = 0x1F;
         razer_send_payload(device, &request, &response);
         break;
