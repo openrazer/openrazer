@@ -193,6 +193,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Cobra Pro                               |  1532:00B0  |
 | Razer DeathAdder V3                           |  1532:00B2  |
 | Razer HyperPolling Wireless Dongle            |  1532:00B3  |
+| Razer Naga V2 HyperSpeed (Receiver)           |  1532:00B4  |
 | Razer DeathAdder V3 Pro (Wired)               |  1532:00B6  |
 | Razer DeathAdder V3 Pro (Wireless)            |  1532:00B7  |
 
