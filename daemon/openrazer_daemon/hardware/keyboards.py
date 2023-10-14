@@ -1946,3 +1946,25 @@ class RazerBlade182023(_RippleKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/9676/9676-1-en-v1.png"
+
+
+class RazerProTypeUltraWired(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Pro Type Ultra (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Pro_Type_Ultra(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0277
+    METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_breath_single_effect', 'get_battery', 'is_charging', 'get_keyboard_layout']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/60218b01153078857f2fe8f0f62071eb/razer-pro-type-ultra-hero-1920x699-new.jpg"
+
+
+class RazerProTypeUltraWireless(RazerProTypeUltraWired):
+    """
+    Class for the Razer Pro Type Ultra (Wireless)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Pro_Type_Ultra_000000000000(-if01)?-event-kbd')
+
+    USB_PID = 0x027B
