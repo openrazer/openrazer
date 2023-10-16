@@ -256,12 +256,10 @@ static bool is_blade_laptop(struct razer_kbd_device *device)
 }
 
 /**
- * Send report to the keyboard
+ * Get request/response indices and timing parameters for the device
  */
-static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request, struct razer_report *response)
+static void razer_get_report_params(struct usb_device *usb_dev, uint *report_index, uint *response_index, ulong *wait_min, ulong *wait_max)
 {
-    uint report_index;
-    uint response_index;
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
@@ -273,14 +271,16 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
-        report_index = 0x03;
-        response_index = 0x03;
-        return razer_get_usb_response(usb_dev, report_index, request, response_index, response, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+        *report_index = 0x03;
+        *response_index = 0x03;
+        *wait_min = RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US;
+        *wait_max = RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US;
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
-        report_index = 0x03;
-        response_index = 0x03;
-        return razer_get_usb_response(usb_dev, report_index, request, response_index, response, RAZER_BLACKWIDOW_V3_WIRELESS_WAIT_MIN_US, RAZER_BLACKWIDOW_V3_WIRELESS_WAIT_MAX_US);
+        *report_index = 0x03;
+        *response_index = 0x03;
+        *wait_min = RAZER_BLACKWIDOW_V3_WIRELESS_WAIT_MIN_US;
+        *wait_max = RAZER_BLACKWIDOW_V3_WIRELESS_WAIT_MAX_US;
         break;
     case USB_DEVICE_ID_RAZER_ANANSI:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_TE:
@@ -289,22 +289,36 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_JP:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
-        report_index = 0x02;
-        response_index = 0x02;
-        return razer_get_usb_response(usb_dev, report_index, request, response_index, response, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+        *report_index = 0x02;
+        *response_index = 0x02;
+        *wait_min = RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US;
+        *wait_max = RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US;
         break;
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
-        report_index = 0x02;
-        response_index = 0x02;
-        return razer_get_usb_response(usb_dev, report_index, request, response_index, response, RAZER_DEATHSTALKER_V2_WIRELESS_WAIT_MIN_US, RAZER_DEATHSTALKER_V2_WIRELESS_WAIT_MAX_US);
+        *report_index = 0x02;
+        *response_index = 0x02;
+        *wait_min = RAZER_DEATHSTALKER_V2_WIRELESS_WAIT_MIN_US;
+        *wait_max = RAZER_DEATHSTALKER_V2_WIRELESS_WAIT_MAX_US;
         break;
     default:
-        report_index = 0x01;
-        response_index = 0x01;
-        return razer_get_usb_response(usb_dev, report_index, request, response_index, response, RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US, RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US);
+        *report_index = 0x01;
+        *response_index = 0x01;
+        *wait_min = RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US;
+        *wait_max = RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US;
         break;
     }
+}
+
+/**
+ * Send report to the keyboard
+ */
+static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request, struct razer_report *response)
+{
+    uint report_index, response_index;
+    ulong wait_min, wait_max;
+    razer_get_report_params(usb_dev, &report_index, &response_index, &wait_min, &wait_max);
+    return razer_get_usb_response(usb_dev, report_index, request, response_index, response, wait_min, wait_max);
 }
 
 /**
