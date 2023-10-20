@@ -186,6 +186,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Viper Mini Signature Edition (Wired)    |  1532:009E  |
 | Razer Viper Mini Signature Edition (Wireless) |  1532:009F  |
 | Razer DeathAdder V2 Lite                      |  1532:00A1  |
+| Razer Cobra                                   |  1532:00A3  |
 | Razer Viper V2 Pro (Wired)                    |  1532:00A5  |
 | Razer Viper V2 Pro (Wireless)                 |  1532:00A6  |
 | Razer Basilisk V3 Pro (Wired)                 |  1532:00AA  |
