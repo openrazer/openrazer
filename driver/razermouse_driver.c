@@ -604,6 +604,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Cobra Pro\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_COBRA:
+        device_type = "Razer Cobra\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
     }
