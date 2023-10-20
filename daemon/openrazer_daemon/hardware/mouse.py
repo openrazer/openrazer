@@ -1723,7 +1723,7 @@ class RazerCobra(__RazerDevice):
     """
     Class for the Razer Cobra (Wired)
     """
-    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Cobra_000000000000-if0(1|2)-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Cobra-if0(1|2)-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x00A3
