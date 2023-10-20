@@ -1719,11 +1719,47 @@ class RazerDeathAdderV2XHyperSpeed(__RazerDevice):
         self._battery_manager.close()
 
 
+class RazerCobra(__RazerDevice):
+    """
+    Class for the Razer Cobra (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Cobra_000000000000-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00A3
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               'get_brightness', 'set_brightness',
+               'get_logo_brightness', 'set_logo_brightness',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
+
+
+    DEVICE_IMAGE = "https://assets3.razerzone.com/fW2yM7nodEe0VlyjBK2HOAdoyQM=/1500x1000/https%3A%2F%2Fhybrismediaprod.blob.core.windows.net%2Fsys-master-phoenix-images-container%2Fhc4%2Fhc2%2F9591467704350%2F230629-cobra-1500x1000-1.jpg"
+
+    DPI_MAX = 8500
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Cobra')
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+
+        self._battery_manager.close()
+
+
 class RazerViperV2ProWired(__RazerDevice):
     """
     Class for the Razer Viper V2 Pro (Wired)
     """
-    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Viper_V2_Pro_000000000000-if0(1|2)-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Viper_V2_Pro-if0(1|2)-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x00A5
