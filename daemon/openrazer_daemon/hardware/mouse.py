@@ -1759,7 +1759,7 @@ class RazerViperV2ProWired(__RazerDevice):
     """
     Class for the Razer Viper V2 Pro (Wired)
     """
-    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Viper_V2_Pro-if0(1|2)-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Viper_V2_Pro-000000000000-if0(1|2)-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x00A5
