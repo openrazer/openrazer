@@ -1733,7 +1733,6 @@ class RazerCobra(__RazerDevice):
                'get_logo_brightness', 'set_logo_brightness',
                'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
 
-
     DEVICE_IMAGE = "https://assets3.razerzone.com/fW2yM7nodEe0VlyjBK2HOAdoyQM=/1500x1000/https%3A%2F%2Fhybrismediaprod.blob.core.windows.net%2Fsys-master-phoenix-images-container%2Fhc4%2Fhc2%2F9591467704350%2F230629-cobra-1500x1000-1.jpg"
 
     DPI_MAX = 8500
