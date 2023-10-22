@@ -790,7 +790,6 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
     case USB_DEVICE_ID_RAZER_VIPER:
     case USB_DEVICE_ID_RAZER_VIPER_MINI:
-    case USB_DEVICE_ID_RAZER_COBRA:
     case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
         request = razer_chroma_extended_matrix_effect_custom_frame();
@@ -2554,7 +2553,6 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
         case USB_DEVICE_ID_RAZER_VIPER:
         case USB_DEVICE_ID_RAZER_VIPER_MINI:
-        case USB_DEVICE_ID_RAZER_COBRA:
         case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
         case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
             request = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
@@ -3027,7 +3025,6 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_BASILISK_V3:
-    case USB_DEVICE_ID_RAZER_COBRA:
     case USB_DEVICE_ID_RAZER_COBRA_PRO:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
@@ -5423,16 +5420,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_reactive);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
 
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
-
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
             break;
 
         case USB_DEVICE_ID_RAZER_COBRA_PRO:
@@ -5755,17 +5743,15 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 
         case USB_DEVICE_ID_RAZER_COBRA:
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
-            device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
+
             device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_reactive);
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
 
             break;
 
