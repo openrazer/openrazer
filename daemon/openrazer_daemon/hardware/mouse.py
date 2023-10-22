@@ -1727,19 +1727,22 @@ class RazerCobra(__RazerDevice):
 
     USB_VID = 0x1532
     USB_PID = 0x00A3
-    METHODS = ['get_device_type_mouse', 'max_dpi',
-               'get_dpi_xy', 'set_dpi_xy',
-               'get_dpi_stages', 'set_dpi_stages',
-               'get_poll_rate', 'set_poll_rate',
-               'get_brightness', 'set_brightness',
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness',
-               'get_idle_time', 'set_idle_time']
+               # Underglow/Logo use LOGO_LED
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive',
+               'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
+               # Custom frame
+               'set_custom_effect', 'set_key_row']
 
     DEVICE_IMAGE = "https://assets3.razerzone.com/fW2yM7nodEe0VlyjBK2HOAdoyQM=/1500x1000/https%3A%2F%2Fhybrismediaprod.blob.core.windows.net%2Fsys-master-phoenix-images-container%2Fhc4%2Fhc2%2F9591467704350%2F230629-cobra-1500x1000-1.jpg"
 
     DPI_MAX = 8500
 
-    POLL_RATES = [125, 500, 1000]
+    # POLL_RATES = [125, 500, 1000]
 
 
 class RazerViperV2ProWired(__RazerDevice):
