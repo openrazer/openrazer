@@ -16,6 +16,7 @@ import random
 from openrazer_daemon.dbus_services.service import DBusService
 import openrazer_daemon.dbus_services.dbus_methods
 from openrazer_daemon.misc import effect_sync
+from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 
 
 # pylint: disable=too-many-instance-attributes
@@ -64,6 +65,7 @@ class RazerDevice(DBusService):
         self.additional_interfaces = []
         if additional_interfaces is not None:
             self.additional_interfaces.extend(additional_interfaces)
+        self._battery_manager = None
 
         self.config = config
         self.persistence = persistence
@@ -313,6 +315,10 @@ class RazerDevice(DBusService):
                         self.zone[i]["wave_dir"] = int(self.persistence[self.storage_name][i + '_wave_dir'])
                     except (KeyError, configparser.NoOptionError):
                         self.logger.info("Failed to get " + i + " wave direction from persistence storage, using default.")
+
+        # Initialize battery manager if the device has support
+        if 'get_battery' in self.METHODS:
+            self._init_battery_manager()
 
         self.restore_dpi_poll_rate()
         self.restore_brightness()
@@ -1050,6 +1056,15 @@ class RazerDevice(DBusService):
         with open(driver_path, 'wb') as driver_file:
             driver_file.write(payload)
 
+    def _init_battery_manager(self):
+        """
+        Initializes the BatteryManager using the provided name
+        """
+        self._battery_manager = _BatteryManager(self, self._device_number, self.getDeviceName())  # pylint: disable=no-member
+        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
+        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
+        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
     def get_vid_pid(self):
         """
         Get the usb VID PID
@@ -1137,6 +1152,9 @@ class RazerDevice(DBusService):
         """
         # Clear observer list
         self._observer_list.clear()
+
+        if self._battery_manager:
+            self._battery_manager.close()
 
     def close(self):
         """

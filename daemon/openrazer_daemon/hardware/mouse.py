@@ -5,7 +5,6 @@ Mouse class
 """
 import re
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice
-from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 
 
 class RazerViperMini(__RazerDevice):
@@ -68,22 +67,6 @@ class RazerLanceheadWirelessReceiver(RazerLanceheadWirelessWired):
     USB_PID = 0x006F
     METHODS = RazerLanceheadWirelessWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Lancehead Wireless')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerLanceheadWired(__RazerDevice):
     """
@@ -122,22 +105,6 @@ class RazerLanceheadWireless(RazerLanceheadWired):
     """
     USB_PID = 0x005A
     METHODS = RazerLanceheadWired.METHODS + ['set_charge_effect', 'set_charge_colour']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Lancehead')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
 
 
 class RazerDeathAdderEssentialWhiteEdition(__RazerDevice):
@@ -247,22 +214,6 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/609/609_mamba_500x500.png"
 
     DPI_MAX = 16000
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
 
 
 class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
@@ -697,22 +648,6 @@ class RazerMamba2012Wireless(__RazerDevice):
 
     DPI_MAX = 6400
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerMamba2012Wired(__RazerDevice):
     """
@@ -761,22 +696,6 @@ class RazerMambaWirelessReceiver(RazerMambaWirelessWired):
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Mamba_Wireless_Receiver-if0(1|2)-event-kbd')
     USB_PID = 0x0072
     METHODS = RazerMambaWirelessWired.METHODS + ['set_charge_effect', 'set_charge_colour']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Mamba Wireless')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
 
 
 class RazerNaga2014(__RazerDevice):
@@ -904,22 +823,6 @@ class RazerViperUltimateWireless(RazerViperUltimateWired):
 
     USB_PID = 0x007B
     METHODS = RazerViperUltimateWired.METHODS + ['set_charge_effect', 'set_charge_colour']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Viper Ultimate Wireless')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
 
 
 class RazerViper(__RazerDevice):
@@ -1081,22 +984,6 @@ class RazerNagaProWireless(RazerNagaProWired):
     USB_PID = 0x0090
     METHODS = RazerNagaProWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Naga Pro (Wireless)')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerDeathAdder1800(__RazerDevice):
     """
@@ -1219,22 +1106,6 @@ class RazerBasiliskUltimateReceiver(RazerBasiliskUltimateWired):
     METHODS = RazerBasiliskUltimateWired.METHODS + \
         ['set_charge_effect', 'set_charge_colour']
 
-    def __init__(self, *args, **kwargs):
-        super(RazerBasiliskUltimateReceiver, self).__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Basilisk Ultimate')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerBasiliskUltimateReceiver, self)._close()
-
-        self._battery_manager.close()
-
 
 class RazerBasiliskV2(__RazerDevice):
     """
@@ -1350,22 +1221,6 @@ class RazerDeathAdderV2ProWireless(RazerDeathAdderV2ProWired):
     USB_PID = 0x007D
     METHODS = RazerDeathAdderV2ProWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer DeathAdder V2 Pro Wireless')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerAtherisReceiver(__RazerDevice):
     """
@@ -1382,22 +1237,6 @@ class RazerAtherisReceiver(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1234/1234_atheris.png"
 
     DPI_MAX = 7200
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Atheris (Receiver)')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
 
 
 class RazerBasiliskXHyperSpeed(__RazerDevice):
@@ -1418,22 +1257,6 @@ class RazerBasiliskXHyperSpeed(__RazerDevice):
 
     DPI_MAX = 16000
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Basilisk X HyperSpeed')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerOrochiV2Receiver(__RazerDevice):
     """
@@ -1452,22 +1275,6 @@ class RazerOrochiV2Receiver(__RazerDevice):
     DEVICE_IMAGE = "https://dl.razerzone.com/src/OrochiV2-1-en-v1.png"
 
     DPI_MAX = 18000
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Orochi V2')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
 
 
 class RazerOrochiV2Bluetooth(RazerOrochiV2Receiver):
@@ -1570,22 +1377,6 @@ class RazerViperMiniSEWired(__RazerDevice):
 
     POLL_RATES = [125, 500, 1000]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Viper Mini Signature Edition')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerViperMiniSEWireless(RazerViperMiniSEWired):
     """
@@ -1615,22 +1406,6 @@ class RazerNagaEpicChromaWired(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/20776/rzrnagaepicchroma_04.png"
 
     DPI_MAX = 8200
-
-    def __init__(self, *args, **kwargs):
-        super(RazerNagaEpicChromaWired, self).__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Naga Epic Chroma')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super(RazerNagaEpicChromaWired, self)._close()
-
-        self._battery_manager.close()
 
 
 class RazerNagaEpicChromaWireless(RazerNagaEpicChromaWired):
@@ -1662,22 +1437,6 @@ class RazerProClickReceiver(__RazerDevice):
 
     POLL_RATES = [125, 500, 1000]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Pro Click')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerProClickWired(RazerProClickReceiver):
     """
@@ -1702,22 +1461,6 @@ class RazerDeathAdderV2XHyperSpeed(__RazerDevice):
 
     DPI_MAX = 14000
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer DeathAdder V2 X HyperSpeed')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerViperV2ProWired(__RazerDevice):
     """
@@ -1734,22 +1477,6 @@ class RazerViperV2ProWired(__RazerDevice):
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6048-1-en-v10.png"
 
     DPI_MAX = 30000
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Viper V2 Pro')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
 
 
 class RazerViperV2ProWireless(RazerViperV2ProWired):
@@ -1788,22 +1515,6 @@ class RazerCobraPro(__RazerDevice):
 
     DPI_MAX = 30000
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Cobra Pro')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerDeathAdderV3(__RazerDevice):
     """
@@ -1838,22 +1549,6 @@ class RazerDeathAdderV3ProWired(__RazerDevice):
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6130/6130-1-en-v2.png"
 
     DPI_MAX = 30000
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer DeathAdder V3 Pro')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
 
 
 class RazerDeathAdderV3ProWireless(RazerDeathAdderV3ProWired):
@@ -1899,22 +1594,6 @@ class RazerBasiliskV3ProWired(__RazerDevice):
 
     DPI_MAX = 26000
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Basilisk V3 Pro')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerBasiliskV3ProWireless(RazerBasiliskV3ProWired):
     """
@@ -1948,22 +1627,6 @@ class RazerHyperPollingWirelessDongle(__RazerDevice):
 
     DPI_MAX = 30000
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer HyperPolling Wireless Dongle')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerProClickMiniReceiver(__RazerDevice):
     """
@@ -1983,22 +1646,6 @@ class RazerProClickMiniReceiver(__RazerDevice):
     DPI_MAX = 12000
 
     POLL_RATES = [125, 500, 1000]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Pro Click Mini')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
 
 
 class RazerDeathAdderV2Lite(__RazerDevice):
@@ -2042,22 +1689,6 @@ class RazerNagaV2HyperSpeedReceiver(__RazerDevice):
 
     DPI_MAX = 30000
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Naga V2 HyperSpeed (Receiver)')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerViperV3HyperSpeed(__RazerDevice):
     """
@@ -2074,19 +1705,3 @@ class RazerViperV3HyperSpeed(__RazerDevice):
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/13432/13432-1-en-v3.png"
 
     DPI_MAX = 30000
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Viper V3 HyperSpeed')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()

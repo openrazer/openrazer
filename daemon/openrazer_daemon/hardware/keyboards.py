@@ -8,7 +8,6 @@ import re
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
 from openrazer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
 from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
-from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 
 
 class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
@@ -400,19 +399,6 @@ class RazerBlackWidowV3ProWired(_RippleKeyboard):
                'set_charge_effect', 'set_charge_colour', 'get_battery', 'is_charging', 'set_low_battery_threshold']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/3809-1-EN-v1.png"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, "Razer BlackWidow V3 Pro (Wired)")
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        super()._close()
-
-        self._battery_manager.close()
 
 
 class RazerBlackWidowChroma(_RippleKeyboard):
@@ -947,22 +933,6 @@ class RazerBlackWidowV3MiniHyperspeed(_RippleKeyboard):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1777/500x500-blackwidowv3mini.png"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, 'Razer BlackWidow V3 Mini Hyperspeed')
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        """
-        Close the key manager
-        """
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerBlackWidowV3MiniHyperspeedWireless(RazerBlackWidowV3MiniHyperspeed):
     """
@@ -1230,19 +1200,6 @@ class RazerDeathStalkerV2ProWired(_RippleKeyboard):
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6118/6118-1-en-v1.png"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, "Razer DeathStalker V2 Pro")
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        super()._close()
-
-        self._battery_manager.close()
-
 
 class RazerDeathStalkerV2ProWireless(RazerDeathStalkerV2ProWired):
     """
@@ -1271,19 +1228,6 @@ class RazerDeathStalkerV2ProTKLWired(_RippleKeyboard):
                'get_battery', 'is_charging']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6117/6117-1-en-v1.png"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._battery_manager = _BatteryManager(self, self._device_number, "Razer DeathStalker V2 Pro TKL")
-        self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    def _close(self):
-        super()._close()
-
-        self._battery_manager.close()
 
 
 class RazerDeathStalkerV2ProTKLWireless(RazerDeathStalkerV2ProTKLWired):
