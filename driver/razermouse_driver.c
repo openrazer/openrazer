@@ -1443,6 +1443,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -1480,7 +1481,6 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
     case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
     case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
     case USB_DEVICE_ID_RAZER_VIPER:
@@ -1867,6 +1867,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         request = razer_chroma_misc_get_polling_rate();
         request.transaction_id.id = 0x1f;
         break;
@@ -1936,7 +1937,6 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
     case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
     case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
     case USB_DEVICE_ID_RAZER_VIPER:
@@ -2063,6 +2063,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         request = razer_chroma_misc_set_polling_rate(polling_rate);
         request.transaction_id.id = 0x1f;
         break;
@@ -2105,7 +2106,6 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
     case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
     case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
-    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
     case USB_DEVICE_ID_RAZER_VIPER:
