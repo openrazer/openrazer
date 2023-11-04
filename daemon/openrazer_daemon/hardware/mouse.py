@@ -1152,11 +1152,11 @@ class RazerBasiliskV3(__RazerDevice):
                'get_scroll_acceleration', 'set_scroll_acceleration',
                'get_scroll_smart_reel', 'set_scroll_smart_reel',
                # All LEDs (partial support)
-               'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
+               'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
                # Logo (partial support)
-               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none',
+               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum',
                # Scroll wheel (partial support)
-               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none',
+               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum',
                # Can set custom matrix effects
                'set_custom_effect', 'set_key_row']
 

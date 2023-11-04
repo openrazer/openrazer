@@ -737,7 +737,6 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     struct razer_report response = {0};
 
     switch (device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_BASILISK_V3:
     case USB_DEVICE_ID_RAZER_COBRA_PRO:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
@@ -3707,7 +3706,6 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V2:
-    case USB_DEVICE_ID_RAZER_BASILISK_V3:
     case USB_DEVICE_ID_RAZER_COBRA_PRO:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
@@ -4812,19 +4810,16 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
 
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
 
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
 
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
@@ -5742,19 +5737,16 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
-            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
 
             device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
 
             device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
 
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
