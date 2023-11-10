@@ -4461,6 +4461,55 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
     dev->tilt_repeat = 33;
 }
 
+int razer_has_battery(unsigned short usb_pid)
+{
+    // every id that exposes the charge_level attribute
+    switch (usb_pid) {
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_COBRA_PRO:
+    case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
+    case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED:
+    case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
+    case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
+        return 1;
+    default:
+        return 0;
+    }
+}
+
 int razer_scale_value(int value, int minIn, int maxIn, int minOut, int maxOut)
 {
     // Ensure the input value is within the valid range.
@@ -4523,8 +4572,10 @@ static int razer_battery_init(struct hid_device *hdev, struct razer_mouse_device
     if (dev->battery)
         return 0;
 
-    // TODO: unique name
-    dev->battery_desc.name = "razermouse_battery_test_meow";
+    dev->battery_desc.name = kasprintf(GFP_KERNEL, "razermouse_battery_%x", dev->usb_pid);
+    if (!dev->battery_desc.name) {
+        return -ENOMEM;
+    }
     dev->battery_desc.type = POWER_SUPPLY_TYPE_BATTERY;
     dev->battery_desc.properties = razermouse_battery_props;
     dev->battery_desc.num_properties = ARRAY_SIZE(razermouse_battery_props);
@@ -4533,7 +4584,7 @@ static int razer_battery_init(struct hid_device *hdev, struct razer_mouse_device
 
     dev->battery = devm_power_supply_register(&hdev->dev, &dev->battery_desc, &ps_config);
     if (IS_ERR(dev->battery)) {
-        printk("razermouse: Unable to register razermouse battery device\n");
+        printk(KERN_WARNING "razermouse: Unable to register razermouse battery device\n");
         return PTR_ERR(dev->battery);
     }
     power_supply_powers(dev->battery, &hdev->dev);
@@ -4563,7 +4614,8 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 
     // Init data
     razer_mouse_init(dev, intf, hdev);
-    razer_battery_init(hdev, dev);
+    if (razer_has_battery(dev->usb_pid))
+        razer_battery_init(hdev, dev);
 
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
@@ -5492,6 +5544,12 @@ exit_free:
     return retval;
 }
 
+static void razer_battery_free(struct razer_mouse_device *dev)
+{
+    kfree(dev->battery_desc.name);
+    dev->battery_desc.name = NULL;
+}
+
 /**
  * Unbind function
  */
@@ -5502,6 +5560,8 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     dev = hid_get_drvdata(hdev);
+
+    razer_battery_free(dev);
 
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
         device_remove_file(&hdev->dev, &dev_attr_version);
