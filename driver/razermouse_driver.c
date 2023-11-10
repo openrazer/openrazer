@@ -4461,7 +4461,8 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
     dev->tilt_repeat = 33;
 }
 
-int razer_scale_value(int value, int minIn, int maxIn, int minOut, int maxOut) {
+int razer_scale_value(int value, int minIn, int maxIn, int minOut, int maxOut)
+{
     // Ensure the input value is within the valid range.
     if (value < minIn) value = minIn;
     if (value > maxIn) value = maxIn;
@@ -4470,7 +4471,7 @@ int razer_scale_value(int value, int minIn, int maxIn, int minOut, int maxOut) {
 }
 
 static int razer_battery_get_property(struct power_supply *ps,
-    enum power_supply_property property, union power_supply_propval *val)
+                                      enum power_supply_property property, union power_supply_propval *val)
 {
     struct razer_mouse_device *dev = power_supply_get_drvdata(ps);
 
@@ -4493,7 +4494,7 @@ static int razer_battery_get_property(struct power_supply *ps,
         break;
     case POWER_SUPPLY_PROP_STATUS:
         val->intval = razer_read_charge_status(dev)
-            ? POWER_SUPPLY_STATUS_CHARGING : POWER_SUPPLY_STATUS_DISCHARGING;
+                      ? POWER_SUPPLY_STATUS_CHARGING : POWER_SUPPLY_STATUS_DISCHARGING;
         break;
     default:
         ret = -EINVAL;
