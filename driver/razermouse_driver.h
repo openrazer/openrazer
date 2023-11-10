@@ -149,6 +149,10 @@ struct razer_mouse_device {
         unsigned char profile;
         unsigned char leds;
     } da3_5g;
+
+    /* battery information */
+	struct power_supply *battery;
+	struct power_supply_desc battery_desc;
 };
 
 // Mamba Key Location
