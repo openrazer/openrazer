@@ -254,7 +254,8 @@ static ssize_t razer_attr_read_version(struct device *dev, struct device_attribu
     return sprintf(buf, "%s\n", DRIVER_VERSION);
 }
 
-static const char *razer_get_device_type(struct razer_mouse_device *dev) {
+static const char *razer_get_device_type(struct razer_mouse_device *dev)
+{
     switch (dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
         return "Razer DeathAdder 3.5G\n";
@@ -1085,7 +1086,7 @@ static unsigned char razer_read_charge_status(struct razer_mouse_device *device)
 static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char status = razer_read_charge_level(device);
+    unsigned char status = razer_read_charge_status(device);
 
     return sprintf(buf, "%d\n", status);
 }
@@ -4465,25 +4466,22 @@ int razer_scale_value(int value, int minIn, int maxIn, int minOut, int maxOut) {
     if (value < minIn) value = minIn;
     if (value > maxIn) value = maxIn;
 
-    // Calculate the scaled value using integer math.
-    int scaledValue = ((value - minIn) * (maxOut - minOut)) / (maxIn - minIn) + minOut;
-
-    return scaledValue;
+    return ((value - minIn) * (maxOut - minOut)) / (maxIn - minIn) + minOut;
 }
 
 static int razer_battery_get_property(struct power_supply *ps,
-	enum power_supply_property property, union power_supply_propval *val)
+    enum power_supply_property property, union power_supply_propval *val)
 {
     struct razer_mouse_device *dev = power_supply_get_drvdata(ps);
 
     int ret = 0;
     switch (property) {
-	case POWER_SUPPLY_PROP_PRESENT:
-		val->intval = 1;
-		break;
-	case POWER_SUPPLY_PROP_SCOPE:
-		val->intval = POWER_SUPPLY_SCOPE_DEVICE;
-		break;
+    case POWER_SUPPLY_PROP_PRESENT:
+        val->intval = 1;
+        break;
+    case POWER_SUPPLY_PROP_SCOPE:
+        val->intval = POWER_SUPPLY_SCOPE_DEVICE;
+        break;
     case POWER_SUPPLY_PROP_CAPACITY:
         val->intval = razer_scale_value(razer_read_charge_level(dev), 0, 255, 0, 100);
         break;
@@ -4494,34 +4492,35 @@ static int razer_battery_get_property(struct power_supply *ps,
         val->intval = 1;
         break;
     case POWER_SUPPLY_PROP_STATUS:
-        val->intval = razer_read_charge_status(dev);
+        val->intval = razer_read_charge_status(dev)
+            ? POWER_SUPPLY_STATUS_CHARGING : POWER_SUPPLY_STATUS_DISCHARGING;
         break;
-	default:
-		ret = -EINVAL;
-		break;
-	}
+    default:
+        ret = -EINVAL;
+        break;
+    }
 
     return ret;
 }
 
 static enum power_supply_property razermouse_battery_props[] = {
     POWER_SUPPLY_PROP_CAPACITY,
-	POWER_SUPPLY_PROP_MODEL_NAME,
-	POWER_SUPPLY_PROP_ONLINE,
-	POWER_SUPPLY_PROP_PRESENT,
-	POWER_SUPPLY_PROP_SCOPE,
-	POWER_SUPPLY_PROP_STATUS,
+    POWER_SUPPLY_PROP_MODEL_NAME,
+    POWER_SUPPLY_PROP_ONLINE,
+    POWER_SUPPLY_PROP_PRESENT,
+    POWER_SUPPLY_PROP_SCOPE,
+    POWER_SUPPLY_PROP_STATUS,
 };
 
 static int razer_battery_init(struct hid_device *hdev, struct razer_mouse_device *dev)
 {
     struct power_supply_config ps_config = {
-		.drv_data = dev
-	};
+        .drv_data = dev
+    };
 
     /* already registered */
-	if (dev->battery)
-		return 0;
+    if (dev->battery)
+        return 0;
 
     // TODO: unique name
     dev->battery_desc.name = "razermouse_battery_test_meow";
@@ -4759,6 +4758,11 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_smart_reel);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_hwheel);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat_delay);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
 
