@@ -4588,7 +4588,6 @@ static int razer_battery_init(struct hid_device *hdev, struct razer_mouse_device
         return PTR_ERR(dev->battery);
     }
     power_supply_powers(dev->battery, &hdev->dev);
-    printk("razermouse: power supply registered\n");
     return 0;
 }
 
