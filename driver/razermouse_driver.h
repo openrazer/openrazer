@@ -134,7 +134,7 @@ struct razer_mouse_device {
     unsigned short usb_vid;
     unsigned short usb_pid;
 
-    char serial[23]; // Now storing a random serial to be used with old devices that don't support it
+    char serial[23]; // Now storing a random serial to be used with old devices that don't support it and for the power_supply device
 
     struct {
         unsigned char led;

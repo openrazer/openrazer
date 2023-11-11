@@ -4538,6 +4538,10 @@ static int razer_battery_get_property(struct power_supply *ps,
     case POWER_SUPPLY_PROP_MODEL_NAME:
         val->strval = razer_get_device_type(dev);
         break;
+    case POWER_SUPPLY_PROP_SERIAL_NUMBER:
+        // this is the random serial number because we don't want upower to think the wired and wireless devices are the same
+        val->strval = dev->serial;
+        break;
     case POWER_SUPPLY_PROP_ONLINE:
         val->intval = 1;
         break;
@@ -4556,6 +4560,7 @@ static int razer_battery_get_property(struct power_supply *ps,
 static enum power_supply_property razermouse_battery_props[] = {
     POWER_SUPPLY_PROP_CAPACITY,
     POWER_SUPPLY_PROP_MODEL_NAME,
+    POWER_SUPPLY_PROP_SERIAL_NUMBER,
     POWER_SUPPLY_PROP_ONLINE,
     POWER_SUPPLY_PROP_PRESENT,
     POWER_SUPPLY_PROP_SCOPE,
