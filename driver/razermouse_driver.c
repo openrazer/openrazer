@@ -4588,7 +4588,6 @@ static int razer_battery_init(struct hid_device *hdev, struct razer_mouse_device
     dev->battery_desc.properties = razermouse_battery_props;
     dev->battery_desc.num_properties = ARRAY_SIZE(razermouse_battery_props);
     dev->battery_desc.get_property = razer_battery_get_property;
-    dev->battery_desc.use_for_apm = 0;
 
     dev->battery = devm_power_supply_register(&hdev->dev, &dev->battery_desc, &ps_config);
     if (IS_ERR(dev->battery)) {
