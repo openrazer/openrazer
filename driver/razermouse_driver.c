@@ -4575,10 +4575,6 @@ static int razer_battery_init(struct hid_device *hdev, struct razer_mouse_device
         .drv_data = dev
     };
 
-    /* already registered */
-    if (dev->battery)
-        return 0;
-
     dev->battery_id = ida_alloc(&razer_battery_device_id_allocator, GFP_KERNEL);
     dev->battery_desc.name = kasprintf(GFP_KERNEL, "razermouse_battery_%i", dev->battery_id);
     if (!dev->battery_desc.name) {
