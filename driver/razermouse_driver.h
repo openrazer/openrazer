@@ -151,6 +151,7 @@ struct razer_mouse_device {
     } da3_5g;
 
     /* battery information */
+    int battery_id;
     struct power_supply *battery;
     struct power_supply_desc battery_desc;
 };

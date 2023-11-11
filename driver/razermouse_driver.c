@@ -4562,6 +4562,8 @@ static enum power_supply_property razermouse_battery_props[] = {
     POWER_SUPPLY_PROP_STATUS,
 };
 
+static DEFINE_IDA(razer_battery_device_id_allocator);
+
 static int razer_battery_init(struct hid_device *hdev, struct razer_mouse_device *dev)
 {
     struct power_supply_config ps_config = {
@@ -4572,7 +4574,8 @@ static int razer_battery_init(struct hid_device *hdev, struct razer_mouse_device
     if (dev->battery)
         return 0;
 
-    dev->battery_desc.name = kasprintf(GFP_KERNEL, "razermouse_battery_%x", dev->usb_pid);
+    dev->battery_id = ida_alloc(&razer_battery_device_id_allocator, GFP_KERNEL);
+    dev->battery_desc.name = kasprintf(GFP_KERNEL, "razermouse_battery_%i", dev->battery_id);
     if (!dev->battery_desc.name) {
         return -ENOMEM;
     }
@@ -4613,8 +4616,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 
     // Init data
     razer_mouse_init(dev, intf, hdev);
-    if (razer_has_battery(dev->usb_pid))
-        razer_battery_init(hdev, dev);
+    dev->battery_id = -1;
 
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
@@ -4628,6 +4630,12 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 
     if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE
        && (expected_subclass == 0xFF || dev->usb_interface_subclass == expected_subclass)) {
+        if(razer_has_battery(dev->usb_pid)) {
+            retval = razer_battery_init(hdev, dev);
+            if (retval)
+                goto exit_free;
+        }
+
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);
@@ -5545,6 +5553,10 @@ exit_free:
 
 static void razer_battery_free(struct razer_mouse_device *dev)
 {
+    if (dev->battery_id >= 0) {
+        ida_free(&razer_battery_device_id_allocator, dev->battery_id);
+        dev->battery_id = -1;
+    }
     kfree(dev->battery_desc.name);
     dev->battery_desc.name = NULL;
 }
