@@ -1672,6 +1672,29 @@ class RazerDeathAdderV2Lite(__RazerDevice):
     DPI_MAX = 8500
 
 
+class RazerCobra(__RazerDevice):
+    """
+    Class for the Razer Cobra
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Cobra-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00A3
+    METHODS = ['get_device_type_mouse',
+               'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               # Logo
+               'get_logo_brightness', 'set_logo_brightness',
+               'set_logo_breath_random', 'set_logo_breath_dual', 'set_logo_breath_single',
+               'set_logo_reactive', 'set_logo_spectrum', 'set_logo_static', 'set_logo_none']
+
+    DEVICE_IMAGE = "https://hybrismediaprod.blob.core.windows.net/sys-master-phoenix-images-container/h54/h60/9591466950686/cobra-500x500.png"
+
+    POLL_RATES = [125, 500, 1000]
+    DPI_MAX = 8500
+
+
 class RazerNagaV2HyperSpeedReceiver(__RazerDevice):
     """
     Class for the Razer Naga V2 HyperSpeed (Receiver)
