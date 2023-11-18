@@ -26,6 +26,6 @@ ubuntu_install: purge_pycache manpages install-resources
 
 manpages:
 	@install -m 644 -D -v resources/man/razer.conf.5 $(DESTDIR)$(PREFIX)/share/man/man5/razer.conf.5
-	@gzip $(DESTDIR)$(PREFIX)/share/man/man5/razer.conf.5
+	@gzip -n $(DESTDIR)$(PREFIX)/share/man/man5/razer.conf.5
 	@install -m 644 -D -v resources/man/openrazer-daemon.8 $(DESTDIR)$(PREFIX)/share/man/man8/openrazer-daemon.8
-	@gzip $(DESTDIR)$(PREFIX)/share/man/man8/openrazer-daemon.8
+	@gzip -n $(DESTDIR)$(PREFIX)/share/man/man8/openrazer-daemon.8
