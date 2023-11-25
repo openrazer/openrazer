@@ -3095,6 +3095,8 @@ static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
         razer_send_payload(device, &request, &response);
@@ -3285,6 +3287,8 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
         if (count != 3) {
             printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
             return -EINVAL;
@@ -3456,6 +3460,8 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
         razer_send_payload(device, &request, &response);
@@ -3643,6 +3649,8 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_OUROBOROS:
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, false);
         request.transaction_id.id = 0x3F;
         break;
