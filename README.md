@@ -92,6 +92,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade 17 Pro (Mid 2021)                 |  1532:0279  |
 | Razer Blade 15 Base (2022)                    |  1432:027A  |
 | Razer Huntsman Mini Analog                    |  1532:0282  |
+| Razer BlackWidow V4                           |  1532:0287  |
 | Razer Blade 15 Advanced (Early 2022)          |  1532:028A  |
 | Razer Blade 17 (2022)                         |  1532:028B  |
 | Razer Blade 14 (2022)                         |  1532:028C  |
