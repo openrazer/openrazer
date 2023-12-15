@@ -285,6 +285,7 @@ static void razer_get_report_params(struct usb_device *usb_dev, uint *report_ind
     case USB_DEVICE_ID_RAZER_ANANSI:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_TE:
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_JP:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
@@ -431,6 +432,7 @@ static void razer_set_device_mode(struct razer_kbd_device *device, unsigned char
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
         request.transaction_id.id = 0x1F;
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
@@ -1034,6 +1036,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Ornata V3 X\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
+        device_type = "Razer Ornata V3 Tenkeyless\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
         device_type = "Razer Huntsman Elite\n";
         break;
@@ -1213,6 +1219,7 @@ static ssize_t razer_attr_write_macro_led_effect(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
         request = razer_chroma_standard_set_led_effect(NOSTORE, MACRO_LED, enabled);
         request.transaction_id.id = 0x1F;
         break;
@@ -1561,6 +1568,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
@@ -1645,6 +1653,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_CYNOSA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
@@ -1739,6 +1748,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
@@ -1830,6 +1840,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_CYNOSA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
@@ -1994,6 +2005,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
@@ -2316,6 +2328,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
@@ -2517,6 +2530,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
@@ -2657,6 +2671,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
@@ -2746,6 +2761,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_ORNATA_V2:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
@@ -2909,6 +2925,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_ORNATA_V2:
         case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
         case USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT:
+        case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
@@ -4052,6 +4069,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
         case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
         case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
+        case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
@@ -4503,6 +4521,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
         case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
         case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
+        case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
@@ -4593,6 +4612,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORNATA_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORNATA_V3_X) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CYNOSA_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CYNOSA_CHROMA_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CYNOSA_LITE) },
