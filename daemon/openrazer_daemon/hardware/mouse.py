@@ -1624,7 +1624,7 @@ class RazerHyperPollingWirelessDongle(__RazerDevice):
                'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
                'set_hyperpolling_wireless_dongle_indicator_led_mode', 'set_hyperpolling_wireless_dongle_pair', 'set_hyperpolling_wireless_dongle_unpair']
 
-    POLL_RATES = [125, 500, 1000, 2000, 4000]
+    POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6141/6141-1-en-v1.png"  # HyperPolling Wireless Dongle
 
