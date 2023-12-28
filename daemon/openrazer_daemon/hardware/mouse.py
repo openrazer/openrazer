@@ -1487,14 +1487,14 @@ class RazerViperV2ProWireless(RazerViperV2ProWired):
     USB_PID = 0x00A6
 
 
-class RazerCobraPro(__RazerDevice):
+class RazerCobraProWired(__RazerDevice):
     """
-    Class for the Razer Cobra Pro
+    Class for the Razer Cobra Pro (Wired)
     """
     EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Cobra_Pro-if0(1|2)-event-kbd')
 
     USB_VID = 0x1532
-    USB_PID = 0x00B0
+    USB_PID = 0x00AF
 
     METHODS = ['get_device_type_mouse',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
@@ -1514,6 +1514,13 @@ class RazerCobraPro(__RazerDevice):
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/13182/13182-1-en-v2.png"
 
     DPI_MAX = 30000
+
+
+class RazerCobraProWireless(RazerCobraProWired):
+    """
+    Class for the Razer Cobra Pro (Wireless)
+    """
+    USB_PID = 0x00B0
 
 
 class RazerDeathAdderV3(__RazerDevice):
