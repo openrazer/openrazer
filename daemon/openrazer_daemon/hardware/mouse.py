@@ -1729,6 +1729,7 @@ class RazerViperV3HyperSpeed(__RazerDevice):
 
     DPI_MAX = 30000
 
+
 class RazerBasiliskV3XHyperSpeed(__RazerDevice):
     """
     Class for the Razer Basilisk V3 X HyperSpeed
