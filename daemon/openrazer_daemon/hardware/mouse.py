@@ -1592,7 +1592,7 @@ class RazerBasiliskV3ProWired(__RazerDevice):
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6220/6220-4-en-v1.png"
 
-    DPI_MAX = 26000
+    DPI_MAX = 30000
 
 
 class RazerBasiliskV3ProWireless(RazerBasiliskV3ProWired):
