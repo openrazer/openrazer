@@ -4425,7 +4425,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
             break;
 
-       case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wheel);           // Wheel
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
@@ -4442,7 +4442,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);                     // Poll Rate
             break;
 
-       case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wheel);           // Wheel
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
