@@ -3458,6 +3458,9 @@ static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_de
             case 0x24: // M5
                 cur_value = USB_HID_KEY_F17; // F17
                 break;
+            case 0x25: // BlackWidow V4 (non-Pro) M6
+                cur_value = USB_HID_KEY_F18; // F18
+                break;
             case 0x50: // Volume Down
                 cur_value = USB_HID_KEY_MEDIA_VOLUMEDOWN; // F17
                 break;
@@ -3554,6 +3557,9 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_de
                 break;
             case 0x24: // M5
                 cur_value = USB_HID_KEY_F17; // F17
+                break;
+            case 0x25: // BlackWidow V4 (non-Pro) M6
+                cur_value = USB_HID_KEY_F18; // F18
                 break;
             case 0x50: // Volume Down
                 cur_value = USB_HID_KEY_MEDIA_VOLUMEDOWN;
