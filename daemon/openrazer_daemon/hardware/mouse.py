@@ -1592,7 +1592,7 @@ class RazerBasiliskV3ProWired(__RazerDevice):
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6220/6220-4-en-v1.png"
 
-    DPI_MAX = 26000
+    DPI_MAX = 30000
 
 
 class RazerBasiliskV3ProWireless(RazerBasiliskV3ProWired):
@@ -1728,3 +1728,24 @@ class RazerViperV3HyperSpeed(__RazerDevice):
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/13432/13432-1-en-v3.png"
 
     DPI_MAX = 30000
+
+
+class RazerBasiliskV3XHyperSpeed(__RazerDevice):
+    """
+    Class for the Razer Basilisk V3 X HyperSpeed
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Basilisk_V3_X_HyperSpeed_000000000000-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00B9
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               # Battery
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
+               # Scroll wheel
+               'get_scroll_brightness', 'set_scroll_brightness',
+               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/9766/9766-1-en-v1.png"
+
+    DPI_MAX = 18000
