@@ -263,264 +263,351 @@ static const char *razer_get_device_type(struct razer_mouse_device *dev)
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
         device_type = "Razer DeathAdder 3.5G\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
         device_type = "Razer DeathAdder 3.5G Black\n";
         break;
+
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
         device_type = "Razer Mamba 2012 (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
         device_type = "Razer Mamba 2012 (Wireless)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
         device_type = "Razer Mamba (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
         device_type = "Razer Mamba (Wireless)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
         device_type = "Razer Mamba Tournament Edition\n";
         break;
+
     case USB_DEVICE_ID_RAZER_ABYSSUS:
         device_type = "Razer Abyssus 2014\n";
         break;
+
     case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
         device_type = "Razer Abyssus 1800\n";
         break;
+
     case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
         device_type = "Razer Abyssus 2000\n";
         break;
+
     case USB_DEVICE_ID_RAZER_IMPERATOR:
         device_type = "Razer Imperator 2012\n";
         break;
+
     case USB_DEVICE_ID_RAZER_OUROBOROS:
         device_type = "Razer Ouroboros\n";
         break;
+
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
         device_type = "Razer Orochi 2011\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
         device_type = "Razer DeathAdder 2013\n";
         break;
+
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
         device_type = "Razer Orochi 2013\n";
         break;
+
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
         device_type = "Razer Orochi (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
         device_type = "Razer DeathAdder Chroma\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
         device_type = "Razer Naga Hex (Red)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
         device_type = "Razer Naga Hex\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_2012:
         device_type = "Razer Naga 2012\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_2014:
         device_type = "Razer Naga 2014\n";
         break;
+
     case USB_DEVICE_ID_RAZER_TAIPAN:
         device_type = "Razer Taipan\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
         device_type = "Razer Naga Hex V2\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
         device_type = "Razer Naga Chroma\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_X:
         device_type = "Razer Naga X\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
         device_type = "Razer DeathAdder Elite\n";
         break;
+
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
         device_type = "Razer Abyssus V2\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
         device_type = "Razer Diamondback Chroma\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
         device_type = "Razer DeathAdder 3500\n";
         break;
+
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
         device_type = "Razer Lancehead (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
         device_type = "Razer Lancehead (Wireless)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
         device_type = "Razer Lancehead Tournament Edition\n";
         break;
+
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         device_type = "Razer Mamba Elite\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
         device_type = "Razer DeathAdder Essential\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
         device_type = "Razer DeathAdder Essential (2021)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
         device_type = "Razer Naga Trinity\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
         device_type = "Razer DeathAdder 1800\n";
         break;
+
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
         device_type = "Razer Lancehead Wireless (Receiver)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
         device_type = "Razer Lancehead Wireless (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
         device_type = "Razer Mamba Wireless (Receiver)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
         device_type = "Razer Mamba Wireless (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
         device_type = "Razer Abyssus Elite (D.Va Edition)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
         device_type = "Razer Abyssus Essential\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
         device_type = "Razer DeathAdder Essential (White Edition)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_VIPER:
         device_type = "Razer Viper\n";
         break;
+
     case USB_DEVICE_ID_RAZER_VIPER_MINI:
         device_type = "Razer Viper Mini\n";
         break;
+
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED:
         device_type = "Razer Viper Mini Signature Edition (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
         device_type = "Razer Viper Mini Signature Edition (Wireless)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
         device_type = "Razer Viper Ultimate (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
         device_type = "Razer Viper Ultimate (Wireless)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRED:
         device_type = "Razer Viper V2 Pro (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS:
         device_type = "Razer Viper V2 Pro (Wireless)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_BASILISK:
         device_type = "Razer Basilisk\n";
         break;
+
     case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
         device_type = "Razer Basilisk Essential\n";
         break;
+
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
         device_type = "Razer Basilisk Ultimate (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
         device_type = "Razer Basilisk Ultimate (Receiver)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_BASILISK_V2:
         device_type = "Razer Basilisk V2\n";
         break;
+
     case USB_DEVICE_ID_RAZER_BASILISK_V3:
         device_type = "Razer Basilisk V3\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
         device_type = "Razer DeathAdder V2\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
         device_type = "Razer DeathAdder V2 Pro (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
         device_type = "Razer DeathAdder V2 Pro (Wireless)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3:
         device_type = "Razer DeathAdder V3\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED:
         device_type = "Razer DeathAdder V3 Pro (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS:
         device_type = "Razer DeathAdder V3 Pro (Wireless)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
         device_type = "Razer HyperPolling Wireless Dongle\n";
         break;
+
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
         device_type = "Razer Basilisk V3 Pro (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
         device_type = "Razer Basilisk V3 Pro (Wireless)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
         device_type = "Razer DeathAdder V2 Mini\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
         device_type = "Razer DeathAdder 2000\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
         device_type = "Razer DeathAdder V2 X HyperSpeed\n";
         break;
+
     case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
         device_type = "Razer Atheris (Receiver)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
         device_type = "Razer Basilisk X HyperSpeed\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
         device_type = "Razer Naga Left-Handed Edition 2020\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
         device_type = "Razer Naga Pro (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         device_type = "Razer Naga Pro (Wireless)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_VIPER_8K:
         device_type = "Razer Viper 8KHz\n";
         break;
+
     case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
         device_type = "Razer Orochi V2 (Receiver)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
         device_type = "Razer Orochi V2 (Bluetooth)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
         device_type = "Razer Pro Click (Receiver)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
         device_type = "Razer Pro Click (Wired)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
         device_type = "Razer Naga Epic Chroma\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
         device_type = "Razer Naga Epic Chroma Dock\n";
         break;
+
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
         device_type = "Razer Pro Click Mini (Receiver)\n";
         break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
         device_type = "Razer DeathAdder V2 Lite\n";
         break;
+
     case USB_DEVICE_ID_RAZER_COBRA_PRO:
         device_type = "Razer Cobra Pro\n";
         break;
+
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
         device_type = "Razer Viper V3 HyperSpeed\n";
         break;
+
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
         device_type = "Razer Naga V2 HyperSpeed (Receiver)\n";
         break;
+
     default:
         device_type = "Unknown Device\n";
     }
