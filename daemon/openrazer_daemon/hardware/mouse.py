@@ -1152,11 +1152,11 @@ class RazerBasiliskV3(__RazerDevice):
                'get_scroll_acceleration', 'set_scroll_acceleration',
                'get_scroll_smart_reel', 'set_scroll_smart_reel',
                # All LEDs (partial support)
-               'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
+               'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
                # Logo (partial support)
-               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none',
+               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum',
                # Scroll wheel (partial support)
-               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none',
+               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum',
                # Can set custom matrix effects
                'set_custom_effect', 'set_key_row']
 
@@ -1592,7 +1592,7 @@ class RazerBasiliskV3ProWired(__RazerDevice):
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6220/6220-4-en-v1.png"
 
-    DPI_MAX = 26000
+    DPI_MAX = 30000
 
 
 class RazerBasiliskV3ProWireless(RazerBasiliskV3ProWired):
@@ -1672,6 +1672,29 @@ class RazerDeathAdderV2Lite(__RazerDevice):
     DPI_MAX = 8500
 
 
+class RazerCobra(__RazerDevice):
+    """
+    Class for the Razer Cobra
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Cobra-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00A3
+    METHODS = ['get_device_type_mouse',
+               'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               # Logo
+               'get_logo_brightness', 'set_logo_brightness',
+               'set_logo_breath_random', 'set_logo_breath_dual', 'set_logo_breath_single',
+               'set_logo_reactive', 'set_logo_spectrum', 'set_logo_static', 'set_logo_none']
+
+    DEVICE_IMAGE = "https://hybrismediaprod.blob.core.windows.net/sys-master-phoenix-images-container/h54/h60/9591466950686/cobra-500x500.png"
+
+    POLL_RATES = [125, 500, 1000]
+    DPI_MAX = 8500
+
+
 class RazerNagaV2HyperSpeedReceiver(__RazerDevice):
     """
     Class for the Razer Naga V2 HyperSpeed (Receiver)
@@ -1705,3 +1728,24 @@ class RazerViperV3HyperSpeed(__RazerDevice):
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/13432/13432-1-en-v3.png"
 
     DPI_MAX = 30000
+
+
+class RazerBasiliskV3XHyperSpeed(__RazerDevice):
+    """
+    Class for the Razer Basilisk V3 X HyperSpeed
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Basilisk_V3_X_HyperSpeed_000000000000-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00B9
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               # Battery
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
+               # Scroll wheel
+               'get_scroll_brightness', 'set_scroll_brightness',
+               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/9766/9766-1-en-v1.png"
+
+    DPI_MAX = 18000
