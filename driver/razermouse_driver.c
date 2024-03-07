@@ -1224,8 +1224,6 @@ static unsigned char razer_read_charge_status(struct razer_mouse_device *device)
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
-        return 0;
-
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
         return 0;
 
