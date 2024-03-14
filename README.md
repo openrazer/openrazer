@@ -106,6 +106,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade 18 (2023)                         |  1532:02A0  |
 | Razer Ornata V3 X                             |  1532:02A2  |
 | Razer BlackWidow V3 Tenkeyless                |  1532:0A24  |
+| Razer Blade 16 (2024)                         |  1532:02B7  |
 
 ### Mice
 | Device                                        | USB VID:PID |
