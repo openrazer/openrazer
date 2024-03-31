@@ -64,6 +64,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade 15 Mercury (Mid 2019)             |  1532:0245  |
 | Razer Blade 15 Base (Mid 2019)                |  1532:0246  |
 | Razer Blade Stealth (Late 2019)               |  1532:024A  |
+| Razer Blade Advanced (Late 2019)              |  1532:024B  |
 | Razer Blade Pro (Late 2019)                   |  1532:024C  |
 | Razer Blade 15 Studio Edition (2019)          |  1532:024D  |
 | Razer BlackWidow V3                           |  1532:024E  |
