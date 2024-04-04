@@ -4312,7 +4312,7 @@ static const struct button_mapping button_mappings[] = {
 /**
  * Convert an evdev mouse button code to the corresponding HID usage
  */
-u32 mouse_button_to_usage(__u16 code)
+static u32 mouse_button_to_usage(__u16 code)
 {
     return HID_UP_BUTTON + (code - BTN_MOUSE) + 1;
 }
@@ -4321,7 +4321,7 @@ u32 mouse_button_to_usage(__u16 code)
  * Send the MSC_SCAN event for the usage code associated with an evdev
  * mouse button code
  */
-void input_button_msc_scan(struct input_dev *input, __u16 button)
+static void input_button_msc_scan(struct input_dev *input, __u16 button)
 {
     input_event(input, EV_MSC, MSC_SCAN, mouse_button_to_usage(button));
 }
@@ -4330,7 +4330,7 @@ void input_button_msc_scan(struct input_dev *input, __u16 button)
  * Look up and send the evdev key associated with the Razer "report 4"
  * code
  */
-void input_rep4_code(struct input_dev *input, u8 code, __s32 value)
+static void input_rep4_code(struct input_dev *input, u8 code, __s32 value)
 {
     if (code < ARRAY_SIZE(rep4_key_codes) && rep4_key_codes[code]) {
         unsigned int button = rep4_key_codes[code];
@@ -4393,7 +4393,7 @@ static int dev_is_on_bus(struct device *dev, void *data)
 /**
  * Find an interface on a usb_device with the specified protocol
  */
-struct usb_interface *find_intf_with_proto(struct usb_device *usbdev, u8 proto)
+static struct usb_interface *find_intf_with_proto(struct usb_device *usbdev, u8 proto)
 {
     int i;
 
