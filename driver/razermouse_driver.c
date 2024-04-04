@@ -2460,7 +2460,7 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
 /**
  * Read device file "charge_low_threshold"
  */
-static ssize_t razer_attr_read_low_battery_threshold(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -4196,7 +4196,7 @@ static DEVICE_ATTR(charge_level,              0440, razer_attr_read_charge_level
 static DEVICE_ATTR(charge_status,             0440, razer_attr_read_charge_status,         NULL);
 static DEVICE_ATTR(charge_effect,             0220, NULL,                                  razer_attr_write_charge_effect);
 static DEVICE_ATTR(charge_colour,             0220, NULL,                                  razer_attr_write_charge_colour);
-static DEVICE_ATTR(charge_low_threshold,      0660, razer_attr_read_low_battery_threshold, razer_attr_write_charge_low_threshold);
+static DEVICE_ATTR(charge_low_threshold,      0660, razer_attr_read_charge_low_threshold,  razer_attr_write_charge_low_threshold);
 
 static DEVICE_ATTR(matrix_brightness,         0660, razer_attr_read_matrix_brightness,     razer_attr_write_matrix_brightness);
 static DEVICE_ATTR(matrix_custom_frame,       0220, NULL,                                  razer_attr_write_matrix_custom_frame);
