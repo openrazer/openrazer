@@ -3602,7 +3602,7 @@ static ssize_t razer_attr_write_matrix_effect_blinking_common(struct device *dev
     struct razer_report response = {0};
 
     if (count != 3) {
-        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
+        printk(KERN_WARNING "razermouse: Blinking mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -3624,7 +3624,7 @@ static ssize_t razer_attr_write_matrix_effect_blinking_common(struct device *dev
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_static not supported for this model\n");
+        printk(KERN_WARNING "razermouse: matrix_effect_blinking not supported for this model\n");
         return -EINVAL;
     }
 
