@@ -98,6 +98,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade 17 (2022)                         |  1532:028B  |
 | Razer Blade 14 (2022)                         |  1532:028C  |
 | Razer BlackWidow V4 Pro                       |  1532:028D  |
+| Razer Ornata V3                               |  1532:028F  |
 | Razer DeathStalker V2 Pro (Wireless)          |  1532:0290  |
 | Razer DeathStalker V2 Pro (Wired)             |  1532:0292  |
 | Razer BlackWidow V4 X                         |  1532:0293  |

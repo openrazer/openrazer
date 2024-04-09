@@ -802,6 +802,13 @@ class RazerOrnataV3(_RippleKeyboard):
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6075-1-en-v1.png"
 
 
+class RazerOrnataV3_Alternate(RazerOrnataV3):
+    """
+    Class for the Razer Ornata V3 (Alternate)
+    """
+    USB_PID = 0x028F
+
+
 class RazerOrnataV3X(_MacroKeyboard):
     """
     Class for the Razer Ornata V3 X
