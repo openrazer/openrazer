@@ -248,6 +248,7 @@ static bool is_blade_laptop(struct razer_kbd_device *device)
     case USB_DEVICE_ID_RAZER_BLADE_17_2022:
     case USB_DEVICE_ID_RAZER_BLADE_14_2022:
     case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
@@ -1143,6 +1144,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Blade 15 Advanced (Early 2022)\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+        device_type = "Razer Blade 14 (2023)\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
         device_type = "Razer Blade 15 (2023)\n";
         break;
@@ -1973,6 +1978,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLADE_17_2022:
     case USB_DEVICE_ID_RAZER_BLADE_14_2022:
     case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
@@ -4096,6 +4102,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         case USB_DEVICE_ID_RAZER_BLADE_17_2022:
         case USB_DEVICE_ID_RAZER_BLADE_14_2022:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+        case USB_DEVICE_ID_RAZER_BLADE_14_2023:
         case USB_DEVICE_ID_RAZER_BLADE_15_2023:
         case USB_DEVICE_ID_RAZER_BLADE_16_2023:
         case USB_DEVICE_ID_RAZER_BLADE_18_2023:
@@ -4562,6 +4569,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_BLADE_17_2022:
         case USB_DEVICE_ID_RAZER_BLADE_14_2022:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+        case USB_DEVICE_ID_RAZER_BLADE_14_2023:
         case USB_DEVICE_ID_RAZER_BLADE_15_2023:
         case USB_DEVICE_ID_RAZER_BLADE_16_2023:
         case USB_DEVICE_ID_RAZER_BLADE_18_2023:
@@ -4733,6 +4741,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_17_2022) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_14_2022) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_14_2023) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_15_2023) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED) },
