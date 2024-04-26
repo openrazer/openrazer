@@ -32,7 +32,7 @@ class BatteryNotifier(threading.Thread):
         self.frequency = 0
         self.percent = 0
 
-        if self._notify2:
+        if self._notify2 and not notify2.is_initted():
             try:
                 notify2.init('OpenRazer')
             except Exception as err:
