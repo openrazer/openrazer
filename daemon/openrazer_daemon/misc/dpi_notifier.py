@@ -39,8 +39,8 @@ class DpiNotifier(threading.Thread):
 
         self._shutdown = False
         self._device_name = device_name
-        
-        self._get_dpi = getattr(parent, "getDPI", lambda : [0, 0])
+
+        self._get_dpi = getattr(parent, "getDPI", lambda: [0, 0])
 
         if self._notify2:
             self._notification = notify2.Notification(summary=device_name)
@@ -84,7 +84,7 @@ class DpiNotifier(threading.Thread):
         dpi_y_has_changed = dpi_level_y != self.last_dpi_level_y
 
         if dpi_x_has_changed:
-            self.last_dpi_level_x = dpi_level_x 
+            self.last_dpi_level_x = dpi_level_x
 
         if dpi_y_has_changed:
             self.last_dpi_level_y = dpi_level_y

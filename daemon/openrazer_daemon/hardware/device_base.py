@@ -1079,7 +1079,6 @@ class RazerDevice(DBusService):
         self._dpi_notifier_manager.frequency = self.config.getint('Startup', 'mouse_dpi_notifier_freq', fallback=500)
         self._dpi_notifier_manager.active = self.config.getboolean('Startup', 'mouse_dpi_notifier', fallback=False)
 
-
     def get_vid_pid(self):
         """
         Get the usb VID PID
