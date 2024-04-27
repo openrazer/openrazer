@@ -1565,6 +1565,7 @@ class RazerDeathAdderV3ProWireless(RazerDeathAdderV3ProWired):
 
     USB_PID = 0x00B7
 
+
 class RazerDeathAdderV3Pro2024Wired(__RazerDevice):
     """
     Class for the Razer DeathAdder V3 Pro 2024 (Wired)
@@ -1580,6 +1581,7 @@ class RazerDeathAdderV3Pro2024Wired(__RazerDevice):
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6130/6130-1-en-v2.png"
 
     DPI_MAX = 30000
+
 
 class RazerDeathAdderV3Pro2024Wireless(RazerDeathAdderV3Pro2024Wired):
     """
