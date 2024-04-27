@@ -1572,6 +1572,20 @@ class RazerDeathAdderV3ProWireless(RazerDeathAdderV3ProWired):
     USB_PID = 0x00B7
 
 
+class RazerDeathAdderV3ProWired_Alternate(RazerDeathAdderV3ProWired):
+    """
+    Class for the Razer DeathAdder V3 Pro (Wired)
+    """
+    USB_PID = 0x00C2
+
+
+class RazerDeathAdderV3ProWireless_Alternate(RazerDeathAdderV3ProWireless):
+    """
+    Class for the Razer DeathAdder V3 Pro (Wireless)
+    """
+    USB_PID = 0x00C3
+
+
 class RazerBasiliskV3ProWired(__RazerDevice):
     """
     Class for the Razer Basilisk V3 Pro (Wired)
