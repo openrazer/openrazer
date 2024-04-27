@@ -1565,6 +1565,29 @@ class RazerDeathAdderV3ProWireless(RazerDeathAdderV3ProWired):
 
     USB_PID = 0x00B7
 
+class RazerDeathAdderV3Pro2024Wired(__RazerDevice):
+    """
+    Class for the Razer DeathAdder V3 Pro 2024 (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_DeathAdder_V3_Pro_2024_000000000000-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00C2
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/6130/6130-1-en-v2.png"
+
+    DPI_MAX = 30000
+
+class RazerDeathAdderV3Pro2024Wireless(RazerDeathAdderV3Pro2024Wired):
+    """
+    Class for the Razer DeathAdder V3 Pro 2024 (Wireless)
+    """
+
+    USB_PID = 0x00C3
+
 
 class RazerBasiliskV3ProWired(__RazerDevice):
     """
