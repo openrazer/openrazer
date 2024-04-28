@@ -56,7 +56,8 @@ class RazerDevice(object):
 
             'battery': self._has_feature('razer.device.power', 'getBattery'),
             'idle_time': self._has_feature('razer.device.power', ('getIdleTime', 'setIdleTime')),
-            # Deprecated, use idle_time
+            'low_battery_threshold': self._has_feature('razer.device.power', ('getLowBatteryThreshold', 'setLowBatteryThreshold')),
+            # Deprecated, use idle_time & low_battery_threshold
             'get_idle_time': self._has_feature('razer.device.power', 'getIdleTime'),
             'set_idle_time': self._has_feature('razer.device.power', 'setIdleTime'),
             'get_low_battery_threshold': self._has_feature('razer.device.power', 'getLowBatteryThreshold'),
