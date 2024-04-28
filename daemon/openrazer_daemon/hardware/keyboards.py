@@ -396,7 +396,7 @@ class RazerBlackWidowV3ProWired(_RippleKeyboard):
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour',
                # Battery
-               'set_charge_effect', 'set_charge_colour', 'get_battery', 'is_charging', 'set_low_battery_threshold']
+               'set_charge_effect', 'set_charge_colour', 'get_battery', 'is_charging', 'get_low_battery_threshold', 'set_low_battery_threshold']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/3809-1-EN-v1.png"
 
