@@ -43,7 +43,7 @@ class RazerLanceheadWirelessWired(__RazerDevice):
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                'get_left_brightness', 'set_left_brightness', 'get_right_brightness', 'set_right_brightness',
                # Battery
-               'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
                'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
@@ -82,7 +82,7 @@ class RazerLanceheadWired(__RazerDevice):
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                'get_left_brightness', 'set_left_brightness', 'get_right_brightness', 'set_right_brightness',
                # Battery
-               'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
                'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
@@ -209,7 +209,9 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
     METHODS = ['get_device_type_mouse', 'get_battery', 'is_charging', 'set_backlight_wave',
                'set_backlight_static', 'set_backlight_spectrum', 'set_backlight_reactive', 'set_backlight_none', 'set_backlight_breath_random',
                'set_backlight_breath_single', 'set_backlight_breath_dual', 'set_custom_effect', 'set_key_row',
-               'set_charge_effect', 'set_charge_colour', 'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
+               'set_charge_effect', 'set_charge_colour',
+               'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
+               'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/609/609_mamba_500x500.png"
 
@@ -227,7 +229,8 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
     METHODS = ['get_device_type_mouse', 'set_backlight_wave',
                'set_backlight_static', 'set_backlight_spectrum', 'set_backlight_reactive', 'set_backlight_none', 'set_backlight_breath_random',
                'set_backlight_breath_single', 'set_backlight_breath_dual', 'set_custom_effect', 'set_key_row', 'max_dpi',
-               'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'set_idle_time', 'set_low_battery_threshold', 'get_battery', 'is_charging']
+               'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               'get_idle_time', 'set_idle_time', 'set_low_battery_threshold', 'get_battery', 'is_charging']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/609/609_mamba_500x500.png"
 
@@ -285,7 +288,7 @@ class RazerOuroboros(__RazerDevice):
     USB_PID = 0x0032
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
                'get_poll_rate', 'set_poll_rate', 'set_scroll_none', 'set_scroll_on', 'get_scroll_brightness', 'set_scroll_brightness',
-               'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold']
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/26/26_ouroboros.png"
 
@@ -315,7 +318,8 @@ class RazerOrochiWired(__RazerDevice):
     METHODS = ['get_device_type_mouse',
                'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_none', 'set_scroll_on',
                'set_backlight_static', 'set_backlight_spectrum', 'set_backlight_reactive', 'set_backlight_none', 'set_backlight_breath_random',
-               'set_backlight_breath_single', 'set_backlight_breath_dual', 'set_idle_time', 'set_low_battery_threshold',
+               'set_backlight_breath_single', 'set_backlight_breath_dual',
+               'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
                'get_poll_rate', 'set_poll_rate']
 
@@ -641,7 +645,8 @@ class RazerMamba2012Wireless(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x0025
     METHODS = ['get_device_type_mouse', 'get_battery', 'is_charging',
-               'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
+               'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_none', 'set_scroll_static', 'set_scroll_spectrum']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/192/192_mamba_2012.png"
@@ -656,7 +661,8 @@ class RazerMamba2012Wired(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x0024
     METHODS = ['get_device_type_mouse',
-               'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+               'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
+               'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_none', 'set_scroll_static', 'set_scroll_spectrum',
                'get_battery', 'is_charging']
 
@@ -676,7 +682,7 @@ class RazerMambaWirelessWired(__RazerDevice):
     MATRIX_DIMS = [1, 16]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Battery
-               'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
                'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
                # Scroll wheel
@@ -1057,7 +1063,7 @@ class RazerBasiliskUltimateWired(__RazerDevice):
     MATRIX_DIMS = [1, 14]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                # Battery
-               'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
                'get_logo_brightness', 'set_logo_brightness',
                # Spectrum
@@ -1200,7 +1206,7 @@ class RazerDeathAdderV2ProWired(__RazerDevice):
     MATRIX_DIMS = [1, 1]
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate', 'get_logo_brightness', 'set_logo_brightness',
                # Battery
-               'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold',
                # Logo
                'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive',
                'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
