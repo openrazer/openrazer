@@ -87,7 +87,8 @@ def test_sysfs_consistency(d):
     # check_sysfs("battery", "charge_effect") # FIXME this is not correct, as per PR comments
     # All devices have a 'set' but not a 'get'
     check_sysfs("set_low_battery_threshold", "charge_low_threshold")
-    check_sysfs("set_idle_time", "device_idle_time")
+    check_sysfs("set_idle_time", "device_idle_time")  # deprecated
+    check_sysfs("idle_time", "device_idle_time")
 
     check_sysfs("battery", "charge_level")
     check_sysfs("battery", "charge_status")
