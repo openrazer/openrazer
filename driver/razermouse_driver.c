@@ -5600,9 +5600,11 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
 
         case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
+        case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_SMOOTH_WIRELESS:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_hyperpolling_wireless_dongle_indicator_led_mode);
             fallthrough;
         case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED:
+        case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_SMOOTH_WIRED:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
@@ -5625,19 +5627,6 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_hyperpolling_wireless_dongle_unpair);
             break;
  
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_SMOOTH_WIRELESS:
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_hyperpolling_wireless_dongle_indicator_led_mode);
-            fallthrough;
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_SMOOTH_WIRED:
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
-            break;
-
         case USB_DEVICE_ID_RAZER_VIPER_8K:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
@@ -6574,9 +6563,11 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
+        case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_SMOOTH_WIRELESS:
             device_remove_file(&hdev->dev, &dev_attr_hyperpolling_wireless_dongle_indicator_led_mode);
             fallthrough;
         case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED:
+        case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_SMOOTH_WIRED:
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
@@ -6597,19 +6588,6 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_hyperpolling_wireless_dongle_indicator_led_mode);
             device_remove_file(&hdev->dev, &dev_attr_hyperpolling_wireless_dongle_pair);
             device_remove_file(&hdev->dev, &dev_attr_hyperpolling_wireless_dongle_unpair);
-            break;
-
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_SMOOTH_WIRELESS:
-            device_remove_file(&hdev->dev, &dev_attr_hyperpolling_wireless_dongle_indicator_led_mode);
-            fallthrough;
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_SMOOTH_WIRED:
-            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
-            device_remove_file(&hdev->dev, &dev_attr_dpi);
-            device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
-            device_remove_file(&hdev->dev, &dev_attr_charge_level);
-            device_remove_file(&hdev->dev, &dev_attr_charge_status);
-            device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
-            device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
             break;
 
         case USB_DEVICE_ID_RAZER_VIPER_8K:
