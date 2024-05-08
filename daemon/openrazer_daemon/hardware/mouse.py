@@ -1566,29 +1566,36 @@ class RazerDeathAdderV3ProWireless(RazerDeathAdderV3ProWired):
     USB_PID = 0x00B7
 
 
-class RazerDeathAdderV3Pro2024Wired(__RazerDevice):
+class RazerDeathAdderV3ProSmoothWired(__RazerDevice):
     """
-    Class for the Razer DeathAdder V3 Pro 2024 (Wired)
+    Class for the Razer DeathAdder V3 Pro (Wired)
     """
-    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_DeathAdder_V3_Pro_2024_000000000000-if0(1|2)-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_DeathAdder_V3_Pro_Smooth_000000000000-if0(1|2)-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x00C2
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
-               'get_poll_rate', 'set_poll_rate',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
                'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
+
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6130/6130-1-en-v2.png"
 
     DPI_MAX = 30000
 
+    POLL_RATES = [125, 500, 1000]
 
-class RazerDeathAdderV3Pro2024Wireless(RazerDeathAdderV3Pro2024Wired):
+
+class RazerDeathAdderV3ProSmoothWireless(RazerDeathAdderV3ProSmoothWired):
     """
-    Class for the Razer DeathAdder V3 Pro 2024 (Wireless)
+    Class for the Razer DeathAdder V3 Pro (Wireless)
     """
 
     USB_PID = 0x00C3
+
+    METHODS = RazerDeathAdderV3ProSmoothWired.METHODS + ['set_hyperpolling_wireless_dongle_indicator_led_mode']
+
+    POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
 
 class RazerBasiliskV3ProWired(__RazerDevice):
