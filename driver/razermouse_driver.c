@@ -527,11 +527,11 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_8K_WIRED:
-        device_type = "Razer DeathAdder V3 Pro (Wired)\n";
+        device_type = "Razer DeathAdder V3 Pro 8K (Wired)\n";
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_8K_WIRELESS:
-        device_type = "Razer DeathAdder V3 Pro (Wireless)\n";
+        device_type = "Razer DeathAdder V3 Pro 8K (Wireless)\n";
         break;
 
     case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
