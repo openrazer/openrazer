@@ -1578,7 +1578,6 @@ class RazerDeathAdderV3Pro8KWired(__RazerDevice):
                'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
                'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'set_low_battery_threshold']
 
-
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6130/6130-1-en-v2.png"
 
     DPI_MAX = 30000
