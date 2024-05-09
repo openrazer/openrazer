@@ -1566,11 +1566,11 @@ class RazerDeathAdderV3ProWireless(RazerDeathAdderV3ProWired):
     USB_PID = 0x00B7
 
 
-class RazerDeathAdderV3Pro8KWired(__RazerDevice):
+class RazerDeathAdderV3ProWired_Alternate(__RazerDevice):
     """
-    Class for the Razer DeathAdder V3 Pro 8K (Wired)
+    Class for the Razer DeathAdder V3 Pro (Wired Alternate)
     """
-    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_DeathAdder_V3_Pro_8K_000000000000-if0(1|2)-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_DeathAdder_V3_Pro_Alternate_000000000000-if0(1|2)-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x00C2
@@ -1585,14 +1585,14 @@ class RazerDeathAdderV3Pro8KWired(__RazerDevice):
     POLL_RATES = [125, 500, 1000]
 
 
-class RazerDeathAdderV3Pro8KWireless(RazerDeathAdderV3Pro8KWired):
+class RazerDeathAdderV3ProWireless_Alternate(RazerDeathAdderV3ProWired_Alternate):
     """
-    Class for the Razer DeathAdder V3 Pro 8K (Wireless)
+    Class for the Razer DeathAdder V3 Pro (Wireless Alternate)
     """
 
     USB_PID = 0x00C3
 
-    METHODS = RazerDeathAdderV3Pro8KWired.METHODS + ['set_hyperpolling_wireless_dongle_indicator_led_mode']
+    METHODS = RazerDeathAdderV3ProWired_Alternate.METHODS + ['set_hyperpolling_wireless_dongle_indicator_led_mode']
 
     POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
