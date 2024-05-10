@@ -72,26 +72,25 @@ class BatteryNotifier(threading.Thread):
         now = datetime.datetime.now()
 
         if (now - self._last_notify_time).seconds > self.frequency:
-            # Update last notified
-            self._last_notify_time = now
-
             battery_level = self._get_battery_func()
-            battery_percent = int(round(battery_level, 0))
+            battery_percent = round(battery_level)
 
-            # Sometimes on wifi don't get batt
+            # On wifi, we sometimes don't get the battery level.
             if battery_level == -1.0:
-                time.sleep(0.2)
-                battery_level = self._get_battery_func()
+                return
+
+            # See https://github.com/openrazer/openrazer/issues/2122.
+            if battery_level == 0.0:
+                return
+
+            # Update the last notified time so that we don't alert too often.
+            self._last_notify_time = now
 
             title = self._device_name
             message = "Battery is {0}%".format(battery_percent)
             icon = "battery-full"
 
-            if battery_level == 0.0:
-                # Do nothing
-                pass
-
-            elif battery_level <= 10.0:
+            if battery_level <= 10.0:
                 message = "Battery is low ({0}%). Please charge your device".format(battery_percent)
                 icon = "battery-empty"
 
