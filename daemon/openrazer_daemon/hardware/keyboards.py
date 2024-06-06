@@ -819,7 +819,7 @@ class RazerOrnataV3Tenkeyless(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
-               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro','set_ripple_effect',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro', 'set_ripple_effect',
                'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/13038/13038-1-en-v1.png"
