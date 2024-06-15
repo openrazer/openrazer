@@ -66,6 +66,11 @@ This flag specifies what battery percentage the device should reach before sendi
 This flag specifies whether effects saved in persistence.\&conf should be applied when the daemon starts.\&
 .PP
 .RE
+\fBpersistence_dual_boot_quirk\fR \fIbool\fR
+.RS 4
+This flag specifies whether the persisted effect is applied twice to address a quirk with newer devices that were last changed by Razer Synapse on Windows.\& Only applicable with restore_persistence = True.\&
+.PP
+.RE
 .SH SEE ALSO
 .PP
 \fBopenrazer-daemon\fR(8)

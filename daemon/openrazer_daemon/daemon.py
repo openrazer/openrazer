@@ -283,6 +283,7 @@ class RazerDaemon(DBusService):
             'sync_effects_enabled': True,
             'devices_off_on_screensaver': True,
             'restore_persistence': True,
+            'persistence_dual_boot_quirk': False,
         }
 
         if config_file is not None and os.path.exists(config_file):
