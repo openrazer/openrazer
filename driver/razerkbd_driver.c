@@ -3088,7 +3088,6 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_X:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
         request = razer_chroma_misc_get_polling_rate2();
         request.transaction_id.id = 0x1f;
@@ -3145,7 +3144,6 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_X:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
         request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x00);
         request.transaction_id.id = 0x1f;
