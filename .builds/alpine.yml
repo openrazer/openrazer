@@ -32,6 +32,8 @@ tasks:
       ./scripts/ci/test-duplicate-fake-driver-serials.sh
       # Check for auto-generated files
       ./scripts/ci/test-auto-generate.sh
+      # Check for hex casing issues
+      ./scripts/ci/test-hex-casing.sh
 
   - compile-driver: |
       cd openrazer
