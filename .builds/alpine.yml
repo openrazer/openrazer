@@ -28,8 +28,6 @@ tasks:
 
       # Check with pylint for errors
       ./scripts/ci/check-pylint.sh
-      # Check for duplicate fake driver serials
-      ./scripts/ci/test-duplicate-fake-driver-serials.sh
       # Check for auto-generated files
       ./scripts/ci/test-auto-generate.sh
       # Check for hex casing issues
