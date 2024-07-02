@@ -1,5 +1,5 @@
 Source: openrazer
-Maintainer: Terry Cain <terry@terrys-home.co.uk>
+Maintainer: Luca Weiss <debian@lucaweiss.eu>
 Section: misc
 Priority: optional
 Build-Depends: debhelper (>= 11),
