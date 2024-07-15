@@ -4770,6 +4770,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct razer_mouse_device *dev = NULL;
     unsigned char expected_subclass = 0xFF;
+    bool has_battery = false;
 
     dev = kzalloc(sizeof(struct razer_mouse_device), GFP_KERNEL);
 
@@ -4784,7 +4785,6 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     // Init data
     razer_mouse_init(dev, intf, hdev);
     dev->battery_id = -1;
-    bool has_battery = false;
 
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
