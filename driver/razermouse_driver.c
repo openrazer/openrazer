@@ -4735,15 +4735,6 @@ int razer_has_battery(unsigned short usb_pid)
     }
 }
 
-int razer_scale_value(int value, int minIn, int maxIn, int minOut, int maxOut)
-{
-    // Ensure the input value is within the valid range.
-    if (value < minIn) value = minIn;
-    if (value > maxIn) value = maxIn;
-
-    return ((value - minIn) * (maxOut - minOut)) / (maxIn - minIn) + minOut;
-}
-
 static int razer_battery_get_property(struct power_supply *ps,
                                       enum power_supply_property property, union power_supply_propval *val)
 {
@@ -4758,7 +4749,7 @@ static int razer_battery_get_property(struct power_supply *ps,
         val->intval = POWER_SUPPLY_SCOPE_DEVICE;
         break;
     case POWER_SUPPLY_PROP_CAPACITY:
-        val->intval = razer_scale_value(razer_read_charge_level(dev), 0, 255, 0, 100);
+        val->intval = (razer_read_charge_level(dev) * 100) / 255;
         break;
     case POWER_SUPPLY_PROP_MODEL_NAME:
         val->strval = razer_get_device_type(dev);
