@@ -4686,55 +4686,6 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
     dev->tilt_repeat = 33;
 }
 
-int razer_has_battery(unsigned short usb_pid)
-{
-    // every id that exposes the charge_level attribute
-    switch (usb_pid) {
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
-    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
-    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
-    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_COBRA_PRO:
-    case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
-    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
-    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
-    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
-    case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
-    case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
-    case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
-    case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
-    case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
-    case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED:
-    case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
-    case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
-        return 1;
-    default:
-        return 0;
-    }
-}
-
 static int razer_battery_get_property(struct power_supply *ps,
                                       enum power_supply_property property, union power_supply_propval *val)
 {
@@ -4833,6 +4784,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     // Init data
     razer_mouse_init(dev, intf, hdev);
     dev->battery_id = -1;
+    bool has_battery = false;
 
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
@@ -4846,12 +4798,6 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 
     if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE
        && (expected_subclass == 0xFF || dev->usb_interface_subclass == expected_subclass)) {
-        if(razer_has_battery(dev->usb_pid)) {
-            retval = razer_battery_init(hdev, dev);
-            if (retval)
-                goto exit_free;
-        }
-
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);
@@ -4879,6 +4825,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             fallthrough;
         case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
         case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
@@ -4927,6 +4874,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
@@ -5053,6 +5001,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
 
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
@@ -5142,6 +5091,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 
         case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
         case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
@@ -5159,6 +5109,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_colour);
             fallthrough;
         case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
@@ -5220,6 +5171,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
@@ -5312,6 +5264,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_spectrum);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             break;
@@ -5461,6 +5414,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
 
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
@@ -5572,6 +5526,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_colour);
             fallthrough;
         case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
@@ -5601,6 +5556,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             fallthrough;
         case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
         case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
@@ -5644,6 +5600,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
 
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
@@ -5666,6 +5623,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
@@ -5679,6 +5637,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
@@ -5689,6 +5648,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
@@ -5747,6 +5707,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
@@ -5766,6 +5727,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
 
+            has_battery = true;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
@@ -5773,7 +5735,11 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
 
         }
-
+        if(has_battery) {
+            retval = razer_battery_init(hdev, dev);
+            if (retval)
+                goto exit_free;
+        }
     }
 
     retval = hid_parse(hdev);
