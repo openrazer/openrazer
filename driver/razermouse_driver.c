@@ -4693,13 +4693,11 @@ static int razer_battery_get_property(struct power_supply *ps,
 
     int ret = 0;
     switch (property) {
-    case POWER_SUPPLY_PROP_PRESENT:
-        val->intval = 1;
-        break;
     case POWER_SUPPLY_PROP_SCOPE:
         val->intval = POWER_SUPPLY_SCOPE_DEVICE;
         break;
     case POWER_SUPPLY_PROP_CAPACITY:
+        // convert 0-255 to percent (0-100)
         val->intval = (razer_read_charge_level(dev) * 100) / 255;
         break;
     case POWER_SUPPLY_PROP_MODEL_NAME:
@@ -4710,9 +4708,13 @@ static int razer_battery_get_property(struct power_supply *ps,
         val->strval = dev->serial;
         break;
     case POWER_SUPPLY_PROP_ONLINE:
-        val->intval = 1;
+        // returns 1 if the mouse is plugged in. charging is a good approximation
+        val->intval = razer_read_charge_status(dev);
         break;
     case POWER_SUPPLY_PROP_STATUS:
+        if (razer_read_charge_level(dev) == 255) {
+            return POWER_SUPPLY_STATUS_FULL;
+        }
         val->intval = razer_read_charge_status(dev)
                       ? POWER_SUPPLY_STATUS_CHARGING : POWER_SUPPLY_STATUS_DISCHARGING;
         break;
@@ -4729,7 +4731,6 @@ static enum power_supply_property razermouse_battery_props[] = {
     POWER_SUPPLY_PROP_MODEL_NAME,
     POWER_SUPPLY_PROP_SERIAL_NUMBER,
     POWER_SUPPLY_PROP_ONLINE,
-    POWER_SUPPLY_PROP_PRESENT,
     POWER_SUPPLY_PROP_SCOPE,
     POWER_SUPPLY_PROP_STATUS,
 };
