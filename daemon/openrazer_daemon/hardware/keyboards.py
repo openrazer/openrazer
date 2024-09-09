@@ -999,7 +999,7 @@ class RazerBlackWidowV3MiniHyperspeed(_RippleKeyboard):
     """
     Class for the Razer BlackWidow V3 Mini Hyperspeed
     """
-    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_V3_Mini(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_V3_Mini_000000000000(-if01)?-event-mouse')
 
     USB_VID = 0x1532
     USB_PID = 0x0258
