@@ -66,13 +66,6 @@ class DpiNotifier(threading.Thread):
         self._shutdown = value
 
     def notify(self):
-        now = math.floor(time.time() * 1000)
-
-        if (now - self._last_notify_time) < self.frequency:
-            return
-
-        self._last_notify_time = now
-
         if not self._notify2:
             return
 
@@ -110,7 +103,11 @@ class DpiNotifier(threading.Thread):
         """
 
         while not self._shutdown:
-            if self.event.is_set() and self.frequency > 0:
+            now = math.floor(time.time() * 1000)
+            have_waited_long_enough = (now - self._last_notify_time) < self.frequency
+
+            if self.event.is_set() and self.frequency > 0 and have_waited_long_enough:
+                self._last_notify_time = now
                 self.notify()
 
             time.sleep(0.1)
