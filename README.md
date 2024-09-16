@@ -76,6 +76,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer BlackWidow V3 Mini Hyperspeed (Wired)   |  1532:0258  |
 | Razer Blade Stealth (Late 2020)               |  1532:0259  |
 | Razer BlackWidow V3 Pro (Wired)               |  1532:025A  |
+| Razer BlackWidow V3 Pro (Wireless)            |  1532:025C  |
 | Razer Ornata V2                               |  1532:025D  |
 | Razer Cynosa V2                               |  1532:025E  |
 | Razer Huntsman V2 Analog                      |  1532:0266  |
@@ -99,6 +100,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer BlackWidow V4 Pro                       |  1532:028D  |
 | Razer DeathStalker V2 Pro (Wireless)          |  1532:0290  |
 | Razer DeathStalker V2 Pro (Wired)             |  1532:0292  |
+| Razer BlackWidow V4 X                         |  1532:0293  |
 | Razer Ornata V3 X                             |  1532:0294  |
 | Razer DeathStalker V2 Pro TKL (Wireless)      |  1532:0296  |
 | Razer DeathStalker V2 Pro TKL (Wired)         |  1532:0298  |
@@ -109,6 +111,9 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade 18 (2023)                         |  1532:02A0  |
 | Razer Ornata V3                               |  1532:02A1  |
 | Razer Ornata V3 X                             |  1532:02A2  |
+| Razer Ornata V3 Tenkeyless                    |  1532:02A3  |
+| Razer BlackWidow V4 75%                       |  1532:02A5  |
+| Razer Blade 14 (2024)                         |  1532:02B6  |
 | Razer BlackWidow V3 Tenkeyless                |  1532:0A24  |
 
 ### Mice
@@ -116,6 +121,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | --------------------------------------------- | ----------- |
 | Razer Orochi 2011                             |  1532:0013  |
 | Razer DeathAdder 3.5G                         |  1532:0016  |
+| Razer Naga Epic                               |  1532:001F  |
 | Razer Abyssus 1800                            |  1532:0020  |
 | Razer Mamba 2012 (Wired)                      |  1532:0024  |
 | Razer Mamba 2012 (Wireless)                   |  1532:0025  |
@@ -204,6 +210,10 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer DeathAdder V3 Pro (Wireless)            |  1532:00B7  |
 | Razer Viper V3 HyperSpeed                     |  1532:00B8  |
 | Razer Basilisk V3 X HyperSpeed                |  1532:00B9  |
+| Razer Viper V3 Pro (Wired)                    |  1532:00C0  |
+| Razer Viper V3 Pro (Wireless)                 |  1532:00C1  |
+| Razer DeathAdder V3 Pro (Wired)               |  1532:00C2  |
+| Razer DeathAdder V3 Pro (Wireless)            |  1532:00C3  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |
@@ -213,6 +223,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Goliathus                               |  1532:0C01  |
 | Razer Goliathus Extended                      |  1532:0C02  |
 | Razer Firefly v2                              |  1532:0C04  |
+| Razer Goliathus Chroma 3XL                    |  1532:0C06  |
 
 ### Headsets
 | Device                                        | USB VID:PID |
