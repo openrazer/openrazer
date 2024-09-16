@@ -4,15 +4,7 @@ import logging
 import threading
 import time
 import math
-
-try:
-    import notify2
-except ImportError:
-    notify2 = None
-
-
-# TODO https://askubuntu.com/questions/110969/notify-send-ignores-timeout
-NOTIFY_TIMEOUT = 4000
+import subprocess
 
 
 class DpiNotifier(threading.Thread):
@@ -23,30 +15,19 @@ class DpiNotifier(threading.Thread):
     def __init__(self, parent, device_id, device_name):
         super().__init__()
         self._logger = logging.getLogger('razer.device{0}.dpinotifier'.format(device_id))
-        self._notify2 = notify2 is not None
 
         self.event = threading.Event()
         self.frequency = 500
         self.last_dpi_level_x = 0
         self.last_dpi_level_y = 0
 
-        if self._notify2 and not notify2.is_initted():
-            try:
-                notify2.init('OpenRazer')
-            except Exception as err:
-                self._logger.warning("Failed to init notification daemon, err: {0}".format(err))
-                self._notify2 = False
-
         self._shutdown = False
         self._device_name = device_name
 
         self._get_dpi = getattr(parent, "getDPI", lambda: [0, 0])
 
-        if self._notify2:
-            self._notification = notify2.Notification(summary=device_name)
-            self._notification.set_timeout(NOTIFY_TIMEOUT)
-
         self._last_notify_time = math.floor(time.time() * 1000)
+        self._last_notification_id = "0"
 
     @property
     def shutdown(self):
@@ -65,10 +46,16 @@ class DpiNotifier(threading.Thread):
         """
         self._shutdown = value
 
-    def notify(self):
-        if not self._notify2:
-            return
+    def show_notification(self, summary: str, message: str, icon: str) -> None:
+        try:
+            result = subprocess.run(["notify-send", "-a", "OpenRazer", "-i", icon, "-r", self._last_notification_id,
+                            "-p", "-t", "4000", summary, message], check=True, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, text=True)
+            self._last_notification_id = result.stdout.rstrip();
+        except subprocess.CalledProcessError as e:
+            self._logger.warning(f"Failed to show notification: {e.output.strip()}")
 
+    def notify(self):
         dpi = self._get_dpi()
         dpi_level_x = dpi[0] if dpi[0] is not None else 0
         dpi_level_y = dpi[1] if dpi[1] is not None else 0
@@ -94,8 +81,7 @@ class DpiNotifier(threading.Thread):
         icon = "input-mouse"
 
         self._logger.debug("{0} {1}".format(title, message))
-        self._notification.update(summary=title, message=message, icon=icon)
-        self._notification.show()
+        self.show_notification(summary=title, message=message, icon=icon)
 
     def run(self):
         """
