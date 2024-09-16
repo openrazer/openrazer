@@ -14,7 +14,8 @@ class DpiNotifier(threading.Thread):
 
     def __init__(self, parent, device_id, device_name):
         super().__init__()
-        self._logger = logging.getLogger('razer.device{0}.dpinotifier'.format(device_id))
+        self._logger = logging.getLogger(
+            'razer.device{0}.dpinotifier'.format(device_id))
 
         self.event = threading.Event()
         self.frequency = 500
@@ -49,11 +50,12 @@ class DpiNotifier(threading.Thread):
     def show_notification(self, summary: str, message: str, icon: str) -> None:
         try:
             result = subprocess.run(["notify-send", "-a", "OpenRazer", "-i", icon, "-r", self._last_notification_id,
-                            "-p", "-t", "4000", summary, message], check=True, stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT, text=True)
-            self._last_notification_id = result.stdout.rstrip();
+                                     "-p", "-t", "4000", summary, message], check=True, stdout=subprocess.PIPE,
+                                    stderr=subprocess.STDOUT, text=True)
+            self._last_notification_id = result.stdout.rstrip()
         except subprocess.CalledProcessError as e:
-            self._logger.warning(f"Failed to show notification: {e.output.strip()}")
+            self._logger.warning(f"Failed to show notification: {
+                                 e.output.strip()}")
 
     def notify(self):
         dpi = self._get_dpi()
@@ -90,7 +92,8 @@ class DpiNotifier(threading.Thread):
 
         while not self._shutdown:
             now = math.floor(time.time() * 1000)
-            have_waited_long_enough = (now - self._last_notify_time) < self.frequency
+            have_waited_long_enough = (
+                now - self._last_notify_time) < self.frequency
 
             if self.event.is_set() and self.frequency > 0 and have_waited_long_enough:
                 self._last_notify_time = now
@@ -110,7 +113,8 @@ class DpiNotifierManager(object):
         if getattr(parent, "getDPI", None) is None:
             return
 
-        self._logger = logging.getLogger('razer.device{0}.notifiermanager'.format(device_number))
+        self._logger = logging.getLogger(
+            'razer.device{0}.notifiermanager'.format(device_number))
 
         self._notifier = DpiNotifier(parent, device_number, device_name)
         self._notifier.start()
