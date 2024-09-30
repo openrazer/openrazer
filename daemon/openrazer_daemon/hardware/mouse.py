@@ -418,6 +418,23 @@ class RazerNagaHexV2(__RazerDevice):
         # self.key_manager.close()
 
 
+class RazerNaga(__RazerDevice):
+    """
+    Class for the Razer Naga
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Naga-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0015
+    DEDICATED_MACRO_KEYS = True
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
+               'set_logo_none', 'set_logo_on', 'set_scroll_none', 'set_scroll_on', 'set_backlight_none', 'set_backlight_on']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/40/razer-naga-molten-gallery-4.png"
+
+    DPI_MAX = 5600
+
+
 class RazerNaga2012(__RazerDevice):
     """
     Class for the Razer Naga 2012
