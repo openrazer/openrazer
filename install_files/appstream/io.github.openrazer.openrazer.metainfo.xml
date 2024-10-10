@@ -104,6 +104,7 @@
     <modalias>usb:v1532p00A6d*</modalias>
     <modalias>usb:v1532p00AAd*</modalias>
     <modalias>usb:v1532p00ABd*</modalias>
+    <modalias>usb:v1532p00CDd*</modalias>
     <modalias>usb:v1532p00AFd*</modalias>
     <modalias>usb:v1532p00B0d*</modalias>
     <modalias>usb:v1532p00B2d*</modalias>
