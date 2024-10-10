@@ -203,6 +203,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Viper V2 Pro (Wireless)                 |  1532:00A6  |
 | Razer Basilisk V3 Pro (Wired)                 |  1532:00AA  |
 | Razer Basilisk V3 Pro (Wireless)              |  1532:00AB  |
+| Razer Basilisk V3 Pro 35K (Wireless)          |  1532:00CD  |
 | Razer Cobra Pro (Wired)                       |  1532:00AF  |
 | Razer Cobra Pro (Wireless)                    |  1532:00B0  |
 | Razer DeathAdder V3                           |  1532:00B2  |

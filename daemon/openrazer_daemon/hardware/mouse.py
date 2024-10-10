@@ -1665,6 +1665,14 @@ class RazerBasiliskV3ProWireless(RazerBasiliskV3ProWired):
     USB_PID = 0x00AB
 
 
+class RazerBasiliskV3Pro35KWireless(RazerBasiliskV3ProWireless):
+    """
+    Class for the Razer Basilisk V3 Pro 35K (Wireless)
+    """
+
+    USB_PID = 0x00CD
+
+
 class RazerHyperPollingWirelessDongle(__RazerDevice):
     """
     Class for the Razer HyperPolling Wireless Dongle
