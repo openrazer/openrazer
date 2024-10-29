@@ -4,7 +4,6 @@ from collections.abc import Iterable
 import dbus as _dbus
 from openrazer.client.fx import RazerFX as _RazerFX
 from xml.etree import ElementTree as _ET
-from openrazer.client.macro import RazerMacro as _RazerMacro
 
 
 class RazerDevice(object):
@@ -13,7 +12,6 @@ class RazerDevice(object):
     """
     _matrix_dimensions: tuple[int, int] | None
     _kbd_layout: str | None
-    macro: _RazerMacro | None
 
     def __init__(self, serial: str) -> None:
         # Load up the DBus
@@ -31,7 +29,6 @@ class RazerDevice(object):
         self._type = str(self._dbus_interfaces['device'].getDeviceType())
         self._fw = str(self._dbus_interfaces['device'].getFirmware())
         self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
-        self._has_dedicated_macro: bool | None = None
         self._device_image: str | None = None
 
         # Deprecated API, but kept for backwards compatibility
@@ -57,13 +54,11 @@ class RazerDevice(object):
             'get_low_battery_threshold': self._has_feature('razer.device.power', 'getLowBatteryThreshold'),
             'set_low_battery_threshold': self._has_feature('razer.device.power', 'setLowBatteryThreshold'),
 
-            'macro_logic': self._has_feature('razer.device.macro'),
             'keyboard_layout': self._has_feature('razer.device.misc', 'getKeyboardLayout'),
             'game_mode_led': self._has_feature('razer.device.led.gamemode'),
             'keyswitch_optimization': self._has_feature('razer.device.misc.keyswitchoptimization', ('getKeyswitchOptimization', 'setKeyswitchOptimization')),
             'macro_mode_led': self._has_feature('razer.device.led.macromode', 'setMacroMode'),
             'macro_mode_led_effect': self._has_feature('razer.device.led.macromode', 'setMacroEffect'),
-            'macro_mode_modifier': self._has_feature('razer.device.macro', 'setModeModifier'),
             'reactive_trigger': self._has_feature('razer.device.misc', 'triggerReactive'),
 
             'poll_rate': self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate')),
@@ -230,12 +225,6 @@ class RazerDevice(object):
 
         # Setup FX
         self.fx = _RazerFX(serial, capabilities=self._capabilities, daemon_dbus=self._dbus, matrix_dims=self._matrix_dimensions)
-
-        # Setup Macro
-        if self.has('macro_logic'):
-            self.macro = _RazerMacro(serial, self.name, daemon_dbus=self._dbus, capabilities=self._capabilities)
-        else:
-            self.macro = None
 
         if self.has('dpi'):
             self._dbus_interfaces['dpi'] = _dbus.Interface(self._dbus, "razer.device.dpi")
@@ -421,19 +410,6 @@ class RazerDevice(object):
         :rtype: dict
         """
         return self._capabilities
-
-    @property
-    def dedicated_macro(self) -> bool:
-        """
-        Device has dedicated macro keys
-
-        :return: If the device has macro keys
-        :rtype: bool
-        """
-        if self._has_dedicated_macro is None:
-            self._has_dedicated_macro = self._dbus_interfaces['device'].hasDedicatedMacroKeys()
-
-        return self._has_dedicated_macro
 
     @property
     def device_image(self) -> str:
