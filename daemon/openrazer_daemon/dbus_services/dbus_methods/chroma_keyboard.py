@@ -100,14 +100,18 @@ def set_game_mode(self, enable):
             alt_tab = os.path.join(kb_int, 'key_alt_tab')
             alt_f4 = os.path.join(kb_int, 'key_alt_f4')
 
-            if enable:
-                open(super_file, 'wb').write(b'\x01')
-                open(alt_tab, 'wb').write(b'\x01')
-                open(alt_f4, 'wb').write(b'\x01')
-            else:
-                open(super_file, 'wb').write(b'\x00')
-                open(alt_tab, 'wb').write(b'\x00')
-                open(alt_f4, 'wb').write(b'\x00')
+            # Some keyboards such as BlackWidow V4 provide additional interfaces
+            # without key_super, key_alt_tab and key_alt_f4 files. We have to go
+            # through all interfaces and check if these files are actually available
+            if os.path.exists(super_file):
+                if enable:
+                    open(super_file, 'wb').write(b'\x01')
+                    open(alt_tab, 'wb').write(b'\x01')
+                    open(alt_f4, 'wb').write(b'\x01')
+                else:
+                    open(super_file, 'wb').write(b'\x00')
+                    open(alt_tab, 'wb').write(b'\x00')
+                    open(alt_f4, 'wb').write(b'\x00')
 
     with open(driver_path, 'w') as driver_file:
         if enable:
@@ -239,6 +243,34 @@ def set_wave_effect(self, direction):
 
     if direction not in self.WAVE_DIRS:
         direction = self.WAVE_DIRS[0]
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write(str(direction))
+
+
+@endpoint('razer.device.lighting.chroma', 'setWheel', in_sig='i')
+def set_wheel_effect(self, direction):
+    """
+    Set the wheel effect on the device
+
+    :param direction: 1 - right, 2 - left
+    :type direction: int
+    """
+    self.logger.debug("DBus call set_wheel_effect")
+
+    # Notify others
+    self.send_effect_event('setWheel', direction)
+
+    # Note: wheel direction is saved in wave_dir!
+    # TODO: Add wheel_dir field handling instead!
+    self.set_persistence("backlight", "effect", 'wheel')
+    self.set_persistence("backlight", "wave_dir", int(direction))
+
+    driver_path = self.get_driver_path('matrix_effect_wheel')
+
+    # If this needs to be configurable, add WHEEL_DIRS like WAVE_DIRS
+    if direction not in (1, 2):
+        direction = 1
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(direction))

@@ -85,9 +85,10 @@ def test_sysfs_consistency(d):
             _test_failed(d.name, str(hex(d._pid)) + " Has one of these capabilities {} but none of these sysfs files: {}".format(capabilities, sysfs_names))
 
     # check_sysfs("battery", "charge_effect") # FIXME this is not correct, as per PR comments
-    # All devices have a 'set' but not a 'get'
-    check_sysfs("set_low_battery_threshold", "charge_low_threshold")
-    check_sysfs("set_idle_time", "device_idle_time")
+    check_sysfs("set_low_battery_threshold", "charge_low_threshold")  # deprecated
+    check_sysfs("low_battery_threshold", "charge_low_threshold")
+    check_sysfs("set_idle_time", "device_idle_time")  # deprecated
+    check_sysfs("idle_time", "device_idle_time")
 
     check_sysfs("battery", "charge_level")
     check_sysfs("battery", "charge_status")
@@ -120,6 +121,7 @@ def test_sysfs_consistency(d):
     if d._pid not in [0x010d, 0x010e, 0x0113, 0x0118, 0x011a, 0x011b, 0x011c, 0x0202]:
         check_sysfs("lighting_static", "matrix_effect_static")
     check_sysfs("lighting_wave", "matrix_effect_wave")
+    check_sysfs("lighting_wheel", "matrix_effect_wheel")
     check_sysfs("lighting_pulsate", "matrix_effect_pulsate")
     check_sysfs("lighting_blinking", "matrix_effect_blinking")
 
@@ -133,7 +135,7 @@ def test_sysfs_consistency(d):
             # There are two implementations with different sysfs files
             check_any_sysfs([f"lighting_{prefix}_{effect}"], [f"{prefix}_matrix_effect_{effect}", f"{prefix}_led_effect"])
 
-        check_sysfs(f"lighting_{prefix}_breath_single", f"{prefix}_matrix_effect_breath")
+        check_any_sysfs([f"lighting_{prefix}_breath_single", f"lighting_{prefix}_breath_mono"], [f"{prefix}_matrix_effect_breath"])
 
 
 def test_ripple_capable(d):

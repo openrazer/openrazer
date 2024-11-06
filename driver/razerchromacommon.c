@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /*
- * Copyright (c) 2015 Terry Cain <terrys-home.co.uk>
+ * Copyright (c) 2015 Terri Cain <terri@dolphincorp.co.uk>
  */
 
 #include "razerchromacommon.h"
@@ -205,7 +205,7 @@ struct razer_report razer_chroma_standard_get_led_brightness(unsigned char varia
  * Standard Matrix Effects Functions
  */
 
-struct razer_report razer_chroma_standard_matrix_effect_base(unsigned char arg_size, unsigned char effect_id)
+static struct razer_report razer_chroma_standard_matrix_effect_base(unsigned char arg_size, unsigned char effect_id)
 {
     struct razer_report report = get_razer_report(0x03, 0x0A, arg_size);
     report.arguments[0] = effect_id;
@@ -478,7 +478,7 @@ struct razer_report razer_chroma_standard_matrix_set_custom_frame(unsigned char 
 /**
  * Sets up the extended matrix effect payload
  */
-struct razer_report razer_chroma_extended_matrix_effect_base(unsigned char arg_size, unsigned char variable_storage, unsigned char led_id, unsigned char effect_id)
+static struct razer_report razer_chroma_extended_matrix_effect_base(unsigned char arg_size, unsigned char variable_storage, unsigned char led_id, unsigned char effect_id)
 {
     struct razer_report report = get_razer_report(0x0F, 0x02, arg_size);
 
@@ -605,6 +605,26 @@ struct razer_report razer_chroma_extended_matrix_effect_starlight_dual(unsigned 
 struct razer_report razer_chroma_extended_matrix_effect_spectrum(unsigned char variable_storage, unsigned char led_id)
 {
     return razer_chroma_extended_matrix_effect_base(0x06, variable_storage, led_id, 0x03);
+}
+
+/**
+ * Set the device to "Wheel" effect
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    06       0f    02  01050a022800 | SET LED MATRIX Effect (VARSTR, Backlight, Wheel 0x0A, Dir 0x02, Speed 0x28, ? 0x00)
+ */
+struct razer_report razer_chroma_extended_matrix_effect_wheel(unsigned char variable_storage, unsigned char led_id, unsigned char direction)
+{
+    struct razer_report report = razer_chroma_extended_matrix_effect_base(0x06, variable_storage, led_id, 0x0a);
+
+    // BlackWidow V4 Pro uses 0x01 and 0x02 for directions
+    // Commands with direction 0x00 seem to be ignored
+    direction = clamp_u8(direction, 0x01, 0x02);
+
+    report.arguments[3] = direction;
+    report.arguments[4] = 0x28; // Speed, lower values are faster
+
+    return report;
 }
 
 /**
@@ -761,7 +781,7 @@ struct razer_report razer_chroma_extended_matrix_set_custom_frame2(unsigned char
 /**
  * Sets up the extended matrix effect payload for mouse devices
  */
-struct razer_report razer_chroma_mouse_extended_matrix_effect_base(unsigned char arg_size, unsigned char variable_storage, unsigned char led_id, unsigned char effect_id)
+static struct razer_report razer_chroma_mouse_extended_matrix_effect_base(unsigned char arg_size, unsigned char variable_storage, unsigned char led_id, unsigned char effect_id)
 {
     struct razer_report report = get_razer_report(0x03, 0x0D, arg_size);
 
@@ -1193,8 +1213,8 @@ struct razer_report razer_chroma_misc_set_dpi_xy(unsigned char variable_storage,
     struct razer_report report = get_razer_report(0x04, 0x05, 0x07);
 
     // Keep the DPI within bounds
-    dpi_x = clamp_u16(dpi_x, 100, 30000);
-    dpi_y = clamp_u16(dpi_y, 100, 30000);
+    dpi_x = clamp_u16(dpi_x, 100, 35000);
+    dpi_y = clamp_u16(dpi_y, 100, 35000);
 
     report.arguments[0] = VARSTORE;
 
@@ -1524,16 +1544,6 @@ struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_indicator
     }
 
     report.arguments[0] = mode;
-
-    return report;
-}
-
-/**
- * Get LED mode for HyperPolling Wireless Dongle
- */
-struct razer_report razer_chroma_misc_get_hyperpolling_wireless_dongle_indicator_led_mode(void)
-{
-    struct razer_report report = get_razer_report(0x07, 0x90, 0x01);
 
     return report;
 }

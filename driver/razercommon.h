@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * Copyright (c) 2015 Tim Theede <pez2001@voyagerproject.de>
- *               2015 Terry Cain <terry@terrys-home.co.uk>
+ *               2015 Terri Cain <terri@dolphincorp.co.uk>
  */
 
 #ifndef DRIVER_RAZERCOMMON_H_
@@ -9,9 +9,9 @@
 
 #include <linux/usb/input.h>
 
-#define DRIVER_VERSION "3.6.1"
+#define DRIVER_VERSION "3.9.0"
 #define DRIVER_LICENSE "GPL v2"
-#define DRIVER_AUTHOR "Terry Cain <terry@terrys-home.co.uk>"
+#define DRIVER_AUTHOR "Terri Cain <terri@dolphincorp.co.uk>"
 
 // Compatbility for fallthrough pseudo keyword for Linux versions older than v5.4
 // See also https://git.kernel.org/torvalds/c/294f69e

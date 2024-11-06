@@ -356,8 +356,8 @@ class KeyboardKeyManager(object):
 
         if key_press == 'autorepeat':  # TODO not done right yet
             # If its brightness then convert autorepeat to key presses
-            # 190 (KEY_F20) and 194 (KEY_F24) are defined in razerkbd_driver.c
-            if key_id in (190, 194):
+            # Brightness keys are defined in keyboard.py and razerkbd_driver.c
+            if key_id in (0x2ab, 0x2aa):
                 key_press = 'press'
             else:
                 # Quit out early
@@ -464,8 +464,8 @@ class KeyboardKeyManager(object):
 
                     if self._current_macro_bind_key is None:
                         # Restrict macro bind keys to M1-M5
-                        if key_name not in ('M1', 'M2', 'M3', 'M4', 'M5'):
-                            self._logger.warning("Macros are only for M1-M5 for now.")
+                        if key_name not in ('M1', 'M2', 'M3', 'M4', 'M5', 'M6'):
+                            self._logger.warning("Macros are only for M1-M6 for now.")
                             self._recording_macro = False
                             self._parent.setMacroMode(False)
                         else:

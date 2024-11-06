@@ -129,6 +129,25 @@ def set_logo_reactive(self, red, green, blue, speed):
         driver_file.write(payload)
 
 
+@endpoint('razer.device.lighting.logo', 'setLogoBreathMono')
+def set_logo_breath_mono(self):
+    """
+    Set the device to mono colour breathing effect
+    """
+    self.logger.debug("DBus call set_logo_breath_mono")
+
+    # Notify others
+    self.send_effect_event('setBreathMono')
+
+    # remember effect
+    self.set_persistence("logo", "effect", 'breathMono')
+
+    driver_path = self.get_driver_path('logo_matrix_effect_breath')
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(b'1')
+
+
 @endpoint('razer.device.lighting.logo', 'setLogoBreathRandom')
 def set_logo_breath_random(self):
     """
@@ -373,6 +392,25 @@ def set_scroll_reactive(self, red, green, blue, speed):
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(payload)
+
+
+@endpoint('razer.device.lighting.scroll', 'setScrollBreathMono')
+def set_scroll_breath_mono(self):
+    """
+    Set the device to mono colour breathing effect
+    """
+    self.logger.debug("DBus call set_scroll_breath_mono")
+
+    # Notify others
+    self.send_effect_event('setBreathMono')
+
+    # remember effect
+    self.set_persistence("scroll", "effect", 'breathMono')
+
+    driver_path = self.get_driver_path('scroll_matrix_effect_breath')
+
+    with open(driver_path, 'wb') as driver_file:
+        driver_file.write(b'1')
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollBreathRandom')

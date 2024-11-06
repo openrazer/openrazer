@@ -10,7 +10,7 @@ import subprocess
 
 KEY_MAPPING = {
     # Row 0
-    'ESC': (0, 1), 'F1': (0, 3), 'F2': (0, 4), 'F3': (0, 5), 'F4': (0, 6), 'F5': (0, 7), 'F6': (0, 8), 'F7': (0, 9), 'F8': (0, 10), 'F9': (0, 11), 'F10': (0, 12), 'F11': (0, 13), 'F12': (0, 14), 'PRTSCR': (0, 15), 'SCRLK': (0, 16), 'PAUSE': (0, 17), 'LOGO': (0, 20), 'JP1': (0, 21),
+    'M6': (0, 0), 'ESC': (0, 1), 'F1': (0, 3), 'F2': (0, 4), 'F3': (0, 5), 'F4': (0, 6), 'F5': (0, 7), 'F6': (0, 8), 'F7': (0, 9), 'F8': (0, 10), 'F9': (0, 11), 'F10': (0, 12), 'F11': (0, 13), 'F12': (0, 14), 'PRTSCR': (0, 15), 'SCRLK': (0, 16), 'PAUSE': (0, 17), 'LOGO': (0, 20), 'JP1': (0, 21),
     # Row 1
     'M1': (1, 0), 'BACKTICK': (1, 1), '1': (1, 2), '2': (1, 3), '3': (1, 4), '4': (1, 5), '5': (1, 6), '6': (1, 7), '7': (1, 8), '8': (1, 9), '9': (1, 10), '0': (1, 11), 'DASH': (1, 12), 'EQUALS': (1, 13), 'BACKSPACE': (1, 14), 'INS': (1, 15), 'HOME': (1, 16), 'PAGEUP': (1, 17), 'NUMLK': (1, 18), 'NPFORWARDSLASH': (1, 19), 'NPASTERISK': (1, 20), 'NPDASH': (1, 21),
     # Row 2
@@ -134,7 +134,9 @@ EVENT_MAPPING = {
     111: 'DELETE', 113: 'MUTE', 114: 'VOL_DOWN', 115: 'VOL_UP', 119: 'PAUSE',
     125: 'SUPER', 127: 'CTXMENU',
     163: 'MEDIA_FORWARD', 164: 'MEDIA_PLAY', 165: 'MEDIA_BACK',
-    183: 'M1', 184: 'M2', 185: 'M3', 186: 'M4', 187: 'M5', 188: 'MACROMODE', 189: 'GAMEMODE', 190: 'BRIGHTNESSDOWN', 194: 'BRIGHTNESSUP'
+    183: 'M1', 184: 'M2', 185: 'M3', 186: 'M4', 187: 'M5', 188: 'M6',
+    189: 'M7', 190: 'M8', 191: 'M9', 192: 'M10', 193: 'M11', 194: 'M12',
+    0x2ad: 'MACROMODE', 0x2ac: 'GAMEMODE', 0x2ab: 'BRIGHTNESSDOWN', 0x2aa: 'BRIGHTNESSUP'
 }
 
 TARTARUS_EVENT_MAPPING = {
@@ -256,6 +258,7 @@ XTE_MAPPING = {
     'M3': 'XF86Launch6',
     'M4': 'XF86Launch7',
     'M5': 'XF86Launch8',
+    'M6': 'XF86Launch9',
     'FN': None,
     'GAMEMODE': None,
     'MACROMODE': None,
