@@ -1044,23 +1044,6 @@ class RazerNagaV2ProWireless(RazerNagaV2ProWired):
     USB_PID = 0x00A8
     METHODS = RazerNagaV2ProWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
-    #def __init__(self, *args, **kwargs):
-        #super().__init__(*args, **kwargs)
-
-        # ToDo: Find correct Batterymanager!
-        # self._battery_manager = _BatteryManager(self, self._device_number, 'Razer Naga V2 Pro (Wireless)')
-        # self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
-        # self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
-        # self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
-
-    #def _close(self):
-    #   """
-    #    Close the key manager
-    #    """
-    #    super()._close()
-
-    #    self._battery_manager.close()
-
 
 class RazerDeathAdder1800(__RazerDevice):
     """
