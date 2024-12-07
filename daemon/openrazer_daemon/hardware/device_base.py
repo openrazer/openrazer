@@ -979,7 +979,15 @@ class RazerDevice(DBusService):
                     time.sleep(0.1)
                     self.logger.debug('getting serial: {0} count:{1}'.format(serial, count))
 
-            if serial == '' or serial == 'Default string' or serial == 'empty (NULL)' or serial == 'As printed in the D cover':
+            # Known bad serials:
+            # - just an empty string
+            # - "Default string"
+            # - "empty (NULL)"
+            # - "As printed in the D cover"
+            # - hex: 01 01 01 01 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16
+            if not re.fullmatch(r"[A-Z]+[\dA-Z]+", serial):
+                self.logger.warning("Invalid serial number found, using a random one.")
+                self.logger.warning("Original value: %s" % serial)
                 serial = 'UNKWN{0:012}'.format(random.randint(0, 4096))
 
             self._serial = serial.replace(' ', '_')
