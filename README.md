@@ -229,6 +229,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Goliathus                               |  1532:0C01  |
 | Razer Goliathus Extended                      |  1532:0C02  |
 | Razer Firefly v2                              |  1532:0C04  |
+| Razer Firefly v2 Pro                          |  1532:0C08  |
 | Razer Goliathus Chroma 3XL                    |  1532:0C06  |
 
 ### Headsets
