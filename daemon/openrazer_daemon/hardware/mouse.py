@@ -1596,7 +1596,7 @@ class RazerDeathAdderV3ProWired(__RazerDevice):
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6130/6130-1-en-v2.png"
 
-    DPI_MAX = 30000
+    DPI_MAX = 35000
 
 
 class RazerDeathAdderV3ProWireless(RazerDeathAdderV3ProWired):
