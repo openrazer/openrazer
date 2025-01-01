@@ -78,6 +78,9 @@ ubuntu_python_library_install:
 	@echo "====================================================="
 	$(MAKE) --no-print-directory -C pylib ubuntu_install
 
+python_library_clean:
+	@make --no-print-directory -C pylib clean
+
 # Legacy XDG autostart
 xdg_install:
 	mkdir -p $(DESTDIR)/etc/xdg/autostart
@@ -87,7 +90,7 @@ install-systemd:
 	$(MAKE) --no-print-directory -C daemon install-systemd
 
 # Clean target
-clean: driver_clean
+clean: driver_clean python_library_clean
 
 setup_dkms:
 	@echo -e "\n::\033[34m Installing DKMS files\033[0m"

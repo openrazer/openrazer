@@ -6,8 +6,14 @@ PREFIX?=/usr
 purge_pycache:
 	find -name '__pycache__' | xargs rm -rf
 
-install: purge_pycache
-	python3 setup.py install --prefix=$(PREFIX) --root=$(DESTDIR)
+build:
+	python3 -m build --wheel --no-isolation --outdir dist/
 
-ubuntu_install: purge_pycache
-	python3 setup.py install --prefix=$(PREFIX) --root=$(DESTDIR) --no-compile --install-layout=deb
+install: purge_pycache build
+	python3 -m installer --destdir=$(DESTDIR) --prefix=$(PREFIX) dist/*.whl
+
+ubuntu_install: purge_pycache build
+	DEB_PYTHON_INSTALL_LAYOUT=deb_system python3 -m installer --destdir=$(DESTDIR) --prefix=$(PREFIX) --no-compile-bytecode dist/*.whl
+
+clean: purge_pycache
+	rm -rf build/ dist/ *.egg-info

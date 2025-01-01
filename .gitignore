@@ -1,5 +1,12 @@
 pylib/docs/_build
 
+/daemon/build/
+/daemon/openrazer-daemon.service
+/daemon/openrazer_daemon.egg-info/
+/daemon/org.razer.service
+/pylib/build/
+/pylib/openrazer.egg-info/
+
 # pytest caches
 .pytest_cache/
 
