@@ -18,14 +18,20 @@ install-systemd: service
 	install -m 644 -D -v org.razer.service $(DESTDIR)$(PREFIX)/share/dbus-1/services/org.razer.service
 	install -m 644 -D -v openrazer-daemon.service $(DESTDIR)$(PREFIX)/lib/systemd/user/openrazer-daemon.service
 
-install: purge_pycache manpages install-resources install-systemd
-	python3 setup.py install --prefix=$(PREFIX) --root=$(DESTDIR)
+build:
+	python3 -m build --wheel --no-isolation --outdir dist/
 
-ubuntu_install: purge_pycache manpages install-resources
-	python3 setup.py install --prefix=$(PREFIX) --root=$(DESTDIR) --no-compile --install-layout=deb
+install: purge_pycache build manpages install-resources install-systemd
+	python3 -m installer --destdir=$(DESTDIR) --prefix=$(PREFIX) dist/*.whl
+
+ubuntu_install: purge_pycache build manpages install-resources
+	DEB_PYTHON_INSTALL_LAYOUT=deb_system python3 -m installer --destdir=$(DESTDIR) --prefix=$(PREFIX) --no-compile-bytecode dist/*.whl
 
 manpages:
 	install -m 644 -D -v resources/man/razer.conf.5 $(DESTDIR)$(PREFIX)/share/man/man5/razer.conf.5
 	gzip -n $(DESTDIR)$(PREFIX)/share/man/man5/razer.conf.5
 	install -m 644 -D -v resources/man/openrazer-daemon.8 $(DESTDIR)$(PREFIX)/share/man/man8/openrazer-daemon.8
 	gzip -n $(DESTDIR)$(PREFIX)/share/man/man8/openrazer-daemon.8
+
+clean: purge_pycache
+	rm -rf build/ dist/ *.egg-info org.razer.service openrazer-daemon.service

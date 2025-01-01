@@ -67,6 +67,9 @@ ubuntu_daemon_install:
 	@echo "====================================================="
 	$(MAKE) --no-print-directory -C daemon ubuntu_install
 
+daemon_clean:
+	make --no-print-directory -C daemon clean
+
 # Python Library
 python_library_install:
 	@echo -e "\n::\033[34m Installing OpenRazer python library\033[0m"
@@ -90,7 +93,7 @@ install-systemd:
 	$(MAKE) --no-print-directory -C daemon install-systemd
 
 # Clean target
-clean: driver_clean python_library_clean
+clean: driver_clean daemon_clean python_library_clean
 
 setup_dkms:
 	@echo -e "\n::\033[34m Installing DKMS files\033[0m"
