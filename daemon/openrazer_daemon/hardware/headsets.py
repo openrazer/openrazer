@@ -158,6 +158,16 @@ class RazerKrakenUltimate(__RazerDevice):
         elif effect == 'breathTriple':
             _dbus_chroma.set_breath_triple_effect(self, *args)
 
+class RazerBarracuda(__RazerDevice):
+    """
+    Class for the Razer Barracuda
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x053c
+    METHODS = ['get_device_type_headset']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/6034/6034-1-en-v2.png"
+
 
 class RazerKrakenKittyEdition(__RazerDeviceBrightnessSuspend):
     """
