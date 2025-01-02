@@ -221,7 +221,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     case USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO:
         device_type = "Razer Kraken V3 Pro\n";
-        break;   
+        break;
 
     default:
         device_type = "Unknown Device\n";
@@ -744,10 +744,10 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
     razer_kraken_init(dev, intf);
 
     switch(usb_dev->descriptor.idProduct) {
-        // The Kraken V3 Pro headset uses the keyboard protocol
-        case USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO:
-            expected_protocol = USB_INTERFACE_PROTOCOL_KEYBOARD;
-            break;
+    // The Kraken V3 Pro headset uses the keyboard protocol
+    case USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO:
+        expected_protocol = USB_INTERFACE_PROTOCOL_KEYBOARD;
+        break;
     }
 
     if(dev->usb_interface_protocol == expected_protocol) {
