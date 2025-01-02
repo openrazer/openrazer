@@ -178,6 +178,7 @@ class RazerKrakenKittyEdition(__RazerDeviceBrightnessSuspend):
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/1c503aa176bc82d999299aba0d6c7d2c/kraken-kitty-quartz.png"
 
+
 class RazerKrakenV3Pro(__RazerDevice):
     """
     Class for the Razer Kraken V3 Pro
