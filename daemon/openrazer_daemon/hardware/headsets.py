@@ -162,9 +162,11 @@ class RazerBarracuda(__RazerDevice):
     """
     Class for the Razer Barracuda
     """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Barracuda_2.4+-event-if03')
+
     USB_VID = 0x1532
     USB_PID = 0x053c
-    METHODS = ['get_device_type_headset']
+    METHODS = ['get_device_type_headset', 'get_battery', 'is_charging']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6034/6034-1-en-v2.png"
 

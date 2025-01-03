@@ -13,6 +13,7 @@
 
 #include "razerbarracuda_driver.h"
 #include "razercommon.h"
+#include "razerchromacommon.h"
 
 /*
  * Version Information
@@ -252,6 +253,162 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
 }
 
 /**
+ * Get request/response indices and timing parameters for the device
+ */
+static void razer_get_report_params(struct usb_device *usb_dev, uint *report_index, uint *response_index, ulong *wait_min, ulong *wait_max)
+{
+    switch (usb_dev->descriptor.idProduct) {
+    default:
+        *report_index = 0x01;
+        *response_index = 0x01;
+        *wait_min = 600;
+        *wait_max = 800;
+        break;
+    }
+}
+
+/**
+ * Send report to the headset
+ */
+static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request, struct razer_report *response)
+{
+    uint report_index, response_index;
+    ulong wait_min, wait_max;
+    razer_get_report_params(usb_dev, &report_index, &response_index, &wait_min, &wait_max);
+    return razer_get_usb_response(usb_dev, report_index, request, response_index, response, wait_min, wait_max);
+}
+
+/**
+ * Function to send to device, get response, and actually check the response
+ */
+static int razer_send_payload(struct razer_barracuda_device *device, struct razer_report *request, struct razer_report *response)
+{
+    int err;
+
+    request->crc = razer_calculate_crc(request);
+
+    mutex_lock(&device->lock);
+    err = razer_get_report(device->usb_dev, request, response);
+    mutex_unlock(&device->lock);
+    if (err) {
+        print_erroneous_report(response, "razerbarracuda", "Invalid Report Length");
+        return err;
+    }
+
+    /* Check the packet number, class and command are the same */
+    if (response->remaining_packets != request->remaining_packets ||
+        response->command_class != request->command_class ||
+        response->command_id.id != request->command_id.id) {
+        print_erroneous_report(response, "razerbarracuda", "Response doesn't match request");
+        return -EIO;
+    }
+
+    switch (response->status) {
+    case RAZER_CMD_BUSY:
+        // TODO: Check if this should be an error.
+        // print_erroneous_report(&response, "razerbarracuda", "Device is busy");
+        break;
+    case RAZER_CMD_FAILURE:
+        print_erroneous_report(response, "razerbarracuda", "Command failed");
+        return -EIO;
+    case RAZER_CMD_NOT_SUPPORTED:
+        print_erroneous_report(response, "razerbarracuda", "Command not supported");
+        return -EIO;
+    case RAZER_CMD_TIMEOUT:
+        print_erroneous_report(response, "razerbarracuda", "Command timed out");
+        return -EIO;
+    }
+
+    return 0;
+}
+
+/**
+ * Read device file "charge_level"
+ *
+ * Returns an integer which needs to be scaled from 0-255 -> 0-100
+ */
+static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_barracuda_device *device = dev_get_drvdata(dev);
+    struct razer_report request = razer_chroma_misc_get_battery_level();
+    struct razer_report response = {0};
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BARRACUDA:
+        request.transaction_id.id = 0x1f;
+        break;
+    default:
+        request.transaction_id.id = 0xFF;
+        break;
+    }
+
+    razer_send_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", response.arguments[1]);
+}
+
+/**
+ * Read device file "charge_status"
+ *
+ * Returns 0 when not charging, 1 when charging
+ */
+static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_barracuda_device *device = dev_get_drvdata(dev);
+    struct razer_report request = razer_chroma_misc_get_charging_status();
+    struct razer_report response = {0};
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BARRACUDA:
+        request.transaction_id.id = 0x1f;
+        break;
+    default:
+        request.transaction_id.id = 0xFF;
+        break;
+    }
+    
+    razer_send_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", response.arguments[1]);
+}
+
+/**
+ * Read device file "charge_low_threshold"
+ */
+static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_barracuda_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_low_battery_threshold();
+    request.transaction_id.id = 0xFF;
+
+    razer_send_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", response.arguments[0]);
+}
+
+/**
+ * Write device file "charge_low_threshold"
+ *
+ * Sets the low battery blink threshold to the ASCII number written to this file.
+ */
+static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_barracuda_device *device = dev_get_drvdata(dev);
+    unsigned char threshold = (unsigned char)simple_strtoul(buf, NULL, 10);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_set_low_battery_threshold(threshold);
+    request.transaction_id.id = 0xFF;
+
+    razer_send_payload(device, &request, &response);
+    return count;
+}
+
+/**
  * Set up the device driver files
 
  *
@@ -266,6 +423,11 @@ static DEVICE_ATTR(device_type,             0440, razer_attr_read_device_type,  
 static DEVICE_ATTR(device_serial,           0440, razer_attr_read_device_serial,              NULL);
 static DEVICE_ATTR(device_mode,             0660, razer_attr_read_device_mode,                razer_attr_write_device_mode);
 static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_firmware_version,           NULL);
+
+static DEVICE_ATTR(charge_level,            0440, razer_attr_read_charge_level,               NULL);
+static DEVICE_ATTR(charge_status,           0440, razer_attr_read_charge_status,              NULL);
+static DEVICE_ATTR(charge_low_threshold,    0660, razer_attr_read_charge_low_threshold,       razer_attr_write_charge_low_threshold);
+
 
 static void razer_barracuda_init(struct razer_barracuda_device *dev, struct usb_interface *intf)
 {
@@ -307,6 +469,9 @@ static int razer_barracuda_probe(struct hid_device *hdev, const struct hid_devic
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);                         // Get string of device serial
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);                      // Get string of device fw version
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);                          // Charge level
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);                         // Charge status
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);                  // Charge low threshold
     }
 
     dev_set_drvdata(&hdev->dev, dev);
@@ -347,6 +512,9 @@ static void razer_barracuda_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_device_serial);                         // Get string of device serial
         device_remove_file(&hdev->dev, &dev_attr_firmware_version);                      // Get string of device fw version
         device_remove_file(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
+        device_remove_file(&hdev->dev, &dev_attr_charge_level);                          // Charge level
+        device_remove_file(&hdev->dev, &dev_attr_charge_status);                         // Charge status
+        device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);                  // Charge low threshold
     }
 
     hid_hw_stop(hdev);
