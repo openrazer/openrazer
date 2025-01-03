@@ -366,7 +366,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
         request.transaction_id.id = 0xFF;
         break;
     }
-    
+
     razer_send_payload(device, &request, &response);
 
     return sprintf(buf, "%d\n", response.arguments[1]);
@@ -432,7 +432,6 @@ static DEVICE_ATTR(charge_low_threshold,    0660, razer_attr_read_charge_low_thr
 static void razer_barracuda_init(struct razer_barracuda_device *dev, struct usb_interface *intf)
 {
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    unsigned int rand_serial = 0;
 
     // Initialise mutex
     mutex_init(&dev->lock);

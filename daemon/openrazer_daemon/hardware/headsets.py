@@ -158,6 +158,7 @@ class RazerKrakenUltimate(__RazerDevice):
         elif effect == 'breathTriple':
             _dbus_chroma.set_breath_triple_effect(self, *args)
 
+
 class RazerBarracuda(__RazerDevice):
     """
     Class for the Razer Barracuda
