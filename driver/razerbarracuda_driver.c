@@ -462,15 +462,19 @@ static int razer_barracuda_probe(struct hid_device *hdev, const struct hid_devic
     razer_barracuda_init(dev, intf);
 
     if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE) {
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);                               // Get driver version
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);                                  // Test mode
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);                         // Get string of device serial
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);                      // Get string of device fw version
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);                          // Charge level
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);                         // Charge status
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);                  // Charge low threshold
+        switch(dev->usb_pid) {
+        case USB_DEVICE_ID_RAZER_BARRACUDA:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);                               // Get driver version
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);                                  // Test mode
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);                         // Get string of device serial
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);                      // Get string of device fw version
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);                          // Charge level
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);                         // Charge status
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);                  // Charge low threshold
+            break;
+        }
     }
 
     dev_set_drvdata(&hdev->dev, dev);
@@ -505,15 +509,19 @@ static void razer_barracuda_disconnect(struct hid_device *hdev)
     dev = hid_get_drvdata(hdev);
 
     if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE) {
-        device_remove_file(&hdev->dev, &dev_attr_version);                               // Get driver version
-        device_remove_file(&hdev->dev, &dev_attr_test);                                  // Test mode
-        device_remove_file(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
-        device_remove_file(&hdev->dev, &dev_attr_device_serial);                         // Get string of device serial
-        device_remove_file(&hdev->dev, &dev_attr_firmware_version);                      // Get string of device fw version
-        device_remove_file(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
-        device_remove_file(&hdev->dev, &dev_attr_charge_level);                          // Charge level
-        device_remove_file(&hdev->dev, &dev_attr_charge_status);                         // Charge status
-        device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);                  // Charge low threshold
+        switch(dev->usb_pid) {
+        case USB_DEVICE_ID_RAZER_BARRACUDA:
+            device_remove_file(&hdev->dev, &dev_attr_version);                               // Get driver version
+            device_remove_file(&hdev->dev, &dev_attr_test);                                  // Test mode
+            device_remove_file(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
+            device_remove_file(&hdev->dev, &dev_attr_device_serial);                         // Get string of device serial
+            device_remove_file(&hdev->dev, &dev_attr_firmware_version);                      // Get string of device fw version
+            device_remove_file(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);                          // Charge level
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);                         // Charge status
+            device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);                  // Charge low threshold
+            break;
+        }
     }
 
     hid_hw_stop(hdev);
