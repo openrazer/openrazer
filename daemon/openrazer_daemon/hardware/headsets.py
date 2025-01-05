@@ -167,7 +167,7 @@ class RazerBarracuda(__RazerDevice):
 
     USB_VID = 0x1532
     USB_PID = 0x053C
-    METHODS = ['get_device_type_headset', 'get_battery', 'is_charging']
+    METHODS = ['get_device_type_headset', 'get_battery', 'is_charging', 'get_low_battery_threshold', 'set_low_battery_threshold']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6034/6034-1-en-v2.png"
 
