@@ -9,11 +9,12 @@ if [ $? -ne 0 ]; then
         exit 1
 fi
 
-FILES=`find . -name "*.py"`
+FILES=$(find . -name "*.py")
 for FILE in $FILES; do
-        $AUTOPEP8 $OPTIONS $FILE | cmp -s $FILE -
+        DIFF=$($AUTOPEP8 $OPTIONS $FILE | diff -u $FILE -)
         if [ $? -ne 0 ]; then
                 echo "[!] $FILE does not respect the agreed coding style." >&2
+                echo "$DIFF" >&2
                 RETURN=1
         fi
 done
