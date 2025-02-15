@@ -11,6 +11,7 @@
 #include <linux/hid.h>
 #include <linux/hrtimer.h>
 #include <linux/random.h>
+#include <linux/version.h>
 
 #include "razermouse_driver.h"
 #include "razercommon.h"
@@ -4621,7 +4622,11 @@ static void tilt_hwheel_stop(struct razer_mouse_device *rdev)
 /**
  * Test if a device is a HID device
  */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 14, 0)
+static int dev_is_on_bus(struct device *dev, const void *data)
+#else
 static int dev_is_on_bus(struct device *dev, void *data)
+#endif
 {
     const struct bus_type *bus = data;
     return dev->bus == bus;
