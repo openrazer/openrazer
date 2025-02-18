@@ -15,9 +15,9 @@ from openrazer.client.devices import RazerDevice
 
 def hex_to_rgb(hex_string: str) -> tuple[int, int, int]:
     hex_string = hex_string.lstrip("#")
-    _r_hex = hex_string[1:3]
-    _g_hex = hex_string[3:5]
-    _b_hex = hex_string[5:7]
+    _r_hex = hex_string[0:2]
+    _g_hex = hex_string[2:4]
+    _b_hex = hex_string[4:6]
     return int(_r_hex, 16), int(_g_hex, 16), int(_b_hex, 16)
 
 
