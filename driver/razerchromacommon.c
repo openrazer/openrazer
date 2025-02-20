@@ -490,6 +490,20 @@ static struct razer_report razer_chroma_extended_matrix_effect_base(unsigned cha
 }
 
 /**
+ * Gets the state from extended matrix effect payload (unreliable! use at risk!)
+ */
+static struct razer_report razer_chroma_extended_matrix_get_effect_base(unsigned char arg_size, unsigned char variable_storage, unsigned char led_id, unsigned char effect_id)
+{
+    struct razer_report report = get_razer_report(0x0F, 0x82, arg_size);
+
+    report.arguments[0] = variable_storage;
+    report.arguments[1] = led_id;
+    report.arguments[2] = effect_id; // Effect ID
+
+    return report;
+}
+
+/**
  * Set the device to "None" effect
  *
  * Status Trans Packet Proto DataSize Class CMD Args
@@ -516,6 +530,17 @@ struct razer_report razer_chroma_extended_matrix_effect_static(unsigned char var
     report.arguments[6] = rgb->r;
     report.arguments[7] = rgb->g;
     report.arguments[8] = rgb->b;
+    return report;
+}
+
+/**
+ * Get the device's "Static" effect state (unreliable!)
+ */
+struct razer_report razer_chroma_extended_matrix_get_effect_static(unsigned char variable_storage, unsigned char led_id)
+{
+    struct razer_report report = razer_chroma_extended_matrix_get_effect_base(0x09, variable_storage, led_id, 0x01);
+
+    report.arguments[5] = 0x01;
     return report;
 }
 
