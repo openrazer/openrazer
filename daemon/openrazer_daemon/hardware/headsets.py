@@ -193,30 +193,3 @@ class RazerKrakenKittyV2(__RazerDevice):
                'set_custom_kraken']
 
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/hcc/h6b/9631977570334/kraken-kitty-v2-quartz-500x500.png"
-
-    def _suspend_device(self):
-        self.suspend_args.clear()
-        self.suspend_args['effect'] = self.zone["backlight"]["effect"]
-        if self.suspend_args['effect'] == "breathDual":
-            self.suspend_args['args'] = self.zone["backlight"]["colors"][0:6]
-        elif self.suspend_args['effect'] == "breathTriple":
-            self.suspend_args['args'] = self.zone["backlight"]["colors"][0:9]
-        else:
-            self.suspend_args['args'] = self.zone["backlight"]["colors"][0:3]
-
-        _dbus_chroma.set_none_effect(self)
-
-    def _resume_device(self):
-        effect = self.suspend_args.get('effect', '')
-        args = self.suspend_args.get('args', [])
-
-        if effect == 'spectrum':
-            _dbus_chroma.set_spectrum_effect(self)
-        elif effect == 'static':
-            _dbus_chroma.set_static_effect(self, *args)
-        elif effect == 'breathSingle':
-            _dbus_chroma.set_breath_single_effect(self, *args)
-        elif effect == 'breathDual':
-            _dbus_chroma.set_breath_dual_effect(self, *args)
-        elif effect == 'breathTriple':
-            _dbus_chroma.set_breath_triple_effect(self, *args)
