@@ -1332,7 +1332,7 @@ class RazerDeathStalkerV2ProTKLWired(_RippleKeyboard):
     """
     Class for the Razer DeathStalker V2 Pro TKL (Wired)
     """
-    EVENT_FILE_REGEX = re.compile(r'.*DSV2_Pro_000000000000-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*DSV2Pro_TKL-if01-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x0298
@@ -1355,6 +1355,7 @@ class RazerDeathStalkerV2ProTKLWireless(RazerDeathStalkerV2ProTKLWired):
     Class for the Razer DeathStalker V2 Pro TKL (Wireless)
     """
     USB_PID = 0x0296
+    EVENT_FILE_REGEX = re.compile(r'.*DSV2Pro_TKL_000000000000-if01-event-mouse')
 
 
 class RazerBlackWidowChromaOverwatch(_RippleKeyboard):
