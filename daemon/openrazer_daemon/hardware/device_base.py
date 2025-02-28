@@ -987,7 +987,7 @@ class RazerDevice(DBusService):
             # - "empty (NULL)"
             # - "As printed in the D cover"
             # - hex: 01 01 01 01 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16
-            if not re.fullmatch(r"[A-Z]+[\dA-Z]+", serial):
+            if not re.fullmatch(r"[\dA-Z]+", serial):
                 self.logger.warning("Invalid serial number found, using a generated one.")
                 self.logger.warning("Original value: %s" % serial)
                 vid, pid = self.get_vid_pid()
