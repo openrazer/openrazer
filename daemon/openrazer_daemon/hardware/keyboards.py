@@ -2055,6 +2055,13 @@ class RazerBlackWidowV4Pro(_RippleKeyboard):
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/9703/9703-1-en-v1.png"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Poll rate is reset after entering driver mode, apply again
+        if not self._disable_persistence:
+            self.restore_dpi_poll_rate()
+
 
 class RazerBlade142023(_RippleKeyboard):
     """

@@ -63,7 +63,7 @@ class RazerDevice(DBusService):
         self._observer_list = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
-        self._disable_persistence = False
+        self._disable_persistence = config.getboolean('Startup', "restore_persistence") is not True
         self.additional_interfaces = []
         if additional_interfaces is not None:
             self.additional_interfaces.extend(additional_interfaces)
@@ -325,7 +325,7 @@ class RazerDevice(DBusService):
         self.restore_dpi_poll_rate()
         self.restore_brightness()
 
-        if self.config.getboolean('Startup', "restore_persistence") is True:
+        if not self._disable_persistence:
             self.restore_effect()
 
             # Some devices need setting a second time after encountering Razer Synapse on Windows
