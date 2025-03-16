@@ -27,9 +27,6 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
 
         self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
 
-        self.logger.info('Putting device into driver mode. Daemon will handle special functionality')
-        self.set_device_mode(0x03, 0x00)  # Driver mode
-
     def _close(self):
         """
         Close the key manager
@@ -2055,6 +2052,7 @@ class RazerBlackWidowV4Pro(_RippleKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/9703/9703-1-en-v1.png"
+    EARLY_DEVICE_MODE = True
 
 
 class RazerBlade142023(_RippleKeyboard):

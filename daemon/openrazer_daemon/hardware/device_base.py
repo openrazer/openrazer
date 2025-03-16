@@ -39,6 +39,7 @@ class RazerDevice(DBusService):
     MATRIX_DIMS = None
     POLL_RATES = None
     DPI_MAX = None
+    EARLY_DEVICE_MODE = False
 
     WAVE_DIRS = (1, 2)
 
@@ -322,6 +323,11 @@ class RazerDevice(DBusService):
         if 'get_battery' in self.METHODS:
             self._init_battery_manager()
 
+        # Some devices should be put into driver mode first to keep their desired persistence
+        if self.EARLY_DEVICE_MODE:
+            self.logger.info('Setting device to "driver" mode. Daemon will handle special functionality')
+            self.set_device_mode(0x03, 0x00)  # Driver mode
+
         self.restore_dpi_poll_rate()
         self.restore_brightness()
 
@@ -332,6 +338,10 @@ class RazerDevice(DBusService):
             if self.config.getboolean('Startup', "persistence_dual_boot_quirk") is True:
                 self.logger.debug("Restoring effect persistence again (dual boot quirk)")
                 self.restore_effect()
+
+        if not self.EARLY_DEVICE_MODE:
+            self.logger.info('Setting device to "driver" mode. Daemon will handle special functionality')
+            self.set_device_mode(0x03, 0x00)  # Driver mode
 
     def send_effect_event(self, effect_name, *args):
         """
