@@ -1,21 +1,17 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
- * Copyright (c) 2015 Terry Cain <terrys-home.co.uk>
+ * Copyright (c) 2015 Terri Cain <terri@dolphincorp.co.uk>
  */
 
 #ifndef __HID_RAZER_KRAKEN_H
 #define __HID_RAZER_KRAKEN_H
 
-// Codename Unknown
 #define USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC 0x0501
-// Codename Rainie
-#define USB_DEVICE_ID_RAZER_KRAKEN 0x0504
-// Codename Unknown
+#define USB_DEVICE_ID_RAZER_KRAKEN 0x0504 // Codename Rainie
 #define USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC_ALT 0x0506
-// Codename Kylie
-#define USB_DEVICE_ID_RAZER_KRAKEN_V2 0x0510
-// Codename Unknown
+#define USB_DEVICE_ID_RAZER_KRAKEN_V2 0x0510 // Codename Kylie
 #define USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE 0x0527
+#define USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2 0x0560
 
 #define USB_INTERFACE_PROTOCOL_NONE 0
 

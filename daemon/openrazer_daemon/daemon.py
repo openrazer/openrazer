@@ -5,7 +5,7 @@ Daemon class
 
 This class is the main core of the daemon, this serves a basic dbus module to control the main bit of the daemon
 """
-__version__ = '3.7.0'
+__version__ = '3.10.1'
 
 import configparser
 import logging
@@ -89,6 +89,9 @@ class RazerDaemon(DBusService):
         self._persistence = configparser.ConfigParser()
         self._persistence.status = {"changed": False}
         self.read_persistence(persistence_file)
+
+        # map of vid+pid to counter for serial numbers for unknown devices
+        self._unknown_serial_counter: dict[tuple[int, int], int] = {}
 
         # Check for plugdev group
         if not self._check_plugdev_group():
@@ -283,6 +286,7 @@ class RazerDaemon(DBusService):
             'sync_effects_enabled': True,
             'devices_off_on_screensaver': True,
             'restore_persistence': True,
+            'persistence_dual_boot_quirk': False,
         }
 
         if config_file is not None and os.path.exists(config_file):
@@ -304,7 +308,7 @@ class RazerDaemon(DBusService):
         if persistence_file is not None and os.path.exists(persistence_file):
             try:
                 self._persistence.read(persistence_file)
-            except configparser.Error:
+            except (configparser.Error, UnicodeDecodeError):
                 self.logger.warning('Failed to read persistence config, resetting!', exc_info=True)
                 with open(persistence_file, "w") as f:
                     f.writelines("")
@@ -491,7 +495,8 @@ class RazerDaemon(DBusService):
                     razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
                                                 persistence=self._persistence, testing=self._test_dir is not None,
                                                 additional_interfaces=sorted(additional_interfaces),
-                                                additional_methods=[])
+                                                additional_methods=[],
+                                                unknown_serial_counter=self._unknown_serial_counter)
 
                     # Wireless devices sometimes don't listen
                     count = 0
@@ -529,7 +534,8 @@ class RazerDaemon(DBusService):
                 self.logger.info('Found valid device.%d: %s', device_number, sys_name)
                 razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
                                             persistence=self._persistence, testing=self._test_dir is not None,
-                                            additional_interfaces=None, additional_methods=[])
+                                            additional_interfaces=None, additional_methods=[],
+                                            unknown_serial_counter=self._unknown_serial_counter)
 
                 # Its a udev event so currently the device hasn't been chmodded yet
                 time.sleep(0.2)
