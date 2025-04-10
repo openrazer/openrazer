@@ -455,7 +455,7 @@ struct razer_report razer_chroma_standard_matrix_set_custom_frame(unsigned char 
 
     if (row_length > sizeof(report.arguments) - start_arg_offset) {
         printk(KERN_ALERT "razerchroma: RGB data too long\n");
-        row_length = sizeof(report.arguments) - start_arg_offset;
+        row_length = 0;
     }
 
     report = get_razer_report(0x03, 0x0B, 0x46); // In theory should be able to leave data size at max as we have start/stop
@@ -757,7 +757,7 @@ struct razer_report razer_chroma_extended_matrix_set_custom_frame2(unsigned char
 
     if (row_length > sizeof(report.arguments) - start_arg_offset) {
         printk(KERN_ALERT "razerchroma: RGB data too long\n");
-        row_length = sizeof(report.arguments) - start_arg_offset;
+        row_length = 0;
     }
 
     // Some devices need a specific packet length, most devices are happy with 0x47
@@ -1024,7 +1024,7 @@ struct razer_report razer_chroma_misc_one_row_set_custom_frame(unsigned char sta
 
     if (row_length > sizeof(report.arguments) - start_arg_offset) {
         printk(KERN_ALERT "razerchroma: RGB data too long\n");
-        row_length = sizeof(report.arguments) - start_arg_offset;
+        row_length = 0;
     }
 
     report.arguments[0] = start_col;
