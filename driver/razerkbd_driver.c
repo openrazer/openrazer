@@ -3043,7 +3043,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
     unsigned char row_id;
     unsigned char start_col;
     unsigned char stop_col;
-    unsigned char row_length;
+    size_t row_length;
     bool want_response = true;
 
     //printk(KERN_ALERT "razerkbd: Total count: %d\n", (unsigned char)count);

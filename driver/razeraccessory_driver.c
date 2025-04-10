@@ -872,7 +872,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
     unsigned char row_id;
     unsigned char start_col;
     unsigned char stop_col;
-    unsigned char row_length;
+    size_t row_length;
 
     //printk(KERN_ALERT "razermyg: Total count: %d\n", (unsigned char)count);
 
