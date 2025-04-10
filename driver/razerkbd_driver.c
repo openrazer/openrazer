@@ -3040,13 +3040,9 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
     struct razer_report request = {0};
     struct razer_report response = {0};
     size_t offset = 0;
-    unsigned char row_id;
-    unsigned char start_col;
-    unsigned char stop_col;
+    unsigned char row_id, start_col, stop_col;
     size_t row_length;
     bool want_response = true;
-
-    //printk(KERN_ALERT "razerkbd: Total count: %d\n", (unsigned char)count);
 
     while(offset < count) {
         if(offset + 3 > count) {
@@ -3057,21 +3053,25 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         row_id = buf[offset++];
         start_col = buf[offset++];
         stop_col = buf[offset++];
-        row_length = ((stop_col+1) - start_col) * 3;
 
-        // printk(KERN_ALERT "razerkbd: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
-
+        // Validate parameters
         if(start_col > stop_col) {
-            printk(KERN_ALERT "razerkbd: Start column is greater than end column\n");
+            printk(KERN_ALERT "razerkbd: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
             return -EINVAL;
         }
 
-        if(offset + row_length > count) {
-            printk(KERN_ALERT "razerkbd: Not enough RGB to fill row\n");
+        row_length = ((stop_col + 1) - start_col) * 3;
+
+        // Make sure we actually got the data that was promised to us
+        if(count < offset + row_length) {
+            printk(KERN_ALERT "razerkbd: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
             return -EINVAL;
         }
+
+        // printk(KERN_INFO "razerkbd: Row ID: %u, Start: %u, Stop: %u, row length: %lu\n", row_id, start_col, stop_col, row_length);
 
         // Offset now at beginning of RGB data
+
         switch (device->usb_pid) {
         case USB_DEVICE_ID_RAZER_ORNATA:
         case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
