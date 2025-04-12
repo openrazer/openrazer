@@ -25,7 +25,7 @@ DRIVERDIR?=$(shell pwd)/driver
 MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/hid
 
 DKMS_NAME?=openrazer-driver
-DKMS_VER?=3.10.1
+DKMS_VER?=3.10.2
 
 
 # Build all target

@@ -9,7 +9,7 @@
 
 #include <linux/usb/input.h>
 
-#define DRIVER_VERSION "3.10.1"
+#define DRIVER_VERSION "3.10.2"
 #define DRIVER_LICENSE "GPL v2"
 #define DRIVER_AUTHOR "Terri Cain <terri@dolphincorp.co.uk>"
 
