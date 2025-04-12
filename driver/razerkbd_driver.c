@@ -4490,6 +4490,7 @@ static DEVICE_ATTR(charge_low_threshold,    0660, razer_attr_read_charge_low_thr
 static int razer_event(struct hid_device *hdev, struct hid_field *field, struct hid_usage *usage, __s32 value)
 {
     struct razer_kbd_device *device = hid_get_drvdata(hdev);
+    struct razer_kbd_usb_device_data *usb_dev_data = dev_get_drvdata(&device->usb_dev->dev);
     const struct razer_key_translation *translation;
 
     // No translations needed on the Blades
@@ -4579,11 +4580,11 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     }
 
     if(translation) {
-        if (test_bit(usage->code, device->pressed_fn) || device->fn_on) {
+        if (test_bit(usage->code, usb_dev_data->pressed_fn) || usb_dev_data->fn_on) {
             if (value) {
-                set_bit(usage->code, device->pressed_fn);
+                set_bit(usage->code, usb_dev_data->pressed_fn);
             } else {
-                clear_bit(usage->code, device->pressed_fn);
+                clear_bit(usage->code, usb_dev_data->pressed_fn);
             }
 
             input_event(field->hidinput->input, usage->type, translation->to, value);
@@ -4621,7 +4622,7 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
  *
  * HID Usage Table http://www.freebsddiary.org/APC/usb_hid_usages.php
  */
-static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_device *device, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
+static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_usb_device_data *usb_dev_data, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
 {
     // The event were looking for is 16, 22 or 48 bytes long and starts with 0x04.
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
@@ -4695,7 +4696,7 @@ static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_de
             data[index+1] = cur_value;
         }
 
-        device->fn_on = !!found_fn;
+        usb_dev_data->fn_on = !!found_fn;
 
         data[0] = 0x01;
         data[1] = 0x00;
@@ -4719,7 +4720,7 @@ static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_de
  *
  * When the rewritten value does not fit the bit field, a key-down and a key-up event is reported separately.
  */
-static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_device *device, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
+static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_usb_device_data *usb_dev_data, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
 {
     DECLARE_BITMAP(bitfield, RAW_EVENT_BITFIELD_BITS) = { 0 };
 
@@ -4847,7 +4848,7 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_de
             }
         }
 
-        device->fn_on = !!found_fn;
+        usb_dev_data->fn_on = !!found_fn;
 
         data[0] = 0x01;
         data[1] = 0x00;
@@ -4872,6 +4873,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 {
     struct razer_kbd_device *device = hid_get_drvdata(hdev);
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct razer_kbd_usb_device_data *usb_dev_data = dev_get_drvdata(&device->usb_dev->dev);
 
     // No translations needed on the Pro...
     if (is_blade_laptop(device)) {
@@ -4895,9 +4897,9 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
-        return razer_raw_event_bitfield(hdev, device, intf, report, data, size);
+        return razer_raw_event_bitfield(hdev, usb_dev_data, intf, report, data, size);
     default:
-        return razer_raw_event_standard(hdev, device, intf, report, data, size);
+        return razer_raw_event_standard(hdev, usb_dev_data, intf, report, data, size);
     }
 }
 
@@ -4966,11 +4968,22 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_kbd_device *dev = NULL;
+    struct razer_kbd_usb_device_data *usb_dev_data = NULL;
 
     dev = kzalloc(sizeof(struct razer_kbd_device), GFP_KERNEL);
     if(dev == NULL) {
         dev_err(&intf->dev, "out of memory\n");
         return -ENOMEM;
+    }
+
+    // Allocate data in context to the usb device if not already done.
+    usb_dev_data = dev_get_drvdata(&usb_dev->dev);
+    if (!usb_dev_data) {
+        usb_dev_data = devm_kzalloc(&usb_dev->dev, sizeof(struct razer_kbd_usb_device_data), GFP_KERNEL);
+        if (!usb_dev_data)
+            return -ENOMEM;
+
+        dev_set_drvdata(&usb_dev->dev, usb_dev_data);
     }
 
     // Init data
