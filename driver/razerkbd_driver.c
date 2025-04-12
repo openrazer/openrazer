@@ -3141,36 +3141,6 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             request.transaction_id.id = 0x3F;
             break;
 
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
-        case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
-        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
-        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
-        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
-        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_2019:
-        case USB_DEVICE_ID_RAZER_BLADE_QHD:
-        case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
-        case USB_DEVICE_ID_RAZER_BLADE_2018:
-        case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
-        case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
-        case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
-        case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
-        case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
-        case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
-        case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
-        case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
-        case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
-        case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
-        case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
-        case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
-        case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
-        case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
-        case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
-        case USB_DEVICE_ID_RAZER_BLADE_14_2021:
-        case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
-            // FIXME this seems not to do anything?
-            request.transaction_id.id = 0x80; // Fall into the 2016/blade/blade2016 to set device id
-            fallthrough;
         default:
             request = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             request.transaction_id.id = 0xFF;
