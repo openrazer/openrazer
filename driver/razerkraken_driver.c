@@ -219,6 +219,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Kraken Ultimate\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
+        device_type = "Razer Kraken Kitty V2\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
     }
@@ -333,6 +337,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_KRAKEN:
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:
     case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
         razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 0);
         break;
     }
@@ -529,6 +534,7 @@ static ssize_t razer_attr_read_matrix_effect_breath(struct device *dev, struct d
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:
     case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
         switch(num_colours) {
         case 3:
             return get_rgb_from_addr(dev, device->breathing_address[2], 0x0C, buf);
@@ -696,6 +702,7 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:
     case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
         dev->led_mode_address = KYLIE_SET_LED_ADDRESS;
         dev->custom_address = KYLIE_CUSTOM_ADDRESS_START;
         dev->breathing_address[0] = KYLIE_BREATHING1_ADDRESS_START;
@@ -753,6 +760,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
         case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
@@ -813,6 +821,7 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
         case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
@@ -853,6 +862,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2) },
     { 0 }
 };
 

@@ -852,29 +852,19 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
 }
 
 /**
- * Write device file "set_key_row"
+ * Write device file "matrix_custom_frame"
  *
- * Writes the colour to the LEDs of the device
- *
- * Start is 0x00
- * Stop is 0x0E
- *
- * As you go from 0x00 -> 0x0E the leds light up in a clockwise direction.
- * 0x01,0x03,0x05,0x07,0x09,0x0B,0x0D Are NOT connected
+ * Format
+ * ROW_ID START_COL STOP_COL RGB...
  */
 static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-
     size_t offset = 0;
-    unsigned char row_id;
-    unsigned char start_col;
-    unsigned char stop_col;
-    unsigned char row_length;
-
-    //printk(KERN_ALERT "razermyg: Total count: %d\n", (unsigned char)count);
+    unsigned char row_id, start_col, stop_col;
+    size_t row_length;
 
     while(offset < count) {
         if(offset + 3 > count) {
@@ -885,19 +875,21 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         row_id = buf[offset++];
         start_col = buf[offset++];
         stop_col = buf[offset++];
-        row_length = ((stop_col+1) - start_col) * 3;
 
-        // printk(KERN_ALERT "razeraccessory: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
-
+        // Validate parameters
         if(start_col > stop_col) {
-            printk(KERN_ALERT "razeraccessory: Start column is greater than end column\n");
+            printk(KERN_ALERT "razeraccessory: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
             return -EINVAL;
         }
 
-        if(offset + row_length > count) {
-            printk(KERN_ALERT "razeraccessory: Not enough RGB to fill row\n");
+        row_length = ((stop_col + 1) - start_col) * 3;
+
+        if(count < offset + row_length) {
+            printk(KERN_ALERT "razeraccessory: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
             return -EINVAL;
         }
+
+        // printk(KERN_INFO "razeraccessory: Row ID: %u, Start: %u, Stop: %u, row length: %lu\n", row_id, start_col, stop_col, row_length);
 
         switch (device->usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_CORE:

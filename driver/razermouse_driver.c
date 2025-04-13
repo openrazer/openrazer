@@ -2798,9 +2798,10 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
 }
 
 /**
- * Write device file "set_key_row"
+ * Write device file "matrix_custom_frame"
  *
- * Writes the colour segments on the mouse.
+ * Format
+ * ROW_ID START_COL STOP_COL RGB...
  */
 static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
@@ -2808,12 +2809,8 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
     struct razer_report request = {0};
     struct razer_report response = {0};
     size_t offset = 0;
-    unsigned char row_id;
-    unsigned char start_col;
-    unsigned char stop_col;
-    unsigned char row_length;
-
-    //printk(KERN_ALERT "razermouse: Total count: %d\n", (unsigned char)count);
+    unsigned char row_id, start_col, stop_col;
+    size_t row_length;
 
     while(offset < count) {
         if(offset + 3 > count) {
@@ -2824,9 +2821,6 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         row_id = buf[offset++];
         start_col = buf[offset++];
         stop_col = buf[offset++];
-        row_length = ((stop_col+1) - start_col) * 3;
-
-        // printk(KERN_ALERT "razermouse: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
 
         // Mouse only has 1 row, row0 (pseudo row as the command actually doesn't take rows)
         if(row_id != 0) {
@@ -2834,17 +2828,24 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             return -EINVAL;
         }
 
+        // Validate parameters
         if(start_col > stop_col) {
-            printk(KERN_ALERT "razermouse: Start column is greater than end column\n");
+            printk(KERN_ALERT "razermouse: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
             return -EINVAL;
         }
 
-        if(offset + row_length > count) {
-            printk(KERN_ALERT "razermouse: Not enough RGB to fill row (%d)\n", (int)(offset + row_length - count));
+        row_length = ((stop_col + 1) - start_col) * 3;
+
+        // Make sure we actually got the data that was promised to us
+        if(count < offset + row_length) {
+            printk(KERN_ALERT "razermouse: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
             return -EINVAL;
         }
+
+        // printk(KERN_INFO "razermouse: Row ID: %u, Start: %u, Stop: %u, row length: %lu\n", row_id, start_col, stop_col, row_length);
 
         // Offset now at beginning of RGB data
+
         switch (device->usb_pid) {
         case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
             request = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
