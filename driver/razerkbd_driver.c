@@ -3708,10 +3708,7 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_de
             // data of size 22 starting with 0x01 is a bit field so we need to handle that separately
             if (size == 22) {
                 if (write_bitfield) {
-                    if (cur_value < (sizeof(bitfield) * BITS_PER_BYTE)) {
-                        // value fits the bit field, so we can use that
-                        set_bit(cur_value, (unsigned long*) bitfield);
-                    } else {
+                    if (cur_value >= sizeof(bitfield) * BITS_PER_BYTE) {
                         // value does not fit the bit field, so we need extra handling
                         int report_extra = 1;
 
