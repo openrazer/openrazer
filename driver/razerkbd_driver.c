@@ -3534,10 +3534,9 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
  */
 static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_device *device, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
 {
-    // The event were looking for is 16 or 22 bytes long and starts with 0x04.
-    // Newer firmware seems to use 22 bytes.
+    // The event were looking for is 16, 22 or 48 bytes long and starts with 0x04.
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
-       ((size == 22) || (size == 16)) && data[0] == 0x04) {
+       ((size == 48) || (size == 22) || (size == 16)) && data[0] == 0x04) {
         // Convert 04... to 0100...
         int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
         int found_fn = 0x00;
@@ -3635,10 +3634,9 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_de
 {
     DECLARE_BITMAP(bitfield, RAW_EVENT_BITFIELD_BITS) = { 0 };
 
-    // The event were looking for is 16 or 22 bytes long and starts with 0x04.
-    // Newer firmware seems to use 22 bytes.
+    // The event were looking for is 16, 22 or 48 bytes long and starts with 0x04.
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
-       ((size == 22) || (size == 16)) && data[0] == 0x04) {
+       ((size == 48) || (size == 22) || (size == 16)) && data[0] == 0x04) {
         // Convert 04... to 0100...
         int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
         int found_fn = 0x00;
