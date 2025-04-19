@@ -4938,8 +4938,12 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
     dev->da3_5g.poll = 1; // Poll rate 1000
 
     // Setup tilt wheel HWHEEL emulation
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 13, 0)
+    hrtimer_setup(&dev->repeat_timer, wheel_tilt_repeat, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+#else
     hrtimer_init(&dev->repeat_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
     dev->repeat_timer.function = wheel_tilt_repeat;
+#endif
     dev->tilt_hwheel = 1;
     dev->tilt_repeat_delay = 250;
     dev->tilt_repeat = 33;
