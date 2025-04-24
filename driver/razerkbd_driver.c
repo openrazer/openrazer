@@ -3619,6 +3619,9 @@ static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_de
     return 0;
 }
 
+#define RAW_EVENT_BITFIELD_BYTES (20)
+#define RAW_EVENT_BITFIELD_BITS (RAW_EVENT_BITFIELD_BYTES * BITS_PER_BYTE)
+
 /**
  * Bitfield raw event function
  *
@@ -3629,7 +3632,7 @@ static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_de
  */
 static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_device *device, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
 {
-    u8 bitfield[20] = { 0 };
+    DECLARE_BITMAP(bitfield, RAW_EVENT_BITFIELD_BITS) = { 0 };
 
     // The event were looking for is 16 or 22 bytes long and starts with 0x04.
     // Newer firmware seems to use 22 bytes.
@@ -3708,9 +3711,9 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_de
             // data of size 22 starting with 0x01 is a bit field so we need to handle that separately
             if (size == 22) {
                 if (write_bitfield) {
-                    if (cur_value < (sizeof(bitfield) * BITS_PER_BYTE)) {
+                    if (cur_value < RAW_EVENT_BITFIELD_BITS) {
                         // value fits the bit field, so we can use that
-                        set_bit(cur_value, (unsigned long*) bitfield);
+                        bitmap_set(bitfield, cur_value, 1);
                     } else {
                         // value does not fit the bit field, so we need extra handling
                         int report_extra = 1;
@@ -3761,7 +3764,7 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_de
         data[0] = 0x01;
         data[1] = 0x00;
         if (size == 22) {
-            memcpy(data + 2, bitfield, sizeof(bitfield));
+            memcpy(data + 2, bitfield, RAW_EVENT_BITFIELD_BYTES);
         }
 
         // Some reason just by editing data, it generates a normal event above. (Could quite possibly work like that, no clue)
