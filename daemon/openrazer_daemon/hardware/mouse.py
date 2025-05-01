@@ -1923,6 +1923,7 @@ class RazerBasiliskV3XHyperSpeed(__RazerDevice):
                'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/9766/9766-1-en-v1.png"
+    DRIVER_MODE = True
 
     DPI_MAX = 18000
 
