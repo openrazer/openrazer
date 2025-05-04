@@ -65,6 +65,7 @@ class RazerGoliathus(__RazerDeviceBrightnessSuspend):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1394/1394_goliathus_chroma.png"
 
+
 class RazerStriderChroma(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Strider Chroma
@@ -74,8 +75,8 @@ class RazerStriderChroma(__RazerDeviceBrightnessSuspend):
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 20]  # Adjust dimensions if necessary
     METHODS = ['get_device_type_mousemat', 'set_static_effect', 'set_spectrum_effect',
-                'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
-                'set_custom_effect', 'set_key_row', 'set_reactive_effect', 'trigger_reactive_effect']
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'set_reactive_effect', 'trigger_reactive_effect']
 
     DEVICE_IMAGE = "https://example.com/razer_strider_chroma.png"  # Replace with actual image URL
 
