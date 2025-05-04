@@ -24,6 +24,8 @@ ATTRS{idProduct}=="0068|007e|0215|0517|0518|0c00|0c01|0c02|0c04|0c06|0f07|0f08|0
     ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razeraccessory"
 
+SUBSYSTEM=="usb", ATTR{idVendor}=="1532", ATTR{idProduct}=="0c05", MODE="0666", GROUP="plugdev"
+
 # Get out if no match
 ENV{ID_RAZER_CHROMA}!="1", GOTO="razer_end"
 

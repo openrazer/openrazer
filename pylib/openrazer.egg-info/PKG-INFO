@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: openrazer
+Version: 3.10.2
+Summary: Library for interacting with the OpenRazer daemon.
+Home-page: https://openrazer.github.io/
+Author: OpenRazer contributors
+License: GPLv2+
+Project-URL: Bug Tracker, https://github.com/openrazer/openrazer/issues
+Project-URL: Source Code, https://github.com/openrazer/openrazer/tree/master/pylib
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)
+Classifier: Operating System :: POSIX :: Linux
+Requires-Dist: dbus-python>=1.2.0
+Requires-Dist: numpy>=1.11.0
+Requires-Dist: openrazer_daemon==3.10.2
