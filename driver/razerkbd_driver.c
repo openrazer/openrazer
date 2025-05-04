@@ -3445,6 +3445,7 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     }
 
     switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH_EDITION:
         translation = find_translation(chroma_keys_2, usage->code);
         break;
