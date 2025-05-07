@@ -5,20 +5,35 @@
 OpenRazer consists of a Linux kernel module and Python daemon + library. The Linux kernel module exposes an
 sysfs interface, the Python daemon (openrazer-daemon) exposes this on it's turn over D-Bus.
 
-It also includes a Python libraries for applications and scripts to use that talks to the daemon over D-Bus.
+It also includes Python libraries for applications and scripts to use that communicate to the daemon over D-Bus.
 
-If you want to add support for a new hardware device it's often required to make changes to both the kernel module
-(`driver/`) and the Python sources (`daemon/`).
+## Add New Device Support
 
-Some other files that need modifying are:
-* `README.md`
-* `install_files/udev/99-razer.rules`
-* `install_files/appstream/io.github.openrazer.openrazer.metainfo.xml`: generate with `./scripts/generate_appstream_file.sh`
-* `pylib/openrazer/_fake_driver/*.cfg`: generate with `./scripts/generate_all_fake_drivers.sh -f`
+If you want to add support for a new hardware device it's often required to make changes to both the kernel module (`driver/`) and the Python sources (`daemon/`).
 
-Generally it's helpful to look at recent commits adding new devices and doing similar changes for your device.
+First of all, **there's no need to reinvent the wheel**. Based on the type of device you're adding, look for relevant pull requests, where similar devices have already been integrated.
 
-This description assumes you have cloned the openrazer repository to your home directory.
+Basic steps though, are:
+
+1. Connect the device then run: `lsusb` to find the connected device's Vendor & Product IDs.
+<br>e.g. `Bus 003 Device 012: ID 1532:0c05 Razer USA, Ltd Razer Strider Chroma`
+<br> **VID (vendor ID):** 1532
+<br> **PID (product ID):** 0c05
+2. Open **README.md** and append the new device, *ordered by type and by VID:PID*
+3. Go to `daemon/openrazer_daemon/hardware/[device_type].py`
+<br> `[device_type]`: file according to your device type, and create the device class. Use other devices as referece. In addition, **search for the device's specs before that**, e.g. Matrix of LEDs, images from official Razer site, methods etc, to configure the device properly.
+4.  Go to: `driver/razer[device_type]_driver.h` to define a constant that points to the device's PID as **0x[PID]**
+<br> e.g. for the previous device: `#define USB_DEVICE_ID_RAZER_STRIDER_CHROMA 0x0C05`
+<br> (Note: *keep using the correct order while defining or using VIDs or PIDs, as mentioned above*)
+5. Go to `driver/razer[device_type]_driver.c` and add support in the kernel driver for the device. Here you can provide functionality to communicate with the USB device, manage its features & effects, and expose device-specific attributes through sysfs.
+6. Last (but not least) navigate to: `install_files/udev/99-razer.rules` to append the device's PID (always in correct order - as we said), in the correct ruleset.
+7. Run: `./scripts/format_source.sh` in case you have any linting issues.
+8. Run: `./scripts/generate_appstream_file.sh` to generate the `install_files/appstream/io.github.openrazer.openrazer.metainfo.xml`
+9. Run: `./scripts/generate_all_fake_drivers.sh -f` to generate `pylib/openrazer/_fake_driver/*.cfg`
+
+This description assumes you have cloned the openrazer repository to your home directory, also created a new branch e.g. **add-[device_name]-support**.
+
+Test thoroughly, then open a PR. Don't forget to link related issues resolved to your PR, also write a description of what is implemented, tested and working, also what is not working.
 
 ## Setup your development environment
 
