@@ -1,3 +1,9 @@
+openrazer (3.10.3) noble; urgency=high
+
+  * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v3.10.3
+
+ -- Luca Weiss <luca@lucaweiss.eu>  Wed, 07 May 2025 21:00:47 +0200
+
 openrazer (3.10.2) noble; urgency=high
 
   * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v3.10.2
