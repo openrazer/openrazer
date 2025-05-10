@@ -39,6 +39,7 @@ class RazerDevice(DBusService):
     MATRIX_DIMS = None
     POLL_RATES = None
     DPI_MAX = None
+    DRIVER_MODE = False
 
     WAVE_DIRS = (1, 2)
 
@@ -321,6 +322,10 @@ class RazerDevice(DBusService):
         # Initialize battery manager if the device has support
         if 'get_battery' in self.METHODS:
             self._init_battery_manager()
+
+        if self.DRIVER_MODE:
+            self.logger.info('Setting device to "driver" mode. Daemon will handle special functionality')
+            self.set_device_mode(0x03, 0x00)  # Driver mode
 
         self.restore_dpi_poll_rate()
         self.restore_brightness()
@@ -1148,6 +1153,17 @@ class RazerDevice(DBusService):
         self.disable_notify = True
         self.disable_persistence = True
 
+        # Set device back to driver mode after e.g. suspend which resets the
+        # device to default device mode.
+        # NOTE: This is really the wrong place to put this, since this callback
+        # is for screensaver unlock, and not for 'wake up from suspend' or
+        # similar. Nevertheless for now this seems to be the best place for
+        # this and should resolve some issues with macro keys not working after
+        # suspend.
+        if self.DRIVER_MODE:
+            self.logger.info('Setting device back to "driver" mode.')
+            self.set_device_mode(0x03, 0x00)  # Driver mode
+
         self.restore_brightness()
         self._resume_device()
 
@@ -1186,6 +1202,13 @@ class RazerDevice(DBusService):
                 dpi_func = getattr(self, "getDPI", None)
                 if dpi_func is not None:
                     self.dpi = dpi_func()
+
+            if self.DRIVER_MODE:
+                # Set back to device mode
+                try:
+                    self.set_device_mode(0x00, 0x00)  # Device mode
+                except FileNotFoundError:
+                    pass
 
             self._close()
 
