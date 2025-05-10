@@ -204,6 +204,8 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Cobra                                   |  1532:00A3  |
 | Razer Viper V2 Pro (Wired)                    |  1532:00A5  |
 | Razer Viper V2 Pro (Wireless)                 |  1532:00A6  |
+| Razer Naga V2 Pro (Wired)                     |  1532:00A7  |
+| Razer Naga V2 Pro (Wireless)                  |  1532:00A8  |
 | Razer Basilisk V3 Pro (Wired)                 |  1532:00AA  |
 | Razer Basilisk V3 Pro (Wireless)              |  1532:00AB  |
 | Razer Cobra Pro (Wired)                       |  1532:00AF  |
@@ -233,6 +235,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Goliathus                               |  1532:0C01  |
 | Razer Goliathus Extended                      |  1532:0C02  |
 | Razer Firefly v2                              |  1532:0C04  |
+| Razer Strider Chroma                          |  1532:0C05  |
 | Razer Goliathus Chroma 3XL                    |  1532:0C06  |
 
 ### Headsets
