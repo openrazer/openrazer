@@ -16,6 +16,7 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
 
     Has macro functionality and brightness based suspend
     """
+    DRIVER_MODE = True
 
     def __init__(self, *args, **kwargs):
         if 'additional_methods' in kwargs:
@@ -27,39 +28,13 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
 
         self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
 
-        self.logger.info('Putting device into driver mode. Daemon will handle special functionality')
-        self.set_device_mode(0x03, 0x00)  # Driver mode
-
     def _close(self):
         """
         Close the key manager
         """
         super()._close()
 
-        try:
-            self.set_device_mode(0x00, 0x00)  # Device mode
-        except FileNotFoundError:  # Could be called when daemon is stopping or device is removed.
-            pass
-
         self.key_manager.close()
-
-    def _resume_device(self):
-        """
-        Restore device mode
-
-        Set device back to driver mode after e.g. suspend which resets the
-        device to default device mode.
-
-        NOTE: This is really the wrong place to put this, since this callback
-        is for screensaver unlock, and not for 'wake up from suspend' or
-        similar. Nevertheless for now this seems to be the best place for this
-        and should resolve some issues with macro keys not working after
-        suspend.
-        """
-        super()._resume_device()
-
-        self.logger.info('Putting device back into driver mode.')
-        self.set_device_mode(0x03, 0x00)  # Driver mode
 
 
 class _RippleKeyboard(_MacroKeyboard):
