@@ -240,6 +240,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Firefly V2                              |  1532:0C04  |
 | Razer Strider Chroma                          |  1532:0C05  |
 | Razer Goliathus Chroma 3XL                    |  1532:0C06  |
+| Razer Firefly V2 Pro                          |  1532:0C08  |
 
 ### Headsets
 | Device                                        | USB VID:PID |
