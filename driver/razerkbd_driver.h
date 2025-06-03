@@ -175,6 +175,9 @@ struct razer_kbd_device {
 
     unsigned char block_keys[3];
     unsigned char left_alt_on;
+
+    /* For devices that have multiple LED states, like Tartarus */
+    struct razer_rgb led_state;
 };
 
 #endif

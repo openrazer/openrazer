@@ -14,9 +14,9 @@
 
 #include "usb_hid_keys.h"
 
-#include "razerkbd_driver.h"
 #include "razercommon.h"
 #include "razerchromacommon.h"
+#include "razerkbd_driver.h"
 
 /*
  * Version Information
@@ -1537,7 +1537,6 @@ static ssize_t razer_attr_write_profile_led_red(struct device *dev, struct devic
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    struct razer_rgb *rgb;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
@@ -1546,13 +1545,8 @@ static ssize_t razer_attr_write_profile_led_red(struct device *dev, struct devic
         request.transaction_id.id = 0xFF;
         break;
     case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
-        request = razer_chroma_extended_matrix_get_effect_static(VARSTORE, SIDE_STRIPE_LED);
-        request.transaction_id.id = 0x1F;
-        razer_send_payload(device, &request, &response);
-        rgb = (struct razer_rgb *)&response.arguments[6];
-        rgb->r = enabled;
-
-        request = razer_chroma_extended_matrix_effect_static(VARSTORE, SIDE_STRIPE_LED, rgb);
+        device->led_state.r = enabled;
+        request = razer_chroma_extended_matrix_effect_static(VARSTORE, SIDE_STRIPE_LED, &device->led_state);
         request.transaction_id.id = 0x1F;
         break;
     default:
@@ -1575,7 +1569,6 @@ static ssize_t razer_attr_write_profile_led_green(struct device *dev, struct dev
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    struct razer_rgb *rgb;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
@@ -1584,13 +1577,8 @@ static ssize_t razer_attr_write_profile_led_green(struct device *dev, struct dev
         request.transaction_id.id = 0xFF;
         break;
     case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
-        request = razer_chroma_extended_matrix_get_effect_static(VARSTORE, SIDE_STRIPE_LED);
-        request.transaction_id.id = 0x1F;
-        razer_send_payload(device, &request, &response);
-        rgb = (struct razer_rgb *)&response.arguments[6];
-        rgb->g = enabled;
-
-        request = razer_chroma_extended_matrix_effect_static(VARSTORE, SIDE_STRIPE_LED, rgb);
+        device->led_state.g = enabled;
+        request = razer_chroma_extended_matrix_effect_static(VARSTORE, SIDE_STRIPE_LED, &device->led_state);
         request.transaction_id.id = 0x1F;
         break;
     default:
@@ -1612,7 +1600,6 @@ static ssize_t razer_attr_write_profile_led_blue(struct device *dev, struct devi
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    struct razer_rgb *rgb;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
@@ -1621,13 +1608,8 @@ static ssize_t razer_attr_write_profile_led_blue(struct device *dev, struct devi
         request.transaction_id.id = 0xFF;
         break;
     case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
-        request = razer_chroma_extended_matrix_get_effect_static(VARSTORE, SIDE_STRIPE_LED);
-        request.transaction_id.id = 0x1F;
-        razer_send_payload(device, &request, &response);
-        rgb = (struct razer_rgb *)&response.arguments[6];
-        rgb->b = enabled;
-
-        request = razer_chroma_extended_matrix_effect_static(VARSTORE, SIDE_STRIPE_LED, rgb);
+        device->led_state.b = enabled;
+        request = razer_chroma_extended_matrix_effect_static(VARSTORE, SIDE_STRIPE_LED, &device->led_state);
         request.transaction_id.id = 0x1F;
         break;
     default:
