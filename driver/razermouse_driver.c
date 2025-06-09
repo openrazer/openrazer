@@ -6143,8 +6143,6 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
             break;
         }
 
@@ -7183,8 +7181,6 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
             device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
         }
 
     }
