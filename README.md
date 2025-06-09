@@ -226,6 +226,8 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Basilisk V3 35K                         |  1532:00CB  |
 | Razer Basilisk V3 Pro 35K (Wired)             |  1532:00CC  |
 | Razer Basilisk V3 Pro 35K (Wireless)          |  1532:00CD  |
+| Razer Pro Click V2 Vertical Edition (Wired)   |  1532:00C7  |
+| Razer Pro Click V2 Vertical Edition (Wireless)|  1532:00C8  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |
