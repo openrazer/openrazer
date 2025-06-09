@@ -1995,7 +1995,7 @@ class RazerProClickV2VerticalEditionWired(__RazerDevice):
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
                'get_dpi_stages', 'set_dpi_stages',
                'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
-               'get_idle_time', 'set_idle_time', 'get_matrix_dims', 'has_matrix',
+               'get_idle_time', 'set_idle_time',
                'get_battery', 'is_charging',
                'get_low_battery_threshold', 'set_low_battery_threshold',
                'get_brightness', 'set_brightness', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect']
