@@ -232,7 +232,6 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     }
 
     return sprintf(buf, device_type);
-    printk(KERN_WARNING "%d", device->usb_pid);
 }
 
 /**
@@ -626,7 +625,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
             device->firmware_version[1] = device->data[1];
             device->firmware_version[2] = device->data[2];
         } else {
-            printk(KERN_CRIT "razerkraken: Did not manage to get firmware version from device, using v9.99 instead");
+            printk(KERN_CRIT "razerkraken: Did not manage to get firmware version from device, using v9.99 instead\n");
             device->firmware_version[0] = 1;
             device->firmware_version[1] = 0x09;
             device->firmware_version[2] = 0x99;
