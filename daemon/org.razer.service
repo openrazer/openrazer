@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.razer
+Exec=/usr/bin/openrazer-daemon
+SystemdService=openrazer-daemon.service
