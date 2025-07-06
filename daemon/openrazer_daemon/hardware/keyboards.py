@@ -403,7 +403,7 @@ class RazerBlackWidowV3ProWired(_RippleKeyboard):
 
 class RazerBlackWidowV3ProWireless(RazerBlackWidowV3ProWired):
     """
-    Class for the Razer BlackWidow v3 Pro 2.4 Ghz Wireless
+    Class for the Razer BlackWidow V3 Pro 2.4 Ghz Wireless
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_BlackWidow_V3_Pro(_\d+)?(-if01)?-event-kbd')
 
