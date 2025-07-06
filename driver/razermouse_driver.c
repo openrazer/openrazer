@@ -7180,6 +7180,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
             device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+            break;
         }
 
     }
