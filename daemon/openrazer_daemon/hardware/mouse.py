@@ -1985,7 +1985,7 @@ class RazerDeathAdderV3HyperSpeedWireless(RazerDeathAdderV3HyperSpeedWired):
 
 class RazerProClickV2VerticalEditionWired(__RazerDevice):
     """
-        Class for the Razer Pro Click V2 Vertical Edition (Wired)
+    Class for the Razer Pro Click V2 Vertical Edition (Wired)
     """
     EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Pro_Click_V2_Vertical_Edition-if0(1|2)-event-kbd')
     USB_VID = 0x1532

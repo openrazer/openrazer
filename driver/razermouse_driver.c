@@ -6015,7 +6015,6 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
             break;
 
-
         case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_hyperpolling_wireless_dongle_indicator_led_mode);
             fallthrough;
@@ -6747,7 +6746,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_spectrum);
             device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_reactive);
             device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_breath);
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_none);
             break;
 
         case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
