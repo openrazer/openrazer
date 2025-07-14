@@ -1098,7 +1098,7 @@ class RazerDevice(DBusService):
         """
         Initializes the DpiManager using the provided name
         """
-        self._dpi_manager = _DpiManager(self, self._device_number, self.getDeviceName()) # pylint: disable=no-member
+        self._dpi_manager = _DpiManager(self, self._device_number, self.getDeviceName())  # pylint: disable=no-member
         self._dpi_manager.active = self.config.getboolean('Startup', 'dpi_notifier', fallback=False)
 
     def get_vid_pid(self):

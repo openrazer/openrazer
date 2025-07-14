@@ -115,4 +115,3 @@ class DpiManager:
             self._dpi_thread.event.set()
         else:
             self._dpi_thread.event.clear()
-
