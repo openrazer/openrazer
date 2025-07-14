@@ -54,17 +54,6 @@ class DpiNotifier(threading.Thread):
 
         self._last_dpi = dpi
 
-        # Sometimes due to various issues we don't get the percentage correctly.
-        # Just ignore them and don't show a bogus notification.
-        # See also: https://github.com/openrazer/openrazer/issues/2122
-        # if battery_level in (0.0, -1.0):
-        #     self._logger.debug("Got bogus battery value: {0}, ignoring.".format(battery_level))
-        #     # Since we don't update _last_notify_time here we're going to retry very soon again.
-        #     # Sleep a bit so we don't spam the device with requests.
-        #     time.sleep(10)
-        #     return
-        # Update the last notified time so that we alert in the configured frequency.
-
         title = self._device_name
         message = "DPI is {0}".format(dpi)
         self._logger.debug("{0} DPI at {1}".format(self._device_name, dpi))
@@ -87,7 +76,7 @@ class DpiNotifier(threading.Thread):
 
 class DpiManager:
     """
-    Class which manages the overall process of notifing battery levels
+    Manages the overall process of notifying dpi changes
     """
 
     def __init__(self, parent, device_number, device_name):
