@@ -16,6 +16,7 @@ from openrazer_daemon.dbus_services.service import DBusService
 import openrazer_daemon.dbus_services.dbus_methods
 from openrazer_daemon.misc import effect_sync
 from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
+from openrazer_daemon.misc.dpi_notifier import DpiManager as _DpiManager
 
 
 # pylint: disable=too-many-instance-attributes
@@ -69,6 +70,7 @@ class RazerDevice(DBusService):
         if additional_interfaces is not None:
             self.additional_interfaces.extend(additional_interfaces)
         self._battery_manager = None
+        self._dpi_manager = None
 
         self.config = config
         self.persistence = persistence
@@ -322,6 +324,10 @@ class RazerDevice(DBusService):
         # Initialize battery manager if the device has support
         if 'get_battery' in self.METHODS:
             self._init_battery_manager()
+
+        # Initialize dpi manager if the device has support
+        if 'get_dpi_xy' in self.METHODS:
+            self._init_dpi_manager()
 
         if self.DRIVER_MODE:
             self.logger.info('Setting device to "driver" mode. Daemon will handle special functionality')
@@ -1087,6 +1093,13 @@ class RazerDevice(DBusService):
         self._battery_manager.active = self.config.getboolean('Startup', 'battery_notifier', fallback=False)
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
         self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
+
+    def _init_dpi_manager(self):
+        """
+        Initializes the DpiManager using the provided name
+        """
+        self._dpi_manager = _DpiManager(self, self._device_number, self.getDeviceName()) # pylint: disable=no-member
+        self._dpi_manager.active = self.config.getboolean('Startup', 'dpi_notifier', fallback=False)
 
     def get_vid_pid(self):
         """
