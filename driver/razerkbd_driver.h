@@ -170,11 +170,13 @@ struct razer_kbd_device {
     unsigned short usb_vid;
     unsigned short usb_pid;
 
-    unsigned int fn_on;
-    DECLARE_BITMAP(pressed_fn, KEY_CNT);
-
     unsigned char block_keys[3];
     unsigned char left_alt_on;
+};
+
+struct razer_kbd_usb_device_data {
+    unsigned int fn_on;
+    DECLARE_BITMAP(pressed_fn, KEY_CNT);
 };
 
 #endif
