@@ -221,6 +221,8 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer DeathAdder V3 Pro (Wireless)                            |  1532:00B7  |
 | Razer Viper V3 HyperSpeed                                     |  1532:00B8  |
 | Razer Basilisk V3 X HyperSpeed                                |  1532:00B9  |
+| Razer DeathAdder V4 Pro (Wired)                               |  1532:00BE  |
+| Razer DeathAdder V4 Pro (Wireless)                            |  1532:00BF  |
 | Razer Viper V3 Pro (Wired)                                    |  1532:00C0  |
 | Razer Viper V3 Pro (Wireless)                                 |  1532:00C1  |
 | Razer DeathAdder V3 Pro (Wired)                               |  1532:00C2  |
