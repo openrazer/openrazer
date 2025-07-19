@@ -330,6 +330,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Ouroboros\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
+        device_type = "Razer Ouroboros (Wireless)\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
         device_type = "Razer Orochi 2011\n";
         break;
@@ -4108,6 +4112,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
     case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
     case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC:
@@ -4246,6 +4251,7 @@ static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
     case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
     case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
@@ -5514,6 +5520,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
 
         case USB_DEVICE_ID_RAZER_OUROBOROS:
+        case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
@@ -6582,6 +6589,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_OUROBOROS:
+        case USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS:
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
             device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
@@ -7215,6 +7223,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TAIPAN) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_IMPERATOR) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OUROBOROS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OUROBOROS_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_2013) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_2013) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_CHROMA) },
