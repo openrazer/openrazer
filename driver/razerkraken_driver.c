@@ -376,7 +376,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
 
     // ON/Static
     effect_byte.bits.on_off_static = 1;
-    effect_report.arguments[0] = 1; //effect_byte.value;
+    effect_report.arguments[0] = effect_byte.value;
 
     // Lock sending of the 2 commands
     mutex_lock(&device->lock);
