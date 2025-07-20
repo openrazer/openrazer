@@ -4850,7 +4850,7 @@ static struct usb_interface *find_intf_with_proto(struct usb_device *usbdev, u8 
  */
 static struct razer_mouse_device *find_mouse(struct hid_device *hdev)
 {
-    const struct bus_type *hid_bus_type = hdev->dev.bus;
+    const struct bus_type *mouse_hid_bus_type = hdev->dev.bus;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usbdev = interface_to_usbdev(intf);
     struct usb_interface *m_intf = find_intf_with_proto(usbdev, USB_INTERFACE_PROTOCOL_MOUSE);
@@ -4860,7 +4860,7 @@ static struct razer_mouse_device *find_mouse(struct hid_device *hdev)
     if (!m_intf)
         return NULL;
 
-    dev = device_find_child(&m_intf->dev, (void *)hid_bus_type, dev_is_on_bus);
+    dev = device_find_child(&m_intf->dev, (void *)mouse_hid_bus_type, dev_is_on_bus);
     if (!dev)
         return NULL;
 
