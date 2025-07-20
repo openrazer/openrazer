@@ -549,9 +549,12 @@ static ssize_t razer_attr_read_matrix_effect_breath(struct device *dev, struct d
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN:
-    default:
         return get_rgb_from_addr(dev, device->breathing_address[0], 0x04, buf);
         break;
+
+    default:
+        printk(KERN_WARNING "razerkraken: Unknown device\n");
+        return -EINVAL;
     }
 }
 
