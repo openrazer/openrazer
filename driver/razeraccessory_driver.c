@@ -1068,9 +1068,29 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
         request.transaction_id.id = 0x1F;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+    case USB_DEVICE_ID_RAZER_CORE:
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_FIREFLY:
+    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
+    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
+    case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+    case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
+    case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
+    case USB_DEVICE_ID_RAZER_CHROMA_MUG:
+    case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+    case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request.transaction_id.id = 0x3F;
         break;
+
+    default:
+        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1106,9 +1126,29 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
         request.transaction_id.id = 0x1F;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+    case USB_DEVICE_ID_RAZER_CORE:
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_FIREFLY:
+    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
+    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
+    case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+    case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
+    case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
+    case USB_DEVICE_ID_RAZER_CHROMA_MUG:
+    case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+    case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1155,9 +1195,29 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
         request.transaction_id.id = 0x1F;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+    case USB_DEVICE_ID_RAZER_CORE:
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_FIREFLY:
+    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
+    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
+    case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+    case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
+    case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
+    case USB_DEVICE_ID_RAZER_CHROMA_MUG:
+    case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+    case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1310,12 +1370,24 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         brightness = sum / 6;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_CORE:
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_FIREFLY:
+    case USB_DEVICE_ID_RAZER_CHROMA_MUG:
+    case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+    case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+    case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
+    case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
         request = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
         request.transaction_id.id = 0xFF;
         razer_send_payload(device, &request, &response);
         brightness = response.arguments[2];
         break;
+
+    default:
+        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        return -EINVAL;
     }
 
     return sprintf(buf, "%d\n", brightness);
@@ -1365,8 +1437,6 @@ static ssize_t razer_attr_write_set_charge_brightness(struct device *dev, struct
 static ssize_t razer_attr_read_set_charge_brightness(struct device *dev, struct device_attribute *attr, char *buf, int led)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
     unsigned char brightness = 0;
 
     switch (device->usb_dev->descriptor.idProduct) {
@@ -1375,11 +1445,8 @@ static ssize_t razer_attr_read_set_charge_brightness(struct device *dev, struct 
         break;
 
     default:
-        request = razer_chroma_standard_get_led_brightness(VARSTORE, led);
-        request.transaction_id.id = 0xFF;
-        razer_send_payload(device, &request, &response);
-        brightness = response.arguments[2];
-        break;
+        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        return -EINVAL;
     }
 
     return sprintf(buf, "%d\n", brightness);
