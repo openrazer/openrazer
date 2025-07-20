@@ -484,6 +484,7 @@ static void razer_set_device_mode(struct razer_kbd_device *device, unsigned char
     case USB_DEVICE_ID_RAZER_CYNOSA_LITE:
         request.transaction_id.id = 0x3F;
         break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
@@ -500,15 +501,104 @@ static void razer_set_device_mode(struct razer_kbd_device *device, unsigned char
     case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
         request.transaction_id.id = 0x1F;
         break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
         request.transaction_id.id = 0x9F;
         break;
-    default:
+
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH_EDITION:
+    case USB_DEVICE_ID_RAZER_ANANSI:
+    case USB_DEVICE_ID_RAZER_NOSTROMO:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_TE_2014:
+    case USB_DEVICE_ID_RAZER_TARTARUS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_EXPERT:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
+    case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_QHD:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN:
+    case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_2018:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_2019:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2020:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_CYNOSA_V2:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2020_BASE:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_JP:
+    case USB_DEVICE_ID_RAZER_BOOK_2020:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_2022:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: device_mode not supported for this model\n");
+        return;
     }
 
     razer_send_payload(device, &request, &response);
@@ -533,18 +623,21 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         request.transaction_id.id = 0x1f;
         break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
         request.transaction_id.id = 0x9f;
         break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
         request.transaction_id.id = 0x3f;
         break;
+
     default:
-        request.transaction_id.id = 0xFF;
-        break;
+        printk(KERN_WARNING "razerkbd: charge_level not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -571,18 +664,21 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         request.transaction_id.id = 0x1f;
         break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
         request.transaction_id.id = 0x9f;
         break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
         request.transaction_id.id = 0x3f;
         break;
+
     default:
-        request.transaction_id.id = 0xFF;
-        break;
+        printk(KERN_WARNING "razerkbd: charge_status not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -701,9 +797,71 @@ static ssize_t razer_attr_write_game_led_state(struct device *dev, struct device
         request = razer_chroma_standard_set_led_state(NOSTORE, GAME_LED, enabled);
         request.transaction_id.id = 0x1f;
         break;
-    default:
+
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH_EDITION:
+    case USB_DEVICE_ID_RAZER_ANANSI:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_TE_2014:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_EXPERT:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+    case USB_DEVICE_ID_RAZER_ORNATA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
+    case USB_DEVICE_ID_RAZER_CYNOSA_CHROMA:
+    case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_CYNOSA_CHROMA_PRO:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_CYNOSA_LITE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_2019:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_TE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_ORNATA_V2:
+    case USB_DEVICE_ID_RAZER_CYNOSA_V2:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_JP:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_ALT:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_X:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_75PCT:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
         request = razer_chroma_standard_set_led_state(VARSTORE, GAME_LED, enabled);
         request.transaction_id.id = 0xFF;
+        break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: game_led_state not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -728,9 +886,71 @@ static ssize_t razer_attr_read_game_led_state(struct device *dev, struct device_
         request = razer_chroma_standard_get_led_state(NOSTORE, GAME_LED);
         request.transaction_id.id = 0x1f;
         break;
-    default:
+
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH_EDITION:
+    case USB_DEVICE_ID_RAZER_ANANSI:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_TE_2014:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_EXPERT:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
+    case USB_DEVICE_ID_RAZER_ORNATA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_ELITE:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ELITE:
+    case USB_DEVICE_ID_RAZER_CYNOSA_CHROMA:
+    case USB_DEVICE_ID_RAZER_TARTARUS_V2:
+    case USB_DEVICE_ID_RAZER_CYNOSA_CHROMA_PRO:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_CYNOSA_LITE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_2019:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_TE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_ORNATA_V2:
+    case USB_DEVICE_ID_RAZER_CYNOSA_V2:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_JP:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_ALT:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_X:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT:
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_75PCT:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
         request = razer_chroma_standard_get_led_state(VARSTORE, GAME_LED);
         request.transaction_id.id = 0xFF;
+        break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: game_led_state not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -758,8 +978,10 @@ static ssize_t razer_attr_write_keyswitch_optimization(struct device *dev, struc
         request.transaction_id.id = 0x1f;
         razer_send_payload(device, &request, &response);
         break;
+
     default:
-        return -ENOSYS;
+        printk(KERN_WARNING "razerkbd: keyswitch_optimization not supported for this model\n");
+        return -EINVAL;
     }
 
     return count;
@@ -781,10 +1003,10 @@ static ssize_t razer_attr_read_keyswitch_optimization(struct device *dev, struct
         request = razer_chroma_misc_get_keyswitch_optimization();
         request.transaction_id.id = 0x1f;
         break;
+
     default:
-        request = razer_chroma_misc_get_keyswitch_optimization();
-        request.transaction_id.id = 0xFF;
-        break;
+        printk(KERN_WARNING "razerkbd: keyswitch_optimization not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1356,10 +1578,41 @@ static ssize_t razer_attr_write_macro_led_effect(struct device *dev, struct devi
         request.transaction_id.id = 0xFF;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH_EDITION:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2013:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_TE_2014:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_EXPERT:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
+    case USB_DEVICE_ID_RAZER_CYNOSA_V2:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
         request = razer_chroma_standard_set_led_effect(VARSTORE, MACRO_LED, enabled);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: macro_led_effect not supported for this model\n");
+        return -EINVAL;
     }
     razer_send_payload(device, &request, &response);
 
@@ -1406,10 +1659,17 @@ static ssize_t razer_attr_write_matrix_effect_pulsate(struct device *dev, struct
         request.transaction_id.id = 0xFF;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_TARTARUS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_EXPERT:
         request = razer_chroma_standard_set_led_effect(VARSTORE, BACKLIGHT_LED, CLASSIC_EFFECT_BREATHING);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: matrix_effect_pulsate not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1455,10 +1715,18 @@ static ssize_t razer_attr_read_profile_led_red(struct device *dev, struct device
         request = razer_chroma_standard_get_led_state(VARSTORE, BLUE_PROFILE_LED);
         request.transaction_id.id = 0xFF;
         break;
-    default:
+
+    case USB_DEVICE_ID_RAZER_NOSTROMO:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER:
+    case USB_DEVICE_ID_RAZER_TARTARUS:
+    case USB_DEVICE_ID_RAZER_TARTARUS_V2:
         request = razer_chroma_standard_get_led_state(VARSTORE, RED_PROFILE_LED);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: profile_led_red not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1483,10 +1751,18 @@ static ssize_t razer_attr_read_profile_led_green(struct device *dev, struct devi
         request = razer_chroma_standard_get_led_state(VARSTORE, RED_PROFILE_LED);
         request.transaction_id.id = 0xFF;
         break;
-    default:
+
+    case USB_DEVICE_ID_RAZER_NOSTROMO:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER:
+    case USB_DEVICE_ID_RAZER_TARTARUS:
+    case USB_DEVICE_ID_RAZER_TARTARUS_V2:
         request = razer_chroma_standard_get_led_state(VARSTORE, GREEN_PROFILE_LED);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: profile_led_green not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1511,10 +1787,18 @@ static ssize_t razer_attr_read_profile_led_blue(struct device *dev, struct devic
         request = razer_chroma_standard_get_led_state(VARSTORE, GREEN_PROFILE_LED);
         request.transaction_id.id = 0xFF;
         break;
-    default:
+
+    case USB_DEVICE_ID_RAZER_NOSTROMO:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER:
+    case USB_DEVICE_ID_RAZER_TARTARUS:
+    case USB_DEVICE_ID_RAZER_TARTARUS_V2:
         request = razer_chroma_standard_get_led_state(VARSTORE, BLUE_PROFILE_LED);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: profile_led_blue not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1538,10 +1822,18 @@ static ssize_t razer_attr_write_profile_led_red(struct device *dev, struct devic
         request = razer_chroma_standard_set_led_state(VARSTORE, BLUE_PROFILE_LED, enabled);
         request.transaction_id.id = 0xFF;
         break;
-    default:
+
+    case USB_DEVICE_ID_RAZER_NOSTROMO:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER:
+    case USB_DEVICE_ID_RAZER_TARTARUS:
+    case USB_DEVICE_ID_RAZER_TARTARUS_V2:
         request = razer_chroma_standard_set_led_state(VARSTORE, RED_PROFILE_LED, enabled);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: profile_led_red not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1565,10 +1857,18 @@ static ssize_t razer_attr_write_profile_led_green(struct device *dev, struct dev
         request = razer_chroma_standard_set_led_state(VARSTORE, RED_PROFILE_LED, enabled);
         request.transaction_id.id = 0xFF;
         break;
-    default:
+
+    case USB_DEVICE_ID_RAZER_NOSTROMO:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER:
+    case USB_DEVICE_ID_RAZER_TARTARUS:
+    case USB_DEVICE_ID_RAZER_TARTARUS_V2:
         request = razer_chroma_standard_set_led_state(VARSTORE, GREEN_PROFILE_LED, enabled);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: profile_led_green not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1591,10 +1891,18 @@ static ssize_t razer_attr_write_profile_led_blue(struct device *dev, struct devi
         request = razer_chroma_standard_set_led_state(VARSTORE, GREEN_PROFILE_LED, enabled);
         request.transaction_id.id = 0xFF;
         break;
-    default:
+
+    case USB_DEVICE_ID_RAZER_NOSTROMO:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER:
+    case USB_DEVICE_ID_RAZER_TARTARUS:
+    case USB_DEVICE_ID_RAZER_TARTARUS_V2:
         request = razer_chroma_standard_set_led_state(VARSTORE, BLUE_PROFILE_LED, enabled);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: profile_led_blue not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1726,10 +2034,69 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
         request.transaction_id.id = 0x3F;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
+    case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_QHD:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_2018:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BOOK_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         request = razer_chroma_standard_matrix_effect_none();
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: matrix_effect_none not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1814,10 +2181,56 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
         request.transaction_id.id = 0x9F;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_QHD:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_2018:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         request = razer_chroma_standard_matrix_effect_wave(direction);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: matrix_effect_wave not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1938,10 +2351,66 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
         request.transaction_id.id = 0x3F;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
+    case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_QHD:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_2018:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BOOK_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         request = razer_chroma_standard_matrix_effect_spectrum();
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: matrix_effect_spectrum not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -2023,10 +2492,66 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
         request = razer_chroma_standard_matrix_effect_reactive(speed, (struct razer_rgb*)&buf[1]);
         request.transaction_id.id = 0x3F;
         break;
-    default:
+
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_QHD:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_2018:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BOOK_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         request = razer_chroma_standard_matrix_effect_reactive(speed, (struct razer_rgb*)&buf[1]);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: matrix_effect_reactive not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -2395,11 +2920,47 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
         }
         break;
 
-    default: // BW2016 can do normal starlight
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
+    case USB_DEVICE_ID_RAZER_BLADE_QHD:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
+    case USB_DEVICE_ID_RAZER_BLADE_2018:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
         request = razer_chroma_standard_matrix_effect_starlight_single(0x01, &rgb1);
         request.transaction_id.id = 0xFF;
         razer_send_payload(device, &request, &response);
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: matrix_effect_starlight not supported for this model\n");
+        return -EINVAL;
     }
 
     return count;
@@ -2575,7 +3136,59 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         }
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
+    case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_QHD:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_2018:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BOOK_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         switch(count) {
         case 3: // Single colour mode
             request = razer_chroma_standard_matrix_effect_breathing_single((struct razer_rgb*)&buf[0]);
@@ -2597,6 +3210,10 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
             // TODO move default to case 1:. Then default: printk(warning). Also remove pointless buffer
         }
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: matrix_effect_breath not supported for this model\n");
+        return -EINVAL;
     }
 
     return count;
@@ -2752,10 +3369,56 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
         request.transaction_id.id = 0x3F;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_QHD:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_2018:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         request = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: matrix_effect_custom not supported for this model\n");
+        return -EINVAL;
     }
 
     /* See comment in razer_attr_write_matrix_custom_frame for want_response */
@@ -2898,8 +3561,68 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
         request.transaction_id.id = 0xFF;
         break;
 
+    case USB_DEVICE_ID_RAZER_ANANSI:
     case USB_DEVICE_ID_RAZER_NOSTROMO:
-    default:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_TARTARUS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_EXPERT:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
+    case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_QHD:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_2018:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BOOK_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         if (is_blade_laptop(device)) {
             request = razer_chroma_misc_set_blade_brightness(brightness);
         } else {
@@ -2907,6 +3630,10 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
         }
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: matrix_brightness not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -2992,8 +3719,71 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         request.transaction_id.id = 0xFF;
         break;
 
+    case USB_DEVICE_ID_RAZER_ANANSI:
     case USB_DEVICE_ID_RAZER_NOSTROMO:
-    default:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_TARTARUS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_EXPERT:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
+    case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
+    case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_QHD:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_2018:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2020:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_ANALOG:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BOOK_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_2022:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_MINI_ANALOG:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         if (is_blade_laptop(device)) {
             request = razer_chroma_misc_get_blade_brightness();
         } else {
@@ -3001,6 +3791,10 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         }
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razerkbd: matrix_brightness not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -3176,10 +3970,54 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             request.transaction_id.id = 0x3F;
             break;
 
-        default:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
+        case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_TE:
+        case USB_DEVICE_ID_RAZER_BLADE_QHD:
+        case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_CHROMA_TE:
+        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+        case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
+        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+        case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
+        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+        case USB_DEVICE_ID_RAZER_BLADE_2018:
+        case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ESSENTIAL:
+        case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+        case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
+        case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+        case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+        case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
+        case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
+        case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+        case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
+        case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+        case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+        case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+        case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+        case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+        case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+        case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+        case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+        case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+        case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+        case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+        case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+        case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+        case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+        case USB_DEVICE_ID_RAZER_BLADE_16_2025:
             request = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             request.transaction_id.id = 0xFF;
             break;
+
+        default:
+            printk(KERN_WARNING "razerkbd: matrix_custom_frame not supported for this model\n");
+            return -EINVAL;
         }
 
         /*
@@ -3223,9 +4061,8 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
         break;
 
     default:
-        request = razer_chroma_misc_get_polling_rate();
-        request.transaction_id.id = 0xFF;
-        break;
+        printk(KERN_WARNING "razerkbd: poll_rate not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -3278,10 +4115,10 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
         request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x00);
         request.transaction_id.id = 0x1f;
         break;
+
     default:
-        request = razer_chroma_misc_set_polling_rate(polling_rate);
-        request.transaction_id.id = 0xFF;
-        break;
+        printk(KERN_WARNING "razerkbd: poll_rate not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
