@@ -4,7 +4,7 @@
 # you want to fake (for debugging)
 #
 
-whereami=$(dirname "$0")
+whereami="$(dirname "$0")"
 
 device_cfg_files=$(ls "$whereami/../pylib/openrazer/_fake_driver/"*.cfg)
 config_dir="/tmp/daemon_config/"
@@ -60,5 +60,4 @@ $terminal_cmd "$whereami/create_fake_device.py" --dest "$test_dir" $options &
 pkill -e openrazer-daemon
 
 # Start the daemon in a new terminal window.
-$terminal_cmd openrazer-daemon --verbose -F --run-dir "$config_dir/data" --log-dir "$config_dir/logs" --test-dir "$test_dir"
-
+$terminal_cmd "$whereami/../daemon/run_openrazer_daemon.py" --verbose -F --run-dir "$config_dir/data" --log-dir "$config_dir/logs" --test-dir "$test_dir"

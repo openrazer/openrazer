@@ -1008,6 +1008,41 @@ class RazerNagaProWireless(RazerNagaProWired):
     METHODS = RazerNagaProWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
 
+class RazerNagaV2ProWired(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Naga V2 Pro (Wired)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x00A7
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [1, 3]
+
+    DEDICATED_MACRO_KEYS = True
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_dpi_stages', 'set_dpi_stages',
+               # Battery
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold',
+               # Logo
+               'get_logo_brightness', 'set_logo_brightness',
+               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
+               # Thumbgrid
+               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               # Custom frame
+               'set_custom_effect', 'set_key_row']
+
+    DPI_MAX = 30000
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/6292/6292-1-en-v1.png"
+
+
+class RazerNagaV2ProWireless(RazerNagaV2ProWired):
+    """
+    Class for the Razer Naga V2 Pro (Wireless)
+    """
+    USB_PID = 0x00A8
+    METHODS = RazerNagaV2ProWired.METHODS + ['set_charge_effect', 'set_charge_colour']
+
+
 class RazerDeathAdder1800(__RazerDevice):
     """
     Class for the Razer DeathAdder 1800
@@ -1888,6 +1923,7 @@ class RazerBasiliskV3XHyperSpeed(__RazerDevice):
                'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none', 'set_scroll_reactive', 'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/9766/9766-1-en-v1.png"
+    DRIVER_MODE = True
 
     DPI_MAX = 18000
 
@@ -1946,3 +1982,31 @@ class RazerDeathAdderV3HyperSpeedWireless(RazerDeathAdderV3HyperSpeedWired):
     """
 
     USB_PID = 0x00C5
+
+
+class RazerProClickV2VerticalEditionWired(__RazerDevice):
+    """
+    Class for the Razer Pro Click V2 Vertical Edition (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Pro_Click_V2_Vertical_Edition-if0(1|2)-event-kbd')
+    USB_VID = 0x1532
+    USB_PID = 0x00C7
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               'get_idle_time', 'set_idle_time',
+               'get_battery', 'is_charging',
+               'get_low_battery_threshold', 'set_low_battery_threshold',
+               'get_brightness', 'set_brightness', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect']
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/15010/15010-1-en-v1.png"
+
+    DPI_MAX = 30000
+
+    POLL_RATES = [125, 250, 500, 1000]
+
+
+class RazerProClickV2VerticalEditionWireless(RazerProClickV2VerticalEditionWired):
+    """
+    Class for the Razer Pro Click V2 Vertical Edition (Wireless)
+    """
+    USB_PID = 0x00C8

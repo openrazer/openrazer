@@ -206,6 +206,34 @@ static const struct razer_key_translation chroma_keys_6[] = {
     { 0 }
 };
 
+// Razer DeathStalker V2 Pro TKL
+static const struct razer_key_translation chroma_keys_7[] = {
+    { KEY_F9, RAZER_MACRO_KEY },
+    { KEY_F10, RAZER_GAME_KEY },
+    { KEY_F11, RAZER_BRIGHTNESS_DOWN },
+    { KEY_F12, RAZER_BRIGHTNESS_UP },
+    { KEY_INSERT, KEY_SYSRQ },
+    { KEY_HOME, KEY_SCROLLLOCK },
+    { KEY_PAGEUP, KEY_PAUSE },
+    { KEY_PAGEDOWN, KEY_SLEEP },
+    // TODO - Add KEY_CONTEXT_MENU when we figure out what it is supposed to be doing
+    { 0 }
+};
+
+// Razer Ornata V3 Tenkeyless
+static const struct razer_key_translation chroma_keys_8[] = {
+    { KEY_F9, RAZER_MACRO_KEY },
+    { KEY_F10, RAZER_GAME_KEY },
+    { KEY_F11, RAZER_BRIGHTNESS_DOWN },
+    { KEY_F12, RAZER_BRIGHTNESS_UP },
+    { KEY_INSERT, KEY_SYSRQ },
+    { KEY_HOME, KEY_SCROLLLOCK },
+    { KEY_PAGEUP, KEY_PAUSE },
+    { KEY_PAGEDOWN, KEY_SLEEP },
+    { KEY_DELETE, KEY_MUTE },
+    { 0 }
+};
+
 /**
  * Essentially search through the struct array above.
  */
@@ -267,6 +295,7 @@ static bool is_blade_laptop(struct razer_kbd_device *device)
     case USB_DEVICE_ID_RAZER_BLADE_14_2024:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_BLADE_18_2024:
         return true;
@@ -1244,6 +1273,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Blade 16 (2023)\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
+        device_type = "Razer Blade 16 (2025)\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
         device_type = "Razer Blade 18 (2023)\n";
         break;
@@ -2081,6 +2114,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_BLADE_14_2024:
     case USB_DEVICE_ID_RAZER_BLADE_18_2024:
@@ -2323,6 +2357,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
 
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
     case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         if(count == 7) {
             request = razer_chroma_standard_matrix_effect_starlight_dual(buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
             request.transaction_id.id = 0xFF;
@@ -3040,13 +3075,9 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
     struct razer_report request = {0};
     struct razer_report response = {0};
     size_t offset = 0;
-    unsigned char row_id;
-    unsigned char start_col;
-    unsigned char stop_col;
-    unsigned char row_length;
+    unsigned char row_id, start_col, stop_col;
+    size_t row_length;
     bool want_response = true;
-
-    //printk(KERN_ALERT "razerkbd: Total count: %d\n", (unsigned char)count);
 
     while(offset < count) {
         if(offset + 3 > count) {
@@ -3057,21 +3088,25 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         row_id = buf[offset++];
         start_col = buf[offset++];
         stop_col = buf[offset++];
-        row_length = ((stop_col+1) - start_col) * 3;
 
-        // printk(KERN_ALERT "razerkbd: Row ID: %d, Start: %d, Stop: %d, row length: %d\n", row_id, start_col, stop_col, row_length);
-
+        // Validate parameters
         if(start_col > stop_col) {
-            printk(KERN_ALERT "razerkbd: Start column is greater than end column\n");
+            printk(KERN_ALERT "razerkbd: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
             return -EINVAL;
         }
 
-        if(offset + row_length > count) {
-            printk(KERN_ALERT "razerkbd: Not enough RGB to fill row\n");
+        row_length = ((stop_col + 1) - start_col) * 3;
+
+        // Make sure we actually got the data that was promised to us
+        if(count < offset + row_length) {
+            printk(KERN_ALERT "razerkbd: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
             return -EINVAL;
         }
+
+        // printk(KERN_INFO "razerkbd: Row ID: %u, Start: %u, Stop: %u, row length: %lu\n", row_id, start_col, stop_col, row_length);
 
         // Offset now at beginning of RGB data
+
         switch (device->usb_pid) {
         case USB_DEVICE_ID_RAZER_ORNATA:
         case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
@@ -3141,36 +3176,6 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             request.transaction_id.id = 0x3F;
             break;
 
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_X_ULTIMATE:
-        case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
-        case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
-        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
-        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
-        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
-        case USB_DEVICE_ID_RAZER_BLADE_STEALTH_2019:
-        case USB_DEVICE_ID_RAZER_BLADE_QHD:
-        case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
-        case USB_DEVICE_ID_RAZER_BLADE_2018:
-        case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
-        case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
-        case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
-        case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
-        case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
-        case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
-        case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
-        case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
-        case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
-        case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
-        case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
-        case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
-        case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
-        case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
-        case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
-        case USB_DEVICE_ID_RAZER_BLADE_14_2021:
-        case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
-            // FIXME this seems not to do anything?
-            request.transaction_id.id = 0x80; // Fall into the 2016/blade/blade2016 to set device id
-            fallthrough;
         default:
             request = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             request.transaction_id.id = 0xFF;
@@ -3461,6 +3466,7 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     }
 
     switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH_EDITION:
         translation = find_translation(chroma_keys_2, usage->code);
         break;
@@ -3485,15 +3491,21 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
-    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
-    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
         translation = find_translation(chroma_keys_5, usage->code);
         break;
 
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+        translation = find_translation(chroma_keys_7, usage->code);
+        break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_75PCT:
         translation = find_translation(chroma_keys_6, usage->code);
+        break;
+
+    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
+        translation = find_translation(chroma_keys_8, usage->code);
         break;
 
     default:
@@ -3546,10 +3558,9 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
  */
 static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_device *device, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
 {
-    // The event were looking for is 16 or 22 bytes long and starts with 0x04.
-    // Newer firmware seems to use 22 bytes.
+    // The event were looking for is 16, 22 or 48 bytes long and starts with 0x04.
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
-       ((size == 22) || (size == 16)) && data[0] == 0x04) {
+       ((size == 48) || (size == 22) || (size == 16)) && data[0] == 0x04) {
         // Convert 04... to 0100...
         int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
         int found_fn = 0x00;
@@ -3632,6 +3643,9 @@ static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_de
     return 0;
 }
 
+#define RAW_EVENT_BITFIELD_BYTES (20)
+#define RAW_EVENT_BITFIELD_BITS (RAW_EVENT_BITFIELD_BYTES * BITS_PER_BYTE)
+
 /**
  * Bitfield raw event function
  *
@@ -3642,12 +3656,11 @@ static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_de
  */
 static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_device *device, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
 {
-    u8 bitfield[20] = { 0 };
+    DECLARE_BITMAP(bitfield, RAW_EVENT_BITFIELD_BITS) = { 0 };
 
-    // The event were looking for is 16 or 22 bytes long and starts with 0x04.
-    // Newer firmware seems to use 22 bytes.
+    // The event were looking for is 16, 22 or 48 bytes long and starts with 0x04.
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
-       ((size == 22) || (size == 16)) && data[0] == 0x04) {
+       ((size == 48) || (size == 22) || (size == 16)) && data[0] == 0x04) {
         // Convert 04... to 0100...
         int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
         int found_fn = 0x00;
@@ -3721,9 +3734,9 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_de
             // data of size 22 starting with 0x01 is a bit field so we need to handle that separately
             if (size == 22) {
                 if (write_bitfield) {
-                    if (cur_value < (sizeof(bitfield) * BITS_PER_BYTE)) {
+                    if (cur_value < RAW_EVENT_BITFIELD_BITS) {
                         // value fits the bit field, so we can use that
-                        set_bit(cur_value, (unsigned long*) bitfield);
+                        bitmap_set(bitfield, cur_value, 1);
                     } else {
                         // value does not fit the bit field, so we need extra handling
                         int report_extra = 1;
@@ -3774,7 +3787,7 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_de
         data[0] = 0x01;
         data[1] = 0x00;
         if (size == 22) {
-            memcpy(data + 2, bitfield, sizeof(bitfield));
+            memcpy(data + 2, bitfield, RAW_EVENT_BITFIELD_BYTES);
         }
 
         // Some reason just by editing data, it generates a normal event above. (Could quite possibly work like that, no clue)
@@ -3813,6 +3826,8 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
         return razer_raw_event_bitfield(hdev, device, intf, report, data, size);
     default:
         return razer_raw_event_standard(hdev, device, intf, report, data, size);
@@ -4285,6 +4300,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         case USB_DEVICE_ID_RAZER_BLADE_14_2023:
         case USB_DEVICE_ID_RAZER_BLADE_15_2023:
         case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+        case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         case USB_DEVICE_ID_RAZER_BLADE_18_2023:
         case USB_DEVICE_ID_RAZER_BLADE_14_2024:
         case USB_DEVICE_ID_RAZER_BLADE_18_2024:
@@ -4790,6 +4806,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_BLADE_14_2023:
         case USB_DEVICE_ID_RAZER_BLADE_15_2023:
         case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+        case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         case USB_DEVICE_ID_RAZER_BLADE_18_2023:
         case USB_DEVICE_ID_RAZER_BLADE_14_2024:
         case USB_DEVICE_ID_RAZER_BLADE_18_2024:
@@ -4994,6 +5011,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_16_2023) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_16_2025) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_18_2023) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_18_2024) },
