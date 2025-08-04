@@ -117,6 +117,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer BlackWidow V4 75%                       |  1532:02A5  |
 | Razer Huntsman V3 Pro                         |  1532:02A6  |
 | Razer Blade 14 (2024)                         |  1532:02B6  |
+| Razer Blade 16 (2025)                         |  1532:02C6  |
 | Razer Blade 18 (2024)                         |  1532:02B8  |
 | Razer BlackWidow V3 Tenkeyless                |  1532:0A24  |
 
@@ -223,6 +224,8 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer DeathAdder V3 Pro (Wireless)            |  1532:00C3  |
 | Razer DeathAdder V3 HyperSpeed (Wired)        |  1532:00C4  |
 | Razer DeathAdder V3 HyperSpeed (Wireless)     |  1532:00C5  |
+| Razer Pro Click V2 Vertical Edition (Wired)   |  1532:00C7  |
+| Razer Pro Click V2 Vertical Edition (Wireless)|  1532:00C8  |
 | Razer Basilisk V3 35K                         |  1532:00CB  |
 | Razer Basilisk V3 Pro 35K (Wired)             |  1532:00CC  |
 | Razer Basilisk V3 Pro 35K (Wireless)          |  1532:00CD  |
@@ -234,9 +237,10 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Firefly                                 |  1532:0C00  |
 | Razer Goliathus                               |  1532:0C01  |
 | Razer Goliathus Extended                      |  1532:0C02  |
-| Razer Firefly v2                              |  1532:0C04  |
+| Razer Firefly V2                              |  1532:0C04  |
 | Razer Strider Chroma                          |  1532:0C05  |
 | Razer Goliathus Chroma 3XL                    |  1532:0C06  |
+| Razer Firefly V2 Pro                          |  1532:0C08  |
 
 ### Headsets
 | Device                                        | USB VID:PID |
