@@ -72,6 +72,8 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_NEW_MOUSE_RECEIVER_WAIT_MIN_US, RAZER_NEW_MOUSE_RECEIVER_WAIT_MAX_US);
         break;
 
@@ -686,6 +688,14 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Naga V2 Pro (Wireless)\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+        device_type = "Razer Pro Click V2 Vertical Edition (Wireless)\n";
+        break;
+
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
+        device_type = "Razer Pro Click V2 Vertical Edition (Wired)\n";
+        break;
+
     default:
         device_type = "Unknown Device\n";
     }
@@ -759,6 +769,8 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -780,9 +792,54 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
         request.transaction_id.id = 0x3f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_NAGA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_NAGA_2012:
+    case USB_DEVICE_ID_RAZER_IMPERATOR:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_TAIPAN:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
+    case USB_DEVICE_ID_RAZER_OROCHI_2013:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX:
+    case USB_DEVICE_ID_RAZER_ABYSSUS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
+    case USB_DEVICE_ID_RAZER_COBRA:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: firmware_version not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -829,6 +886,8 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
         request.transaction_id.id = 0x1f;
         break;
@@ -908,6 +967,8 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_effect_custom_frame();
         request.transaction_id.id = 0x1f;
         break;
@@ -917,10 +978,16 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
         request.transaction_id.id = 0x80;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
         request = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: matrix_effect_custom not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -974,6 +1041,8 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
         request.transaction_id.id = 0x1f;
         break;
@@ -1010,6 +1079,8 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
         request.transaction_id.id = 0x1f;
         break;
@@ -1052,6 +1123,8 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
         request.transaction_id.id = 0x1f;
         break;
@@ -1090,6 +1163,8 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
         request.transaction_id.id = 0x1f;
         break;
@@ -1120,6 +1195,8 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         switch(count) {
         case 3: // Single colour mode
             request = razer_chroma_mouse_extended_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
@@ -1230,6 +1307,8 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -1237,9 +1316,53 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
         request.transaction_id.id = 0x08;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_NAGA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
+    case USB_DEVICE_ID_RAZER_NAGA_2012:
+    case USB_DEVICE_ID_RAZER_IMPERATOR:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_TAIPAN:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
+    case USB_DEVICE_ID_RAZER_OROCHI_2013:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX:
+    case USB_DEVICE_ID_RAZER_ABYSSUS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
+    case USB_DEVICE_ID_RAZER_COBRA:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: device_serial not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1310,12 +1433,28 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: charge_level not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1389,12 +1528,27 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: charge_status not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1425,9 +1579,19 @@ static ssize_t razer_attr_write_charge_effect(struct device *dev, struct device_
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: charge_effect not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1464,9 +1628,19 @@ static ssize_t razer_attr_write_charge_colour(struct device *dev, struct device_
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: charge_colour not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1557,6 +1731,8 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_misc_get_polling_rate();
         request.transaction_id.id = 0x1f;
         break;
@@ -1595,12 +1771,59 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
 
         return sprintf(buf, "%d\n", polling_rate);
 
-    default:
+    case USB_DEVICE_ID_RAZER_OROCHI_2011:
+    case USB_DEVICE_ID_RAZER_NAGA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_NAGA_2012:
+    case USB_DEVICE_ID_RAZER_IMPERATOR:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_TAIPAN:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
+    case USB_DEVICE_ID_RAZER_OROCHI_2013:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX:
+    case USB_DEVICE_ID_RAZER_ABYSSUS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
+    case USB_DEVICE_ID_RAZER_COBRA:
         request = razer_chroma_misc_get_polling_rate();
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: poll_rate not supported for this model\n");
+        return -EINVAL;
     }
 
+    // XXX Clean up this special case for Orochi
     if(device->usb_pid == USB_DEVICE_ID_RAZER_OROCHI_2011) {
         response.arguments[0] = device->orochi2011.poll;
     } else {
@@ -1704,6 +1927,8 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_misc_set_polling_rate(polling_rate);
         request.transaction_id.id = 0x1f;
         break;
@@ -1718,10 +1943,51 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_NAGA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_NAGA_2012:
+    case USB_DEVICE_ID_RAZER_IMPERATOR:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_TAIPAN:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
+    case USB_DEVICE_ID_RAZER_OROCHI_2013:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX:
+    case USB_DEVICE_ID_RAZER_ABYSSUS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
+    case USB_DEVICE_ID_RAZER_COBRA:
         request = razer_chroma_misc_set_polling_rate(polling_rate);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: poll_rate not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1785,6 +2051,8 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         request.transaction_id.id = 0x1F;
         break;
@@ -1842,6 +2110,8 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_get_brightness(VARSTORE, ZERO_LED);
         request.transaction_id.id = 0x1F;
         break;
@@ -2034,12 +2304,50 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_IMPERATOR:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_TAIPAN:
+    case USB_DEVICE_ID_RAZER_OROCHI_2013:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
+    case USB_DEVICE_ID_RAZER_COBRA:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: dpi not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -2141,6 +2449,8 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_misc_get_dpi_xy(NOSTORE);
         request.transaction_id.id = 0x1f;
         break;
@@ -2170,10 +2480,44 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
         request.transaction_id.id = 0x3f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_TAIPAN:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
+    case USB_DEVICE_ID_RAZER_COBRA:
         request = razer_chroma_misc_get_dpi_xy(NOSTORE);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: dpi not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -2475,12 +2819,37 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
+    case USB_DEVICE_ID_RAZER_NAGA_X:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
+    case USB_DEVICE_ID_RAZER_COBRA:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: dpi_stages not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -2554,12 +2923,37 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
+    case USB_DEVICE_ID_RAZER_NAGA_X:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
+    case USB_DEVICE_ID_RAZER_COBRA:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: dpi_stages not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -2645,12 +3039,44 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: device_idle_time not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -2702,12 +3128,44 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: device_idle_time not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -2745,12 +3203,54 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: charge_low_threshold not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -2790,12 +3290,55 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
+    case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: charge_low_threshold not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -3001,6 +3544,8 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -3022,9 +3567,55 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
         request.transaction_id.id = 0x3f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_NAGA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_NAGA_2012:
+    case USB_DEVICE_ID_RAZER_IMPERATOR:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_TAIPAN:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
+    case USB_DEVICE_ID_RAZER_OROCHI_2013:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX:
+    case USB_DEVICE_ID_RAZER_ABYSSUS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
+    case USB_DEVICE_ID_RAZER_COBRA:
+    case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: device_mode not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -3111,12 +3702,61 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_NAGA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_NAGA_2012:
+    case USB_DEVICE_ID_RAZER_IMPERATOR:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_TAIPAN:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
+    case USB_DEVICE_ID_RAZER_OROCHI_2013:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX:
+    case USB_DEVICE_ID_RAZER_ABYSSUS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_VIPER_8K:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_COBRA:
+    case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: device_mode not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -3164,6 +3804,8 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_get_brightness(VARSTORE, led_id);
         request.transaction_id.id = 0x1f;
         break;
@@ -3195,10 +3837,27 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
         request.transaction_id.id = 0x3F;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
         request = razer_chroma_standard_get_led_brightness(VARSTORE, led_id);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: led_brightness not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -3244,6 +3903,8 @@ static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, led_id, brightness);
         request.transaction_id.id = 0x1f;
         break;
@@ -3275,10 +3936,27 @@ static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device
         request.transaction_id.id = 0x3F;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
         request = razer_chroma_standard_set_led_brightness(VARSTORE, led_id, brightness);
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: led_brightness not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -3404,6 +4082,8 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, led_id, direction);
         request.transaction_id.id = 0x1f;
         break;
@@ -3513,6 +4193,8 @@ static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, led_id);
         request.transaction_id.id = 0x1f;
         break;
@@ -3608,6 +4290,8 @@ static ssize_t razer_attr_write_matrix_effect_reactive_common(struct device *dev
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_COBRA:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_effect_reactive(VARSTORE, led_id, speed, (struct razer_rgb*)&buf[1]);
         request.transaction_id.id = 0x1f;
         break;
@@ -3737,6 +4421,8 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_COBRA:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         switch(count) {
         case 3: // Single colour mode
             request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
@@ -3791,12 +4477,55 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
+    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
+    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
+    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
+    case USB_DEVICE_ID_RAZER_VIPER:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
+    case USB_DEVICE_ID_RAZER_COBRA:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
+    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
+    case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
         request.transaction_id.id = 0x3f;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: matrix_effect_breath not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -3905,6 +4634,8 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_COBRA:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
         request.transaction_id.id = 0x1f;
         break;
@@ -4105,6 +4836,8 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_COBRA:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
         request = razer_chroma_extended_matrix_effect_none(VARSTORE, led_id);
         request.transaction_id.id = 0x1f;
         break;
@@ -4466,9 +5199,14 @@ static ssize_t razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode(
         request.transaction_id.id = 0x1F;
         break;
 
-    default:
+    case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
         request.transaction_id.id = 0xFF;
         break;
+
+    default:
+        printk(KERN_WARNING "razermouse: hyperpolling_wireless_dongle_indicator_led_mode not supported for this model\n");
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -4772,7 +5510,7 @@ static struct usb_interface *find_intf_with_proto(struct usb_device *usbdev, u8 
  */
 static struct razer_mouse_device *find_mouse(struct hid_device *hdev)
 {
-    const struct bus_type *hid_bus_type = hdev->dev.bus;
+    const struct bus_type *mouse_hid_bus_type = hdev->dev.bus;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usbdev = interface_to_usbdev(intf);
     struct usb_interface *m_intf = find_intf_with_proto(usbdev, USB_INTERFACE_PROTOCOL_MOUSE);
@@ -4782,7 +5520,7 @@ static struct razer_mouse_device *find_mouse(struct hid_device *hdev)
     if (!m_intf)
         return NULL;
 
-    dev = device_find_child(&m_intf->dev, (void *)hid_bus_type, dev_is_on_bus);
+    dev = device_find_child(&m_intf->dev, (void *)mouse_hid_bus_type, dev_is_on_bus);
     if (!dev)
         return NULL;
 
@@ -6049,6 +6787,22 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
             break;
+
+        case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+        case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+            break;
         }
 
     }
@@ -7071,6 +7825,22 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
             break;
+
+        case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+        case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);
+            device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
+            device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+            break;
         }
 
     }
@@ -7189,6 +7959,8 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_EPIC) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED) },
     { 0 }
 };
 
