@@ -220,7 +220,7 @@ static const struct razer_key_translation chroma_keys_7[] = {
     { 0 }
 };
 
-/ Razer Ornata V3 Tenkeyless
+// Razer Ornata V3 Tenkeyless
 static const struct razer_key_translation chroma_keys_8[] = {
     { KEY_F9, RAZER_MACRO_KEY },
     { KEY_F10, RAZER_GAME_KEY },
@@ -595,7 +595,7 @@ static void razer_set_device_mode(struct razer_kbd_device *device, unsigned char
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
         request.transaction_id.id = 0xFF;
         break;
-    
+
     default:
         printk(KERN_WARNING "razerkbd: device_mode not supported for this model\n");
         return;
@@ -797,7 +797,7 @@ static ssize_t razer_attr_write_game_led_state(struct device *dev, struct device
         request = razer_chroma_standard_set_led_state(NOSTORE, GAME_LED, enabled);
         request.transaction_id.id = 0x1f;
         break;
-    
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH_EDITION:
     case USB_DEVICE_ID_RAZER_ANANSI:
@@ -1609,7 +1609,7 @@ static ssize_t razer_attr_write_macro_led_effect(struct device *dev, struct devi
         request = razer_chroma_standard_set_led_effect(VARSTORE, MACRO_LED, enabled);
         request.transaction_id.id = 0xFF;
         break;
-    
+
     default:
         printk(KERN_WARNING "razerkbd: macro_led_effect not supported for this model\n");
         return -EINVAL;
@@ -1751,7 +1751,7 @@ static ssize_t razer_attr_read_profile_led_green(struct device *dev, struct devi
         request = razer_chroma_standard_get_led_state(VARSTORE, RED_PROFILE_LED);
         request.transaction_id.id = 0xFF;
         break;
- 
+
     case USB_DEVICE_ID_RAZER_NOSTROMO:
     case USB_DEVICE_ID_RAZER_ORBWEAVER:
     case USB_DEVICE_ID_RAZER_TARTARUS:
@@ -1899,7 +1899,7 @@ static ssize_t razer_attr_write_profile_led_blue(struct device *dev, struct devi
         request = razer_chroma_standard_set_led_state(VARSTORE, BLUE_PROFILE_LED, enabled);
         request.transaction_id.id = 0xFF;
         break;
-  
+
     default:
         printk(KERN_WARNING "razerkbd: profile_led_blue not supported for this model\n");
         return -EINVAL;
@@ -3630,7 +3630,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
         }
         request.transaction_id.id = 0xFF;
         break;
-    
+
     default:
         printk(KERN_WARNING "razerkbd: matrix_brightness not supported for this model\n");
         return -EINVAL;
@@ -3791,7 +3791,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         }
         request.transaction_id.id = 0xFF;
         break;
-    
+
     default:
         printk(KERN_WARNING "razerkbd: matrix_brightness not supported for this model\n");
         return -EINVAL;
@@ -4115,7 +4115,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
         request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x00);
         request.transaction_id.id = 0x1f;
         break;
-    
+
     default:
         printk(KERN_WARNING "razerkbd: poll_rate not supported for this model\n");
         return -EINVAL;
@@ -4340,11 +4340,11 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_75PCT:
         translation = find_translation(chroma_keys_6, usage->code);
         break;
-    
+
     case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
         translation = find_translation(chroma_keys_8, usage->code);
         break;
-    
+
     default:
         translation = find_translation(chroma_keys, usage->code);
         break;

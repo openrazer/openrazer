@@ -1103,7 +1103,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     default:
         printk(KERN_WARNING "razeraccessory: Unknown device\n");
         return -EINVAL;
-    }   
+    }
 
     razer_send_payload(device, &request, &response);
 
@@ -1229,7 +1229,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
 
     default:
         printk(KERN_WARNING "razeraccessory: Unknown device\n");
-        return -EINVAL;    
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1459,11 +1459,8 @@ static ssize_t razer_attr_read_set_charge_brightness(struct device *dev, struct 
         break;
 
     default:
-        request = razer_chroma_standard_get_led_brightness(VARSTORE, led);
-        request.transaction_id.id = 0xFF;
-        razer_send_payload(device, &request, &response);
-        brightness = response.arguments[2];
-        break;
+        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        return -EINVAL;
     }
 
     return sprintf(buf, "%d\n", brightness);
