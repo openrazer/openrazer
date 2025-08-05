@@ -128,7 +128,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
         device_type = "Razer Firefly V2\n";
         break;
-  
+
     case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
         device_type = "Razer Firefly V2 Pro\n";
         break;
@@ -1103,7 +1103,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     default:
         printk(KERN_WARNING "razeraccessory: Unknown device\n");
         return -EINVAL;
-}
+    }   
 
     razer_send_payload(device, &request, &response);
 
@@ -1160,7 +1160,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
 
     default:
         printk(KERN_WARNING "razeraccessory: Unknown device\n");
-        return -EINVAL;  
+        return -EINVAL;
     }
 
     razer_send_payload(device, &request, &response);
@@ -1229,8 +1229,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
 
     default:
         printk(KERN_WARNING "razeraccessory: Unknown device\n");
-        return -EINVAL;
-     
+        return -EINVAL;    
     }
 
     razer_send_payload(device, &request, &response);
@@ -2174,6 +2173,7 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
 
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+    case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
     case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
@@ -2225,6 +2225,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY:
+    case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
@@ -2290,6 +2291,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
         case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
@@ -2302,6 +2304,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
         case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
         case USB_DEVICE_ID_RAZER_CORE:
         case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
@@ -2332,6 +2335,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_FIREFLY:
         case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
         case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
         case USB_DEVICE_ID_RAZER_CORE:
         case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
@@ -2357,6 +2361,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
         case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
@@ -2453,6 +2458,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+    case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
@@ -2527,6 +2533,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
         case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
         case USB_DEVICE_ID_RAZER_CORE:
         case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
@@ -2665,6 +2672,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY_V2) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL) },
