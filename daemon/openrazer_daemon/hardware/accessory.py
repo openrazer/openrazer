@@ -230,3 +230,19 @@ class RazerLaptopStandChromaV2(_RazerDeviceBrightnessSuspend):
                'set_custom_effect', 'set_key_row']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/272c328913c00c6f584fe3dead2ca2a6/razer-laptop-stand-chroma-v2-hero-mobile-v2.jpg"
+
+
+class RazerTomahawkATX(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Tomahawk ATX
+    """
+
+    USB_VID = 0x1532
+    USB_PID = 0x0F17
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 20]
+    METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/ed80ca04f3ff1b5d2c61655581776a6c/tomahawk-a1-m1-atx.png"
