@@ -2221,7 +2221,6 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-    case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
         expected_protocol = 0;
         break;
 
@@ -2244,6 +2243,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
+    case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
         expected_protocol = USB_INTERFACE_PROTOCOL_KEYBOARD;
         break;
     }
@@ -2468,7 +2468,6 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-    case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
         expected_protocol = 0;
         break;
 
@@ -2490,6 +2489,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
+    case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
         expected_protocol = USB_INTERFACE_PROTOCOL_KEYBOARD;
         break;
     }
