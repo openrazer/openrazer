@@ -1096,6 +1096,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165Hz:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request.transaction_id.id = 0x3F;
         break;
@@ -1154,6 +1155,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165Hz:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request.transaction_id.id = 0xFF;
         break;
@@ -1223,6 +1225,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165Hz:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request.transaction_id.id = 0xFF;
         break;
