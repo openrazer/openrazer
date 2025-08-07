@@ -354,7 +354,6 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
-    case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
         request = razer_chroma_standard_matrix_effect_reactive(speed, (struct razer_rgb*)&buf[1]);
         request.transaction_id.id = 0xFF;
         break;
@@ -2372,7 +2371,6 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_CORE:
         case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
-        case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);            // Reactive
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_reactive_trigger);           // Reactive trigger
             break;
