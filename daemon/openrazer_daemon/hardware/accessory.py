@@ -106,6 +106,8 @@ class RazerNommoChroma(_RazerDeviceBrightnessSuspend):
                'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row']
 
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1275/1275_nommo_chroma.png"
+
 
 class RazerNommoPro(_RazerDeviceBrightnessSuspend):
     """
@@ -228,8 +230,8 @@ class RazerLaptopStandChromaV2(_RazerDeviceBrightnessSuspend):
                'set_custom_effect', 'set_key_row']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/272c328913c00c6f584fe3dead2ca2a6/razer-laptop-stand-chroma-v2-hero-mobile-v2.jpg"
-
-
+    
+    
 class RazerTomahawkATX(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Tomahawk ATX 
