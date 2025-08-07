@@ -230,8 +230,8 @@ class RazerLaptopStandChromaV2(_RazerDeviceBrightnessSuspend):
                'set_custom_effect', 'set_key_row']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/272c328913c00c6f584fe3dead2ca2a6/razer-laptop-stand-chroma-v2-hero-mobile-v2.jpg"
-    
-    
+
+
 class RazerTomahawkATX(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Tomahawk ATX 
