@@ -243,4 +243,4 @@ class RazerTomahawkATX(_RazerDeviceBrightnessSuspend):
                'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row']
 
-    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/ed…04f3ff1b5d2c61655581776a6c/tomahawk-a1-m1-atx.png"
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/ed80ca04f3ff1b5d2c61655581776a6c/tomahawk-a1-m1-atx.png"
