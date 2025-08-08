@@ -271,6 +271,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Chroma Hardware Development Kit (HDK)   |  1532:0F09  |
 | Razer Laptop Stand Chroma                     |  1532:0F0D  |
 | Razer Raptor 27                               |  1532:0F12  |
+| Razer Tomahawk ATX                            |  1532:0F17  |
 | Razer Core X Chroma                           |  1532:0F1A  |
 | Razer Mouse Bungee V3 Chroma                  |  1532:0F1D  |
 | Razer Chroma Addressable RGB Controller       |  1532:0F1F  |
@@ -278,7 +279,6 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Thunderbolt 4 Dock Chroma               |  1532:0F21  |
 | Razer Charging Pad Chroma                     |  1532:0F26  |
 | Razer Laptop Stand Chroma V2                  |  1532:0F2B  |
-| Razer Tomahawk ATX                            |  1532:0F17  |
 
 #### Determining the Device ID
 Razer devices use a USB VID (Vendor ID) of `1532`. You can identify the USB PID (Product ID) by typing:
