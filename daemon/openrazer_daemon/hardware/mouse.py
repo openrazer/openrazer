@@ -295,6 +295,21 @@ class RazerOuroboros(__RazerDevice):
     DPI_MAX = 8200
 
 
+class RazerOuroborosWireless(__RazerDevice):
+    """
+    Class for the Razer Ouroboros (Wireless)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0033
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_poll_rate', 'set_poll_rate', 'set_scroll_none', 'set_scroll_on', 'get_scroll_brightness', 'set_scroll_brightness',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/products/752/razer-ouroboros-gallery-1.png"
+
+    DPI_MAX = 8200
+
+
 class RazerOrochi2013(__RazerDevice):
     """
     Class for the Razer Orochi 2013
