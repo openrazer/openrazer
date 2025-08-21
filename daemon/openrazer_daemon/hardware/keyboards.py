@@ -582,7 +582,7 @@ class RazerHuntsmanV3ProTenkeyless(_RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x02A7
     HAS_MATRIX = True
-    MATRIX_DIMS = [6, 18]
+    MATRIX_DIMS = [6, 19]
     # TODO Remove get_keyboard_layout once not _RazerDeviceBrightnessSuspend anymore
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
