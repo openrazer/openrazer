@@ -1756,7 +1756,6 @@ class RazerBasiliskV3Pro35KPhantomGreenEditionWired(__RazerDevice):
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
                'get_poll_rate', 'set_poll_rate',
                'get_brightness', 'set_brightness',
-               'get_logo_brightness', 'set_logo_brightness',
                'get_scroll_brightness', 'set_scroll_brightness',
                # Scroll wheel controls
                'get_scroll_mode', 'set_scroll_mode',
