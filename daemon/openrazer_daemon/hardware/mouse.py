@@ -1775,7 +1775,7 @@ class RazerBasiliskV3Pro35KPhantomGreenEditionWired(__RazerDevice):
     DPI_MAX = 35000
 
 
-class RazerBasiliskV3Pro35KPhantomGreenEditionWireless(RazerBasiliskV3Pro35KWired):
+class RazerBasiliskV3Pro35KPhantomGreenEditionWireless(RazerBasiliskV3Pro35KPhantomGreenEditionWired):
     """
     Class for the Razer Basilisk V3 Pro 35K Phantom Green Edition (Wireless)
     """
