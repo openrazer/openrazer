@@ -20,9 +20,7 @@ tasks:
       cd openrazer
 
       # Check the formatting of the driver and the python code
-      # Disable astyle for now:
-      # https://gitlab.com/saalen/astyle/-/issues/91
-      #./scripts/ci/check-astyle-formatting.sh
+      ./scripts/ci/check-astyle-formatting.sh
       ./scripts/ci/check-autopep8-formatting.sh
 
   - check-misc: |
