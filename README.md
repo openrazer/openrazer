@@ -124,113 +124,113 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer BlackWidow V3 Tenkeyless                |  1532:0A24  |
 
 ### Mice
-| Device                                        | USB VID:PID |
-| --------------------------------------------- | ----------- |
-| Razer Orochi 2011                             |  1532:0013  |
-| Razer Naga                                    |  1532:0015  |
-| Razer DeathAdder 3.5G                         |  1532:0016  |
-| Razer Naga Epic                               |  1532:001F  |
-| Razer Abyssus 1800                            |  1532:0020  |
-| Razer Mamba 2012 (Wired)                      |  1532:0024  |
-| Razer Mamba 2012 (Wireless)                   |  1532:0025  |
-| Razer DeathAdder 3.5G Black                   |  1532:0029  |
-| Razer Naga 2012                               |  1532:002E  |
-| Razer Imperator 2012                          |  1532:002F  |
-| Razer Ouroboros 2012                          |  1532:0032  |
-| Razer Taipan                                  |  1532:0034  |
-| Razer Naga Hex (Red)                          |  1532:0036  |
-| Razer DeathAdder 2013                         |  1532:0037  |
-| Razer DeathAdder 1800                         |  1532:0038  |
-| Razer Orochi 2013                             |  1532:0039  |
-| Razer Naga Epic Chroma (Wired)                |  1532:003E  |
-| Razer Naga Epic Chroma (Wireless)             |  1532:003F  |
-| Razer Naga 2014                               |  1532:0040  |
-| Razer Naga Hex                                |  1532:0041  |
-| Razer Abyssus 2014                            |  1532:0042  |
-| Razer DeathAdder Chroma                       |  1532:0043  |
-| Razer Mamba (Wired)                           |  1532:0044  |
-| Razer Mamba (Wireless)                        |  1532:0045  |
-| Razer Mamba Tournament Edition                |  1532:0046  |
-| Razer Orochi (Wired)                          |  1532:0048  |
-| Razer Diamondback Chroma                      |  1532:004C  |
-| Razer DeathAdder 2000                         |  1532:004F  |
-| Razer Naga Hex V2                             |  1532:0050  |
-| Razer Naga Chroma                             |  1532:0053  |
-| Razer DeathAdder 3500                         |  1532:0054  |
-| Razer Lancehead (Wired)                       |  1532:0059  |
-| Razer Lancehead (Wireless)                    |  1532:005A  |
-| Razer Abyssus V2                              |  1532:005B  |
-| Razer DeathAdder Elite                        |  1532:005C  |
-| Razer Abyssus 2000                            |  1532:005E  |
-| Razer Lancehead Tournament Edition            |  1532:0060  |
-| Razer Atheris (Receiver)                      |  1532:0062  |
-| Razer Basilisk                                |  1532:0064  |
-| Razer Basilisk Essential                      |  1532:0065  |
-| Razer Naga Trinity                            |  1532:0067  |
-| Razer Abyssus Elite (D.Va Edition)            |  1532:006A  |
-| Razer Abyssus Essential                       |  1532:006B  |
-| Razer Mamba Elite (Wired)                     |  1532:006C  |
-| Razer DeathAdder Essential                    |  1532:006E  |
-| Razer Lancehead Wireless (Receiver)           |  1532:006F  |
-| Razer Lancehead Wireless (Wired)              |  1532:0070  |
-| Razer DeathAdder Essential (White Edition)    |  1532:0071  |
-| Razer Mamba Wireless (Receiver)               |  1532:0072  |
-| Razer Mamba Wireless (Wired)                  |  1532:0073  |
-| Razer Pro Click (Receiver)                    |  1532:0077  |
-| Razer Viper                                   |  1532:0078  |
-| Razer Viper Ultimate (Wired)                  |  1532:007A  |
-| Razer Viper Ultimate (Wireless)               |  1532:007B  |
-| Razer DeathAdder V2 Pro (Wired)               |  1532:007C  |
-| Razer DeathAdder V2 Pro (Wireless)            |  1532:007D  |
-| Razer Pro Click (Wired)                       |  1532:0080  |
-| Razer Basilisk X HyperSpeed                   |  1532:0083  |
-| Razer DeathAdder V2                           |  1532:0084  |
-| Razer Basilisk V2                             |  1532:0085  |
-| Razer Basilisk Ultimate (Wired)               |  1532:0086  |
-| Razer Basilisk Ultimate (Receiver)            |  1532:0088  |
-| Razer Viper Mini                              |  1532:008A  |
-| Razer DeathAdder V2 Mini                      |  1532:008C  |
-| Razer Naga Left-Handed Edition                |  1532:008D  |
-| Razer Naga Pro (Wired)                        |  1532:008F  |
-| Razer Naga Pro (Wireless)                     |  1532:0090  |
-| Razer Viper 8KHz                              |  1532:0091  |
-| Razer Orochi V2 (Receiver)                    |  1532:0094  |
-| Razer Orochi V2 (Bluetooth)                   |  1532:0095  |
-| Razer Naga X                                  |  1532:0096  |
-| Razer DeathAdder Essential (2021)             |  1532:0098  |
-| Razer Basilisk V3                             |  1532:0099  |
-| Razer Pro Click Mini (Receiver)               |  1532:009A  |
-| Razer DeathAdder V2 X HyperSpeed              |  1532:009C  |
-| Razer Viper Mini Signature Edition (Wired)    |  1532:009E  |
-| Razer Viper Mini Signature Edition (Wireless) |  1532:009F  |
-| Razer DeathAdder V2 Lite                      |  1532:00A1  |
-| Razer Cobra                                   |  1532:00A3  |
-| Razer Viper V2 Pro (Wired)                    |  1532:00A5  |
-| Razer Viper V2 Pro (Wireless)                 |  1532:00A6  |
-| Razer Naga V2 Pro (Wired)                     |  1532:00A7  |
-| Razer Naga V2 Pro (Wireless)                  |  1532:00A8  |
-| Razer Basilisk V3 Pro (Wired)                 |  1532:00AA  |
-| Razer Basilisk V3 Pro (Wireless)              |  1532:00AB  |
-| Razer Cobra Pro (Wired)                       |  1532:00AF  |
-| Razer Cobra Pro (Wireless)                    |  1532:00B0  |
-| Razer DeathAdder V3                           |  1532:00B2  |
-| Razer HyperPolling Wireless Dongle            |  1532:00B3  |
-| Razer Naga V2 HyperSpeed (Receiver)           |  1532:00B4  |
-| Razer DeathAdder V3 Pro (Wired)               |  1532:00B6  |
-| Razer DeathAdder V3 Pro (Wireless)            |  1532:00B7  |
-| Razer Viper V3 HyperSpeed                     |  1532:00B8  |
-| Razer Basilisk V3 X HyperSpeed                |  1532:00B9  |
-| Razer Viper V3 Pro (Wired)                    |  1532:00C0  |
-| Razer Viper V3 Pro (Wireless)                 |  1532:00C1  |
-| Razer DeathAdder V3 Pro (Wired)               |  1532:00C2  |
-| Razer DeathAdder V3 Pro (Wireless)            |  1532:00C3  |
-| Razer DeathAdder V3 HyperSpeed (Wired)        |  1532:00C4  |
-| Razer DeathAdder V3 HyperSpeed (Wireless)     |  1532:00C5  |
-| Razer Pro Click V2 Vertical Edition (Wired)   |  1532:00C7  |
-| Razer Pro Click V2 Vertical Edition (Wireless)|  1532:00C8  |
-| Razer Basilisk V3 35K                         |  1532:00CB  |
-| Razer Basilisk V3 Pro 35K (Wired)             |  1532:00CC  |
-| Razer Basilisk V3 Pro 35K (Wireless)          |  1532:00CD  |
+| Device                                                        | USB VID:PID |
+| ------------------------------------------------------------- | ----------- |
+| Razer Orochi 2011                                             |  1532:0013  |
+| Razer Naga                                                    |  1532:0015  |
+| Razer DeathAdder 3.5G                                         |  1532:0016  |
+| Razer Naga Epic                                               |  1532:001F  |
+| Razer Abyssus 1800                                            |  1532:0020  |
+| Razer Mamba 2012 (Wired)                                      |  1532:0024  |
+| Razer Mamba 2012 (Wireless)                                   |  1532:0025  |
+| Razer DeathAdder 3.5G Black                                   |  1532:0029  |
+| Razer Naga 2012                                               |  1532:002E  |
+| Razer Imperator 2012                                          |  1532:002F  |
+| Razer Ouroboros 2012                                          |  1532:0032  |
+| Razer Taipan                                                  |  1532:0034  |
+| Razer Naga Hex (Red)                                          |  1532:0036  |
+| Razer DeathAdder 2013                                         |  1532:0037  |
+| Razer DeathAdder 1800                                         |  1532:0038  |
+| Razer Orochi 2013                                             |  1532:0039  |
+| Razer Naga Epic Chroma (Wired)                                |  1532:003E  |
+| Razer Naga Epic Chroma (Wireless)                             |  1532:003F  |
+| Razer Naga 2014                                               |  1532:0040  |
+| Razer Naga Hex                                                |  1532:0041  |
+| Razer Abyssus 2014                                            |  1532:0042  |
+| Razer DeathAdder Chroma                                       |  1532:0043  |
+| Razer Mamba (Wired)                                           |  1532:0044  |
+| Razer Mamba (Wireless)                                        |  1532:0045  |
+| Razer Mamba Tournament Edition                                |  1532:0046  |
+| Razer Orochi (Wired)                                          |  1532:0048  |
+| Razer Diamondback Chroma                                      |  1532:004C  |
+| Razer DeathAdder 2000                                         |  1532:004F  |
+| Razer Naga Hex V2                                             |  1532:0050  |
+| Razer Naga Chroma                                             |  1532:0053  |
+| Razer DeathAdder 3500                                         |  1532:0054  |
+| Razer Lancehead (Wired)                                       |  1532:0059  |
+| Razer Lancehead (Wireless)                                    |  1532:005A  |
+| Razer Abyssus V2                                              |  1532:005B  |
+| Razer DeathAdder Elite                                        |  1532:005C  |
+| Razer Abyssus 2000                                            |  1532:005E  |
+| Razer Lancehead Tournament Edition                            |  1532:0060  |
+| Razer Atheris (Receiver)                                      |  1532:0062  |
+| Razer Basilisk                                                |  1532:0064  |
+| Razer Basilisk Essential                                      |  1532:0065  |
+| Razer Naga Trinity                                            |  1532:0067  |
+| Razer Abyssus Elite (D.Va Edition)                            |  1532:006A  |
+| Razer Abyssus Essential                                       |  1532:006B  |
+| Razer Mamba Elite (Wired)                                     |  1532:006C  |
+| Razer DeathAdder Essential                                    |  1532:006E  |
+| Razer Lancehead Wireless (Receiver)                           |  1532:006F  |
+| Razer Lancehead Wireless (Wired)                              |  1532:0070  |
+| Razer DeathAdder Essential (White Edition)                    |  1532:0071  |
+| Razer Mamba Wireless (Receiver)                               |  1532:0072  |
+| Razer Mamba Wireless (Wired)                                  |  1532:0073  |
+| Razer Pro Click (Receiver)                                    |  1532:0077  |
+| Razer Viper                                                   |  1532:0078  |
+| Razer Viper Ultimate (Wired)                                  |  1532:007A  |
+| Razer Viper Ultimate (Wireless)                               |  1532:007B  |
+| Razer DeathAdder V2 Pro (Wired)                               |  1532:007C  |
+| Razer DeathAdder V2 Pro (Wireless)                            |  1532:007D  |
+| Razer Pro Click (Wired)                                       |  1532:0080  |
+| Razer Basilisk X HyperSpeed                                   |  1532:0083  |
+| Razer DeathAdder V2                                           |  1532:0084  |
+| Razer Basilisk V2                                             |  1532:0085  |
+| Razer Basilisk Ultimate (Wired)                               |  1532:0086  |
+| Razer Basilisk Ultimate (Receiver)                            |  1532:0088  |
+| Razer Viper Mini                                              |  1532:008A  |
+| Razer DeathAdder V2 Mini                                      |  1532:008C  |
+| Razer Naga Left-Handed Edition                                |  1532:008D  |
+| Razer Naga Pro (Wired)                                        |  1532:008F  |
+| Razer Naga Pro (Wireless)                                     |  1532:0090  |
+| Razer Viper 8KHz                                              |  1532:0091  |
+| Razer Orochi V2 (Receiver)                                    |  1532:0094  |
+| Razer Orochi V2 (Bluetooth)                                   |  1532:0095  |
+| Razer Naga X                                                  |  1532:0096  |
+| Razer DeathAdder Essential (2021)                             |  1532:0098  |
+| Razer Basilisk V3                                             |  1532:0099  |
+| Razer Pro Click Mini (Receiver)                               |  1532:009A  |
+| Razer DeathAdder V2 X HyperSpeed                              |  1532:009C  |
+| Razer Viper Mini Signature Edition (Wired)                    |  1532:009E  |
+| Razer Viper Mini Signature Edition (Wireless)                 |  1532:009F  |
+| Razer DeathAdder V2 Lite                                      |  1532:00A1  |
+| Razer Cobra                                                   |  1532:00A3  |
+| Razer Viper V2 Pro (Wired)                                    |  1532:00A5  |
+| Razer Viper V2 Pro (Wireless)                                 |  1532:00A6  |
+| Razer Naga V2 Pro (Wired)                                     |  1532:00A7  |
+| Razer Naga V2 Pro (Wireless)                                  |  1532:00A8  |
+| Razer Basilisk V3 Pro (Wired)                                 |  1532:00AA  |
+| Razer Basilisk V3 Pro (Wireless)                              |  1532:00AB  |
+| Razer Cobra Pro (Wired)                                       |  1532:00AF  |
+| Razer Cobra Pro (Wireless)                                    |  1532:00B0  |
+| Razer DeathAdder V3                                           |  1532:00B2  |
+| Razer HyperPolling Wireless Dongle                            |  1532:00B3  |
+| Razer Naga V2 HyperSpeed (Receiver)                           |  1532:00B4  |
+| Razer DeathAdder V3 Pro (Wired)                               |  1532:00B6  |
+| Razer DeathAdder V3 Pro (Wireless)                            |  1532:00B7  |
+| Razer Viper V3 HyperSpeed                                     |  1532:00B8  |
+| Razer Basilisk V3 X HyperSpeed                                |  1532:00B9  |
+| Razer Viper V3 Pro (Wired)                                    |  1532:00C0  |
+| Razer Viper V3 Pro (Wireless)                                 |  1532:00C1  |
+| Razer DeathAdder V3 Pro (Wired)                               |  1532:00C2  |
+| Razer DeathAdder V3 Pro (Wireless)                            |  1532:00C3  |
+| Razer DeathAdder V3 HyperSpeed (Wired)                        |  1532:00C4  |
+| Razer DeathAdder V3 HyperSpeed (Wireless)                     |  1532:00C5  |
+| Razer Pro Click V2 Vertical Edition (Wired)                   |  1532:00C7  |
+| Razer Pro Click V2 Vertical Edition (Wireless)                |  1532:00C8  |
+| Razer Basilisk V3 35K                                         |  1532:00CB  |
+| Razer Basilisk V3 Pro 35K (Wired)                             |  1532:00CC  |
+| Razer Basilisk V3 Pro 35K (Wireless)                          |  1532:00CD  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |
