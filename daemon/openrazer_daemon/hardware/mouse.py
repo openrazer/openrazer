@@ -1748,8 +1748,8 @@ class RazerBasiliskV3Pro35KPhantomGreenEditionWired(__RazerDevice):
     """
     Class for the Razer Basilisk V3 Pro 35K Phantom Green Edition (Wired)
     """
-    USB_PID = 0x00D6
     USB_VID = 0x1532
+    USB_PID = 0x00D6
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 12]
     METHODS = ['get_device_type_mouse',
