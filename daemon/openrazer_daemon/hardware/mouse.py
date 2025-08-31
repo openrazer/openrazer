@@ -1700,7 +1700,7 @@ class RazerBasiliskV3ProWireless(RazerBasiliskV3ProWired):
     USB_PID = 0x00AB
 
 
-class RazerBasiliskV3Pro35KWired(RazerBasiliskV3ProWired):
+class RazerBasiliskV3Pro35KWired(__RazerDevice):
     """
     Class for the Razer Basilisk V3 Pro 35K (Wired)
     """
