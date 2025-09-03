@@ -1,0 +1,17 @@
+setup.py
+openrazer/__init__.py
+openrazer.egg-info/PKG-INFO
+openrazer.egg-info/SOURCES.txt
+openrazer.egg-info/dependency_links.txt
+openrazer.egg-info/requires.txt
+openrazer.egg-info/top_level.txt
+openrazer/client/__init__.py
+openrazer/client/constants.py
+openrazer/client/debug.py
+openrazer/client/device.py
+openrazer/client/fx.py
+openrazer/client/macro.py
+openrazer/client/devices/__init__.py
+openrazer/client/devices/keyboard.py
+openrazer/client/devices/mice.py
+openrazer/client/devices/mousemat.py

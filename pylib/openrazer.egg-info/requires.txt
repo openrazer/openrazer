@@ -1,0 +1,3 @@
+dbus-python>=1.2.0
+numpy>=1.11.0
+openrazer_daemon==3.10.3
