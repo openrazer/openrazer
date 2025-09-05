@@ -1700,7 +1700,7 @@ class RazerBasiliskV3ProWireless(RazerBasiliskV3ProWired):
     USB_PID = 0x00AB
 
 
-class RazerBasiliskV3Pro35KWired(__RazerDevice):
+class RazerBasiliskV3Pro35KWired(RazerBasiliskV3ProWired):
     """
     Class for the Razer Basilisk V3 Pro 35K (Wired)
     """
@@ -2026,7 +2026,7 @@ class RazerProClickV2Wired(__RazerDevice):
                'get_battery', 'is_charging',
                'get_low_battery_threshold', 'set_low_battery_threshold',
                'get_brightness', 'set_brightness', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect']
-    DEVICE_IMAGE = "https://assets3.razerzone.com/tqhNM88GhdyLh1I_hH0y9CHkzLs=/300x300/https%3A%2F%2Fmedias-p1.phoenix.razer.com%2Fsys-master-phoenix-images-container%2Fha3%2Fh76%2F9899953717278%2Fpro-click-v2-black-500x500.png"
+    DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/ha3/h76/9899953717278/pro-click-v2-black-500x500.png"
 
     DPI_MAX = 30000
 

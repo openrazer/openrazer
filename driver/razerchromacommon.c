@@ -953,16 +953,16 @@ struct razer_report razer_chroma_misc_set_keyswitch_optimization_command2(unsign
     // 0x00 -> Typing (Store)
     // 0x01 -> Gaming (Store)
     switch(optimization_mode) {
-    case 0x00:
-        report.arguments[0] = 0x01;
+case 0x00:
+            report.arguments[0] = 0x01;
         report.arguments[1] = 0x00;
         report.arguments[2] = 0x14;
         report.arguments[3] = 0x00;
         report.arguments[4] = 0x28;
         report.arguments[5] = 0x00;
         break;
-    case 0x01:
-        report.arguments[0] = 0x01;
+case 0x01:
+            report.arguments[0] = 0x01;
         break;
     }
 
@@ -1106,17 +1106,17 @@ struct razer_report razer_chroma_misc_set_polling_rate(unsigned short polling_ra
     struct razer_report report = get_razer_report(0x00, 0x05, 0x01);
 
     switch(polling_rate) {
-    case 1000:
-        report.arguments[0] = 0x01;
+case 1000:
+            report.arguments[0] = 0x01;
         break;
-    case  500:
-        report.arguments[0] = 0x02;
+case  500:
+            report.arguments[0] = 0x02;
         break;
-    case  125:
-        report.arguments[0] = 0x08;
+case  125:
+            report.arguments[0] = 0x08;
         break;
-    default: // 500Hz
-        report.arguments[0] = 0x02;
+default: // 500Hz
+            report.arguments[0] = 0x02;
         break;
     }
 
@@ -1156,29 +1156,29 @@ struct razer_report razer_chroma_misc_set_polling_rate2(unsigned short polling_r
 
     report.arguments[0] = argument; // For some devices Razer sends each request once with 0x00 and once with 0x01 - maybe varstore?
     switch(polling_rate) {
-    case 8000:
-        report.arguments[1] = 0x01;
+case 8000:
+            report.arguments[1] = 0x01;
         break;
-    case 4000:
-        report.arguments[1] = 0x02;
+case 4000:
+            report.arguments[1] = 0x02;
         break;
-    case 2000:
-        report.arguments[1] = 0x04;
+case 2000:
+            report.arguments[1] = 0x04;
         break;
-    case 1000:
-        report.arguments[1] = 0x08;
+case 1000:
+            report.arguments[1] = 0x08;
         break;
-    case  500:
-        report.arguments[1] = 0x10;
+case  500:
+            report.arguments[1] = 0x10;
         break;
-    case  250:
-        report.arguments[1] = 0x20;
+case  250:
+            report.arguments[1] = 0x20;
         break;
-    case  125:
-        report.arguments[1] = 0x40;
+case  125:
+            report.arguments[1] = 0x40;
         break;
-    default: // 500Hz
-        report.arguments[1] = 0x10;
+default: // 500Hz
+            report.arguments[1] = 0x10;
         break;
     }
 
