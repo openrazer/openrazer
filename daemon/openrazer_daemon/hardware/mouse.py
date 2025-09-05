@@ -2011,6 +2011,7 @@ class RazerProClickV2VerticalEditionWireless(RazerProClickV2VerticalEditionWired
     """
     USB_PID = 0x00C8
 
+
 class RazerProClickV2Wired(__RazerDevice):
     """
     Class for the Razer Pro Click V2 (Wired)
