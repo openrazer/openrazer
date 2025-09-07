@@ -1,0 +1,11 @@
+# Ignore these commits when using 'git blame'
+#     git blame --ignore-revs-file .git-blame-ignore-revs <filename>
+#
+# or configure using:
+#     git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# This file is automatically used on GitHub.
+#
+
+# README: Whitespace changes only
+ed89c7d6308fd52e6c2a9754e23289b859df93a6
