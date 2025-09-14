@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: openrazer_daemon
+Version: 3.10.3
+Requires-Dist: daemonize>=2.4.7
+Requires-Dist: dbus-python>=1.2.0
+Requires-Dist: PyGObject>=3.20.0
+Requires-Dist: pyudev>=0.16.1
+Requires-Dist: setproctitle>=1.1.8
+Dynamic: requires-dist
