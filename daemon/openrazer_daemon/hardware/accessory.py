@@ -105,7 +105,7 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
     MATRIX_DIMS = [1, 8]
     METHODS = ['get_device_type_accessory', 'set_brightness', 'get_brightness', 'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect']
 
-    DEVICE_IMAGE = "https://assets3.razerzone.com/hLGw-_MX7dc4gv9SYK5lVD7bFvE=/1500x1000/https%3A%2F%2Fmedias-p1.phoenix.razer.com%2Fsys-master-phoenix-images-container%2Fh05%2Fh7a%2F9449945956382%2F220823-mouse-dock-pro-1500x1000-1-v2.jpg"
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/6229/6229-1-en-v2.png"
 
 
 class RazerNommoChroma(_RazerDeviceBrightnessSuspend):
