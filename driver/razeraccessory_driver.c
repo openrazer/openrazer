@@ -1075,6 +1075,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         request.transaction_id.id = 0xFF;
         razer_send_payload(device, &request, &response);
         strncpy(&serial_string[0], &response.arguments[0], 22);
@@ -1091,12 +1092,6 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         request.transaction_id.id = 0x1F;
-        razer_send_payload(device, &request, &response);
-        strncpy(&serial_string[0], &response.arguments[0], 22);
-        serial_string[22] = '\0';
-        break;
-    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
-        request.transaction_id.id = 0xFF;
         razer_send_payload(device, &request, &response);
         strncpy(&serial_string[0], &response.arguments[0], 22);
         serial_string[22] = '\0';
