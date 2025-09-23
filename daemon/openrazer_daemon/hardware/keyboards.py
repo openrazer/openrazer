@@ -2241,7 +2241,7 @@ class RazerBlackWidowV4Pro75PCTWired(_RippleKeyboard):
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/he7/h76/9815507599390/bw-v4-pro-75-500x500.png"
 
 
-class RazerBlackWidowV4Pro75PCTWireless(_RippleKeyboard):
+class RazerBlackWidowV4Pro75PCTWireless(RazerBlackWidowV4Pro75PCTWired):
     """
     Class for the Razer BlackWidow V4 Pro 75% Wireless
     """
