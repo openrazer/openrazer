@@ -1638,7 +1638,7 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
         request.transaction_id.id = 0x1F;
         break;
 
-        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, led, (struct razer_rgb*) & buf[0]);
         request.transaction_id.id = 0xFF;
         break;
@@ -1692,7 +1692,7 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
         request.transaction_id.id = 0x1F;
         break;
 
-        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         // Direction values are flipped compared to other devices
         direction ^= ((1<<0) | (1<<1));
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, led, direction);
