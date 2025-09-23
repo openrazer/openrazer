@@ -67,10 +67,6 @@ static int razer_send_payload(struct razer_accessory_device *device, struct raze
     }
 
     switch (response->status) {
-    case RAZER_CMD_BUSY:
-        // TODO: Check if this should be an error.
-        print_erroneous_report(response, "razeraccessory", "Device is busy");
-        break;
     case RAZER_CMD_FAILURE:
         print_erroneous_report(response, "razeraccessory", "Command failed");
         return -EIO;
@@ -844,6 +840,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         }
         request.transaction_id.id = 0x1F;
         break;
+
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         // Must be in normal mode for hardware effects
         razer_set_device_mode(device, 0x00, 0x00);
@@ -1285,6 +1282,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
         request.transaction_id.id = 0x1F;
         device->saved_brightness = brightness;
         break;
+
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         request.transaction_id.id = 0xFF;
@@ -1422,6 +1420,7 @@ static ssize_t razer_attr_write_set_charge_brightness(struct device *dev, struct
         request.transaction_id.id = 0x1F;
         device->saved_brightness = brightness;
         break;
+
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, led, brightness);
         request.transaction_id.id = 0xFF;
@@ -1531,6 +1530,7 @@ static ssize_t razer_attr_write_charge_mode_spectrum(struct device *dev, struct 
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, led);
         request.transaction_id.id = 0x1F;
         break;
+
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, led);
         request.transaction_id.id = 0xFF;
@@ -1581,6 +1581,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
         request = razer_chroma_extended_matrix_effect_none(VARSTORE, led);
         request.transaction_id.id = 0x1F;
         break;
+
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         request = razer_chroma_extended_matrix_effect_none(VARSTORE, led);
         request.transaction_id.id = 0xFF;
@@ -1636,7 +1637,8 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, led, (struct razer_rgb*) & buf[0]);
         request.transaction_id.id = 0x1F;
         break;
-    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, led, (struct razer_rgb*) & buf[0]);
         request.transaction_id.id = 0xFF;
         break;
@@ -1689,7 +1691,8 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, led, direction);
         request.transaction_id.id = 0x1F;
         break;
-    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         // Direction values are flipped compared to other devices
         direction ^= ((1<<0) | (1<<1));
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, led, direction);
@@ -1753,6 +1756,7 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
         }
         request.transaction_id.id = 0x1F;
         break;
+
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         switch(count) {
         case 3: // Single colour mode
