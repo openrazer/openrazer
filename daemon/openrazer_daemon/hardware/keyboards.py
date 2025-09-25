@@ -2236,7 +2236,7 @@ class RazerBlackWidowV4Pro75PCTWired(_RippleKeyboard):
                'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
                'set_ripple_effect', 'set_ripple_effect_random_colour',
                # Battery
-               'set_charge_effect', 'set_charge_colour', 'get_battery', 'is_charging', 'get_low_battery_threshold', 'set_low_battery_threshold']
+               'get_battery', 'is_charging']
 
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/he7/h76/9815507599390/bw-v4-pro-75-500x500.png"
 
