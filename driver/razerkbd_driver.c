@@ -635,15 +635,15 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO_75PCT_WIRELESS:
         request.transaction_id.id = 0x9f;
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO_75PCT_WIRED:
         request.transaction_id.id = 0x3f;
         break;
 
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO_75PCT_WIRED:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO_75PCT_WIRELESS:
 
     default:
         printk(KERN_WARNING "razerkbd: charge_level not supported for this model\n");
@@ -679,15 +679,15 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO_75PCT_WIRELESS:
         request.transaction_id.id = 0x9f;
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO_75PCT_WIRED:
         request.transaction_id.id = 0x3f;
         break;
 
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO_75PCT_WIRED:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO_75PCT_WIRELESS:
     
     default:
         printk(KERN_WARNING "razerkbd: charge_status not supported for this model\n");
