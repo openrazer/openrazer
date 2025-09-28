@@ -2227,7 +2227,7 @@ class RazerBlackWidowV4Pro75PCTWired(_RippleKeyboard):
     HAS_MATRIX = True
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [8, 23]
-    POLL_RATES = [125, 250, 500, 1000, 2000, 4000]
+    POLL_RATES = [125, 250, 500, 1000]
     METHODS = ['get_device_type_keyboard', 'set_wave_effect',  'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
@@ -2250,3 +2250,4 @@ class RazerBlackWidowV4Pro75PCTWireless(RazerBlackWidowV4Pro75PCTWired):
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_BlackWidow_V4_Pro_75(_\d+)?(-if01)?-event-kbd')
 
     USB_PID = 0x02B4
+    POLL_RATES = [125, 250, 500, 1000, 2000, 4000]

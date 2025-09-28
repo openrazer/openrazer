@@ -628,6 +628,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO_75PCT_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -640,7 +641,6 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO_75PCT_WIRED:
         request.transaction_id.id = 0x3f;
         break;
 
