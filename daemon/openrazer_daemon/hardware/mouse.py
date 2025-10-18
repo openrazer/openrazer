@@ -1633,7 +1633,6 @@ class RazerCobraHyperSpeedReceiver(RazerCobraHyperSpeed):
     Class for the Razer Cobra HyperSpeed Receiver
     """
     EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Cobra_HyperSpeed-event-if0(1|2)-event-kbd')
-    POLL_RATES = [125, 500, 1000]
     USB_PID = 0x00DA
 
 class RazerDeathAdderV3(__RazerDevice):
