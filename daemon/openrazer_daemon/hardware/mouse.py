@@ -1618,8 +1618,6 @@ class RazerCobraHyperSpeed(__RazerDevice):
                'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
                # Logo (partial support)
                'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none',
-               # Scroll wheel (partial support)
-               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none',
                # Battery
                'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold']
 
