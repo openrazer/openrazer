@@ -3276,6 +3276,7 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
     request = razer_chroma_misc_get_low_battery_threshold();
 
     switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED:
@@ -3331,7 +3332,6 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
     case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRELESS:
@@ -3368,6 +3368,7 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
     request = razer_chroma_misc_set_low_battery_threshold(threshold);
 
     switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED:
@@ -3422,7 +3423,6 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRELESS:
