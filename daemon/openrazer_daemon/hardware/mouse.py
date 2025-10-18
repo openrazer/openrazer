@@ -1624,8 +1624,7 @@ class RazerCobraHyperSpeed(__RazerDevice):
                'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/15141/15141-1-en-v1.png"
-    #POLL_RATES = [125, 500, 1000]
-    POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
+    POLL_RATES = [125, 500, 1000]
     DPI_MAX = 26000
 
 class RazerCobraHyperSpeedReceiver(RazerCobraHyperSpeed):
