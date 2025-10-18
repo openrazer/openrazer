@@ -1612,7 +1612,6 @@ class RazerCobraHyperSpeed(__RazerDevice):
                'get_poll_rate', 'set_poll_rate',
                'get_brightness', 'set_brightness',
                'get_logo_brightness', 'set_logo_brightness',
-               'get_scroll_brightness', 'set_scroll_brightness',
                'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
                # All LEDs (partial support)
                'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
