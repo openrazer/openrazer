@@ -1598,6 +1598,7 @@ class RazerCobraProWireless(RazerCobraProWired):
     """
     USB_PID = 0x00B0
 
+
 class RazerCobraHyperSpeed(__RazerDevice):
     """
     Class for the Razer Cobra HyperSpeed
@@ -1624,12 +1625,14 @@ class RazerCobraHyperSpeed(__RazerDevice):
     POLL_RATES = [125, 500, 1000]
     DPI_MAX = 26000
 
+
 class RazerCobraHyperSpeedReceiver(RazerCobraHyperSpeed):
     """
     Class for the Razer Cobra HyperSpeed Receiver
     """
     EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Cobra_HyperSpeed-event-if0(1|2)-event-kbd')
     USB_PID = 0x00DB
+
 
 class RazerDeathAdderV3(__RazerDevice):
     """
