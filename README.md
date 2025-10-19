@@ -205,8 +205,8 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Viper Mini Signature Edition (Wireless)                 |  1532:009F  |
 | Razer DeathAdder V2 Lite                                      |  1532:00A1  |
 | Razer Cobra                                                   |  1532:00A3  |
-| Razer Cobra Hyperspeed Receiver                               |  1532:00DA  |
-| Razer Cobra Hyperspeed                                        |  1532:00DB  |
+| Razer Cobra Hyperspeed Receiver                               |  1532:00DB  |
+| Razer Cobra Hyperspeed                                        |  1532:00DA  |
 | Razer Viper V2 Pro (Wired)                                    |  1532:00A5  |
 | Razer Viper V2 Pro (Wireless)                                 |  1532:00A6  |
 | Razer Naga V2 Pro (Wired)                                     |  1532:00A7  |
