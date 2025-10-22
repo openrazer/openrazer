@@ -73,7 +73,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade 15 Base (Early 2020)              |  1532:0255  |
 | Razer Blade Pro 17 (Early 2020)               |  1532:0256  |
 | Razer Huntsman Mini                           |  1532:0257  |
-| Razer BlackWidow V3 Mini Hyperspeed (Wired)   |  1532:0258  |
+| Razer BlackWidow V3 Mini HyperSpeed (Wired)   |  1532:0258  |
 | Razer Blade Stealth (Late 2020)               |  1532:0259  |
 | Razer BlackWidow V3 Pro (Wired)               |  1532:025A  |
 | Razer BlackWidow V3 Pro (Wireless)            |  1532:025C  |
@@ -89,7 +89,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Blade 17 Pro (Early 2021)               |  1532:026E  |
 | Razer Blade 15 Base (Early 2021)              |  1532:026F  |
 | Razer Blade 14 (2021)                         |  1532:0270  |
-| Razer BlackWidow V3 Mini Hyperspeed (Wireless)|  1532:0271  |
+| Razer BlackWidow V3 Mini HyperSpeed (Wireless)|  1532:0271  |
 | Razer Blade 15 Advanced (Mid 2021)            |  1532:0276  |
 | Razer Blade 17 Pro (Mid 2021)                 |  1532:0279  |
 | Razer Blade 15 Base (2022)                    |  1432:027A  |

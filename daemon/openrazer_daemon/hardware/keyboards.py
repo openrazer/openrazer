@@ -1040,9 +1040,9 @@ class RazerBlackWidowV3TK(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1709/1709-blackwidow-v3-tkl.png"
 
 
-class RazerBlackWidowV3MiniHyperspeed(_RippleKeyboard):
+class RazerBlackWidowV3MiniHyperSpeedWired(_RippleKeyboard):
     """
-    Class for the Razer BlackWidow V3 Mini Hyperspeed
+    Class for the Razer BlackWidow V3 Mini HyperSpeed (Wired)
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_V3_Mini_000000000000(-if01)?-event-mouse')
 
@@ -1061,9 +1061,9 @@ class RazerBlackWidowV3MiniHyperspeed(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1777/500x500-blackwidowv3mini.png"
 
 
-class RazerBlackWidowV3MiniHyperspeedWireless(RazerBlackWidowV3MiniHyperspeed):
+class RazerBlackWidowV3MiniHyperSpeedWireless(RazerBlackWidowV3MiniHyperSpeedWired):
     """
-    Class for the Razer BlackWidow V3 Mini Hyperspeed (Wireless)
+    Class for the Razer BlackWidow V3 Mini HyperSpeed (Wireless)
     """
     USB_PID = 0x0271
 
