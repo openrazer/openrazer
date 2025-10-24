@@ -50,7 +50,7 @@ class _MatrixKeyboard(_MacroKeyboard):
 
         if not self.HAS_MATRIX:
             # You can use _MacroKeyboard instead if the keyboard doesn't support matrix
-            raise RuntimeError("Cannot use MatrhxKeyboard without matrix capabilities")
+            raise RuntimeError("Cannot use MatrixKeyboard without matrix capabilities")
 
         self.complex_managers = [_ComplexEffectManager(self, self._device_number, constr) for constr in COMPLEX_EFFECT_THREADS]
 
