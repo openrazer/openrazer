@@ -11,6 +11,7 @@ from openrazer_daemon.misc.complex_effect import ComplexEffectManager as _Comple
 from openrazer_daemon.misc.complex_effect_catalogue import COMPLEX_EFFECT_THREADS, COMPLEX_EFFECTS_METHODS
 from openrazer_daemon.misc.utils import capitalize_first_char
 
+
 class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
     """
     Keyboard class

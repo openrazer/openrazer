@@ -12,8 +12,10 @@ import time
 # pylint: disable=import-error
 from openrazer_daemon.misc.complex_effect import ComplexEffectThread, ComplexEffectManager, transmute_keyboard_matrix_from_polychromatic
 
+
 def scale_colour(colour, scale):
     return tuple(x * scale for x in colour)
+
 
 class ReactiveEffectThread(ComplexEffectThread):
     EFFECT_NAME = "reactive2"

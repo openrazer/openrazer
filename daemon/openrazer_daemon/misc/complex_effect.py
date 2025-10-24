@@ -6,6 +6,7 @@ import logging
 from openrazer_daemon.keyboard import KeyboardColour
 from openrazer_daemon.misc.utils import capitalize_first_char
 
+
 def hex2rgb(hx):
     if len(hx) != 7:
         return (255, 0, 0)
@@ -17,6 +18,8 @@ def hex2rgb(hx):
         )
     except:
         return (255, 0, 0)
+
+
 def transmute_keyboard_matrix_from_polychromatic(raw_matrix):
     # Iterate over the columns
     for column in raw_matrix.values():
@@ -25,6 +28,7 @@ def transmute_keyboard_matrix_from_polychromatic(raw_matrix):
             # Convert hex to tuple of rgb
             column[i] = hex2rgb(entry)
     return raw_matrix
+
 
 class ComplexEffectThread(threading.Thread):
     """

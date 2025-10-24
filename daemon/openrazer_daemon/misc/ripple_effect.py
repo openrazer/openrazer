@@ -33,7 +33,6 @@ class RippleEffectThread(ComplexEffectThread):
         except:
             self._mode = 1
 
-
     def run(self):
         """
         Event loop
@@ -107,4 +106,3 @@ class RippleEffectThread(ComplexEffectThread):
 
             # Sleep until the next ripple refresh
             time.sleep(self._refresh_rate)
-

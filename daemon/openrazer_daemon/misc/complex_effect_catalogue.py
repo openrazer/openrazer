@@ -7,7 +7,6 @@ from openrazer_daemon.misc.utils import capitalize_first_char
 COMPLEX_EFFECT_THREADS = [RippleEffectThread, ReactiveEffectThread]
 
 
-
 def template_set_effect(f_name, effect_name):
     def _template(self, red, green, blue, refresh_rate):
         """
@@ -33,6 +32,7 @@ def template_set_effect(f_name, effect_name):
         self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
     return _template
 
+
 def template_set_effect_random(f_name, effect_name):
     def _template(self, refresh_rate):
         """
@@ -47,6 +47,7 @@ def template_set_effect_random(f_name, effect_name):
         # remember effect
         self.set_persistence("backlight", "effect", effect_name + 'RandomColour')
     return _template
+
 
 def template_set_effect_config_file(f_name, effect_name):
     def _template(self, red, green, blue, matrix, refresh_rate):
@@ -76,12 +77,14 @@ def template_set_effect_config_file(f_name, effect_name):
         self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
     return _template
 
+
 @dataclass
 class ComplexEffectDbusDefinition:
     interface: str
     name: str
     in_sig: str
     function: Callable
+
 
 COMPLEX_EFFECTS_METHODS = {}
 for x in COMPLEX_EFFECT_THREADS:
