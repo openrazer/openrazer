@@ -55,6 +55,7 @@ class ComplexEffectThread(threading.Thread):
         self._rows, self._cols = self._parent._parent.MATRIX_DIMS
 
         self._keyboard_grid = KeyboardColour(self._rows, self._cols)
+        self._matrix_map = None
 
     @property
     def shutdown(self):

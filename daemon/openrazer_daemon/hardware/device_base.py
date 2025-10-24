@@ -1142,7 +1142,7 @@ class RazerDevice(DBusService):
                 self.logger.debug("Adding templated %s.%s method to DBus", new_function.interface, new_function.name)
                 self.add_dbus_method(new_function.interface, new_function.name, new_function.function, new_function.in_sig, None, False)
             else:
-                raise RuntimeError("Couldn't add method to DBus: " + str(e)) from None
+                raise RuntimeError("Couldn't add method to DBus: " + str(method_name)) from None
 
     def suspend_device(self):
         """
