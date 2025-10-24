@@ -97,6 +97,7 @@ class ComplexEffectThread(threading.Thread):
     def get_color_for_key(self, row, col):
         if self._matrix_map:
             try:
+                # pylint: disable=unsubscriptable-object
                 return self._matrix_map[str(col)][str(row)]
             except:
                 return self._colour
