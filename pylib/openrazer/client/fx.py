@@ -50,6 +50,76 @@ class BaseRazerFX(object):
         return self._capabilities.get('lighting_' + capability, False)
 
 
+class RazerAdvancedFX(BaseRazerFX):
+    def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, matrix_dims=(-1, -1)):
+        super().__init__(serial, capabilities, daemon_dbus)
+
+        # Only init'd when there's a matrix
+        self._capabilities = capabilities
+
+        if not all([dim >= 1 for dim in matrix_dims]):
+            raise ValueError("Matrix dimensions cannot contain -1")
+
+        if daemon_dbus is None:
+            session_bus = _dbus.SessionBus()
+            daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
+
+        self._matrix_dims = matrix_dims
+        self._lighting_dbus = _dbus.Interface(daemon_dbus, "razer.device.lighting.chroma")
+
+        self.matrix = Frame(matrix_dims)
+
+    @property
+    def cols(self):
+        """
+        Number of columns in matrix
+
+        :return: Columns
+        :rtype: int
+        """
+        return self._matrix_dims[1]
+
+    @property
+    def rows(self):
+        """
+        Number of rows in matrix
+
+        :return: Rows
+        :rtype: int
+        """
+        return self._matrix_dims[0]
+
+    def _draw(self, ba):
+        self._lighting_dbus.setKeyRow(ba)
+
+        self._lighting_dbus.setCustom()
+
+    def draw(self):
+        """
+        Draw what's in the current frame buffer
+        """
+        self._draw(bytes(self.matrix))
+
+    def draw_fb_or(self):
+        self._draw(bytes(self.matrix.draw_with_fb_or()))
+
+    def set_key(self, column_id, rgb, row_id=0):  # Not needed on mice
+        if self.has('led_single'):
+            if isinstance(rgb, (tuple, list)) and len(rgb) == 3 and all([isinstance(component, int) for component in rgb]):
+                if row_id < self._matrix_dims[0] and column_id < self._matrix_dims[1]:
+                    self._lighting_dbus.setKey(row_id, column_id, [clamp_ubyte(component) for component in rgb])
+                else:
+                    raise ValueError("Row or column out of bounds. Max dimensions are: {0},{1}".format(*self._matrix_dims))
+            else:
+                raise ValueError("RGB must be an RGB tuple")
+
+    def restore(self):
+        """
+        Restore the device to the last effect
+        """
+        self._lighting_dbus.restoreLastEffect()
+
+
 class RazerFX(BaseRazerFX):
     def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, matrix_dims=(-1, -1)):
         super().__init__(serial, capabilities, daemon_dbus)
@@ -610,76 +680,6 @@ class RazerFX(BaseRazerFX):
 
             return True
         return False
-
-
-class RazerAdvancedFX(BaseRazerFX):
-    def __init__(self, serial: str, capabilities: dict, daemon_dbus=None, matrix_dims=(-1, -1)):
-        super().__init__(serial, capabilities, daemon_dbus)
-
-        # Only init'd when there's a matrix
-        self._capabilities = capabilities
-
-        if not all([dim >= 1 for dim in matrix_dims]):
-            raise ValueError("Matrix dimensions cannot contain -1")
-
-        if daemon_dbus is None:
-            session_bus = _dbus.SessionBus()
-            daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
-
-        self._matrix_dims = matrix_dims
-        self._lighting_dbus = _dbus.Interface(daemon_dbus, "razer.device.lighting.chroma")
-
-        self.matrix = Frame(matrix_dims)
-
-    @property
-    def cols(self):
-        """
-        Number of columns in matrix
-
-        :return: Columns
-        :rtype: int
-        """
-        return self._matrix_dims[1]
-
-    @property
-    def rows(self):
-        """
-        Number of rows in matrix
-
-        :return: Rows
-        :rtype: int
-        """
-        return self._matrix_dims[0]
-
-    def _draw(self, ba):
-        self._lighting_dbus.setKeyRow(ba)
-
-        self._lighting_dbus.setCustom()
-
-    def draw(self):
-        """
-        Draw what's in the current frame buffer
-        """
-        self._draw(bytes(self.matrix))
-
-    def draw_fb_or(self):
-        self._draw(bytes(self.matrix.draw_with_fb_or()))
-
-    def set_key(self, column_id, rgb, row_id=0):  # Not needed on mice
-        if self.has('led_single'):
-            if isinstance(rgb, (tuple, list)) and len(rgb) == 3 and all([isinstance(component, int) for component in rgb]):
-                if row_id < self._matrix_dims[0] and column_id < self._matrix_dims[1]:
-                    self._lighting_dbus.setKey(row_id, column_id, [clamp_ubyte(component) for component in rgb])
-                else:
-                    raise ValueError("Row or column out of bounds. Max dimensions are: {0},{1}".format(*self._matrix_dims))
-            else:
-                raise ValueError("RGB must be an RGB tuple")
-
-    def restore(self):
-        """
-        Restore the device to the last effect
-        """
-        self._lighting_dbus.restoreLastEffect()
 
 
 class SingleLed(BaseRazerFX):
