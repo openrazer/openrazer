@@ -11,7 +11,7 @@ jobs:
       pull-requests: write
       actions: write
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v10
         with:
           stale-issue-message: 'This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
           days-before-issue-stale: 120
