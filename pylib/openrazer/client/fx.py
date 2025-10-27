@@ -1107,9 +1107,7 @@ class Frame(object):
         self._rows, self._cols = dimensions
         self._components = 3
 
-        self._matrix = None
-        self._fb1 = None
-        self.reset()
+        self._init()
 
     # Index with row, col OR y, x
     def __getitem__(self, key: tuple) -> tuple:
@@ -1159,13 +1157,16 @@ class Frame(object):
         """
         return b''.join([self.row_binary(row_id) for row_id in range(0, self._rows)])
 
+    def _init(self) -> None:
+        self._matrix = _np.zeros((self._components, self._rows, self._cols), 'uint8')
+        self._fb1 = _np.copy(self._matrix)
+
     def reset(self):
         """
         Init/Clear the matrix
         """
         if self._matrix is None:
-            self._matrix = _np.zeros((self._components, self._rows, self._cols), 'uint8')
-            self._fb1 = _np.copy(self._matrix)
+            self._init()
         else:
             self._matrix.fill(0)
 
