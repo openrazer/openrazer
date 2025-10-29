@@ -16,7 +16,9 @@ from typing import Optional
 from openrazer_daemon.dbus_services.service import DBusService
 import openrazer_daemon.dbus_services.dbus_methods
 from openrazer_daemon.misc import effect_sync
+from openrazer_daemon.misc.complex_effect_catalogue import COMPLEX_EFFECTS_METHODS
 from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
+from openrazer_daemon.misc.utils import capitalize_first_char
 
 
 # pylint: disable=too-many-instance-attributes
@@ -101,6 +103,7 @@ class RazerDevice(DBusService):
                 "brightness": 75.0,
                 "effect": 'spectrum',
                 "colors": [0, 255, 0, 0, 255, 255, 0, 0, 255],
+                "config": "",
                 "speed": 1,
                 "wave_dir": 1,
             }
@@ -308,6 +311,12 @@ class RazerDevice(DBusService):
                     except (KeyError, configparser.NoOptionError):
                         self.logger.info("Failed to get " + i + " colors from persistence storage, using default.")
 
+                    # color matrix
+                    try:
+                        self.zone[i]["config"] = str(self.persistence[self.storage_name][i + '_config'])
+                    except (KeyError, configparser.NoOptionError):
+                        self.logger.info("Failed to get " + i + " config from persistence storage, using default.")
+
                     # speed
                     try:
                         self.zone[i]["speed"] = int(self.persistence[self.storage_name][i + '_speed'])
@@ -398,7 +407,7 @@ class RazerDevice(DBusService):
             if self.zone[i]["present"]:
                 # load active state
                 if 'set_' + i + '_active' in self.METHODS:
-                    active_func = getattr(self, "set" + self.capitalize_first_char(i) + "Active", None)
+                    active_func = getattr(self, "set" + capitalize_first_char(i) + "Active", None)
                     if active_func is not None:
                         active_func(self.zone[i]["active"])
 
@@ -407,7 +416,7 @@ class RazerDevice(DBusService):
                 if i == "backlight":
                     bright_func = getattr(self, "setBrightness", None)
                 elif 'set_' + i + '_brightness' in self.METHODS:
-                    bright_func = getattr(self, "set" + self.capitalize_first_char(i) + "Brightness", None)
+                    bright_func = getattr(self, "set" + capitalize_first_char(i) + "Brightness", None)
 
                 if bright_func is not None:
                     bright_func(self.zone[i]["brightness"])
@@ -420,7 +429,7 @@ class RazerDevice(DBusService):
             if self.zone[i]["present"]:
                 # set active state
                 if 'set_' + i + '_active' in self.METHODS:
-                    active_func = getattr(self, "set" + self.capitalize_first_char(i) + "Active", None)
+                    active_func = getattr(self, "set" + capitalize_first_char(i) + "Active", None)
                     if active_func is not None:
                         active_func(False)
 
@@ -429,7 +438,7 @@ class RazerDevice(DBusService):
                 if i == "backlight":
                     bright_func = getattr(self, "setBrightness", None)
                 elif 'set_' + i + '_brightness' in self.METHODS:
-                    bright_func = getattr(self, "set" + self.capitalize_first_char(i) + "Brightness", None)
+                    bright_func = getattr(self, "set" + capitalize_first_char(i) + "Brightness", None)
 
                 if bright_func is not None:
                     bright_func(0)
@@ -447,9 +456,9 @@ class RazerDevice(DBusService):
                 # yes, we need to handle the backlight zone separately too.
                 # the backlight effect methods don't have a prefix.
                 if i == "backlight":
-                    effect_func_name = 'set' + self.capitalize_first_char(self.zone[i]["effect"])
+                    effect_func_name = 'set' + capitalize_first_char(self.zone[i]["effect"])
                 else:
-                    effect_func_name = 'set' + self.handle_underscores(self.capitalize_first_char(i)) + self.capitalize_first_char(self.zone[i]["effect"])
+                    effect_func_name = 'set' + self.handle_underscores(capitalize_first_char(i)) + capitalize_first_char(self.zone[i]["effect"])
 
                 # find the effect method
                 effect_func = getattr(self, effect_func_name, None)
@@ -462,7 +471,7 @@ class RazerDevice(DBusService):
                     if i == "backlight":
                         effect_func_name = 'setSpectrum'
                     else:
-                        effect_func_name = 'set' + self.capitalize_first_char(i) + 'Spectrum'
+                        effect_func_name = 'set' + capitalize_first_char(i) + 'Spectrum'
                     effect_func = getattr(self, effect_func_name, None)
 
                 # we check again here because there is a possibility the device may not even have Spectrum
@@ -1125,12 +1134,16 @@ class RazerDevice(DBusService):
 
         self.methods_internal.extend(self.METHODS)
         for method_name in self.methods_internal:
-            try:
+            if method_name in available_functions:
                 new_function = available_functions[method_name]
                 self.logger.debug("Adding %s.%s method to DBus", new_function.interface, new_function.name)
                 self.add_dbus_method(new_function.interface, new_function.name, new_function, new_function.in_sig, new_function.out_sig, new_function.byte_arrays)
-            except KeyError as e:
-                raise RuntimeError("Couldn't add method to DBus: " + str(e)) from None
+            elif method_name in COMPLEX_EFFECTS_METHODS:
+                new_function = COMPLEX_EFFECTS_METHODS[method_name]
+                self.logger.debug("Adding templated %s.%s method to DBus", new_function.interface, new_function.name)
+                self.add_dbus_method(new_function.interface, new_function.name, new_function.function, new_function.in_sig, None, False)
+            else:
+                raise RuntimeError("Couldn't add method to DBus: " + str(method_name)) from None
 
     def suspend_device(self):
         """
@@ -1313,10 +1326,6 @@ class RazerDevice(DBusService):
     @staticmethod
     def handle_underscores(string):
         return re.sub(r'[_]+(?P<first>[a-z])', lambda m: m.group('first').upper(), string)
-
-    @staticmethod
-    def capitalize_first_char(string):
-        return string[0].upper() + string[1:]
 
     def __del__(self):
         self.close()
