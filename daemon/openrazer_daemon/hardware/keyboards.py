@@ -1040,9 +1040,9 @@ class RazerBlackWidowV3TK(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1709/1709-blackwidow-v3-tkl.png"
 
 
-class RazerBlackWidowV3MiniHyperspeed(_RippleKeyboard):
+class RazerBlackWidowV3MiniHyperSpeedWired(_RippleKeyboard):
     """
-    Class for the Razer BlackWidow V3 Mini Hyperspeed
+    Class for the Razer BlackWidow V3 Mini HyperSpeed (Wired)
     """
     EVENT_FILE_REGEX = re.compile(r'.*BlackWidow_V3_Mini_000000000000(-if01)?-event-mouse')
 
@@ -1061,11 +1061,39 @@ class RazerBlackWidowV3MiniHyperspeed(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1777/500x500-blackwidowv3mini.png"
 
 
-class RazerBlackWidowV3MiniHyperspeedWireless(RazerBlackWidowV3MiniHyperspeed):
+class RazerBlackWidowV3MiniHyperSpeedWireless(RazerBlackWidowV3MiniHyperSpeedWired):
     """
-    Class for the Razer BlackWidow V3 Mini Hyperspeed (Wireless)
+    Class for the Razer BlackWidow V3 Mini HyperSpeed (Wireless)
     """
     USB_PID = 0x0271
+
+
+class RazerBlackWidowV4MiniHyperSpeedWired(_RippleKeyboard):
+    """
+    Class for the Razer BlackWidow V4 Mini HyperSpeed (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow_V4_Mini_(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02B9
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [5, 14]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_battery', 'is_charging']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/d0ebf9b718890099da55f79fb6b4569f/razer-blackwidowv4-mini-hyperspeed-usp5.webp"
+
+
+class RazerBlackWidowV4MiniHyperSpeedWireless(RazerBlackWidowV4MiniHyperSpeedWired):
+    """
+    Class for the Razer BlackWidow V4 Mini HyperSpeed (Wireless)
+    """
+    USB_PID = 0x02BA
 
 
 class RazerCynosaChroma(_RippleKeyboard):
@@ -2214,3 +2242,22 @@ class RazerBlade142025(_RippleKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/15088/15088-1-en-v1.png"
+
+
+class RazerBlade182025(_RippleKeyboard):
+    """
+    Class for the Razer Blade 18 (2025)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02C7
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 19]
+    METHODS = ['get_device_type_keyboard', 'get_logo_active', 'set_logo_active', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
+               'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/14968/14968-1-en-v1.png"

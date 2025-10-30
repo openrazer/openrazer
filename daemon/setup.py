@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="openrazer_daemon",
-    version="3.10.3",
+    version="3.11.0",
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=[
         "daemonize >= 2.4.7",
