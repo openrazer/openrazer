@@ -6789,7 +6789,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
             break;
 
-        
+
         case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRED:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
