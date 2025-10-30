@@ -205,8 +205,6 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Viper Mini Signature Edition (Wireless)                 |  1532:009F  |
 | Razer DeathAdder V2 Lite                                      |  1532:00A1  |
 | Razer Cobra                                                   |  1532:00A3  |
-| Razer Cobra Hyperspeed (Wireless)                             |  1532:00DB  |
-| Razer Cobra Hyperspeed                                        |  1532:00DA  |
 | Razer Viper V2 Pro (Wired)                                    |  1532:00A5  |
 | Razer Viper V2 Pro (Wireless)                                 |  1532:00A6  |
 | Razer Naga V2 Pro (Wired)                                     |  1532:00A7  |
@@ -235,6 +233,8 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer Basilisk V3 Pro 35K (Wireless)                          |  1532:00CD  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wired)       |  1532:00D6  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wireless)    |  1532:00D7  |
+| Razer Cobra Hyperspeed (Wired)                                |  1532:00DA  |
+| Razer Cobra Hyperspeed (Wireless)                             |  1532:00DB  |
 
 ### Mousemats
 | Device                                        | USB VID:PID |

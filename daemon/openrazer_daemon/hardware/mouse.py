@@ -1613,14 +1613,11 @@ class RazerCobraHyperSpeed(__RazerDevice):
                'get_poll_rate', 'set_poll_rate',
                'get_brightness', 'set_brightness',
                'get_logo_brightness', 'set_logo_brightness',
-               'get_scroll_brightness', 'set_scroll_brightness',
                'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
                # All LEDs (partial support)
                'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
                # Logo (partial support)
                'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none',
-               # Scroll wheel (partial support)
-               'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none',
                # Battery
                'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold']
 
@@ -1629,7 +1626,7 @@ class RazerCobraHyperSpeed(__RazerDevice):
     DPI_MAX = 26000
 
 
-class RazerCobraHyperSpeedReceiver(RazerCobraHyperSpeed):
+class RazerCobraHyperSpeedWireless(RazerCobraHyperSpeed):
     """
     Class for the Razer Cobra HyperSpeed Receiver
     """
