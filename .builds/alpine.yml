@@ -13,6 +13,7 @@ packages:
   - py3-setuptools
   - py3-udev
   - sed
+  - vermin
 sources:
   - https://github.com/openrazer/openrazer
 tasks:
@@ -32,6 +33,8 @@ tasks:
       ./scripts/ci/test-auto-generate.sh
       # Check for hex casing issues
       ./scripts/ci/test-hex-casing.sh
+      # Check for Python version compatibility
+      ./scripts/ci/test-vermin.sh
 
   - compile-driver: |
       cd openrazer
