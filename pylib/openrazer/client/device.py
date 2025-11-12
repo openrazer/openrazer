@@ -47,9 +47,8 @@ class RazerDeviceFactory(BaseDeviceFactory):
         device_dbus = dbus.Interface(daemon_dbus, "razer.device.misc")
 
         device_type = device_dbus.getDeviceType()
-        device_vid_pid = device_dbus.getVidPid()
 
         device_class = DEVICE_MAP.get(device_type, RazerDevice)
-        device = device_class(serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
+        device = device_class(serial, daemon_dbus=daemon_dbus)
 
         return device

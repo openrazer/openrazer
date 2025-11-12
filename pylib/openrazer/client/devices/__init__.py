@@ -13,7 +13,7 @@ class RazerDevice(object):
     _FX = _RazerFX
     _MACRO_CLASS = _RazerMacro
 
-    def __init__(self, serial, vid_pid=None, daemon_dbus=None):
+    def __init__(self, serial, daemon_dbus=None):
         # Load up the DBus
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
@@ -38,10 +38,7 @@ class RazerDevice(object):
         # Deprecated API, but kept for backwards compatibility
         self._urls = None
 
-        if vid_pid is None:
-            self._vid, self._pid = self._dbus_interfaces['device'].getVidPid()
-        else:
-            self._vid, self._pid = vid_pid
+        self._vid, self._pid = self._dbus_interfaces['device'].getVidPid()
 
         self._serial = serial
 
