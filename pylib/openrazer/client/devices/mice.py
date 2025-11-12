@@ -8,7 +8,7 @@ class RazerMouse(__RazerDevice):
     _MACRO_CLASS = _RazerMacro
 
     @property
-    def max_dpi(self) -> int:
+    def max_dpi(self) -> int | None:
         """
         Gets max DPI
 
@@ -21,7 +21,7 @@ class RazerMouse(__RazerDevice):
             return None
 
     @property
-    def available_dpi(self) -> list:
+    def available_dpi(self) -> list[int] | None:
         """
         Gets the available DPI
 
@@ -36,7 +36,7 @@ class RazerMouse(__RazerDevice):
             return None
 
     @property
-    def dpi(self) -> tuple:
+    def dpi(self) -> tuple[int, int]:
         """
         Get mouse DPI
 
@@ -57,7 +57,7 @@ class RazerMouse(__RazerDevice):
             raise NotImplementedError()
 
     @dpi.setter
-    def dpi(self, value: tuple):
+    def dpi(self, value: tuple[int, int]) -> None:
         """
         Set mouse dpi
 
@@ -91,7 +91,7 @@ class RazerMouse(__RazerDevice):
             raise NotImplementedError()
 
     @property
-    def dpi_stages(self) -> (int, list):
+    def dpi_stages(self) -> tuple[int, list[tuple[int, int]]]:
         """
         Get mouse DPI stages
 
@@ -118,7 +118,7 @@ class RazerMouse(__RazerDevice):
             raise NotImplementedError()
 
     @dpi_stages.setter
-    def dpi_stages(self, value: (int, list)):
+    def dpi_stages(self, value: tuple[int, list[tuple[int, int]]]) -> None:
         """
         Set mouse DPI stages
 
@@ -193,7 +193,7 @@ class RazerMouse(__RazerDevice):
             raise NotImplementedError()
 
     @scroll_mode.setter
-    def scroll_mode(self, mode: int):
+    def scroll_mode(self, mode: int) -> None:
         """
         Set the scroll mode of the device
 
@@ -223,7 +223,7 @@ class RazerMouse(__RazerDevice):
             raise NotImplementedError()
 
     @scroll_acceleration.setter
-    def scroll_acceleration(self, enabled: bool):
+    def scroll_acceleration(self, enabled: bool) -> None:
         """
         Set the device's scroll acceleration state
 
@@ -253,7 +253,7 @@ class RazerMouse(__RazerDevice):
             raise NotImplementedError()
 
     @scroll_smart_reel.setter
-    def scroll_smart_reel(self, enabled: bool):
+    def scroll_smart_reel(self, enabled: bool) -> None:
         """
         Set the device's "smart reel" state
 

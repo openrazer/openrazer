@@ -23,7 +23,7 @@ class RazerKeyboard(__RazerDevice):
             return False
 
     @game_mode_led.setter
-    def game_mode_led(self, value: bool):
+    def game_mode_led(self, value: bool) -> None:
         """
         Set game mode LED state
 
@@ -50,7 +50,7 @@ class RazerKeyboard(__RazerDevice):
             return False
 
     @macro_mode_led.setter
-    def macro_mode_led(self, value: bool):
+    def macro_mode_led(self, value: bool) -> None:
         """
         Set macro mode LED state
 
@@ -78,7 +78,7 @@ class RazerKeyboard(__RazerDevice):
             return False
 
     @macro_mode_led_effect.setter
-    def macro_mode_led_effect(self, value: int):
+    def macro_mode_led_effect(self, value: int) -> None:
         """
         Set macro mode LED effect
 
@@ -103,7 +103,7 @@ class RazerKeyboard(__RazerDevice):
             return False
 
     @keyswitch_optimization.setter
-    def keyswitch_optimization(self, value: bool):
+    def keyswitch_optimization(self, value: bool) -> None:
         """
         Set keyswitch optimization state
 
@@ -130,7 +130,7 @@ class RazerKeyboard(__RazerDevice):
             return False
 
     @profile_led_red.setter
-    def profile_led_red(self, enable: bool):
+    def profile_led_red(self, enable: bool) -> None:
         """
         Set red profile LED state
 
@@ -154,7 +154,7 @@ class RazerKeyboard(__RazerDevice):
             return False
 
     @profile_led_green.setter
-    def profile_led_green(self, enable: bool):
+    def profile_led_green(self, enable: bool) -> None:
         """
         Set green profile LED state
 
@@ -178,7 +178,7 @@ class RazerKeyboard(__RazerDevice):
             return False
 
     @profile_led_blue.setter
-    def profile_led_blue(self, enable: bool):
+    def profile_led_blue(self, enable: bool) -> None:
         """
         Set blue profile LED state
 

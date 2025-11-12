@@ -3,6 +3,7 @@
 import json
 import dbus as _dbus
 from openrazer.client.device import RazerDeviceFactory as _RazerDeviceFactory
+from openrazer.client.devices import RazerDevice as __RazerDevice
 from openrazer.client import constants as constants
 
 __version__ = '3.11.0'
@@ -17,7 +18,7 @@ class DeviceManager(object):
     DeviceManager Class
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Load up the DBus
         session_bus = _dbus.SessionBus()
         try:
@@ -40,18 +41,18 @@ class DeviceManager(object):
             device = _RazerDeviceFactory.get_device(serial)
             self._devices.append(device)
 
-    def stop_daemon(self):
+    def stop_daemon(self) -> None:
         """
         Stops the Daemon via a DBus call
         """
         self._dbus_daemon.stop()
 
     @property
-    def turn_off_on_screensaver(self):
+    def turn_off_on_screensaver(self) -> bool:
         return self._dbus_devices.getOffOnScreensaver()
 
     @turn_off_on_screensaver.setter
-    def turn_off_on_screensaver(self, enable):
+    def turn_off_on_screensaver(self, enable: bool) -> None:
         """
         Enable or Disable the logic to turn off the devices whilst the screensaver is active
 
@@ -68,11 +69,11 @@ class DeviceManager(object):
         self._dbus_devices.enableTurnOffOnScreensaver(enable)
 
     @property
-    def sync_effects(self):
+    def sync_effects(self) -> bool:
         return self._dbus_devices.getSyncEffects()
 
     @sync_effects.setter
-    def sync_effects(self, sync):
+    def sync_effects(self, sync: bool) -> None:
         """
         Enable or disable the syncing of effects between devices
 
@@ -89,13 +90,13 @@ class DeviceManager(object):
         self._dbus_devices.syncEffects(sync)
 
     @property
-    def supported_devices(self):
+    def supported_devices(self) -> dict[str, tuple[int, int]]:
         json_data = self._dbus_daemon.supportedDevices()
 
         return json.loads(json_data)
 
     @property
-    def devices(self):
+    def devices(self) -> list[__RazerDevice]:
         """
         A list of Razer devices
 
@@ -106,7 +107,7 @@ class DeviceManager(object):
         return self._devices
 
     @property
-    def version(self):
+    def version(self) -> str:
         """
         Python library version
 
@@ -116,7 +117,7 @@ class DeviceManager(object):
         return __version__
 
     @property
-    def daemon_version(self):
+    def daemon_version(self) -> str:
         """
         Daemon version
 
