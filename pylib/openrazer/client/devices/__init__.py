@@ -575,5 +575,5 @@ class RazerDevice(object):
 
 class BaseDeviceFactory(object):
     @staticmethod
-    def get_device(serial: str, daemon_dbus=None) -> RazerDevice:
+    def get_device(serial: str, daemon_dbus: _dbus.proxies.ProxyObject = None) -> RazerDevice:
         raise NotImplementedError()
