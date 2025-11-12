@@ -3,16 +3,15 @@
 import dbus
 from openrazer.client.devices import RazerDevice, BaseDeviceFactory
 from openrazer.client.devices.mousemat import RazerMousemat
-from openrazer.client.devices.keyboard import RazerKeyboardFactory
+from openrazer.client.devices.keyboard import RazerKeyboard
 from openrazer.client.devices.mice import RazerMouse
 
 
 DEVICE_MAP = {
     'mousemat': RazerMousemat,
-    'keyboard': RazerKeyboardFactory,
+    'keyboard': RazerKeyboard,
     'mouse': RazerMouse,
-    'keypad': RazerKeyboardFactory,
-    'default': RazerDevice
+    'keypad': RazerKeyboard,
 }
 
 
@@ -53,17 +52,7 @@ class RazerDeviceFactory(BaseDeviceFactory):
         device_type = device_dbus.getDeviceType()
         device_vid_pid = device_dbus.getVidPid()
 
-        if device_type in DEVICE_MAP:
-            # Have device mapping
-            device_class = DEVICE_MAP[device_type]
-            if hasattr(device_class, 'get_device'):
-                # DeviceFactory
-                device = device_class.get_device(serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
-            else:
-                # DeviceClass
-                device = device_class(serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
-        else:
-            # No mapping, default to RazerDevice
-            device = DEVICE_MAP['default'](serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
+        device_class = DEVICE_MAP.get(device_type, RazerDevice)
+        device = device_class(serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
 
         return device
