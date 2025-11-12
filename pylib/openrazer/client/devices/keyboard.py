@@ -187,20 +187,3 @@ class RazerKeyboard(__RazerDevice):
         """
         if self.has('lighting_profile_led_blue'):
             self._dbus_interfaces['profile_led'].setBlueLED(enable)
-
-
-DEVICE_PID_MAP = {
-
-}
-
-
-class RazerKeyboardFactory(__BaseDeviceFactory):
-    @staticmethod
-    def get_device(serial, vid_pid=None, daemon_dbus=None):
-        if vid_pid is None:
-            pid = 0xFFFF
-        else:
-            pid = vid_pid[1]
-
-        device_class = DEVICE_PID_MAP.get(pid, RazerKeyboard)
-        return device_class(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
