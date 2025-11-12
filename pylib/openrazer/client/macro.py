@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 import json as _json
+from collections.abc import Iterable
 
 import dbus as _dbus
 
@@ -9,7 +10,7 @@ from openrazer_daemon import keyboard
 
 
 class RazerMacro(object):
-    def __init__(self, serial: str, devname: str, daemon_dbus=None, capabilities=None):
+    def __init__(self, serial: str, devname: str, daemon_dbus: _dbus.proxies.ProxyObject = None, capabilities: dict[str, bool] | None = None) -> None:
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
@@ -25,7 +26,7 @@ class RazerMacro(object):
 
         self.name = devname
 
-    def get_macros(self) -> dict:
+    def get_macros(self) -> dict[str, list[_daemon_macro.MacroObject]]:
         json_payload = self._macro_dbus.getMacros()
         macro_structure = _json.loads(json_payload)
 
@@ -40,7 +41,7 @@ class RazerMacro(object):
 
         return macro_key_mapping
 
-    def add_macro(self, bind_key: str, macro_object_sequence: list):
+    def add_macro(self, bind_key: str, macro_object_sequence: Iterable[_daemon_macro.MacroObject]) -> None:
         """
         Add macro to specified bind key
 
@@ -65,7 +66,7 @@ class RazerMacro(object):
         json_payload = _json.dumps(macro_list)
         self._macro_dbus.addMacro(bind_key, json_payload)
 
-    def del_macro(self, bind_key: str):
+    def del_macro(self, bind_key: str) -> None:
         key_map = keyboard.KEY_MAPPING
         map_str = "keyboard.KEY_MAPPING"
         if self.name in ["Razer Orbweaver", "Razer Orbweaver Chroma", "Razer Tartarus V2", "Razer Tartarus Chroma V2"]:
@@ -84,13 +85,13 @@ class RazerMacro(object):
             self._macro_dbus.deleteMacro(bind_key)
 
     @property
-    def mode_modifier(self):
+    def mode_modifier(self) -> bool:
         if 'macro_mode_modifier' in self._capabilities:
             return self._macro_dbus.getModeModifier()
         return False
 
     @mode_modifier.setter
-    def mode_modifier(self, value):
+    def mode_modifier(self, value: bool) -> None:
         if 'macro_mode_modifier' in self._capabilities and isinstance(value, bool):
             self._macro_dbus.getModeModifier(value)
 
@@ -108,7 +109,7 @@ class RazerMacro(object):
         return _daemon_macro.MacroURL(url)
 
     @staticmethod
-    def create_script_macro_item(script_path: str, script_args: str = None) -> _daemon_macro.MacroScript:
+    def create_script_macro_item(script_path: str, script_args: str | None = None) -> _daemon_macro.MacroScript:
         """
         Create a macro object that runs a script
 
@@ -157,7 +158,7 @@ class RazerMacro(object):
         return _daemon_macro.MacroKey(key_name, pre_pause, 'DOWN')
 
     @classmethod
-    def create_keypress_macro_item(cls, key_name: str, pre_pause: int = 0) -> list:
+    def create_keypress_macro_item(cls, key_name: str, pre_pause: int = 0) -> list[_daemon_macro.MacroKey]:
         """
         Create a macro action that consists of a key press and release event
 

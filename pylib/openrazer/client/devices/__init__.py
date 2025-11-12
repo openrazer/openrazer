@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
+from collections.abc import Iterable
 import dbus as _dbus
 from openrazer.client.fx import RazerFX as _RazerFX
 from xml.etree import ElementTree as _ET
@@ -13,7 +14,7 @@ class RazerDevice(object):
     _FX = _RazerFX
     _MACRO_CLASS = _RazerMacro
 
-    def __init__(self, serial, daemon_dbus=None):
+    def __init__(self, serial: str, daemon_dbus: _dbus.proxies.ProxyObject = None) -> None:
         # Load up the DBus
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
@@ -260,7 +261,7 @@ class RazerDevice(object):
         if self.has('scroll_mode') or self.has('scroll_acceleration') or self.has('scroll_smart_reel'):
             self._dbus_interfaces['scroll'] = _dbus.Interface(self._dbus, "razer.device.scroll")
 
-    def _get_available_features(self):
+    def _get_available_features(self) -> dict[str, list[str]]:
         introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')
         xml_spec = introspect_interface.Introspect()
         root = _ET.fromstring(xml_spec)
@@ -273,7 +274,7 @@ class RazerDevice(object):
                 continue
 
             current_interface = child.attrib['name']
-            current_interface_methods = []
+            current_interface_methods: list[str] = []
 
             for method in child:
                 if method.tag != 'method':
@@ -285,7 +286,7 @@ class RazerDevice(object):
 
         return interfaces
 
-    def _has_feature(self, object_path: str, method_name=None) -> bool:
+    def _has_feature(self, object_path: str, method_name: str | Iterable[str] | None = None) -> bool:
         """
         Checks to see if the device has said DBus method
 
@@ -394,7 +395,7 @@ class RazerDevice(object):
         return self._dbus_interfaces['brightness'].getBrightness()
 
     @brightness.setter
-    def brightness(self, value: float):
+    def brightness(self, value: float) -> None:
         """
         Set device brightness
 
@@ -415,7 +416,7 @@ class RazerDevice(object):
         self._dbus_interfaces['brightness'].setBrightness(value)
 
     @property
-    def capabilities(self) -> dict:
+    def capabilities(self) -> dict[str, bool]:
         """
         Device capabilities
 
@@ -445,7 +446,7 @@ class RazerDevice(object):
         return self._device_image
 
     @property
-    def razer_urls(self) -> dict:
+    def razer_urls(self) -> dict[str, bool | str]:
         # Deprecated API, but kept for backwards compatibility
         return {
             "DEPRECATED": True,
@@ -474,7 +475,7 @@ class RazerDevice(object):
         if self.has('battery'):
             return bool(self._dbus_interfaces['power'].isCharging())
 
-    def set_idle_time(self, idle_time) -> None:
+    def set_idle_time(self, idle_time: int) -> None:
         """
         Sets the idle time on the device
 
@@ -493,7 +494,7 @@ class RazerDevice(object):
         if self.has('battery'):
             return int(self._dbus_interfaces['power'].getIdleTime())
 
-    def set_low_battery_threshold(self, threshold) -> None:
+    def set_low_battery_threshold(self, threshold: int) -> None:
         """
         Set the low battery threshold as a percentage
 
@@ -528,7 +529,7 @@ class RazerDevice(object):
             raise NotImplementedError()
 
     @poll_rate.setter
-    def poll_rate(self, poll_rate: int):
+    def poll_rate(self, poll_rate: int) -> None:
         """
         Set poll rate of device
 
@@ -547,7 +548,7 @@ class RazerDevice(object):
             raise NotImplementedError()
 
     @property
-    def supported_poll_rates(self) -> list:
+    def supported_poll_rates(self) -> list[int]:
         """
         Get poll rates supported by the device
 
@@ -563,10 +564,10 @@ class RazerDevice(object):
         else:
             raise NotImplementedError()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self._name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<{0} {1}>'.format(self.__class__.__name__, self._serial)
 
 
