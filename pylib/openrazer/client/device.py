@@ -21,7 +21,7 @@ class RazerDeviceFactory(BaseDeviceFactory):
 
     """
     @staticmethod
-    def get_device(serial, vid_pid=None, daemon_dbus=None):
+    def get_device(serial: str, daemon_dbus: dbus.proxies.ProxyObject = None) -> RazerDevice:
         """
         Factory for turning a serial into a class
 
@@ -33,9 +33,6 @@ class RazerDeviceFactory(BaseDeviceFactory):
 
         :param serial: Device serial
         :type serial: str
-
-        :param vid_pid: Device VID, PID
-        :type vid_pid: list of int
 
         :param daemon_dbus: Daemon DBus object
         :type daemon_dbus: object or None
