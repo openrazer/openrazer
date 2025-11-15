@@ -189,6 +189,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Nommo Chroma\n";
         break;
 
+    case USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K:
+        device_type = "Razer Wolverine Pro 8K\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         device_type = "Razer Kraken Kitty Edition\n";
         break;
@@ -2246,6 +2250,10 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
         expected_protocol = USB_INTERFACE_PROTOCOL_KEYBOARD;
         break;
+
+    case USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K:
+        expected_protocol = 2;  // HID Boot Protocol for Keyboard
+        break;
     }
 
     if(dev->usb_interface_protocol == expected_protocol) {
@@ -2685,6 +2693,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_BASE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA) },
