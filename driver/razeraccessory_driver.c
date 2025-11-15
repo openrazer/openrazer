@@ -2129,8 +2129,39 @@ static void razer_accessory_init(struct razer_accessory_device *dev, struct usb_
  */
 static int razer_setup_input(struct input_dev *input, struct hid_device *hdev)
 {
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
     __set_bit(EV_KEY, input->evbit);
     __set_bit(KEY_PROG1, input->keybit);
+
+    // Setup Wolverine Pro 8K gamepad inputs
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K) {
+        // Button capabilities
+        __set_bit(BTN_A, input->keybit);
+        __set_bit(BTN_B, input->keybit);
+        __set_bit(BTN_X, input->keybit);
+        __set_bit(BTN_Y, input->keybit);
+        __set_bit(BTN_TL, input->keybit);  // LB
+        __set_bit(BTN_TR, input->keybit);  // RB
+        __set_bit(BTN_SELECT, input->keybit);  // View
+        __set_bit(BTN_START, input->keybit);   // Menu
+        __set_bit(BTN_THUMBL, input->keybit);  // L3
+        __set_bit(BTN_THUMBR, input->keybit);  // R3
+        __set_bit(BTN_DPAD_UP, input->keybit);
+        __set_bit(BTN_DPAD_DOWN, input->keybit);
+        __set_bit(BTN_DPAD_LEFT, input->keybit);
+        __set_bit(BTN_DPAD_RIGHT, input->keybit);
+        
+        // Axis capabilities
+        __set_bit(EV_ABS, input->evbit);
+        input_set_abs_params(input, ABS_X, -32768, 32767, 16, 128);  // Left stick X
+        input_set_abs_params(input, ABS_Y, -32768, 32767, 16, 128);  // Left stick Y
+        input_set_abs_params(input, ABS_RX, -32768, 32767, 16, 128); // Right stick X
+        input_set_abs_params(input, ABS_RY, -32768, 32767, 16, 128); // Right stick Y
+        input_set_abs_params(input, ABS_Z, 0, 255, 0, 0);   // Left trigger
+        input_set_abs_params(input, ABS_RZ, 0, 255, 0, 0);  // Right trigger
+    }
 
     return 0;
 }
@@ -2663,6 +2694,57 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
     struct razer_accessory_device *device = hid_get_drvdata(hdev);
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    // Handle Wolverine Pro 8K input reports
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K) {
+        if (size == 20 && data[0] == 0x00 && data[1] == 0x14) {
+            u16 buttons = data[2] | (data[3] << 8);
+            
+            // D-pad buttons (data[2])
+            input_report_key(device->input, BTN_DPAD_UP, buttons & 0x01);
+            input_report_key(device->input, BTN_DPAD_DOWN, buttons & 0x02);
+            input_report_key(device->input, BTN_DPAD_LEFT, buttons & 0x04);
+            input_report_key(device->input, BTN_DPAD_RIGHT, buttons & 0x08);
+            
+            // Face buttons (data[3])
+            input_report_key(device->input, BTN_A, buttons & 0x0010);
+            input_report_key(device->input, BTN_B, buttons & 0x0020);
+            input_report_key(device->input, BTN_X, buttons & 0x0040);
+            input_report_key(device->input, BTN_Y, buttons & 0x0080);
+            input_report_key(device->input, BTN_TL, buttons & 0x0100);  // LB
+            input_report_key(device->input, BTN_TR, buttons & 0x0200);  // RB
+            input_report_key(device->input, BTN_SELECT, buttons & 0x0400);  // View
+            input_report_key(device->input, BTN_START, buttons & 0x0800);   // Menu
+            input_report_key(device->input, BTN_THUMBL, buttons & 0x1000);  // L3
+            input_report_key(device->input, BTN_THUMBR, buttons & 0x2000);  // R3
+            
+            // Analog sticks - 16-bit little-endian values
+            if (size >= 14) {
+                s16 lx = (s16)(data[10] | (data[11] << 8));
+                s16 ly = (s16)(data[12] | (data[13] << 8));
+                input_report_abs(device->input, ABS_X, lx);
+                input_report_abs(device->input, ABS_Y, ly);
+            }
+            
+            if (size >= 18) {
+                s16 rx = (s16)(data[14] | (data[15] << 8));
+                s16 ry = (s16)(data[16] | (data[17] << 8));
+                input_report_abs(device->input, ABS_RX, rx);
+                input_report_abs(device->input, ABS_RY, ry);
+            }
+            
+            // Triggers (if present in other bytes)
+            if (size >= 10) {
+                input_report_abs(device->input, ABS_Z, data[8]);   // LT
+                input_report_abs(device->input, ABS_RZ, data[9]);  // RT
+            }
+            
+            input_sync(device->input);
+            return 1;
+        }
+    }
 
     if(size == 16 && data[0] == 0x04) {
         input_report_key(device->input, KEY_PROG1, 0x01);
