@@ -53,17 +53,14 @@ static void wolverine_irq(struct urb *urb)
 
 	/* Debug: Print first 10 bytes of ANY data received */
 	if (wv->data_size == 20 && data[0] == 0x00 && data[1] == 0x14) {
-		/* Special Razer buttons use multi-bit patterns in data[2]:
-		 * 0x05 = Razer logo/power button (impossible D-pad combo)
+		/* Special screenshot button uses multi-bit pattern in data[2]:
 		 * 0x09 = Screenshot button (impossible D-pad combo)
-		 * Handle these FIRST before individual bits
-		 * NOTE: SELECT does NOT use special combo - it's just bit 5 (0x20)
+		 * NOTE: SELECT is just bit 5 (0x20), Razer button is in byte 3 bit 2
 		 */
-		int razer_btn = (data[2] == 0x05);
 		int screenshot_btn = (data[2] == 0x09);
 		
 		/* Byte 2 button mapping - VERIFIED through systematic testing */
-		if (!razer_btn && !screenshot_btn) {
+		if (!screenshot_btn) {
 			input_report_key(input, BTN_DPAD_UP, data[2] & 0x01);      /* D-pad UP */
 			input_report_key(input, BTN_DPAD_DOWN, data[2] & 0x02);    /* D-pad DOWN */
 			input_report_key(input, BTN_DPAD_LEFT, data[2] & 0x04);    /* D-pad LEFT */
@@ -73,7 +70,7 @@ static void wolverine_irq(struct urb *urb)
 			input_report_key(input, BTN_THUMBL, data[2] & 0x40);       /* L3 - Left stick click */
 			input_report_key(input, BTN_THUMBR, data[2] & 0x80);       /* R3 - Right stick click */
 		} else {
-			/* Clear all byte2 buttons when special button combo active */
+			/* Clear all byte2 buttons when screenshot button active */
 			input_report_key(input, BTN_DPAD_UP, 0);
 			input_report_key(input, BTN_DPAD_DOWN, 0);
 			input_report_key(input, BTN_DPAD_LEFT, 0);
@@ -84,13 +81,13 @@ static void wolverine_irq(struct urb *urb)
 			input_report_key(input, BTN_THUMBR, 0);
 		}
 		
-		/* Special buttons */
-		input_report_key(input, BTN_MODE, razer_btn);                 /* Razer logo */
+		/* Special screenshot button */
 		input_report_key(input, BTN_TRIGGER_HAPPY1, screenshot_btn);  /* Screenshot */
 		
 		/* Byte 3 button mapping (verified via testing) */
 		input_report_key(input, BTN_TL, data[3] & 0x01);     /* LB - Left Bumper */
 		input_report_key(input, BTN_TR, data[3] & 0x02);     /* RB - Right Bumper */
+		input_report_key(input, BTN_MODE, data[3] & 0x04);   /* Razer logo button */
 		input_report_key(input, BTN_A, data[3] & 0x10);      /* A button */
 		input_report_key(input, BTN_B, data[3] & 0x20);      /* B button */
 		input_report_key(input, BTN_X, data[3] & 0x40);      /* X button */
