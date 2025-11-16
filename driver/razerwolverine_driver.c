@@ -13,16 +13,21 @@
 #include <linux/usb.h>
 #include <linux/usb/input.h>
 #include <linux/input.h>
+#include <linux/device.h>
 
 #include "razerwolverine_driver.h"
 
 MODULE_AUTHOR("OpenRazer Team");
 MODULE_DESCRIPTION("Razer Wolverine V3 Pro USB Gamepad Driver");
 MODULE_LICENSE("GPL");
+MODULE_SOFTDEP("pre: xpad");
 
-/* USB device ID table */
+/* USB device ID table 
+ * Match the entire device (all interfaces) to ensure we get priority over xpad
+ */
 static const struct usb_device_id wolverine_table[] = {
-	{ USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K) },
+	{ USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED) },
+	{ USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS) },
 	{ }
 };
 MODULE_DEVICE_TABLE(usb, wolverine_table);
@@ -51,7 +56,7 @@ static void wolverine_irq(struct urb *urb)
 		goto resubmit;
 	}
 
-	/* Debug: Print first 10 bytes of ANY data received */
+	/* Process gamepad input packets (header: 00 14) */
 	if (wv->data_size == 20 && data[0] == 0x00 && data[1] == 0x14) {
 		/* Special screenshot button uses multi-bit pattern in data[2]:
 		 * 0x09 = Screenshot button (impossible D-pad combo)
@@ -184,6 +189,8 @@ static int wolverine_probe(struct usb_interface *intf, const struct usb_device_i
 	if (intf->cur_altsetting->desc.bInterfaceNumber != 0)
 		return -ENODEV;
 
+	dev_info(&intf->dev, "Razer Wolverine V3 Pro connecting via razerwolverine driver\n");
+
 	/* Find the interrupt IN endpoint (0x81) */
 	ep_in = NULL;
 	for (int i = 0; i < intf->cur_altsetting->desc.bNumEndpoints; i++) {
@@ -313,6 +320,8 @@ static struct usb_driver wolverine_driver = {
 	.probe      = wolverine_probe,
 	.disconnect = wolverine_disconnect,
 	.id_table   = wolverine_table,
+	.supports_autosuspend = 0,
+	.disable_hub_initiated_lpm = 1,
 };
 
 module_usb_driver(wolverine_driver);

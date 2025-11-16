@@ -2137,21 +2137,34 @@ static int razer_setup_input(struct input_dev *input, struct hid_device *hdev)
 
     // Setup Wolverine Pro 8K gamepad inputs
     if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K) {
-        // Button capabilities
+        // Standard gamepad buttons
         __set_bit(BTN_A, input->keybit);
         __set_bit(BTN_B, input->keybit);
         __set_bit(BTN_X, input->keybit);
         __set_bit(BTN_Y, input->keybit);
-        __set_bit(BTN_TL, input->keybit);  // LB
-        __set_bit(BTN_TR, input->keybit);  // RB
-        __set_bit(BTN_SELECT, input->keybit);  // View
-        __set_bit(BTN_START, input->keybit);   // Menu
-        __set_bit(BTN_THUMBL, input->keybit);  // L3
-        __set_bit(BTN_THUMBR, input->keybit);  // R3
+        __set_bit(BTN_TL, input->keybit);   // LB
+        __set_bit(BTN_TR, input->keybit);   // RB
+        __set_bit(BTN_TL2, input->keybit);  // LT digital
+        __set_bit(BTN_TR2, input->keybit);  // RT digital
+        __set_bit(BTN_SELECT, input->keybit);   // View
+        __set_bit(BTN_START, input->keybit);    // Menu
+        __set_bit(BTN_THUMBL, input->keybit);   // L3
+        __set_bit(BTN_THUMBR, input->keybit);   // R3
         __set_bit(BTN_DPAD_UP, input->keybit);
         __set_bit(BTN_DPAD_DOWN, input->keybit);
         __set_bit(BTN_DPAD_LEFT, input->keybit);
         __set_bit(BTN_DPAD_RIGHT, input->keybit);
+        
+        // Razer-specific buttons
+        __set_bit(BTN_MODE, input->keybit);             // Razer logo/power button
+        __set_bit(BTN_TRIGGER_HAPPY1, input->keybit);   // Screenshot button
+        __set_bit(BTN_TRIGGER_HAPPY2, input->keybit);   // M button (below screenshot)
+        __set_bit(BTN_TRIGGER_HAPPY3, input->keybit);   // M1 (future/programmable)
+        __set_bit(BTN_TRIGGER_HAPPY4, input->keybit);   // M2 (future/programmable)
+        __set_bit(BTN_TRIGGER_HAPPY5, input->keybit);   // M3 (future/programmable)
+        __set_bit(BTN_TRIGGER_HAPPY6, input->keybit);   // M4 (future/programmable)
+        __set_bit(BTN_TRIGGER_HAPPY7, input->keybit);   // M5 (future/programmable)
+        __set_bit(BTN_TRIGGER_HAPPY8, input->keybit);   // M6 (future/programmable)
         
         // Axis capabilities
         __set_bit(EV_ABS, input->evbit);
@@ -2191,9 +2204,17 @@ static int razer_input_configured(struct hid_device *hdev, struct hid_input *hi)
 static int razer_input_mapping(struct hid_device *hdev, struct hid_input *hi, struct hid_field *field,    struct hid_usage *usage, unsigned long **bit, int *max)
 {
     struct razer_accessory_device *device = hid_get_drvdata(hdev);
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     if (!device->input)
         device->input = hi->input;
+
+    // For Wolverine Pro 8K, ignore HID's default input mappings
+    // We handle all input in raw_event
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K) {
+        return -1;
+    }
 
     return 0;
 }
@@ -2697,28 +2718,65 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
+    // Debug: print ALL raw events for Wolverine
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K) {
+        printk(KERN_INFO "razer: raw_event size=%d", size);
+        if (size > 0 && size <= 20) {
+            int i;
+            printk(KERN_CONT " data:");
+            for (i = 0; i < size; i++) {
+                printk(KERN_CONT " %02x", data[i]);
+            }
+        }
+        printk(KERN_CONT "\n");
+    }
+    
     // Handle Wolverine Pro 8K input reports
     if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K) {
         if (size == 20 && data[0] == 0x00 && data[1] == 0x14) {
-            u16 buttons = data[2] | (data[3] << 8);
+            // Special Razer buttons use multi-bit patterns in data[2]:
+            // 0x05 = Razer logo/power button (bits 0+2: would be Down+Left)
+            // 0x06 = Select/View button (bits 1+2: would be Right+Left - impossible)
+            // 0x09 = Screenshot button (bits 0+3: would be Down+Start)
+            // Handle these FIRST before individual bits
+            int razer_btn = (data[2] == 0x05);
+            int select_btn = (data[2] == 0x06);
+            int screenshot_btn = (data[2] == 0x09);
             
-            // D-pad buttons (data[2])
-            input_report_key(device->input, BTN_DPAD_UP, buttons & 0x01);
-            input_report_key(device->input, BTN_DPAD_DOWN, buttons & 0x02);
-            input_report_key(device->input, BTN_DPAD_LEFT, buttons & 0x04);
-            input_report_key(device->input, BTN_DPAD_RIGHT, buttons & 0x08);
+            // Byte 2 individual button mapping (skip if special button active):
+            if (!razer_btn && !select_btn && !screenshot_btn) {
+                input_report_key(device->input, BTN_DPAD_DOWN, data[2] & 0x01);
+                input_report_key(device->input, BTN_DPAD_RIGHT, data[2] & 0x02);
+                input_report_key(device->input, BTN_DPAD_LEFT, data[2] & 0x04);
+                input_report_key(device->input, BTN_START, data[2] & 0x08);
+            } else {
+                // Clear d-pad and start when special buttons are active
+                input_report_key(device->input, BTN_DPAD_DOWN, 0);
+                input_report_key(device->input, BTN_DPAD_RIGHT, 0);
+                input_report_key(device->input, BTN_DPAD_LEFT, 0);
+                input_report_key(device->input, BTN_START, 0);
+            }
             
-            // Face buttons (data[3])
-            input_report_key(device->input, BTN_A, buttons & 0x0010);
-            input_report_key(device->input, BTN_B, buttons & 0x0020);
-            input_report_key(device->input, BTN_X, buttons & 0x0040);
-            input_report_key(device->input, BTN_Y, buttons & 0x0080);
-            input_report_key(device->input, BTN_TL, buttons & 0x0100);  // LB
-            input_report_key(device->input, BTN_TR, buttons & 0x0200);  // RB
-            input_report_key(device->input, BTN_SELECT, buttons & 0x0400);  // View
-            input_report_key(device->input, BTN_START, buttons & 0x0800);   // Menu
-            input_report_key(device->input, BTN_THUMBL, buttons & 0x1000);  // L3
-            input_report_key(device->input, BTN_THUMBR, buttons & 0x2000);  // R3
+            // Remaining byte 2 bits (these don't conflict with special buttons):
+            input_report_key(device->input, BTN_TRIGGER_HAPPY2, data[2] & 0x10);  // M button
+            input_report_key(device->input, BTN_TL, data[2] & 0x20);              // LB
+            input_report_key(device->input, BTN_THUMBR, data[2] & 0x40);          // R3
+            input_report_key(device->input, BTN_DPAD_UP, data[2] & 0x80);
+            
+            // Special buttons:
+            input_report_key(device->input, BTN_MODE, razer_btn);                 // Razer logo button
+            input_report_key(device->input, BTN_SELECT, select_btn);              // Select/View
+            input_report_key(device->input, BTN_TRIGGER_HAPPY1, screenshot_btn);  // Screenshot
+            
+            // Byte 3 button mapping:
+            input_report_key(device->input, BTN_TL2, data[3] & 0x01);    // LT digital
+            input_report_key(device->input, BTN_TR2, data[3] & 0x02);    // RT digital
+            input_report_key(device->input, BTN_TR, data[3] & 0x04);     // RB
+            input_report_key(device->input, BTN_THUMBL, data[3] & 0x08); // L3 (left stick click)
+            input_report_key(device->input, BTN_A, data[3] & 0x10);
+            input_report_key(device->input, BTN_B, data[3] & 0x20);
+            input_report_key(device->input, BTN_Y, data[3] & 0x40);
+            input_report_key(device->input, BTN_X, data[3] & 0x80);
             
             // Analog sticks - 16-bit little-endian values
             if (size >= 14) {

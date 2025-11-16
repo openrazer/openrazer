@@ -8,7 +8,8 @@
 
 /* USB Vendor/Device IDs */
 #define USB_VENDOR_ID_RAZER             0x1532
-#define USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K  0x0A59
+#define USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED    0x0A57  /* Wired USB-C mode */
+#define USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS 0x0A59  /* 2.4GHz wireless dongle */
 
 /**
  * Device structure for Wolverine Pro 8K

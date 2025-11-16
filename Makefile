@@ -19,7 +19,7 @@ DESTDIR?=/
 # Specify the kernel directory to use
 KERNELDIR?=/lib/modules/$(shell uname -r)/build
 # Need the absolute directory do the driver directory to build kernel modules
-DRIVERDIR?=$(shell pwd)/driver
+DRIVERDIR?=$(shell pwd | sed 's/ /\\ /g')/driver
 
 # Where kernel drivers are going to be installed
 MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/hid
