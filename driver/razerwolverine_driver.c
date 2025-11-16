@@ -63,7 +63,6 @@ static void wolverine_irq(struct urb *urb)
 		 * NOTE: SELECT is just bit 5 (0x20), Razer button is in byte 3 bit 2
 		 */
 		int screenshot_btn = (data[2] == 0x09);
-		
 		/* Byte 2 button mapping - VERIFIED through systematic testing */
 		if (!screenshot_btn) {
 			input_report_key(input, BTN_DPAD_UP, data[2] & 0x01);      /* D-pad UP */
@@ -107,9 +106,8 @@ static void wolverine_irq(struct urb *urb)
 		input_report_abs(input, ABS_RX, (s16)(data[10] | (data[11] << 8)));     /* Right stick X */
 		input_report_abs(input, ABS_RY, -(s16)(data[12] | (data[13] << 8)));    /* Right stick Y - inverted */
 		
-            input_report_abs(input, ABS_Z, data[4]);   /* Left trigger */
-            input_report_abs(input, ABS_RZ, data[5]);  /* Right trigger */
-		/* Analog triggers - not present or digital only on this controller */
+		input_report_abs(input, ABS_Z, data[4]);   /* Left trigger */
+		input_report_abs(input, ABS_RZ, data[5]);  /* Right trigger */
 		
 		input_sync(input);
 	}
@@ -278,6 +276,10 @@ static int wolverine_probe(struct usb_interface *intf, const struct usb_device_i
 
 	usb_set_intfdata(intf, wv);
 	dev_info(&intf->dev, "Razer Wolverine V3 Pro connected\n");
+	
+	/* Battery status not currently supported - would require reverse engineering
+	 * Razer's proprietary protocol. Standard HID battery commands don't work. */
+	
 	return 0;
 
 err_unregister_input:
