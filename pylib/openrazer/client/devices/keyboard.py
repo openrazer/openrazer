@@ -3,7 +3,6 @@
 """
 Contains functionality specific to keyboard-like devices
 """
-import dbus as _dbus
 
 from openrazer.client.constants import MACRO_LED_STATIC, MACRO_LED_BLINK
 from openrazer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFactory as __BaseDeviceFactory
