@@ -43,7 +43,7 @@ def get_attrs(obj):
                 elif isinstance(attr, types.FunctionType):
                     funcs.append(obj_attr + str(inspect.signature(attr)))
                     break
-            except Exception as err:
+            except Exception:
                 pass
         else:
             fields.append(obj_attr)
