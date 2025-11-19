@@ -124,10 +124,3 @@ class DeviceManager(object):
         :rtype: str
         """
         return str(self._daemon_version)
-
-
-if __name__ == '__main__':
-    a = DeviceManager()
-    b = a.devices[0]
-
-    print()
