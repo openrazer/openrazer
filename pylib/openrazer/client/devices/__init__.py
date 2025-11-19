@@ -1,11 +1,9 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-import json
 import dbus as _dbus
 from openrazer.client.fx import RazerFX as _RazerFX
 from xml.etree import ElementTree as _ET
 from openrazer.client.macro import RazerMacro as _RazerMacro
-from openrazer.client import constants as _c
 
 
 class RazerDevice(object):

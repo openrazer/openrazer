@@ -3,7 +3,7 @@
 import json
 import dbus as _dbus
 from openrazer.client.device import RazerDeviceFactory as _RazerDeviceFactory
-from openrazer.client import constants
+from openrazer.client import constants as constants
 
 __version__ = '3.11.0'
 
