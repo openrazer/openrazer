@@ -108,6 +108,9 @@ class RazerDevice(object):
             'lighting_led_matrix': self._dbus_interfaces['device'].hasMatrix() == True,
             'lighting_led_single': self._has_feature('razer.device.lighting.chroma', 'setKey'),
 
+            # Razer Chroma Addressable RGB Controller
+            'lighting_channels': self._has_feature('razer.device.lighting.channel', 'getNumChannels'),
+
             # Mouse lighting attrs
             'lighting_logo': self._has_feature('razer.device.lighting.logo'),
             'lighting_logo_active': self._has_feature('razer.device.lighting.logo', 'setLogoActive'),
