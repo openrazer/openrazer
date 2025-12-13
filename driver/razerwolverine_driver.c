@@ -4,6 +4,10 @@
  * 
  * Driver for Razer Wolverine V3 Pro gaming controller with full input support.
  * The controller uses a vendor-specific USB interface for gamepad input.
+ * 
+ * For wireless mode (dongle), the input device is only registered when the
+ * controller is actually powered on and sending data, preventing Steam and
+ * other applications from seeing a phantom controller.
  */
 
 #include <linux/kernel.h>
@@ -14,6 +18,7 @@
 #include <linux/usb/input.h>
 #include <linux/input.h>
 #include <linux/device.h>
+#include <linux/jiffies.h>
 
 #include "razerwolverine_driver.h"
 
@@ -32,13 +37,94 @@ static const struct usb_device_id wolverine_table[] = {
 };
 MODULE_DEVICE_TABLE(usb, wolverine_table);
 
+/* Forward declarations */
+static int wolverine_setup_input(struct wolverine_device *wv);
+
+/**
+ * Work handler - register input device when controller starts sending data
+ * Called from workqueue context (safe to sleep/block)
+ */
+static void wolverine_connect_work(struct work_struct *work)
+{
+	struct wolverine_device *wv = container_of(work, struct wolverine_device, connect_work);
+	int error;
+	
+	mutex_lock(&wv->reg_lock);
+	
+	if (wv->shutting_down || wv->input_registered) {
+		mutex_unlock(&wv->reg_lock);
+		return;
+	}
+	
+	error = input_register_device(wv->input);
+	if (error) {
+		dev_err(&wv->intf->dev, "Failed to register input device: %d\n", error);
+		mutex_unlock(&wv->reg_lock);
+		return;
+	}
+	
+	wv->input_registered = true;
+	dev_info(&wv->intf->dev, "Razer Wolverine V3 Pro controller connected\n");
+	
+	/* Start monitoring for disconnect */
+	schedule_delayed_work(&wv->disconnect_work, WOLVERINE_DISCONNECT_TIMEOUT);
+	
+	mutex_unlock(&wv->reg_lock);
+}
+
+/**
+ * Delayed work handler - check if controller has stopped sending data
+ * Called from workqueue context (safe to sleep/block)
+ */
+static void wolverine_disconnect_work(struct work_struct *work)
+{
+	struct wolverine_device *wv = container_of(work, struct wolverine_device,
+						   disconnect_work.work);
+	
+	mutex_lock(&wv->reg_lock);
+	
+	if (wv->shutting_down || !wv->input_registered) {
+		mutex_unlock(&wv->reg_lock);
+		return;
+	}
+	
+	/* Check if we haven't received data for the timeout period */
+	if (time_after(jiffies, wv->last_packet_time + WOLVERINE_DISCONNECT_TIMEOUT)) {
+		/* Controller stopped sending - unregister input device */
+		input_unregister_device(wv->input);
+		wv->input_registered = false;
+		atomic_set(&wv->controller_connected, 0);
+		
+		/* Allocate a new input device for next connection */
+		wv->input = input_allocate_device();
+		if (wv->input) {
+			wv->input->name = "Microsoft X-Box 360 pad";
+			wv->input->phys = wv->phys;
+			wv->input->dev.parent = &wv->intf->dev;
+			wv->input->id.bustype = BUS_USB;
+			wv->input->id.vendor = USB_VENDOR_ID_MICROSOFT;
+			wv->input->id.product = USB_DEVICE_ID_XBOX360_CONTROLLER;
+			wv->input->id.version = 0x0110;
+			input_set_drvdata(wv->input, wv);
+			wolverine_setup_input(wv);
+		}
+		
+		dev_info(&wv->intf->dev, "Razer Wolverine V3 Pro controller disconnected\n");
+	} else {
+		/* Still receiving data - reschedule check */
+		schedule_delayed_work(&wv->disconnect_work, WOLVERINE_DISCONNECT_TIMEOUT);
+	}
+	
+	mutex_unlock(&wv->reg_lock);
+}
+
 /**
  * URB completion callback - processes incoming USB interrupt data
  */
 static void wolverine_irq(struct urb *urb)
 {
 	struct wolverine_device *wv = urb->context;
-	struct input_dev *input = wv->input;
+	struct input_dev *input;
 	unsigned char *data = wv->data;
 	int status;
 
@@ -58,6 +144,21 @@ static void wolverine_irq(struct urb *urb)
 
 	/* Process gamepad input packets (header: 00 14) */
 	if (wv->data_size == 20 && data[0] == 0x00 && data[1] == 0x14) {
+		/* Update last packet time (atomic, no lock needed) */
+		wv->last_packet_time = jiffies;
+		
+		/* If controller wasn't connected, schedule registration work */
+		if (!atomic_read(&wv->controller_connected)) {
+			atomic_set(&wv->controller_connected, 1);
+			schedule_work(&wv->connect_work);
+		}
+		
+		/* Only process input if device is registered */
+		if (!wv->input_registered)
+			goto resubmit;
+		
+		input = wv->input;
+		
 		/* Special screenshot button uses multi-bit pattern in data[2]:
 		 * 0x09 = Screenshot button (impossible D-pad combo)
 		 * NOTE: SELECT is just bit 5 (0x20), Razer button is in byte 3 bit 2
@@ -219,18 +320,30 @@ static int wolverine_probe(struct usb_interface *intf, const struct usb_device_i
 	wv->usbdev = usbdev;
 	wv->input = input;
 	wv->intf = intf;
+	
+	/* Initialize connection tracking */
+	mutex_init(&wv->reg_lock);
+	atomic_set(&wv->controller_connected, 0);
+	wv->input_registered = false;
+	wv->shutting_down = false;
+	wv->last_packet_time = 0;
+	INIT_WORK(&wv->connect_work, wolverine_connect_work);
+	INIT_DELAYED_WORK(&wv->disconnect_work, wolverine_disconnect_work);
 
-	/* Setup input device */
-	input->name = "Razer Wolverine V3 Pro for PC";
+	/* Setup input device - use Xbox 360 name for Steam compatibility */
+	input->name = "Microsoft X-Box 360 pad";
 	input->phys = wv->phys;
 	usb_make_path(usbdev, wv->phys, sizeof(wv->phys));
 	strlcat(wv->phys, "/input0", sizeof(wv->phys));
 
 	input->dev.parent = &intf->dev;
 	input->id.bustype = BUS_USB;
-	input->id.vendor = le16_to_cpu(usbdev->descriptor.idVendor);
-	input->id.product = le16_to_cpu(usbdev->descriptor.idProduct);
-	input->id.version = le16_to_cpu(usbdev->descriptor.bcdDevice);
+	/* Report as Xbox 360 controller for Steam/game compatibility.
+	 * This makes Steam treat it as a native Xbox controller with
+	 * automatic button mapping and game compatibility detection. */
+	input->id.vendor = USB_VENDOR_ID_MICROSOFT;
+	input->id.product = USB_DEVICE_ID_XBOX360_CONTROLLER;
+	input->id.version = 0x0110;  /* Xbox 360 controller version */
 
 	input_set_drvdata(input, wv);
 
@@ -262,10 +375,16 @@ static int wolverine_probe(struct usb_interface *intf, const struct usb_device_i
 	wv->irq->transfer_dma = wv->data_dma;
 	wv->irq->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
 
-	/* Register input device */
-	error = input_register_device(input);
-	if (error)
-		goto err_free_dma;
+	/* For wired mode (0x0A57), register input device immediately since
+	 * the controller is always connected when the cable is plugged in.
+	 * For wireless mode (0x0A59), defer registration until we receive data. */
+	if (id->idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED) {
+		error = input_register_device(input);
+		if (error)
+			goto err_free_dma;
+		wv->input_registered = true;
+		atomic_set(&wv->controller_connected, 1);
+	}
 
 	/* Submit URB to start receiving data */
 	error = usb_submit_urb(wv->irq, GFP_KERNEL);
@@ -275,16 +394,20 @@ static int wolverine_probe(struct usb_interface *intf, const struct usb_device_i
 	}
 
 	usb_set_intfdata(intf, wv);
-	dev_info(&intf->dev, "Razer Wolverine V3 Pro connected\n");
 	
-	/* Battery status not currently supported - would require reverse engineering
-	 * Razer's proprietary protocol. Standard HID battery commands don't work. */
+	if (id->idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED) {
+		dev_info(&intf->dev, "Razer Wolverine V3 Pro (wired) connected\n");
+	} else {
+		dev_info(&intf->dev, "Razer Wolverine V3 Pro dongle ready, waiting for controller\n");
+	}
 	
 	return 0;
 
 err_unregister_input:
-	input_unregister_device(input);
-	input = NULL;
+	if (wv->input_registered) {
+		input_unregister_device(input);
+		input = NULL;
+	}
 err_free_dma:
 	usb_free_coherent(usbdev, wv->data_size, wv->data, wv->data_dma);
 err_free_urb:
@@ -305,13 +428,27 @@ static void wolverine_disconnect(struct usb_interface *intf)
 
 	usb_set_intfdata(intf, NULL);
 	if (wv) {
+		/* Signal shutdown to prevent work items from doing anything */
+		wv->shutting_down = true;
+		
+		/* Cancel pending work items */
+		cancel_work_sync(&wv->connect_work);
+		cancel_delayed_work_sync(&wv->disconnect_work);
+		
 		usb_kill_urb(wv->irq);
-		input_unregister_device(wv->input);
+		
+		/* Only unregister if it was registered */
+		if (wv->input_registered)
+			input_unregister_device(wv->input);
+		else
+			input_free_device(wv->input);
+		
 		usb_free_urb(wv->irq);
 		usb_free_coherent(wv->usbdev, wv->data_size, wv->data, wv->data_dma);
+		mutex_destroy(&wv->reg_lock);
 		kfree(wv);
 	}
-	dev_info(&intf->dev, "Razer Wolverine V3 Pro disconnected\n");
+	dev_info(&intf->dev, "Razer Wolverine V3 Pro dongle disconnected\n");
 }
 
 /**
