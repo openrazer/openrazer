@@ -215,7 +215,7 @@ class RazerMouse(__RazerDevice):
         :raises NotImplementedError: If function is not supported
         """
         if self.has('scroll_acceleration'):
-            return bool(int(self._dbus_interfaces['scroll'].getScrollAcceleration()))
+            return bool(self._dbus_interfaces['scroll'].getScrollAcceleration())
         else:
             raise NotImplementedError()
 
@@ -245,7 +245,7 @@ class RazerMouse(__RazerDevice):
         :raises NotImplementedError: If function is not supported
         """
         if self.has('scroll_smart_reel'):
-            return bool(int(self._dbus_interfaces['scroll'].getScrollSmartReel()))
+            return bool(self._dbus_interfaces['scroll'].getScrollSmartReel())
         else:
             raise NotImplementedError()
 
