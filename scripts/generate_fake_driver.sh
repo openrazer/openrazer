@@ -227,6 +227,11 @@ EOF
         # "fn_toggle": not used by daemon
         [[ "$attr" = "" || "$attr" = "test" || "$attr" = "fn_toggle" ]] && continue
 
+        # Wolverine V3 Pro 8K PC doesn't have controllable LEDs
+        if [ "$device_pid" = "0A57" ] || [ "$device_pid" = "0A59" ]; then
+            [[ "$attr" = matrix_* ]] && continue
+        fi
+
         metadata="${files_metadata[$attr]}"
         if [ -z "$metadata" ]; then
             echo "Error: Missing metadata for attr: $attr"

@@ -2323,12 +2323,16 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);                         // Get string of device serial
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);                      // Get string of device fw version
 
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);                   // Custom effect frame
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);                    // No effect
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);                  // Static effect
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);                  // Breathing effect
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);                  // Custom effect
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);                     // Brightness
+        // Wolverine V3 Pro 8K PC doesn't have controllable LEDs via HID
+        if (usb_dev->descriptor.idProduct != USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED &&
+            usb_dev->descriptor.idProduct != USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS) {
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);               // Custom effect frame
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);                // No effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);              // Static effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);              // Breathing effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);              // Custom effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);                 // Brightness
+        }
 
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
