@@ -684,7 +684,7 @@ class RazerFX(BaseRazerFX):
 
 
 class SingleLed(BaseRazerFX):
-    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject, led_name: str = 'logo'):
+    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject, led_name: str):
         super().__init__(serial, capabilities, daemon_dbus)
 
         self._led_name = led_name
