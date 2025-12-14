@@ -11,8 +11,6 @@ class RazerDevice(object):
     """
     Raw razer base device
     """
-    _FX = _RazerFX
-    _MACRO_CLASS = _RazerMacro
 
     def __init__(self, serial: str, daemon_dbus: _dbus.proxies.ProxyObject = None) -> None:
         # Load up the DBus
@@ -231,18 +229,11 @@ class RazerDevice(object):
             self._kbd_layout = None
 
         # Setup FX
-        if self._FX is None:
-            self.fx = None
-        else:
-            self.fx = self._FX(serial, capabilities=self._capabilities, daemon_dbus=daemon_dbus, matrix_dims=self._matrix_dimensions)
+        self.fx = _RazerFX(serial, capabilities=self._capabilities, daemon_dbus=self._dbus, matrix_dims=self._matrix_dimensions)
 
         # Setup Macro
         if self.has('macro_logic'):
-            if self._MACRO_CLASS is not None:
-                self.macro = self._MACRO_CLASS(serial, self.name, daemon_dbus=daemon_dbus, capabilities=self._capabilities)
-            else:
-                self._capabilities['macro_logic'] = False
-                self.macro = None
+            self.macro = _RazerMacro(serial, self.name, daemon_dbus=self._dbus, capabilities=self._capabilities)
         else:
             self.macro = None
 
