@@ -10,15 +10,12 @@ from openrazer_daemon import keyboard
 
 
 class RazerMacro(object):
-    def __init__(self, serial: str, devname: str, daemon_dbus: _dbus.proxies.ProxyObject, capabilities: dict[str, bool] | None = None) -> None:
+    def __init__(self, serial: str, devname: str, daemon_dbus: _dbus.proxies.ProxyObject, capabilities: dict[str, bool]) -> None:
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
 
-        if capabilities is None:
-            self._capabilities = {}
-        else:
-            self._capabilities = capabilities
+        self._capabilities = capabilities
 
         self._macro_dbus = _dbus.Interface(daemon_dbus, "razer.device.macro")
 
