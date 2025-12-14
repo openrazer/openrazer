@@ -53,14 +53,11 @@ class BaseRazerFX(object):
 
 
 class RazerAdvancedFX(BaseRazerFX):
-    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject, matrix_dims: tuple[int, int] = (-1, -1)):
+    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject, matrix_dims: tuple[int, int]):
         super().__init__(serial, capabilities, daemon_dbus)
 
         # Only init'd when there's a matrix
         self._capabilities = capabilities
-
-        if not all([dim >= 1 for dim in matrix_dims]):
-            raise ValueError("Matrix dimensions cannot contain -1")
 
         if daemon_dbus is None:
             session_bus = _dbus.SessionBus()
@@ -125,13 +122,13 @@ class RazerAdvancedFX(BaseRazerFX):
 class RazerFX(BaseRazerFX):
     advanced: RazerAdvancedFX | None
 
-    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject, matrix_dims: tuple[int, int] = (-1, -1)):
+    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject, matrix_dims: tuple[int, int] | None):
         super().__init__(serial, capabilities, daemon_dbus)
 
         self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.chroma")
 
         # all() part basically checks that all dimensions are present (-1 is bad)
-        if self.has('led_matrix') and all([dim >= 1 for dim in matrix_dims]):
+        if self.has('led_matrix') and matrix_dims is not None:
             self.advanced = RazerAdvancedFX(serial, capabilities, daemon_dbus=self._dbus, matrix_dims=matrix_dims)
         else:
             self.advanced = None
