@@ -12,13 +12,10 @@ class RazerDevice(object):
     Raw razer base device
     """
 
-    def __init__(self, serial: str, daemon_dbus: _dbus.proxies.ProxyObject = None) -> None:
+    def __init__(self, serial: str) -> None:
         # Load up the DBus
-        if daemon_dbus is None:
-            session_bus = _dbus.SessionBus()
-            daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
-
-        self._dbus = daemon_dbus
+        session_bus = _dbus.SessionBus()
+        self._dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
 
         self._available_features = self._get_available_features()
 
@@ -582,5 +579,5 @@ class RazerDevice(object):
 
 class BaseDeviceFactory(object):
     @staticmethod
-    def get_device(serial: str, daemon_dbus: _dbus.proxies.ProxyObject = None) -> RazerDevice:
+    def get_device(serial: str) -> RazerDevice:
         raise NotImplementedError()

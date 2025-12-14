@@ -30,7 +30,7 @@ def clamp_ubyte(value: int) -> int:
 
 # Default Chroma lighting
 class BaseRazerFX(object):
-    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject = None):
+    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject):
         self._capabilities = capabilities
 
         if daemon_dbus is None:
@@ -53,7 +53,7 @@ class BaseRazerFX(object):
 
 
 class RazerAdvancedFX(BaseRazerFX):
-    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject = None, matrix_dims: tuple[int, int] = (-1, -1)):
+    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject, matrix_dims: tuple[int, int] = (-1, -1)):
         super().__init__(serial, capabilities, daemon_dbus)
 
         # Only init'd when there's a matrix
@@ -125,7 +125,7 @@ class RazerAdvancedFX(BaseRazerFX):
 class RazerFX(BaseRazerFX):
     advanced: RazerAdvancedFX | None
 
-    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject = None, matrix_dims: tuple[int, int] = (-1, -1)):
+    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject, matrix_dims: tuple[int, int] = (-1, -1)):
         super().__init__(serial, capabilities, daemon_dbus)
 
         self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.chroma")
@@ -687,7 +687,7 @@ class RazerFX(BaseRazerFX):
 
 
 class SingleLed(BaseRazerFX):
-    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject = None, led_name: str = 'logo'):
+    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject, led_name: str = 'logo'):
         super().__init__(serial, capabilities, daemon_dbus)
 
         self._led_name = led_name
@@ -1033,7 +1033,7 @@ class MiscLighting(BaseRazerFX):
     _fully_charged: SingleLed | None
     _backlight: SingleLed | None
 
-    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject = None):
+    def __init__(self, serial: str, capabilities: dict[str, bool], daemon_dbus: _dbus.proxies.ProxyObject):
         super().__init__(serial, capabilities, daemon_dbus)
 
         self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.logo")
