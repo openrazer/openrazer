@@ -388,7 +388,7 @@ class RazerDevice(object):
         :return: Device brightness
         :rtype: float
         """
-        return self._dbus_interfaces['brightness'].getBrightness()
+        return float(self._dbus_interfaces['brightness'].getBrightness())
 
     @brightness.setter
     def brightness(self, value: float) -> None:

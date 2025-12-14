@@ -48,7 +48,7 @@ class DeviceManager(object):
 
     @property
     def turn_off_on_screensaver(self) -> bool:
-        return self._dbus_devices.getOffOnScreensaver()
+        return bool(self._dbus_devices.getOffOnScreensaver())
 
     @turn_off_on_screensaver.setter
     def turn_off_on_screensaver(self, enable: bool) -> None:
@@ -69,7 +69,7 @@ class DeviceManager(object):
 
     @property
     def sync_effects(self) -> bool:
-        return self._dbus_devices.getSyncEffects()
+        return bool(self._dbus_devices.getSyncEffects())
 
     @sync_effects.setter
     def sync_effects(self, sync: bool) -> None:

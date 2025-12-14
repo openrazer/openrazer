@@ -84,7 +84,7 @@ class RazerMacro(object):
     @property
     def mode_modifier(self) -> bool:
         if 'macro_mode_modifier' in self._capabilities:
-            return self._macro_dbus.getModeModifier()
+            return bool(self._macro_dbus.getModeModifier())
         return False
 
     @mode_modifier.setter
