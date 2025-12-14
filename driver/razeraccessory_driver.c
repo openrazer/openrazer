@@ -190,8 +190,11 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED:
+        device_type = "Razer Wolverine V3 Pro 8K PC (Wired)\n";
+        break;
+
     case USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS:
-        device_type = "Razer Wolverine V3 Pro 8K PC\n";
+        device_type = "Razer Wolverine V3 Pro 8K PC (Wireless)\n";
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
