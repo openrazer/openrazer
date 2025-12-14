@@ -111,10 +111,7 @@ class RazerKeyboard(__RazerDevice):
         :type value: bool
         """
         if self.has('keyswitch_optimization'):
-            if value:
-                self._dbus_interfaces['keyswitch_optimization'].setKeyswitchOptimization(True)
-            else:
-                self._dbus_interfaces['keyswitch_optimization'].setKeyswitchOptimization(False)
+            self._dbus_interfaces['keyswitch_optimization'].setKeyswitchOptimization(value)
 
     @property
     def profile_led_red(self) -> bool:
