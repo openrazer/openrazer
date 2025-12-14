@@ -5,32 +5,32 @@ from openrazer.client.devices import RazerDevice as __RazerDevice
 
 class RazerMouse(__RazerDevice):
     @property
-    def max_dpi(self) -> int | None:
+    def max_dpi(self) -> int:
         """
         Gets max DPI
 
-        :return: Max DPI, if device does not have DPI it'll return None
-        :rtype: int or None
+        :return: Max DPI, if device does not have DPI it'll raise an exception
+        :rtype: int
         """
         if self.has('dpi'):
             return int(self._dbus_interfaces['dpi'].maxDPI())
         else:
-            return None
+            raise NotImplementedError()
 
     @property
-    def available_dpi(self) -> list[int] | None:
+    def available_dpi(self) -> list[int]:
         """
         Gets the available DPI
 
         :return: Available DPI, if device has only a couple of fixed possible DPI values
-        :rtype: list or None
+        :rtype: list
         """
         if self.has('available_dpi'):
             dbuslist = self._dbus_interfaces['dpi'].availableDPI()
             # Repack list from dbus ints to normal ints
             return [int(d) for d in dbuslist]
         else:
-            return None
+            raise NotImplementedError()
 
     @property
     def dpi(self) -> tuple[int, int]:
