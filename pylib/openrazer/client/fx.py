@@ -149,7 +149,7 @@ class RazerFX(BaseRazerFX):
         :return: Effect name ("static", "spectrum", etc.)
         :rtype: str
         """
-        return self._lighting_dbus.getEffect()
+        return str(self._lighting_dbus.getEffect())
 
     @property
     def colors(self) -> bytes:
@@ -169,7 +169,7 @@ class RazerFX(BaseRazerFX):
         :return: Effect speed (a value between 0 and 3)
         :rtype: int
         """
-        return self._lighting_dbus.getEffectSpeed()
+        return int(self._lighting_dbus.getEffectSpeed())
 
     @property
     def wave_dir(self) -> int:
@@ -179,7 +179,7 @@ class RazerFX(BaseRazerFX):
         :return: Wave direction (WAVE_LEFT or WAVE_RIGHT)
         :rtype: int
         """
-        return self._lighting_dbus.getWaveDir()
+        return int(self._lighting_dbus.getWaveDir())
 
     def none(self) -> bool:
         """
