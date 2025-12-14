@@ -19,7 +19,7 @@ openrazer-daemon - Daemon to manage Razer devices in userspace
 .PP
 \fBopenrazer-daemon\fR is a userspace service which is designed to be an intermediary between userspace programs and the Razer drivers.\& It will provide some higher level functions to allow similar operation to the Windows Razer Synapse program.\& This service is designed to be started by xdg-autostart as a session service.\&
 .PP
-The service has the functionality to sync effects between multiple devices, perform on-the-fly macro recording and playback and reimplements the FN+Keys logic so they work when \fBmacro_keys\fR are enabled.\& The service can also perform various ripple effects and turn off the devices when the screensaver is active.\&
+The service has the functionality to sync effects between multiple devices, reimplements the FN+Keys logic so they work when the device is in '\&driver'\& mode.\& The service can also perform various ripple effects and turn off the devices when the screensaver is active.\&
 .PP
 Note, that all paths shown as defaults, eg \(ti/.\&local/share/ or \(ti/.\&config/ can be changed with XDG Base Directory specification variables: \fB$XDG_CONFIG_HOME\fR, \fB$XDG_DATA_HOME\fR and \fB$XDG_RUNTIME_DIR\fR.\&
 .PP
