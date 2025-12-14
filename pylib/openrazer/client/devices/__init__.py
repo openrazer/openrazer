@@ -11,6 +11,9 @@ class RazerDevice(object):
     """
     Raw razer base device
     """
+    _matrix_dimensions: tuple[int, int] | None
+    _kbd_layout: str | None
+    macro: _RazerMacro | None
 
     def __init__(self, serial: str) -> None:
         # Load up the DBus
@@ -28,8 +31,8 @@ class RazerDevice(object):
         self._type = str(self._dbus_interfaces['device'].getDeviceType())
         self._fw = str(self._dbus_interfaces['device'].getFirmware())
         self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
-        self._has_dedicated_macro = None
-        self._device_image = None
+        self._has_dedicated_macro: bool | None = None
+        self._device_image: str | None = None
 
         # Deprecated API, but kept for backwards compatibility
         self._urls = None
