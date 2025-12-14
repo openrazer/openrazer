@@ -18,7 +18,7 @@ class RazerKeyboard(__RazerDevice):
         :rtype: bool
         """
         if self.has('game_mode_led'):
-            return self._dbus_interfaces['game_mode_led'].getGameMode()
+            return bool(self._dbus_interfaces['game_mode_led'].getGameMode())
         else:
             raise NotImplementedError()
 
@@ -47,7 +47,7 @@ class RazerKeyboard(__RazerDevice):
         :rtype: bool
         """
         if self.has('macro_mode_led'):
-            return self._dbus_interfaces['macro_mode_led'].getMacroMode()
+            return bool(self._dbus_interfaces['macro_mode_led'].getMacroMode())
         else:
             raise NotImplementedError()
 
@@ -77,7 +77,7 @@ class RazerKeyboard(__RazerDevice):
         :rtype: int
         """
         if self.has('macro_mode_led_effect'):
-            return self._dbus_interfaces['macro_mode_led'].getMacroEffect()
+            return int(self._dbus_interfaces['macro_mode_led'].getMacroEffect())
         else:
             raise NotImplementedError()
 
@@ -107,7 +107,7 @@ class RazerKeyboard(__RazerDevice):
         :rtype: bool
         """
         if self.has('keyswitch_optimization'):
-            return self._dbus_interfaces['keyswitch_optimization'].getKeyswitchOptimization()
+            return bool(self._dbus_interfaces['keyswitch_optimization'].getKeyswitchOptimization())
         else:
             raise NotImplementedError()
 
