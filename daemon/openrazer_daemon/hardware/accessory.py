@@ -5,6 +5,7 @@ Mug class
 """
 import re
 
+from openrazer_daemon.hardware.device_base import RazerDevice as _RazerDevice
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
 
 
@@ -248,7 +249,7 @@ class RazerTomahawkATX(_RazerDeviceBrightnessSuspend):
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/ed80ca04f3ff1b5d2c61655581776a6c/tomahawk-a1-m1-atx.png"
 
 
-class RazerWolverineV3Pro8KPCWired(_RazerDeviceBrightnessSuspend):
+class RazerWolverineV3Pro8KPCWired(_RazerDevice):
     """
     Class for the Razer Wolverine V3 Pro 8K PC (Wired)
     """
@@ -261,7 +262,7 @@ class RazerWolverineV3Pro8KPCWired(_RazerDeviceBrightnessSuspend):
     DEVICE_IMAGE = "https://assets3.razerzone.com/1Y6JWmbDqiKYXeTcRLPTYNyIFug=/300x300/https%3A%2F%2Fmedias-p1.phoenix.razer.com%2Fsys-master-phoenix-images-container%2Fh6e%2Fh3a%2F9945965625374%2Fwolverine-v3-pro-8k-pc-black-500x500.png"
 
 
-class RazerWolverineV3Pro8KPCWireless(_RazerDeviceBrightnessSuspend):
+class RazerWolverineV3Pro8KPCWireless(_RazerDevice):
     """
     Class for the Razer Wolverine V3 Pro 8K PC (Wireless Dongle)
     """
