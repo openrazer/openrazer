@@ -376,7 +376,10 @@ class RazerDevice(object):
         :return: Keyboard layout
         :rtype: str
         """
-        return self._kbd_layout
+        if self._kbd_layout:
+            return self._kbd_layout
+        else:
+            raise NotImplementedError()
 
     @property
     def brightness(self) -> float:
