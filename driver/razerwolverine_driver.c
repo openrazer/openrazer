@@ -98,7 +98,7 @@ static void wolverine_disconnect_work(struct work_struct *work)
 		/* Allocate a new input device for next connection */
 		wv->input = input_allocate_device();
 		if (wv->input) {
-			wv->input->name = "Microsoft X-Box 360 pad";
+			wv->input->name = "Razer Wolverine V3 Pro 8K PC";
 			wv->input->phys = wv->phys;
 			wv->input->dev.parent = &wv->intf->dev;
 			wv->input->id.bustype = BUS_USB;
@@ -331,7 +331,7 @@ static int wolverine_probe(struct usb_interface *intf, const struct usb_device_i
 	INIT_DELAYED_WORK(&wv->disconnect_work, wolverine_disconnect_work);
 
 	/* Setup input device - use Xbox 360 name for Steam compatibility */
-	input->name = "Microsoft X-Box 360 pad";
+	input->name = "Razer Wolverine V3 Pro 8K PC";
 	input->phys = wv->phys;
 	usb_make_path(usbdev, wv->phys, sizeof(wv->phys));
 	strlcat(wv->phys, "/input0", sizeof(wv->phys));
