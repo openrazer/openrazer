@@ -464,6 +464,8 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             return int(self._dbus_interfaces['power'].getBattery())
+        else:
+            raise NotImplementedError()
 
     @property
     def is_charging(self) -> bool:
@@ -474,6 +476,8 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             return bool(self._dbus_interfaces['power'].isCharging())
+        else:
+            raise NotImplementedError()
 
     def set_idle_time(self, idle_time: int) -> None:
         """
@@ -483,6 +487,8 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             self._dbus_interfaces['power'].setIdleTime(idle_time)
+        else:
+            raise NotImplementedError()
 
     def get_idle_time(self) -> int:
         """
@@ -493,6 +499,8 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             return int(self._dbus_interfaces['power'].getIdleTime())
+        else:
+            raise NotImplementedError()
 
     def set_low_battery_threshold(self, threshold: int) -> None:
         """
@@ -503,6 +511,8 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             self._dbus_interfaces['power'].setLowBatteryThreshold(threshold)
+        else:
+            raise NotImplementedError()
 
     def get_low_battery_threshold(self) -> int:
         """
@@ -512,6 +522,8 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             return int(self._dbus_interfaces['power'].getLowBatteryThreshold())
+        else:
+            raise NotImplementedError()
 
     @property
     def poll_rate(self) -> int:
