@@ -21,7 +21,7 @@ class RazerDeviceFactory(BaseDeviceFactory):
 
     """
     @staticmethod
-    def get_device(serial: str, daemon_dbus: dbus.proxies.ProxyObject = None) -> RazerDevice:
+    def get_device(serial: str) -> RazerDevice:
         """
         Factory for turning a serial into a class
 
@@ -34,21 +34,15 @@ class RazerDeviceFactory(BaseDeviceFactory):
         :param serial: Device serial
         :type serial: str
 
-        :param daemon_dbus: Daemon DBus object
-        :type daemon_dbus: object or None
-
         :return: RazerDevice object (or subclass)
         :rtype: RazerDevice
         """
-        if daemon_dbus is None:
-            session_bus = dbus.SessionBus()
-            daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
-
+        session_bus = dbus.SessionBus()
+        daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
         device_dbus = dbus.Interface(daemon_dbus, "razer.device.misc")
 
         device_type = device_dbus.getDeviceType()
 
         device_class = DEVICE_MAP.get(device_type, RazerDevice)
-        device = device_class(serial, daemon_dbus=daemon_dbus)
 
-        return device
+        return device_class(serial)
