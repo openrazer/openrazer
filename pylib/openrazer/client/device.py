@@ -1,22 +1,22 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-import dbus as _dbus
-from openrazer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFactory as __BaseDeviceFactory
-from openrazer.client.devices.mousemat import RazerMousemat as __RazerMousemat
-from openrazer.client.devices.keyboard import RazerKeyboardFactory as __RazerKeyboardFactory
-from openrazer.client.devices.mice import RazerMouse as __RazerMouse
+import dbus
+from openrazer.client.devices import RazerDevice, BaseDeviceFactory
+from openrazer.client.devices.mousemat import RazerMousemat
+from openrazer.client.devices.keyboard import RazerKeyboardFactory
+from openrazer.client.devices.mice import RazerMouse
 
 
 DEVICE_MAP = {
-    'mousemat': __RazerMousemat,
-    'keyboard': __RazerKeyboardFactory,
-    'mouse': __RazerMouse,
-    'keypad': __RazerKeyboardFactory,
-    'default': __RazerDevice
+    'mousemat': RazerMousemat,
+    'keyboard': RazerKeyboardFactory,
+    'mouse': RazerMouse,
+    'keypad': RazerKeyboardFactory,
+    'default': RazerDevice
 }
 
 
-class RazerDeviceFactory(__BaseDeviceFactory):
+class RazerDeviceFactory(BaseDeviceFactory):
     """
     Simple factory to return an object for a given device
 
@@ -45,10 +45,10 @@ class RazerDeviceFactory(__BaseDeviceFactory):
         :rtype: RazerDevice
         """
         if daemon_dbus is None:
-            session_bus = _dbus.SessionBus()
+            session_bus = dbus.SessionBus()
             daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
 
-        device_dbus = _dbus.Interface(daemon_dbus, "razer.device.misc")
+        device_dbus = dbus.Interface(daemon_dbus, "razer.device.misc")
 
         device_type = device_dbus.getDeviceType()
         device_vid_pid = device_dbus.getVidPid()
