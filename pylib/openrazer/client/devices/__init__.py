@@ -280,7 +280,10 @@ class RazerDevice(object):
                 if method.tag != 'method':
                     continue
 
-                current_interface_methods.append(method.attrib.get('name'))
+                name = method.attrib.get('name')
+                if name is None:
+                    raise RuntimeError(f"Attribute name is unexpectedly None: {method.attrib}")
+                current_interface_methods.append(name)
 
             interfaces[current_interface] = current_interface_methods
 
