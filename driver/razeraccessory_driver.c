@@ -189,8 +189,9 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Nommo Chroma\n";
         break;
 
-    case USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K:
-        device_type = "Razer Wolverine Pro 8K\n";
+    case USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS:
+        device_type = "Razer Wolverine V3 Pro 8K PC\n";
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
@@ -2135,8 +2136,9 @@ static int razer_setup_input(struct input_dev *input, struct hid_device *hdev)
     __set_bit(EV_KEY, input->evbit);
     __set_bit(KEY_PROG1, input->keybit);
 
-    // Setup Wolverine Pro 8K gamepad inputs
-    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K) {
+    // Setup Wolverine V3 Pro 8K PC gamepad inputs
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED ||
+        usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS) {
         // Standard gamepad buttons
         __set_bit(BTN_A, input->keybit);
         __set_bit(BTN_B, input->keybit);
@@ -2210,9 +2212,10 @@ static int razer_input_mapping(struct hid_device *hdev, struct hid_input *hi, st
     if (!device->input)
         device->input = hi->input;
 
-    // For Wolverine Pro 8K, ignore HID's default input mappings
+    // For Wolverine V3 Pro 8K PC, ignore HID's default input mappings
     // We handle all input in raw_event
-    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K) {
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED ||
+        usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS) {
         return -1;
     }
 
@@ -2303,7 +2306,8 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         expected_protocol = USB_INTERFACE_PROTOCOL_KEYBOARD;
         break;
 
-    case USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K:
+    case USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS:
         expected_protocol = 2;  // HID Boot Protocol for Keyboard
         break;
     }
@@ -2719,7 +2723,8 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     // Debug: print ALL raw events for Wolverine
-    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K) {
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED ||
+        usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS) {
         printk(KERN_INFO "razer: raw_event size=%d", size);
         if (size > 0 && size <= 20) {
             int i;
@@ -2731,8 +2736,9 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
         printk(KERN_CONT "\n");
     }
     
-    // Handle Wolverine Pro 8K input reports
-    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K) {
+    // Handle Wolverine V3 Pro 8K PC input reports
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED ||
+        usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS) {
         if (size == 20 && data[0] == 0x00 && data[1] == 0x14) {
             // Special Razer buttons use multi-bit patterns in data[2]:
             // 0x05 = Razer logo/power button (bits 0+2: would be Down+Left)
@@ -2833,7 +2839,8 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_BASE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_CHROMA) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_WOLVERINE_PRO_8K) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA) },
