@@ -53,7 +53,7 @@ struct razer_accessory_device {
     unsigned char saved_brightness;
 
     char serial[23];
-    
+
     // Force feedback for Wolverine Pro 8K
     struct work_struct ff_work;
     u8 ff_left_motor;

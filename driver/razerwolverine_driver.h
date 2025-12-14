@@ -23,25 +23,25 @@
  * struct wolverine_device - Device structure for Wolverine V3 Pro 8K PC
  */
 struct wolverine_device {
-	struct usb_device *usbdev;
-	struct usb_interface *intf;
-	struct input_dev *input;
-	struct urb *irq;
+    struct usb_device *usbdev;
+    struct usb_interface *intf;
+    struct input_dev *input;
+    struct urb *irq;
 
-	unsigned char *data;
-	dma_addr_t data_dma;
-	size_t data_size;
+    unsigned char *data;
+    dma_addr_t data_dma;
+    size_t data_size;
 
-	char phys[64];
+    char phys[64];
 
-	/* Controller connection tracking (for wireless dongle) */
-	atomic_t controller_connected;
-	bool input_registered;
-	unsigned long last_packet_time;
-	struct delayed_work disconnect_work;
-	struct work_struct connect_work;
-	struct mutex reg_lock;
-	bool shutting_down;
+    /* Controller connection tracking (for wireless dongle) */
+    atomic_t controller_connected;
+    bool input_registered;
+    unsigned long last_packet_time;
+    struct delayed_work disconnect_work;
+    struct work_struct connect_work;
+    struct mutex reg_lock;
+    bool shutting_down;
 };
 
 #endif /* __HID_RAZER_WOLVERINE_H */

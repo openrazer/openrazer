@@ -2156,7 +2156,7 @@ static int razer_setup_input(struct input_dev *input, struct hid_device *hdev)
         __set_bit(BTN_DPAD_DOWN, input->keybit);
         __set_bit(BTN_DPAD_LEFT, input->keybit);
         __set_bit(BTN_DPAD_RIGHT, input->keybit);
-        
+
         // Razer-specific buttons
         __set_bit(BTN_MODE, input->keybit);             // Razer logo/power button
         __set_bit(BTN_TRIGGER_HAPPY1, input->keybit);   // Screenshot button
@@ -2167,7 +2167,7 @@ static int razer_setup_input(struct input_dev *input, struct hid_device *hdev)
         __set_bit(BTN_TRIGGER_HAPPY6, input->keybit);   // M4 (future/programmable)
         __set_bit(BTN_TRIGGER_HAPPY7, input->keybit);   // M5 (future/programmable)
         __set_bit(BTN_TRIGGER_HAPPY8, input->keybit);   // M6 (future/programmable)
-        
+
         // Axis capabilities
         __set_bit(EV_ABS, input->evbit);
         input_set_abs_params(input, ABS_X, -32768, 32767, 16, 128);  // Left stick X
@@ -2735,7 +2735,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
         }
         printk(KERN_CONT "\n");
     }
-    
+
     // Handle Wolverine V3 Pro 8K PC input reports
     if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED ||
         usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS) {
@@ -2748,7 +2748,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
             int razer_btn = (data[2] == 0x05);
             int select_btn = (data[2] == 0x06);
             int screenshot_btn = (data[2] == 0x09);
-            
+
             // Byte 2 individual button mapping (skip if special button active):
             if (!razer_btn && !select_btn && !screenshot_btn) {
                 input_report_key(device->input, BTN_DPAD_DOWN, data[2] & 0x01);
@@ -2762,18 +2762,18 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
                 input_report_key(device->input, BTN_DPAD_LEFT, 0);
                 input_report_key(device->input, BTN_START, 0);
             }
-            
+
             // Remaining byte 2 bits (these don't conflict with special buttons):
             input_report_key(device->input, BTN_TRIGGER_HAPPY2, data[2] & 0x10);  // M button
             input_report_key(device->input, BTN_TL, data[2] & 0x20);              // LB
             input_report_key(device->input, BTN_THUMBR, data[2] & 0x40);          // R3
             input_report_key(device->input, BTN_DPAD_UP, data[2] & 0x80);
-            
+
             // Special buttons:
             input_report_key(device->input, BTN_MODE, razer_btn);                 // Razer logo button
             input_report_key(device->input, BTN_SELECT, select_btn);              // Select/View
             input_report_key(device->input, BTN_TRIGGER_HAPPY1, screenshot_btn);  // Screenshot
-            
+
             // Byte 3 button mapping:
             input_report_key(device->input, BTN_TL2, data[3] & 0x01);    // LT digital
             input_report_key(device->input, BTN_TR2, data[3] & 0x02);    // RT digital
@@ -2783,7 +2783,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
             input_report_key(device->input, BTN_B, data[3] & 0x20);
             input_report_key(device->input, BTN_Y, data[3] & 0x40);
             input_report_key(device->input, BTN_X, data[3] & 0x80);
-            
+
             // Analog sticks - 16-bit little-endian values
             if (size >= 14) {
                 s16 lx = (s16)(data[10] | (data[11] << 8));
@@ -2791,20 +2791,20 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
                 input_report_abs(device->input, ABS_X, lx);
                 input_report_abs(device->input, ABS_Y, ly);
             }
-            
+
             if (size >= 18) {
                 s16 rx = (s16)(data[14] | (data[15] << 8));
                 s16 ry = (s16)(data[16] | (data[17] << 8));
                 input_report_abs(device->input, ABS_RX, rx);
                 input_report_abs(device->input, ABS_RY, ry);
             }
-            
+
             // Triggers (if present in other bytes)
             if (size >= 10) {
                 input_report_abs(device->input, ABS_Z, data[8]);   // LT
                 input_report_abs(device->input, ABS_RZ, data[9]);  // RT
             }
-            
+
             input_sync(device->input);
             return 1;
         }
