@@ -1,12 +1,9 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 from openrazer.client.devices import RazerDevice as __RazerDevice
-from openrazer.client.macro import RazerMacro as _RazerMacro
 
 
 class RazerMouse(__RazerDevice):
-    _MACRO_CLASS = _RazerMacro
-
     @property
     def max_dpi(self) -> int | None:
         """
