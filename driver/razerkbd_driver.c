@@ -1509,7 +1509,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_75PCT:
-        device_type = "Razer BlackWidow V4 75%\n";
+        device_type = "Razer BlackWidow V4 75%%\n";
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
