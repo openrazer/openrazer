@@ -15,7 +15,7 @@ passed = True
 with open(f"{repo_root}/README.md") as f:
     README = f.readlines()
 
-with open(f"{repo_root}/install_files/udev/99-razer.rules") as f:
+with open(f"{repo_root}/install_files/udev/71-razer.rules") as f:
     UDEV = f.readlines()
 
 for device in devmgr.devices:
