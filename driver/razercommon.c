@@ -12,24 +12,38 @@
 
 #include "razercommon.h"
 
+
+/**
+ * The Razer Leviathan V2 X uses report id 7 (0x0307) and not 0 (0x0300)
+ * report id 0 is the default used in openrazer
+ * This method checks whether the device is 0x054a (Razer Leviathan V2 X and if yes returns true)
+ */
 static inline bool razer_device_uses_feature_report_id_7(struct usb_device *usb_dev)
 {
     return usb_dev->descriptor.idVendor == 0x1532 &&
     usb_dev->descriptor.idProduct == 0x054a; // Razer Leviathan V2 X
 }
 
+/**
+ * The Razer Leviathan V2 X uses report id 7 (0x0307) and not 0 (0x0300)
+ * This method returns 0x0307 (report ID 7) when the device is 0x054a (Razer Leviathan V2 X) and 0x0300 (report ID 0) for all others
+ */
 static inline u16 razer_feature_wvalue(struct usb_device *usb_dev)
 {
     if (razer_device_uses_feature_report_id_7(usb_dev))
         return 0x0307; // Feature report, Report ID 7
-        return 0x0300;     // Feature report, Report ID 0 (existing behavior)
+    return 0x0300;     // Feature report, Report ID 0 (default)
 }
 
+/**
+ * The Razer Leviathan V2 X needs 91 byte commands (report id + 90-byte Razer report)
+ * This method sets the RAZER_USB_REPORT_LEN to 91 to hold the report id for device 0x054a (Razer Leviathan V2 X)
+ */
 static inline u16 razer_feature_wlength(struct usb_device *usb_dev)
 {
     if (razer_device_uses_feature_report_id_7(usb_dev))
-        return RAZER_USB_REPORT_LEN + 1; // report-id byte + 90-byte Razer report
-        return RAZER_USB_REPORT_LEN;
+        return RAZER_USB_REPORT_LEN + 1; // report id byte + 90-byte Razer report
+    return RAZER_USB_REPORT_LEN;
 }
 
 /**
