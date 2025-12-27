@@ -2439,6 +2439,9 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
             break;
 
+        case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
+            break;
+
         default:
             // Needs to be in "Driver" mode just to function
             razer_set_device_mode(dev, 0x03, 0x00);

@@ -12,6 +12,26 @@
 
 #include "razercommon.h"
 
+static inline bool razer_device_uses_feature_report_id_7(struct usb_device *usb_dev)
+{
+    return usb_dev->descriptor.idVendor == 0x1532 &&
+    usb_dev->descriptor.idProduct == 0x054a; // Razer Leviathan V2 X
+}
+
+static inline u16 razer_feature_wvalue(struct usb_device *usb_dev)
+{
+    if (razer_device_uses_feature_report_id_7(usb_dev))
+        return 0x0307; // Feature report, Report ID 7
+        return 0x0300;     // Feature report, Report ID 0 (existing behavior)
+}
+
+static inline u16 razer_feature_wlength(struct usb_device *usb_dev)
+{
+    if (razer_device_uses_feature_report_id_7(usb_dev))
+        return RAZER_USB_REPORT_LEN + 1; // report-id byte + 90-byte Razer report
+        return RAZER_USB_REPORT_LEN;
+}
+
 /**
  * Send USB control report to the keyboard
  * USUALLY index = 0x02
@@ -21,14 +41,21 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
 {
     uint request = HID_REQ_SET_REPORT; // 0x09
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
-    uint value = 0x300;
-    uint size = RAZER_USB_REPORT_LEN;
-    char *buf;
+    uint value = razer_feature_wvalue(usb_dev);
+    uint size = razer_feature_wlength(usb_dev);
+    u8 *buf;
     int len;
 
-    buf = kmemdup(data, size, GFP_KERNEL);
-    if (buf == NULL)
+    buf = kzalloc(size, GFP_KERNEL);
+    if (!buf)
         return -ENOMEM;
+
+    if (razer_device_uses_feature_report_id_7(usb_dev)) {
+        buf[0] = 0x07;
+        memcpy(buf + 1, data, RAZER_USB_REPORT_LEN);
+    } else {
+        memcpy(buf, data, RAZER_USB_REPORT_LEN);
+    }
 
     // Send usb control message
     len = usb_control_msg(usb_dev, usb_sndctrlpipe(usb_dev, 0),
@@ -71,20 +98,20 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
 {
     uint request = HID_REQ_GET_REPORT; // 0x01
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN; // 0xA1
-    uint value = 0x300;
+    uint value = razer_feature_wvalue(usb_dev);
 
-    uint size = RAZER_USB_REPORT_LEN; // 0x90
+    uint size = razer_feature_wlength(usb_dev);
     int len;
     int retval;
     int result = 0;
-    char *buf;
+    u8 *buf;
 
     if (WARN_ON(request_report->transaction_id.id == 0x00)) {
         request_report->transaction_id.id = 0xFF;
     }
 
-    buf = kzalloc(sizeof(struct razer_report), GFP_KERNEL);
-    if (buf == NULL)
+    buf = kzalloc(size, GFP_KERNEL);
+    if (!buf)
         return -ENOMEM;
 
     // Send the request to the device.
@@ -101,11 +128,19 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
                           size,
                           USB_CTRL_SET_TIMEOUT);
 
-    memcpy(response_report, buf, sizeof(struct razer_report));
+    if (razer_device_uses_feature_report_id_7(usb_dev)) {
+        if (len >= 1 && buf[0] == 0x07) {
+            memcpy(response_report, buf + 1, sizeof(struct razer_report));
+        } else {
+            memset(response_report, 0, sizeof(struct razer_report));
+        }
+    } else {
+        memcpy(response_report, buf, sizeof(struct razer_report));
+    }
     kfree(buf);
 
     // Error if report is wrong length
-    if(len != 90) {
+    if (len != size) {
         printk(KERN_WARNING "razer driver: Invalid USB response. USB Report length: %d\n", len);
         result = 1;
     }
