@@ -123,12 +123,13 @@ class RazerNommoPro(_RazerDeviceBrightnessSuspend):
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1419/1419_nommo_pro.png"
 
+
 class RazerLeviathanV2X(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Leviathan V2 X (Soundbar)
     """
     USB_VID = 0x1532
-    USB_PID = 0x054a
+    USB_PID = 0x054A
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 14]
     METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
