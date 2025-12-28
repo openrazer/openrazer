@@ -21,7 +21,7 @@
 static inline bool razer_device_uses_feature_report_id_7(struct usb_device *usb_dev)
 {
     return usb_dev->descriptor.idVendor == 0x1532 &&
-    usb_dev->descriptor.idProduct == 0x054a; // Razer Leviathan V2 X
+           usb_dev->descriptor.idProduct == 0x054a; // Razer Leviathan V2 X
 }
 
 /**
