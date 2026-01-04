@@ -1,3 +1,8 @@
+# Set permissions if this is Razer device
+# DO NOT set uaccess for `input` subsystems as it would make it trivial to write keyloggers
+# See https://wiki.archlinux.org/title/Udev#Allowing_regular_users_to_use_devices
+ACTION!="remove", SUBSYSTEMS=="usb|hid", ATTRS{idVendor}=="1532", MODE="0660", TAG+="uaccess"
+
 ACTION!="add", GOTO="razer_end"
 SUBSYSTEMS=="usb|input|hid", ATTRS{idVendor}=="1532", GOTO="razer_vendor"
 GOTO="razer_end"
@@ -26,9 +31,6 @@ ATTRS{idProduct}=="0068|007e|0215|0517|0518|0c00|0c01|0c02|0c04|0c05|0c06|0c08|0
 
 # Get out if no match
 ENV{ID_RAZER_CHROMA}!="1", GOTO="razer_end"
-
-# Set permissions if this is an input node
-SUBSYSTEM=="usb|input|hid", GROUP:="plugdev"
 
 # We're done unless it's the hid node
 SUBSYSTEM!="hid|usb", GOTO="razer_end"
