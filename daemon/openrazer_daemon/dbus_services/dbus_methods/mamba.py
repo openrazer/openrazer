@@ -414,3 +414,50 @@ def set_hyperpolling_wireless_dongle_unpair(self, pid):
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(pid)
+
+
+@endpoint('razer.device.misc', 'getHyperPollingMultiLEDModes', out_sig='ay')
+def get_hyperpolling_wireless_dongle_multi_indicator_led_modes(self):
+    """
+    Get the function of the 3 LEDs on the dongle
+    0 = Off
+    1 = Battery Status
+    2 = Connection Status
+    3 = Polling Rate
+    4 = DPI Indicator
+
+    :return: List of 3 LED modes
+    :rtype: list of int
+    """
+    self.logger.debug("DBus call get_hyperpolling_wireless_dongle_multi_indicator_led_modes")
+
+    driver_path = self.get_driver_path('hyperpolling_wireless_dongle_multi_indicator_led_modes')
+
+    with open(driver_path, 'r') as driver_file:
+        modes = [int(x) for x in driver_file.read().strip().split()]
+        return modes
+
+
+@endpoint("razer.device.misc", "setHyperPollingMultiLEDModes", in_sig="yyy")
+def set_hyperpolling_wireless_dongle_multi_indicator_led_modes(self, mode1, mode2, mode3):
+    """
+    Set the function of the 3 LEDs on the dongle, takes in 3 chars
+    0 = Off
+    1 = Battery Status
+    2 = Connection Status
+    3 = Polling Rate
+    4 = DPI Indicator
+
+    :param mode1: LED 1 mode
+    :type mode1: char
+    :param mode2: LED 2 mode
+    :type mode2: char
+    :param mode3: LED 3 mode
+    :type mode3: char
+    """
+    self.logger.debug("DBus call set_hyperpolling_wireless_dongle_multi_indicator_led_modes")
+
+    driver_path = self.get_driver_path('hyperpolling_wireless_dongle_multi_indicator_led_modes')
+
+    with open(driver_path, "wb") as driver_file:
+        driver_file.write(bytes([mode1, mode2, mode3]))

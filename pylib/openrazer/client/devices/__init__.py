@@ -72,6 +72,7 @@ class RazerDevice(object):
             'macro_mode_modifier': self._has_feature('razer.device.macro', 'setModeModifier'),
             'reactive_trigger': self._has_feature('razer.device.misc', 'triggerReactive'),
             'hyperpolling_indicator_led': self._has_feature('razer.device.misc', ('getHyperPollingLED', 'setHyperPollingLED')),
+            'hyperpolling_multi_indicator_led_modes': self._has_feature('razer.device.misc', ('getHyperPollingMultiLEDModes', 'setHyperPollingMultiLEDModes')),
 
             'poll_rate': self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate')),
             'supported_poll_rates': self._has_feature('razer.device.misc', 'getSupportedPollRates'),
@@ -597,6 +598,42 @@ class RazerDevice(object):
             if not isinstance(mode, int):
                 raise ValueError("Mode is not an integer: {0}".format(mode))
             self._dbus_interfaces['device'].setHyperPollingLED(mode)
+        else:
+            raise NotImplementedError()
+
+    def get_hyperpolling_multi_indicator_led_modes(self) -> tuple:
+        """
+        Get the function of the 3 LEDs on the hyperpolling wireless dongle
+
+        :return: Tuple of 3 LED modes (0=Off, 1=Battery, 2=Connection, 3=Polling Rate, 4=DPI)
+        :rtype: tuple
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('hyperpolling_multi_indicator_led_modes'):
+            modes = self._dbus_interfaces['device'].getHyperPollingMultiLEDModes()
+            return tuple(int(m) for m in modes)
+        else:
+            raise NotImplementedError()
+
+    def set_hyperpolling_multi_indicator_led_modes(self, mode1: int, mode2: int, mode3: int) -> None:
+        """
+        Set the function of the 3 LEDs on the hyperpolling wireless dongle
+
+        :param mode1: LED 1 mode (0=Off, 1=Battery, 2=Connection, 3=Polling Rate, 4=DPI)
+        :type mode1: int
+        :param mode2: LED 2 mode
+        :type mode2: int
+        :param mode3: LED 3 mode
+        :type mode3: int
+
+        :raises NotImplementedError: If function is not supported
+        :raises ValueError: If modes are not integers
+        """
+        if self.has('hyperpolling_multi_indicator_led_modes'):
+            if not all(isinstance(m, int) for m in (mode1, mode2, mode3)):
+                raise ValueError("Modes must be integers")
+            self._dbus_interfaces['device'].setHyperPollingMultiLEDModes(mode1, mode2, mode3)
         else:
             raise NotImplementedError()
 
