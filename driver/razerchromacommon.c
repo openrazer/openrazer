@@ -1588,3 +1588,24 @@ struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(un
 
     return report;
 }
+
+/**
+ * Set dongle indicator LED mode
+ * Off = 0
+ * Battery status = 1
+ * Connection status = 2
+ * Polling rate indicator = 3
+ * DPI indicator = 4
+ *
+ * left, middle, right leds
+ */
+struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_multi_indicator_led_modes(unsigned char mode1, unsigned char mode2, unsigned char mode3)
+{
+    struct razer_report report = get_razer_report(0x07, 0x15, 0x03);
+
+    report.arguments[0] = mode1;
+    report.arguments[1] = mode2;
+    report.arguments[2] = mode3;
+
+    return report;
+}

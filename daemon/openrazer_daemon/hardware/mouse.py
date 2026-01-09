@@ -1990,6 +1990,9 @@ class RazerDeathAdderV4ProWireless(RazerDeathAdderV4ProWired):
     Class for the Razer DeathAdder V4 Pro (Wireless)
     """
     USB_PID = 0x00BF
+    METHODS = RazerDeathAdderV4ProWired.METHODS + [
+        "set_hyperpolling_wireless_dongle_multi_indicator_led_modes",
+    ]
 
 
 class RazerViperV3ProWired(__RazerDevice):

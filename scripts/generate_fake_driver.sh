@@ -42,6 +42,7 @@ declare -A files_metadata=(
     ["fully_charged_matrix_effect_wave"]="w;"
     ["game_led_state"]="rw;0"
     ["hyperpolling_wireless_dongle_indicator_led_mode"]="w;"
+    ["hyperpolling_wireless_dongle_multi_indicator_led_modes"]="w;"
     ["hyperpolling_wireless_dongle_pair"]="w;"
     ["hyperpolling_wireless_dongle_unpair"]="w;"
     ["keyswitch_optimization"]="rw;0"
