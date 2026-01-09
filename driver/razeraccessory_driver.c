@@ -2133,53 +2133,11 @@ static void razer_accessory_init(struct razer_accessory_device *dev, struct usb_
  */
 static int razer_setup_input(struct input_dev *input, struct hid_device *hdev)
 {
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-
     __set_bit(EV_KEY, input->evbit);
     __set_bit(KEY_PROG1, input->keybit);
 
-    // Setup Wolverine V3 Pro 8K PC gamepad inputs
-    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED ||
-        usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS) {
-        // Standard gamepad buttons
-        __set_bit(BTN_A, input->keybit);
-        __set_bit(BTN_B, input->keybit);
-        __set_bit(BTN_X, input->keybit);
-        __set_bit(BTN_Y, input->keybit);
-        __set_bit(BTN_TL, input->keybit);   // LB
-        __set_bit(BTN_TR, input->keybit);   // RB
-        __set_bit(BTN_TL2, input->keybit);  // LT digital
-        __set_bit(BTN_TR2, input->keybit);  // RT digital
-        __set_bit(BTN_SELECT, input->keybit);   // View
-        __set_bit(BTN_START, input->keybit);    // Menu
-        __set_bit(BTN_THUMBL, input->keybit);   // L3
-        __set_bit(BTN_THUMBR, input->keybit);   // R3
-        __set_bit(BTN_DPAD_UP, input->keybit);
-        __set_bit(BTN_DPAD_DOWN, input->keybit);
-        __set_bit(BTN_DPAD_LEFT, input->keybit);
-        __set_bit(BTN_DPAD_RIGHT, input->keybit);
-
-        // Razer-specific buttons
-        __set_bit(BTN_MODE, input->keybit);             // Razer logo/power button
-        __set_bit(BTN_TRIGGER_HAPPY1, input->keybit);   // Screenshot button
-        __set_bit(BTN_TRIGGER_HAPPY2, input->keybit);   // M button (below screenshot)
-        __set_bit(BTN_TRIGGER_HAPPY3, input->keybit);   // M1 (future/programmable)
-        __set_bit(BTN_TRIGGER_HAPPY4, input->keybit);   // M2 (future/programmable)
-        __set_bit(BTN_TRIGGER_HAPPY5, input->keybit);   // M3 (future/programmable)
-        __set_bit(BTN_TRIGGER_HAPPY6, input->keybit);   // M4 (future/programmable)
-        __set_bit(BTN_TRIGGER_HAPPY7, input->keybit);   // M5 (future/programmable)
-        __set_bit(BTN_TRIGGER_HAPPY8, input->keybit);   // M6 (future/programmable)
-
-        // Axis capabilities
-        __set_bit(EV_ABS, input->evbit);
-        input_set_abs_params(input, ABS_X, -32768, 32767, 16, 128);  // Left stick X
-        input_set_abs_params(input, ABS_Y, -32768, 32767, 16, 128);  // Left stick Y
-        input_set_abs_params(input, ABS_RX, -32768, 32767, 16, 128); // Right stick X
-        input_set_abs_params(input, ABS_RY, -32768, 32767, 16, 128); // Right stick Y
-        input_set_abs_params(input, ABS_Z, 0, 255, 0, 0);   // Left trigger
-        input_set_abs_params(input, ABS_RZ, 0, 255, 0, 0);  // Right trigger
-    }
+    // Wolverine V3 Pro 8K PC input is handled by razerwolverine driver
+    // This function is only used by other accessories
 
     return 0;
 }
@@ -2501,9 +2459,19 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         goto exit_free;
     }
 
-    if (hid_hw_start(hdev, HID_CONNECT_DEFAULT)) {
-        hid_err(hdev, "hw start failed\n");
-        goto exit_free;
+    // Wolverine V3 Pro uses razerwolverine driver for input, not razeraccessory
+    // Use HID_CONNECT_DRIVER to avoid creating duplicate input device
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED ||
+        usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS) {
+        if (hid_hw_start(hdev, HID_CONNECT_DRIVER)) {
+            hid_err(hdev, "hw start failed\n");
+            goto exit_free;
+        }
+    } else {
+        if (hid_hw_start(hdev, HID_CONNECT_DEFAULT)) {
+            hid_err(hdev, "hw start failed\n");
+            goto exit_free;
+        }
     }
 
     usb_disable_autosuspend(usb_dev);
