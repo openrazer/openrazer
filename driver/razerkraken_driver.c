@@ -118,10 +118,19 @@ static int razer_kraken_v2pro_send_control_msg(struct usb_device *usb_dev, struc
                           USB_CTRL_SET_TIMEOUT);
 
     kfree(buf);
-    if (len != size)
-        printk(KERN_WARNING "razer driver: V2 Pro data transfer failed.\n");
 
-    return ((len < 0) ? len : ((len != size) ? -EIO : 0));
+    if (len < 0) {
+        printk(KERN_ERR "razer driver: V2 Pro control message failed with error %d.\n", len);
+        return len;
+    }
+
+    if (len != size) {
+        printk(KERN_WARNING "razer driver: V2 Pro short data transfer (len=%d, expected=%u).\n",
+               len, size);
+        return -EIO;
+    }
+
+    return 0;
 }
 
 /**
@@ -808,7 +817,14 @@ static ssize_t razer_attr_write_matrix_brightness_v2pro(struct device *dev, stru
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_v2pro_report report;
-    unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
+    unsigned char brightness;
+    int ret;
+
+    ret = kstrtou8(buf, 10, &brightness);
+    if (ret)
+        return ret;
+
+    mutex_lock(&device->lock);
 
     // Always cache the brightness value
     device->v2pro_brightness = brightness;
@@ -816,6 +832,7 @@ static ssize_t razer_attr_write_matrix_brightness_v2pro(struct device *dev, stru
     // If "none" effect is active, don't send brightness to device
     // This prevents LEDs from turning on when adjusting brightness in "none" mode
     if (device->v2pro_effect_none) {
+        mutex_unlock(&device->lock);
         return count;
     }
 
@@ -823,7 +840,6 @@ static ssize_t razer_attr_write_matrix_brightness_v2pro(struct device *dev, stru
     report.data[0] = 0x0f;  // Subcommand parameter
     report.data[1] = brightness;
 
-    mutex_lock(&device->lock);
     razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
     mutex_unlock(&device->lock);
 
@@ -837,9 +853,14 @@ static ssize_t razer_attr_write_matrix_brightness_v2pro(struct device *dev, stru
 static ssize_t razer_attr_read_matrix_brightness_v2pro(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+    unsigned char brightness;
+
+    mutex_lock(&device->lock);
+    brightness = device->v2pro_brightness;
+    mutex_unlock(&device->lock);
 
     // Return cached brightness value
-    buf[0] = device->v2pro_brightness;
+    buf[0] = brightness;
     return 1;
 }
 
@@ -867,6 +888,7 @@ static ssize_t razer_attr_write_matrix_custom_frame_v2pro(struct device *dev, st
         return -EINVAL;
 
     num_cols = end_col - start_col + 1;
+    // Validate exact buffer size: row(1) + start(1) + end(1) + num_cols * RGB(3) bytes
     if (count != (size_t)(3 + num_cols * 3))
         return -EINVAL;
 
@@ -874,6 +896,7 @@ static ssize_t razer_attr_write_matrix_custom_frame_v2pro(struct device *dev, st
 
     // Copy RGB data for each zone
     // Zone positions in report.data: 0-2=Zone1, 3-5=Zone2, 6-8=Zone3, 9-11=Zone4
+    // Bounds safety: start_col <= 3 and num_cols <= 4 ensures max write is data[9..11]
     memset(report.data, 0, 12);
     memcpy(&report.data[start_col * 3], &buf[3], num_cols * 3);
 
@@ -1035,7 +1058,7 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2_PRO:
         // V2 Pro uses a completely different protocol - no memory addresses
         dev->is_v2_pro = 1;
-        dev->v2pro_effect_none = 0;
+        dev->v2pro_effect_none = 1;    // "none" effect is active by default
         dev->v2pro_brightness = 0xFF;  // Default to max brightness
         dev->v2pro_current_effect = 0; // Start with "none" effect
         break;
