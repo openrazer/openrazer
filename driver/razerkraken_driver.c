@@ -1037,6 +1037,9 @@ static DEVICE_ATTR(matrix_effect_custom,    0660, razer_attr_read_matrix_effect_
 static DEVICE_ATTR(matrix_effect_breath,    0660, razer_attr_read_matrix_effect_breath,       razer_attr_write_matrix_effect_breath);
 
 // Kraken Kitty V2 Pro specific sysfs attributes
+// These use standard attribute names (matrix_brightness, matrix_custom_frame) for userspace compatibility.
+// No naming collision occurs because these DEVICE_ATTRs are only registered for V2 Pro devices
+// via the switch-case in razer_kraken_probe(). Other Kraken devices define their own handlers.
 // Note: matrix_effect_none, matrix_effect_static, matrix_effect_custom, matrix_current_effect use dispatch in their handlers
 static DEVICE_ATTR(matrix_brightness,          0660, razer_attr_read_matrix_brightness_v2pro,      razer_attr_write_matrix_brightness_v2pro);
 static DEVICE_ATTR(matrix_custom_frame,        0220, NULL,                                         razer_attr_write_matrix_custom_frame_v2pro);
