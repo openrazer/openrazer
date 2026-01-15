@@ -349,7 +349,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
 
         // Restore cached brightness
         report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_BRIGHTNESS, 0x01);
-        report.data[0] = 0x0f;
+        report.data[0] = KRAKEN_V2_PRO_ZONE_MASK_ALL;
         report.data[1] = device->v2pro_brightness;
         razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
 
@@ -837,7 +837,7 @@ static ssize_t razer_attr_write_matrix_brightness_v2pro(struct device *dev, stru
     }
 
     report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_BRIGHTNESS, 0x01);
-    report.data[0] = 0x0f;  // Subcommand parameter
+    report.data[0] = KRAKEN_V2_PRO_ZONE_MASK_ALL;  // Subcommand parameter
     report.data[1] = brightness;
 
     razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
@@ -918,7 +918,7 @@ static ssize_t razer_attr_write_matrix_effect_none_v2pro(struct device *dev, str
     struct razer_kraken_v2pro_report report;
 
     report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_BRIGHTNESS, 0x01);
-    report.data[0] = 0x0f;
+    report.data[0] = KRAKEN_V2_PRO_ZONE_MASK_ALL;
     report.data[1] = 0x00;  // Brightness = 0 (off)
 
     mutex_lock(&device->lock);
@@ -955,7 +955,7 @@ static ssize_t razer_attr_write_matrix_effect_custom_v2pro(struct device *dev, s
 
     // Restore cached brightness
     report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_BRIGHTNESS, 0x01);
-    report.data[0] = 0x0f;
+    report.data[0] = KRAKEN_V2_PRO_ZONE_MASK_ALL;
     report.data[1] = device->v2pro_brightness;  // Use cached brightness
     razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
 
@@ -1004,7 +1004,7 @@ static ssize_t razer_attr_write_matrix_effect_static_v2pro(struct device *dev, s
 
     // Restore cached brightness: 40 02 01 0f XX
     report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_BRIGHTNESS, 0x01);
-    report.data[0] = 0x0f;
+    report.data[0] = KRAKEN_V2_PRO_ZONE_MASK_ALL;
     report.data[1] = device->v2pro_brightness;  // Use cached brightness
     razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
 
