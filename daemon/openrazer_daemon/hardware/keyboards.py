@@ -2268,6 +2268,7 @@ class RazerBlade182025(_RippleKeyboard):
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/14968/14968-1-en-v1.png"
 
+
 class RazerBlackWidowV4TKLWired(_RippleKeyboard):
     """
     Class for the Razer BlackWidow V4 Tenkeyless HyperSpeed Wired
@@ -2286,6 +2287,7 @@ class RazerBlackWidowV4TKLWired(_RippleKeyboard):
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect', 'get_supported_poll_rates']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/15142/15142-1-en-v1.png"
+
 
 class RazerBlackWidowV4TKLWireless(RazerBlackWidowV4TKLWired):
     """

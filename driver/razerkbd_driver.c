@@ -1575,7 +1575,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_BLADE_18_2025:
         device_type = "Razer Blade 18 (2025)\n";
         break;
-    
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TKL_HYPERSPEED_WIRED:
         device_type = "Razer BlackWidow V4 TKL Hyperspeed (Wired)\n";
         break;
@@ -4502,7 +4502,7 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
         translation = find_translation(chroma_keys_8, usage->code);
         break;
-    
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TKL_HYPERSPEED_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TKL_HYPERSPEED_WIRELESS:
         translation = find_translation(chroma_keys_9, usage->code);

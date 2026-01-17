@@ -1154,7 +1154,7 @@ def cmd_frame_scan(dev: Device, rows: int, cols: int, rgb: tuple[int, int, int])
     r, g, b = rgb
     visible: list[tuple[int, int]] = []
 
-    print(f"\nScanning {rows}x{cols} (rows=0..{rows-1}, cols=0..{cols-1})")
+    print(f"\nScanning {rows}x{cols} (rows=0..{rows - 1}, cols=0..{cols - 1})")
     print("Tip: open another terminal and run: sudo dmesg -w")
 
     def ask_visible() -> str:
