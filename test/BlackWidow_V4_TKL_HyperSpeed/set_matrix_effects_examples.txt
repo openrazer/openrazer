@@ -1,0 +1,51 @@
+Effects “matrix_effect_*” (the ones shown by list)
+-------------------------------------------------------
+
+none (turn off)
+sudo python3 set_matrix_effects.py none
+
+spectrum
+sudo python3 set_matrix_effects.py spectrum
+
+wave (1=left→right, 2=right→left)
+sudo python3 set_matrix_effects.py wave --dir 1
+sudo python3 set_matrix_effects.py wave --dir 2
+
+static
+sudo python3 set_matrix_effects.py static --rgb 0,255,0
+
+reactive (speed 1..4)
+sudo python3 set_matrix_effects.py reactive --rgb 255,0,0 --speed 4
+
+breath (random/single/dual/triple)
+sudo python3 set_matrix_effects.py breath-random
+sudo python3 set_matrix_effects.py breath-single --rgb 0,255,255
+sudo python3 set_matrix_effects.py breath-dual --rgb 255,0,0 --rgb2 0,0,255
+sudo python3 set_matrix_effects.py breath-triple --rgb 255,0,0 --rgb2 0,255,0 --rgb3 0,0,255
+
+starlight (typical speed 1..3)
+sudo python3 set_matrix_effects.py starlight-random --speed 2
+sudo python3 set_matrix_effects.py starlight-single --speed 2 --rgb 255,255,255
+sudo python3 set_matrix_effects.py starlight-dual --speed 2 --rgb 255,0,0 --rgb2 0,0,255
+
+custom (only switches to custom mode)
+----------------------------------
+sudo python3 set_matrix_effects.py custom
+
+
+Custom mode (matrix_custom_frame)
+---------------------------------
+One pixel (and it clears it at the end)
+sudo python3 set_matrix_effects.py frame-pixel --row 0 --col 0 --rgb 0,0,255 --hold 1 --clear
+
+Solid fill 6x18
+sudo python3 set_matrix_effects.py frame-fill --rows 6 --cols 18 --pattern solid --rgb 0,0,255 --hold 3
+
+Checker fill 6x18
+sudo python3 set_matrix_effects.py frame-fill --rows 6 --cols 18 --pattern checker --rgb 0,0,255 --rgb2 255,0,0 --hold 3
+
+Animation (bar / snake / row / col)
+sudo python3 set_matrix_effects.py frame-animate --rows 6 --cols 18 --pattern bar --rgb 0,0,255 --rgb2 0,0,0 --fps 25 --seconds 8
+
+Interactive scan (if you want to re-validate)
+sudo python3 set_matrix_effects.py frame-scan --rows 6 --cols 18 --rgb 0,0,255
