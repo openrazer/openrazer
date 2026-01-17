@@ -7,7 +7,9 @@ import re
 
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
 from openrazer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
+from openrazer_daemon.misc.fire_effect import FireManager as _FireManager
 from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
+from openrazer_daemon.misc.wheel_effect import WheelManager as _WheelManager
 
 
 class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
@@ -52,6 +54,8 @@ class _RippleKeyboard(_MacroKeyboard):
             raise RuntimeError("Cannot use RippleKeyboard without matrix capabilities")
 
         self.ripple_manager = _RippleManager(self, self._device_number)
+        self.wheel_manager = _WheelManager(self, self._device_number)
+        self.fire_manager = _FireManager(self, self._device_number)
 
         # we need to set the effect to ripple (if needed) after the ripple manager has started
         # otherwise it doesn't work
@@ -69,6 +73,8 @@ class _RippleKeyboard(_MacroKeyboard):
         super()._close()
 
         self.ripple_manager.close()
+        self.wheel_manager.close()
+        self.fire_manager.close()
 
 
 class RazerNostromo(_RazerDeviceBrightnessSuspend):
@@ -2273,12 +2279,11 @@ class RazerBlackWidowV4TKLWired(_RippleKeyboard):
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [6, 18]
     POLL_RATES = [125, 250, 500, 1000, 2000, 4000]
-    METHODS = ['get_device_type_keyboard', 'set_wave_effect','set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_wheel_effect', 'set_fire_effect', 'set_fire_variant_effect', 'set_fire_palette_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
                'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
-               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates']
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect', 'get_supported_poll_rates']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/15142/15142-1-en-v1.png"
 
