@@ -6,7 +6,7 @@ A collection of Linux drivers for Razer devices - providing kernel drivers, DBus
 
 Sometimes there are problems with the driver installation due to missing kernel modules or secure boot. Please refer to the [Troubleshooting wiki page](https://github.com/openrazer/openrazer/wiki/Troubleshooting) for guidance.
 
-If the troubleshooting guide did not pinpoint the problem, [try searching open/closed issues](https://github.com/openrazer/openrazer/issues?q=is%3Aissue+) before creating a new one.
+If the troubleshooting guide did not pinpoint the problemlus, [try searching open/closed issues](https://github.com/openrazer/openrazer/issues?q=is%3Aissue+) before creating a new one.
 
 ## Device Support
 
@@ -117,6 +117,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer BlackWidow V4 75%                                       |  1532:02A5  |
 | Razer Huntsman V3 Pro                                         |  1532:02A6  |
 | Razer Huntsman V3 Pro TKL                                     |  1532:02A7  |
+| Razer Huntsman V3 Pro Mini                                    |  1532:02B0  |
 | Razer Blade 14 (2024)                                         |  1532:02B6  |
 | Razer Blade 18 (2024)                                         |  1532:02B8  |
 | Razer BlackWidow V4 Mini HyperSpeed (Wired)                   |  1532:02B9  |
