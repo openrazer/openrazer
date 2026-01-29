@@ -624,7 +624,7 @@ class RazerHuntsmanV3ProMini(_RazerDeviceBrightnessSuspend):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.key_manager = self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
+        self.key_manager =  _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
     def _close(self):
         """
         Close the key manager
