@@ -636,6 +636,38 @@ class RazerHuntsmanV3ProTKL(_RazerDeviceBrightnessSuspend):
 
 
 # TODO Should become _RippleKeyboard once kernel support for driver mode is implemented
+class RazerHuntsmanV3ProMini(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Huntsman V3 Pro Mini
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Huntsman_V3_Pro_Mini.*-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02B0
+    HAS_MATRIX = True
+    WAVE_DIRS = (0, 1)
+    MATRIX_DIMS = [5, 15]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'get_macro_mode', 'set_macro_mode', 'get_macro_effect', 'set_macro_effect',
+               'get_game_mode', 'set_game_mode', 'set_custom_effect', 'set_key_row', 'get_keyboard_layout']
+
+    DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/h8d/h31/9662065901598/230921-huntsman-v3-pro-mini-black-1500x1000-5.jpg"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+        self.key_manager.close()
+
+
+# TODO Should become _RippleKeyboard once kernel support for driver mode is implemented
 class RazerHuntsmanMiniAnalog(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Huntsman Mini Analog
