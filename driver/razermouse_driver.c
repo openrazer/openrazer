@@ -5767,6 +5767,8 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_NAGA_2014:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_BASILISK_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
@@ -5913,6 +5915,8 @@ static int razer_input_configured(struct hid_device *hdev,
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_NAGA_2014:
         case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+        case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+        case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
             input_set_capability(hidinput->input, EV_REL, REL_HWHEEL);
             input_set_capability(hidinput->input, EV_REL, REL_HWHEEL_HI_RES);
             input_set_capability(hidinput->input, EV_KEY, BTN_FORWARD);
@@ -6502,6 +6506,9 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_hwheel);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat_delay);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat);
             break;
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
@@ -7607,6 +7614,9 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
             device_remove_file(&hdev->dev, &dev_attr_charge_level);
             device_remove_file(&hdev->dev, &dev_attr_charge_status);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_hwheel);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_repeat_delay);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_repeat);
             break;
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
