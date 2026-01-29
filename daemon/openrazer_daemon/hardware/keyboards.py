@@ -618,8 +618,15 @@ class RazerHuntsmanV3ProMini(_RazerDeviceBrightnessSuspend):
     HAS_MATRIX = True
     WAVE_DIRS = (0, 1)
     MATRIX_DIMS = [5, 15]
-    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'get_game_mode',
-               'set_game_mode', 'get_macro_mode', 'set_macro_mode', 'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro', 'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect', 'set_ripple_effect', 'set_ripple_effect_random_colour']
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 
+               'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 
+               'set_breath_random_effect', 'set_breath_single_effect', 
+               'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 
+               'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode', 
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 
+               'add_macro', 'set_starlight_random_effect', 'set_starlight_single_effect', 
+               'set_starlight_dual_effect', 'set_ripple_effect', 
+               'set_ripple_effect_random_colour', 'get_keyboard_layout']
 
     DEVICE_IMAGE = "https://assets3.razerzone.com/dhlpO3R-cnN2Tye-XONaxE7-1q8=/1500x1000/https%3A%2F%2Fmedias-p1.phoenix.razer.com%2Fsys-master-phoenix-images-container%2Fh8d%2Fh31%2F9662065901598%2F230921-huntsman-v3-pro-mini-black-1500x1000-5.jpg"
 
