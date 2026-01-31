@@ -17,7 +17,7 @@
 #define USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS 0x0A59
 
 /* Timeout for detecting controller disconnect (in jiffies) */
-#define WOLVERINE_DISCONNECT_TIMEOUT (30 * HZ)
+#define WOLVERINE_DISCONNECT_TIMEOUT (60 * HZ)
 
 /**
  * struct wolverine_device - Device structure for Wolverine V3 Pro 8K PC
