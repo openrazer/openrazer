@@ -4565,6 +4565,16 @@ static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_de
 
         device->fn_on = !!found_fn;
 
+        // Emit KEY_FN event for Hypershift support
+        {
+            struct hid_input *hidinput;
+            hidinput = list_first_entry_or_null(&hdev->inputs, struct hid_input, list);
+            if (hidinput) {
+                input_report_key(hidinput->input, KEY_FN, device->fn_on);
+                input_sync(hidinput->input);
+            }
+        }
+
         data[0] = 0x01;
         data[1] = 0x00;
 
@@ -4716,6 +4726,16 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_de
         }
 
         device->fn_on = !!found_fn;
+
+        // Emit KEY_FN event for Hypershift support
+        {
+            struct hid_input *hidinput;
+            hidinput = list_first_entry_or_null(&hdev->inputs, struct hid_input, list);
+            if (hidinput) {
+                input_report_key(hidinput->input, KEY_FN, device->fn_on);
+                input_sync(hidinput->input);
+            }
+        }
 
         data[0] = 0x01;
         data[1] = 0x00;
@@ -5829,6 +5849,9 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 static void razer_setup_key_bits(struct input_dev *input)
 {
     __set_bit(EV_KEY, input->evbit);
+
+    // FN/Hypershift
+    __set_bit(KEY_FN, input->keybit);
 
     // Chroma keys
     __set_bit(RAZER_MACRO_KEY, input->keybit);
