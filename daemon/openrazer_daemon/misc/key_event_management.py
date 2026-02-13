@@ -266,7 +266,7 @@ class KeyboardKeyManager(object):
 
         self._should_grab_event_files = should_grab_event_files
         self._event_files_locked = False
-        
+
         self._hypershift = False
 
         if self._should_grab_event_files:
