@@ -113,7 +113,7 @@ class BatteryNotifier(threading.Thread):
 
 class BatteryManager(object):
     """
-    Class which manages the overall process of notifing battery levels
+    Class which manages the overall process of notifying battery levels
     """
 
     def __init__(self, parent, device_number, device_name):
