@@ -117,6 +117,7 @@ The devices below are fully feature supported by OpenRazer, which means all avai
 | Razer BlackWidow V4 75%                                       |  1532:02A5  |
 | Razer Huntsman V3 Pro                                         |  1532:02A6  |
 | Razer Huntsman V3 Pro TKL                                     |  1532:02A7  |
+| Razer Huntsman V3 X TKL                                       |  1532:02B1  |
 | Razer Blade 14 (2024)                                         |  1532:02B6  |
 | Razer Blade 18 (2024)                                         |  1532:02B8  |
 | Razer BlackWidow V4 Mini HyperSpeed (Wired)                   |  1532:02B9  |
