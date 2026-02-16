@@ -1,0 +1,145 @@
+DBus-only effect testing (no sysfs / no sudo)
+============================================
+
+This script talks to openrazer-daemon over DBus (SessionBus).
+Do NOT use sudo (sudo usually breaks the SessionBus).
+
+
+1) List devices / get serial
+----------------------------
+python3 set_matrix_effects.py serial
+
+# Pick the serial for your keyboard and set it:
+export OPENRAZER_SERIAL=YOUR_SERIAL
+
+
+2) Show what the device supports (DBus methods)
+----------------------------------------------
+python3 set_matrix_effects.py list
+
+
+3) Standard effects
+-------------------
+python3 set_matrix_effects.py none
+python3 set_matrix_effects.py spectrum
+
+python3 set_matrix_effects.py wave --dir 1   # 1 left->right
+python3 set_matrix_effects.py wave --dir 2   # 2 right->left
+
+python3 set_matrix_effects.py static --rgb 0,255,0
+python3 set_matrix_effects.py blinking --rgb 255,0,0
+
+python3 set_matrix_effects.py reactive --rgb 0,0,255 --speed 4   # speed 1..4
+
+python3 set_matrix_effects.py breath-random
+python3 set_matrix_effects.py breath-single --rgb 0,255,255
+python3 set_matrix_effects.py breath-dual --rgb 255,0,0 --rgb2 0,0,255
+python3 set_matrix_effects.py breath-triple --rgb 255,0,0 --rgb2 0,255,0 --rgb3 0,0,255
+
+python3 set_matrix_effects.py starlight-random --speed 2
+python3 set_matrix_effects.py starlight-single --speed 2 --rgb 255,255,255
+python3 set_matrix_effects.py starlight-dual --speed 2 --rgb 255,0,0 --rgb2 0,0,255
+
+
+4) Software effects (daemon): wheel + fire
+------------------------------------------
+python3 set_matrix_effects.py wheel --dir 1   # 1=right
+python3 set_matrix_effects.py wheel --dir 2   # 2=left
+
+python3 set_matrix_effects.py fire --speed 3  # speed 1..4
+
+# Variants
+python3 set_matrix_effects.py fire-blue --speed 3
+python3 set_matrix_effects.py fire-spectral --speed 3
+python3 set_matrix_effects.py fire-magic --speed 3
+
+# Fully custom palette (colors are evenly spaced from low->high intensity)
+python3 set_matrix_effects.py fire-palette --speed 3 --colors '0,0,0;0,0,255;0,255,255;255,255,255'
+
+
+5) Custom frame tools (DBus setCustom + setKeyRow)
+--------------------------------------------------
+python3 set_matrix_effects.py custom
+
+# One pixel (clears the whole matrix first, for deterministic testing)
+python3 set_matrix_effects.py frame-pixel --row 0 --col 0 --rgb 0,0,255 --hold 1 --clear
+
+# Fill patterns
+python3 set_matrix_effects.py frame-fill --pattern solid --rgb 0,0,255 --hold 3
+python3 set_matrix_effects.py frame-fill --pattern checker --rgb 0,0,255 --rgb2 255,0,0 --hold 3
+
+# Animation (bar / snake / row / col)
+python3 set_matrix_effects.py frame-animate --pattern bar --rgb 0,0,255 --rgb2 0,0,0 --fps 25 --seconds 8
+
+# Interactive scan
+python3 set_matrix_effects.py frame-scan --rgb 0,0,255
+Effects “matrix_effect_*” (the ones shown by list)
+-------------------------------------------------------
+
+Get device serial (for DBus wheel/fire)
+--------------------------------------
+python3 set_matrix_effects.py serial
+
+none (turn off)
+sudo python3 set_matrix_effects.py none
+
+spectrum
+sudo python3 set_matrix_effects.py spectrum
+
+wave (1=left→right, 2=right→left)
+sudo python3 set_matrix_effects.py wave --dir 1
+sudo python3 set_matrix_effects.py wave --dir 2
+
+
+DBus effects (daemon) (wheel/fire)
+----------------------------------
+NOTE: Do NOT use sudo for these (sudo usually breaks the SessionBus).
+
+# Option A: set serial via env var
+OPENRAZER_SERIAL=YOUR_SERIAL python3 set_matrix_effects.py wheel --dir 1  # 1=right
+OPENRAZER_SERIAL=YOUR_SERIAL python3 set_matrix_effects.py wheel --dir 2  # 2=left
+
+OPENRAZER_SERIAL=YOUR_SERIAL python3 set_matrix_effects.py fire --speed 3  # speed 1..4
+
+# Option B: pass serial explicitly
+python3 set_matrix_effects.py --serial YOUR_SERIAL wheel --dir 1
+python3 set_matrix_effects.py --serial YOUR_SERIAL fire --speed 3
+
+static
+sudo python3 set_matrix_effects.py static --rgb 0,255,0
+
+reactive (speed 1..4)
+sudo python3 set_matrix_effects.py reactive --rgb 255,0,0 --speed 4
+
+breath (random/single/dual/triple)
+sudo python3 set_matrix_effects.py breath-random
+sudo python3 set_matrix_effects.py breath-single --rgb 0,255,255
+sudo python3 set_matrix_effects.py breath-dual --rgb 255,0,0 --rgb2 0,0,255
+sudo python3 set_matrix_effects.py breath-triple --rgb 255,0,0 --rgb2 0,255,0 --rgb3 0,0,255
+
+starlight (typical speed 1..3)
+sudo python3 set_matrix_effects.py starlight-random --speed 2
+sudo python3 set_matrix_effects.py starlight-single --speed 2 --rgb 255,255,255
+sudo python3 set_matrix_effects.py starlight-dual --speed 2 --rgb 255,0,0 --rgb2 0,0,255
+
+custom (only switches to custom mode)
+----------------------------------
+sudo python3 set_matrix_effects.py custom
+
+
+Custom mode (matrix_custom_frame)
+---------------------------------
+One pixel (and it clears it at the end)
+sudo python3 set_matrix_effects.py frame-pixel --row 0 --col 0 --rgb 0,0,255 --hold 1 --clear
+
+Solid fill 6x18
+sudo python3 set_matrix_effects.py frame-fill --rows 6 --cols 18 --pattern solid --rgb 0,0,255 --hold 3
+
+Checker fill 6x18
+sudo python3 set_matrix_effects.py frame-fill --rows 6 --cols 18 --pattern checker --rgb 0,0,255 --rgb2 255,0,0 --hold 3
+
+Animation (bar / snake / row / col)
+sudo python3 set_matrix_effects.py frame-animate --rows 6 --cols 18 --pattern bar --rgb 0,0,255 --rgb2 0,0,0 --fps 25 --seconds 8
+
+Interactive scan (if you want to re-validate)
+sudo python3 set_matrix_effects.py frame-scan --rows 6 --cols 18 --rgb 0,0,255

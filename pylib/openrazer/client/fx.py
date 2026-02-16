@@ -252,6 +252,70 @@ class RazerFX(BaseRazerFX):
             return True
         return False
 
+    def fire(self, speed: int = 3) -> bool:
+        """Fire effect (software-rendered by the daemon for some devices).
+
+        :param speed: Speed 1..4
+        :type speed: int
+
+        :return: True if success, False otherwise
+        :rtype: bool
+
+        :raises ValueError: If speed is invalid
+        """
+        if speed not in (1, 2, 3, 4):
+            raise ValueError("Speed must be 1..4")
+
+        if self.has('fire'):
+            self._lighting_dbus.setFire(int(speed))
+            return True
+        return False
+
+    def fire_variant(self, speed: int = 3, variant: int = 0) -> bool:
+        """Fire effect with a palette variant.
+
+        variant:
+          0 = warm (default)
+          1 = blue (gas flame)
+          2 = spectral green
+                    3 = magic (purple/white)
+        """
+        if speed not in (1, 2, 3, 4):
+            raise ValueError("Speed must be 1..4")
+
+        if self.has('fire_variant'):
+            self._lighting_dbus.setFireVariant(int(speed), int(variant))
+            return True
+        return False
+
+    def fire_blue(self, speed: int = 3) -> bool:
+        return self.fire_variant(speed=speed, variant=1)
+
+    def fire_spectral(self, speed: int = 3) -> bool:
+        return self.fire_variant(speed=speed, variant=2)
+
+    def fire_magic(self, speed: int = 3) -> bool:
+        return self.fire_variant(speed=speed, variant=3)
+
+    def fire_palette(self, speed: int, rgb_list: list[tuple[int, int, int]]) -> bool:
+        """Fire effect with a custom palette.
+
+        rgb_list is a list of RGB tuples, e.g.:
+          [(0,0,0), (0,0,255), (0,255,255), (255,255,255)]
+        """
+        if speed not in (1, 2, 3, 4):
+            raise ValueError("Speed must be 1..4")
+        if not rgb_list:
+            raise ValueError("rgb_list must not be empty")
+
+        if self.has('fire_palette'):
+            payload = bytearray()
+            for (r, g, b) in rgb_list:
+                payload += bytes([clamp_ubyte(r), clamp_ubyte(g), clamp_ubyte(b)])
+            self._lighting_dbus.setFirePalette(int(speed), _dbus.ByteArray(bytes(payload)))
+            return True
+        return False
+
     def static(self, red: int, green: int, blue: int) -> bool:
         """
         Static effect

@@ -272,8 +272,96 @@ def set_wheel_effect(self, direction):
     if direction not in (1, 2):
         direction = 1
 
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write(str(direction))
+    # Some devices don't implement a firmware wheel effect; in that case this
+    # sysfs node may be missing. A software WheelManager (if present) can
+    # render the effect via matrix_custom_frame, triggered by send_effect_event.
+    if os.path.exists(driver_path):
+        with open(driver_path, 'w') as driver_file:
+            driver_file.write(str(direction))
+
+
+@endpoint('razer.device.lighting.chroma', 'setFire', in_sig='i')
+def set_fire_effect(self, speed):
+    """Set a software-rendered fire effect on the device.
+
+    Some keyboards do not implement a firmware "fire" matrix effect. For those
+    devices, a software FireManager (if present) can render the effect via
+    matrix_custom_frame, triggered by send_effect_event.
+
+    :param speed: Speed (1..4)
+    :type speed: int
+    """
+    self.logger.debug("DBus call set_fire_effect")
+
+    # Notify others (software effect managers listen to this)
+    self.send_effect_event('setFire', speed)
+
+    # remember effect
+    self.set_persistence("backlight", "effect", 'fire')
+
+    # Reset any previously selected palette variant back to default.
+    # (The software FireManager will also reset its palette on setFire.)
+    self.set_persistence("backlight", "fire_variant", 0)
+
+    try:
+        speed_i = int(speed)
+    except (TypeError, ValueError):
+        speed_i = 3
+    if speed_i not in (1, 2, 3, 4):
+        speed_i = 3
+    self.set_persistence("backlight", "speed", int(speed_i))
+
+
+@endpoint('razer.device.lighting.chroma', 'setFireVariant', in_sig='ii')
+def set_fire_variant_effect(self, speed, variant):
+    """Set a software-rendered fire effect with a palette variant.
+
+    variant:
+      0 = warm (default)
+      1 = blue (gas flame)
+      2 = spectral green
+            3 = magic (purple/white)
+    """
+    self.logger.debug("DBus call set_fire_variant_effect")
+
+    # Notify others (software effect managers listen to this)
+    self.send_effect_event('setFireVariant', speed, variant)
+
+    self.set_persistence("backlight", "effect", 'fire')
+    try:
+        speed_i = int(speed)
+    except (TypeError, ValueError):
+        speed_i = 3
+    if speed_i not in (1, 2, 3, 4):
+        speed_i = 3
+    self.set_persistence("backlight", "speed", int(speed_i))
+
+    try:
+        variant_i = int(variant)
+    except (TypeError, ValueError):
+        variant_i = 0
+    self.set_persistence("backlight", "fire_variant", int(variant_i))
+
+
+@endpoint('razer.device.lighting.chroma', 'setFirePalette', in_sig='iay', byte_arrays=True)
+def set_fire_palette_effect(self, speed, palette):
+    """Set a software-rendered fire effect with a custom palette.
+
+    palette: byte array of RGB triplets (R,G,B repeating). Example for 3 stops:
+      [0,0,0, 0,0,255, 0,255,255, 255,255,255]
+    """
+    self.logger.debug("DBus call set_fire_palette_effect")
+
+    self.send_effect_event('setFirePalette', speed, palette)
+
+    self.set_persistence("backlight", "effect", 'fire')
+    try:
+        speed_i = int(speed)
+    except (TypeError, ValueError):
+        speed_i = 3
+    if speed_i not in (1, 2, 3, 4):
+        speed_i = 3
+    self.set_persistence("backlight", "speed", int(speed_i))
 
 
 @endpoint('razer.device.lighting.chroma', 'setStatic', in_sig='yyy')

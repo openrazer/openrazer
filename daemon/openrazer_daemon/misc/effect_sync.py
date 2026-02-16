@@ -38,7 +38,9 @@ class EffectSync(object):
             #  0         1       2             3
             # ('effect', Device, 'effectName', 'effectparams'...)
             # Device is the device the msg originated from (could be parent device)
-            if msg[1] is not self._parent:
+            # Some callers/tests use None as the origin device.
+            origin_device = msg[1]
+            if origin_device is None or origin_device is not self._parent:
                 # Msg from another device
                 self.run_effect(msg[2], *msg[3:])
 
@@ -52,6 +54,22 @@ class EffectSync(object):
         :param args: Arguments for the specified effect
         :type args: list
         """
+        if self._parent is None:
+            return
+
+        # Fast-path mappings for devices with limited effect APIs.
+        # If the target can't do chroma breathing, approximate it with pulsate.
+        if effect_name == 'setBreathSingle':
+            has_breath_single = getattr(self._parent, 'setBreathSingle', None) is not None
+            pulsate = getattr(self._parent, 'setPulsate', None)
+            if (not has_breath_single) and pulsate is not None:
+                self._parent.disable_notify = True
+                try:
+                    pulsate()
+                finally:
+                    self._parent.disable_notify = False
+                return
+
         # Disable notifications
         self._parent.disable_notify = True
 
@@ -246,8 +264,10 @@ class EffectSync(object):
                             effect_func(*args)
 
                     if effect_name == 'setBreathSingle':
+                        effect_func = getattr(self._parent, 'setPulsate', None)
                         if effect_func is not None:
-                            effect_func(*pargs)
+                            # setPulsate doesn't take any argument
+                            effect_func()
                         effect_func = getattr(self._parent, 'setScrollPulsate', None)
                         if effect_func is not None:
                             effect_func(*pargs)
@@ -310,9 +330,9 @@ class EffectSync(object):
 
         except Exception as err:
             self._logger.exception("Caught exception trying to sync effects.", exc_info=err)
-
-        # Re-enable notifications
-        self._parent.disable_notify = False
+        finally:
+            # Re-enable notifications
+            self._parent.disable_notify = False
 
     @staticmethod
     def get_num_arguments(func):
