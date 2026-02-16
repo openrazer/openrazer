@@ -2261,3 +2261,33 @@ class RazerBlade182025(_RippleKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/14968/14968-1-en-v1.png"
+
+
+class RazerJoro(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Joro
+    """
+    EVENT_FILE_REGEX = re.compile(r".*Razer_Joro(-if01)?-event-kbd")
+
+    USB_VID = 0x1532
+    USB_PID = 0x02CD
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 22]
+    METHODS = ["get_device_type_keyboard", "set_wave_effect", "set_static_effect", "set_spectrum_effect",
+               "set_reactive_effect", "set_none_effect", "set_breath_random_effect", "set_breath_single_effect", "set_breath_dual_effect",
+               "set_starlight_random_effect", "set_starlight_single_effect", "set_starlight_dual_effect",
+               "get_macro_mode", "set_macro_mode", "get_macro_effect", "set_macro_effect",
+               "get_game_mode", "set_game_mode", "set_custom_effect", "set_key_row", "get_keyboard_layout"]
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/joro-hero.webp"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+        self.key_manager.close()
