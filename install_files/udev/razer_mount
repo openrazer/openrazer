@@ -60,3 +60,21 @@ if [ -d /sys/bus/hid/drivers/"$DRIVER"/"$DEVICE_ID" ] ; then
 	mesg "Changed group /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/"
 fi
 
+# Handle USB bus drivers for razerwolverine (unbind xpad/xone first)
+if [ "$DRIVER" = "razerwolverine" ]; then
+	# Extract USB interface from device ID (e.g., 1-4:1.0)
+	USB_INTF=$(echo "$DEVICE_ID" | grep -oE '[0-9]+-[0-9]+:[0-9]+\.[0-9]+' || true)
+	if [ -n "$USB_INTF" ]; then
+		for USB_DRIVER in "xpad" "xone"; do
+			if [ -d /sys/bus/usb/drivers/"$USB_DRIVER"/"$USB_INTF" ]; then
+				mesg "Unbinding $USB_INTF from $USB_DRIVER"
+				printf '%s' "$USB_INTF" > /sys/bus/usb/drivers/"$USB_DRIVER"/unbind 2>/dev/null || true
+			fi
+		done
+		if [ -d /sys/bus/usb/drivers/razerwolverine ] && [ ! -d /sys/bus/usb/drivers/razerwolverine/"$USB_INTF" ]; then
+			mesg "Binding $USB_INTF to razerwolverine"
+			printf '%s' "$USB_INTF" > /sys/bus/usb/drivers/razerwolverine/bind 2>/dev/null || true
+		fi
+	fi
+fi
+

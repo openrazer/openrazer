@@ -1,0 +1,10 @@
+# Razer Wolverine V3 Pro 8K PC - Automatically unbind from xpad and bind to razerwolverine
+# This ensures the razerwolverine driver handles these devices instead of the generic xpad driver
+
+# Wolverine V3 Pro 8K PC Wired (USB-C) - Interface 0
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0a57", ATTR{bInterfaceNumber}=="00", \
+    RUN+="/bin/sh -c 'echo $kernel > /sys/bus/usb/drivers/xpad/unbind 2>/dev/null || true; echo $kernel > /sys/bus/usb/drivers/razerwolverine/bind 2>/dev/null || true'"
+
+# Wolverine V3 Pro 8K PC Wireless (2.4GHz Dongle) - Interface 0
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0a59", ATTR{bInterfaceNumber}=="00", \
+    RUN+="/bin/sh -c 'echo $kernel > /sys/bus/usb/drivers/xpad/unbind 2>/dev/null || true; echo $kernel > /sys/bus/usb/drivers/razerwolverine/bind 2>/dev/null || true'"

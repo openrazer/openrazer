@@ -19,7 +19,7 @@ DESTDIR?=/
 # Specify the kernel directory to use
 KERNELDIR?=/lib/modules/$(shell uname -r)/build
 # Need the absolute directory do the driver directory to build kernel modules
-DRIVERDIR?=$(shell pwd)/driver
+DRIVERDIR?=$(shell pwd | sed 's/ /\\ /g')/driver
 
 # Where kernel drivers are going to be installed
 MODULEDIR?=/lib/modules/$(shell uname -r)/kernel/drivers/hid
@@ -109,6 +109,7 @@ udev_install:
 	@echo -e "\n::\033[34m Installing OpenRazer udev rules\033[0m"
 	@echo "====================================================="
 	install -m 644 -v -D install_files/udev/99-razer.rules $(DESTDIR)$(UDEV_PREFIX)/lib/udev/rules.d/99-razer.rules
+	install -m 644 -v -D install_files/udev/99-razer-wolverine.rules $(DESTDIR)$(UDEV_PREFIX)/lib/udev/rules.d/99-razer-wolverine.rules
 	install -m 755 -v -D install_files/udev/razer_mount $(DESTDIR)$(UDEV_PREFIX)/lib/udev/razer_mount
 
 appstream_install:

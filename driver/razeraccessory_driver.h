@@ -11,6 +11,8 @@
 #define USB_DEVICE_ID_RAZER_CORE 0x0215
 #define USB_DEVICE_ID_RAZER_NOMMO_CHROMA 0x0517
 #define USB_DEVICE_ID_RAZER_NOMMO_PRO 0x0518
+#define USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRED 0x0A57
+#define USB_DEVICE_ID_RAZER_WOLVERINE_V3_PRO_WIRELESS 0x0A59
 #define USB_DEVICE_ID_RAZER_FIREFLY 0x0C00
 #define USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA 0x0C01
 #define USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED 0x0C02
@@ -51,6 +53,11 @@ struct razer_accessory_device {
     unsigned char saved_brightness;
 
     char serial[23];
+
+    // Force feedback for Wolverine Pro 8K
+    struct work_struct ff_work;
+    u8 ff_left_motor;
+    u8 ff_right_motor;
 };
 
 /*

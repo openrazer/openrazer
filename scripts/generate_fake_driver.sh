@@ -198,7 +198,8 @@ while IFS= read -r device_raw; do
         [ "$device_pid" = "028F" ] || # Razer Ornata V3
         [ "$device_pid" = "02A2" ] || # Razer Ornata V3 X
         [ "$device_pid" = "00C2" ] || # Razer DeathAdder V3 Pro (Wired)
-        [ "$device_pid" = "00C3" ]; then # Razer DeathAdder V3 Pro (Wireless)
+        [ "$device_pid" = "00C3" ] || # Razer DeathAdder V3 Pro (Wireless)
+        [ "$device_pid" = "0A59" ]; then # Razer Wolverine V3 Pro 8K PC (Wireless)
         filename=${filename%.cfg}_2.cfg
     fi
 
@@ -225,6 +226,11 @@ EOF
         # "test": not used by daemon
         # "fn_toggle": not used by daemon
         [[ "$attr" = "" || "$attr" = "test" || "$attr" = "fn_toggle" ]] && continue
+
+        # Wolverine V3 Pro 8K PC doesn't have controllable LEDs
+        if [ "$device_pid" = "0A57" ] || [ "$device_pid" = "0A59" ]; then
+            [[ "$attr" = matrix_* ]] && continue
+        fi
 
         metadata="${files_metadata[$attr]}"
         if [ -z "$metadata" ]; then

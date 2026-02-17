@@ -11,5 +11,6 @@ drivers=$(ls driver/razer*_driver.c | cut -d'/' -f2 | cut -d'_' -f1)
 
 for driver in $drivers; do
     [ "$driver" = "razercore" ] && continue # razercore is currently broken
+    [ "$driver" = "razerwolverine" ] && continue # razerwolverine is USB gamepad driver, not HID
     $(dirname "$0")/generate_fake_driver.sh $driver
 done
