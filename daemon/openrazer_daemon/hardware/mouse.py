@@ -1443,7 +1443,7 @@ class RazerViperMiniSEWireless(RazerViperMiniSEWired):
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Viper_Mini_Signature_Edition-if0(1|2)-event-kbd')
     USB_PID = 0x009F
 
-    METHODS = RazerViperMiniSEWired.METHODS + ['set_hyperpolling_wireless_dongle_indicator_led_mode']
+    METHODS = RazerViperMiniSEWired.METHODS + ['get_hyperpolling_wireless_dongle_indicator_led_mode', 'set_hyperpolling_wireless_dongle_indicator_led_mode']
 
     POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
@@ -1830,7 +1830,7 @@ class RazerHyperPollingWirelessDongle(__RazerDevice):
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
                'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
                'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold',
-               'set_hyperpolling_wireless_dongle_indicator_led_mode', 'set_hyperpolling_wireless_dongle_pair', 'set_hyperpolling_wireless_dongle_unpair']
+               'get_hyperpolling_wireless_dongle_indicator_led_mode', 'set_hyperpolling_wireless_dongle_indicator_led_mode', 'set_hyperpolling_wireless_dongle_pair', 'set_hyperpolling_wireless_dongle_unpair']
 
     POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
@@ -1991,6 +1991,7 @@ class RazerDeathAdderV4ProWireless(RazerDeathAdderV4ProWired):
     """
     USB_PID = 0x00BF
     METHODS = RazerDeathAdderV4ProWired.METHODS + [
+        "get_hyperpolling_wireless_dongle_multi_indicator_led_modes",
         "set_hyperpolling_wireless_dongle_multi_indicator_led_modes",
     ]
 
@@ -2020,7 +2021,7 @@ class RazerViperV3ProWireless(RazerViperV3ProWired):
 
     USB_PID = 0x00C1
 
-    METHODS = RazerViperV3ProWired.METHODS + ['set_hyperpolling_wireless_dongle_indicator_led_mode']
+    METHODS = RazerViperV3ProWired.METHODS + ['get_hyperpolling_wireless_dongle_indicator_led_mode', 'set_hyperpolling_wireless_dongle_indicator_led_mode']
 
     POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
