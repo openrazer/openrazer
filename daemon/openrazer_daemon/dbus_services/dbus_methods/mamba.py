@@ -346,6 +346,25 @@ def get_supported_poll_rates(self):
     return self.POLL_RATES
 
 
+@endpoint('razer.device.misc', 'getHyperPollingLED', out_sig='y')
+def get_hyperpolling_wireless_dongle_indicator_led_mode(self):
+    """
+    Get the function of the LED on the dongle
+    1 = Connection Status (green if connected to mouse)
+    2 = Battery Status (green if high battery, yellow if medium battery, red if low battery)
+    3 = Battery Warning (red if low battery, off otherwise)
+
+    :return: LED mode
+    :rtype: int
+    """
+    self.logger.debug("DBus call get_hyperpolling_wireless_dongle_indicator_led_mode")
+
+    driver_path = self.get_driver_path('hyperpolling_wireless_dongle_indicator_led_mode')
+
+    with open(driver_path, 'r') as driver_file:
+        return int(driver_file.read().strip())
+
+
 @endpoint('razer.device.misc', 'setHyperPollingLED', in_sig='y')
 def set_hyperpolling_wireless_dongle_indicator_led_mode(self, mode):
     """

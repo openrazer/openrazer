@@ -5373,6 +5373,37 @@ static ssize_t razer_attr_write_backlight_matrix_effect_none(struct device *dev,
 }
 
 /**
+ * Read device file "hyperpolling_wireless_dongle_indicator_led_mode"
+ */
+static ssize_t razer_attr_read_hyperpolling_wireless_dongle_indicator_led_mode(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_hyperpolling_wireless_dongle_indicator_led_mode();
+
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
+        request.transaction_id.id = 0x1F;
+        break;
+
+    case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
+        request.transaction_id.id = 0xFF;
+        break;
+
+    default:
+        printk(KERN_WARNING "razermouse: hyperpolling_wireless_dongle_indicator_led_mode read not supported for this model\n");
+        return -EINVAL;
+    }
+
+    razer_send_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", response.arguments[0]);
+}
+
+/**
  * Write device file "hyperpolling_wireless_dongle_indicator_led_mode"
  */
 static ssize_t razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -5544,7 +5575,7 @@ static DEVICE_ATTR(backlight_matrix_effect_none,        0220, NULL,             
 static DEVICE_ATTR(backlight_matrix_effect_on,          0220, NULL,                         razer_attr_write_backlight_matrix_effect_on);
 
 // For HyperPolling Wireless Dongle
-static DEVICE_ATTR(hyperpolling_wireless_dongle_indicator_led_mode,             0220, NULL, razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode);
+static DEVICE_ATTR(hyperpolling_wireless_dongle_indicator_led_mode,             0660, razer_attr_read_hyperpolling_wireless_dongle_indicator_led_mode, razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode);
 static DEVICE_ATTR(hyperpolling_wireless_dongle_pair,                           0220, NULL, razer_attr_write_hyperpolling_wireless_dongle_pair);
 static DEVICE_ATTR(hyperpolling_wireless_dongle_unpair,                         0220, NULL, razer_attr_write_hyperpolling_wireless_dongle_unpair);
 

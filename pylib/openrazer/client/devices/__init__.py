@@ -71,6 +71,7 @@ class RazerDevice(object):
             'macro_mode_led_effect': self._has_feature('razer.device.led.macromode', 'setMacroEffect'),
             'macro_mode_modifier': self._has_feature('razer.device.macro', 'setModeModifier'),
             'reactive_trigger': self._has_feature('razer.device.misc', 'triggerReactive'),
+            'hyperpolling_indicator_led': self._has_feature('razer.device.misc', ('getHyperPollingLED', 'setHyperPollingLED')),
 
             'poll_rate': self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate')),
             'supported_poll_rates': self._has_feature('razer.device.misc', 'getSupportedPollRates'),
@@ -565,6 +566,37 @@ class RazerDevice(object):
             dbuslist = self._dbus_interfaces['device'].getSupportedPollRates()
             # Repack list from dbus ints to normal ints
             return [int(d) for d in dbuslist]
+        else:
+            raise NotImplementedError()
+
+    def get_hyperpolling_indicator_led(self) -> int:
+        """
+        Get the function of the LED on the hyperpolling wireless dongle
+
+        :return: LED mode (0=Off, 1=On, 2=Battery, 3=Connection, 4=Pairing)
+        :rtype: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('hyperpolling_indicator_led'):
+            return int(self._dbus_interfaces['device'].getHyperPollingLED())
+        else:
+            raise NotImplementedError()
+
+    def set_hyperpolling_indicator_led(self, mode: int) -> None:
+        """
+        Set the function of the LED on the hyperpolling wireless dongle
+
+        :param mode: LED mode (0=Off, 1=On, 2=Battery, 3=Connection, 4=Pairing)
+        :type mode: int
+
+        :raises NotImplementedError: If function is not supported
+        :raises ValueError: If mode is not an integer
+        """
+        if self.has('hyperpolling_indicator_led'):
+            if not isinstance(mode, int):
+                raise ValueError("Mode is not an integer: {0}".format(mode))
+            self._dbus_interfaces['device'].setHyperPollingLED(mode)
         else:
             raise NotImplementedError()
 
