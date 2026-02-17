@@ -122,115 +122,115 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_FIREFLY:
-        device_type = "Razer Firefly\n";
+        device_type = "Razer Firefly";
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
-        device_type = "Razer Firefly V2\n";
+        device_type = "Razer Firefly V2";
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
-        device_type = "Razer Firefly V2 Pro\n";
+        device_type = "Razer Firefly V2 Pro";
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
-        device_type = "Razer Firefly Hyperflux\n";
+        device_type = "Razer Firefly Hyperflux";
         break;
 
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
-        device_type = "Razer Goliathus\n";
+        device_type = "Razer Goliathus";
         break;
 
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
-        device_type = "Razer Goliathus Extended\n";
+        device_type = "Razer Goliathus Extended";
         break;
 
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
-        device_type = "Razer Goliathus Chroma 3XL\n";
+        device_type = "Razer Goliathus Chroma 3XL";
         break;
 
     case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
-        device_type = "Razer Strider Chroma\n";
+        device_type = "Razer Strider Chroma";
         break;
 
     case USB_DEVICE_ID_RAZER_CORE:
-        device_type = "Razer Core\n";
+        device_type = "Razer Core";
         break;
 
     case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
-        device_type = "Razer Core X Chroma\n";
+        device_type = "Razer Core X Chroma";
         break;
 
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
-        device_type = "Razer Laptop Stand Chroma\n";
+        device_type = "Razer Laptop Stand Chroma";
         break;
 
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        device_type = "Razer Chroma Mug Holder\n";
+        device_type = "Razer Chroma Mug Holder";
         break;
 
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
-        device_type = "Razer Chroma HDK\n";
+        device_type = "Razer Chroma HDK";
         break;
 
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
-        device_type = "Razer Base Station Chroma\n";
+        device_type = "Razer Base Station Chroma";
         break;
 
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
-        device_type = "Razer Base Station V2 Chroma\n";
+        device_type = "Razer Base Station V2 Chroma";
         break;
 
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
-        device_type = "Razer Nommo Pro\n";
+        device_type = "Razer Nommo Pro";
         break;
 
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
-        device_type = "Razer Nommo Chroma\n";
+        device_type = "Razer Nommo Chroma";
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
-        device_type = "Razer Kraken Kitty Edition\n";
+        device_type = "Razer Kraken Kitty Edition";
         break;
 
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
-        device_type = "Razer Mouse Bungee V3 Chroma\n";
+        device_type = "Razer Mouse Bungee V3 Chroma";
         break;
 
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-        device_type = "Razer Charging Pad Chroma\n";
+        device_type = "Razer Charging Pad Chroma";
         break;
 
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
-        device_type = "Razer Mouse Dock\n";
+        device_type = "Razer Mouse Dock";
         break;
 
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
-        device_type = "Razer Thunderbolt 4 Dock Chroma\n";
+        device_type = "Razer Thunderbolt 4 Dock Chroma";
         break;
 
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
-        device_type = "Razer Raptor 27\n";
+        device_type = "Razer Raptor 27";
         break;
 
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-        device_type = "Razer Chroma Addressable RGB Controller\n";
+        device_type = "Razer Chroma Addressable RGB Controller";
         break;
 
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
-        device_type = "Razer Laptop Stand Chroma V2\n";
+        device_type = "Razer Laptop Stand Chroma V2";
         break;
 
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
-        device_type = "Razer Tomahawk ATX\n";
+        device_type = "Razer Tomahawk ATX";
         break;
 
     default:
-        device_type = "Unknown Device\n";
+        device_type = "Unknown Device";
         break;
     }
 
-    return sprintf(buf, device_type);
+    return sprintf(buf, "%s\n", device_type);
 }
 
 /**

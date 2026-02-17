@@ -1967,6 +1967,31 @@ class RazerBasiliskV3XHyperSpeed(__RazerDevice):
     DPI_MAX = 18000
 
 
+class RazerDeathAdderV4ProWired(__RazerDevice):
+    """
+    Class for the Razer DeathAdder V4 Pro (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_DeathAdder_V4_Pro_[0-9A-F]+-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00BE
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold']
+
+    DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/h01/hf3/9926511951902/deathadder-v4-pro-black-500x500.png"
+
+    POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
+    DPI_MAX = 45000
+
+
+class RazerDeathAdderV4ProWireless(RazerDeathAdderV4ProWired):
+    """
+    Class for the Razer DeathAdder V4 Pro (Wireless)
+    """
+    USB_PID = 0x00BF
+
+
 class RazerViperV3ProWired(__RazerDevice):
     """
     Class for the Razer Viper V3 Pro (Wired)
@@ -2049,3 +2074,31 @@ class RazerProClickV2VerticalEditionWireless(RazerProClickV2VerticalEditionWired
     Class for the Razer Pro Click V2 Vertical Edition (Wireless)
     """
     USB_PID = 0x00C8
+
+
+class RazerProClickV2Wired(__RazerDevice):
+    """
+    Class for the Razer Pro Click V2 (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Pro_Click_V2-if0(1|2)-event-kbd')
+    USB_VID = 0x1532
+    USB_PID = 0x00D0
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               'get_idle_time', 'set_idle_time',
+               'get_battery', 'is_charging',
+               'get_low_battery_threshold', 'set_low_battery_threshold',
+               'get_brightness', 'set_brightness', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect']
+    DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/ha3/h76/9899953717278/pro-click-v2-black-500x500.png"
+
+    DPI_MAX = 30000
+
+    POLL_RATES = [125, 250, 500, 1000]
+
+
+class RazerProClickV2Wireless(RazerProClickV2Wired):
+    """
+    Class for the Razer Pro Click V2 (Wireless)
+    """
+    USB_PID = 0x00D1
