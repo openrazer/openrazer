@@ -127,6 +127,8 @@ def test_sysfs_consistency(d):
 
     check_sysfs("lighting_backlight_active", "backlight_led_state")
 
+    check_sysfs("hyperpolling_indicator_led", "hyperpolling_wireless_dongle_indicator_led_mode")
+
     for prefix in ["logo", "scroll", "left", "right", "charging", "fast_charging", "fully_charged"]:
         check_sysfs(f"lighting_{prefix}_brightness", f"{prefix}_led_brightness")
         check_sysfs(f"lighting_{prefix}_active", f"{prefix}_led_state")
