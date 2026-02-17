@@ -1599,6 +1599,40 @@ class RazerCobraProWireless(RazerCobraProWired):
     USB_PID = 0x00B0
 
 
+class RazerCobraHyperSpeedWired(__RazerDevice):
+    """
+    Class for the Razer Cobra HyperSpeed (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-1532_Razer_Cobra_HyperSpeed_000000000000-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00DA
+
+    METHODS = ['get_device_type_mouse',
+               'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate',
+               'get_brightness', 'set_brightness',
+               'get_logo_brightness', 'set_logo_brightness',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               # All LEDs (partial support)
+               'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
+               # Logo (partial support)
+               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none',
+               # Battery
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/15141/15141-1-en-v1.png"
+    DPI_MAX = 26000
+
+
+class RazerCobraHyperSpeedWireless(RazerCobraHyperSpeedWired):
+    """
+    Class for the Razer Cobra HyperSpeed (Wireless)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Cobra_HyperSpeed-event-if0(1|2)-event-kbd')
+    USB_PID = 0x00DB
+
+
 class RazerDeathAdderV3(__RazerDevice):
     """
     Class for the Razer DeathAdder V3
