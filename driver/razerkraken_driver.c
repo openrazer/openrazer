@@ -204,15 +204,15 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC:
     case USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC_ALT:
-        device_type = "Razer Kraken 7.1\n";
+        device_type = "Razer Kraken 7.1";
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN:
-        device_type = "Razer Kraken 7.1 Chroma\n"; // Rainie
+        device_type = "Razer Kraken 7.1 Chroma"; // Rainie
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-        device_type = "Razer Kraken 7.1 V2\n"; // Kylie
+        device_type = "Razer Kraken 7.1 V2"; // Kylie
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_TOURNAMENT:
@@ -220,18 +220,18 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
-        device_type = "Razer Kraken Ultimate\n";
+        device_type = "Razer Kraken Ultimate";
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
-        device_type = "Razer Kraken Kitty V2\n";
+        device_type = "Razer Kraken Kitty V2";
         break;
 
     default:
-        device_type = "Unknown Device\n";
+        device_type = "Unknown Device";
     }
 
-    return sprintf(buf, device_type);
+    return sprintf(buf, "%s\n", device_type);
 }
 
 /**
@@ -381,7 +381,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
 
     // ON/Static
     effect_byte.bits.on_off_static = 1;
-    effect_report.arguments[0] = 1; //effect_byte.value;
+    effect_report.arguments[0] = effect_byte.value;
 
     // Lock sending of the 2 commands
     mutex_lock(&device->lock);
@@ -555,9 +555,12 @@ static ssize_t razer_attr_read_matrix_effect_breath(struct device *dev, struct d
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN:
-    default:
         return get_rgb_from_addr(dev, device->breathing_address[0], 0x04, buf);
         break;
+
+    default:
+        printk(KERN_WARNING "razerkraken: Unknown device\n");
+        return -EINVAL;
     }
 }
 

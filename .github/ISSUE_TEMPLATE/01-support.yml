@@ -56,12 +56,14 @@ body:
       label: Symptoms
       description: "Do any of these apply?"
       options:
-        - label: "Uninstalling OpenRazer fixes the problem"
-        - label: "Re-plugging the device fixes the problem"
+        - label: "Uninstalling OpenRazer fixes the problem."
+        - label: "Re-plugging the device fixes the problem."
         - label: "It worked before a system/kernel update."
         - label: "Only a problem if the daemon is running."
         - label: "Only a problem from power up or a reboot."
-        - label: "I'm dual booting with Windows."
+        - label: "Dual boot with Windows (Synapse not installed)."
+        - label: "Dual boot with Windows (Synapse 3 installed)."
+        - label: "Dual boot with Windows (Synapse 4 installed)."
         - label: "Intermittent or erratic problem."
         - label: "My device is missing a feature."
 

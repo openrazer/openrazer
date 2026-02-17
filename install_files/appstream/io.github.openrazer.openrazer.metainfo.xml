@@ -115,15 +115,23 @@
     <modalias>usb:v1532p00B7d*</modalias>
     <modalias>usb:v1532p00B8d*</modalias>
     <modalias>usb:v1532p00B9d*</modalias>
+    <modalias>usb:v1532p00BEd*</modalias>
+    <modalias>usb:v1532p00BFd*</modalias>
     <modalias>usb:v1532p00C0d*</modalias>
     <modalias>usb:v1532p00C1d*</modalias>
     <modalias>usb:v1532p00C2d*</modalias>
     <modalias>usb:v1532p00C3d*</modalias>
     <modalias>usb:v1532p00C4d*</modalias>
     <modalias>usb:v1532p00C5d*</modalias>
+    <modalias>usb:v1532p00C7d*</modalias>
+    <modalias>usb:v1532p00C8d*</modalias>
     <modalias>usb:v1532p00CBd*</modalias>
     <modalias>usb:v1532p00CCd*</modalias>
     <modalias>usb:v1532p00CDd*</modalias>
+    <modalias>usb:v1532p00D0d*</modalias>
+    <modalias>usb:v1532p00D1d*</modalias>
+    <modalias>usb:v1532p00D6d*</modalias>
+    <modalias>usb:v1532p00D7d*</modalias>
     <modalias>usb:v1532p010Dd*</modalias>
     <modalias>usb:v1532p010Ed*</modalias>
     <modalias>usb:v1532p010Fd*</modalias>
@@ -230,8 +238,16 @@
     <modalias>usb:v1532p02A3d*</modalias>
     <modalias>usb:v1532p02A5d*</modalias>
     <modalias>usb:v1532p02A6d*</modalias>
+    <modalias>usb:v1532p02A7d*</modalias>
     <modalias>usb:v1532p02B6d*</modalias>
     <modalias>usb:v1532p02B8d*</modalias>
+    <modalias>usb:v1532p02B9d*</modalias>
+    <modalias>usb:v1532p02BAd*</modalias>
+    <modalias>usb:v1532p02C5d*</modalias>
+    <modalias>usb:v1532p02C6d*</modalias>
+    <modalias>usb:v1532p02C7d*</modalias>
+    <modalias>usb:v1532p02D5d*</modalias>
+    <modalias>usb:v1532p02D7d*</modalias>
     <modalias>usb:v1532p0501d*</modalias>
     <modalias>usb:v1532p0504d*</modalias>
     <modalias>usb:v1532p0506d*</modalias>
@@ -248,11 +264,13 @@
     <modalias>usb:v1532p0C04d*</modalias>
     <modalias>usb:v1532p0C05d*</modalias>
     <modalias>usb:v1532p0C06d*</modalias>
+    <modalias>usb:v1532p0C08d*</modalias>
     <modalias>usb:v1532p0F07d*</modalias>
     <modalias>usb:v1532p0F08d*</modalias>
     <modalias>usb:v1532p0F09d*</modalias>
     <modalias>usb:v1532p0F0Dd*</modalias>
     <modalias>usb:v1532p0F12d*</modalias>
+    <modalias>usb:v1532p0F17d*</modalias>
     <modalias>usb:v1532p0F19d*</modalias>
     <modalias>usb:v1532p0F1Ad*</modalias>
     <modalias>usb:v1532p0F1Dd*</modalias>
