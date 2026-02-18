@@ -1,28 +1,27 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-import dbus as _dbus
-from openrazer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFactory as __BaseDeviceFactory
-from openrazer.client.devices.mousemat import RazerMousemat as __RazerMousemat
-from openrazer.client.devices.keyboard import RazerKeyboardFactory as __RazerKeyboardFactory
-from openrazer.client.devices.mice import RazerMouse as __RazerMouse
+import dbus
+from openrazer.client.devices import RazerDevice, BaseDeviceFactory
+from openrazer.client.devices.mousemat import RazerMousemat
+from openrazer.client.devices.keyboard import RazerKeyboard
+from openrazer.client.devices.mice import RazerMouse
 
 
 DEVICE_MAP = {
-    'mousemat': __RazerMousemat,
-    'keyboard': __RazerKeyboardFactory,
-    'mouse': __RazerMouse,
-    'keypad': __RazerKeyboardFactory,
-    'default': __RazerDevice
+    'mousemat': RazerMousemat,
+    'keyboard': RazerKeyboard,
+    'mouse': RazerMouse,
+    'keypad': RazerKeyboard,
 }
 
 
-class RazerDeviceFactory(__BaseDeviceFactory):
+class RazerDeviceFactory(BaseDeviceFactory):
     """
     Simple factory to return an object for a given device
 
     """
     @staticmethod
-    def get_device(serial, vid_pid=None, daemon_dbus=None):
+    def get_device(serial: str) -> RazerDevice:
         """
         Factory for turning a serial into a class
 
@@ -35,35 +34,15 @@ class RazerDeviceFactory(__BaseDeviceFactory):
         :param serial: Device serial
         :type serial: str
 
-        :param vid_pid: Device VID, PID
-        :type vid_pid: list of int
-
-        :param daemon_dbus: Daemon DBus object
-        :type daemon_dbus: object or None
-
         :return: RazerDevice object (or subclass)
         :rtype: RazerDevice
         """
-        if daemon_dbus is None:
-            session_bus = _dbus.SessionBus()
-            daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
-
-        device_dbus = _dbus.Interface(daemon_dbus, "razer.device.misc")
+        session_bus = dbus.SessionBus()
+        daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
+        device_dbus = dbus.Interface(daemon_dbus, "razer.device.misc")
 
         device_type = device_dbus.getDeviceType()
-        device_vid_pid = device_dbus.getVidPid()
 
-        if device_type in DEVICE_MAP:
-            # Have device mapping
-            device_class = DEVICE_MAP[device_type]
-            if hasattr(device_class, 'get_device'):
-                # DeviceFactory
-                device = device_class.get_device(serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
-            else:
-                # DeviceClass
-                device = device_class(serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
-        else:
-            # No mapping, default to RazerDevice
-            device = DEVICE_MAP['default'](serial, vid_pid=device_vid_pid, daemon_dbus=daemon_dbus)
+        device_class = DEVICE_MAP.get(device_type, RazerDevice)
 
-        return device
+        return device_class(serial)
