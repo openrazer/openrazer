@@ -215,7 +215,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Kraken 7.1 V2"; // Kylie
         break;
 
-    case USB_DEVICE_ID_RAZER_KRAKEN_TOURNAMENT:
+    case USB_DEVICE_ID_RAZER_KRAKEN_TE:
         device_type = "Razer Kraken Tournament Edition\n";
         break;
 
@@ -340,7 +340,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN:
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-    case USB_DEVICE_ID_RAZER_KRAKEN_TOURNAMENT:
+    case USB_DEVICE_ID_RAZER_KRAKEN_TE:
     case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
         razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 0);
@@ -538,7 +538,7 @@ static ssize_t razer_attr_read_matrix_effect_breath(struct device *dev, struct d
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-    case USB_DEVICE_ID_RAZER_KRAKEN_TOURNAMENT:
+    case USB_DEVICE_ID_RAZER_KRAKEN_TE:
     case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
         switch(num_colours) {
@@ -710,7 +710,7 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
 
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-    case USB_DEVICE_ID_RAZER_KRAKEN_TOURNAMENT:
+    case USB_DEVICE_ID_RAZER_KRAKEN_TE:
     case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
         dev->led_mode_address = KYLIE_SET_LED_ADDRESS;
@@ -769,7 +769,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             break;
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-        case USB_DEVICE_ID_RAZER_KRAKEN_TOURNAMENT:
+        case USB_DEVICE_ID_RAZER_KRAKEN_TE:
         case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
@@ -831,7 +831,7 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
 
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-        case USB_DEVICE_ID_RAZER_KRAKEN_TOURNAMENT:
+        case USB_DEVICE_ID_RAZER_KRAKEN_TE:
         case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
@@ -873,7 +873,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_CLASSIC_ALT) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_V2) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_TOURNAMENT) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_TE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2) },
     { 0 }

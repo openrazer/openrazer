@@ -120,7 +120,7 @@ class RazerKrakenTournament(__RazerDevice):
     """
     Class for the Razer Kraken Tournament Edition
     """
-    EVENT_FILE_REGEX = re.compile(r'.*Razer_Kraken_Tournament+-event-if03')
+    EVENT_FILE_REGEX = re.compile(r'.*RAZER_KRAKEN_TE+-event-if03')
 
     USB_VID = 0x1532
     USB_PID = 0x0520
