@@ -116,7 +116,7 @@ class RazerKraken71V2(__RazerDevice):
             _dbus_chroma.set_breath_triple_effect(self, *args)
 
 
-class RazerKrakenTournament(__RazerDevice):
+class RazerKrakenTournamentEdition(__RazerDevice):
     """
     Class for the Razer Kraken Tournament Edition
     """
