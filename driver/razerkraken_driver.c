@@ -216,7 +216,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_TE:
-        device_type = "Razer Kraken Tournament Edition\n";
+        device_type = "Razer Kraken Tournament Edition";
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
