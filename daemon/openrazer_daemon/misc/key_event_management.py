@@ -267,6 +267,8 @@ class KeyboardKeyManager(object):
         self._should_grab_event_files = should_grab_event_files
         self._event_files_locked = False
 
+        self._hypershift = False
+
         if self._should_grab_event_files:
             self.grab_event_files(True)
 
@@ -386,7 +388,10 @@ class KeyboardKeyManager(object):
 
             # Key release
             if key_press == 'release':
-                if self._recording_macro:
+                if key_name == 'FN':
+                    self._hypershift = False
+                    self.grab_event_files(False)
+                elif self._recording_macro:
                     # Skip as don't care about releasing macro bind key
                     if key_name not in (self._current_macro_bind_key, 'MACROMODE'):
                         # Record key release events
@@ -395,7 +400,11 @@ class KeyboardKeyManager(object):
             else:
                 # Key press
 
-                if self._temp_key_store_active:
+                if key_name == 'FN':
+                    self._hypershift = True
+                    self.grab_event_files(True)
+                    # Don't process hypershift further (it's a modifier, not an action key)
+                elif self._temp_key_store_active:
                     colour = random_colour_picker(self._last_colour_choice, COLOUR_CHOICES)
                     self._last_colour_choice = colour
                     self._temp_key_store.append((now + self._temp_expire_time, self.KEY_MAP[key_name], colour))
@@ -463,8 +472,13 @@ class KeyboardKeyManager(object):
                 elif self._recording_macro:
 
                     if self._current_macro_bind_key is None:
-                        # Restrict macro bind keys to M1-M5
-                        if key_name not in ('M1', 'M2', 'M3', 'M4', 'M5', 'M6'):
+                        if self._hypershift:
+                            # Hypershift macros can bind to any key
+                            self._current_macro_bind_key = 'FN+' + key_name
+                            self._logger.info("Recording macro for %s", self._current_macro_bind_key)
+                            self._parent.setMacroEffect(0x00)
+                        elif key_name not in ('M1', 'M2', 'M3', 'M4', 'M5', 'M6'):
+                            # Without hypershift, restrict to M1-M6
                             self._logger.warning("Macros are only for M1-M6 for now.")
                             self._recording_macro = False
                             self._parent.setMacroMode(False)
@@ -481,8 +495,12 @@ class KeyboardKeyManager(object):
                         self._current_macro_combo.append((event_time, key_name, 'DOWN'))
                 # Not recording anything so if a macro key is pressed then run
                 else:
-                    # If key has a macro, play it
-                    if key_name in self._macros:
+                    # Check for hypershift-modified macro first, then plain macro
+                    if self._hypershift:
+                        hs_key = 'FN+' + key_name
+                        if hs_key in self._macros:
+                            self.play_macro(hs_key)
+                    elif key_name in self._macros:
                         self.play_macro(key_name)
 
         except KeyError as err:

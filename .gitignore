@@ -1,4 +1,6 @@
 pylib/docs/_build
+pylib/build
+pylib/openrazer.egg-info
 
 # pytest caches
 .pytest_cache/

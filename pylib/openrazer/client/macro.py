@@ -40,7 +40,7 @@ class RazerMacro(object):
 
         return macro_key_mapping
 
-    def add_macro(self, bind_key: str, macro_object_sequence: list):
+    def add_macro(self, bind_key: str, macro_object_sequence: list, hypershift: bool = False):
         """
         Add macro to specified bind key
 
@@ -49,7 +49,13 @@ class RazerMacro(object):
 
         :param macro_object_sequence: List of macro objects
         :type macro_object_sequence: list or tuple or __daemon_macro.MacroObject
+
+        :param hypershift: If True, prefix bind_key with 'FN+' for hypershift-layer macros
+        :type hypershift: bool
         """
+        if hypershift:
+            bind_key = 'FN+' + bind_key
+
         if isinstance(macro_object_sequence, _daemon_macro.MacroObject):
             macro_object_sequence = [macro_object_sequence]
         if not isinstance(macro_object_sequence, (tuple, list)):
