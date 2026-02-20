@@ -193,3 +193,30 @@ class RazerKrakenKittyV2(__RazerDevice):
                'set_custom_kraken']
 
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/hcc/h6b/9631977570334/kraken-kitty-v2-quartz-500x500.png"
+
+
+class RazerKrakenKittyV2Pro(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Kraken Kitty V2 Pro
+
+    This device uses a different USB protocol from other Kraken devices.
+    It has 4 RGB zones (LeftEar, RightEar, LogoLeft, LogoRight) controlled
+    as a 1x4 matrix.
+
+    Spectrum is the hardware default effect. Breathing effects require
+    software rendering via pylib's AdvancedFX using set_key_row.
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Kraken_Kitty_V2_Pro_00000000-event-if03')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0554
+
+    METHODS = ['get_device_type_headset',
+               'set_none_effect', 'set_spectrum_effect', 'set_static_effect',
+               'set_custom_effect', 'set_key_row',
+               'set_brightness', 'get_brightness']
+
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 4]  # 1 row, 4 columns (zones: LeftEar, RightEar, LogoLeft, LogoRight)
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/6313/6313-1-en-v1.png"
