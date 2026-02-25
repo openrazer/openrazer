@@ -5778,6 +5778,8 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
         /* Detect wheel tilt edges */
         if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
             int i;
@@ -5913,6 +5915,8 @@ static int razer_input_configured(struct hid_device *hdev,
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_NAGA_2014:
         case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
+        case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
+        case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
             input_set_capability(hidinput->input, EV_REL, REL_HWHEEL);
             input_set_capability(hidinput->input, EV_REL, REL_HWHEEL_HI_RES);
             input_set_capability(hidinput->input, EV_KEY, BTN_FORWARD);
@@ -7019,6 +7023,20 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 
         case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
         case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+            break;
+
         case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
         case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
@@ -7033,6 +7051,9 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_hwheel);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat_delay);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat);
             break;
         }
 
@@ -8094,6 +8115,20 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 
         case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
         case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);
+            device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
+            device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+            break;
+
         case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
         case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
@@ -8108,6 +8143,9 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
             device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_hwheel);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_repeat_delay);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_repeat);
             break;
         }
 
