@@ -5373,6 +5373,37 @@ static ssize_t razer_attr_write_backlight_matrix_effect_none(struct device *dev,
 }
 
 /**
+ * Read device file "hyperpolling_wireless_dongle_indicator_led_mode"
+ */
+static ssize_t razer_attr_read_hyperpolling_wireless_dongle_indicator_led_mode(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_hyperpolling_wireless_dongle_indicator_led_mode();
+
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
+        request.transaction_id.id = 0x1F;
+        break;
+
+    case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
+        request.transaction_id.id = 0xFF;
+        break;
+
+    default:
+        printk(KERN_WARNING "razermouse: hyperpolling_wireless_dongle_indicator_led_mode read not supported for this model\n");
+        return -EINVAL;
+    }
+
+    razer_send_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", response.arguments[0]);
+}
+
+/**
  * Write device file "hyperpolling_wireless_dongle_indicator_led_mode"
  */
 static ssize_t razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -5396,6 +5427,77 @@ static ssize_t razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode(
 
     default:
         printk(KERN_WARNING "razermouse: hyperpolling_wireless_dongle_indicator_led_mode not supported for this model\n");
+        return -EINVAL;
+    }
+
+    razer_send_payload(device, &request, &response);
+
+    return count;
+}
+
+/**
+ * Read device file "hyperpolling_wireless_dongle_multi_indicator_led_modes"
+ *
+ * Returns the LED modes for the wireless dongle indicator LEDs as 3 space-separated values
+ */
+static ssize_t razer_attr_read_hyperpolling_wireless_dongle_multi_indicator_led_modes(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_hyperpolling_wireless_dongle_multi_indicator_led_modes();
+
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
+        request.transaction_id.id = 0x1F;
+        break;
+
+    default:
+        printk(KERN_WARNING "razermouse: hyperpolling_wireless_dongle_multi_indicator_led_modes read not supported for this model\n");
+        return -EINVAL;
+    }
+
+    razer_send_payload(device, &request, &response);
+
+    return sprintf(buf, "%d %d %d\n", response.arguments[0], response.arguments[1], response.arguments[2]);
+}
+
+/**
+ * Write device file "hyperpolling_wireless_dongle_multi_indicator_led_modes"
+ *
+ * Sets the LED modes for the wireless dongle indicator LEDs by writing 3 bytes
+ */
+static ssize_t razer_attr_write_hyperpolling_wireless_dongle_multi_indicator_led_modes(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    int i;
+
+    if (count != 3) {
+        printk(KERN_WARNING "razermouse: hyperpolling_wireless_dongle_multi_indicator_led_modes requires 3 bytes (mode1, mode2, mode3)\n");
+        return -EINVAL;
+    }
+
+    for (i = 0; i < 3; i++) {
+        if (buf[i] > 0x04) {
+            printk(KERN_WARNING "razermouse: hyperpolling_wireless_dongle_multi_indicator_led_modes mode %d out of range\n", i + 1);
+            return -EINVAL;
+        }
+    }
+
+    request = razer_chroma_misc_set_hyperpolling_wireless_dongle_multi_indicator_led_modes(buf[0], buf[1], buf[2]);
+
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
+        request.transaction_id.id = 0x1F;
+        break;
+
+    default:
+        printk(KERN_WARNING "razermouse: hyperpolling_wireless_dongle_multi_indicator_led_modes not supported for this model\n");
         return -EINVAL;
     }
 
@@ -5544,9 +5646,11 @@ static DEVICE_ATTR(backlight_matrix_effect_none,        0220, NULL,             
 static DEVICE_ATTR(backlight_matrix_effect_on,          0220, NULL,                         razer_attr_write_backlight_matrix_effect_on);
 
 // For HyperPolling Wireless Dongle
-static DEVICE_ATTR(hyperpolling_wireless_dongle_indicator_led_mode,             0220, NULL, razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode);
+static DEVICE_ATTR(hyperpolling_wireless_dongle_indicator_led_mode,             0660, razer_attr_read_hyperpolling_wireless_dongle_indicator_led_mode, razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode);
 static DEVICE_ATTR(hyperpolling_wireless_dongle_pair,                           0220, NULL, razer_attr_write_hyperpolling_wireless_dongle_pair);
 static DEVICE_ATTR(hyperpolling_wireless_dongle_unpair,                         0220, NULL, razer_attr_write_hyperpolling_wireless_dongle_unpair);
+static DEVICE_ATTR(hyperpolling_wireless_dongle_multi_indicator_led_modes,      0660, razer_attr_read_hyperpolling_wireless_dongle_multi_indicator_led_modes, razer_attr_write_hyperpolling_wireless_dongle_multi_indicator_led_modes);
+
 
 #define REP4_DPI_UP  0x20
 #define REP4_DPI_DN  0x21
@@ -6891,10 +6995,21 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRED:
         case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRELESS:
         case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
         case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+            break;
+
+        case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_hyperpolling_wireless_dongle_multi_indicator_led_modes);
+            fallthrough;
+        case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
@@ -7966,10 +8081,21 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRED:
         case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRELESS:
         case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
         case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);
+            device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
+            device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
+            break;
+
+        case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED:
+            device_remove_file(&hdev->dev, &dev_attr_hyperpolling_wireless_dongle_multi_indicator_led_modes);
+            fallthrough;
+        case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
