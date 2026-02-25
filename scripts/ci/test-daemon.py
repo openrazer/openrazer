@@ -137,6 +137,11 @@ def test_sysfs_consistency(d):
 
         check_any_sysfs([f"lighting_{prefix}_breath_single", f"lighting_{prefix}_breath_mono"], [f"{prefix}_matrix_effect_breath"])
 
+    for channel in range(1, 7):
+        check_sysfs("lighting_channels", f"channel{channel}_led_brightness")
+        check_sysfs("lighting_channels", f"channel{channel}_size")
+    check_sysfs("lighting_channels", "reset_channels")
+
 
 def test_ripple_capable(d):
     # Check that the device has a matrix for a software ripple effect
