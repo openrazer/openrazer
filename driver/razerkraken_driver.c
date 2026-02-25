@@ -24,6 +24,11 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
 
+// Forward declarations for V2 Pro specific handlers
+static ssize_t razer_attr_write_matrix_effect_none_v2pro(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+static ssize_t razer_attr_write_matrix_effect_static_v2pro(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+static ssize_t razer_attr_write_matrix_effect_custom_v2pro(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+
 /**
  * Print report to syslog
  */
@@ -78,6 +83,69 @@ static int razer_kraken_send_control_msg(struct usb_device *usb_dev,struct razer
         printk(KERN_WARNING "razer driver: Device data transfer failed.\n");
 
     return ((len < 0) ? len : ((len != size) ? -EIO : 0));
+}
+
+/**
+ * Send control message for Kraken Kitty V2 Pro
+ *
+ * V2 Pro uses a different protocol with 15-byte reports:
+ * - Report ID: 0x40
+ * - USB Value: 0x0240
+ * - USB Index: 0x0003
+ */
+static int razer_kraken_v2pro_send_control_msg(struct usb_device *usb_dev, struct razer_kraken_v2pro_report *report)
+{
+    uint request = HID_REQ_SET_REPORT; // 0x09
+    uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
+    uint value = KRAKEN_V2_PRO_USB_VALUE;     // 0x0240
+    uint index = KRAKEN_V2_PRO_USB_INTERFACE; // 0x0003
+    uint size = KRAKEN_V2_PRO_REPORT_LEN;     // 15
+    char *buf;
+    int len;
+
+    buf = kmemdup(report, size, GFP_KERNEL);
+    if (buf == NULL)
+        return -ENOMEM;
+
+    // Send usb control message
+    len = usb_control_msg(usb_dev, usb_sndctrlpipe(usb_dev, 0),
+                          request,      // Request      U8
+                          request_type, // RequestType  U8
+                          value,        // Value        U16
+                          index,        // Index        U16
+                          buf,          // Data         void* data
+                          size,         // Length       U16
+                          USB_CTRL_SET_TIMEOUT);
+
+    kfree(buf);
+
+    if (len < 0) {
+        printk(KERN_ERR "razer driver: V2 Pro control message failed with error %d.\n", len);
+        return len;
+    }
+
+    if (len != size) {
+        printk(KERN_WARNING "razer driver: V2 Pro short data transfer (len=%d, expected=%u).\n",
+               len, size);
+        return -EIO;
+    }
+
+    return 0;
+}
+
+/**
+ * Get V2 Pro report initialized with command
+ */
+static struct razer_kraken_v2pro_report get_kraken_v2pro_report(unsigned char command, unsigned char subcommand)
+{
+    struct razer_kraken_v2pro_report report;
+    memset(&report, 0, sizeof(struct razer_kraken_v2pro_report));
+
+    report.report_id = KRAKEN_V2_PRO_REPORT_ID; // 0x40
+    report.command = command;
+    report.subcommand = subcommand;
+
+    return report;
 }
 
 /**
@@ -223,6 +291,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Kraken Kitty V2";
         break;
 
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2_PRO:
+        device_type = "Razer Kraken Kitty V2 Pro\n";
+        break;
+
     default:
         device_type = "Unknown Device";
     }
@@ -258,21 +330,51 @@ static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute 
 static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-    struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
-    union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
-    // Spectrum Cycling | ON
-    effect_byte.bits.on_off_static = 1;
-    effect_byte.bits.spectrum_cycling = 1;
+    // V2 Pro: set hardware spectrum cycling effect
+    if (device->is_v2_pro) {
+        struct razer_kraken_v2pro_report report;
 
-    report.arguments[0] = effect_byte.value;
+        mutex_lock(&device->lock);
 
-    // Lock access to sending USB as adhering to the razer len*15ms delay
-    mutex_lock(&device->lock);
-    razer_kraken_send_control_msg(device->usb_dev, &report, 0);
-    mutex_unlock(&device->lock);
+        // Clear "none" effect flag, set current effect
+        device->v2pro_effect_none = 0;
+        device->v2pro_current_effect = 3; // Effect: spectrum
 
-    return count;
+        // Set spectrum effect for all zones: 40 01 00 0f 03
+        report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_MODE, 0x00);
+        report.data[0] = KRAKEN_V2_PRO_ZONE_MASK_ALL;   // 0x0f = all 4 zones
+        report.data[1] = KRAKEN_V2_PRO_EFFECT_SPECTRUM; // 0x03 = spectrum cycling
+        razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
+
+        // Restore cached brightness
+        report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_BRIGHTNESS, 0x01);
+        report.data[0] = KRAKEN_V2_PRO_ZONE_MASK_ALL;
+        report.data[1] = device->v2pro_brightness;
+        razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
+
+        mutex_unlock(&device->lock);
+
+        return count;
+    }
+
+    {
+        struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
+        union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
+
+        // Spectrum Cycling | ON
+        effect_byte.bits.on_off_static = 1;
+        effect_byte.bits.spectrum_cycling = 1;
+
+        report.arguments[0] = effect_byte.value;
+
+        // Lock access to sending USB as adhering to the razer len*15ms delay
+        mutex_lock(&device->lock);
+        razer_kraken_send_control_msg(device->usb_dev, &report, 0);
+        mutex_unlock(&device->lock);
+
+        return count;
+    }
 }
 
 /**
@@ -283,19 +385,27 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
 static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-    struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
-    union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
-    // Spectrum Cycling | OFF
-    effect_byte.bits.on_off_static = 0;
-    effect_byte.bits.spectrum_cycling = 0;
+    // V2 Pro uses different protocol
+    if (device->is_v2_pro) {
+        return razer_attr_write_matrix_effect_none_v2pro(dev, attr, buf, count);
+    }
 
-    report.arguments[0] = effect_byte.value;
+    {
+        struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
+        union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
-    // Lock access to sending USB as adhering to the razer len*15ms delay
-    mutex_lock(&device->lock);
-    razer_kraken_send_control_msg(device->usb_dev, &report, 0);
-    mutex_unlock(&device->lock);
+        // Spectrum Cycling | OFF
+        effect_byte.bits.on_off_static = 0;
+        effect_byte.bits.spectrum_cycling = 0;
+
+        report.arguments[0] = effect_byte.value;
+
+        // Lock access to sending USB as adhering to the razer len*15ms delay
+        mutex_lock(&device->lock);
+        razer_kraken_send_control_msg(device->usb_dev, &report, 0);
+        mutex_unlock(&device->lock);
+    }
 
     return count;
 }
@@ -308,43 +418,51 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
 static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-    struct razer_kraken_request_report rgb_report = get_kraken_request_report(0x04, 0x40, count, device->breathing_address[0]);
-    struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
-    union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
-    if (count != 3 && count != 4) {
-        printk(KERN_WARNING "razerkraken: Static mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
-        return -EINVAL;
+    // V2 Pro uses different protocol
+    if (device->is_v2_pro) {
+        return razer_attr_write_matrix_effect_static_v2pro(dev, attr, buf, count);
     }
 
-    rgb_report.arguments[0] = buf[0];
-    rgb_report.arguments[1] = buf[1];
-    rgb_report.arguments[2] = buf[2];
+    {
+        struct razer_kraken_request_report rgb_report = get_kraken_request_report(0x04, 0x40, count, device->breathing_address[0]);
+        struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
+        union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
-    if(count == 4) {
-        rgb_report.arguments[3] = buf[3];
+        if (count != 3 && count != 4) {
+            printk(KERN_WARNING "razerkraken: Static mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
+            return -EINVAL;
+        }
+
+        rgb_report.arguments[0] = buf[0];
+        rgb_report.arguments[1] = buf[1];
+        rgb_report.arguments[2] = buf[2];
+
+        if(count == 4) {
+            rgb_report.arguments[3] = buf[3];
+        }
+
+        // ON/Static
+        effect_byte.bits.on_off_static = 1;
+        effect_report.arguments[0] = effect_byte.value;
+
+        // Lock sending of the 2 commands
+        mutex_lock(&device->lock);
+
+        // Basically Kraken Classic doesn't take RGB arguments so only do it for the KrakenV1,V2,Ultimate
+        switch(device->usb_pid) {
+        case USB_DEVICE_ID_RAZER_KRAKEN:
+        case USB_DEVICE_ID_RAZER_KRAKEN_V2:
+        case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
+            razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 0);
+            break;
+        }
+
+        // Send Set static command
+        razer_kraken_send_control_msg(device->usb_dev, &effect_report, 0);
+        mutex_unlock(&device->lock);
     }
-
-    // ON/Static
-    effect_byte.bits.on_off_static = 1;
-    effect_report.arguments[0] = effect_byte.value;
-
-    // Lock sending of the 2 commands
-    mutex_lock(&device->lock);
-
-    // Basically Kraken Classic doesn't take RGB arguments so only do it for the KrakenV1,V2,Ultimate
-    switch(device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_KRAKEN:
-    case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-    case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
-    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
-        razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 0);
-        break;
-    }
-
-    // Send Set static command
-    razer_kraken_send_control_msg(device->usb_dev, &effect_report, 0);
-    mutex_unlock(&device->lock);
 
     return count;
 }
@@ -357,33 +475,41 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
 static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-    struct razer_kraken_request_report rgb_report = get_kraken_request_report(0x04, 0x40, count, device->custom_address);
-    struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
-    union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
-    if(count != 3 && count != 4) {
-        printk(KERN_WARNING "razerkraken: Custom mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
-        return -EINVAL;
+    // V2 Pro uses different protocol
+    if (device->is_v2_pro) {
+        return razer_attr_write_matrix_effect_custom_v2pro(dev, attr, buf, count);
     }
 
-    rgb_report.arguments[0] = buf[0];
-    rgb_report.arguments[1] = buf[1];
-    rgb_report.arguments[2] = buf[2];
+    {
+        struct razer_kraken_request_report rgb_report = get_kraken_request_report(0x04, 0x40, count, device->custom_address);
+        struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
+        union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
-    if(count == 4) {
-        rgb_report.arguments[3] = buf[3];
+        if(count != 3 && count != 4) {
+            printk(KERN_WARNING "razerkraken: Custom mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
+            return -EINVAL;
+        }
+
+        rgb_report.arguments[0] = buf[0];
+        rgb_report.arguments[1] = buf[1];
+        rgb_report.arguments[2] = buf[2];
+
+        if(count == 4) {
+            rgb_report.arguments[3] = buf[3];
+        }
+
+        // ON/Static
+        effect_byte.bits.on_off_static = 1;
+        effect_report.arguments[0] = effect_byte.value;
+
+        // Lock sending of the 2 commands
+        mutex_lock(&device->lock);
+        razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 1);
+
+        razer_kraken_send_control_msg(device->usb_dev, &effect_report, 1);
+        mutex_unlock(&device->lock);
     }
-
-    // ON/Static
-    effect_byte.bits.on_off_static = 1;
-    effect_report.arguments[0] = effect_byte.value;
-
-    // Lock sending of the 2 commands
-    mutex_lock(&device->lock);
-    razer_kraken_send_control_msg(device->usb_dev, &rgb_report, 1);
-
-    razer_kraken_send_control_msg(device->usb_dev, &effect_report, 1);
-    mutex_unlock(&device->lock);
 
     return count;
 }
@@ -640,9 +766,17 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
  */
 static ssize_t razer_attr_read_matrix_current_effect(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    unsigned char current_effect = get_current_effect(dev);
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
 
-    return sprintf(buf, "%02x\n", current_effect);
+    // V2 Pro tracks effect state in driver, not in device memory
+    if (device->is_v2_pro) {
+        return sprintf(buf, "%02x\n", device->v2pro_current_effect);
+    }
+
+    {
+        unsigned char current_effect = get_current_effect(dev);
+        return sprintf(buf, "%02x\n", current_effect);
+    }
 }
 
 /**
@@ -664,6 +798,219 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     buf[1] = 0x00;
 
     return 2;
+}
+
+/*
+ * Kraken Kitty V2 Pro specific sysfs handlers
+ * These use the 15-byte HID protocol instead of memory-mapped addresses
+ */
+
+/**
+ * Write device file "matrix_brightness" for V2 Pro
+ * Accepts ASCII string: brightness 0-255
+ * Sends: 40 02 01 0f XX 00...
+ *
+ * If "none" effect is active, brightness is cached but not sent to device
+ * to prevent LEDs from turning on when brightness slider is moved.
+ */
+static ssize_t razer_attr_write_matrix_brightness_v2pro(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    struct razer_kraken_v2pro_report report;
+    unsigned char brightness;
+    int ret;
+
+    ret = kstrtou8(buf, 10, &brightness);
+    if (ret)
+        return ret;
+
+    mutex_lock(&device->lock);
+
+    // Always cache the brightness value
+    device->v2pro_brightness = brightness;
+
+    // If "none" effect is active, don't send brightness to device
+    // This prevents LEDs from turning on when adjusting brightness in "none" mode
+    if (device->v2pro_effect_none) {
+        mutex_unlock(&device->lock);
+        return count;
+    }
+
+    report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_BRIGHTNESS, 0x01);
+    report.data[0] = KRAKEN_V2_PRO_ZONE_MASK_ALL;  // Subcommand parameter
+    report.data[1] = brightness;
+
+    razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Read device file "matrix_brightness" for V2 Pro
+ * Returns cached brightness value (0-255)
+ */
+static ssize_t razer_attr_read_matrix_brightness_v2pro(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    unsigned char brightness;
+
+    mutex_lock(&device->lock);
+    brightness = device->v2pro_brightness;
+    mutex_unlock(&device->lock);
+
+    // Return cached brightness value
+    buf[0] = brightness;
+    return 1;
+}
+
+/**
+ * Write device file "matrix_custom_frame" for V2 Pro
+ * Accepts 15 bytes: [row][start_col][end_col][RGB x 4 zones]
+ * Where row=0, start_col=0, end_col=3 for full 4-zone update
+ * Sends: 40 03 00 R1 G1 B1 R2 G2 B2 R3 G3 B3 R4 G4 B4
+ */
+static ssize_t razer_attr_write_matrix_custom_frame_v2pro(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    struct razer_kraken_v2pro_report report;
+    unsigned char start_col, end_col, num_cols;
+
+    // Minimum: row(1) + start(1) + end(1) + 1 zone RGB(3) = 6 bytes
+    // Maximum: row(1) + start(1) + end(1) + 4 zones RGB(12) = 15 bytes
+    if (count < 6 || count > 15)
+        return -EINVAL;
+
+    start_col = buf[1];
+    end_col = buf[2];
+
+    if (start_col > 3 || end_col > 3 || start_col > end_col)
+        return -EINVAL;
+
+    num_cols = end_col - start_col + 1;
+    // Validate exact buffer size: row(1) + start(1) + end(1) + num_cols * RGB(3) bytes
+    if (count != (size_t)(3 + num_cols * 3))
+        return -EINVAL;
+
+    report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_STATIC_COLOR, 0x00);
+
+    // Copy RGB data for each zone
+    // Zone positions in report.data: 0-2=Zone1, 3-5=Zone2, 6-8=Zone3, 9-11=Zone4
+    // Bounds safety: start_col <= 3 and num_cols <= 4 ensures max write is data[9..11]
+    memset(report.data, 0, 12);
+    memcpy(&report.data[start_col * 3], &buf[3], num_cols * 3);
+
+    mutex_lock(&device->lock);
+    razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Write device file "matrix_effect_none" for V2 Pro
+ * Turns off all LEDs by setting brightness to 0 and sets "none" flag
+ * to prevent brightness changes from turning LEDs back on.
+ */
+static ssize_t razer_attr_write_matrix_effect_none_v2pro(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    struct razer_kraken_v2pro_report report;
+
+    report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_BRIGHTNESS, 0x01);
+    report.data[0] = KRAKEN_V2_PRO_ZONE_MASK_ALL;
+    report.data[1] = 0x00;  // Brightness = 0 (off)
+
+    mutex_lock(&device->lock);
+    device->v2pro_effect_none = 1;  // Mark "none" effect as active
+    device->v2pro_current_effect = 0; // Effect: none
+    razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Write device file "matrix_effect_custom" for V2 Pro
+ * Enables direct mode and restores cached brightness for custom frame updates
+ *
+ * Clears "none" flag and restores cached brightness.
+ */
+static ssize_t razer_attr_write_matrix_effect_custom_v2pro(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    struct razer_kraken_v2pro_report report;
+
+    mutex_lock(&device->lock);
+
+    // Clear "none" effect flag, set current effect
+    device->v2pro_effect_none = 0;
+    device->v2pro_current_effect = 2; // Effect: custom
+
+    // Enable direct control mode for all zones
+    report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_MODE, 0x00);
+    report.data[0] = KRAKEN_V2_PRO_ZONE_MASK_ALL;
+    report.data[1] = KRAKEN_V2_PRO_MODE_DIRECT;
+    razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
+
+    // Restore cached brightness
+    report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_BRIGHTNESS, 0x01);
+    report.data[0] = KRAKEN_V2_PRO_ZONE_MASK_ALL;
+    report.data[1] = device->v2pro_brightness;  // Use cached brightness
+    razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
+
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/**
+ * Write device file "matrix_effect_static" for V2 Pro
+ * Sets all 4 zones to the same color
+ * Sends: mode enable -> color -> brightness (cached value)
+ * Accepts 3 bytes: R G B
+ *
+ * Clears "none" flag and restores cached brightness.
+ */
+static ssize_t razer_attr_write_matrix_effect_static_v2pro(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    struct razer_kraken_v2pro_report report;
+    int i;
+
+    if (count != 3)
+        return -EINVAL;
+
+    mutex_lock(&device->lock);
+
+    // Clear "none" effect flag, set current effect
+    device->v2pro_effect_none = 0;
+    device->v2pro_current_effect = 1; // Effect: static
+
+    // Enable direct control mode for all zones: 40 01 00 0f 08
+    report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_MODE, 0x00);
+    report.data[0] = KRAKEN_V2_PRO_ZONE_MASK_ALL;  // 0x0f = all 4 zones
+    report.data[1] = KRAKEN_V2_PRO_MODE_DIRECT;    // 0x08 = direct mode
+    razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
+
+    // Set color for all 4 zones: 40 03 00 R G B R G B R G B R G B
+    report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_STATIC_COLOR, 0x00);
+    for (i = 0; i < KRAKEN_V2_PRO_ZONES; i++) {
+        report.data[i * 3 + 0] = buf[0];  // R
+        report.data[i * 3 + 1] = buf[1];  // G
+        report.data[i * 3 + 2] = buf[2];  // B
+    }
+    razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
+
+    // Restore cached brightness: 40 02 01 0f XX
+    report = get_kraken_v2pro_report(KRAKEN_V2_PRO_CMD_BRIGHTNESS, 0x01);
+    report.data[0] = KRAKEN_V2_PRO_ZONE_MASK_ALL;
+    report.data[1] = device->v2pro_brightness;  // Use cached brightness
+    razer_kraken_v2pro_send_control_msg(device->usb_dev, &report);
+
+    mutex_unlock(&device->lock);
+
+    return count;
 }
 
 /**
@@ -689,6 +1036,14 @@ static DEVICE_ATTR(matrix_effect_static,    0660, razer_attr_read_matrix_effect_
 static DEVICE_ATTR(matrix_effect_custom,    0660, razer_attr_read_matrix_effect_custom,       razer_attr_write_matrix_effect_custom);
 static DEVICE_ATTR(matrix_effect_breath,    0660, razer_attr_read_matrix_effect_breath,       razer_attr_write_matrix_effect_breath);
 
+// Kraken Kitty V2 Pro specific sysfs attributes
+// These use standard attribute names (matrix_brightness, matrix_custom_frame) for userspace compatibility.
+// No naming collision occurs because these DEVICE_ATTRs are only registered for V2 Pro devices
+// via the switch-case in razer_kraken_probe(). Other Kraken devices define their own handlers.
+// Note: matrix_effect_none, matrix_effect_static, matrix_effect_custom, matrix_current_effect use dispatch in their handlers
+static DEVICE_ATTR(matrix_brightness,          0660, razer_attr_read_matrix_brightness_v2pro,      razer_attr_write_matrix_brightness_v2pro);
+static DEVICE_ATTR(matrix_custom_frame,        0220, NULL,                                         razer_attr_write_matrix_custom_frame_v2pro);
+
 static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf)
 {
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -703,6 +1058,13 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
     dev->usb_pid = usb_dev->descriptor.idProduct;
 
     switch(dev->usb_pid) {
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2_PRO:
+        // V2 Pro uses a completely different protocol - no memory addresses
+        dev->is_v2_pro = 1;
+        dev->v2pro_effect_none = 1;    // "none" effect is active by default
+        dev->v2pro_brightness = 0xFF;  // Default to max brightness
+        dev->v2pro_current_effect = 0; // Start with "none" effect
+        break;
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:
     case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
@@ -771,6 +1133,17 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
             break;
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2_PRO:
+            // V2 Pro uses different protocol - 4-zone matrix with software effects
+            // Uses standard file names but dispatches to V2 Pro specific handlers
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect (brightness=0)
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect (hardware default)
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect trigger
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Custom frame (4 zones RGB)
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);             // Brightness control
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
+            break;
         }
     }
 
@@ -832,6 +1205,15 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
             break;
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2_PRO:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect trigger
+            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Custom frame
+            device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);             // Brightness
+            device_remove_file(&hdev->dev, &dev_attr_matrix_current_effect);         // Current effect
+            break;
         }
     }
 
@@ -866,6 +1248,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2_PRO) },
     { 0 }
 };
 
