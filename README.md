@@ -287,6 +287,8 @@ This will output something similar to this:
 | Razer Pro Click V2 (Wireless)                                 |  1532:00D1  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wired)       |  1532:00D6  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wireless)    |  1532:00D7  |
+| Razer Cobra HyperSpeed (Wired)                                |  1532:00DA  |
+| Razer Cobra HyperSpeed (Wireless)                             |  1532:00DB  |
 
 ### Mousemats
 | Device                                                        | USB VID:PID |
