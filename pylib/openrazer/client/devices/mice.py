@@ -1,44 +1,39 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-import dbus as _dbus
-
 from openrazer.client.devices import RazerDevice as __RazerDevice
-from openrazer.client.macro import RazerMacro as _RazerMacro
 
 
 class RazerMouse(__RazerDevice):
-    _MACRO_CLASS = _RazerMacro
-
     @property
     def max_dpi(self) -> int:
         """
         Gets max DPI
 
-        :return: Max DPI, if device does not have DPI it'll return None
-        :rtype: int or None
+        :return: Max DPI, if device does not have DPI it'll raise an exception
+        :rtype: int
         """
         if self.has('dpi'):
             return int(self._dbus_interfaces['dpi'].maxDPI())
         else:
-            return None
+            raise NotImplementedError()
 
     @property
-    def available_dpi(self) -> list:
+    def available_dpi(self) -> list[int]:
         """
         Gets the available DPI
 
         :return: Available DPI, if device has only a couple of fixed possible DPI values
-        :rtype: list or None
+        :rtype: list
         """
         if self.has('available_dpi'):
             dbuslist = self._dbus_interfaces['dpi'].availableDPI()
             # Repack list from dbus ints to normal ints
             return [int(d) for d in dbuslist]
         else:
-            return None
+            raise NotImplementedError()
 
     @property
-    def dpi(self) -> tuple:
+    def dpi(self) -> tuple[int, int]:
         """
         Get mouse DPI
 
@@ -59,7 +54,7 @@ class RazerMouse(__RazerDevice):
             raise NotImplementedError()
 
     @dpi.setter
-    def dpi(self, value: tuple):
+    def dpi(self, value: tuple[int, int]) -> None:
         """
         Set mouse dpi
 
@@ -93,7 +88,7 @@ class RazerMouse(__RazerDevice):
             raise NotImplementedError()
 
     @property
-    def dpi_stages(self) -> (int, list):
+    def dpi_stages(self) -> tuple[int, list[tuple[int, int]]]:
         """
         Get mouse DPI stages
 
@@ -120,7 +115,7 @@ class RazerMouse(__RazerDevice):
             raise NotImplementedError()
 
     @dpi_stages.setter
-    def dpi_stages(self, value: (int, list)):
+    def dpi_stages(self, value: tuple[int, list[tuple[int, int]]]) -> None:
         """
         Set mouse DPI stages
 
@@ -195,7 +190,7 @@ class RazerMouse(__RazerDevice):
             raise NotImplementedError()
 
     @scroll_mode.setter
-    def scroll_mode(self, mode: int):
+    def scroll_mode(self, mode: int) -> None:
         """
         Set the scroll mode of the device
 
@@ -220,12 +215,12 @@ class RazerMouse(__RazerDevice):
         :raises NotImplementedError: If function is not supported
         """
         if self.has('scroll_acceleration'):
-            return bool(int(self._dbus_interfaces['scroll'].getScrollAcceleration()))
+            return bool(self._dbus_interfaces['scroll'].getScrollAcceleration())
         else:
             raise NotImplementedError()
 
     @scroll_acceleration.setter
-    def scroll_acceleration(self, enabled: bool):
+    def scroll_acceleration(self, enabled: bool) -> None:
         """
         Set the device's scroll acceleration state
 
@@ -250,12 +245,12 @@ class RazerMouse(__RazerDevice):
         :raises NotImplementedError: If function is not supported
         """
         if self.has('scroll_smart_reel'):
-            return bool(int(self._dbus_interfaces['scroll'].getScrollSmartReel()))
+            return bool(self._dbus_interfaces['scroll'].getScrollSmartReel())
         else:
             raise NotImplementedError()
 
     @scroll_smart_reel.setter
-    def scroll_smart_reel(self, enabled: bool):
+    def scroll_smart_reel(self, enabled: bool) -> None:
         """
         Set the device's "smart reel" state
 
