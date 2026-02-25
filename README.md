@@ -301,15 +301,16 @@ This will output something similar to this:
 | Razer Firefly V2 Pro                                          |  1532:0C08  |
 
 ### Headsets
-| Device                                                        | USB VID:PID |
-| ------------------------------------------------------------- | ----------- |
-| Razer Kraken 7.1                                              |  1532:0501  |
-| Razer Kraken 7.1 Chroma                                       |  1532:0504  |
-| Razer Kraken 7.1                                              |  1532:0506  |
-| Razer Kraken 7.1 V2                                           |  1532:0510  |
-| Razer Kraken Ultimate                                         |  1532:0527  |
-| Razer Kraken Kitty Edition V2                                 |  1532:0560  |
-| Razer Kraken Kitty Edition                                    |  1532:0F19  |
+| Device                                        | USB VID:PID |
+| --------------------------------------------- | ----------- |
+| Razer Kraken 7.1                              |  1532:0501  |
+| Razer Kraken 7.1 Chroma                       |  1532:0504  |
+| Razer Kraken 7.1                              |  1532:0506  |
+| Razer Kraken 7.1 V2                           |  1532:0510  |
+| Razer Kraken Tournament Edition               |  1532:0520  |
+| Razer Kraken Ultimate                         |  1532:0527  |
+| Razer Kraken Kitty Edition V2                 |  1532:0560  |
+| Razer Kraken Kitty Edition                    |  1532:0F19  |
 
 ### Misc
 | Device                                                        | USB VID:PID |
