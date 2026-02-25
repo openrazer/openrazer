@@ -60,6 +60,115 @@ This will output something similar to this:
 
 
 ### Keyboards
+| Device                                        | USB VID:PID |
+| --------------------------------------------- | ----------- |
+| Razer BlackWidow Ultimate 2012                |  1532:010D  |
+| Razer BlackWidow Classic (Alternate)          |  1532:010E  |
+| Razer Anansi                                  |  1532:010F  |
+| Razer DeathStalker (Essential)                |  1532:0118  |
+| Razer BlackWidow Ultimate 2013                |  1532:011A  |
+| Razer BlackWidow Stealth                      |  1532:011B  |
+| Razer BlackWidow Tournament Edition 2014      |  1532:011C  |
+| Razer DeathStalker Expert                     |  1532:0202  |
+| Razer BlackWidow Chroma                       |  1532:0203  |
+| Razer DeathStalker Chroma                     |  1532:0204  |
+| Razer Blade Stealth                           |  1532:0205  |
+| Razer BlackWidow Tournament Edition Chroma    |  1532:0209  |
+| Razer Blade QHD                               |  1532:020F  |
+| Razer Blade Pro (Late 2016)                   |  1532:0210  |
+| Razer BlackWidow Chroma (Overwatch)           |  1532:0211  |
+| Razer BlackWidow Ultimate 2016                |  1532:0214  |
+| Razer BlackWidow X Chroma                     |  1532:0216  |
+| Razer BlackWidow X Ultimate                   |  1532:0217  |
+| Razer BlackWidow X Tournament Edition Chroma  |  1532:021A  |
+| Razer Ornata Chroma                           |  1532:021E  |
+| Razer Ornata                                  |  1532:021F  |
+| Razer Blade Stealth (Late 2016)               |  1532:0220  |
+| Razer BlackWidow Chroma V2                    |  1532:0221  |
+| Razer Blade (Late 2016)                       |  1532:0224  |
+| Razer Blade Pro (2017)                        |  1532:0225  |
+| Razer Huntsman Elite                          |  1532:0226  |
+| Razer Huntsman                                |  1532:0227  |
+| Razer BlackWidow Elite                        |  1532:0228  |
+| Razer Cynosa Chroma                           |  1532:022A  |
+| Razer Cynosa Chroma Pro                       |  1532:022C  |
+| Razer Blade Stealth (Mid 2017)                |  1532:022D  |
+| Razer Blade Pro FullHD (2017)                 |  1532:022F  |
+| Razer Blade Stealth (Late 2017)               |  1532:0232  |
+| Razer Blade 15 (2018)                         |  1532:0233  |
+| Razer Blade Pro 17 (2019)                     |  1532:0234  |
+| Razer BlackWidow Lite (2018)                  |  1532:0235  |
+| Razer BlackWidow Essential                    |  1532:0237  |
+| Razer Blade Stealth (2019)                    |  1532:0239  |
+| Razer Blade 15 Advanced (2019)                |  1532:023A  |
+| Razer Blade 15 Base (2018)                    |  1532:023B  |
+| Razer Cynosa Lite                             |  1532:023F  |
+| Razer Blade 15 Mercury (2018)                 |  1532:0240  |
+| Razer BlackWidow (2019)                       |  1532:0241  |
+| Razer Huntsman Tournament Edition             |  1532:0243  |
+| Razer Blade 15 Mercury (Mid 2019)             |  1532:0245  |
+| Razer Blade 15 Base (Mid 2019)                |  1532:0246  |
+| Razer Blade Stealth (Late 2019)               |  1532:024A  |
+| Razer Blade Advanced (Late 2019)              |  1532:024B  |
+| Razer Blade Pro (Late 2019)                   |  1532:024C  |
+| Razer Blade 15 Studio Edition (2019)          |  1532:024D  |
+| Razer BlackWidow V3                           |  1532:024E  |
+| Razer Blade Stealth (Early 2020)              |  1532:0252  |
+| Razer Blade 15 Advanced (2020)                |  1532:0253  |
+| Razer Blade 15 Base (Early 2020)              |  1532:0255  |
+| Razer Blade Pro 17 (Early 2020)               |  1532:0256  |
+| Razer Huntsman Mini                           |  1532:0257  |
+| Razer BlackWidow V3 Mini Hyperspeed (Wired)   |  1532:0258  |
+| Razer Blade Stealth (Late 2020)               |  1532:0259  |
+| Razer BlackWidow V3 Pro (Wired)               |  1532:025A  |
+| Razer BlackWidow V3 Pro (Wireless)            |  1532:025C  |
+| Razer Ornata V2                               |  1532:025D  |
+| Razer Cynosa V2                               |  1532:025E  |
+| Razer Huntsman V2 Analog                      |  1532:0266  |
+| Razer Blade 15 Base (Late 2020)               |  1532:0268  |
+| Razer Huntsman Mini (JP)                      |  1532:0269  |
+| Razer Book 13 (2020)                          |  1532:026A  |
+| Razer Huntsman V2 TKL                         |  1532:026B  |
+| Razer Huntsman V2                             |  1532:026C  |
+| Razer Blade 15 Advanced (Early 2021)          |  1532:026D  |
+| Razer Blade 17 Pro (Early 2021)               |  1532:026E  |
+| Razer Blade 15 Base (Early 2021)              |  1532:026F  |
+| Razer Blade 14 (2021)                         |  1532:0270  |
+| Razer BlackWidow V3 Mini Hyperspeed (Wireless)|  1532:0271  |
+| Razer Blade 15 Advanced (Mid 2021)            |  1532:0276  |
+| Razer Blade 17 Pro (Mid 2021)                 |  1532:0279  |
+| Razer Blade 15 Base (2022)                    |  1432:027A  |
+| Razer Huntsman Mini Analog                    |  1532:0282  |
+| Razer BlackWidow V4                           |  1532:0287  |
+| Razer Blade 15 Advanced (Early 2022)          |  1532:028A  |
+| Razer Blade 17 (2022)                         |  1532:028B  |
+| Razer Blade 14 (2022)                         |  1532:028C  |
+| Razer BlackWidow V4 Pro                       |  1532:028D  |
+| Razer Ornata V3                               |  1532:028F  |
+| Razer DeathStalker V2 Pro (Wireless)          |  1532:0290  |
+| Razer DeathStalker V2 Pro (Wired)             |  1532:0292  |
+| Razer BlackWidow V4 X                         |  1532:0293  |
+| Razer Ornata V3 X                             |  1532:0294  |
+| Razer DeathStalker V2 Pro TKL (Wireless)      |  1532:0296  |
+| Razer DeathStalker V2 Pro TKL (Wired)         |  1532:0298  |
+| Razer DeathStalker V2                         |  1532:0295  |
+| Razer Blade 14 (2023)                         |  1532:029D  |
+| Razer Blade 15 (2023)                         |  1532:029E  |
+| Razer Blade 16 (2023)                         |  1532:029F  |
+| Razer Blade 18 (2023)                         |  1532:02A0  |
+| Razer Ornata V3                               |  1532:02A1  |
+| Razer Ornata V3 X                             |  1532:02A2  |
+| Razer Ornata V3 Tenkeyless                    |  1532:02A3  |
+| Razer BlackWidow V4 75%                       |  1532:02A5  |
+| Razer Huntsman V3 Pro                         |  1532:02A6  |
+| Razer Huntsman V3 Pro TKL                     |  1532:02A7  |
+| Razer BlackWidow V4 Pro 75% (Wired)           |  1532:02B3  |
+| Razer BlackWidow V4 Pro 75% (Wireless)        |  1532:02B4  |
+| Razer Blade 14 (2024)                         |  1532:02B6  |
+| Razer Blade 18 (2024)                         |  1532:02B8  |
+| Razer Blade 14 (2025)                         |  1532:02C5  |
+| Razer Blade 16 (2025)                         |  1532:02C6  |
+| Razer BlackWidow V3 Tenkeyless                |  1532:0A24  |
 | Device                                                        | USB VID:PID |
 | ------------------------------------------------------------- | ----------- |
 | Razer BlackWidow Ultimate 2012                                |  1532:010D  |

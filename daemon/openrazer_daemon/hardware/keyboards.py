@@ -2274,6 +2274,41 @@ class RazerBlade142025(_RippleKeyboard):
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/15088/15088-1-en-v1.png"
 
 
+class RazerBlackWidowV4Pro75PCTWired(_RippleKeyboard):
+    """
+    Class for the Razer BlackWidow V4 Pro 75% Wired
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_BlackWidow_V4_Pro_75(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02B3
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [8, 23]
+    POLL_RATES = [125, 250, 500, 1000]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect',  'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               # TODO
+               # 
+               #'set_wheel_effect', 'set_ripple_effect', 'set_ripple_effect_random_colour',
+               # Battery
+               'get_battery', 'is_charging']
+
+    DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/he7/h76/9815507599390/bw-v4-pro-75-500x500.png"
+
+
+class RazerBlackWidowV4Pro75PCTWireless(RazerBlackWidowV4Pro75PCTWired):
+    """
+    Class for the Razer BlackWidow V4 Pro 75% Wireless
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_BlackWidow_V4_Pro_75(_\d+)?(-if01)?-event-kbd')
+
+    USB_PID = 0x02B4
+    POLL_RATES = [125, 250, 500, 1000, 2000, 4000]
 class RazerBlade182025(_RippleKeyboard):
     """
     Class for the Razer Blade 18 (2025)
