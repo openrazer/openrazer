@@ -5480,7 +5480,10 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 
         // Set device to regular mode, not driver mode
         // When the daemon discovers the device it will instruct it to enter driver mode
-        razer_set_device_mode(dev, 0x00, 0x00);
+        // Tartarus Pro firmware does not support this command and will reset if sent
+        if (usb_dev->descriptor.idProduct != USB_DEVICE_ID_RAZER_TARTARUS_PRO) {
+            razer_set_device_mode(dev, 0x00, 0x00);
+        }
     } else if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_super);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_tab);
