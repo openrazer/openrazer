@@ -58,6 +58,7 @@
 #define USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY 0x0240
 #define USB_DEVICE_ID_RAZER_BLACKWIDOW_2019 0x0241
 #define USB_DEVICE_ID_RAZER_HUNTSMAN_TE 0x0243
+#define USB_DEVICE_ID_RAZER_TARTARUS_PRO 0x0244
 #define USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY 0x0245
 #define USB_DEVICE_ID_RAZER_BLADE_2019_BASE 0x0246
 #define USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2019 0x024A
@@ -182,6 +183,9 @@ struct razer_kbd_device {
 
     unsigned char block_keys[3];
     unsigned char left_alt_on;
+
+    /* For devices that have multiple LED states, like Tartarus */
+    struct razer_rgb led_state;
 };
 
 #endif
