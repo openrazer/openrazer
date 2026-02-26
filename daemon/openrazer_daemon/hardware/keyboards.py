@@ -237,6 +237,8 @@ class RazerTartarusPro(_RippleKeyboard):
     """
     Class for Razer Tartarus Pro
     """
+
+    DRIVER_MODE = False
     EVENT_FILE_REGEX = re.compile(r'.*Razer_Tartarus_Pro(-if01)?-event-kbd')
 
     USB_VID = 0x1532
