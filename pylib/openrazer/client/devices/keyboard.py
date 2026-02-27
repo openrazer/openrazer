@@ -3,7 +3,6 @@
 """
 Contains functionality specific to keyboard-like devices
 """
-import dbus as _dbus
 
 from openrazer.client.constants import MACRO_LED_STATIC, MACRO_LED_BLINK
 from openrazer.client.devices import RazerDevice as __RazerDevice, BaseDeviceFactory as __BaseDeviceFactory
@@ -19,12 +18,12 @@ class RazerKeyboard(__RazerDevice):
         :rtype: bool
         """
         if self.has('game_mode_led'):
-            return self._dbus_interfaces['game_mode_led'].getGameMode()
+            return bool(self._dbus_interfaces['game_mode_led'].getGameMode())
         else:
-            return False
+            raise NotImplementedError()
 
     @game_mode_led.setter
-    def game_mode_led(self, value: bool):
+    def game_mode_led(self, value: bool) -> None:
         """
         Set game mode LED state
 
@@ -36,6 +35,8 @@ class RazerKeyboard(__RazerDevice):
                 self._dbus_interfaces['game_mode_led'].setGameMode(True)
             else:
                 self._dbus_interfaces['game_mode_led'].setGameMode(False)
+        else:
+            raise NotImplementedError()
 
     @property
     def macro_mode_led(self) -> bool:
@@ -46,12 +47,12 @@ class RazerKeyboard(__RazerDevice):
         :rtype: bool
         """
         if self.has('macro_mode_led'):
-            return self._dbus_interfaces['macro_mode_led'].getMacroMode()
+            return bool(self._dbus_interfaces['macro_mode_led'].getMacroMode())
         else:
-            return False
+            raise NotImplementedError()
 
     @macro_mode_led.setter
-    def macro_mode_led(self, value: bool):
+    def macro_mode_led(self, value: bool) -> None:
         """
         Set macro mode LED state
 
@@ -63,6 +64,8 @@ class RazerKeyboard(__RazerDevice):
                 self._dbus_interfaces['macro_mode_led'].setMacroMode(True)
             else:
                 self._dbus_interfaces['macro_mode_led'].setMacroMode(False)
+        else:
+            raise NotImplementedError()
 
     @property
     def macro_mode_led_effect(self) -> int:
@@ -74,12 +77,12 @@ class RazerKeyboard(__RazerDevice):
         :rtype: int
         """
         if self.has('macro_mode_led_effect'):
-            return self._dbus_interfaces['macro_mode_led'].getMacroEffect()
+            return int(self._dbus_interfaces['macro_mode_led'].getMacroEffect())
         else:
-            return False
+            raise NotImplementedError()
 
     @macro_mode_led_effect.setter
-    def macro_mode_led_effect(self, value: int):
+    def macro_mode_led_effect(self, value: int) -> None:
         """
         Set macro mode LED effect
 
@@ -87,8 +90,13 @@ class RazerKeyboard(__RazerDevice):
         :param value: Effect ID
         :type value: int
         """
-        if self.has('macro_mode_led_effect') and value in (MACRO_LED_STATIC, MACRO_LED_BLINK):
-            self._dbus_interfaces['macro_mode_led'].setMacroEffect(value)
+        if self.has('macro_mode_led_effect'):
+            if value in (MACRO_LED_STATIC, MACRO_LED_BLINK):
+                self._dbus_interfaces['macro_mode_led'].setMacroEffect(value)
+            else:
+                raise ValueError(f"Unexpected MACRO_LED_* value passed {value}")
+        else:
+            raise NotImplementedError()
 
     @property
     def keyswitch_optimization(self) -> bool:
@@ -99,12 +107,12 @@ class RazerKeyboard(__RazerDevice):
         :rtype: bool
         """
         if self.has('keyswitch_optimization'):
-            return self._dbus_interfaces['keyswitch_optimization'].getKeyswitchOptimization()
+            return bool(self._dbus_interfaces['keyswitch_optimization'].getKeyswitchOptimization())
         else:
-            return False
+            raise NotImplementedError()
 
     @keyswitch_optimization.setter
-    def keyswitch_optimization(self, value: bool):
+    def keyswitch_optimization(self, value: bool) -> None:
         """
         Set keyswitch optimization state
 
@@ -112,10 +120,9 @@ class RazerKeyboard(__RazerDevice):
         :type value: bool
         """
         if self.has('keyswitch_optimization'):
-            if value:
-                self._dbus_interfaces['keyswitch_optimization'].setKeyswitchOptimization(True)
-            else:
-                self._dbus_interfaces['keyswitch_optimization'].setKeyswitchOptimization(False)
+            self._dbus_interfaces['keyswitch_optimization'].setKeyswitchOptimization(value)
+        else:
+            raise NotImplementedError()
 
     @property
     def profile_led_red(self) -> bool:
@@ -128,10 +135,10 @@ class RazerKeyboard(__RazerDevice):
         if self.has('lighting_profile_led_red'):
             return bool(self._dbus_interfaces['profile_led'].getRedLED())
         else:
-            return False
+            raise NotImplementedError()
 
     @profile_led_red.setter
-    def profile_led_red(self, enable: bool):
+    def profile_led_red(self, enable: bool) -> None:
         """
         Set red profile LED state
 
@@ -140,6 +147,8 @@ class RazerKeyboard(__RazerDevice):
         """
         if self.has('lighting_profile_led_red'):
             self._dbus_interfaces['profile_led'].setRedLED(enable)
+        else:
+            raise NotImplementedError()
 
     @property
     def profile_led_green(self) -> bool:
@@ -152,10 +161,10 @@ class RazerKeyboard(__RazerDevice):
         if self.has('lighting_profile_led_green'):
             return bool(self._dbus_interfaces['profile_led'].getGreenLED())
         else:
-            return False
+            raise NotImplementedError()
 
     @profile_led_green.setter
-    def profile_led_green(self, enable: bool):
+    def profile_led_green(self, enable: bool) -> None:
         """
         Set green profile LED state
 
@@ -164,6 +173,8 @@ class RazerKeyboard(__RazerDevice):
         """
         if self.has('lighting_profile_led_green'):
             self._dbus_interfaces['profile_led'].setGreenLED(enable)
+        else:
+            raise NotImplementedError()
 
     @property
     def profile_led_blue(self) -> bool:
@@ -176,10 +187,10 @@ class RazerKeyboard(__RazerDevice):
         if self.has('lighting_profile_led_blue'):
             return bool(self._dbus_interfaces['profile_led'].getBlueLED())
         else:
-            return False
+            raise NotImplementedError()
 
     @profile_led_blue.setter
-    def profile_led_blue(self, enable: bool):
+    def profile_led_blue(self, enable: bool) -> None:
         """
         Set blue profile LED state
 
@@ -188,20 +199,5 @@ class RazerKeyboard(__RazerDevice):
         """
         if self.has('lighting_profile_led_blue'):
             self._dbus_interfaces['profile_led'].setBlueLED(enable)
-
-
-DEVICE_PID_MAP = {
-
-}
-
-
-class RazerKeyboardFactory(__BaseDeviceFactory):
-    @staticmethod
-    def get_device(serial, vid_pid=None, daemon_dbus=None):
-        if vid_pid is None:
-            pid = 0xFFFF
         else:
-            pid = vid_pid[1]
-
-        device_class = DEVICE_PID_MAP.get(pid, RazerKeyboard)
-        return device_class(serial, vid_pid=vid_pid, daemon_dbus=daemon_dbus)
+            raise NotImplementedError()
