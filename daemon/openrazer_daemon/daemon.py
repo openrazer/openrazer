@@ -642,6 +642,10 @@ class RazerDaemon(DBusService):
         else:
             self.logger.info('Stopping daemon on signal %d', signum)
 
+        # "Resume" all devices, in case they're still "suspended"
+        # (lights off because of screensaver)
+        self.resume_devices()
+
         self._main_loop.quit()
 
         # Stop udev monitor
