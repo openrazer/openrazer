@@ -1,27 +1,24 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-import json
+from collections.abc import Iterable
 import dbus as _dbus
 from openrazer.client.fx import RazerFX as _RazerFX
 from xml.etree import ElementTree as _ET
 from openrazer.client.macro import RazerMacro as _RazerMacro
-from openrazer.client import constants as _c
 
 
 class RazerDevice(object):
     """
     Raw razer base device
     """
-    _FX = _RazerFX
-    _MACRO_CLASS = _RazerMacro
+    _matrix_dimensions: tuple[int, int] | None
+    _kbd_layout: str | None
+    macro: _RazerMacro | None
 
-    def __init__(self, serial, vid_pid=None, daemon_dbus=None):
+    def __init__(self, serial: str) -> None:
         # Load up the DBus
-        if daemon_dbus is None:
-            session_bus = _dbus.SessionBus()
-            daemon_dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
-
-        self._dbus = daemon_dbus
+        session_bus = _dbus.SessionBus()
+        self._dbus = session_bus.get_object("org.razer", "/org/razer/device/{0}".format(serial))
 
         self._available_features = self._get_available_features()
 
@@ -34,16 +31,13 @@ class RazerDevice(object):
         self._type = str(self._dbus_interfaces['device'].getDeviceType())
         self._fw = str(self._dbus_interfaces['device'].getFirmware())
         self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
-        self._has_dedicated_macro = None
-        self._device_image = None
+        self._has_dedicated_macro: bool | None = None
+        self._device_image: str | None = None
 
         # Deprecated API, but kept for backwards compatibility
         self._urls = None
 
-        if vid_pid is None:
-            self._vid, self._pid = self._dbus_interfaces['device'].getVidPid()
-        else:
-            self._vid, self._pid = vid_pid
+        self._vid, self._pid = self._dbus_interfaces['device'].getVidPid()
 
         self._serial = serial
 
@@ -105,7 +99,7 @@ class RazerDevice(object):
             'lighting_pulsate': self._has_feature('razer.device.lighting.bw2013', 'setPulsate'),
 
             # Get if the device has an LED Matrix, == True as its a DBus boolean otherwise, so for consistency sake we coerce it into a native bool
-            'lighting_led_matrix': self._dbus_interfaces['device'].hasMatrix() == True,
+            'lighting_led_matrix': self._dbus_interfaces['device'].hasMatrix(),
             'lighting_led_single': self._has_feature('razer.device.lighting.chroma', 'setKey'),
 
             # Mouse lighting attrs
@@ -235,18 +229,11 @@ class RazerDevice(object):
             self._kbd_layout = None
 
         # Setup FX
-        if self._FX is None:
-            self.fx = None
-        else:
-            self.fx = self._FX(serial, capabilities=self._capabilities, daemon_dbus=daemon_dbus, matrix_dims=self._matrix_dimensions)
+        self.fx = _RazerFX(serial, capabilities=self._capabilities, daemon_dbus=self._dbus, matrix_dims=self._matrix_dimensions)
 
         # Setup Macro
         if self.has('macro_logic'):
-            if self._MACRO_CLASS is not None:
-                self.macro = self._MACRO_CLASS(serial, self.name, daemon_dbus=daemon_dbus, capabilities=self._capabilities)
-            else:
-                self._capabilities['macro_logic'] = False
-                self.macro = None
+            self.macro = _RazerMacro(serial, self.name, daemon_dbus=self._dbus, capabilities=self._capabilities)
         else:
             self.macro = None
 
@@ -265,7 +252,7 @@ class RazerDevice(object):
         if self.has('scroll_mode') or self.has('scroll_acceleration') or self.has('scroll_smart_reel'):
             self._dbus_interfaces['scroll'] = _dbus.Interface(self._dbus, "razer.device.scroll")
 
-    def _get_available_features(self):
+    def _get_available_features(self) -> dict[str, list[str]]:
         introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')
         xml_spec = introspect_interface.Introspect()
         root = _ET.fromstring(xml_spec)
@@ -278,19 +265,22 @@ class RazerDevice(object):
                 continue
 
             current_interface = child.attrib['name']
-            current_interface_methods = []
+            current_interface_methods: list[str] = []
 
             for method in child:
                 if method.tag != 'method':
                     continue
 
-                current_interface_methods.append(method.attrib.get('name'))
+                name = method.attrib.get('name')
+                if name is None:
+                    raise RuntimeError(f"Attribute name is unexpectedly None: {method.attrib}")
+                current_interface_methods.append(name)
 
             interfaces[current_interface] = current_interface_methods
 
         return interfaces
 
-    def _has_feature(self, object_path: str, method_name=None) -> bool:
+    def _has_feature(self, object_path: str, method_name: str | Iterable[str] | None = None) -> bool:
         """
         Checks to see if the device has said DBus method
 
@@ -386,7 +376,10 @@ class RazerDevice(object):
         :return: Keyboard layout
         :rtype: str
         """
-        return self._kbd_layout
+        if self._kbd_layout:
+            return self._kbd_layout
+        else:
+            raise NotImplementedError()
 
     @property
     def brightness(self) -> float:
@@ -396,10 +389,10 @@ class RazerDevice(object):
         :return: Device brightness
         :rtype: float
         """
-        return self._dbus_interfaces['brightness'].getBrightness()
+        return float(self._dbus_interfaces['brightness'].getBrightness())
 
     @brightness.setter
-    def brightness(self, value: float):
+    def brightness(self, value: float) -> None:
         """
         Set device brightness
 
@@ -420,7 +413,7 @@ class RazerDevice(object):
         self._dbus_interfaces['brightness'].setBrightness(value)
 
     @property
-    def capabilities(self) -> dict:
+    def capabilities(self) -> dict[str, bool]:
         """
         Device capabilities
 
@@ -450,7 +443,7 @@ class RazerDevice(object):
         return self._device_image
 
     @property
-    def razer_urls(self) -> dict:
+    def razer_urls(self) -> dict[str, bool | str]:
         # Deprecated API, but kept for backwards compatibility
         return {
             "DEPRECATED": True,
@@ -468,6 +461,8 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             return int(self._dbus_interfaces['power'].getBattery())
+        else:
+            raise NotImplementedError()
 
     @property
     def is_charging(self) -> bool:
@@ -478,8 +473,10 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             return bool(self._dbus_interfaces['power'].isCharging())
+        else:
+            raise NotImplementedError()
 
-    def set_idle_time(self, idle_time) -> None:
+    def set_idle_time(self, idle_time: int) -> None:
         """
         Sets the idle time on the device
 
@@ -487,6 +484,8 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             self._dbus_interfaces['power'].setIdleTime(idle_time)
+        else:
+            raise NotImplementedError()
 
     def get_idle_time(self) -> int:
         """
@@ -497,8 +496,10 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             return int(self._dbus_interfaces['power'].getIdleTime())
+        else:
+            raise NotImplementedError()
 
-    def set_low_battery_threshold(self, threshold) -> None:
+    def set_low_battery_threshold(self, threshold: int) -> None:
         """
         Set the low battery threshold as a percentage
 
@@ -507,6 +508,8 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             self._dbus_interfaces['power'].setLowBatteryThreshold(threshold)
+        else:
+            raise NotImplementedError()
 
     def get_low_battery_threshold(self) -> int:
         """
@@ -516,6 +519,8 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             return int(self._dbus_interfaces['power'].getLowBatteryThreshold())
+        else:
+            raise NotImplementedError()
 
     @property
     def poll_rate(self) -> int:
@@ -533,7 +538,7 @@ class RazerDevice(object):
             raise NotImplementedError()
 
     @poll_rate.setter
-    def poll_rate(self, poll_rate: int):
+    def poll_rate(self, poll_rate: int) -> None:
         """
         Set poll rate of device
 
@@ -552,7 +557,7 @@ class RazerDevice(object):
             raise NotImplementedError()
 
     @property
-    def supported_poll_rates(self) -> list:
+    def supported_poll_rates(self) -> list[int]:
         """
         Get poll rates supported by the device
 
@@ -568,14 +573,14 @@ class RazerDevice(object):
         else:
             raise NotImplementedError()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self._name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<{0} {1}>'.format(self.__class__.__name__, self._serial)
 
 
 class BaseDeviceFactory(object):
     @staticmethod
-    def get_device(serial: str, daemon_dbus=None) -> RazerDevice:
+    def get_device(serial: str) -> RazerDevice:
         raise NotImplementedError()
