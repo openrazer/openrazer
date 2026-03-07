@@ -1530,6 +1530,14 @@ struct razer_report razer_chroma_misc_get_scroll_smart_reel(void)
 }
 
 /**
+ * Get LED mode for HyperPolling Wireless Dongle
+ */
+struct razer_report razer_chroma_misc_get_hyperpolling_wireless_dongle_indicator_led_mode(void)
+{
+    return get_razer_report(0x07, 0x90, 0x01);
+}
+
+/**
  * Set LED mode for HyperPolling Wireless Dongle
  * 1 = Connection Status
  * 2 = Battery Status
@@ -1585,6 +1593,36 @@ struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(un
 
     report.arguments[0] = (pid >> 8) & 0xFF;
     report.arguments[1] = pid & 0xFF;
+
+    return report;
+}
+
+/**
+ * Get dongle indicator LED modes
+ * Returns 3 bytes for left, middle, right LEDs
+ */
+struct razer_report razer_chroma_misc_get_hyperpolling_wireless_dongle_multi_indicator_led_modes(void)
+{
+    return get_razer_report(0x07, 0x95, 0x03);
+}
+
+/**
+ * Set dongle indicator LED mode
+ * Off = 0
+ * Battery status = 1
+ * Connection status = 2
+ * Polling rate indicator = 3
+ * DPI indicator = 4
+ *
+ * left, middle, right leds
+ */
+struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_multi_indicator_led_modes(unsigned char mode1, unsigned char mode2, unsigned char mode3)
+{
+    struct razer_report report = get_razer_report(0x07, 0x15, 0x03);
+
+    report.arguments[0] = mode1;
+    report.arguments[1] = mode2;
+    report.arguments[2] = mode3;
 
     return report;
 }
