@@ -362,7 +362,7 @@ def set_hyperpolling_wireless_dongle_indicator_led_mode(self, mode):
     driver_path = self.get_driver_path('hyperpolling_wireless_dongle_indicator_led_mode')
 
     with open(driver_path, 'w') as driver_file:
-        driver_file.write(str(mode))
+        driver_file.write(str(int(mode)))
 
 
 @endpoint('razer.device.misc', 'setHyperPollingPair', in_sig='s')
