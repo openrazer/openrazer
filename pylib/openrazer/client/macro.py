@@ -90,7 +90,7 @@ class RazerMacro(object):
     @mode_modifier.setter
     def mode_modifier(self, value: bool) -> None:
         if 'macro_mode_modifier' in self._capabilities and isinstance(value, bool):
-            self._macro_dbus.getModeModifier(value)
+            self._macro_dbus.setModeModifier(value)
 
     @staticmethod
     def create_url_macro_item(url: str) -> _daemon_macro.MacroURL:
