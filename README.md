@@ -310,6 +310,8 @@ This will output something similar to this:
 | Razer Kraken 7.1 V2                                           |  1532:0510  |
 | Razer Kraken Ultimate                                         |  1532:0527  |
 | Razer Kraken Kitty Edition V2                                 |  1532:0560  |
+| Razer Kraken Kitty V3 Pro Receiver                            |  1532:0587  |
+| Razer Kraken Kitty V3 Pro                                     |  1532:0588  |
 | Razer Kraken Kitty Edition                                    |  1532:0F19  |
 
 ### Misc
