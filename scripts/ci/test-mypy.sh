@@ -7,4 +7,4 @@
 # $ mypy --strict daemon/
 # $ mypy --strict pylib/
 
-mypy --strict pylib/openrazer/
+mypy --strict pylib/openrazer/ scripts/create_fake_device.py
