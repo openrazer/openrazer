@@ -7,4 +7,4 @@
 # $ mypy --strict daemon/
 # $ mypy --strict pylib/
 
-mypy --strict pylib/openrazer/client/
+mypy --strict pylib/openrazer/
