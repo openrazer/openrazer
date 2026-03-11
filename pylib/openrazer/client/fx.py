@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
+from collections.abc import Callable
+from typing import Any
 import numpy as _np
 import numpy.typing as _npt
-import dbus as _dbus
+import dbus as _dbus  # type: ignore
 # from openrazer.client.constants import WAVE_LEFT, WAVE_RIGHT, REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS, REACTIVE_2000MS
 from openrazer.client import constants as c
-from types import FunctionType
 
 # TODO logging.debug if value out of range v1.1
 
@@ -641,9 +642,12 @@ class SingleLed(BaseRazerFX):
     def _shas(self, item: str) -> bool:
         return self.has('{0}_{1}'.format(self._led_name, item))
 
-    def _getattr(self, name: str) -> FunctionType:
-        attr = name.replace('#', self._led_name.title().replace("_", ""))
-        return getattr(self._lighting_dbus, attr, None)
+    def _getattr(self, name: str) -> Callable[..., Any]:
+        attr_name = name.replace('#', self._led_name.title().replace("_", ""))
+        attr = getattr(self._lighting_dbus, attr_name, None)
+        if not callable(attr):
+            raise RuntimeError(f"Expected to get callable, got {type(attr)}")
+        return attr  # type: ignore
 
     @property
     def active(self) -> bool:
