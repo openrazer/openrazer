@@ -17,14 +17,14 @@ KEY_ACTION = {
 }
 
 
-def touch(fname, times=None):
+def touch(fname: str) -> None:
     with open(fname, 'a'):
-        os.utime(fname, times)
+        os.utime(fname)
 
 
 class FakeDevice(object):
     @staticmethod
-    def parse_endpoint_line(line):
+    def parse_endpoint_line(line: str) -> tuple[int, str, str | None, str]:
         components = line.split(',')
 
         if len(components) == 2:
@@ -38,16 +38,16 @@ class FakeDevice(object):
         orig_perm = chmod
 
         if chmod == 'r':
-            chmod = 0o660
+            chmod_int = 0o660
         elif chmod == 'w':
-            chmod = 0o660
+            chmod_int = 0o660
         else:
-            chmod = 0o660
+            chmod_int = 0o660
 
-        return chmod, name, default, orig_perm
+        return chmod_int, name, default, orig_perm
 
     @staticmethod
-    def create_endpoint(path, chmod, default=None):
+    def create_endpoint(path: str, chmod: int, default: str | None = None) -> None:
         if os.path.exists(path):
             os.chmod(path, 0o660)
             os.remove(path)
@@ -55,17 +55,17 @@ class FakeDevice(object):
         if default is not None:
             # Convert to bytes
             if default.startswith("0x"):
-                default = bytes.fromhex(default[2:])
+                default_bin = bytes.fromhex(default[2:])
             else:
-                default = default.encode('UTF-8')
+                default_bin = default.encode('UTF-8')
 
             with open(path, 'wb') as f:
-                f.write(default)
+                f.write(default_bin)
         else:
             touch(path)
         os.chmod(path, chmod)
 
-    def __init__(self, spec_name, serial=None, tmp_dir=os.environ.get('TMPDIR', '/tmp')):
+    def __init__(self, spec_name: str, serial: str | None = None, tmp_dir: str=os.environ.get('TMPDIR', '/tmp')):
 
         if spec_name not in SPECS:
             raise ValueError("Spec {0} not in SPECS".format(spec_name))
@@ -79,8 +79,8 @@ class FakeDevice(object):
         self._tmp_dir = os.path.join(tmp_dir, self._config.get('device', 'dir_name'))
         os.makedirs(self._tmp_dir, exist_ok=True)
 
-        self.endpoints = {}
-        self.events = {}
+        self.endpoints: dict[str, tuple[int, str | None, str]] = {}
+        self.events: dict[str, tuple[str, int]] = {}
         self.create_endpoints()
         self.create_events()
 
@@ -90,23 +90,23 @@ class FakeDevice(object):
         # Disallow write in directory, so disallow creating new files after setup is done.
         os.chmod(self._tmp_dir, 0o555)
 
-    def _get_endpoint_path(self, endpoint):
+    def _get_endpoint_path(self, endpoint: str) -> str:
         return os.path.join(self._tmp_dir, endpoint)
 
-    def _get_event_path(self, event):
+    def _get_event_path(self, event: str) -> str:
         return os.path.join(self._tmp_dir, 'input', event)
 
-    def create_events(self):
+    def create_events(self) -> None:
         """
         Goes through event files and creates them as needed
         """
-        event_files = self._config.get('device', 'event', fallback=None)
+        event_files: str | None = self._config.get('device', 'event', fallback=None)
         if event_files is None:
-            event_files = []
+            event_files_list = []
         else:
-            event_files = event_files.splitlines()
+            event_files_list = event_files.splitlines()
 
-        for index, event_file in enumerate(event_files):
+        for index, event_file in enumerate(event_files_list):
             path = self._get_event_path(event_file)
 
             os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -118,7 +118,7 @@ class FakeDevice(object):
 
             self.events[str(index)] = (event_file, file_object)
 
-    def create_endpoints(self):
+    def create_endpoints(self) -> None:
         for endpoint_line in self._config.get('device', 'files').splitlines():
             chmod, name, default, orig_perm = self.parse_endpoint_line(endpoint_line)
             path = self._get_endpoint_path(name)
@@ -128,7 +128,7 @@ class FakeDevice(object):
             self.endpoints[name] = (chmod, default, orig_perm)
             self.create_endpoint(path, chmod, default)
 
-    def get(self, endpoint, binary=False):
+    def get(self, endpoint: str, binary: bool=False) -> str | bytes:
         """
         Gets a value from a given endpoint
 
@@ -157,9 +157,12 @@ class FakeDevice(object):
         except UnicodeDecodeError as e:
             return str(e)
 
+        if not isinstance(result, bytes) and not isinstance(result, str):
+            raise ValueError(f"Got invalid type in result: {type(result)}")
+
         return result
 
-    def set(self, endpoint, value, binary=False):
+    def set(self, endpoint: str, value: str, binary: bool=False) -> None:
         if endpoint not in self.endpoints:
             raise ValueError("Endpoint {0} does not exist".format(endpoint))
 
@@ -173,23 +176,23 @@ class FakeDevice(object):
         with open(path, write_mode) as open_endpoint:
             open_endpoint.write(value)
 
-    def emit_kb_event(self, file_id, key_code, value):
+    def emit_kb_event(self, file_id: str, key_code: int, value: str) -> int:
 
         if file_id not in self.events:
             raise ValueError("file_id {0} does not exist".format(file_id))
 
         if value in KEY_ACTION:
-            value = KEY_ACTION[value]
+            value_int = KEY_ACTION[value]
         else:
-            value = 0x00
+            value_int = 0x00
 
-        event_binary = struct.pack(EVENT_FORMAT, self._tick, 0, EV_KEY, key_code, value)
+        event_binary = struct.pack(EVENT_FORMAT, self._tick, 0, EV_KEY, key_code, value_int)
         pipe_fd = self.events[file_id][1]
         os.write(pipe_fd, event_binary)
 
         return len(event_binary)
 
-    def close(self):
+    def close(self) -> None:
         if os.path.exists(self._tmp_dir):
             # Allow deletion
             for endpoint in self.endpoints:
