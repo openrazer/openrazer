@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 from collections.abc import Iterable
-import dbus as _dbus
+import dbus as _dbus  # type: ignore
 from openrazer.client.fx import RazerFX as _RazerFX
 from xml.etree import ElementTree as _ET
 from openrazer.client.macro import RazerMacro as _RazerMacro
@@ -218,7 +218,8 @@ class RazerDevice(object):
 
         # Nasty hack to convert dbus.Int32 into native
         if self.has('lighting_led_matrix'):
-            self._matrix_dimensions = tuple([int(dim) for dim in self._dbus_interfaces['device'].getMatrixDimensions()])
+            matrix_dims = self._dbus_interfaces['device'].getMatrixDimensions()
+            self._matrix_dimensions = (int(matrix_dims[0]), int(matrix_dims[1]))
         else:
             self._matrix_dimensions = None
 
