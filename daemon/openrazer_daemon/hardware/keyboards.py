@@ -228,6 +228,8 @@ class RazerTartarusPro(_RippleKeyboard):
                'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_brightness', 'set_brightness']
 
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1591/1591_tartaruspro.png"
+
 
 class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
     """
