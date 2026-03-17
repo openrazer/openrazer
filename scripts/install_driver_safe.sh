@@ -15,10 +15,17 @@ MODULES=(razerkbd razermouse razerkraken razeraccessory)
 BACKUP_DIR="/tmp/openrazer-module-backup-$(date +%Y%m%d-%H%M%S)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Resolve DKMS name/version from the top-level Makefile
-DKMS_NAME=$(grep -m1 '^DKMS_NAME' "${SCRIPT_DIR}/Makefile" | awk -F= '{print $2}' | tr -d ' ')
-DKMS_VER=$(grep -m1 '^DKMS_VER'  "${SCRIPT_DIR}/Makefile" | awk -F= '{print $2}' | tr -d ' ')
-DKMS_SRC="/usr/src/${DKMS_NAME}-${DKMS_VER}"
+# Resolve DKMS name/version — sed strips any ?= or := Makefile assignment syntax
+DKMS_NAME=$(grep -m1 '^DKMS_NAME' "${SCRIPT_DIR}/Makefile" | sed 's/^[^=]*=[ \t]*//' | tr -d ' \t\r\n')
+DKMS_VER_MK=$(grep -m1 '^DKMS_VER'  "${SCRIPT_DIR}/Makefile" | sed 's/^[^=]*=[ \t]*//' | tr -d ' \t\r\n')
+
+# Auto-detect the installed DKMS source directory; the system package may have
+# been updated to a newer version than what the Makefile records.
+DKMS_SRC=$(ls -d "/usr/src/${DKMS_NAME}-"* 2>/dev/null | sort -V | tail -1 || echo "")
+if [[ -z "${DKMS_SRC}" ]]; then
+    DKMS_SRC="/usr/src/${DKMS_NAME}-${DKMS_VER_MK}"
+fi
+DKMS_VER="${DKMS_SRC##/usr/src/${DKMS_NAME}-}"
 
 # DKMS module directory (higher priority than kernel/drivers/hid)
 DKMS_MODDIR="/lib/modules/$(uname -r)/updates/dkms"
