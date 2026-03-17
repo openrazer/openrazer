@@ -30,16 +30,11 @@ DKMS_VER="${DKMS_SRC##/usr/src/${DKMS_NAME}-}"
 # DKMS module directory (higher priority than kernel/drivers/hid)
 DKMS_MODDIR="/lib/modules/$(uname -r)/updates/dkms"
 
-# Daemon keyboards.py: repo source vs installed destination
+# Daemon keyboards.py: repo source vs installed destination.
+# Use dpkg to find the exact installed path — more reliable than sys.path
+# which changes depending on whether we're running as root or a regular user.
 KEYBOARDS_SRC="${SCRIPT_DIR}/daemon/openrazer_daemon/hardware/keyboards.py"
-KEYBOARDS_DST="$(python3 -c "
-import sys, os
-for p in sys.path:
-    candidate = os.path.join(p, 'openrazer_daemon/hardware/keyboards.py')
-    if os.path.isfile(candidate):
-        print(candidate)
-        break
-" 2>/dev/null)"
+KEYBOARDS_DST="$(dpkg -L openrazer-daemon 2>/dev/null | grep 'hardware/keyboards\.py$' | head -1)"
 
 if [[ $EUID -ne 0 ]]; then
     echo "Error: this script must be run as root (use sudo)." >&2
@@ -196,8 +191,20 @@ fi
 # ── 10. Restart daemon ───────────────────────────────────────────────────────
 echo ":: Starting openrazer-daemon"
 REAL_USER="${SUDO_USER:-}"
-if [[ -n "${REAL_USER}" ]]; then
-    sudo -u "${REAL_USER}" systemctl --user restart openrazer-daemon 2>/dev/null || true
+REAL_UID="$(id -u "${REAL_USER:-root}" 2>/dev/null || echo "")"
+if [[ -n "${REAL_USER}" && -n "${REAL_UID}" ]]; then
+    # systemctl --user needs the user's D-Bus session bus socket
+    DBUS_ADDR="unix:path=/run/user/${REAL_UID}/bus"
+    if [[ -S "/run/user/${REAL_UID}/bus" ]]; then
+        sudo -u "${REAL_USER}" \
+            DBUS_SESSION_BUS_ADDRESS="${DBUS_ADDR}" \
+            XDG_RUNTIME_DIR="/run/user/${REAL_UID}" \
+            systemctl --user restart openrazer-daemon 2>/dev/null \
+        && echo ":: openrazer-daemon restarted" \
+        || echo "Warning: could not restart openrazer-daemon via systemctl (run: systemctl --user restart openrazer-daemon)"
+    else
+        echo "Warning: user D-Bus session not found; run manually: systemctl --user restart openrazer-daemon"
+    fi
 else
     systemctl restart openrazer-daemon 2>/dev/null || true
 fi
