@@ -109,6 +109,8 @@ rollback() {
         modprobe "${mod}" 2>/dev/null && echo "  reloaded ${mod}" || true
     done
     systemctl start openrazer-daemon 2>/dev/null || true
+    # Rebind any HID devices that were left driverless during the failed install
+    udevadm trigger --action=add --subsystem-match=hid 2>/dev/null || true
     echo ":: Rollback complete. Backup kept at ${BACKUP_DIR}" >&2
 }
 
@@ -138,6 +140,16 @@ if ! dkms install "${DKMS_NAME}/${DKMS_VER}" --force; then
 fi
 
 # ── 7. Load and verify ───────────────────────────────────────────────────────
+# udev may have auto-reloaded the old razerkbd module while DKMS was building
+# (the unbound keyboard triggers hotplug). Force another unbind+unload cycle
+# so modprobe loads the freshly built module.
+echo ":: Ensuring old razerkbd is unloaded before loading new version"
+for dev in /sys/bus/hid/drivers/razerkbd/????:????:????.????; do
+    [[ -e "${dev}" ]] || continue
+    echo "${dev##*/}" > /sys/bus/hid/drivers/razerkbd/unbind 2>/dev/null || true
+done
+modprobe -r razerkbd 2>/dev/null || true
+
 echo ":: Loading razerkbd"
 if ! modprobe razerkbd; then
     echo "Error: modprobe razerkbd failed." >&2
