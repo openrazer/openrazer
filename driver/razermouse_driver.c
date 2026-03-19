@@ -2778,6 +2778,48 @@ static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct devi
     return sprintf(buf, "%d\n", response.arguments[1]);
 }
 
+/**
+ * Write device file "scroll_profile"
+ *
+ * Sets the scroll profile (hyperscroll) of the mouse.
+ */
+static ssize_t razer_attr_write_scroll_profile(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned int profile;
+
+    if (kstrtouint(buf, 0, &profile) < 0 || profile > 5)
+        return -EINVAL;
+
+    request = razer_chroma_misc_set_scroll_profile(profile);
+    request.transaction_id.id = 0x1f;
+
+    razer_send_payload(device, &request, &response);
+
+    return count;
+}
+
+/**
+ * Read device file "scroll_profile"
+ *
+ * Gets the scroll profile (hyperscroll) from the mouse.
+ */
+static ssize_t razer_attr_read_scroll_profile(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_scroll_profile();
+    request.transaction_id.id = 0x1f;
+
+    razer_send_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", response.arguments[1]);
+}
+
 static ssize_t razer_attr_write_tilt_hwheel(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
@@ -5472,6 +5514,7 @@ static DEVICE_ATTR(device_idle_time,          0660, razer_attr_read_device_idle_
 static DEVICE_ATTR(scroll_mode,               0660, razer_attr_read_scroll_mode,           razer_attr_write_scroll_mode);
 static DEVICE_ATTR(scroll_acceleration,       0660, razer_attr_read_scroll_acceleration,   razer_attr_write_scroll_acceleration);
 static DEVICE_ATTR(scroll_smart_reel,         0660, razer_attr_read_scroll_smart_reel,     razer_attr_write_scroll_smart_reel);
+static DEVICE_ATTR(scroll_profile,            0660, razer_attr_read_scroll_profile,        razer_attr_write_scroll_profile);
 
 static DEVICE_ATTR(tilt_hwheel,               0660, razer_attr_read_tilt_hwheel,           razer_attr_write_tilt_hwheel);
 static DEVICE_ATTR(tilt_repeat,               0660, razer_attr_read_tilt_repeat,           razer_attr_write_tilt_repeat);
@@ -6707,6 +6750,11 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_mode);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_acceleration);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_smart_reel);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_profile);
 
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_wave);

@@ -100,3 +100,38 @@ def get_scroll_smart_reel(self):
 
     with open(driver_path, 'r') as driver_file:
         return bool(int(driver_file.read().strip()))
+
+
+@endpoint('razer.device.scroll', 'setScrollProfile', in_sig='y')
+def set_scroll_profile(self, profile):
+    """
+    Set the device's scroll profile (hyperscroll)
+
+    :param profile: The profile to set (0 = standard, 1 = distinct, 2 = precise, 3 = adaptive, 4 = smooth, 5 = custom)
+    :type profile: int
+    """
+    self.logger.debug("DBus call set_scroll_profile")
+
+    if profile not in (0, 1, 2, 3, 4, 5):
+        raise ValueError("profile has to be 0-5")
+
+    driver_path = self.get_driver_path('scroll_profile')
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write(str(int(profile)))
+
+
+@endpoint('razer.device.scroll', 'getScrollProfile', out_sig='y')
+def get_scroll_profile(self):
+    """
+    Get the device's current scroll profile (hyperscroll)
+
+    :return: The device's current scroll profile (0 = standard, 1 = distinct, 2 = precise, 3 = adaptive, 4 = smooth, 5 = custom)
+    :rtype: int
+    """
+    self.logger.debug("DBus call get_scroll_profile")
+
+    driver_path = self.get_driver_path('scroll_profile')
+
+    with open(driver_path, 'r') as driver_file:
+        return int(driver_file.read().strip())

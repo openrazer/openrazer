@@ -1530,6 +1530,47 @@ struct razer_report razer_chroma_misc_get_scroll_smart_reel(void)
 }
 
 /**
+ * Set scroll wheel profile (hyperscroll) on the device
+ *
+ * Profiles:
+ * 0 = Standard
+ * 1 = Distinct
+ * 2 = Precise
+ * 3 = Adaptive
+ * 4 = Smooth
+ * 5 = Custom
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    02       02    18  0100    | SET SCROLL PROFILE (VARSTR, STANDARD)
+ * 00     1f    0000   00    02       02    18  0101    | SET SCROLL PROFILE (VARSTR, DISTINCT)
+ * 00     1f    0000   00    02       02    18  0102    | SET SCROLL PROFILE (VARSTR, PRECISE)
+ * 00     1f    0000   00    02       02    18  0103    | SET SCROLL PROFILE (VARSTR, ADAPTIVE)
+ * 00     1f    0000   00    02       02    18  0104    | SET SCROLL PROFILE (VARSTR, SMOOTH)
+ * 00     1f    0000   00    02       02    18  0105    | SET SCROLL PROFILE (VARSTR, CUSTOM)
+ */
+struct razer_report razer_chroma_misc_set_scroll_profile(unsigned char profile)
+{
+    struct razer_report report = get_razer_report(0x02, 0x18, 0x02);
+
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = profile;
+
+    return report;
+}
+
+/**
+ * Get scroll wheel profile (hyperscroll) from the device
+ */
+struct razer_report razer_chroma_misc_get_scroll_profile(void)
+{
+    struct razer_report report = get_razer_report(0x02, 0x98, 0x02);
+
+    report.arguments[0] = VARSTORE;
+
+    return report;
+}
+
+/**
  * Set LED mode for HyperPolling Wireless Dongle
  * 1 = Connection Status
  * 2 = Battery Status
