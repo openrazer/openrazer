@@ -287,6 +287,8 @@ This will output something similar to this:
 | Razer Basilisk V3 Pro 35K (Wireless)                          |  1532:00CD  |
 | Razer Pro Click V2 (Wired)                                    |  1532:00D0  |
 | Razer Pro Click V2 (Wireless)                                 |  1532:00D1  |
+| Razer Basilisk Mobile (Wired)                                 |  1532:00D3  |
+| Razer Basilisk Mobile (Receiver)                              |  1532:00D4  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wired)       |  1532:00D6  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wireless)    |  1532:00D7  |
 
