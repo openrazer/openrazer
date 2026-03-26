@@ -1219,6 +1219,7 @@ class RazerBasiliskV3(__RazerDevice):
                'set_custom_effect', 'set_key_row']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/pages/basilisk-v3-4D578898E8144Le8da21dde32b7a9f5f/basilisk.png"
+    DRIVER_MODE = True
 
     DPI_MAX = 26000
 
