@@ -334,6 +334,7 @@ This will output something similar to this:
 | Razer Chroma Hardware Development Kit (HDK)                   |  1532:0F09  |
 | Razer Laptop Stand Chroma                                     |  1532:0F0D  |
 | Razer Raptor 27                                               |  1532:0F12  |
+| Lian Li O11 Dynamic - Razer Edition                           |  1532:0F13  |
 | Razer Tomahawk ATX                                            |  1532:0F17  |
 | Razer Core X Chroma                                           |  1532:0F1A  |
 | Razer Mouse Bungee V3 Chroma                                  |  1532:0F1D  |
