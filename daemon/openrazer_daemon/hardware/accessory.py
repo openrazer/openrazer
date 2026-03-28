@@ -246,6 +246,22 @@ class RazerLaptopStandChromaV2(_RazerDeviceBrightnessSuspend):
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/272c328913c00c6f584fe3dead2ca2a6/razer-laptop-stand-chroma-v2-hero-mobile-v2.jpg"
 
 
+class RazerLianLiO11Dynamic(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Lian Li O11 Dynamic - Razer Edition
+    """
+
+    USB_VID = 0x1532
+    USB_PID = 0x0F13
+    HAS_MATRIX = True
+    MATRIX_DIMS = [4, 16]
+    METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/6bd258f651d00e7ee1d7a5c4607917f3/lian-li-usp-desktop.jpg"
+
+
 class RazerTomahawkATX(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Tomahawk ATX
