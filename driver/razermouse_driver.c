@@ -5556,6 +5556,8 @@ static DEVICE_ATTR(hyperpolling_wireless_dongle_unpair,                         
 #define REP4_TILT_R  0x23
 #define REP4_PROFILE 0x50
 #define REP4_SNIPER  0x51
+#define REP4_DPI_CYCLE 0x52
+#define REP4_SCROLL  0x54
 
 #define BIT_TILT_L 5
 #define BIT_TILT_R 6
@@ -5576,6 +5578,8 @@ static const __u16 rep4_key_codes[] = {
     [REP4_DPI_UP]  = BTN_MOUSE + 8,
     [REP4_DPI_DN]  = BTN_MOUSE + 9,
     [REP4_PROFILE] = BTN_MOUSE + 10,
+    [REP4_DPI_CYCLE] = BTN_MOUSE + 11,
+    [REP4_SCROLL]  = BTN_MOUSE + 12,
     /* NOTE: Highest legal mouse button is BTN_MOUSE + 15 */
 };
 
@@ -5915,6 +5919,8 @@ static int razer_input_configured(struct hid_device *hdev,
             input_set_capability(hidinput->input, EV_KEY, BTN_MOUSE + 8);
             input_set_capability(hidinput->input, EV_KEY, BTN_MOUSE + 9);
             input_set_capability(hidinput->input, EV_KEY, BTN_MOUSE + 10);
+            input_set_capability(hidinput->input, EV_KEY, BTN_MOUSE + 11);
+            input_set_capability(hidinput->input, EV_KEY, BTN_MOUSE + 12);
             fallthrough;
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_NAGA_2014:
