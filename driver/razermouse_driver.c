@@ -77,7 +77,6 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
@@ -101,7 +100,12 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_VIPER_MOUSE_RECEIVER_WAIT_MIN_US, RAZER_VIPER_MOUSE_RECEIVER_WAIT_MAX_US);
+        break;
+
+    case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+        index = 0x03;
         return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_VIPER_MOUSE_RECEIVER_WAIT_MIN_US, RAZER_VIPER_MOUSE_RECEIVER_WAIT_MAX_US);
         break;
 
