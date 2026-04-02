@@ -276,8 +276,6 @@ This will output something similar to this:
 | Razer DeathAdder V4 Pro (Wireless)                            |  1532:00BF  |
 | Razer Viper V3 Pro (Wired)                                    |  1532:00C0  |
 | Razer Viper V3 Pro (Wireless)                                 |  1532:00C1  |
-| Razer Viper V4 Pro (Wired)                                    |  1532:00E5  |
-| Razer Viper V4 Pro (Wireless)                                 |  1532:00E6  |
 | Razer DeathAdder V3 Pro (Wired)                               |  1532:00C2  |
 | Razer DeathAdder V3 Pro (Wireless)                            |  1532:00C3  |
 | Razer DeathAdder V3 HyperSpeed (Wired)                        |  1532:00C4  |
@@ -293,6 +291,8 @@ This will output something similar to this:
 | Razer Basilisk Mobile (Receiver)                              |  1532:00D4  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wired)       |  1532:00D6  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wireless)    |  1532:00D7  |
+| Razer Viper V4 Pro (Wired)                                    |  1532:00E5  |
+| Razer Viper V4 Pro (Wireless)                                 |  1532:00E6  |
 
 ### Mousemats
 | Device                                                        | USB VID:PID |
