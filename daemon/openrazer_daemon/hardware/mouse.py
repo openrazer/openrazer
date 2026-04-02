@@ -2147,7 +2147,7 @@ class RazerViperV4ProWired(__RazerDevice):
                'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
                'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold']
 
-    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1234/viper-v4-pro.png"
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/20779/20779-01-en-v1.png"
 
     POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
     DPI_MAX = 50000
