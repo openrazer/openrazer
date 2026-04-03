@@ -2378,6 +2378,7 @@ class RazerHuntsmanV3Pro8KHz(_RazerDeviceBrightnessSuspend):
         super()._close()
         self.key_manager.close()
 
+
 class RazerHuntsmanV3XTKL(_RippleKeyboard):
     """
     Class for the Razer Huntsman V3 X TKL

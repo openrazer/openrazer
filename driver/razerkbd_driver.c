@@ -1592,8 +1592,8 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_X_TKL:
-            device_type = "Razer Huntsman V3 X TKL";
-            break;
+        device_type = "Razer Huntsman V3 X TKL";
+        break;
 
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
         device_type = "Razer Huntsman V3 Pro Mini";
