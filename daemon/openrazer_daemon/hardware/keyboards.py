@@ -48,9 +48,9 @@ class _RippleKeyboardNoGameMode(_RazerDevice):
 
     def __init__(self, *args, **kwargs):
         if 'additional_methods' in kwargs:
-            kwargs['additional_methods'].extend(['get_keyboard_layout'])
+            kwargs['additional_methods'].extend(['get_keyboard_layout', 'get_brightness', 'set_brightness'])
         else:
-            kwargs['additional_methods'] = ['get_keyboard_layout']
+            kwargs['additional_methods'] = ['get_keyboard_layout', 'get_brightness', 'set_brightness']
         super().__init__(*args, **kwargs)
 
         if not self.HAS_MATRIX:
