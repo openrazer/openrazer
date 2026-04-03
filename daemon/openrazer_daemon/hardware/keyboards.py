@@ -5,7 +5,7 @@ Keyboards class
 """
 import re
 
-from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
+from openrazer_daemon.hardware.device_base import RazerDevice as _RazerDevice, RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
 from openrazer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
 from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
 
@@ -34,6 +34,44 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         """
         super()._close()
 
+        self.key_manager.close()
+
+
+class _RippleKeyboardNoGameMode(_RazerDevice):
+    """
+    Keyboard class with ripple effect but without game mode and macro support.
+
+    Use this for devices that don't have game_led_state sysfs interface.
+    """
+
+    DRIVER_MODE = True
+
+    def __init__(self, *args, **kwargs):
+        if 'additional_methods' in kwargs:
+            kwargs['additional_methods'].extend(['get_keyboard_layout'])
+        else:
+            kwargs['additional_methods'] = ['get_keyboard_layout']
+        super().__init__(*args, **kwargs)
+
+        if not self.HAS_MATRIX:
+            raise RuntimeError("Cannot use RippleKeyboard without matrix capabilities")
+
+        self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
+        self.ripple_manager = _RippleManager(self, self._device_number)
+
+        if self.zone["backlight"]["effect"] == "ripple" or self.zone["backlight"]["effect"] == "rippleRandomColour":
+            effect_func_name = 'set' + self.capitalize_first_char(self.zone["backlight"]["effect"])
+            effect_func = getattr(self, effect_func_name, None)
+
+            if effect_func is not None:
+                if effect_func_name == 'setRipple':
+                    effect_func(self.zone["backlight"]["colors"][0], self.zone["backlight"]["colors"][1], self.zone["backlight"]["colors"][2], self.ripple_manager._ripple_thread._refresh_rate)
+                elif effect_func_name == 'setRippleRandomColour':
+                    effect_func(self.ripple_manager._ripple_thread._refresh_rate)
+
+    def _close(self):
+        super()._close()
+        self.ripple_manager.close()
         self.key_manager.close()
 
 
@@ -2379,11 +2417,11 @@ class RazerHuntsmanV3Pro8KHz(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
-class RazerHuntsmanV3XTKL(_RippleKeyboard):
+class RazerHuntsmanV3XTKL(_RippleKeyboardNoGameMode):
     """
     Class for the Razer Huntsman V3 X TKL
     """
-    EVENT_FILE_REGEX = re.compile(r'.*Razer_Huntsman_V3_X_TKL-if01-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Huntsman_V3_X_Tenkeyless-if01-event-kbd')
 
     USB_VID = 0x1532
     USB_PID = 0x02B1

@@ -231,13 +231,15 @@ class RippleManager(object):
             # Device is the device the msg originated from (could be parent device)
             if msg[2] == 'setRipple':
                 # Get (red, green, blue) tuple (args 3:6), and refreshrate arg 6
-                self._parent.key_manager.temp_key_store_state = True
+                if hasattr(self._parent, 'key_manager'):
+                    self._parent.key_manager.temp_key_store_state = True
                 self._ripple_thread.enable(msg[3:6], msg[6])
             else:
                 # Effect other than ripple so stop
                 self._ripple_thread.disable()
 
-                self._parent.key_manager.temp_key_store_state = False
+                if hasattr(self._parent, 'key_manager'):
+                    self._parent.key_manager.temp_key_store_state = False
 
     def close(self):
         """
