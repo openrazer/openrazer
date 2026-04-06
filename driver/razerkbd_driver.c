@@ -6038,6 +6038,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
         case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
         case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ:
+        case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_X_TKL:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
