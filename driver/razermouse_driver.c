@@ -5886,10 +5886,16 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
             }
 
             for (i = 1; i < size; i++) {
-                if (!search(rdev->rep4 + 1, data[i], size - 1))
-                    input_rep4_code(m_rdev->input, data[i], 1);
-                if (!search(data + 1, rdev->rep4[i], size - 1))
-                    input_rep4_code(m_rdev->input, rdev->rep4[i], 0);
+                if (!search(rdev->rep4 + 1, data[i], size - 1)) {
+                    if (data[i] == REP4_SCROLL)
+                        schedule_work(&m_rdev->scroll_toggle_work);
+                    else
+                        input_rep4_code(m_rdev->input, data[i], 1);
+                }
+                if (!search(data + 1, rdev->rep4[i], size - 1)) {
+                    if (rdev->rep4[i] != REP4_SCROLL)
+                        input_rep4_code(m_rdev->input, rdev->rep4[i], 0);
+                }
             }
             memcpy(rdev->rep4, data, 16);
             return 1;
@@ -6005,6 +6011,17 @@ static int razer_input_configured(struct hid_device *hdev,
     return 0;
 }
 
+static void scroll_toggle_worker(struct work_struct *work)
+{
+    struct razer_mouse_device *dev = container_of(work, struct razer_mouse_device, scroll_toggle_work);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    dev->scroll_mode ^= 1;
+    request = razer_chroma_misc_set_scroll_mode(dev->scroll_mode);
+    request.transaction_id.id = 0x1f;
+    razer_send_payload(dev, &request, &response);
+}
+
 /**
  * Mouse init function
  */
@@ -6015,6 +6032,7 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
 
     // Initialise mutex
     mutex_init(&dev->lock);
+    INIT_WORK(&dev->scroll_toggle_work, scroll_toggle_worker);
     // Setup values
     dev->usb_dev = usb_dev;
     dev->usb_vid = usb_dev->descriptor.idVendor;
