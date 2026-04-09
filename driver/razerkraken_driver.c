@@ -187,7 +187,7 @@ static unsigned int get_rgb_from_addr(struct device *dev, unsigned short address
  */
 static ssize_t razer_attr_read_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "%s\n", DRIVER_VERSION);
+    return sysfs_emit(buf, "%s\n", DRIVER_VERSION);
 }
 
 /**
@@ -231,7 +231,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Unknown Device";
     }
 
-    return sprintf(buf, "%s\n", device_type);
+    return sysfs_emit(buf, "%s\n", device_type);
 }
 
 /**
@@ -251,7 +251,7 @@ static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute
  */
 static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "\n");
+    return sysfs_emit(buf, "\n");
 }
 
 /**
@@ -600,7 +600,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 
     }
 
-    return sprintf(buf, "%s\n", &device->serial[0]);
+    return sysfs_emit(buf, "%s\n", &device->serial[0]);
 }
 
 /**
@@ -636,7 +636,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
         mutex_unlock(&device->lock);
     }
 
-    return sprintf(buf, "v%x.%x\n", device->firmware_version[1], device->firmware_version[2]);
+    return sysfs_emit(buf, "v%x.%x\n", device->firmware_version[1], device->firmware_version[2]);
 }
 
 /**
@@ -648,7 +648,7 @@ static ssize_t razer_attr_read_matrix_current_effect(struct device *dev, struct 
 {
     unsigned char current_effect = get_current_effect(dev);
 
-    return sprintf(buf, "%02x\n", current_effect);
+    return sysfs_emit(buf, "%02x\n", current_effect);
 }
 
 /**
