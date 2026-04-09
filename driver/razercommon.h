@@ -8,6 +8,7 @@
 #define DRIVER_RAZERCOMMON_H_
 
 #include <linux/usb/input.h>
+#include <linux/version.h>
 
 #define DRIVER_VERSION "3.12.1"
 #define DRIVER_LICENSE "GPL v2"
@@ -171,5 +172,10 @@ void print_erroneous_report(struct razer_report* report, char* driver_name, char
 // Convenience functions
 unsigned char clamp_u8(unsigned char value, unsigned char min, unsigned char max);
 unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned short max);
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 10, 0)
+__printf(2, 3)
+int sysfs_emit(char *buf, const char *fmt, ...);
+#endif
 
 #endif /* DRIVER_RAZERCOMMON_H_ */
