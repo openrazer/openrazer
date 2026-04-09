@@ -177,7 +177,7 @@ static int deathadder3_5g_set_led_state(struct razer_mouse_device *device, unsig
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: Invalid led_id on DeathAdder 3.5G\n");
+        dev_warn(&device->usb_dev->dev, "razermouse: Invalid led_id on DeathAdder 3.5G\n");
         return -EINVAL;
     }
 
@@ -251,7 +251,7 @@ static int orochi_2011_set_led_state(struct razer_mouse_device *device, unsigned
         }
         break;
     default:
-        printk(KERN_WARNING "razermouse: Invalid led_id on Orochi 2011\n");
+        dev_warn(&device->usb_dev->dev, "razermouse: Invalid led_id on Orochi 2011\n");
         return -EINVAL;
     }
 
@@ -880,7 +880,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: firmware_version not supported for this model\n");
+        dev_warn(dev, "razermouse: firmware_version not supported for this model\n");
         return -EINVAL;
     }
 
@@ -949,7 +949,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_none not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_none not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1038,7 +1038,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_custom not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_custom not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1059,7 +1059,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     struct razer_report response = {0};
 
     if (count != 3) {
-        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
+        dev_warn(dev, "razermouse: Static mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -1117,7 +1117,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_static not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_static not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1159,7 +1159,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_wave not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_wave not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1207,7 +1207,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_spectrum not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_spectrum not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1229,7 +1229,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     unsigned char speed;
 
     if (count != 4) {
-        printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
+        dev_warn(dev, "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
         return -EINVAL;
     }
 
@@ -1249,7 +1249,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_reactive not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_reactive not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1297,7 +1297,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_breath not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_breath not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1450,7 +1450,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: device_serial not supported for this model\n");
+        dev_warn(dev, "razermouse: device_serial not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1550,7 +1550,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: charge_level not supported for this model\n");
+        dev_warn(dev, "razermouse: charge_level not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1652,7 +1652,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: charge_status not supported for this model\n");
+        dev_warn(dev, "razermouse: charge_status not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1673,7 +1673,7 @@ static ssize_t razer_attr_write_charge_effect(struct device *dev, struct device_
     struct razer_report response = {0};
 
     if (count != 1) {
-        printk(KERN_WARNING "razermouse: Incorrect number of bytes for setting the charging effect\n");
+        dev_warn(dev, "razermouse: Incorrect number of bytes for setting the charging effect\n");
         return -EINVAL;
     }
 
@@ -1695,7 +1695,7 @@ static ssize_t razer_attr_write_charge_effect(struct device *dev, struct device_
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: charge_effect not supported for this model\n");
+        dev_warn(dev, "razermouse: charge_effect not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1722,7 +1722,7 @@ static ssize_t razer_attr_write_charge_colour(struct device *dev, struct device_
     razer_send_payload(device, &request, &response);
 
     if (count != 3) {
-        printk(KERN_WARNING "razermouse: Charging colour mode only accepts RGB (3byte)\n");
+        dev_warn(dev, "razermouse: Charging colour mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -1744,7 +1744,7 @@ static ssize_t razer_attr_write_charge_colour(struct device *dev, struct device_
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: charge_colour not supported for this model\n");
+        dev_warn(dev, "razermouse: charge_colour not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1932,7 +1932,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: poll_rate not supported for this model\n");
+        dev_warn(dev, "razermouse: poll_rate not supported for this model\n");
         return -EINVAL;
     }
 
@@ -2107,7 +2107,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: poll_rate not supported for this model\n");
+        dev_warn(dev, "razermouse: poll_rate not supported for this model\n");
         return -EINVAL;
     }
 
@@ -2192,7 +2192,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_brightness not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_brightness not supported for this model\n");
         return -EINVAL;
     }
 
@@ -2261,7 +2261,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_brightness not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_brightness not supported for this model\n");
         return -EINVAL;
     }
 
@@ -2298,7 +2298,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
             dpi_x = (buf[0] << 8) | (buf[1] & 0xFF); // TODO make convenience function
             deathadder3_5g_set_dpi(device, dpi_x);
         } else {
-            printk(KERN_WARNING "razermouse: DPI requires 2 bytes\n");
+            dev_warn(dev, "razermouse: DPI requires 2 bytes\n");
             return -EINVAL;
         }
         return count;
@@ -2320,7 +2320,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
             dpi_x_byte = buf[0];
             dpi_y_byte = buf[1];
         } else {
-            printk(KERN_WARNING "razermouse: DPI requires 1 byte or 2 bytes\n");
+            dev_warn(dev, "razermouse: DPI requires 1 byte or 2 bytes\n");
             return -EINVAL;
         }
 
@@ -2337,7 +2337,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
             dpi_x_byte = buf[0];
             dpi_y_byte = buf[1];
         } else {
-            printk(KERN_WARNING "razermouse: DPI requires 1 byte or 2 bytes\n");
+            dev_warn(dev, "razermouse: DPI requires 1 byte or 2 bytes\n");
             return -EINVAL;
         }
         device->orochi2011.dpi = dpi_x_byte;
@@ -2366,7 +2366,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     }
 
     if (count != 2 && count != 4) {
-        printk(KERN_WARNING "razermouse: DPI requires 2 bytes or 4 bytes\n");
+        dev_warn(dev, "razermouse: DPI requires 2 bytes or 4 bytes\n");
         return -EINVAL;
     }
 
@@ -2493,7 +2493,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: dpi not supported for this model\n");
+        dev_warn(dev, "razermouse: dpi not supported for this model\n");
         return -EINVAL;
     }
 
@@ -2671,7 +2671,7 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: dpi not supported for this model\n");
+        dev_warn(dev, "razermouse: dpi not supported for this model\n");
         return -EINVAL;
     }
 
@@ -2907,7 +2907,7 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
     size_t remaining = count;
 
     if (remaining < 5) {
-        printk(KERN_ALERT "razermouse: At least one DPI stage expected\n");
+        dev_err(dev, "razermouse: At least one DPI stage expected\n");
         return -EINVAL;
     }
 
@@ -2916,7 +2916,7 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
     buf++;
 
     if (active_stage < 1) {
-        printk(KERN_ALERT "razermouse: Invalid active DPI stage: %u < 1\n", active_stage);
+        dev_err(dev, "razermouse: Invalid active DPI stage: %u < 1\n", active_stage);
         return -EINVAL;
     }
 
@@ -2933,7 +2933,7 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
     }
 
     if (active_stage > stages_count) {
-        printk(KERN_ALERT "razermouse: Invalid active DPI stage: %u > %u\n", active_stage, stages_count);
+        dev_err(dev, "razermouse: Invalid active DPI stage: %u > %u\n", active_stage, stages_count);
         return -EINVAL;
     }
 
@@ -3011,7 +3011,7 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: dpi_stages not supported for this model\n");
+        dev_warn(dev, "razermouse: dpi_stages not supported for this model\n");
         return -EINVAL;
     }
 
@@ -3123,7 +3123,7 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: dpi_stages not supported for this model\n");
+        dev_warn(dev, "razermouse: dpi_stages not supported for this model\n");
         return -EINVAL;
     }
 
@@ -3254,7 +3254,7 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: device_idle_time not supported for this model\n");
+        dev_warn(dev, "razermouse: device_idle_time not supported for this model\n");
         return -EINVAL;
     }
 
@@ -3351,7 +3351,7 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: device_idle_time not supported for this model\n");
+        dev_warn(dev, "razermouse: device_idle_time not supported for this model\n");
         return -EINVAL;
     }
 
@@ -3444,7 +3444,7 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: charge_low_threshold not supported for this model\n");
+        dev_warn(dev, "razermouse: charge_low_threshold not supported for this model\n");
         return -EINVAL;
     }
 
@@ -3540,7 +3540,7 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: charge_low_threshold not supported for this model\n");
+        dev_warn(dev, "razermouse: charge_low_threshold not supported for this model\n");
         return -EINVAL;
     }
 
@@ -3566,7 +3566,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
     while(offset < count) {
         if(offset + 3 > count) {
-            printk(KERN_ALERT "razermouse: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
+            dev_err(dev, "razermouse: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
             return -EINVAL;
         }
 
@@ -3576,13 +3576,13 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
         // Mouse only has 1 row, row0 (pseudo row as the command actually doesn't take rows)
         if(row_id != 0) {
-            printk(KERN_ALERT "razermouse: Row ID must be 0\n");
+            dev_err(dev, "razermouse: Row ID must be 0\n");
             return -EINVAL;
         }
 
         // Validate parameters
         if(start_col > stop_col) {
-            printk(KERN_ALERT "razermouse: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
+            dev_err(dev, "razermouse: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
             return -EINVAL;
         }
 
@@ -3590,11 +3590,11 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
         // Make sure we actually got the data that was promised to us
         if(count < offset + row_length) {
-            printk(KERN_ALERT "razermouse: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
+            dev_err(dev, "razermouse: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
             return -EINVAL;
         }
 
-        // printk(KERN_INFO "razermouse: Row ID: %u, Start: %u, Stop: %u, row length: %lu\n", row_id, start_col, stop_col, row_length);
+        // dev_info(dev, "razermouse: Row ID: %u, Start: %u, Stop: %u, row length: %lu\n", row_id, start_col, stop_col, row_length);
 
         // Offset now at beginning of RGB data
 
@@ -3671,7 +3671,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             break;
 
         default:
-            printk(KERN_WARNING "razermouse: matrix_custom_frame not supported for this model\n");
+            dev_warn(dev, "razermouse: matrix_custom_frame not supported for this model\n");
             return -EINVAL;
         }
 
@@ -3694,7 +3694,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     struct razer_report response = {0};
 
     if (count != 2) {
-        printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.\n");
+        dev_warn(dev, "razerkbd: Device mode only takes 2 bytes.\n");
         return -EINVAL;
     }
 
@@ -3827,7 +3827,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: device_mode not supported for this model\n");
+        dev_warn(dev, "razermouse: device_mode not supported for this model\n");
         return -EINVAL;
     }
 
@@ -3976,7 +3976,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: device_mode not supported for this model\n");
+        dev_warn(dev, "razermouse: device_mode not supported for this model\n");
         return -EINVAL;
     }
 
@@ -4081,7 +4081,7 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: led_brightness not supported for this model\n");
+        dev_warn(dev, "razermouse: led_brightness not supported for this model\n");
         return -EINVAL;
     }
 
@@ -4184,7 +4184,7 @@ static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: led_brightness not supported for this model\n");
+        dev_warn(dev, "razermouse: led_brightness not supported for this model\n");
         return -EINVAL;
     }
 
@@ -4330,7 +4330,7 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_wave not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_wave not supported for this model\n");
         return -EINVAL;
     }
 
@@ -4446,7 +4446,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_spectrum not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_spectrum not supported for this model\n");
         return -EINVAL;
     }
 
@@ -4476,7 +4476,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive_common(struct device *dev
     unsigned char speed;
 
     if (count != 4) {
-        printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
+        dev_warn(dev, "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
         return -EINVAL;
     }
 
@@ -4545,7 +4545,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive_common(struct device *dev
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_reactive not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_reactive not supported for this model\n");
         return -EINVAL;
     }
 
@@ -4581,7 +4581,7 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
         if (count != 3) {
-            printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
+            dev_warn(dev, "razermouse: Static mode only accepts RGB (3byte)\n");
             return -EINVAL;
         }
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
@@ -4700,7 +4700,7 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_breath not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_breath not supported for this model\n");
         return -EINVAL;
     }
 
@@ -4767,7 +4767,7 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_breath not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_breath not supported for this model\n");
         return -EINVAL;
     }
 
@@ -4796,7 +4796,7 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
     struct razer_report response = {0};
 
     if (count != 3) {
-        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
+        dev_warn(dev, "razermouse: Static mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -4897,7 +4897,7 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_static not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_static not supported for this model\n");
         return -EINVAL;
     }
 
@@ -4926,7 +4926,7 @@ static ssize_t razer_attr_write_matrix_effect_blinking_common(struct device *dev
     struct razer_report response = {0};
 
     if (count != 3) {
-        printk(KERN_WARNING "razermouse: Blinking mode only accepts RGB (3byte)\n");
+        dev_warn(dev, "razermouse: Blinking mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -4948,7 +4948,7 @@ static ssize_t razer_attr_write_matrix_effect_blinking_common(struct device *dev
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_blinking not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_blinking not supported for this model\n");
         return -EINVAL;
     }
 
@@ -5102,7 +5102,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_none not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_none not supported for this model\n");
         return -EINVAL;
     }
 
@@ -5169,7 +5169,7 @@ static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, stru
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_none not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_none not supported for this model\n");
         return -EINVAL;
     }
 
@@ -5456,7 +5456,7 @@ static ssize_t razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode(
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: hyperpolling_wireless_dongle_indicator_led_mode not supported for this model\n");
+        dev_warn(dev, "razermouse: hyperpolling_wireless_dongle_indicator_led_mode not supported for this model\n");
         return -EINVAL;
     }
 
@@ -5875,7 +5875,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
             int i;
 
             if (!m_rdev) {
-                printk(KERN_WARNING "razermouse: Couldn't find mouse intf from kbd intf\n");
+                hid_warn(hdev, "razermouse: Couldn't find mouse intf from kbd intf\n");
                 return 1;
             }
 

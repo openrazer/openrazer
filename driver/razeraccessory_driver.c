@@ -326,7 +326,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -348,7 +348,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     unsigned char speed;
 
     if (count != 4) {
-        printk(KERN_WARNING "razeraccessory: Reactive only accepts Speed, RGB (4byte)\n");
+        dev_warn(dev, "razeraccessory: Reactive only accepts Speed, RGB (4byte)\n");
         return -EINVAL;
     }
 
@@ -375,7 +375,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -416,7 +416,7 @@ static ssize_t razer_attr_write_matrix_reactive_trigger(struct device *dev, stru
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -490,7 +490,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -511,7 +511,7 @@ static ssize_t razer_attr_write_matrix_effect_blinking(struct device *dev, struc
     struct razer_report response = {0};
 
     if (count != 3) {
-        printk(KERN_WARNING "razeraccessory: Blinking mode only accepts RGB (3byte)\n");
+        dev_warn(dev, "razeraccessory: Blinking mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -587,7 +587,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -608,7 +608,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     struct razer_report response = {0};
 
     if (count != 3) {
-        printk(KERN_WARNING "razeraccessory: Static mode only accepts RGB (3byte)\n");
+        dev_warn(dev, "razeraccessory: Static mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -707,7 +707,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         break;
     }
 
@@ -783,7 +783,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -917,7 +917,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -934,7 +934,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
     unsigned char speed = 0;
 
     if (count != 1 && count != 4 && count != 7) {
-        printk(KERN_WARNING "razeraccessory: Starlight accepts only 1, 4 or 7 bytes input (speed, [RGB], [RGB])\n");
+        dev_warn(dev, "razeraccessory: Starlight accepts only 1, 4 or 7 bytes input (speed, [RGB], [RGB])\n");
         return -EINVAL;
     }
     speed = buf[0];
@@ -960,7 +960,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -986,7 +986,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
     while(offset < count) {
         if(offset + 3 > count) {
-            printk(KERN_ALERT "razeraccessory: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
+            dev_err(dev, "razeraccessory: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
             return -EINVAL;
         }
 
@@ -996,18 +996,18 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
         // Validate parameters
         if(start_col > stop_col) {
-            printk(KERN_ALERT "razeraccessory: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
+            dev_err(dev, "razeraccessory: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
             return -EINVAL;
         }
 
         row_length = ((stop_col + 1) - start_col) * 3;
 
         if(count < offset + row_length) {
-            printk(KERN_ALERT "razeraccessory: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
+            dev_err(dev, "razeraccessory: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
             return -EINVAL;
         }
 
-        // printk(KERN_INFO "razeraccessory: Row ID: %u, Start: %u, Stop: %u, row length: %lu\n", row_id, start_col, stop_col, row_length);
+        // dev_info(dev, "razeraccessory: Row ID: %u, Start: %u, Stop: %u, row length: %lu\n", row_id, start_col, stop_col, row_length);
 
         switch (device->usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_CORE:
@@ -1072,7 +1072,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             return count;
 
         default:
-            printk(KERN_WARNING "razeraccessory: Unknown device\n");
+            dev_warn(dev, "razeraccessory: Unknown device\n");
             return -EINVAL;
         }
 
@@ -1144,7 +1144,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -1203,7 +1203,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -1222,7 +1222,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     struct razer_report response = {0};
 
     if (count != 2) {
-        printk(KERN_WARNING "razeraccessory: Device mode only takes 2 bytes.\n");
+        dev_warn(dev, "razeraccessory: Device mode only takes 2 bytes.\n");
         return -EINVAL;
     }
 
@@ -1263,7 +1263,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -1334,7 +1334,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -1359,7 +1359,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     struct razer_report response = {0};
 
     if (count < 1) {
-        printk(KERN_WARNING "razeraccessory: Brightness takes an ascii number\n");
+        dev_warn(dev, "razeraccessory: Brightness takes an ascii number\n");
         return -EINVAL;
     }
 
@@ -1443,7 +1443,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -1515,7 +1515,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -1535,7 +1535,7 @@ static ssize_t razer_attr_write_set_charge_brightness(struct device *dev, struct
     struct razer_report response = {0};
 
     if (count < 1) {
-        printk(KERN_WARNING "razeraccessory: Brightness takes an ascii number\n");
+        dev_warn(dev, "razeraccessory: Brightness takes an ascii number\n");
         return -EINVAL;
     }
 
@@ -1555,7 +1555,7 @@ static ssize_t razer_attr_write_set_charge_brightness(struct device *dev, struct
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -1581,7 +1581,7 @@ static ssize_t razer_attr_read_set_charge_brightness(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -1659,7 +1659,7 @@ static ssize_t razer_attr_write_charge_mode_spectrum(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -1710,7 +1710,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -1750,7 +1750,7 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
     struct razer_report response = {0};
 
     if (count != 3) {
-        printk(KERN_WARNING "razeraccessory: Static mode only accepts RGB (3byte)\n");
+        dev_warn(dev, "razeraccessory: Static mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -1766,7 +1766,7 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -1822,7 +1822,7 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -1897,7 +1897,7 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
         break;
 
     default:
-        printk(KERN_WARNING "razeraccessory: Unknown device\n");
+        dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
     }
 
@@ -1941,7 +1941,7 @@ static ssize_t razer_attr_write_channel_led_brightness(unsigned char led, struct
     struct razer_report response = {0};
 
     if (count < 1) {
-        printk(KERN_WARNING "razeraccessory: Brightness takes an ascii number\n");
+        dev_warn(dev, "razeraccessory: Brightness takes an ascii number\n");
         return -EINVAL;
     }
 
@@ -2044,7 +2044,7 @@ static ssize_t razer_attr_write_channel_size(unsigned int channel, struct device
     struct razer_accessory_device *device;
 
     if (count < 1) {
-        printk(KERN_WARNING "razeraccessory: Size takes an ascii number\n");
+        dev_warn(dev, "razeraccessory: Size takes an ascii number\n");
         return -EINVAL;
     }
 
