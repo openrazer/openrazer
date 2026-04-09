@@ -45,7 +45,7 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
 
     kfree(buf);
     if(len!=size)
-        printk(KERN_WARNING "razer driver: Device data transfer failed.\n");
+        dev_warn(&usb_dev->dev, "razer driver: Device data transfer failed.\n");
 
     return ((len < 0) ? len : ((len != size) ? -EIO : 0));
 }
@@ -106,7 +106,7 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
 
     // Error if report is wrong length
     if(len != 90) {
-        printk(KERN_WARNING "razer driver: Invalid USB response. USB Report length: %d\n", len);
+        dev_warn(&usb_dev->dev, "razer driver: Invalid USB response. USB Report length: %d\n", len);
         result = 1;
     }
 
@@ -239,7 +239,7 @@ int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *dat
 
     kfree(buf);
     if(len!=report_size)
-        printk(KERN_WARNING "razer driver: Device data transfer failed.\n");
+        dev_warn(&usb_dev->dev, "razer driver: Device data transfer failed.\n");
 
     return ((len < 0) ? len : ((len != report_size) ? -EIO : 0));
 }
@@ -268,7 +268,7 @@ int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, unsig
     report.last_idx = size - 1;
 
     if (size * 3 > ARRAY_SIZE(report.color_data)) {
-        printk(KERN_ERR "razer driver: size too big\n");
+        dev_err(&usb_dev->dev,"razer driver: size too big\n");
         return -EINVAL;
     }
 
@@ -287,7 +287,7 @@ int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, unsig
                           USB_CTRL_SET_TIMEOUT);
 
     if (len != sizeof(report))
-        printk(KERN_WARNING "razer driver: Device data transfer failed. len = %d", len);
+        dev_warn(&usb_dev->dev, "razer driver: Device data transfer failed. len = %d", len);
 
     return ((len < 0) ? len : ((len != size) ? -EIO : 0));
 }

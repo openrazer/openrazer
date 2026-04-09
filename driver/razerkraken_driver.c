@@ -75,7 +75,7 @@ static int razer_kraken_send_control_msg(struct usb_device *usb_dev,struct razer
 
     kfree(buf);
     if(len!=size)
-        printk(KERN_WARNING "razer driver: Device data transfer failed.\n");
+        dev_warn(&usb_dev->dev, "razer driver: Device data transfer failed.\n");
 
     return ((len < 0) ? len : ((len != size) ? -EIO : 0));
 }
@@ -136,7 +136,7 @@ static unsigned char get_current_effect(struct device *dev)
     if(device->data[0] == 0x05) {
         result = device->data[1];
     } else {
-        printk(KERN_CRIT "razerkraken: Did not manage to get report\n");
+        dev_err(dev, "razerkraken: Did not manage to get report\n");
     }
 
     // Unlock if there isn't already a lock (as there would be by now), otherwise skip as reusing existing lock
@@ -165,11 +165,11 @@ static unsigned int get_rgb_from_addr(struct device *dev, unsigned short address
 
     // Check for actual data
     if(device->data[0] == 0x05) {
-        //printk(KERN_CRIT "razerkraken: Got %02x%02x%02x %02x\n", device->data[1], device->data[2], device->data[3], device->data[4]);
+        //dev_err(dev, "razerkraken: Got %02x%02x%02x %02x\n", device->data[1], device->data[2], device->data[3], device->data[4]);
         memcpy(&buf[0], &device->data[1], len);
         written = len;
     } else {
-        printk(KERN_CRIT "razerkraken: Did not manage to get report\n");
+        dev_err(dev, "razerkraken: Did not manage to get report\n");
     }
 
     // Unlock if there isn't already a lock (as there would be by now), otherwise skip as reusing existing lock
@@ -317,7 +317,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
     if (count != 3 && count != 4) {
-        printk(KERN_WARNING "razerkraken: Static mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
+        dev_warn(dev, "razerkraken: Static mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
         return -EINVAL;
     }
 
@@ -367,7 +367,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
     if(count != 3 && count != 4) {
-        printk(KERN_WARNING "razerkraken: Custom mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
+        dev_warn(dev, "razerkraken: Custom mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
         return -EINVAL;
     }
 
@@ -428,7 +428,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
 
     // Short circuit here as rainie only does breathing1
     if(device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN && count != 3) {
-        printk(KERN_WARNING "razerkraken: Breathing mode only accepts RGB (3byte)\n");
+        dev_warn(dev, "razerkraken: Breathing mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -510,7 +510,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         mutex_unlock(&device->lock);
 
     } else {
-        printk(KERN_WARNING "razerkraken: Breathing mode only accepts RGB (3byte), RGB RGB (6byte) or RGB RGB RGB (9byte)\n");
+        dev_warn(dev, "razerkraken: Breathing mode only accepts RGB (3byte), RGB RGB (6byte) or RGB RGB RGB (9byte)\n");
         return -EINVAL;
     }
 
@@ -559,7 +559,7 @@ static ssize_t razer_attr_read_matrix_effect_breath(struct device *dev, struct d
         break;
 
     default:
-        printk(KERN_WARNING "razerkraken: Unknown device\n");
+        dev_warn(dev, "razerkraken: Unknown device\n");
         return -EINVAL;
     }
 }
@@ -589,7 +589,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
             memcpy(&device->serial[0], &device->data[1], 22);
             device->serial[22] = '\0';
         } else {
-            printk(KERN_CRIT "razerkraken: Did not manage to get serial from device, using XX01 instead\n");
+            dev_err(dev, "razerkraken: Did not manage to get serial from device, using XX01 instead\n");
             device->serial[0] = 'X';
             device->serial[1] = 'X';
             device->serial[2] = '0';
@@ -628,7 +628,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
             device->firmware_version[1] = device->data[1];
             device->firmware_version[2] = device->data[2];
         } else {
-            printk(KERN_CRIT "razerkraken: Did not manage to get firmware version from device, using v9.99 instead\n");
+            dev_err(dev, "razerkraken: Did not manage to get firmware version from device, using v9.99 instead\n");
             device->firmware_version[0] = 1;
             device->firmware_version[1] = 0x09;
             device->firmware_version[2] = 0x99;
@@ -852,13 +852,13 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 {
     struct razer_kraken_device *device = dev_get_drvdata(&hdev->dev);
 
-    //printk(KERN_WARNING "razerkraken: Got raw message %d\n", size);
+    //dev_warn(dev, "razerkraken: Got raw message %d\n", size);
 
     if(size == 33) { // Should be a response to a Control packet
         memcpy(&device->data[0], &data[0], size);
 
     } else {
-        printk(KERN_WARNING "razerkraken: Got raw message, length: %d\n", size);
+        hid_warn(hdev, "razerkraken: Got raw message, length: %d\n", size);
     }
 
     return 0;
