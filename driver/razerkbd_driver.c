@@ -457,7 +457,7 @@ static ssize_t razer_attr_read_kbd_layout(struct device *dev, struct device_attr
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%02x\n", response.arguments[0]);
+    return sysfs_emit(buf, "%02x\n", response.arguments[0]);
 }
 
 /**
@@ -655,7 +655,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", response.arguments[1]);
 }
 
 /**
@@ -700,7 +700,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", response.arguments[1]);
 }
 
 /**
@@ -769,7 +769,7 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[0]);
+    return sysfs_emit(buf, "%d\n", response.arguments[0]);
 }
 
 /**
@@ -985,7 +985,7 @@ static ssize_t razer_attr_read_game_led_state(struct device *dev, struct device_
     }
 
     razer_send_payload(device, &request, &response);
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return sysfs_emit(buf, "%d\n", response.arguments[2]);
 }
 
 /**
@@ -1048,7 +1048,7 @@ static ssize_t razer_attr_read_keyswitch_optimization(struct device *dev, struct
         state = 1; // Gaming
     }
 
-    return sprintf(buf, "%d\n", state);
+    return sysfs_emit(buf, "%d\n", state);
 }
 
 /**
@@ -1087,7 +1087,7 @@ static ssize_t razer_attr_read_macro_led_state(struct device *dev, struct device
     request.transaction_id.id = 0xFF;
 
     razer_send_payload(device, &request, &response);
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return sysfs_emit(buf, "%d\n", response.arguments[2]);
 }
 
 /**
@@ -1097,7 +1097,7 @@ static ssize_t razer_attr_read_macro_led_state(struct device *dev, struct device
  */
 static ssize_t razer_attr_read_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "%s\n", DRIVER_VERSION);
+    return sysfs_emit(buf, "%s\n", DRIVER_VERSION);
 }
 
 /**
@@ -1586,7 +1586,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Unknown Device";
     }
 
-    return sprintf(buf, "%s\n", device_type);
+    return sysfs_emit(buf, "%s\n", device_type);
 }
 
 /**
@@ -1711,7 +1711,7 @@ static ssize_t razer_attr_read_macro_led_effect(struct device *dev, struct devic
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return sysfs_emit(buf, "%d\n", response.arguments[2]);
 }
 
 /**
@@ -1769,7 +1769,7 @@ static ssize_t razer_attr_read_matrix_effect_pulsate(struct device *dev, struct 
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return sysfs_emit(buf, "%d\n", response.arguments[2]);
 }
 
 /**
@@ -1807,7 +1807,7 @@ static ssize_t razer_attr_read_profile_led_red(struct device *dev, struct device
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return sysfs_emit(buf, "%d\n", response.arguments[2]);
 }
 
 /**
@@ -1843,7 +1843,7 @@ static ssize_t razer_attr_read_profile_led_green(struct device *dev, struct devi
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return sysfs_emit(buf, "%d\n", response.arguments[2]);
 }
 
 /**
@@ -1879,7 +1879,7 @@ static ssize_t razer_attr_read_profile_led_blue(struct device *dev, struct devic
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return sysfs_emit(buf, "%d\n", response.arguments[2]);
 }
 
 /**
@@ -2012,7 +2012,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     serial_string[22] = '\0';
 
 exit:
-    return sprintf(buf, "%s\n", &serial_string[0]);
+    return sysfs_emit(buf, "%s\n", &serial_string[0]);
 }
 
 /**
@@ -2031,7 +2031,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "v%d.%d\n", response.arguments[0], response.arguments[1]);
+    return sysfs_emit(buf, "v%d.%d\n", response.arguments[0], response.arguments[1]);
 }
 
 /**
@@ -3407,7 +3407,7 @@ static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_
     if (has_inverted_led_state(dev) && (state == 0 || state == 1))
         state = !state;
 
-    return sprintf(buf, "%d\n", state);
+    return sysfs_emit(buf, "%d\n", state);
 }
 
 /**
@@ -3633,7 +3633,7 @@ static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute 
     razer_send_payload(device, &request, &response);
 
     print_erroneous_report(&response, "razerkbd", "Test");
-    return sprintf(buf, "%02x%02x%02x\n", response.arguments[0], response.arguments[1], response.arguments[2]);
+    return sysfs_emit(buf, "%02x%02x%02x\n", response.arguments[0], response.arguments[1], response.arguments[2]);
 }
 
 /**
@@ -3981,7 +3981,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         brightness = response.arguments[2];
     }
 
-    return sprintf(buf, "%d\n", brightness);
+    return sysfs_emit(buf, "%d\n", brightness);
 }
 
 /**
@@ -4282,7 +4282,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
         break;
     }
 
-    return sprintf(buf, "%d\n", polling_rate);
+    return sysfs_emit(buf, "%d\n", polling_rate);
 }
 
 /**
