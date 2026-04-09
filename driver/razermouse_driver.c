@@ -6061,7 +6061,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     dev = kzalloc(sizeof(struct razer_mouse_device), GFP_KERNEL);
 
     if(dev == NULL) {
-        dev_err(&intf->dev, "out of memory\n");
+        hid_err(hdev, "out of memory\n");
         return -ENOMEM;
     }
 
@@ -8270,7 +8270,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
     hrtimer_cancel(&dev->repeat_timer);
 
     kfree(dev);
-    dev_info(&intf->dev, "Razer Device disconnected\n");
+    hid_info(hdev, "Razer Device disconnected\n");
 }
 
 /**

@@ -4972,7 +4972,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 
     dev = kzalloc(sizeof(struct razer_kbd_device), GFP_KERNEL);
     if(dev == NULL) {
-        dev_err(&intf->dev, "out of memory\n");
+        hid_err(hdev, "out of memory\n");
         return -ENOMEM;
     }
 
@@ -6036,7 +6036,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
 
     hid_hw_stop(hdev);
     kfree(dev);
-    dev_info(&intf->dev, "Razer Device disconnected\n");
+    hid_info(hdev, "Razer Device disconnected\n");
 }
 
 /**

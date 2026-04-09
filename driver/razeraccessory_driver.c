@@ -2343,7 +2343,7 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
         if (intf->cur_altsetting->desc.bInterfaceNumber != 0) {
-            dev_info(&intf->dev, "skipping secondary interface\n");
+            hid_info(hdev, "skipping secondary interface\n");
             return false;
         }
     }
@@ -2364,7 +2364,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
 
     dev = kzalloc(sizeof(struct razer_accessory_device), GFP_KERNEL);
     if(dev == NULL) {
-        dev_err(&intf->dev, "out of memory\n");
+        hid_err(hdev, "out of memory\n");
         return -ENOMEM;
     }
 
@@ -2811,7 +2811,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     hid_hw_stop(hdev);
 
     kfree(dev);
-    dev_info(&intf->dev, "Razer Device disconnected\n");
+    hid_info(hdev, "Razer Device disconnected\n");
 }
 
 /**
