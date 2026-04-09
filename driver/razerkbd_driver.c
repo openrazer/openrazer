@@ -606,7 +606,7 @@ static void razer_set_device_mode(struct razer_kbd_device *device, unsigned char
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: device_mode not supported for this model\n");
+        dev_warn(&device->usb_dev->dev, "razerkbd: device_mode not supported for this model\n");
         return;
     }
 
@@ -649,7 +649,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: charge_level not supported for this model\n");
+        dev_warn(dev, "razerkbd: charge_level not supported for this model\n");
         return -EINVAL;
     }
 
@@ -694,7 +694,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: charge_status not supported for this model\n");
+        dev_warn(dev, "razerkbd: charge_status not supported for this model\n");
         return -EINVAL;
     }
 
@@ -715,7 +715,7 @@ static ssize_t razer_attr_write_charge_effect(struct device *dev, struct device_
     struct razer_report response = {0};
 
     if (count != 1) {
-        printk(KERN_WARNING "razerkbd: Incorrect number of bytes for setting the charging effect\n");
+        dev_warn(dev, "razerkbd: Incorrect number of bytes for setting the charging effect\n");
         return -EINVAL;
     }
 
@@ -744,7 +744,7 @@ static ssize_t razer_attr_write_charge_colour(struct device *dev, struct device_
     razer_send_payload(device, &request, &response);
 
     if (count != 3) {
-        printk(KERN_WARNING "razerkbd: Charging colour mode only accepts RGB (3byte)\n");
+        dev_warn(dev, "razerkbd: Charging colour mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -884,7 +884,7 @@ static ssize_t razer_attr_write_game_led_state(struct device *dev, struct device
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: game_led_state not supported for this model\n");
+        dev_warn(dev, "razerkbd: game_led_state not supported for this model\n");
         return -EINVAL;
     }
 
@@ -980,7 +980,7 @@ static ssize_t razer_attr_read_game_led_state(struct device *dev, struct device_
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: game_led_state not supported for this model\n");
+        dev_warn(dev, "razerkbd: game_led_state not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1011,7 +1011,7 @@ static ssize_t razer_attr_write_keyswitch_optimization(struct device *dev, struc
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: keyswitch_optimization not supported for this model\n");
+        dev_warn(dev, "razerkbd: keyswitch_optimization not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1036,7 +1036,7 @@ static ssize_t razer_attr_read_keyswitch_optimization(struct device *dev, struct
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: keyswitch_optimization not supported for this model\n");
+        dev_warn(dev, "razerkbd: keyswitch_optimization not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1687,7 +1687,7 @@ static ssize_t razer_attr_write_macro_led_effect(struct device *dev, struct devi
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: macro_led_effect not supported for this model\n");
+        dev_warn(dev, "razerkbd: macro_led_effect not supported for this model\n");
         return -EINVAL;
     }
     razer_send_payload(device, &request, &response);
@@ -1744,7 +1744,7 @@ static ssize_t razer_attr_write_matrix_effect_pulsate(struct device *dev, struct
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: matrix_effect_pulsate not supported for this model\n");
+        dev_warn(dev, "razerkbd: matrix_effect_pulsate not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1801,7 +1801,7 @@ static ssize_t razer_attr_read_profile_led_red(struct device *dev, struct device
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: profile_led_red not supported for this model\n");
+        dev_warn(dev, "razerkbd: profile_led_red not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1837,7 +1837,7 @@ static ssize_t razer_attr_read_profile_led_green(struct device *dev, struct devi
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: profile_led_green not supported for this model\n");
+        dev_warn(dev, "razerkbd: profile_led_green not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1873,7 +1873,7 @@ static ssize_t razer_attr_read_profile_led_blue(struct device *dev, struct devic
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: profile_led_blue not supported for this model\n");
+        dev_warn(dev, "razerkbd: profile_led_blue not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1908,7 +1908,7 @@ static ssize_t razer_attr_write_profile_led_red(struct device *dev, struct devic
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: profile_led_red not supported for this model\n");
+        dev_warn(dev, "razerkbd: profile_led_red not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1943,7 +1943,7 @@ static ssize_t razer_attr_write_profile_led_green(struct device *dev, struct dev
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: profile_led_green not supported for this model\n");
+        dev_warn(dev, "razerkbd: profile_led_green not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1977,7 +1977,7 @@ static ssize_t razer_attr_write_profile_led_blue(struct device *dev, struct devi
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: profile_led_blue not supported for this model\n");
+        dev_warn(dev, "razerkbd: profile_led_blue not supported for this model\n");
         return -EINVAL;
     }
 
@@ -2181,7 +2181,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: matrix_effect_none not supported for this model\n");
+        dev_warn(dev, "razerkbd: matrix_effect_none not supported for this model\n");
         return -EINVAL;
     }
 
@@ -2325,7 +2325,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: matrix_effect_wave not supported for this model\n");
+        dev_warn(dev, "razerkbd: matrix_effect_wave not supported for this model\n");
         return -EINVAL;
     }
 
@@ -2357,7 +2357,7 @@ static ssize_t razer_attr_write_matrix_effect_wheel(struct device *dev, struct d
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: matrix_effect_wheel not supported for this model\n");
+        dev_warn(dev, "razerkbd: matrix_effect_wheel not supported for this model\n");
         return -EINVAL;
     }
     razer_send_payload(device, &request, &response);
@@ -2515,7 +2515,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: matrix_effect_spectrum not supported for this model\n");
+        dev_warn(dev, "razerkbd: matrix_effect_spectrum not supported for this model\n");
         return -EINVAL;
     }
 
@@ -2537,7 +2537,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     unsigned char speed;
 
     if (count != 4) {
-        printk(KERN_WARNING "razerkbd: Reactive only accepts Speed, RGB (4byte)\n");
+        dev_warn(dev, "razerkbd: Reactive only accepts Speed, RGB (4byte)\n");
         return -EINVAL;
     }
 
@@ -2666,7 +2666,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: matrix_effect_reactive not supported for this model\n");
+        dev_warn(dev, "razerkbd: matrix_effect_reactive not supported for this model\n");
         return -EINVAL;
     }
 
@@ -2762,7 +2762,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLADE_18_2024:
     case USB_DEVICE_ID_RAZER_BLADE_18_2025:
         if (count != 3) {
-            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            dev_warn(dev, "razerkbd: Static mode only accepts RGB (3byte)\n");
             return -EINVAL;
         }
         request = razer_chroma_standard_matrix_effect_static((struct razer_rgb*)&buf[0]);
@@ -2773,7 +2773,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
         if (count != 3) {
-            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            dev_warn(dev, "razerkbd: Static mode only accepts RGB (3byte)\n");
             return -EINVAL;
         }
         request = razer_chroma_standard_matrix_effect_static((struct razer_rgb*)&buf[0]);
@@ -2802,7 +2802,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         if (count != 3) {
-            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            dev_warn(dev, "razerkbd: Static mode only accepts RGB (3byte)\n");
             return -EINVAL;
         }
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
@@ -2836,7 +2836,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         if (count != 3) {
-            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            dev_warn(dev, "razerkbd: Static mode only accepts RGB (3byte)\n");
             return -EINVAL;
         }
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
@@ -2851,7 +2851,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         if (count != 3) {
-            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            dev_warn(dev, "razerkbd: Static mode only accepts RGB (3byte)\n");
             return -EINVAL;
         }
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
@@ -2861,7 +2861,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
 
     case USB_DEVICE_ID_RAZER_ANANSI:
         if (count != 3) {
-            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            dev_warn(dev, "razerkbd: Static mode only accepts RGB (3byte)\n");
             return -EINVAL;
         }
         request = razer_chroma_standard_set_led_state(VARSTORE, BACKLIGHT_LED, ON);
@@ -2876,7 +2876,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: Cannot set static mode for this device\n");
+        dev_warn(dev, "razerkbd: Cannot set static mode for this device\n");
         return -EINVAL;
     }
 
@@ -2903,7 +2903,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORNATA:
         if (count != 4) {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
+            dev_warn(dev, "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         request = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1]);
@@ -2939,7 +2939,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
             request.transaction_id.id = 0x3F;
             razer_send_payload(device, &request, &response);
         } else {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
+            dev_warn(dev, "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         break;
@@ -2967,7 +2967,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
         } else if(count == 1) {
             request = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
         } else {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
+            dev_warn(dev, "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         request.transaction_id.id = 0x1F;
@@ -2987,7 +2987,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
         } else if(count == 1) {
             request = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
         } else {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
+            dev_warn(dev, "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         request.transaction_id.id = 0x9F;
@@ -3009,7 +3009,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
             request.transaction_id.id = 0x1F;
             razer_send_payload(device, &request, &response);
         } else {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
+            dev_warn(dev, "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         break;
@@ -3031,7 +3031,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
             request.transaction_id.id = 0xFF;
             razer_send_payload(device, &request, &response);
         } else {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
+            dev_warn(dev, "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         break;
@@ -3050,7 +3050,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
             request.transaction_id.id = 0x3F;
             razer_send_payload(device, &request, &response);
         } else {
-            printk(KERN_WARNING "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
+            dev_warn(dev, "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
         }
         break;
@@ -3095,7 +3095,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: matrix_effect_starlight not supported for this model\n");
+        dev_warn(dev, "razerkbd: matrix_effect_starlight not supported for this model\n");
         return -EINVAL;
     }
 
@@ -3122,7 +3122,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
             break;
 
         default:
-            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
+            dev_warn(dev, "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
             return -EINVAL;
         }
         break;
@@ -3153,7 +3153,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
             break;
 
         default:
-            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
+            dev_warn(dev, "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
             return -EINVAL;
         }
         break;
@@ -3195,7 +3195,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
             break;
 
         default:
-            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
+            dev_warn(dev, "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
             return -EINVAL;
         }
         break;
@@ -3230,7 +3230,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         } else if (count == 1) { // "Random" colour mode
             request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
         } else {
-            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
+            dev_warn(dev, "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
             return -EINVAL;
         }
         request.transaction_id.id = 0x1F;
@@ -3250,7 +3250,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         } else if (count == 1) { // "Random" colour mode
             request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
         } else {
-            printk(KERN_WARNING "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
+            dev_warn(dev, "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
             return -EINVAL;
         }
         request.transaction_id.id = 0x9F;
@@ -3276,7 +3276,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
             request.transaction_id.id = 0x3F;
             razer_send_payload(device, &request, &response);
             break;
-            // TODO move default to case 1:. Then default: printk(warning). Also remove pointless buffer
+            // TODO move default to case 1:. Then default: dev_warn(). Also remove pointless buffer
         }
         break;
 
@@ -3353,12 +3353,12 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
             request.transaction_id.id = 0xFF;
             razer_send_payload(device, &request, &response);
             break;
-            // TODO move default to case 1:. Then default: printk(warning). Also remove pointless buffer
+            // TODO move default to case 1:. Then default: dev_warn(). Also remove pointless buffer
         }
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: matrix_effect_breath not supported for this model\n");
+        dev_warn(dev, "razerkbd: matrix_effect_breath not supported for this model\n");
         return -EINVAL;
     }
 
@@ -3573,7 +3573,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: matrix_effect_custom not supported for this model\n");
+        dev_warn(dev, "razerkbd: matrix_effect_custom not supported for this model\n");
         return -EINVAL;
     }
 
@@ -3798,7 +3798,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: matrix_brightness not supported for this model\n");
+        dev_warn(dev, "razerkbd: matrix_brightness not supported for this model\n");
         return -EINVAL;
     }
 
@@ -3968,7 +3968,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: matrix_brightness not supported for this model\n");
+        dev_warn(dev, "razerkbd: matrix_brightness not supported for this model\n");
         return -EINVAL;
     }
 
@@ -3994,7 +3994,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     struct razer_report response = {0};
 
     if (count != 2) {
-        printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.\n");
+        dev_warn(dev, "razerkbd: Device mode only takes 2 bytes.\n");
         return -EINVAL;
     }
 
@@ -4050,7 +4050,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
     while(offset < count) {
         if(offset + 3 > count) {
-            printk(KERN_ALERT "razerkbd: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
+            dev_err(dev, "razerkbd: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
             return -EINVAL;
         }
 
@@ -4060,7 +4060,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
         // Validate parameters
         if(start_col > stop_col) {
-            printk(KERN_ALERT "razerkbd: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
+            dev_err(dev, "razerkbd: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
             return -EINVAL;
         }
 
@@ -4068,11 +4068,11 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
         // Make sure we actually got the data that was promised to us
         if(count < offset + row_length) {
-            printk(KERN_ALERT "razerkbd: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
+            dev_err(dev, "razerkbd: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
             return -EINVAL;
         }
 
-        // printk(KERN_INFO "razerkbd: Row ID: %u, Start: %u, Stop: %u, row length: %lu\n", row_id, start_col, stop_col, row_length);
+        // dev_info(dev, "razerkbd: Row ID: %u, Start: %u, Stop: %u, row length: %lu\n", row_id, start_col, stop_col, row_length);
 
         // Offset now at beginning of RGB data
 
@@ -4201,7 +4201,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             break;
 
         default:
-            printk(KERN_WARNING "razerkbd: matrix_custom_frame not supported for this model\n");
+            dev_warn(dev, "razerkbd: matrix_custom_frame not supported for this model\n");
             return -EINVAL;
         }
 
@@ -4252,7 +4252,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: poll_rate not supported for this model\n");
+        dev_warn(dev, "razerkbd: poll_rate not supported for this model\n");
         return -EINVAL;
     }
 
@@ -4314,7 +4314,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
         break;
 
     default:
-        printk(KERN_WARNING "razerkbd: poll_rate not supported for this model\n");
+        dev_warn(dev, "razerkbd: poll_rate not supported for this model\n");
         return -EINVAL;
     }
 
@@ -4331,7 +4331,7 @@ static ssize_t razer_attr_write_key_super(struct device *dev, struct device_attr
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
     if (count < 1) {
-        printk(KERN_ALERT "razerkbd: Failed to provide argument\n");
+        dev_err(dev, "razerkbd: Failed to provide argument\n");
         return -EINVAL;
     }
 
@@ -4360,11 +4360,11 @@ static ssize_t razer_attr_write_key_alt_tab(struct device *dev, struct device_at
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
     if (count < 1) {
-        printk(KERN_ALERT "razerkbd: Failed to provide argument\n");
+        dev_err(dev, "razerkbd: Failed to provide argument\n");
         return -EINVAL;
     }
 
-    printk(KERN_WARNING "razerkbd: Settings block_keys[1] to %u\n", buf[0]);
+    dev_warn(dev, "razerkbd: Settings block_keys[1] to %u\n", buf[0]);
     device->block_keys[1] = buf[0];
 
     return count;
@@ -4390,7 +4390,7 @@ static ssize_t razer_attr_write_key_alt_f4(struct device *dev, struct device_att
     struct razer_kbd_device *device = dev_get_drvdata(dev);
 
     if (count < 1) {
-        printk(KERN_ALERT "razerkbd: Failed to provide argument\n");
+        dev_err(dev, "razerkbd: Failed to provide argument\n");
         return -EINVAL;
     }
 
