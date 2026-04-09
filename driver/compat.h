@@ -1,5 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 
+#include <linux/version.h>
+
 // Compatbility for fallthrough pseudo keyword for Linux versions older than v5.4
 // See also https://git.kernel.org/torvalds/c/294f69e
 #ifndef fallthrough
@@ -36,4 +38,9 @@
  * See also https://git.kernel.org/torvalds/c/52ea899 */
 #ifndef REL_HWHEEL_HI_RES
 #define REL_HWHEEL_HI_RES 0x0c
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 10, 0)
+__printf(2, 3)
+int sysfs_emit(char *buf, const char *fmt, ...);
 #endif
