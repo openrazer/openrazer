@@ -106,7 +106,7 @@ static void razer_set_device_mode(struct razer_accessory_device *device, unsigne
  */
 static ssize_t razer_attr_read_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "%s\n", DRIVER_VERSION);
+    return sysfs_emit(buf, "%s\n", DRIVER_VERSION);
 }
 
 /**
@@ -238,7 +238,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
     }
 
-    return sprintf(buf, "%s\n", device_type);
+    return sysfs_emit(buf, "%s\n", device_type);
 }
 
 /**
@@ -258,7 +258,7 @@ static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute
  */
 static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "\n");
+    return sysfs_emit(buf, "\n");
 }
 
 /**
@@ -1148,7 +1148,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
         return -EINVAL;
     }
 
-    return sprintf(buf, "%s\n", &serial_string[0]);
+    return sysfs_emit(buf, "%s\n", &serial_string[0]);
 }
 
 /**
@@ -1209,7 +1209,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "v%u.%u\n", response.arguments[0], response.arguments[1]);
+    return sysfs_emit(buf, "v%u.%u\n", response.arguments[0], response.arguments[1]);
 }
 
 /**
@@ -1283,7 +1283,7 @@ static ssize_t razer_attr_read_is_mug_present(struct device *dev, struct device_
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%u\n", response.arguments[1]);
+    return sysfs_emit(buf, "%u\n", response.arguments[1]);
 }
 
 /**
@@ -1519,7 +1519,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         return -EINVAL;
     }
 
-    return sprintf(buf, "%d\n", brightness);
+    return sysfs_emit(buf, "%d\n", brightness);
 }
 
 /**
@@ -1585,7 +1585,7 @@ static ssize_t razer_attr_read_set_charge_brightness(struct device *dev, struct 
         return -EINVAL;
     }
 
-    return sprintf(buf, "%d\n", brightness);
+    return sysfs_emit(buf, "%d\n", brightness);
 }
 
 /**
@@ -2000,7 +2000,7 @@ static ssize_t razer_attr_read_channel_size(unsigned int channel, struct device 
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[channel * 2]);
+    return sysfs_emit(buf, "%d\n", response.arguments[channel * 2]);
 }
 
 static ssize_t razer_attr_read_channel1_size(struct device *dev, struct device_attribute *attr, char *buf)
@@ -2161,7 +2161,7 @@ static ssize_t razer_attr_read_channel_led_brightness(unsigned char led, struct 
     razer_send_payload(device, &request, &response);
     brightness = response.arguments[2];
 
-    return sprintf(buf, "%d\n", brightness);
+    return sysfs_emit(buf, "%d\n", brightness);
 }
 
 static ssize_t razer_attr_read_channel1_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)

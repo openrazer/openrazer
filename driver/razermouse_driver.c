@@ -275,7 +275,7 @@ static int orochi_2011_set_led_state(struct razer_mouse_device *device, unsigned
  */
 static ssize_t razer_attr_read_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "%s\n", DRIVER_VERSION);
+    return sysfs_emit(buf, "%s\n", DRIVER_VERSION);
 }
 
 /**
@@ -740,7 +740,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Unknown Device";
     }
 
-    return sprintf(buf, "%s\n", device_type);
+    return sysfs_emit(buf, "%s\n", device_type);
 }
 
 /**
@@ -758,12 +758,12 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Orochi 2011 doesn't have FW
-        return sprintf(buf, "v%d.%d\n", 9, 99);
+        return sysfs_emit(buf, "v%d.%d\n", 9, 99);
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G: // DA don't think supports fw, its proper old
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
-        return sprintf(buf, "v%d.%d\n", 0x01, 0x00);
+        return sysfs_emit(buf, "v%d.%d\n", 0x01, 0x00);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_X:
@@ -892,7 +892,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "v%d.%d\n", response.arguments[0], response.arguments[1]);
+    return sysfs_emit(buf, "v%d.%d\n", response.arguments[0], response.arguments[1]);
 }
 
 /**
@@ -1332,7 +1332,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED: // Doesn't have proper serial
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
-        return sprintf(buf, "%s\n", &device->serial[0]);
+        return sysfs_emit(buf, "%s\n", &device->serial[0]);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1464,7 +1464,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     strncpy(&serial_string[0], &response.arguments[0], 22);
     serial_string[22] = '\0';
 
-    return sprintf(buf, "%s\n", &serial_string[0]);
+    return sysfs_emit(buf, "%s\n", &serial_string[0]);
 }
 
 /**
@@ -1562,7 +1562,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", response.arguments[1]);
 }
 
 /**
@@ -1591,7 +1591,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED:
-        return sprintf(buf, "0\n");
+        return sysfs_emit(buf, "0\n");
         break;
 
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
@@ -1664,7 +1664,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", response.arguments[1]);
 }
 
 /**
@@ -1785,7 +1785,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
             polling_rate = 125;
             break;
         }
-        return sprintf(buf, "%d\n", polling_rate);
+        return sysfs_emit(buf, "%d\n", polling_rate);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1888,7 +1888,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
             break;
         }
 
-        return sprintf(buf, "%d\n", polling_rate);
+        return sysfs_emit(buf, "%d\n", polling_rate);
 
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
     case USB_DEVICE_ID_RAZER_NAGA:
@@ -1961,7 +1961,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
         break;
     }
 
-    return sprintf(buf, "%d\n", polling_rate);
+    return sysfs_emit(buf, "%d\n", polling_rate);
 }
 
 /**
@@ -2277,7 +2277,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         return 0;
     }
     // Brightness is at arg[0] for dock and arg[1] for led_brightness
-    return sprintf(buf, "%d\n", response.arguments[brightness_index]);
+    return sysfs_emit(buf, "%d\n", response.arguments[brightness_index]);
 }
 
 /**
@@ -2540,11 +2540,11 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
             dpi_x = 3500;
             break;
         }
-        return sprintf(buf, "%u\n", dpi_x);
+        return sysfs_emit(buf, "%u\n", dpi_x);
         break;
 
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        return sprintf(buf, "%u:%u\n", device->orochi2011.dpi, device->orochi2011.dpi);
+        return sysfs_emit(buf, "%u:%u\n", device->orochi2011.dpi, device->orochi2011.dpi);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_EPIC:
@@ -2698,7 +2698,7 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
         dpi_y = (response.arguments[3] << 8) | (response.arguments[4] & 0xFF);
     }
 
-    return sprintf(buf, "%u:%u\n", dpi_x, dpi_y);
+    return sysfs_emit(buf, "%u:%u\n", dpi_x, dpi_y);
 }
 
 /**
@@ -2740,7 +2740,7 @@ static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_att
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", response.arguments[1]);
 }
 
 /**
@@ -2782,7 +2782,7 @@ static ssize_t razer_attr_read_scroll_acceleration(struct device *dev, struct de
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", response.arguments[1]);
 }
 
 /**
@@ -2824,7 +2824,7 @@ static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct devi
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", response.arguments[1]);
 }
 
 static ssize_t razer_attr_write_tilt_hwheel(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2840,7 +2840,7 @@ static ssize_t razer_attr_write_tilt_hwheel(struct device *dev, struct device_at
 static ssize_t razer_attr_read_tilt_hwheel(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    return sprintf(buf, "%u\n", device->tilt_hwheel);
+    return sysfs_emit(buf, "%u\n", device->tilt_hwheel);
 }
 
 static ssize_t razer_attr_write_tilt_repeat(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2856,7 +2856,7 @@ static ssize_t razer_attr_write_tilt_repeat(struct device *dev, struct device_at
 static ssize_t razer_attr_read_tilt_repeat(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    return sprintf(buf, "%u\n", device->tilt_repeat);
+    return sysfs_emit(buf, "%u\n", device->tilt_repeat);
 }
 
 static ssize_t razer_attr_write_tilt_repeat_delay(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2872,7 +2872,7 @@ static ssize_t razer_attr_write_tilt_repeat_delay(struct device *dev, struct dev
 static ssize_t razer_attr_read_tilt_repeat_delay(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    return sprintf(buf, "%u\n", device->tilt_repeat_delay);
+    return sysfs_emit(buf, "%u\n", device->tilt_repeat_delay);
 }
 
 /**
@@ -3267,7 +3267,7 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     razer_send_payload(device, &request, &response);
 
     idle_time = (response.arguments[0] << 8) | (response.arguments[1] & 0xFF);
-    return sprintf(buf, "%u\n", idle_time);
+    return sysfs_emit(buf, "%u\n", idle_time);
 }
 
 /**
@@ -3456,7 +3456,7 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[0]);
+    return sysfs_emit(buf, "%d\n", response.arguments[0]);
 }
 
 /**
@@ -3859,7 +3859,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G: // Doesn't support device mode, exit early
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        return sprintf(buf, "%d:%d\n", 0, 0);
+        return sysfs_emit(buf, "%d:%d\n", 0, 0);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -4093,7 +4093,7 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return sysfs_emit(buf, "%d\n", response.arguments[2]);
 }
 
 /**
