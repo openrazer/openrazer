@@ -745,7 +745,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
 
     dev = kzalloc(sizeof(struct razer_kraken_device), GFP_KERNEL);
     if(dev == NULL) {
-        dev_err(&intf->dev, "out of memory\n");
+        hid_err(hdev, "out of memory\n");
         return -ENOMEM;
     }
 
@@ -809,7 +809,6 @@ exit_free:
 static void razer_kraken_disconnect(struct hid_device *hdev)
 {
     struct razer_kraken_device *dev;
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
 
     dev = hid_get_drvdata(hdev);
 
@@ -846,7 +845,7 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
 
     hid_hw_stop(hdev);
     kfree(dev);
-    dev_info(&intf->dev, "Razer Device disconnected\n");
+    hid_info(hdev, "Razer Device disconnected\n");
 }
 
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
