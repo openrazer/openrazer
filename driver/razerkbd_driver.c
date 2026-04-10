@@ -784,9 +784,14 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
 static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
-    unsigned char threshold = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char threshold;
+    int err;
+
+    err = kstrtou8(buf, 0, &threshold);
+    if (err < 0)
+        return err;
 
     request = razer_chroma_misc_set_low_battery_threshold(threshold);
     request.transaction_id.id = 0xFF;
@@ -810,7 +815,12 @@ static ssize_t razer_attr_write_game_led_state(struct device *dev, struct device
     struct razer_kbd_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
+    unsigned char enabled;
+    int err;
+
+    err = kstrtou8(buf, 0, &enabled);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
@@ -1000,7 +1010,12 @@ static ssize_t razer_attr_write_keyswitch_optimization(struct device *dev, struc
     struct razer_kbd_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned char mode = (unsigned char)simple_strtoul(buf, NULL, 10);
+    unsigned char mode;
+    int err;
+
+    err = kstrtou8(buf, 0, &mode);
+    if (err < 0)
+        return err;
 
     // Toggle Keyswitch Optimization
     switch (device->usb_pid) {
@@ -1064,9 +1079,14 @@ static ssize_t razer_attr_read_keyswitch_optimization(struct device *dev, struct
 static ssize_t razer_attr_write_macro_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
-    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char enabled;
+    int err;
+
+    err = kstrtou8(buf, 0, &enabled);
+    if (err < 0)
+        return err;
 
     request = razer_chroma_standard_set_led_state(VARSTORE, MACRO_LED, enabled);
     request.transaction_id.id = 0xFF;
@@ -1603,7 +1623,12 @@ static ssize_t razer_attr_write_macro_led_effect(struct device *dev, struct devi
     struct razer_kbd_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
+    unsigned char enabled;
+    int err;
+
+    err = kstrtou8(buf, 0, &enabled);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
@@ -1892,9 +1917,14 @@ static ssize_t razer_attr_read_profile_led_blue(struct device *dev, struct devic
 static ssize_t razer_attr_write_profile_led_red(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
-    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char enabled;
+    int err;
+
+    err = kstrtou8(buf, 0, &enabled);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
@@ -1927,9 +1957,14 @@ static ssize_t razer_attr_write_profile_led_red(struct device *dev, struct devic
 static ssize_t razer_attr_write_profile_led_green(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
-    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char enabled;
+    int err;
+
+    err = kstrtou8(buf, 0, &enabled);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
@@ -1961,9 +1996,14 @@ static ssize_t razer_attr_write_profile_led_green(struct device *dev, struct dev
 static ssize_t razer_attr_write_profile_led_blue(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
-    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char enabled;
+    int err;
+
+    err = kstrtou8(buf, 0, &enabled);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORBWEAVER_CHROMA:
@@ -2205,9 +2245,14 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
 static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
-    unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char direction;
+    int err;
+
+    err = kstrtou8(buf, 0, &direction);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORNATA:
@@ -2347,9 +2392,14 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
 static ssize_t razer_attr_write_matrix_effect_wheel(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
-    unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char direction;
+    int err;
+
+    err = kstrtou8(buf, 0, &direction);
+    if (err < 0)
+        return err;
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4:
@@ -3422,9 +3472,14 @@ static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_
 static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
-    unsigned char state = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char state;
+    int err;
+
+    err = kstrtou8(buf, 0, &state);
+    if (err < 0)
+        return err;
 
     if (has_inverted_led_state(dev) && (state == 0 || state == 1))
         state = !state;
@@ -3598,9 +3653,14 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
 static ssize_t razer_attr_write_fn_toggle(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
-    unsigned char state = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char state;
+    int err;
+
+    err = kstrtou8(buf, 0, &state);
+    if (err < 0)
+        return err;
 
     request = razer_chroma_misc_fn_key_toggle(state);
     request.transaction_id.id = 0xFF;
@@ -3648,9 +3708,14 @@ static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute 
 static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
-    unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char brightness;
+    int err;
+
+    err = kstrtou8(buf, 0, &brightness);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
 
@@ -4297,9 +4362,14 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
 static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kbd_device *device = dev_get_drvdata(dev);
-    unsigned short polling_rate = (unsigned short)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned short polling_rate;
+    int err;
+
+    err = kstrtou16(buf, 0, &polling_rate);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
