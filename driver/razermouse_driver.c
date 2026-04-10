@@ -897,9 +897,14 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
 static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char enabled;
+    int err;
+
+    err = kstrtou8(buf, 0, &enabled);
+    if (err < 0)
+        return err;
 
     request = razer_chroma_standard_set_led_state(VARSTORE, LOGO_LED, enabled);
     request.transaction_id.id = 0xFF;
@@ -1135,9 +1140,14 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
 static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char direction;
+    int err;
+
+    err = kstrtou8(buf, 0, &direction);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_BASILISK_V3:
@@ -1966,9 +1976,14 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
 static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned short polling_rate = (unsigned short)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned short polling_rate;
+    int err;
+
+    err = kstrtou16(buf, 0, &polling_rate);
+    if (err < 0)
+        return err;
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
@@ -2145,9 +2160,14 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
 static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char brightness;
+    int err;
+
+    err = kstrtou8(buf, 0, &brightness);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
@@ -3272,9 +3292,14 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
 static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned short idle_time = (unsigned short)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned short idle_time;
+    int err;
+
+    err = kstrtou16(buf, 0, &idle_time);
+    if (err < 0)
+        return err;
 
     request = razer_chroma_misc_set_idle_time(idle_time);
 
@@ -3461,9 +3486,14 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
 static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char threshold = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char threshold;
+    int err;
+
+    err = kstrtou8(buf, 0, &threshold);
+    if (err < 0)
+        return err;
 
     request = razer_chroma_misc_set_low_battery_threshold(threshold);
 
@@ -4096,9 +4126,14 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
 static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char brightness;
+    int err;
+
+    err = kstrtou8(buf, 0, &brightness);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -4279,9 +4314,14 @@ static ssize_t razer_attr_write_backlight_led_brightness(struct device *dev, str
 static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char direction;
+    int err;
+
+    err = kstrtou8(buf, 0, &direction);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
@@ -5439,9 +5479,14 @@ static ssize_t razer_attr_write_backlight_matrix_effect_none(struct device *dev,
 static ssize_t razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char mode = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char mode;
+    int err;
+
+    err = kstrtou8(buf, 0, &mode);
+    if (err < 0)
+        return err;
 
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_indicator_led_mode(mode);
 
@@ -5471,9 +5516,14 @@ static ssize_t razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode(
 static ssize_t razer_attr_write_hyperpolling_wireless_dongle_pair(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned int pid = (unsigned int)simple_strtoul(buf, NULL, 16);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned short pid;
+    int err;
+
+    err = kstrtou16(buf, 0, &pid);
+    if (err < 0)
+        return err;
 
     // Step 1: Put in pairing mode
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(0x01);
@@ -5496,9 +5546,14 @@ static ssize_t razer_attr_write_hyperpolling_wireless_dongle_pair(struct device 
 static ssize_t razer_attr_write_hyperpolling_wireless_dongle_unpair(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned int pid = (unsigned int)simple_strtoul(buf, NULL, 16);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned short pid;
+    int err;
+
+    err = kstrtou16(buf, 0, &pid);
+    if (err < 0)
+        return err;
 
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(pid);
     request.transaction_id.id = 0xFF;
