@@ -725,9 +725,14 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
 static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char direction;
+    int rc;
+
+    rc = kstrtou8(buf, 0, &direction);
+    if (rc < 0)
+        return rc;
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY:
@@ -1354,16 +1359,19 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
 static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    unsigned char brightness = 0;
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char brightness = 0;
+    int rc;
 
     if (count < 1) {
         dev_warn(dev, "razeraccessory: Brightness takes an ascii number\n");
         return -EINVAL;
     }
 
-    brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
+    rc = kstrtou8(buf, 0, &brightness);
+    if (rc < 0)
+        return rc;
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -1530,16 +1538,19 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
 static ssize_t razer_attr_write_set_charge_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int led)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    unsigned char brightness = 0;
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char brightness = 0;
+    int rc;
 
     if (count < 1) {
         dev_warn(dev, "razeraccessory: Brightness takes an ascii number\n");
         return -EINVAL;
     }
 
-    brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
+    rc = kstrtou8(buf, 0, &brightness);
+    if (rc < 0)
+        return rc;
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
@@ -1802,9 +1813,14 @@ static ssize_t razer_attr_write_fully_charged_matrix_effect_static(struct device
 static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, int led)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char direction;
+    int rc;
+
+    rc = kstrtou8(buf, 0, &direction);
+    if (rc < 0)
+        return rc;
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
@@ -1936,16 +1952,19 @@ static ssize_t razer_attr_write_fully_charged_matrix_effect_breath(struct device
 static ssize_t razer_attr_write_channel_led_brightness(unsigned char led, struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    unsigned char brightness = 0;
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char brightness = 0;
+    int rc;
 
     if (count < 1) {
         dev_warn(dev, "razeraccessory: Brightness takes an ascii number\n");
         return -EINVAL;
     }
 
-    brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
+    rc = kstrtou8(buf, 0, &brightness);
+    if (rc < 0)
+        return rc;
 
     request = razer_chroma_extended_matrix_brightness(VARSTORE, led, brightness);
     request.transaction_id.id = 0x3F;
@@ -2038,10 +2057,11 @@ static ssize_t razer_attr_read_channel6_size(struct device *dev, struct device_a
  */
 static ssize_t razer_attr_write_channel_size(unsigned int channel, struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    unsigned char sz;
     struct razer_report request = {0};
     struct razer_report response = {0};
     struct razer_accessory_device *device;
+    unsigned char sz;
+    int rc;
 
     if (count < 1) {
         dev_warn(dev, "razeraccessory: Size takes an ascii number\n");
@@ -2058,7 +2078,9 @@ static ssize_t razer_attr_write_channel_size(unsigned int channel, struct device
     razer_send_payload(device, &request, &response);
 
     /* Set new sizes */
-    sz = (unsigned char)simple_strtoul(buf, NULL, 10);
+    rc = kstrtou8(buf, 0, &sz);
+    if (rc < 0)
+        return rc;
 
     request = get_razer_report(0x0f, 0x08, 0x0d);
     request.transaction_id.id = 0xFF;
