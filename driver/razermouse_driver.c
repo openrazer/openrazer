@@ -1342,7 +1342,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED: // Doesn't have proper serial
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
-        return sysfs_emit(buf, "%s\n", &device->serial[0]);
+        return sysfs_emit(buf, "%s\n", device->serial);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1471,10 +1471,10 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     }
 
     razer_send_payload(device, &request, &response);
-    strncpy(&serial_string[0], &response.arguments[0], 22);
+    strncpy(serial_string, response.arguments, 22);
     serial_string[22] = '\0';
 
-    return sysfs_emit(buf, "%s\n", &serial_string[0]);
+    return sysfs_emit(buf, "%s\n", serial_string);
 }
 
 /**
@@ -6079,7 +6079,7 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
 
     // Get a "random" integer
     get_random_bytes(&rand_serial, sizeof(unsigned int));
-    sprintf(&dev->serial[0], "PM%012u", rand_serial);
+    sprintf(dev->serial, "PM%012u", rand_serial);
 
     // Setup orochi2011
     dev->orochi2011.dpi = 0x4c;

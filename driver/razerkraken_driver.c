@@ -166,7 +166,7 @@ static unsigned int get_rgb_from_addr(struct device *dev, unsigned short address
     // Check for actual data
     if(device->data[0] == 0x05) {
         //dev_err(dev, "razerkraken: Got %02x%02x%02x %02x\n", device->data[1], device->data[2], device->data[3], device->data[4]);
-        memcpy(&buf[0], &device->data[1], len);
+        memcpy(buf, &device->data[1], len);
         written = len;
     } else {
         dev_err(dev, "razerkraken: Did not manage to get report\n");
@@ -586,7 +586,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
         // Check for actual data
         if(device->data[0] == 0x05) {
             // Serial is present
-            memcpy(&device->serial[0], &device->data[1], 22);
+            memcpy(device->serial, &device->data[1], 22);
             device->serial[22] = '\0';
         } else {
             dev_err(dev, "razerkraken: Did not manage to get serial from device, using XX01 instead\n");
@@ -600,7 +600,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 
     }
 
-    return sysfs_emit(buf, "%s\n", &device->serial[0]);
+    return sysfs_emit(buf, "%s\n", device->serial);
 }
 
 /**
@@ -728,7 +728,7 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
 
         // Get a "random" integer
         get_random_bytes(&rand_serial, sizeof(unsigned int));
-        sprintf(&dev->serial[0], "HN%015u", rand_serial);
+        sprintf(dev->serial, "HN%015u", rand_serial);
         break;
     }
 }
@@ -855,7 +855,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     //dev_warn(dev, "razerkraken: Got raw message %d\n", size);
 
     if(size == 33) { // Should be a response to a Control packet
-        memcpy(&device->data[0], &data[0], size);
+        memcpy(device->data, data, size);
 
     } else {
         hid_warn(hdev, "razerkraken: Got raw message, length: %d\n", size);

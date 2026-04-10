@@ -1106,7 +1106,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        strncpy(&serial_string[0], &device->serial[0], sizeof(serial_string));
+        strncpy(serial_string, device->serial, sizeof(serial_string));
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY:
@@ -1127,7 +1127,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         request.transaction_id.id = 0xFF;
         razer_send_payload(device, &request, &response);
-        strncpy(&serial_string[0], &response.arguments[0], 22);
+        strncpy(serial_string, response.arguments, 22);
         serial_string[22] = '\0';
         break;
 
@@ -1144,7 +1144,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
         request.transaction_id.id = 0x1F;
         razer_send_payload(device, &request, &response);
-        strncpy(&serial_string[0], &response.arguments[0], 22);
+        strncpy(serial_string, response.arguments, 22);
         serial_string[22] = '\0';
         break;
 
@@ -1153,7 +1153,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
         return -EINVAL;
     }
 
-    return sysfs_emit(buf, "%s\n", &serial_string[0]);
+    return sysfs_emit(buf, "%s\n", serial_string);
 }
 
 /**
@@ -2297,7 +2297,7 @@ static void razer_accessory_init(struct razer_accessory_device *dev, struct usb_
 
     // Get a "random" integer
     get_random_bytes(&rand_serial, sizeof(unsigned int));
-    sprintf(&dev->serial[0], "MUG%012u", rand_serial);
+    sprintf(dev->serial, "MUG%012u", rand_serial);
 }
 
 /**
