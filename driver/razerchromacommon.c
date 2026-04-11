@@ -1464,6 +1464,91 @@ struct razer_report razer_naga_trinity_effect_static(struct razer_rgb *rgb)
 }
 
 /**
+ * Set the Naga Trinity to "Breathing Single" effect
+ */
+struct razer_report razer_naga_trinity_effect_breathing_single(struct razer_rgb *rgb)
+{
+    struct razer_report report = get_razer_report(0x0f, 0x02, 0x09);
+
+    report.arguments[0] = 0x00;
+    report.arguments[1] = 0x00;
+    report.arguments[2] = 0x02;
+    report.arguments[3] = 0x01;
+    report.arguments[4] = 0x00;
+    report.arguments[5] = 0x01;
+    report.arguments[6] = rgb->r;
+    report.arguments[7] = rgb->g;
+    report.arguments[8] = rgb->b;
+
+    return report;
+}
+
+/**
+ * Set the Naga Trinity to "Breathing Dual" effect
+ */
+struct razer_report razer_naga_trinity_effect_breathing_dual(struct razer_rgb *rgb1, struct razer_rgb *rgb2)
+{
+    struct razer_report report = get_razer_report(0x0f, 0x02, 0x0c);
+
+    report.arguments[0] = 0x00;
+    report.arguments[1] = 0x00;
+    report.arguments[2] = 0x02;
+    report.arguments[3] = 0x02;
+    report.arguments[4] = 0x00;
+    report.arguments[5] = 0x02;
+    report.arguments[6] = rgb1->r;
+    report.arguments[7] = rgb1->g;
+    report.arguments[8] = rgb1->b;
+    report.arguments[9] = rgb2->r;
+    report.arguments[10] = rgb2->g;
+    report.arguments[11] = rgb2->b;
+
+    return report;
+}
+
+/**
+ * Set the Naga Trinity to "Breathing Random" effect
+ */
+struct razer_report razer_naga_trinity_effect_breathing_random(void)
+{
+    struct razer_report report = get_razer_report(0x0f, 0x02, 0x06);
+
+    report.arguments[0] = 0x00;
+    report.arguments[1] = 0x00;
+    report.arguments[2] = 0x02;
+
+    return report;
+}
+
+/**
+ * Set the Naga Trinity to "Spectrum Cycle" effect
+ */
+struct razer_report razer_naga_trinity_effect_spectrum(void)
+{
+    struct razer_report report = get_razer_report(0x0f, 0x02, 0x06);
+
+    report.arguments[0] = 0x00;
+    report.arguments[1] = 0x00;
+    report.arguments[2] = 0x03;
+
+    return report;
+}
+
+/**
+ * Set the Naga Trinity to "None" effect
+ */
+struct razer_report razer_naga_trinity_effect_none(void)
+{
+    struct razer_report report = get_razer_report(0x0f, 0x02, 0x06);
+
+    report.arguments[0] = 0x00;
+    report.arguments[1] = 0x00;
+    report.arguments[2] = 0x00;
+
+    return report;
+}
+
+/**
  * Set scroll wheel mode on the device
  *
  * Status Trans Packet Proto DataSize Class CMD Args
