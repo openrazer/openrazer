@@ -140,6 +140,11 @@ struct razer_report razer_chroma_misc_set_orochi2011_poll_dpi(unsigned short pol
 
 struct razer_report razer_basilisk_mobile_effect_static(struct razer_rgb* rgb);
 struct razer_report razer_naga_trinity_effect_static(struct razer_rgb* rgb);
+struct razer_report razer_naga_trinity_effect_breathing_single(struct razer_rgb* rgb);
+struct razer_report razer_naga_trinity_effect_breathing_dual(struct razer_rgb* rgb1, struct razer_rgb* rgb2);
+struct razer_report razer_naga_trinity_effect_breathing_random(void);
+struct razer_report razer_naga_trinity_effect_spectrum(void);
+struct razer_report razer_naga_trinity_effect_none(void);
 
 struct razer_report razer_chroma_misc_set_scroll_mode(unsigned int scroll_mode);
 struct razer_report razer_chroma_misc_get_scroll_mode(void);
