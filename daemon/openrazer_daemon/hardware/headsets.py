@@ -236,3 +236,59 @@ class RazerKrakenKittyV2(__RazerDevice):
                'set_custom_kraken']
 
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/hcc/h6b/9631977570334/kraken-kitty-v2-quartz-500x500.png"
+
+
+class RazerNariUltimate(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Nari Ultimate (wireless dongle variant).
+
+    Exposes two zones:
+        - main zone: mapped to the haptic motor intensity (0..100),
+          driven through the standard matrix_brightness attribute.
+        - logo zone: the Razer logo LED on each cup (binary on/off),
+          driven through logo_led_brightness / logo_led_state and the
+          logo_matrix_effect_none / logo_matrix_effect_static pair.
+
+    Microphone mute and volume are standard USB Audio Class Feature Unit
+    controls handled by snd-usb-audio, not by this driver.
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x051A
+    METHODS = ['get_device_type_headset',
+               # Main zone: haptic mapped through brightness
+               'get_brightness', 'set_brightness', 'set_none_effect',
+               # Logo zone: status LED
+               'get_logo_brightness', 'set_logo_brightness',
+               'get_logo_active', 'set_logo_active',
+               'set_logo_static', 'set_logo_none']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/razer-nari-ultimate/shop/nariultimate-ch5-v1.png"
+
+
+class RazerNariUltimateWired(RazerNariUltimate):
+    """Razer Nari Ultimate (wired USB variant)."""
+    USB_PID = 0x051B
+
+
+class RazerNari(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the non-Ultimate Razer Nari (no haptic motors).
+
+    The protocol is identical to the Ultimate, but the headset lacks
+    the bass-response haptic drivers so the matrix_brightness zone is
+    effectively a no-op on the hardware; we still expose it to keep
+    the daemon/Polychromatic UI consistent with the Ultimate class.
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x051C
+    METHODS = ['get_device_type_headset',
+               'get_logo_brightness', 'set_logo_brightness',
+               'get_logo_active', 'set_logo_active',
+               'set_logo_static', 'set_logo_none']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/razer-nari/shop/nari-ch5-v1.png"
+
+
+class RazerNariWired(RazerNari):
+    """Razer Nari (wired USB variant)."""
+    USB_PID = 0x051D

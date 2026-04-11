@@ -313,11 +313,12 @@ static ssize_t razer_attr_read_test(struct device *dev,
 /* ---------------------------------------------------------------------
  * Sysfs: main zone -- haptic motor
  *
- * OpenRazer's daemon treats `matrix_brightness` as a zone-wide slider.
- * For the Nari Ultimate we map this to haptic intensity (0..100), the
- * only meaningful analogue scale the device exposes on this zone.
- * Writing 0 disables the motor; any other value enables it at the
- * given intensity.
+ * OpenRazer's daemon treats `matrix_brightness` as a zone-wide slider
+ * and scales user percentages (0..100) into the 0..255 range before
+ * writing. For the Nari Ultimate we accept 0..255 here and scale it
+ * down to the haptic intensity byte (0..100, linear). Writing 0
+ * disables the motor; any other value enables it at the scaled
+ * intensity.
  * ------------------------------------------------------------------ */
 
 static ssize_t razer_attr_read_matrix_brightness(struct device *dev,
@@ -325,8 +326,12 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev,
                                                  char *buf)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
-    return sprintf(buf, "%d\n",
-                   device->haptic_enabled ? device->haptic_intensity : 0);
+    unsigned int scaled;
+
+    scaled = device->haptic_enabled
+        ? (unsigned int)device->haptic_intensity * 255u / 100u
+        : 0u;
+    return sprintf(buf, "%u\n", scaled);
 }
 
 static ssize_t razer_attr_write_matrix_brightness(struct device *dev,
@@ -335,13 +340,15 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev,
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
     unsigned long v;
+    unsigned char intensity;
 
     if (kstrtoul(buf, 10, &v) != 0)
         return -EINVAL;
-    if (v > 100)
-        v = 100;
+    if (v > 255)
+        v = 255;
 
-    set_haptic(device, v > 0 ? 1 : 0, (unsigned char)v);
+    intensity = (unsigned char)((v * 100u) / 255u);
+    set_haptic(device, v > 0 ? 1 : 0, intensity);
     return count;
 }
 
@@ -358,26 +365,29 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev,
  * Sysfs: logo zone -- status LED
  *
  * The logo LED is binary (on/off) on the Nari. We expose it as a second
- * zone so Polychromatic shows it distinctly.
+ * zone so Polychromatic shows it distinctly. To match OpenRazer's
+ * conventions for mouse logo zones we provide:
  *
- *   logo_matrix_brightness:    0 = off, any other value = on
- *   logo_matrix_effect_none:   turn the logo off
- *   logo_matrix_effect_static: turn the logo on (RGB bytes are recorded
- *       but only the on/off dimension is known to reach hardware;
- *       colour decoding is future work).
+ *   logo_led_brightness:       daemon writes 0..255; we map 0 to off,
+ *                              any non-zero value to on.
+ *   logo_led_state:            plain 0/1 toggle used by setLogoActive.
+ *   logo_matrix_effect_none:   turn the logo off.
+ *   logo_matrix_effect_static: turn the logo on (RGB bytes are stored
+ *                              for read-back, but real colour control
+ *                              is not decoded yet).
  * ------------------------------------------------------------------ */
 
-static ssize_t razer_attr_read_logo_matrix_brightness(struct device *dev,
-                                                      struct device_attribute *attr,
-                                                      char *buf)
+static ssize_t razer_attr_read_logo_led_brightness(struct device *dev,
+                                                   struct device_attribute *attr,
+                                                   char *buf)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
-    return sprintf(buf, "%d\n", device->led_brightness ? 100 : 0);
+    return sprintf(buf, "%u\n", device->led_brightness ? 255u : 0u);
 }
 
-static ssize_t razer_attr_write_logo_matrix_brightness(struct device *dev,
-                                                       struct device_attribute *attr,
-                                                       const char *buf, size_t count)
+static ssize_t razer_attr_write_logo_led_brightness(struct device *dev,
+                                                    struct device_attribute *attr,
+                                                    const char *buf, size_t count)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
     unsigned long v;
@@ -386,6 +396,27 @@ static ssize_t razer_attr_write_logo_matrix_brightness(struct device *dev,
         return -EINVAL;
 
     set_led_state(device, v > 0 ? 1 : 0);
+    return count;
+}
+
+static ssize_t razer_attr_read_logo_led_state(struct device *dev,
+                                              struct device_attribute *attr,
+                                              char *buf)
+{
+    struct razer_nari_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%u\n", device->led_brightness ? 1u : 0u);
+}
+
+static ssize_t razer_attr_write_logo_led_state(struct device *dev,
+                                               struct device_attribute *attr,
+                                               const char *buf, size_t count)
+{
+    struct razer_nari_device *device = dev_get_drvdata(dev);
+
+    if (count < 1)
+        return -EINVAL;
+
+    set_led_state(device, (buf[0] != '0') ? 1 : 0);
     return count;
 }
 
@@ -456,7 +487,8 @@ static DEVICE_ATTR(device_serial,             0440, razer_attr_read_device_seria
 static DEVICE_ATTR(matrix_brightness,         0660, razer_attr_read_matrix_brightness,          razer_attr_write_matrix_brightness);
 static DEVICE_ATTR(matrix_effect_none,        0220, NULL,                                       razer_attr_write_matrix_effect_none);
 
-static DEVICE_ATTR(logo_matrix_brightness,    0660, razer_attr_read_logo_matrix_brightness,     razer_attr_write_logo_matrix_brightness);
+static DEVICE_ATTR(logo_led_brightness,       0660, razer_attr_read_logo_led_brightness,        razer_attr_write_logo_led_brightness);
+static DEVICE_ATTR(logo_led_state,             0660, razer_attr_read_logo_led_state,             razer_attr_write_logo_led_state);
 static DEVICE_ATTR(logo_matrix_effect_none,   0220, NULL,                                       razer_attr_write_logo_matrix_effect_none);
 static DEVICE_ATTR(logo_matrix_effect_static, 0660, razer_attr_read_logo_matrix_effect_static,  razer_attr_write_logo_matrix_effect_static);
 
@@ -522,7 +554,8 @@ static int razer_nari_probe(struct hid_device *hdev,
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
 
         /* Logo zone: status LED */
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_brightness);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
     }
@@ -563,7 +596,8 @@ static void razer_nari_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
         device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
 
-        device_remove_file(&hdev->dev, &dev_attr_logo_matrix_brightness);
+        device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
+        device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
         device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
         device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
     }
