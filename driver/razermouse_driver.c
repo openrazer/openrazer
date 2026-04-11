@@ -973,10 +973,14 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
 
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS: // TODO: this is probably wrong?
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED: // TODO: this is probably wrong?
-    case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
         request = razer_chroma_standard_matrix_effect_none();
         request.transaction_id.id = 0xFF;
+        break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
+        request = razer_naga_trinity_effect_none();
+        request.transaction_id.id = 0x1f;
         break;
 
     default:
@@ -1231,10 +1235,14 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     int err;
 
     switch (device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
+        request = razer_naga_trinity_effect_spectrum();
+        request.transaction_id.id = 0x1f;
+        break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         request = razer_chroma_mouse_extended_matrix_effect_spectrum(VARSTORE, BACKLIGHT_LED);
         request.transaction_id.id = 0x1f;
         break;
@@ -1327,10 +1335,28 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     int err;
 
     switch (device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
+        switch(count) {
+        case 3: // Single colour mode
+            request = razer_naga_trinity_effect_breathing_single((struct razer_rgb*)&buf[0]);
+            request.transaction_id.id = 0x1f;
+            break;
+
+        case 6: // Dual colour mode
+            request = razer_naga_trinity_effect_breathing_dual((struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            request.transaction_id.id = 0x1f;
+            break;
+
+        default: // "Random" colour mode
+            request = razer_naga_trinity_effect_breathing_random();
+            request.transaction_id.id = 0x1f;
+            break;
+        }
+        break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
