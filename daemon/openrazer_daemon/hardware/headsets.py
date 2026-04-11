@@ -255,8 +255,11 @@ class RazerNariUltimate(__RazerDeviceBrightnessSuspend):
     USB_VID = 0x1532
     USB_PID = 0x051A
     METHODS = ['get_device_type_headset',
-               # Main zone: haptic mapped through brightness
-               'get_brightness', 'set_brightness', 'set_none_effect',
+               # Main zone: haptic mapped through the brightness slider.
+               # No effect picker is exposed on this zone because haptic has
+               # no meaningful "effect" concept (set_none_effect would clash
+               # with the slider's own 0-value-means-off semantics).
+               'get_brightness', 'set_brightness',
                # Logo zone: status LED
                'get_logo_brightness', 'set_logo_brightness',
                'get_logo_active', 'set_logo_active',

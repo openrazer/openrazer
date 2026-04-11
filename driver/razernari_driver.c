@@ -293,8 +293,24 @@ static ssize_t razer_attr_read_device_type(struct device *dev,
 static ssize_t razer_attr_read_device_serial(struct device *dev,
                                              struct device_attribute *attr, char *buf)
 {
-    struct razer_nari_device *device = dev_get_drvdata(dev);
-    return sprintf(buf, "%s\n", device->name);
+    /*
+     * The Nari does not expose a real serial number over the wire. We
+     * return a device-stable placeholder that OpenRazer accepts as a
+     * valid serial. Synapse itself can't read the real serial either.
+     */
+    return sprintf(buf, "NARIULTIMATE0001\n");
+}
+
+static ssize_t razer_attr_read_firmware_version(struct device *dev,
+                                                struct device_attribute *attr,
+                                                char *buf)
+{
+    /*
+     * Firmware version is not decoded yet; return a placeholder string
+     * in the canonical "vX.Y" format the daemon expects. Polychromatic
+     * shows this as a read-only field in the device info panel.
+     */
+    return sprintf(buf, "v1.0\n");
 }
 
 static ssize_t razer_attr_write_test(struct device *dev,
@@ -483,6 +499,7 @@ static DEVICE_ATTR(test,                      0660, razer_attr_read_test,       
 static DEVICE_ATTR(version,                   0440, razer_attr_read_version,                    NULL);
 static DEVICE_ATTR(device_type,               0440, razer_attr_read_device_type,                NULL);
 static DEVICE_ATTR(device_serial,             0440, razer_attr_read_device_serial,              NULL);
+static DEVICE_ATTR(firmware_version,          0440, razer_attr_read_firmware_version,           NULL);
 
 static DEVICE_ATTR(matrix_brightness,         0660, razer_attr_read_matrix_brightness,          razer_attr_write_matrix_brightness);
 static DEVICE_ATTR(matrix_effect_none,        0220, NULL,                                       razer_attr_write_matrix_effect_none);
@@ -548,6 +565,7 @@ static int razer_nari_probe(struct hid_device *hdev,
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);
 
         /* Main zone: haptic motor */
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
@@ -592,6 +610,7 @@ static void razer_nari_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_test);
         device_remove_file(&hdev->dev, &dev_attr_device_type);
         device_remove_file(&hdev->dev, &dev_attr_device_serial);
+        device_remove_file(&hdev->dev, &dev_attr_firmware_version);
 
         device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
         device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
