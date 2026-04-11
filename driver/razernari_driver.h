@@ -29,24 +29,58 @@ struct razer_nari_device {
     unsigned short usb_vid;
     unsigned char* name;
 
-    //store color in device. -> hardware does not report set color. At least Synapse can't get it either.
+    // LED logo state. Hardware does not report set color back, Synapse can't
+    // read it either, so we store it in the device struct for read-back.
     unsigned short red;
     unsigned short green;
     unsigned short blue;
-    unsigned short brigthness;
+    unsigned short led_brightness;
 
-    //don't know yet what  is in the reports.. keep looking.
+    // Haptic state: enable flag and intensity 0..100. The Nari Ultimate has
+    // two bass-response haptic motors in the ear cups; Nari (non-Ultimate)
+    // lacks the motors and will ignore the haptic commands.
+    unsigned char haptic_enabled;
+    unsigned char haptic_intensity;
+
+    // Raw response data from the device, kept for future battery decoding.
     u8 data[64];
 };
 
 /*
- * TBH I don't really have a clue how to use the reports.
- * Somewhere in there seems to be the battery information. But I can't decipher it.
- * Maybe there is more in there, but not too much. Synapse can not tell a lot
- * about the device either. For example the don't know the set color or brightness.
- * */
+ * Razer Nari uses HID Feature Report 0xff on interface 5 (SET_REPORT,
+ * wValue=0x03ff, wIndex=0x0005, wLength=64). The report is 64 bytes
+ * including the Report ID as byte 0. No CRC is used.
+ *
+ * Layout (decoded from pcap captures in felixZmn/razer-nari-driver):
+ *
+ *     offset  meaning
+ *     ------  -------
+ *          0  Report ID, always 0xff
+ *          1  magic, always 0x0a (0xfd for some rare requests)
+ *          2  magic, always 0x00
+ *          3  magic, always 0xff
+ *          4  common header byte, always 0x04
+ *          5  command class
+ *          6  protocol byte, always 0xf1
+ *          7  command sub-id
+ *          8  command target
+ *          9  enable / state byte
+ *         10  value (haptic intensity, etc.)
+ *      11-63  command-specific arguments or zero padding
+ *
+ * Known commands:
+ *
+ *   LED logo on/off:
+ *       bytes[5..8] = { 0x12, 0xf1, 0x03, 0x71 }
+ *       bytes[9]    = 0x00 (off) or 0xff (on)
+ *
+ *   Haptic intensity:
+ *       bytes[5..8] = { 0x02, 0xf1, 0x06, 0x20 }
+ *       bytes[9]    = 0x00 (disable) or 0x01 (enable)
+ *       bytes[10]   = intensity 0x00..0x64 (0..100 decimal, linear)
+ */
 struct razer_nari_request_report {
-    unsigned char arguments[64];
+    unsigned char arguments[RAZER_NARI_REPORT_LEN];
     unsigned char length;
 };
 

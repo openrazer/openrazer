@@ -1,6 +1,19 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /*
- * Copyright (c) 2015 Terry Cain <terrys-home.co.uk>
+ * Razer Nari (including Nari Ultimate) kernel driver for OpenRazer.
+ *
+ * Protocol decoded from USB pcap captures in felixZmn/razer-nari-driver
+ * via pattern analysis. Initial driver skeleton by Garfonso.
+ *
+ * Supported features:
+ *   - Logo LED on/off (Nari Ultimate and Nari)
+ *   - Haptic motor intensity 0..100 (Nari Ultimate only; the non-Ultimate
+ *     Nari lacks the motors and will ignore the haptic command harmlessly)
+ *   - Device type / serial introspection
+ *
+ * USB microphone mute and volume controls are USB Audio Class Feature Unit
+ * commands rather than Razer-specific reports, so they are handled by the
+ * kernel's standard snd-usb-audio driver without any driver work here.
  */
 
 #include <linux/kernel.h>
@@ -14,9 +27,6 @@
 #include "razernari_driver.h"
 #include "razercommon.h"
 
-/*
- * Version Information
- */
 #define DRIVER_DESC "Razer Nari Headset Device Driver"
 
 MODULE_AUTHOR(DRIVER_AUTHOR);
@@ -26,13 +36,64 @@ MODULE_LICENSE(DRIVER_LICENSE);
 
 #define NARI_DEBUG_REPORTS 0
 
+/* ---------------------------------------------------------------------
+ * USB transport
+ * ------------------------------------------------------------------ */
+
 /**
- * Print report to syslog
+ * Send a Feature Report to the Nari over the control endpoint.
+ *
+ * The Nari uses HID Feature Report 0xff on interface 5:
+ *   SET_REPORT, wValue=0x03ff, wIndex=5, wLength=64.
+ * Byte 0 of the payload is the report ID (0xff).
+ *
+ * @skip: when non-zero, skip the post-send delay. Razer devices normally
+ * want a len*15ms idle after a SET_REPORT, but for the short Nari
+ * commands the delay is unnecessary in practice.
  */
-static void print_nari_report(unsigned char* report)
+static int razer_nari_send_control_msg(struct usb_device *usb_dev,
+                                       struct razer_nari_request_report *report,
+                                       unsigned char skip)
 {
-    pr_info("Razer Nari received GET_REPORT response:");
-    for (int i = 0; i < RAZER_NARI_REPORT_LEN; i++) {
+    uint request = HID_REQ_SET_REPORT;
+    uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT;
+    uint value = 0x03ff;
+    uint index = 5;
+    uint size = RAZER_NARI_REPORT_LEN;
+    char *buf;
+    int len;
+
+    buf = kmemdup(report, size, GFP_KERNEL);
+    if (buf == NULL)
+        return -ENOMEM;
+
+    len = usb_control_msg(usb_dev, usb_sndctrlpipe(usb_dev, 0),
+                          request, request_type,
+                          value, index,
+                          buf, size,
+                          USB_CTRL_SET_TIMEOUT);
+
+    if (skip != 1)
+        msleep(report->length * 15);
+
+    kfree(buf);
+    if (len != size)
+        printk(KERN_WARNING "razernari: Device data transfer failed (len=%d expected=%u).\n",
+               len, size);
+
+    return ((len < 0) ? len : ((len != size) ? -EIO : 0));
+}
+
+#if NARI_DEBUG_REPORTS
+/**
+ * Pretty-print a 64-byte report to the kernel log.
+ */
+static void print_nari_report(unsigned char *report)
+{
+    int i;
+
+    pr_info("razernari GET_REPORT response:");
+    for (i = 0; i < RAZER_NARI_REPORT_LEN; i++) {
         if (i % 16 == 0) {
             pr_cont("\n");
             pr_info("\t");
@@ -43,378 +104,383 @@ static void print_nari_report(unsigned char* report)
 }
 
 /**
- * @brief Request a report from device.
- * 
- * @param usb_dev 
- * @return int 
+ * Issue a GET_REPORT on Feature Report 0xff.
+ * The response layout is not yet decoded; this is a debugging aid only.
  */
 static int razer_nari_send_request_report_msg(struct hid_device *hdev)
 {
     int ret;
-    unsigned char* report;
-    report = kzalloc(RAZER_NARI_REPORT_LEN, GFP_KERNEL);
+    unsigned char *report;
+    struct razer_nari_device *device;
 
-    ret = hid_hw_raw_request(hdev, 0xFF, report, RAZER_NARI_REPORT_LEN, HID_FEATURE_REPORT, HID_REQ_GET_REPORT);
+    report = kzalloc(RAZER_NARI_REPORT_LEN, GFP_KERNEL);
+    if (!report)
+        return -ENOMEM;
+
+    ret = hid_hw_raw_request(hdev, 0xff, report, RAZER_NARI_REPORT_LEN,
+                             HID_FEATURE_REPORT, HID_REQ_GET_REPORT);
     if (ret != RAZER_NARI_REPORT_LEN) {
-        pr_err("Failed to send GET_REPORT request: %d\n", ret);
+        pr_err("razernari: Failed to send GET_REPORT: %d\n", ret);
+        kfree(report);
         return ret;
     }
 
-    // Print the received response to the kernel logs
-    /*pr_info("Received GET_REPORT response: ");
-    for (int i = 0; i < ret; i++)
-        pr_cont("%02X ", report[i]);
-    pr_cont("\n");*/
-    struct razer_nari_device *device = dev_get_drvdata(&hdev->dev);
+    device = dev_get_drvdata(&hdev->dev);
     memcpy(&device->data[0], report, RAZER_NARI_REPORT_LEN);
     print_nari_report(&device->data[0]);
-
+    kfree(report);
     return 0;
 }
+#endif /* NARI_DEBUG_REPORTS */
+
+/* ---------------------------------------------------------------------
+ * Report builders
+ *
+ * Each builder returns a 64-byte Feature Report with the common header
+ * (bytes 0..4 = ff 0a 00 ff 04) pre-filled. Command-specific bytes are
+ * layered on top.
+ * ------------------------------------------------------------------ */
 
 /**
- * @brief Send a report to device in order to change some setting.
- * 
- * @param usb_dev 
- * @param report 
- * @param skip 
- * @return int 
+ * Base report with only the common 5-byte header filled.
  */
-static int razer_nari_send_control_msg(struct usb_device *usb_dev,struct razer_nari_request_report* report, unsigned char skip)
-{
-    uint request = HID_REQ_SET_REPORT; // 0x09
-    uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
-    uint value = 0x03ff; //fixed for almost all messages. Let's start that way.
-    uint index = 5;
-    uint size = 64;
-    char *buf;
-    int len;
-
-    buf = kmemdup(report, size, GFP_KERNEL);
-    if (buf == NULL)
-        return -ENOMEM;
-
-    // Send usb control message
-    len = usb_control_msg(usb_dev, usb_sndctrlpipe(usb_dev, 0),
-                          request,      // Request      U8
-                          request_type, // RequestType  U8
-                          value,        // Value        U16
-                          index,        // Index        U16
-                          buf,          // Data         void* data
-                          size,         // Length       U16
-                          USB_CTRL_SET_TIMEOUT); //     Int
-
-    // Wait
-    if(skip != 1) {
-        msleep(report->length * 15);
-    }
-
-    kfree(buf);
-    if(len!=size)
-        printk(KERN_WARNING "razer driver: Device data transfer failed.\n");
-
-    return ((len < 0) ? len : ((len != size) ? -EIO : 0));
-}
-
-/**
- * Get a request report
- */
-static struct razer_nari_request_report get_nari_request_report(void)
+static struct razer_nari_request_report get_nari_base_request_report(void)
 {
     struct razer_nari_request_report report;
+
     memset(&report, 0, sizeof(struct razer_nari_request_report));
 
-    report.length = 64;
-    report.arguments[0] = 0xFF; //this is always fixed FF.
-    report.arguments[1] = 0x0A; //this is mostly 0A. Some differ. Hm.
-    report.arguments[2] = 0x00; //this seems to be 0 always, too.
-    report.arguments[3] = 0xFF; //this is ff for most request, fd for some, like setting sleep time.
-    report.arguments[4] = 0x04; //seems fixed, too.
+    report.length = RAZER_NARI_REPORT_LEN;
+    report.arguments[0] = 0xff; /* Report ID, always fixed */
+    report.arguments[1] = 0x0a; /* Magic, 0x0a for most commands */
+    report.arguments[2] = 0x00;
+    report.arguments[3] = 0xff; /* 0xfd for some rare requests */
+    report.arguments[4] = 0x04; /* Common wrapper byte */
+
+    return report;
+}
+
+/**
+ * LED logo on/off command. state = 0x00 (off) or 0xff (on).
+ */
+static struct razer_nari_request_report get_nari_led_request_report(unsigned char state)
+{
+    struct razer_nari_request_report report = get_nari_base_request_report();
 
     report.arguments[5] = 0x12;
-    report.arguments[6] = 0xF1;
-
-    return report;
-}
-
-/**
- * Get a color / brighntess request report
- */
-static struct razer_nari_request_report get_nari_brightness_request_report(unsigned short brightness)
-{
-    struct razer_nari_request_report report = get_nari_request_report();
-
-    //set some fixed header. Always this for brightness settings:
+    report.arguments[6] = 0xf1;
     report.arguments[7] = 0x03;
     report.arguments[8] = 0x71;
-
-    //now set brightness:
-    report.arguments[9] = brightness;
+    report.arguments[9] = state;
 
     return report;
 }
 
 /**
- * Get a request report for color settings
+ * Haptic motor intensity command (Nari Ultimate only).
+ *
+ * @enable:    0 = disable, 1 = enable
+ * @intensity: 0..100, passed directly as byte 10 of the report (linear)
  */
-static struct razer_nari_request_report get_nari_color_request_report(unsigned short red, unsigned short green, unsigned short blue)
+static struct razer_nari_request_report get_nari_haptic_request_report(unsigned char enable,
+                                                                       unsigned char intensity)
 {
-    struct razer_nari_request_report report = get_nari_request_report();
+    struct razer_nari_request_report report = get_nari_base_request_report();
 
-    //set some fixed header. Always this for color settings:
+    report.arguments[5] = 0x02;
+    report.arguments[6] = 0xf1;
+    report.arguments[7] = 0x06;
+    report.arguments[8] = 0x20;
+    report.arguments[9] = enable ? 0x01 : 0x00;
+    report.arguments[10] = intensity;
+
+    return report;
+}
+
+#if NARI_DEBUG_REPORTS
+/**
+ * Speculative RGB colour command from Garfonso's original skeleton.
+ * This path has not been verified: the Nari Ultimate's logo is not
+ * known to accept colour values, and Synapse itself cannot read the
+ * current colour back. Kept for future reverse-engineering work.
+ */
+static struct razer_nari_request_report get_nari_color_request_report(unsigned char red,
+                                                                      unsigned char green,
+                                                                      unsigned char blue)
+{
+    struct razer_nari_request_report report = get_nari_base_request_report();
+
+    report.arguments[5] = 0x12;
+    report.arguments[6] = 0xf1;
     report.arguments[7] = 0x05;
     report.arguments[8] = 0x72;
-
-    //now set color:
-    report.arguments[9] = red;
+    report.arguments[9]  = red;
     report.arguments[10] = green;
     report.arguments[11] = blue;
 
     return report;
 }
+#endif
 
-/**
- * Read device file "version"
- *
- * Returns a string
- */
-static ssize_t razer_attr_read_version(struct device *dev, struct device_attribute *attr, char *buf)
+/* ---------------------------------------------------------------------
+ * State setters
+ * ------------------------------------------------------------------ */
+
+static void set_led_state(struct razer_nari_device *device, unsigned char on)
+{
+    struct razer_nari_request_report report =
+        get_nari_led_request_report(on ? 0xff : 0x00);
+
+    device->led_brightness = on ? 255 : 0;
+
+    mutex_lock(&device->lock);
+    razer_nari_send_control_msg(device->usb_dev, &report, 1);
+    mutex_unlock(&device->lock);
+}
+
+static void set_haptic(struct razer_nari_device *device,
+                       unsigned char enable,
+                       unsigned char intensity)
+{
+    struct razer_nari_request_report report;
+
+    if (intensity > 100)
+        intensity = 100;
+
+    device->haptic_enabled = enable ? 1 : 0;
+    device->haptic_intensity = intensity;
+
+    report = get_nari_haptic_request_report(device->haptic_enabled,
+                                            device->haptic_intensity);
+
+    mutex_lock(&device->lock);
+    razer_nari_send_control_msg(device->usb_dev, &report, 1);
+    mutex_unlock(&device->lock);
+}
+
+/* ---------------------------------------------------------------------
+ * Sysfs: introspection
+ * ------------------------------------------------------------------ */
+
+static ssize_t razer_attr_read_version(struct device *dev,
+                                       struct device_attribute *attr, char *buf)
 {
     return sprintf(buf, "%s\n", DRIVER_VERSION);
 }
 
-/**
- * Read device file "device_type"
- *
- * Returns friendly string of device type
- */
-static ssize_t razer_attr_read_device_type(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_device_type(struct device *dev,
+                                           struct device_attribute *attr, char *buf)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
-
-    char *device_type;
+    const char *device_type;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NARI_ULTIMATE_WIRELESS:
     case USB_DEVICE_ID_RAZER_NARI_ULTIMATE_USB:
         device_type = "Razer Nari Ultimate\n";
         break;
-
     case USB_DEVICE_ID_RAZER_NARI_WIRELESS:
     case USB_DEVICE_ID_RAZER_NARI_USB:
         device_type = "Razer Nari\n";
         break;
-
     default:
         device_type = "Unknown Device\n";
     }
 
-    return sprintf(buf, device_type);
+    return sprintf(buf, "%s", device_type);
 }
 
-/**
- * Write device file "test"
- *
- * Does nothing
- */
-static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_read_device_serial(struct device *dev,
+                                             struct device_attribute *attr, char *buf)
+{
+    struct razer_nari_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%s\n", device->name);
+}
+
+static ssize_t razer_attr_write_test(struct device *dev,
+                                     struct device_attribute *attr,
+                                     const char *buf, size_t count)
 {
     return count;
 }
 
-/**
- * Read device file "test"
- *
- * Returns a string
- */
-static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_test(struct device *dev,
+                                    struct device_attribute *attr, char *buf)
 {
     return sprintf(buf, "\n");
 }
 
-/**
- * @brief Set the brigthness on device
- * 
- * @param device 
- * @param brightness 
- */
-static void set_brigthness(struct razer_nari_device *device, unsigned char brightness) {
-    device->brigthness = brightness;
-    struct razer_nari_request_report report = get_nari_brightness_request_report(device->brigthness);
-
-    // Lock access to sending USB as adhering to the razer len*15ms delay
-    mutex_lock(&device->lock);
-    razer_nari_send_control_msg(device->usb_dev, &report, device->brigthness);
-    mutex_unlock(&device->lock);
-}
-
-/**
- * Write device file "brightness"
+/* ---------------------------------------------------------------------
+ * Sysfs: main zone -- haptic motor
  *
- * Set brightness from this file
- */
-static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+ * OpenRazer's daemon treats `matrix_brightness` as a zone-wide slider.
+ * For the Nari Ultimate we map this to haptic intensity (0..100), the
+ * only meaningful analogue scale the device exposes on this zone.
+ * Writing 0 disables the motor; any other value enables it at the
+ * given intensity.
+ * ------------------------------------------------------------------ */
+
+static ssize_t razer_attr_read_matrix_brightness(struct device *dev,
+                                                 struct device_attribute *attr,
+                                                 char *buf)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
-    unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
+    return sprintf(buf, "%d\n",
+                   device->haptic_enabled ? device->haptic_intensity : 0);
+}
 
-    set_brigthness(device, brightness);
-    
+static ssize_t razer_attr_write_matrix_brightness(struct device *dev,
+                                                  struct device_attribute *attr,
+                                                  const char *buf, size_t count)
+{
+    struct razer_nari_device *device = dev_get_drvdata(dev);
+    unsigned long v;
+
+    if (kstrtoul(buf, 10, &v) != 0)
+        return -EINVAL;
+    if (v > 100)
+        v = 100;
+
+    set_haptic(device, v > 0 ? 1 : 0, (unsigned char)v);
     return count;
 }
 
-/**
- * Write device file "mode_none"
- *
- * None effect mode is activated whenever the file is written to
- */
-static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_matrix_effect_none(struct device *dev,
+                                                   struct device_attribute *attr,
+                                                   const char *buf, size_t count)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
-    set_brigthness(device, 0); //none always means 0 brightness.
-
+    set_haptic(device, 0, device->haptic_intensity);
     return count;
 }
 
-/**
- * Write device file "mode_static"
+/* ---------------------------------------------------------------------
+ * Sysfs: logo zone -- status LED
  *
- * Static effect mode is activated whenever the file is written to with 3 bytes
- */
-static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+ * The logo LED is binary (on/off) on the Nari. We expose it as a second
+ * zone so Polychromatic shows it distinctly.
+ *
+ *   logo_matrix_brightness:    0 = off, any other value = on
+ *   logo_matrix_effect_none:   turn the logo off
+ *   logo_matrix_effect_static: turn the logo on (RGB bytes are recorded
+ *       but only the on/off dimension is known to reach hardware;
+ *       colour decoding is future work).
+ * ------------------------------------------------------------------ */
+
+static ssize_t razer_attr_read_logo_matrix_brightness(struct device *dev,
+                                                      struct device_attribute *attr,
+                                                      char *buf)
+{
+    struct razer_nari_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->led_brightness ? 100 : 0);
+}
+
+static ssize_t razer_attr_write_logo_matrix_brightness(struct device *dev,
+                                                       struct device_attribute *attr,
+                                                       const char *buf, size_t count)
+{
+    struct razer_nari_device *device = dev_get_drvdata(dev);
+    unsigned long v;
+
+    if (kstrtoul(buf, 10, &v) != 0)
+        return -EINVAL;
+
+    set_led_state(device, v > 0 ? 1 : 0);
+    return count;
+}
+
+static ssize_t razer_attr_write_logo_matrix_effect_none(struct device *dev,
+                                                        struct device_attribute *attr,
+                                                        const char *buf, size_t count)
+{
+    struct razer_nari_device *device = dev_get_drvdata(dev);
+    set_led_state(device, 0);
+    return count;
+}
+
+static ssize_t razer_attr_write_logo_matrix_effect_static(struct device *dev,
+                                                          struct device_attribute *attr,
+                                                          const char *buf, size_t count)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
 
     if (count != 3 && count != 4) {
-        printk(KERN_WARNING "razernari: Static mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
+        printk(KERN_WARNING "razernari: static effect expects 3 bytes (RGB) or 4 bytes (RGBA)\n");
         return -EINVAL;
     }
 
-    struct razer_nari_request_report rgb_report = get_nari_color_request_report(buf[0], buf[1], buf[2]);
+    /*
+     * Store the requested colour for read-back and turn the LED on.
+     * Real RGB colour control is not decoded yet; we only drive the
+     * verified on/off command here. Colour bytes are kept so
+     * user-space sees a consistent value when reading back.
+     */
+    device->red = buf[0];
+    device->green = buf[1];
+    device->blue = buf[2];
+    set_led_state(device, 1);
 
-    //I don't think this will work.. but should not hurt, right?
-    if(count == 4) {
-        rgb_report.arguments[12] = buf[3];
+#if NARI_DEBUG_REPORTS
+    {
+        struct razer_nari_request_report rgb =
+            get_nari_color_request_report(buf[0], buf[1], buf[2]);
+        mutex_lock(&device->lock);
+        razer_nari_send_control_msg(device->usb_dev, &rgb, 1);
+        mutex_unlock(&device->lock);
     }
-
-    // Lock sending of the 2 commands
-    mutex_lock(&device->lock);
-    razer_nari_send_control_msg(device->usb_dev, &rgb_report, 0);
-    mutex_unlock(&device->lock);
+#endif
 
     return count;
 }
 
-/**
- * Read device file "mode_static"
- *
- * Returns 4 bytes for config
- */
-static ssize_t razer_attr_read_matrix_effect_static(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_logo_matrix_effect_static(struct device *dev,
+                                                         struct device_attribute *attr,
+                                                         char *buf)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
-    //device does not report color in reports, it seems... :-/ -> tested, not even synapse can do this. So it seems there is nothing we can do.
     buf[0] = device->red;
     buf[1] = device->green;
     buf[2] = device->blue;
     return 3;
 }
 
-static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    struct razer_nari_device *device = dev_get_drvdata(dev);
-    return sprintf(buf, "%d\n", device->brigthness);
-}
+/* ---------------------------------------------------------------------
+ * Device attribute declarations
+ * ------------------------------------------------------------------ */
 
-/**
- * Read device file "serial"
- *
- * Returns a string
- */
-static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    struct razer_nari_device *device = dev_get_drvdata(dev);
-    return sprintf(buf, "%s\n", device->name); //we can not jet read the serial from reports... so just return the name for now.
-}
+static DEVICE_ATTR(test,                      0660, razer_attr_read_test,                       razer_attr_write_test);
+static DEVICE_ATTR(version,                   0440, razer_attr_read_version,                    NULL);
+static DEVICE_ATTR(device_type,               0440, razer_attr_read_device_type,                NULL);
+static DEVICE_ATTR(device_serial,             0440, razer_attr_read_device_serial,              NULL);
 
+static DEVICE_ATTR(matrix_brightness,         0660, razer_attr_read_matrix_brightness,          razer_attr_write_matrix_brightness);
+static DEVICE_ATTR(matrix_effect_none,        0220, NULL,                                       razer_attr_write_matrix_effect_none);
 
-#if NARI_DEBUG_REPORTS
-/**
- * @brief Write device file "request_report"
- * 
- * Requests updated status from device. Will update charging status and battery level. //TODO!!
- */
-static ssize_t razer_attr_write_request_report(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    struct razer_nari_device *device = dev_get_drvdata(dev);
-    mutex_lock(&device->lock);
-    razer_nari_send_request_report_msg(device->hid_dev);
-    mutex_unlock(&device->lock);
+static DEVICE_ATTR(logo_matrix_brightness,    0660, razer_attr_read_logo_matrix_brightness,     razer_attr_write_logo_matrix_brightness);
+static DEVICE_ATTR(logo_matrix_effect_none,   0220, NULL,                                       razer_attr_write_logo_matrix_effect_none);
+static DEVICE_ATTR(logo_matrix_effect_static, 0660, razer_attr_read_logo_matrix_effect_static,  razer_attr_write_logo_matrix_effect_static);
 
-    return count;
-};
+/* ---------------------------------------------------------------------
+ * Init / probe / disconnect
+ * ------------------------------------------------------------------ */
 
-
-/**
- * Write device file "request_battery_report"
- *
- * Requests updated status from device. Will update charging status and battery level. //TODO!!
- */
-static ssize_t razer_attr_write_request_battery_report(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    struct razer_nari_device *device = dev_get_drvdata(dev);
-    mutex_lock(&device->lock);
-    struct razer_nari_request_report report = get_nari_request_report();
-    report.arguments[3] = 0xFD; //this is the battery report request.
-    report.arguments[4] = 0x04; //second try. Without that, it just repeated the request.
-    report.arguments[7] = 0x02;
-    report.arguments[8] = 0x05;
-    razer_nari_send_control_msg(device->usb_dev, &report, 0);
-
-    razer_nari_send_request_report_msg(device->hid_dev);
-    mutex_unlock(&device->lock);
-
-    return count;
-};
-#endif
-
-/**
- * Set up the device driver files
-
- *
- * Read only is 0444
- * Write only is 0220
- * Read and write is 0664
- */
-
-static DEVICE_ATTR(test,                    0660, razer_attr_read_test,                       razer_attr_write_test);
-static DEVICE_ATTR(version,                 0440, razer_attr_read_version,                    NULL);
-static DEVICE_ATTR(device_type,             0440, razer_attr_read_device_type,                NULL);
-static DEVICE_ATTR(device_serial,           0440, razer_attr_read_device_serial,              NULL);
-#if NARI_DEBUG_REPORTS
-//static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_firmware_version,           NULL);
-static DEVICE_ATTR(request_report,          0220, NULL,                                       razer_attr_write_request_report);
-static DEVICE_ATTR(request_battery_report,  0220, NULL,                                       razer_attr_write_request_battery_report);
-#endif
-
-static DEVICE_ATTR(matrix_brightness,       0660, razer_attr_read_matrix_brightness,          razer_attr_write_matrix_brightness);
-static DEVICE_ATTR(matrix_effect_none,      0220, NULL,                                       razer_attr_write_matrix_effect_none);
-static DEVICE_ATTR(matrix_effect_static,    0660, razer_attr_read_matrix_effect_static,       razer_attr_write_matrix_effect_static);
-
-static void razer_nari_init(struct razer_nari_device *dev, struct usb_interface *intf, struct hid_device *hdev)
+static void razer_nari_init(struct razer_nari_device *dev,
+                            struct usb_interface *intf,
+                            struct hid_device *hdev)
 {
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
-    // Initialise mutex
     mutex_init(&dev->lock);
-    // Setup values
     dev->usb_dev = usb_dev;
     dev->usb_interface_protocol = intf->cur_altsetting->desc.bInterfaceProtocol;
     dev->usb_vid = usb_dev->descriptor.idVendor;
     dev->usb_pid = usb_dev->descriptor.idProduct;
     dev->hid_dev = hdev;
+    dev->haptic_enabled = 0;
+    dev->haptic_intensity = 0;
+    dev->led_brightness = 0;
 
-    switch(dev->usb_pid) { //custom setup. Not needed until now.
+    switch (dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_NARI_ULTIMATE_WIRELESS:
     case USB_DEVICE_ID_RAZER_NARI_ULTIMATE_USB:
         dev->name = "Razer Nari Ultimate";
@@ -429,10 +495,8 @@ static void razer_nari_init(struct razer_nari_device *dev, struct usb_interface 
     }
 }
 
-/**
- * Probe method is ran whenever a device is binded to the driver
- */
-static int razer_nari_probe(struct hid_device *hdev, const struct hid_device_id *id)
+static int razer_nari_probe(struct hid_device *hdev,
+                            const struct hid_device_id *id)
 {
     int retval = 0;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
@@ -440,31 +504,32 @@ static int razer_nari_probe(struct hid_device *hdev, const struct hid_device_id 
     struct razer_nari_device *dev = NULL;
 
     dev = kzalloc(sizeof(struct razer_nari_device), GFP_KERNEL);
-    if(dev == NULL) {
+    if (dev == NULL) {
         dev_err(&intf->dev, "out of memory\n");
         return -ENOMEM;
     }
 
-    // Init data
     razer_nari_init(dev, intf, hdev);
 
-    if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE) {
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);                               // Get driver version
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);                                  // Test mode
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);                         // Get serial of device
-#if NARI_DEBUG_REPORTS
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_request_report);                        // Request report from device
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_request_battery_report);                // Request battery report from device
-#endif
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);                     // Set brightness of logo led
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);                    // No effect
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);                  // Static effect
+    if (dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE) {
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);
+
+        /* Main zone: haptic motor */
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+
+        /* Logo zone: status LED */
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_brightness);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
     }
 
     dev_set_drvdata(&hdev->dev, dev);
 
-    if(hid_parse(hdev)) {
+    if (hid_parse(hdev)) {
         hid_err(hdev, "parse failed\n");
         goto exit_free;
     }
@@ -474,10 +539,7 @@ static int razer_nari_probe(struct hid_device *hdev, const struct hid_device_id 
         goto exit_free;
     }
 
-    razer_nari_send_request_report_msg(hdev);
-
     usb_disable_autosuspend(usb_dev);
-
     return 0;
 
 exit_free:
@@ -485,9 +547,6 @@ exit_free:
     return retval;
 }
 
-/**
- * Unbind function
- */
 static void razer_nari_disconnect(struct hid_device *hdev)
 {
     struct razer_nari_device *dev;
@@ -495,41 +554,39 @@ static void razer_nari_disconnect(struct hid_device *hdev)
 
     dev = hid_get_drvdata(hdev);
 
-    if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE) {
-        device_remove_file(&hdev->dev, &dev_attr_version);                               // Get driver version
-        device_remove_file(&hdev->dev, &dev_attr_test);                                  // Test mode
-        device_remove_file(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
-        device_remove_file(&hdev->dev, &dev_attr_device_serial);                         // Get serial of device
-#if NARI_DEBUG_REPORTS
-        device_remove_file(&hdev->dev, &dev_attr_request_report);                        // Request report from device
-        device_remove_file(&hdev->dev, &dev_attr_request_battery_report);                // Request battery report from device
-#endif
-        device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);                     // Set brightness of logo led
-        device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);                    // No effect
-        device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);                  // Static effect
+    if (dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE) {
+        device_remove_file(&hdev->dev, &dev_attr_version);
+        device_remove_file(&hdev->dev, &dev_attr_test);
+        device_remove_file(&hdev->dev, &dev_attr_device_type);
+        device_remove_file(&hdev->dev, &dev_attr_device_serial);
+
+        device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+        device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+
+        device_remove_file(&hdev->dev, &dev_attr_logo_matrix_brightness);
+        device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+        device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
     }
 
     hid_hw_stop(hdev);
     kfree(dev);
-    dev_info(&intf->dev, "Razer Device disconnected\n");
+    dev_info(&intf->dev, "Razer Nari disconnected\n");
 }
 
-/**
- * Device ID mapping table
- */
+/* ---------------------------------------------------------------------
+ * HID device table and module hookup
+ * ------------------------------------------------------------------ */
+
 static const struct hid_device_id razer_devices[] = {
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NARI_ULTIMATE_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NARI_ULTIMATE_USB) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NARI_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NARI_USB) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_NARI_ULTIMATE_WIRELESS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_NARI_ULTIMATE_USB) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_NARI_WIRELESS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_NARI_USB) },
     { 0 }
 };
 
 MODULE_DEVICE_TABLE(hid, razer_devices);
 
-/**
- * Describes the contents of the driver
- */
 static struct hid_driver razer_nari_driver = {
     .name = "razernari",
     .id_table = razer_devices,
