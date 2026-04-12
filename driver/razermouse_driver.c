@@ -76,13 +76,13 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
-        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_NEW_MOUSE_RECEIVER_WAIT_MIN_US, RAZER_NEW_MOUSE_RECEIVER_WAIT_MAX_US);
+        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_NEW_MOUSE_RECEIVER_WAIT_US);
         break;
 
     case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
     case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
     case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
-        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_ATHERIS_RECEIVER_WAIT_MIN_US, RAZER_ATHERIS_RECEIVER_WAIT_MAX_US);
+        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_ATHERIS_RECEIVER_WAIT_US);
         break;
 
     case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
@@ -94,18 +94,18 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
-        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_VIPER_MOUSE_RECEIVER_WAIT_MIN_US, RAZER_VIPER_MOUSE_RECEIVER_WAIT_MAX_US);
+        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_VIPER_MOUSE_RECEIVER_WAIT_US);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_X:
     case USB_DEVICE_ID_RAZER_BASILISK_V3:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
         index = 0x03;
-        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
+        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_MOUSE_WAIT_US);
         break;
 
     default:
-        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
+        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_MOUSE_WAIT_US);
     }
 }
 
@@ -182,7 +182,7 @@ static int deathadder3_5g_set_led_state(struct razer_mouse_device *device, unsig
     }
 
     mutex_lock(&device->lock);
-    razer_send_control_msg_old_device(hid_to_usb_dev(device->hdev), &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
+    razer_send_control_msg_old_device(hid_to_usb_dev(device->hdev), &device->da3_5g, 0x10, 0x00, 4, 3000);
     mutex_unlock(&device->lock);
 
     return 0;
@@ -206,7 +206,7 @@ static void deathadder3_5g_set_poll_rate(struct razer_mouse_device *device, unsi
     }
 
     mutex_lock(&device->lock);
-    razer_send_control_msg_old_device(hid_to_usb_dev(device->hdev), &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
+    razer_send_control_msg_old_device(hid_to_usb_dev(device->hdev), &device->da3_5g, 0x10, 0x00, 4, 3000);
     mutex_unlock(&device->lock);
 }
 
@@ -229,7 +229,7 @@ static void deathadder3_5g_set_dpi(struct razer_mouse_device *device, unsigned s
     }
 
     mutex_lock(&device->lock);
-    razer_send_control_msg_old_device(hid_to_usb_dev(device->hdev), &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
+    razer_send_control_msg_old_device(hid_to_usb_dev(device->hdev), &device->da3_5g, 0x10, 0x00, 4, 3000);
     mutex_unlock(&device->lock);
 }
 

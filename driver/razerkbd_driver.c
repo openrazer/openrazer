@@ -298,7 +298,7 @@ static bool is_blade_laptop(struct razer_kbd_device *device)
 /**
  * Get request/response indices and timing parameters for the device
  */
-static void razer_get_report_params(struct usb_device *usb_dev, uint *report_index, uint *response_index, ulong *wait_min, ulong *wait_max)
+static void razer_get_report_params(struct usb_device *usb_dev, uint *report_index, uint *response_index, ulong *wait)
 {
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V2_TENKEYLESS:
@@ -321,15 +321,13 @@ static void razer_get_report_params(struct usb_device *usb_dev, uint *report_ind
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         *report_index = 0x03;
         *response_index = 0x03;
-        *wait_min = RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US;
-        *wait_max = RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US;
+        *wait = RAZER_BLACKWIDOW_CHROMA_WAIT_US;
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
         *report_index = 0x03;
         *response_index = 0x03;
-        *wait_min = RAZER_BLACKWIDOW_V3_WIRELESS_WAIT_MIN_US;
-        *wait_max = RAZER_BLACKWIDOW_V3_WIRELESS_WAIT_MAX_US;
+        *wait = RAZER_BLACKWIDOW_V3_WIRELESS_WAIT_US;
         break;
     case USB_DEVICE_ID_RAZER_ANANSI:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_TE:
@@ -345,28 +343,24 @@ static void razer_get_report_params(struct usb_device *usb_dev, uint *report_ind
     case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
         *report_index = 0x02;
         *response_index = 0x02;
-        *wait_min = RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US;
-        *wait_max = RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US;
+        *wait = RAZER_BLACKWIDOW_CHROMA_WAIT_US;
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         *report_index = 0x02;
         *response_index = 0x02;
-        *wait_min = RAZER_BLACKWIDOW_V3_WIRELESS_WAIT_MIN_US;
-        *wait_max = RAZER_BLACKWIDOW_V3_WIRELESS_WAIT_MAX_US;
+        *wait = RAZER_BLACKWIDOW_V3_WIRELESS_WAIT_US;
         break;
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
         *report_index = 0x02;
         *response_index = 0x02;
-        *wait_min = RAZER_DEATHSTALKER_V2_WIRELESS_WAIT_MIN_US;
-        *wait_max = RAZER_DEATHSTALKER_V2_WIRELESS_WAIT_MAX_US;
+        *wait = RAZER_DEATHSTALKER_V2_WIRELESS_WAIT_US;
         break;
     default:
         *report_index = 0x01;
         *response_index = 0x01;
-        *wait_min = RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US;
-        *wait_max = RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US;
+        *wait = RAZER_BLACKWIDOW_CHROMA_WAIT_US;
         break;
     }
 }
@@ -377,11 +371,11 @@ static void razer_get_report_params(struct usb_device *usb_dev, uint *report_ind
 static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request, struct razer_report *response)
 {
     uint report_index, response_index;
-    ulong wait_min, wait_max;
+    ulong wait;
 
-    razer_get_report_params(usb_dev, &report_index, &response_index, &wait_min, &wait_max);
+    razer_get_report_params(usb_dev, &report_index, &response_index, &wait);
 
-    return razer_get_usb_response(usb_dev, report_index, request, response_index, response, wait_min, wait_max);
+    return razer_get_usb_response(usb_dev, report_index, request, response_index, response, wait);
 }
 
 /**
@@ -391,14 +385,14 @@ static int razer_send_payload_no_response(struct razer_kbd_device *device, struc
 {
     struct usb_device *usb_dev = hid_to_usb_dev(device->hdev);
     uint report_index, response_index;
-    ulong wait_min, wait_max;
+    ulong wait;
 
     /* Except the caller to have set the transaction_id */
     WARN_ON(request->transaction_id.id == 0x00);
 
-    razer_get_report_params(usb_dev, &report_index, &response_index, &wait_min, &wait_max);
+    razer_get_report_params(usb_dev, &report_index, &response_index, &wait);
 
-    return razer_send_control_msg(usb_dev, request, report_index, wait_min, wait_max);
+    return razer_send_control_msg(usb_dev, request, report_index, wait);
 }
 
 /**
