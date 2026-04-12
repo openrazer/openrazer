@@ -6108,7 +6108,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     struct razer_mouse_device *dev = NULL;
     unsigned char expected_subclass = 0xFF;
 
-    dev = kzalloc(sizeof(struct razer_mouse_device), GFP_KERNEL);
+    dev = kzalloc_obj(*dev);
 
     if(dev == NULL) {
         hid_err(hdev, "out of memory\n");
