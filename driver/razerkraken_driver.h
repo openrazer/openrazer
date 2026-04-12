@@ -149,6 +149,7 @@ struct razer_kraken_request_report {
     unsigned char addr_l;
     unsigned char arguments[32];
 };
+static_assert(sizeof(struct razer_kraken_request_report) == 37);
 
 struct razer_kraken_response_report {
     unsigned char report_id;

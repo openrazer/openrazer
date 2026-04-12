@@ -398,7 +398,7 @@ static int __must_check razer_send_payload_no_response(struct razer_kbd_device *
 
     razer_get_report_params(usb_dev, &report_index, &response_index, &wait);
 
-    return razer_send_control_msg(device->hdev, request, report_index, wait);
+    return razer_send_control_msg(device->hdev, request, sizeof(*request), report_index, wait);
 }
 
 /**

@@ -17,38 +17,30 @@
  * USUALLY index = 0x02
  * FIREFLY is 0
  */
-int razer_send_control_msg(struct hid_device *hdev, void const *data, uint report_index, ulong wait)
+int razer_send_control_msg(struct hid_device *hdev, const void *data, u16 size, u16 index, ulong wait)
 {
     struct usb_device *usb_dev = hid_to_usb_dev(hdev);
-    uint request = HID_REQ_SET_REPORT; // 0x09
-    uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
-    uint value = 0x300;
-    uint size = RAZER_USB_REPORT_LEN;
-    char *buf;
-    int len;
-
-    buf = kmemdup(data, size, GFP_KERNEL);
-    if (buf == NULL)
-        return -ENOMEM;
+    int ret;
 
     // Send usb control message
-    len = usb_control_msg(usb_dev, usb_sndctrlpipe(usb_dev, 0),
-                          request,      // Request
-                          request_type, // RequestType
-                          value,        // Value
-                          report_index, // Index
-                          buf,          // Data
-                          size,         // Length
-                          USB_CTRL_SET_TIMEOUT);
+    ret = usb_control_msg_send(usb_dev,
+                               0, // endpoint to send the message to
+                               HID_REQ_SET_REPORT, // USB message request value (0x09)
+                               USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT, // USB message request type value (0x21)
+                               0x300, // USB message value
+                               index, // USB message index value
+                               data, // pointer to the data to send
+                               size, // length in bytes of the data to send
+                               USB_CTRL_SET_TIMEOUT, // time in msecs to wait for the message to complete before timing out
+                               GFP_KERNEL);
 
     // Wait
     fsleep(wait);
 
-    kfree(buf);
-    if(len!=size)
-        hid_warn(hdev, "razer driver: Device data transfer failed.\n");
+    if (ret)
+        hid_warn(hdev, "Failed to send USB control message: %d\n", ret);
 
-    return ((len < 0) ? len : ((len != size) ? -EIO : 0));
+    return ret;
 }
 
 /**
@@ -71,45 +63,31 @@ int razer_send_control_msg(struct hid_device *hdev, void const *data, uint repor
 int razer_get_usb_response(struct hid_device *hdev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, ulong wait)
 {
     struct usb_device *usb_dev = hid_to_usb_dev(hdev);
-    uint request = HID_REQ_GET_REPORT; // 0x01
-    uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN; // 0xA1
-    uint value = 0x300;
-
-    uint size = RAZER_USB_REPORT_LEN; // 0x90
-    int len;
-    int retval;
-    int result = 0;
-    char *buf;
+    int err;
 
     if (WARN_ON(request_report->transaction_id.id == 0x00)) {
         request_report->transaction_id.id = 0xFF;
     }
 
-    buf = kzalloc(sizeof(struct razer_report), GFP_KERNEL);
-    if (buf == NULL)
-        return -ENOMEM;
-
     // Send the request to the device.
-    // TODO look to see if index needs to be different for the request and the response
-    retval = razer_send_control_msg(hdev, request_report, report_index, wait);
+    err = razer_send_control_msg(hdev, request_report, sizeof(*request_report), report_index, wait);
+    if (err)
+        return err;
 
     // Now ask for response
-    len = usb_control_msg(usb_dev, usb_rcvctrlpipe(usb_dev, 0),
-                          request,         // Request
-                          request_type,    // RequestType
-                          value,           // Value
-                          response_index,  // Index
-                          buf,             // Data
-                          size,
-                          USB_CTRL_SET_TIMEOUT);
-
-    memcpy(response_report, buf, sizeof(struct razer_report));
-    kfree(buf);
-
-    // Error if report is wrong length
-    if(len != 90) {
-        hid_warn(hdev, "razer driver: Invalid USB response. USB Report length: %d\n", len);
-        result = 1;
+    err = usb_control_msg_recv(usb_dev,
+                               0, // endpoint to send the message to
+                               HID_REQ_GET_REPORT, // USB message request value (0x01)
+                               USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN, // USB message request type value (0xA1)
+                               0x300, // USB message value
+                               response_index, // USB message index value
+                               response_report, // pointer to the data to be filled in by the message
+                               sizeof(*response_report), // length in bytes of the data to be received
+                               USB_CTRL_SET_TIMEOUT, // time in msecs to wait for the message to complete before timing out
+                               GFP_KERNEL);
+    if (err) {
+        hid_warn(hdev, "Failed to receive USB control message: %d\n", err);
+        return err;
     }
 
     if (WARN_ONCE(response_report->data_size > ARRAY_SIZE(response_report->arguments),
@@ -120,7 +98,7 @@ int razer_get_usb_response(struct hid_device *hdev, uint report_index, struct ra
         return -EINVAL;
     }
 
-    return result;
+    return err;
 }
 
 /**
@@ -183,48 +161,37 @@ void print_erroneous_report(struct hid_device *hdev, struct razer_report* report
              report->arguments[12], report->arguments[13], report->arguments[14], report->arguments[15]);
 }
 
-int razer_send_control_msg_old_device(struct hid_device *hdev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait)
+int razer_send_control_msg_old_device(struct hid_device *hdev, const void *data, uint value, uint index, uint size, ulong wait)
 {
     struct usb_device *usb_dev = hid_to_usb_dev(hdev);
-    uint request = HID_REQ_SET_REPORT; // 0x09
-    uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
-    char *buf;
-    int len;
-
-    buf = kmemdup(data, report_size, GFP_KERNEL);
-    if (buf == NULL)
-        return -ENOMEM;
+    int ret;
 
     // Send usb control message
-    len = usb_control_msg(usb_dev, usb_sndctrlpipe(usb_dev, 0),
-                          request,      // Request
-                          request_type, // RequestType
-                          report_value, // Value
-                          report_index, // Index
-                          buf,          // Data
-                          report_size,  // Length
-                          USB_CTRL_SET_TIMEOUT);
+    ret = usb_control_msg_send(usb_dev,
+                               0, // endpoint to send the message to
+                               HID_REQ_SET_REPORT, // USB message request value (0x09)
+                               USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT, // USB message request type value (0x21)
+                               value, // USB message value
+                               index, // USB message index value
+                               data, // pointer to the data to send
+                               size, // length in bytes of the data to send
+                               USB_CTRL_SET_TIMEOUT, // time in msecs to wait for the message to complete before timing out
+                               GFP_KERNEL);
 
     // Wait
     fsleep(wait);
 
-    kfree(buf);
-    if(len!=report_size)
-        hid_warn(hdev, "razer driver: Device data transfer failed.\n");
+    if (ret)
+        hid_warn(hdev, "Failed to send USB control message: %d\n", ret);
 
-    return ((len < 0) ? len : ((len != report_size) ? -EIO : 0));
+    return ret;
 }
 
 int razer_send_argb_msg(struct hid_device* hdev, unsigned char channel, size_t size, void const* data)
 {
     struct usb_device *usb_dev = hid_to_usb_dev(hdev);
-    uint request = HID_REQ_SET_REPORT; // 0x09
-    uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
-    uint value = 0x300;
-    int len;
-    char *buf;
-
     struct razer_argb_report report = {0};
+    int ret;
 
     if (channel < 5) {
         report.report_id = 0x04;
@@ -246,20 +213,20 @@ int razer_send_argb_msg(struct hid_device* hdev, unsigned char channel, size_t s
 
     memcpy(report.color_data, data, size * 3);
 
-    buf = kmemdup(&report, sizeof(report), GFP_KERNEL);
-
     // Send usb control message
-    len = usb_control_msg(usb_dev, usb_sndctrlpipe(usb_dev, 0),
-                          request,            // Request
-                          request_type,       // RequestType
-                          value,              // Value
-                          0x01,               // Index
-                          buf,                // Data
-                          sizeof(report),     // Length
-                          USB_CTRL_SET_TIMEOUT);
+    ret = usb_control_msg_send(usb_dev,
+                               0, // endpoint to send the message to
+                               HID_REQ_SET_REPORT, // USB message request value (0x09)
+                               USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT, // USB message request type value (0x21)
+                               0x300, // USB message value
+                               0x01, // USB message index value
+                               &report, // pointer to the data to send
+                               sizeof(report), // length in bytes of the data to send
+                               USB_CTRL_SET_TIMEOUT, // time in msecs to wait for the message to complete before timing out
+                               GFP_KERNEL);
 
-    if (len != sizeof(report))
-        hid_warn(hdev, "razer driver: Device data transfer failed. len = %d", len);
+    if (ret)
+        hid_warn(hdev, "Failed to send USB control message: %d\n", ret);
 
-    return ((len < 0) ? len : ((len != size) ? -EIO : 0));
+    return ret;
 }

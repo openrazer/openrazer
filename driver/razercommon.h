@@ -25,9 +25,6 @@ do { \
 
 #define USB_VENDOR_ID_RAZER 0x1532
 
-/* Each USB report has 90 bytes*/
-#define RAZER_USB_REPORT_LEN 0x5A
-
 // LED STATE
 #define OFF 0x00
 #define ON  0x01
@@ -148,8 +145,8 @@ struct razer_argb_report {
 };
 static_assert(sizeof(struct razer_argb_report) == 320);
 
-int razer_send_control_msg(struct hid_device *hdev,void const *data, unsigned int report_index, unsigned long wait);
-int razer_send_control_msg_old_device(struct hid_device *hdev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait);
+int razer_send_control_msg(struct hid_device *hdev, const void *data, u16 size, u16 index, ulong wait);
+int razer_send_control_msg_old_device(struct hid_device *hdev, const void *data, uint value, uint index, uint size, ulong wait);
 int razer_get_usb_response(struct hid_device *hdev, unsigned int report_index, struct razer_report* request_report, unsigned int response_index, struct razer_report* response_report, unsigned long wait);
 int razer_send_argb_msg(struct hid_device *hdev, unsigned char channel, size_t size, void const* data);
 unsigned char razer_calculate_crc(struct razer_report *report);
