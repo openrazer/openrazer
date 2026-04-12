@@ -17,7 +17,7 @@
  * USUALLY index = 0x02
  * FIREFLY is 0
  */
-int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint report_index, ulong wait_min, ulong wait_max)
+int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint report_index, ulong wait)
 {
     uint request = HID_REQ_SET_REPORT; // 0x09
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
@@ -41,7 +41,7 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
                           USB_CTRL_SET_TIMEOUT);
 
     // Wait
-    usleep_range(wait_min, wait_max);
+    fsleep(wait);
 
     kfree(buf);
     if(len!=size)
@@ -67,7 +67,7 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
  *
  * Returns 0 when successful, 1 if the report length is invalid.
  */
-int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, ulong wait_min, ulong wait_max)
+int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, ulong wait)
 {
     uint request = HID_REQ_GET_REPORT; // 0x01
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN; // 0xA1
@@ -89,7 +89,7 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
 
     // Send the request to the device.
     // TODO look to see if index needs to be different for the request and the response
-    retval = razer_send_control_msg(usb_dev, request_report, report_index, wait_min, wait_max);
+    retval = razer_send_control_msg(usb_dev, request_report, report_index, wait);
 
     // Now ask for response
     len = usb_control_msg(usb_dev, usb_rcvctrlpipe(usb_dev, 0),
@@ -213,7 +213,7 @@ unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned shor
     return value;
 }
 
-int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait_min, ulong wait_max)
+int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait)
 {
     uint request = HID_REQ_SET_REPORT; // 0x09
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
@@ -235,7 +235,7 @@ int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *dat
                           USB_CTRL_SET_TIMEOUT);
 
     // Wait
-    usleep_range(wait_min, wait_max);
+    fsleep(wait);
 
     kfree(buf);
     if(len!=report_size)
