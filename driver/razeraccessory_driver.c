@@ -1106,7 +1106,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        strncpy(serial_string, device->serial, sizeof(serial_string));
+        strscpy(serial_string, device->serial, sizeof(serial_string));
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY:
@@ -1127,7 +1127,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         request.transaction_id.id = 0xFF;
         razer_send_payload(device, &request, &response);
-        strncpy(serial_string, response.arguments, 22);
+        memcpy(serial_string, response.arguments, 22);
         serial_string[22] = '\0';
         break;
 
@@ -1144,7 +1144,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
         request.transaction_id.id = 0x1F;
         razer_send_payload(device, &request, &response);
-        strncpy(serial_string, response.arguments, 22);
+        memcpy(serial_string, response.arguments, 22);
         serial_string[22] = '\0';
         break;
 
