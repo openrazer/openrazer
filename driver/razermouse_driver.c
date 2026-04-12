@@ -1461,7 +1461,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     }
 
     razer_send_payload(device, &request, &response);
-    strncpy(&serial_string[0], &response.arguments[0], 22);
+    memcpy(&serial_string[0], &response.arguments[0], 22);
     serial_string[22] = '\0';
 
     return sprintf(buf, "%s\n", &serial_string[0]);

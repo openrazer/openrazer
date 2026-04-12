@@ -2021,7 +2021,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 
     /* For Blade laptops we get the serial number from DMI */
     if (is_blade_laptop(device)) {
-        strncpy(&serial_string[0], dmi_get_system_info(DMI_PRODUCT_SERIAL), 50);
+        strscpy(&serial_string[0], dmi_get_system_info(DMI_PRODUCT_SERIAL), 50);
         goto exit;
     }
 
@@ -2030,7 +2030,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 
     razer_send_payload(device, &request, &response);
 
-    strncpy(&serial_string[0], &response.arguments[0], 22);
+    memcpy(&serial_string[0], &response.arguments[0], 22);
     serial_string[22] = '\0';
 
 exit:
