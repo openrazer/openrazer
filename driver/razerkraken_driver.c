@@ -47,38 +47,29 @@ static void print_erroneous_kraken_request_report(struct razer_kraken_request_re
 static int razer_kraken_send_control_msg(struct hid_device *hdev,struct razer_kraken_request_report* report, unsigned char skip)
 {
     struct usb_device *usb_dev = hid_to_usb_dev(hdev);
-    uint request = HID_REQ_SET_REPORT; // 0x09
-    uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
-    uint value = 0x0204;
-    uint index = 0x0003;
-    uint size = 37;
-    char *buf;
-    int len;
-
-    buf = kmemdup(report, size, GFP_KERNEL);
-    if (buf == NULL)
-        return -ENOMEM;
+    int ret;
 
     // Send usb control message
-    len = usb_control_msg(usb_dev, usb_sndctrlpipe(usb_dev, 0),
-                          request,      // Request      U8
-                          request_type, // RequestType  U8
-                          value,        // Value        U16
-                          index,        // Index        U16
-                          buf,          // Data         void* data
-                          size,         // Length       U16
-                          USB_CTRL_SET_TIMEOUT); //     Int
+    ret = usb_control_msg_send(usb_dev,
+                               0, // endpoint to send the message to
+                               HID_REQ_SET_REPORT, // USB message request value (0x09)
+                               USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT, // USB message request type value (0x21)
+                               0x0204, // USB message value
+                               0x0003, // USB message index value
+                               report, // pointer to the data to send
+                               sizeof(*report), // length in bytes of the data to send
+                               USB_CTRL_SET_TIMEOUT, // time in msecs to wait for the message to complete before timing out
+                               GFP_KERNEL);
 
     // Wait
     if(skip != 1) {
         msleep(report->length * 15);
     }
 
-    kfree(buf);
-    if(len!=size)
-        hid_warn(hdev, "razer driver: Device data transfer failed.\n");
+    if (ret)
+        hid_warn(hdev, "Failed to send USB control message: %d\n", ret);
 
-    return ((len < 0) ? len : ((len != size) ? -EIO : 0));
+    return ret;
 }
 
 /**
