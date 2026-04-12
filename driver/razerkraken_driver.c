@@ -744,7 +744,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_kraken_device *dev = NULL;
 
-    dev = kzalloc(sizeof(struct razer_kraken_device), GFP_KERNEL);
+    dev = kzalloc_obj(*dev);
     if(dev == NULL) {
         hid_err(hdev, "out of memory\n");
         return -ENOMEM;
