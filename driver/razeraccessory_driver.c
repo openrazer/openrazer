@@ -2528,13 +2528,40 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
     return true;
 }
 
+static int get_expected_interface_protocol(struct razer_accessory_device *device)
+{
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_CORE:
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+    case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+    case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
+    case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
+    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+        return 0;
+
+    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
+    case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
+    case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+        return USB_INTERFACE_PROTOCOL_KEYBOARD;
+
+    default:
+        return USB_INTERFACE_PROTOCOL_MOUSE;
+    }
+}
+
 /**
  * Probe method is ran whenever a device is binded to the driver
  */
 static int razer_accessory_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
     int retval = 0;
-    unsigned char expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
+
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_accessory_device *dev = NULL;
@@ -2549,86 +2576,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     // Init data
     razer_accessory_init(dev, intf, hdev);
 
-    switch(usb_dev->descriptor.idProduct) {
-    case USB_DEVICE_ID_RAZER_CORE:
-    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
-    case USB_DEVICE_ID_RAZER_FIREFLY_V2:
-    case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
-    case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
-    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
-    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-    case USB_DEVICE_ID_RAZER_RAPTOR_27:
-    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-        expected_protocol = 0;
-        break;
-
-    case USB_DEVICE_ID_RAZER_FIREFLY:
-    case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
-    case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
-    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
-    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
-    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
-    case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-    case USB_DEVICE_ID_RAZER_CHROMA_HDK:
-    case USB_DEVICE_ID_RAZER_CHROMA_BASE:
-    case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
-    case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
-    case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
-    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
-        expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
-        break;
-
-    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
-    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
-    case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
-    case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
-    case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
-    case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
-        expected_protocol = USB_INTERFACE_PROTOCOL_KEYBOARD;
-        break;
-    }
-
-    if(dev->usb_interface_protocol == expected_protocol) {
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);                               // Get driver version
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);                                  // Test mode
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);                           // Get string of device mode
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);                         // Get string of device serial
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);                      // Get string of device fw version
-
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);                   // Custom effect frame
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);                    // No effect
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);                  // Static effect
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);                  // Breathing effect
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);                  // Custom effect
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);                     // Brightness
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-            // Razer has also added a "Fast Wave" effect for at least this device
-            // which uses the same effect command but a speed parameter of 0x10.
-            // It has not been implemented.
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charging_led_brightness);           // Charging effects
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charging_matrix_effect_wave);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charging_matrix_effect_spectrum);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charging_matrix_effect_breath);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charging_matrix_effect_static);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charging_matrix_effect_none);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fast_charging_led_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fast_charging_matrix_effect_wave);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fast_charging_matrix_effect_spectrum);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fast_charging_matrix_effect_breath);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fast_charging_matrix_effect_static);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fast_charging_matrix_effect_none);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_led_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_wave);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_spectrum);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_breath);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_static);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_none);
-            break;
-        }
-
+    if(dev->usb_interface_protocol == get_expected_interface_protocol(dev)) {
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
         case USB_DEVICE_ID_RAZER_FIREFLY_V2:
@@ -2639,117 +2587,6 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
             // Device initial brightness is always 100% anyway
             dev->saved_brightness = 0xFF;
-            break;
-        }
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
-        case USB_DEVICE_ID_RAZER_FIREFLY_V2:
-        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
-        case USB_DEVICE_ID_RAZER_CORE:
-        case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
-        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
-        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
-        case USB_DEVICE_ID_RAZER_FIREFLY:
-        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
-        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
-        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
-        case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
-        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        case USB_DEVICE_ID_RAZER_CHROMA_BASE:
-        case USB_DEVICE_ID_RAZER_CHROMA_HDK:
-        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
-        case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
-        case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
-        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
-        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-        case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
-        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
-        case USB_DEVICE_ID_RAZER_RAPTOR_27:
-        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
-        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
-        case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
-        case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
-            break;
-        }
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_FIREFLY:
-        case USB_DEVICE_ID_RAZER_FIREFLY_V2:
-        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
-        case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
-        case USB_DEVICE_ID_RAZER_CORE:
-        case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
-        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        case USB_DEVICE_ID_RAZER_CHROMA_HDK:
-        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-        case USB_DEVICE_ID_RAZER_CHROMA_BASE:
-        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
-        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
-        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
-        case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
-        case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
-        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
-        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
-        case USB_DEVICE_ID_RAZER_RAPTOR_27:
-        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
-        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
-        case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
-        case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);                // Wave effect
-            break;
-        }
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
-        case USB_DEVICE_ID_RAZER_FIREFLY_V2:
-        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
-        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
-        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
-        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
-        case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
-        case USB_DEVICE_ID_RAZER_FIREFLY:
-        case USB_DEVICE_ID_RAZER_CORE:
-        case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
-        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);            // Reactive
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_reactive_trigger);           // Reactive trigger
-            break;
-        }
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_is_mug_present);                    // Is cup present
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_blinking);            // Blinking effect
-            break;
-        }
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
-        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
-        case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);
-            break;
-        }
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_reset_channels);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel1_size);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel2_size);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel3_size);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel4_size);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel5_size);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel6_size);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel1_led_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel2_led_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel3_led_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel4_led_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel5_led_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_channel6_led_brightness);
             break;
         }
 
@@ -2796,197 +2633,7 @@ exit_free:
  */
 static void razer_accessory_disconnect(struct hid_device *hdev)
 {
-    unsigned char expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
-    struct razer_accessory_device *dev;
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
-
-    dev = hid_get_drvdata(hdev);
-
-    switch(usb_dev->descriptor.idProduct) {
-    case USB_DEVICE_ID_RAZER_CORE:
-    case USB_DEVICE_ID_RAZER_FIREFLY_V2:
-    case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
-    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
-    case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
-    case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
-    case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
-    case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-    case USB_DEVICE_ID_RAZER_RAPTOR_27:
-    case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-        expected_protocol = 0;
-        break;
-
-    case USB_DEVICE_ID_RAZER_FIREFLY:
-    case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
-    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
-    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
-    case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
-    case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-    case USB_DEVICE_ID_RAZER_CHROMA_HDK:
-    case USB_DEVICE_ID_RAZER_CHROMA_BASE:
-    case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
-    case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
-    case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
-    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
-        expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
-        break;
-
-    case USB_DEVICE_ID_RAZER_NOMMO_PRO:
-    case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
-    case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
-    case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
-    case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
-    case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
-        expected_protocol = USB_INTERFACE_PROTOCOL_KEYBOARD;
-        break;
-    }
-
-    if(dev->usb_interface_protocol == expected_protocol) {
-        device_remove_file(&hdev->dev, &dev_attr_version);                               // Get driver version
-        device_remove_file(&hdev->dev, &dev_attr_test);                                  // Test mode
-        device_remove_file(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
-        device_remove_file(&hdev->dev, &dev_attr_device_mode);                           // Get string of device mode
-        device_remove_file(&hdev->dev, &dev_attr_device_serial);                         // Get string of device serial
-        device_remove_file(&hdev->dev, &dev_attr_firmware_version);                      // Get string of device fw version
-
-        device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);                   // Custom effect frame
-        device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);                    // No effect
-        device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);                  // Static effect
-        device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);                  // Breathing effect
-        device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);                  // Custom effect
-        device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);                     // Brightness
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-            device_remove_file(&hdev->dev, &dev_attr_charging_led_brightness);           // Charging effects
-            device_remove_file(&hdev->dev, &dev_attr_charging_matrix_effect_wave);
-            device_remove_file(&hdev->dev, &dev_attr_charging_matrix_effect_spectrum);
-            device_remove_file(&hdev->dev, &dev_attr_charging_matrix_effect_breath);
-            device_remove_file(&hdev->dev, &dev_attr_charging_matrix_effect_static);
-            device_remove_file(&hdev->dev, &dev_attr_charging_matrix_effect_none);
-            device_remove_file(&hdev->dev, &dev_attr_fast_charging_led_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_fast_charging_matrix_effect_wave);
-            device_remove_file(&hdev->dev, &dev_attr_fast_charging_matrix_effect_spectrum);
-            device_remove_file(&hdev->dev, &dev_attr_fast_charging_matrix_effect_breath);
-            device_remove_file(&hdev->dev, &dev_attr_fast_charging_matrix_effect_static);
-            device_remove_file(&hdev->dev, &dev_attr_fast_charging_matrix_effect_none);
-            device_remove_file(&hdev->dev, &dev_attr_fully_charged_led_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_wave);
-            device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_spectrum);
-            device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_breath);
-            device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_static);
-            device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_none);
-            break;
-        }
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
-        case USB_DEVICE_ID_RAZER_FIREFLY_V2:
-        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
-        case USB_DEVICE_ID_RAZER_CORE:
-        case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
-        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
-        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
-        case USB_DEVICE_ID_RAZER_FIREFLY:
-        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
-        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
-        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
-        case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
-        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        case USB_DEVICE_ID_RAZER_CHROMA_BASE:
-        case USB_DEVICE_ID_RAZER_CHROMA_HDK:
-        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
-        case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
-        case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
-        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
-        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-        case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
-        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
-        case USB_DEVICE_ID_RAZER_RAPTOR_27:
-        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
-        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
-        case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
-        case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
-            break;
-        }
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_FIREFLY:
-        case USB_DEVICE_ID_RAZER_FIREFLY_V2:
-        case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
-        case USB_DEVICE_ID_RAZER_CORE:
-        case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
-        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-        case USB_DEVICE_ID_RAZER_CHROMA_HDK:
-        case USB_DEVICE_ID_RAZER_CHROMA_BASE:
-        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
-        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
-        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
-        case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
-        case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
-        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
-        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
-        case USB_DEVICE_ID_RAZER_RAPTOR_27:
-        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
-        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
-        case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
-        case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);                // Wave effect
-            break;
-        }
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
-        case USB_DEVICE_ID_RAZER_FIREFLY_V2:
-        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
-        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
-        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
-        case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
-        case USB_DEVICE_ID_RAZER_FIREFLY:
-        case USB_DEVICE_ID_RAZER_CORE:
-        case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
-        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);            // Reactive
-            device_remove_file(&hdev->dev, &dev_attr_matrix_reactive_trigger);           // Reactive trigger
-            break;
-        }
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
-            device_remove_file(&hdev->dev, &dev_attr_is_mug_present);                    // Is cup present
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_blinking);            // Blinking effect
-            break;
-        }
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
-            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);
-            break;
-        }
-
-        switch(usb_dev->descriptor.idProduct) {
-        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
-            device_remove_file(&hdev->dev, &dev_attr_reset_channels);
-            device_remove_file(&hdev->dev, &dev_attr_channel1_size);
-            device_remove_file(&hdev->dev, &dev_attr_channel2_size);
-            device_remove_file(&hdev->dev, &dev_attr_channel3_size);
-            device_remove_file(&hdev->dev, &dev_attr_channel4_size);
-            device_remove_file(&hdev->dev, &dev_attr_channel5_size);
-            device_remove_file(&hdev->dev, &dev_attr_channel6_size);
-            device_remove_file(&hdev->dev, &dev_attr_channel1_led_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_channel2_led_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_channel3_led_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_channel4_led_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_channel5_led_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_channel6_led_brightness);
-            break;
-        }
-    }
+    struct razer_accessory_device *dev = hid_get_drvdata(hdev);
 
     hid_hw_stop(hdev);
 
@@ -3018,6 +2665,255 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 
     return 0;
 }
+
+static struct attribute *razer_attributes[] = {
+    &dev_attr_test.attr,
+    &dev_attr_version.attr,
+    &dev_attr_device_type.attr,
+    &dev_attr_device_mode.attr,
+    &dev_attr_device_serial.attr,
+    &dev_attr_firmware_version.attr,
+    &dev_attr_matrix_effect_none.attr,
+    &dev_attr_matrix_effect_spectrum.attr,
+    &dev_attr_matrix_effect_static.attr,
+    &dev_attr_matrix_effect_reactive.attr,
+    &dev_attr_matrix_effect_breath.attr,
+    &dev_attr_matrix_effect_custom.attr,
+    &dev_attr_matrix_effect_wave.attr,
+    &dev_attr_matrix_effect_blinking.attr,
+    &dev_attr_matrix_effect_starlight.attr,
+    &dev_attr_matrix_brightness.attr,
+    &dev_attr_matrix_custom_frame.attr,
+    &dev_attr_matrix_reactive_trigger.attr,
+    &dev_attr_charging_led_brightness.attr,
+    &dev_attr_charging_matrix_effect_wave.attr,
+    &dev_attr_charging_matrix_effect_spectrum.attr,
+    &dev_attr_charging_matrix_effect_breath.attr,
+    &dev_attr_charging_matrix_effect_static.attr,
+    &dev_attr_charging_matrix_effect_none.attr,
+    &dev_attr_fast_charging_led_brightness.attr,
+    &dev_attr_fast_charging_matrix_effect_wave.attr,
+    &dev_attr_fast_charging_matrix_effect_spectrum.attr,
+    &dev_attr_fast_charging_matrix_effect_breath.attr,
+    &dev_attr_fast_charging_matrix_effect_static.attr,
+    &dev_attr_fast_charging_matrix_effect_none.attr,
+    &dev_attr_fully_charged_led_brightness.attr,
+    &dev_attr_fully_charged_matrix_effect_wave.attr,
+    &dev_attr_fully_charged_matrix_effect_spectrum.attr,
+    &dev_attr_fully_charged_matrix_effect_breath.attr,
+    &dev_attr_fully_charged_matrix_effect_static.attr,
+    &dev_attr_fully_charged_matrix_effect_none.attr,
+    &dev_attr_reset_channels.attr,
+    &dev_attr_channel1_size.attr,
+    &dev_attr_channel2_size.attr,
+    &dev_attr_channel3_size.attr,
+    &dev_attr_channel4_size.attr,
+    &dev_attr_channel5_size.attr,
+    &dev_attr_channel6_size.attr,
+    &dev_attr_channel1_led_brightness.attr,
+    &dev_attr_channel2_led_brightness.attr,
+    &dev_attr_channel3_led_brightness.attr,
+    &dev_attr_channel4_led_brightness.attr,
+    &dev_attr_channel5_led_brightness.attr,
+    &dev_attr_channel6_led_brightness.attr,
+    &dev_attr_is_mug_present.attr,
+    NULL,
+};
+
+static umode_t razer_attr_is_visible(struct kobject *kobj, struct attribute *attr, int n)
+{
+    struct device *dev = kobj_to_dev(kobj);
+    struct hid_device *hdev = to_hid_device(dev);
+    struct razer_accessory_device *device = hid_get_drvdata(hdev);
+
+    /* Hide all sysfs files if it's not for the correct interfaces */
+    if (device->usb_interface_protocol != get_expected_interface_protocol(device))
+        return 0;
+
+    /* Visible for all */
+    if (attr == &dev_attr_version.attr ||
+        attr == &dev_attr_test.attr ||
+        attr == &dev_attr_device_type.attr ||
+        attr == &dev_attr_device_mode.attr ||
+        attr == &dev_attr_device_serial.attr ||
+        attr == &dev_attr_firmware_version.attr ||
+        attr == &dev_attr_matrix_custom_frame.attr ||
+        attr == &dev_attr_matrix_effect_none.attr ||
+        attr == &dev_attr_matrix_effect_static.attr ||
+        attr == &dev_attr_matrix_effect_breath.attr ||
+        attr == &dev_attr_matrix_effect_custom.attr ||
+        attr == &dev_attr_matrix_brightness.attr) {
+        return attr->mode; /* Show it */
+    }
+
+    if (attr == &dev_attr_charging_led_brightness.attr ||
+        attr == &dev_attr_charging_matrix_effect_wave.attr ||
+        attr == &dev_attr_charging_matrix_effect_spectrum.attr ||
+        attr == &dev_attr_charging_matrix_effect_breath.attr ||
+        attr == &dev_attr_charging_matrix_effect_static.attr ||
+        attr == &dev_attr_charging_matrix_effect_none.attr ||
+        attr == &dev_attr_fast_charging_led_brightness.attr ||
+        attr == &dev_attr_fast_charging_matrix_effect_wave.attr ||
+        attr == &dev_attr_fast_charging_matrix_effect_spectrum.attr ||
+        attr == &dev_attr_fast_charging_matrix_effect_breath.attr ||
+        attr == &dev_attr_fast_charging_matrix_effect_static.attr ||
+        attr == &dev_attr_fast_charging_matrix_effect_none.attr ||
+        attr == &dev_attr_fully_charged_led_brightness.attr ||
+        attr == &dev_attr_fully_charged_matrix_effect_wave.attr ||
+        attr == &dev_attr_fully_charged_matrix_effect_spectrum.attr ||
+        attr == &dev_attr_fully_charged_matrix_effect_breath.attr ||
+        attr == &dev_attr_fully_charged_matrix_effect_static.attr) {
+        switch (device->usb_pid) {
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+            return attr->mode; /* Show it */
+        default:
+            return 0;          /* Hide it */
+        }
+    }
+
+    if (attr == &dev_attr_matrix_effect_spectrum.attr) {
+        switch (device->usb_pid) {
+        case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
+        case USB_DEVICE_ID_RAZER_CORE:
+        case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
+        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        case USB_DEVICE_ID_RAZER_FIREFLY:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
+        case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
+        case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+        case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
+        case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        case USB_DEVICE_ID_RAZER_RAPTOR_27:
+        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
+        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
+        case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
+        case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+            return attr->mode; /* Show it */
+        default:
+            return 0;          /* Hide it */
+        }
+    }
+
+    if (attr == &dev_attr_matrix_effect_wave.attr) {
+        switch (device->usb_pid) {
+        case USB_DEVICE_ID_RAZER_FIREFLY:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
+        case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
+        case USB_DEVICE_ID_RAZER_CORE:
+        case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
+        case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+        case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
+        case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        case USB_DEVICE_ID_RAZER_RAPTOR_27:
+        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
+        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
+        case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
+        case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+            return attr->mode; /* Show it */
+        default:
+            return 0;          /* Hide it */
+        }
+    }
+
+    if (attr == &dev_attr_matrix_effect_reactive.attr ||
+        attr == &dev_attr_matrix_reactive_trigger.attr) {
+        switch (device->usb_pid) {
+        case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
+        case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
+        case USB_DEVICE_ID_RAZER_FIREFLY:
+        case USB_DEVICE_ID_RAZER_CORE:
+        case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
+        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
+            return attr->mode; /* Show it */
+        default:
+            return 0;          /* Hide it */
+        }
+    }
+
+    if (attr == &dev_attr_is_mug_present.attr ||
+        attr == &dev_attr_matrix_effect_blinking.attr) {
+        switch (device->usb_pid) {
+        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
+            return attr->mode; /* Show it */
+        default:
+            return 0;          /* Hide it */
+        }
+    }
+
+    if (attr == &dev_attr_matrix_effect_starlight.attr) {
+        switch (device->usb_pid) {
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
+        case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
+            return attr->mode; /* Show it */
+        default:
+            return 0;          /* Hide it */
+        }
+    }
+
+    if (attr == &dev_attr_reset_channels.attr ||
+        attr == &dev_attr_channel1_size.attr ||
+        attr == &dev_attr_channel2_size.attr ||
+        attr == &dev_attr_channel3_size.attr ||
+        attr == &dev_attr_channel4_size.attr ||
+        attr == &dev_attr_channel5_size.attr ||
+        attr == &dev_attr_channel6_size.attr ||
+        attr == &dev_attr_channel1_led_brightness.attr ||
+        attr == &dev_attr_channel2_led_brightness.attr ||
+        attr == &dev_attr_channel3_led_brightness.attr ||
+        attr == &dev_attr_channel4_led_brightness.attr ||
+        attr == &dev_attr_channel5_led_brightness.attr ||
+        attr == &dev_attr_channel6_led_brightness.attr) {
+        switch (device->usb_pid) {
+        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+            return attr->mode; /* Show it */
+        default:
+            return 0;          /* Hide it */
+        }
+    }
+
+    WARN_ONCE(1, "Unhandled attr in %s: %s\n", __func__, attr->name);
+
+    return 0; /* Hide it */
+}
+
+static const struct attribute_group razer_attribute_group = {
+    .attrs = razer_attributes,
+    .is_visible = razer_attr_is_visible,
+};
+
+static const struct attribute_group *razer_attribute_groups[] = {
+    &razer_attribute_group,
+    NULL,
+};
 
 /**
  * Device ID mapping table
@@ -3067,7 +2963,10 @@ static struct hid_driver razer_accessory_driver = {
     .remove = razer_accessory_disconnect,
     .raw_event = razer_raw_event,
     .input_mapping = razer_input_mapping,
-    .input_configured = razer_input_configured
+    .input_configured = razer_input_configured,
+    .driver = {
+        .dev_groups = razer_attribute_groups,
+    },
 };
 
 module_hid_driver(razer_accessory_driver);
