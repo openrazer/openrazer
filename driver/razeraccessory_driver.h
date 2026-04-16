@@ -38,12 +38,19 @@
 #define RAZER_ACCESSORY_WAIT_US 600
 #define RAZER_NEW_DEVICE_WAIT_US 31000
 
+struct razer_accessory_match_data {
+    const char *name;
+    const u8 transaction_id;
+    const struct attribute *visible_attributes[];
+};
+
 struct razer_accessory_device {
     struct hid_device *hdev;
     struct usb_device *usb_dev; // TODO: remove usages, replace with hdev
     struct input_dev *input;
     struct mutex lock;
     unsigned char usb_interface_protocol;
+    const struct razer_accessory_match_data *data;
 
     unsigned short usb_vid;
     unsigned short usb_pid;
