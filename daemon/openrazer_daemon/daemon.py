@@ -198,7 +198,8 @@ class RazerDaemon(DBusService):
         try:
             return grp.getgrnam('plugdev').gr_gid in os.getgroups()
         except KeyError:
-            pass
+            # plugdev group doesn't exist on this system (e.g. Arch Linux)
+            return True
 
         return False
 
@@ -485,11 +486,8 @@ class RazerDaemon(DBusService):
 
                     # Checking permissions
                     test_file = os.path.join(sys_path, 'device_type')
-                    file_group_id = os.stat(test_file).st_gid
-                    file_group_name = grp.getgrgid(file_group_id)[0]
-
-                    if os.getgid() != file_group_id and file_group_name != 'plugdev':
-                        self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
+                    if not os.access(test_file, os.R_OK):
+                        self.logger.critical("Could not access {0}/device_type".format(sys_path))
                         break
 
                     razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
