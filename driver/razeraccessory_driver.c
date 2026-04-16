@@ -2576,6 +2576,8 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     // Init data
     razer_accessory_init(dev, intf, hdev);
 
+    dev->data = (struct razer_accessory_match_data *)id->driver_data;
+
     if(dev->usb_interface_protocol == get_expected_interface_protocol(dev)) {
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -2725,6 +2727,7 @@ static umode_t razer_attr_is_visible(struct kobject *kobj, struct attribute *att
     struct device *dev = kobj_to_dev(kobj);
     struct hid_device *hdev = to_hid_device(dev);
     struct razer_accessory_device *device = hid_get_drvdata(hdev);
+    int i;
 
     /* Hide all sysfs files if it's not for the correct interfaces */
     if (device->usb_interface_protocol != get_expected_interface_protocol(device))
@@ -2746,6 +2749,15 @@ static umode_t razer_attr_is_visible(struct kobject *kobj, struct attribute *att
         return attr->mode; /* Show it */
     }
 
+    /* Show the file if it's in the device data */
+    for (i = 0; device->data->visible_attributes[i] != NULL; i++) {
+        if (attr == device->data->visible_attributes[i])
+            return attr->mode; /* Show it */
+    }
+
+    return 0; /* Hide it */
+
+#if 0
     if (attr == &dev_attr_charging_led_brightness.attr ||
         attr == &dev_attr_charging_matrix_effect_wave.attr ||
         attr == &dev_attr_charging_matrix_effect_spectrum.attr ||
@@ -2903,6 +2915,7 @@ static umode_t razer_attr_is_visible(struct kobject *kobj, struct attribute *att
     WARN_ONCE(1, "Unhandled attr in %s: %s\n", __func__, attr->name);
 
     return 0; /* Hide it */
+#endif
 }
 
 static const struct attribute_group razer_attribute_group = {
@@ -2915,11 +2928,28 @@ static const struct attribute_group *razer_attribute_groups[] = {
     NULL,
 };
 
+static struct razer_accessory_match_data razer_firefly_data = {
+    .name = "Razer Firefly",
+    .visible_attributes = {
+        &dev_attr_matrix_brightness.attr,
+        &dev_attr_matrix_custom_frame.attr,
+        &dev_attr_matrix_effect_breath.attr,
+        &dev_attr_matrix_effect_custom.attr,
+        &dev_attr_matrix_effect_none.attr,
+        &dev_attr_matrix_effect_reactive.attr,
+        &dev_attr_matrix_effect_spectrum.attr,
+        &dev_attr_matrix_effect_static.attr,
+        &dev_attr_matrix_effect_wave.attr,
+        &dev_attr_matrix_reactive_trigger.attr,
+        NULL,
+    },
+};
+
 /**
  * Device ID mapping table
  */
 static const struct hid_device_id razer_devices[] = {
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY), .driver_data = (kernel_ulong_t) &razer_firefly_data, },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO) },
