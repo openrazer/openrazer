@@ -48,6 +48,13 @@ The *[Startup]* section in the configuration file contains values to be used dur
 *persistence_dual_boot_quirk* _bool_
 	This flag specifies whether the persisted effect is applied twice to address a quirk with newer devices that were last changed by Razer Synapse on Windows. Only applicable with restore_persistence = True.
 
+## DEVICE
+
+Additional per-device sections can be defined with the name "Device:XXXX" where XXXX is the serial number of your device.
+
+*driver_mode* _bool_
+	This flag specifies an override whether the device should be switched into "driver mode" (as opposed to keeping it in "device mode"). Ideally the OpenRazer stack should support all functionality in software and support the devices being in driver mode, but that's not the case for a wide variety of devices yet, especially mice. However some users may want to explicitly force a device into driver mode to enable some functionality like horizontal scrolling.
+
 # SEE ALSO
 
 *openrazer-daemon*(8)
