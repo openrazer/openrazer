@@ -252,7 +252,7 @@ int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, unsig
     int len;
     char *buf;
 
-    struct razer_argb_report report;
+    struct razer_argb_report report = {0};
 
     if (channel < 5) {
         report.report_id = 0x04;
