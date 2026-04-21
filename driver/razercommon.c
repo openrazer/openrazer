@@ -193,26 +193,6 @@ void print_erroneous_report(struct razer_report* report, char* driver_name, char
            report->arguments[12], report->arguments[13], report->arguments[14], report->arguments[15]);
 }
 
-/**
- * Clamp a value to a min,max
- */
-unsigned char clamp_u8(unsigned char value, unsigned char min, unsigned char max)
-{
-    if(value > max)
-        return max;
-    if(value < min)
-        return min;
-    return value;
-}
-unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned short max)
-{
-    if(value > max)
-        return max;
-    if(value < min)
-        return min;
-    return value;
-}
-
 int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait)
 {
     uint request = HID_REQ_SET_REPORT; // 0x09
