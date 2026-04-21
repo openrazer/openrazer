@@ -163,10 +163,6 @@ struct razer_report get_razer_report(unsigned char command_class, unsigned char 
 struct razer_report get_empty_razer_report(void);
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message);
 
-// Convenience functions
-unsigned char clamp_u8(unsigned char value, unsigned char min, unsigned char max);
-unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned short max);
-
 /* Borrowed from drivers/hid/usbhid/usbhid.h */
 #define	hid_to_usb_dev(hid_dev) \
 	to_usb_device(hid_dev->dev.parent->parent)
