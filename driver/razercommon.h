@@ -160,7 +160,6 @@ int razer_get_usb_response(struct usb_device *usb_dev, unsigned int report_index
 int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, size_t size, void const* data);
 unsigned char razer_calculate_crc(struct razer_report *report);
 struct razer_report get_razer_report(unsigned char command_class, unsigned char command_id, unsigned char data_size);
-struct razer_report get_empty_razer_report(void);
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message);
 
 /* Borrowed from drivers/hid/usbhid/usbhid.h */

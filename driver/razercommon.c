@@ -163,17 +163,6 @@ struct razer_report get_razer_report(unsigned char command_class, unsigned char 
 }
 
 /**
- * Get empty razer report
- */
-struct razer_report get_empty_razer_report(void)
-{
-    struct razer_report new_report = {0};
-    memset(&new_report, 0, sizeof(struct razer_report));
-
-    return new_report;
-}
-
-/**
  * Print report to syslog
  */
 void print_erroneous_report(struct razer_report* report, char* driver_name, char* message)
