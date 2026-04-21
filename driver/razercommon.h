@@ -84,8 +84,6 @@ enum razer_matrix_effect_id {
 #define RAZER_CMD_TIMEOUT       0x04
 #define RAZER_CMD_NOT_SUPPORTED 0x05
 
-struct razer_report;
-
 struct razer_rgb {
     u8 r;
     u8 g;
