@@ -37,6 +37,11 @@ MODULE_LICENSE(DRIVER_LICENSE);
 #define RAZER_BRIGHTNESS_DOWN KEY_MACRO28
 #define RAZER_BRIGHTNESS_UP KEY_MACRO27
 
+struct razer_key_translation {
+    u16 from;
+    u16 to;
+};
+
 /**
  * List of keys to swap
  */
