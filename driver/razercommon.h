@@ -87,22 +87,24 @@ enum razer_matrix_effect_id {
 struct razer_report;
 
 struct razer_rgb {
-    unsigned char r,g,b;
+    u8 r;
+    u8 g;
+    u8 b;
 };
 
 union transaction_id_union {
-    unsigned char id;
+    u8 id;
     struct transaction_parts {
-        unsigned char device : 3;
-        unsigned char id : 5;
+        u8 device : 3;
+        u8 id : 5;
     } parts;
 };
 
 union command_id_union {
-    unsigned char id;
+    u8 id;
     struct command_id_parts {
-        unsigned char direction : 1;
-        unsigned char id : 7;
+        u8 direction : 1;
+        u8 id : 7;
     } parts;
 };
 
@@ -124,26 +126,28 @@ union command_id_union {
  * */
 
 struct razer_report {
-    unsigned char status;
+    u8 status;
     union transaction_id_union transaction_id; /* */
-    unsigned short remaining_packets; /* Big Endian */
-    unsigned char protocol_type; /*0x0*/
-    unsigned char data_size;
-    unsigned char command_class;
+    __be16 remaining_packets; /* Big Endian */
+    u8 protocol_type; /*0x0*/
+    u8 data_size;
+    u8 command_class;
     union command_id_union command_id;
-    unsigned char arguments[80];
-    unsigned char crc;/*xor'ed bytes of report*/
-    unsigned char reserved; /*0x0*/
+    u8 arguments[80];
+    u8 crc;/*xor'ed bytes of report*/
+    u8 reserved; /*0x0*/
 };
+static_assert(sizeof(struct razer_report) == 90);
 
 struct razer_argb_report {
-    unsigned char report_id;
-    unsigned char channel_1;
-    unsigned char channel_2;
-    unsigned char pad;
-    unsigned char last_idx;
-    unsigned char color_data[315];
+    u8 report_id;
+    u8 channel_1;
+    u8 channel_2;
+    u8 pad;
+    u8 last_idx;
+    u8 color_data[315];
 };
+static_assert(sizeof(struct razer_argb_report) == 320);
 
 struct razer_key_translation {
     u16 from;
