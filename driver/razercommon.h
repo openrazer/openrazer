@@ -8,20 +8,11 @@
 #define DRIVER_RAZERCOMMON_H_
 
 #include <linux/usb/input.h>
+#include "compat.h"
 
 #define DRIVER_VERSION "3.12.1"
 #define DRIVER_LICENSE "GPL v2"
 #define DRIVER_AUTHOR "Terri Cain <terri@dolphincorp.co.uk>"
-
-// Compatbility for fallthrough pseudo keyword for Linux versions older than v5.4
-// See also https://git.kernel.org/torvalds/c/294f69e
-#ifndef fallthrough
-#if __has_attribute(__fallthrough__)
-# define fallthrough                    __attribute__((__fallthrough__))
-#else
-# define fallthrough                    do {} while (0)  /* fallthrough */
-#endif
-#endif
 
 // Macro to create device files
 #define CREATE_DEVICE_FILE(dev, type) \

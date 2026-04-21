@@ -22,12 +22,6 @@
  */
 #define DRIVER_DESC "Razer Mouse Device Driver"
 
-/* REL_HWHEEL_HI_RES was added in Linux 5.0, so define ourselves for older kernels
- * See also https://git.kernel.org/torvalds/c/52ea899 */
-#ifndef REL_HWHEEL_HI_RES
-#define REL_HWHEEL_HI_RES 0x0c
-#endif
-
 MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
