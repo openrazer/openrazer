@@ -28,28 +28,6 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
 
-// KEY_MACRO* has been added in Linux 5.5, so define ourselves for older kernels.
-// See also https://git.kernel.org/torvalds/c/b5625db
-#ifndef KEY_MACRO1
-#define KEY_MACRO1  0x290
-#define KEY_MACRO2  0x291
-#define KEY_MACRO3  0x292
-#define KEY_MACRO4  0x293
-#define KEY_MACRO5  0x294
-#define KEY_MACRO6  0x295
-#define KEY_MACRO7  0x296
-#define KEY_MACRO8  0x297
-#define KEY_MACRO9  0x298
-#define KEY_MACRO10 0x299
-#define KEY_MACRO11 0x2a0
-#define KEY_MACRO12 0x2a1
-// ...
-#define KEY_MACRO27 0x2aa
-#define KEY_MACRO28 0x2ab
-#define KEY_MACRO29 0x2ac
-#define KEY_MACRO30 0x2ad
-#endif
-
 // These are evdev key codes, not HID key codes.
 // Lower macro key codes are intended for the actual macro keys
 // Higher macro key codes are inteded for Chroma functions
