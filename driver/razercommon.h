@@ -153,7 +153,7 @@ struct razer_key_translation {
 int razer_send_control_msg(struct usb_device *usb_dev,void const *data, unsigned int report_index, unsigned long wait);
 int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait);
 int razer_get_usb_response(struct usb_device *usb_dev, unsigned int report_index, struct razer_report* request_report, unsigned int response_index, struct razer_report* response_report, unsigned long wait);
-int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, unsigned char size, void const* data);
+int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, size_t size, void const* data);
 unsigned char razer_calculate_crc(struct razer_report *report);
 struct razer_report get_razer_report(unsigned char command_class, unsigned char command_id, unsigned char data_size);
 struct razer_report get_empty_razer_report(void);

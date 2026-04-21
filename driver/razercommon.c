@@ -244,7 +244,7 @@ int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *dat
     return ((len < 0) ? len : ((len != report_size) ? -EIO : 0));
 }
 
-int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, unsigned char size, void const* data)
+int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, size_t size, void const* data)
 {
     uint request = HID_REQ_SET_REPORT; // 0x09
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
