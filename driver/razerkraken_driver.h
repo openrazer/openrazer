@@ -13,8 +13,18 @@
 #define USB_DEVICE_ID_RAZER_KRAKEN_TE 0x0520
 #define USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE 0x0527
 #define USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2 0x0560
+#define USB_DEVICE_ID_RAZER_BLACKSHARK_V3 0x057A
 
 #define USB_INTERFACE_PROTOCOL_NONE 0
+
+/* BlackShark V3 HID command protocol (Report ID 0x02, interface 5) */
+#define RAZER_BLACKSHARK_REPORT_LEN  64
+#define RAZER_BLACKSHARK_IFACE        5
+
+#define BLACKSHARK_PARAM_SERIAL       0x00
+#define BLACKSHARK_PARAM_MIC_VOLUME   0x21
+#define BLACKSHARK_PARAM_SIDETONE     0x2c
+#define BLACKSHARK_PARAM_THX          0x9e
 
 // #define RAZER_KRAKEN_V2_REPORT_LEN ?
 
@@ -34,7 +44,7 @@ struct razer_kraken_device {
     // 3 Bytes, first byte is whether fw version is collected, 2nd byte is major version, 3rd is minor, should be printed out in hex form as are bcd
     unsigned char firmware_version[3];
 
-    u8 data[33];
+    u8 data[64];
 
 };
 
