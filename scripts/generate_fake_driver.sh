@@ -127,9 +127,11 @@ declare -A files_metadata=(
     ["channel5_led_brightness"]="rw;0"
     ["channel6_led_brightness"]="rw;0"
     ["version"]="r;1.0.0"
+    ["headphone_eq"]="rw;0 0 0 0 0 0 0 0 0 0"
     ["mic_volume"]="rw;100"
-    ["sidetone"]="rw;0"
     ["thx_spatial_audio"]="rw;0"
+    ["ultra_low_latency"]="rw;0"
+    ["wireless_power_save"]="rw;15"
 )
 
 # USB PID of devices that use single-byte values for DPI

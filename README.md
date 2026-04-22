@@ -314,6 +314,7 @@ This will output something similar to this:
 | Razer Kraken Tournament Edition                               |  1532:0520  |
 | Razer Kraken Ultimate                                         |  1532:0527  |
 | Razer Kraken Kitty Edition V2                                 |  1532:0560  |
+| Razer BlackShark V3                                           |  1532:0579  |
 | Razer BlackShark V3                                           |  1532:057A  |
 | Razer Kraken Kitty Edition                                    |  1532:0F19  |
 

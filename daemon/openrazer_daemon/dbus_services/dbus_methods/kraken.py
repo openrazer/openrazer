@@ -54,21 +54,53 @@ def set_mic_volume(self, volume):
         f.write(str(vol))
 
 
-@endpoint('razer.device.audio.headphone', 'getSidetone', out_sig='d')
-def get_sidetone(self):
-    self.logger.debug("DBus call get_sidetone")
-    driver_path = self.get_driver_path('sidetone')
+@endpoint('razer.device.audio.headphone', 'getWirelessPowerSave', out_sig='i')
+def get_wireless_power_save(self):
+    self.logger.debug("DBus call get_wireless_power_save")
+    driver_path = self.get_driver_path('wireless_power_save')
     with open(driver_path, 'r') as f:
-        return float(f.read().strip())
+        return int(f.read().strip())
 
 
-@endpoint('razer.device.audio.headphone', 'setSidetone', in_sig='d')
-def set_sidetone(self, level):
-    self.logger.debug("DBus call set_sidetone")
-    driver_path = self.get_driver_path('sidetone')
-    val = max(0, min(30, int(level)))
+@endpoint('razer.device.audio.headphone', 'setWirelessPowerSave', in_sig='i')
+def set_wireless_power_save(self, minutes):
+    self.logger.debug("DBus call set_wireless_power_save")
+    driver_path = self.get_driver_path('wireless_power_save')
     with open(driver_path, 'w') as f:
-        f.write(str(val))
+        f.write(str(int(minutes)))
+
+
+@endpoint('razer.device.audio.headphone', 'getUltraLowLatency', out_sig='b')
+def get_ultra_low_latency(self):
+    self.logger.debug("DBus call get_ultra_low_latency")
+    driver_path = self.get_driver_path('ultra_low_latency')
+    with open(driver_path, 'r') as f:
+        return bool(int(f.read().strip()))
+
+
+@endpoint('razer.device.audio.headphone', 'setUltraLowLatency', in_sig='b')
+def set_ultra_low_latency(self, enabled):
+    self.logger.debug("DBus call set_ultra_low_latency")
+    driver_path = self.get_driver_path('ultra_low_latency')
+    with open(driver_path, 'w') as f:
+        f.write('1' if enabled else '0')
+
+
+@endpoint('razer.device.audio.equalizer', 'getHeadphoneEQ', out_sig='ai')
+def get_headphone_eq(self):
+    self.logger.debug("DBus call get_headphone_eq")
+    driver_path = self.get_driver_path('headphone_eq')
+    with open(driver_path, 'r') as f:
+        return [int(v) for v in f.read().strip().split()]
+
+
+@endpoint('razer.device.audio.equalizer', 'setHeadphoneEQ', in_sig='ai')
+def set_headphone_eq(self, bands):
+    self.logger.debug("DBus call set_headphone_eq")
+    driver_path = self.get_driver_path('headphone_eq')
+    vals = [max(-6, min(6, int(b))) for b in bands[:10]]
+    with open(driver_path, 'w') as f:
+        f.write(' '.join(str(v) for v in vals))
 
 
 @endpoint('razer.device.audio.effects', 'getThxSpatialAudio', out_sig='b')

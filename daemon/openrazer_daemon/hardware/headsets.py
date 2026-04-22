@@ -248,7 +248,9 @@ class RazerBlackSharkV3(__RazerDevice):
     USB_PID = 0x057A
     METHODS = ['get_device_type_headset',
                'get_mic_volume', 'set_mic_volume',
-               'get_sidetone', 'set_sidetone',
+               'get_wireless_power_save', 'set_wireless_power_save',
+               'get_ultra_low_latency', 'set_ultra_low_latency',
+               'get_headphone_eq', 'set_headphone_eq',
                'get_thx_spatial_audio', 'set_thx_spatial_audio']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/blackshark-v3-500x500.png"
@@ -258,3 +260,10 @@ class RazerBlackSharkV3(__RazerDevice):
 
     def _resume_device(self):
         pass
+
+
+class RazerBlackSharkV3Wired(RazerBlackSharkV3):
+    """
+    Class for the Razer BlackShark V3 (wired USB)
+    """
+    USB_PID = 0x0579
