@@ -324,6 +324,13 @@ class RazerDevice(DBusService):
         if 'get_battery' in self.METHODS:
             self._init_battery_manager()
 
+        try:
+            driver_mode_default = self.DRIVER_MODE
+            self.DRIVER_MODE = self.config.getboolean(f"Device:{self.serial}", "driver_mode")
+            self.logger.info('Overriding DRIVER_MODE with "%s" from config (default: "%s")', self.DRIVER_MODE, driver_mode_default)
+        except (configparser.NoSectionError, configparser.NoOptionError):
+            pass
+
         if self.DRIVER_MODE:
             self.logger.info('Setting device to "driver" mode. Daemon will handle special functionality')
             self.set_device_mode(0x03, 0x00)  # Driver mode
