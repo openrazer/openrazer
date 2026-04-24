@@ -405,43 +405,62 @@ static int razer_send_payload_no_response(struct razer_kbd_device *device, struc
  */
 static int razer_send_payload(struct razer_kbd_device *device, struct razer_report *request, struct razer_report *response)
 {
+    int retry;
     int err;
 
     request->crc = razer_calculate_crc(request);
 
-    mutex_lock(&device->lock);
-    err = razer_get_report(hid_to_usb_dev(device->hdev), request, response);
-    mutex_unlock(&device->lock);
-    if (err) {
-        print_erroneous_report(response, "razerkbd", "Invalid Report Length");
+    for (retry = 5; retry > 0; retry--) {
+        mutex_lock(&device->lock);
+        err = razer_get_report(hid_to_usb_dev(device->hdev), request, response);
+        mutex_unlock(&device->lock);
+        if (err) {
+            print_erroneous_report(response, "razerkbd", "Invalid Report Length");
+            goto retry;
+        }
+
+        /* Check the packet number, class and command are the same */
+        if (response->remaining_packets != request->remaining_packets ||
+            response->command_class != request->command_class ||
+            response->command_id.id != request->command_id.id) {
+            print_erroneous_report(response, "razerkbd", "Response doesn't match request");
+            err = -EINVAL;
+            goto retry;
+        }
+
+        /* Some commands respond with 'busy' but succeed. Treat it as success. */
+        if (response->status == RAZER_CMD_SUCCESSFUL ||
+            response->status == RAZER_CMD_BUSY)
+            return 0;
+
+retry:
+        hid_dbg(device->hdev,
+                "Sending command failed: %d, response status: %d, retries left: %d\n",
+                err, response->status, retry);
+
+        /* otherwise try again after a delay of 10ms... */
+        fsleep(10000);
+    }
+
+    if (err)
         return err;
-    }
 
-    /* Check the packet number, class and command are the same */
-    if (response->remaining_packets != request->remaining_packets ||
-        response->command_class != request->command_class ||
-        response->command_id.id != request->command_id.id) {
-        print_erroneous_report(response, "razerkbd", "Response doesn't match request");
-        return -EIO;
-    }
-
+    /* Only "valid" but failed responses should reach this */
     switch (response->status) {
-    case RAZER_CMD_BUSY:
-        // TODO: Check if this should be an error.
-        // print_erroneous_report(&response, "razermouse", "Device is busy");
-        break;
     case RAZER_CMD_FAILURE:
         print_erroneous_report(response, "razerkbd", "Command failed");
-        return -EIO;
+        return -EINVAL;
     case RAZER_CMD_NOT_SUPPORTED:
         print_erroneous_report(response, "razerkbd", "Command not supported");
-        return -EIO;
+        return -ENOTSUPP;
     case RAZER_CMD_TIMEOUT:
         print_erroneous_report(response, "razerkbd", "Command timed out");
+        return -ETIMEDOUT;
+    default:
+        print_erroneous_report(response, "razerkbd", "Unknown error");
+        WARN_ONCE(1, "Unknown response status received: %d\n", response->status);
         return -EIO;
     }
-
-    return 0;
 }
 
 /**
