@@ -30,14 +30,25 @@
 #define BLACKSHARK_PARAM_THX               0x9e
 #define BLACKSHARK_PARAM_EQ                0x15
 
-/* SET params = GET param | 0x80 */
-#define BLACKSHARK_SET_MIC_VOLUME          0xa1
-#define BLACKSHARK_SET_POWER_SAVE          0xac
-#define BLACKSHARK_SET_ULTRA_LOW_LATENCY   0xdf
-#define BLACKSHARK_SET_EQ                  0x95
-#define BLACKSHARK_SET_EQ_BEGIN            0xe1
-#define BLACKSHARK_SET_EQ_APPLY            0xe0
-#define BLACKSHARK_SET_EQ_COMMIT           0xeb
+/* SET commands (verified from pcap captures) */
+#define BLACKSHARK_SET_EQ                  0x95  /* Headphone EQ data — buf[14..23]=10 bands, buf[13]=profile_idx */
+#define BLACKSHARK_SET_MIC_EQ_PRESET       0x96  /* Mic EQ preset — buf[13]: 0x20=Default 0x21=Esports 0x22=Broadcast 0x23=MicBoost */
+#define BLACKSHARK_SET_MIC_EQ_DATA         0x97  /* Mic EQ band data — buf[13..22]=10 bands sign-magnitude */
+#define BLACKSHARK_SET_SIDETONE_INIT       0x98  /* Sidetone enable — buf[13]=0x01 */
+#define BLACKSHARK_SET_SIDETONE_LEVEL      0x99  /* Sidetone level — buf[13]=0x00..0x0f (0..15) */
+#define BLACKSHARK_SET_EQ_APPLY            0xe0  /* Headphone EQ apply — profile-specific */
+#define BLACKSHARK_SET_EQ_BEGIN            0xe1  /* Headphone EQ begin/end — buf[13]=0x01 begin, 0x02 end */
+#define BLACKSHARK_SET_EQ_COMMIT           0xeb  /* Headphone EQ commit */
+#define BLACKSHARK_SET_FN_BUTTON           0xea  /* Audio function button mode — buf[13]: 0x01=sidetone save, 0x02=footsteps */
+#define BLACKSHARK_SET_MIC_EQ_BEGIN        0x16  /* Mic EQ begin marker */
+#define BLACKSHARK_SET_MIC_EQ_END          0x17  /* Mic EQ end marker */
+
+/* DEPRECATED — these were guessed and verified WRONG/unverified.
+ * Mic volume is UAC2 standard (Report 0x44 Feature, Interface 0), handled by ALSA/PipeWire.
+ * Power save and ULL command bytes have NOT been found yet (0x99 is sidetone, not ULL). */
+#define BLACKSHARK_SET_MIC_VOLUME          0xa1  /* DEPRECATED: mic vol is UAC2 not Razer HID */
+#define BLACKSHARK_SET_POWER_SAVE          0xac  /* UNVERIFIED: never seen in captures */
+#define BLACKSHARK_SET_ULTRA_LOW_LATENCY   0xdf  /* UNVERIFIED: never seen in captures */
 
 // #define RAZER_KRAKEN_V2_REPORT_LEN ?
 

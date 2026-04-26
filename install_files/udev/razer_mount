@@ -55,8 +55,16 @@ for GENERIC_DRIVER in "razer" "hid-generic"; do
 done
 
 if [ -d /sys/bus/hid/drivers/"$DRIVER"/"$DEVICE_ID" ] ; then
-	mesg "Changing group /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/"
-	chgrp -R plugdev /sys/bus/hid/drivers/"$DRIVER"/"$DEVICE_ID"/
-	mesg "Changed group /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/"
+	# Prefer the "openrazer" group if it exists (created by the openrazer package),
+	# fall back to "plugdev" otherwise. Both are conventional for HID device access.
+	if getent group openrazer >/dev/null 2>&1; then
+		GROUP=openrazer
+	else
+		GROUP=plugdev
+	fi
+	mesg "Changing group of /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/ to $GROUP"
+	chgrp -R "$GROUP" /sys/bus/hid/drivers/"$DRIVER"/"$DEVICE_ID"/
+	chmod -R g+rw /sys/bus/hid/drivers/"$DRIVER"/"$DEVICE_ID"/
+	mesg "Changed group of /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/"
 fi
 
