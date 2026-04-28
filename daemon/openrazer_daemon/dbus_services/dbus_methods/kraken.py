@@ -98,9 +98,21 @@ def get_headphone_eq(self):
 def set_headphone_eq(self, bands):
     self.logger.debug("DBus call set_headphone_eq")
     driver_path = self.get_driver_path('headphone_eq')
-    vals = [max(-6, min(6, int(b))) for b in bands[:10]]
+    # Two accepted shapes:
+    #   10 ints: just bands  → driver writes to profile 1 (Game) by default
+    #   11 ints: [profile, b0..b9] → driver writes to the given profile slot
+    # The 11-value form keeps the firmware's "current profile" pointer in sync
+    # with what the UI thinks is selected, so the headset's profile-switch
+    # button cycles correctly relative to the GUI.
+    if len(bands) >= 11:
+        profile = max(0, min(4, int(bands[0])))
+        vals = [max(-6, min(6, int(b))) for b in bands[1:11]]
+        payload = str(profile) + ' ' + ' '.join(str(v) for v in vals)
+    else:
+        vals = [max(-6, min(6, int(b))) for b in bands[:10]]
+        payload = ' '.join(str(v) for v in vals)
     with open(driver_path, 'w') as f:
-        f.write(' '.join(str(v) for v in vals))
+        f.write(payload)
 
 
 @endpoint('razer.device.audio.effects', 'getThxSpatialAudio', out_sig='b')
