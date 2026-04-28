@@ -15,6 +15,7 @@
 #define USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2 0x0560
 #define USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED 0x0579
 #define USB_DEVICE_ID_RAZER_BLACKSHARK_V3 0x057A
+#define USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO 0x0577
 
 #define USB_INTERFACE_PROTOCOL_NONE 0
 
@@ -42,6 +43,54 @@
 #define BLACKSHARK_SET_FN_BUTTON           0xea  /* Audio function button mode — buf[13]: 0x01=sidetone save, 0x02=footsteps */
 #define BLACKSHARK_SET_MIC_EQ_BEGIN        0x16  /* Mic EQ begin marker */
 #define BLACKSHARK_SET_MIC_EQ_END          0x17  /* Mic EQ end marker */
+
+/* ---- BlackShark V3 Pro (PID 0x0577) command set ----
+ *
+ * Protocol decoded by RiskRunner0 (https://github.com/RiskRunner0/blackshark-linux,
+ * GPL-2.0-or-later) from Synapse usbmon captures on Windows. Verified against
+ * a startup pcap from a V3 Pro user on the openrazer fork PR.
+ *
+ * Same envelope as V3 (Report 0x02, transaction_id 0x60, CRC=XOR[0..61]),
+ * but with a substantially different command vocabulary.
+ *
+ * Layout:
+ *   buf[6]   = data_size (3 + args_len)
+ *   buf[9]   = flags (0x80 = SET/GET, 0x00 = init handshake)
+ *   buf[10]  = command class
+ *   buf[11]  = sub (always 0x00)
+ *   buf[12]  = command id
+ *   buf[13..]= args
+ */
+#define BLACKSHARK_V3_PRO_BATTERY_CLASS    0x21  /* args=[0x00]; resp[0]=%, resp[1]=charging */
+#define BLACKSHARK_V3_PRO_BATTERY_ID       0x00
+#define BLACKSHARK_V3_PRO_CHARGING_CLASS   0x2a  /* args=[0x00] GET state */
+#define BLACKSHARK_V3_PRO_CHARGING_GET     0x00
+#define BLACKSHARK_V3_PRO_SIDETONE_GET_CL  0x98  /* args=[0x01, 0x00] */
+#define BLACKSHARK_V3_PRO_SIDETONE_SET_CL  0x99  /* args=[level, 0x00] */
+#define BLACKSHARK_V3_PRO_SIDETONE_READ_CL 0x2c  /* args=[0x00]; resp[0]=level (0..15) */
+#define BLACKSHARK_V3_PRO_SIDETONE_ID      0x01
+#define BLACKSHARK_V3_PRO_SIDETONE_MAX     0x0f
+#define BLACKSHARK_V3_PRO_THX_CLASS        0xdf  /* args=[mode, 0x00]; 0=stereo 1=spatial */
+#define BLACKSHARK_V3_PRO_THX_ID           0x01
+#define BLACKSHARK_V3_PRO_ANC_CLASS        0x92  /* args=[on, level, 0x00]; level 1..4 */
+#define BLACKSHARK_V3_PRO_ANC_ID           0x02
+#define BLACKSHARK_V3_PRO_ANC_LEVEL_MIN    1
+#define BLACKSHARK_V3_PRO_ANC_LEVEL_MAX    4
+#define BLACKSHARK_V3_PRO_POWER_SAVE_CLASS 0xac  /* args=[minutes, 0x00]; 0/15/30/45/60 */
+#define BLACKSHARK_V3_PRO_POWER_SAVE_ID    0x01
+
+/* EQ — 5-step sequence per preset switch.
+ * 9 bands at 60/170/310/600/1k/3k/6k/12k/16k Hz, 9 preset slots (0..8).
+ * Sign-magnitude encoding (same as V3): 0x00=0dB, 0x01=+1dB, 0x81=-1dB. */
+#define BLACKSHARK_V3_PRO_EQ_STATE_CLASS   0xe1  /* args=[0x01,0x00] gate, [0x02,0x00] apply */
+#define BLACKSHARK_V3_PRO_EQ_STATE_ID      0x01
+#define BLACKSHARK_V3_PRO_EQ_BANDS_CLASS   0x95  /* args=[idx, b0..b8, 0x00] (12 bytes) */
+#define BLACKSHARK_V3_PRO_EQ_BANDS_ID      0x0b
+#define BLACKSHARK_V3_PRO_EQ_META_CLASS    0xe0  /* args=[idx, ...] (7 bytes) */
+#define BLACKSHARK_V3_PRO_EQ_META_ID       0x06
+#define BLACKSHARK_V3_PRO_EQ_COMMIT_CLASS  0xeb  /* args=[idx, ...] (12 bytes) */
+#define BLACKSHARK_V3_PRO_EQ_COMMIT_ID     0x0b
+#define BLACKSHARK_V3_PRO_EQ_PRESET_COUNT  9
 
 /* DEPRECATED — these were guessed and verified WRONG/unverified.
  * Mic volume is UAC2 standard (Report 0x44 Feature, Interface 0), handled by ALSA/PipeWire.

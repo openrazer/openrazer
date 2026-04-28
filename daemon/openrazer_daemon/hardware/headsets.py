@@ -267,3 +267,26 @@ class RazerBlackSharkV3Wired(RazerBlackSharkV3):
     Class for the Razer BlackShark V3 (wired USB)
     """
     USB_PID = 0x0579
+
+
+class RazerBlackSharkV3Pro(__RazerDevice):
+    """
+    Class for the Razer BlackShark V3 Pro (2.4GHz wireless dongle)
+
+    Protocol decoded by RiskRunner0 (https://github.com/RiskRunner0/blackshark-linux,
+    GPL-2.0-or-later) — not yet hardware-tested through this daemon. Sysfs attributes
+    are exposed under v3pro_* names by the razerkraken driver.
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Inc_BlackShark_V3_Pro_0+-event-if05')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0577
+    METHODS = ['get_device_type_headset']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/blackshark-v3-pro-500x500.png"
+
+    def _suspend_device(self):
+        self.suspend_args.clear()
+
+    def _resume_device(self):
+        pass

@@ -355,6 +355,134 @@ static int razer_blackshark_send_cmd(struct razer_kraken_device *dev, u8 *buf)
 
 /* ---- end BlackShark V3 helpers ---- */
 
+/* ---- BlackShark V3 Pro (PID 0x0577) HID command helpers ----
+ *
+ * Protocol decoded by RiskRunner0 (https://github.com/RiskRunner0/blackshark-linux,
+ * GPL-2.0-or-later) from Synapse usbmon captures. Cross-checked against a startup
+ * pcap from a V3 Pro user on this PR.
+ *
+ * NOTE: These code paths are based on third-party reverse engineering and have
+ * NOT been hardware-tested by the contributor of this driver. They are committed
+ * here as a starting point for V3 Pro users who can validate against real hardware.
+ *
+ * Same envelope as V3 (Report 0x02, transaction_id 0x60, CRC=XOR[0..61]).
+ * Direction byte buf[9] = 0x80 for normal SET/GET (V3 Pro is wireless-only via
+ * a 2.4GHz dongle, so we use the same convention as V3 wireless).
+ */
+
+static void razer_blackshark_v3pro_build(u8 *buf, u8 class, u8 cmd, const u8 *args, u8 args_len)
+{
+    u8 crc = 0;
+    int i;
+
+    memset(buf, 0, RAZER_BLACKSHARK_REPORT_LEN);
+    buf[0] = 0x02;
+    buf[2] = 0x60;
+    buf[6] = 3 + args_len;  /* class + sub + cmd + args */
+    buf[9] = 0x80;
+    buf[10] = class;
+    buf[11] = 0x00;
+    buf[12] = cmd;
+    if (args && args_len)
+        memcpy(&buf[13], args, args_len);
+    for (i = 0; i < 62; i++) crc ^= buf[i];
+    buf[62] = crc;
+}
+
+/*
+ * EQ band data per preset (from RiskRunner0's Synapse pcaps, sign-magnitude).
+ * Format: [preset_idx, b0..b8, extra, padding] — 12 bytes total.
+ * Bands: 60Hz, 170Hz, 310Hz, 600Hz, 1kHz, 3kHz, 6kHz, 12kHz, 16kHz.
+ * Only 5 of 9 presets were captured; presets 5..8 fall back to flat data with
+ * the slot index applied.
+ */
+static const u8 bs_v3pro_eq_bands[5][12] = {
+    /* 0: Flat */
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
+    /* 1 */
+    { 0x01, 0x02, 0x02, 0x05, 0x05, 0x01, 0x81, 0x02, 0x03, 0x03, 0x03, 0x00 },
+    /* 2 */
+    { 0x02, 0x03, 0x03, 0x03, 0x81, 0x84, 0x84, 0x02, 0x03, 0x03, 0x03, 0x00 },
+    /* 3 */
+    { 0x03, 0x02, 0x02, 0x00, 0x00, 0x01, 0x81, 0x81, 0x03, 0x03, 0x03, 0x00 },
+    /* 4 */
+    { 0x04, 0x01, 0x01, 0x81, 0x00, 0x02, 0x00, 0x04, 0x04, 0x04, 0x83, 0x00 },
+};
+
+static const u8 bs_v3pro_eq_meta[5][7] = {
+    { 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00 },
+    { 0x01, 0x01, 0x01, 0x00, 0x01, 0x00, 0x00 },
+    { 0x02, 0x03, 0x01, 0x00, 0x03, 0x00, 0x00 },
+    { 0x03, 0x02, 0x01, 0x00, 0x02, 0x00, 0x00 },
+    { 0x04, 0x04, 0x01, 0x00, 0x0b, 0x00, 0x00 },
+};
+
+static const u8 bs_v3pro_eq_commit[5][12] = {
+    { 0x00, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
+    { 0x01, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
+    { 0x02, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
+    { 0x03, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
+    { 0x04, 0x00, 0x00, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
+};
+
+/*
+ * Apply a V3 Pro EQ preset switch (5-command sequence).
+ *   1. GET state    cls=0xe1 cmd=0x01 args=[0x01, 0x00]
+ *   2. SET bands    cls=0x95 cmd=0x0b args=[idx, b0..b8, 0x00]
+ *   3. SET meta     cls=0xe0 cmd=0x06 args=[idx, ...]
+ *   4. APPLY        cls=0xe1 cmd=0x01 args=[0x02, 0x00]
+ *   5. COMMIT       cls=0xeb cmd=0x0b args=[idx, ...]
+ */
+static int razer_blackshark_v3pro_apply_eq(struct razer_kraken_device *device, u8 preset)
+{
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    const u8 gate_get[2] = { 0x01, 0x00 };
+    const u8 gate_apply[2] = { 0x02, 0x00 };
+    u8 bands[12], meta[7], commit[12];
+    int ret;
+
+    if (preset >= BLACKSHARK_V3_PRO_EQ_PRESET_COUNT)
+        return -EINVAL;
+
+    if (preset < ARRAY_SIZE(bs_v3pro_eq_bands)) {
+        memcpy(bands, bs_v3pro_eq_bands[preset], sizeof(bands));
+        memcpy(meta, bs_v3pro_eq_meta[preset], sizeof(meta));
+        memcpy(commit, bs_v3pro_eq_commit[preset], sizeof(commit));
+    } else {
+        /* Slots 5..8: flat band data with slot index applied */
+        memcpy(bands, bs_v3pro_eq_bands[0], sizeof(bands));
+        bands[0] = preset;
+        memcpy(meta, bs_v3pro_eq_meta[0], sizeof(meta));
+        meta[0] = preset;
+        memcpy(commit, bs_v3pro_eq_commit[0], sizeof(commit));
+        commit[0] = preset;
+    }
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_EQ_STATE_CLASS,
+                                 BLACKSHARK_V3_PRO_EQ_STATE_ID, gate_get, sizeof(gate_get));
+    if ((ret = razer_blackshark_send_cmd(device, cmdbuf))) return ret;
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_EQ_BANDS_CLASS,
+                                 BLACKSHARK_V3_PRO_EQ_BANDS_ID, bands, sizeof(bands));
+    if ((ret = razer_blackshark_send_cmd(device, cmdbuf))) return ret;
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_EQ_META_CLASS,
+                                 BLACKSHARK_V3_PRO_EQ_META_ID, meta, sizeof(meta));
+    if ((ret = razer_blackshark_send_cmd(device, cmdbuf))) return ret;
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_EQ_STATE_CLASS,
+                                 BLACKSHARK_V3_PRO_EQ_STATE_ID, gate_apply, sizeof(gate_apply));
+    if ((ret = razer_blackshark_send_cmd(device, cmdbuf))) return ret;
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_EQ_COMMIT_CLASS,
+                                 BLACKSHARK_V3_PRO_EQ_COMMIT_ID, commit, sizeof(commit));
+    if ((ret = razer_blackshark_send_cmd(device, cmdbuf))) return ret;
+
+    return 0;
+}
+
+/* ---- end BlackShark V3 Pro helpers ---- */
+
 /**
  * Get the current effect
  */
@@ -475,6 +603,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 
     case USB_DEVICE_ID_RAZER_BLACKSHARK_V3:
         device_type = "Razer BlackShark V3 (Wireless)";
+        break;
+
+    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
+        device_type = "Razer BlackShark V3 Pro";
         break;
 
     default:
@@ -824,6 +956,13 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x20, 0x16, 0x7f00);
 
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO) {
+        /* V3 Pro serial query path is not yet decoded — return a placeholder. */
+        if (device->serial[0] == '\0')
+            strncpy(device->serial, "BS_V3PRO_000000", sizeof(device->serial) - 1);
+        return sprintf(buf, "%s\n", device->serial);
+    }
+
     if (device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3 ||
         device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED) {
         if (device->serial[0] == '\0') {
@@ -888,7 +1027,8 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x20, 0x02, 0x0030);
 
     if (device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3 ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED) {
+        device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED ||
+        device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO) {
         return sprintf(buf, "v1.0\n");
     }
 
@@ -1274,6 +1414,174 @@ static ssize_t razer_attr_write_thx_spatial_audio(struct device *dev, struct dev
 
 /* ---- end BlackShark V3 sysfs functions ---- */
 
+/* ---- BlackShark V3 Pro sysfs functions (untested — third-party RE) ---- */
+
+static ssize_t razer_attr_read_v3pro_battery_level(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    const u8 args[1] = { 0x00 };
+    int level = -1;
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
+                                 BLACKSHARK_V3_PRO_BATTERY_ID, args, sizeof(args));
+    mutex_lock(&device->lock);
+    razer_blackshark_send_cmd(device, cmdbuf);
+    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
+        level = device->data[13];
+    mutex_unlock(&device->lock);
+
+    return sprintf(buf, "%d\n", level);
+}
+
+static ssize_t razer_attr_read_v3pro_charging(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    const u8 args[1] = { 0x00 };
+    int charging = -1;
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
+                                 BLACKSHARK_V3_PRO_BATTERY_ID, args, sizeof(args));
+    mutex_lock(&device->lock);
+    razer_blackshark_send_cmd(device, cmdbuf);
+    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
+        charging = device->data[14] ? 1 : 0;
+    mutex_unlock(&device->lock);
+
+    return sprintf(buf, "%d\n", charging);
+}
+
+static ssize_t razer_attr_write_v3pro_sidetone(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    unsigned long val;
+    u8 args[2];
+
+    if (kstrtoul(buf, 10, &val))
+        return -EINVAL;
+    if (val > BLACKSHARK_V3_PRO_SIDETONE_MAX)
+        val = BLACKSHARK_V3_PRO_SIDETONE_MAX;
+    args[0] = (u8)val;
+    args[1] = 0x00;
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_SIDETONE_SET_CL,
+                                 BLACKSHARK_V3_PRO_SIDETONE_ID, args, sizeof(args));
+    mutex_lock(&device->lock);
+    razer_blackshark_send_cmd(device, cmdbuf);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+static ssize_t razer_attr_read_v3pro_sidetone(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    const u8 args[1] = { 0x00 };
+    int level = -1;
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_SIDETONE_READ_CL, 0x00, args, sizeof(args));
+    mutex_lock(&device->lock);
+    razer_blackshark_send_cmd(device, cmdbuf);
+    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_SIDETONE_READ_CL)
+        level = device->data[13];
+    mutex_unlock(&device->lock);
+
+    return sprintf(buf, "%d\n", level);
+}
+
+static ssize_t razer_attr_write_v3pro_thx(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    unsigned long val;
+    u8 args[2];
+
+    if (kstrtoul(buf, 10, &val))
+        return -EINVAL;
+    args[0] = val ? 1 : 0;
+    args[1] = 0x00;
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_THX_CLASS,
+                                 BLACKSHARK_V3_PRO_THX_ID, args, sizeof(args));
+    mutex_lock(&device->lock);
+    razer_blackshark_send_cmd(device, cmdbuf);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/* ANC: write "enabled level" (e.g. "1 3" = on level 3, "0 1" = off). */
+static ssize_t razer_attr_write_v3pro_anc(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    unsigned int enabled, level;
+    u8 args[3];
+
+    if (sscanf(buf, "%u %u", &enabled, &level) != 2)
+        return -EINVAL;
+    if (level < BLACKSHARK_V3_PRO_ANC_LEVEL_MIN) level = BLACKSHARK_V3_PRO_ANC_LEVEL_MIN;
+    if (level > BLACKSHARK_V3_PRO_ANC_LEVEL_MAX) level = BLACKSHARK_V3_PRO_ANC_LEVEL_MAX;
+    args[0] = enabled ? 1 : 0;
+    args[1] = (u8)level;
+    args[2] = 0x00;
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_ANC_CLASS,
+                                 BLACKSHARK_V3_PRO_ANC_ID, args, sizeof(args));
+    mutex_lock(&device->lock);
+    razer_blackshark_send_cmd(device, cmdbuf);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/* Power save timeout in minutes (0=disabled, 15/30/45/60). */
+static ssize_t razer_attr_write_v3pro_power_save(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    unsigned long val;
+    u8 args[2];
+
+    if (kstrtoul(buf, 10, &val))
+        return -EINVAL;
+    if (val > 60) val = 60;
+    args[0] = (u8)val;
+    args[1] = 0x00;
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_POWER_SAVE_CLASS,
+                                 BLACKSHARK_V3_PRO_POWER_SAVE_ID, args, sizeof(args));
+    mutex_lock(&device->lock);
+    razer_blackshark_send_cmd(device, cmdbuf);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/* Headphone EQ: writes a single byte = preset slot index (0..8). */
+static ssize_t razer_attr_write_v3pro_headphone_eq(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    unsigned long val;
+    int ret;
+
+    if (kstrtoul(buf, 10, &val))
+        return -EINVAL;
+    if (val >= BLACKSHARK_V3_PRO_EQ_PRESET_COUNT)
+        return -EINVAL;
+
+    mutex_lock(&device->lock);
+    ret = razer_blackshark_v3pro_apply_eq(device, (u8)val);
+    mutex_unlock(&device->lock);
+
+    return ret < 0 ? ret : count;
+}
+
+/* ---- end BlackShark V3 Pro sysfs functions ---- */
+
 static DEVICE_ATTR(test,                    0660, razer_attr_read_test,                       razer_attr_write_test);
 static DEVICE_ATTR(version,                 0440, razer_attr_read_version,                    NULL);
 static DEVICE_ATTR(device_type,             0440, razer_attr_read_device_type,                NULL);
@@ -1296,6 +1604,15 @@ static DEVICE_ATTR(sidetone,                0220, NULL,                         
 static DEVICE_ATTR(mic_eq,                  0220, NULL,                                    razer_attr_write_mic_eq);
 static DEVICE_ATTR(mic_eq_preset,           0220, NULL,                                    razer_attr_write_mic_eq_preset);
 static DEVICE_ATTR(audio_function_button,   0220, NULL,                                    razer_attr_write_audio_function_button);
+/* BlackShark V3 Pro (PID 0x0577) — distinct attribute names so they don't collide
+ * with V3's headphone_eq (which has 10-band write semantics). */
+static DEVICE_ATTR(v3pro_battery_level,     0440, razer_attr_read_v3pro_battery_level,     NULL);
+static DEVICE_ATTR(v3pro_charging,          0440, razer_attr_read_v3pro_charging,          NULL);
+static DEVICE_ATTR(v3pro_sidetone,          0660, razer_attr_read_v3pro_sidetone,          razer_attr_write_v3pro_sidetone);
+static DEVICE_ATTR(v3pro_thx_spatial_audio, 0220, NULL,                                    razer_attr_write_v3pro_thx);
+static DEVICE_ATTR(v3pro_anc,               0220, NULL,                                    razer_attr_write_v3pro_anc);
+static DEVICE_ATTR(v3pro_power_save,        0220, NULL,                                    razer_attr_write_v3pro_power_save);
+static DEVICE_ATTR(v3pro_headphone_eq,      0220, NULL,                                    razer_attr_write_v3pro_headphone_eq);
 
 static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf)
 {
@@ -1334,6 +1651,7 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
         break;
     case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKSHARK_V3:
+    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
         // No Chroma RGB — no LED memory addresses required
         break;
     }
@@ -1396,6 +1714,15 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq_preset);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_function_button);
+            break;
+        case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_battery_level);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_charging);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_sidetone);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_thx_spatial_audio);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_anc);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_power_save);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_headphone_eq);
             break;
         }
     }
@@ -1471,6 +1798,15 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_mic_eq_preset);
             device_remove_file(&hdev->dev, &dev_attr_audio_function_button);
             break;
+        case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
+            device_remove_file(&hdev->dev, &dev_attr_v3pro_battery_level);
+            device_remove_file(&hdev->dev, &dev_attr_v3pro_charging);
+            device_remove_file(&hdev->dev, &dev_attr_v3pro_sidetone);
+            device_remove_file(&hdev->dev, &dev_attr_v3pro_thx_spatial_audio);
+            device_remove_file(&hdev->dev, &dev_attr_v3pro_anc);
+            device_remove_file(&hdev->dev, &dev_attr_v3pro_power_save);
+            device_remove_file(&hdev->dev, &dev_attr_v3pro_headphone_eq);
+            break;
         }
     }
 
@@ -1488,7 +1824,8 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     if (size == 33) {
         memcpy(&device->data[0], &data[0], size);
     } else if (size == 64 && (device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3 ||
-                              device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED)) {
+                              device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED ||
+                              device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO)) {
         memcpy(&device->data[0], &data[0], size);
     } else {
         printk(KERN_WARNING "razerkraken: Got raw message, length: %d\n", size);
@@ -1510,6 +1847,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKSHARK_V3) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO) },
     { 0 }
 };
 

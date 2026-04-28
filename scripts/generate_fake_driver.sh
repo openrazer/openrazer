@@ -136,6 +136,13 @@ declare -A files_metadata=(
     ["thx_spatial_audio"]="rw;0"
     ["ultra_low_latency"]="rw;0"
     ["wireless_power_save"]="rw;15"
+    ["v3pro_battery_level"]="r;100"
+    ["v3pro_charging"]="r;0"
+    ["v3pro_sidetone"]="rw;0"
+    ["v3pro_thx_spatial_audio"]="w;"
+    ["v3pro_anc"]="w;"
+    ["v3pro_power_save"]="w;"
+    ["v3pro_headphone_eq"]="w;"
 )
 
 # USB PID of devices that use single-byte values for DPI
