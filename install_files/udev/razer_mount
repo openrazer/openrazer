@@ -55,9 +55,11 @@ for GENERIC_DRIVER in "razer" "hid-generic"; do
 done
 
 if [ -d /sys/bus/hid/drivers/"$DRIVER"/"$DEVICE_ID" ] ; then
-	# Prefer the "openrazer" group if it exists (created by the openrazer package),
-	# fall back to "plugdev" otherwise. Both are conventional for HID device access.
-	if getent group openrazer >/dev/null 2>&1; then
+	# Prefer "plugdev" (the group the daemon's startup check expects), fall back
+	# to "openrazer" for setups that only have the openrazer group provisioned.
+	if getent group plugdev >/dev/null 2>&1; then
+		GROUP=plugdev
+	elif getent group openrazer >/dev/null 2>&1; then
 		GROUP=openrazer
 	else
 		GROUP=plugdev
