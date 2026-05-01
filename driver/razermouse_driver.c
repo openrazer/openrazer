@@ -382,6 +382,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Naga 2014";
         break;
 
+    case USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION:
+        device_type = "Razer Naga Classic Edition";
+        break;
+
     case USB_DEVICE_ID_RAZER_TAIPAN:
         device_type = "Razer Taipan";
         break;
@@ -856,6 +860,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
     case USB_DEVICE_ID_RAZER_ABYSSUS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
@@ -1425,6 +1430,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
     case USB_DEVICE_ID_RAZER_ABYSSUS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
@@ -1907,6 +1913,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
     case USB_DEVICE_ID_RAZER_ABYSSUS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
@@ -2086,6 +2093,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
     case USB_DEVICE_ID_RAZER_ABYSSUS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
@@ -2471,6 +2479,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
@@ -2648,6 +2657,7 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
@@ -3802,6 +3812,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
     case USB_DEVICE_ID_RAZER_ABYSSUS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
@@ -3950,6 +3961,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
     case USB_DEVICE_ID_RAZER_ABYSSUS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
@@ -5837,6 +5849,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     switch (hdev->product) {
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
     case USB_DEVICE_ID_RAZER_NAGA_2014:
+    case USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
@@ -5989,6 +6002,7 @@ static int razer_input_configured(struct hid_device *hdev,
             fallthrough;
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
         case USB_DEVICE_ID_RAZER_NAGA_2014:
+        case USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION:
         case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
         case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
         case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
@@ -6537,6 +6551,14 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_on);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            break;
+
+        case USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_hwheel);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat_delay);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             break;
 
         case USB_DEVICE_ID_RAZER_NAGA_2014:
@@ -7680,6 +7702,14 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             break;
 
+        case USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION:
+            device_remove_file(&hdev->dev, &dev_attr_tilt_hwheel);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_repeat_delay);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_repeat);
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            break;
+
         case USB_DEVICE_ID_RAZER_NAGA_2014:
             device_remove_file(&hdev->dev, &dev_attr_tilt_hwheel);
             device_remove_file(&hdev->dev, &dev_attr_tilt_repeat_delay);
@@ -8347,6 +8377,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_CLASSIC_EDITION) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_8K) },

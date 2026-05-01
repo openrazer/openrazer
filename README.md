@@ -246,6 +246,7 @@ This will output something similar to this:
 | Razer Naga Pro (Wired)                                        |  1532:008F  |
 | Razer Naga Pro (Wireless)                                     |  1532:0090  |
 | Razer Viper 8KHz                                              |  1532:0091  |
+| Razer Naga Classic Edition                                    |  1532:0093  |
 | Razer Orochi V2 (Receiver)                                    |  1532:0094  |
 | Razer Orochi V2 (Bluetooth)                                   |  1532:0095  |
 | Razer Naga X                                                  |  1532:0096  |
