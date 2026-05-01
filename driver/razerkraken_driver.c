@@ -1547,17 +1547,18 @@ static ssize_t razer_attr_write_v3pro_anc(struct device *dev, struct device_attr
     return count;
 }
 
-/* Ultra-Low Latency toggle (V3 Pro). Args: [on/off]. */
+/* Ultra-Low Latency toggle (V3 Pro). Args: [on/off, 0x00]. */
 static ssize_t razer_attr_write_v3pro_ull(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
     unsigned long val;
-    u8 args[1];
+    u8 args[2];
 
     if (kstrtoul(buf, 10, &val))
         return -EINVAL;
     args[0] = val ? 1 : 0;
+    args[1] = 0x00;
 
     razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_ULL_CLASS,
                                  BLACKSHARK_V3_PRO_ULL_ID, args, sizeof(args));
@@ -1568,19 +1569,20 @@ static ssize_t razer_attr_write_v3pro_ull(struct device *dev, struct device_attr
     return count;
 }
 
-/* Game/Chat balance (V3 Pro). Args: [0..20], 0=full chat, 10=center, 20=full game. */
+/* Game/Chat balance. Args: [balance 0..20, 0x00]. 0=full chat, 10=center, 20=full game. */
 static ssize_t razer_attr_write_game_chat_balance(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
     unsigned long val;
-    u8 args[1];
+    u8 args[2];
 
     if (kstrtoul(buf, 10, &val))
         return -EINVAL;
     if (val > BLACKSHARK_V3_PRO_GAME_CHAT_MAX)
         val = BLACKSHARK_V3_PRO_GAME_CHAT_MAX;
     args[0] = (u8)val;
+    args[1] = 0x00;
 
     razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_GAME_CHAT_CLASS,
                                  BLACKSHARK_V3_PRO_GAME_CHAT_ID, args, sizeof(args));
@@ -1591,18 +1593,19 @@ static ssize_t razer_attr_write_game_chat_balance(struct device *dev, struct dev
     return count;
 }
 
-/* In-call audio mix (V3 Pro). Args: [mode]; 0=combine, 1=lower, 2=mute. */
+/* In-call audio mix. Args: [mode, 0x00]; 0=combine, 1=lower, 2=mute. */
 static ssize_t razer_attr_write_in_call_audio_mix(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
     unsigned long val;
-    u8 args[1];
+    u8 args[2];
 
     if (kstrtoul(buf, 10, &val))
         return -EINVAL;
     if (val > 2) val = 2;
     args[0] = (u8)val;
+    args[1] = 0x00;
 
     razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_INCALL_MIX_CLASS,
                                  BLACKSHARK_V3_PRO_INCALL_MIX_ID, args, sizeof(args));
@@ -1613,18 +1616,19 @@ static ssize_t razer_attr_write_in_call_audio_mix(struct device *dev, struct dev
     return count;
 }
 
-/* Audio prompts toggle (V3 Pro). Args: [0x00, on]. */
+/* Audio prompts toggle. Args: [0x00, on, 0x00]. */
 static ssize_t razer_attr_write_audio_prompts(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
     unsigned long val;
-    u8 args[2];
+    u8 args[3];
 
     if (kstrtoul(buf, 10, &val))
         return -EINVAL;
     args[0] = 0x00;
     args[1] = val ? 1 : 0;
+    args[2] = 0x00;
 
     razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_AUDIO_PROMPTS_CL,
                                  BLACKSHARK_V3_PRO_AUDIO_PROMPTS_ID, args, sizeof(args));
