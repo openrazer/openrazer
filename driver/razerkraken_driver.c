@@ -1569,7 +1569,7 @@ static ssize_t razer_attr_write_v3pro_ull(struct device *dev, struct device_attr
 }
 
 /* Game/Chat balance (V3 Pro). Args: [0..20], 0=full chat, 10=center, 20=full game. */
-static ssize_t razer_attr_write_v3pro_game_chat_balance(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_game_chat_balance(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
@@ -1592,7 +1592,7 @@ static ssize_t razer_attr_write_v3pro_game_chat_balance(struct device *dev, stru
 }
 
 /* In-call audio mix (V3 Pro). Args: [mode]; 0=combine, 1=lower, 2=mute. */
-static ssize_t razer_attr_write_v3pro_in_call_audio_mix(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_in_call_audio_mix(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
@@ -1614,7 +1614,7 @@ static ssize_t razer_attr_write_v3pro_in_call_audio_mix(struct device *dev, stru
 }
 
 /* Audio prompts toggle (V3 Pro). Args: [0x00, on]. */
-static ssize_t razer_attr_write_v3pro_audio_prompts(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_audio_prompts(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
@@ -1711,9 +1711,10 @@ static DEVICE_ATTR(v3pro_anc,                  0220, NULL,                      
 static DEVICE_ATTR(v3pro_ultra_low_latency,    0220, NULL,                                    razer_attr_write_v3pro_ull);
 static DEVICE_ATTR(v3pro_power_save,           0220, NULL,                                    razer_attr_write_v3pro_power_save);
 static DEVICE_ATTR(v3pro_headphone_eq,         0220, NULL,                                    razer_attr_write_v3pro_headphone_eq);
-static DEVICE_ATTR(v3pro_game_chat_balance,    0220, NULL,                                    razer_attr_write_v3pro_game_chat_balance);
-static DEVICE_ATTR(v3pro_in_call_audio_mix,    0220, NULL,                                    razer_attr_write_v3pro_in_call_audio_mix);
-static DEVICE_ATTR(v3pro_audio_prompts,        0220, NULL,                                    razer_attr_write_v3pro_audio_prompts);
+/* Shared between V3 (both PIDs) and V3 Pro — same wire envelope, same bytes. */
+static DEVICE_ATTR(game_chat_balance,          0220, NULL,                                    razer_attr_write_game_chat_balance);
+static DEVICE_ATTR(in_call_audio_mix,          0220, NULL,                                    razer_attr_write_in_call_audio_mix);
+static DEVICE_ATTR(audio_prompts,              0220, NULL,                                    razer_attr_write_audio_prompts);
 
 static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf)
 {
@@ -1815,6 +1816,9 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq_preset);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_function_button);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_chat_balance);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_in_call_audio_mix);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_prompts);
             break;
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_battery_level);
@@ -1825,9 +1829,9 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_ultra_low_latency);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_power_save);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_headphone_eq);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_game_chat_balance);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_in_call_audio_mix);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_audio_prompts);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_chat_balance);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_in_call_audio_mix);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_prompts);
             break;
         }
     }
@@ -1902,6 +1906,9 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_mic_eq);
             device_remove_file(&hdev->dev, &dev_attr_mic_eq_preset);
             device_remove_file(&hdev->dev, &dev_attr_audio_function_button);
+            device_remove_file(&hdev->dev, &dev_attr_game_chat_balance);
+            device_remove_file(&hdev->dev, &dev_attr_in_call_audio_mix);
+            device_remove_file(&hdev->dev, &dev_attr_audio_prompts);
             break;
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
             device_remove_file(&hdev->dev, &dev_attr_v3pro_battery_level);
@@ -1912,9 +1919,9 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_v3pro_ultra_low_latency);
             device_remove_file(&hdev->dev, &dev_attr_v3pro_power_save);
             device_remove_file(&hdev->dev, &dev_attr_v3pro_headphone_eq);
-            device_remove_file(&hdev->dev, &dev_attr_v3pro_game_chat_balance);
-            device_remove_file(&hdev->dev, &dev_attr_v3pro_in_call_audio_mix);
-            device_remove_file(&hdev->dev, &dev_attr_v3pro_audio_prompts);
+            device_remove_file(&hdev->dev, &dev_attr_game_chat_balance);
+            device_remove_file(&hdev->dev, &dev_attr_in_call_audio_mix);
+            device_remove_file(&hdev->dev, &dev_attr_audio_prompts);
             break;
         }
     }
