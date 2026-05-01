@@ -609,6 +609,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer BlackShark V3 (Wireless)";
         break;
 
+    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED:
+        device_type = "Razer BlackShark V3 Pro (Wired)";
+        break;
+
     case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
         device_type = "Razer BlackShark V3 Pro";
         break;
@@ -960,7 +964,8 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x20, 0x16, 0x7f00);
 
-    if (device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO) {
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
+        device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED) {
         /* V3 Pro serial query path is not yet decoded — return a placeholder. */
         if (device->serial[0] == '\0')
             strncpy(device->serial, "BS_V3PRO_000000", sizeof(device->serial) - 1);
@@ -1032,7 +1037,8 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
 
     if (device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3 ||
         device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO) {
+        device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
+        device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED) {
         return sprintf(buf, "v1.0\n");
     }
 
@@ -1757,6 +1763,7 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
         break;
     case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKSHARK_V3:
+    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
         // No Chroma RGB — no LED memory addresses required
         break;
@@ -1824,6 +1831,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_in_call_audio_mix);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_prompts);
             break;
+        case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_battery_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_charging);
@@ -1914,6 +1922,7 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_in_call_audio_mix);
             device_remove_file(&hdev->dev, &dev_attr_audio_prompts);
             break;
+        case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
             device_remove_file(&hdev->dev, &dev_attr_v3pro_battery_level);
             device_remove_file(&hdev->dev, &dev_attr_v3pro_charging);
@@ -1945,7 +1954,8 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
         memcpy(&device->data[0], &data[0], size);
     } else if (size == 64 && (device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3 ||
                               device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED ||
-                              device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO)) {
+                              device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
+                              device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED)) {
         memcpy(&device->data[0], &data[0], size);
     } else {
         printk(KERN_WARNING "razerkraken: Got raw message, length: %d\n", size);
@@ -1967,6 +1977,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKSHARK_V3) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO) },
     { 0 }
 };
