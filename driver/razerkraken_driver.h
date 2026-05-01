@@ -83,7 +83,7 @@
 #define BLACKSHARK_V3_PRO_ANC_LEVEL_MAX    4
 #define BLACKSHARK_V3_PRO_POWER_SAVE_CLASS 0xac  /* SET; args=[minutes]; 0/15/30/45/60 */
 #define BLACKSHARK_V3_PRO_POWER_SAVE_ID    0x01
-#define BLACKSHARK_V3_PRO_GAME_CHAT_CLASS  0xdc  /* SET; args=[balance 0..20]; 10=center */
+#define BLACKSHARK_V3_PRO_GAME_CHAT_CLASS  0xdc  /* SET; args=[balance 0..20]; 0=full game, 10=center, 20=full chat */
 #define BLACKSHARK_V3_PRO_GAME_CHAT_ID     0x01
 #define BLACKSHARK_V3_PRO_GAME_CHAT_MAX    0x14
 #define BLACKSHARK_V3_PRO_INCALL_MIX_CLASS 0xdd  /* SET; args=[mode]; 0=combine 1=lower 2=mute */

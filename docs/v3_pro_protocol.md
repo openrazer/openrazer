@@ -198,7 +198,7 @@ Present on both V3 and V3 Pro.
 
 | Class | Direction | Args | Meaning |
 |-------|-----------|------|---------|
-| `0xdc` | SET | `[0x01, balance]` | `0x00..0x14` (0..20). 0 = full chat, 10 = center, 20 = full game |
+| `0xdc` | SET | `[0x01, balance]` | `0x00..0x14` (0..20). 0 = full game, 10 = center, 20 = full chat |
 
 Present on both V3 and V3 Pro.
 

@@ -1569,7 +1569,7 @@ static ssize_t razer_attr_write_v3pro_ull(struct device *dev, struct device_attr
     return count;
 }
 
-/* Game/Chat balance. Args: [balance 0..20, 0x00]. 0=full chat, 10=center, 20=full game. */
+/* Game/Chat balance. Args: [balance 0..20, 0x00]. 0=full game, 10=center, 20=full chat. */
 static ssize_t razer_attr_write_game_chat_balance(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
