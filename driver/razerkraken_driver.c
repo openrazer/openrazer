@@ -1173,6 +1173,90 @@ static ssize_t razer_attr_write_audio_function_button(struct device *dev, struct
     return count;
 }
 
+/*
+ * game_chat_balance write: 0..20, where 0=full game, 10=center, 20=full chat.
+ * Cmd 0xdc, single arg byte. Range 0..20 confirmed in pcaps.
+ */
+static ssize_t razer_attr_write_game_chat_balance(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    unsigned long val;
+
+    if (kstrtoul(buf, 10, &val))
+        return -EINVAL;
+    if (val > 20) val = 20;
+
+    razer_blackshark_build_set(cmdbuf, BLACKSHARK_SET_GAME_CHAT_BALANCE, (u8)val,
+                               razer_blackshark_set_dir(device->usb_pid));
+    mutex_lock(&device->lock);
+    razer_blackshark_send_cmd(device, cmdbuf);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/*
+ * in_call_audio_mix write: BT call vs 2.4 GHz behaviour.
+ *   0 = combine 2.4 GHz and Bluetooth
+ *   1 = lower 2.4 GHz volume
+ *   2 = mute 2.4 GHz
+ * Cmd 0xdd, single arg byte.
+ */
+static ssize_t razer_attr_write_in_call_audio_mix(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    unsigned long val;
+
+    if (kstrtoul(buf, 10, &val))
+        return -EINVAL;
+    if (val > 2) return -EINVAL;
+
+    razer_blackshark_build_set(cmdbuf, BLACKSHARK_SET_IN_CALL_AUDIO_MIX, (u8)val,
+                               razer_blackshark_set_dir(device->usb_pid));
+    mutex_lock(&device->lock);
+    razer_blackshark_send_cmd(device, cmdbuf);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
+/*
+ * audio_prompts write: voice-prompt toggle (mic mute/unmute prompts).
+ * Cmd 0xe5, two arg bytes — buf[13]=0x00, buf[14]=on/off, count=2.
+ */
+static ssize_t razer_attr_write_audio_prompts(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    unsigned long val;
+    u8 crc = 0;
+    int i;
+
+    if (kstrtoul(buf, 10, &val))
+        return -EINVAL;
+
+    memset(cmdbuf, 0, RAZER_BLACKSHARK_REPORT_LEN);
+    cmdbuf[0]  = 0x02;                                    /* report_id */
+    cmdbuf[2]  = 0x60;                                    /* transaction_id */
+    cmdbuf[6]  = 0x06;                                    /* data_size = 3 + 2 args + cmd byte */
+    cmdbuf[9]  = razer_blackshark_set_dir(device->usb_pid);
+    cmdbuf[10] = BLACKSHARK_SET_AUDIO_PROMPTS;            /* 0xe5 */
+    cmdbuf[11] = 0x00;
+    cmdbuf[12] = 0x02;                                    /* arg count = 2 */
+    cmdbuf[13] = 0x00;                                    /* fixed sub-arg */
+    cmdbuf[14] = val ? 1 : 0;
+    for (i = 0; i < 62; i++) crc ^= cmdbuf[i];
+    cmdbuf[62] = crc;
+
+    mutex_lock(&device->lock);
+    razer_blackshark_send_cmd(device, cmdbuf);
+    mutex_unlock(&device->lock);
+
+    return count;
+}
+
 static ssize_t razer_attr_read_headphone_eq(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
@@ -1296,6 +1380,9 @@ static DEVICE_ATTR(sidetone,                0220, NULL,                         
 static DEVICE_ATTR(mic_eq,                  0220, NULL,                                    razer_attr_write_mic_eq);
 static DEVICE_ATTR(mic_eq_preset,           0220, NULL,                                    razer_attr_write_mic_eq_preset);
 static DEVICE_ATTR(audio_function_button,   0220, NULL,                                    razer_attr_write_audio_function_button);
+static DEVICE_ATTR(game_chat_balance,       0220, NULL,                                    razer_attr_write_game_chat_balance);
+static DEVICE_ATTR(in_call_audio_mix,       0220, NULL,                                    razer_attr_write_in_call_audio_mix);
+static DEVICE_ATTR(audio_prompts,           0220, NULL,                                    razer_attr_write_audio_prompts);
 
 static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf)
 {
@@ -1396,6 +1483,9 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq_preset);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_function_button);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_chat_balance);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_in_call_audio_mix);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_prompts);
             break;
         }
     }
@@ -1470,6 +1560,9 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_mic_eq);
             device_remove_file(&hdev->dev, &dev_attr_mic_eq_preset);
             device_remove_file(&hdev->dev, &dev_attr_audio_function_button);
+            device_remove_file(&hdev->dev, &dev_attr_game_chat_balance);
+            device_remove_file(&hdev->dev, &dev_attr_in_call_audio_mix);
+            device_remove_file(&hdev->dev, &dev_attr_audio_prompts);
             break;
         }
     }
