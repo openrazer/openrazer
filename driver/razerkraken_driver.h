@@ -46,49 +46,63 @@
 
 /* ---- BlackShark V3 Pro (PID 0x0577) command set ----
  *
- * Protocol decoded by RiskRunner0 (https://github.com/RiskRunner0/blackshark-linux,
- * GPL-2.0-or-later) from Synapse usbmon captures on Windows. Verified against
- * a startup pcap from a V3 Pro user on the openrazer fork PR.
+ * Decoded from Razer Synapse 4 USBPcap traces on Windows (initial seed from
+ * RiskRunner0's blackshark-linux + dedicated pcaps Apr 2026). Full protocol
+ * spec at docs/v3_pro_protocol.md.
  *
- * Same envelope as V3 (Report 0x02, transaction_id 0x60, CRC=XOR[0..61]),
- * but with a substantially different command vocabulary.
+ * Same envelope as V3 (Report 0x02, transaction_id 0x60, CRC=XOR[0..61]).
+ * V3 and V3 Pro share most commands — only ANC/Ambient is V3 Pro–exclusive.
  *
  * Layout:
  *   buf[6]   = data_size (3 + args_len)
- *   buf[9]   = flags (0x80 = SET/GET, 0x00 = init handshake)
+ *   buf[9]   = direction (0x80 SET, 0x00 GET, 0x84 ACK)
  *   buf[10]  = command class
- *   buf[11]  = sub (always 0x00)
- *   buf[12]  = command id
+ *   buf[11]  = subclass (always 0x00)
+ *   buf[12]  = arg count (number of meaningful bytes at buf[13..])
  *   buf[13..]= args
  */
-#define BLACKSHARK_V3_PRO_BATTERY_CLASS    0x21  /* args=[0x00]; resp[0]=%, resp[1]=charging */
+#define BLACKSHARK_V3_PRO_BATTERY_CLASS    0x21  /* GET; resp[0]=%, resp[1]=charging */
 #define BLACKSHARK_V3_PRO_BATTERY_ID       0x00
-#define BLACKSHARK_V3_PRO_CHARGING_CLASS   0x2a  /* args=[0x00] GET state */
+#define BLACKSHARK_V3_PRO_CHARGING_CLASS   0x2a  /* GET; resp[0]=charging? */
 #define BLACKSHARK_V3_PRO_CHARGING_GET     0x00
-#define BLACKSHARK_V3_PRO_SIDETONE_GET_CL  0x98  /* args=[0x01, 0x00] */
-#define BLACKSHARK_V3_PRO_SIDETONE_SET_CL  0x99  /* args=[level, 0x00] */
-#define BLACKSHARK_V3_PRO_SIDETONE_READ_CL 0x2c  /* args=[0x00]; resp[0]=level (0..15) */
+#define BLACKSHARK_V3_PRO_SIDETONE_GET_CL  0x98  /* SET precursor; args=[0x01] */
+#define BLACKSHARK_V3_PRO_SIDETONE_SET_CL  0x99  /* SET level; args=[level 0..15] */
+#define BLACKSHARK_V3_PRO_SIDETONE_READ_CL 0x2c  /* GET; resp[0]=level */
 #define BLACKSHARK_V3_PRO_SIDETONE_ID      0x01
 #define BLACKSHARK_V3_PRO_SIDETONE_MAX     0x0f
-#define BLACKSHARK_V3_PRO_THX_CLASS        0xdf  /* args=[mode, 0x00]; 0=stereo 1=spatial */
+#define BLACKSHARK_V3_PRO_THX_CLASS        0x9e  /* SET; args=[mode]; 0=stereo 1=THX-spatial */
 #define BLACKSHARK_V3_PRO_THX_ID           0x01
-#define BLACKSHARK_V3_PRO_ANC_CLASS        0x92  /* args=[on, level, 0x00]; level 1..4 */
+#define BLACKSHARK_V3_PRO_ULL_CLASS        0xdf  /* SET; args=[on/off]; Ultra-Low Latency */
+#define BLACKSHARK_V3_PRO_ULL_ID           0x01
+#define BLACKSHARK_V3_PRO_ANC_CLASS        0x92  /* SET; args=[mode, level]; mode 0=off 1=ANC 0x50=ambient */
 #define BLACKSHARK_V3_PRO_ANC_ID           0x02
+#define BLACKSHARK_V3_PRO_ANC_MODE_OFF     0x00
+#define BLACKSHARK_V3_PRO_ANC_MODE_ANC     0x01
+#define BLACKSHARK_V3_PRO_ANC_MODE_AMBIENT 0x50
 #define BLACKSHARK_V3_PRO_ANC_LEVEL_MIN    1
 #define BLACKSHARK_V3_PRO_ANC_LEVEL_MAX    4
-#define BLACKSHARK_V3_PRO_POWER_SAVE_CLASS 0xac  /* args=[minutes, 0x00]; 0/15/30/45/60 */
+#define BLACKSHARK_V3_PRO_POWER_SAVE_CLASS 0xac  /* SET; args=[minutes]; 0/15/30/45/60 */
 #define BLACKSHARK_V3_PRO_POWER_SAVE_ID    0x01
+#define BLACKSHARK_V3_PRO_GAME_CHAT_CLASS  0xdc  /* SET; args=[balance 0..20]; 10=center */
+#define BLACKSHARK_V3_PRO_GAME_CHAT_ID     0x01
+#define BLACKSHARK_V3_PRO_GAME_CHAT_MAX    0x14
+#define BLACKSHARK_V3_PRO_INCALL_MIX_CLASS 0xdd  /* SET; args=[mode]; 0=combine 1=lower 2=mute */
+#define BLACKSHARK_V3_PRO_INCALL_MIX_ID    0x01
+#define BLACKSHARK_V3_PRO_AUDIO_PROMPTS_CL 0xe5  /* SET; args=[0x00, on]; mic mute/unmute prompt */
+#define BLACKSHARK_V3_PRO_AUDIO_PROMPTS_ID 0x02
 
 /* EQ — 5-step sequence per preset switch.
- * 9 bands at 60/170/310/600/1k/3k/6k/12k/16k Hz, 9 preset slots (0..8).
- * Sign-magnitude encoding (same as V3): 0x00=0dB, 0x01=+1dB, 0x81=-1dB. */
-#define BLACKSHARK_V3_PRO_EQ_STATE_CLASS   0xe1  /* args=[0x01,0x00] gate, [0x02,0x00] apply */
+ * 10 bands at 31/63/125/250/500/1k/2k/4k/8k/16k Hz; 9 preset slots (0..8).
+ * Slots 0..4 are factory (Default/Game/Movie/Music/Esports), 5..8 are user
+ * custom slots from Synapse's "EDIT EQ LIST" UI.
+ * Sign-magnitude gain (same as V3): 0x00=0dB, 0x01=+1dB, 0x81=-1dB; range ±6dB. */
+#define BLACKSHARK_V3_PRO_EQ_STATE_CLASS   0xe1  /* SET; args=[profile_idx] activates slot */
 #define BLACKSHARK_V3_PRO_EQ_STATE_ID      0x01
-#define BLACKSHARK_V3_PRO_EQ_BANDS_CLASS   0x95  /* args=[idx, b0..b8, 0x00] (12 bytes) */
+#define BLACKSHARK_V3_PRO_EQ_BANDS_CLASS   0x95  /* SET; args=[profile_idx, b0..b9] (11 bytes) */
 #define BLACKSHARK_V3_PRO_EQ_BANDS_ID      0x0b
-#define BLACKSHARK_V3_PRO_EQ_META_CLASS    0xe0  /* args=[idx, ...] (7 bytes) */
+#define BLACKSHARK_V3_PRO_EQ_META_CLASS    0xe0  /* SET; args=[idx, ...] (7 bytes) */
 #define BLACKSHARK_V3_PRO_EQ_META_ID       0x06
-#define BLACKSHARK_V3_PRO_EQ_COMMIT_CLASS  0xeb  /* args=[idx, ...] (12 bytes) */
+#define BLACKSHARK_V3_PRO_EQ_COMMIT_CLASS  0xeb  /* SET; args=[idx, ...] (11 bytes) */
 #define BLACKSHARK_V3_PRO_EQ_COMMIT_ID     0x0b
 #define BLACKSHARK_V3_PRO_EQ_PRESET_COUNT  9
 
