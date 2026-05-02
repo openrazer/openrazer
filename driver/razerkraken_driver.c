@@ -378,7 +378,13 @@ static void razer_blackshark_v3pro_build(u8 *buf, u8 class, u8 cmd, const u8 *ar
     memset(buf, 0, RAZER_BLACKSHARK_REPORT_LEN);
     buf[0] = 0x02;
     buf[2] = 0x60;
-    buf[6] = 3 + args_len;  /* class + sub + cmd + args */
+    /* buf[6] = total payload bytes from buf[9] inclusive
+     *        = direction + class + sub + argc + args = 4 + args_len.
+     * Synapse's wire-format: SETs with argc=2 carry buf[6]=0x06. Earlier
+     * formula (3 + args_len) was off by one; the firmware silently dropped
+     * the trailing arg byte, which made ANC level changes inaudible on
+     * Linux while Windows-Synapse felt right. */
+    buf[6] = 4 + args_len;
     buf[9] = 0x80;
     buf[10] = class;
     buf[11] = 0x00;
