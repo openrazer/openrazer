@@ -165,21 +165,20 @@ struct razer_report get_razer_report(unsigned char command_class, unsigned char 
 /**
  * Print report to syslog
  */
-void print_erroneous_report(struct razer_report* report, char* driver_name, char* message)
+void print_erroneous_report(struct hid_device *hdev, struct razer_report* report, const char *message)
 {
-    printk(KERN_WARNING "%s: %s. status: %02x transaction_id.id: %02x remaining_packets: %02x protocol_type: %02x data_size: %02x, command_class: %02x, command_id.id: %02x Params: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x .\n",
-           driver_name,
-           message,
-           report->status,
-           report->transaction_id.id,
-           report->remaining_packets,
-           report->protocol_type,
-           report->data_size,
-           report->command_class,
-           report->command_id.id,
-           report->arguments[0], report->arguments[1], report->arguments[2], report->arguments[3], report->arguments[4], report->arguments[5],
-           report->arguments[6], report->arguments[7], report->arguments[8], report->arguments[9], report->arguments[10], report->arguments[11],
-           report->arguments[12], report->arguments[13], report->arguments[14], report->arguments[15]);
+    hid_warn(hdev, "%s. status: %02x transaction_id.id: %02x remaining_packets: %02x protocol_type: %02x data_size: %02x, command_class: %02x, command_id.id: %02x Params: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x .\n",
+             message,
+             report->status,
+             report->transaction_id.id,
+             report->remaining_packets,
+             report->protocol_type,
+             report->data_size,
+             report->command_class,
+             report->command_id.id,
+             report->arguments[0], report->arguments[1], report->arguments[2], report->arguments[3], report->arguments[4], report->arguments[5],
+             report->arguments[6], report->arguments[7], report->arguments[8], report->arguments[9], report->arguments[10], report->arguments[11],
+             report->arguments[12], report->arguments[13], report->arguments[14], report->arguments[15]);
 }
 
 int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait)
