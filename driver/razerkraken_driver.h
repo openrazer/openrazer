@@ -24,13 +24,24 @@
 #define RAZER_BLACKSHARK_REPORT_LEN  64
 #define RAZER_BLACKSHARK_IFACE        5
 
-/* GET params (arg[1] with direction byte 0x80) */
-#define BLACKSHARK_PARAM_SERIAL            0x00
-#define BLACKSHARK_PARAM_MIC_VOLUME        0x21
-#define BLACKSHARK_PARAM_POWER_SAVE        0x2c
-#define BLACKSHARK_PARAM_ULTRA_LOW_LATENCY 0x5f
-#define BLACKSHARK_PARAM_THX               0x9e
-#define BLACKSHARK_PARAM_EQ                0x15
+/* GET params (class byte at buf[10]; SET shares the same class — direction
+ * byte at buf[9] picks 0x80 wireless / 0x00 wired, not request type).
+ * Verified from Synapse responses in the 2026-05-02 V3 wired + 2.4GHz pcaps. */
+#define BLACKSHARK_PARAM_SERIAL            0x00  /* GET; cnt=15 ASCII serial */
+#define BLACKSHARK_PARAM_INIT              0x02  /* GET; capability handshake — Synapse sends FIRST before any other GET */
+#define BLACKSHARK_PARAM_EQ_BANDS          0x15  /* GET; cnt=11 [slot, b0..b9] sign-magnitude — paired SET 0x95 */
+#define BLACKSHARK_PARAM_MIC_EQ_PRESET     0x16  /* GET; cnt=1 [slot] 0x20=Default..0x23=MicBoost (was misnamed BLACKSHARK_SET_MIC_EQ_BEGIN) */
+#define BLACKSHARK_PARAM_MIC_EQ_BANDS      0x17  /* GET; cnt=10 mic EQ bands sign-magnitude (was misnamed BLACKSHARK_SET_MIC_EQ_END) */
+#define BLACKSHARK_PARAM_BATTERY_LEVEL     0x21  /* GET; cnt=1 [percent 0..100] */
+#define BLACKSHARK_PARAM_MIC_VOLUME        0x21  /* DEPRECATED alias for BATTERY_LEVEL — earlier wrong guess; mic volume is UAC2 not Razer HID */
+#define BLACKSHARK_PARAM_CHARGE_STATE      0x2a  /* GET; cnt=1 [charging? 0/1] */
+#define BLACKSHARK_PARAM_SIDETONE_LEVEL    0x2c  /* GET; cnt=1 [level 0..15] (was misnamed BLACKSHARK_PARAM_POWER_SAVE) */
+#define BLACKSHARK_PARAM_ULTRA_LOW_LATENCY 0x5f  /* GET; cnt=1 [on/off]. Confirmed via readback. */
+#define BLACKSHARK_PARAM_EQ_SLOT_META      0x60  /* GET; cnt=6 [slot, ?, enabled?, 00, ?, 00] */
+#define BLACKSHARK_PARAM_THX               0x9e  /* GET; cnt=1 [0=stereo, 1=THX-spatial] */
+#define BLACKSHARK_PARAM_AUDIO_PROMPTS     0xe5  /* GET; cnt=1 [on/off] */
+#define BLACKSHARK_PARAM_AUDIO_FN_BUTTON   0xea  /* GET; cnt=1 [mode 0..3] */
+#define BLACKSHARK_PARAM_EQ                BLACKSHARK_PARAM_EQ_BANDS  /* legacy alias */
 
 /* SET commands (verified from pcap captures) */
 #define BLACKSHARK_SET_EQ                  0x95  /* Headphone EQ data — buf[14..23]=10 bands, buf[13]=profile_idx */
@@ -41,9 +52,7 @@
 #define BLACKSHARK_SET_EQ_APPLY            0xe0  /* Headphone EQ apply — profile-specific */
 #define BLACKSHARK_SET_EQ_BEGIN            0xe1  /* Headphone EQ begin/end — buf[13]=0x01 begin, 0x02 end */
 #define BLACKSHARK_SET_EQ_COMMIT           0xeb  /* Headphone EQ commit */
-#define BLACKSHARK_SET_FN_BUTTON           0xea  /* Audio function button mode — buf[13]: 0x01=sidetone save, 0x02=footsteps */
-#define BLACKSHARK_SET_MIC_EQ_BEGIN        0x16  /* Mic EQ begin marker */
-#define BLACKSHARK_SET_MIC_EQ_END          0x17  /* Mic EQ end marker */
+#define BLACKSHARK_SET_FN_BUTTON           0xea  /* Audio FN button mode — buf[13]: 0x00=GameChat (default), 0x01=Sidetone, 0x02=Footsteps, 0x03=BluetoothVolume. Updated 2026-05-02 from new pcap; previous "0x01=sidetone, 0x02=footsteps" was incomplete (missing 0=GameChat default and 3=BTVol). */
 
 /* ---- BlackShark V3 Pro (PID 0x0577) command set ----
  *

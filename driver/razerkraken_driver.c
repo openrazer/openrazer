@@ -1190,18 +1190,16 @@ static ssize_t razer_attr_write_mic_volume(struct device *dev, struct device_att
 static ssize_t razer_attr_read_wireless_power_save(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
-    s8 val = -1;
+    s8 val;
 
-    razer_blackshark_build_get(cmdbuf, BLACKSHARK_PARAM_POWER_SAVE, device->usb_pid);
+    /* TODO: V3 power-save GET class is unverified. The previous code read
+     * class 0x2c, but the 2026-05-02 pcap analysis identified 0x2c as
+     * sidetone-level read (returns 0..15), not power-save minutes. Until
+     * the right GET class is identified (no 2.4GHz pcap shows a power_save
+     * read on its own — it's only ever set), fall back to the cache that
+     * write_wireless_power_save populates. -1 = never written this session. */
     mutex_lock(&device->lock);
-    razer_blackshark_send_cmd(device, cmdbuf);
-    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_PARAM_POWER_SAVE) {
-        val = device->data[13];
-        device->cached_v3_power_save = val;
-    } else {
-        val = device->cached_v3_power_save;  /* may be -1 */
-    }
+    val = device->cached_v3_power_save;
     mutex_unlock(&device->lock);
 
     return sprintf(buf, "%d\n", val);
