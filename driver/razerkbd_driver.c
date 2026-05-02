@@ -415,7 +415,7 @@ static int razer_send_payload(struct razer_kbd_device *device, struct razer_repo
         err = razer_get_report(hid_to_usb_dev(device->hdev), request, response);
         mutex_unlock(&device->lock);
         if (err) {
-            print_erroneous_report(response, "razerkbd", "Invalid Report Length");
+            print_erroneous_report(device->hdev, response, "Invalid Report Length");
             goto retry;
         }
 
@@ -423,7 +423,7 @@ static int razer_send_payload(struct razer_kbd_device *device, struct razer_repo
         if (response->remaining_packets != request->remaining_packets ||
             response->command_class != request->command_class ||
             response->command_id.id != request->command_id.id) {
-            print_erroneous_report(response, "razerkbd", "Response doesn't match request");
+            print_erroneous_report(device->hdev, response, "Response doesn't match request");
             err = -EINVAL;
             goto retry;
         }
@@ -448,16 +448,16 @@ retry:
     /* Only "valid" but failed responses should reach this */
     switch (response->status) {
     case RAZER_CMD_FAILURE:
-        print_erroneous_report(response, "razerkbd", "Command failed");
+        print_erroneous_report(device->hdev, response, "Command failed");
         return -EINVAL;
     case RAZER_CMD_NOT_SUPPORTED:
-        print_erroneous_report(response, "razerkbd", "Command not supported");
+        print_erroneous_report(device->hdev, response, "Command not supported");
         return -ENOTSUPP;
     case RAZER_CMD_TIMEOUT:
-        print_erroneous_report(response, "razerkbd", "Command timed out");
+        print_erroneous_report(device->hdev, response, "Command timed out");
         return -ETIMEDOUT;
     default:
-        print_erroneous_report(response, "razerkbd", "Unknown error");
+        print_erroneous_report(device->hdev, response, "Unknown error");
         WARN_ONCE(1, "Unknown response status received: %d\n", response->status);
         return -EIO;
     }
@@ -3714,7 +3714,7 @@ static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute 
 
     razer_send_payload(device, &request, &response);
 
-    print_erroneous_report(&response, "razerkbd", "Test");
+    print_erroneous_report(device->hdev, &response, "Test");
     return sysfs_emit(buf, "%02x%02x%02x\n", response.arguments[0], response.arguments[1], response.arguments[2]);
 }
 
