@@ -28,16 +28,18 @@ MODULE_LICENSE(DRIVER_LICENSE);
 /**
  * Send report to the device
  */
-static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request, struct razer_report *response)
+static int razer_get_report(struct hid_device *hdev, struct razer_report *request, struct razer_report *response)
 {
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
+
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
-        return razer_get_usb_response(usb_dev, 0x00, request, 0x00, response, RAZER_NEW_DEVICE_WAIT_US);
+        return razer_get_usb_response(hdev, 0x00, request, 0x00, response, RAZER_NEW_DEVICE_WAIT_US);
         break;
 
     default:
-        return razer_get_usb_response(usb_dev, 0x00, request, 0x00, response, RAZER_ACCESSORY_WAIT_US);
+        return razer_get_usb_response(hdev, 0x00, request, 0x00, response, RAZER_ACCESSORY_WAIT_US);
     }
 }
 
@@ -53,7 +55,7 @@ static int razer_send_payload(struct razer_accessory_device *device, struct raze
 
     for (retry = 5; retry > 0; retry--) {
         mutex_lock(&device->lock);
-        err = razer_get_report(hid_to_usb_dev(device->hdev), request, response);
+        err = razer_get_report(device->hdev, request, response);
         mutex_unlock(&device->lock);
         if (err) {
             print_erroneous_report(device->hdev, response, "Invalid Report Length");
@@ -1091,7 +1093,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
         case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
             mutex_lock(&device->lock);
-            razer_send_argb_msg(device->usb_dev, row_id, (stop_col - start_col) + 1, (unsigned char*)&buf[offset]);
+            razer_send_argb_msg(device->hdev, row_id, (stop_col - start_col) + 1, (unsigned char*)&buf[offset]);
             mutex_unlock(&device->lock);
             return count;
 

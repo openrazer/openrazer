@@ -372,14 +372,15 @@ static void razer_get_report_params(struct usb_device *usb_dev, uint *report_ind
 /**
  * Send report to the keyboard
  */
-static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request, struct razer_report *response)
+static int razer_get_report(struct hid_device *hdev, struct razer_report *request, struct razer_report *response)
 {
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
     uint report_index, response_index;
     ulong wait;
 
     razer_get_report_params(usb_dev, &report_index, &response_index, &wait);
 
-    return razer_get_usb_response(usb_dev, report_index, request, response_index, response, wait);
+    return razer_get_usb_response(hdev, report_index, request, response_index, response, wait);
 }
 
 /**
@@ -396,7 +397,7 @@ static int razer_send_payload_no_response(struct razer_kbd_device *device, struc
 
     razer_get_report_params(usb_dev, &report_index, &response_index, &wait);
 
-    return razer_send_control_msg(usb_dev, request, report_index, wait);
+    return razer_send_control_msg(device->hdev, request, report_index, wait);
 }
 
 /**
@@ -411,7 +412,7 @@ static int razer_send_payload(struct razer_kbd_device *device, struct razer_repo
 
     for (retry = 5; retry > 0; retry--) {
         mutex_lock(&device->lock);
-        err = razer_get_report(hid_to_usb_dev(device->hdev), request, response);
+        err = razer_get_report(device->hdev, request, response);
         mutex_unlock(&device->lock);
         if (err) {
             print_erroneous_report(device->hdev, response, "Invalid Report Length");
