@@ -137,13 +137,21 @@ struct razer_kraken_device {
 
     /* Last-written cache for write-only V3/V3 Pro attrs.
      * -1 = not yet written this session; read handler returns "-1" so the GUI
-     * can fall back to its JSON cache. Updated on every successful SET. */
+     * can fall back to its JSON cache. Updated on every successful SET.
+     * V3 reads also fall back to these when the device GET reply doesn't
+     * arrive in time (the kernel's 150 ms wait often misses the response). */
+    s8 cached_v3_power_save;
+    s8 cached_v3_ull;
+    s8 cached_v3_thx;
+    s8 cached_v3_eq_active;
+    s8 cached_v3_sidetone;
     s8 cached_v3pro_thx;
     s8 cached_v3pro_anc_mode;
     s8 cached_v3pro_anc_level;
     s8 cached_v3pro_ull;
     s8 cached_v3pro_power_save;
     s8 cached_v3pro_eq_profile;
+    s8 cached_v3pro_sidetone;
     s8 cached_game_chat_balance;
     s8 cached_in_call_audio_mix;
     s8 cached_audio_prompts;
