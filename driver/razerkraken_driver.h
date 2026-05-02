@@ -118,6 +118,7 @@
 
 struct razer_kraken_device {
     struct usb_device *usb_dev;
+    struct hid_device *hdev;       /* needed for hid_hw_raw_request on V3/V3 Pro */
     struct mutex lock;
     unsigned char usb_interface_protocol;
     unsigned short usb_pid;
@@ -134,6 +135,14 @@ struct razer_kraken_device {
 
     u8 data[64];
     s8 eq_bands[10];
+
+    /* V3 / V3 Pro vendor-response synchronization.
+     * razer_blackshark_send_cmd sends a SET_REPORT via hid_hw_raw_request,
+     * then waits on this completion. razer_raw_event signals it when the
+     * device's interrupt-IN reply (64 bytes) arrives. Without this, the
+     * kernel's old 150 ms msleep often misses the reply window. */
+    struct completion vendor_response;
+    bool vendor_response_inited;
 
     /* Last-written cache for write-only V3/V3 Pro attrs.
      * -1 = not yet written this session; read handler returns "-1" so the GUI

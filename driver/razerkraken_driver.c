@@ -10,6 +10,7 @@
 #include <linux/usb/input.h>
 #include <linux/hid.h>
 #include <linux/random.h>
+#include <linux/completion.h>
 
 #include "razerkraken_driver.h"
 #include "razercommon.h"
@@ -325,31 +326,48 @@ static int razer_blackshark_send_cmd(struct razer_kraken_device *dev, u8 *buf)
 {
     int ret;
     u8 *kbuf;
+    long wait;
 
     kbuf = kmemdup(buf, RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
     if (!kbuf)
         return -ENOMEM;
 
+    /* Mark response slot as "no reply yet" and arm completion BEFORE sending
+     * so a fast response (some are <5ms) can't race the wait. */
     dev->data[1] = 0x00;
+    if (dev->vendor_response_inited)
+        reinit_completion(&dev->vendor_response);
 
-    ret = usb_control_msg(dev->usb_dev,
-                          usb_sndctrlpipe(dev->usb_dev, 0),
-                          HID_REQ_SET_REPORT,
-                          USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT,
-                          0x0202, RAZER_BLACKSHARK_IFACE,
-                          kbuf, RAZER_BLACKSHARK_REPORT_LEN,
-                          USB_CTRL_SET_TIMEOUT);
+    /* hid_hw_raw_request is the proper HID-core path: it issues the
+     * SET_REPORT and stays integrated with raw_event() so the device's
+     * interrupt-IN reply lands in our raw_event handler (which fires
+     * complete() below). usb_control_msg bypasses hid-core and the IN
+     * reply gets dropped on the floor — that was the old 150ms-msleep
+     * bug that left V3/V3 Pro GETs returning fallback data. */
+    ret = hid_hw_raw_request(dev->hdev, 0x02,
+                             kbuf, RAZER_BLACKSHARK_REPORT_LEN,
+                             HID_OUTPUT_REPORT, HID_REQ_SET_REPORT);
     kfree(kbuf);
 
     if (ret != RAZER_BLACKSHARK_REPORT_LEN) {
-        printk(KERN_WARNING "razerkraken: BlackShark V3 SET_REPORT failed (%d)\n", ret);
+        printk(KERN_WARNING "razerkraken: BlackShark V3 hid_hw_raw_request failed (%d)\n", ret);
         return -EIO;
     }
 
-    /* Device response (interrupt-IN on ep 0x84) arrives 60–120ms after
-     * each SET_REPORT. Synapse waits for it before the next command;
-     * sending sooner leaves the firmware state machine stuck. */
-    msleep(150);
+    if (!dev->vendor_response_inited) {
+        /* Probe didn't arm the completion (very early call) — fall back to
+         * the legacy fixed wait. Should not normally fire. */
+        msleep(150);
+        return 0;
+    }
+
+    /* Wait up to 2s for raw_event() to copy the reply into dev->data and
+     * fire dev->vendor_response. If we time out, dev->data[1] stays 0 and
+     * existing readers fall back to -1 (their cache) — same as before. */
+    wait = wait_for_completion_timeout(&dev->vendor_response,
+                                       msecs_to_jiffies(2000));
+    if (!wait)
+        return -ETIMEDOUT;
     return 0;
 }
 
@@ -1950,6 +1968,13 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
 
     // Init data
     razer_kraken_init(dev, intf);
+    dev->hdev = hdev;
+
+    /* Arm the V3/V3 Pro response completion before any send_cmd can fire.
+     * Initialise unconditionally — older Kraken devices won't take this
+     * path (they use razer_kraken_send_control_msg, not the V3 helpers). */
+    init_completion(&dev->vendor_response);
+    dev->vendor_response_inited = true;
 
     if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);                               // Get driver version
@@ -2024,6 +2049,39 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
     if (hid_hw_start(hdev, HID_CONNECT_DEFAULT)) {
         hid_err(hdev, "hw start failed\n");
         goto exit_free;
+    }
+
+    /* V3 / V3 Pro: replicate Synapse's pre-GET init handshake. Without
+     * cls=0x02 dir=0x00 first, the firmware silently ignores subsequent
+     * GETs (cls=0x21 battery, cls=0x2a charging, cls=0x00 serial, ...).
+     * Verified in 2.4GHz pcap (frame 1811 is Synapse's first command).
+     * Best-effort — if the device hasn't woken up yet at probe time the
+     * handshake will time out and that's fine; subsequent reads will
+     * just retry their own send_cmd. */
+    switch (dev->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3:
+    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED:
+    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
+    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED: {
+        u8 init_buf[RAZER_BLACKSHARK_REPORT_LEN] = {0};
+        u8 crc = 0;
+        int i;
+
+        init_buf[0]  = 0x02;
+        init_buf[2]  = 0x60;
+        init_buf[6]  = 0x04;
+        init_buf[9]  = 0x00; /* dir = GET */
+        init_buf[10] = 0x02; /* class = capability init handshake */
+        for (i = 0; i < 62; i++) crc ^= init_buf[i];
+        init_buf[62] = crc;
+
+        mutex_lock(&dev->lock);
+        razer_blackshark_send_cmd(dev, init_buf);
+        mutex_unlock(&dev->lock);
+        break;
+    }
+    default:
+        break;
     }
 
     usb_disable_autosuspend(usb_dev);
@@ -2118,8 +2176,6 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 {
     struct razer_kraken_device *device = dev_get_drvdata(&hdev->dev);
 
-    //printk(KERN_WARNING "razerkraken: Got raw message %d\n", size);
-
     if (size == 33) {
         memcpy(&device->data[0], &data[0], size);
     } else if (size == 64 && (device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3 ||
@@ -2127,6 +2183,10 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
                               device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
                               device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED)) {
         memcpy(&device->data[0], &data[0], size);
+        /* Wake up razer_blackshark_send_cmd() which is waiting on this
+         * completion. Safe in interrupt/softirq context. */
+        if (device->vendor_response_inited)
+            complete(&device->vendor_response);
     } else {
         printk(KERN_WARNING "razerkraken: Got raw message, length: %d\n", size);
     }
