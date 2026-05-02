@@ -1282,9 +1282,16 @@ static ssize_t razer_attr_write_mic_eq_preset(struct device *dev, struct device_
                                razer_blackshark_set_dir(device->usb_pid));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_v3_mic_eq_preset = (s8)val;
     mutex_unlock(&device->lock);
 
     return count;
+}
+
+static ssize_t razer_attr_read_mic_eq_preset(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->cached_v3_mic_eq_preset);
 }
 
 /*
@@ -1335,9 +1342,16 @@ static ssize_t razer_attr_write_audio_function_button(struct device *dev, struct
                                razer_blackshark_set_dir(device->usb_pid));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_v3_fn_button = (s8)val;
     mutex_unlock(&device->lock);
 
     return count;
+}
+
+static ssize_t razer_attr_read_audio_function_button(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->cached_v3_fn_button);
 }
 
 static ssize_t razer_attr_read_headphone_eq(struct device *dev, struct device_attribute *attr, char *buf)
@@ -1795,8 +1809,8 @@ static DEVICE_ATTR(headphone_eq,            0660, razer_attr_read_headphone_eq, 
 static DEVICE_ATTR(thx_spatial_audio,       0660, razer_attr_read_thx_spatial_audio,       razer_attr_write_thx_spatial_audio);
 static DEVICE_ATTR(sidetone,                0660, razer_attr_read_sidetone,                razer_attr_write_sidetone);
 static DEVICE_ATTR(mic_eq,                  0220, NULL,                                    razer_attr_write_mic_eq);
-static DEVICE_ATTR(mic_eq_preset,           0220, NULL,                                    razer_attr_write_mic_eq_preset);
-static DEVICE_ATTR(audio_function_button,   0220, NULL,                                    razer_attr_write_audio_function_button);
+static DEVICE_ATTR(mic_eq_preset,           0660, razer_attr_read_mic_eq_preset,           razer_attr_write_mic_eq_preset);
+static DEVICE_ATTR(audio_function_button,   0660, razer_attr_read_audio_function_button,   razer_attr_write_audio_function_button);
 /* BlackShark V3 Pro (PID 0x0577) — distinct attribute names so they don't collide
  * with V3's headphone_eq (which has 10-band write semantics). */
 static DEVICE_ATTR(v3pro_battery_level,        0440, razer_attr_read_v3pro_battery_level,     NULL);
@@ -1831,6 +1845,8 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
     dev->cached_v3_thx             = -1;
     dev->cached_v3_eq_active       = -1;
     dev->cached_v3_sidetone        = -1;
+    dev->cached_v3_mic_eq_preset   = -1;
+    dev->cached_v3_fn_button       = -1;
     dev->cached_v3pro_thx          = -1;
     dev->cached_v3pro_anc_mode     = -1;
     dev->cached_v3pro_anc_level    = -1;

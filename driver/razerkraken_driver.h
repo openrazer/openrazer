@@ -145,6 +145,8 @@ struct razer_kraken_device {
     s8 cached_v3_thx;
     s8 cached_v3_eq_active;
     s8 cached_v3_sidetone;
+    s8 cached_v3_mic_eq_preset;
+    s8 cached_v3_fn_button;
     s8 cached_v3pro_thx;
     s8 cached_v3pro_anc_mode;
     s8 cached_v3pro_anc_level;
