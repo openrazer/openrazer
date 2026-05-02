@@ -1592,9 +1592,15 @@ static ssize_t razer_attr_write_v3pro_anc(struct device *dev, struct device_attr
     if (level > BLACKSHARK_V3_PRO_ANC_LEVEL_MAX) level = BLACKSHARK_V3_PRO_ANC_LEVEL_MAX;
 
     switch (mode_in) {
-    case 1:  args[0] = BLACKSHARK_V3_PRO_ANC_MODE_ANC;     break;
-    case 2:  args[0] = BLACKSHARK_V3_PRO_ANC_MODE_AMBIENT; break;
-    default: args[0] = BLACKSHARK_V3_PRO_ANC_MODE_OFF;     break;
+    case 1:
+        args[0] = BLACKSHARK_V3_PRO_ANC_MODE_ANC;
+        break;
+    case 2:
+        args[0] = BLACKSHARK_V3_PRO_ANC_MODE_AMBIENT;
+        break;
+    default:
+        args[0] = BLACKSHARK_V3_PRO_ANC_MODE_OFF;
+        break;
     }
     args[1] = (u8)level;
 
@@ -1613,7 +1619,7 @@ static ssize_t razer_attr_read_v3pro_anc(struct device *dev, struct device_attri
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     return sprintf(buf, "%d %d\n", device->cached_v3pro_anc_mode,
-                                   device->cached_v3pro_anc_level);
+                   device->cached_v3pro_anc_level);
 }
 
 /* Ultra-Low Latency toggle (V3 Pro). Args: [on/off, 0x00]. */

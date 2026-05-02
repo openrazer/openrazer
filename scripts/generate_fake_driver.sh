@@ -139,10 +139,14 @@ declare -A files_metadata=(
     ["v3pro_battery_level"]="r;100"
     ["v3pro_charging"]="r;0"
     ["v3pro_sidetone"]="rw;0"
-    ["v3pro_thx_spatial_audio"]="w;"
-    ["v3pro_anc"]="w;"
-    ["v3pro_power_save"]="w;"
-    ["v3pro_headphone_eq"]="w;"
+    ["v3pro_thx_spatial_audio"]="rw;0"
+    ["v3pro_anc"]="rw;0 1"
+    ["v3pro_ultra_low_latency"]="rw;0"
+    ["v3pro_power_save"]="rw;30"
+    ["v3pro_headphone_eq"]="rw;0"
+    ["audio_prompts"]="rw;1"
+    ["game_chat_balance"]="rw;10"
+    ["in_call_audio_mix"]="rw;0"
 )
 
 # USB PID of devices that use single-byte values for DPI
