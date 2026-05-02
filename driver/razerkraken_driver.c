@@ -117,17 +117,33 @@ static union razer_kraken_effect_byte get_kraken_effect_byte(void)
 /* ---- BlackShark V3 HID command helpers ----
  *
  * Wire format verified from USB captures of both transports:
- *   - Wired (PID 0x0579):   buf[9] = 0x00 for SET, 0x80 for GET
- *   - 2.4GHz (PID 0x057A):  buf[9] = 0x80 for both SET and GET
+ *   - Wired (PID 0x0579):       buf[9] = 0x00 for both SET and GET (re-decoded
+ *                               from new pcap 2026-05-02; previous "0x80 GET"
+ *                               note was wrong — wired Synapse uses 0x00)
+ *   - 2.4GHz (PID 0x057A):      buf[9] = 0x80 for both SET and GET
+ *   - V3 Pro wired (0x0576):    buf[9] = 0x00 (assumed by transport rule)
+ *   - V3 Pro 2.4GHz (0x0577):   buf[9] = 0x80 (verified via stealthee's pcap)
  * CRC is XOR of bytes [0..61] (includes the 0x02 report id at buf[0]).
+ *
+ * Rule: wireless transports use 0x80, wired transports use 0x00.
+ * Direction is independent of SET vs GET — both use the same transport byte.
  */
 
-static inline u8 razer_blackshark_set_dir(u16 pid)
+static inline u8 razer_blackshark_dir_byte(u16 pid)
 {
-    return (pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3) ? 0x80 : 0x00;
+    /* Wireless dongles (V3 0x057A, V3 Pro 0x0577) use 0x80;
+     * wired transports (V3 0x0579, V3 Pro 0x0576) use 0x00. */
+    return (pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3 ||
+            pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO) ? 0x80 : 0x00;
 }
 
-static void razer_blackshark_build_get(u8 *buf, u8 param)
+/* Back-compat alias kept until callers are migrated. */
+static inline u8 razer_blackshark_set_dir(u16 pid)
+{
+    return razer_blackshark_dir_byte(pid);
+}
+
+static void razer_blackshark_build_get(u8 *buf, u8 param, u16 pid)
 {
     u8 crc = 0;
     int i;
@@ -136,7 +152,7 @@ static void razer_blackshark_build_get(u8 *buf, u8 param)
     buf[0] = 0x02;   /* report_id */
     buf[2] = 0x60;   /* transaction_id */
     buf[6] = 0x04;   /* data_size */
-    buf[9] = 0x80;   /* args[0] = GET (same on both transports) */
+    buf[9] = razer_blackshark_dir_byte(pid); /* transport-dependent dir byte */
     buf[10] = param; /* args[1] = param_id */
     for (i = 0; i < 62; i++) crc ^= buf[i];
     buf[62] = crc;
@@ -1002,7 +1018,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
             u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
             u8 slen;
 
-            razer_blackshark_build_get(cmdbuf, BLACKSHARK_PARAM_SERIAL);
+            razer_blackshark_build_get(cmdbuf, BLACKSHARK_PARAM_SERIAL, device->usb_pid);
             mutex_lock(&device->lock);
             razer_blackshark_send_cmd(device, cmdbuf);
             /* Response: data[1]=0x02, data[10]=param, data[12]=str_len, data[13..]=serial */
@@ -1142,7 +1158,7 @@ static ssize_t razer_attr_read_mic_volume(struct device *dev, struct device_attr
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
     u8 val = 0;
 
-    razer_blackshark_build_get(cmdbuf, BLACKSHARK_PARAM_MIC_VOLUME);
+    razer_blackshark_build_get(cmdbuf, BLACKSHARK_PARAM_MIC_VOLUME, device->usb_pid);
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
     if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_PARAM_MIC_VOLUME)
@@ -1177,7 +1193,7 @@ static ssize_t razer_attr_read_wireless_power_save(struct device *dev, struct de
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
     s8 val = -1;
 
-    razer_blackshark_build_get(cmdbuf, BLACKSHARK_PARAM_POWER_SAVE);
+    razer_blackshark_build_get(cmdbuf, BLACKSHARK_PARAM_POWER_SAVE, device->usb_pid);
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
     if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_PARAM_POWER_SAVE) {
@@ -1222,7 +1238,7 @@ static ssize_t razer_attr_read_ultra_low_latency(struct device *dev, struct devi
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
     s8 val = -1;
 
-    razer_blackshark_build_get(cmdbuf, BLACKSHARK_PARAM_ULTRA_LOW_LATENCY);
+    razer_blackshark_build_get(cmdbuf, BLACKSHARK_PARAM_ULTRA_LOW_LATENCY, device->usb_pid);
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
     if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_PARAM_ULTRA_LOW_LATENCY) {
@@ -1517,7 +1533,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
             level = (device->data[13] * 255) / 100;
     } else {
         /* V3 / V3 wired: battery class is 0x21, no sub. Same scaling. */
-        razer_blackshark_build_get(cmdbuf, 0x21);
+        razer_blackshark_build_get(cmdbuf, 0x21, device->usb_pid);
         razer_blackshark_send_cmd(device, cmdbuf);
         if (device->data[1] == 0x02 && device->data[10] == 0x21)
             level = (device->data[13] * 255) / 100;
@@ -1543,7 +1559,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
             charging = device->data[14] ? 1 : 0;
     } else {
         /* V3: dedicated charging-status class 0x2a, returns one byte. */
-        razer_blackshark_build_get(cmdbuf, 0x2a);
+        razer_blackshark_build_get(cmdbuf, 0x2a, device->usb_pid);
         razer_blackshark_send_cmd(device, cmdbuf);
         if (device->data[1] == 0x02 && device->data[10] == 0x2a)
             charging = device->data[13] ? 1 : 0;
@@ -2070,7 +2086,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
         init_buf[0]  = 0x02;
         init_buf[2]  = 0x60;
         init_buf[6]  = 0x04;
-        init_buf[9]  = 0x00; /* dir = GET */
+        init_buf[9]  = razer_blackshark_dir_byte(dev->usb_pid);
         init_buf[10] = 0x02; /* class = capability init handshake */
         for (i = 0; i < 62; i++) crc ^= init_buf[i];
         init_buf[62] = crc;
