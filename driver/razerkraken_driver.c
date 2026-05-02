@@ -1540,6 +1540,12 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     }
     mutex_unlock(&device->lock);
 
+    /* Fallback to the most recent unsolicited push if the synchronous GET
+     * didn't produce a valid value. raw_event populates pushed_battery_pct
+     * whenever the device proactively reports a level change (sub=0x02). */
+    if (level < 0 && device->pushed_battery_pct >= 0)
+        level = (device->pushed_battery_pct * 255) / 100;
+
     return sprintf(buf, "%d\n", level);
 }
 
@@ -1565,6 +1571,10 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
             charging = device->data[13] ? 1 : 0;
     }
     mutex_unlock(&device->lock);
+
+    /* Fallback to the most recent unsolicited charging push (sub=0x02). */
+    if (charging < 0 && device->pushed_charging >= 0)
+        charging = device->pushed_charging;
 
     return sprintf(buf, "%d\n", charging);
 }
@@ -1934,6 +1944,8 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
     dev->cached_game_chat_balance  = -1;
     dev->cached_in_call_audio_mix  = -1;
     dev->cached_audio_prompts      = -1;
+    dev->pushed_battery_pct        = -1;
+    dev->pushed_charging           = -1;
 
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:
@@ -2199,6 +2211,27 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
                               device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
                               device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED)) {
         memcpy(&device->data[0], &data[0], size);
+
+        /* Capture unsolicited state-change pushes (sub=0x02) into a
+         * separate cache so they're not clobbered by the next
+         * send_cmd's data[1]=0 clear. Lets sysfs readers fall back to
+         * push-cache when their own GET reply never arrives — battery
+         * transitions like 96→97 in the wired pcap are pushed, not
+         * replied to. */
+        if (data[11] == 0x02 && data[12] >= 1) {
+            switch (data[10]) {
+            case 0x21: /* battery percent */
+                if (data[13] <= 100)
+                    device->pushed_battery_pct = data[13];
+                break;
+            case 0x2a: /* charging flag */
+                device->pushed_charging = data[13] ? 1 : 0;
+                break;
+            default:
+                break;
+            }
+        }
+
         /* Wake up razer_blackshark_send_cmd() which is waiting on this
          * completion. Safe in interrupt/softirq context. */
         if (device->vendor_response_inited)

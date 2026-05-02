@@ -144,6 +144,18 @@ struct razer_kraken_device {
     struct completion vendor_response;
     bool vendor_response_inited;
 
+    /* Cache of the most recent UNSOLICITED push value (sub=0x02) the
+     * device sent on its own initiative — separate from the request-reply
+     * path because send_cmd clears device->data[1] on each call. Updated
+     * by raw_event whenever a push arrives. -1 = no push received yet.
+     * Used as a fallback by the charge_level/charge_status readers when
+     * the synchronous GET reply doesn't arrive (the V3 firmware on some
+     * setups silently drops query responses but still emits state-change
+     * pushes — the 96→97 battery transition in the wired capture was an
+     * unsolicited push, not a reply). */
+    s8 pushed_battery_pct;
+    s8 pushed_charging;
+
     /* Last-written cache for write-only V3/V3 Pro attrs.
      * -1 = not yet written this session; read handler returns "-1" so the GUI
      * can fall back to its JSON cache. Updated on every successful SET.
