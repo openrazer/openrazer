@@ -42,7 +42,8 @@
 #define RAZER_NEW_DEVICE_WAIT_MAX_US 31100
 
 struct razer_accessory_device {
-    struct usb_device *usb_dev;
+    struct hid_device *hdev;
+    struct usb_device *usb_dev; // TODO: remove usages, replace with hdev
     struct input_dev *input;
     struct mutex lock;
     unsigned char usb_interface_protocol;

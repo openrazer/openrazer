@@ -2268,6 +2268,7 @@ static void razer_accessory_init(struct razer_accessory_device *dev, struct usb_
     // Initialise mutex
     mutex_init(&dev->lock);
     // Setup values
+    dev->hdev = hdev;
     dev->usb_dev = usb_dev;
     dev->usb_vid = usb_dev->descriptor.idVendor;
     dev->usb_pid = usb_dev->descriptor.idProduct;

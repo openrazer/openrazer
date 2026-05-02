@@ -377,7 +377,9 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
 {
     uint report_index, response_index;
     ulong wait_min, wait_max;
+
     razer_get_report_params(usb_dev, &report_index, &response_index, &wait_min, &wait_max);
+
     return razer_get_usb_response(usb_dev, report_index, request, response_index, response, wait_min, wait_max);
 }
 
@@ -386,14 +388,16 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
  */
 static int razer_send_payload_no_response(struct razer_kbd_device *device, struct razer_report *request)
 {
+    struct usb_device *usb_dev = hid_to_usb_dev(device->hdev);
     uint report_index, response_index;
     ulong wait_min, wait_max;
 
     /* Except the caller to have set the transaction_id */
     WARN_ON(request->transaction_id.id == 0x00);
 
-    razer_get_report_params(device->usb_dev, &report_index, &response_index, &wait_min, &wait_max);
-    return razer_send_control_msg(device->usb_dev, request, report_index, wait_min, wait_max);
+    razer_get_report_params(usb_dev, &report_index, &response_index, &wait_min, &wait_max);
+
+    return razer_send_control_msg(usb_dev, request, report_index, wait_min, wait_max);
 }
 
 /**
@@ -406,7 +410,7 @@ static int razer_send_payload(struct razer_kbd_device *device, struct razer_repo
     request->crc = razer_calculate_crc(request);
 
     mutex_lock(&device->lock);
-    err = razer_get_report(device->usb_dev, request, response);
+    err = razer_get_report(hid_to_usb_dev(device->hdev), request, response);
     mutex_unlock(&device->lock);
     if (err) {
         print_erroneous_report(response, "razerkbd", "Invalid Report Length");
@@ -605,7 +609,7 @@ static void razer_set_device_mode(struct razer_kbd_device *device, unsigned char
         break;
 
     default:
-        dev_warn(&device->usb_dev->dev, "razerkbd: device_mode not supported for this model\n");
+        hid_warn(device->hdev, "razerkbd: device_mode not supported for this model\n");
         return;
     }
 
@@ -4468,7 +4472,8 @@ static DEVICE_ATTR(charge_low_threshold,    0660, razer_attr_read_charge_low_thr
 static int razer_event(struct hid_device *hdev, struct hid_field *field, struct hid_usage *usage, __s32 value)
 {
     struct razer_kbd_device *device = hid_get_drvdata(hdev);
-    struct razer_kbd_usb_device_data *usb_dev_data = dev_get_drvdata(&device->usb_dev->dev);
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
+    struct razer_kbd_usb_device_data *usb_dev_data = dev_get_drvdata(&usb_dev->dev);
     const struct razer_key_translation *translation;
 
     // No translations needed on the Blades
@@ -4851,7 +4856,8 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 {
     struct razer_kbd_device *device = hid_get_drvdata(hdev);
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    struct razer_kbd_usb_device_data *usb_dev_data = dev_get_drvdata(&device->usb_dev->dev);
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
+    struct razer_kbd_usb_device_data *usb_dev_data = dev_get_drvdata(&usb_dev->dev);
 
     // No translations needed on the Pro...
     if (is_blade_laptop(device)) {
@@ -4924,14 +4930,15 @@ static int razer_kbd_input_mapping(struct hid_device *hdev, struct hid_input *hi
     }
 }
 
-static void razer_kbd_init(struct razer_kbd_device *dev, struct usb_interface *intf, struct hid_device *hdev)
+static void razer_kbd_init(struct razer_kbd_device *dev, struct hid_device *hdev)
 {
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
 
     // Initialise mutex
     mutex_init(&dev->lock);
     // Setup values
-    dev->usb_dev = usb_dev;
+    dev->hdev = hdev;
     dev->usb_vid = usb_dev->descriptor.idVendor;
     dev->usb_pid = usb_dev->descriptor.idProduct;
     dev->usb_interface_protocol = intf->cur_altsetting->desc.bInterfaceProtocol;
@@ -4944,7 +4951,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 {
     int retval = 0;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
     struct razer_kbd_device *dev = NULL;
     struct razer_kbd_usb_device_data *usb_dev_data = NULL;
 
@@ -4965,7 +4972,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
     }
 
     // Init data
-    razer_kbd_init(dev, intf, hdev);
+    razer_kbd_init(dev, hdev);
 
     // Other interfaces are actual key-emitting devices
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {

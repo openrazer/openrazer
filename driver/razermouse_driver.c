@@ -119,7 +119,7 @@ static int razer_send_payload(struct razer_mouse_device *device, struct razer_re
     request->crc = razer_calculate_crc(request);
 
     mutex_lock(&device->lock);
-    err = razer_get_report(device->usb_dev, request, response);
+    err = razer_get_report(hid_to_usb_dev(device->hdev), request, response);
     mutex_unlock(&device->lock);
     if (err) {
         print_erroneous_report(response, "razermouse", "Invalid Report Length");
@@ -177,12 +177,12 @@ static int deathadder3_5g_set_led_state(struct razer_mouse_device *device, unsig
         break;
 
     default:
-        dev_warn(&device->usb_dev->dev, "razermouse: Invalid led_id on DeathAdder 3.5G\n");
+        hid_warn(device->hdev, "razermouse: Invalid led_id on DeathAdder 3.5G\n");
         return -EINVAL;
     }
 
     mutex_lock(&device->lock);
-    razer_send_control_msg_old_device(device->usb_dev, &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
+    razer_send_control_msg_old_device(hid_to_usb_dev(device->hdev), &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
     mutex_unlock(&device->lock);
 
     return 0;
@@ -206,7 +206,7 @@ static void deathadder3_5g_set_poll_rate(struct razer_mouse_device *device, unsi
     }
 
     mutex_lock(&device->lock);
-    razer_send_control_msg_old_device(device->usb_dev, &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
+    razer_send_control_msg_old_device(hid_to_usb_dev(device->hdev), &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
     mutex_unlock(&device->lock);
 }
 
@@ -229,7 +229,7 @@ static void deathadder3_5g_set_dpi(struct razer_mouse_device *device, unsigned s
     }
 
     mutex_lock(&device->lock);
-    razer_send_control_msg_old_device(device->usb_dev, &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
+    razer_send_control_msg_old_device(hid_to_usb_dev(device->hdev), &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
     mutex_unlock(&device->lock);
 }
 
@@ -251,7 +251,7 @@ static int orochi_2011_set_led_state(struct razer_mouse_device *device, unsigned
         }
         break;
     default:
-        dev_warn(&device->usb_dev->dev, "razermouse: Invalid led_id on Orochi 2011\n");
+        hid_warn(device->hdev, "razermouse: Invalid led_id on Orochi 2011\n");
         return -EINVAL;
     }
 
@@ -6002,15 +6002,17 @@ static int razer_input_configured(struct hid_device *hdev,
 /**
  * Mouse init function
  */
-static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interface *intf, struct hid_device *hdev)
+static void razer_mouse_init(struct razer_mouse_device *dev, struct hid_device *hdev)
 {
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
+
     unsigned int rand_serial = 0;
 
     // Initialise mutex
     mutex_init(&dev->lock);
     // Setup values
-    dev->usb_dev = usb_dev;
+    dev->hdev = hdev;
     dev->usb_vid = usb_dev->descriptor.idVendor;
     dev->usb_pid = usb_dev->descriptor.idProduct;
     dev->usb_interface_protocol = intf->cur_altsetting->desc.bInterfaceProtocol;
@@ -6048,7 +6050,6 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
 static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
     int retval = 0;
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct razer_mouse_device *dev = NULL;
     unsigned char expected_subclass = 0xFF;
 
@@ -6060,7 +6061,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     }
 
     // Init data
-    razer_mouse_init(dev, intf, hdev);
+    razer_mouse_init(dev, hdev);
 
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:

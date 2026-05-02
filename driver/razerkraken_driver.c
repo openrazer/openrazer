@@ -695,7 +695,7 @@ static DEVICE_ATTR(matrix_effect_static,    0660, razer_attr_read_matrix_effect_
 static DEVICE_ATTR(matrix_effect_custom,    0660, razer_attr_read_matrix_effect_custom,       razer_attr_write_matrix_effect_custom);
 static DEVICE_ATTR(matrix_effect_breath,    0660, razer_attr_read_matrix_effect_breath,       razer_attr_write_matrix_effect_breath);
 
-static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf)
+static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf, struct hid_device *hdev)
 {
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     unsigned int rand_serial = 0;
@@ -703,6 +703,7 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
     // Initialise mutex
     mutex_init(&dev->lock);
     // Setup values
+    dev->hdev = hdev;
     dev->usb_dev = usb_dev;
     dev->usb_interface_protocol = intf->cur_altsetting->desc.bInterfaceProtocol;
     dev->usb_vid = usb_dev->descriptor.idVendor;
@@ -750,7 +751,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
     }
 
     // Init data
-    razer_kraken_init(dev, intf);
+    razer_kraken_init(dev, intf, hdev);
 
     if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);                               // Get driver version
