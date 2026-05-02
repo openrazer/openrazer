@@ -258,7 +258,8 @@ class RazerBlackSharkV3(__RazerDevice):
                'get_audio_function_button', 'set_audio_function_button',
                'get_game_chat_balance', 'set_game_chat_balance',
                'get_in_call_audio_mix', 'set_in_call_audio_mix',
-               'get_audio_prompts', 'set_audio_prompts']
+               'get_audio_prompts', 'set_audio_prompts',
+               'get_battery', 'is_charging']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/blackshark-v3-500x500.png"
 

@@ -1469,24 +1469,41 @@ static ssize_t razer_attr_write_thx_spatial_audio(struct device *dev, struct dev
 /* ---- BlackShark V3 Pro sysfs functions (untested — third-party RE) ---- */
 
 /*
- * V3 Pro reports battery as 0..100 (one byte). The standard openrazer
+ * Both V3 and V3 Pro return battery as a 0..100 byte. The standard openrazer
  * convention for charge_level is a 0..255 byte (mamba.py scales by 255/100
  * to display percent). Multiply by 255/100 here so the daemon's existing
- * mamba.get_battery does the right thing without a V3 Pro-specific endpoint.
+ * mamba.get_battery does the right thing.
+ *
+ * V3 uses the simpler (V3) envelope at class 0x21; V3 Pro uses the variable-
+ * arg envelope at class 0x21 with sub 0x00. Dispatch on PID.
  */
+static bool is_v3_pro_pid(unsigned short pid)
+{
+    return pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
+           pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED;
+}
+
 static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
-    const u8 args[1] = { 0x00 };
     int level = -1;
 
-    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
-                                 BLACKSHARK_V3_PRO_BATTERY_ID, args, sizeof(args));
     mutex_lock(&device->lock);
-    razer_blackshark_send_cmd(device, cmdbuf);
-    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
-        level = (device->data[13] * 255) / 100;
+    if (is_v3_pro_pid(device->usb_pid)) {
+        const u8 args[1] = { 0x00 };
+        razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
+                                     BLACKSHARK_V3_PRO_BATTERY_ID, args, sizeof(args));
+        razer_blackshark_send_cmd(device, cmdbuf);
+        if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
+            level = (device->data[13] * 255) / 100;
+    } else {
+        /* V3 / V3 wired: battery class is 0x21, no sub. Same scaling. */
+        razer_blackshark_build_get(cmdbuf, 0x21);
+        razer_blackshark_send_cmd(device, cmdbuf);
+        if (device->data[1] == 0x02 && device->data[10] == 0x21)
+            level = (device->data[13] * 255) / 100;
+    }
     mutex_unlock(&device->lock);
 
     return sprintf(buf, "%d\n", level);
@@ -1496,15 +1513,23 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
-    const u8 args[1] = { 0x00 };
     int charging = -1;
 
-    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
-                                 BLACKSHARK_V3_PRO_BATTERY_ID, args, sizeof(args));
     mutex_lock(&device->lock);
-    razer_blackshark_send_cmd(device, cmdbuf);
-    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
-        charging = device->data[14] ? 1 : 0;
+    if (is_v3_pro_pid(device->usb_pid)) {
+        const u8 args[1] = { 0x00 };
+        razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
+                                     BLACKSHARK_V3_PRO_BATTERY_ID, args, sizeof(args));
+        razer_blackshark_send_cmd(device, cmdbuf);
+        if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
+            charging = device->data[14] ? 1 : 0;
+    } else {
+        /* V3: dedicated charging-status class 0x2a, returns one byte. */
+        razer_blackshark_build_get(cmdbuf, 0x2a);
+        razer_blackshark_send_cmd(device, cmdbuf);
+        if (device->data[1] == 0x02 && device->data[10] == 0x2a)
+            charging = device->data[13] ? 1 : 0;
+    }
     mutex_unlock(&device->lock);
 
     return sprintf(buf, "%d\n", charging);
@@ -1967,6 +1992,8 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_chat_balance);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_in_call_audio_mix);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_prompts);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             break;
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
@@ -2060,6 +2087,8 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_game_chat_balance);
             device_remove_file(&hdev->dev, &dev_attr_in_call_audio_mix);
             device_remove_file(&hdev->dev, &dev_attr_audio_prompts);
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);
             break;
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
