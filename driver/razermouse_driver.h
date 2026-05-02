@@ -142,7 +142,7 @@
 #define RAZER_MOUSE_MAX_DPI_STAGES 5
 
 struct razer_mouse_device {
-    struct usb_device *usb_dev;
+    struct hid_device *hdev;
     struct mutex lock;
 
     struct input_dev *input;

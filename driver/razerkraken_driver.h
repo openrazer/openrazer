@@ -19,7 +19,8 @@
 // #define RAZER_KRAKEN_V2_REPORT_LEN ?
 
 struct razer_kraken_device {
-    struct usb_device *usb_dev;
+    struct hid_device *hdev;
+    struct usb_device *usb_dev; // TODO: remove usages, replace with hdev
     struct mutex lock;
     unsigned char usb_interface_protocol;
     unsigned short usb_pid;
