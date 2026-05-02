@@ -7,6 +7,7 @@
 #ifndef DRIVER_RAZERCOMMON_H_
 #define DRIVER_RAZERCOMMON_H_
 
+#include <linux/hid.h>
 #include <linux/usb/input.h>
 #include "compat.h"
 
@@ -147,10 +148,10 @@ struct razer_argb_report {
 };
 static_assert(sizeof(struct razer_argb_report) == 320);
 
-int razer_send_control_msg(struct usb_device *usb_dev,void const *data, unsigned int report_index, unsigned long wait);
-int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait);
-int razer_get_usb_response(struct usb_device *usb_dev, unsigned int report_index, struct razer_report* request_report, unsigned int response_index, struct razer_report* response_report, unsigned long wait);
-int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, size_t size, void const* data);
+int razer_send_control_msg(struct hid_device *hdev,void const *data, unsigned int report_index, unsigned long wait);
+int razer_send_control_msg_old_device(struct hid_device *hdev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait);
+int razer_get_usb_response(struct hid_device *hdev, unsigned int report_index, struct razer_report* request_report, unsigned int response_index, struct razer_report* response_report, unsigned long wait);
+int razer_send_argb_msg(struct hid_device *hdev, unsigned char channel, size_t size, void const* data);
 unsigned char razer_calculate_crc(struct razer_report *report);
 struct razer_report get_razer_report(unsigned char command_class, unsigned char command_id, unsigned char data_size);
 void print_erroneous_report(struct hid_device *hdev, struct razer_report* report, const char *message);

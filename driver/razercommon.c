@@ -17,8 +17,9 @@
  * USUALLY index = 0x02
  * FIREFLY is 0
  */
-int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint report_index, ulong wait)
+int razer_send_control_msg(struct hid_device *hdev, void const *data, uint report_index, ulong wait)
 {
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
     uint request = HID_REQ_SET_REPORT; // 0x09
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
     uint value = 0x300;
@@ -45,7 +46,7 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
 
     kfree(buf);
     if(len!=size)
-        dev_warn(&usb_dev->dev, "razer driver: Device data transfer failed.\n");
+        hid_warn(hdev, "razer driver: Device data transfer failed.\n");
 
     return ((len < 0) ? len : ((len != size) ? -EIO : 0));
 }
@@ -67,8 +68,9 @@ int razer_send_control_msg(struct usb_device *usb_dev,void const *data, uint rep
  *
  * Returns 0 when successful, 1 if the report length is invalid.
  */
-int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, ulong wait)
+int razer_get_usb_response(struct hid_device *hdev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, ulong wait)
 {
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
     uint request = HID_REQ_GET_REPORT; // 0x01
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN; // 0xA1
     uint value = 0x300;
@@ -89,7 +91,7 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
 
     // Send the request to the device.
     // TODO look to see if index needs to be different for the request and the response
-    retval = razer_send_control_msg(usb_dev, request_report, report_index, wait);
+    retval = razer_send_control_msg(hdev, request_report, report_index, wait);
 
     // Now ask for response
     len = usb_control_msg(usb_dev, usb_rcvctrlpipe(usb_dev, 0),
@@ -106,7 +108,7 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
 
     // Error if report is wrong length
     if(len != 90) {
-        dev_warn(&usb_dev->dev, "razer driver: Invalid USB response. USB Report length: %d\n", len);
+        hid_warn(hdev, "razer driver: Invalid USB response. USB Report length: %d\n", len);
         result = 1;
     }
 
@@ -181,8 +183,9 @@ void print_erroneous_report(struct hid_device *hdev, struct razer_report* report
              report->arguments[12], report->arguments[13], report->arguments[14], report->arguments[15]);
 }
 
-int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait)
+int razer_send_control_msg_old_device(struct hid_device *hdev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait)
 {
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
     uint request = HID_REQ_SET_REPORT; // 0x09
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
     char *buf;
@@ -207,13 +210,14 @@ int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *dat
 
     kfree(buf);
     if(len!=report_size)
-        dev_warn(&usb_dev->dev, "razer driver: Device data transfer failed.\n");
+        hid_warn(hdev, "razer driver: Device data transfer failed.\n");
 
     return ((len < 0) ? len : ((len != report_size) ? -EIO : 0));
 }
 
-int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, size_t size, void const* data)
+int razer_send_argb_msg(struct hid_device* hdev, unsigned char channel, size_t size, void const* data)
 {
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
     uint request = HID_REQ_SET_REPORT; // 0x09
     uint request_type = USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT; // 0x21
     uint value = 0x300;
@@ -236,7 +240,7 @@ int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, size_
     report.last_idx = size - 1;
 
     if (size * 3 > ARRAY_SIZE(report.color_data)) {
-        dev_err(&usb_dev->dev,"razer driver: size too big\n");
+        hid_err(hdev, "razer driver: size too big\n");
         return -EINVAL;
     }
 
@@ -255,7 +259,7 @@ int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, size_
                           USB_CTRL_SET_TIMEOUT);
 
     if (len != sizeof(report))
-        dev_warn(&usb_dev->dev, "razer driver: Device data transfer failed. len = %d", len);
+        hid_warn(hdev, "razer driver: Device data transfer failed. len = %d", len);
 
     return ((len < 0) ? len : ((len != size) ? -EIO : 0));
 }
