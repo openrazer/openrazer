@@ -1001,13 +1001,17 @@ static ssize_t razer_attr_read_wireless_power_save(struct device *dev, struct de
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
-    u8 val = 15;
+    s8 val = -1;
 
     razer_blackshark_build_get(cmdbuf, BLACKSHARK_PARAM_POWER_SAVE);
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
-    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_PARAM_POWER_SAVE)
+    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_PARAM_POWER_SAVE) {
         val = device->data[13];
+        device->cached_v3_power_save = val;
+    } else {
+        val = device->cached_v3_power_save;  /* may still be -1 */
+    }
     mutex_unlock(&device->lock);
 
     return sprintf(buf, "%d\n", val);
@@ -1032,6 +1036,7 @@ static ssize_t razer_attr_write_wireless_power_save(struct device *dev, struct d
                                razer_blackshark_set_dir(device->usb_pid));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_v3_power_save = (s8)snapped;
     mutex_unlock(&device->lock);
 
     return count;
@@ -1041,13 +1046,17 @@ static ssize_t razer_attr_read_ultra_low_latency(struct device *dev, struct devi
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
-    u8 val = 0;
+    s8 val = -1;
 
     razer_blackshark_build_get(cmdbuf, BLACKSHARK_PARAM_ULTRA_LOW_LATENCY);
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
-    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_PARAM_ULTRA_LOW_LATENCY)
+    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_PARAM_ULTRA_LOW_LATENCY) {
         val = device->data[13];
+        device->cached_v3_ull = val;
+    } else {
+        val = device->cached_v3_ull;
+    }
     mutex_unlock(&device->lock);
 
     return sprintf(buf, "%d\n", val);
@@ -1066,6 +1075,7 @@ static ssize_t razer_attr_write_ultra_low_latency(struct device *dev, struct dev
                                razer_blackshark_set_dir(device->usb_pid));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_v3_ull = val ? 1 : 0;
     mutex_unlock(&device->lock);
 
     return count;
@@ -1092,9 +1102,16 @@ static ssize_t razer_attr_write_sidetone(struct device *dev, struct device_attri
     razer_blackshark_send_cmd(device, cmdbuf);
     razer_blackshark_build_set(cmdbuf, BLACKSHARK_SET_SIDETONE_LEVEL, (u8)val, dir);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_v3_sidetone = (s8)val;
     mutex_unlock(&device->lock);
 
     return count;
+}
+
+static ssize_t razer_attr_read_sidetone(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->cached_v3_sidetone);
 }
 
 /*
@@ -1115,9 +1132,16 @@ static ssize_t razer_attr_write_mic_eq_preset(struct device *dev, struct device_
                                razer_blackshark_set_dir(device->usb_pid));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_v3_mic_eq_preset = (s8)val;
     mutex_unlock(&device->lock);
 
     return count;
+}
+
+static ssize_t razer_attr_read_mic_eq_preset(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->cached_v3_mic_eq_preset);
 }
 
 /*
@@ -1168,9 +1192,16 @@ static ssize_t razer_attr_write_audio_function_button(struct device *dev, struct
                                razer_blackshark_set_dir(device->usb_pid));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_v3_fn_button = (s8)val;
     mutex_unlock(&device->lock);
 
     return count;
+}
+
+static ssize_t razer_attr_read_audio_function_button(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->cached_v3_fn_button);
 }
 
 /*
@@ -1326,13 +1357,17 @@ static ssize_t razer_attr_read_thx_spatial_audio(struct device *dev, struct devi
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
-    u8 val = 0;
+    s8 val = -1;
 
     razer_blackshark_build_get_thx(cmdbuf);
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
-    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_PARAM_THX)
+    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_PARAM_THX) {
         val = device->data[13];
+        device->cached_v3_thx = val;
+    } else {
+        val = device->cached_v3_thx;
+    }
     mutex_unlock(&device->lock);
 
     return sprintf(buf, "%d\n", val);
@@ -1351,6 +1386,7 @@ static ssize_t razer_attr_write_thx_spatial_audio(struct device *dev, struct dev
                                razer_blackshark_set_dir(device->usb_pid));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_v3_thx = val ? 1 : 0;
     mutex_unlock(&device->lock);
 
     return count;
@@ -1376,10 +1412,10 @@ static DEVICE_ATTR(wireless_power_save,     0660, razer_attr_read_wireless_power
 static DEVICE_ATTR(ultra_low_latency,       0660, razer_attr_read_ultra_low_latency,       razer_attr_write_ultra_low_latency);
 static DEVICE_ATTR(headphone_eq,            0660, razer_attr_read_headphone_eq,            razer_attr_write_headphone_eq);
 static DEVICE_ATTR(thx_spatial_audio,       0660, razer_attr_read_thx_spatial_audio,       razer_attr_write_thx_spatial_audio);
-static DEVICE_ATTR(sidetone,                0220, NULL,                                    razer_attr_write_sidetone);
+static DEVICE_ATTR(sidetone,                0660, razer_attr_read_sidetone,                razer_attr_write_sidetone);
 static DEVICE_ATTR(mic_eq,                  0220, NULL,                                    razer_attr_write_mic_eq);
-static DEVICE_ATTR(mic_eq_preset,           0220, NULL,                                    razer_attr_write_mic_eq_preset);
-static DEVICE_ATTR(audio_function_button,   0220, NULL,                                    razer_attr_write_audio_function_button);
+static DEVICE_ATTR(mic_eq_preset,           0660, razer_attr_read_mic_eq_preset,           razer_attr_write_mic_eq_preset);
+static DEVICE_ATTR(audio_function_button,   0660, razer_attr_read_audio_function_button,   razer_attr_write_audio_function_button);
 static DEVICE_ATTR(game_chat_balance,       0220, NULL,                                    razer_attr_write_game_chat_balance);
 static DEVICE_ATTR(in_call_audio_mix,       0220, NULL,                                    razer_attr_write_in_call_audio_mix);
 static DEVICE_ATTR(audio_prompts,           0220, NULL,                                    razer_attr_write_audio_prompts);
@@ -1396,6 +1432,14 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
     dev->usb_interface_protocol = intf->cur_altsetting->desc.bInterfaceProtocol;
     dev->usb_vid = usb_dev->descriptor.idVendor;
     dev->usb_pid = usb_dev->descriptor.idProduct;
+
+    /* -1 = "no SET this session". Userspace falls back to its own cache. */
+    dev->cached_v3_power_save    = -1;
+    dev->cached_v3_ull           = -1;
+    dev->cached_v3_thx           = -1;
+    dev->cached_v3_sidetone      = -1;
+    dev->cached_v3_mic_eq_preset = -1;
+    dev->cached_v3_fn_button     = -1;
 
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:

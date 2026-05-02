@@ -73,6 +73,17 @@ struct razer_kraken_device {
     u8 data[64];
     s8 eq_bands[10];
 
+    /* Last-written cache for V3 attrs. -1 means "no SET this session" so a
+     * userspace reader can fall back to its own cache. The kernel's GET
+     * doesn't always get a reply within the 150 ms post-SET wait, so we also
+     * fall back to these on read failure rather than returning a hardcoded
+     * default that masks "we don't know". */
+    s8 cached_v3_power_save;
+    s8 cached_v3_ull;
+    s8 cached_v3_thx;
+    s8 cached_v3_sidetone;
+    s8 cached_v3_mic_eq_preset;
+    s8 cached_v3_fn_button;
 };
 
 union razer_kraken_effect_byte {
