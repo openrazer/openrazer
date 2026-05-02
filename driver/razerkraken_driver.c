@@ -1518,9 +1518,16 @@ static ssize_t razer_attr_write_v3pro_thx(struct device *dev, struct device_attr
                                  BLACKSHARK_V3_PRO_THX_ID, args, sizeof(args));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_v3pro_thx = args[0];
     mutex_unlock(&device->lock);
 
     return count;
+}
+
+static ssize_t razer_attr_read_v3pro_thx(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->cached_v3pro_thx);
 }
 
 /* ANC: write "mode level" — mode 0=off, 1=ANC, 2=ambient. Level 1..4 (ANC only).
@@ -1548,9 +1555,18 @@ static ssize_t razer_attr_write_v3pro_anc(struct device *dev, struct device_attr
                                  BLACKSHARK_V3_PRO_ANC_ID, args, sizeof(args));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_v3pro_anc_mode = mode_in > 2 ? 0 : (s8)mode_in;
+    device->cached_v3pro_anc_level = (s8)level;
     mutex_unlock(&device->lock);
 
     return count;
+}
+
+static ssize_t razer_attr_read_v3pro_anc(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d %d\n", device->cached_v3pro_anc_mode,
+                                   device->cached_v3pro_anc_level);
 }
 
 /* Ultra-Low Latency toggle (V3 Pro). Args: [on/off, 0x00]. */
@@ -1570,9 +1586,16 @@ static ssize_t razer_attr_write_v3pro_ull(struct device *dev, struct device_attr
                                  BLACKSHARK_V3_PRO_ULL_ID, args, sizeof(args));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_v3pro_ull = args[0];
     mutex_unlock(&device->lock);
 
     return count;
+}
+
+static ssize_t razer_attr_read_v3pro_ull(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->cached_v3pro_ull);
 }
 
 /* Game/Chat balance. Args: [balance 0..20, 0x00]. 0=full game, 10=center, 20=full chat. */
@@ -1594,9 +1617,16 @@ static ssize_t razer_attr_write_game_chat_balance(struct device *dev, struct dev
                                  BLACKSHARK_V3_PRO_GAME_CHAT_ID, args, sizeof(args));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_game_chat_balance = args[0];
     mutex_unlock(&device->lock);
 
     return count;
+}
+
+static ssize_t razer_attr_read_game_chat_balance(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->cached_game_chat_balance);
 }
 
 /* In-call audio mix. Args: [mode, 0x00]; 0=combine, 1=lower, 2=mute. */
@@ -1617,9 +1647,16 @@ static ssize_t razer_attr_write_in_call_audio_mix(struct device *dev, struct dev
                                  BLACKSHARK_V3_PRO_INCALL_MIX_ID, args, sizeof(args));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_in_call_audio_mix = args[0];
     mutex_unlock(&device->lock);
 
     return count;
+}
+
+static ssize_t razer_attr_read_in_call_audio_mix(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->cached_in_call_audio_mix);
 }
 
 /* Audio prompts toggle. Args: [0x00, on, 0x00]. */
@@ -1640,9 +1677,16 @@ static ssize_t razer_attr_write_audio_prompts(struct device *dev, struct device_
                                  BLACKSHARK_V3_PRO_AUDIO_PROMPTS_ID, args, sizeof(args));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_audio_prompts = args[1];
     mutex_unlock(&device->lock);
 
     return count;
+}
+
+static ssize_t razer_attr_read_audio_prompts(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->cached_audio_prompts);
 }
 
 /* Power save timeout in minutes (0=disabled, 15/30/45/60). */
@@ -1663,9 +1707,16 @@ static ssize_t razer_attr_write_v3pro_power_save(struct device *dev, struct devi
                                  BLACKSHARK_V3_PRO_POWER_SAVE_ID, args, sizeof(args));
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
+    device->cached_v3pro_power_save = args[0];
     mutex_unlock(&device->lock);
 
     return count;
+}
+
+static ssize_t razer_attr_read_v3pro_power_save(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->cached_v3pro_power_save);
 }
 
 /* Headphone EQ: writes a single byte = preset slot index (0..8). */
@@ -1682,9 +1733,17 @@ static ssize_t razer_attr_write_v3pro_headphone_eq(struct device *dev, struct de
 
     mutex_lock(&device->lock);
     ret = razer_blackshark_v3pro_apply_eq(device, (u8)val);
+    if (ret >= 0)
+        device->cached_v3pro_eq_profile = (s8)val;
     mutex_unlock(&device->lock);
 
     return ret < 0 ? ret : count;
+}
+
+static ssize_t razer_attr_read_v3pro_headphone_eq(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->cached_v3pro_eq_profile);
 }
 
 /* ---- end BlackShark V3 Pro sysfs functions ---- */
@@ -1716,15 +1775,15 @@ static DEVICE_ATTR(audio_function_button,   0220, NULL,                         
 static DEVICE_ATTR(v3pro_battery_level,        0440, razer_attr_read_v3pro_battery_level,     NULL);
 static DEVICE_ATTR(v3pro_charging,             0440, razer_attr_read_v3pro_charging,          NULL);
 static DEVICE_ATTR(v3pro_sidetone,             0660, razer_attr_read_v3pro_sidetone,          razer_attr_write_v3pro_sidetone);
-static DEVICE_ATTR(v3pro_thx_spatial_audio,    0220, NULL,                                    razer_attr_write_v3pro_thx);
-static DEVICE_ATTR(v3pro_anc,                  0220, NULL,                                    razer_attr_write_v3pro_anc);
-static DEVICE_ATTR(v3pro_ultra_low_latency,    0220, NULL,                                    razer_attr_write_v3pro_ull);
-static DEVICE_ATTR(v3pro_power_save,           0220, NULL,                                    razer_attr_write_v3pro_power_save);
-static DEVICE_ATTR(v3pro_headphone_eq,         0220, NULL,                                    razer_attr_write_v3pro_headphone_eq);
+static DEVICE_ATTR(v3pro_thx_spatial_audio,    0660, razer_attr_read_v3pro_thx,               razer_attr_write_v3pro_thx);
+static DEVICE_ATTR(v3pro_anc,                  0660, razer_attr_read_v3pro_anc,               razer_attr_write_v3pro_anc);
+static DEVICE_ATTR(v3pro_ultra_low_latency,    0660, razer_attr_read_v3pro_ull,               razer_attr_write_v3pro_ull);
+static DEVICE_ATTR(v3pro_power_save,           0660, razer_attr_read_v3pro_power_save,        razer_attr_write_v3pro_power_save);
+static DEVICE_ATTR(v3pro_headphone_eq,         0660, razer_attr_read_v3pro_headphone_eq,      razer_attr_write_v3pro_headphone_eq);
 /* Shared between V3 (both PIDs) and V3 Pro — same wire envelope, same bytes. */
-static DEVICE_ATTR(game_chat_balance,          0220, NULL,                                    razer_attr_write_game_chat_balance);
-static DEVICE_ATTR(in_call_audio_mix,          0220, NULL,                                    razer_attr_write_in_call_audio_mix);
-static DEVICE_ATTR(audio_prompts,              0220, NULL,                                    razer_attr_write_audio_prompts);
+static DEVICE_ATTR(game_chat_balance,          0660, razer_attr_read_game_chat_balance,       razer_attr_write_game_chat_balance);
+static DEVICE_ATTR(in_call_audio_mix,          0660, razer_attr_read_in_call_audio_mix,       razer_attr_write_in_call_audio_mix);
+static DEVICE_ATTR(audio_prompts,              0660, razer_attr_read_audio_prompts,           razer_attr_write_audio_prompts);
 
 static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf)
 {
@@ -1738,6 +1797,17 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
     dev->usb_interface_protocol = intf->cur_altsetting->desc.bInterfaceProtocol;
     dev->usb_vid = usb_dev->descriptor.idVendor;
     dev->usb_pid = usb_dev->descriptor.idProduct;
+
+    /* -1 = "unknown" (no SET seen this session). GUI falls back to JSON cache. */
+    dev->cached_v3pro_thx          = -1;
+    dev->cached_v3pro_anc_mode     = -1;
+    dev->cached_v3pro_anc_level    = -1;
+    dev->cached_v3pro_ull          = -1;
+    dev->cached_v3pro_power_save   = -1;
+    dev->cached_v3pro_eq_profile   = -1;
+    dev->cached_game_chat_balance  = -1;
+    dev->cached_in_call_audio_mix  = -1;
+    dev->cached_audio_prompts      = -1;
 
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_KRAKEN_V2:

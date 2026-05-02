@@ -135,6 +135,18 @@ struct razer_kraken_device {
     u8 data[64];
     s8 eq_bands[10];
 
+    /* Last-written cache for write-only V3/V3 Pro attrs.
+     * -1 = not yet written this session; read handler returns "-1" so the GUI
+     * can fall back to its JSON cache. Updated on every successful SET. */
+    s8 cached_v3pro_thx;
+    s8 cached_v3pro_anc_mode;
+    s8 cached_v3pro_anc_level;
+    s8 cached_v3pro_ull;
+    s8 cached_v3pro_power_save;
+    s8 cached_v3pro_eq_profile;
+    s8 cached_game_chat_balance;
+    s8 cached_in_call_audio_mix;
+    s8 cached_audio_prompts;
 };
 
 union razer_kraken_effect_byte {
