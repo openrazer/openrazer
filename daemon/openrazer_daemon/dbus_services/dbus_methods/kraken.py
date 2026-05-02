@@ -304,23 +304,7 @@ def set_anc(self, mode, level):
         f.write(f"{mode} {level}")
 
 
-# ── battery (V3 Pro only) ────────────────────────────────────────────────────
-# Distinct function names from mamba's get_battery / is_charging — those are
-# imported into dbus_methods/__init__.py via `from mamba import *` and would
-# be shadowed if we redefined them here. Polychromatic / pylib map both onto
-# razer.device.power.{getBattery,isCharging} via interface routing.
-@endpoint('razer.device.power', 'getBattery', out_sig='d')
-def get_battery_v3pro(self):
-    """Battery percent 0..100, or -1 if unknown (no GET response yet)."""
-    self.logger.debug("DBus call get_battery_v3pro")
-    p = self.get_driver_path('v3pro_battery_level')
-    with open(p, 'r') as f:
-        return float(f.read().strip())
-
-
-@endpoint('razer.device.power', 'isCharging', out_sig='b')
-def is_charging_v3pro(self):
-    self.logger.debug("DBus call is_charging_v3pro")
-    p = self.get_driver_path('v3pro_charging')
-    with open(p, 'r') as f:
-        return int(f.read().strip()) == 1
+# V3 Pro battery is exposed via the standard charge_level / charge_status
+# sysfs files. mamba.py's existing get_battery / is_charging endpoints read
+# those files and serve the same razer.device.power.getBattery / isCharging
+# DBus methods — no V3 Pro-specific battery endpoint needed here.

@@ -301,7 +301,7 @@ class RazerBlackSharkV3Pro(__RazerDevice):
                'get_in_call_audio_mix', 'set_in_call_audio_mix',
                'get_audio_prompts', 'set_audio_prompts',
                'get_anc', 'set_anc',
-               'get_battery_v3pro', 'is_charging_v3pro']
+               'get_battery', 'is_charging']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/blackshark-v3-pro-500x500.png"
 

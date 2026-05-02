@@ -620,7 +620,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
-        device_type = "Razer BlackShark V3 Pro";
+        device_type = "Razer BlackShark V3 Pro (Wireless)";
         break;
 
     default:
@@ -1468,7 +1468,13 @@ static ssize_t razer_attr_write_thx_spatial_audio(struct device *dev, struct dev
 
 /* ---- BlackShark V3 Pro sysfs functions (untested — third-party RE) ---- */
 
-static ssize_t razer_attr_read_v3pro_battery_level(struct device *dev, struct device_attribute *attr, char *buf)
+/*
+ * V3 Pro reports battery as 0..100 (one byte). The standard openrazer
+ * convention for charge_level is a 0..255 byte (mamba.py scales by 255/100
+ * to display percent). Multiply by 255/100 here so the daemon's existing
+ * mamba.get_battery does the right thing without a V3 Pro-specific endpoint.
+ */
+static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
@@ -1480,13 +1486,13 @@ static ssize_t razer_attr_read_v3pro_battery_level(struct device *dev, struct de
     mutex_lock(&device->lock);
     razer_blackshark_send_cmd(device, cmdbuf);
     if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
-        level = device->data[13];
+        level = (device->data[13] * 255) / 100;
     mutex_unlock(&device->lock);
 
     return sprintf(buf, "%d\n", level);
 }
 
-static ssize_t razer_attr_read_v3pro_charging(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
@@ -1825,8 +1831,8 @@ static DEVICE_ATTR(mic_eq_preset,           0660, razer_attr_read_mic_eq_preset,
 static DEVICE_ATTR(audio_function_button,   0660, razer_attr_read_audio_function_button,   razer_attr_write_audio_function_button);
 /* BlackShark V3 Pro (PID 0x0577) — distinct attribute names so they don't collide
  * with V3's headphone_eq (which has 10-band write semantics). */
-static DEVICE_ATTR(v3pro_battery_level,        0440, razer_attr_read_v3pro_battery_level,     NULL);
-static DEVICE_ATTR(v3pro_charging,             0440, razer_attr_read_v3pro_charging,          NULL);
+static DEVICE_ATTR(charge_level,               0440, razer_attr_read_charge_level,            NULL);
+static DEVICE_ATTR(charge_status,              0440, razer_attr_read_charge_status,           NULL);
 static DEVICE_ATTR(v3pro_sidetone,             0660, razer_attr_read_v3pro_sidetone,          razer_attr_write_v3pro_sidetone);
 static DEVICE_ATTR(v3pro_thx_spatial_audio,    0660, razer_attr_read_v3pro_thx,               razer_attr_write_v3pro_thx);
 static DEVICE_ATTR(v3pro_anc,                  0660, razer_attr_read_v3pro_anc,               razer_attr_write_v3pro_anc);
@@ -1964,8 +1970,8 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             break;
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_battery_level);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_charging);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_sidetone);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_thx_spatial_audio);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_anc);
@@ -2057,8 +2063,8 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             break;
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
-            device_remove_file(&hdev->dev, &dev_attr_v3pro_battery_level);
-            device_remove_file(&hdev->dev, &dev_attr_v3pro_charging);
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);
             device_remove_file(&hdev->dev, &dev_attr_v3pro_sidetone);
             device_remove_file(&hdev->dev, &dev_attr_v3pro_thx_spatial_audio);
             device_remove_file(&hdev->dev, &dev_attr_v3pro_anc);
