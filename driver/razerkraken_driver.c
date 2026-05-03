@@ -1185,7 +1185,11 @@ static ssize_t razer_attr_write_audio_function_button(struct device *dev, struct
 
     if (kstrtoul(buf, 10, &val))
         return -EINVAL;
-    if (val < 1 || val > 2)
+    /* Was clamped to 1..2 (Sidetone, Footsteps). Widened to 0..255 to expose
+     * Game/Chat (0) and Bluetooth Volume (3) — all four modes verified
+     * on-device 2026-05-03. The earlier 'modes 0/3 alias to 1' reading was
+     * the driver returning -EINVAL before bytes ever reached the firmware. */
+    if (val > 0xff)
         return -EINVAL;
 
     razer_blackshark_build_set(cmdbuf, BLACKSHARK_SET_FN_BUTTON, (u8)val,

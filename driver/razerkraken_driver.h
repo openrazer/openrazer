@@ -22,13 +22,18 @@
 #define RAZER_BLACKSHARK_REPORT_LEN  64
 #define RAZER_BLACKSHARK_IFACE        5
 
-/* GET params (arg[1] with direction byte 0x80) */
+/* GET params (class byte at buf[10] with direction byte 0x80).
+ * Synapse 4 webapp parser source defines the canonical names — see
+ * project memory v3 audio enum decode 2026-05-03. */
 #define BLACKSHARK_PARAM_SERIAL            0x00
-#define BLACKSHARK_PARAM_MIC_VOLUME        0x21
-#define BLACKSHARK_PARAM_POWER_SAVE        0x2c
+#define BLACKSHARK_PARAM_SIDETONE_VOLUME   0x19  /* SIDETONE_VOLUME=25 in Synapse enum */
+#define BLACKSHARK_PARAM_MIC_VOLUME        0x21  /* DEPRECATED alias — mic vol is UAC2 not Razer HID */
+#define BLACKSHARK_PARAM_AUTO_POWER_OFF    0x2c  /* AUTO_POWER_OFF_STATUS=44; was misnamed POWER_SAVE */
 #define BLACKSHARK_PARAM_ULTRA_LOW_LATENCY 0x5f
 #define BLACKSHARK_PARAM_THX               0x9e
 #define BLACKSHARK_PARAM_EQ                0x15
+/* Back-compat alias — older code used POWER_SAVE for what's actually AUTO_POWER_OFF. */
+#define BLACKSHARK_PARAM_POWER_SAVE        BLACKSHARK_PARAM_AUTO_POWER_OFF
 
 /* SET commands (verified from pcap captures) */
 #define BLACKSHARK_SET_EQ                  0x95  /* Headphone EQ data — buf[14..23]=10 bands, buf[13]=profile_idx */
@@ -44,7 +49,7 @@
 #define BLACKSHARK_SET_EQ_BEGIN            0xe1  /* Headphone EQ begin/end — buf[13]=0x01 begin, 0x02 end */
 #define BLACKSHARK_SET_AUDIO_PROMPTS       0xe5  /* Voice-prompts toggle — buf[13]=0x00, buf[14]=0/1 (count=2) */
 #define BLACKSHARK_SET_EQ_COMMIT           0xeb  /* Headphone EQ commit */
-#define BLACKSHARK_SET_FN_BUTTON           0xea  /* Audio function button mode — buf[13]: 0x01=sidetone save, 0x02=footsteps */
+#define BLACKSHARK_SET_FN_BUTTON           0xea  /* Audio FN button mode — buf[13]: 0x00=GameChat (default), 0x01=Sidetone, 0x02=Footsteps, 0x03=BluetoothVolume. All four verified on-device 2026-05-03 after widening write_audio_function_button clamp from 1..2 to 0..255. */
 #define BLACKSHARK_SET_MIC_EQ_BEGIN        0x16  /* Mic EQ begin marker */
 #define BLACKSHARK_SET_MIC_EQ_END          0x17  /* Mic EQ end marker */
 
