@@ -2093,6 +2093,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_headphone_eq);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq_preset);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_function_button);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_chat_balance);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_in_call_audio_mix);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_prompts);
@@ -2221,6 +2222,7 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_v3pro_headphone_eq);
             device_remove_file(&hdev->dev, &dev_attr_mic_eq);
             device_remove_file(&hdev->dev, &dev_attr_mic_eq_preset);
+            device_remove_file(&hdev->dev, &dev_attr_audio_function_button);
             device_remove_file(&hdev->dev, &dev_attr_game_chat_balance);
             device_remove_file(&hdev->dev, &dev_attr_in_call_audio_mix);
             device_remove_file(&hdev->dev, &dev_attr_audio_prompts);
