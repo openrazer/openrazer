@@ -385,8 +385,14 @@ static int razer_blackshark_send_cmd(struct razer_kraken_device *dev, u8 *buf)
      * (EQ = 5 frames × 2s = 10s of UI freeze per preset click). 250ms is
      * still long enough for any device that DOES respond (V3 Pro wired with
      * its own gate workaround, future firmware that drops the gate, etc.). */
+    /* 1000ms — V3 Pro typical reply is ~40ms, but the FIRST query after a
+     * wireless wake or under USB bus contention can race a 250ms timeout
+     * (battery returns -1, ANC/sidetone reads fall through). 1s gives enough
+     * headroom while still being half of the original 2s. Multi-frame writes
+     * (EQ apply) treat -ETIMEDOUT as success per frame so this doesn't add
+     * UI freeze on the write path. */
     wait = wait_for_completion_timeout(&dev->vendor_response,
-                                       msecs_to_jiffies(250));
+                                       msecs_to_jiffies(1000));
     if (!wait)
         return -ETIMEDOUT;
     return 0;
