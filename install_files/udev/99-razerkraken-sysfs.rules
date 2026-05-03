@@ -1,0 +1,8 @@
+# Per-attribute sysfs files created by razerkraken (charge_level,
+# headphone_eq, sidetone, etc.) inherit root:root mode 0660 from the kernel.
+# The 99-razer.rules `GROUP:=plugdev` only sets group on the parent USB/HID
+# device, not on driver-created attribute files. Catch the bind event and
+# chgrp every file in the device directory so users in plugdev can write
+# without sudo.
+ACTION=="bind", SUBSYSTEM=="hid", DRIVER=="razerkraken", \
+    RUN+="/bin/sh -c 'chgrp plugdev /sys%p/* 2>/dev/null || true'"
