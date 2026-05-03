@@ -1547,15 +1547,10 @@ static ssize_t razer_attr_write_thx_spatial_audio(struct device *dev, struct dev
  * to display percent). Multiply by 255/100 here so the daemon's existing
  * mamba.get_battery does the right thing.
  *
- * V3 uses the simpler (V3) envelope at class 0x21; V3 Pro uses the variable-
- * arg envelope at class 0x21 with sub 0x00. Dispatch on PID.
+ * Same V3 Pro envelope (cls=0x21 sub=0x00 cnt=1 args=[0x00]) used for both
+ * V3 and V3 Pro — wire bytes are byte-identical to what the V3 envelope
+ * produces, no PID branching needed.
  */
-static bool is_v3_pro_pid(unsigned short pid)
-{
-    return pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
-           pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED;
-}
-
 static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_attribute *attr, char *buf)
 {
     /* Verbatim restore of the V3 Pro working logic from commit 8c944f2d.

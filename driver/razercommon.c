@@ -90,6 +90,7 @@ int razer_get_usb_response(struct usb_device *usb_dev, uint report_index, struct
     // Send the request to the device.
     // TODO look to see if index needs to be different for the request and the response
     retval = razer_send_control_msg(usb_dev, request_report, report_index, wait_min, wait_max);
+    (void)retval;  // silence -Wunused-but-set-variable until callers actually check it
 
     // Now ask for response
     len = usb_control_msg(usb_dev, usb_rcvctrlpipe(usb_dev, 0),
