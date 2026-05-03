@@ -509,23 +509,48 @@ static int razer_blackshark_v3pro_apply_eq(struct razer_kraken_device *device, u
 
     razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_EQ_STATE_CLASS,
                                  BLACKSHARK_V3_PRO_EQ_STATE_ID, gate_get, sizeof(gate_get));
-    if ((ret = razer_blackshark_send_cmd(device, cmdbuf))) return ret;
+    /* The SET_REPORT control transfer itself is fine; only the optional
+     * response push on ep 0x84 may time out (some frames in this sequence
+     * are write-only — firmware doesn't reply). Treat -ETIMEDOUT as success
+     * so the whole 5-frame chain runs; only abort on real bus errors. */
+    ret = razer_blackshark_send_cmd(device, cmdbuf);
+    if (ret < 0 && ret != -ETIMEDOUT) return ret;
 
     razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_EQ_BANDS_CLASS,
                                  BLACKSHARK_V3_PRO_EQ_BANDS_ID, bands, sizeof(bands));
-    if ((ret = razer_blackshark_send_cmd(device, cmdbuf))) return ret;
+    /* The SET_REPORT control transfer itself is fine; only the optional
+     * response push on ep 0x84 may time out (some frames in this sequence
+     * are write-only — firmware doesn't reply). Treat -ETIMEDOUT as success
+     * so the whole 5-frame chain runs; only abort on real bus errors. */
+    ret = razer_blackshark_send_cmd(device, cmdbuf);
+    if (ret < 0 && ret != -ETIMEDOUT) return ret;
 
     razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_EQ_META_CLASS,
                                  BLACKSHARK_V3_PRO_EQ_META_ID, meta, sizeof(meta));
-    if ((ret = razer_blackshark_send_cmd(device, cmdbuf))) return ret;
+    /* The SET_REPORT control transfer itself is fine; only the optional
+     * response push on ep 0x84 may time out (some frames in this sequence
+     * are write-only — firmware doesn't reply). Treat -ETIMEDOUT as success
+     * so the whole 5-frame chain runs; only abort on real bus errors. */
+    ret = razer_blackshark_send_cmd(device, cmdbuf);
+    if (ret < 0 && ret != -ETIMEDOUT) return ret;
 
     razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_EQ_STATE_CLASS,
                                  BLACKSHARK_V3_PRO_EQ_STATE_ID, gate_apply, sizeof(gate_apply));
-    if ((ret = razer_blackshark_send_cmd(device, cmdbuf))) return ret;
+    /* The SET_REPORT control transfer itself is fine; only the optional
+     * response push on ep 0x84 may time out (some frames in this sequence
+     * are write-only — firmware doesn't reply). Treat -ETIMEDOUT as success
+     * so the whole 5-frame chain runs; only abort on real bus errors. */
+    ret = razer_blackshark_send_cmd(device, cmdbuf);
+    if (ret < 0 && ret != -ETIMEDOUT) return ret;
 
     razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_EQ_COMMIT_CLASS,
                                  BLACKSHARK_V3_PRO_EQ_COMMIT_ID, commit, sizeof(commit));
-    if ((ret = razer_blackshark_send_cmd(device, cmdbuf))) return ret;
+    /* The SET_REPORT control transfer itself is fine; only the optional
+     * response push on ep 0x84 may time out (some frames in this sequence
+     * are write-only — firmware doesn't reply). Treat -ETIMEDOUT as success
+     * so the whole 5-frame chain runs; only abort on real bus errors. */
+    ret = razer_blackshark_send_cmd(device, cmdbuf);
+    if (ret < 0 && ret != -ETIMEDOUT) return ret;
 
     return 0;
 }
