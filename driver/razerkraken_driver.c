@@ -1558,30 +1558,23 @@ static bool is_v3_pro_pid(unsigned short pid)
 
 static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_attribute *attr, char *buf)
 {
+    /* Verbatim restore of the V3 Pro working logic from commit 8c944f2d.
+     * Uses the V3 Pro envelope (cls=0x21 sub=0x00 cnt=1 args=[0x00]) for
+     * BOTH V3 and V3 Pro — wire bytes are identical, no PID branching.
+     * Plus push-cache fallback for unsolicited cls=0x20 sub=0x02 reports. */
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    const u8 args[1] = { 0x00 };
     int level = -1;
 
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
+                                 BLACKSHARK_V3_PRO_BATTERY_ID, args, sizeof(args));
     mutex_lock(&device->lock);
-    if (is_v3_pro_pid(device->usb_pid)) {
-        const u8 args[1] = { 0x00 };
-        razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
-                                     BLACKSHARK_V3_PRO_BATTERY_ID, args, sizeof(args));
-        razer_blackshark_send_cmd(device, cmdbuf);
-        if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
-            level = (device->data[13] * 255) / 100;
-    } else {
-        /* V3 / V3 wired: battery class is 0x21, no sub. Same scaling. */
-        razer_blackshark_build_get(cmdbuf, 0x21, device->usb_pid);
-        razer_blackshark_send_cmd(device, cmdbuf);
-        if (device->data[1] == 0x02 && device->data[10] == 0x21)
-            level = (device->data[13] * 255) / 100;
-    }
+    razer_blackshark_send_cmd(device, cmdbuf);
+    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
+        level = (device->data[13] * 255) / 100;
     mutex_unlock(&device->lock);
 
-    /* Fallback to the most recent unsolicited push if the synchronous GET
-     * didn't produce a valid value. raw_event populates pushed_battery_pct
-     * whenever the device proactively reports a level change (sub=0x02). */
     if (level < 0 && device->pushed_battery_pct >= 0)
         level = (device->pushed_battery_pct * 255) / 100;
 
@@ -1590,28 +1583,22 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
 
 static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_attribute *attr, char *buf)
 {
+    /* Verbatim restore of working V3 Pro charging logic from 8c944f2d.
+     * V3 Pro returns charging in data[14] of the same cls=0x21 reply that
+     * has the percentage in data[13]. Same envelope works for V3 too. */
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    const u8 args[1] = { 0x00 };
     int charging = -1;
 
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
+                                 BLACKSHARK_V3_PRO_BATTERY_ID, args, sizeof(args));
     mutex_lock(&device->lock);
-    if (is_v3_pro_pid(device->usb_pid)) {
-        const u8 args[1] = { 0x00 };
-        razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
-                                     BLACKSHARK_V3_PRO_BATTERY_ID, args, sizeof(args));
-        razer_blackshark_send_cmd(device, cmdbuf);
-        if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
-            charging = device->data[14] ? 1 : 0;
-    } else {
-        /* V3: dedicated charging-status class 0x2a, returns one byte. */
-        razer_blackshark_build_get(cmdbuf, 0x2a, device->usb_pid);
-        razer_blackshark_send_cmd(device, cmdbuf);
-        if (device->data[1] == 0x02 && device->data[10] == 0x2a)
-            charging = device->data[13] ? 1 : 0;
-    }
+    razer_blackshark_send_cmd(device, cmdbuf);
+    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
+        charging = device->data[14] ? 1 : 0;
     mutex_unlock(&device->lock);
 
-    /* Fallback to the most recent unsolicited charging push (sub=0x02). */
     if (charging < 0 && device->pushed_charging >= 0)
         charging = device->pushed_charging;
 
