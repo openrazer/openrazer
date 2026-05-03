@@ -377,11 +377,16 @@ static int razer_blackshark_send_cmd(struct razer_kraken_device *dev, u8 *buf)
         return 0;
     }
 
-    /* Wait up to 2s for raw_event() to copy the reply into dev->data and
-     * fire dev->vendor_response. If we time out, dev->data[1] stays 0 and
-     * existing readers fall back to -1 (their cache) — same as before. */
+    /* Wait up to 250ms for raw_event() to copy the reply into dev->data and
+     * fire dev->vendor_response. Was 2s, but on V3 wireless (PID 0x057A) the
+     * firmware silently drops responses on Linux/QEMU-passthrough USB stacks
+     * (see project memory: USB-stack-timing gate, not fixable from here), so
+     * the 2s wait was just dead time multiplying every multi-frame write
+     * (EQ = 5 frames × 2s = 10s of UI freeze per preset click). 250ms is
+     * still long enough for any device that DOES respond (V3 Pro wired with
+     * its own gate workaround, future firmware that drops the gate, etc.). */
     wait = wait_for_completion_timeout(&dev->vendor_response,
-                                       msecs_to_jiffies(2000));
+                                       msecs_to_jiffies(250));
     if (!wait)
         return -ETIMEDOUT;
     return 0;
@@ -1373,7 +1378,12 @@ static ssize_t razer_attr_write_audio_function_button(struct device *dev, struct
 
     if (kstrtoul(buf, 10, &val))
         return -EINVAL;
-    if (val < 1 || val > 2)
+    /* Was clamped to 1..2 (Sidetone, Footsteps). Widened to 0..255 so userspace
+     * can probe other byte values from the Synapse CONTROL_KNOB enum
+     * (GAME_CHAT_BALANCE=20, SWITCH_INPUT_SOURCE=18, MIC_SIDETONE_LEVEL=19, etc.)
+     * to map the V3's full FN-button cycle. Bytes the firmware doesn't recognise
+     * just no-op on the device side. */
+    if (val > 0xff)
         return -EINVAL;
 
     razer_blackshark_build_set(cmdbuf, BLACKSHARK_SET_FN_BUTTON, (u8)val,

@@ -34,12 +34,18 @@
 #define BLACKSHARK_PARAM_MIC_EQ_BANDS      0x17  /* GET; cnt=10 mic EQ bands sign-magnitude (was misnamed BLACKSHARK_SET_MIC_EQ_END) */
 #define BLACKSHARK_PARAM_BATTERY_LEVEL     0x21  /* GET; cnt=1 [percent 0..100] */
 #define BLACKSHARK_PARAM_MIC_VOLUME        0x21  /* DEPRECATED alias for BATTERY_LEVEL — earlier wrong guess; mic volume is UAC2 not Razer HID */
+#define BLACKSHARK_PARAM_SIDETONE_VOLUME   0x19  /* GET; cnt=1 [level 0..15]. Synapse 4 enum: SIDETONE_VOLUME=25 (0x19). */
 #define BLACKSHARK_PARAM_CHARGE_STATE      0x2a  /* GET; cnt=1 [charging? 0/1] */
-#define BLACKSHARK_PARAM_SIDETONE_LEVEL    0x2c  /* GET; cnt=1 [level 0..15] (was misnamed BLACKSHARK_PARAM_POWER_SAVE) */
+#define BLACKSHARK_PARAM_AUTO_POWER_OFF    0x2c  /* GET; cnt=1 [minutes]. Synapse 4 enum: AUTO_POWER_OFF_STATUS=44 (0x2c). Previously misnamed SIDETONE_LEVEL; both reply 0..15 so the bug was masked until 2026-05-03 Synapse webapp source decode. */
+#define BLACKSHARK_PARAM_GAME_CHAT_BAL_PRO 0x5c  /* GET; cnt=1 [balance]. V3 Pro variant (Synapse Eu enum: 92). Pair: SET 0xdc. */
+#define BLACKSHARK_PARAM_IN_CALL_AUDIO_MIX 0x5d  /* GET; cnt=1 [mode]. Pair: SET 0xdd. */
 #define BLACKSHARK_PARAM_ULTRA_LOW_LATENCY 0x5f  /* GET; cnt=1 [on/off]. Confirmed via readback. */
 #define BLACKSHARK_PARAM_EQ_SLOT_META      0x60  /* GET; cnt=6 [slot, ?, enabled?, 00, ?, 00] */
+#define BLACKSHARK_PARAM_GAME_CHAT_BAL_V3  0x65  /* GET; cnt=1 [balance]. V3 wireless variant (Synapse Eu enum: 229=0xe5). Pair: SET 0xe5 sub=0x01. */
+#define BLACKSHARK_PARAM_AUDIO_PROMPTS_GET 0x66  /* GET; cnt=1 [on/off]. Pair: SET 0xe5 sub=0x02 (cls byte multiplexes by sub). */
+#define BLACKSHARK_PARAM_AUDIO_FN_GET      0x6a  /* GET; cnt=1 [mode 0..3]. Pair: SET 0xea. */
 #define BLACKSHARK_PARAM_THX               0x9e  /* GET; cnt=1 [0=stereo, 1=THX-spatial] */
-#define BLACKSHARK_PARAM_AUDIO_PROMPTS     0xe5  /* GET; cnt=1 [on/off] */
+#define BLACKSHARK_PARAM_AUDIO_PROMPTS     0xe5  /* GET (V3 wireless variant — note 0xe5 cls is multiplexed: sub=0x01 = GAME_CHAT_BALANCE, sub=0x02 = AUDIO_PROMPTS). */
 #define BLACKSHARK_PARAM_AUDIO_FN_BUTTON   0xea  /* GET; cnt=1 [mode 0..3] */
 #define BLACKSHARK_PARAM_EQ                BLACKSHARK_PARAM_EQ_BANDS  /* legacy alias */
 
@@ -52,7 +58,7 @@
 #define BLACKSHARK_SET_EQ_APPLY            0xe0  /* Headphone EQ apply — profile-specific */
 #define BLACKSHARK_SET_EQ_BEGIN            0xe1  /* Headphone EQ begin/end — buf[13]=0x01 begin, 0x02 end */
 #define BLACKSHARK_SET_EQ_COMMIT           0xeb  /* Headphone EQ commit */
-#define BLACKSHARK_SET_FN_BUTTON           0xea  /* Audio FN button mode — buf[13]: 0x00=GameChat (default), 0x01=Sidetone, 0x02=Footsteps, 0x03=BluetoothVolume. Updated 2026-05-02 from new pcap; previous "0x01=sidetone, 0x02=footsteps" was incomplete (missing 0=GameChat default and 3=BTVol). */
+#define BLACKSHARK_SET_FN_BUTTON           0xea  /* Audio FN button mode — buf[13]: 0x00=GameChat (default), 0x01=Sidetone, 0x02=Footsteps, 0x03=BluetoothVolume. All four verified on-device 2026-05-03 after widening the write_audio_function_button clamp from 1..2 to 0..255 — the earlier "0x00/0x03 alias to 0x01" reading was the driver returning -EINVAL before the bytes ever reached the device. */
 
 /* ---- BlackShark V3 Pro (PID 0x0577) command set ----
  *
@@ -77,7 +83,7 @@
 #define BLACKSHARK_V3_PRO_CHARGING_GET     0x00
 #define BLACKSHARK_V3_PRO_SIDETONE_GET_CL  0x98  /* SET precursor; args=[0x01] */
 #define BLACKSHARK_V3_PRO_SIDETONE_SET_CL  0x99  /* SET level; args=[level 0..15] */
-#define BLACKSHARK_V3_PRO_SIDETONE_READ_CL 0x2c  /* GET; resp[0]=level */
+#define BLACKSHARK_V3_PRO_SIDETONE_READ_CL 0x19  /* GET; resp[0]=level. Was 0x2c (AUTO_POWER_OFF) — fixed 2026-05-03 from Synapse 4 source enum SIDETONE_VOLUME=25. */
 #define BLACKSHARK_V3_PRO_SIDETONE_ID      0x01
 #define BLACKSHARK_V3_PRO_SIDETONE_MAX     0x0f
 #define BLACKSHARK_V3_PRO_THX_CLASS        0x9e  /* SET; args=[mode]; 0=stereo 1=THX-spatial */
