@@ -31,6 +31,9 @@ from openrazer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 from openrazer_daemon.misc.autosave_persistence import PersistenceAutoSave
 
 
+HYPERFLUX_V2_HID_PREFIX = '0003:1532:00CF'
+
+
 class RazerDaemon(DBusService):
     """
     Daemon class
@@ -479,15 +482,15 @@ class RazerDaemon(DBusService):
                         if double_device:
                             continue
 
-                        for alt_device in device_list:
-                            if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
-                                additional_interfaces.append(alt_device.sys_path)
+                        if device_match.upper() != HYPERFLUX_V2_HID_PREFIX:
+                            for alt_device in device_list:
+                                if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
+                                    additional_interfaces.append(alt_device.sys_path)
 
                     # Checking permissions
                     test_file = os.path.join(sys_path, 'device_type')
                     file_group_id = os.stat(test_file).st_gid
                     file_group_name = grp.getgrgid(file_group_id)[0]
-
                     if os.getgid() != file_group_id and file_group_name != 'plugdev':
                         self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
                         break
@@ -553,6 +556,8 @@ class RazerDaemon(DBusService):
                 # Basically find the other usb interfaces
                 device_match = sys_name.split('.')[0]
                 for d in self._razer_devices:
+                    if device_match.upper() == HYPERFLUX_V2_HID_PREFIX:
+                        continue
                     if device_match in d.device_id and d.device_id != sys_name:
                         if not sys_path in d.dbus.additional_interfaces:
                             d.dbus.additional_interfaces.append(sys_path)

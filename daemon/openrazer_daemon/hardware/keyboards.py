@@ -3,8 +3,10 @@
 """
 Keyboards class
 """
+import os
 import re
 
+from openrazer_daemon.hardware.device_base import RazerDevice as _RazerDevice
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
 from openrazer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
 from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
@@ -1476,6 +1478,50 @@ class RazerDeathStalkerV2ProTKLWireless(RazerDeathStalkerV2ProTKLWired):
     """
     USB_PID = 0x0296
     EVENT_FILE_REGEX = re.compile(r'.*DSV2Pro_TKL_000000000000-if01-event-mouse')
+
+
+class RazerDeathStalkerV2ProTKLHyperFluxV2(_RazerDevice):
+    """
+    Class for the Razer DeathStalker V2 Pro TKL via HyperFlux V2.
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x00CF
+    DRIVER_MODE = True
+    EVENT_FILE_REGEX = None
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 17]
+    METHODS = ['get_device_type_keyboard',
+               'get_brightness', 'set_brightness',
+               'set_static_effect', 'set_spectrum_effect', 'set_wave_effect', 'set_none_effect',
+               'set_reactive_effect',
+               'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'get_game_mode', 'set_game_mode',
+               # Battery
+               'get_battery', 'is_charging']
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/6117/6117-1-en-v1.png"
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('additional_methods', []).append('get_keyboard_layout')
+        super().__init__(*args, **kwargs)
+
+    @classmethod
+    def match(cls, device_id, dev_path):
+        if not super().match(device_id, dev_path):
+            return False
+
+        try:
+            iface_file = os.path.join(os.path.dirname(os.path.realpath(dev_path)), 'bInterfaceNumber')
+            with open(iface_file, encoding='utf-8') as file:
+                return int(file.read().strip(), 16) == 1
+        except (OSError, ValueError):
+            return False
+
+    def restore_brightness(self):
+        pass
+
+    def restore_effect(self):
+        pass
 
 
 class RazerBlackWidowChromaOverwatch(_RippleKeyboard):
