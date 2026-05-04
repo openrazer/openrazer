@@ -202,7 +202,7 @@ static int deathadder3_5g_set_led_state(struct razer_mouse_device *device, unsig
     }
 
     mutex_lock(&device->lock);
-    razer_send_control_msg_old_device(device->hdev, &device->da3_5g, 0x10, 0x00, 4, 3000);
+    razer_send_control_msg_old_device(device->hdev, &device->da3_5g, 0x10, 0x00, sizeof(device->da3_5g), 3000);
     mutex_unlock(&device->lock);
 
     return 0;
@@ -226,7 +226,7 @@ static void deathadder3_5g_set_poll_rate(struct razer_mouse_device *device, unsi
     }
 
     mutex_lock(&device->lock);
-    razer_send_control_msg_old_device(device->hdev, &device->da3_5g, 0x10, 0x00, 4, 3000);
+    razer_send_control_msg_old_device(device->hdev, &device->da3_5g, 0x10, 0x00, sizeof(device->da3_5g), 3000);
     mutex_unlock(&device->lock);
 }
 
@@ -249,7 +249,7 @@ static void deathadder3_5g_set_dpi(struct razer_mouse_device *device, unsigned s
     }
 
     mutex_lock(&device->lock);
-    razer_send_control_msg_old_device(device->hdev, &device->da3_5g, 0x10, 0x00, 4, 3000);
+    razer_send_control_msg_old_device(device->hdev, &device->da3_5g, 0x10, 0x00, sizeof(device->da3_5g), 3000);
     mutex_unlock(&device->lock);
 }
 
