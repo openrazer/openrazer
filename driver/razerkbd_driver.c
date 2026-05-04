@@ -617,6 +617,7 @@ static void razer_set_device_mode(struct razer_kbd_device *device, unsigned char
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ:
     case USB_DEVICE_ID_RAZER_BLADE_14_2024:
