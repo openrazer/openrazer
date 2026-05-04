@@ -29,7 +29,7 @@ class RazerDevice(object):
 
         self._name = str(self._dbus_interfaces['device'].getDeviceName())
         self._type = str(self._dbus_interfaces['device'].getDeviceType())
-        self._fw = str(self._dbus_interfaces['device'].getFirmware())
+        self._fw: str | None = None
         self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
         self._has_dedicated_macro: bool | None = None
         self._device_image: str | None = None
@@ -346,6 +346,8 @@ class RazerDevice(object):
         :return: FW Version
         :rtype: str
         """
+        if not self._fw:
+            self._fw = str(self._dbus_interfaces['device'].getFirmware())
         return self._fw
 
     @property
