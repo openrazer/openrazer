@@ -1751,6 +1751,8 @@ class RazerBasiliskV3Pro35KHyperFluxV2(RazerBasiliskV3Pro35KWireless):
     """
 
     USB_PID = 0x00CF
+    SERIAL_RETRY_ATTEMPTS = 12
+    SERIAL_RETRY_DELAY = 0.5
     EVENT_FILE_REGEX = None
 
     @classmethod

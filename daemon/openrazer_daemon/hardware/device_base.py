@@ -47,6 +47,10 @@ class RazerDevice(DBusService):
     ZONES = ('backlight', 'logo', 'scroll', 'left', 'right', 'charging', 'fast_charging', 'fully_charged', 'channel1', 'channel2', 'channel3', 'channel4', 'channel5', 'channel6')
 
     DEVICE_IMAGE: Optional[str] = None
+    PRE_SERIAL_DRIVER_MODE = False
+    PRE_SERIAL_DRIVER_MODE_DELAY = 0.5
+    SERIAL_RETRY_ATTEMPTS = 5
+    SERIAL_RETRY_DELAY = 0.1
 
     def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter):
 
@@ -77,6 +81,15 @@ class RazerDevice(DBusService):
         self._parent = None
         self._device_path = device_path
         self._device_number = device_number
+
+        if self.PRE_SERIAL_DRIVER_MODE:
+            try:
+                self.logger.info('Setting device to "driver" mode before reading serial')
+                self.set_device_mode(0x03, 0x00)
+                time.sleep(self.PRE_SERIAL_DRIVER_MODE_DELAY)
+            except OSError as err:
+                self.logger.warning('Unable to set driver mode before reading serial: %s', err)
+
         self.serial = self.get_serial()
 
         if self.USB_PID == 0x0f07:
@@ -974,8 +987,8 @@ class RazerDevice(DBusService):
             serial_path = os.path.join(self._device_path, 'device_serial')
             count = 0
             serial = ''
-            while len(serial) == 0:
-                if count >= 5:
+            while not re.fullmatch(r"[\dA-Z]+", serial):
+                if count >= self.SERIAL_RETRY_ATTEMPTS:
                     break
 
                 try:
@@ -990,8 +1003,8 @@ class RazerDevice(DBusService):
 
                 count += 1
 
-                if len(serial) == 0:
-                    time.sleep(0.1)
+                if not re.fullmatch(r"[\dA-Z]+", serial):
+                    time.sleep(self.SERIAL_RETRY_DELAY)
                     self.logger.debug('getting serial: {0} count:{1}'.format(serial, count))
 
             # Known bad serials:

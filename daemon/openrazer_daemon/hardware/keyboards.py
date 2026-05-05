@@ -1487,6 +1487,9 @@ class RazerDeathStalkerV2ProTKLHyperFluxV2(_RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x00CF
     DRIVER_MODE = True
+    PRE_SERIAL_DRIVER_MODE = True
+    SERIAL_RETRY_ATTEMPTS = 12
+    SERIAL_RETRY_DELAY = 0.5
     EVENT_FILE_REGEX = None
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 17]

@@ -539,7 +539,7 @@ class RazerDaemon(DBusService):
                 return False
             time.sleep(0.1)
 
-    def _add_device(self, device):
+    def _add_device(self, device, emit_signal=True):
         """
         Add device event from udev
 
@@ -571,7 +571,9 @@ class RazerDaemon(DBusService):
                 if len(device_serial) > 0:
                     # Add Device
                     self._razer_devices.add(sys_name, device_serial, razer_device)
-                    self.device_added()
+                    if emit_signal:
+                        self.device_added()
+                    return True
                 else:
                     logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
             else:
@@ -583,7 +585,9 @@ class RazerDaemon(DBusService):
                     if device_match in d.device_id and d.device_id != sys_name:
                         if not sys_path in d.dbus.additional_interfaces:
                             d.dbus.additional_interfaces.append(sys_path)
-                            return
+                            return False
+
+        return False
 
     def _remove_device(self, device):
         """
@@ -632,11 +636,31 @@ class RazerDaemon(DBusService):
 
     def _collecting_udev_method(self, device):
         time.sleep(2)  # delay to let udev add all devices that we want
-        # Sort the devices
-        self._collecting_udev_devices.sort(key=lambda x: x.sys_path, reverse=True)
+        # Sort the devices. HyperFlux V2 exposes keyboard and mouse as separate
+        # HID interfaces behind one receiver; initialise the keyboard first
+        # because it can take longer to provide its wireless serial at hotplug.
+        self._collecting_udev_devices.sort(key=self._udev_device_sort_key)
+        device_added = False
         for d in self._collecting_udev_devices:
-            self._add_device(d)
+            device_added = self._add_device(d, emit_signal=False) or device_added
+        if device_added:
+            self.device_added()
         self._collecting_udev = False
+
+    @staticmethod
+    def _udev_device_sort_key(device):
+        sys_name = device.sys_name.upper()
+        if not sys_name.startswith(HYPERFLUX_V2_HID_PREFIX):
+            return (1, device.sys_path)
+
+        try:
+            iface_file = os.path.join(os.path.dirname(os.path.realpath(device.sys_path)), 'bInterfaceNumber')
+            with open(iface_file, encoding='utf-8') as file:
+                iface = int(file.read().strip(), 16)
+        except (OSError, ValueError):
+            iface = 99
+
+        return (0, iface, device.sys_path)
 
     def run(self):
         """
