@@ -56,7 +56,6 @@ done
 
 if [ -d /sys/bus/hid/drivers/"$DRIVER"/"$DEVICE_ID" ] ; then
 	mesg "Changing group /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/"
-	chgrp -R plugdev /sys/bus/hid/drivers/"$DRIVER"/"$DEVICE_ID"/
+	chgrp -R openrazer /sys/bus/hid/drivers/"$DRIVER"/"$DEVICE_ID"/
 	mesg "Changed group /sys/bus/hid/drivers/$DRIVER/$DEVICE_ID/"
 fi
-

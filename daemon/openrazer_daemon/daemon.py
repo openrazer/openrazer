@@ -32,6 +32,7 @@ from openrazer_daemon.misc.autosave_persistence import PersistenceAutoSave
 
 
 HYPERFLUX_V2_HID_PREFIX = '0003:1532:00CF'
+RAZER_DEVICE_GROUPS = ('openrazer', 'plugdev')
 
 
 class RazerDaemon(DBusService):
@@ -491,8 +492,8 @@ class RazerDaemon(DBusService):
                     test_file = os.path.join(sys_path, 'device_type')
                     file_group_id = os.stat(test_file).st_gid
                     file_group_name = grp.getgrgid(file_group_id)[0]
-                    if os.getgid() != file_group_id and file_group_name != 'plugdev':
-                        self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
+                    if os.getgid() != file_group_id and file_group_name not in RAZER_DEVICE_GROUPS:
+                        self.logger.critical("Could not access {0}/device_type, file is not owned by openrazer or plugdev".format(sys_path))
                         break
 
                     razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,

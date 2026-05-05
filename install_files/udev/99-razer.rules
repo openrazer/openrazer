@@ -37,7 +37,7 @@ ATTRS{idProduct}=="00cf", ATTRS{idVendor}=="1532", KERNELS=="*:1.4", \
 ENV{ID_RAZER_CHROMA}!="1", GOTO="razer_end"
 
 # Set permissions if this is an input node
-SUBSYSTEM=="usb|input|hid", GROUP:="plugdev"
+SUBSYSTEM=="usb|input|hid", GROUP:="openrazer"
 
 # We're done unless it's the hid node
 SUBSYSTEM!="hid|usb", GOTO="razer_end"
