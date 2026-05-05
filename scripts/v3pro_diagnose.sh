@@ -7,6 +7,31 @@
 
 set -u
 
+echo "=== 0. Pulling latest from fork ==="
+if [ -d ~/openrazer-blackshark/.git ]; then
+    cd ~/openrazer-blackshark
+    git fetch fork blackshark-v3-pro 2>&1 || git fetch origin blackshark-v3-pro 2>&1 || true
+    BEFORE=$(git rev-parse HEAD)
+    git pull --ff-only 2>&1 | tail -3
+    AFTER=$(git rev-parse HEAD)
+    if [ "$BEFORE" != "$AFTER" ]; then
+        echo "  pulled new commits — rebuilding driver via DKMS..."
+        sudo make setup_dkms 2>&1 | tail -3
+        sudo dkms install openrazer-driver/3.12.1 --force 2>&1 | tail -5
+        sudo rmmod razerkraken 2>/dev/null || true
+        sudo modprobe razerkraken
+        sleep 1
+    else
+        echo "  already up to date"
+    fi
+else
+    echo "  ~/openrazer-blackshark not found — clone it first:"
+    echo "    cd ~ && git clone https://github.com/mehmetbayoglu/openrazer.git openrazer-blackshark"
+    echo "    cd openrazer-blackshark && git checkout blackshark-v3-pro"
+    exit 1
+fi
+
+echo ""
 echo "=== 1. Razer device on USB bus ==="
 lsusb | grep -i razer || echo "  no Razer device found via lsusb"
 
