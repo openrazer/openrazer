@@ -136,6 +136,7 @@
 
 struct razer_mouse_match_data {
     const char *name;
+    const struct attribute **visible_attributes;
 };
 
 struct razer_mouse_device {

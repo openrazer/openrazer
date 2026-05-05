@@ -5867,6 +5867,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         break;
     }
 
+#if 0
     if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE
        && (expected_subclass == 0xFF || dev->usb_interface_subclass == expected_subclass)) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
@@ -6943,6 +6944,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         }
 
     }
+#endif
 
     hid_set_drvdata(hdev, dev);
     dev_set_drvdata(&hdev->dev, dev);
@@ -6974,11 +6976,10 @@ exit_free:
 static void razer_mouse_disconnect(struct hid_device *hdev)
 {
     struct razer_mouse_device *dev;
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     dev = hid_get_drvdata(hdev);
 
+#if 0
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
         device_remove_file(&hdev->dev, &dev_attr_version);
         device_remove_file(&hdev->dev, &dev_attr_test);
@@ -8054,6 +8055,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         }
 
     }
+#endif
 
     hid_hw_stop(hdev);
     hrtimer_cancel(&dev->repeat_timer);
@@ -8061,6 +8063,139 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
     kfree(dev);
     hid_info(hdev, "Razer Device disconnected\n");
 }
+
+static struct attribute *razer_attributes[] = {
+    &dev_attr_backlight_led_brightness.attr,
+    &dev_attr_backlight_matrix_effect_breath.attr,
+    &dev_attr_backlight_matrix_effect_none.attr,
+    &dev_attr_backlight_matrix_effect_on.attr,
+    &dev_attr_backlight_matrix_effect_reactive.attr,
+    &dev_attr_backlight_matrix_effect_spectrum.attr,
+    &dev_attr_backlight_matrix_effect_static.attr,
+    &dev_attr_backlight_matrix_effect_wave.attr,
+    &dev_attr_charge_colour.attr,
+    &dev_attr_charge_effect.attr,
+    &dev_attr_charge_level.attr,
+    &dev_attr_charge_low_threshold.attr,
+    &dev_attr_charge_status.attr,
+    &dev_attr_device_idle_time.attr,
+    &dev_attr_device_mode.attr,
+    &dev_attr_device_serial.attr,
+    &dev_attr_device_type.attr,
+    &dev_attr_dpi.attr,
+    &dev_attr_dpi_stages.attr,
+    &dev_attr_firmware_version.attr,
+    &dev_attr_hyperpolling_wireless_dongle_indicator_led_mode.attr,
+    &dev_attr_hyperpolling_wireless_dongle_pair.attr,
+    &dev_attr_hyperpolling_wireless_dongle_unpair.attr,
+    &dev_attr_left_led_brightness.attr,
+    &dev_attr_left_matrix_effect_breath.attr,
+    &dev_attr_left_matrix_effect_none.attr,
+    &dev_attr_left_matrix_effect_reactive.attr,
+    &dev_attr_left_matrix_effect_spectrum.attr,
+    &dev_attr_left_matrix_effect_static.attr,
+    &dev_attr_left_matrix_effect_wave.attr,
+    &dev_attr_logo_led_brightness.attr,
+    &dev_attr_logo_matrix_effect_blinking.attr,
+    &dev_attr_logo_matrix_effect_breath.attr,
+    &dev_attr_logo_matrix_effect_none.attr,
+    &dev_attr_logo_matrix_effect_on.attr,
+    &dev_attr_logo_matrix_effect_reactive.attr,
+    &dev_attr_logo_matrix_effect_spectrum.attr,
+    &dev_attr_logo_matrix_effect_static.attr,
+    &dev_attr_logo_matrix_effect_wave.attr,
+    &dev_attr_matrix_brightness.attr,
+    &dev_attr_matrix_custom_frame.attr,
+    &dev_attr_matrix_effect_breath.attr,
+    &dev_attr_matrix_effect_custom.attr,
+    &dev_attr_matrix_effect_none.attr,
+    &dev_attr_matrix_effect_reactive.attr,
+    &dev_attr_matrix_effect_spectrum.attr,
+    &dev_attr_matrix_effect_static.attr,
+    &dev_attr_matrix_effect_wave.attr,
+    &dev_attr_poll_rate.attr,
+    &dev_attr_right_led_brightness.attr,
+    &dev_attr_right_matrix_effect_breath.attr,
+    &dev_attr_right_matrix_effect_none.attr,
+    &dev_attr_right_matrix_effect_reactive.attr,
+    &dev_attr_right_matrix_effect_spectrum.attr,
+    &dev_attr_right_matrix_effect_static.attr,
+    &dev_attr_right_matrix_effect_wave.attr,
+    &dev_attr_scroll_acceleration.attr,
+    &dev_attr_scroll_led_brightness.attr,
+    &dev_attr_scroll_matrix_effect_blinking.attr,
+    &dev_attr_scroll_matrix_effect_breath.attr,
+    &dev_attr_scroll_matrix_effect_none.attr,
+    &dev_attr_scroll_matrix_effect_on.attr,
+    &dev_attr_scroll_matrix_effect_reactive.attr,
+    &dev_attr_scroll_matrix_effect_spectrum.attr,
+    &dev_attr_scroll_matrix_effect_static.attr,
+    &dev_attr_scroll_matrix_effect_wave.attr,
+    &dev_attr_scroll_mode.attr,
+    &dev_attr_scroll_smart_reel.attr,
+    &dev_attr_test.attr,
+    &dev_attr_tilt_hwheel.attr,
+    &dev_attr_tilt_repeat.attr,
+    &dev_attr_tilt_repeat_delay.attr,
+    &dev_attr_version.attr,
+    NULL,
+};
+
+static umode_t razer_attr_is_visible(struct kobject *kobj, struct attribute *attr, int n)
+{
+    struct device *dev = kobj_to_dev(kobj);
+    struct hid_device *hdev = to_hid_device(dev);
+    struct razer_mouse_device *device = hid_get_drvdata(hdev);
+    int i;
+
+    /* Hide all sysfs files if it's not for the correct interfaces */
+    if (device->usb_interface_protocol != USB_INTERFACE_PROTOCOL_MOUSE)
+        return 0; /* Hide it */
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
+        if (device->usb_interface_subclass != 0x01)
+            return 0; /* Hide it */
+        break;
+    }
+
+    /* Visible for all */
+    if (attr == &dev_attr_version.attr ||
+        attr == &dev_attr_test.attr ||
+        attr == &dev_attr_firmware_version.attr ||
+        attr == &dev_attr_device_type.attr ||
+        attr == &dev_attr_device_serial.attr ||
+        attr == &dev_attr_device_mode.attr) {
+         return attr->mode; /* Show it */
+    }
+
+    if (!device->data->visible_attributes) {
+        WARN_ONCE(1, "No visible_attributes defined in driver_data!\n");
+        return 0; /* Hide it */
+    }
+
+    /* Show the file if it's in the device data */
+    for (i = 0; device->data->visible_attributes[i] != NULL; i++) {
+        if (attr == device->data->visible_attributes[i])
+            return attr->mode; /* Show it */
+    }
+
+    return 0; /* Hide it */
+}
+
+static const struct attribute_group razer_attribute_group = {
+    .attrs = razer_attributes,
+    .is_visible = razer_attr_is_visible,
+};
+
+static const struct attribute_group *razer_attribute_groups[] = {
+    &razer_attribute_group,
+    NULL,
+};
 
 static const struct razer_mouse_match_data razer_deathadder_3_5g_data = {
     .name = "Razer DeathAdder 3.5G",
@@ -8200,6 +8335,44 @@ static const struct razer_mouse_match_data razer_lancehead_te_wired_data = {
 
 static const struct razer_mouse_match_data razer_mamba_elite_data = {
     .name = "Razer Mamba Elite",
+    .visible_attributes = (const struct attribute *[]) {
+        &dev_attr_dpi.attr,
+        &dev_attr_poll_rate.attr,
+        &dev_attr_logo_led_brightness.attr,
+        &dev_attr_logo_matrix_effect_wave.attr,
+        &dev_attr_logo_matrix_effect_spectrum.attr,
+        &dev_attr_logo_matrix_effect_reactive.attr,
+        &dev_attr_logo_matrix_effect_breath.attr,
+        &dev_attr_logo_matrix_effect_static.attr,
+        &dev_attr_logo_matrix_effect_none.attr,
+        &dev_attr_scroll_led_brightness.attr,
+        &dev_attr_scroll_matrix_effect_wave.attr,
+        &dev_attr_scroll_matrix_effect_spectrum.attr,
+        &dev_attr_scroll_matrix_effect_reactive.attr,
+        &dev_attr_scroll_matrix_effect_breath.attr,
+        &dev_attr_scroll_matrix_effect_static.attr,
+        &dev_attr_scroll_matrix_effect_none.attr,
+        &dev_attr_left_led_brightness.attr,
+        &dev_attr_left_matrix_effect_wave.attr,
+        &dev_attr_left_matrix_effect_spectrum.attr,
+        &dev_attr_left_matrix_effect_reactive.attr,
+        &dev_attr_left_matrix_effect_breath.attr,
+        &dev_attr_left_matrix_effect_static.attr,
+        &dev_attr_left_matrix_effect_none.attr,
+        &dev_attr_right_led_brightness.attr,
+        &dev_attr_right_matrix_effect_wave.attr,
+        &dev_attr_right_matrix_effect_spectrum.attr,
+        &dev_attr_right_matrix_effect_reactive.attr,
+        &dev_attr_right_matrix_effect_breath.attr,
+        &dev_attr_right_matrix_effect_static.attr,
+        &dev_attr_right_matrix_effect_none.attr,
+        &dev_attr_matrix_effect_custom.attr,
+        &dev_attr_matrix_custom_frame.attr,
+        &dev_attr_tilt_hwheel.attr,
+        &dev_attr_tilt_repeat_delay.attr,
+        &dev_attr_tilt_repeat.attr,
+        NULL,
+    },
 };
 
 static const struct razer_mouse_match_data razer_deathadder_essential_data = {
@@ -8640,6 +8813,9 @@ static struct hid_driver razer_mouse_driver = {
     .raw_event = razer_raw_event,
     .input_mapping = razer_input_mapping,
     .input_configured = razer_input_configured,
+    .driver = {
+        .dev_groups = razer_attribute_groups,
+    },
 };
 
 module_hid_driver(razer_mouse_driver);
