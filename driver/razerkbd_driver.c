@@ -4996,6 +4996,36 @@ static int razer_raw_event_hyperflux_v2_media(struct hid_device *hdev, struct us
     return 1;
 }
 
+/*
+ * The HyperFlux V2 receiver can surface the Basilisk's DPI-cycle and
+ * scroll-mode buttons on the keyboard interface as report-0x04 codes 0x52
+ * and 0x54. The generic Razer keyboard report-0x04 path treats those same
+ * values as keyboard media keys, which turns the mouse buttons into mute and
+ * previous-song. The DeathStalker media dial uses report 0x08 above, so these
+ * mouse-origin report-0x04 values must not be translated as keyboard media.
+ */
+static int razer_raw_event_hyperflux_v2_mouse_buttons(struct usb_interface *intf, u8 *data, int size)
+{
+    int i;
+
+    if (intf->cur_altsetting->desc.bInterfaceProtocol != USB_INTERFACE_PROTOCOL_KEYBOARD ||
+        size != 16 || data[0] != 0x04) {
+        return 0;
+    }
+
+    for (i = 1; i < size; i++) {
+        switch (data[i]) {
+        case 0x52: /* Basilisk DPI cycle */
+        case 0x54: /* Basilisk scroll mode */
+            return 1;
+        default:
+            break;
+        }
+    }
+
+    return 0;
+}
+
 /**
  * Raw event function
  *
@@ -5014,6 +5044,9 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_HYPERFLUX_V2:
+        if (razer_raw_event_hyperflux_v2_mouse_buttons(intf, data, size)) {
+            return 1;
+        }
         if (razer_raw_event_hyperflux_v2_media(hdev, intf, data, size)) {
             return 1;
         }

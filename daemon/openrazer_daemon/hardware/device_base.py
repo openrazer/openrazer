@@ -56,6 +56,7 @@ class RazerDevice(DBusService):
     SERIAL_RETRY_ATTEMPTS = 5
     SERIAL_RETRY_DELAY = 0.1
     REQUIRE_VALID_SERIAL = False
+    FORCE_DEVICE_MODE = False
 
     def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter):
 
@@ -342,12 +343,17 @@ class RazerDevice(DBusService):
         if 'get_battery' in self.METHODS:
             self._init_battery_manager()
 
-        try:
-            driver_mode_default = self.DRIVER_MODE
-            self.DRIVER_MODE = self.config.getboolean(f"Device:{self.serial}", "driver_mode")
-            self.logger.info('Overriding DRIVER_MODE with "%s" from config (default: "%s")', self.DRIVER_MODE, driver_mode_default)
-        except (configparser.NoSectionError, configparser.NoOptionError):
-            pass
+        if not self.FORCE_DEVICE_MODE:
+            try:
+                driver_mode_default = self.DRIVER_MODE
+                self.DRIVER_MODE = self.config.getboolean(f"Device:{self.serial}", "driver_mode")
+                self.logger.info('Overriding DRIVER_MODE with "%s" from config (default: "%s")', self.DRIVER_MODE, driver_mode_default)
+            except (configparser.NoSectionError, configparser.NoOptionError):
+                pass
+
+        if self.FORCE_DEVICE_MODE:
+            self.logger.info('Setting device to "device" mode. Device firmware will handle special functionality')
+            self.set_device_mode(0x00, 0x00)  # Device mode
 
         if self.DRIVER_MODE:
             self.logger.info('Setting device to "driver" mode. Daemon will handle special functionality')

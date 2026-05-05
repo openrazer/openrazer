@@ -1754,6 +1754,7 @@ class RazerBasiliskV3Pro35KHyperFluxV2(RazerBasiliskV3Pro35KWireless):
     SERIAL_RETRY_ATTEMPTS = 1
     SERIAL_RETRY_DELAY = 0.5
     REQUIRE_VALID_SERIAL = True
+    FORCE_DEVICE_MODE = True
     EVENT_FILE_REGEX = None
 
     @classmethod
