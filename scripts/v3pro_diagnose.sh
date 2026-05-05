@@ -24,6 +24,29 @@ if [ -d ~/openrazer-blackshark/.git ]; then
     else
         echo "  already up to date"
     fi
+
+    # Manually rebind any Razer HID device that's currently in /sys/bus/hid/devices
+    # but missing from /sys/bus/hid/drivers/razerkraken/. Replicates a hot-replug
+    # so the new module attaches without the user touching the dongle.
+    echo "  rebinding any Razer HID devices..."
+    for hid_dev in /sys/bus/hid/devices/0003:1532:*; do
+        [ -e "$hid_dev" ] || continue
+        hid_name=$(basename "$hid_dev")
+        # if already bound to razerkraken, skip
+        if [ -e "/sys/bus/hid/drivers/razerkraken/$hid_name" ]; then
+            continue
+        fi
+        # unbind from whatever driver currently owns it (if any)
+        cur_drv=$(readlink "$hid_dev/driver" 2>/dev/null)
+        if [ -n "$cur_drv" ]; then
+            echo "$hid_name" | sudo tee "$hid_dev/driver/unbind" >/dev/null 2>&1 || true
+        fi
+        # bind to razerkraken
+        echo "$hid_name" | sudo tee /sys/bus/hid/drivers/razerkraken/bind >/dev/null 2>&1 \
+            && echo "    rebound $hid_name to razerkraken" \
+            || echo "    razerkraken refused $hid_name (probably not a razerkraken-supported PID)"
+    done
+    sleep 1
 else
     echo "  ~/openrazer-blackshark not found — clone it first:"
     echo "    cd ~ && git clone https://github.com/mehmetbayoglu/openrazer.git openrazer-blackshark"
