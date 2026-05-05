@@ -508,7 +508,7 @@ class RazerDaemon(DBusService):
                                                     additional_methods=[],
                                                     unknown_serial_counter=self._unknown_serial_counter)
                     except DeviceSerialNotReady:
-                        self.logger.warning("Serial not ready for device %s. Will retry.", sys_name)
+                        self.logger.info("Serial not ready for device %s. Will retry.", sys_name)
                         self._add_pending_device(sys_name)
                         continue
 
@@ -563,7 +563,7 @@ class RazerDaemon(DBusService):
         retry instead.
         """
         if getattr(device_class, 'REQUIRE_VALID_SERIAL', False):
-            self.logger.warning("Deferring device %s until serial is ready", sys_name)
+            self.logger.info("Deferring device %s until serial is ready", sys_name)
             self._add_pending_device(sys_name)
             return True
 
@@ -669,7 +669,7 @@ class RazerDaemon(DBusService):
                                                 additional_interfaces=None, additional_methods=[],
                                                 unknown_serial_counter=self._unknown_serial_counter)
                 except DeviceSerialNotReady:
-                    self.logger.warning("Serial not ready for device %s. Will retry.", sys_name)
+                    self.logger.info("Serial not ready for device %s. Will retry.", sys_name)
                     self._add_pending_device(sys_name)
                     return False
 
