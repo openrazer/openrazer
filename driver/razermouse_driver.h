@@ -134,9 +134,14 @@
 
 #define RAZER_MOUSE_MAX_DPI_STAGES 5
 
+struct razer_mouse_match_data {
+    const char *name;
+};
+
 struct razer_mouse_device {
     struct hid_device *hdev;
     struct mutex lock;
+    const struct razer_mouse_match_data *data;
 
     struct input_dev *input;
     struct hrtimer repeat_timer;
