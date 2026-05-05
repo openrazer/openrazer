@@ -488,11 +488,7 @@ class RazerDaemon(DBusService):
                                 if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
                                     additional_interfaces.append(alt_device.sys_path)
 
-                    # Checking permissions
-                    test_file = os.path.join(sys_path, 'device_type')
-                    file_group_id = os.stat(test_file).st_gid
-                    file_group_name = grp.getgrgid(file_group_id)[0]
-                    if os.getgid() != file_group_id and file_group_name not in RAZER_DEVICE_GROUPS:
+                    if not test_mode and not self._wait_for_device_permissions(sys_path):
                         self.logger.critical("Could not access {0}/device_type, file is not owned by openrazer or plugdev".format(sys_path))
                         break
 
@@ -519,6 +515,30 @@ class RazerDaemon(DBusService):
 
                     device_number += 1
 
+    def _wait_for_device_permissions(self, sys_path, timeout=5.0):
+        """
+        Wait for udev to finish applying permissions to OpenRazer sysfs files.
+
+        The hid add/bind event can reach the daemon before the udev helper has
+        changed the sysfs file group. Reading the serial before that point turns
+        hotplug into a race.
+        """
+        test_file = os.path.join(sys_path, 'device_type')
+        deadline = time.monotonic() + timeout
+
+        while True:
+            try:
+                file_group_id = os.stat(test_file).st_gid
+                file_group_name = grp.getgrgid(file_group_id)[0]
+                if (os.getgid() == file_group_id or file_group_name in RAZER_DEVICE_GROUPS) and os.access(test_file, os.R_OK):
+                    return True
+            except (FileNotFoundError, KeyError):
+                pass
+
+            if time.monotonic() >= deadline:
+                return False
+            time.sleep(0.1)
+
     def _add_device(self, device):
         """
         Add device event from udev
@@ -536,13 +556,14 @@ class RazerDaemon(DBusService):
 
             if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
                 self.logger.info('Found valid device.%d: %s', device_number, sys_name)
+                if not self._wait_for_device_permissions(sys_path):
+                    self.logger.critical("Could not access {0}/device_type, file is not owned by openrazer or plugdev".format(sys_path))
+                    break
+
                 razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
                                             persistence=self._persistence, testing=self._test_dir is not None,
                                             additional_interfaces=None, additional_methods=[],
                                             unknown_serial_counter=self._unknown_serial_counter)
-
-                # Its a udev event so currently the device hasn't been chmodded yet
-                time.sleep(0.2)
 
                 # Wireless devices sometimes don't listen
                 device_serial = razer_device.get_serial()
