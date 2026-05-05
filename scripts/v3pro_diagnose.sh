@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# V3 Pro diagnostic — figures out why charge_level returns -1.
+# Usage:
+#   curl -sL <url> | bash
+# or:
+#   bash v3pro_diagnose.sh
+
+set -u
+
+echo "=== 1. Razer device on USB bus ==="
+lsusb | grep -i razer || echo "  no Razer device found via lsusb"
+
+echo ""
+echo "=== 2. Loaded razer kernel modules ==="
+lsmod | grep -i raze || echo "  no razer modules loaded"
+
+echo ""
+echo "=== 3. razerkraken module info ==="
+modinfo razerkraken 2>&1 | grep -E "filename|srcversion|version" | head -5
+
+echo ""
+echo "=== 4. Bound device path ==="
+DEV=$(ls /sys/bus/hid/drivers/razerkraken/ 2>/dev/null | grep -iE '057[67]' | head -1)
+if [ -z "$DEV" ]; then
+    echo "  no V3 Pro bound to razerkraken (not connected, or driver not attached)"
+    echo "  contents of /sys/bus/hid/drivers/razerkraken/:"
+    ls /sys/bus/hid/drivers/razerkraken/ 2>/dev/null
+    exit 1
+fi
+echo "  $DEV"
+SYSFS="/sys/bus/hid/drivers/razerkraken/$DEV"
+
+echo ""
+echo "=== 5. Permissions on charge_level ==="
+ls -la "$SYSFS/charge_level"
+
+echo ""
+echo "=== 6. Read with regular user ==="
+RESULT_USER=$(cat "$SYSFS/charge_level" 2>&1)
+echo "  result: $RESULT_USER"
+
+echo ""
+echo "=== 7. Read with sudo ==="
+RESULT_ROOT=$(sudo cat "$SYSFS/charge_level" 2>&1)
+echo "  result: $RESULT_ROOT"
+
+echo ""
+echo "=== 8. udev rules files ==="
+for f in /etc/udev/rules.d/*razer* /usr/lib/udev/rules.d/*razer* /run/udev/rules.d/*razer*; do
+    [ -f "$f" ] || continue
+    echo "--- $f ---"
+    cat "$f"
+    echo ""
+done
+
+echo ""
+echo "=== 9. Recent kernel messages from razerkraken ==="
+sudo dmesg | grep -i razer | tail -20
+
+echo ""
+echo "=== 10. git status of the fork ==="
+if [ -d ~/openrazer-blackshark/.git ]; then
+    cd ~/openrazer-blackshark
+    git log -3 --oneline
+    echo "  branch: $(git branch --show-current)"
+fi
+
+echo ""
+echo "=== DIAGNOSIS ==="
+if [ "$RESULT_USER" = "-1" ] && [ "$RESULT_ROOT" = "-1" ]; then
+    echo "  Both reads return -1 → driver code issue, NOT permissions"
+    echo "  Likely causes:"
+    echo "    - V3 Pro headset is OFF (turn it on, dongle queries headset over 2.4GHz)"
+    echo "    - Stale source in /usr/src — re-pull and re-install:"
+    echo "        cd ~/openrazer-blackshark && git pull && sudo make setup_dkms"
+    echo "        sudo dkms install openrazer-driver/3.12.1 --force"
+    echo "        sudo rmmod razerkraken && sudo modprobe razerkraken"
+elif [ "$RESULT_USER" = "-1" ] && [ "$RESULT_ROOT" != "-1" ]; then
+    echo "  User read fails, sudo works → udev permission issue"
+    echo "  Check the udev rules files above for conflicting ownership/perms"
+    echo "  Try:  sudo udevadm control --reload-rules && sudo udevadm trigger"
+elif [ "$RESULT_USER" != "-1" ]; then
+    echo "  charge_level returns $RESULT_USER (real battery × 2.55 — divide by 2.55 for %)"
+    echo "  Driver is working. Run the capture script next:"
+    echo "    ~/Documents/v3-research-2026-05-03/v3pro_linux_capture.sh"
+fi
