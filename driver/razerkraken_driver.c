@@ -1542,31 +1542,105 @@ static ssize_t razer_attr_write_thx_spatial_audio(struct device *dev, struct dev
 /* ---- BlackShark V3 Pro sysfs functions (untested — third-party RE) ---- */
 
 /*
+ * Replay the Synapse startup wake sequence on V3 wireless. Without these
+ * three priming SETs the dongle silently drops every subsequent wireless
+ * query on Linux. Decoded from Synapse usbmon captures.
+ *
+ *   1. cls=0x02 dir=0x00   (init step 1)
+ *   2. cls=0x2A dir=0x00   (init step 2)
+ *   3. cls=0x2A dir=0x80   (init step 3)
+ *
+ * Must NOT hold device->lock — this issues 3 control transfers and sleeps.
+ */
+static void razer_blackshark_v3_handshake(struct razer_kraken_device *device)
+{
+    static const struct { u8 cls; u8 dir; } primers[] = {
+        { 0x02, 0x00 },
+        { 0x2A, 0x00 },
+        { 0x2A, 0x80 },
+    };
+    u8 prime[RAZER_BLACKSHARK_REPORT_LEN];
+    u8 *kp;
+    int idx, j, ret;
+    u8 crc;
+
+    for (idx = 0; idx < (int)ARRAY_SIZE(primers); idx++) {
+        razer_blackshark_v3pro_build(prime, primers[idx].cls, 0x00, NULL, 0);
+        prime[9] = primers[idx].dir;
+        crc = 0;
+        for (j = 0; j < 62; j++) crc ^= prime[j];
+        prime[62] = crc;
+
+        kp = kmemdup(prime, RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
+        if (!kp)
+            return;
+        ret = hid_hw_raw_request(device->hdev, 0x02, kp,
+                                 RAZER_BLACKSHARK_REPORT_LEN,
+                                 HID_OUTPUT_REPORT, HID_REQ_SET_REPORT);
+        kfree(kp);
+        printk(KERN_DEBUG "razerkraken v3 handshake cls=%02x dir=%02x: %d\n",
+               primers[idx].cls, primers[idx].dir, ret);
+        /* 2ms gap mirrors Windows-with-driver pacing. Earlier 30ms was wrong
+         * — Synapse fires SETs back-to-back at ~3ms intervals; a longer gap
+         * may let the firmware's handshake state machine reset between
+         * primers. */
+        usleep_range(2000, 3000);
+    }
+}
+
+/*
+ * Issue cls=0x21 battery query and poll GET_REPORT for the reply.
+ *
+ * The standard send_cmd → raw_event → completion path times out for V3
+ * wireless on Linux (the dongle never pushes int-IN on EP 0x84). The
+ * firmware does answer via control GET_REPORT once the handshake has
+ * primed it, so we drive that directly here.
+ *
+ * Caller must hold device->lock. Returns 0 if a reply landed in
+ * device->data, -ETIMEDOUT otherwise.
+ */
+static int razer_blackshark_v3_battery_query(struct razer_kraken_device *device)
+{
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    bool is_v3_pro = (device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
+                      device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED);
+
+    /* V3 Pro firmware needs cls=0x21 with args=[0x00] (data_size=5).
+     * V3 wireless firmware needs cls=0x21 with NO args (data_size=4) —
+     * exactly what Synapse sends per the cold-plug pcap analysis.
+     * This branch matches the 2026-05-02 working logic (commit a5d74fd5). */
+    if (is_v3_pro) {
+        const u8 args[1] = { 0x00 };
+        razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
+                                     BLACKSHARK_V3_PRO_BATTERY_ID, args, sizeof(args));
+    } else {
+        razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
+                                     BLACKSHARK_V3_PRO_BATTERY_ID, NULL, 0);
+    }
+    /* send_cmd issues the SET_REPORT through hid-core and waits up to 1s on
+     * dev->vendor_response, which raw_event() fires when the firmware pushes
+     * the int-IN reply. V3 Pro replies fast (~40ms); V3 wireless never
+     * replies and times out (firmware-side gate). */
+    return razer_blackshark_send_cmd(device, cmdbuf);
+}
+
+/*
  * Both V3 and V3 Pro return battery as a 0..100 byte. The standard openrazer
  * convention for charge_level is a 0..255 byte (mamba.py scales by 255/100
  * to display percent). Multiply by 255/100 here so the daemon's existing
  * mamba.get_battery does the right thing.
- *
- * Same V3 Pro envelope (cls=0x21 sub=0x00 cnt=1 args=[0x00]) used for both
- * V3 and V3 Pro — wire bytes are byte-identical to what the V3 envelope
- * produces, no PID branching needed.
  */
 static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    /* Verbatim restore of the V3 Pro working logic from commit 8c944f2d.
-     * Uses the V3 Pro envelope (cls=0x21 sub=0x00 cnt=1 args=[0x00]) for
-     * BOTH V3 and V3 Pro — wire bytes are identical, no PID branching.
-     * Plus push-cache fallback for unsolicited cls=0x20 sub=0x02 reports. */
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
-    const u8 args[1] = { 0x00 };
     int level = -1;
 
-    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
-                                 BLACKSHARK_V3_PRO_BATTERY_ID, args, sizeof(args));
+    razer_blackshark_v3_handshake(device);
+
     mutex_lock(&device->lock);
-    razer_blackshark_send_cmd(device, cmdbuf);
-    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
+    if (razer_blackshark_v3_battery_query(device) == 0 &&
+        device->data[1] == 0x02 &&
+        device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
         level = (device->data[13] * 255) / 100;
     mutex_unlock(&device->lock);
 
@@ -2226,6 +2300,10 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
     struct razer_kraken_device *device = dev_get_drvdata(&hdev->dev);
+
+    /* PROBE: log every raw_event so we can see what's actually arriving */
+    print_hex_dump(KERN_INFO, "razerkraken raw_event: ", DUMP_PREFIX_OFFSET, 16, 1,
+                   data, min(size, 24), false);
 
     if (size == 33) {
         memcpy(&device->data[0], &data[0], size);
