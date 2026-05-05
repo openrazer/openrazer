@@ -490,11 +490,25 @@ static ssize_t razer_attr_read_kbd_layout(struct device *dev, struct device_attr
     struct razer_kbd_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
+    int attempt;
 
-    request = get_razer_report(0x00, 0x86, 0x02);
-    request.transaction_id.id = 0xFF;
+    for (attempt = 0; attempt < 5; attempt++) {
+        memset(&request, 0, sizeof(request));
+        memset(&response, 0, sizeof(response));
 
-    razer_send_payload(device, &request, &response);
+        request = get_razer_report(0x00, 0x86, 0x02);
+        request.transaction_id.id = razer_is_deathstalker_v2_wireless(device) ? 0x9F : 0xFF;
+
+        err = razer_send_payload(device, &request, &response);
+        if (err == 0 && response.arguments[0] != 0)
+            break;
+
+        if (!razer_is_deathstalker_v2_wireless(device))
+            break;
+
+        msleep(500);
+    }
 
     return sprintf(buf, "%02x\n", response.arguments[0]);
 }
