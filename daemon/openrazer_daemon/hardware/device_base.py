@@ -19,6 +19,10 @@ from openrazer_daemon.misc import effect_sync
 from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 
 
+class DeviceSerialNotReady(RuntimeError):
+    """Raised when a device must not be registered with a generated serial."""
+
+
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=E1102
 # See https://github.com/PyCQA/pylint/issues/1493
@@ -51,6 +55,7 @@ class RazerDevice(DBusService):
     PRE_SERIAL_DRIVER_MODE_DELAY = 0.5
     SERIAL_RETRY_ATTEMPTS = 5
     SERIAL_RETRY_DELAY = 0.1
+    REQUIRE_VALID_SERIAL = False
 
     def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter):
 
@@ -1014,6 +1019,9 @@ class RazerDevice(DBusService):
             # - "As printed in the D cover"
             # - hex: 01 01 01 01 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16
             if not re.fullmatch(r"[\dA-Z]+", serial):
+                if self.REQUIRE_VALID_SERIAL:
+                    raise DeviceSerialNotReady("Device serial is not ready")
+
                 self.logger.warning("Invalid serial number found, using a generated one.")
                 self.logger.warning("Original value: %s" % serial)
                 vid, pid = self.get_vid_pid()
