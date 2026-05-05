@@ -301,460 +301,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
 
-    char *device_type;
-
-    switch (device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
-        device_type = "Razer DeathAdder 3.5G";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
-        device_type = "Razer DeathAdder 3.5G Black";
-        break;
-
-    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
-        device_type = "Razer Mamba 2012 (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
-        device_type = "Razer Mamba 2012 (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
-        device_type = "Razer Mamba (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
-        device_type = "Razer Mamba (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
-        device_type = "Razer Mamba Tournament Edition";
-        break;
-
-    case USB_DEVICE_ID_RAZER_ABYSSUS:
-        device_type = "Razer Abyssus 2014";
-        break;
-
-    case USB_DEVICE_ID_RAZER_ABYSSUS_1800:
-        device_type = "Razer Abyssus 1800";
-        break;
-
-    case USB_DEVICE_ID_RAZER_ABYSSUS_2000:
-        device_type = "Razer Abyssus 2000";
-        break;
-
-    case USB_DEVICE_ID_RAZER_IMPERATOR:
-        device_type = "Razer Imperator 2012";
-        break;
-
-    case USB_DEVICE_ID_RAZER_OUROBOROS:
-        device_type = "Razer Ouroboros";
-        break;
-
-    case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        device_type = "Razer Orochi 2011";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
-        device_type = "Razer DeathAdder 2013";
-        break;
-
-    case USB_DEVICE_ID_RAZER_OROCHI_2013:
-        device_type = "Razer Orochi 2013";
-        break;
-
-    case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
-        device_type = "Razer Orochi (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
-        device_type = "Razer DeathAdder Chroma";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_HEX_RED:
-        device_type = "Razer Naga Hex (Red)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_HEX:
-        device_type = "Razer Naga Hex";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA:
-        device_type = "Razer Naga";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_2012:
-        device_type = "Razer Naga 2012";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
-        device_type = "Razer Naga Epic";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_2014:
-        device_type = "Razer Naga 2014";
-        break;
-
-    case USB_DEVICE_ID_RAZER_TAIPAN:
-        device_type = "Razer Taipan";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-        device_type = "Razer Naga Hex V2";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
-        device_type = "Razer Naga Chroma";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_X:
-        device_type = "Razer Naga X";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
-        device_type = "Razer DeathAdder Elite";
-        break;
-
-    case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
-        device_type = "Razer Abyssus V2";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
-        device_type = "Razer Diamondback Chroma";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
-        device_type = "Razer DeathAdder 3500";
-        break;
-
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-        device_type = "Razer Lancehead (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-        device_type = "Razer Lancehead (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
-        device_type = "Razer Lancehead Tournament Edition";
-        break;
-
-    case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
-        device_type = "Razer Mamba Elite";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL:
-        device_type = "Razer DeathAdder Essential";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021:
-        device_type = "Razer DeathAdder Essential (2021)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
-        device_type = "Razer Naga Trinity";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_1800:
-        device_type = "Razer DeathAdder 1800";
-        break;
-
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-        device_type = "Razer Lancehead Wireless (Receiver)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-        device_type = "Razer Lancehead Wireless (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
-        device_type = "Razer Mamba Wireless (Receiver)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-        device_type = "Razer Mamba Wireless (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION:
-        device_type = "Razer Abyssus Elite (D.Va Edition)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL:
-        device_type = "Razer Abyssus Essential";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION:
-        device_type = "Razer DeathAdder Essential (White Edition)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER:
-        device_type = "Razer Viper";
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_MINI:
-        device_type = "Razer Viper Mini";
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED:
-        device_type = "Razer Viper Mini Signature Edition (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
-        device_type = "Razer Viper Mini Signature Edition (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
-        device_type = "Razer Viper Ultimate (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
-        device_type = "Razer Viper Ultimate (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRED:
-        device_type = "Razer Viper V2 Pro (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS:
-        device_type = "Razer Viper V2 Pro (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK:
-        device_type = "Razer Basilisk";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
-        device_type = "Razer Basilisk Essential";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
-        device_type = "Razer Basilisk Ultimate (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-        device_type = "Razer Basilisk Ultimate (Receiver)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_V2:
-        device_type = "Razer Basilisk V2";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_V3:
-        device_type = "Razer Basilisk V3";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-        device_type = "Razer DeathAdder V2";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
-        device_type = "Razer DeathAdder V2 Pro (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
-        device_type = "Razer DeathAdder V2 Pro (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V3:
-        device_type = "Razer DeathAdder V3";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED_ALT:
-        device_type = "Razer DeathAdder V3 Pro (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS_ALT:
-        device_type = "Razer DeathAdder V3 Pro (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRED:
-        device_type = "Razer DeathAdder V3 HyperSpeed (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRELESS:
-        device_type = "Razer DeathAdder V3 HyperSpeed (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
-        device_type = "Razer HyperPolling Wireless Dongle";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
-        device_type = "Razer Basilisk V3 Pro (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
-        device_type = "Razer Basilisk V3 Pro (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
-        device_type = "Razer Basilisk V3 35K";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
-        device_type = "Razer Basilisk V3 Pro 35K (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
-        device_type = "Razer Basilisk V3 Pro 35K (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
-        device_type = "Razer Basilisk V3 Pro 35K Phantom Green Edition (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
-        device_type = "Razer Basilisk V3 Pro 35K Phantom Green Edition (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
-        device_type = "Razer DeathAdder V2 Mini";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
-        device_type = "Razer DeathAdder 2000";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
-        device_type = "Razer DeathAdder V2 X HyperSpeed";
-        break;
-
-    case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
-        device_type = "Razer Atheris (Receiver)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
-        device_type = "Razer Basilisk X HyperSpeed";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
-        device_type = "Razer Naga Left-Handed Edition 2020";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
-        device_type = "Razer Naga Pro (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
-        device_type = "Razer Naga Pro (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_8K:
-        device_type = "Razer Viper 8KHz";
-        break;
-
-    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
-        device_type = "Razer Orochi V2 (Receiver)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
-        device_type = "Razer Orochi V2 (Bluetooth)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
-        device_type = "Razer Pro Click (Receiver)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
-        device_type = "Razer Pro Click (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
-        device_type = "Razer Naga Epic Chroma";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
-        device_type = "Razer Naga Epic Chroma Dock";
-        break;
-
-    case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
-        device_type = "Razer Pro Click Mini (Receiver)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
-        device_type = "Razer DeathAdder V2 Lite";
-        break;
-
-    case USB_DEVICE_ID_RAZER_COBRA:
-        device_type = "Razer Cobra";
-        break;
-
-    case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRELESS:
-        device_type = "Razer Cobra Pro (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRED:
-        device_type = "Razer Cobra Pro (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
-        device_type = "Razer Viper V3 HyperSpeed";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
-        device_type = "Razer Naga V2 HyperSpeed (Receiver)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
-        device_type = "Razer Basilisk V3 X HyperSpeed";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER:
-        device_type = "Razer Basilisk Mobile (Receiver)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED:
-        device_type = "Razer Basilisk Mobile (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED:
-        device_type = "Razer DeathAdder V4 Pro (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
-        device_type = "Razer DeathAdder V4 Pro (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
-        device_type = "Razer Viper V3 Pro (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
-        device_type = "Razer Viper V3 Pro (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
-        device_type = "Razer Naga V2 Pro (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
-        device_type = "Razer Naga V2 Pro (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
-        device_type = "Razer Pro Click V2 Vertical Edition (Wireless)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
-        device_type = "Razer Pro Click V2 Vertical Edition (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
-        device_type = "Razer Pro Click V2 (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
-        device_type = "Razer Pro Click V2 (Wireless)";
-        break;
-
-    default:
-        device_type = "Unknown Device";
-    }
-
-    return sysfs_emit(buf, "%s\n", device_type);
+    return sysfs_emit(buf, "%s\n", device->data->name);
 }
 
 /**
@@ -6308,6 +5855,8 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     // Init data
     razer_mouse_init(dev, hdev);
 
+    dev->data = (struct razer_mouse_match_data *)id->driver_data;
+
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
@@ -8513,123 +8062,567 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
     hid_info(hdev, "Razer Device disconnected\n");
 }
 
+static const struct razer_mouse_match_data razer_deathadder_3_5g_data = {
+    .name = "Razer DeathAdder 3.5G",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_3_5g_black_data = {
+    .name = "Razer DeathAdder 3.5G Black",
+};
+
+static const struct razer_mouse_match_data razer_mamba_2012_wired_data = {
+    .name = "Razer Mamba 2012 (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_mamba_2012_wireless_data = {
+    .name = "Razer Mamba 2012 (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_mamba_wired_data = {
+    .name = "Razer Mamba (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_mamba_wireless_data = {
+    .name = "Razer Mamba (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_mamba_te_wired_data = {
+    .name = "Razer Mamba Tournament Edition",
+};
+
+static const struct razer_mouse_match_data razer_abyssus_data = {
+    .name = "Razer Abyssus 2014",
+};
+
+static const struct razer_mouse_match_data razer_abyssus_1800_data = {
+    .name = "Razer Abyssus 1800",
+};
+
+static const struct razer_mouse_match_data razer_abyssus_2000_data = {
+    .name = "Razer Abyssus 2000",
+};
+
+static const struct razer_mouse_match_data razer_imperator_data = {
+    .name = "Razer Imperator 2012",
+};
+
+static const struct razer_mouse_match_data razer_ouroboros_data = {
+    .name = "Razer Ouroboros",
+};
+
+static const struct razer_mouse_match_data razer_orochi_2011_data = {
+    .name = "Razer Orochi 2011",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_2013_data = {
+    .name = "Razer DeathAdder 2013",
+};
+
+static const struct razer_mouse_match_data razer_orochi_2013_data = {
+    .name = "Razer Orochi 2013",
+};
+
+static const struct razer_mouse_match_data razer_orochi_chroma_data = {
+    .name = "Razer Orochi (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_chroma_data = {
+    .name = "Razer DeathAdder Chroma",
+};
+
+static const struct razer_mouse_match_data razer_naga_hex_red_data = {
+    .name = "Razer Naga Hex (Red)",
+};
+
+static const struct razer_mouse_match_data razer_naga_hex_data = {
+    .name = "Razer Naga Hex",
+};
+
+static const struct razer_mouse_match_data razer_naga_data = {
+    .name = "Razer Naga",
+};
+
+static const struct razer_mouse_match_data razer_naga_2012_data = {
+    .name = "Razer Naga 2012",
+};
+
+static const struct razer_mouse_match_data razer_naga_epic_data = {
+    .name = "Razer Naga Epic",
+};
+
+static const struct razer_mouse_match_data razer_naga_2014_data = {
+    .name = "Razer Naga 2014",
+};
+
+static const struct razer_mouse_match_data razer_taipan_data = {
+    .name = "Razer Taipan",
+};
+
+static const struct razer_mouse_match_data razer_naga_hex_v2_data = {
+    .name = "Razer Naga Hex V2",
+};
+
+static const struct razer_mouse_match_data razer_naga_chroma_data = {
+    .name = "Razer Naga Chroma",
+};
+
+static const struct razer_mouse_match_data razer_naga_x_data = {
+    .name = "Razer Naga X",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_elite_data = {
+    .name = "Razer DeathAdder Elite",
+};
+
+static const struct razer_mouse_match_data razer_abyssus_v2_data = {
+    .name = "Razer Abyssus V2",
+};
+
+static const struct razer_mouse_match_data razer_diamondback_chroma_data = {
+    .name = "Razer Diamondback Chroma",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_3500_data = {
+    .name = "Razer DeathAdder 3500",
+};
+
+static const struct razer_mouse_match_data razer_lancehead_wired_data = {
+    .name = "Razer Lancehead (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_lancehead_wireless_data = {
+    .name = "Razer Lancehead (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_lancehead_te_wired_data = {
+    .name = "Razer Lancehead Tournament Edition",
+};
+
+static const struct razer_mouse_match_data razer_mamba_elite_data = {
+    .name = "Razer Mamba Elite",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_essential_data = {
+    .name = "Razer DeathAdder Essential",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_essential_2021_data = {
+    .name = "Razer DeathAdder Essential (2021)",
+};
+
+static const struct razer_mouse_match_data razer_naga_trinity_data = {
+    .name = "Razer Naga Trinity",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_1800_data = {
+    .name = "Razer DeathAdder 1800",
+};
+
+static const struct razer_mouse_match_data razer_lancehead_wireless_receiver_data = {
+    .name = "Razer Lancehead Wireless (Receiver)",
+};
+
+static const struct razer_mouse_match_data razer_lancehead_wireless_wired_data = {
+    .name = "Razer Lancehead Wireless (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_mamba_wireless_receiver_data = {
+    .name = "Razer Mamba Wireless (Receiver)",
+};
+
+static const struct razer_mouse_match_data razer_mamba_wireless_wired_data = {
+    .name = "Razer Mamba Wireless (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_abyssus_elite_dva_edition_data = {
+    .name = "Razer Abyssus Elite (D.Va Edition)",
+};
+
+static const struct razer_mouse_match_data razer_abyssus_essential_data = {
+    .name = "Razer Abyssus Essential",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_essential_white_edition_data = {
+    .name = "Razer DeathAdder Essential (White Edition)",
+};
+
+static const struct razer_mouse_match_data razer_viper_data = {
+    .name = "Razer Viper",
+};
+
+static const struct razer_mouse_match_data razer_viper_mini_data = {
+    .name = "Razer Viper Mini",
+};
+
+static const struct razer_mouse_match_data razer_viper_mini_se_wired_data = {
+    .name = "Razer Viper Mini Signature Edition (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_viper_mini_se_wireless_data = {
+    .name = "Razer Viper Mini Signature Edition (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_viper_ultimate_wired_data = {
+    .name = "Razer Viper Ultimate (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_viper_ultimate_wireless_data = {
+    .name = "Razer Viper Ultimate (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_viper_v2_pro_wired_data = {
+    .name = "Razer Viper V2 Pro (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_viper_v2_pro_wireless_data = {
+    .name = "Razer Viper V2 Pro (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_data = {
+    .name = "Razer Basilisk",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_essential_data = {
+    .name = "Razer Basilisk Essential",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_ultimate_wired_data = {
+    .name = "Razer Basilisk Ultimate (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_ultimate_receiver_data = {
+    .name = "Razer Basilisk Ultimate (Receiver)",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_v2_data = {
+    .name = "Razer Basilisk V2",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_v3_data = {
+    .name = "Razer Basilisk V3",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_v2_data = {
+    .name = "Razer DeathAdder V2",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_v2_pro_wired_data = {
+    .name = "Razer DeathAdder V2 Pro (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_v2_pro_wireless_data = {
+    .name = "Razer DeathAdder V2 Pro (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_v3_data = {
+    .name = "Razer DeathAdder V3",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_v3_pro_wired_data = {
+    .name = "Razer DeathAdder V3 Pro (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_v3_pro_wireless_data = {
+    .name = "Razer DeathAdder V3 Pro (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_v3_hyperspeed_wired_data = {
+    .name = "Razer DeathAdder V3 HyperSpeed (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_v3_hyperspeed_wireless_data = {
+    .name = "Razer DeathAdder V3 HyperSpeed (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_hyperpolling_wireless_dongle_data = {
+    .name = "Razer HyperPolling Wireless Dongle",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_v3_pro_wired_data = {
+    .name = "Razer Basilisk V3 Pro (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_v3_pro_wireless_data = {
+    .name = "Razer Basilisk V3 Pro (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_v3_35k_data = {
+    .name = "Razer Basilisk V3 35K",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_v3_pro_35k_wired_data = {
+    .name = "Razer Basilisk V3 Pro 35K (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_v3_pro_35k_wireless_data = {
+    .name = "Razer Basilisk V3 Pro 35K (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_v3_pro_35k_phantom_green_edition_wired_data = {
+    .name = "Razer Basilisk V3 Pro 35K Phantom Green Edition (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_v3_pro_35k_phantom_green_edition_wireless_data = {
+    .name = "Razer Basilisk V3 Pro 35K Phantom Green Edition (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_v2_mini_data = {
+    .name = "Razer DeathAdder V2 Mini",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_2000_data = {
+    .name = "Razer DeathAdder 2000",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_v2_x_hyperspeed_data = {
+    .name = "Razer DeathAdder V2 X HyperSpeed",
+};
+
+static const struct razer_mouse_match_data razer_atheris_receiver_data = {
+    .name = "Razer Atheris (Receiver)",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_x_hyperspeed_data = {
+    .name = "Razer Basilisk X HyperSpeed",
+};
+
+static const struct razer_mouse_match_data razer_naga_left_handed_2020_data = {
+    .name = "Razer Naga Left-Handed Edition 2020",
+};
+
+static const struct razer_mouse_match_data razer_naga_pro_wired_data = {
+    .name = "Razer Naga Pro (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_naga_pro_wireless_data = {
+    .name = "Razer Naga Pro (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_viper_8k_data = {
+    .name = "Razer Viper 8KHz",
+};
+
+static const struct razer_mouse_match_data razer_orochi_v2_receiver_data = {
+    .name = "Razer Orochi V2 (Receiver)",
+};
+
+static const struct razer_mouse_match_data razer_orochi_v2_bluetooth_data = {
+    .name = "Razer Orochi V2 (Bluetooth)",
+};
+
+static const struct razer_mouse_match_data razer_pro_click_receiver_data = {
+    .name = "Razer Pro Click (Receiver)",
+};
+
+static const struct razer_mouse_match_data razer_pro_click_wired_data = {
+    .name = "Razer Pro Click (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_naga_epic_chroma_data = {
+    .name = "Razer Naga Epic Chroma",
+};
+
+static const struct razer_mouse_match_data razer_naga_epic_chroma_dock_data = {
+    .name = "Razer Naga Epic Chroma Dock",
+};
+
+static const struct razer_mouse_match_data razer_pro_click_mini_receiver_data = {
+    .name = "Razer Pro Click Mini (Receiver)",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_v2_lite_data = {
+    .name = "Razer DeathAdder V2 Lite",
+};
+
+static const struct razer_mouse_match_data razer_cobra_data = {
+    .name = "Razer Cobra",
+};
+
+static const struct razer_mouse_match_data razer_cobra_pro_wireless_data = {
+    .name = "Razer Cobra Pro (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_cobra_pro_wired_data = {
+    .name = "Razer Cobra Pro (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_viper_v3_hyperspeed_data = {
+    .name = "Razer Viper V3 HyperSpeed",
+};
+
+static const struct razer_mouse_match_data razer_naga_v2_hyperspeed_receiver_data = {
+    .name = "Razer Naga V2 HyperSpeed (Receiver)",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_v3_x_hyperspeed_data = {
+    .name = "Razer Basilisk V3 X HyperSpeed",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_mobile_receiver_data = {
+    .name = "Razer Basilisk Mobile (Receiver)",
+};
+
+static const struct razer_mouse_match_data razer_basilisk_mobile_wired_data = {
+    .name = "Razer Basilisk Mobile (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_v4_pro_wired_data = {
+    .name = "Razer DeathAdder V4 Pro (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_deathadder_v4_pro_wireless_data = {
+    .name = "Razer DeathAdder V4 Pro (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_viper_v3_pro_wired_data = {
+    .name = "Razer Viper V3 Pro (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_viper_v3_pro_wireless_data = {
+    .name = "Razer Viper V3 Pro (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_naga_v2_pro_wired_data = {
+    .name = "Razer Naga V2 Pro (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_naga_v2_pro_wireless_data = {
+    .name = "Razer Naga V2 Pro (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_pro_click_v2_vertical_edition_wireless_data = {
+    .name = "Razer Pro Click V2 Vertical Edition (Wireless)",
+};
+
+static const struct razer_mouse_match_data razer_pro_click_v2_vertical_edition_wired_data = {
+    .name = "Razer Pro Click V2 Vertical Edition (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_pro_click_v2_wired_data = {
+    .name = "Razer Pro Click V2 (Wired)",
+};
+
+static const struct razer_mouse_match_data razer_pro_click_v2_wireless_data = {
+    .name = "Razer Pro Click V2 (Wireless)",
+};
+
 /**
  * Device ID mapping table
  */
 static const struct hid_device_id razer_devices[] = {
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_2011) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_1800) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_2000) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_3_5G) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX_RED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_2012) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_2014) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TAIPAN) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_IMPERATOR) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OUROBOROS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_2013) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_2013) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_CHROMA) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX_V2) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_CHROMA) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ELITE) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_V2) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_3500) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_TRINITY) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_ELITE) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_1800) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_MINI) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V2) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_2000) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_X) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_8K) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_COBRA_PRO_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_COBRA_PRO_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED_ALT) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS_ALT) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_35K) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_COBRA) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_EPIC) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED) },
-    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_2011), .driver_data = (kernel_ulong_t) &razer_orochi_2011_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_1800), .driver_data = (kernel_ulong_t) &razer_abyssus_1800_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_2000), .driver_data = (kernel_ulong_t) &razer_abyssus_2000_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_3_5G), .driver_data = (kernel_ulong_t) &razer_deathadder_3_5g_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK), .driver_data = (kernel_ulong_t) &razer_deathadder_3_5g_black_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX_RED), .driver_data = (kernel_ulong_t) &razer_naga_hex_red_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA), .driver_data = (kernel_ulong_t) &razer_naga_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_2012), .driver_data = (kernel_ulong_t) &razer_naga_2012_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_2014), .driver_data = (kernel_ulong_t) &razer_naga_2014_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX), .driver_data = (kernel_ulong_t) &razer_naga_hex_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED), .driver_data = (kernel_ulong_t) &razer_mamba_2012_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS), .driver_data = (kernel_ulong_t) &razer_mamba_2012_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRED), .driver_data = (kernel_ulong_t) &razer_mamba_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRELESS), .driver_data = (kernel_ulong_t) &razer_mamba_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED), .driver_data = (kernel_ulong_t) &razer_mamba_te_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS), .driver_data = (kernel_ulong_t) &razer_abyssus_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TAIPAN), .driver_data = (kernel_ulong_t) &razer_taipan_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_IMPERATOR), .driver_data = (kernel_ulong_t) &razer_imperator_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OUROBOROS), .driver_data = (kernel_ulong_t) &razer_ouroboros_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_2013), .driver_data = (kernel_ulong_t) &razer_deathadder_2013_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_2013), .driver_data = (kernel_ulong_t) &razer_orochi_2013_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_CHROMA), .driver_data = (kernel_ulong_t) &razer_orochi_chroma_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA), .driver_data = (kernel_ulong_t) &razer_deathadder_chroma_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_HEX_V2), .driver_data = (kernel_ulong_t) &razer_naga_hex_v2_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_CHROMA), .driver_data = (kernel_ulong_t) &razer_naga_chroma_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA), .driver_data = (kernel_ulong_t) &razer_naga_epic_chroma_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK), .driver_data = (kernel_ulong_t) &razer_naga_epic_chroma_dock_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ELITE), .driver_data = (kernel_ulong_t) &razer_deathadder_elite_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA), .driver_data = (kernel_ulong_t) &razer_diamondback_chroma_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_V2), .driver_data = (kernel_ulong_t) &razer_abyssus_v2_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_3500), .driver_data = (kernel_ulong_t) &razer_deathadder_3500_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED), .driver_data = (kernel_ulong_t) &razer_lancehead_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS), .driver_data = (kernel_ulong_t) &razer_lancehead_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED), .driver_data = (kernel_ulong_t) &razer_lancehead_te_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_TRINITY), .driver_data = (kernel_ulong_t) &razer_naga_trinity_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_ELITE), .driver_data = (kernel_ulong_t) &razer_mamba_elite_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL), .driver_data = (kernel_ulong_t) &razer_deathadder_essential_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_2021), .driver_data = (kernel_ulong_t) &razer_deathadder_essential_2021_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_1800), .driver_data = (kernel_ulong_t) &razer_deathadder_1800_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER), .driver_data = (kernel_ulong_t) &razer_lancehead_wireless_receiver_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED), .driver_data = (kernel_ulong_t) &razer_lancehead_wireless_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER), .driver_data = (kernel_ulong_t) &razer_mamba_wireless_receiver_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED), .driver_data = (kernel_ulong_t) &razer_mamba_wireless_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_ELITE_DVA_EDITION), .driver_data = (kernel_ulong_t) &razer_abyssus_elite_dva_edition_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ABYSSUS_ESSENTIAL), .driver_data = (kernel_ulong_t) &razer_abyssus_essential_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_ESSENTIAL_WHITE_EDITION), .driver_data = (kernel_ulong_t) &razer_deathadder_essential_white_edition_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER), .driver_data = (kernel_ulong_t) &razer_viper_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_MINI), .driver_data = (kernel_ulong_t) &razer_viper_mini_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED), .driver_data = (kernel_ulong_t) &razer_viper_mini_se_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS), .driver_data = (kernel_ulong_t) &razer_viper_mini_se_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED), .driver_data = (kernel_ulong_t) &razer_viper_ultimate_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS), .driver_data = (kernel_ulong_t) &razer_viper_ultimate_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK), .driver_data = (kernel_ulong_t) &razer_basilisk_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL), .driver_data = (kernel_ulong_t) &razer_basilisk_essential_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER), .driver_data = (kernel_ulong_t) &razer_basilisk_ultimate_receiver_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED), .driver_data = (kernel_ulong_t) &razer_basilisk_ultimate_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V2), .driver_data = (kernel_ulong_t) &razer_basilisk_v2_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3), .driver_data = (kernel_ulong_t) &razer_basilisk_v3_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2), .driver_data = (kernel_ulong_t) &razer_deathadder_v2_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED), .driver_data = (kernel_ulong_t) &razer_deathadder_v2_pro_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS), .driver_data = (kernel_ulong_t) &razer_deathadder_v2_pro_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI), .driver_data = (kernel_ulong_t) &razer_deathadder_v2_mini_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED), .driver_data = (kernel_ulong_t) &razer_deathadder_v2_x_hyperspeed_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_2000), .driver_data = (kernel_ulong_t) &razer_deathadder_2000_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER), .driver_data = (kernel_ulong_t) &razer_atheris_receiver_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED), .driver_data = (kernel_ulong_t) &razer_basilisk_x_hyperspeed_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_X), .driver_data = (kernel_ulong_t) &razer_naga_x_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020), .driver_data = (kernel_ulong_t) &razer_naga_left_handed_2020_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED), .driver_data = (kernel_ulong_t) &razer_naga_pro_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS), .driver_data = (kernel_ulong_t) &razer_naga_pro_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED), .driver_data = (kernel_ulong_t) &razer_naga_v2_pro_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS), .driver_data = (kernel_ulong_t) &razer_naga_v2_pro_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_8K), .driver_data = (kernel_ulong_t) &razer_viper_8k_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER), .driver_data = (kernel_ulong_t) &razer_orochi_v2_receiver_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH), .driver_data = (kernel_ulong_t) &razer_orochi_v2_bluetooth_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER), .driver_data = (kernel_ulong_t) &razer_pro_click_receiver_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED), .driver_data = (kernel_ulong_t) &razer_pro_click_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRED), .driver_data = (kernel_ulong_t) &razer_viper_v2_pro_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS), .driver_data = (kernel_ulong_t) &razer_viper_v2_pro_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_COBRA_PRO_WIRED), .driver_data = (kernel_ulong_t) &razer_cobra_pro_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_COBRA_PRO_WIRELESS), .driver_data = (kernel_ulong_t) &razer_cobra_pro_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3), .driver_data = (kernel_ulong_t) &razer_deathadder_v3_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED), .driver_data = (kernel_ulong_t) &razer_deathadder_v3_pro_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS), .driver_data = (kernel_ulong_t) &razer_deathadder_v3_pro_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED_ALT), .driver_data = (kernel_ulong_t) &razer_deathadder_v3_pro_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS_ALT), .driver_data = (kernel_ulong_t) &razer_deathadder_v3_pro_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRED), .driver_data = (kernel_ulong_t) &razer_deathadder_v3_hyperspeed_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRELESS), .driver_data = (kernel_ulong_t) &razer_deathadder_v3_hyperspeed_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE), .driver_data = (kernel_ulong_t) &razer_hyperpolling_wireless_dongle_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED), .driver_data = (kernel_ulong_t) &razer_basilisk_v3_pro_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS), .driver_data = (kernel_ulong_t) &razer_basilisk_v3_pro_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_35K), .driver_data = (kernel_ulong_t) &razer_basilisk_v3_35k_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED), .driver_data = (kernel_ulong_t) &razer_basilisk_v3_pro_35k_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS), .driver_data = (kernel_ulong_t) &razer_basilisk_v3_pro_35k_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED), .driver_data = (kernel_ulong_t) &razer_basilisk_v3_pro_35k_phantom_green_edition_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS), .driver_data = (kernel_ulong_t) &razer_basilisk_v3_pro_35k_phantom_green_edition_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER), .driver_data = (kernel_ulong_t) &razer_pro_click_mini_receiver_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE), .driver_data = (kernel_ulong_t) &razer_deathadder_v2_lite_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_COBRA), .driver_data = (kernel_ulong_t) &razer_cobra_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER), .driver_data = (kernel_ulong_t) &razer_naga_v2_hyperspeed_receiver_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED), .driver_data = (kernel_ulong_t) &razer_viper_v3_hyperspeed_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED), .driver_data = (kernel_ulong_t) &razer_basilisk_v3_x_hyperspeed_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER), .driver_data = (kernel_ulong_t) &razer_basilisk_mobile_receiver_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED), .driver_data = (kernel_ulong_t) &razer_basilisk_mobile_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED), .driver_data = (kernel_ulong_t) &razer_deathadder_v4_pro_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS), .driver_data = (kernel_ulong_t) &razer_deathadder_v4_pro_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED), .driver_data = (kernel_ulong_t) &razer_viper_v3_pro_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS), .driver_data = (kernel_ulong_t) &razer_viper_v3_pro_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_EPIC), .driver_data = (kernel_ulong_t) &razer_naga_epic_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS), .driver_data = (kernel_ulong_t) &razer_pro_click_v2_vertical_edition_wireless_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED), .driver_data = (kernel_ulong_t) &razer_pro_click_v2_vertical_edition_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED), .driver_data = (kernel_ulong_t) &razer_pro_click_v2_wired_data, },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS), .driver_data = (kernel_ulong_t) &razer_pro_click_v2_wireless_data, },
     { 0 }
 };
 
