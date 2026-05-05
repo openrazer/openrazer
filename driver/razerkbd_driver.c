@@ -4933,6 +4933,56 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_us
 }
 
 /**
+ * HyperFlux V2 sends the DeathStalker media dial button on report 0x08 instead
+ * of the report 0x04 path used by other Razer keyboards. Convert those values
+ * into a consumer-control report so Linux exposes normal media key events.
+ */
+static int razer_raw_event_hyperflux_v2_media(struct hid_device *hdev, struct usb_interface *intf, u8 *data, int size)
+{
+    u8 usage = 0x00;
+
+    if (intf->cur_altsetting->desc.bInterfaceProtocol != USB_INTERFACE_PROTOCOL_KEYBOARD ||
+        size != 16 || data[0] != 0x08) {
+        return 0;
+    }
+
+    switch (data[1]) {
+    case 0x50:
+        usage = USB_HID_USAGE_MEDIA_VOLUMEDOWN;
+        break;
+    case 0x51:
+        usage = USB_HID_USAGE_MEDIA_VOLUMEUP;
+        break;
+    case 0x52:
+        usage = USB_HID_USAGE_MEDIA_MUTE;
+        break;
+    case 0x53:
+        usage = USB_HID_USAGE_MEDIA_NEXTSONG;
+        break;
+    case 0x54:
+        usage = USB_HID_USAGE_MEDIA_PREVIOUSSONG;
+        break;
+    case 0x55:
+        usage = USB_HID_USAGE_MEDIA_PLAYPAUSE;
+        break;
+    default:
+        break;
+    }
+
+    if (usage) {
+        u8 xdata[22] = { 0x02 };
+
+        xdata[1] = usage;
+        hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), 0);
+
+        xdata[1] = 0x00;
+        hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), 0);
+    }
+
+    return 1;
+}
+
+/**
  * Raw event function
  *
  * Handles provided HID reports, branched out for specific keyboard models, since some keyboards need specific handling.
@@ -4949,6 +4999,12 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     }
 
     switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_HYPERFLUX_V2:
+        if (razer_raw_event_hyperflux_v2_media(hdev, intf, data, size)) {
+            return 1;
+        }
+        return razer_raw_event_standard(hdev, usb_dev_data, intf, report, data, size);
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_X:
