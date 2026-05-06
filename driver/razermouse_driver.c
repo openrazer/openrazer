@@ -12,6 +12,7 @@
 #include <linux/hrtimer.h>
 #include <linux/random.h>
 #include <linux/version.h>
+#include <linux/delay.h>
 
 #include "razermouse_driver.h"
 #include "razercommon.h"
@@ -32,6 +33,16 @@ MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
+
+static bool razer_mouse_is_hyperflux_v2(struct razer_mouse_device *device)
+{
+    return device->usb_pid == USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2;
+}
+
+static bool razer_mouse_is_valid_dpi(unsigned short dpi_x, unsigned short dpi_y)
+{
+    return dpi_x >= 100 && dpi_x <= 35000 && dpi_y >= 100 && dpi_y <= 35000;
+}
 
 /**
  * Send report to the mouse
@@ -158,6 +169,33 @@ static int razer_send_payload(struct razer_mouse_device *device, struct razer_re
     }
 
     return 0;
+}
+
+static int razer_mouse_read_stable_arg1(struct razer_mouse_device *device, struct razer_report request, unsigned char *value)
+{
+    struct razer_report response = {0};
+    int attempts = razer_mouse_is_hyperflux_v2(device) ? 8 : 1;
+    int attempt;
+    int err;
+    int last_value = -1;
+
+    for (attempt = 0; attempt < attempts; attempt++) {
+        memset(&response, 0, sizeof(struct razer_report));
+        err = razer_send_payload(device, &request, &response);
+        if (!err && response.arguments[1] <= 1) {
+            if (!razer_mouse_is_hyperflux_v2(device) || last_value == response.arguments[1]) {
+                *value = response.arguments[1];
+                return 0;
+            }
+
+            last_value = response.arguments[1];
+        }
+
+        if (attempt + 1 < attempts)
+            msleep(25);
+    }
+
+    return -EIO;
 }
 
 /*
@@ -2539,6 +2577,9 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
     struct razer_report response = {0};
     unsigned short dpi_x;
     unsigned short dpi_y;
+    int err;
+    int attempts = 1;
+    int attempt;
 
     // So far I think imperator uses varstore
     switch(device->usb_pid) {
@@ -2701,24 +2742,48 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    if (razer_mouse_is_hyperflux_v2(device))
+        attempts = 8;
 
-    // Byte, Byte for DPI not Short, Short
-    if (device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX_RED ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_NAGA ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_2012 ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_DEATHADDER_2013 ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_EPIC ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_ABYSSUS_1800) { // NagaHex is crap uses only byte for dpi
-        dpi_x = response.arguments[0];
-        dpi_y = response.arguments[1];
-    } else {
-        dpi_x = (response.arguments[1] << 8) | (response.arguments[2] & 0xFF); // Apparently the char buffer is rubbish, as buf[1] somehow can equal FFFFFF80????
-        dpi_y = (response.arguments[3] << 8) | (response.arguments[4] & 0xFF);
+    for (attempt = 0; attempt < attempts; attempt++) {
+        memset(&response, 0, sizeof(struct razer_report));
+        err = razer_send_payload(device, &request, &response);
+        if (err) {
+            if (attempt + 1 < attempts)
+                msleep(25);
+            continue;
+        }
+
+        // Byte, Byte for DPI not Short, Short
+        if (device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX ||
+            device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX_RED ||
+            device->usb_pid == USB_DEVICE_ID_RAZER_NAGA ||
+            device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_2012 ||
+            device->usb_pid == USB_DEVICE_ID_RAZER_DEATHADDER_2013 ||
+            device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_EPIC ||
+            device->usb_pid == USB_DEVICE_ID_RAZER_ABYSSUS_1800) { // NagaHex is crap uses only byte for dpi
+            dpi_x = response.arguments[0];
+            dpi_y = response.arguments[1];
+        } else {
+            dpi_x = (response.arguments[1] << 8) | (response.arguments[2] & 0xFF); // Apparently the char buffer is rubbish, as buf[1] somehow can equal FFFFFF80????
+            dpi_y = (response.arguments[3] << 8) | (response.arguments[4] & 0xFF);
+        }
+
+        if (!razer_mouse_is_hyperflux_v2(device) || razer_mouse_is_valid_dpi(dpi_x, dpi_y)) {
+            device->last_dpi_x = dpi_x;
+            device->last_dpi_y = dpi_y;
+            device->has_last_dpi = true;
+            return sprintf(buf, "%u:%u\n", dpi_x, dpi_y);
+        }
+
+        if (attempt + 1 < attempts)
+            msleep(25);
     }
 
-    return sprintf(buf, "%u:%u\n", dpi_x, dpi_y);
+    if (device->has_last_dpi)
+        return sprintf(buf, "%u:%u\n", device->last_dpi_x, device->last_dpi_y);
+
+    return -EIO;
 }
 
 /**
@@ -2753,14 +2818,21 @@ static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_att
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
-    struct razer_report response = {0};
+    unsigned char value;
 
     request = razer_chroma_misc_get_scroll_mode();
     request.transaction_id.id = 0x1f;
 
-    razer_send_payload(device, &request, &response);
+    if (!razer_mouse_read_stable_arg1(device, request, &value)) {
+        device->last_scroll_mode = value;
+        device->has_last_scroll_mode = true;
+        return sprintf(buf, "%d\n", value);
+    }
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    if (device->has_last_scroll_mode)
+        return sprintf(buf, "%d\n", device->last_scroll_mode);
+
+    return -EIO;
 }
 
 /**
@@ -2795,14 +2867,21 @@ static ssize_t razer_attr_read_scroll_acceleration(struct device *dev, struct de
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
-    struct razer_report response = {0};
+    unsigned char value;
 
     request = razer_chroma_misc_get_scroll_acceleration();
     request.transaction_id.id = 0x1f;
 
-    razer_send_payload(device, &request, &response);
+    if (!razer_mouse_read_stable_arg1(device, request, &value)) {
+        device->last_scroll_acceleration = value;
+        device->has_last_scroll_acceleration = true;
+        return sprintf(buf, "%d\n", value);
+    }
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    if (device->has_last_scroll_acceleration)
+        return sprintf(buf, "%d\n", device->last_scroll_acceleration);
+
+    return -EIO;
 }
 
 /**
@@ -2837,14 +2916,21 @@ static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct devi
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
-    struct razer_report response = {0};
+    unsigned char value;
 
     request = razer_chroma_misc_get_scroll_smart_reel();
     request.transaction_id.id = 0x1f;
 
-    razer_send_payload(device, &request, &response);
+    if (!razer_mouse_read_stable_arg1(device, request, &value)) {
+        device->last_scroll_smart_reel = value;
+        device->has_last_scroll_smart_reel = true;
+        return sprintf(buf, "%d\n", value);
+    }
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    if (device->has_last_scroll_smart_reel)
+        return sprintf(buf, "%d\n", device->last_scroll_smart_reel);
+
+    return -EIO;
 }
 
 static ssize_t razer_attr_write_tilt_hwheel(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -3727,7 +3813,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     struct razer_report response = {0};
 
     if (count != 2) {
-        printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.\n");
+        printk(KERN_WARNING "razermouse: Device mode only takes 2 bytes.\n");
         return -EINVAL;
     }
 

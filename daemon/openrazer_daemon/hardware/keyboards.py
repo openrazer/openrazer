@@ -21,6 +21,7 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
     DRIVER_MODE = True
 
     def __init__(self, *args, **kwargs):
+        self.key_manager = None
         if 'additional_methods' in kwargs:
             kwargs['additional_methods'].extend(['get_keyboard_layout'])
         else:
@@ -36,7 +37,8 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         """
         super()._close()
 
-        self.key_manager.close()
+        if self.key_manager is not None:
+            self.key_manager.close()
 
 
 class _RippleKeyboard(_MacroKeyboard):
@@ -47,6 +49,7 @@ class _RippleKeyboard(_MacroKeyboard):
     """
 
     def __init__(self, *args, **kwargs):
+        self.ripple_manager = None
         super().__init__(*args, **kwargs)
 
         if not self.HAS_MATRIX:
@@ -70,7 +73,8 @@ class _RippleKeyboard(_MacroKeyboard):
     def _close(self):
         super()._close()
 
-        self.ripple_manager.close()
+        if self.ripple_manager is not None:
+            self.ripple_manager.close()
 
 
 class RazerNostromo(_RazerDeviceBrightnessSuspend):
@@ -1480,18 +1484,22 @@ class RazerDeathStalkerV2ProTKLWireless(RazerDeathStalkerV2ProTKLWired):
     EVENT_FILE_REGEX = re.compile(r'.*DSV2Pro_TKL_000000000000-if01-event-mouse')
 
 
-class RazerDeathStalkerV2ProTKLHyperFluxV2(_RazerDevice):
+class RazerDeathStalkerV2ProTKLHyperFluxV2(_RippleKeyboard):
     """
     Class for the Razer DeathStalker V2 Pro TKL via HyperFlux V2.
     """
     USB_VID = 0x1532
     USB_PID = 0x00CF
-    DRIVER_MODE = True
-    PRE_SERIAL_DRIVER_MODE = True
+    # HyperFlux V2 exposes one composite receiver; driver mode is shared across
+    # the paired devices and breaks the mouse's firmware-handled buttons.
+    DRIVER_MODE = False
+    PRE_SERIAL_DRIVER_MODE = False
+    FORCE_DEVICE_MODE = True
     SERIAL_RETRY_ATTEMPTS = 1
     SERIAL_RETRY_DELAY = 0.5
     REQUIRE_VALID_SERIAL = True
     EVENT_FILE_REGEX = None
+    EVENT_FILE_USE_DEVICE_PATH = True
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 17]
     METHODS = ['get_device_type_keyboard',
@@ -1500,14 +1508,14 @@ class RazerDeathStalkerV2ProTKLHyperFluxV2(_RazerDevice):
                'set_reactive_effect',
                'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_custom_effect', 'set_key_row',
                'get_game_mode', 'set_game_mode',
+               'get_macro_mode', 'set_macro_mode', 'get_macro_effect', 'set_macro_effect',
+               'get_macros', 'delete_macro', 'add_macro',
+               'set_ripple_effect', 'set_ripple_effect_random_colour',
                # Battery
                'get_battery', 'is_charging']
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6117/6117-1-en-v1.png"
-
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('additional_methods', []).append('get_keyboard_layout')
-        super().__init__(*args, **kwargs)
 
     @classmethod
     def match(cls, device_id, dev_path):

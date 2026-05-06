@@ -2584,6 +2584,9 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         // Needs to be in "Normal" mode for idle effects to function properly
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        // HyperFlux V2 is a shared receiver. Driver mode also affects the
+        // paired keyboard/mouse interfaces and disables mouse firmware buttons.
+        case USB_DEVICE_ID_RAZER_HYPERFLUX_V2:
             break;
 
         default:

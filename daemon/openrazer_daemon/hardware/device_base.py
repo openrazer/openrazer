@@ -57,6 +57,7 @@ class RazerDevice(DBusService):
     SERIAL_RETRY_DELAY = 0.1
     REQUIRE_VALID_SERIAL = False
     FORCE_DEVICE_MODE = False
+    EVENT_FILE_USE_DEVICE_PATH = False
 
     def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter):
 
@@ -87,6 +88,7 @@ class RazerDevice(DBusService):
         self._parent = None
         self._device_path = device_path
         self._device_number = device_number
+        self._is_closed = False
 
         if self.PRE_SERIAL_DRIVER_MODE:
             try:
@@ -136,8 +138,6 @@ class RazerDevice(DBusService):
 
         self._effect_sync = effect_sync.EffectSync(self, device_number)
 
-        self._is_closed = False
-
         # device methods available in all devices
         self.methods_internal = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name']
         self.methods_internal.extend(additional_methods)
@@ -154,6 +154,19 @@ class RazerDevice(DBusService):
             for event_file in os.listdir(search_dir):
                 if self.EVENT_FILE_REGEX is not None and self.EVENT_FILE_REGEX.match(event_file) is not None:
                     self.event_files.append(os.path.join(search_dir, event_file))
+
+        if self.EVENT_FILE_USE_DEVICE_PATH and not self._testing:
+            device_input_path = os.path.join(device_path, 'input')
+            if os.path.isdir(device_input_path):
+                for input_name in sorted(os.listdir(device_input_path)):
+                    input_path = os.path.join(device_input_path, input_name)
+                    if not os.path.isdir(input_path):
+                        continue
+                    for event_name in sorted(os.listdir(input_path)):
+                        if event_name.startswith('event'):
+                            event_path = os.path.join('/dev/input', event_name)
+                            if os.path.exists(event_path) and event_path not in self.event_files:
+                                self.event_files.append(event_path)
 
         object_path = os.path.join(self.OBJECT_PATH, self.serial)
         super().__init__(object_path)
@@ -354,8 +367,7 @@ class RazerDevice(DBusService):
         if self.FORCE_DEVICE_MODE:
             self.logger.info('Setting device to "device" mode. Device firmware will handle special functionality')
             self.set_device_mode(0x00, 0x00)  # Device mode
-
-        if self.DRIVER_MODE:
+        elif self.DRIVER_MODE:
             self.logger.info('Setting device to "driver" mode. Daemon will handle special functionality')
             self.set_device_mode(0x03, 0x00)  # Driver mode
 
@@ -1195,7 +1207,10 @@ class RazerDevice(DBusService):
         # similar. Nevertheless for now this seems to be the best place for
         # this and should resolve some issues with macro keys not working after
         # suspend.
-        if self.DRIVER_MODE:
+        if self.FORCE_DEVICE_MODE:
+            self.logger.info('Setting device back to "device" mode.')
+            self.set_device_mode(0x00, 0x00)  # Device mode
+        elif self.DRIVER_MODE:
             self.logger.info('Setting device back to "driver" mode.')
             self.set_device_mode(0x03, 0x00)  # Driver mode
 
