@@ -1764,6 +1764,8 @@ class RazerBasiliskV3Pro35KHyperFluxV2(RazerBasiliskV3Pro35KWireless):
 
         try:
             iface_file = os.path.join(os.path.dirname(os.path.realpath(dev_path)), 'bInterfaceNumber')
+            if not os.path.exists(iface_file):
+                iface_file = os.path.join(dev_path, 'bInterfaceNumber')
             with open(iface_file, encoding='utf-8') as file:
                 return int(file.read().strip(), 16) == 4
         except (OSError, ValueError):
