@@ -3752,7 +3752,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
+        case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
         case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
@@ -6096,7 +6096,7 @@ static int razer_input_configured(struct hid_device *hdev,
         case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
+        case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
@@ -6390,7 +6390,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
+        case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
@@ -7532,7 +7532,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
-    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
+        case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_dpi_stages);

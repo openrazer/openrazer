@@ -4237,7 +4237,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
-    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_HYPERFLUX_V2:
+        case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_HYPERFLUX_V2:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
             request = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             request.transaction_id.id = 0x9F;
@@ -5317,7 +5317,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
-    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_HYPERFLUX_V2:
+        case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_HYPERFLUX_V2:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_super);                     // Super Key
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_tab);                   // Alt + Tab
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_alt_f4);                    // Alt + F4
@@ -5863,7 +5863,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
-    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_HYPERFLUX_V2:
+        case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_HYPERFLUX_V2:
             device_remove_file(&hdev->dev, &dev_attr_key_super);                     // Super Key
             device_remove_file(&hdev->dev, &dev_attr_key_alt_tab);                   // Alt + Tab
             device_remove_file(&hdev->dev, &dev_attr_key_alt_f4);                    // Alt + F4
