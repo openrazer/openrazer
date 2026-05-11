@@ -1532,7 +1532,7 @@ class RazerDeathStalkerV2ProTKLHyperFluxV2(_RippleKeyboard):
             return False
 
     def restore_brightness(self):
-        pass
+        super().restore_brightness()
 
     def restore_effect(self):
         pass
