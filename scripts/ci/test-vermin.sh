@@ -2,7 +2,7 @@
 
 # shellcheck disable=SC2046
 vermin \
-    -t=3.9- \
+    -t=3.10- \
     --backport argparse \
     --backport configparser \
     --backport typing \
