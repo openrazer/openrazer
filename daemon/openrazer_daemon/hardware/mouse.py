@@ -1692,6 +1692,44 @@ class RazerBasiliskV3ProWired(__RazerDevice):
     DPI_MAX = 30000
 
 
+class RazerBasiliskV3ProDocked(__RazerDevice):
+    """
+    Class for the Razer Basilisk V3 Pro connected via Mouse Dock Pro
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x00A4
+    DEVICE_NAME = "Razer Basilisk V3 Pro"
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 13]
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/6220/6220-4-en-v1.png"
+    DPI_MAX = 30000
+    POLL_RATES = [125, 500, 1000]
+    SERIAL_SUFFIX = '__mouse'
+    METHODS = [
+        'get_device_type_mouse',
+        'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+        'get_poll_rate', 'set_poll_rate',
+        'get_brightness', 'set_brightness',
+        'get_battery', 'is_charging',
+        'get_scroll_mode', 'set_scroll_mode',
+        'get_scroll_acceleration', 'set_scroll_acceleration',
+        'get_scroll_smart_reel', 'set_scroll_smart_reel',
+        'get_idle_time', 'set_idle_time',
+        'get_low_battery_threshold', 'set_low_battery_threshold',
+        'set_custom_effect', 'set_key_row',
+        'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
+        'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+        'get_logo_brightness', 'set_logo_brightness',
+        'get_scroll_brightness', 'set_scroll_brightness',
+        'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none',
+        'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none',
+    ]
+
+    @classmethod
+    def match(cls, device_id, dev_path):
+        return False
+
+
 class RazerBasiliskV3ProWireless(RazerBasiliskV3ProWired):
     """
     Class for the Razer Basilisk V3 Pro (Wireless)
