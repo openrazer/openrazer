@@ -140,6 +140,7 @@ class RazerDaemon(DBusService):
         self._collecting_udev_devices = []
 
         self._init_autosave_persistence()
+        self._init_dock_mouse_monitor()
 
         # TODO remove
         self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
@@ -224,6 +225,99 @@ class RazerDaemon(DBusService):
         self._autosave_persistence.thread = threading.Thread(target=self._autosave_persistence.watch)
         self._autosave_persistence.thread.daemon = True
         self._autosave_persistence.thread.start()
+
+    def _init_dock_mouse_monitor(self):
+        self._dock_mouse_connected = {}
+        self._dock_mouse_pending = {}
+        t = threading.Thread(target=self._dock_mouse_monitor_loop, daemon=True)
+        t.start()
+
+    def _dock_mouse_monitor_loop(self):
+        while True:
+            try:
+                self._check_dock_mouse_state()
+            except Exception:
+                self.logger.exception("Error in dock mouse monitor")
+            time.sleep(5)
+
+    def _check_dock_mouse_state(self):
+        from openrazer_daemon.hardware.accessory import RazerMouseDockPro
+
+        for device_id, device_wrapper in list(self._razer_devices.id_items()):
+            razer_device = device_wrapper.dbus
+            if not isinstance(razer_device, RazerMouseDockPro):
+                continue
+
+            child_id = device_id + ':mouse'
+
+            try:
+                with open(os.path.join(razer_device._device_path, 'charge_level'), 'r') as f:
+                    connected = int(f.read().strip()) > 0
+            except (OSError, ValueError):
+                connected = False
+
+            was_connected = self._dock_mouse_connected.get(device_id)
+
+            if was_connected is None:
+                self._dock_mouse_connected[device_id] = connected
+                self._dock_mouse_pending[device_id] = None
+
+            elif connected != was_connected:
+                pending = self._dock_mouse_pending.get(device_id)
+                if pending == connected:
+                    if connected and child_id not in self._razer_devices:
+                        self.logger.info("Mouse connected to dock %s", device_id)
+                        self._dock_mouse_connected[device_id] = True
+                        self._add_dock_child_device(device_id, razer_device._device_path, razer_device)
+                    elif not connected and child_id in self._razer_devices:
+                        self.logger.info("Mouse disconnected from dock %s", device_id)
+                        self._dock_mouse_connected[device_id] = False
+                        self._remove_dock_child_device(child_id)
+                    self._dock_mouse_pending[device_id] = None
+                else:
+                    self._dock_mouse_pending[device_id] = connected
+
+            else:
+                self._dock_mouse_pending[device_id] = None
+
+    def _add_dock_child_device(self, parent_id, sys_path, parent_device):
+        from openrazer_daemon.hardware.mouse import RazerBasiliskV3ProDocked
+
+        child_id = parent_id + ':mouse'
+        if child_id in self._razer_devices:
+            return
+
+        device_number = len(self._razer_devices)
+        self.logger.info('Adding dock child device.%d: %s', device_number, child_id)
+
+        child_device = RazerBasiliskV3ProDocked(
+            device_path=sys_path, device_number=device_number,
+            config=self._config, persistence=self._persistence,
+            testing=self._test_dir is not None,
+            additional_interfaces=None, additional_methods=[],
+            unknown_serial_counter=self._unknown_serial_counter)
+
+        child_serial = child_device.get_serial()
+        serial_suffix = '__mouse'
+        if not child_serial.endswith(serial_suffix):
+            child_serial += serial_suffix
+            child_device._serial = child_serial
+            child_device.serial = child_serial
+
+        self._razer_devices.add(child_id, child_serial, child_device)
+        self.device_added()
+
+    def _remove_dock_child_device(self, child_id):
+        try:
+            device = self._razer_devices[child_id]
+            device.dbus.close()
+            device.dbus.remove_from_connection()
+            self.logger.warning("Removing dock child device %s", child_id)
+            del self._razer_devices[child_id]
+            self.write_persistence(self._persistence_file)
+            self.device_removed()
+        except (IndexError, KeyError):
+            pass
 
     def _init_signals(self):
         """

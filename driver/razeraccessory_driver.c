@@ -2703,6 +2703,19 @@ static ssize_t razer_attr_read_mouse_serial(struct device *dev, struct device_at
     return sprintf(buf, "%s\n", &serial_string[0]);
 }
 
+static ssize_t razer_attr_read_mouse_connected(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    int err;
+
+    request = razer_chroma_standard_get_serial();
+    err = razer_dock_send_mouse_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", err == 0 ? 1 : 0);
+}
+
 static ssize_t razer_attr_read_mouse_firmware(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
@@ -2913,6 +2926,7 @@ static DEVICE_ATTR(scroll_matrix_effect_spectrum,           0220, NULL,         
 static DEVICE_ATTR(scroll_matrix_effect_none,               0220, NULL,                                           razer_attr_write_scroll_matrix_effect_none);
 
 static DEVICE_ATTR(mouse_serial,                            0440, razer_attr_read_mouse_serial,                  NULL);
+static DEVICE_ATTR(mouse_connected,                         0440, razer_attr_read_mouse_connected,               NULL);
 static DEVICE_ATTR(mouse_firmware,                          0440, razer_attr_read_mouse_firmware,                NULL);
 static DEVICE_ATTR(mouse_matrix_brightness,                 0660, razer_attr_read_mouse_matrix_brightness,       razer_attr_write_mouse_matrix_brightness);
 static DEVICE_ATTR(mouse_matrix_effect_wave,                0220, NULL,                                           razer_attr_write_mouse_main_matrix_effect_wave);
@@ -3261,6 +3275,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_serial);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_connected);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_firmware);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_effect_wave);
@@ -3528,6 +3543,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             device_remove_file(&hdev->dev, &dev_attr_mouse_serial);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_connected);
             device_remove_file(&hdev->dev, &dev_attr_mouse_firmware);
             device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_brightness);
             device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_effect_wave);
