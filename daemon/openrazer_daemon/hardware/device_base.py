@@ -41,11 +41,13 @@ class RazerDevice(DBusService):
     POLL_RATES: Optional[list[int]] = None
     DPI_MAX: Optional[int] = None
     DRIVER_MODE = False
+    SERIAL_SUFFIX = ''
 
     WAVE_DIRS = (1, 2)
 
     ZONES = ('backlight', 'logo', 'scroll', 'left', 'right', 'charging', 'fast_charging', 'fully_charged', 'channel1', 'channel2', 'channel3', 'channel4', 'channel5', 'channel6')
 
+    DEVICE_NAME: Optional[str] = None
     DEVICE_IMAGE: Optional[str] = None
 
     def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter):
@@ -1008,9 +1010,18 @@ class RazerDevice(DBusService):
                 self._unknown_serial_counter[(vid, pid)] = idx + 1
                 serial = "UNKNOWN_{0:04X}{1:04X}_{2:04d}".format(vid, pid, idx)
 
-            self._serial = serial.replace(' ', '_')
+            self._serial = serial.replace(' ', '_') + self.SERIAL_SUFFIX
 
         return self._serial
+
+    def get_child_devices(self):
+        """
+        Get additional logical child devices for this physical device.
+
+        :return: List of (DeviceClass, kwargs) tuples
+        :rtype: list
+        """
+        return []
 
     def get_device_mode(self):
         """
