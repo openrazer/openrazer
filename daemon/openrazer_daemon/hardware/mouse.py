@@ -1692,9 +1692,9 @@ class RazerBasiliskV3ProWired(__RazerDevice):
     DPI_MAX = 30000
 
 
-class RazerBasiliskV3ProDocked(__RazerDevice):
+class RazerDockedMouse(__RazerDevice):
     """
-    Class for the Razer Basilisk V3 Pro connected via Mouse Dock Pro
+    Class for a mouse connected via Razer Mouse Dock Pro
     """
     USB_VID = 0x1532
     USB_PID = 0x00A4
@@ -1707,6 +1707,7 @@ class RazerBasiliskV3ProDocked(__RazerDevice):
     SERIAL_SUFFIX = '__mouse'
 
     _MOUSE_SYSFS_MAP = {
+        'firmware_version': 'mouse_firmware',
         'matrix_brightness': 'mouse_matrix_brightness',
         'matrix_effect_wave': 'mouse_matrix_effect_wave',
         'matrix_effect_static': 'mouse_matrix_effect_static',
