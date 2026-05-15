@@ -5,6 +5,7 @@ from openrazer.client.devices import RazerDevice, BaseDeviceFactory
 from openrazer.client.devices.mousemat import RazerMousemat
 from openrazer.client.devices.keyboard import RazerKeyboard
 from openrazer.client.devices.mice import RazerMouse
+from openrazer.client.devices.accessory import RazerAccessory
 
 
 DEVICE_MAP = {
@@ -12,6 +13,7 @@ DEVICE_MAP = {
     'keyboard': RazerKeyboard,
     'mouse': RazerMouse,
     'keypad': RazerKeyboard,
+    'accessory': RazerAccessory,
 }
 
 
