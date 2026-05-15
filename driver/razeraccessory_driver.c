@@ -2710,10 +2710,13 @@ static ssize_t razer_attr_read_mouse_connected(struct device *dev, struct device
     struct razer_report response = {0};
     int err;
 
-    request = razer_chroma_standard_get_serial();
+    request = razer_chroma_misc_get_battery_level();
     err = razer_dock_send_mouse_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", err == 0 ? 1 : 0);
+    if (err)
+        return sprintf(buf, "0\n");
+
+    return sprintf(buf, "%d\n", response.arguments[1] > 0 ? 1 : 0);
 }
 
 static ssize_t razer_attr_read_mouse_firmware(struct device *dev, struct device_attribute *attr, char *buf)
@@ -2779,14 +2782,14 @@ static ssize_t razer_attr_write_mouse_main_matrix_effect_breath(struct device *d
     struct razer_report request = {0};
     struct razer_report response = {0};
 
-    switch(buf[0]) {
-    case 1:
-        request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[1]);
-        break;
-    case 2:
-        request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
-        break;
+    switch(count) {
     case 3:
+        request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
+        break;
+    case 6:
+        request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+        break;
+    default:
         request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
         break;
     }
