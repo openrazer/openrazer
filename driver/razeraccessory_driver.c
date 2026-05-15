@@ -160,7 +160,10 @@ static int razer_set_device_mode(struct razer_accessory_device *device, unsigned
     struct razer_report response = {0};
 
     request = razer_chroma_standard_set_device_mode(mode, param);
-    request.transaction_id.id = 0x3F;
+    if (device->usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO)
+        request.transaction_id.id = 0xFF;
+    else
+        request.transaction_id.id = 0x3F;
 
     return razer_send_payload(device, &request, &response);
 }
