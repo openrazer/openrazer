@@ -251,8 +251,8 @@ class RazerDaemon(DBusService):
             child_id = device_id + ':mouse'
 
             try:
-                with open(os.path.join(razer_device._device_path, 'charge_level'), 'r') as f:
-                    connected = int(f.read().strip()) > 0
+                with open(os.path.join(razer_device._device_path, 'mouse_connected'), 'r') as f:
+                    connected = f.read().strip() == '1'
             except (OSError, ValueError):
                 connected = False
 
@@ -281,7 +281,7 @@ class RazerDaemon(DBusService):
                 self._dock_mouse_pending[device_id] = None
 
     def _add_dock_child_device(self, parent_id, sys_path, parent_device):
-        from openrazer_daemon.hardware.mouse import RazerBasiliskV3ProDocked
+        from openrazer_daemon.hardware.mouse import RazerDockedMouse
 
         child_id = parent_id + ':mouse'
         if child_id in self._razer_devices:
@@ -290,7 +290,7 @@ class RazerDaemon(DBusService):
         device_number = len(self._razer_devices)
         self.logger.info('Adding dock child device.%d: %s', device_number, child_id)
 
-        child_device = RazerBasiliskV3ProDocked(
+        child_device = RazerDockedMouse(
             device_path=sys_path, device_number=device_number,
             config=self._config, persistence=self._persistence,
             testing=self._test_dir is not None,

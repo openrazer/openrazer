@@ -115,15 +115,15 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6229/6229-1-en-v2.png"
 
     def get_child_devices(self):
-        from openrazer_daemon.hardware.mouse import RazerBasiliskV3ProDocked
+        from openrazer_daemon.hardware.mouse import RazerDockedMouse
         if self._is_mouse_connected():
-            return [(RazerBasiliskV3ProDocked, {'id_suffix': ':mouse', 'serial_suffix': '__mouse'})]
+            return [(RazerDockedMouse, {'id_suffix': ':mouse', 'serial_suffix': '__mouse'})]
         return []
 
     def _is_mouse_connected(self):
         try:
-            with open(os.path.join(self._device_path, 'charge_level'), 'r') as f:
-                return int(f.read().strip()) > 0
+            with open(os.path.join(self._device_path, 'mouse_connected'), 'r') as f:
+                return f.read().strip() == '1'
         except (OSError, ValueError):
             return False
 
