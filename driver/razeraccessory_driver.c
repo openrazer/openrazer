@@ -3033,6 +3033,77 @@ static ssize_t razer_attr_write_mouse_matrix_custom_frame(struct device *dev, st
 }
 
 /**
+ * Write device file "pair"
+ *
+ * Pairs the Mouse Dock Pro with a mouse identified by its USB PID (hex string, e.g. "00ab").
+ */
+static ssize_t razer_attr_write_mouse_dock_pro_pair(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    unsigned int pid = (unsigned int)simple_strtoul(buf, NULL, 16);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    int i;
+
+    /*
+     * tid=0x1F is the dock's RF relay channel.  When no mouse is associated
+     * the dock broadcasts pairing commands on this channel so a nearby mouse
+     * can respond.  tid=0xFF is the LED/system firmware channel: it
+     * acknowledges the commands but does not trigger RF scanning.
+     */
+    request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(0x01);
+    request.transaction_id.id = 0x1F;
+    razer_send_payload(device, &request, &response);
+
+    request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(0x01);
+    request.transaction_id.id = 0x1F;
+    razer_send_payload(device, &request, &response);
+
+    request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step2(pid);
+    request.transaction_id.id = 0x1F;
+    razer_send_payload(device, &request, &response);
+
+    /*
+     * Keep the dock in RF scan mode with periodic 0x86 keepalives (same
+     * pattern as Synapse).  Afterwards, 0xb9 commits the pairing; the dock
+     * responds BUSY while it finalises the RF link, which razer_send_payload
+     * treats as non-fatal.  The sleep is interruptible so a signal can abort.
+     */
+    for (i = 0; i < 33; i++) {
+        if (schedule_timeout_interruptible(msecs_to_jiffies(30)) != 0)
+            break;
+        request = get_razer_report(0x00, 0x86, 0x03);
+        request.transaction_id.id = 0xFF;
+        razer_send_payload(device, &request, &response);
+    }
+
+    request = get_razer_report(0x00, 0xb9, 0x01);
+    request.transaction_id.id = 0x1F;
+    razer_send_payload(device, &request, &response);
+
+    return count;
+}
+
+/**
+ * Write device file "unpair"
+ *
+ * Unpairs the Mouse Dock Pro from a mouse identified by its USB PID (hex string, e.g. "00ab").
+ */
+static ssize_t razer_attr_write_mouse_dock_pro_unpair(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    unsigned int pid = (unsigned int)simple_strtoul(buf, NULL, 16);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(pid);
+    request.transaction_id.id = 0x3F;
+    razer_send_payload(device, &request, &response);
+
+    return count;
+}
+
+/**
  * Set up the device driver files
 
  *
@@ -3081,6 +3152,9 @@ static DEVICE_ATTR(fully_charged_matrix_effect_spectrum,    0220, NULL,         
 static DEVICE_ATTR(fully_charged_matrix_effect_breath,      0220, NULL,                                           razer_attr_write_fully_charged_matrix_effect_breath);
 static DEVICE_ATTR(fully_charged_matrix_effect_static,      0220, NULL,                                           razer_attr_write_fully_charged_matrix_effect_static);
 static DEVICE_ATTR(fully_charged_matrix_effect_none,        0220, NULL,                                           razer_attr_write_fully_charged_matrix_effect_none);
+
+static DEVICE_ATTR(pair,                                    0220, NULL,                                           razer_attr_write_mouse_dock_pro_pair);
+static DEVICE_ATTR(unpair,                                  0220, NULL,                                           razer_attr_write_mouse_dock_pro_unpair);
 
 static DEVICE_ATTR(reset_channels,                          0220, NULL,                                           razer_attr_write_reset_channels);
 static DEVICE_ATTR(channel1_size,                           0660, razer_attr_read_channel1_size,                  razer_attr_write_channel1_size);
@@ -3481,6 +3555,8 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_effect_breath);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_effect_custom);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_custom_frame);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_pair);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_unpair);
             break;
         }
 
@@ -3697,6 +3773,13 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);
+            break;
+        }
+
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+            device_remove_file(&hdev->dev, &dev_attr_pair);                                // Pair mouse to dock
+            device_remove_file(&hdev->dev, &dev_attr_unpair);                              // Unpair mouse from dock
             break;
         }
 

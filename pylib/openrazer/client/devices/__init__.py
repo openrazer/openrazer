@@ -65,6 +65,7 @@ class RazerDevice(object):
             'macro_mode_led_effect': self._has_feature('razer.device.led.macromode', 'setMacroEffect'),
             'macro_mode_modifier': self._has_feature('razer.device.macro', 'setModeModifier'),
             'reactive_trigger': self._has_feature('razer.device.misc', 'triggerReactive'),
+            'dock_pro_pair': self._has_feature('razer.device.misc', ('setMouseDockProPair', 'setMouseDockProUnpair')),
 
             'poll_rate': self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate')),
             'supported_poll_rates': self._has_feature('razer.device.misc', 'getSupportedPollRates'),
@@ -572,6 +573,34 @@ class RazerDevice(object):
             dbuslist = self._dbus_interfaces['device'].getSupportedPollRates()
             # Repack list from dbus ints to normal ints
             return [int(d) for d in dbuslist]
+        else:
+            raise NotImplementedError()
+
+    def pair_mouse_dock_pro(self, pid: str) -> None:
+        """
+        Pair Mouse Dock Pro with a mouse by its USB PID.
+
+        :param pid: Mouse USB product ID as a hex string, e.g. "00ab"
+        :type pid: str
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('dock_pro_pair'):
+            self._dbus_interfaces['device'].setMouseDockProPair(pid)
+        else:
+            raise NotImplementedError()
+
+    def unpair_mouse_dock_pro(self, pid: str) -> None:
+        """
+        Unpair Mouse Dock Pro from a mouse by its USB PID.
+
+        :param pid: Mouse USB product ID as a hex string, e.g. "00ab"
+        :type pid: str
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('dock_pro_pair'):
+            self._dbus_interfaces['device'].setMouseDockProUnpair(pid)
         else:
             raise NotImplementedError()
 
