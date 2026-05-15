@@ -103,9 +103,32 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
     HAS_MATRIX = True
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [1, 8]
-    METHODS = ['get_device_type_accessory', 'set_brightness', 'get_brightness', 'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect']
+    EVENT_FILE_REGEX = re.compile(r'.*(Razer_)?Mouse_Dock_Pro-if0(1|2)-event-kbd')
+    METHODS = [
+        # Existing accessory methods
+        'get_device_type_accessory', 'set_brightness', 'get_brightness',
+        'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_static_effect',
+        'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect',
+        'set_breath_single_effect', 'set_breath_dual_effect',
+        # Mouse passthrough methods
+        'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+        'get_poll_rate', 'set_poll_rate',
+        'get_battery', 'is_charging',
+        'get_scroll_mode', 'set_scroll_mode',
+        'get_scroll_acceleration', 'set_scroll_acceleration',
+        'get_scroll_smart_reel', 'set_scroll_smart_reel',
+        'get_idle_time', 'set_idle_time',
+        'get_low_battery_threshold', 'set_low_battery_threshold',
+        # Mouse LED controls
+        'get_logo_brightness', 'set_logo_brightness',
+        'get_scroll_brightness', 'set_scroll_brightness',
+        'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none',
+        'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none',
+    ]
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6229/6229-1-en-v2.png"
+
+    DPI_MAX = 30000
 
 
 class RazerNommoChroma(_RazerDeviceBrightnessSuspend):
