@@ -103,7 +103,8 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
     HAS_MATRIX = True
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [1, 8]
-    METHODS = ['get_device_type_accessory', 'set_brightness', 'get_brightness', 'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect']
+    METHODS = ['get_device_type_accessory', 'set_brightness', 'get_brightness', 'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_mouse_dock_pro_pair', 'set_mouse_dock_pro_unpair']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6229/6229-1-en-v2.png"
 
