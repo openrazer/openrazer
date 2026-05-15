@@ -1705,6 +1705,18 @@ class RazerBasiliskV3ProDocked(__RazerDevice):
     DPI_MAX = 30000
     POLL_RATES = [125, 500, 1000]
     SERIAL_SUFFIX = '__mouse'
+
+    _MOUSE_SYSFS_MAP = {
+        'matrix_brightness': 'mouse_matrix_brightness',
+        'matrix_effect_wave': 'mouse_matrix_effect_wave',
+        'matrix_effect_static': 'mouse_matrix_effect_static',
+        'matrix_effect_spectrum': 'mouse_matrix_effect_spectrum',
+        'matrix_effect_none': 'mouse_matrix_effect_none',
+        'matrix_effect_breath': 'mouse_matrix_effect_breath',
+        'matrix_effect_custom': 'mouse_matrix_effect_custom',
+        'matrix_custom_frame': 'mouse_matrix_custom_frame',
+    }
+
     METHODS = [
         'get_device_type_mouse',
         'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
@@ -1724,6 +1736,10 @@ class RazerBasiliskV3ProDocked(__RazerDevice):
         'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none',
         'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none',
     ]
+
+    def get_driver_path(self, driver_filename):
+        driver_filename = self._MOUSE_SYSFS_MAP.get(driver_filename, driver_filename)
+        return super().get_driver_path(driver_filename)
 
     @classmethod
     def match(cls, device_id, dev_path):
