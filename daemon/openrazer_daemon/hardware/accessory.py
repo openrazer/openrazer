@@ -3,6 +3,7 @@
 """
 Mug class
 """
+import os
 import re
 
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
@@ -115,7 +116,16 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
 
     def get_child_devices(self):
         from openrazer_daemon.hardware.mouse import RazerBasiliskV3ProDocked
-        return [(RazerBasiliskV3ProDocked, {'id_suffix': ':mouse', 'serial_suffix': '__mouse'})]
+        if self._is_mouse_connected():
+            return [(RazerBasiliskV3ProDocked, {'id_suffix': ':mouse', 'serial_suffix': '__mouse'})]
+        return []
+
+    def _is_mouse_connected(self):
+        try:
+            with open(os.path.join(self._device_path, 'charge_level'), 'r') as f:
+                return int(f.read().strip()) > 0
+        except (OSError, ValueError):
+            return False
 
 
 class RazerNommoChroma(_RazerDeviceBrightnessSuspend):
