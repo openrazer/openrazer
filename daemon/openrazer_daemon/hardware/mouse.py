@@ -1703,7 +1703,7 @@ class RazerDockedMouse(__RazerDevice):
     MATRIX_DIMS = [1, 13]
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6220/6220-4-en-v1.png"
     DPI_MAX = 30000
-    POLL_RATES = [125, 500, 1000]
+    POLL_RATES = [125, 250, 500, 1000, 2000, 4000, 8000]
     SERIAL_SUFFIX = '__mouse'
 
     _MOUSE_SYSFS_MAP = {
