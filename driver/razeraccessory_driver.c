@@ -2371,17 +2371,29 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     struct razer_report response = {0};
     unsigned short polling_rate = 500; // default
 
-    request = razer_chroma_misc_get_polling_rate();
+    request = razer_chroma_misc_get_polling_rate2();
     razer_dock_send_mouse_payload(device, &request, &response);
 
-    switch(response.arguments[0]) {
+    switch(response.arguments[1]) {
     case 0x01:
-        polling_rate = 1000;
+        polling_rate = 8000;
         break;
     case 0x02:
-        polling_rate = 500;
+        polling_rate = 4000;
+        break;
+    case 0x04:
+        polling_rate = 2000;
         break;
     case 0x08:
+        polling_rate = 1000;
+        break;
+    case 0x10:
+        polling_rate = 500;
+        break;
+    case 0x20:
+        polling_rate = 250;
+        break;
+    case 0x40:
         polling_rate = 125;
         break;
     }
@@ -2396,7 +2408,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     struct razer_report request = {0};
     struct razer_report response = {0};
 
-    request = razer_chroma_misc_set_polling_rate(polling_rate);
+    request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x01);
     razer_dock_send_mouse_payload(device, &request, &response);
 
     return count;
