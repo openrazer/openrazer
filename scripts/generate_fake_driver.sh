@@ -83,6 +83,7 @@ declare -A files_metadata=(
     ["mouse_matrix_effect_static"]="w;"
     ["mouse_matrix_effect_wave"]="w;"
     ["mouse_serial"]="r;XX00000000A4"
+    ["nearby_mice"]="r;00ab"
     ["matrix_brightness"]="rw;0"
     ["matrix_current_effect"]="w;05"
     ["matrix_custom_frame"]="w;"
