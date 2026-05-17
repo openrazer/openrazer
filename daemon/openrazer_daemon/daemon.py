@@ -288,12 +288,6 @@ class RazerDaemon(DBusService):
             unknown_serial_counter=self._unknown_serial_counter)
 
         child_serial = child_device.get_serial()
-        serial_suffix = '__mouse'
-        if not child_serial.endswith(serial_suffix):
-            child_serial += serial_suffix
-            child_device._serial = child_serial
-            child_device.serial = child_serial
-
         self._razer_devices.add(child_id, child_serial, child_device)
         self.device_added()
 
@@ -628,14 +622,7 @@ class RazerDaemon(DBusService):
                                        additional_interfaces=None, additional_methods=[],
                                        unknown_serial_counter=self._unknown_serial_counter)
 
-            child_serial = child_device.get_serial()
-            serial_suffix = child_kwargs.get('serial_suffix', '')
-            if serial_suffix and not child_serial.endswith(serial_suffix):
-                child_serial += serial_suffix
-                child_device._serial = child_serial
-                child_device.serial = child_serial
-
-            self._razer_devices.add(child_sys_name, child_serial, child_device)
+            self._razer_devices.add(child_sys_name, child_device.get_serial(), child_device)
             device_number += 1
 
         return device_number

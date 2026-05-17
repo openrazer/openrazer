@@ -119,7 +119,7 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
     def get_child_devices(self):
         from openrazer_daemon.hardware.mouse import RazerDockedMouse
         if self._is_mouse_connected():
-            return [(RazerDockedMouse, {'id_suffix': ':mouse', 'serial_suffix': '__mouse'})]
+            return [(RazerDockedMouse, {'id_suffix': ':mouse'})]
         return []
 
     def _is_mouse_connected(self):
