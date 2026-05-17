@@ -157,4 +157,27 @@ void print_erroneous_report(struct hid_device *hdev, struct razer_report* report
 #define	hid_to_usb_dev(hid_dev) \
 	to_usb_device(hid_dev->dev.parent->parent)
 
+/*
+ * Response parsers shared by razermouse and razeraccessory.  Each one takes a
+ * response buffer that came back from the device and extracts a single
+ * decoded field.  Argument indices here must match the wire protocol; do not
+ * second-guess them per device — the dispatch wrappers (transaction_id, wait
+ * timing) differ per driver, but the response layout is the same.
+ */
+void razer_parse_dpi_xy(const struct razer_report *response, unsigned short *dpi_x, unsigned short *dpi_y);
+unsigned char razer_parse_battery_level(const struct razer_report *response);
+unsigned char razer_parse_charging_status(const struct razer_report *response);
+unsigned char razer_parse_scroll_arg(const struct razer_report *response);
+unsigned short razer_parse_idle_time(const struct razer_report *response);
+unsigned char razer_parse_low_battery_threshold(const struct razer_report *response);
+/* Decodes the hyperpolling/extended poll-rate response (arguments[1] bitmask).
+ * Returns Hz or 0 if the byte is unknown — caller decides how to surface that. */
+unsigned short razer_parse_poll_rate_hyperpolling(const struct razer_report *response);
+/* Formats up to max_stages DPI stages into buf.  Clamps stages_count against
+ * max_stages AND bounds the per-stage copy against sizeof(response->arguments)
+ * — never trusts response->data_size, which is attacker-controllable via a
+ * crafted USB response.  Returns total bytes written, including the leading
+ * active-stage byte. */
+ssize_t razer_parse_dpi_stages(const struct razer_report *response, char *buf, unsigned char max_stages);
+
 #endif /* DRIVER_RAZERCOMMON_H_ */

@@ -2448,15 +2448,12 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned short dpi_x;
-    unsigned short dpi_y;
+    unsigned short dpi_x, dpi_y;
 
     request = razer_chroma_misc_get_dpi_xy(VARSTORE);
     razer_dock_send_mouse_payload(device, &request, &response);
 
-    dpi_x = (response.arguments[1] << 8) | (response.arguments[2] & 0xFF);
-    dpi_y = (response.arguments[3] << 8) | (response.arguments[4] & 0xFF);
-
+    razer_parse_dpi_xy(&response, &dpi_x, &dpi_y);
     return sprintf(buf, "%u:%u\n", dpi_x, dpi_y);
 }
 
@@ -2508,38 +2505,11 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned char stages_count;
-    ssize_t count = 1;
-    unsigned int i;
-    unsigned char *args;
 
     request = razer_chroma_misc_get_dpi_stages(VARSTORE);
     razer_dock_send_mouse_payload(device, &request, &response);
 
-    /*
-     * stages_count and data_size both come straight from the USB response
-     * (i.e. attacker-controllable by a malicious or spoofed dock).  Clamp
-     * stages_count to the structural max and bound the loop against the
-     * fixed-size arguments buffer instead of trusting data_size; otherwise
-     * a crafted response could walk args past the end of response.arguments
-     * and copy adjacent kernel-stack bytes into the sysfs page buffer.
-     */
-    stages_count = response.arguments[2];
-    if (stages_count > RAZER_ACCESSORY_MOUSE_MAX_DPI_STAGES)
-        stages_count = RAZER_ACCESSORY_MOUSE_MAX_DPI_STAGES;
-
-    buf[0] = response.arguments[1];
-    args = response.arguments + 4;
-
-    for (i = 0; i < stages_count; i++) {
-        if (args + 4 > response.arguments + sizeof(response.arguments))
-            break;
-        memcpy(buf + count, args, 4);
-        count += 4;
-        args += 7;
-    }
-
-    return count;
+    return razer_parse_dpi_stages(&response, buf, RAZER_ACCESSORY_MOUSE_MAX_DPI_STAGES);
 }
 
 static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attribute *attr, char *buf)
@@ -2547,34 +2517,14 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned short polling_rate = 500; // default
+    unsigned short polling_rate;
 
     request = razer_chroma_misc_get_polling_rate2();
     razer_dock_send_mouse_payload(device, &request, &response);
 
-    switch(response.arguments[1]) {
-    case 0x01:
-        polling_rate = 8000;
-        break;
-    case 0x02:
-        polling_rate = 4000;
-        break;
-    case 0x04:
-        polling_rate = 2000;
-        break;
-    case 0x08:
-        polling_rate = 1000;
-        break;
-    case 0x10:
-        polling_rate = 500;
-        break;
-    case 0x20:
-        polling_rate = 250;
-        break;
-    case 0x40:
-        polling_rate = 125;
-        break;
-    }
+    polling_rate = razer_parse_poll_rate_hyperpolling(&response);
+    if (polling_rate == 0)
+        polling_rate = 500;  /* unknown response byte — return a safe default */
 
     return sprintf(buf, "%d\n", polling_rate);
 }
@@ -2601,7 +2551,7 @@ static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_att
     request = razer_chroma_misc_get_battery_level();
     razer_dock_send_mouse_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sprintf(buf, "%d\n", razer_parse_battery_level(&response));
 }
 
 static ssize_t razer_attr_read_is_charging(struct device *dev, struct device_attribute *attr, char *buf)
@@ -2613,7 +2563,7 @@ static ssize_t razer_attr_read_is_charging(struct device *dev, struct device_att
     request = razer_chroma_misc_get_charging_status();
     razer_dock_send_mouse_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sprintf(buf, "%d\n", razer_parse_charging_status(&response));
 }
 
 static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_attribute *attr, char *buf)
@@ -2625,7 +2575,7 @@ static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_att
     request = razer_chroma_misc_get_scroll_mode();
     razer_dock_send_mouse_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sprintf(buf, "%d\n", razer_parse_scroll_arg(&response));
 }
 
 static ssize_t razer_attr_write_scroll_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2653,7 +2603,7 @@ static ssize_t razer_attr_read_scroll_acceleration(struct device *dev, struct de
     request = razer_chroma_misc_get_scroll_acceleration();
     razer_dock_send_mouse_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sprintf(buf, "%d\n", razer_parse_scroll_arg(&response));
 }
 
 static ssize_t razer_attr_write_scroll_acceleration(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2681,7 +2631,7 @@ static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct devi
     request = razer_chroma_misc_get_scroll_smart_reel();
     razer_dock_send_mouse_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sprintf(buf, "%d\n", razer_parse_scroll_arg(&response));
 }
 
 static ssize_t razer_attr_write_scroll_smart_reel(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2705,13 +2655,11 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned short idle_time = 0;
 
     request = razer_chroma_misc_get_idle_time();
     razer_dock_send_mouse_payload(device, &request, &response);
 
-    idle_time = (response.arguments[0] << 8) | (response.arguments[1] & 0xFF);
-    return sprintf(buf, "%u\n", idle_time);
+    return sprintf(buf, "%u\n", razer_parse_idle_time(&response));
 }
 
 static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2736,7 +2684,7 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
     request = razer_chroma_misc_get_low_battery_threshold();
     razer_dock_send_mouse_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[0]);
+    return sprintf(buf, "%d\n", razer_parse_low_battery_threshold(&response));
 }
 
 static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
