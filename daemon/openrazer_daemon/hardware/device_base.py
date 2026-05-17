@@ -973,7 +973,7 @@ class RazerDevice(DBusService):
         """
         # TODO raise exception if serial can't be got and handle during device add
         if self._serial is None:
-            serial_path = os.path.join(self._device_path, 'device_serial')
+            serial_path = self.get_driver_path('device_serial')
             count = 0
             serial = ''
             while len(serial) == 0:
