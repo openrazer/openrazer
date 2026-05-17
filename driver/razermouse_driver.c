@@ -3153,15 +3153,24 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
     // 03    third DPI stage
     // ...
 
+    /*
+     * stages_count and data_size both come straight from the USB response
+     * (i.e. attacker-controllable by a malicious or spoofed device).  Clamp
+     * stages_count to the structural max and bound the loop against the
+     * fixed-size arguments buffer instead of trusting data_size; otherwise
+     * a crafted response could walk args past the end of response.arguments
+     * and copy adjacent kernel-stack bytes into the sysfs page buffer.
+     */
     stages_count = response.arguments[2];
+    if (stages_count > RAZER_MOUSE_MAX_DPI_STAGES)
+        stages_count = RAZER_MOUSE_MAX_DPI_STAGES;
 
     buf[0] = response.arguments[1];
 
     count = 1;
     args = response.arguments + 4;
     for (i = 0; i < stages_count; i++) {
-        // Check that we don't read past response.data_size
-        if (args + 4 > response.arguments + response.data_size) {
+        if (args + 4 > response.arguments + sizeof(response.arguments)) {
             break;
         }
 
