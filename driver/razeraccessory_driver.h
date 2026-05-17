@@ -53,6 +53,14 @@ struct razer_accessory_device {
     unsigned char saved_brightness;
 
     char serial[23];
+
+    /*
+     * Set to 1 while a pair or unpair sequence is in progress.  The
+     * mouse_connected sysfs handler returns 0 immediately when this flag is
+     * set so the daemon's monitor loop cannot send RF-relay battery GETs that
+     * would disrupt the dock's RF state machine mid-sequence.
+     */
+    atomic_t pairing_busy;
 };
 
 /*
