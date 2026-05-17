@@ -2900,15 +2900,24 @@ static ssize_t razer_attr_read_mouse_connected(struct device *dev, struct device
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    int err;
 
-    request = razer_chroma_misc_get_battery_level();
-    err = razer_dock_send_mouse_payload(device, &request, &response);
-
-    if (err)
+    if (atomic_read(&device->pairing_busy))
         return sprintf(buf, "0\n");
 
-    return sprintf(buf, "1\n");
+    /*
+     * Query dock firmware via cmd=0xbf heartbeat instead of relaying a battery
+     * GET to the mouse over RF.  args[1] of the response is the dock's
+     * paired-flag (1 = mouse paired, 0 = no mouse).  This is a pure firmware
+     * round-trip with no RF traffic, so it can be polled safely.
+     */
+    request = get_razer_report(0x00, 0xbf, 0x50);
+    request.transaction_id.id = 0x3F;
+    razer_send_payload(device, &request, &response);
+
+    if (response.status != RAZER_CMD_SUCCESSFUL)
+        return sprintf(buf, "0\n");
+
+    return sprintf(buf, "%d\n", response.arguments[1] == 1 ? 1 : 0);
 }
 
 static ssize_t razer_attr_read_mouse_firmware(struct device *dev, struct device_attribute *attr, char *buf)
@@ -3056,6 +3065,8 @@ static ssize_t razer_attr_write_mouse_dock_pro_pair(struct device *dev, struct d
     struct razer_report response = {0};
     int i;
 
+    atomic_set(&device->pairing_busy, 1);
+
     /*
      * tid=0x1F is the dock's RF relay channel.  When no mouse is associated
      * the dock broadcasts pairing commands on this channel so a nearby mouse
@@ -3076,9 +3087,12 @@ static ssize_t razer_attr_write_mouse_dock_pro_pair(struct device *dev, struct d
 
     /*
      * Keep the dock in RF scan mode with periodic 0x86 keepalives (same
-     * pattern as Synapse).  Afterwards, 0xb9 commits the pairing; the dock
-     * responds BUSY while it finalises the RF link, which razer_send_payload
-     * treats as non-fatal.  The sleep is interruptible so a signal can abort.
+     * pattern as Synapse).  The dock answers BUSY while still scanning and
+     * SUCCESS once a mouse has been associated, so we can break out as
+     * soon as it flips — the v2 capture shows this typically happens in
+     * 30-40 iterations but can be much faster.  The 33-iteration cap
+     * (~1 s) matches the longest pairing window observed.  The sleep is
+     * interruptible so a signal can abort.
      */
     for (i = 0; i < 33; i++) {
         if (schedule_timeout_interruptible(msecs_to_jiffies(30)) != 0)
@@ -3086,12 +3100,15 @@ static ssize_t razer_attr_write_mouse_dock_pro_pair(struct device *dev, struct d
         request = get_razer_report(0x00, 0x86, 0x03);
         request.transaction_id.id = 0xFF;
         razer_send_payload(device, &request, &response);
+        if (response.status == RAZER_CMD_SUCCESSFUL)
+            break;
     }
 
     request = get_razer_report(0x00, 0xb9, 0x01);
     request.transaction_id.id = 0x1F;
     razer_send_payload(device, &request, &response);
 
+    atomic_set(&device->pairing_busy, 0);
     return count;
 }
 
@@ -3107,10 +3124,13 @@ static ssize_t razer_attr_write_mouse_dock_pro_unpair(struct device *dev, struct
     struct razer_report request = {0};
     struct razer_report response = {0};
 
+    atomic_set(&device->pairing_busy, 1);
+
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(pid);
     request.transaction_id.id = 0x3F;
     razer_send_payload(device, &request, &response);
 
+    atomic_set(&device->pairing_busy, 0);
     return count;
 }
 
@@ -3223,6 +3243,7 @@ static void razer_accessory_init(struct razer_accessory_device *dev, struct usb_
 
     // Initialise mutex
     mutex_init(&dev->lock);
+    atomic_set(&dev->pairing_busy, 0);
     // Setup values
     dev->hdev = hdev;
     dev->usb_dev = usb_dev;

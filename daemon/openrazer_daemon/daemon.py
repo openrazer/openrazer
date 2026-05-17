@@ -227,7 +227,6 @@ class RazerDaemon(DBusService):
         self._autosave_persistence.thread.start()
 
     def _init_dock_mouse_monitor(self):
-        self._dock_mouse_connected = {}
         self._dock_mouse_pending = {}
         t = threading.Thread(target=self._dock_mouse_monitor_loop, daemon=True)
         t.start()
@@ -249,43 +248,27 @@ class RazerDaemon(DBusService):
                 continue
 
             child_id = device_id + ':mouse'
+            child_present = child_id in self._razer_devices
+            connected = razer_device._is_mouse_connected()
 
-            try:
-                with open(os.path.join(razer_device._device_path, 'mouse_connected'), 'r') as f:
-                    connected = f.read().strip() == '1'
-            except (OSError, ValueError):
-                connected = False
+            if connected == child_present:
+                self._dock_mouse_pending.pop(device_id, None)
+                continue
 
-            was_connected = self._dock_mouse_connected.get(device_id)
+            # Sampled state differs from reality. Require two consecutive
+            # matching samples (~10 s) before acting, to avoid reacting to a
+            # transient RF blip during pair/unpair or a missed heartbeat.
+            if self._dock_mouse_pending.get(device_id) != connected:
+                self._dock_mouse_pending[device_id] = connected
+                continue
 
-            if was_connected is None:
-                # First observation: reconcile with existing child device state
-                self._dock_mouse_connected[device_id] = connected
-                self._dock_mouse_pending[device_id] = None
-                if connected and child_id not in self._razer_devices:
-                    self.logger.info("Mouse connected to dock %s (initial)", device_id)
-                    self._add_dock_child_device(device_id, razer_device._device_path, razer_device)
-                elif not connected and child_id in self._razer_devices:
-                    self.logger.info("Mouse disconnected from dock %s (initial)", device_id)
-                    self._remove_dock_child_device(child_id)
-
-            elif connected != was_connected:
-                pending = self._dock_mouse_pending.get(device_id)
-                if pending == connected:
-                    if connected and child_id not in self._razer_devices:
-                        self.logger.info("Mouse connected to dock %s", device_id)
-                        self._dock_mouse_connected[device_id] = True
-                        self._add_dock_child_device(device_id, razer_device._device_path, razer_device)
-                    elif not connected and child_id in self._razer_devices:
-                        self.logger.info("Mouse disconnected from dock %s", device_id)
-                        self._dock_mouse_connected[device_id] = False
-                        self._remove_dock_child_device(child_id)
-                    self._dock_mouse_pending[device_id] = None
-                else:
-                    self._dock_mouse_pending[device_id] = connected
-
+            self._dock_mouse_pending.pop(device_id, None)
+            if connected:
+                self.logger.info("Mouse connected to dock %s", device_id)
+                self._add_dock_child_device(device_id, razer_device._device_path, razer_device)
             else:
-                self._dock_mouse_pending[device_id] = None
+                self.logger.info("Mouse disconnected from dock %s", device_id)
+                self._remove_dock_child_device(child_id)
 
     def _add_dock_child_device(self, parent_id, sys_path, parent_device):
         from openrazer_daemon.hardware.mouse import RazerDockedMouse
@@ -723,6 +706,8 @@ class RazerDaemon(DBusService):
                 self.logger.warning("Removing %s", device.device_id)
                 del self._razer_devices[device.device_id]
 
+            self._dock_mouse_pending.pop(device_id, None)
+
             self.write_persistence(self._persistence_file)
             self.device_removed()
 
@@ -803,6 +788,3 @@ class RazerDaemon(DBusService):
 
         # Write config
         self.write_persistence(self._persistence_file)
-
-
-Daemon = RazerDaemon
