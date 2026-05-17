@@ -111,6 +111,7 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
         'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect',
         'set_breath_single_effect', 'set_breath_dual_effect',
         'set_mouse_dock_pro_pair', 'set_mouse_dock_pro_unpair',
+        'get_nearby_mice', 'pair_any_nearby_mouse',
     ]
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6229/6229-1-en-v2.png"

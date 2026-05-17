@@ -2717,6 +2717,44 @@ static ssize_t razer_attr_write_scroll_matrix_effect_none(struct device *dev, st
     return razer_attr_write_mouse_matrix_effect_none(dev, attr, buf, count, SCROLL_WHEEL_LED);
 }
 
+/*
+ * Returns the PIDs of Razer mice the dock has recently seen on its RF channel,
+ * formatted as space-separated four-hex-digit strings on a single line ("00ab"
+ * for a Basilisk V3 Pro Wireless, etc.).  Returns an empty line if the dock
+ * has not been claimed for nearby-discovery (i.e. not a Mouse Dock Pro), or if
+ * no announcement has been received in the last 30 seconds.  The daemon polls
+ * this to drive a "scan and pair" UX without requiring the user to know which
+ * mouse is in range.
+ */
+static ssize_t razer_attr_read_nearby_mice(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_dock_pro_shared *shared = device->shared;
+    unsigned short pids[RAZER_DOCK_PRO_MAX_NEARBY];
+    unsigned long flags;
+    ssize_t count = 0;
+    int i;
+
+    if (!shared)
+        return sprintf(buf, "\n");
+
+    spin_lock_irqsave(&shared->nearby_lock, flags);
+    if (!shared->nearby_jiffies || time_after(jiffies, shared->nearby_jiffies + 30 * HZ)) {
+        spin_unlock_irqrestore(&shared->nearby_lock, flags);
+        return sprintf(buf, "\n");
+    }
+    memcpy(pids, shared->nearby_pids, sizeof(pids));
+    spin_unlock_irqrestore(&shared->nearby_lock, flags);
+
+    for (i = 0; i < RAZER_DOCK_PRO_MAX_NEARBY; i++) {
+        if (pids[i] == 0)
+            continue;
+        count += sprintf(buf + count, count ? " %04x" : "%04x", pids[i]);
+    }
+    count += sprintf(buf + count, "\n");
+    return count;
+}
+
 static ssize_t razer_attr_read_mouse_serial(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
@@ -3064,6 +3102,7 @@ static DEVICE_ATTR(scroll_matrix_effect_none,               0220, NULL,         
 
 static DEVICE_ATTR(mouse_serial,                            0440, razer_attr_read_mouse_serial,                  NULL);
 static DEVICE_ATTR(mouse_connected,                         0440, razer_attr_read_mouse_connected,               NULL);
+static DEVICE_ATTR(nearby_mice,                             0440, razer_attr_read_nearby_mice,                   NULL);
 static DEVICE_ATTR(mouse_firmware,                          0440, razer_attr_read_mouse_firmware,                NULL);
 static DEVICE_ATTR(mouse_matrix_brightness,                 0660, razer_attr_read_mouse_matrix_brightness,       razer_attr_write_mouse_matrix_brightness);
 static DEVICE_ATTR(mouse_matrix_effect_wave,                0220, NULL,                                           razer_attr_write_mouse_main_matrix_effect_wave);
@@ -3436,6 +3475,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_serial);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_connected);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_nearby_mice);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_firmware);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_effect_wave);
@@ -3714,6 +3754,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
             device_remove_file(&hdev->dev, &dev_attr_mouse_serial);
             device_remove_file(&hdev->dev, &dev_attr_mouse_connected);
+            device_remove_file(&hdev->dev, &dev_attr_nearby_mice);
             device_remove_file(&hdev->dev, &dev_attr_mouse_firmware);
             device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_brightness);
             device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_effect_wave);
@@ -3745,9 +3786,45 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
  *
  * data[1] == 0xa0 if mug is present
  */
+/*
+ * Parse a 16-byte HID input report announcing nearby Razer mice that the
+ * Mouse Dock Pro can see over RF.  Format observed in razer_dock_pairing_v2.pcapng:
+ *
+ *   05 37 <flags> <count> <pid_hi> <pid_lo> <pid_hi> <pid_lo> ... 00 00 ...
+ *
+ * Bytes 4 onwards hold up to RAZER_DOCK_PRO_MAX_NEARBY two-byte big-endian PIDs,
+ * zero-padded.  We rewrite the cache wholesale on each report so a mouse that
+ * has gone out of range simply stops appearing.
+ */
+static void razer_dock_pro_update_nearby(struct razer_dock_pro_shared *shared, u8 *data, int size)
+{
+    unsigned long flags;
+    int slot;
+    int offset;
+    unsigned short pid;
+
+    if (size < 16 || data[0] != 0x05 || data[1] != 0x37)
+        return;
+
+    spin_lock_irqsave(&shared->nearby_lock, flags);
+    memset(shared->nearby_pids, 0, sizeof(shared->nearby_pids));
+    slot = 0;
+    for (offset = 4; offset + 1 < 16 && slot < RAZER_DOCK_PRO_MAX_NEARBY; offset += 2) {
+        pid = ((unsigned short)data[offset] << 8) | data[offset + 1];
+        if (pid == 0)
+            break;
+        shared->nearby_pids[slot++] = pid;
+    }
+    shared->nearby_jiffies = jiffies;
+    spin_unlock_irqrestore(&shared->nearby_lock, flags);
+}
+
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
     struct razer_accessory_device *device = hid_get_drvdata(hdev);
+
+    if (device->shared)
+        razer_dock_pro_update_nearby(device->shared, data, size);
 
     if(size == 16 && data[0] == 0x04) {
         input_report_key(device->input, KEY_PROG1, 0x01);
