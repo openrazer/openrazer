@@ -28,15 +28,9 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
 
-/*
- * Mouse Dock Pro exposes three USB interfaces.  Interface 0 carries the
- * control-transfer feature reports the driver has always used; interface 1
- * carries HID input reports (notably nearby-mouse announcements on EP 0x82).
- * Both interfaces get their own probe call and their own razer_accessory_device,
- * but they need to share the nearby-mice cache.  This list maps usb_device *
- * to a kref'd razer_dock_pro_shared so the second-to-probe interface can
- * attach to the existing struct instead of allocating a parallel copy.
- */
+/* See razer_dock_pro_shared in razeraccessory_driver.h.  This global list
+ * keys those shared structs by usb_device * so the two MOUSE_DOCK_PRO
+ * interface probes can share state without allocating parallel copies. */
 static LIST_HEAD(dock_pro_shared_list);
 static DEFINE_MUTEX(dock_pro_shared_list_lock);
 
@@ -2573,16 +2567,11 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned short polling_rate;
 
     request = razer_chroma_misc_get_polling_rate2();
     razer_dock_send_mouse_payload(device, &request, &response);
 
-    polling_rate = razer_parse_poll_rate_hyperpolling(&response);
-    if (polling_rate == 0)
-        polling_rate = 500;  /* unknown response byte — return a safe default */
-
-    return sprintf(buf, "%d\n", polling_rate);
+    return sprintf(buf, "%d\n", razer_parse_poll_rate_hyperpolling(&response));
 }
 
 static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2895,15 +2884,9 @@ static ssize_t razer_attr_write_scroll_matrix_effect_none(struct device *dev, st
     return razer_attr_write_mouse_matrix_effect_none(dev, attr, buf, count, SCROLL_WHEEL_LED);
 }
 
-/*
- * Returns the PIDs of Razer mice the dock has recently seen on its RF channel,
- * formatted as space-separated four-hex-digit strings on a single line ("00ab"
- * for a Basilisk V3 Pro Wireless, etc.).  Returns an empty line if the dock
- * has not been claimed for nearby-discovery (i.e. not a Mouse Dock Pro), or if
- * no announcement has been received in the last 30 seconds.  The daemon polls
- * this to drive a "scan and pair" UX without requiring the user to know which
- * mouse is in range.
- */
+/* Space-separated four-hex-digit PIDs of mice the dock has seen on its RF
+ * channel within the last 30 s, or an empty line if none / not a Mouse
+ * Dock Pro. */
 static ssize_t razer_attr_read_nearby_mice(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
@@ -3188,6 +3171,40 @@ static ssize_t razer_attr_write_mouse_dock_pro_unpair(struct device *dev, struct
     return count;
 }
 
+/*
+ * Tell the dock to scan for nearby Razer mice and emit '05 37 ...' HID input
+ * reports on interface 1.  Per razer_dock_pairing_v2.pcapng, Synapse 4 sends
+ * this as one of its first commands at dock startup; without it the dock
+ * never broadcasts nearby announcements on its own.  Single-byte payload
+ * 0x01 — meaning of other arg values not characterised.  Caller must hold
+ * the dock's interface-0 device (only that interface can carry feature
+ * reports via razer_send_payload).
+ */
+static void razer_mouse_dock_pro_start_scan(struct razer_accessory_device *device)
+{
+    /* Reuses pair_step1 because cmd=0x46 arg=0x01 is the same "begin RF
+     * discovery" command both flows need — the builder ignores its `pid`
+     * argument.  The dock takes ~10 s to surface a result on its '05 37 ...'
+     * input channel (per razer_dock_pairing_v2.pcapng). */
+    struct razer_report request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(0);
+    struct razer_report response = {0};
+    int err;
+
+    request.transaction_id.id = 0x3F;
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        dev_warn(&device->usb_dev->dev, "nearby-mouse scan trigger failed (err=%d)\n", err);
+}
+
+/* One-shot trigger; the dock's scan is not continuous so the cache goes
+ * stale after ~30 s.  Daemon writes here before reading nearby_mice. */
+static ssize_t razer_attr_write_scan_for_mice(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    razer_mouse_dock_pro_start_scan(device);
+    return count;
+}
+
 /**
  * Set up the device driver files
 
@@ -3281,6 +3298,7 @@ static DEVICE_ATTR(scroll_matrix_effect_none,               0220, NULL,         
 static DEVICE_ATTR(mouse_serial,                            0440, razer_attr_read_mouse_serial,                  NULL);
 static DEVICE_ATTR(mouse_connected,                         0440, razer_attr_read_mouse_connected,               NULL);
 static DEVICE_ATTR(nearby_mice,                             0440, razer_attr_read_nearby_mice,                   NULL);
+static DEVICE_ATTR(scan_for_mice,                           0220, NULL,                                          razer_attr_write_scan_for_mice);
 static DEVICE_ATTR(mouse_firmware,                          0440, razer_attr_read_mouse_firmware,                NULL);
 static DEVICE_ATTR(mouse_matrix_brightness,                 0660, razer_attr_read_mouse_matrix_brightness,       razer_attr_write_mouse_matrix_brightness);
 static DEVICE_ATTR(mouse_matrix_effect_wave,                0220, NULL,                                           razer_attr_write_mouse_main_matrix_effect_wave);
@@ -3423,8 +3441,8 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             kfree(dev);
             return -ENOMEM;
         }
-        dev_info(&intf->dev, "Mouse Dock Pro interface %u attached (shared state @ %p)\n",
-                 intf->cur_altsetting->desc.bInterfaceNumber, dev->shared);
+        dev_info(&intf->dev, "Mouse Dock Pro interface %u attached\n",
+                 intf->cur_altsetting->desc.bInterfaceNumber);
     }
 
     switch(usb_dev->descriptor.idProduct) {
@@ -3656,6 +3674,12 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_serial);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_connected);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_nearby_mice);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scan_for_mice);
+
+            /* Kick off one scan at probe so the cache has something to show
+             * before userspace asks; subsequent scans are on-demand via
+             * scan_for_mice (the dock's scan is one-shot, not continuous). */
+            razer_mouse_dock_pro_start_scan(dev);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_firmware);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_effect_wave);
@@ -3937,6 +3961,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_mouse_serial);
             device_remove_file(&hdev->dev, &dev_attr_mouse_connected);
             device_remove_file(&hdev->dev, &dev_attr_nearby_mice);
+            device_remove_file(&hdev->dev, &dev_attr_scan_for_mice);
             device_remove_file(&hdev->dev, &dev_attr_mouse_firmware);
             device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_brightness);
             device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_effect_wave);
@@ -3969,33 +3994,32 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
  * data[1] == 0xa0 if mug is present
  */
 /*
- * Parse a 16-byte HID input report announcing nearby Razer mice that the
- * Mouse Dock Pro can see over RF.  Format observed in razer_dock_pairing_v2.pcapng:
+ * Wire format of a nearby-mouse announcement on EP 0x82 of the Mouse Dock Pro
+ * (decoded from razer_dock_pairing_v2.pcapng):
  *
  *   05 37 <flags> <count> <pid_hi> <pid_lo> <pid_hi> <pid_lo> ... 00 00 ...
  *
- * Bytes 4 onwards hold up to RAZER_DOCK_PRO_MAX_NEARBY two-byte big-endian PIDs,
- * zero-padded.  We rewrite the cache wholesale on each report so a mouse that
- * has gone out of range simply stops appearing.
+ * Bytes 4 onwards hold up to RAZER_DOCK_PRO_MAX_NEARBY two-byte big-endian
+ * PIDs, zero-padded.  Header bytes are checked by the caller so unrelated
+ * input reports skip the spinlock entirely.
  */
-static void razer_dock_pro_update_nearby(struct razer_dock_pro_shared *shared, u8 *data, int size)
+static void razer_dock_pro_update_nearby(struct razer_dock_pro_shared *shared, u8 *data)
 {
+    unsigned short pids[RAZER_DOCK_PRO_MAX_NEARBY] = {0};
     unsigned long flags;
-    int slot;
+    int slot = 0;
     int offset;
-    unsigned short pid;
 
-    if (size < 16 || data[0] != 0x05 || data[1] != 0x37)
-        return;
-
-    spin_lock_irqsave(&shared->nearby_lock, flags);
-    memset(shared->nearby_pids, 0, sizeof(shared->nearby_pids));
-    slot = 0;
     for (offset = 4; offset + 1 < 16 && slot < RAZER_DOCK_PRO_MAX_NEARBY; offset += 2) {
-        pid = ((unsigned short)data[offset] << 8) | data[offset + 1];
+        unsigned short pid = ((unsigned short)data[offset] << 8) | data[offset + 1];
         if (pid == 0)
             break;
-        shared->nearby_pids[slot++] = pid;
+        pids[slot++] = pid;
+    }
+
+    spin_lock_irqsave(&shared->nearby_lock, flags);
+    if (memcmp(shared->nearby_pids, pids, sizeof(pids)) != 0) {
+        memcpy(shared->nearby_pids, pids, sizeof(pids));
     }
     shared->nearby_jiffies = jiffies;
     spin_unlock_irqrestore(&shared->nearby_lock, flags);
@@ -4005,8 +4029,8 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 {
     struct razer_accessory_device *device = hid_get_drvdata(hdev);
 
-    if (device->shared)
-        razer_dock_pro_update_nearby(device->shared, data, size);
+    if (device->shared && size >= 16 && data[0] == 0x05 && data[1] == 0x37)
+        razer_dock_pro_update_nearby(device->shared, data);
 
     if(size == 16 && data[0] == 0x04) {
         input_report_key(device->input, KEY_PROG1, 0x01);

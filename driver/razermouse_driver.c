@@ -1941,11 +1941,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
         if (err)
             return err;
 
-        polling_rate = razer_parse_poll_rate_hyperpolling(&response);
-        if (polling_rate == 0)
-            polling_rate = 500;
-
-        return sysfs_emit(buf, "%d\n", polling_rate);
+        return sysfs_emit(buf, "%d\n", razer_parse_poll_rate_hyperpolling(&response));
 
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
     case USB_DEVICE_ID_RAZER_NAGA:
