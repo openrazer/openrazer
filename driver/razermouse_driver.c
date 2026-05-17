@@ -1562,7 +1562,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sprintf(buf, "%d\n", razer_parse_battery_level(&response));
 }
 
 /**
@@ -1664,7 +1664,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sprintf(buf, "%d\n", razer_parse_charging_status(&response));
 }
 
 /**
@@ -1867,26 +1867,9 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
 
         razer_send_payload(device, &request, &response);
 
-        switch(response.arguments[1]) {
-        case 0x01:
-            polling_rate = 8000;
-            break;
-        case 0x02:
-            polling_rate = 4000;
-            break;
-        case 0x04:
-            polling_rate = 2000;
-            break;
-        case 0x08:
-            polling_rate = 1000;
-            break;
-        case  0x10:
+        polling_rate = razer_parse_poll_rate_hyperpolling(&response);
+        if (polling_rate == 0)
             polling_rate = 500;
-            break;
-        case  0x40:
-            polling_rate = 125;
-            break;
-        }
 
         return sprintf(buf, "%d\n", polling_rate);
 
@@ -2694,8 +2677,7 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
         dpi_x = response.arguments[0];
         dpi_y = response.arguments[1];
     } else {
-        dpi_x = (response.arguments[1] << 8) | (response.arguments[2] & 0xFF); // Apparently the char buffer is rubbish, as buf[1] somehow can equal FFFFFF80????
-        dpi_y = (response.arguments[3] << 8) | (response.arguments[4] & 0xFF);
+        razer_parse_dpi_xy(&response, &dpi_x, &dpi_y);
     }
 
     return sprintf(buf, "%u:%u\n", dpi_x, dpi_y);
@@ -2740,7 +2722,7 @@ static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_att
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sprintf(buf, "%d\n", razer_parse_scroll_arg(&response));
 }
 
 /**
@@ -2782,7 +2764,7 @@ static ssize_t razer_attr_read_scroll_acceleration(struct device *dev, struct de
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sprintf(buf, "%d\n", razer_parse_scroll_arg(&response));
 }
 
 /**
@@ -2824,7 +2806,7 @@ static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct devi
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sprintf(buf, "%d\n", razer_parse_scroll_arg(&response));
 }
 
 static ssize_t razer_attr_write_tilt_hwheel(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -3050,10 +3032,6 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned char stages_count;
-    ssize_t count;                 // bytes written
-    unsigned int i;                // iterator over stages_count
-    unsigned char *args;           // pointer to the next dpi value in response.arguments
 
     request = razer_chroma_misc_get_dpi_stages(VARSTORE);
 
@@ -3153,33 +3131,7 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
     // 03    third DPI stage
     // ...
 
-    /*
-     * stages_count and data_size both come straight from the USB response
-     * (i.e. attacker-controllable by a malicious or spoofed device).  Clamp
-     * stages_count to the structural max and bound the loop against the
-     * fixed-size arguments buffer instead of trusting data_size; otherwise
-     * a crafted response could walk args past the end of response.arguments
-     * and copy adjacent kernel-stack bytes into the sysfs page buffer.
-     */
-    stages_count = response.arguments[2];
-    if (stages_count > RAZER_MOUSE_MAX_DPI_STAGES)
-        stages_count = RAZER_MOUSE_MAX_DPI_STAGES;
-
-    buf[0] = response.arguments[1];
-
-    count = 1;
-    args = response.arguments + 4;
-    for (i = 0; i < stages_count; i++) {
-        if (args + 4 > response.arguments + sizeof(response.arguments)) {
-            break;
-        }
-
-        memcpy(buf + count, args, 4);
-        count += 4;
-        args += 7;
-    }
-
-    return count;
+    return razer_parse_dpi_stages(&response, buf, RAZER_MOUSE_MAX_DPI_STAGES);
 }
 
 /**
@@ -3192,7 +3144,6 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned short idle_time = 0;
 
     request = razer_chroma_misc_get_idle_time();
 
@@ -3275,8 +3226,7 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
 
     razer_send_payload(device, &request, &response);
 
-    idle_time = (response.arguments[0] << 8) | (response.arguments[1] & 0xFF);
-    return sprintf(buf, "%u\n", idle_time);
+    return sprintf(buf, "%u\n", razer_parse_idle_time(&response));
 }
 
 /**
@@ -3465,7 +3415,7 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
 
     razer_send_payload(device, &request, &response);
 
-    return sprintf(buf, "%d\n", response.arguments[0]);
+    return sprintf(buf, "%d\n", razer_parse_low_battery_threshold(&response));
 }
 
 /**

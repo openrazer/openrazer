@@ -213,6 +213,77 @@ unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned shor
     return value;
 }
 
+void razer_parse_dpi_xy(const struct razer_report *response, unsigned short *dpi_x, unsigned short *dpi_y)
+{
+    *dpi_x = (response->arguments[1] << 8) | (response->arguments[2] & 0xFF);
+    *dpi_y = (response->arguments[3] << 8) | (response->arguments[4] & 0xFF);
+}
+
+unsigned char razer_parse_battery_level(const struct razer_report *response)
+{
+    return response->arguments[1];
+}
+
+unsigned char razer_parse_charging_status(const struct razer_report *response)
+{
+    return response->arguments[1];
+}
+
+unsigned char razer_parse_scroll_arg(const struct razer_report *response)
+{
+    return response->arguments[1];
+}
+
+unsigned short razer_parse_idle_time(const struct razer_report *response)
+{
+    return (response->arguments[0] << 8) | (response->arguments[1] & 0xFF);
+}
+
+unsigned char razer_parse_low_battery_threshold(const struct razer_report *response)
+{
+    return response->arguments[0];
+}
+
+unsigned short razer_parse_poll_rate_hyperpolling(const struct razer_report *response)
+{
+    switch(response->arguments[1]) {
+    case 0x01: return 8000;
+    case 0x02: return 4000;
+    case 0x04: return 2000;
+    case 0x08: return 1000;
+    case 0x10: return  500;
+    case 0x20: return  250;
+    case 0x40: return  125;
+    }
+    return 0;
+}
+
+ssize_t razer_parse_dpi_stages(const struct razer_report *response, char *buf, unsigned char max_stages)
+{
+    unsigned char stages_count;
+    unsigned int i;
+    const unsigned char *args;
+    ssize_t count;
+
+    stages_count = response->arguments[2];
+    if (stages_count > max_stages)
+        stages_count = max_stages;
+
+    buf[0] = response->arguments[1];
+
+    count = 1;
+    args = response->arguments + 4;
+    for (i = 0; i < stages_count; i++) {
+        if (args + 4 > response->arguments + sizeof(response->arguments))
+            break;
+        memcpy(buf + count, args, 4);
+        count += 4;
+        args += 7;
+    }
+
+    return count;
+}
+
 int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait_min, ulong wait_max)
 {
     uint request = HID_REQ_SET_REPORT; // 0x09
