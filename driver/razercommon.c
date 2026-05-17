@@ -246,16 +246,25 @@ unsigned char razer_parse_low_battery_threshold(const struct razer_report *respo
 
 unsigned short razer_parse_poll_rate_hyperpolling(const struct razer_report *response)
 {
+    /* Unknown byte yields the previous default of 500 Hz so callers don't have
+     * to repeat the fallback themselves. */
     switch(response->arguments[1]) {
-    case 0x01: return 8000;
-    case 0x02: return 4000;
-    case 0x04: return 2000;
-    case 0x08: return 1000;
-    case 0x10: return  500;
-    case 0x20: return  250;
-    case 0x40: return  125;
+    case 0x01:
+        return 8000;
+    case 0x02:
+        return 4000;
+    case 0x04:
+        return 2000;
+    case 0x08:
+        return 1000;
+    case 0x20:
+        return  250;
+    case 0x40:
+        return  125;
+    case 0x10:
+    default:
+        return  500;
     }
-    return 0;
 }
 
 ssize_t razer_parse_dpi_stages(const struct razer_report *response, char *buf, unsigned char max_stages)
