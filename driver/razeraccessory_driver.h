@@ -35,11 +35,39 @@
 #define USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA 0x0F26
 #define USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2 0x0F2B
 
+#include <linux/kref.h>
+#include <linux/list.h>
+#include <linux/spinlock.h>
+
 #define RAZER_ACCESSORY_WAIT_MIN_US 600
 #define RAZER_ACCESSORY_WAIT_MAX_US 1000
 
 #define RAZER_NEW_DEVICE_WAIT_MIN_US 31000
 #define RAZER_NEW_DEVICE_WAIT_MAX_US 31100
+
+/* Maximum number of nearby Razer mice the dock can announce at once.
+ * Per the v2 capture format (16-byte HID input report on EP 0x82, "05 37 ..."),
+ * the slot count is small; 8 covers any realistic environment. */
+#define RAZER_DOCK_PRO_MAX_NEARBY 8
+
+/*
+ * State shared between the two HID interfaces the Mouse Dock Pro exposes.
+ * Interface 0 carries the control-transfer feature reports (matrix LEDs,
+ * pair/unpair, paired-mouse passthrough) and owns the user-visible sysfs
+ * tree.  Interface 1 carries unsolicited HID input reports on EP 0x82,
+ * including the dock's announcements of nearby Razer mice.  They need to
+ * share the nearby-mice cache, so each per-interface razer_accessory_device
+ * carries a pointer to the same razer_dock_pro_shared.
+ */
+struct razer_dock_pro_shared {
+    struct list_head list;       /* linked into dock_pro_shared_list */
+    struct kref ref;             /* released when both interfaces detach */
+    struct usb_device *usb_dev;  /* key for find-or-create lookup */
+
+    spinlock_t nearby_lock;      /* IRQ-safe: written from raw_event */
+    unsigned short nearby_pids[RAZER_DOCK_PRO_MAX_NEARBY];  /* 0 = empty */
+    unsigned long nearby_jiffies;
+};
 
 struct razer_accessory_device {
     struct usb_device *usb_dev;
@@ -61,6 +89,10 @@ struct razer_accessory_device {
      * would disrupt the dock's RF state machine mid-sequence.
      */
     atomic_t pairing_busy;
+
+    /* Non-NULL only on Mouse Dock Pro interfaces.  Lazily allocated by the
+     * first interface to probe; released when both interfaces detach. */
+    struct razer_dock_pro_shared *shared;
 };
 
 /*

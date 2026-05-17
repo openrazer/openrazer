@@ -28,6 +28,62 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
 
+/*
+ * Mouse Dock Pro exposes three USB interfaces.  Interface 0 carries the
+ * control-transfer feature reports the driver has always used; interface 1
+ * carries HID input reports (notably nearby-mouse announcements on EP 0x82).
+ * Both interfaces get their own probe call and their own razer_accessory_device,
+ * but they need to share the nearby-mice cache.  This list maps usb_device *
+ * to a kref'd razer_dock_pro_shared so the second-to-probe interface can
+ * attach to the existing struct instead of allocating a parallel copy.
+ */
+static LIST_HEAD(dock_pro_shared_list);
+static DEFINE_MUTEX(dock_pro_shared_list_lock);
+
+static void razer_dock_pro_shared_release(struct kref *ref)
+{
+    struct razer_dock_pro_shared *shared = container_of(ref, struct razer_dock_pro_shared, ref);
+    list_del(&shared->list);
+    kfree(shared);
+}
+
+static struct razer_dock_pro_shared *razer_dock_pro_shared_get(struct usb_device *usb_dev)
+{
+    struct razer_dock_pro_shared *shared;
+
+    mutex_lock(&dock_pro_shared_list_lock);
+    list_for_each_entry(shared, &dock_pro_shared_list, list) {
+        if (shared->usb_dev == usb_dev) {
+            kref_get(&shared->ref);
+            mutex_unlock(&dock_pro_shared_list_lock);
+            return shared;
+        }
+    }
+
+    shared = kzalloc(sizeof(*shared), GFP_KERNEL);
+    if (!shared) {
+        mutex_unlock(&dock_pro_shared_list_lock);
+        return NULL;
+    }
+
+    kref_init(&shared->ref);
+    shared->usb_dev = usb_dev;
+    spin_lock_init(&shared->nearby_lock);
+    list_add(&shared->list, &dock_pro_shared_list);
+
+    mutex_unlock(&dock_pro_shared_list_lock);
+    return shared;
+}
+
+static void razer_dock_pro_shared_put(struct razer_dock_pro_shared *shared)
+{
+    if (!shared)
+        return;
+    mutex_lock(&dock_pro_shared_list_lock);
+    kref_put(&shared->ref, razer_dock_pro_shared_release);
+    mutex_unlock(&dock_pro_shared_list_lock);
+}
+
 /**
  * Send report to the device
  */
@@ -3089,6 +3145,19 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     switch (usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        /* Interface 0 = control transfers (feature reports for LEDs,
+         * pair/unpair, paired-mouse passthrough).  Interface 1 = HID
+         * input reports including nearby-mouse announcements on EP 0x82.
+         * Interface 2 is the HID-with-vendor protocol used for the mouse
+         * passthrough's USB-input side; we don't handle it. */
+        if (intf->cur_altsetting->desc.bInterfaceNumber > 1) {
+            dev_info(&intf->dev, "skipping interface %u\n",
+                     intf->cur_altsetting->desc.bInterfaceNumber);
+            return false;
+        }
+        break;
+
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
     case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
     case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
@@ -3096,7 +3165,6 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
@@ -3129,6 +3197,16 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
 
     // Init data
     razer_accessory_init(dev, intf, hdev);
+
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO) {
+        dev->shared = razer_dock_pro_shared_get(usb_dev);
+        if (!dev->shared) {
+            kfree(dev);
+            return -ENOMEM;
+        }
+        dev_info(&intf->dev, "Mouse Dock Pro interface %u attached (shared state @ %p)\n",
+                 intf->cur_altsetting->desc.bInterfaceNumber, dev->shared);
+    }
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CORE:
@@ -3404,6 +3482,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     return 0;
 
 exit_free:
+    razer_dock_pro_shared_put(dev->shared);
     kfree(dev);
     return retval;
 }
@@ -3650,6 +3729,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
 
     hid_hw_stop(hdev);
 
+    razer_dock_pro_shared_put(dev->shared);
     kfree(dev);
     dev_info(&intf->dev, "Razer Device disconnected\n");
 }
