@@ -1698,7 +1698,7 @@ class RazerDockedMouse(__RazerDevice):
     """
     USB_VID = 0x1532
     USB_PID = 0x00A4
-    DEVICE_NAME = "Razer Basilisk V3 Pro"
+    DEVICE_NAME = "Razer Basilisk V3 Pro (Docked)"
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 13]
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6220/6220-4-en-v1.png"
