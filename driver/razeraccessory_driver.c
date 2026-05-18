@@ -2716,7 +2716,7 @@ static ssize_t razer_attr_read_mouse_connected(struct device *dev, struct device
     if (err)
         return sprintf(buf, "0\n");
 
-    return sprintf(buf, "%d\n", response.arguments[1] > 0 ? 1 : 0);
+    return sprintf(buf, "1\n");
 }
 
 static ssize_t razer_attr_read_mouse_firmware(struct device *dev, struct device_attribute *attr, char *buf)

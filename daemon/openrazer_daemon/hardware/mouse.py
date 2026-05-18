@@ -1742,6 +1742,19 @@ class RazerDockedMouse(__RazerDevice):
         driver_filename = self._MOUSE_SYSFS_MAP.get(driver_filename, driver_filename)
         return super().get_driver_path(driver_filename)
 
+    def get_serial(self):
+        if self._serial is None:
+            try:
+                with open(super().get_driver_path('mouse_serial'), 'r') as f:
+                    serial = f.read().strip()
+                if serial and re.fullmatch(r"[\dA-Z]+", serial):
+                    self._serial = serial.replace(' ', '_') + self.SERIAL_SUFFIX
+                else:
+                    self._serial = super().get_serial()
+            except (OSError, UnicodeDecodeError):
+                self._serial = super().get_serial()
+        return self._serial
+
     @classmethod
     def match(cls, device_id, dev_path):
         return False
