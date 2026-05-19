@@ -2820,17 +2820,27 @@ static ssize_t razer_attr_write_mouse_matrix_custom_frame(struct device *dev, st
     size_t row_length;
 
     while(offset < count) {
-        if(offset + 3 > count)
-            break;
+        if(offset + 3 > count) {
+            printk(KERN_ALERT "razeraccessory: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
+            return -EINVAL;
+        }
 
         row_id = buf[offset++];
         start_col = buf[offset++];
         stop_col = buf[offset++];
 
-        row_length = ((stop_col - start_col) + 1) * 3;
+        // Validate parameters
+        if(start_col > stop_col) {
+            printk(KERN_ALERT "razeraccessory: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
+            return -EINVAL;
+        }
 
-        if(offset + row_length > count)
-            break;
+        row_length = ((stop_col + 1) - start_col) * 3;
+
+        if(count < offset + row_length) {
+            printk(KERN_ALERT "razeraccessory: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
+            return -EINVAL;
+        }
 
         request = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
         razer_dock_send_mouse_payload(device, &request, &response);
