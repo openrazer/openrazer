@@ -259,8 +259,15 @@ class RazerDaemon(DBusService):
             was_connected = self._dock_mouse_connected.get(device_id)
 
             if was_connected is None:
+                # First observation: reconcile with existing child device state
                 self._dock_mouse_connected[device_id] = connected
                 self._dock_mouse_pending[device_id] = None
+                if connected and child_id not in self._razer_devices:
+                    self.logger.info("Mouse connected to dock %s (initial)", device_id)
+                    self._add_dock_child_device(device_id, razer_device._device_path, razer_device)
+                elif not connected and child_id in self._razer_devices:
+                    self.logger.info("Mouse disconnected from dock %s (initial)", device_id)
+                    self._remove_dock_child_device(child_id)
 
             elif connected != was_connected:
                 pending = self._dock_mouse_pending.get(device_id)
