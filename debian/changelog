@@ -1,3 +1,9 @@
+openrazer (3.12.3) resolute; urgency=high
+
+  * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v3.12.3
+
+ -- Luca Weiss <luca@lucaweiss.eu>  Thu, 21 May 2026 17:57:57 +0200
+
 openrazer (3.12.2) noble; urgency=high
 
   * Changelog available at https://github.com/openrazer/openrazer/releases/tag/v3.12.2
