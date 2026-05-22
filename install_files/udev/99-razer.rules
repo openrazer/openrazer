@@ -24,11 +24,20 @@ ATTRS{idProduct}=="0068|007e|00a4|0215|0517|0518|0c00|0c01|0c02|0c04|0c05|0c06|0
     ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razeraccessory"
 
+# HyperFlux V2 presents the mat, keyboard and mouse as separate interfaces on
+# one USB PID. Bind only the interfaces with OpenRazer sysfs support.
+ATTRS{idProduct}=="00cf", ATTRS{idVendor}=="1532", KERNELS=="*:1.0", \
+    ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razeraccessory"
+ATTRS{idProduct}=="00cf", ATTRS{idVendor}=="1532", KERNELS=="*:1.1", \
+    ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerkbd"
+ATTRS{idProduct}=="00cf", ATTRS{idVendor}=="1532", KERNELS=="*:1.4", \
+    ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razermouse"
+
 # Get out if no match
 ENV{ID_RAZER_CHROMA}!="1", GOTO="razer_end"
 
 # Set permissions if this is an input node
-SUBSYSTEM=="usb|input|hid", GROUP:="plugdev"
+SUBSYSTEM=="usb|input|hid", GROUP:="openrazer"
 
 # We're done unless it's the hid node
 SUBSYSTEM!="hid|usb", GOTO="razer_end"

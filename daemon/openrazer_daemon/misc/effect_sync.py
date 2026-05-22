@@ -7,6 +7,15 @@ import inspect
 import logging
 
 
+DEVICE_LOCAL_EFFECTS = {
+    # Matrix/custom effects are device-geometry specific. Syncing them to
+    # another device can disturb unrelated state, especially on shared receivers.
+    'setCustom',
+    'setKeyRow',
+    'setRipple',
+}
+
+
 class EffectSync(object):
     """
     Class which deals with receiving effect events from other devices
@@ -38,6 +47,8 @@ class EffectSync(object):
             #  0         1       2             3
             # ('effect', Device, 'effectName', 'effectparams'...)
             # Device is the device the msg originated from (could be parent device)
+            if msg[2] in DEVICE_LOCAL_EFFECTS:
+                return
             if msg[1] is not self._parent:
                 # Msg from another device
                 self.run_effect(msg[2], *msg[3:])

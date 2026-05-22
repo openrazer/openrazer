@@ -31,6 +31,7 @@ class RippleEffectThread(threading.Thread):
 
         self._shutdown = False
         self._active = False
+        self._needs_clear = False
 
         self._rows, self._cols = self._parent._parent.MATRIX_DIMS
 
@@ -89,6 +90,7 @@ class RippleEffectThread(threading.Thread):
         else:
             self._colour = colour
         self._refresh_rate = refresh_rate
+        self._needs_clear = True
         self._active = True
 
     def disable(self):
@@ -96,6 +98,7 @@ class RippleEffectThread(threading.Thread):
         Disable the ripple effect
         """
         self._active = False
+        self._needs_clear = False
 
     def run(self):
         """
@@ -116,6 +119,20 @@ class RippleEffectThread(threading.Thread):
         # TODO time execution and then sleep for _refresh_rate - time_taken
         while not self._shutdown:
             if self._active:
+                key_list = self.key_list
+
+                # Do not continuously send blank matrix frames. On shared
+                # receivers, that can interfere with unrelated control reads.
+                if not key_list:
+                    if self._needs_clear:
+                        self._keyboard_grid.reset_rows()
+                        self._parent.set_rgb_matrix(self._keyboard_grid.get_total_binary())
+                        self._parent.refresh_keyboard()
+                        self._needs_clear = False
+
+                    time.sleep(self._refresh_rate)
+                    continue
+
                 # Clear keyboard
                 self._keyboard_grid.reset_rows()
 
@@ -123,7 +140,7 @@ class RippleEffectThread(threading.Thread):
 
                 radiuses = []
 
-                for expire_time, (key_row, key_col), colour in self.key_list:
+                for expire_time, (key_row, key_col), colour in key_list:
                     event_time = expire_time - expire_diff
 
                     now_diff = now - event_time
@@ -165,6 +182,7 @@ class RippleEffectThread(threading.Thread):
 
                 self._parent.set_rgb_matrix(payload)
                 self._parent.refresh_keyboard()
+                self._needs_clear = True
 
             # Sleep until the next ripple refresh
             time.sleep(self._refresh_rate)

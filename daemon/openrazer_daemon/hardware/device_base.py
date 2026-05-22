@@ -19,6 +19,10 @@ from openrazer_daemon.misc import effect_sync
 from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 
 
+class DeviceSerialNotReady(RuntimeError):
+    """Raised when a device must not be registered with a generated serial."""
+
+
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=E1102
 # See https://github.com/PyCQA/pylint/issues/1493
@@ -47,6 +51,13 @@ class RazerDevice(DBusService):
     ZONES = ('backlight', 'logo', 'scroll', 'left', 'right', 'charging', 'fast_charging', 'fully_charged', 'channel1', 'channel2', 'channel3', 'channel4', 'channel5', 'channel6')
 
     DEVICE_IMAGE: Optional[str] = None
+    PRE_SERIAL_DRIVER_MODE = False
+    PRE_SERIAL_DRIVER_MODE_DELAY = 0.5
+    SERIAL_RETRY_ATTEMPTS = 5
+    SERIAL_RETRY_DELAY = 0.1
+    REQUIRE_VALID_SERIAL = False
+    FORCE_DEVICE_MODE = False
+    EVENT_FILE_USE_DEVICE_PATH = False
 
     def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter):
 
@@ -77,6 +88,16 @@ class RazerDevice(DBusService):
         self._parent = None
         self._device_path = device_path
         self._device_number = device_number
+        self._is_closed = False
+
+        if self.PRE_SERIAL_DRIVER_MODE:
+            try:
+                self.logger.info('Setting device to "driver" mode before reading serial')
+                self.set_device_mode(0x03, 0x00)
+                time.sleep(self.PRE_SERIAL_DRIVER_MODE_DELAY)
+            except OSError as err:
+                self.logger.warning('Unable to set driver mode before reading serial: %s', err)
+
         self.serial = self.get_serial()
 
         if self.USB_PID == 0x0f07:
@@ -117,8 +138,6 @@ class RazerDevice(DBusService):
 
         self._effect_sync = effect_sync.EffectSync(self, device_number)
 
-        self._is_closed = False
-
         # device methods available in all devices
         self.methods_internal = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name']
         self.methods_internal.extend(additional_methods)
@@ -135,6 +154,19 @@ class RazerDevice(DBusService):
             for event_file in os.listdir(search_dir):
                 if self.EVENT_FILE_REGEX is not None and self.EVENT_FILE_REGEX.match(event_file) is not None:
                     self.event_files.append(os.path.join(search_dir, event_file))
+
+        if self.EVENT_FILE_USE_DEVICE_PATH and not self._testing:
+            device_input_path = os.path.join(device_path, 'input')
+            if os.path.isdir(device_input_path):
+                for input_name in sorted(os.listdir(device_input_path)):
+                    input_path = os.path.join(device_input_path, input_name)
+                    if not os.path.isdir(input_path):
+                        continue
+                    for event_name in sorted(os.listdir(input_path)):
+                        if event_name.startswith('event'):
+                            event_path = os.path.join('/dev/input', event_name)
+                            if os.path.exists(event_path) and event_path not in self.event_files:
+                                self.event_files.append(event_path)
 
         object_path = os.path.join(self.OBJECT_PATH, self.serial)
         super().__init__(object_path)
@@ -324,14 +356,18 @@ class RazerDevice(DBusService):
         if 'get_battery' in self.METHODS:
             self._init_battery_manager()
 
-        try:
-            driver_mode_default = self.DRIVER_MODE
-            self.DRIVER_MODE = self.config.getboolean(f"Device:{self.serial}", "driver_mode")
-            self.logger.info('Overriding DRIVER_MODE with "%s" from config (default: "%s")', self.DRIVER_MODE, driver_mode_default)
-        except (configparser.NoSectionError, configparser.NoOptionError):
-            pass
+        if not self.FORCE_DEVICE_MODE:
+            try:
+                driver_mode_default = self.DRIVER_MODE
+                self.DRIVER_MODE = self.config.getboolean(f"Device:{self.serial}", "driver_mode")
+                self.logger.info('Overriding DRIVER_MODE with "%s" from config (default: "%s")', self.DRIVER_MODE, driver_mode_default)
+            except (configparser.NoSectionError, configparser.NoOptionError):
+                pass
 
-        if self.DRIVER_MODE:
+        if self.FORCE_DEVICE_MODE:
+            self.logger.info('Setting device to "device" mode. Device firmware will handle special functionality')
+            self.set_device_mode(0x00, 0x00)  # Device mode
+        elif self.DRIVER_MODE:
             self.logger.info('Setting device to "driver" mode. Daemon will handle special functionality')
             self.set_device_mode(0x03, 0x00)  # Driver mode
 
@@ -974,8 +1010,8 @@ class RazerDevice(DBusService):
             serial_path = os.path.join(self._device_path, 'device_serial')
             count = 0
             serial = ''
-            while len(serial) == 0:
-                if count >= 5:
+            while not re.fullmatch(r"[\dA-Z]+", serial):
+                if count >= self.SERIAL_RETRY_ATTEMPTS:
                     break
 
                 try:
@@ -990,8 +1026,8 @@ class RazerDevice(DBusService):
 
                 count += 1
 
-                if len(serial) == 0:
-                    time.sleep(0.1)
+                if not re.fullmatch(r"[\dA-Z]+", serial):
+                    time.sleep(self.SERIAL_RETRY_DELAY)
                     self.logger.debug('getting serial: {0} count:{1}'.format(serial, count))
 
             # Known bad serials:
@@ -1001,6 +1037,9 @@ class RazerDevice(DBusService):
             # - "As printed in the D cover"
             # - hex: 01 01 01 01 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16
             if not re.fullmatch(r"[\dA-Z]+", serial):
+                if self.REQUIRE_VALID_SERIAL:
+                    raise DeviceSerialNotReady("Device serial is not ready")
+
                 self.logger.warning("Invalid serial number found, using a generated one.")
                 self.logger.warning("Original value: %s" % serial)
                 vid, pid = self.get_vid_pid()
@@ -1168,7 +1207,10 @@ class RazerDevice(DBusService):
         # similar. Nevertheless for now this seems to be the best place for
         # this and should resolve some issues with macro keys not working after
         # suspend.
-        if self.DRIVER_MODE:
+        if self.FORCE_DEVICE_MODE:
+            self.logger.info('Setting device back to "device" mode.')
+            self.set_device_mode(0x00, 0x00)  # Device mode
+        elif self.DRIVER_MODE:
             self.logger.info('Setting device back to "driver" mode.')
             self.set_device_mode(0x03, 0x00)  # Driver mode
 

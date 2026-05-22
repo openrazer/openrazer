@@ -5,6 +5,7 @@ Documentation=man:openrazer-daemon(8)
 [Service]
 Type=dbus
 BusName=org.razer
+ExecStartPre=/usr/bin/udevadm settle --timeout=10
 ExecStart=##PREFIX##/bin/openrazer-daemon -F
 
 [Install]

@@ -113,6 +113,7 @@
 #define USB_DEVICE_ID_RAZER_BASILISK_V3_35K 0x00CB
 #define USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED 0x00CC
 #define USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS 0x00CD
+#define USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2 0x00CF
 #define USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED 0x00D0
 #define USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS 0x00D1
 #define USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED 0x00D3
@@ -153,6 +154,15 @@ struct razer_mouse_device {
     __s32 hwheel_value;
     u8 button_byte; // Previous value of mouse button byte in HID record
     u8 rep4[16]; // Previous value of report 4 on the keyboard intf
+    bool has_last_dpi;
+    unsigned short last_dpi_x;
+    unsigned short last_dpi_y;
+    bool has_last_scroll_mode;
+    unsigned char last_scroll_mode;
+    bool has_last_scroll_acceleration;
+    unsigned char last_scroll_acceleration;
+    bool has_last_scroll_smart_reel;
+    unsigned char last_scroll_smart_reel;
 
     unsigned char usb_interface_protocol;
     unsigned char usb_interface_subclass;

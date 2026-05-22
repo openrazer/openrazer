@@ -150,6 +150,7 @@ This will output something similar to this:
 | Razer BlackWidow V4 X                                         |  1532:0293  |
 | Razer Ornata V3 X                                             |  1532:0294  |
 | Razer DeathStalker V2 Pro TKL (Wireless)                      |  1532:0296  |
+| Razer DeathStalker V2 Pro TKL (HyperFlux V2)                  |  1532:00CF  |
 | Razer DeathStalker V2 Pro TKL (Wired)                         |  1532:0298  |
 | Razer DeathStalker V2                                         |  1532:0295  |
 | Razer Blade 14 (2023)                                         |  1532:029D  |
@@ -285,6 +286,7 @@ This will output something similar to this:
 | Razer Basilisk V3 35K                                         |  1532:00CB  |
 | Razer Basilisk V3 Pro 35K (Wired)                             |  1532:00CC  |
 | Razer Basilisk V3 Pro 35K (Wireless)                          |  1532:00CD  |
+| Razer Basilisk V3 Pro 35K (HyperFlux V2)                      |  1532:00CF  |
 | Razer Pro Click V2 (Wired)                                    |  1532:00D0  |
 | Razer Pro Click V2 (Wireless)                                 |  1532:00D1  |
 | Razer Basilisk Mobile (Wired)                                 |  1532:00D3  |

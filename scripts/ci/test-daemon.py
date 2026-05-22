@@ -42,16 +42,32 @@ def test_sysfs_consistency(d):
     # Check sysfs files exist for capabilities
     vid = str(hex(d._vid))[2:].upper().rjust(4, '0')
     pid = str(hex(d._pid))[2:].upper().rjust(4, '0')
+    sysfs_dirs = []
+
+    for path in glob.glob(f"{daemon_test_dir}/*:{vid}:{pid}*", recursive=True):
+        try:
+            with open(f"{path}/device_serial") as f:
+                serial = f.read().strip()
+        except OSError:
+            continue
+
+        if serial == d.serial:
+            sysfs_dirs.append(path)
+
+    if not sysfs_dirs:
+        sysfs_dirs = glob.glob(f"{daemon_test_dir}/*:{vid}:{pid}*", recursive=True)
 
     def check_sysfs(capability: str, sysfs_name: str):
         """
         Check the device has either the given pylib capability for the
         given sysfs name, and vice versa.
         """
-        try:
-            expected_path = glob.glob(f"{daemon_test_dir}/*:{vid}:{pid}*/{sysfs_name}", recursive=True)[0]
-        except IndexError:
-            expected_path = ""
+        expected_path = ""
+        for sysfs_dir in sysfs_dirs:
+            paths = glob.glob(f"{sysfs_dir}/{sysfs_name}", recursive=True)
+            if paths:
+                expected_path = paths[0]
+                break
 
         if d.has(capability) and not glob.glob(expected_path, recursive=True):
             _test_failed(d.name, str(hex(d._pid)) + " Has capability '{}' but no sysfs file: '{}'".format(capability, sysfs_name))
@@ -67,8 +83,10 @@ def test_sysfs_consistency(d):
         found_capability = []
 
         for sysfs_name in sysfs_names:
-            if glob.glob(f"{daemon_test_dir}/*:{vid}:{pid}*/{sysfs_name}", recursive=True):
-                found_sysfs.append(sysfs_name)
+            for sysfs_dir in sysfs_dirs:
+                if glob.glob(f"{sysfs_dir}/{sysfs_name}", recursive=True):
+                    found_sysfs.append(sysfs_name)
+                    break
 
         for capability in capabilities:
             if d.has(capability):

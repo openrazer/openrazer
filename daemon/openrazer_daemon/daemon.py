@@ -25,10 +25,16 @@ import json
 import threading
 
 import openrazer_daemon.hardware
+from openrazer_daemon.hardware.device_base import DeviceSerialNotReady
 from openrazer_daemon.dbus_services.service import DBusService
 from openrazer_daemon.device import DeviceCollection
 from openrazer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 from openrazer_daemon.misc.autosave_persistence import PersistenceAutoSave
+
+
+HYPERFLUX_V2_HID_PREFIX = '0003:1532:00CF'
+RAZER_DEVICE_GROUPS = ('openrazer', 'plugdev')
+HYPERFLUX_V2_PUBLISH_HOLD_SECONDS = 60.0
 
 
 class RazerDaemon(DBusService):
@@ -109,6 +115,13 @@ class RazerDaemon(DBusService):
 
         # Listen for input events from udev
         self._init_udev_monitor()
+        self._collecting_udev = False
+        self._collecting_udev_devices = []
+        self._pending_device_ids = set()
+        self._pending_ready_devices = {}
+        self._pending_device_since = {}
+        self._pending_device_retry_active = False
+        self._device_add_lock = threading.RLock()
 
         # Load Classes
         self._device_classes = openrazer_daemon.hardware.get_device_classes()
@@ -135,9 +148,6 @@ class RazerDaemon(DBusService):
         for m in methods:
             self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
             self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
-
-        self._collecting_udev = False
-        self._collecting_udev_devices = []
 
         self._init_autosave_persistence()
 
@@ -466,6 +476,9 @@ class RazerDaemon(DBusService):
                 if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
                     self.logger.info('Found device.%d: %s', device_number, sys_name)
 
+                    if not test_mode and self._defer_initial_device(device_class, sys_name):
+                        continue
+
                     # TODO add testdir support
                     # Basically find the other usb interfaces
                     device_match = sys_name.split('.')[0]
@@ -479,24 +492,25 @@ class RazerDaemon(DBusService):
                         if double_device:
                             continue
 
-                        for alt_device in device_list:
-                            if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
-                                additional_interfaces.append(alt_device.sys_path)
+                        if device_match.upper() != HYPERFLUX_V2_HID_PREFIX:
+                            for alt_device in device_list:
+                                if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
+                                    additional_interfaces.append(alt_device.sys_path)
 
-                    # Checking permissions
-                    test_file = os.path.join(sys_path, 'device_type')
-                    file_group_id = os.stat(test_file).st_gid
-                    file_group_name = grp.getgrgid(file_group_id)[0]
-
-                    if os.getgid() != file_group_id and file_group_name != 'plugdev':
-                        self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
+                    if not test_mode and not self._wait_for_device_permissions(sys_path):
+                        self.logger.critical("Could not access {0}/device_type, file is not owned by openrazer or plugdev".format(sys_path))
                         break
 
-                    razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
-                                                persistence=self._persistence, testing=self._test_dir is not None,
-                                                additional_interfaces=sorted(additional_interfaces),
-                                                additional_methods=[],
-                                                unknown_serial_counter=self._unknown_serial_counter)
+                    try:
+                        razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
+                                                    persistence=self._persistence, testing=self._test_dir is not None,
+                                                    additional_interfaces=sorted(additional_interfaces),
+                                                    additional_methods=[],
+                                                    unknown_serial_counter=self._unknown_serial_counter)
+                    except DeviceSerialNotReady:
+                        self.logger.info("Serial not ready for device %s. Will retry.", sys_name)
+                        self._add_pending_device(sys_name)
+                        continue
 
                     # Wireless devices sometimes don't listen
                     count = 0
@@ -511,11 +525,123 @@ class RazerDaemon(DBusService):
                         logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
                         continue
 
-                    self._razer_devices.add(sys_name, device_serial, razer_device)
+                    self._publish_ready_device(sys_name, device_serial, razer_device, emit_signal=False)
 
                     device_number += 1
 
-    def _add_device(self, device):
+    def _wait_for_device_permissions(self, sys_path, timeout=5.0):
+        """
+        Wait for udev to finish applying permissions to OpenRazer sysfs files.
+
+        The hid add/bind event can reach the daemon before the udev helper has
+        changed the sysfs file group. Reading the serial before that point turns
+        hotplug into a race.
+        """
+        test_file = os.path.join(sys_path, 'device_type')
+        deadline = time.monotonic() + timeout
+
+        while True:
+            try:
+                file_group_id = os.stat(test_file).st_gid
+                file_group_name = grp.getgrgid(file_group_id)[0]
+                if (os.getgid() == file_group_id or file_group_name in RAZER_DEVICE_GROUPS) and os.access(test_file, os.R_OK):
+                    return True
+            except (FileNotFoundError, KeyError):
+                pass
+
+            if time.monotonic() >= deadline:
+                return False
+            time.sleep(0.1)
+
+    def _defer_initial_device(self, device_class, sys_name):
+        """
+        Defer startup probing for devices whose serial path can block.
+
+        HyperFlux V2 child devices can be present before their wireless reports
+        answer. Constructing their daemon object at startup may block DBus
+        service registration, so initial scan records them for asynchronous
+        retry instead.
+        """
+        if getattr(device_class, 'REQUIRE_VALID_SERIAL', False):
+            self.logger.info("Deferring device %s until serial is ready", sys_name)
+            self._add_pending_device(sys_name)
+            return True
+
+        return False
+
+    @staticmethod
+    def _is_hyperflux_v2_device_id(sys_name):
+        return sys_name.upper().startswith(HYPERFLUX_V2_HID_PREFIX)
+
+    def _has_pending_hyperflux_v2_devices(self):
+        return any(self._is_hyperflux_v2_device_id(device_id) for device_id in self._pending_device_ids)
+
+    def _hyperflux_v2_hold_expired(self):
+        now = time.monotonic()
+        return any(
+            self._is_hyperflux_v2_device_id(device_id)
+            and now - pending_since >= HYPERFLUX_V2_PUBLISH_HOLD_SECONDS
+            for device_id, pending_since in self._pending_device_since.items()
+        )
+
+    def _add_pending_device(self, sys_name):
+        with self._device_add_lock:
+            self._pending_device_ids.add(sys_name)
+            self._pending_device_since.setdefault(sys_name, time.monotonic())
+
+    def _discard_pending_device(self, sys_name):
+        with self._device_add_lock:
+            self._pending_device_ids.discard(sys_name)
+            self._pending_device_since.pop(sys_name, None)
+
+    def _publish_ready_device(self, sys_name, device_serial, razer_device, emit_signal=True):
+        with self._device_add_lock:
+            if not self._is_hyperflux_v2_device_id(sys_name):
+                self._razer_devices.add(sys_name, device_serial, razer_device)
+                self._discard_pending_device(sys_name)
+                added_device = True
+            else:
+                self._discard_pending_device(sys_name)
+                self._pending_ready_devices[sys_name] = (device_serial, razer_device)
+
+                if self._has_pending_hyperflux_v2_devices() and not self._hyperflux_v2_hold_expired():
+                    self.logger.info("Holding ready HyperFlux V2 device until sibling serials are ready: %s", sys_name)
+                    return False
+
+                added_device = self._publish_pending_ready_hyperflux_v2_devices()
+
+        if emit_signal and added_device:
+            self.device_added()
+
+        return added_device
+
+    def _publish_pending_ready_hyperflux_v2_devices(self):
+        added_device = False
+        for device_id, (serial, dbus_device) in sorted(list(self._pending_ready_devices.items())):
+            if not self._is_hyperflux_v2_device_id(device_id):
+                continue
+            if device_id not in self._razer_devices:
+                self._razer_devices.add(device_id, serial, dbus_device)
+                added_device = True
+            del self._pending_ready_devices[device_id]
+        return added_device
+
+    def _release_expired_hyperflux_v2_hold(self):
+        with self._device_add_lock:
+            if not self._pending_ready_devices:
+                return False
+            if not self._has_pending_hyperflux_v2_devices() or not self._hyperflux_v2_hold_expired():
+                return False
+
+            self.logger.info("Publishing ready HyperFlux V2 devices after sibling serial wait expired")
+            added_device = self._publish_pending_ready_hyperflux_v2_devices()
+
+        if added_device:
+            self.device_added()
+
+        return added_device
+
+    def _add_device(self, device, emit_signal=True):
         """
         Add device event from udev
 
@@ -527,36 +653,45 @@ class RazerDaemon(DBusService):
             sys_name = device.sys_name
             sys_path = device.sys_path
 
-            if sys_name in self._razer_devices:
-                continue
+            with self._device_add_lock:
+                if sys_name in self._razer_devices or sys_name in self._pending_ready_devices:
+                    continue
 
             if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
                 self.logger.info('Found valid device.%d: %s', device_number, sys_name)
-                razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
-                                            persistence=self._persistence, testing=self._test_dir is not None,
-                                            additional_interfaces=None, additional_methods=[],
-                                            unknown_serial_counter=self._unknown_serial_counter)
+                if not self._wait_for_device_permissions(sys_path):
+                    self.logger.critical("Could not access {0}/device_type, file is not owned by openrazer or plugdev".format(sys_path))
+                    break
 
-                # Its a udev event so currently the device hasn't been chmodded yet
-                time.sleep(0.2)
+                try:
+                    razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
+                                                persistence=self._persistence, testing=self._test_dir is not None,
+                                                additional_interfaces=None, additional_methods=[],
+                                                unknown_serial_counter=self._unknown_serial_counter)
+                except DeviceSerialNotReady:
+                    self.logger.info("Serial not ready for device %s. Will retry.", sys_name)
+                    self._add_pending_device(sys_name)
+                    return False
 
                 # Wireless devices sometimes don't listen
                 device_serial = razer_device.get_serial()
 
                 if len(device_serial) > 0:
-                    # Add Device
-                    self._razer_devices.add(sys_name, device_serial, razer_device)
-                    self.device_added()
+                    return self._publish_ready_device(sys_name, device_serial, razer_device, emit_signal=emit_signal)
                 else:
                     logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
             else:
                 # Basically find the other usb interfaces
                 device_match = sys_name.split('.')[0]
                 for d in self._razer_devices:
+                    if device_match.upper() == HYPERFLUX_V2_HID_PREFIX:
+                        continue
                     if device_match in d.device_id and d.device_id != sys_name:
                         if not sys_path in d.dbus.additional_interfaces:
                             d.dbus.additional_interfaces.append(sys_path)
-                            return
+                            return False
+
+        return False
 
     def _remove_device(self, device):
         """
@@ -566,6 +701,16 @@ class RazerDaemon(DBusService):
         :type device: pyudev.device._device.Device
         """
         device_id = device.sys_name
+        with self._device_add_lock:
+            self._discard_pending_device(device_id)
+            ready_device = self._pending_ready_devices.pop(device_id, None)
+        if ready_device is not None:
+            try:
+                ready_device[1].close()
+                ready_device[1].remove_from_connection()
+            except Exception as err:  # pylint: disable=broad-except
+                self.logger.warning("Failed to remove pending ready device %s: %s", device_id, err)
+            return
 
         try:
             device = self._razer_devices[device_id]
@@ -605,11 +750,62 @@ class RazerDaemon(DBusService):
 
     def _collecting_udev_method(self, device):
         time.sleep(2)  # delay to let udev add all devices that we want
-        # Sort the devices
-        self._collecting_udev_devices.sort(key=lambda x: x.sys_path, reverse=True)
+        # Sort the devices. HyperFlux V2 exposes keyboard and mouse as separate
+        # HID interfaces behind one receiver; initialise the keyboard first
+        # because it can take longer to provide its wireless serial at hotplug.
+        self._collecting_udev_devices.sort(key=self._udev_device_sort_key)
+        device_added = False
         for d in self._collecting_udev_devices:
-            self._add_device(d)
+            device_added = self._add_device(d, emit_signal=False) or device_added
+        if device_added:
+            self.device_added()
         self._collecting_udev = False
+
+    @staticmethod
+    def _udev_device_sort_key(device):
+        sys_name = device.sys_name.upper()
+        if not sys_name.startswith(HYPERFLUX_V2_HID_PREFIX):
+            return (1, device.sys_path)
+
+        try:
+            iface_file = os.path.join(os.path.dirname(os.path.realpath(device.sys_path)), 'bInterfaceNumber')
+            with open(iface_file, encoding='utf-8') as file:
+                iface = int(file.read().strip(), 16)
+        except (OSError, ValueError):
+            iface = 99
+
+        return (0, iface, device.sys_path)
+
+    def _retry_pending_devices(self):
+        with self._device_add_lock:
+            if not self._pending_device_ids:
+                return True
+
+            if self._pending_device_retry_active:
+                return True
+
+            self._pending_device_retry_active = True
+        t = threading.Thread(target=self._retry_pending_devices_worker)
+        t.daemon = True
+        t.start()
+
+        return True
+
+    def _retry_pending_devices_worker(self):
+        try:
+            self._retry_pending_devices_once()
+        finally:
+            with self._device_add_lock:
+                self._pending_device_retry_active = False
+
+    def _retry_pending_devices_once(self):
+        for device in self._udev_context.list_devices(subsystem='hid'):
+            with self._device_add_lock:
+                if device.sys_name not in self._pending_device_ids or device.sys_name in self._razer_devices or device.sys_name in self._pending_ready_devices:
+                    continue
+            self.logger.info('Retrying pending device: %s', device.sys_name)
+            self._add_device(device)
+        self._release_expired_hyperflux_v2_hold()
 
     def run(self):
         """
@@ -619,6 +815,7 @@ class RazerDaemon(DBusService):
 
         # Start listening for device changes
         self._udev_observer.start()
+        GLib.timeout_add_seconds(2, self._retry_pending_devices)
 
         # Start the mainloop
         try:

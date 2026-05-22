@@ -137,6 +137,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Firefly Hyperflux";
         break;
 
+    case USB_DEVICE_ID_RAZER_HYPERFLUX_V2:
+        device_type = "Razer HyperFlux V2";
+        break;
+
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
         device_type = "Razer Goliathus";
         break;
@@ -2336,6 +2340,7 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+    case USB_DEVICE_ID_RAZER_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
@@ -2385,6 +2390,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
+    case USB_DEVICE_ID_RAZER_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
@@ -2578,6 +2584,9 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         // Needs to be in "Normal" mode for idle effects to function properly
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        // HyperFlux V2 is a shared receiver. Driver mode also affects the
+        // paired keyboard/mouse interfaces and disables mouse firmware buttons.
+        case USB_DEVICE_ID_RAZER_HYPERFLUX_V2:
             break;
 
         default:
@@ -2843,6 +2852,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_HYPERFLUX_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA) },

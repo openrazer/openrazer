@@ -3,8 +3,10 @@
 """
 Keyboards class
 """
+import os
 import re
 
+from openrazer_daemon.hardware.device_base import RazerDevice as _RazerDevice
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
 from openrazer_daemon.misc.key_event_management import KeyboardKeyManager as _KeyboardKeyManager, GamepadKeyManager as _GamepadKeyManager, OrbweaverKeyManager as _OrbweaverKeyManager
 from openrazer_daemon.misc.ripple_effect import RippleManager as _RippleManager
@@ -19,6 +21,7 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
     DRIVER_MODE = True
 
     def __init__(self, *args, **kwargs):
+        self.key_manager = None
         if 'additional_methods' in kwargs:
             kwargs['additional_methods'].extend(['get_keyboard_layout'])
         else:
@@ -34,7 +37,8 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         """
         super()._close()
 
-        self.key_manager.close()
+        if self.key_manager is not None:
+            self.key_manager.close()
 
 
 class _RippleKeyboard(_MacroKeyboard):
@@ -45,6 +49,7 @@ class _RippleKeyboard(_MacroKeyboard):
     """
 
     def __init__(self, *args, **kwargs):
+        self.ripple_manager = None
         super().__init__(*args, **kwargs)
 
         if not self.HAS_MATRIX:
@@ -68,7 +73,8 @@ class _RippleKeyboard(_MacroKeyboard):
     def _close(self):
         super()._close()
 
-        self.ripple_manager.close()
+        if self.ripple_manager is not None:
+            self.ripple_manager.close()
 
 
 class RazerNostromo(_RazerDeviceBrightnessSuspend):
@@ -1476,6 +1482,60 @@ class RazerDeathStalkerV2ProTKLWireless(RazerDeathStalkerV2ProTKLWired):
     """
     USB_PID = 0x0296
     EVENT_FILE_REGEX = re.compile(r'.*DSV2Pro_TKL_000000000000-if01-event-mouse')
+
+
+class RazerDeathStalkerV2ProTKLHyperFluxV2(_RippleKeyboard):
+    """
+    Class for the Razer DeathStalker V2 Pro TKL via HyperFlux V2.
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x00CF
+    # HyperFlux V2 exposes one composite receiver; driver mode is shared across
+    # the paired devices and breaks the mouse's firmware-handled buttons.
+    DRIVER_MODE = False
+    PRE_SERIAL_DRIVER_MODE = False
+    FORCE_DEVICE_MODE = True
+    SERIAL_RETRY_ATTEMPTS = 1
+    SERIAL_RETRY_DELAY = 0.5
+    REQUIRE_VALID_SERIAL = True
+    EVENT_FILE_REGEX = None
+    EVENT_FILE_USE_DEVICE_PATH = True
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 17]
+    METHODS = ['get_device_type_keyboard',
+               'get_brightness', 'set_brightness',
+               'set_static_effect', 'set_spectrum_effect', 'set_wave_effect', 'set_none_effect',
+               'set_reactive_effect',
+               'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_custom_effect', 'set_key_row',
+               'get_game_mode', 'set_game_mode',
+               'get_macro_mode', 'set_macro_mode', 'get_macro_effect', 'set_macro_effect',
+               'get_macros', 'delete_macro', 'add_macro',
+               'set_ripple_effect', 'set_ripple_effect_random_colour',
+               # Battery
+               'get_battery', 'is_charging']
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/6117/6117-1-en-v1.png"
+
+    @classmethod
+    def match(cls, device_id, dev_path):
+        if not super().match(device_id, dev_path):
+            return False
+
+        try:
+            iface_file = os.path.join(os.path.dirname(os.path.realpath(dev_path)), 'bInterfaceNumber')
+            if not os.path.exists(iface_file):
+                iface_file = os.path.join(dev_path, 'bInterfaceNumber')
+            with open(iface_file, encoding='utf-8') as file:
+                return int(file.read().strip(), 16) == 1
+        except (OSError, ValueError):
+            return False
+
+    def restore_brightness(self):
+        super().restore_brightness()
+
+    def restore_effect(self):
+        pass
 
 
 class RazerBlackWidowChromaOverwatch(_RippleKeyboard):

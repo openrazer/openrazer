@@ -3,6 +3,7 @@
 """
 Mouse class
 """
+import os
 import re
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice
 
@@ -1742,6 +1743,33 @@ class RazerBasiliskV3Pro35KWireless(RazerBasiliskV3Pro35KWired):
     """
 
     USB_PID = 0x00CD
+
+
+class RazerBasiliskV3Pro35KHyperFluxV2(RazerBasiliskV3Pro35KWireless):
+    """
+    Class for the Razer Basilisk V3 Pro 35K via HyperFlux V2.
+    """
+
+    USB_PID = 0x00CF
+    SERIAL_RETRY_ATTEMPTS = 1
+    SERIAL_RETRY_DELAY = 0.5
+    REQUIRE_VALID_SERIAL = True
+    FORCE_DEVICE_MODE = True
+    EVENT_FILE_REGEX = None
+
+    @classmethod
+    def match(cls, device_id, dev_path):
+        if not super().match(device_id, dev_path):
+            return False
+
+        try:
+            iface_file = os.path.join(os.path.dirname(os.path.realpath(dev_path)), 'bInterfaceNumber')
+            if not os.path.exists(iface_file):
+                iface_file = os.path.join(dev_path, 'bInterfaceNumber')
+            with open(iface_file, encoding='utf-8') as file:
+                return int(file.read().strip(), 16) == 4
+        except (OSError, ValueError):
+            return False
 
 
 class RazerBasiliskV3Pro35KPhantomGreenEditionWired(__RazerDevice):

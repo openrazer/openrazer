@@ -12,6 +12,7 @@
 #include <linux/hrtimer.h>
 #include <linux/random.h>
 #include <linux/version.h>
+#include <linux/delay.h>
 
 #include "razermouse_driver.h"
 #include "razercommon.h"
@@ -32,6 +33,16 @@ MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
+
+static bool razer_mouse_is_hyperflux_v2(struct razer_mouse_device *device)
+{
+    return device->usb_pid == USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2;
+}
+
+static bool razer_mouse_is_valid_dpi(unsigned short dpi_x, unsigned short dpi_y)
+{
+    return dpi_x >= 100 && dpi_x <= 35000 && dpi_y >= 100 && dpi_y <= 35000;
+}
 
 /**
  * Send report to the mouse
@@ -66,6 +77,7 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -157,6 +169,33 @@ static int razer_send_payload(struct razer_mouse_device *device, struct razer_re
     }
 
     return 0;
+}
+
+static int razer_mouse_read_stable_arg1(struct razer_mouse_device *device, struct razer_report request, unsigned char *value)
+{
+    struct razer_report response = {0};
+    int attempts = razer_mouse_is_hyperflux_v2(device) ? 8 : 1;
+    int attempt;
+    int err;
+    int last_value = -1;
+
+    for (attempt = 0; attempt < attempts; attempt++) {
+        memset(&response, 0, sizeof(struct razer_report));
+        err = razer_send_payload(device, &request, &response);
+        if (!err && response.arguments[1] <= 1) {
+            if (!razer_mouse_is_hyperflux_v2(device) || last_value == response.arguments[1]) {
+                *value = response.arguments[1];
+                return 0;
+            }
+
+            last_value = response.arguments[1];
+        }
+
+        if (attempt + 1 < attempts)
+            msleep(25);
+    }
+
+    return -EIO;
 }
 
 /*
@@ -588,6 +627,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Basilisk V3 Pro 35K (Wireless)";
         break;
 
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
+        device_type = "Razer Basilisk V3 Pro 35K (HyperFlux V2)";
+        break;
+
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
         device_type = "Razer Basilisk V3 Pro 35K Phantom Green Edition (Wired)";
         break;
@@ -800,6 +843,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -934,6 +978,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
@@ -1018,6 +1063,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
@@ -1112,6 +1158,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
@@ -1154,6 +1201,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
@@ -1202,6 +1250,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
@@ -1385,6 +1434,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -1520,6 +1570,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -1628,6 +1679,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -1834,6 +1886,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -2038,6 +2091,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -2178,6 +2232,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
@@ -2243,6 +2298,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
@@ -2440,6 +2496,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -2520,6 +2577,9 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
     struct razer_report response = {0};
     unsigned short dpi_x;
     unsigned short dpi_y;
+    int err;
+    int attempts = 1;
+    int attempt;
 
     // So far I think imperator uses varstore
     switch(device->usb_pid) {
@@ -2593,6 +2653,7 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -2681,24 +2742,48 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    if (razer_mouse_is_hyperflux_v2(device))
+        attempts = 8;
 
-    // Byte, Byte for DPI not Short, Short
-    if (device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX_RED ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_NAGA ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_2012 ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_DEATHADDER_2013 ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_EPIC ||
-        device->usb_pid == USB_DEVICE_ID_RAZER_ABYSSUS_1800) { // NagaHex is crap uses only byte for dpi
-        dpi_x = response.arguments[0];
-        dpi_y = response.arguments[1];
-    } else {
-        dpi_x = (response.arguments[1] << 8) | (response.arguments[2] & 0xFF); // Apparently the char buffer is rubbish, as buf[1] somehow can equal FFFFFF80????
-        dpi_y = (response.arguments[3] << 8) | (response.arguments[4] & 0xFF);
+    for (attempt = 0; attempt < attempts; attempt++) {
+        memset(&response, 0, sizeof(struct razer_report));
+        err = razer_send_payload(device, &request, &response);
+        if (err) {
+            if (attempt + 1 < attempts)
+                msleep(25);
+            continue;
+        }
+
+        // Byte, Byte for DPI not Short, Short
+        if (device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX ||
+            device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX_RED ||
+            device->usb_pid == USB_DEVICE_ID_RAZER_NAGA ||
+            device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_2012 ||
+            device->usb_pid == USB_DEVICE_ID_RAZER_DEATHADDER_2013 ||
+            device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_EPIC ||
+            device->usb_pid == USB_DEVICE_ID_RAZER_ABYSSUS_1800) { // NagaHex is crap uses only byte for dpi
+            dpi_x = response.arguments[0];
+            dpi_y = response.arguments[1];
+        } else {
+            dpi_x = (response.arguments[1] << 8) | (response.arguments[2] & 0xFF); // Apparently the char buffer is rubbish, as buf[1] somehow can equal FFFFFF80????
+            dpi_y = (response.arguments[3] << 8) | (response.arguments[4] & 0xFF);
+        }
+
+        if (!razer_mouse_is_hyperflux_v2(device) || razer_mouse_is_valid_dpi(dpi_x, dpi_y)) {
+            device->last_dpi_x = dpi_x;
+            device->last_dpi_y = dpi_y;
+            device->has_last_dpi = true;
+            return sprintf(buf, "%u:%u\n", dpi_x, dpi_y);
+        }
+
+        if (attempt + 1 < attempts)
+            msleep(25);
     }
 
-    return sprintf(buf, "%u:%u\n", dpi_x, dpi_y);
+    if (device->has_last_dpi)
+        return sprintf(buf, "%u:%u\n", device->last_dpi_x, device->last_dpi_y);
+
+    return -EIO;
 }
 
 /**
@@ -2733,14 +2818,21 @@ static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_att
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
-    struct razer_report response = {0};
+    unsigned char value;
 
     request = razer_chroma_misc_get_scroll_mode();
     request.transaction_id.id = 0x1f;
 
-    razer_send_payload(device, &request, &response);
+    if (!razer_mouse_read_stable_arg1(device, request, &value)) {
+        device->last_scroll_mode = value;
+        device->has_last_scroll_mode = true;
+        return sprintf(buf, "%d\n", value);
+    }
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    if (device->has_last_scroll_mode)
+        return sprintf(buf, "%d\n", device->last_scroll_mode);
+
+    return -EIO;
 }
 
 /**
@@ -2775,14 +2867,21 @@ static ssize_t razer_attr_read_scroll_acceleration(struct device *dev, struct de
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
-    struct razer_report response = {0};
+    unsigned char value;
 
     request = razer_chroma_misc_get_scroll_acceleration();
     request.transaction_id.id = 0x1f;
 
-    razer_send_payload(device, &request, &response);
+    if (!razer_mouse_read_stable_arg1(device, request, &value)) {
+        device->last_scroll_acceleration = value;
+        device->has_last_scroll_acceleration = true;
+        return sprintf(buf, "%d\n", value);
+    }
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    if (device->has_last_scroll_acceleration)
+        return sprintf(buf, "%d\n", device->last_scroll_acceleration);
+
+    return -EIO;
 }
 
 /**
@@ -2817,14 +2916,21 @@ static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct devi
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
-    struct razer_report response = {0};
+    unsigned char value;
 
     request = razer_chroma_misc_get_scroll_smart_reel();
     request.transaction_id.id = 0x1f;
 
-    razer_send_payload(device, &request, &response);
+    if (!razer_mouse_read_stable_arg1(device, request, &value)) {
+        device->last_scroll_smart_reel = value;
+        device->has_last_scroll_smart_reel = true;
+        return sprintf(buf, "%d\n", value);
+    }
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    if (device->has_last_scroll_smart_reel)
+        return sprintf(buf, "%d\n", device->last_scroll_smart_reel);
+
+    return -EIO;
 }
 
 static ssize_t razer_attr_write_tilt_hwheel(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2972,6 +3078,7 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -3084,6 +3191,7 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -3208,6 +3316,7 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -3305,6 +3414,7 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -3444,6 +3554,7 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
     case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
         request.transaction_id.id = 0xFF;
@@ -3540,6 +3651,7 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
         request.transaction_id.id = 0xFF;
@@ -3640,6 +3752,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+        case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
         case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
@@ -3700,7 +3813,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     struct razer_report response = {0};
 
     if (count != 2) {
-        printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.\n");
+        printk(KERN_WARNING "razermouse: Device mode only takes 2 bytes.\n");
         return -EINVAL;
     }
 
@@ -3747,6 +3860,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -3913,6 +4027,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
@@ -4027,6 +4142,7 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
@@ -4130,6 +4246,7 @@ static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
@@ -4312,6 +4429,7 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
@@ -4428,6 +4546,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
@@ -4878,6 +4997,7 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
@@ -5084,6 +5204,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
@@ -5847,6 +5968,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
@@ -5974,6 +6096,7 @@ static int razer_input_configured(struct hid_device *hdev,
         case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+        case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
@@ -6046,6 +6169,16 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
     dev->tilt_hwheel = 1;
     dev->tilt_repeat_delay = 250;
     dev->tilt_repeat = 33;
+}
+
+static bool razer_mouse_match(struct hid_device *hdev, bool ignore_special_driver)
+{
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+
+    if (hdev->product == USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2)
+        return intf->cur_altsetting->desc.bInterfaceNumber == 4;
+
+    return true;
 }
 
 /**
@@ -6257,6 +6390,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+        case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
@@ -7398,6 +7532,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+        case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2:
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
@@ -8371,6 +8506,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_35K) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_HYPERFLUX_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER) },
@@ -8401,6 +8537,7 @@ MODULE_DEVICE_TABLE(hid, razer_devices);
 static struct hid_driver razer_mouse_driver = {
     .name      = "razermouse",
     .id_table  = razer_devices,
+    .match     = razer_mouse_match,
     .probe     = razer_mouse_probe,
     .remove    = razer_mouse_disconnect,
 
