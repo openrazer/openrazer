@@ -2376,9 +2376,8 @@ static DEVICE_ATTR(charge_low_threshold,    0660, razer_attr_read_charge_low_thr
 
 /* ── Fan hwmon integration ────────────────────────────────────────────────── */
 
-#define RAZER_FAN_PWM_FULL   0
-#define RAZER_FAN_PWM_MANUAL 1
-#define RAZER_FAN_PWM_AUTO   2
+#define RAZER_FAN_PWM_MANUAL 0
+#define RAZER_FAN_PWM_AUTO   1
 
 struct razer_fan_spec {
     u16 pid;
@@ -2478,9 +2477,6 @@ static void razer_fan_apply(struct razer_fan_data *fan)
     u8 zone;
 
     switch (fan->fan_pwm_enable) {
-    case RAZER_FAN_PWM_FULL:
-        rpm100 = razer_fan_pwm_to_rpm100(fan, 255);
-        break;
     case RAZER_FAN_PWM_MANUAL:
         rpm100 = razer_fan_pwm_to_rpm100(fan, fan->fan_pwm);
         break;
@@ -2550,7 +2546,6 @@ static int razer_laptop_fan_write(struct device *dev,
         break;
     case hwmon_pwm_enable:
         switch (val) {
-        /* 0 = "release to firmware" — same as auto for this EC */
         case 0: fan->fan_pwm_enable = RAZER_FAN_PWM_AUTO;   break;
         case 1: fan->fan_pwm_enable = RAZER_FAN_PWM_MANUAL; break;
         case 2: fan->fan_pwm_enable = RAZER_FAN_PWM_AUTO;   break;
