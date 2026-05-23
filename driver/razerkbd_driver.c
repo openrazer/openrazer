@@ -1735,7 +1735,6 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     strncpy(&serial_string[0], &response.arguments[0], 22);
     serial_string[22] = '\0';
 
-exit:
     return sprintf(buf, "%s\n", &serial_string[0]);
 }
 
@@ -2766,61 +2765,6 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     return count;
 }
 
-static int has_inverted_led_state(struct device *dev)
-{
-    struct razer_kbd_device *device = dev_get_drvdata(dev);
-
-    switch (device->usb_pid) {
-    default:
-        return 0;
-    }
-}
-
-/**
- * Reads device file "logo_led_state"
- *
- * Reads the logo lighting state (the ASCII number) written to this file.
- */
-static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    struct razer_kbd_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-    int state;
-
-    request = razer_chroma_standard_get_led_effect(VARSTORE, LOGO_LED);
-    request.transaction_id.id = 0xFF;
-    razer_send_payload(device, &request, &response);
-    state = response.arguments[2];
-
-    if (has_inverted_led_state(dev) && (state == 0 || state == 1))
-        state = !state;
-
-    return sprintf(buf, "%d\n", state);
-}
-
-/**
- * Write device file "logo_led_state"
- *
- * Sets the logo lighting state to the ASCII number written to this file.
- */
-static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    struct razer_kbd_device *device = dev_get_drvdata(dev);
-    unsigned char state = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    if (has_inverted_led_state(dev) && (state == 0 || state == 1))
-        state = !state;
-
-    // Blade laptops are... different. They use state instead of effect.
-    request = razer_chroma_standard_set_led_effect(VARSTORE, LOGO_LED, state);
-    request.transaction_id.id = 0xFF;
-    razer_send_payload(device, &request, &response);
-
-    return count;
-}
 
 /**
  * Write device file "matrix_effect_custom"
@@ -2932,25 +2876,6 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     return count;
 }
 
-/**
- * Write device file "fn_toggle"
- *
- * Sets the logo lighting state to the ASCII number written to this file.
- */
-static ssize_t razer_attr_write_fn_toggle(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    struct razer_kbd_device *device = dev_get_drvdata(dev);
-    unsigned char state = (unsigned char)simple_strtoul(buf, NULL, 10);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    request = razer_chroma_misc_fn_key_toggle(state);
-    request.transaction_id.id = 0xFF;
-
-    razer_send_payload(device, &request, &response);
-
-    return count;
-}
 
 /**
  * Write device file "test"
@@ -3617,7 +3542,6 @@ static ssize_t razer_attr_read_key_alt_f4(struct device *dev, struct device_attr
 static DEVICE_ATTR(game_led_state,          0660, razer_attr_read_game_led_state,             razer_attr_write_game_led_state);
 static DEVICE_ATTR(macro_led_state,         0660, razer_attr_read_macro_led_state,            razer_attr_write_macro_led_state);
 static DEVICE_ATTR(macro_led_effect,        0660, razer_attr_read_macro_led_effect,           razer_attr_write_macro_led_effect);
-static DEVICE_ATTR(logo_led_state,          0660, razer_attr_read_logo_led_state,             razer_attr_write_logo_led_state);
 static DEVICE_ATTR(profile_led_red,         0660, razer_attr_read_profile_led_red,            razer_attr_write_profile_led_red);
 static DEVICE_ATTR(profile_led_green,       0660, razer_attr_read_profile_led_green,          razer_attr_write_profile_led_green);
 static DEVICE_ATTR(profile_led_blue,        0660, razer_attr_read_profile_led_blue,           razer_attr_write_profile_led_blue);
@@ -3627,7 +3551,6 @@ static DEVICE_ATTR(version,                 0440, razer_attr_read_version,      
 static DEVICE_ATTR(kbd_layout,              0440, razer_attr_read_kbd_layout,                 NULL);
 
 static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_firmware_version,           NULL);
-static DEVICE_ATTR(fn_toggle,               0220, NULL,                                       razer_attr_write_fn_toggle);
 static DEVICE_ATTR(poll_rate,               0660, razer_attr_read_poll_rate,                  razer_attr_write_poll_rate);
 static DEVICE_ATTR(keyswitch_optimization,  0660, razer_attr_read_keyswitch_optimization,     razer_attr_write_keyswitch_optimization);
 

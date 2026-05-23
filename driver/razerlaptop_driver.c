@@ -2648,7 +2648,7 @@ static void razer_kbd_init(struct razer_kbd_device *dev, struct usb_interface *i
 /**
  * Probe method is ran whenever a device is binded to the driver
  */
-static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *id)
+static int razer_laptop_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
     int retval = 0;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
@@ -2844,7 +2844,7 @@ exit_free:
 /**
  * Unbind function
  */
-static void razer_kbd_disconnect(struct hid_device *hdev)
+static void razer_laptop_disconnect(struct hid_device *hdev)
 {
     struct razer_kbd_device *dev;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
@@ -3077,8 +3077,8 @@ MODULE_DEVICE_TABLE(hid, razer_laptop_devices);
 static struct hid_driver razer_laptop_driver = {
     .name     = "razerlaptop",
     .id_table = razer_laptop_devices,
-    .probe    = razer_kbd_probe,
-    .remove   = razer_kbd_disconnect,
+    .probe    = razer_laptop_probe,
+    .remove   = razer_laptop_disconnect,
     .event    = razer_event,
     .raw_event = razer_raw_event,
 };
