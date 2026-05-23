@@ -2502,8 +2502,8 @@ static void razer_fan_apply(struct razer_fan_data *fan)
 #ifdef CONFIG_HWMON
 
 static umode_t razer_laptop_fan_is_visible(const void *data,
-                                           enum hwmon_sensor_types type,
-                                           u32 attr, int channel)
+        enum hwmon_sensor_types type,
+        u32 attr, int channel)
 {
     if (type == hwmon_pwm &&
         (attr == hwmon_pwm_enable || attr == hwmon_pwm_input))
@@ -2519,8 +2519,12 @@ static int razer_laptop_fan_read(struct device *dev,
 
     mutex_lock(&fan->fan_lock);
     switch (attr) {
-    case hwmon_pwm_input:  *val = fan->fan_pwm;        break;
-    case hwmon_pwm_enable: *val = fan->fan_pwm_enable; break;
+    case hwmon_pwm_input:
+        *val = fan->fan_pwm;
+        break;
+    case hwmon_pwm_enable:
+        *val = fan->fan_pwm_enable;
+        break;
     default:
         mutex_unlock(&fan->fan_lock);
         return -EOPNOTSUPP;
@@ -2539,17 +2543,28 @@ static int razer_laptop_fan_write(struct device *dev,
     mutex_lock(&fan->fan_lock);
     switch (attr) {
     case hwmon_pwm_input:
-        if (val < 0 || val > 255) { ret = -EINVAL; break; }
+        if (val < 0 || val > 255) {
+            ret = -EINVAL;
+            break;
+        }
         fan->fan_pwm        = (u8)val;
         fan->fan_pwm_enable = RAZER_FAN_PWM_MANUAL;
         razer_fan_apply(fan);
         break;
     case hwmon_pwm_enable:
         switch (val) {
-        case 0: fan->fan_pwm_enable = RAZER_FAN_PWM_AUTO;   break;
-        case 1: fan->fan_pwm_enable = RAZER_FAN_PWM_MANUAL; break;
-        case 2: fan->fan_pwm_enable = RAZER_FAN_PWM_AUTO;   break;
-        default: ret = -EINVAL; break;
+        case 0:
+            fan->fan_pwm_enable = RAZER_FAN_PWM_AUTO;
+            break;
+        case 1:
+            fan->fan_pwm_enable = RAZER_FAN_PWM_MANUAL;
+            break;
+        case 2:
+            fan->fan_pwm_enable = RAZER_FAN_PWM_AUTO;
+            break;
+        default:
+            ret = -EINVAL;
+            break;
         }
         if (!ret)
             razer_fan_apply(fan);
@@ -2789,8 +2804,8 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         const struct razer_fan_spec *fan_spec = razer_find_fan_spec(dev->usb_pid);
         if (fan_spec) {
             struct razer_fan_data *fan_data = devm_kzalloc(&hdev->dev,
-                                                            sizeof(*fan_data),
-                                                            GFP_KERNEL);
+                                              sizeof(*fan_data),
+                                              GFP_KERNEL);
             if (fan_data) {
                 fan_data->device         = dev;
                 fan_data->fan_min        = fan_spec->fan_min;
@@ -2800,7 +2815,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
                 fan_data->fan_pwm_enable = RAZER_FAN_PWM_AUTO;
                 mutex_init(&fan_data->fan_lock);
                 devm_hwmon_device_register_with_info(&hdev->dev, "razer_fan",
-                    fan_data, &razer_laptop_fan_chip_info, NULL);
+                                                     fan_data, &razer_laptop_fan_chip_info, NULL);
             }
         }
     }
