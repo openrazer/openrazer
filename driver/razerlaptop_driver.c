@@ -1712,6 +1712,8 @@ static DEVICE_ATTR(key_alt_f4,              0660, razer_attr_read_key_alt_f4,   
 
 /* ── Fan hwmon integration ────────────────────────────────────────────────── */
 
+#ifdef CONFIG_HWMON
+
 #define RAZER_FAN_PWM_MANUAL 0
 #define RAZER_FAN_PWM_AUTO   1
 
@@ -1834,8 +1836,6 @@ static void razer_fan_apply(struct razer_fan_data *fan)
             razer_fan_send(fan->device, 0x0d, 0x01, 0x03, 0x00, zone, rpm100, 0x00);
     }
 }
-
-#ifdef CONFIG_HWMON
 
 static umode_t razer_laptop_fan_is_visible(const void *data,
         enum hwmon_sensor_types type,
