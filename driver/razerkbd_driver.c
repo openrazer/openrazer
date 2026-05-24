@@ -11,6 +11,7 @@
 #include <linux/hid.h>
 #include <linux/dmi.h>
 #include <linux/input-event-codes.h>
+#include <linux/version.h>
 
 #include "usb_hid_keys.h"
 
@@ -4852,11 +4853,23 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_us
 
                             // report key down
                             xdata[1] = cur_value;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 1, 0) || \
+        (LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 10) && LINUX_VERSION_CODE < KERNEL_VERSION(7, 1, 0)) || \
+        (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 18, 33) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 19, 0))
+                            hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), sizeof(xdata), 0);
+#else
                             hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), 0);
+#endif
 
                             // report key up
                             xdata[1] = 0x00;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 1, 0) || \
+        (LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 10) && LINUX_VERSION_CODE < KERNEL_VERSION(7, 1, 0)) || \
+        (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 18, 33) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 19, 0))
+                            hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), sizeof(xdata), 0);
+#else
                             hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), 0);
+#endif
                         }
                     }
                 }
