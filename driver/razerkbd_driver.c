@@ -4515,6 +4515,7 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     struct razer_kbd_device *device = hid_get_drvdata(hdev);
     struct razer_kbd_usb_device_data *usb_dev_data = dev_get_drvdata(&device->usb_dev->dev);
     const struct razer_key_translation *translation;
+    int special_key_index;
 
     // No translations needed on the Blades
     if (is_blade_laptop(device)) {
@@ -4529,6 +4530,14 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     // Block win key
     if(device->block_keys[0] && (usage->code == KEY_LEFTMETA || usage->code == KEY_RIGHTMETA)) {
         return 1;
+    }
+
+    // Block key codes from the razer 0x04 event since they cannot interact with the FN toggle
+    // Starts from i=1 to skip the check for KEY_FN itself
+    for (special_key_index = 1; special_key_index < RAZER_RAW_EVENT_MAPPINGS_SIZE; special_key_index++) {
+        if (usage->code == raw_event_mappings[special_key_index].evdev_key_code) {
+            return 1;
+        }
     }
 
     // Store Alt state
