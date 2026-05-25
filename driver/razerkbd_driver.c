@@ -262,6 +262,28 @@ static const struct razer_key_translation *find_translation(const struct razer_k
     return NULL;
 }
 
+// Mapping of known key codes from the razer 0x04 raw event to their evdev key code
+#define RAZER_RAW_EVENT_MAPPINGS_SIZE 17
+static const struct razer_raw_event_mapping raw_event_mappings[RAZER_RAW_EVENT_MAPPINGS_SIZE] = {
+    { .razer_key_code = 0x01, .evdev_key_code = KEY_FN }, // FN key
+    { .razer_key_code = 0x20, .evdev_key_code = KEY_F13 }, // M1 key
+    { .razer_key_code = 0x21, .evdev_key_code = KEY_F14 }, // M2 key
+    { .razer_key_code = 0x22, .evdev_key_code = KEY_F15 }, // M3 key
+    { .razer_key_code = 0x23, .evdev_key_code = KEY_F16 }, // M4 key
+    { .razer_key_code = 0x24, .evdev_key_code = KEY_F17 }, // M5 key
+    { .razer_key_code = 0x25, .evdev_key_code = KEY_F18 }, // M6 key (on BlackWidow V4 non-Pro)
+    { .razer_key_code = 0x50, .evdev_key_code = KEY_VOLUMEDOWN }, // Volume Down media key
+    { .razer_key_code = 0x51, .evdev_key_code = KEY_VOLUMEUP }, // Volume Up media key
+    { .razer_key_code = 0x52, .evdev_key_code = KEY_MUTE }, // Mute media key
+    { .razer_key_code = 0x53, .evdev_key_code = KEY_NEXTSONG }, // Next media key
+    { .razer_key_code = 0x54, .evdev_key_code = KEY_PREVIOUSSONG }, // Previous media key
+    { .razer_key_code = 0x55, .evdev_key_code = KEY_PLAYPAUSE }, // Play/Pause media key
+    { .razer_key_code = 0x60, .evdev_key_code = KEY_F24 }, // BlackWidow V4 Pro command dial button
+    { .razer_key_code = 0x63, .evdev_key_code = KEY_F18 }, // BlackWidow V4 Pro Side button 1
+    { .razer_key_code = 0x64, .evdev_key_code = KEY_F19 }, // BlackWidow V4 Pro Side button 2
+    { .razer_key_code = 0x65, .evdev_key_code = KEY_F20 }, // BlackWidow V4 Pro Side button 3
+};
+
 static bool is_blade_laptop(struct razer_kbd_device *device)
 {
     switch (device->usb_pid) {
