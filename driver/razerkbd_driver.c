@@ -4630,115 +4630,61 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
 /**
  * Standard raw event function
  *
- * Bastard function. Could most probably be done a load better.
- * Basically it shifts all of the key's in the 04... event to the right 1, and then sets the first 2 bytes to 0x0100. This then allows the keys to be processed with the above normal event function
+ * Handles provided HID reports, detects the special razer 0x04 event and sends evdev events for known key codes
  *
- * Converts M1-M5 into F13-F17. It also blanks out FN keypresses so it acts more like the modifier it should be.
- * 04012000000000000000 FN is pressed, M1 pressed
- * 04010000000000000000 M1 is released
- * goes to
- * 01000068000000000000 FN is pressed (blanked), M1 pressed (converted to F13)
- * 01000000000000000000 M1 is released
- *
- * Converts Mute/Next/Play/Prev into multimedia keys
- *   04 00 52 00  ... 00 - Mute key pressed
- *   04 00 00 00 ... 00 - Mute key released
- * goes to
- *   01 00 00 E2 00 ... 00 - Mute pressed (converted to KEY_MEDIA_MUTE)
- *   01 00 00 00 00 ... 00
- * they key codes are
- *   0x52 - Mute
- *   0x53 - Next song
- *   0x55 - Play/Pause
- *   0x54 - Prev song
- *
- * HID Usage Table http://www.freebsddiary.org/APC/usb_hid_usages.php
+ * The event starts with byte 0x04 and every byte after that represents one of the special keys currently being pressed.
+ * These get mapped to the corresponding evdev key codes via raw_event_mappings and send out via input_event()
+ * Examples for 0x04 events:
+ * 04 01 20 00 00 00 00 00 00 00 FN is pressed, M1 pressed
+ * 04 01 00 00 00 00 00 00 00 00 M1 is released
  */
 static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_usb_device_data *usb_dev_data, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
 {
-    // The event were looking for is 16, 22 or 48 bytes long and starts with 0x04.
-    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
-       ((size == 48) || (size == 22) || (size == 16)) && data[0] == 0x04) {
-        // Convert 04... to 0100...
-        int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
-        int found_fn = 0x00;
+    struct input_dev *input_dev = report->field[0]->hidinput->input;
+    DECLARE_BITMAP(special_keys_pressed, RAZER_RAW_EVENT_MAPPINGS_SIZE);
+    int data_index;
+    int key_index;
 
-        while(--index > 0) {
-            u8 cur_value = data[index];
-            if(cur_value == 0x00) { // Skip 0x00
-                continue;
-            }
-
-            switch(cur_value) {
-            case 0x01: // FN
-                //cur_value = 0x73; // F24
-                cur_value = 0x00;
-                found_fn = 0x01;
-                break;
-            case 0x20: // M1
-                cur_value = USB_HID_KEY_F13; // F13
-                break;
-            case 0x21: // M2
-                cur_value = USB_HID_KEY_F14; // F14
-                break;
-            case 0x22: // M3
-                cur_value = USB_HID_KEY_F15; // F15
-                break;
-            case 0x23: // M4
-                cur_value = USB_HID_KEY_F16; // F16
-                break;
-            case 0x24: // M5
-                cur_value = USB_HID_KEY_F17; // F17
-                break;
-            case 0x25: // BlackWidow V4 (non-Pro) M6
-                cur_value = USB_HID_KEY_F18; // F18
-                break;
-            case 0x50: // Volume Down
-                cur_value = USB_HID_KEY_MEDIA_VOLUMEDOWN; // F17
-                break;
-            case 0x51: // Volume Up
-                cur_value =  USB_HID_KEY_MEDIA_VOLUMEUP; // F17
-                break;
-            case 0x52: // Mute
-                cur_value = USB_HID_KEY_MEDIA_MUTE;
-                break;
-            case 0x53: // Next (song)
-                cur_value = USB_HID_KEY_MEDIA_NEXTSONG;
-                break;
-            case 0x55: // Play/Pause
-                cur_value = USB_HID_KEY_MEDIA_PLAYPAUSE;
-                break;
-            case 0x54: // Prev (song)
-                cur_value = USB_HID_KEY_MEDIA_PREVIOUSSONG;
-                break;
-            case 0x60: // BlackWidow V4 Pro command dial button
-                cur_value = USB_HID_KEY_F24; // F24 (not sure if we want it this way)
-                break;
-            case 0x63: // BlackWidow V4 Pro Side button 1
-                cur_value = USB_HID_KEY_F18; // F18
-                break;
-            case 0x64: // BlackWidow V4 Pro Side button 2
-                cur_value = USB_HID_KEY_F19; // F19
-                break;
-            case 0x65: // BlackWidow V4 Pro Side button 3
-                cur_value = USB_HID_KEY_F20; // F20
-                break;
-            }
-
-            data[index+1] = cur_value;
-        }
-
-        usb_dev_data->fn_on = !!found_fn;
-
-        data[0] = 0x01;
-        data[1] = 0x00;
-
-        // Some reason just by editing data, it generates a normal event above. (Could quite possibly work like that, no clue)
-        //hid_report_raw_event(hdev, HID_INPUT_REPORT, data, size, 0);
-        return 1;
+    // The special event we are looking for is 16, 22 or 48 bytes long and starts with 0x04, ignore all other events
+    if (!(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD
+          && data[0] == 0x04
+          && (size == 48 || size == 22 || size == 16)
+         )) {
+        return 0;
     }
 
-    return 0;
+    bitmap_zero(special_keys_pressed, RAZER_RAW_EVENT_MAPPINGS_SIZE);
+
+    // Read through event data to find currently pressed keys
+    // Start from 1 to skip the 04 marker byte
+    for (data_index = 1; data_index < size; data_index++) {
+        u8 razer_key_code = data[data_index];
+
+        // Skip empty data
+        if(razer_key_code == 0x00) {
+            continue;
+        }
+
+        // Test for known key codes in the mappings array
+        for (key_index = 0; key_index < RAZER_RAW_EVENT_MAPPINGS_SIZE; key_index++) {
+            if (razer_key_code == raw_event_mappings[key_index].razer_key_code) {
+                bitmap_set(special_keys_pressed, key_index, 1);
+            }
+        }
+    }
+
+    // Press or release keys via input_event and their detected state
+    for (key_index = 0; key_index < RAZER_RAW_EVENT_MAPPINGS_SIZE; key_index++) {
+        u16 evdev_key_code = raw_event_mappings[key_index].evdev_key_code;
+        bool pressed = !!test_bit(key_index, special_keys_pressed);
+
+        if (evdev_key_code == KEY_FN) {
+            usb_dev_data->fn_on = pressed;
+        } else {
+            input_event(input_dev, EV_KEY, evdev_key_code, pressed);
+        }
+    }
+    return 1;
 }
 
 #define RAW_EVENT_BITFIELD_BYTES (20)
@@ -4941,7 +4887,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
-        return razer_raw_event_bitfield(hdev, usb_dev_data, intf, report, data, size);
+        return razer_raw_event_standard(hdev, usb_dev_data, intf, report, data, size);
     default:
         return razer_raw_event_standard(hdev, usb_dev_data, intf, report, data, size);
     }
