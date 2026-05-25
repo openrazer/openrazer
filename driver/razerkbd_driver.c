@@ -4628,7 +4628,7 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
 }
 
 /**
- * Standard raw event function
+ * Raw event function
  *
  * Handles provided HID reports, detects the special razer 0x04 event and sends evdev events for known key codes
  *
@@ -4638,12 +4638,24 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
  * 04 01 20 00 00 00 00 00 00 00 FN is pressed, M1 pressed
  * 04 01 00 00 00 00 00 00 00 00 M1 is released
  */
-static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_usb_device_data *usb_dev_data, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
+static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
+    struct razer_kbd_device *device = hid_get_drvdata(hdev);
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct razer_kbd_usb_device_data *usb_dev_data = dev_get_drvdata(&device->usb_dev->dev);
     struct input_dev *input_dev = report->field[0]->hidinput->input;
     DECLARE_BITMAP(special_keys_pressed, RAZER_RAW_EVENT_MAPPINGS_SIZE);
     int data_index;
     int key_index;
+
+    // No translations needed on the Pro...
+    if (is_blade_laptop(device)) {
+        return 0;
+    }
+
+    // Uncomment these lines to print the raw event data to the kernel log and discover new key codes
+    // printk(KERN_WARNING "razerkbd: raw event of size %d with data:\n", size);
+    // print_hex_dump(KERN_WARNING, " razerkbd: ", DUMP_PREFIX_NONE, 16, 1, data, size, false);
 
     // The special event we are looking for is 16, 22 or 48 bytes long and starts with 0x04, ignore all other events
     if (!(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD
@@ -4685,212 +4697,6 @@ static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_us
         }
     }
     return 1;
-}
-
-#define RAW_EVENT_BITFIELD_BYTES (20)
-#define RAW_EVENT_BITFIELD_BITS (RAW_EVENT_BITFIELD_BYTES * BITS_PER_BYTE)
-
-/**
- * Bitfield raw event function
- *
- * Handles raw events very similarly to razer_raw_event_standard, but for size 22, handles the data as a bit field,
- * instead of an array of values.
- *
- * When the rewritten value does not fit the bit field, a key-down and a key-up event is reported separately.
- */
-static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_usb_device_data *usb_dev_data, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
-{
-    DECLARE_BITMAP(bitfield, RAW_EVENT_BITFIELD_BITS) = { 0 };
-
-    // The event were looking for is 16, 22 or 48 bytes long and starts with 0x04.
-    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
-       ((size == 48) || (size == 22) || (size == 16)) && data[0] == 0x04) {
-        // Convert 04... to 0100...
-        int index = size-1; // This way we start at 2nd last value, does subtract 1 from the 15key rollover though (not an issue cmon)
-        int found_fn = 0x00;
-
-        while(--index > 0) {
-            bool write_bitfield = true;
-            u8 cur_value = data[index];
-            if(cur_value == 0x00) { // Skip 0x00
-                continue;
-            }
-
-            switch(cur_value) {
-            case 0x01: // FN
-                //cur_value = 0x73; // F24
-                cur_value = 0x00;
-                found_fn = 0x01;
-                write_bitfield = false;
-                break;
-            case 0x20: // M1
-                cur_value = USB_HID_KEY_F13; // F13
-                break;
-            case 0x21: // M2
-                cur_value = USB_HID_KEY_F14; // F14
-                break;
-            case 0x22: // M3
-                cur_value = USB_HID_KEY_F15; // F15
-                break;
-            case 0x23: // M4
-                cur_value = USB_HID_KEY_F16; // F16
-                break;
-            case 0x24: // M5
-                cur_value = USB_HID_KEY_F17; // F17
-                break;
-            case 0x25: // BlackWidow V4 (non-Pro) M6
-                cur_value = USB_HID_KEY_F18; // F18
-                break;
-            case 0x50: // Volume Down
-                cur_value = USB_HID_KEY_MEDIA_VOLUMEDOWN;
-                break;
-            case 0x51: // Volume Up
-                cur_value =  USB_HID_KEY_MEDIA_VOLUMEUP;
-                break;
-            case 0x52: // Mute
-                cur_value = USB_HID_KEY_MEDIA_MUTE;
-                break;
-            case 0x53: // Next (song)
-                cur_value = USB_HID_KEY_MEDIA_NEXTSONG;
-                break;
-            case 0x55: // Play/Pause
-                cur_value = USB_HID_KEY_MEDIA_PLAYPAUSE;
-                break;
-            case 0x54: // Prev (song)
-                cur_value = USB_HID_KEY_MEDIA_PREVIOUSSONG;
-                break;
-            case 0x60: // BlackWidow V4 Pro command dial button
-                cur_value = USB_HID_KEY_F24; // F24 (not sure if we want it this way)
-                break;
-            case 0x63: // BlackWidow V4 Pro Side button 1
-                cur_value = USB_HID_KEY_F18; // F18
-                break;
-            case 0x64: // BlackWidow V4 Pro Side button 2
-                cur_value = USB_HID_KEY_F19; // F19
-                break;
-            case 0x65: // BlackWidow V4 Pro Side button 3
-                cur_value = USB_HID_KEY_F20; // F20
-                break;
-            default:
-                write_bitfield = false;
-            }
-
-            // data of size 22 starting with 0x01 is a bit field so we need to handle that separately
-            if (size == 22) {
-                if (write_bitfield) {
-                    if (cur_value < RAW_EVENT_BITFIELD_BITS) {
-                        // value fits the bit field, so we can use that
-                        bitmap_set(bitfield, cur_value, 1);
-                    } else {
-                        // value does not fit the bit field, so we need extra handling
-                        int report_extra = 1;
-
-                        switch (cur_value) {
-                        case USB_HID_KEY_MEDIA_VOLUMEUP:
-                            cur_value = USB_HID_USAGE_MEDIA_VOLUMEUP;
-                            break;
-                        case USB_HID_KEY_MEDIA_VOLUMEDOWN:
-                            cur_value = USB_HID_USAGE_MEDIA_VOLUMEDOWN;
-                            break;
-                        case USB_HID_KEY_MEDIA_MUTE:
-                            cur_value = USB_HID_USAGE_MEDIA_MUTE;
-                            break;
-                        case USB_HID_KEY_MEDIA_NEXTSONG:
-                            cur_value = USB_HID_USAGE_MEDIA_NEXTSONG;
-                            break;
-                        case USB_HID_KEY_MEDIA_PLAYPAUSE:
-                            cur_value = USB_HID_USAGE_MEDIA_PLAYPAUSE;
-                            break;
-                        case USB_HID_KEY_MEDIA_PREVIOUSSONG:
-                            cur_value = USB_HID_USAGE_MEDIA_PREVIOUSSONG;
-                            break;
-                        default:
-                            report_extra = 0;
-                        }
-
-                        if (report_extra) {
-                            u8 xdata[22] = { 0x02 };
-
-                            // report key down
-                            xdata[1] = cur_value;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 1, 0) || \
-        (LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 10) && LINUX_VERSION_CODE < KERNEL_VERSION(7, 1, 0)) || \
-        (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 18, 33) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 19, 0))
-                            hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), sizeof(xdata), 0);
-#else
-                            hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), 0);
-#endif
-
-                            // report key up
-                            xdata[1] = 0x00;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 1, 0) || \
-        (LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 10) && LINUX_VERSION_CODE < KERNEL_VERSION(7, 1, 0)) || \
-        (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 18, 33) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 19, 0))
-                            hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), sizeof(xdata), 0);
-#else
-                            hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), 0);
-#endif
-                        }
-                    }
-                }
-            } else { // size 16
-                data[index+1] = cur_value;
-            }
-        }
-
-        usb_dev_data->fn_on = !!found_fn;
-
-        data[0] = 0x01;
-        data[1] = 0x00;
-        if (size == 22) {
-            memcpy(data + 2, bitfield, RAW_EVENT_BITFIELD_BYTES);
-        }
-
-        // Some reason just by editing data, it generates a normal event above. (Could quite possibly work like that, no clue)
-        //hid_report_raw_event(hdev, HID_INPUT_REPORT, data, size, 0);
-        return 1;
-    }
-
-    return 0;
-}
-
-/**
- * Raw event function
- *
- * Handles provided HID reports, branched out for specific keyboard models, since some keyboards need specific handling.
- */
-static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
-{
-    struct razer_kbd_device *device = hid_get_drvdata(hdev);
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    struct razer_kbd_usb_device_data *usb_dev_data = dev_get_drvdata(&device->usb_dev->dev);
-
-    // No translations needed on the Pro...
-    if (is_blade_laptop(device)) {
-        return 0;
-    }
-
-    switch (device->usb_pid) {
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_X:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_75PCT:
-    case USB_DEVICE_ID_RAZER_ORNATA_V2:
-    case USB_DEVICE_ID_RAZER_ORNATA_V3:
-    case USB_DEVICE_ID_RAZER_ORNATA_V3_ALT:
-    case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_HUNTSMAN_V2:
-    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
-    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
-        return razer_raw_event_standard(hdev, usb_dev_data, intf, report, data, size);
-    default:
-        return razer_raw_event_standard(hdev, usb_dev_data, intf, report, data, size);
-    }
 }
 
 /**
