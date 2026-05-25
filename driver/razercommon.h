@@ -159,6 +159,11 @@ struct razer_key_translation {
     u16 to;
 };
 
+struct razer_raw_event_mapping {
+    u8 razer_key_code;
+    u16 evdev_key_code;
+};
+
 int razer_send_control_msg(struct usb_device *usb_dev,void const *data, unsigned int report_index, unsigned long wait_min, unsigned long wait_max);
 int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait_min, ulong wait_max);
 int razer_get_usb_response(struct usb_device *usb_dev, unsigned int report_index, struct razer_report* request_report, unsigned int response_index, struct razer_report* response_report, unsigned long wait_min, unsigned long wait_max);
