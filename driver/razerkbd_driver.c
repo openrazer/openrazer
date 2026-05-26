@@ -1594,8 +1594,11 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ:
-    case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ_ALT:
         device_type = "Razer Huntsman V3 Pro 8KHz";
+        break;
+
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ_ALT:
+        device_type = "Razer Huntsman V3 Pro Tenkeyless 8KHz";
         break;
 
     case USB_DEVICE_ID_RAZER_BLADE_18_2024:
