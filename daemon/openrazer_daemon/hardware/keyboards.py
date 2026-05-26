@@ -626,11 +626,11 @@ class RazerHuntsmanV3Pro(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
-class RazerHuntsmanV3Pro8KHzAlternate(RazerHuntsmanV3Pro):
+class RazerHuntsmanV3ProTenkeyless8KHz(RazerHuntsmanV3Pro):
     """
-    Class for the Razer Huntsman V3 Pro 8KHz (Alternate)
+    Class for the Razer Huntsman V3 Pro Tenkeyless 8KHz
     """
-    EVENT_FILE_REGEX = re.compile(r'.*Razer_Huntsman_V3_Pro_8KHz(-if01)?-event-kbd')
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Huntsman_V3_Pro_Tenkeyless_8KHz(-if01)?-event-kbd')
     USB_PID = 0x02D0
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/h62/h24/9980311044126/huntsman-v3-pro-8khz-b-500x500.png"
 
