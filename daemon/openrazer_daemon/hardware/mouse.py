@@ -2052,6 +2052,14 @@ class RazerViperV3ProWireless(RazerViperV3ProWired):
     POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
 
+class RazerViperV3ProSE(RazerViperV3ProWireless):
+    """
+    Class for the Razer Viper V3 Pro SE
+    """
+
+    USB_PID = 0x00DF
+
+
 class RazerDeathAdderV3HyperSpeedWired(__RazerDevice):
     """
     Class for the Razer DeathAdder V3 HyperSpeed (Wired)
