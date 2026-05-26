@@ -276,6 +276,8 @@ This will output something similar to this:
 | Razer DeathAdder V4 Pro (Wireless)                            |  1532:00BF  |
 | Razer Viper V3 Pro (Wired)                                    |  1532:00C0  |
 | Razer Viper V3 Pro (Wireless)                                 |  1532:00C1  |
+| Razer Viper V3 Pro SE (Wired)                                 |  1532:00DE  |
+| Razer Viper V3 Pro SE (Wireless)                              |  1532:00DF  |
 | Razer DeathAdder V3 Pro (Wired)                               |  1532:00C2  |
 | Razer DeathAdder V3 Pro (Wireless)                            |  1532:00C3  |
 | Razer DeathAdder V3 HyperSpeed (Wired)                        |  1532:00C4  |
