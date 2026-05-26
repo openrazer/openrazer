@@ -2052,12 +2052,25 @@ class RazerViperV3ProWireless(RazerViperV3ProWired):
     POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
 
-class RazerViperV3ProSE(RazerViperV3ProWireless):
+class RazerViperV3ProSEWired(RazerViperV3ProWired):
     """
-    Class for the Razer Viper V3 Pro SE
+    Class for the Razer Viper V3 Pro SE (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Viper_V3_Pro_SE-if0(1|2)-event-kbd')
+
+    USB_PID = 0x00DE
+
+
+class RazerViperV3ProSEWireless(RazerViperV3ProSEWired):
+    """
+    Class for the Razer Viper V3 Pro SE (Wireless)
     """
 
     USB_PID = 0x00DF
+
+    METHODS = RazerViperV3ProSEWired.METHODS + ['set_hyperpolling_wireless_dongle_indicator_led_mode']
+
+    POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
 
 class RazerDeathAdderV3HyperSpeedWired(__RazerDevice):
