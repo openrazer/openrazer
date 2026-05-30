@@ -635,7 +635,6 @@ class RazerHuntsmanV3ProTenkeyless8KHz(RazerHuntsmanV3Pro):
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/h62/h24/9980311044126/huntsman-v3-pro-8khz-b-500x500.png"
 
 
-
 # TODO Should become _RippleKeyboard once kernel support for driver mode is implemented
 class RazerHuntsmanV3ProTKL(_RazerDeviceBrightnessSuspend):
     """
