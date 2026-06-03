@@ -132,6 +132,10 @@
 #define USB_DEVICE_ID_RAZER_BLADE_18_2026 0x02E1
 #define USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK 0x0A24
 
+/* Razer Blade 16 (2024) key matrix dimensions */
+#define RAZER_BLADE_16_2024_MATRIX_ROWS 6
+#define RAZER_BLADE_16_2024_MATRIX_COLUMNS 16
+
 /* Each keyboard report has 90 bytes*/
 #define RAZER_BLACKWIDOW_REPORT_LEN 0x5A
 

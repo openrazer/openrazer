@@ -2973,6 +2973,36 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
 }
 
 /**
+ * Set a static colour by filling the key matrix with a custom frame
+ */
+static int razer_blade_16_2024_set_static(struct razer_kbd_device *device, struct razer_rgb *color)
+{
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char row_data[RAZER_BLADE_16_2024_MATRIX_COLUMNS * 3] = {0};
+    unsigned char row, column;
+    int err;
+
+    for (column = 0; column < RAZER_BLADE_16_2024_MATRIX_COLUMNS; column++) {
+        row_data[column * 3] = color->r;
+        row_data[column * 3 + 1] = color->g;
+        row_data[column * 3 + 2] = color->b;
+    }
+
+    for (row = 0; row < RAZER_BLADE_16_2024_MATRIX_ROWS; row++) {
+        request = razer_chroma_standard_matrix_set_custom_frame(row, 0, RAZER_BLADE_16_2024_MATRIX_COLUMNS - 1, row_data);
+        request.transaction_id.id = 0xFF;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+    }
+
+    request = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
+    request.transaction_id.id = 0xFF;
+    return razer_send_payload(device, &request, &response);
+}
+
+/**
  * Write device file "matrix_effect_static"
  *
  * Set the keyboard to static mode when 3 RGB bytes are written
@@ -3007,39 +3037,15 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
             return err;
         break;
 
-    case USB_DEVICE_ID_RAZER_BLADE_16_2024: {
-        // This generation ignores the regular "static" command, so emulate a
-        // static colour by filling the whole keyboard matrix with a single
-        // colour using a custom frame.
-        unsigned char row_index, col;
-        unsigned char row_buffer[3 * 16] = {0};
-
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
         if (count != 3) {
             dev_warn(dev, "razerkbd: Static mode only accepts RGB (3byte)\n");
             return -EINVAL;
         }
-
-        for (col = 0; col < 16; col++) {
-            row_buffer[col * 3] = buf[0];
-            row_buffer[col * 3 + 1] = buf[1];
-            row_buffer[col * 3 + 2] = buf[2];
-        }
-
-        for (row_index = 0; row_index < 6; row_index++) {
-            request = razer_chroma_standard_matrix_set_custom_frame(row_index, 0, 15, row_buffer);
-            request.transaction_id.id = 0xFF;
-            err = razer_send_payload(device, &request, &response);
-            if (err)
-                return err;
-        }
-
-        request = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
-        request.transaction_id.id = 0xFF;
-        err = razer_send_payload(device, &request, &response);
+        err = razer_blade_16_2024_set_static(device, (struct razer_rgb *)&buf[0]);
         if (err)
             return err;
         break;
-    }
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
