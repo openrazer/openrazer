@@ -12,6 +12,7 @@
 #include <linux/dmi.h>
 #include <linux/input-event-codes.h>
 #include <linux/version.h>
+#include <linux/delay.h>
 
 #include "usb_hid_keys.h"
 
@@ -2973,6 +2974,26 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
 }
 
 /**
+ * Send a payload, resending while the device reports it is busy
+ */
+static int razer_send_payload_busy_retry(struct razer_kbd_device *device, struct razer_report *request, struct razer_report *response)
+{
+    int attempt;
+    int err;
+
+    for (attempt = 0; attempt < RAZER_BUSY_RETRIES; attempt++) {
+        err = razer_send_payload(device, request, response);
+        if (err)
+            return err;
+        if (response->status != RAZER_CMD_BUSY)
+            break;
+        usleep_range(900, 1100);
+    }
+
+    return 0;
+}
+
+/**
  * Set a static colour by filling the key matrix with a custom frame
  */
 static int razer_blade_16_2024_set_static(struct razer_kbd_device *device, struct razer_rgb *color)
@@ -2992,14 +3013,14 @@ static int razer_blade_16_2024_set_static(struct razer_kbd_device *device, struc
     for (row = 0; row < RAZER_BLADE_16_2024_MATRIX_ROWS; row++) {
         request = razer_chroma_standard_matrix_set_custom_frame(row, 0, RAZER_BLADE_16_2024_MATRIX_COLUMNS - 1, row_data);
         request.transaction_id.id = 0xFF;
-        err = razer_send_payload(device, &request, &response);
+        err = razer_send_payload_busy_retry(device, &request, &response);
         if (err)
             return err;
     }
 
     request = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
     request.transaction_id.id = 0xFF;
-    return razer_send_payload(device, &request, &response);
+    return razer_send_payload_busy_retry(device, &request, &response);
 }
 
 /**
