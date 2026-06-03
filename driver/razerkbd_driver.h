@@ -133,6 +133,9 @@
 #define RAZER_BLADE_16_2024_MATRIX_ROWS 6
 #define RAZER_BLADE_16_2024_MATRIX_COLUMNS 16
 
+/* How many times to resend a report while the device is busy */
+#define RAZER_BUSY_RETRIES 5
+
 /* Each keyboard report has 90 bytes*/
 #define RAZER_BLACKWIDOW_REPORT_LEN 0x5A
 
