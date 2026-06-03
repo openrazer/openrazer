@@ -3007,6 +3007,40 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
             return err;
         break;
 
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024: {
+        // This generation ignores the regular "static" command, so emulate a
+        // static colour by filling the whole keyboard matrix with a single
+        // colour using a custom frame.
+        unsigned char row_index, col;
+        unsigned char row_buffer[3 * 16] = {0};
+
+        if (count != 3) {
+            dev_warn(dev, "razerkbd: Static mode only accepts RGB (3byte)\n");
+            return -EINVAL;
+        }
+
+        for (col = 0; col < 16; col++) {
+            row_buffer[col * 3] = buf[0];
+            row_buffer[col * 3 + 1] = buf[1];
+            row_buffer[col * 3 + 2] = buf[2];
+        }
+
+        for (row_index = 0; row_index < 6; row_index++) {
+            request = razer_chroma_standard_matrix_set_custom_frame(row_index, 0, 15, row_buffer);
+            request.transaction_id.id = 0xFF;
+            err = razer_send_payload(device, &request, &response);
+            if (err)
+                return err;
+        }
+
+        request = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
+        request.transaction_id.id = 0xFF;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        break;
+    }
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_CHROMA:
@@ -3057,7 +3091,6 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
-    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_16_2026:
     case USB_DEVICE_ID_RAZER_BLADE_16_2025:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
@@ -3385,6 +3418,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
 
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
     case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_16_2026:
     case USB_DEVICE_ID_RAZER_BLADE_16_2025:
     case USB_DEVICE_ID_RAZER_BLADE_14_2021:
@@ -3466,7 +3500,6 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
-    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_BLADE_14_2024:
     case USB_DEVICE_ID_RAZER_BLADE_14_2025:
