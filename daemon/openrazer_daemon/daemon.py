@@ -5,7 +5,7 @@ Daemon class
 
 This class is the main core of the daemon, this serves a basic dbus module to control the main bit of the daemon
 """
-__version__ = '3.11.0'
+__version__ = '3.12.1'
 
 import configparser
 import logging
@@ -641,6 +641,10 @@ class RazerDaemon(DBusService):
             self.logger.info('Stopping daemon.')
         else:
             self.logger.info('Stopping daemon on signal %d', signum)
+
+        # "Resume" all devices, in case they're still "suspended"
+        # (lights off because of screensaver)
+        self.resume_devices()
 
         self._main_loop.quit()
 

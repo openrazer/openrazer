@@ -173,7 +173,7 @@ while IFS= read -r device_raw; do
     device_pid=$(echo "$device_raw" | cut -d' ' -f2 | sed 's/0x//')
 
     devicetype_line=$(echo "$devicetype_lines" | sed -n '/case '$device':/,/break;/p' | grep "device_type = ")
-    device_name=$(echo "$devicetype_line" | sed 's/[[:space:]]\+device_type = "\(.\+\)\\n";.*/\1/' | sed 's/%/%%/g')
+    device_name=$(echo "$devicetype_line" | sed 's/[[:space:]]\+device_type = "\(.\+\)";.*/\1/' | sed 's/%/%%/g')
 
     #echo "-----------------------------" >&2
     echo "Generating for $device_name (1532:$device_pid) ..." >&2

@@ -97,7 +97,7 @@ if __name__ == "__main__":
                 dock_device = razer_device
             if any(_mouse_name in razer_device.name for _mouse_name in CHROMA_DOCK_MICE_NAMES):
                 mouse_device = razer_device
-            if not razer_device.battery_level:
+            if not razer_device.has('battery'):
                 continue
 
             print(f"{razer_device.name} is at {razer_device.battery_level}% battery.")

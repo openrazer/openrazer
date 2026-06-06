@@ -1417,6 +1417,28 @@ struct razer_report razer_chroma_misc_set_orochi2011_poll_dpi(unsigned short pol
 }
 
 /**
+ * Set the Basilisk Mobile to "Static" effect
+ */
+struct razer_report razer_basilisk_mobile_effect_static(struct razer_rgb *rgb)
+{
+    struct razer_report report = get_razer_report(0x0f, 0x03, 0x0b);
+
+    report.arguments[0] = 0x00;
+    report.arguments[1] = 0x00;
+    report.arguments[2] = 0x00;
+    report.arguments[3] = 0x00;
+    report.arguments[4] = 0x01;
+    report.arguments[5] = rgb->r;
+    report.arguments[6] = rgb->g;
+    report.arguments[7] = rgb->b;
+    report.arguments[8] = rgb->r;
+    report.arguments[9] = rgb->g;
+    report.arguments[10] = rgb->b;
+
+    return report;
+}
+
+/**
  * Set the Naga Trinity to "Static" effect
  */
 struct razer_report razer_naga_trinity_effect_static(struct razer_rgb *rgb)

@@ -208,6 +208,29 @@ class RazerTartarusV2(_RippleKeyboard):
         # self.key_manager.close()
 
 
+class RazerTartarusPro(_RippleKeyboard):
+    """
+    Class for Razer Tartarus Pro
+    """
+
+    DRIVER_MODE = False
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Tartarus_Pro(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0244
+    HAS_MATRIX = True
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [1, 21]
+
+    METHODS = ['get_device_type_keypad',
+               'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_brightness', 'set_brightness']
+
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1591/1591_tartaruspro.png"
+
+
 class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Orbweaver
@@ -395,6 +418,36 @@ class RazerBlackWidowV3ProWireless(RazerBlackWidowV3ProWired):
                'set_charge_effect', 'set_charge_colour', 'get_battery', 'is_charging', 'get_low_battery_threshold', 'set_low_battery_threshold']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/3809-1-EN-v1.png"
+
+
+class RazerBlackWidowV4TenkeylessHyperSpeedWired(_RippleKeyboard):
+    """
+    Class for the Razer BlackWidow V4 Tenkeyless HyperSpeed (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_BlackWidow_V4_Tenkeyless_HyperSpeed(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02D7
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [6, 18]
+    POLL_RATES = [125, 250, 500, 1000]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_battery', 'is_charging']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/15142/15142-1-en-v1.png"
+
+
+class RazerBlackWidowV4TenkeylessHyperSpeedWireless(RazerBlackWidowV4TenkeylessHyperSpeedWired):
+    """
+    Class for the Razer BlackWidow V4 Tenkeyless HyperSpeed (Wireless)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_BlackWidow_V4_Tenkeyless_HyperSpeed(_\d+)?(-if01)?-event-mouse')
+    USB_PID = 0x02D5
 
 
 class RazerBlackWidowChroma(_RippleKeyboard):
@@ -592,6 +645,38 @@ class RazerHuntsmanV3ProTKL(_RazerDeviceBrightnessSuspend):
                'get_game_mode', 'set_game_mode', 'set_custom_effect', 'set_key_row', 'get_keyboard_layout']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/d01af9710e2077e2b88eb9dc6f68f62f/quick-actuation-adjustment-mode.webp"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+        self.key_manager.close()
+
+
+# TODO Should become _RippleKeyboard once kernel support for driver mode is implemented
+class RazerHuntsmanV3ProMini(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Huntsman V3 Pro Mini
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Huntsman_V3_Pro_Mini.*-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02B0
+    HAS_MATRIX = True
+    WAVE_DIRS = (0, 1)
+    MATRIX_DIMS = [5, 15]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'get_macro_mode', 'set_macro_mode', 'get_macro_effect', 'set_macro_effect',
+               'get_game_mode', 'set_game_mode', 'set_custom_effect', 'set_key_row', 'get_keyboard_layout']
+
+    DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/h8d/h31/9662065901598/230921-huntsman-v3-pro-mini-black-1500x1000-5.jpg"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -2261,3 +2346,34 @@ class RazerBlade182025(_RippleKeyboard):
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/14968/14968-1-en-v1.png"
+
+
+class RazerHuntsmanV3Pro8KHz(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Huntsman V3 Pro 8KHz
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Huntsman_V3_Pro_8KHz(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02CF
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 22]
+    # TODO Remove get_keyboard_layout once not _RazerDeviceBrightnessSuspend anymore
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'get_macro_mode', 'set_macro_mode', 'get_macro_effect', 'set_macro_effect',
+               'get_game_mode', 'set_game_mode', 'set_custom_effect', 'set_key_row', 'get_keyboard_layout']
+
+    DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/h62/h24/9980311044126/huntsman-v3-pro-8khz-b-500x500.png"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+        self.key_manager.close()
