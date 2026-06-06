@@ -54,8 +54,6 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_WIRELESS:
-    case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_WIRED:
     case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS:
@@ -83,6 +81,11 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
         return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_NEW_MOUSE_RECEIVER_WAIT_MIN_US, RAZER_NEW_MOUSE_RECEIVER_WAIT_MAX_US);
+        break;
+
+    case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_WIRELESS:
+    case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_WIRED:
+        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_COBRA_HYPERSPEED_RECEIVER_WAIT_MIN_US, RAZER_COBRA_HYPERSPEED_RECEIVER_WAIT_MAX_US);
         break;
 
     case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
