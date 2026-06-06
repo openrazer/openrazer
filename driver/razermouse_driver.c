@@ -682,11 +682,11 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_WIRED:
-        device_type = "Razer Cobra HyperSpeed (Wired)\n";
+        device_type = "Razer Cobra HyperSpeed (Wired)";
         break;
 
     case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_WIRELESS:
-        device_type = "Razer Cobra HyperSpeed (Wireless)\n";
+        device_type = "Razer Cobra HyperSpeed (Wireless)";
         break;
 
 
