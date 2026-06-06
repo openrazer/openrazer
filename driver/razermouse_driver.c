@@ -2057,8 +2057,6 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_WIRELESS:
-    case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_WIRED:
     case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED:
@@ -2161,6 +2159,8 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
         request.transaction_id.id = 0xFF;
         razer_send_payload(device, &request, &response);
         break;
+    case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_WIRED:
+    case USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3:
