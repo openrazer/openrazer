@@ -1603,10 +1603,7 @@ class RazerCobraHyperSpeed(__RazerDevice):
     """
     Class for the Razer Cobra HyperSpeed
     """
-    EVENT_FILE_REGEX = re.compile(r'.*usb-1532_Razer_Cobra_HyperSpeed_000000000000-if0(1|2)-event-kbd')
-
     USB_VID = 0x1532
-    USB_PID = 0x00DA
 
     METHODS = ['get_device_type_mouse',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
@@ -1622,8 +1619,15 @@ class RazerCobraHyperSpeed(__RazerDevice):
                'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/15141/15141-1-en-v1.png"
-    POLL_RATES = [125, 500, 1000]
     DPI_MAX = 26000
+
+class RazerCobraHyperSpeedWired(RazerCobraHyperSpeed):
+    """
+    Class for the Razer Cobra HyperSpeed (Wired)
+    """
+    USB_PID = 0x00DA
+    EVENT_FILE_REGEX = re.compile(r'.*usb-1532_Razer_Cobra_HyperSpeed_000000000000-if0(1|2)-event-kbd')
+    POLL_RATES = [125, 500, 1000, 4000, 8000]
 
 
 class RazerCobraHyperSpeedWireless(RazerCobraHyperSpeed):
@@ -1632,6 +1636,7 @@ class RazerCobraHyperSpeedWireless(RazerCobraHyperSpeed):
     """
     EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Cobra_HyperSpeed-event-if0(1|2)-event-kbd')
     USB_PID = 0x00DB
+    POLL_RATES = [125, 500, 1000]
 
 
 class RazerDeathAdderV3(__RazerDevice):
