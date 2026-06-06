@@ -1604,7 +1604,7 @@ class RazerCobraHyperSpeed(__RazerDevice):
     Class for the Razer Cobra HyperSpeed
     """
     USB_VID = 0x1532
-    USB_PID = 0x00DA
+
     METHODS = ['get_device_type_mouse',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
                'get_poll_rate', 'set_poll_rate',
@@ -1626,7 +1626,7 @@ class RazerCobraHyperSpeedWired(RazerCobraHyperSpeed):
     """
     Class for the Razer Cobra HyperSpeed (Wired)
     """
-
+    USB_PID = 0x00DA
     EVENT_FILE_REGEX = re.compile(r'.*usb-1532_Razer_Cobra_HyperSpeed_000000000000-if0(1|2)-event-kbd')
     POLL_RATES = [125, 500, 1000, 4000, 8000]
 
