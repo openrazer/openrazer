@@ -1621,6 +1621,7 @@ class RazerCobraHyperSpeed(__RazerDevice):
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/15141/15141-1-en-v1.png"
     DPI_MAX = 26000
 
+
 class RazerCobraHyperSpeedWired(RazerCobraHyperSpeed):
     """
     Class for the Razer Cobra HyperSpeed (Wired)
