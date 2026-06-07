@@ -187,6 +187,7 @@ class RazerThunderbolt4DockChroma(_RazerDeviceBrightnessSuspend):
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/4030-1-EN-v1.png"
 
+
 class RazerThunderbolt5DockChroma(RazerThunderbolt4DockChroma):
     """
     Class for the Razer Thunderbolt 5 Dock Chroma
