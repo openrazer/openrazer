@@ -187,6 +187,26 @@ class RazerThunderbolt4DockChroma(_RazerDeviceBrightnessSuspend):
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/4030-1-EN-v1.png"
 
+class RazerThunderbolt5DockChroma(RazerThunderbolt4DockChroma):
+    """
+    Class for the Razer Thunderbolt 5 Dock Chroma
+    """
+    USB_PID = 0x0F52
+
+
+class RazerThunderbolt5Dock(RazerThunderbolt5DockChroma):
+    """
+    Class for the Razer Thunderbolt 5 Dock
+    """
+    USB_PID = 0x0F53
+
+
+class RazerThunderbolt5DockAudio(RazerThunderbolt5DockChroma):
+    """
+    Class for the Razer Thunderbolt 5 Dock Audio
+    """
+    USB_PID = 0x0F57
+
 
 class RazerChargingPadChroma(_RazerDeviceBrightnessSuspend):
     """
