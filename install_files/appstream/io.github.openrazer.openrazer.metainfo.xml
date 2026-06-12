@@ -286,5 +286,8 @@
     <modalias>usb:v1532p0F21d*</modalias>
     <modalias>usb:v1532p0F26d*</modalias>
     <modalias>usb:v1532p0F2Bd*</modalias>
+    <modalias>usb:v1532p0F52d*</modalias>
+    <modalias>usb:v1532p0F53d*</modalias>
+    <modalias>usb:v1532p0F57d*</modalias>
   </provides>
 </component>

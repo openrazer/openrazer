@@ -343,6 +343,9 @@ This will output something similar to this:
 | Razer Chroma Addressable RGB Controller                       |  1532:0F1F  |
 | Razer Base Station V2 Chroma                                  |  1532:0F20  |
 | Razer Thunderbolt 4 Dock Chroma                               |  1532:0F21  |
+| Razer Thunderbolt 5 Dock Chroma                               |  1532:0F52  |
+| Razer Thunderbolt 5 Dock                                       |  1532:0F53  |
+| Razer Thunderbolt 5 Dock Audio                                 |  1532:0F57  |
 | Razer Charging Pad Chroma                                     |  1532:0F26  |
 | Razer Laptop Stand Chroma V2                                  |  1532:0F2B  |
 
