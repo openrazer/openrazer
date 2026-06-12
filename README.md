@@ -331,6 +331,7 @@ This will output something similar to this:
 | Razer Tartarus Pro                                            |  1532:0244  |
 | Razer Nommo Chroma                                            |  1532:0517  |
 | Razer Nommo Pro                                               |  1532:0518  |
+| Razer Leviathan V2 X                                          |  1532:054a  |
 | Razer Chroma Mug Holder                                       |  1532:0F07  |
 | Razer Base Station Chroma                                     |  1532:0F08  |
 | Razer Chroma Hardware Development Kit (HDK)                   |  1532:0F09  |
