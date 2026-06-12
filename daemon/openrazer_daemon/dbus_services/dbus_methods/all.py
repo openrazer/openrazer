@@ -79,6 +79,9 @@ def get_device_name(self):
     """
     self.logger.debug("DBus call get_device_name")
 
+    if self.DEVICE_NAME is not None:
+        return self.DEVICE_NAME
+
     driver_path = self.get_driver_path('device_type')
 
     with open(driver_path, 'r') as driver_file:

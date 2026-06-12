@@ -19,11 +19,64 @@
  * Version Information
  */
 #define DRIVER_DESC "Razer Accessory Device Driver"
+#define RAZER_ACCESSORY_MOUSE_MAX_DPI_STAGES 5
+#define RAZER_ACCESSORY_MOUSE_WAIT_MIN_US 31000
+#define RAZER_ACCESSORY_MOUSE_WAIT_MAX_US 31100
 
 MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
+
+/* See razer_dock_pro_shared in razeraccessory_driver.h.  This global list
+ * keys those shared structs by usb_device * so the two MOUSE_DOCK_PRO
+ * interface probes can share state without allocating parallel copies. */
+static LIST_HEAD(dock_pro_shared_list);
+static DEFINE_MUTEX(dock_pro_shared_list_lock);
+
+static void razer_dock_pro_shared_release(struct kref *ref)
+{
+    struct razer_dock_pro_shared *shared = container_of(ref, struct razer_dock_pro_shared, ref);
+    list_del(&shared->list);
+    kfree(shared);
+}
+
+static struct razer_dock_pro_shared *razer_dock_pro_shared_get(struct usb_device *usb_dev)
+{
+    struct razer_dock_pro_shared *shared;
+
+    mutex_lock(&dock_pro_shared_list_lock);
+    list_for_each_entry(shared, &dock_pro_shared_list, list) {
+        if (shared->usb_dev == usb_dev) {
+            kref_get(&shared->ref);
+            mutex_unlock(&dock_pro_shared_list_lock);
+            return shared;
+        }
+    }
+
+    shared = kzalloc(sizeof(*shared), GFP_KERNEL);
+    if (!shared) {
+        mutex_unlock(&dock_pro_shared_list_lock);
+        return NULL;
+    }
+
+    kref_init(&shared->ref);
+    shared->usb_dev = usb_dev;
+    spin_lock_init(&shared->nearby_lock);
+    list_add(&shared->list, &dock_pro_shared_list);
+
+    mutex_unlock(&dock_pro_shared_list_lock);
+    return shared;
+}
+
+static void razer_dock_pro_shared_put(struct razer_dock_pro_shared *shared)
+{
+    if (!shared)
+        return;
+    mutex_lock(&dock_pro_shared_list_lock);
+    kref_put(&shared->ref, razer_dock_pro_shared_release);
+    mutex_unlock(&dock_pro_shared_list_lock);
+}
 
 /**
  * Send report to the device
@@ -86,6 +139,48 @@ static int razer_send_payload(struct razer_accessory_device *device, struct raze
 }
 
 /**
+ * Send a mouse command through the Mouse Dock Pro receiver.
+ */
+static int razer_dock_send_mouse_payload(struct razer_accessory_device *device, struct razer_report *request, struct razer_report *response)
+{
+    int err;
+
+    request->transaction_id.id = 0x1F;
+    request->crc = razer_calculate_crc(request);
+
+    mutex_lock(&device->lock);
+    err = razer_get_usb_response(device->usb_dev, 0x00, request, 0x00, response, RAZER_ACCESSORY_MOUSE_WAIT_MIN_US, RAZER_ACCESSORY_MOUSE_WAIT_MAX_US);
+    mutex_unlock(&device->lock);
+    if (err) {
+        print_erroneous_report(response, "razeraccessory", "Invalid Mouse Report Length");
+        return err;
+    }
+
+    if (response->remaining_packets != request->remaining_packets ||
+        response->command_class != request->command_class ||
+        response->command_id.id != request->command_id.id) {
+        print_erroneous_report(response, "razeraccessory", "Mouse response doesn't match request");
+        return -EIO;
+    }
+
+    switch (response->status) {
+    case RAZER_CMD_BUSY:
+        break;
+    case RAZER_CMD_FAILURE:
+        print_erroneous_report(response, "razeraccessory", "Mouse command failed");
+        return -EIO;
+    case RAZER_CMD_NOT_SUPPORTED:
+        print_erroneous_report(response, "razeraccessory", "Mouse command not supported");
+        return -EIO;
+    case RAZER_CMD_TIMEOUT:
+        print_erroneous_report(response, "razeraccessory", "Mouse command timed out");
+        return -EIO;
+    }
+
+    return 0;
+}
+
+/**
  * Device mode function
  */
 static void razer_set_device_mode(struct razer_accessory_device *device, unsigned char mode, unsigned char param)
@@ -94,7 +189,10 @@ static void razer_set_device_mode(struct razer_accessory_device *device, unsigne
     struct razer_report response = {0};
 
     request = razer_chroma_standard_set_device_mode(mode, param);
-    request.transaction_id.id = 0x3F;
+    if (device->usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO)
+        request.transaction_id.id = 0xFF;
+    else
+        request.transaction_id.id = 0x3F;
 
     razer_send_payload(device, &request, &response);
 }
@@ -2192,6 +2290,743 @@ static ssize_t razer_attr_read_channel6_led_brightness(struct device *dev, struc
     return razer_attr_read_channel_led_brightness(ARGB_CH_6_LED, dev, attr, buf);
 }
 
+static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned short dpi_x;
+    unsigned short dpi_y;
+
+    if (count != 2 && count != 4) {
+        printk(KERN_WARNING "razeraccessory: DPI requires 2 bytes or 4 bytes\n");
+        return -EINVAL;
+    }
+
+    dpi_x = (buf[0] << 8) | (buf[1] & 0xFF);
+    dpi_y = dpi_x;
+
+    if (count == 4)
+        dpi_y = (buf[2] << 8) | (buf[3] & 0xFF);
+
+    request = razer_chroma_misc_set_dpi_xy(VARSTORE, dpi_x, dpi_y);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned short dpi_x, dpi_y;
+
+    request = razer_chroma_misc_get_dpi_xy(VARSTORE);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    razer_parse_dpi_xy(&response, &dpi_x, &dpi_y);
+    return sprintf(buf, "%u:%u\n", dpi_x, dpi_y);
+}
+
+static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned short dpi[2 * RAZER_ACCESSORY_MOUSE_MAX_DPI_STAGES] = {0};
+    unsigned char stages_count = 0;
+    unsigned char active_stage;
+    size_t remaining = count;
+
+    if (remaining < 5) {
+        printk(KERN_ALERT "razeraccessory: At least one DPI stage expected\n");
+        return -EINVAL;
+    }
+
+    active_stage = buf[0];
+    remaining--;
+    buf++;
+
+    if (active_stage < 1) {
+        printk(KERN_ALERT "razeraccessory: Invalid active DPI stage: %u < 1\n", active_stage);
+        return -EINVAL;
+    }
+
+    while (stages_count < RAZER_ACCESSORY_MOUSE_MAX_DPI_STAGES && remaining >= 4) {
+        dpi[stages_count * 2] = (buf[0] << 8) | (buf[1] & 0xFF);
+        dpi[stages_count * 2 + 1] = (buf[2] << 8) | (buf[3] & 0xFF);
+        stages_count += 1;
+        buf += 4;
+        remaining -= 4;
+    }
+
+    if (active_stage > stages_count) {
+        printk(KERN_ALERT "razeraccessory: Invalid active DPI stage: %u > %u\n", active_stage, stages_count);
+        return -EINVAL;
+    }
+
+    request = razer_chroma_misc_set_dpi_stages(VARSTORE, stages_count, active_stage, dpi);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_dpi_stages(VARSTORE);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return razer_parse_dpi_stages(&response, buf, RAZER_ACCESSORY_MOUSE_MAX_DPI_STAGES);
+}
+
+static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_polling_rate2();
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", razer_parse_poll_rate_hyperpolling(&response));
+}
+
+static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    unsigned short polling_rate = (unsigned short)simple_strtoul(buf, NULL, 10);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x01);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_battery_level();
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", razer_parse_battery_level(&response));
+}
+
+static ssize_t razer_attr_read_is_charging(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_charging_status();
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", razer_parse_charging_status(&response));
+}
+
+static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_scroll_mode();
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", razer_parse_scroll_arg(&response));
+}
+
+static ssize_t razer_attr_write_scroll_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned int scroll_mode;
+
+    if (kstrtouint(buf, 0, &scroll_mode) < 0 || scroll_mode > 1)
+        return -EINVAL;
+
+    request = razer_chroma_misc_set_scroll_mode(scroll_mode);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_read_scroll_acceleration(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_scroll_acceleration();
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", razer_parse_scroll_arg(&response));
+}
+
+static ssize_t razer_attr_write_scroll_acceleration(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    bool acceleration;
+
+    if (kstrtobool(buf, &acceleration) < 0)
+        return -EINVAL;
+
+    request = razer_chroma_misc_set_scroll_acceleration(acceleration);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_scroll_smart_reel();
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", razer_parse_scroll_arg(&response));
+}
+
+static ssize_t razer_attr_write_scroll_smart_reel(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    bool smart_reel;
+
+    if (kstrtobool(buf, &smart_reel) < 0)
+        return -EINVAL;
+
+    request = razer_chroma_misc_set_scroll_smart_reel(smart_reel);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_idle_time();
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return sprintf(buf, "%u\n", razer_parse_idle_time(&response));
+}
+
+static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    unsigned short idle_time = (unsigned short)simple_strtoul(buf, NULL, 10);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_set_idle_time(idle_time);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_get_low_battery_threshold();
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", razer_parse_low_battery_threshold(&response));
+}
+
+static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    unsigned char threshold = (unsigned char)simple_strtoul(buf, NULL, 10);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_misc_set_low_battery_threshold(threshold);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_read_mouse_led_brightness(struct device *dev, struct device_attribute *attr, char *buf, unsigned char led_id)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_extended_matrix_get_brightness(VARSTORE, led_id);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", response.arguments[2]);
+}
+
+static ssize_t razer_attr_write_mouse_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_extended_matrix_brightness(VARSTORE, led_id, brightness);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_read_logo_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_mouse_led_brightness(dev, attr, buf, LOGO_LED);
+}
+
+static ssize_t razer_attr_write_logo_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_led_brightness(dev, attr, buf, count, LOGO_LED);
+}
+
+static ssize_t razer_attr_read_scroll_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return razer_attr_read_mouse_led_brightness(dev, attr, buf, SCROLL_WHEEL_LED);
+}
+
+static ssize_t razer_attr_write_scroll_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_led_brightness(dev, attr, buf, count, SCROLL_WHEEL_LED);
+}
+
+static ssize_t razer_attr_write_mouse_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_extended_matrix_effect_wave(VARSTORE, led_id, direction);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_write_mouse_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    if (count != 3) {
+        printk(KERN_WARNING "razeraccessory: Static mode only accepts RGB (3byte)\n");
+        return -EINVAL;
+    }
+
+    request = razer_chroma_extended_matrix_effect_static(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_write_mouse_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, led_id);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_write_mouse_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_extended_matrix_effect_none(VARSTORE, led_id);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_write_logo_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_wave(dev, attr, buf, count, LOGO_LED);
+}
+
+static ssize_t razer_attr_write_logo_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_static(dev, attr, buf, count, LOGO_LED);
+}
+
+static ssize_t razer_attr_write_logo_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_spectrum(dev, attr, buf, count, LOGO_LED);
+}
+
+static ssize_t razer_attr_write_logo_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_none(dev, attr, buf, count, LOGO_LED);
+}
+
+static ssize_t razer_attr_write_scroll_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_wave(dev, attr, buf, count, SCROLL_WHEEL_LED);
+}
+
+static ssize_t razer_attr_write_scroll_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_static(dev, attr, buf, count, SCROLL_WHEEL_LED);
+}
+
+static ssize_t razer_attr_write_scroll_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_spectrum(dev, attr, buf, count, SCROLL_WHEEL_LED);
+}
+
+static ssize_t razer_attr_write_scroll_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_none(dev, attr, buf, count, SCROLL_WHEEL_LED);
+}
+
+/* Space-separated four-hex-digit PIDs of mice the dock has seen on its RF
+ * channel within the last 30 s, or an empty line if none / not a Mouse
+ * Dock Pro. */
+static ssize_t razer_attr_read_nearby_mice(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_dock_pro_shared *shared = device->shared;
+    unsigned short pids[RAZER_DOCK_PRO_MAX_NEARBY];
+    unsigned long flags;
+    ssize_t count = 0;
+    int i;
+
+    if (!shared)
+        return sprintf(buf, "\n");
+
+    spin_lock_irqsave(&shared->nearby_lock, flags);
+    if (!shared->nearby_jiffies || time_after(jiffies, shared->nearby_jiffies + 30 * HZ)) {
+        spin_unlock_irqrestore(&shared->nearby_lock, flags);
+        return sprintf(buf, "\n");
+    }
+    memcpy(pids, shared->nearby_pids, sizeof(pids));
+    spin_unlock_irqrestore(&shared->nearby_lock, flags);
+
+    for (i = 0; i < RAZER_DOCK_PRO_MAX_NEARBY; i++) {
+        if (pids[i] == 0)
+            continue;
+        count += sprintf(buf + count, count ? " %04x" : "%04x", pids[i]);
+    }
+    count += sprintf(buf + count, "\n");
+    return count;
+}
+
+static ssize_t razer_attr_read_mouse_serial(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    char serial_string[51];
+
+    request = razer_chroma_standard_get_serial();
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    strncpy(&serial_string[0], &response.arguments[0], 22);
+    serial_string[22] = '\0';
+
+    return sprintf(buf, "%s\n", &serial_string[0]);
+}
+
+static ssize_t razer_attr_read_mouse_connected(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    if (atomic_read(&device->pairing_busy))
+        return sprintf(buf, "0\n");
+
+    /*
+     * Query dock firmware via cmd=0xbf heartbeat instead of relaying a battery
+     * GET to the mouse over RF.  args[1] of the response is the dock's
+     * paired-flag (1 = mouse paired, 0 = no mouse).  This is a pure firmware
+     * round-trip with no RF traffic, so it can be polled safely.
+     */
+    request = get_razer_report(0x00, 0xbf, 0x50);
+    request.transaction_id.id = 0x3F;
+    razer_send_payload(device, &request, &response);
+
+    if (response.status != RAZER_CMD_SUCCESSFUL)
+        return sprintf(buf, "0\n");
+
+    return sprintf(buf, "%d\n", response.arguments[1] == 1 ? 1 : 0);
+}
+
+static ssize_t razer_attr_read_mouse_firmware(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_standard_get_firmware_version();
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return sprintf(buf, "v%d.%d\n", response.arguments[0], response.arguments[1]);
+}
+
+static ssize_t razer_attr_read_mouse_matrix_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_extended_matrix_get_brightness(VARSTORE, ZERO_LED);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return sprintf(buf, "%d\n", response.arguments[2]);
+}
+
+static ssize_t razer_attr_write_mouse_matrix_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_write_mouse_main_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_wave(dev, attr, buf, count, ZERO_LED);
+}
+
+static ssize_t razer_attr_write_mouse_main_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_static(dev, attr, buf, count, ZERO_LED);
+}
+
+static ssize_t razer_attr_write_mouse_main_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_spectrum(dev, attr, buf, count, ZERO_LED);
+}
+
+static ssize_t razer_attr_write_mouse_main_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_none(dev, attr, buf, count, ZERO_LED);
+}
+
+static ssize_t razer_attr_write_mouse_main_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    switch(count) {
+    case 3:
+        request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
+        break;
+    case 6:
+        request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+        break;
+    default:
+        request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
+        break;
+    }
+
+    razer_dock_send_mouse_payload(device, &request, &response);
+    return count;
+}
+
+static ssize_t razer_attr_write_mouse_main_matrix_effect_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = razer_chroma_extended_matrix_effect_custom_frame();
+    razer_dock_send_mouse_payload(device, &request, &response);
+
+    return count;
+}
+
+static ssize_t razer_attr_write_mouse_matrix_custom_frame(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char row_id, start_col, stop_col;
+    size_t offset = 0;
+    size_t row_length;
+
+    while(offset < count) {
+        if(offset + 3 > count) {
+            printk(KERN_ALERT "razeraccessory: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
+            return -EINVAL;
+        }
+
+        row_id = buf[offset++];
+        start_col = buf[offset++];
+        stop_col = buf[offset++];
+
+        // Validate parameters
+        if(start_col > stop_col) {
+            printk(KERN_ALERT "razeraccessory: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
+            return -EINVAL;
+        }
+
+        row_length = ((stop_col + 1) - start_col) * 3;
+
+        if(count < offset + row_length) {
+            printk(KERN_ALERT "razeraccessory: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
+            return -EINVAL;
+        }
+
+        request = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+        razer_dock_send_mouse_payload(device, &request, &response);
+
+        offset += row_length;
+    }
+
+    return count;
+}
+
+/**
+ * Write device file "pair"
+ *
+ * Pairs the Mouse Dock Pro with a mouse identified by its USB PID (hex string, e.g. "00ab").
+ */
+static ssize_t razer_attr_write_mouse_dock_pro_pair(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    unsigned int pid = (unsigned int)simple_strtoul(buf, NULL, 16);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    int i;
+
+    atomic_set(&device->pairing_busy, 1);
+
+    /*
+     * tid=0x1F is the dock's RF relay channel.  When no mouse is associated
+     * the dock broadcasts pairing commands on this channel so a nearby mouse
+     * can respond.  tid=0xFF is the LED/system firmware channel: it
+     * acknowledges the commands but does not trigger RF scanning.
+     */
+    request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(0x01);
+    request.transaction_id.id = 0x1F;
+    razer_send_payload(device, &request, &response);
+
+    request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(0x01);
+    request.transaction_id.id = 0x1F;
+    razer_send_payload(device, &request, &response);
+
+    request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step2(pid);
+    request.transaction_id.id = 0x1F;
+    razer_send_payload(device, &request, &response);
+
+    /*
+     * Keep the dock in RF scan mode with periodic 0x86 keepalives (same
+     * pattern as Synapse).  The dock answers BUSY while still scanning and
+     * SUCCESS once a mouse has been associated, so we can break out as
+     * soon as it flips — the v2 capture shows this typically happens in
+     * 30-40 iterations but can be much faster.  The 33-iteration cap
+     * (~1 s) matches the longest pairing window observed.  The sleep is
+     * interruptible so a signal can abort.
+     */
+    for (i = 0; i < 33; i++) {
+        if (schedule_timeout_interruptible(msecs_to_jiffies(30)) != 0)
+            break;
+        request = get_razer_report(0x00, 0x86, 0x03);
+        request.transaction_id.id = 0xFF;
+        razer_send_payload(device, &request, &response);
+        if (response.status == RAZER_CMD_SUCCESSFUL)
+            break;
+    }
+
+    request = get_razer_report(0x00, 0xb9, 0x01);
+    request.transaction_id.id = 0x1F;
+    razer_send_payload(device, &request, &response);
+
+    atomic_set(&device->pairing_busy, 0);
+    return count;
+}
+
+/**
+ * Write device file "unpair"
+ *
+ * Unpairs the Mouse Dock Pro from a mouse identified by its USB PID (hex string, e.g. "00ab").
+ */
+static ssize_t razer_attr_write_mouse_dock_pro_unpair(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    unsigned int pid = (unsigned int)simple_strtoul(buf, NULL, 16);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    atomic_set(&device->pairing_busy, 1);
+
+    request = razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(pid);
+    request.transaction_id.id = 0x3F;
+    razer_send_payload(device, &request, &response);
+
+    atomic_set(&device->pairing_busy, 0);
+    return count;
+}
+
+/*
+ * Tell the dock to scan for nearby Razer mice and emit '05 37 ...' HID input
+ * reports on interface 1.  Per razer_dock_pairing_v2.pcapng, Synapse 4 sends
+ * this as one of its first commands at dock startup; without it the dock
+ * never broadcasts nearby announcements on its own.  Single-byte payload
+ * 0x01 — meaning of other arg values not characterised.  Caller must hold
+ * the dock's interface-0 device (only that interface can carry feature
+ * reports via razer_send_payload).
+ */
+static void razer_mouse_dock_pro_start_scan(struct razer_accessory_device *device)
+{
+    /* Reuses pair_step1 because cmd=0x46 arg=0x01 is the same "begin RF
+     * discovery" command both flows need — the builder ignores its `pid`
+     * argument.  The dock takes ~10 s to surface a result on its '05 37 ...'
+     * input channel (per razer_dock_pairing_v2.pcapng). */
+    struct razer_report request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(0);
+    struct razer_report response = {0};
+    int err;
+
+    request.transaction_id.id = 0x3F;
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        dev_warn(&device->usb_dev->dev, "nearby-mouse scan trigger failed (err=%d)\n", err);
+}
+
+/* One-shot trigger; the dock's scan is not continuous so the cache goes
+ * stale after ~30 s.  Daemon writes here before reading nearby_mice. */
+static ssize_t razer_attr_write_scan_for_mice(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    razer_mouse_dock_pro_start_scan(device);
+    return count;
+}
+
 /**
  * Set up the device driver files
 
@@ -2242,6 +3077,9 @@ static DEVICE_ATTR(fully_charged_matrix_effect_breath,      0220, NULL,         
 static DEVICE_ATTR(fully_charged_matrix_effect_static,      0220, NULL,                                           razer_attr_write_fully_charged_matrix_effect_static);
 static DEVICE_ATTR(fully_charged_matrix_effect_none,        0220, NULL,                                           razer_attr_write_fully_charged_matrix_effect_none);
 
+static DEVICE_ATTR(pair,                                    0220, NULL,                                           razer_attr_write_mouse_dock_pro_pair);
+static DEVICE_ATTR(unpair,                                  0220, NULL,                                           razer_attr_write_mouse_dock_pro_unpair);
+
 static DEVICE_ATTR(reset_channels,                          0220, NULL,                                           razer_attr_write_reset_channels);
 static DEVICE_ATTR(channel1_size,                           0660, razer_attr_read_channel1_size,                  razer_attr_write_channel1_size);
 static DEVICE_ATTR(channel2_size,                           0660, razer_attr_read_channel2_size,                  razer_attr_write_channel2_size);
@@ -2258,6 +3096,41 @@ static DEVICE_ATTR(channel6_led_brightness,                 0660, razer_attr_rea
 
 static DEVICE_ATTR(is_mug_present,                          0440, razer_attr_read_is_mug_present,                 NULL);
 
+static DEVICE_ATTR(poll_rate,                               0660, razer_attr_read_poll_rate,                      razer_attr_write_poll_rate);
+static DEVICE_ATTR(dpi,                                     0660, razer_attr_read_dpi,                            razer_attr_write_dpi);
+static DEVICE_ATTR(dpi_stages,                              0660, razer_attr_read_dpi_stages,                     razer_attr_write_dpi_stages);
+static DEVICE_ATTR(charge_level,                            0440, razer_attr_read_get_battery,                    NULL);
+static DEVICE_ATTR(charge_status,                           0440, razer_attr_read_is_charging,                    NULL);
+static DEVICE_ATTR(scroll_mode,                             0660, razer_attr_read_scroll_mode,                    razer_attr_write_scroll_mode);
+static DEVICE_ATTR(scroll_acceleration,                     0660, razer_attr_read_scroll_acceleration,            razer_attr_write_scroll_acceleration);
+static DEVICE_ATTR(scroll_smart_reel,                       0660, razer_attr_read_scroll_smart_reel,              razer_attr_write_scroll_smart_reel);
+static DEVICE_ATTR(device_idle_time,                        0660, razer_attr_read_device_idle_time,               razer_attr_write_device_idle_time);
+static DEVICE_ATTR(charge_low_threshold,                    0660, razer_attr_read_charge_low_threshold,           razer_attr_write_charge_low_threshold);
+static DEVICE_ATTR(logo_led_brightness,                     0660, razer_attr_read_logo_led_brightness,            razer_attr_write_logo_led_brightness);
+static DEVICE_ATTR(scroll_led_brightness,                   0660, razer_attr_read_scroll_led_brightness,          razer_attr_write_scroll_led_brightness);
+static DEVICE_ATTR(logo_matrix_effect_wave,                 0220, NULL,                                           razer_attr_write_logo_matrix_effect_wave);
+static DEVICE_ATTR(logo_matrix_effect_static,               0220, NULL,                                           razer_attr_write_logo_matrix_effect_static);
+static DEVICE_ATTR(logo_matrix_effect_spectrum,             0220, NULL,                                           razer_attr_write_logo_matrix_effect_spectrum);
+static DEVICE_ATTR(logo_matrix_effect_none,                 0220, NULL,                                           razer_attr_write_logo_matrix_effect_none);
+static DEVICE_ATTR(scroll_matrix_effect_wave,               0220, NULL,                                           razer_attr_write_scroll_matrix_effect_wave);
+static DEVICE_ATTR(scroll_matrix_effect_static,             0220, NULL,                                           razer_attr_write_scroll_matrix_effect_static);
+static DEVICE_ATTR(scroll_matrix_effect_spectrum,           0220, NULL,                                           razer_attr_write_scroll_matrix_effect_spectrum);
+static DEVICE_ATTR(scroll_matrix_effect_none,               0220, NULL,                                           razer_attr_write_scroll_matrix_effect_none);
+
+static DEVICE_ATTR(mouse_serial,                            0440, razer_attr_read_mouse_serial,                  NULL);
+static DEVICE_ATTR(mouse_connected,                         0440, razer_attr_read_mouse_connected,               NULL);
+static DEVICE_ATTR(nearby_mice,                             0440, razer_attr_read_nearby_mice,                   NULL);
+static DEVICE_ATTR(scan_for_mice,                           0220, NULL,                                          razer_attr_write_scan_for_mice);
+static DEVICE_ATTR(mouse_firmware,                          0440, razer_attr_read_mouse_firmware,                NULL);
+static DEVICE_ATTR(mouse_matrix_brightness,                 0660, razer_attr_read_mouse_matrix_brightness,       razer_attr_write_mouse_matrix_brightness);
+static DEVICE_ATTR(mouse_matrix_effect_wave,                0220, NULL,                                           razer_attr_write_mouse_main_matrix_effect_wave);
+static DEVICE_ATTR(mouse_matrix_effect_static,              0220, NULL,                                           razer_attr_write_mouse_main_matrix_effect_static);
+static DEVICE_ATTR(mouse_matrix_effect_spectrum,            0220, NULL,                                           razer_attr_write_mouse_main_matrix_effect_spectrum);
+static DEVICE_ATTR(mouse_matrix_effect_none,                0220, NULL,                                           razer_attr_write_mouse_main_matrix_effect_none);
+static DEVICE_ATTR(mouse_matrix_effect_breath,              0220, NULL,                                           razer_attr_write_mouse_main_matrix_effect_breath);
+static DEVICE_ATTR(mouse_matrix_effect_custom,              0220, NULL,                                           razer_attr_write_mouse_main_matrix_effect_custom);
+static DEVICE_ATTR(mouse_matrix_custom_frame,               0220, NULL,                                           razer_attr_write_mouse_matrix_custom_frame);
+
 static void razer_accessory_init(struct razer_accessory_device *dev, struct usb_interface *intf, struct hid_device *hdev)
 {
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -2265,6 +3138,7 @@ static void razer_accessory_init(struct razer_accessory_device *dev, struct usb_
 
     // Initialise mutex
     mutex_init(&dev->lock);
+    atomic_set(&dev->pairing_busy, 0);
     // Setup values
     dev->usb_dev = usb_dev;
     dev->usb_vid = usb_dev->descriptor.idVendor;
@@ -2328,6 +3202,19 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     switch (usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        /* Interface 0 = control transfers (feature reports for LEDs,
+         * pair/unpair, paired-mouse passthrough).  Interface 1 = HID
+         * input reports including nearby-mouse announcements on EP 0x82.
+         * Interface 2 is the HID-with-vendor protocol used for the mouse
+         * passthrough's USB-input side; we don't handle it. */
+        if (intf->cur_altsetting->desc.bInterfaceNumber > 1) {
+            dev_info(&intf->dev, "skipping interface %u\n",
+                     intf->cur_altsetting->desc.bInterfaceNumber);
+            return false;
+        }
+        break;
+
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
     case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
     case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
@@ -2335,7 +3222,6 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
-    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
@@ -2368,6 +3254,16 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
 
     // Init data
     razer_accessory_init(dev, intf, hdev);
+
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO) {
+        dev->shared = razer_dock_pro_shared_get(usb_dev);
+        if (!dev->shared) {
+            kfree(dev);
+            return -ENOMEM;
+        }
+        dev_info(&intf->dev, "Mouse Dock Pro interface %u attached\n",
+                 intf->cur_altsetting->desc.bInterfaceNumber);
+    }
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CORE:
@@ -2574,6 +3470,51 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         }
 
         switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_mode);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_acceleration);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_smart_reel);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_serial);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_connected);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_nearby_mice);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scan_for_mice);
+
+            /* Kick off one scan at probe so the cache has something to show
+             * before userspace asks; subsequent scans are on-demand via
+             * scan_for_mice (the dock's scan is one-shot, not continuous). */
+            razer_mouse_dock_pro_start_scan(dev);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_firmware);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_effect_custom);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_matrix_custom_frame);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_pair);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_unpair);
+            break;
+        }
+
+        switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         // Needs to be in "Normal" mode for idle effects to function properly
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
@@ -2605,6 +3546,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     return 0;
 
 exit_free:
+    razer_dock_pro_shared_put(dev->shared);
     kfree(dev);
     return retval;
 }
@@ -2788,6 +3730,13 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         }
 
         switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+            device_remove_file(&hdev->dev, &dev_attr_pair);                                // Pair mouse to dock
+            device_remove_file(&hdev->dev, &dev_attr_unpair);                              // Unpair mouse from dock
+            break;
+        }
+
+        switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
             device_remove_file(&hdev->dev, &dev_attr_reset_channels);
             device_remove_file(&hdev->dev, &dev_attr_channel1_size);
@@ -2804,10 +3753,49 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_channel6_led_brightness);
             break;
         }
+
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_mode);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_acceleration);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_smart_reel);
+            device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
+            device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_serial);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_connected);
+            device_remove_file(&hdev->dev, &dev_attr_nearby_mice);
+            device_remove_file(&hdev->dev, &dev_attr_scan_for_mice);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_firmware);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_effect_custom);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_matrix_custom_frame);
+            break;
+        }
     }
 
     hid_hw_stop(hdev);
 
+    razer_dock_pro_shared_put(dev->shared);
     kfree(dev);
     dev_info(&intf->dev, "Razer Device disconnected\n");
 }
@@ -2823,9 +3811,44 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
  *
  * data[1] == 0xa0 if mug is present
  */
+/*
+ * Wire format of a nearby-mouse announcement on EP 0x82 of the Mouse Dock Pro
+ * (decoded from razer_dock_pairing_v2.pcapng):
+ *
+ *   05 37 <flags> <count> <pid_hi> <pid_lo> <pid_hi> <pid_lo> ... 00 00 ...
+ *
+ * Bytes 4 onwards hold up to RAZER_DOCK_PRO_MAX_NEARBY two-byte big-endian
+ * PIDs, zero-padded.  Header bytes are checked by the caller so unrelated
+ * input reports skip the spinlock entirely.
+ */
+static void razer_dock_pro_update_nearby(struct razer_dock_pro_shared *shared, u8 *data)
+{
+    unsigned short pids[RAZER_DOCK_PRO_MAX_NEARBY] = {0};
+    unsigned long flags;
+    int slot = 0;
+    int offset;
+
+    for (offset = 4; offset + 1 < 16 && slot < RAZER_DOCK_PRO_MAX_NEARBY; offset += 2) {
+        unsigned short pid = ((unsigned short)data[offset] << 8) | data[offset + 1];
+        if (pid == 0)
+            break;
+        pids[slot++] = pid;
+    }
+
+    spin_lock_irqsave(&shared->nearby_lock, flags);
+    if (memcmp(shared->nearby_pids, pids, sizeof(pids)) != 0) {
+        memcpy(shared->nearby_pids, pids, sizeof(pids));
+    }
+    shared->nearby_jiffies = jiffies;
+    spin_unlock_irqrestore(&shared->nearby_lock, flags);
+}
+
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
     struct razer_accessory_device *device = hid_get_drvdata(hdev);
+
+    if (device->shared && size >= 16 && data[0] == 0x05 && data[1] == 0x37)
+        razer_dock_pro_update_nearby(device->shared, data);
 
     if(size == 16 && data[0] == 0x04) {
         input_report_key(device->input, KEY_PROG1, 0x01);

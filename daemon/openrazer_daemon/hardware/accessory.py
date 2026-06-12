@@ -3,6 +3,7 @@
 """
 Mug class
 """
+import os
 import re
 
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
@@ -103,9 +104,30 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
     HAS_MATRIX = True
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [1, 8]
-    METHODS = ['get_device_type_accessory', 'set_brightness', 'get_brightness', 'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect']
+    EVENT_FILE_REGEX = re.compile(r'.*(Razer_)?Mouse_Dock_Pro-if0(1|2)-event-kbd')
+    METHODS = [
+        'get_device_type_accessory', 'set_brightness', 'get_brightness',
+        'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_static_effect',
+        'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect',
+        'set_breath_single_effect', 'set_breath_dual_effect',
+        'set_mouse_dock_pro_pair', 'set_mouse_dock_pro_unpair',
+        'scan_for_nearby_mice', 'get_nearby_mice', 'pair_any_nearby_mouse',
+    ]
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6229/6229-1-en-v2.png"
+
+    def get_child_devices(self):
+        from openrazer_daemon.hardware.mouse import RazerDockedMouse
+        if self._is_mouse_connected():
+            return [(RazerDockedMouse, {'id_suffix': ':mouse'})]
+        return []
+
+    def _is_mouse_connected(self):
+        try:
+            with open(os.path.join(self._device_path, 'mouse_connected'), 'r') as f:
+                return f.read().strip() == '1'
+        except (OSError, ValueError):
+            return False
 
 
 class RazerNommoChroma(_RazerDeviceBrightnessSuspend):
