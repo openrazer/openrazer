@@ -37,6 +37,7 @@ class RazerDevice(DBusService):
     USB_PID: int
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = False
+    WIRELESS_PID: Optional[int] = None
     MATRIX_DIMS: Optional[list[int]] = None
     POLL_RATES: Optional[list[int]] = None
     DPI_MAX: Optional[int] = None

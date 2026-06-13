@@ -73,6 +73,7 @@ declare -A files_metadata=(
     ["macro_led_effect"]="rw;0"
     ["macro_led_state"]="rw;0"
     ["mouse_connected"]="r;1"
+    ["paired_pid"]="r;00ab"
     ["mouse_firmware"]="r;v1.0"
     ["mouse_matrix_brightness"]="rw;0"
     ["mouse_matrix_custom_frame"]="w;"

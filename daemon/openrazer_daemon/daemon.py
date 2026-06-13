@@ -249,7 +249,7 @@ class RazerDaemon(DBusService):
 
             child_id = device_id + ':mouse'
             child_present = child_id in self._razer_devices
-            connected = razer_device._is_mouse_connected()
+            connected = razer_device.is_mouse_connected()
 
             if connected == child_present:
                 self._dock_mouse_pending.pop(device_id, None)
@@ -265,31 +265,11 @@ class RazerDaemon(DBusService):
             self._dock_mouse_pending.pop(device_id, None)
             if connected:
                 self.logger.info("Mouse connected to dock %s", device_id)
-                self._add_dock_child_device(device_id, razer_device._device_path, razer_device)
+                self._add_child_devices(device_id, razer_device._device_path, len(self._razer_devices), razer_device)
+                self.device_added()
             else:
                 self.logger.info("Mouse disconnected from dock %s", device_id)
                 self._remove_dock_child_device(child_id)
-
-    def _add_dock_child_device(self, parent_id, sys_path, parent_device):
-        from openrazer_daemon.hardware.mouse import RazerDockedMouse
-
-        child_id = parent_id + ':mouse'
-        if child_id in self._razer_devices:
-            return
-
-        device_number = len(self._razer_devices)
-        self.logger.info('Adding dock child device.%d: %s', device_number, child_id)
-
-        child_device = RazerDockedMouse(
-            device_path=sys_path, device_number=device_number,
-            config=self._config, persistence=self._persistence,
-            testing=self._test_dir is not None,
-            additional_interfaces=None, additional_methods=[],
-            unknown_serial_counter=self._unknown_serial_counter)
-
-        child_serial = child_device.get_serial()
-        self._razer_devices.add(child_id, child_serial, child_device)
-        self.device_added()
 
     def _remove_dock_child_device(self, child_id):
         try:

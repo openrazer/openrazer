@@ -7,6 +7,48 @@ import re
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice
 
 
+class RazerMouseDocked(__RazerDevice):
+    """
+    Base class for mice accessed via the Razer Mouse Dock Pro.
+
+    The dock relays mouse commands over RF; the kernel driver exposes the
+    docked mouse's sysfs attributes prefixed with ``mouse_``.  This base
+    class applies that remap, disables udev matching (docked mice never
+    appear as independent USB devices), and sets USB_PID to the dock's own
+    PID so the daemon can share its sysfs path.
+
+    Concrete subclasses declare ``WIRELESS_PID`` (the mouse's wireless USB
+    PID, used for registry lookup) plus the device-specific ``DEVICE_NAME``,
+    ``METHODS``, ``MATRIX_DIMS``, ``POLL_RATES``, etc.
+    """
+
+    USB_VID = 0x1532
+    USB_PID = 0x00A4  # Dock Pro's USB PID; docked mice share its sysfs path
+    EVENT_FILE_REGEX = re.compile(r".*Razer_Mouse_Dock_Pro-event-mouse")
+
+    # Map logical sysfs filenames to the dock-prefixed names the driver exposes
+    _MOUSE_SYSFS_MAP = {
+        "device_serial": "mouse_serial",
+        "firmware_version": "mouse_firmware",
+        "matrix_brightness": "mouse_matrix_brightness",
+        "matrix_effect_wave": "mouse_matrix_effect_wave",
+        "matrix_effect_static": "mouse_matrix_effect_static",
+        "matrix_effect_spectrum": "mouse_matrix_effect_spectrum",
+        "matrix_effect_none": "mouse_matrix_effect_none",
+        "matrix_effect_breath": "mouse_matrix_effect_breath",
+        "matrix_effect_custom": "mouse_matrix_effect_custom",
+        "matrix_custom_frame": "mouse_matrix_custom_frame",
+    }
+
+    def get_driver_path(self, driver_filename):
+        driver_filename = self._MOUSE_SYSFS_MAP.get(driver_filename, driver_filename)
+        return super().get_driver_path(driver_filename)
+
+    @classmethod
+    def match(cls, device_id, dev_path):  # noqa: ARG003
+        return False
+
+
 class RazerViperMini(__RazerDevice):
     """
     Class for the Razer Viper Mini
@@ -1692,67 +1734,31 @@ class RazerBasiliskV3ProWired(__RazerDevice):
     DPI_MAX = 30000
 
 
-class RazerDockedMouse(__RazerDevice):
-    """
-    Class for a mouse connected via Razer Mouse Dock Pro
-    """
-    USB_VID = 0x1532
-    USB_PID = 0x00A4
-    DEVICE_NAME = "Razer Basilisk V3 Pro (Docked)"
-    HAS_MATRIX = True
-    MATRIX_DIMS = [1, 13]
-    DEVICE_IMAGE = "https://dl.razerzone.com/src2/6220/6220-4-en-v1.png"
-    DPI_MAX = 30000
-    POLL_RATES = [125, 250, 500, 1000, 2000, 4000, 8000]
-
-    _MOUSE_SYSFS_MAP = {
-        'device_serial': 'mouse_serial',
-        'firmware_version': 'mouse_firmware',
-        'matrix_brightness': 'mouse_matrix_brightness',
-        'matrix_effect_wave': 'mouse_matrix_effect_wave',
-        'matrix_effect_static': 'mouse_matrix_effect_static',
-        'matrix_effect_spectrum': 'mouse_matrix_effect_spectrum',
-        'matrix_effect_none': 'mouse_matrix_effect_none',
-        'matrix_effect_breath': 'mouse_matrix_effect_breath',
-        'matrix_effect_custom': 'mouse_matrix_effect_custom',
-        'matrix_custom_frame': 'mouse_matrix_custom_frame',
-    }
-
-    METHODS = [
-        'get_device_type_mouse',
-        'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
-        'get_poll_rate', 'set_poll_rate',
-        'get_brightness', 'set_brightness',
-        'get_battery', 'is_charging',
-        'get_scroll_mode', 'set_scroll_mode',
-        'get_scroll_acceleration', 'set_scroll_acceleration',
-        'get_scroll_smart_reel', 'set_scroll_smart_reel',
-        'get_idle_time', 'set_idle_time',
-        'get_low_battery_threshold', 'set_low_battery_threshold',
-        'set_custom_effect', 'set_key_row',
-        'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
-        'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
-        'get_logo_brightness', 'set_logo_brightness',
-        'get_scroll_brightness', 'set_scroll_brightness',
-        'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none',
-        'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none',
-    ]
-
-    def get_driver_path(self, driver_filename):
-        driver_filename = self._MOUSE_SYSFS_MAP.get(driver_filename, driver_filename)
-        return super().get_driver_path(driver_filename)
-
-    @classmethod
-    def match(cls, device_id, dev_path):
-        return False
-
-
 class RazerBasiliskV3ProWireless(RazerBasiliskV3ProWired):
     """
     Class for the Razer Basilisk V3 Pro (Wireless)
     """
 
     USB_PID = 0x00AB
+
+
+class RazerBasiliskV3ProDocked(RazerMouseDocked, RazerBasiliskV3ProWireless):
+    """
+    Razer Basilisk V3 Pro accessed via the Mouse Dock Pro.
+
+    ``WIRELESS_PID`` is the Basilisk V3 Pro's wireless USB PID; the daemon
+    uses it to look up this class when the dock reports that mouse as paired.
+    """
+
+    WIRELESS_PID = RazerBasiliskV3ProWireless.USB_PID
+    DEVICE_NAME = "Razer Basilisk V3 Pro (Docked)"
+
+    # TODO: Verify if the wired version also supports the same capabilities or if this is only for wireless/docked.
+    METHODS = RazerBasiliskV3ProWired.METHODS + [
+        'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+        'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
+        'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
+    ]
 
 
 class RazerBasiliskV3Pro35KWired(__RazerDevice):

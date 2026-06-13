@@ -36,7 +36,6 @@
 #define USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2 0x0F2B
 
 #include <linux/kref.h>
-#include <linux/list.h>
 #include <linux/spinlock.h>
 
 #define RAZER_ACCESSORY_WAIT_MIN_US 600
@@ -67,6 +66,14 @@ struct razer_dock_pro_shared {
     spinlock_t nearby_lock;      /* IRQ-safe: written from raw_event */
     unsigned short nearby_pids[RAZER_DOCK_PRO_MAX_NEARBY];  /* 0 = empty */
     unsigned long nearby_jiffies;
+
+    /*
+     * PID of the currently paired mouse, set at pair_step2 and cleared at
+     * unpair.  Used as a fallback by razer_attr_read_paired_pid when the
+     * 0xbf heartbeat response does not carry the PID (e.g. older firmware).
+     * Protected by nearby_lock.
+     */
+    unsigned short paired_pid;
 };
 
 struct razer_accessory_device {

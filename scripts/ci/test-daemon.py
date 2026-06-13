@@ -46,7 +46,7 @@ def test_sysfs_consistency(d):
     # Sysfs files that belong to a child device sharing the same PID.
     # The Mouse Dock Pro exposes dock and mouse passthrough sysfs under the
     # same USB device, but the dock (accessory) class does not claim mouse
-    # capabilities — those live on the RazerDockedMouse child device.
+    # capabilities — those live on the docked mouse child device (e.g. RazerBasiliskV3ProDocked).
     _mouse_passthrough_sysfs = {
         'charge_level', 'charge_low_threshold', 'charge_status',
         'device_idle_time', 'dpi', 'dpi_stages', 'poll_rate',

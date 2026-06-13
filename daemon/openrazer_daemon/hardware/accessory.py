@@ -117,12 +117,41 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6229/6229-1-en-v2.png"
 
     def get_child_devices(self):
-        from openrazer_daemon.hardware.mouse import RazerDockedMouse
-        if self._is_mouse_connected():
-            return [(RazerDockedMouse, {'id_suffix': ':mouse'})]
-        return []
+        if not self.is_mouse_connected():
+            return []
 
-    def _is_mouse_connected(self):
+        paired_pid = self._read_paired_pid()
+        if paired_pid is None:
+            self.logger.warning("Mouse connected to dock but paired PID unavailable")
+            return []
+
+        from openrazer_daemon.hardware import mouse as mouse_module
+
+        registry = {
+            cls.WIRELESS_PID: cls
+            for cls in vars(mouse_module).values()
+            if isinstance(cls, type) and hasattr(cls, "WIRELESS_PID")
+        }
+
+        docked_class = registry.get(paired_pid)
+        if docked_class is None:
+            self.logger.warning("No docked class for paired PID 0x%04X", paired_pid)
+            return []
+
+        return [(docked_class, {"id_suffix": ":mouse"})]
+
+    def _read_paired_pid(self):
+        """Return the USB PID of the currently paired mouse, or None if unavailable."""
+        try:
+            with open(os.path.join(self._device_path, "paired_pid"), "r") as f:
+                value = f.read().strip()
+                if not value or value == "0000":
+                    return None
+                return int(value, 16)
+        except (OSError, ValueError):
+            return None
+
+    def is_mouse_connected(self):
         try:
             with open(os.path.join(self._device_path, 'mouse_connected'), 'r') as f:
                 return f.read().strip() == '1'
