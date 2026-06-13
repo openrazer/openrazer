@@ -738,6 +738,19 @@ class RazerNaga2014(__RazerDevice):
     DPI_MAX = 8200
 
 
+class RazerNagaClassicEdition(RazerNaga2014):
+    """
+    Class for the Razer Naga Classic Edition
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_(Razer_)?Naga_Classic_Edition-if0(1|2)-event-kbd')
+
+    USB_PID = 0x0093
+    DRIVER_MODE = True
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
+
+    DEVICE_IMAGE = RazerNaga2014.DEVICE_IMAGE
+
+
 class RazerOrochi2011(__RazerDevice):
     """
     Class for the Razer Orochi 2011
