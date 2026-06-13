@@ -136,6 +136,7 @@ This will output something similar to this:
 | Razer Blade 14 (2021)                                         |  1532:0270  |
 | Razer BlackWidow V3 Mini HyperSpeed (Wireless)                |  1532:0271  |
 | Razer Blade 15 Advanced (Mid 2021)                            |  1532:0276  |
+| Razer Pro Type Ultra                                          |  1532:0277  |
 | Razer Blade 17 Pro (Mid 2021)                                 |  1532:0279  |
 | Razer Blade 15 Base (2022)                                    |  1432:027A  |
 | Razer Huntsman Mini Analog                                    |  1532:0282  |

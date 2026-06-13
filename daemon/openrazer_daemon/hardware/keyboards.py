@@ -1441,6 +1441,23 @@ class RazerDeathStalkerV2ProWired(_RippleKeyboard):
     DEVICE_IMAGE = "https://dl.razerzone.com/src/6118/6118-1-en-v1.png"
 
 
+class RazerProTypeUltra(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Pro Type Ultra
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Pro_Type_Ultra(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0277
+    METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_none_effect',
+               'set_breath_random_effect',
+               'get_brightness', 'set_brightness',
+               # Battery
+               'get_battery', 'is_charging']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/5765/5765-1-en-v1.png"
+
+
 class RazerDeathStalkerV2ProWireless(RazerDeathStalkerV2ProWired):
     """
     Class for the Razer DeathStalker V2 Pro (Wireless)
