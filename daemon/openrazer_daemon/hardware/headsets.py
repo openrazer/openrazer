@@ -236,3 +236,34 @@ class RazerKrakenKittyV2(__RazerDevice):
                'set_custom_kraken']
 
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/hcc/h6b/9631977570334/kraken-kitty-v2-quartz-500x500.png"
+
+
+class RazerBlackSharkV3(__RazerDevice):
+    """
+    Class for the Razer BlackShark V3
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Inc_BlackShark_V3_0+-event-if05')
+
+    USB_VID = 0x1532
+    USB_PID = 0x057A
+    METHODS = ['get_device_type_headset',
+               'get_mic_volume', 'set_mic_volume',
+               'get_wireless_power_save', 'set_wireless_power_save',
+               'get_ultra_low_latency', 'set_ultra_low_latency',
+               'get_headphone_eq', 'set_headphone_eq',
+               'get_thx_spatial_audio', 'set_thx_spatial_audio']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/blackshark-v3-500x500.png"
+
+    def _suspend_device(self):
+        self.suspend_args.clear()
+
+    def _resume_device(self):
+        pass
+
+
+class RazerBlackSharkV3Wired(RazerBlackSharkV3):
+    """
+    Class for the Razer BlackShark V3 (wired USB)
+    """
+    USB_PID = 0x0579

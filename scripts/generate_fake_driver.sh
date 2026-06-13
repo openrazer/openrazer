@@ -127,6 +127,18 @@ declare -A files_metadata=(
     ["channel5_led_brightness"]="rw;0"
     ["channel6_led_brightness"]="rw;0"
     ["version"]="r;1.0.0"
+    ["audio_function_button"]="w;"
+    ["audio_prompts"]="w;"
+    ["game_chat_balance"]="w;"
+    ["headphone_eq"]="rw;0 0 0 0 0 0 0 0 0 0"
+    ["in_call_audio_mix"]="w;"
+    ["mic_eq"]="w;"
+    ["mic_eq_preset"]="w;"
+    ["mic_volume"]="rw;100"
+    ["sidetone"]="w;"
+    ["thx_spatial_audio"]="rw;0"
+    ["ultra_low_latency"]="rw;0"
+    ["wireless_power_save"]="rw;15"
 )
 
 # USB PID of devices that use single-byte values for DPI
