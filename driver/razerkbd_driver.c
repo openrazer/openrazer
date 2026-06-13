@@ -12,6 +12,7 @@
 #include <linux/dmi.h>
 #include <linux/input-event-codes.h>
 #include <linux/version.h>
+#include <linux/delay.h>
 
 #include "usb_hid_keys.h"
 
@@ -291,6 +292,7 @@ static bool is_blade_laptop(struct razer_kbd_device *device)
     case USB_DEVICE_ID_RAZER_BLADE_14_2025:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_16_2025:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_BLADE_18_2024:
@@ -618,6 +620,7 @@ static int razer_set_device_mode(struct razer_kbd_device *device, unsigned char 
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
@@ -1634,6 +1637,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Blade 16 (2023)";
         break;
 
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
+        device_type = "Razer Blade 16 (2024)";
+        break;
+
     case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         device_type = "Razer Blade 16 (2025)";
         break;
@@ -2312,6 +2319,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_BLADE_14_2024:
     case USB_DEVICE_ID_RAZER_BLADE_14_2025:
@@ -2463,6 +2471,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_BLADE_14_2024:
     case USB_DEVICE_ID_RAZER_BLADE_14_2025:
@@ -2666,6 +2675,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_BLADE_14_2024:
     case USB_DEVICE_ID_RAZER_BLADE_14_2025:
@@ -2820,6 +2830,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_BLADE_14_2024:
     case USB_DEVICE_ID_RAZER_BLADE_14_2025:
@@ -2840,6 +2851,48 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
         return err;
 
     return count;
+}
+
+/**
+ * Send a payload, resending while the device reports it is busy
+ */
+static void razer_send_payload_busy_retry(struct razer_kbd_device *device, struct razer_report *request, struct razer_report *response)
+{
+    int attempt;
+
+    for (attempt = 0; attempt < RAZER_BUSY_RETRIES; attempt++) {
+        razer_send_payload(device, request, response);
+        if (response->status != RAZER_CMD_BUSY)
+            break;
+        usleep_range(900, 1100);
+    }
+}
+
+/**
+ * Set a static colour by filling the key matrix with a custom frame
+ */
+static void razer_blade_16_2024_set_static(struct razer_kbd_device *device, struct razer_rgb *color)
+{
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char row_data[RAZER_BLADE_16_2024_MATRIX_COLUMNS * 3] = {0};
+    unsigned char row, column;
+
+    for (column = 0; column < RAZER_BLADE_16_2024_MATRIX_COLUMNS; column++) {
+        row_data[column * 3] = color->r;
+        row_data[column * 3 + 1] = color->g;
+        row_data[column * 3 + 2] = color->b;
+    }
+
+    for (row = 0; row < RAZER_BLADE_16_2024_MATRIX_ROWS; row++) {
+        request = razer_chroma_standard_matrix_set_custom_frame(row, 0, RAZER_BLADE_16_2024_MATRIX_COLUMNS - 1, row_data);
+        request.transaction_id.id = 0xFF;
+        razer_send_payload_busy_retry(device, &request, &response);
+    }
+
+    request = razer_chroma_standard_matrix_effect_custom_frame(NOSTORE);
+    request.transaction_id.id = 0xFF;
+    razer_send_payload_busy_retry(device, &request, &response);
 }
 
 /**
@@ -2875,6 +2928,14 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         err = razer_send_payload(device, &request, &response);
         if (err)
             return err;
+        break;
+
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
+        if (count != 3) {
+            printk(KERN_WARNING "razerkbd: Static mode only accepts RGB (3byte)\n");
+            return -EINVAL;
+        }
+        razer_blade_16_2024_set_static(device, (struct razer_rgb *)&buf[0]);
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_OVERWATCH:
@@ -3223,6 +3284,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
 
     case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
     case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_16_2025:
     case USB_DEVICE_ID_RAZER_BLADE_14_2021:
         if(count == 7) {
@@ -3575,6 +3637,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_BLADE_14_2024:
     case USB_DEVICE_ID_RAZER_BLADE_14_2025:
@@ -3825,6 +3888,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_BLADE_14_2024:
     case USB_DEVICE_ID_RAZER_BLADE_14_2025:
@@ -4063,6 +4127,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_BLADE_14_2024:
     case USB_DEVICE_ID_RAZER_BLADE_14_2025:
@@ -4233,6 +4298,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2024:
     case USB_DEVICE_ID_RAZER_BLADE_18_2023:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
@@ -4483,6 +4549,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BLADE_14_2023:
         case USB_DEVICE_ID_RAZER_BLADE_15_2023:
         case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+        case USB_DEVICE_ID_RAZER_BLADE_16_2024:
         case USB_DEVICE_ID_RAZER_BLADE_18_2023:
         case USB_DEVICE_ID_RAZER_BLADE_14_2024:
         case USB_DEVICE_ID_RAZER_BLADE_14_2025:
@@ -5716,6 +5783,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         case USB_DEVICE_ID_RAZER_BLADE_14_2023:
         case USB_DEVICE_ID_RAZER_BLADE_15_2023:
         case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+        case USB_DEVICE_ID_RAZER_BLADE_16_2024:
         case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         case USB_DEVICE_ID_RAZER_BLADE_18_2023:
         case USB_DEVICE_ID_RAZER_BLADE_14_2024:
@@ -6263,6 +6331,7 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_BLADE_14_2023:
         case USB_DEVICE_ID_RAZER_BLADE_15_2023:
         case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+        case USB_DEVICE_ID_RAZER_BLADE_16_2024:
         case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         case USB_DEVICE_ID_RAZER_BLADE_18_2023:
         case USB_DEVICE_ID_RAZER_BLADE_14_2024:
@@ -6479,6 +6548,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_16_2023) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_16_2024) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_16_2025) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_18_2023) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO) },
