@@ -2468,7 +2468,7 @@ static ssize_t razer_attr_read_channel6_led_brightness(struct device *dev, struc
     return razer_attr_read_channel_led_brightness(ARGB_CH_6_LED, dev, attr, buf);
 }
 
-static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_dpi(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2493,7 +2493,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     return count;
 }
 
-static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_mouse_dpi(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2507,7 +2507,7 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
     return sprintf(buf, "%u:%u\n", dpi_x, dpi_y);
 }
 
-static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_dpi_stages(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2550,7 +2550,7 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
     return count;
 }
 
-static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_mouse_dpi_stages(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2562,7 +2562,7 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
     return razer_parse_dpi_stages(&response, buf, RAZER_ACCESSORY_MOUSE_MAX_DPI_STAGES);
 }
 
-static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_mouse_poll_rate(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2574,7 +2574,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     return sprintf(buf, "%d\n", razer_parse_poll_rate_hyperpolling(&response));
 }
 
-static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_poll_rate(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     unsigned short polling_rate = (unsigned short)simple_strtoul(buf, NULL, 10);
@@ -2587,7 +2587,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     return count;
 }
 
-static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_mouse_get_battery(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2599,7 +2599,7 @@ static ssize_t razer_attr_read_get_battery(struct device *dev, struct device_att
     return sprintf(buf, "%d\n", razer_parse_battery_level(&response));
 }
 
-static ssize_t razer_attr_read_is_charging(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_mouse_is_charging(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2611,7 +2611,7 @@ static ssize_t razer_attr_read_is_charging(struct device *dev, struct device_att
     return sprintf(buf, "%d\n", razer_parse_charging_status(&response));
 }
 
-static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_mouse_scroll_mode(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2623,7 +2623,7 @@ static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_att
     return sprintf(buf, "%d\n", razer_parse_scroll_arg(&response));
 }
 
-static ssize_t razer_attr_write_scroll_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_scroll_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2639,7 +2639,7 @@ static ssize_t razer_attr_write_scroll_mode(struct device *dev, struct device_at
     return count;
 }
 
-static ssize_t razer_attr_read_scroll_acceleration(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_mouse_scroll_acceleration(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2651,7 +2651,7 @@ static ssize_t razer_attr_read_scroll_acceleration(struct device *dev, struct de
     return sprintf(buf, "%d\n", razer_parse_scroll_arg(&response));
 }
 
-static ssize_t razer_attr_write_scroll_acceleration(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_scroll_acceleration(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2667,7 +2667,7 @@ static ssize_t razer_attr_write_scroll_acceleration(struct device *dev, struct d
     return count;
 }
 
-static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_mouse_scroll_smart_reel(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2679,7 +2679,7 @@ static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct devi
     return sprintf(buf, "%d\n", razer_parse_scroll_arg(&response));
 }
 
-static ssize_t razer_attr_write_scroll_smart_reel(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_scroll_smart_reel(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2695,7 +2695,7 @@ static ssize_t razer_attr_write_scroll_smart_reel(struct device *dev, struct dev
     return count;
 }
 
-static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_mouse_device_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2707,7 +2707,7 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     return sprintf(buf, "%u\n", razer_parse_idle_time(&response));
 }
 
-static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_device_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     unsigned short idle_time = (unsigned short)simple_strtoul(buf, NULL, 10);
@@ -2720,7 +2720,7 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
     return count;
 }
 
-static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_mouse_charge_low_threshold(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
@@ -2732,7 +2732,7 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
     return sprintf(buf, "%d\n", razer_parse_low_battery_threshold(&response));
 }
 
-static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_charge_low_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     unsigned char threshold = (unsigned char)simple_strtoul(buf, NULL, 10);
@@ -2770,22 +2770,22 @@ static ssize_t razer_attr_write_mouse_led_brightness(struct device *dev, struct 
     return count;
 }
 
-static ssize_t razer_attr_read_logo_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_mouse_logo_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
 {
     return razer_attr_read_mouse_led_brightness(dev, attr, buf, LOGO_LED);
 }
 
-static ssize_t razer_attr_write_logo_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_logo_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_led_brightness(dev, attr, buf, count, LOGO_LED);
 }
 
-static ssize_t razer_attr_read_scroll_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_mouse_scroll_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
 {
     return razer_attr_read_mouse_led_brightness(dev, attr, buf, SCROLL_WHEEL_LED);
 }
 
-static ssize_t razer_attr_write_scroll_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_scroll_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_led_brightness(dev, attr, buf, count, SCROLL_WHEEL_LED);
 }
@@ -2866,52 +2866,52 @@ static ssize_t razer_attr_write_mouse_matrix_effect_breath(struct device *dev, s
     return count;
 }
 
-static ssize_t razer_attr_write_logo_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_logo_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_matrix_effect_wave(dev, attr, buf, count, LOGO_LED);
 }
 
-static ssize_t razer_attr_write_logo_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_logo_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_matrix_effect_static(dev, attr, buf, count, LOGO_LED);
 }
 
-static ssize_t razer_attr_write_logo_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_logo_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_matrix_effect_spectrum(dev, attr, buf, count, LOGO_LED);
 }
 
-static ssize_t razer_attr_write_logo_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_logo_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_matrix_effect_none(dev, attr, buf, count, LOGO_LED);
 }
 
-static ssize_t razer_attr_write_logo_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_logo_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_matrix_effect_breath(dev, attr, buf, count, LOGO_LED);
 }
 
-static ssize_t razer_attr_write_scroll_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_scroll_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_matrix_effect_wave(dev, attr, buf, count, SCROLL_WHEEL_LED);
 }
 
-static ssize_t razer_attr_write_scroll_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_scroll_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_matrix_effect_static(dev, attr, buf, count, SCROLL_WHEEL_LED);
 }
 
-static ssize_t razer_attr_write_scroll_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_scroll_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_matrix_effect_spectrum(dev, attr, buf, count, SCROLL_WHEEL_LED);
 }
 
-static ssize_t razer_attr_write_scroll_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_scroll_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_matrix_effect_none(dev, attr, buf, count, SCROLL_WHEEL_LED);
 }
 
-static ssize_t razer_attr_write_scroll_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_mouse_scroll_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_matrix_effect_breath(dev, attr, buf, count, SCROLL_WHEEL_LED);
 }
@@ -3363,28 +3363,28 @@ static DEVICE_ATTR(channel6_led_brightness,                 0660, razer_attr_rea
 
 static DEVICE_ATTR(is_mug_present,                          0440, razer_attr_read_is_mug_present,                 NULL);
 
-static DEVICE_ATTR(poll_rate,                               0660, razer_attr_read_poll_rate,                      razer_attr_write_poll_rate);
-static DEVICE_ATTR(dpi,                                     0660, razer_attr_read_dpi,                            razer_attr_write_dpi);
-static DEVICE_ATTR(dpi_stages,                              0660, razer_attr_read_dpi_stages,                     razer_attr_write_dpi_stages);
-static DEVICE_ATTR(charge_level,                            0440, razer_attr_read_get_battery,                    NULL);
-static DEVICE_ATTR(charge_status,                           0440, razer_attr_read_is_charging,                    NULL);
-static DEVICE_ATTR(scroll_mode,                             0660, razer_attr_read_scroll_mode,                    razer_attr_write_scroll_mode);
-static DEVICE_ATTR(scroll_acceleration,                     0660, razer_attr_read_scroll_acceleration,            razer_attr_write_scroll_acceleration);
-static DEVICE_ATTR(scroll_smart_reel,                       0660, razer_attr_read_scroll_smart_reel,              razer_attr_write_scroll_smart_reel);
-static DEVICE_ATTR(device_idle_time,                        0660, razer_attr_read_device_idle_time,               razer_attr_write_device_idle_time);
-static DEVICE_ATTR(charge_low_threshold,                    0660, razer_attr_read_charge_low_threshold,           razer_attr_write_charge_low_threshold);
-static DEVICE_ATTR(logo_led_brightness,                     0660, razer_attr_read_logo_led_brightness,            razer_attr_write_logo_led_brightness);
-static DEVICE_ATTR(scroll_led_brightness,                   0660, razer_attr_read_scroll_led_brightness,          razer_attr_write_scroll_led_brightness);
-static DEVICE_ATTR(logo_matrix_effect_wave,                 0220, NULL,                                           razer_attr_write_logo_matrix_effect_wave);
-static DEVICE_ATTR(logo_matrix_effect_static,               0220, NULL,                                           razer_attr_write_logo_matrix_effect_static);
-static DEVICE_ATTR(logo_matrix_effect_spectrum,             0220, NULL,                                           razer_attr_write_logo_matrix_effect_spectrum);
-static DEVICE_ATTR(logo_matrix_effect_none,                 0220, NULL,                                           razer_attr_write_logo_matrix_effect_none);
-static DEVICE_ATTR(logo_matrix_effect_breath,               0220, NULL,                                           razer_attr_write_logo_matrix_effect_breath);
-static DEVICE_ATTR(scroll_matrix_effect_wave,               0220, NULL,                                           razer_attr_write_scroll_matrix_effect_wave);
-static DEVICE_ATTR(scroll_matrix_effect_static,             0220, NULL,                                           razer_attr_write_scroll_matrix_effect_static);
-static DEVICE_ATTR(scroll_matrix_effect_spectrum,           0220, NULL,                                           razer_attr_write_scroll_matrix_effect_spectrum);
-static DEVICE_ATTR(scroll_matrix_effect_none,               0220, NULL,                                           razer_attr_write_scroll_matrix_effect_none);
-static DEVICE_ATTR(scroll_matrix_effect_breath,             0220, NULL,                                           razer_attr_write_scroll_matrix_effect_breath);
+static DEVICE_ATTR(poll_rate,                               0660, razer_attr_read_mouse_poll_rate,                      razer_attr_write_mouse_poll_rate);
+static DEVICE_ATTR(dpi,                                     0660, razer_attr_read_mouse_dpi,                            razer_attr_write_mouse_dpi);
+static DEVICE_ATTR(dpi_stages,                              0660, razer_attr_read_mouse_dpi_stages,                     razer_attr_write_mouse_dpi_stages);
+static DEVICE_ATTR(charge_level,                            0440, razer_attr_read_mouse_get_battery,                    NULL);
+static DEVICE_ATTR(charge_status,                           0440, razer_attr_read_mouse_is_charging,                    NULL);
+static DEVICE_ATTR(mouse_scroll_mode,                       0660, razer_attr_read_mouse_scroll_mode,                    razer_attr_write_mouse_scroll_mode);
+static DEVICE_ATTR(mouse_scroll_acceleration,               0660, razer_attr_read_mouse_scroll_acceleration,            razer_attr_write_mouse_scroll_acceleration);
+static DEVICE_ATTR(mouse_scroll_smart_reel,                 0660, razer_attr_read_mouse_scroll_smart_reel,              razer_attr_write_mouse_scroll_smart_reel);
+static DEVICE_ATTR(device_idle_time,                        0660, razer_attr_read_mouse_device_idle_time,               razer_attr_write_mouse_device_idle_time);
+static DEVICE_ATTR(charge_low_threshold,                    0660, razer_attr_read_mouse_charge_low_threshold,           razer_attr_write_mouse_charge_low_threshold);
+static DEVICE_ATTR(mouse_logo_led_brightness,               0660, razer_attr_read_mouse_logo_led_brightness,            razer_attr_write_mouse_logo_led_brightness);
+static DEVICE_ATTR(mouse_scroll_led_brightness,             0660, razer_attr_read_mouse_scroll_led_brightness,          razer_attr_write_mouse_scroll_led_brightness);
+static DEVICE_ATTR(mouse_logo_matrix_effect_wave,           0220, NULL,                                           razer_attr_write_mouse_logo_matrix_effect_wave);
+static DEVICE_ATTR(mouse_logo_matrix_effect_static,         0220, NULL,                                           razer_attr_write_mouse_logo_matrix_effect_static);
+static DEVICE_ATTR(mouse_logo_matrix_effect_spectrum,       0220, NULL,                                           razer_attr_write_mouse_logo_matrix_effect_spectrum);
+static DEVICE_ATTR(mouse_logo_matrix_effect_none,           0220, NULL,                                           razer_attr_write_mouse_logo_matrix_effect_none);
+static DEVICE_ATTR(mouse_logo_matrix_effect_breath,         0220, NULL,                                           razer_attr_write_mouse_logo_matrix_effect_breath);
+static DEVICE_ATTR(mouse_scroll_matrix_effect_wave,         0220, NULL,                                           razer_attr_write_mouse_scroll_matrix_effect_wave);
+static DEVICE_ATTR(mouse_scroll_matrix_effect_static,       0220, NULL,                                           razer_attr_write_mouse_scroll_matrix_effect_static);
+static DEVICE_ATTR(mouse_scroll_matrix_effect_spectrum,     0220, NULL,                                           razer_attr_write_mouse_scroll_matrix_effect_spectrum);
+static DEVICE_ATTR(mouse_scroll_matrix_effect_none,         0220, NULL,                                           razer_attr_write_mouse_scroll_matrix_effect_none);
+static DEVICE_ATTR(mouse_scroll_matrix_effect_breath,       0220, NULL,                                           razer_attr_write_mouse_scroll_matrix_effect_breath);
 
 static DEVICE_ATTR(mouse_serial,                            0440, razer_attr_read_mouse_serial,                  NULL);
 static DEVICE_ATTR(mouse_connected,                         0440, razer_attr_read_mouse_connected,               NULL);
@@ -3748,23 +3748,23 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_mode);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_acceleration);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_smart_reel);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_scroll_mode);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_scroll_acceleration);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_scroll_smart_reel);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_logo_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_scroll_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_logo_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_logo_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_logo_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_logo_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_logo_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_scroll_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_scroll_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_scroll_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_scroll_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_scroll_matrix_effect_breath);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_serial);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_connected);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_paired_pid);
@@ -4038,23 +4038,23 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
             device_remove_file(&hdev->dev, &dev_attr_charge_level);
             device_remove_file(&hdev->dev, &dev_attr_charge_status);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_mode);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_acceleration);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_smart_reel);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_scroll_mode);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_scroll_acceleration);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_scroll_smart_reel);
             device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
             device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
-            device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
-            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
-            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
-            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
-            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
-            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
-            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_logo_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_scroll_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_logo_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_logo_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_logo_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_logo_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_logo_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_scroll_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_scroll_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_scroll_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_scroll_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_scroll_matrix_effect_breath);
             device_remove_file(&hdev->dev, &dev_attr_mouse_serial);
             device_remove_file(&hdev->dev, &dev_attr_mouse_connected);
             device_remove_file(&hdev->dev, &dev_attr_paired_pid);

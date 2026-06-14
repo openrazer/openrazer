@@ -31,7 +31,9 @@ class RazerMouseDocked(__RazerDevice):
     # concrete subclass.
     WIRELESS_PID: int
 
-    # Map logical sysfs filenames to the dock-prefixed names the driver exposes
+    # Map logical sysfs filenames to the dock-prefixed names the driver exposes.
+    # All mouse relay attributes use the mouse_ prefix so it is clear they are
+    # passed through to the paired mouse rather than being native dock functions.
     _MOUSE_SYSFS_MAP = {
         "device_serial": "mouse_serial",
         "firmware_version": "mouse_firmware",
@@ -43,6 +45,21 @@ class RazerMouseDocked(__RazerDevice):
         "matrix_effect_breath": "mouse_matrix_effect_breath",
         "matrix_effect_custom": "mouse_matrix_effect_custom",
         "matrix_custom_frame": "mouse_matrix_custom_frame",
+        "logo_led_brightness": "mouse_logo_led_brightness",
+        "scroll_led_brightness": "mouse_scroll_led_brightness",
+        "logo_matrix_effect_wave": "mouse_logo_matrix_effect_wave",
+        "logo_matrix_effect_static": "mouse_logo_matrix_effect_static",
+        "logo_matrix_effect_spectrum": "mouse_logo_matrix_effect_spectrum",
+        "logo_matrix_effect_none": "mouse_logo_matrix_effect_none",
+        "logo_matrix_effect_breath": "mouse_logo_matrix_effect_breath",
+        "scroll_matrix_effect_wave": "mouse_scroll_matrix_effect_wave",
+        "scroll_matrix_effect_static": "mouse_scroll_matrix_effect_static",
+        "scroll_matrix_effect_spectrum": "mouse_scroll_matrix_effect_spectrum",
+        "scroll_matrix_effect_none": "mouse_scroll_matrix_effect_none",
+        "scroll_matrix_effect_breath": "mouse_scroll_matrix_effect_breath",
+        "scroll_mode": "mouse_scroll_mode",
+        "scroll_acceleration": "mouse_scroll_acceleration",
+        "scroll_smart_reel": "mouse_scroll_smart_reel",
     }
 
     def get_driver_path(self, driver_filename):
