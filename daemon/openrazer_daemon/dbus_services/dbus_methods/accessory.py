@@ -81,6 +81,12 @@ def pair_any_nearby_mouse(self):
     kernel cache for up to ~12 s before giving up.  Already-active mice show
     up in the cache immediately and we return right away.
 
+    NOTE: This method blocks the daemon's DBus event loop for up to 12 s.
+    It exists only as a convenience shim until a GUI client implements proper
+    pairing using the lower-level scanForNearbyMice / getNearbyMice /
+    setMouseDockProPair primitives on the client side.  Once that exists,
+    this method should be removed.
+
     :return: PID of the mouse that was paired, or "" if none were in range
     :rtype: str
     """
