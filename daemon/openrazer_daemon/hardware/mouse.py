@@ -1085,6 +1085,15 @@ class RazerNagaV2ProWireless(RazerNagaV2ProWired):
     METHODS = RazerNagaV2ProWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
 
+class RazerNagaV2ProDocked(RazerMouseDocked, RazerNagaV2ProWireless):
+    """
+    Class for the Razer Naga V2 Pro accessed via the Mouse Dock Pro.
+    """
+
+    WIRELESS_PID = RazerNagaV2ProWireless.USB_PID
+    DEVICE_NAME = "Razer Naga V2 Pro (Docked)"
+
+
 class RazerDeathAdder1800(__RazerDevice):
     """
     Class for the Razer DeathAdder 1800
