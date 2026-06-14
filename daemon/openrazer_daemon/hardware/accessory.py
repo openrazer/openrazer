@@ -3,7 +3,6 @@
 """
 Mug class
 """
-import os
 import re
 
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
@@ -116,6 +115,19 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6229/6229-1-en-v2.png"
 
+    _wireless_pid_registry = None
+
+    @classmethod
+    def _get_wireless_pid_registry(cls):
+        if cls._wireless_pid_registry is None:
+            from openrazer_daemon.hardware import get_device_classes
+            cls._wireless_pid_registry = {
+                c.WIRELESS_PID: c
+                for c in get_device_classes()
+                if c.WIRELESS_PID is not None
+            }
+        return cls._wireless_pid_registry
+
     def get_child_devices(self):
         if not self.is_mouse_connected():
             return []
@@ -125,14 +137,7 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
             self.logger.warning("Mouse connected to dock but paired PID unavailable")
             return []
 
-        from openrazer_daemon.hardware import mouse as mouse_module
-
-        registry = {
-            cls.WIRELESS_PID: cls
-            for cls in vars(mouse_module).values()
-            if isinstance(cls, type) and hasattr(cls, "WIRELESS_PID")
-        }
-
+        registry = self._get_wireless_pid_registry()
         docked_class = registry.get(paired_pid)
         if docked_class is None:
             self.logger.warning("No docked class for paired PID 0x%04X", paired_pid)
@@ -143,7 +148,7 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
     def _read_paired_pid(self):
         """Return the USB PID of the currently paired mouse, or None if unavailable."""
         try:
-            with open(os.path.join(self._device_path, "paired_pid"), "r") as f:
+            with open(self.get_driver_path("paired_pid")) as f:
                 value = f.read().strip()
                 if not value or value == "0000":
                     return None
@@ -153,7 +158,7 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
 
     def is_mouse_connected(self):
         try:
-            with open(os.path.join(self._device_path, 'mouse_connected'), 'r') as f:
+            with open(self.get_driver_path("mouse_connected")) as f:
                 return f.read().strip() == '1'
         except (OSError, ValueError):
             return False

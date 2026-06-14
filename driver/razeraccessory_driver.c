@@ -2997,12 +2997,12 @@ static ssize_t razer_attr_read_paired_pid(struct device *dev, struct device_attr
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned short pid;
+    unsigned short pid = 0;
     unsigned long flags;
     int err;
 
     if (atomic_read(&device->pairing_busy))
-        return sprintf(buf, "0000\n");
+        goto out;
 
     /*
      * Re-issue the 0xbf heartbeat used by mouse_connected.  If the firmware
@@ -3021,22 +3021,18 @@ static ssize_t razer_attr_read_paired_pid(struct device *dev, struct device_attr
     request.transaction_id.id = 0x3F;
     err = razer_send_payload(device, &request, &response);
 
-    if (!err && response.status == RAZER_CMD_SUCCESSFUL && response.arguments[1] == 1) {
+    if (!err && response.status == RAZER_CMD_SUCCESSFUL && response.arguments[1] == 1)
         pid = ((unsigned short)response.arguments[2] << 8) | response.arguments[3];
-        if (pid != 0)
-            return sprintf(buf, "%04x\n", pid);
-    }
 
     /* Heartbeat path unavailable; use the at-pair-time cache */
-    if (device->shared) {
+    if (!pid && device->shared) {
         spin_lock_irqsave(&device->shared->nearby_lock, flags);
         pid = device->shared->paired_pid;
         spin_unlock_irqrestore(&device->shared->nearby_lock, flags);
-        if (pid != 0)
-            return sprintf(buf, "%04x\n", pid);
     }
 
-    return sprintf(buf, "0000\n");
+out:
+    return sprintf(buf, "%04x\n", pid);
 }
 
 static ssize_t razer_attr_read_mouse_firmware(struct device *dev, struct device_attribute *attr, char *buf)
@@ -3154,6 +3150,16 @@ static ssize_t razer_attr_write_mouse_matrix_custom_frame(struct device *dev, st
     return count;
 }
 
+static void razer_set_shared_paired_pid(struct razer_accessory_device *device, unsigned short pid)
+{
+    unsigned long flags;
+    if (!device->shared)
+        return;
+    spin_lock_irqsave(&device->shared->nearby_lock, flags);
+    device->shared->paired_pid = pid;
+    spin_unlock_irqrestore(&device->shared->nearby_lock, flags);
+}
+
 /**
  * Write device file "pair"
  *
@@ -3225,12 +3231,8 @@ static ssize_t razer_attr_write_mouse_dock_pro_pair(struct device *dev, struct d
 
     /* Cache the PID so paired_pid can return it even before a reboot flushes
      * the heartbeat path (and as a fallback if the heartbeat carries no PID). */
-    if (device->shared && (unsigned short)pid != 0) {
-        unsigned long flags;
-        spin_lock_irqsave(&device->shared->nearby_lock, flags);
-        device->shared->paired_pid = (unsigned short)pid;
-        spin_unlock_irqrestore(&device->shared->nearby_lock, flags);
-    }
+    if ((unsigned short)pid != 0)
+        razer_set_shared_paired_pid(device, (unsigned short)pid);
 
     atomic_set(&device->pairing_busy, 0);
     return err ? err : count;
@@ -3255,12 +3257,7 @@ static ssize_t razer_attr_write_mouse_dock_pro_unpair(struct device *dev, struct
     request.transaction_id.id = 0x3F;
     err = razer_send_payload(device, &request, &response);
 
-    if (device->shared) {
-        unsigned long flags;
-        spin_lock_irqsave(&device->shared->nearby_lock, flags);
-        device->shared->paired_pid = 0;
-        spin_unlock_irqrestore(&device->shared->nearby_lock, flags);
-    }
+    razer_set_shared_paired_pid(device, 0);
 
     atomic_set(&device->pairing_busy, 0);
     return err ? err : count;
