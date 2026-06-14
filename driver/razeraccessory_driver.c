@@ -2937,6 +2937,7 @@ static ssize_t razer_attr_read_mouse_connected(struct device *dev, struct device
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     if (atomic_read(&device->pairing_busy))
         return sprintf(buf, "0\n");
@@ -2949,7 +2950,9 @@ static ssize_t razer_attr_read_mouse_connected(struct device *dev, struct device
      */
     request = get_razer_report(0x00, 0xbf, 0x50);
     request.transaction_id.id = 0x3F;
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return sprintf(buf, "0\n");
 
     if (response.status != RAZER_CMD_SUCCESSFUL)
         return sprintf(buf, "0\n");
@@ -3101,6 +3104,7 @@ static ssize_t razer_attr_write_mouse_dock_pro_pair(struct device *dev, struct d
     struct razer_report request = {0};
     struct razer_report response = {0};
     int i;
+    int err;
 
     atomic_set(&device->pairing_busy, 1);
 
@@ -3112,15 +3116,27 @@ static ssize_t razer_attr_write_mouse_dock_pro_pair(struct device *dev, struct d
      */
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(0x01);
     request.transaction_id.id = 0x1F;
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err) {
+        atomic_set(&device->pairing_busy, 0);
+        return err;
+    }
 
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(0x01);
     request.transaction_id.id = 0x1F;
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err) {
+        atomic_set(&device->pairing_busy, 0);
+        return err;
+    }
 
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step2(pid);
     request.transaction_id.id = 0x1F;
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err) {
+        atomic_set(&device->pairing_busy, 0);
+        return err;
+    }
 
     /*
      * Keep the dock in RF scan mode with periodic 0x86 keepalives (same
@@ -3136,17 +3152,17 @@ static ssize_t razer_attr_write_mouse_dock_pro_pair(struct device *dev, struct d
             break;
         request = get_razer_report(0x00, 0x86, 0x03);
         request.transaction_id.id = 0xFF;
-        razer_send_payload(device, &request, &response);
-        if (response.status == RAZER_CMD_SUCCESSFUL)
+        err = razer_send_payload(device, &request, &response);
+        if (!err && response.status == RAZER_CMD_SUCCESSFUL)
             break;
     }
 
     request = get_razer_report(0x00, 0xb9, 0x01);
     request.transaction_id.id = 0x1F;
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
 
     atomic_set(&device->pairing_busy, 0);
-    return count;
+    return err ? err : count;
 }
 
 /**
@@ -3160,15 +3176,16 @@ static ssize_t razer_attr_write_mouse_dock_pro_unpair(struct device *dev, struct
     unsigned int pid = (unsigned int)simple_strtoul(buf, NULL, 16);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     atomic_set(&device->pairing_busy, 1);
 
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(pid);
     request.transaction_id.id = 0x3F;
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
 
     atomic_set(&device->pairing_busy, 0);
-    return count;
+    return err ? err : count;
 }
 
 /*
