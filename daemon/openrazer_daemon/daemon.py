@@ -605,6 +605,7 @@ class RazerDaemon(DBusService):
                                        unknown_serial_counter=self._unknown_serial_counter)
 
             self._razer_devices.add(child_sys_name, child_device.get_serial(), child_device)
+            self._razer_devices[sys_name].child_ids.append(child_sys_name)
             device_number += 1
 
         return device_number
@@ -666,8 +667,9 @@ class RazerDaemon(DBusService):
         try:
             device = self._razer_devices[device_id]
             devices_to_remove = [device]
-            devices_to_remove.extend(child for _, child in list(self._razer_devices.id_items())
-                                     if child.device_id.startswith(device_id + ':'))
+            devices_to_remove.extend(self._razer_devices[child_id]
+                                     for child_id in device.child_ids
+                                     if child_id in self._razer_devices)
 
             for device in devices_to_remove:
                 self._teardown_device(device)

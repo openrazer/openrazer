@@ -12,12 +12,17 @@ class Device(object):
 
     def __init__(self, device_id, device_serial, device_dbus_object):
         self._parent = None
+        self._child_ids = []
 
         self._id = device_id
         self._serial = device_serial
         self._dbus = device_dbus_object
         # Register as parent
         self._dbus.register_parent(self)
+
+    @property
+    def child_ids(self):
+        return self._child_ids
 
     @property
     def device_id(self):
