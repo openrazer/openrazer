@@ -2983,13 +2983,10 @@ static ssize_t razer_attr_read_mouse_connected(struct device *dev, struct device
     request = get_razer_report(0x00, 0xbf, 0x50);
     request.transaction_id.id = 0x3F;
     err = razer_send_payload(device, &request, &response);
-    if (err)
+    if (err || response.status != RAZER_CMD_SUCCESSFUL)
         return sprintf(buf, "0\n");
 
-    if (response.status != RAZER_CMD_SUCCESSFUL)
-        return sprintf(buf, "0\n");
-
-    return sprintf(buf, "%d\n", response.arguments[1] == 1 ? 1 : 0);
+    return sprintf(buf, "%d\n", response.arguments[1] == 1);
 }
 
 static ssize_t razer_attr_read_paired_pid(struct device *dev, struct device_attribute *attr, char *buf)
@@ -4119,9 +4116,7 @@ static void razer_dock_pro_update_nearby(struct razer_dock_pro_shared *shared, u
     }
 
     spin_lock_irqsave(&shared->nearby_lock, flags);
-    if (memcmp(shared->nearby_pids, pids, sizeof(pids)) != 0) {
-        memcpy(shared->nearby_pids, pids, sizeof(pids));
-    }
+    memcpy(shared->nearby_pids, pids, sizeof(pids));
     shared->nearby_jiffies = jiffies;
     spin_unlock_irqrestore(&shared->nearby_lock, flags);
 }
