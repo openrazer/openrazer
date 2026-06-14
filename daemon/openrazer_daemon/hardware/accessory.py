@@ -124,7 +124,7 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
             cls._wireless_pid_registry = {
                 c.WIRELESS_PID: c
                 for c in get_device_classes()
-                if c.WIRELESS_PID is not None
+                if getattr(c, 'WIRELESS_PID', None) is not None
             }
         return cls._wireless_pid_registry
 

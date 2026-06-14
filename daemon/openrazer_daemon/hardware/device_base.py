@@ -37,17 +37,19 @@ class RazerDevice(DBusService):
     USB_PID: int
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = False
-    WIRELESS_PID: Optional[int] = None
     MATRIX_DIMS: Optional[list[int]] = None
     POLL_RATES: Optional[list[int]] = None
     DPI_MAX: Optional[int] = None
     DRIVER_MODE = False
-    SERIAL_SUFFIX = ''
 
     WAVE_DIRS = (1, 2)
 
     ZONES = ('backlight', 'logo', 'scroll', 'left', 'right', 'charging', 'fast_charging', 'fully_charged', 'channel1', 'channel2', 'channel3', 'channel4', 'channel5', 'channel6')
 
+    # Override DEVICE_NAME when the device cannot supply its own name via the
+    # device_type sysfs node (e.g. logical child devices that share a parent's
+    # sysfs path).  get_device_name() returns this string instead of reading
+    # device_type from the driver.
     DEVICE_NAME: Optional[str] = None
     DEVICE_IMAGE: Optional[str] = None
 
@@ -1020,7 +1022,7 @@ class RazerDevice(DBusService):
                 self._unknown_serial_counter[(vid, pid)] = idx + 1
                 serial = "UNKNOWN_{0:04X}{1:04X}_{2:04d}".format(vid, pid, idx)
 
-            self._serial = serial.replace(' ', '_') + self.SERIAL_SUFFIX
+            self._serial = serial.replace(' ', '_')
 
         return self._serial
 

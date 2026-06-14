@@ -26,6 +26,11 @@ class RazerMouseDocked(__RazerDevice):
     USB_PID = 0x00A4  # Dock Pro's USB PID; docked mice share its sysfs path
     EVENT_FILE_REGEX = re.compile(r".*Razer_Mouse_Dock_Pro-event-mouse")
 
+    # Wireless USB PID of the paired mouse; used by the daemon's PID registry
+    # to look up which concrete subclass to instantiate.  Must be set by every
+    # concrete subclass.
+    WIRELESS_PID: int
+
     # Map logical sysfs filenames to the dock-prefixed names the driver exposes
     _MOUSE_SYSFS_MAP = {
         "device_serial": "mouse_serial",
