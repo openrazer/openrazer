@@ -26,6 +26,7 @@ import threading
 
 import openrazer_daemon.hardware
 from openrazer_daemon.dbus_services.service import DBusService
+from openrazer_daemon.hardware.accessory import RazerMouseDockPro
 from openrazer_daemon.device import DeviceCollection
 from openrazer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 from openrazer_daemon.misc.autosave_persistence import PersistenceAutoSave
@@ -240,8 +241,6 @@ class RazerDaemon(DBusService):
             time.sleep(5)
 
     def _check_dock_mouse_state(self):
-        from openrazer_daemon.hardware.accessory import RazerMouseDockPro
-
         for device_id, device_wrapper in list(self._razer_devices.id_items()):
             razer_device = device_wrapper.dbus
             if not isinstance(razer_device, RazerMouseDockPro):
