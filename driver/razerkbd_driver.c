@@ -37,6 +37,21 @@ MODULE_LICENSE(DRIVER_LICENSE);
 #define RAZER_BRIGHTNESS_DOWN KEY_MACRO28
 #define RAZER_BRIGHTNESS_UP KEY_MACRO27
 
+/*
+ * Whether hid_report_raw_event() takes 6 parameters compared to the original 5 parameters.
+ * See "HID: pass the buffer size to hid_report_raw_event"
+ */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 1, 0) || \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 10) && LINUX_VERSION_CODE < KERNEL_VERSION(7, 1, 0)) || \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 18, 33) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 19, 0)) || \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 93) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 13, 0)) || \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 143) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 7, 0)) || \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 176) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)) || \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 210) && LINUX_VERSION_CODE < KERNEL_VERSION(5, 16, 0)) || \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 259) && LINUX_VERSION_CODE < KERNEL_VERSION(5, 11, 0))
+#define LINUX_HID_REPORT_RAW_EVENT_WITH_BUFFER_SIZE
+#endif
+
 struct razer_key_translation {
     u16 from;
     u16 to;
@@ -5120,9 +5135,7 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_us
 
                             // report key down
                             xdata[1] = cur_value;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 1, 0) || \
-        (LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 10) && LINUX_VERSION_CODE < KERNEL_VERSION(7, 1, 0)) || \
-        (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 18, 33) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 19, 0))
+#ifdef LINUX_HID_REPORT_RAW_EVENT_WITH_BUFFER_SIZE
                             hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), sizeof(xdata), 0);
 #else
                             hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), 0);
@@ -5130,9 +5143,7 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_us
 
                             // report key up
                             xdata[1] = 0x00;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 1, 0) || \
-        (LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 10) && LINUX_VERSION_CODE < KERNEL_VERSION(7, 1, 0)) || \
-        (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 18, 33) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 19, 0))
+#ifdef LINUX_HID_REPORT_RAW_EVENT_WITH_BUFFER_SIZE
                             hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), sizeof(xdata), 0);
 #else
                             hid_report_raw_event(hdev, HID_INPUT_REPORT, xdata, sizeof(xdata), 0);
