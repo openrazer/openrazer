@@ -6065,6 +6065,33 @@ static int search(u8 *array, u8 value, unsigned n)
     return 0;
 }
 
+static void process_mouse_button_edges(struct razer_mouse_device *rdev, u8 *data)
+{
+    int i;
+
+    for (i = 0; i < ARRAY_SIZE(button_mappings); i++) {
+        const struct button_mapping *mapping = &button_mappings[i];
+        u8 mask = 1 << mapping->bit;
+
+        if (mapping->hwheel_value && rdev->tilt_hwheel) {
+            __s32 rel_value = mapping->hwheel_value;
+
+            if (rising_bit(rdev->button_byte, data[0], mask))
+                tilt_hwheel_start(rdev, rel_value);
+            if (falling_bit(rdev->button_byte, data[0], mask))
+                tilt_hwheel_stop(rdev);
+        } else if (edge_bit(rdev->button_byte, data[0], mask)) {
+            unsigned int code = mapping->code;
+
+            input_button_msc_scan(rdev->input, code);
+            input_report_key(rdev->input, code, !!(data[0] & mask));
+            input_sync(rdev->input);
+        }
+    }
+
+    rdev->button_byte = data[0];
+}
+
 /**
  * Raw event function
  */
@@ -6094,24 +6121,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
         /* Detect wheel tilt edges */
         if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
-            int i;
-            for (i = 0; i < ARRAY_SIZE(button_mappings); i++) {
-                const struct button_mapping *mapping = &button_mappings[i];
-                u8 mask = 1 << mapping->bit;
-                if (mapping->hwheel_value && rdev->tilt_hwheel) {
-                    __s32 rel_value = mapping->hwheel_value;
-                    if (rising_bit(rdev->button_byte, data[0], mask))
-                        tilt_hwheel_start(rdev, rel_value);
-                    if (falling_bit(rdev->button_byte, data[0], mask))
-                        tilt_hwheel_stop(rdev);
-                } else if (edge_bit(rdev->button_byte, data[0], mask)) {
-                    unsigned int code = mapping->code;
-                    input_button_msc_scan(rdev->input, code);
-                    input_report_key(rdev->input, code, !!(data[0] & mask));
-                    input_sync(rdev->input);
-                }
-            }
-            rdev->button_byte = data[0];
+            process_mouse_button_edges(rdev, data);
         }
 
         /* Detect buttons reported on the keyboard interface */
@@ -6134,6 +6144,12 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
             return 1;
         }
         break;
+    case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
+        // When in device mode, this device needs the same mouse button tilt as above but also the dpi up/down from default.
+        /* Detect wheel tilt edges */
+        if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE)
+            process_mouse_button_edges(rdev, data);
+        fallthrough;
     default:
         // The event were looking for is 16 bytes long and starts with 0x04
         if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
