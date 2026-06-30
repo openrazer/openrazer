@@ -17,6 +17,7 @@ from openrazer_daemon.dbus_services.service import DBusService
 import openrazer_daemon.dbus_services.dbus_methods
 from openrazer_daemon.misc import effect_sync
 from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
+from openrazer_daemon.misc.sleep_state_monitor import SleepStateMonitor as _SleepStateMonitor
 
 
 # pylint: disable=too-many-instance-attributes
@@ -70,6 +71,7 @@ class RazerDevice(DBusService):
         if additional_interfaces is not None:
             self.additional_interfaces.extend(additional_interfaces)
         self._battery_manager = None
+        self._sleep_monitor = None
 
         self.config = config
         self.persistence = persistence
@@ -323,6 +325,10 @@ class RazerDevice(DBusService):
         # Initialize battery manager if the device has support
         if 'get_battery' in self.METHODS:
             self._init_battery_manager()
+
+        # Initialize sleep state monitor
+        if 'get_sleep_state' in self.METHODS:
+            self._init_sleep_monitor()
 
         try:
             driver_mode_default = self.DRIVER_MODE
@@ -1096,6 +1102,11 @@ class RazerDevice(DBusService):
         with open(driver_path, 'wb') as driver_file:
             driver_file.write(payload)
 
+    
+    def _init_sleep_monitor(self):
+        self._sleep_monitor = _SleepStateMonitor(self, self._device_number, self.getDeviceName())
+        self._sleep_monitor.start()
+
     def _init_battery_manager(self):
         """
         Initializes the BatteryManager using the provided name
@@ -1206,6 +1217,9 @@ class RazerDevice(DBusService):
 
         if self._battery_manager:
             self._battery_manager.close()
+
+        if self._sleep_monitor:
+            self._sleep_monitor.close()
 
     def close(self):
         """
