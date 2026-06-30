@@ -297,11 +297,11 @@ static ssize_t razer_attr_read_version(struct device *dev, struct device_attribu
 }
 
 /**
- * Read device file "device_sleep_state"
+ * Read device file "sleep_state"
  *
  * Returns 0 (awake), 1 (asleep), or 2 (unknown)
  */
-static ssize_t razer_attr_read_device_sleep_state(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_sleep_state(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
 
@@ -5787,7 +5787,7 @@ static DEVICE_ATTR(dpi_stages,                0660, razer_attr_read_dpi_stages, 
 static DEVICE_ATTR(device_type,               0440, razer_attr_read_device_type,           NULL);
 static DEVICE_ATTR(device_mode,               0660, razer_attr_read_device_mode,           razer_attr_write_device_mode);
 static DEVICE_ATTR(device_serial,             0440, razer_attr_read_device_serial,         NULL);
-static DEVICE_ATTR(device_sleep_state,        0440, razer_attr_read_device_sleep_state,    NULL);
+static DEVICE_ATTR(sleep_state,               0440, razer_attr_read_sleep_state,           NULL);
 static DEVICE_ATTR(device_idle_time,          0660, razer_attr_read_device_idle_time,      razer_attr_write_device_idle_time);
 
 static DEVICE_ATTR(scroll_mode,               0660, razer_attr_read_scroll_mode,           razer_attr_write_scroll_mode);
@@ -6406,7 +6406,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     }
 
     /* Expose sleep state on all interfaces for this mouse. */
-    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_sleep_state);
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_sleep_state);
 
     if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE
        && (expected_subclass == 0xFF || dev->usb_interface_subclass == expected_subclass)) {
@@ -7523,7 +7523,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 
     dev = hid_get_drvdata(hdev);
 
-    device_remove_file(&hdev->dev, &dev_attr_device_sleep_state);
+    device_remove_file(&hdev->dev, &dev_attr_sleep_state);
 
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
         device_remove_file(&hdev->dev, &dev_attr_version);
