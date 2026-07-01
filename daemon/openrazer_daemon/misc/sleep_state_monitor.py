@@ -14,8 +14,6 @@ class SleepState(Enum):
     UNKNOWN = 2
 
 
-
-
 class SleepStateMonitor(threading.Thread):
     """
     Thread to watch sleep state
@@ -51,12 +49,12 @@ class SleepStateMonitor(threading.Thread):
         :type value: bool
         """
         self._shutdown = value
-    
+
     def close(self):
         if not self._shutdown:
             self._logger.debug("Closing sleep state monitor")
-            self.shutdown=True
-            self.join(timeout = 2)
+            self.shutdown = True
+            self.join(timeout=2)
             if self.is_alive():
                 self._logger.error("Failed to stop sleep state monitoring for %s.", self._device_name)
 

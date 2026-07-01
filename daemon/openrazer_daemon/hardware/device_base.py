@@ -351,7 +351,7 @@ class RazerDevice(DBusService):
                 return config_option
             except (configparser.NoSectionError, configparser.NoOptionError):
                 return None
-        
+
         self.TILT_HWHEEL = _get_optional_config("tilt_hwheel", self.config.getboolean)
         self.TILT_HWHEEL_REPEAT_INTERVAL = _get_optional_config('tilt_hwheel_repeat_interval', self.config.getint)
         self.TILT_HWHEEL_REPEAT_START_DELAY = _get_optional_config('tilt_hwheel_repeat_start_delay', self.config.getint)
@@ -1150,7 +1150,6 @@ class RazerDevice(DBusService):
         with open(driver_path, 'wb') as driver_file:
             driver_file.write(payload)
 
-    
     def _init_sleep_monitor(self):
         self._sleep_monitor = _SleepStateMonitor(self, self._device_number, self.getDeviceName())
         self._sleep_monitor.start()

@@ -6033,10 +6033,10 @@ static void update_sleep_state(struct hid_device *hdev, u8 state)
     struct usb_device *usbdev = interface_to_usbdev(first_intf);
 
     if (!usbdev || !usbdev->actconfig)
-      return;
+        return;
     for (i = 0; i < usbdev->actconfig->desc.bNumInterfaces; i++) {
         struct usb_interface *intf = usb_ifnum_to_if(usbdev, i);
-        if (!intf) 
+        if (!intf)
             continue;
         dev = device_find_child(&intf->dev, (void *)mouse_hid_bus_type, dev_is_on_bus);
         if (!dev)
@@ -6164,7 +6164,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
             hid_dbg(hdev, "sleep_state -> awake\n");
         }
     } else if (rdev->sleep_state != RAZER_MOUSE_SLEEP_STATE_AWAKE && size > 0) {
-        // Any regular report indicates active link/device. 
+        // Any regular report indicates active link/device.
         // Mainly to update state when the driver loads, but also covers other edge cases.
         update_sleep_state(hdev, RAZER_MOUSE_SLEEP_STATE_AWAKE);
     }
@@ -6405,7 +6405,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         break;
     }
 
-    // Expose sleep state on all interfaces 
+    // Expose sleep state on all interfaces
     CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_sleep_state);
 
     if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE
