@@ -369,6 +369,7 @@ class RazerDevice(DBusService):
                 self.restore_effect()
 
     def set_horizontal_wheel_tilt(self, enabled: bool | None):
+        """Sets whether horizontal wheel tlit emulating sideways scroll is enabled."""
         if enabled is None:
             return
         setting_path = os.path.join(self._device_path, 'tilt_hwheel')
@@ -377,6 +378,7 @@ class RazerDevice(DBusService):
             tilt_file.write(f"{int(enabled)}\n".encode('ascii'))
 
     def set_horizontal_wheel_tilt_repeat_interval(self, value: int | None):
+        """Sets the interval between sideways scrolling while the wheel tilt is held."""
         if value is None:
             return
         setting_path = os.path.join(self._device_path, 'tilt_repeat')
@@ -385,6 +387,7 @@ class RazerDevice(DBusService):
             tilt_file.write(f"{int(value)}\n".encode('ascii'))
 
     def set_horizontal_wheel_tilt_repeat_delay(self, value: int | None):
+        """Sets the delay before starting sideways scrolling repeat."""
         if value is None:
             return
         setting_path = os.path.join(self._device_path, 'tilt_repeat_delay')
