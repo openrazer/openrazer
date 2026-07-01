@@ -6405,7 +6405,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         break;
     }
 
-    /* Expose sleep state on all interfaces for this mouse. */
+    // Expose sleep state on all interfaces 
     CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_sleep_state);
 
     if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE

@@ -33,7 +33,6 @@ class SleepStateMonitor(threading.Thread):
         self._shutdown = False
         self._device_name = device_name
 
-        # Could save reference to parent but only need battery level function
         self.parent: "RazerDevice" = parent
 
     @property
