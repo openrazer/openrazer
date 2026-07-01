@@ -71,7 +71,7 @@ class SleepStateMonitor(threading.Thread):
             if self.state != new_state:
                 self.state = new_state
                 self._logger.info(
-                    "Sleep state for %s updated to %s", self._device_name, self.state
+                    "Sleep state for %s updated to %s", self._device_name, self.state.name
                 )
                 if new_state == SleepState.AWAKE:
                     self.parent.resume_device()

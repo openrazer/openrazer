@@ -42,6 +42,9 @@ class RazerDevice(DBusService):
     POLL_RATES: Optional[list[int]] = None
     DPI_MAX: Optional[int] = None
     DRIVER_MODE = False
+    TILT_HWHEEL = None
+    TILT_HWHEEL_REPEAT_INTERVAL = None
+    TILT_HWHEEL_REPEAT_START_DELAY = None
 
     WAVE_DIRS = (1, 2)
 
@@ -341,8 +344,21 @@ class RazerDevice(DBusService):
             self.logger.info('Setting device to "driver" mode. Daemon will handle special functionality')
             self.set_device_mode(0x03, 0x00)  # Driver mode
 
+        def _get_optional_config(name: str, config_fetcher):
+            try:
+                config_option = config_fetcher(f"Device:{self.serial}", name)
+                self.logger.info('Overriding %s with "%s" from config', name, config_option)
+                return config_option
+            except (configparser.NoSectionError, configparser.NoOptionError):
+                return None
+        
+        self.TILT_HWHEEL = _get_optional_config("tilt_hwheel", self.config.getboolean)
+        self.TILT_HWHEEL_REPEAT_INTERVAL = _get_optional_config('tilt_hwheel_repeat_interval', self.config.getint)
+        self.TILT_HWHEEL_REPEAT_START_DELAY = _get_optional_config('tilt_hwheel_repeat_start_delay', self.config.getint)
+
         self.restore_dpi_poll_rate()
         self.restore_brightness()
+        self._apply_wheel_tilt_config()
 
         if self.config.getboolean('Startup', "restore_persistence") is True:
             self.restore_effect()
@@ -351,6 +367,35 @@ class RazerDevice(DBusService):
             if self.config.getboolean('Startup', "persistence_dual_boot_quirk") is True:
                 self.logger.debug("Restoring effect persistence again (dual boot quirk)")
                 self.restore_effect()
+
+    def set_horizontal_wheel_tilt(self, enabled: bool | None):
+        if enabled is None:
+            return
+        setting_path = os.path.join(self._device_path, 'tilt_hwheel')
+        self.logger.info("Applying %s to tilt_hwheel", enabled)
+        with open(setting_path, 'wb') as tilt_file:
+            tilt_file.write(f"{int(enabled)}\n".encode('ascii'))
+
+    def set_horizontal_wheel_tilt_repeat_interval(self, value: int | None):
+        if value is None:
+            return
+        setting_path = os.path.join(self._device_path, 'tilt_repeat')
+        self.logger.info("Applying %s to tilt_repeat", value)
+        with open(setting_path, 'wb') as tilt_file:
+            tilt_file.write(f"{int(value)}\n".encode('ascii'))
+
+    def set_horizontal_wheel_tilt_repeat_delay(self, value: int | None):
+        if value is None:
+            return
+        setting_path = os.path.join(self._device_path, 'tilt_repeat_delay')
+        self.logger.info("Applying %s to tilt_repeat_delay", value)
+        with open(setting_path, 'wb') as tilt_file:
+            tilt_file.write(f"{int(value)}\n".encode('ascii'))
+
+    def _apply_wheel_tilt_config(self):
+        self.set_horizontal_wheel_tilt(self.TILT_HWHEEL)
+        self.set_horizontal_wheel_tilt_repeat_interval(self.TILT_HWHEEL_REPEAT_INTERVAL)
+        self.set_horizontal_wheel_tilt_repeat_delay(self.TILT_HWHEEL_REPEAT_START_DELAY)
 
     def send_effect_event(self, effect_name, *args):
         """
@@ -1192,6 +1237,7 @@ class RazerDevice(DBusService):
             self.logger.info('Setting device back to "driver" mode.')
             self.set_device_mode(0x03, 0x00)  # Driver mode
 
+        self._apply_wheel_tilt_config()
         self.restore_brightness()
         self._resume_device()
 

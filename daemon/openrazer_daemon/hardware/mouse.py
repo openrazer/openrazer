@@ -1926,7 +1926,6 @@ class RazerNagaV2HyperSpeedReceiver(__RazerDevice):
     DEVICE_IMAGE = "https://hybrismediaprod.blob.core.windows.net/sys-master-phoenix-images-container%2Fh4c%2Fh44%2F9451887460382%2Fnaga-v2-hyperspeed-500x500.png"
 
     DPI_MAX = 30000
-    DRIVER_MODE = True
 
 
 class RazerViperV3HyperSpeed(__RazerDevice):

@@ -55,6 +55,15 @@ Additional per-device sections can be defined with the name "Device:XXXX" where 
 *driver_mode* _bool_
 	This flag specifies an override whether the device should be switched into "driver mode" (as opposed to keeping it in "device mode"). Ideally the OpenRazer stack should support all functionality in software and support the devices being in driver mode, but that's not the case for a wide variety of devices yet, especially mice. However some users may want to explicitly force a device into driver mode to enable some functionality like horizontal scrolling.
 
+*tilt_hwheel* _bool_
+	Enable or disable horizontal wheel tilt emulation via HWHEEL events for the device.
+
+*tilt_hwheel_repeat_interval* _int_
+	Interval in milliseconds between repeated horizontal tilt events while tilt is held.
+
+*tilt_hwheel_repeat_start_delay* _int_
+	Delay in milliseconds before repeated horizontal tilt events start after initial tilt event.
+
 # SEE ALSO
 
 *openrazer-daemon*(8)
