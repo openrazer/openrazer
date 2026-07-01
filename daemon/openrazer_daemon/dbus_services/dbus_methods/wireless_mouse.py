@@ -15,4 +15,3 @@ def get_sleep_state(self):
 
     with open(driver_path, 'r') as driver_file:
         return int(driver_file.read().strip())
-
