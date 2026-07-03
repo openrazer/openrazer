@@ -52,7 +52,7 @@ class RazerDevice(DBusService):
 
     DEVICE_IMAGE: Optional[str] = None
 
-    def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter):
+    def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter, reinit_callback):
 
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
@@ -66,6 +66,7 @@ class RazerDevice(DBusService):
         # Local storage key name
         self.storage_name = "UnknownDevice"
 
+        self._reinit_callback = reinit_callback
         self._observer_list = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
@@ -333,6 +334,61 @@ class RazerDevice(DBusService):
         if 'get_sleep_state' in self.METHODS:
             self._init_sleep_monitor()
 
+        self.get_device_config()
+
+        self.restore_dpi_poll_rate()
+        self.restore_brightness()
+        self._apply_wheel_tilt_config()
+
+        if self.config.getboolean('Startup', "restore_persistence") is True:
+            self.restore_effect()
+
+            # Some devices need setting a second time after encountering Razer Synapse on Windows
+            if self.config.getboolean('Startup', "persistence_dual_boot_quirk") is True:
+                self.logger.debug("Restoring effect persistence again (dual boot quirk)")
+                self.restore_effect()
+
+    def device_wake_callback(self):
+        """
+        Callback called when the device wakes up from sleep/powersave mode.
+        """
+        # If the device is asleep when the daemon loads, the serial number is generated and
+        # starts with UNKNOWN. Relaad the config now that it will respond with the serial number.
+        if self.serial.startswith("UNKNOWN"):
+            self.logger.info("UNKNOWN serial detected upon wake.")
+            # Reset device serial cache
+            self._serial = None
+            new_serial = self.get_serial()
+            self.logger.info(new_serial)
+            if new_serial != self.serial:
+                self.logger.info("Serial changed to %s, reinit device.", new_serial)
+                self._reinit_callback()
+                return
+
+        # Reapply driver settings
+        self.resume_device()
+
+        self._device_wake_callback()
+
+    def _device_wake_callback(self):
+        """
+        Override to implement custom wake behavior
+        """
+        pass
+
+    def device_sleep_callback(self):
+        """
+        Callback called when the device idle timer expires and the device goes into sleep/powersave mode.
+        """
+        self._device_sleep_callback()
+
+    def _device_sleep_callback(self):
+        """
+        Override to implement custom idle sleep behavior
+        """
+        pass
+
+    def get_device_config(self):
         try:
             driver_mode_default = self.DRIVER_MODE
             self.DRIVER_MODE = self.config.getboolean(f"Device:{self.serial}", "driver_mode")
@@ -355,18 +411,6 @@ class RazerDevice(DBusService):
         self.TILT_HWHEEL = _get_optional_config("tilt_hwheel", self.config.getboolean)
         self.TILT_HWHEEL_REPEAT_INTERVAL = _get_optional_config('tilt_hwheel_repeat_interval', self.config.getint)
         self.TILT_HWHEEL_REPEAT_START_DELAY = _get_optional_config('tilt_hwheel_repeat_start_delay', self.config.getint)
-
-        self.restore_dpi_poll_rate()
-        self.restore_brightness()
-        self._apply_wheel_tilt_config()
-
-        if self.config.getboolean('Startup', "restore_persistence") is True:
-            self.restore_effect()
-
-            # Some devices need setting a second time after encountering Razer Synapse on Windows
-            if self.config.getboolean('Startup', "persistence_dual_boot_quirk") is True:
-                self.logger.debug("Restoring effect persistence again (dual boot quirk)")
-                self.restore_effect()
 
     def set_horizontal_wheel_tilt(self, enabled: bool | None):
         """Sets whether horizontal wheel tlit emulating sideways scroll is enabled."""
@@ -1025,7 +1069,7 @@ class RazerDevice(DBusService):
         """
         return os.path.join(self._device_path, driver_filename)
 
-    def get_serial(self):
+    def get_serial(self, wait_count: int = 5):
         """
         Get serial number for device
 
@@ -1038,7 +1082,7 @@ class RazerDevice(DBusService):
             count = 0
             serial = ''
             while len(serial) == 0:
-                if count >= 5:
+                if count >= wait_count:
                     break
 
                 try:
@@ -1151,7 +1195,7 @@ class RazerDevice(DBusService):
             driver_file.write(payload)
 
     def _init_sleep_monitor(self):
-        self._sleep_monitor = _SleepStateMonitor(self, self._device_number, self.getDeviceName())
+        self._sleep_monitor = _SleepStateMonitor(self, self._device_number, self.getDeviceName())  # pylint: disable=no-member
         self._sleep_monitor.start()
 
     def _init_battery_manager(self):

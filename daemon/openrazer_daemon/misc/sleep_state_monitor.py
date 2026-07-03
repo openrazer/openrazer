@@ -21,17 +21,19 @@ class SleepStateMonitor(threading.Thread):
 
     def __init__(self, parent: "RazerDevice", device_id: str, device_name: str):
         super().__init__()
+        self.parent: "RazerDevice" = parent
         self._logger = logging.getLogger(
             "razer.device{0}.sleepmonitor".format(device_id)
         )
 
         self.interval = 0.1
-        self.state = SleepState.UNKNOWN
+        try:
+            self.state = SleepState(self.parent.getSleepState())
+        except Exception:
+            self.state = SleepState.UNKNOWN
 
         self._shutdown = False
         self._device_name = device_name
-
-        self.parent: "RazerDevice" = parent
 
     @property
     def shutdown(self):
@@ -64,14 +66,19 @@ class SleepStateMonitor(threading.Thread):
         """
 
         while not self._shutdown:
-            new_state = SleepState(self.parent.getSleepState())
-            if self.state != new_state:
-                self.state = new_state
-                self._logger.info(
-                    "Sleep state for %s updated to %s", self._device_name, self.state.name
-                )
-                if new_state == SleepState.AWAKE:
-                    self.parent.resume_device()
+            try:
+                new_state = SleepState(self.parent.getSleepState())
+                if self.state != new_state:
+                    self.state = new_state
+                    self._logger.info(
+                        "Sleep state for %s updated to %s", self._device_name, self.state.name
+                    )
+                    if new_state == SleepState.AWAKE:
+                        self.parent.device_wake_callback()
+                    elif new_state == SleepState.ASLEEP:
+                        self.parent.device_sleep_callback()
+            except Exception as exc:
+                self._logger.warning("Exception in sleep polling. %s", str(exc))
             time.sleep(self.interval)
 
         self._logger.debug("Shutting down Sleep State Monitor")
