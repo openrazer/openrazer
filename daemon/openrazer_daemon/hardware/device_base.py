@@ -358,9 +358,9 @@ class RazerDevice(DBusService):
             self.logger.warning("UNKNOWN serial detected upon wake.")
             # Reset device serial cache
             self._serial = None
-            new_serial = self.get_serial()
+            new_serial = self.get_serial(increment_unknown_counter=False)
             self.logger.debug("new serial %s", new_serial)
-            if new_serial != self.serial:
+            if not new_serial.startswith("UNKNOWN"):
                 self.logger.info("Serial changed to %s, reinit device.", new_serial)
                 self._reinit_callback()
                 return
@@ -1069,7 +1069,7 @@ class RazerDevice(DBusService):
         """
         return os.path.join(self._device_path, driver_filename)
 
-    def get_serial(self, wait_count: int = 5):
+    def get_serial(self, increment_unknown_counter=True):
         """
         Get serial number for device
 
@@ -1082,7 +1082,7 @@ class RazerDevice(DBusService):
             count = 0
             serial = ''
             while len(serial) == 0:
-                if count >= wait_count:
+                if count >= 5:
                     break
 
                 try:
@@ -1112,7 +1112,8 @@ class RazerDevice(DBusService):
                 self.logger.warning("Original value: %s" % serial)
                 vid, pid = self.get_vid_pid()
                 idx = self._unknown_serial_counter.get((vid, pid), 0)
-                self._unknown_serial_counter[(vid, pid)] = idx + 1
+                if increment_unknown_counter:
+                    self._unknown_serial_counter[(vid, pid)] = idx + 1
                 serial = "UNKNOWN_{0:04X}{1:04X}_{2:04d}".format(vid, pid, idx)
 
             self._serial = serial.replace(' ', '_')
