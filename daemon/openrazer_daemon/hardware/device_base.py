@@ -355,11 +355,11 @@ class RazerDevice(DBusService):
         # If the device is asleep when the daemon loads, the serial number is generated and
         # starts with UNKNOWN. Relaad the config now that it will respond with the serial number.
         if self.serial.startswith("UNKNOWN"):
-            self.logger.info("UNKNOWN serial detected upon wake.")
+            self.logger.warning("UNKNOWN serial detected upon wake.")
             # Reset device serial cache
             self._serial = None
             new_serial = self.get_serial()
-            self.logger.info(new_serial)
+            self.logger.debug("new serial %s", new_serial)
             if new_serial != self.serial:
                 self.logger.info("Serial changed to %s, reinit device.", new_serial)
                 self._reinit_callback()
