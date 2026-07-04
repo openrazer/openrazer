@@ -28,13 +28,13 @@ ATTRS{idProduct}=="0068|007e|00a4|0215|0517|0518|054a|0c00|0c01|0c02|0c04|0c05|0
 ENV{ID_RAZER_CHROMA}!="1", GOTO="razer_end"
 
 # Set permissions if this is an input node
-SUBSYSTEM=="usb|input|hid", GROUP:="openrazer"
+SUBSYSTEM=="usb|input|hid", GROUP:="plugdev"
 
 # We're done unless it's the hid node
 SUBSYSTEM!="hid|usb", GOTO="razer_end"
 
 # Rebind if needed, then fix sysfs attribute group ownership
 SUBSYSTEM=="hid|usb", RUN+="razer_mount $env{RAZER_DRIVER} $kernel"
-SUBSYSTEM=="hid", RUN+="/bin/chgrp -R openrazer /sys%p"
+SUBSYSTEM=="hid", RUN+="/bin/chgrp -R plugdev /sys%p"
 
 LABEL="razer_end"
