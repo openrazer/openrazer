@@ -345,6 +345,7 @@ This will output something similar to this:
 | Razer Thunderbolt 4 Dock Chroma                               |  1532:0F21  |
 | Razer Charging Pad Chroma                                     |  1532:0F26  |
 | Razer Laptop Stand Chroma V2                                  |  1532:0F2B  |
+| Razer Razer Laptop Cooling Pad                                |  1532:0F43  |
 
 ---
 
