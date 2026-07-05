@@ -49,6 +49,7 @@ class RazerDevice(object):
             'brightness': self._has_feature('razer.device.lighting.brightness'),
 
             'battery': self._has_feature('razer.device.power', 'getBattery'),
+            'sleep_state': self._has_feature('razer.device.misc', 'getSleepState'),
             'idle_time': self._has_feature('razer.device.power', ('getIdleTime', 'setIdleTime')),
             'low_battery_threshold': self._has_feature('razer.device.power', ('getLowBatteryThreshold', 'setLowBatteryThreshold')),
             # Deprecated, use idle_time & low_battery_threshold
@@ -486,6 +487,20 @@ class RazerDevice(object):
         """
         if self.has('battery'):
             self._dbus_interfaces['power'].setIdleTime(idle_time)
+        else:
+            raise NotImplementedError()
+
+    def get_sleep_state(self) -> int:
+        """
+        Gets the sleep state of the device
+
+        :return: Sleep state
+                 0: Awake
+                 1: Asleep
+                 2: Unknown
+        """
+        if self.has('sleep_state'):
+            return int(self._dbus_interfaces['wireless'].getSleepState())
         else:
             raise NotImplementedError()
 

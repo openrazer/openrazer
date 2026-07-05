@@ -110,6 +110,7 @@ declare -A files_metadata=(
     ["scroll_mode"]="rw;0"
     ["scroll_acceleration"]="rw;0"
     ["scroll_smart_reel"]="rw;0"
+    ["sleep_state"]="r;0"
     ["tilt_hwheel"]="rw;0"
     ["tilt_repeat"]="rw;0"
     ["tilt_repeat_delay"]="rw;0"

@@ -153,6 +153,9 @@ struct razer_mouse_device {
     unsigned short usb_vid;
     unsigned short usb_pid;
 
+    // 0=awake, 1=asleep, 2=unknown
+    u8 sleep_state;
+
     char serial[23]; // Now storing a random serial to be used with old devices that don't support it
 
     struct {
