@@ -3,7 +3,11 @@
 """
 Mouse class
 """
+import contextlib
+import glob
 import re
+import threading
+
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice
 
 
@@ -2073,9 +2077,59 @@ class RazerDeathAdderV3HyperSpeedWired(__RazerDevice):
 class RazerDeathAdderV3HyperSpeedWireless(RazerDeathAdderV3HyperSpeedWired):
     """
     Class for the Razer DeathAdder V3 HyperSpeed (Wireless)
+
+    Wireless power toggle (without unplugging the dongle) does not trigger udev
+    or evdev events. On wake, firmware may reset device_mode from driver mode
+    (0x03:0x00) back to device mode, which breaks middle-click (wheel press);
+    scrolling is unaffected. A background thread polls sysfs and restores driver
+    mode when needed.
     """
 
     USB_PID = 0x00C5
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._wheel_fix_stop = threading.Event()
+
+        def adaptive_fix():
+            # Poll sysfs: no udev/evdev hook exists for RF power-on without dongle removal
+            pattern = (
+                f"/sys/bus/hid/drivers/razermouse/"
+                f"0003:{self.USB_VID:04X}:{self.USB_PID:04X}.*/device_mode"
+            )
+
+            while not self._wheel_fix_stop.is_set():
+                target_paths = glob.glob(pattern)
+                if not target_paths:
+                    break
+
+                sleep_interval = 8
+                try:
+                    with open(target_paths[0], "rb") as f:
+                        needs_fix = not f.read().startswith(b"\x03\x00")
+
+                    if needs_fix:
+                        with open(target_paths[0], "wb") as f:
+                            f.write(b"\x03\x00")
+                        self.logger.info("Razer fix: wheel middle-click restored")
+                        sleep_interval = 2
+                except Exception:
+                    pass
+
+                if self._wheel_fix_stop.wait(sleep_interval):
+                    break
+
+        self._wheel_fix_thread = threading.Thread(
+            target=adaptive_fix, daemon=True, name="da-v3-hs-wheel-fix"
+        )
+        self._wheel_fix_thread.start()
+
+    def _close(self):
+        self._wheel_fix_stop.set()
+        with contextlib.suppress(Exception):
+            self._wheel_fix_thread.join(timeout=2)
+        super()._close()
 
 
 class RazerProClickV2VerticalEditionWired(__RazerDevice):
