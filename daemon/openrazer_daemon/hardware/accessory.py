@@ -103,9 +103,65 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
     HAS_MATRIX = True
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [1, 8]
-    METHODS = ['get_device_type_accessory', 'set_brightness', 'get_brightness', 'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect']
+    EVENT_FILE_REGEX = re.compile(r'.*(Razer_)?Mouse_Dock_Pro-if0(1|2)-event-kbd')
+    METHODS = [
+        'get_device_type_accessory', 'set_brightness', 'get_brightness',
+        'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_static_effect',
+        'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect',
+        'set_breath_single_effect', 'set_breath_dual_effect',
+        'set_mouse_dock_pro_pair', 'set_mouse_dock_pro_unpair',
+        'scan_for_nearby_mice', 'get_nearby_mice', 'pair_any_nearby_mouse',
+    ]
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6229/6229-1-en-v2.png"
+
+    _wireless_pid_registry = None
+
+    @classmethod
+    def _get_wireless_pid_registry(cls):
+        if cls._wireless_pid_registry is None:
+            from openrazer_daemon.hardware import get_device_classes
+            cls._wireless_pid_registry = {
+                c.WIRELESS_PID: c
+                for c in get_device_classes()
+                if getattr(c, 'WIRELESS_PID', None) is not None
+            }
+        return cls._wireless_pid_registry
+
+    def get_child_devices(self):
+        if not self.is_mouse_connected():
+            return []
+
+        paired_pid = self._read_paired_pid()
+        if paired_pid is None:
+            self.logger.warning("Mouse connected to dock but paired PID unavailable")
+            return []
+
+        registry = self._get_wireless_pid_registry()
+        docked_class = registry.get(paired_pid)
+        if docked_class is None:
+            self.logger.warning("No docked class for paired PID 0x%04X", paired_pid)
+            return []
+
+        return [(docked_class, {"id_suffix": ":mouse"})]
+
+    def _read_paired_pid(self):
+        """Return the USB PID of the currently paired mouse, or None if unavailable."""
+        try:
+            with open(self.get_driver_path("paired_pid")) as f:
+                value = f.read().strip()
+                if not value or value == "0000":
+                    return None
+                return int(value, 16)
+        except (OSError, ValueError):
+            return None
+
+    def is_mouse_connected(self):
+        try:
+            with open(self.get_driver_path("mouse_connected")) as f:
+                return f.read().strip() == '1'
+        except (OSError, ValueError):
+            return False
 
 
 class RazerNommoChroma(_RazerDeviceBrightnessSuspend):

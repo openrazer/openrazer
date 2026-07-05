@@ -26,6 +26,7 @@ import threading
 
 import openrazer_daemon.hardware
 from openrazer_daemon.dbus_services.service import DBusService
+from openrazer_daemon.hardware.accessory import RazerMouseDockPro
 from openrazer_daemon.device import DeviceCollection
 from openrazer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 from openrazer_daemon.misc.autosave_persistence import PersistenceAutoSave
@@ -140,6 +141,7 @@ class RazerDaemon(DBusService):
         self._collecting_udev_devices = []
 
         self._init_autosave_persistence()
+        self._init_dock_mouse_monitor()
 
         # TODO remove
         self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
@@ -224,6 +226,63 @@ class RazerDaemon(DBusService):
         self._autosave_persistence.thread = threading.Thread(target=self._autosave_persistence.watch)
         self._autosave_persistence.thread.daemon = True
         self._autosave_persistence.thread.start()
+
+    def _init_dock_mouse_monitor(self):
+        self._dock_mouse_pending = set()
+        t = threading.Thread(target=self._dock_mouse_monitor_loop, daemon=True)
+        t.start()
+
+    def _dock_mouse_monitor_loop(self):
+        while True:
+            try:
+                self._check_dock_mouse_state()
+            except Exception:
+                self.logger.exception("Error in dock mouse monitor")
+            time.sleep(5)
+
+    def _check_dock_mouse_state(self):
+        for device_id, device_wrapper in list(self._razer_devices.id_items()):
+            razer_device = device_wrapper.dbus
+            if not isinstance(razer_device, RazerMouseDockPro):
+                continue
+
+            child_id = device_id + ':mouse'
+            child_present = child_id in self._razer_devices
+            connected = razer_device.is_mouse_connected()
+
+            if connected == child_present:
+                self._dock_mouse_pending.discard(device_id)
+                continue
+
+            # Sampled state differs from reality. Require two consecutive
+            # matching samples (~10 s) before acting, to avoid reacting to a
+            # transient RF blip during pair/unpair or a missed heartbeat.
+            if device_id not in self._dock_mouse_pending:
+                self._dock_mouse_pending.add(device_id)
+                continue
+
+            self._dock_mouse_pending.discard(device_id)
+            if connected:
+                self.logger.info("Mouse connected to dock %s", device_id)
+                self._add_child_devices(device_id, razer_device._device_path, len(self._razer_devices), razer_device)
+                self.device_added()
+            else:
+                self.logger.info("Mouse disconnected from dock %s", device_id)
+                self._remove_dock_child_device(child_id)
+
+    def _teardown_device(self, device):
+        device.dbus.close()
+        device.dbus.remove_from_connection()
+        self.logger.warning("Removing %s", device.device_id)
+        del self._razer_devices[device.device_id]
+
+    def _remove_dock_child_device(self, child_id):
+        try:
+            self._teardown_device(self._razer_devices[child_id])
+            self.write_persistence(self._persistence_file)
+            self.device_removed()
+        except (IndexError, KeyError):
+            pass
 
     def _init_signals(self):
         """
@@ -514,6 +573,41 @@ class RazerDaemon(DBusService):
                     self._razer_devices.add(sys_name, device_serial, razer_device)
 
                     device_number += 1
+                    device_number = self._add_child_devices(sys_name, sys_path, device_number, razer_device)
+
+    def _add_child_devices(self, sys_name, sys_path, device_number, razer_device):
+        """
+        Add logical child devices exposed through an already matched physical device.
+
+        :param sys_name: Physical device sysfs name
+        :type sys_name: str
+        :param sys_path: Physical device sysfs path
+        :type sys_path: str
+        :param device_number: Next available device number
+        :type device_number: int
+        :param razer_device: Parent device instance
+        :type razer_device: openrazer_daemon.hardware.device_base.RazerDevice
+        :return: Next available device number
+        :rtype: int
+        """
+        for child_class, child_kwargs in razer_device.get_child_devices():
+            child_kwargs = child_kwargs or {}
+            child_sys_name = sys_name + child_kwargs.get('id_suffix', '')
+
+            if child_sys_name in self._razer_devices:
+                continue
+
+            self.logger.info('Found logical child device.%d: %s', device_number, child_sys_name)
+            child_device = child_class(device_path=sys_path, device_number=device_number, config=self._config,
+                                       persistence=self._persistence, testing=self._test_dir is not None,
+                                       additional_interfaces=None, additional_methods=[],
+                                       unknown_serial_counter=self._unknown_serial_counter)
+
+            self._razer_devices.add(child_sys_name, child_device.get_serial(), child_device)
+            self._razer_devices[sys_name].child_ids.append(child_sys_name)
+            device_number += 1
+
+        return device_number
 
     def _add_device(self, device):
         """
@@ -546,6 +640,8 @@ class RazerDaemon(DBusService):
                 if len(device_serial) > 0:
                     # Add Device
                     self._razer_devices.add(sys_name, device_serial, razer_device)
+                    device_number += 1
+                    self._add_child_devices(sys_name, sys_path, device_number, razer_device)
                     self.device_added()
                 else:
                     logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
@@ -569,14 +665,17 @@ class RazerDaemon(DBusService):
 
         try:
             device = self._razer_devices[device_id]
+            devices_to_remove = [device]
+            devices_to_remove.extend(self._razer_devices[child_id]
+                                     for child_id in device.child_ids
+                                     if child_id in self._razer_devices)
 
-            device.dbus.close()
-            device.dbus.remove_from_connection()
+            for device in devices_to_remove:
+                self._teardown_device(device)
+
+            self._dock_mouse_pending.discard(device_id)
+
             self.write_persistence(self._persistence_file)
-            self.logger.warning("Removing %s", device_id)
-
-            # Delete device
-            del self._razer_devices[device.device_id]
             self.device_removed()
 
         except IndexError:  # Why didn't i set it up as KeyError

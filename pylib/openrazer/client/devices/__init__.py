@@ -65,6 +65,8 @@ class RazerDevice(object):
             'macro_mode_led_effect': self._has_feature('razer.device.led.macromode', 'setMacroEffect'),
             'macro_mode_modifier': self._has_feature('razer.device.macro', 'setModeModifier'),
             'reactive_trigger': self._has_feature('razer.device.misc', 'triggerReactive'),
+            'dock_pro_pair': self._has_feature('razer.device.misc', ('setMouseDockProPair', 'setMouseDockProUnpair')),
+            'dock_pro_nearby_discovery': self._has_feature('razer.device.misc', ('getNearbyMice', 'pairAnyNearbyMouse', 'scanForNearbyMice')),
 
             'poll_rate': self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate')),
             'supported_poll_rates': self._has_feature('razer.device.misc', 'getSupportedPollRates'),
@@ -572,6 +574,82 @@ class RazerDevice(object):
             dbuslist = self._dbus_interfaces['device'].getSupportedPollRates()
             # Repack list from dbus ints to normal ints
             return [int(d) for d in dbuslist]
+        else:
+            raise NotImplementedError()
+
+    def pair_mouse_dock_pro(self, pid: str) -> None:
+        """
+        Pair Mouse Dock Pro with a mouse by its USB PID.
+
+        :param pid: Mouse USB product ID as a hex string, e.g. "00ab"
+        :type pid: str
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('dock_pro_pair'):
+            self._dbus_interfaces['device'].setMouseDockProPair(pid)
+        else:
+            raise NotImplementedError()
+
+    def unpair_mouse_dock_pro(self, pid: str) -> None:
+        """
+        Unpair Mouse Dock Pro from a mouse by its USB PID.
+
+        :param pid: Mouse USB product ID as a hex string, e.g. "00ab"
+        :type pid: str
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('dock_pro_pair'):
+            self._dbus_interfaces['device'].setMouseDockProUnpair(pid)
+        else:
+            raise NotImplementedError()
+
+    def scan_for_nearby_mice(self) -> None:
+        """
+        Trigger a one-shot dock scan; results land in the cache within a few
+        hundred ms.
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('dock_pro_nearby_discovery'):
+            self._dbus_interfaces['device'].scanForNearbyMice()
+        else:
+            raise NotImplementedError()
+
+    @property
+    def nearby_mice(self) -> list[str]:
+        """
+        PIDs of Razer mice the dock currently sees on its RF channel.
+
+        Each entry is a 4-hex-digit USB product ID string (e.g. "00ab" for
+        a Basilisk V3 Pro Wireless).  Empty list if no mouse has beaconed
+        in the last ~30 seconds.  Call :meth:`scan_for_nearby_mice` first
+        to trigger a fresh dock scan if needed.
+
+        :return: list of mouse PID strings
+        :rtype: list[str]
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('dock_pro_nearby_discovery'):
+            return [str(p) for p in self._dbus_interfaces['device'].getNearbyMice()]
+        else:
+            raise NotImplementedError()
+
+    def pair_any_nearby_mouse(self) -> str:
+        """
+        Pair the first nearby mouse the dock has seen.  Convenience method for
+        a one-click "scan and pair" UX where the caller does not need to know
+        the PID upfront.
+
+        :return: PID of the mouse that was paired, or "" if none were in range
+        :rtype: str
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('dock_pro_nearby_discovery'):
+            return str(self._dbus_interfaces['device'].pairAnyNearbyMouse())
         else:
             raise NotImplementedError()
 

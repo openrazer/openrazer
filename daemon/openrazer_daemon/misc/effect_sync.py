@@ -246,8 +246,9 @@ class EffectSync(object):
                             effect_func(*args)
 
                     if effect_name == 'setBreathSingle':
+                        effect_func = getattr(self._parent, 'setPulsate', None)
                         if effect_func is not None:
-                            effect_func(*pargs)
+                            effect_func()
                         effect_func = getattr(self._parent, 'setScrollPulsate', None)
                         if effect_func is not None:
                             effect_func(*pargs)

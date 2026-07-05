@@ -46,6 +46,11 @@ class RazerDevice(DBusService):
 
     ZONES = ('backlight', 'logo', 'scroll', 'left', 'right', 'charging', 'fast_charging', 'fully_charged', 'channel1', 'channel2', 'channel3', 'channel4', 'channel5', 'channel6')
 
+    # Override DEVICE_NAME when the device cannot supply its own name via the
+    # device_type sysfs node (e.g. logical child devices that share a parent's
+    # sysfs path).  get_device_name() returns this string instead of reading
+    # device_type from the driver.
+    DEVICE_NAME: Optional[str] = None
     DEVICE_IMAGE: Optional[str] = None
 
     def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter):
@@ -980,7 +985,7 @@ class RazerDevice(DBusService):
         """
         # TODO raise exception if serial can't be got and handle during device add
         if self._serial is None:
-            serial_path = os.path.join(self._device_path, 'device_serial')
+            serial_path = self.get_driver_path('device_serial')
             count = 0
             serial = ''
             while len(serial) == 0:
@@ -1020,6 +1025,15 @@ class RazerDevice(DBusService):
             self._serial = serial.replace(' ', '_')
 
         return self._serial
+
+    def get_child_devices(self):
+        """
+        Get additional logical child devices for this physical device.
+
+        :return: List of (DeviceClass, kwargs) tuples
+        :rtype: list
+        """
+        return []
 
     def get_device_mode(self):
         """
