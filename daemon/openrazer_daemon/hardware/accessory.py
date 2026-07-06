@@ -276,3 +276,21 @@ class RazerTomahawkATX(_RazerDeviceBrightnessSuspend):
                'set_custom_effect', 'set_key_row']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/ed80ca04f3ff1b5d2c61655581776a6c/tomahawk-a1-m1-atx.png"
+
+
+class RazerMonitorStandChroma(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Monitor Stand Chroma
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*RAZER_Razer_Monitor_Stand_Chroma-event-if01')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0F59
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [1, 15]
+    METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/812837a18ab4e9590983cb7693626b1b/razer-monitor-stand-chroma-hero-mobile.webp"
