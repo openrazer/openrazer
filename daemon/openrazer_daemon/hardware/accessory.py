@@ -136,6 +136,20 @@ class RazerNommoPro(_RazerDeviceBrightnessSuspend):
                'set_custom_effect', 'set_key_row']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1419/1419_nommo_pro.png"
+    
+class RazerLeviathanV2X(_RazerDeviceBrightnessSuspend):
+    ""
+    Class for the Razer Leviathan V2 X (Speakers)
+    ""
+    USB_VID = 0x1532
+    USB_PID = 0x054a
+    HAS_MATRIX = True
+    MATRIX_DIMS = [2, 14]
+    METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/5bebba64e57ee2831b4f41f0af0201af/razer-leviathan-v2-x-hero-desktop.webp"
 
 
 class RazerMouseBungeeV3Chroma(_RazerDeviceBrightnessSuspend):
