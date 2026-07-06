@@ -17,25 +17,46 @@
  * USUALLY index = 0x02
  * FIREFLY is 0
  */
+/* Leviathan V2 X uses Feature Report ID 7 (0x0307) and 91-byte packets */
+static inline bool razer_is_leviathan_v2x(struct usb_device *usb_dev)
+{
+    return usb_dev->descriptor.idProduct == 0x054a;
+}
+
 int razer_send_control_msg(struct hid_device *hdev, const void *data, u16 size, u16 index, ulong wait)
 {
     struct usb_device *usb_dev = hid_to_usb_dev(hdev);
+    bool leviathan = razer_is_leviathan_v2x(usb_dev);
+    u16 value = leviathan ? 0x0307 : 0x0300;
+    u16 send_size = leviathan ? size + 1 : size;
+    u8 *buf = NULL;
     int ret;
+
+    if (leviathan) {
+        buf = kzalloc(send_size, GFP_KERNEL);
+        if (!buf)
+            return -ENOMEM;
+        buf[0] = 0x07;
+        memcpy(buf + 1, data, size);
+        data = buf;
+    }
 
     // Send usb control message
     ret = usb_control_msg_send(usb_dev,
                                0, // endpoint to send the message to
                                HID_REQ_SET_REPORT, // USB message request value (0x09)
                                USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT, // USB message request type value (0x21)
-                               0x300, // USB message value
+                               value, // USB message value
                                index, // USB message index value
                                data, // pointer to the data to send
-                               size, // length in bytes of the data to send
+                               send_size, // length in bytes of the data to send
                                USB_CTRL_SET_TIMEOUT, // time in msecs to wait for the message to complete before timing out
                                GFP_KERNEL);
 
     // Wait
     fsleep(wait);
+
+    kfree(buf);
 
     if (ret)
         hid_warn(hdev, "Failed to send USB control message: %d\n", ret);
@@ -63,6 +84,7 @@ int razer_send_control_msg(struct hid_device *hdev, const void *data, u16 size, 
 int razer_get_usb_response(struct hid_device *hdev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, ulong wait)
 {
     struct usb_device *usb_dev = hid_to_usb_dev(hdev);
+    bool leviathan = razer_is_leviathan_v2x(usb_dev);
     int err;
 
     if (WARN_ON(request_report->transaction_id.id == 0x00)) {
@@ -74,20 +96,41 @@ int razer_get_usb_response(struct hid_device *hdev, uint report_index, struct ra
     if (err)
         return err;
 
-    // Now ask for response
-    err = usb_control_msg_recv(usb_dev,
-                               0, // endpoint to send the message to
-                               HID_REQ_GET_REPORT, // USB message request value (0x01)
-                               USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN, // USB message request type value (0xA1)
-                               0x300, // USB message value
-                               response_index, // USB message index value
-                               response_report, // pointer to the data to be filled in by the message
-                               sizeof(*response_report), // length in bytes of the data to be received
-                               USB_CTRL_SET_TIMEOUT, // time in msecs to wait for the message to complete before timing out
-                               GFP_KERNEL);
-    if (err) {
-        hid_warn(hdev, "Failed to receive USB control message: %d\n", err);
-        return err;
+    if (leviathan) {
+        /* Leviathan returns 91 bytes: report ID (0x07) + 90-byte razer_report */
+        u8 buf[sizeof(struct razer_report) + 1] = {0};
+        err = usb_control_msg_recv(usb_dev,
+                                   0,
+                                   HID_REQ_GET_REPORT,
+                                   USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN,
+                                   0x0307,
+                                   response_index,
+                                   buf, sizeof(buf),
+                                   USB_CTRL_SET_TIMEOUT, GFP_KERNEL);
+        if (err) {
+            hid_warn(hdev, "Failed to receive USB control message: %d\n", err);
+            return err;
+        }
+        if (buf[0] == 0x07)
+            memcpy(response_report, buf + 1, sizeof(struct razer_report));
+        else
+            memset(response_report, 0, sizeof(struct razer_report));
+    } else {
+        // Now ask for response
+        err = usb_control_msg_recv(usb_dev,
+                                   0, // endpoint to send the message to
+                                   HID_REQ_GET_REPORT, // USB message request value (0x01)
+                                   USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN, // USB message request type value (0xA1)
+                                   0x300, // USB message value
+                                   response_index, // USB message index value
+                                   response_report, // pointer to the data to be filled in by the message
+                                   sizeof(*response_report), // length in bytes of the data to be received
+                                   USB_CTRL_SET_TIMEOUT, // time in msecs to wait for the message to complete before timing out
+                                   GFP_KERNEL);
+        if (err) {
+            hid_warn(hdev, "Failed to receive USB control message: %d\n", err);
+            return err;
+        }
     }
 
     if (WARN_ONCE(response_report->data_size > ARRAY_SIZE(response_report->arguments),

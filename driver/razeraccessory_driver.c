@@ -35,6 +35,7 @@ static int razer_get_report(struct hid_device *hdev, struct razer_report *reques
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
         return razer_get_usb_response(hdev, 0x00, request, 0x00, response, RAZER_NEW_DEVICE_WAIT_US);
         break;
 
@@ -210,6 +211,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Nommo Chroma";
         break;
 
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
+        device_type = "Razer Leviathan V2 X";
+        break;
+
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         device_type = "Razer Kraken Kitty Edition";
         break;
@@ -313,6 +318,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
@@ -490,6 +496,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
@@ -607,6 +614,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request = razer_chroma_extended_matrix_effect_custom_frame();
@@ -681,6 +689,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
@@ -814,6 +823,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
@@ -889,6 +899,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         switch(count) {
@@ -1116,6 +1127,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
         case USB_DEVICE_ID_RAZER_NOMMO_PRO:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
             request = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             request.transaction_id.id = 0x3F;
@@ -1208,6 +1220,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
@@ -1279,6 +1292,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
@@ -1346,6 +1360,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
@@ -1423,6 +1438,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
     case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
@@ -1522,6 +1538,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         request.transaction_id.id = 0x3F;
         break;
@@ -1625,6 +1642,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
@@ -2559,6 +2577,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
         expected_protocol = 0;
         break;
 
@@ -2587,6 +2606,9 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         expected_protocol = USB_INTERFACE_PROTOCOL_KEYBOARD;
         break;
     }
+
+    hid_set_drvdata(hdev, dev);
+    dev_set_drvdata(&hdev->dev, dev);
 
     if(dev->usb_interface_protocol == expected_protocol) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);                               // Get driver version
@@ -2650,6 +2672,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
         case USB_DEVICE_ID_RAZER_FIREFLY:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
@@ -2688,6 +2711,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
         case USB_DEVICE_ID_RAZER_NOMMO_PRO:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
@@ -2758,6 +2782,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         // Needs to be in "Normal" mode for idle effects to function properly
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
             break;
 
         default:
@@ -2768,9 +2793,6 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             break;
         }
     }
-
-    hid_set_drvdata(hdev, dev);
-    dev_set_drvdata(&hdev->dev, dev);
 
     if(hid_parse(hdev)) {
         hid_err(hdev, "parse failed\n");
@@ -2814,6 +2836,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+    case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
         expected_protocol = 0;
         break;
 
@@ -2888,6 +2911,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
         case USB_DEVICE_ID_RAZER_FIREFLY:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
         case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
@@ -2924,6 +2948,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_CHROMA_BASE:
         case USB_DEVICE_ID_RAZER_NOMMO_PRO:
         case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        case USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X:
         case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
@@ -3038,6 +3063,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_BASE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LEVIATHAN_V2_X) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA) },
