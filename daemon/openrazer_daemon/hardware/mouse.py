@@ -738,17 +738,21 @@ class RazerNaga2014(__RazerDevice):
     DPI_MAX = 8200
 
 
-class RazerNagaClassicEdition(RazerNaga2014):
+class RazerNagaClassicEdition(__RazerDevice):
     """
     Class for the Razer Naga Classic Edition
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_(Razer_)?Naga_Classic_Edition-if0(1|2)-event-kbd')
 
+    USB_VID = 0x1532
     USB_PID = 0x0093
+    DEDICATED_MACRO_KEYS = True
     DRIVER_MODE = True
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
-    DEVICE_IMAGE = RazerNaga2014.DEVICE_IMAGE
+    DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/227/227_razer_naga_2014.png"
+
+    DPI_MAX = 8200
 
 
 class RazerOrochi2011(__RazerDevice):
