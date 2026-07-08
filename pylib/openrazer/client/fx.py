@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
+from collections.abc import Callable
+from typing import Any
 import numpy as _np
 import numpy.typing as _npt
-import dbus as _dbus
+import dbus as _dbus  # type: ignore
 # from openrazer.client.constants import WAVE_LEFT, WAVE_RIGHT, REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS, REACTIVE_2000MS
 from openrazer.client import constants as c
-from types import FunctionType
 
 # TODO logging.debug if value out of range v1.1
 
@@ -111,6 +112,8 @@ class RazerAdvancedFX(BaseRazerFX):
                     raise ValueError("Row or column out of bounds. Max dimensions are: {0},{1}".format(*self._matrix_dims))
             else:
                 raise ValueError("RGB must be an RGB tuple")
+        else:
+            raise NotImplementedError()
 
     def restore(self) -> None:
         """
@@ -181,41 +184,30 @@ class RazerFX(BaseRazerFX):
         """
         return int(self._lighting_dbus.getWaveDir())
 
-    def none(self) -> bool:
+    def none(self) -> None:
         """
         No effect
-
-        :return: True if success, False otherwise
-        :rtype: bool
         """
         if self.has('none'):
             self._lighting_dbus.setNone()
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def spectrum(self) -> bool:
+    def spectrum(self) -> None:
         """
         Spectrum effect
-
-        :return: True if success, False otherwise
-        :rtype: bool
         """
         if self.has('spectrum'):
             self._lighting_dbus.setSpectrum()
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def wave(self, direction: int) -> bool:
+    def wave(self, direction: int) -> None:
         """
         Wave effect
 
         :param direction: Wave direction either WAVE_RIGHT (0x01) or WAVE_LEFT (0x02)
         :type direction: int
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If direction is invalid
         """
@@ -224,19 +216,15 @@ class RazerFX(BaseRazerFX):
 
         if self.has('wave'):
             self._lighting_dbus.setWave(direction)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def wheel(self, direction: int) -> bool:
+    def wheel(self, direction: int) -> None:
         """
         Wheel effect
 
         :param direction: Wheel direction either WHEEL_RIGHT or WHEEL_LEFT
         :type direction: int
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If direction is invalid
         """
@@ -245,11 +233,10 @@ class RazerFX(BaseRazerFX):
 
         if self.has('wheel'):
             self._lighting_dbus.setWheel(direction)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def static(self, red: int, green: int, blue: int) -> bool:
+    def static(self, red: int, green: int, blue: int) -> None:
         """
         Static effect
 
@@ -261,9 +248,6 @@ class RazerFX(BaseRazerFX):
 
         :param blue: Blue component. Must be 0->255
         :type blue: int
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If parameters are invalid
         """
@@ -280,11 +264,10 @@ class RazerFX(BaseRazerFX):
             blue = clamp_ubyte(blue)
 
             self._lighting_dbus.setStatic(red, green, blue)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def reactive(self, red: int, green: int, blue: int, time: int) -> bool:
+    def reactive(self, red: int, green: int, blue: int, time: int) -> None:
         """
         Reactive effect
 
@@ -299,9 +282,6 @@ class RazerFX(BaseRazerFX):
 
         :param blue: Blue component. Must be 0->255
         :type blue: int
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If parameters are invalid
         """
@@ -320,11 +300,10 @@ class RazerFX(BaseRazerFX):
             blue = clamp_ubyte(blue)
 
             self._lighting_dbus.setReactive(red, green, blue, time)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def breath_single(self, red: int, green: int, blue: int) -> bool:
+    def breath_single(self, red: int, green: int, blue: int) -> None:
         """
         Breath effect - single colour
 
@@ -336,9 +315,6 @@ class RazerFX(BaseRazerFX):
 
         :param blue: Blue component. Must be 0->255
         :type blue: int
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If parameters are invalid
         """
@@ -355,12 +331,11 @@ class RazerFX(BaseRazerFX):
             blue = clamp_ubyte(blue)
 
             self._lighting_dbus.setBreathSingle(red, green, blue)
-
-            return True
-        return False
+        else:
+            raise NotImplementedError()
 
     # TODO Change to tuple of rgb
-    def breath_dual(self, red: int, green: int, blue: int, red2: int, green2: int, blue2: int) -> bool:
+    def breath_dual(self, red: int, green: int, blue: int, red2: int, green2: int, blue2: int) -> None:
         """
         Breath effect - single colour
 
@@ -381,9 +356,6 @@ class RazerFX(BaseRazerFX):
 
         :param blue2: Second blue component. Must be 0->255
         :type blue2: int
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If parameters are invalid
         """
@@ -409,11 +381,10 @@ class RazerFX(BaseRazerFX):
             blue2 = clamp_ubyte(blue2)
 
             self._lighting_dbus.setBreathDual(red, green, blue, red2, green2, blue2)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def breath_triple(self, red: int, green: int, blue: int, red2: int, green2: int, blue2: int, red3: int, green3: int, blue3: int) -> bool:
+    def breath_triple(self, red: int, green: int, blue: int, red2: int, green2: int, blue2: int, red3: int, green3: int, blue3: int) -> None:
         """
         Breath effect - single colour
 
@@ -443,9 +414,6 @@ class RazerFX(BaseRazerFX):
 
         :param blue3: Second blue component. Must be 0->255
         :type blue3: int
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If parameters are invalid
         """
@@ -480,11 +448,10 @@ class RazerFX(BaseRazerFX):
             blue3 = clamp_ubyte(blue3)
 
             self._lighting_dbus.setBreathTriple(red, green, blue, red2, green2, blue2, red3, green3, blue3)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def breath_random(self) -> bool:
+    def breath_random(self) -> None:
         """
         Breath effect - random colours
 
@@ -496,11 +463,10 @@ class RazerFX(BaseRazerFX):
 
         if self.has('breath_random'):
             self._lighting_dbus.setBreathRandom()
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def ripple(self, red: int, green: int, blue: int, refreshrate: float = c.RIPPLE_REFRESH_RATE) -> bool:
+    def ripple(self, red: int, green: int, blue: int, refreshrate: float = c.RIPPLE_REFRESH_RATE) -> None:
         """
         Set the Ripple Effect.
 
@@ -516,9 +482,6 @@ class RazerFX(BaseRazerFX):
 
         :param refreshrate: Effect refresh rate
         :type refreshrate: float
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If arguments are invalid
         """
@@ -537,20 +500,16 @@ class RazerFX(BaseRazerFX):
             blue = clamp_ubyte(blue)
 
             self._custom_lighting_dbus.setRipple(red, green, blue, refreshrate)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def ripple_random(self, refreshrate: float = c.RIPPLE_REFRESH_RATE) -> bool:
+    def ripple_random(self, refreshrate: float = c.RIPPLE_REFRESH_RATE) -> None:
         """
         Set the Ripple Effect with random colours
 
         The refresh rate should be set to about 0.05 for a decent effect
         :param refreshrate: Effect refresh rate
         :type refreshrate: float
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If arguments are invalid
         """
@@ -559,11 +518,10 @@ class RazerFX(BaseRazerFX):
 
         if self.has('ripple_random'):
             self._custom_lighting_dbus.setRippleRandomColour(refreshrate)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def starlight_single(self, red: int, green: int, blue: int, time: int) -> bool:
+    def starlight_single(self, red: int, green: int, blue: int, time: int) -> None:
         """
         Starlight effect
 
@@ -578,9 +536,6 @@ class RazerFX(BaseRazerFX):
 
         :param time: Starlight speed
         :type time: int
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If parameters are invalid
         """
@@ -599,11 +554,10 @@ class RazerFX(BaseRazerFX):
             blue = clamp_ubyte(blue)
 
             self._lighting_dbus.setStarlightSingle(red, green, blue, time)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def starlight_dual(self, red: int, green: int, blue: int, red2: int, green2: int, blue2: int, time: int) -> bool:
+    def starlight_dual(self, red: int, green: int, blue: int, red2: int, green2: int, blue2: int, time: int) -> None:
         """
         Starlight effect
 
@@ -657,19 +611,15 @@ class RazerFX(BaseRazerFX):
             blue2 = clamp_ubyte(blue2)
 
             self._lighting_dbus.setStarlightDual(red, green, blue, red2, green2, blue2, time)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def starlight_random(self, time: int) -> bool:
+    def starlight_random(self, time: int) -> None:
         """
         Starlight effect
 
         :param time: Starlight speed
         :type time: int
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If parameters are invalid
         """
@@ -678,9 +628,8 @@ class RazerFX(BaseRazerFX):
 
         if self.has('starlight_random'):
             self._lighting_dbus.setStarlightRandom(time)
-
-            return True
-        return False
+        else:
+            raise NotImplementedError()
 
 
 class SingleLed(BaseRazerFX):
@@ -693,17 +642,19 @@ class SingleLed(BaseRazerFX):
     def _shas(self, item: str) -> bool:
         return self.has('{0}_{1}'.format(self._led_name, item))
 
-    def _getattr(self, name: str) -> FunctionType:
-        attr = name.replace('#', self._led_name.title().replace("_", ""))
-        return getattr(self._lighting_dbus, attr, None)
+    def _getattr(self, name: str) -> Callable[..., Any]:
+        attr_name = name.replace('#', self._led_name.title().replace("_", ""))
+        attr = getattr(self._lighting_dbus, attr_name, None)
+        if not callable(attr):
+            raise RuntimeError(f"Expected to get callable, got {type(attr)}")
+        return attr  # type: ignore
 
     @property
     def active(self) -> bool:
         func = self._getattr('get#Active')
         if func is not None:
             return bool(func())
-        else:
-            return False
+        raise NotImplementedError()
 
     @active.setter
     def active(self, value: bool) -> None:
@@ -713,6 +664,8 @@ class SingleLed(BaseRazerFX):
                 func(True)
             else:
                 func(False)
+        else:
+            raise NotImplementedError()
 
     @property
     def effect(self) -> str:
@@ -772,8 +725,10 @@ class SingleLed(BaseRazerFX):
                 brightness = 0.0
 
             self._getattr('set#Brightness')(brightness)
+        else:
+            raise NotImplementedError()
 
-    def blinking(self, red: int, green: int, blue: int) -> bool:
+    def blinking(self, red: int, green: int, blue: int) -> None:
         if not isinstance(red, int):
             raise ValueError("Red is not an integer")
         if not isinstance(green, int):
@@ -787,11 +742,10 @@ class SingleLed(BaseRazerFX):
             blue = clamp_ubyte(blue)
 
             self._getattr('set#Blinking')(red, green, blue)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def pulsate(self, red: int, green: int, blue: int) -> bool:
+    def pulsate(self, red: int, green: int, blue: int) -> None:
         if not isinstance(red, int):
             raise ValueError("Red is not an integer")
         if not isinstance(green, int):
@@ -805,11 +759,10 @@ class SingleLed(BaseRazerFX):
             blue = clamp_ubyte(blue)
 
             self._getattr('set#Pulsate')(red, green, blue)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def static(self, red: int, green: int, blue: int) -> bool:
+    def static(self, red: int, green: int, blue: int) -> None:
         if not isinstance(red, int):
             raise ValueError("Red is not an integer")
         if not isinstance(green, int):
@@ -823,42 +776,37 @@ class SingleLed(BaseRazerFX):
             blue = clamp_ubyte(blue)
 
             self._getattr('set#Static')(red, green, blue)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def wave(self, direction: int) -> bool:
+    def wave(self, direction: int) -> None:
         if direction not in (c.WAVE_LEFT, c.WAVE_RIGHT):
             raise ValueError("Direction must be WAVE_RIGHT (0x01) or WAVE_LEFT (0x02)")
 
         if self._shas('wave'):
             self._getattr('set#Wave')(direction)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def none(self) -> bool:
+    def none(self) -> None:
         if self._shas('none'):
             self._getattr('set#None')()
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def on(self) -> bool:
+    def on(self) -> None:
         if self._shas('on'):
             self._getattr('set#On')()
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def spectrum(self) -> bool:
+    def spectrum(self) -> None:
         if self._shas('spectrum'):
             self._getattr('set#Spectrum')()
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def reactive(self, red: int, green: int, blue: int, time: int) -> bool:
+    def reactive(self, red: int, green: int, blue: int, time: int) -> None:
         """
         Reactive effect
 
@@ -873,9 +821,6 @@ class SingleLed(BaseRazerFX):
 
         :param blue: Blue component. Must be 0->255
         :type blue: int
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If parameters are invalid
         """
@@ -894,11 +839,10 @@ class SingleLed(BaseRazerFX):
             blue = clamp_ubyte(blue)
 
             self._getattr('set#Reactive')(red, green, blue, time)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def breath_single(self, red: int, green: int, blue: int) -> bool:
+    def breath_single(self, red: int, green: int, blue: int) -> None:
         """
         Breath effect - single colour
 
@@ -910,9 +854,6 @@ class SingleLed(BaseRazerFX):
 
         :param blue: Blue component. Must be 0->255
         :type blue: int
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If parameters are invalid
         """
@@ -929,12 +870,11 @@ class SingleLed(BaseRazerFX):
             blue = clamp_ubyte(blue)
 
             self._getattr('set#BreathSingle')(red, green, blue)
-
-            return True
-        return False
+        else:
+            raise NotImplementedError()
 
     # TODO Change to tuple of rgb
-    def breath_dual(self, red: int, green: int, blue: int, red2: int, green2: int, blue2: int) -> bool:
+    def breath_dual(self, red: int, green: int, blue: int, red2: int, green2: int, blue2: int) -> None:
         """
         Breath effect - single colour
 
@@ -955,9 +895,6 @@ class SingleLed(BaseRazerFX):
 
         :param blue2: Second blue component. Must be 0->255
         :type blue2: int
-
-        :return: True if success, False otherwise
-        :rtype: bool
 
         :raises ValueError: If parameters are invalid
         """
@@ -983,11 +920,10 @@ class SingleLed(BaseRazerFX):
             blue2 = clamp_ubyte(blue2)
 
             self._getattr('set#BreathDual')(red, green, blue, red2, green2, blue2)
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def breath_random(self) -> bool:
+    def breath_random(self) -> None:
         """
         Breath effect - random colours
 
@@ -999,11 +935,10 @@ class SingleLed(BaseRazerFX):
 
         if self._shas('breath_random'):
             self._getattr('set#BreathRandom')()
+        else:
+            raise NotImplementedError()
 
-            return True
-        return False
-
-    def breath_mono(self) -> bool:
+    def breath_mono(self) -> None:
         """
         Breath effect - mono colour
 
@@ -1015,9 +950,8 @@ class SingleLed(BaseRazerFX):
 
         if self._shas('breath_mono'):
             self._getattr('set#BreathMono')()
-
-            return True
-        return False
+        else:
+            raise NotImplementedError()
 
 
 class MiscLighting(BaseRazerFX):
