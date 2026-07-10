@@ -1573,8 +1573,8 @@ static void razer_blackshark_v3_handshake(struct razer_kraken_device *device)
                                  RAZER_BLACKSHARK_REPORT_LEN,
                                  HID_OUTPUT_REPORT, HID_REQ_SET_REPORT);
         kfree(kp);
-        printk(KERN_DEBUG "razerkraken v3 handshake cls=%02x dir=%02x: %d\n",
-               primers[idx].cls, primers[idx].dir, ret);
+        hid_dbg(device->hdev, "v3 handshake cls=%02x dir=%02x: %d\n",
+                primers[idx].cls, primers[idx].dir, ret);
         /* 2ms gap mirrors Windows-with-driver pacing. Earlier 30ms was wrong
          * — Synapse fires SETs back-to-back at ~3ms intervals; a longer gap
          * may let the firmware's handshake state machine reset between
@@ -2294,10 +2294,6 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
     struct razer_kraken_device *device = dev_get_drvdata(&hdev->dev);
-
-    /* PROBE: log every raw_event so we can see what's actually arriving */
-    print_hex_dump(KERN_INFO, "razerkraken raw_event: ", DUMP_PREFIX_OFFSET, 16, 1,
-                   data, min(size, 24), false);
 
     if (size == 33) { // Should be a response to a Control packet
         memcpy(&device->data[0], &data[0], size);
