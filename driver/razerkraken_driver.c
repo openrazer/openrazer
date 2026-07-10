@@ -1554,7 +1554,10 @@ static ssize_t razer_attr_write_thx_spatial_audio(struct device *dev, struct dev
  */
 static void razer_blackshark_v3_handshake(struct razer_kraken_device *device)
 {
-    static const struct { u8 cls; u8 dir; } primers[] = {
+    static const struct {
+        u8 cls;
+        u8 dir;
+    } primers[] = {
         { 0x02, 0x00 },
         { 0x2A, 0x00 },
         { 0x2A, 0x80 },
