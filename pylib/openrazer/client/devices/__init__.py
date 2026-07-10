@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 from collections.abc import Iterable
-import dbus as _dbus
+import dbus as _dbus  # type: ignore
 from openrazer.client.fx import RazerFX as _RazerFX
 from xml.etree import ElementTree as _ET
 from openrazer.client.macro import RazerMacro as _RazerMacro
@@ -29,7 +29,7 @@ class RazerDevice(object):
 
         self._name = str(self._dbus_interfaces['device'].getDeviceName())
         self._type = str(self._dbus_interfaces['device'].getDeviceType())
-        self._fw = str(self._dbus_interfaces['device'].getFirmware())
+        self._fw: str | None = None
         self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
         self._has_dedicated_macro: bool | None = None
         self._device_image: str | None = None
@@ -243,7 +243,8 @@ class RazerDevice(object):
 
         # Nasty hack to convert dbus.Int32 into native
         if self.has('lighting_led_matrix'):
-            self._matrix_dimensions = tuple([int(dim) for dim in self._dbus_interfaces['device'].getMatrixDimensions()])
+            matrix_dims = self._dbus_interfaces['device'].getMatrixDimensions()
+            self._matrix_dimensions = (int(matrix_dims[0]), int(matrix_dims[1]))
         else:
             self._matrix_dimensions = None
 
@@ -383,6 +384,8 @@ class RazerDevice(object):
         :return: FW Version
         :rtype: str
         """
+        if not self._fw:
+            self._fw = str(self._dbus_interfaces['device'].getFirmware())
         return self._fw
 
     @property

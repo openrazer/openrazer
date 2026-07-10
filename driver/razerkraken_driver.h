@@ -132,8 +132,8 @@
 // #define RAZER_KRAKEN_V2_REPORT_LEN ?
 
 struct razer_kraken_device {
-    struct usb_device *usb_dev;
-    struct hid_device *hdev;       /* needed for hid_hw_raw_request on V3/V3 Pro */
+    struct hid_device *hdev;
+    struct usb_device *usb_dev; // TODO: remove usages, replace with hdev
     struct mutex lock;
     unsigned char usb_interface_protocol;
     unsigned short usb_pid;
@@ -305,6 +305,7 @@ struct razer_kraken_request_report {
     unsigned char addr_l;
     unsigned char arguments[32];
 };
+static_assert(sizeof(struct razer_kraken_request_report) == 37);
 
 struct razer_kraken_response_report {
     unsigned char report_id;
