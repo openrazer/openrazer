@@ -604,12 +604,12 @@ class RazerDevice(object):
             raise NotImplementedError()
         self._dbus_interfaces['audio_headphone'].setWirelessPowerSave(int(minutes))
 
-    def get_headphone_eq(self) -> list:
+    def get_headphone_eq(self) -> list[int]:
         if not self.has('audio_headphone_eq'):
             raise NotImplementedError()
-        return list(self._dbus_interfaces['audio_equalizer'].getHeadphoneEQ())
+        return [int(band) for band in self._dbus_interfaces['audio_equalizer'].getHeadphoneEQ()]
 
-    def set_headphone_eq(self, bands) -> None:
+    def set_headphone_eq(self, bands: list[int]) -> None:
         if not self.has('audio_headphone_eq'):
             raise NotImplementedError()
         self._dbus_interfaces['audio_equalizer'].setHeadphoneEQ(list(bands))
@@ -624,12 +624,12 @@ class RazerDevice(object):
             raise NotImplementedError()
         self._dbus_interfaces['audio_headphone'].setSidetone(int(level))
 
-    def get_mic_eq(self) -> list:
+    def get_mic_eq(self) -> list[int]:
         if not self.has('audio_mic_eq'):
             raise NotImplementedError()
-        return list(self._dbus_interfaces['audio_equalizer'].getMicEQ())
+        return [int(band) for band in self._dbus_interfaces['audio_equalizer'].getMicEQ()]
 
-    def set_mic_eq(self, bands) -> None:
+    def set_mic_eq(self, bands: list[int]) -> None:
         if not self.has('audio_mic_eq'):
             raise NotImplementedError()
         self._dbus_interfaces['audio_equalizer'].setMicEQ(list(bands))
@@ -684,7 +684,7 @@ class RazerDevice(object):
             raise NotImplementedError()
         self._dbus_interfaces['audio_headphone'].setAudioPrompts(bool(enabled))
 
-    def get_anc(self):
+    def get_anc(self) -> tuple[int, int]:
         """Returns (mode, level). mode: 0=off / 1=ANC / 2=ambient. level: 1..4."""
         if not self.has('audio_anc'):
             raise NotImplementedError()
