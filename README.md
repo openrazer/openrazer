@@ -173,6 +173,7 @@ This will output something similar to this:
 | Razer Huntsman V3 Pro 8KHz                                    |  1532:02CF  |
 | Razer BlackWidow V4 Tenkeyless HyperSpeed (Wireless)          |  1532:02D5  |
 | Razer BlackWidow V4 Tenkeyless HyperSpeed (Wired)             |  1532:02D7  |
+| Razer Blade 18 (2026)                                         |  1532:02E1  |
 | Razer BlackWidow V3 Tenkeyless                                |  1532:0A24  |
 
 ### Mice
