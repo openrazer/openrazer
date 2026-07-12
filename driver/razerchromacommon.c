@@ -85,7 +85,7 @@ struct razer_report razer_chroma_standard_set_led_state(unsigned char variable_s
     struct razer_report report = get_razer_report(0x03, 0x00, 0x03);
     report.arguments[0] = variable_storage;
     report.arguments[1] = led_id;
-    report.arguments[2] = clamp_u8(led_state, 0x00, 0x01);
+    report.arguments[2] = clamp(led_state, 0x00, 0x01);
 
     return report;
 }
@@ -150,7 +150,7 @@ struct razer_report razer_chroma_standard_set_led_effect(unsigned char variable_
     struct razer_report report = get_razer_report(0x03, 0x02, 0x03);
     report.arguments[0] = variable_storage;
     report.arguments[1] = led_id;
-    report.arguments[2] = clamp_u8(led_effect, 0x00, 0x05);
+    report.arguments[2] = clamp(led_effect, 0x00, 0x05);
 
     return report;
 }
@@ -232,7 +232,7 @@ struct razer_report razer_chroma_standard_matrix_effect_none(void)
 struct razer_report razer_chroma_standard_matrix_effect_wave(unsigned char wave_direction)
 {
     struct razer_report report = razer_chroma_standard_matrix_effect_base(0x02, MATRIX_EFFECT_WAVE);
-    report.arguments[1] = clamp_u8(wave_direction, 0x01, 0x02);
+    report.arguments[1] = clamp(wave_direction, 0x01, 0x02);
 
     return report;
 }
@@ -257,7 +257,7 @@ struct razer_report razer_chroma_standard_matrix_effect_spectrum(void)
 struct razer_report razer_chroma_standard_matrix_effect_reactive(unsigned char speed, struct razer_rgb *rgb1)
 {
     struct razer_report report = razer_chroma_standard_matrix_effect_base(0x05, MATRIX_EFFECT_REACTIVE);
-    report.arguments[1] = clamp_u8(speed, 0x01, 0x04); // Time
+    report.arguments[1] = clamp(speed, 0x01, 0x04); // Time
     report.arguments[2] = rgb1->r; /*rgb color definition*/
     report.arguments[3] = rgb1->g;
     report.arguments[4] = rgb1->b;
@@ -292,7 +292,7 @@ struct razer_report razer_chroma_standard_matrix_effect_starlight_single(unsigne
     struct razer_report report = razer_chroma_standard_matrix_effect_base(0x01, MATRIX_EFFECT_STARLIGHT);
 
     report.arguments[1] = 0x01; // Type one color
-    report.arguments[2] = clamp_u8(speed, 0x01, 0x03); // Speed
+    report.arguments[2] = clamp(speed, 0x01, 0x03); // Speed
 
     report.arguments[3] = rgb1->r; // Red 1
     report.arguments[4] = rgb1->g; // Green 1
@@ -317,7 +317,7 @@ struct razer_report razer_chroma_standard_matrix_effect_starlight_dual(unsigned 
     struct razer_report report = razer_chroma_standard_matrix_effect_base(0x01, MATRIX_EFFECT_STARLIGHT);
 
     report.arguments[1] = 0x02; // Type two color
-    report.arguments[2] = clamp_u8(speed, 0x01, 0x03); // Speed
+    report.arguments[2] = clamp(speed, 0x01, 0x03); // Speed
 
     report.arguments[3] = rgb1->r; // Red 1
     report.arguments[4] = rgb1->g; // Green 1
@@ -335,7 +335,7 @@ struct razer_report razer_chroma_standard_matrix_effect_starlight_random(unsigne
     struct razer_report report = razer_chroma_standard_matrix_effect_base(0x01, MATRIX_EFFECT_STARLIGHT);
 
     report.arguments[1] = 0x03; // Type random color
-    report.arguments[2] = clamp_u8(speed, 0x01, 0x03); // Speed
+    report.arguments[2] = clamp(speed, 0x01, 0x03); // Speed
 
     return report;
 }
@@ -534,7 +534,7 @@ struct razer_report razer_chroma_extended_matrix_effect_wave(unsigned char varia
 
     // Some devices use values 0x00, 0x01
     // Others use values 0x01, 0x02
-    direction = clamp_u8(direction, 0x00, 0x02);
+    direction = clamp(direction, 0x00, 0x02);
 
     // Razer has also added a "Fast Wave" effect for at least one device
     // which uses the same effect command but a speed parameter of 0x10
@@ -559,7 +559,7 @@ struct razer_report razer_chroma_extended_matrix_effect_starlight_random(unsigne
 {
     struct razer_report report = razer_chroma_extended_matrix_effect_base(0x06, variable_storage, led_id, 0x07);
 
-    speed = clamp_u8(speed, 0x01, 0x03);
+    speed = clamp(speed, 0x01, 0x03);
 
     report.arguments[4] = speed;
     return report;
@@ -568,7 +568,7 @@ struct razer_report razer_chroma_extended_matrix_effect_starlight_single(unsigne
 {
     struct razer_report report = razer_chroma_extended_matrix_effect_base(0x09, variable_storage, led_id, 0x07);
 
-    speed = clamp_u8(speed, 0x01, 0x03);
+    speed = clamp(speed, 0x01, 0x03);
 
     report.arguments[4] = speed;
     report.arguments[5] = 0x01;
@@ -582,7 +582,7 @@ struct razer_report razer_chroma_extended_matrix_effect_starlight_dual(unsigned 
 {
     struct razer_report report = razer_chroma_extended_matrix_effect_base(0x0C, variable_storage, led_id, 0x07);
 
-    speed = clamp_u8(speed, 0x01, 0x03);
+    speed = clamp(speed, 0x01, 0x03);
 
     report.arguments[4] = speed;
     report.arguments[5] = 0x02;
@@ -619,7 +619,7 @@ struct razer_report razer_chroma_extended_matrix_effect_wheel(unsigned char vari
 
     // BlackWidow V4 Pro uses 0x01 and 0x02 for directions
     // Commands with direction 0x00 seem to be ignored
-    direction = clamp_u8(direction, 0x01, 0x02);
+    direction = clamp(direction, 0x01, 0x02);
 
     report.arguments[3] = direction;
     report.arguments[4] = 0x28; // Speed, lower values are faster
@@ -640,7 +640,7 @@ struct razer_report razer_chroma_extended_matrix_effect_reactive(unsigned char v
 {
     struct razer_report report = razer_chroma_extended_matrix_effect_base(0x09, variable_storage, led_id, 0x05);
 
-    speed = clamp_u8(speed, 0x01, 0x04);
+    speed = clamp(speed, 0x01, 0x04);
 
     report.arguments[4] = speed;
     report.arguments[5] = 0x01;
@@ -842,7 +842,7 @@ struct razer_report razer_chroma_mouse_extended_matrix_effect_reactive(unsigned 
 {
     struct razer_report report = razer_chroma_mouse_extended_matrix_effect_base(0x07, variable_storage, led_id, 0x02);
 
-    speed = clamp_u8(speed, 0x01, 0x04);
+    speed = clamp(speed, 0x01, 0x04);
 
     report.arguments[3] = speed;
     report.arguments[4] = rgb->r;
@@ -910,7 +910,7 @@ struct razer_report razer_chroma_misc_fn_key_toggle(unsigned char state)
 {
     struct razer_report report = get_razer_report(0x02, 0x06, 0x02);
     report.arguments[0] = 0x00; // ?? Variable storage maybe
-    report.arguments[1] = clamp_u8(state, 0x00, 0x01); // State
+    report.arguments[1] = clamp(state, 0x00, 0x01); // State
 
     return report;
 }
@@ -1075,7 +1075,7 @@ struct razer_report razer_chroma_misc_get_charging_status(void)
 struct razer_report razer_chroma_misc_set_dock_charge_type(unsigned char charge_type)
 {
     struct razer_report report = get_razer_report(0x03, 0x10, 0x01);
-    report.arguments[0] = clamp_u8(charge_type, 0x00, 0x01);
+    report.arguments[0] = clamp(charge_type, 0x00, 0x01);
 
     return report;
 }
@@ -1343,7 +1343,7 @@ struct razer_report razer_chroma_misc_set_idle_time(unsigned short idle_time)
     struct razer_report report = get_razer_report(0x07, 0x03, 0x02);
 
     // Keep the idle time within bounds
-    idle_time = clamp_u16(idle_time, 60, 900);
+    idle_time = clamp(idle_time, 60, 900);
 
     report.arguments[0] = (idle_time >> 8) & 0x00FF;
     report.arguments[1] = idle_time & 0x00FF;
@@ -1371,7 +1371,7 @@ struct razer_report razer_chroma_misc_set_low_battery_threshold(unsigned char ba
     struct razer_report report = get_razer_report(0x07, 0x01, 0x01);
 
     // Keep the battery threshold within bounds
-    battery_threshold = clamp_u8(battery_threshold, 0x0C, 0x3F);
+    battery_threshold = clamp(battery_threshold, 0x0C, 0x3F);
 
     report.arguments[0] = battery_threshold;
 
@@ -1410,8 +1410,8 @@ struct razer_report razer_chroma_misc_set_orochi2011_poll_dpi(unsigned short pol
 
     report.arguments[1] = poll_rate;
 
-    report.arguments[3] = clamp_u8(dpi_x, 0x15, 0x9C);
-    report.arguments[4] = clamp_u8(dpi_y, 0x15, 0x9C);
+    report.arguments[3] = clamp(dpi_x, 0x15, 0x9C);
+    report.arguments[4] = clamp(dpi_y, 0x15, 0x9C);
 
     return report;
 }

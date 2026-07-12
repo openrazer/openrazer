@@ -160,31 +160,25 @@
 #define RAZER_STEALTH_ROW_LEN 0x10
 #define RAZER_STEALTH_ROWS_NUM 6
 
-#define RAZER_BLACKWIDOW_CHROMA_WAIT_MS 1
-#define RAZER_BLACKWIDOW_CHROMA_WAIT_MIN_US 600
-#define RAZER_BLACKWIDOW_CHROMA_WAIT_MAX_US 800
-
-#define RAZER_BLACKWIDOW_V3_WIRELESS_WAIT_MIN_US 4900
-#define RAZER_BLACKWIDOW_V3_WIRELESS_WAIT_MAX_US 5000
-
-#define RAZER_DEATHSTALKER_V2_WIRELESS_WAIT_MIN_US 4900
-#define RAZER_DEATHSTALKER_V2_WIRELESS_WAIT_MAX_US 5000
-
-#define RAZER_FIREFLY_WAIT_MIN_US 900
-#define RAZER_FIREFLY_WAIT_MAX_US 1000
+#define RAZER_BLACKWIDOW_CHROMA_WAIT_US 600
+#define RAZER_BLACKWIDOW_V3_WIRELESS_WAIT_US 4900
+#define RAZER_DEATHSTALKER_V2_WIRELESS_WAIT_US 4900
+#define RAZER_FIREFLY_WAIT_US 900
 
 struct razer_kbd_device {
-    struct usb_device *usb_dev;
+    struct hid_device *hdev;
     struct mutex lock;
     unsigned char usb_interface_protocol;
     unsigned short usb_vid;
     unsigned short usb_pid;
 
-    unsigned int fn_on;
-    DECLARE_BITMAP(pressed_fn, KEY_CNT);
-
     unsigned char block_keys[3];
     unsigned char left_alt_on;
+};
+
+struct razer_kbd_usb_device_data {
+    unsigned int fn_on;
+    DECLARE_BITMAP(pressed_fn, KEY_CNT);
 };
 
 #endif
