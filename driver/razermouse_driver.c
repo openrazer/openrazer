@@ -101,7 +101,7 @@ static int razer_get_report(struct hid_device *hdev, struct razer_report *reques
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
         index = 0x03;
-        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_VIPER_MOUSE_RECEIVER_WAIT_MIN_US, RAZER_VIPER_MOUSE_RECEIVER_WAIT_MAX_US);
+        return razer_get_usb_response(hdev, index, request, index, response, RAZER_VIPER_MOUSE_RECEIVER_WAIT_US);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_X:
