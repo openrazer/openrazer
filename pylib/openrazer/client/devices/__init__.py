@@ -57,6 +57,12 @@ class RazerDevice(object):
             'get_low_battery_threshold': self._has_feature('razer.device.power', 'getLowBatteryThreshold'),
             'set_low_battery_threshold': self._has_feature('razer.device.power', 'setLowBatteryThreshold'),
 
+            'equalizer': self._has_feature('razer.device.audio', ('getEqualizer', 'setEqualizer')),
+            'equalizer_preset': self._has_feature('razer.device.audio', ('getEqualizerPreset', 'setEqualizerPreset')),
+            'mic_monitoring': self._has_feature('razer.device.audio', ('getMicMonitoring', 'setMicMonitoring')),
+            'mic_monitoring_level': self._has_feature('razer.device.audio', ('getMicMonitoringLevel', 'setMicMonitoringLevel')),
+            'bluetooth_dnd': self._has_feature('razer.device.misc', ('getBluetoothDnd', 'setBluetoothDnd')),
+
             'macro_logic': self._has_feature('razer.device.macro'),
             'keyboard_layout': self._has_feature('razer.device.misc', 'getKeyboardLayout'),
             'game_mode_led': self._has_feature('razer.device.led.gamemode'),
@@ -241,6 +247,8 @@ class RazerDevice(object):
             self._dbus_interfaces['dpi'] = _dbus.Interface(self._dbus, "razer.device.dpi")
         if self.has('battery'):
             self._dbus_interfaces['power'] = _dbus.Interface(self._dbus, "razer.device.power")
+        if self.has('equalizer') or self.has('mic_monitoring'):
+            self._dbus_interfaces['audio'] = _dbus.Interface(self._dbus, "razer.device.audio")
         if self.has('game_mode_led'):
             self._dbus_interfaces['game_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.gamemode")
         if self.has('keyswitch_optimization'):
@@ -523,6 +531,171 @@ class RazerDevice(object):
             return int(self._dbus_interfaces['power'].getLowBatteryThreshold())
         else:
             raise NotImplementedError()
+
+    @property
+    def equalizer(self) -> list[int]:
+        """
+        Get the on-device equalizer
+
+        :return: 10 per-band gains in dB (low to high frequency)
+        :rtype: list of int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('equalizer'):
+            return [int(b) for b in self._dbus_interfaces['audio'].getEqualizer()]
+        else:
+            raise NotImplementedError()
+
+    @equalizer.setter
+    def equalizer(self, bands: list[int]) -> None:
+        """
+        Set the on-device equalizer
+
+        :param bands: 10 per-band gains in dB (low to high frequency), each
+                      clamped to +/- 5 dB
+        :type bands: list of int
+
+        :raises NotImplementedError: If function is not supported
+        :raises ValueError: If bands is not a list of 10 integers
+        """
+        if not self.has('equalizer'):
+            raise NotImplementedError()
+
+        bands = list(bands)
+        if len(bands) != 10:
+            raise ValueError("Equalizer requires exactly 10 bands")
+        self._dbus_interfaces['audio'].setEqualizer([int(b) for b in bands])
+
+    @property
+    def equalizer_preset(self) -> str:
+        """
+        Get the active device EQ preset
+
+        :return: One of "game", "music", "movie", "game1".."game5", "custom"
+        :rtype: str
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('equalizer_preset'):
+            return str(self._dbus_interfaces['audio'].getEqualizerPreset())
+        else:
+            raise NotImplementedError()
+
+    @equalizer_preset.setter
+    def equalizer_preset(self, preset: str) -> None:
+        """
+        Select the device EQ preset
+
+        "game", "music" and "movie" use curves stored on the device;
+        "custom" applies the bands set via the equalizer property;
+        "game1".."game5" are the five fixed game-specific EQ profiles.
+
+        :param preset: One of "game", "music", "movie", "game1".."game5", "custom"
+        :type preset: str
+
+        :raises NotImplementedError: If function is not supported
+        :raises ValueError: If preset is unknown
+        """
+        if not self.has('equalizer_preset'):
+            raise NotImplementedError()
+
+        preset = str(preset).lower()
+        if preset not in ('game', 'music', 'movie', 'custom',
+                          'game1', 'game2', 'game3', 'game4', 'game5'):
+            raise ValueError("Preset must be one of: game, music, movie, game1..game5, custom")
+        self._dbus_interfaces['audio'].setEqualizerPreset(preset)
+
+    @property
+    def mic_monitoring(self) -> bool:
+        """
+        Get whether mic monitoring (sidetone) is enabled
+
+        :rtype: bool
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('mic_monitoring'):
+            return bool(self._dbus_interfaces['audio'].getMicMonitoring())
+        else:
+            raise NotImplementedError()
+
+    @mic_monitoring.setter
+    def mic_monitoring(self, enabled: bool) -> None:
+        """
+        Enable or disable mic monitoring (sidetone)
+
+        :param enabled: True to hear your own mic in the headset
+        :type enabled: bool
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('mic_monitoring'):
+            self._dbus_interfaces['audio'].setMicMonitoring(bool(enabled))
+        else:
+            raise NotImplementedError()
+
+    @property
+    def mic_monitoring_level(self) -> int:
+        """
+        Get the mic monitoring (sidetone) loudness (0-10)
+
+        :rtype: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('mic_monitoring_level'):
+            return int(self._dbus_interfaces['audio'].getMicMonitoringLevel())
+        else:
+            raise NotImplementedError()
+
+    @mic_monitoring_level.setter
+    def mic_monitoring_level(self, level: int) -> None:
+        """
+        Set the mic monitoring (sidetone) loudness
+
+        :param level: Level 0-10
+        :type level: int
+
+        :raises NotImplementedError: If function is not supported
+        :raises ValueError: If level is not 0-10
+        """
+        if not self.has('mic_monitoring_level'):
+            raise NotImplementedError()
+
+        level = int(level)
+        if not 0 <= level <= 10:
+            raise ValueError("Mic monitoring level must be 0-10")
+        self._dbus_interfaces['audio'].setMicMonitoringLevel(level)
+
+    @property
+    def bluetooth_dnd(self) -> bool:
+        """
+        Get whether Bluetooth "Do Not Disturb" is enabled (dual-mode headsets:
+        suppress Bluetooth interruptions while in 2.4GHz mode)
+
+        :rtype: bool
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('bluetooth_dnd'):
+            return bool(self._dbus_interfaces['device'].getBluetoothDnd())
+        else:
+            raise NotImplementedError()
+
+    @bluetooth_dnd.setter
+    def bluetooth_dnd(self, enabled: bool) -> None:
+        """
+        Toggle Bluetooth "Do Not Disturb"
+
+        :param enabled: True to enable
+        :type enabled: bool
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if not self.has('bluetooth_dnd'):
+            raise NotImplementedError()
+        self._dbus_interfaces['device'].setBluetoothDnd(bool(enabled))
 
     @property
     def poll_rate(self) -> int:
