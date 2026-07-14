@@ -656,6 +656,21 @@ static int razer_set_device_mode(struct razer_kbd_device *device, unsigned char 
 }
 
 /**
+ * Set the active onboard profile
+ */
+static int razer_set_active_profile(struct razer_kbd_device *device, unsigned char profile)
+{
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = get_razer_report(0x05, 0x02, 0x01);
+    request.arguments[0] = profile;
+    request.transaction_id.id = 0x1F;
+
+    return razer_send_payload(device, &request, &response);
+}
+
+/**
  * Read device file "charge_level"
  *
  * Returns an integer which needs to be scaled from 0-255 -> 0-100
@@ -5800,6 +5815,16 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         // Tartarus Pro resets when it receives this command
         if (usb_dev->descriptor.idProduct != USB_DEVICE_ID_RAZER_TARTARUS_PRO) {
             err = razer_set_device_mode(dev, 0x00, 0x00);
+            if (err)
+                return err;
+        }
+
+        // The Huntsman V3 Pro 8KHz silently ignores effect and brightness
+        // commands while the read-only profile is active. Selecting profile 1,
+        // as Synapse does on startup, makes the device apply these commands
+        // again.
+        if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ) {
+            err = razer_set_active_profile(dev, 0x01);
             if (err)
                 return err;
         }
