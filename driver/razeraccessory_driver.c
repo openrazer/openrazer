@@ -2494,6 +2494,250 @@ static ssize_t razer_attr_read_channel6_led_brightness(struct device *dev, struc
     return razer_attr_read_channel_led_brightness(ARGB_CH_6_LED, dev, attr, buf);
 }
 
+/*
+ * Audio device files (Nommo V2)
+ */
+
+/**
+ * Write device file "audio_eq_preset"
+ *
+ * EQ preset as an ASCII number:
+ * 0 = default, 1 = game, 2 = music, 3 = movie, 4 = treble, 5 = mic boost,
+ * 16 (0x10) = custom (see audio_eq_bands)
+ */
+static ssize_t razer_attr_write_audio_eq_preset(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char preset = 0;
+    int err;
+
+    err = kstrtou8(buf, 0, &preset);
+    if (err < 0)
+        return err;
+
+    request = get_razer_report(0x08, 0x02, 0x02);
+    request.arguments[1] = preset;
+    request.transaction_id.id = 0x3F;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return count;
+}
+
+/**
+ * Read device file "audio_eq_preset"
+ */
+static ssize_t razer_attr_read_audio_eq_preset(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    int err;
+
+    request = get_razer_report(0x08, 0x82, 0x02);
+    request.transaction_id.id = 0x3F;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return sysfs_emit(buf, "%u\n", response.arguments[1]);
+}
+
+/**
+ * Write device file "audio_eq_bands"
+ *
+ * Takes 10 space-separated band gains as ASCII numbers (0-255), bands low to
+ * high: 31Hz, 63Hz, 125Hz, 250Hz, 500Hz, 1kHz, 2kHz, 4kHz, 8kHz, 16kHz.
+ * Flat (0 dB) is 12 (0x0C); Synapse uses 0-24 for -12dB..+12dB.
+ * Switches the EQ preset to custom before applying the bands.
+ */
+static ssize_t razer_attr_write_audio_eq_bands(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char bands[RAZER_NOMMO_V2_EQ_BANDS];
+    int err, i;
+
+    if (sscanf(buf, "%hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu",
+               &bands[0], &bands[1], &bands[2], &bands[3], &bands[4],
+               &bands[5], &bands[6], &bands[7], &bands[8], &bands[9]) != RAZER_NOMMO_V2_EQ_BANDS) {
+        dev_warn(dev, "razeraccessory: audio_eq_bands takes 10 space-separated numbers\n");
+        return -EINVAL;
+    }
+
+    // Bands apply to the currently active preset, so select custom first
+    request = get_razer_report(0x08, 0x02, 0x02);
+    request.arguments[1] = 0x10; // custom preset
+    request.transaction_id.id = 0x3F;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    request = get_razer_report(0x08, 0x04, RAZER_NOMMO_V2_EQ_BANDS + 1);
+    for (i = 0; i < RAZER_NOMMO_V2_EQ_BANDS; i++) {
+        request.arguments[i + 1] = bands[i];
+    }
+    request.transaction_id.id = 0x3F;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return count;
+}
+
+/**
+ * Read device file "audio_eq_bands"
+ */
+static ssize_t razer_attr_read_audio_eq_bands(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    int err;
+
+    request = get_razer_report(0x08, 0x84, RAZER_NOMMO_V2_EQ_BANDS + 1);
+    request.transaction_id.id = 0x3F;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return sysfs_emit(buf, "%u %u %u %u %u %u %u %u %u %u\n",
+                      response.arguments[1], response.arguments[2], response.arguments[3],
+                      response.arguments[4], response.arguments[5], response.arguments[6],
+                      response.arguments[7], response.arguments[8], response.arguments[9],
+                      response.arguments[10]);
+}
+
+/**
+ * Write device file "audio_bass"
+ *
+ * Subwoofer bass level as an ASCII number, 1-7
+ */
+static ssize_t razer_attr_write_audio_bass(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char bass = 0;
+    int err;
+
+    err = kstrtou8(buf, 0, &bass);
+    if (err < 0)
+        return err;
+
+    request = get_razer_report(0x08, 0x07, 0x02);
+    request.arguments[1] = clamp(bass, (unsigned char)1, (unsigned char)7);
+    request.transaction_id.id = 0x3F;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return count;
+}
+
+/**
+ * Read device file "audio_bass"
+ */
+static ssize_t razer_attr_read_audio_bass(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    int err;
+
+    request = get_razer_report(0x08, 0x87, 0x02);
+    request.transaction_id.id = 0x3F;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return sysfs_emit(buf, "%u\n", response.arguments[1]);
+}
+
+/**
+ * Write device file "device_idle_time"
+ *
+ * Auto-standby timeout in seconds as an ASCII number; 0 disables standby.
+ * Synapse offers 900 (15 min), 1800 (30 min) and 2700 (45 min).
+ */
+static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned short idle_time = 0;
+    int err;
+
+    err = kstrtou16(buf, 0, &idle_time);
+    if (err < 0)
+        return err;
+
+    request = get_razer_report(0x07, 0x08, 0x02);
+    request.arguments[1] = idle_time > 0 ? 0x01 : 0x00;
+    request.transaction_id.id = 0x3F;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    if (idle_time > 0) {
+        request = get_razer_report(0x07, 0x03, 0x02);
+        request.arguments[0] = (idle_time >> 8) & 0xFF;
+        request.arguments[1] = idle_time & 0xFF;
+        request.transaction_id.id = 0x3F;
+
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+    }
+
+    return count;
+}
+
+/**
+ * Read device file "device_idle_time"
+ *
+ * Returns 0 when auto-standby is disabled
+ */
+static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    int err;
+
+    request = get_razer_report(0x07, 0x88, 0x02);
+    request.transaction_id.id = 0x3F;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    if (response.arguments[1] == 0x00) {
+        return sysfs_emit(buf, "0\n");
+    }
+
+    request = get_razer_report(0x07, 0x83, 0x02);
+    request.transaction_id.id = 0x3F;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return sysfs_emit(buf, "%u\n", (response.arguments[0] << 8) | response.arguments[1]);
+}
+
 /**
  * Set up the device driver files
 
@@ -2559,6 +2803,11 @@ static DEVICE_ATTR(channel5_led_brightness,                 0660, razer_attr_rea
 static DEVICE_ATTR(channel6_led_brightness,                 0660, razer_attr_read_channel6_led_brightness,        razer_attr_write_channel6_led_brightness);
 
 static DEVICE_ATTR(is_mug_present,                          0440, razer_attr_read_is_mug_present,                 NULL);
+
+static DEVICE_ATTR(audio_eq_preset,                         0660, razer_attr_read_audio_eq_preset,                razer_attr_write_audio_eq_preset);
+static DEVICE_ATTR(audio_eq_bands,                          0660, razer_attr_read_audio_eq_bands,                 razer_attr_write_audio_eq_bands);
+static DEVICE_ATTR(audio_bass,                              0660, razer_attr_read_audio_bass,                     razer_attr_write_audio_bass);
+static DEVICE_ATTR(device_idle_time,                        0660, razer_attr_read_device_idle_time,               razer_attr_write_device_idle_time);
 
 static void razer_accessory_init(struct razer_accessory_device *dev, struct usb_interface *intf, struct hid_device *hdev)
 {
@@ -2751,6 +3000,13 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_breath);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_none);
+            break;
+
+        case USB_DEVICE_ID_RAZER_NOMMO_V2:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_eq_preset);                   // Audio EQ preset
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_eq_bands);                    // Audio custom EQ bands
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_bass);                        // Subwoofer bass level
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);                  // Auto-standby timeout
             break;
         }
 
@@ -3007,6 +3263,13 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_breath);
             device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_static);
             device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_none);
+            break;
+
+        case USB_DEVICE_ID_RAZER_NOMMO_V2:
+            device_remove_file(&hdev->dev, &dev_attr_audio_eq_preset);                   // Audio EQ preset
+            device_remove_file(&hdev->dev, &dev_attr_audio_eq_bands);                    // Audio custom EQ bands
+            device_remove_file(&hdev->dev, &dev_attr_audio_bass);                        // Subwoofer bass level
+            device_remove_file(&hdev->dev, &dev_attr_device_idle_time);                  // Auto-standby timeout
             break;
         }
 
