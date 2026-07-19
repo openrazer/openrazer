@@ -146,13 +146,10 @@ class RazerNommoV2(_RazerDeviceBrightnessSuspend):
     USB_PID = 0x055C
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 12]
-    # No wave/breath methods: the firmware only supports its built-in spectrum
-    # cycle and custom frames; static/none are rendered as custom frames by the
-    # driver
     METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_spectrum_effect',
                'set_none_effect', 'set_custom_effect', 'set_key_row']
 
-    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/eaebb52fa1538ccab9d076b1ea6e2d6c/razer-nommo-v2-hero-desktop.webp"
+    DEVICE_IMAGE = "https://dl.razerzone.com/directory/13035-nommo-v2-en-v1.png"
 
 
 class RazerMouseBungeeV3Chroma(_RazerDeviceBrightnessSuspend):

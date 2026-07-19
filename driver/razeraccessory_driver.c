@@ -39,7 +39,6 @@ static int razer_get_report(struct hid_device *hdev, struct razer_report *reques
         break;
 
     case USB_DEVICE_ID_RAZER_NOMMO_V2:
-        // Razer report is numbered feature report 0x07 on this device
         return razer_get_usb_response_report_id(hdev, 0x00, request, 0x00, response, 0x07, RAZER_NEW_DEVICE_WAIT_US);
         break;
 
@@ -2494,10 +2493,6 @@ static ssize_t razer_attr_read_channel6_led_brightness(struct device *dev, struc
     return razer_attr_read_channel_led_brightness(ARGB_CH_6_LED, dev, attr, buf);
 }
 
-/*
- * Audio device files (Nommo V2)
- */
-
 /**
  * Write device file "audio_eq_preset"
  *
@@ -2669,7 +2664,6 @@ static ssize_t razer_attr_read_audio_bass(struct device *dev, struct device_attr
  * Write device file "device_idle_time"
  *
  * Auto-standby timeout in seconds as an ASCII number; 0 disables standby.
- * Synapse offers 900 (15 min), 1800 (30 min) and 2700 (45 min).
  */
 static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
