@@ -1068,12 +1068,6 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         request.transaction_id.id = 0x3F;
         break;
 
-    case USB_DEVICE_ID_RAZER_NOMMO_V2:
-        // The firmware has no breathing effect (Synapse renders it in
-        // software by streaming custom frames)
-        dev_warn(dev, "razeraccessory: breath effect is not supported on this device\n");
-        return -EINVAL;
-
     default:
         dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
@@ -3055,9 +3049,18 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);                   // Custom effect frame
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);                    // No effect
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);                  // Static effect
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);                  // Breathing effect
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);                  // Custom effect
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);                     // Brightness
+
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_NOMMO_V2:
+            // No hardware breathing effect
+            break;
+
+        default:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);              // Breathing effect
+            break;
+        }
 
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
@@ -3321,9 +3324,18 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);                   // Custom effect frame
         device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);                    // No effect
         device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);                  // Static effect
-        device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);                  // Breathing effect
         device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);                  // Custom effect
         device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);                     // Brightness
+
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_NOMMO_V2:
+            // No hardware breathing effect
+            break;
+
+        default:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);              // Breathing effect
+            break;
+        }
 
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
