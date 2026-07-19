@@ -138,6 +138,21 @@ class RazerNommoPro(_RazerDeviceBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1419/1419_nommo_pro.png"
 
 
+class RazerNommoV2(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Nommo V2 (Speakers)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x055C
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 12]
+    METHODS = ['get_device_type_accessory', 'set_static_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_custom_effect', 'set_key_row',
+               'get_idle_time', 'set_idle_time']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/directory/13035-nommo-v2-en-v1.png"
+
+
 class RazerMouseBungeeV3Chroma(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Mouse Bungee V3 Chroma

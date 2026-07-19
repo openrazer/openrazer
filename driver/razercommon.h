@@ -146,8 +146,10 @@ struct razer_argb_report {
 static_assert(sizeof(struct razer_argb_report) == 320);
 
 int razer_send_control_msg(struct hid_device *hdev, const void *data, u16 size, u16 index, ulong wait);
+int razer_send_control_msg_report_id(struct hid_device *hdev, const void *data, u16 size, u16 index, u8 report_id, ulong wait);
 int razer_send_control_msg_old_device(struct hid_device *hdev, const void *data, uint value, uint index, uint size, ulong wait);
 int razer_get_usb_response(struct hid_device *hdev, unsigned int report_index, struct razer_report* request_report, unsigned int response_index, struct razer_report* response_report, unsigned long wait);
+int razer_get_usb_response_report_id(struct hid_device *hdev, unsigned int report_index, struct razer_report* request_report, unsigned int response_index, struct razer_report* response_report, u8 report_id, unsigned long wait);
 int razer_send_argb_msg(struct hid_device *hdev, unsigned char channel, size_t size, void const* data);
 unsigned char razer_calculate_crc(struct razer_report *report);
 struct razer_report get_razer_report(unsigned char command_class, unsigned char command_id, unsigned char data_size);

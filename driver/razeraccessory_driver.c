@@ -38,6 +38,10 @@ static int razer_get_report(struct hid_device *hdev, struct razer_report *reques
         return razer_get_usb_response(hdev, 0x00, request, 0x00, response, RAZER_NEW_DEVICE_WAIT_US);
         break;
 
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        return razer_get_usb_response_report_id(hdev, 0x00, request, 0x00, response, 0x07, RAZER_NEW_DEVICE_WAIT_US);
+        break;
+
     default:
         return razer_get_usb_response(hdev, 0x00, request, 0x00, response, RAZER_ACCESSORY_WAIT_US);
     }
@@ -210,6 +214,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Nommo Chroma";
         break;
 
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        device_type = "Razer Nommo V2";
+        break;
+
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         device_type = "Razer Kraken Kitty Edition";
         break;
@@ -349,6 +357,17 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
             return err;
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
         request.transaction_id.id = 0xFF;
+        break;
+
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        // Must be in normal mode for hardware effects
+        err = razer_set_device_mode(device, 0x00, 0x00);
+        if (err)
+            return err;
+        // The firmware ignores the usual spectrum effect ID (0x03); effect
+        // ID 0x00 engages the device's built-in spectrum cycle instead.
+        request = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
+        request.transaction_id.id = 0x3F;
         break;
 
     default:
@@ -528,6 +547,26 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
         request.transaction_id.id = 0xFF;
         break;
 
+    case USB_DEVICE_ID_RAZER_NOMMO_V2: {
+        unsigned char row[RAZER_NOMMO_V2_LEDS * 3] = { 0 };
+
+        // No hardware "off" effect (effect ID 0x00 starts the spectrum
+        // cycle); display an all-black custom frame instead. The custom
+        // effect must be engaged before uploading the frame - frames sent
+        // while a hardware effect is active are discarded.
+        err = razer_set_device_mode(device, 0x03, 0x00);
+        if (err)
+            return err;
+        request = razer_chroma_extended_matrix_effect_custom_frame();
+        request.transaction_id.id = 0x3F;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        request = razer_chroma_extended_matrix_set_custom_frame(0, 0, RAZER_NOMMO_V2_LEDS - 1, row);
+        request.transaction_id.id = 0x3F;
+        break;
+    }
+
     default:
         dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
@@ -631,6 +670,15 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         request = razer_chroma_extended_matrix_effect_custom_frame();
         request.transaction_id.id = 0xFF;
+        break;
+
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        // Must be in driver mode for custom effects
+        err = razer_set_device_mode(device, 0x03, 0x00);
+        if (err)
+            return err;
+        request = razer_chroma_extended_matrix_effect_custom_frame();
+        request.transaction_id.id = 0x3F;
         break;
 
     default:
@@ -767,6 +815,32 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
         request.transaction_id.id = 0xFF;
         break;
+
+    case USB_DEVICE_ID_RAZER_NOMMO_V2: {
+        unsigned char row[RAZER_NOMMO_V2_LEDS * 3];
+        int i;
+
+        // No hardware static effect; display a solid custom frame instead,
+        // matching what Synapse does for this device. The custom effect
+        // must be engaged before uploading the frame - frames sent while a
+        // hardware effect is active are discarded.
+        err = razer_set_device_mode(device, 0x03, 0x00);
+        if (err)
+            return err;
+        request = razer_chroma_extended_matrix_effect_custom_frame();
+        request.transaction_id.id = 0x3F;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        for (i = 0; i < RAZER_NOMMO_V2_LEDS * 3; i += 3) {
+            row[i] = buf[0];
+            row[i + 1] = buf[1];
+            row[i + 2] = buf[2];
+        }
+        request = razer_chroma_extended_matrix_set_custom_frame(0, 0, RAZER_NOMMO_V2_LEDS - 1, row);
+        request.transaction_id.id = 0x3F;
+        break;
+    }
 
     default:
         dev_warn(dev, "razeraccessory: Unknown device\n");
@@ -1153,6 +1227,15 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             request.transaction_id.id = 0xFF;
             break;
 
+        case USB_DEVICE_ID_RAZER_NOMMO_V2:
+            // Must be in driver mode for custom effects
+            err = razer_set_device_mode(device, 0x03, 0x00);
+            if (err)
+                return err;
+            request = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
+            request.transaction_id.id = 0x3F;
+            break;
+
         case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
             mutex_lock(&device->lock);
             razer_send_argb_msg(device->hdev, row_id, (stop_col - start_col) + 1, (unsigned char*)&buf[offset]);
@@ -1238,6 +1321,15 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
         serial_string[22] = '\0';
         break;
 
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        request.transaction_id.id = 0x3F;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        memcpy(serial_string, response.arguments, 22);
+        serial_string[22] = '\0';
+        break;
+
     default:
         dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
@@ -1291,6 +1383,13 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+        request.transaction_id.id = 0x3F;
+        break;
+
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        // The standard firmware version command (0x81) returns 0.0 on this
+        // device; command 0x87 reports the real version
+        request = get_razer_report(0x00, 0x87, 0x02);
         request.transaction_id.id = 0x3F;
         break;
 
@@ -1359,6 +1458,10 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request.transaction_id.id = 0xFF;
+        break;
+
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        request.transaction_id.id = 0x3F;
         break;
 
     default:
@@ -1436,6 +1539,10 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request.transaction_id.id = 0xFF;
+        break;
+
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        request.transaction_id.id = 0x3F;
         break;
 
     default:
@@ -1522,6 +1629,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_NOMMO_PRO:
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         request.transaction_id.id = 0x3F;
         break;
@@ -1635,6 +1743,15 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
         request = razer_chroma_standard_get_led_brightness(VARSTORE, BACKLIGHT_LED);
         request.transaction_id.id = 0xFF;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        brightness = response.arguments[2];
+        break;
+
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, ZERO_LED);
+        request.transaction_id.id = 0x3F;
         err = razer_send_payload(device, &request, &response);
         if (err)
             return err;
@@ -2371,6 +2488,333 @@ static ssize_t razer_attr_read_channel6_led_brightness(struct device *dev, struc
 }
 
 /**
+ * Write device file "audio_eq_preset"
+ *
+ * EQ preset as an ASCII number:
+ * 0 = default, 1 = game, 2 = music, 3 = movie, 4 = treble, 5 = mic boost,
+ * 16 (0x10) = custom (see audio_eq_bands)
+ */
+static ssize_t razer_attr_write_audio_eq_preset(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char transaction_id;
+    unsigned char preset = 0;
+    int err;
+
+    err = kstrtou8(buf, 0, &preset);
+    if (err < 0)
+        return err;
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: audio_eq_preset not supported for this model\n");
+        return -EINVAL;
+    }
+
+    request = get_razer_report(0x08, 0x02, 0x02);
+    request.arguments[1] = preset;
+    request.transaction_id.id = transaction_id;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return count;
+}
+
+/**
+ * Read device file "audio_eq_preset"
+ */
+static ssize_t razer_attr_read_audio_eq_preset(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char transaction_id;
+    int err;
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: audio_eq_preset not supported for this model\n");
+        return -EINVAL;
+    }
+
+    request = get_razer_report(0x08, 0x82, 0x02);
+    request.transaction_id.id = transaction_id;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return sysfs_emit(buf, "%u\n", response.arguments[1]);
+}
+
+/**
+ * Write device file "audio_eq_bands"
+ *
+ * Takes 10 space-separated band gains as ASCII numbers (0-255), bands low to
+ * high: 31Hz, 63Hz, 125Hz, 250Hz, 500Hz, 1kHz, 2kHz, 4kHz, 8kHz, 16kHz.
+ * Flat (0 dB) is 12 (0x0C); Synapse uses 0-24 for -12dB..+12dB.
+ * Switches the EQ preset to custom before applying the bands.
+ */
+static ssize_t razer_attr_write_audio_eq_bands(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char transaction_id;
+    unsigned char bands[RAZER_AUDIO_EQ_BANDS];
+    int err, i;
+
+    if (sscanf(buf, "%hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu",
+               &bands[0], &bands[1], &bands[2], &bands[3], &bands[4],
+               &bands[5], &bands[6], &bands[7], &bands[8], &bands[9]) != RAZER_AUDIO_EQ_BANDS) {
+        dev_warn(dev, "razeraccessory: audio_eq_bands takes 10 space-separated numbers\n");
+        return -EINVAL;
+    }
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: audio_eq_bands not supported for this model\n");
+        return -EINVAL;
+    }
+
+    // Bands apply to the currently active preset, so select custom first
+    request = get_razer_report(0x08, 0x02, 0x02);
+    request.arguments[1] = 0x10; // custom preset
+    request.transaction_id.id = transaction_id;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    request = get_razer_report(0x08, 0x04, RAZER_AUDIO_EQ_BANDS + 1);
+    for (i = 0; i < RAZER_AUDIO_EQ_BANDS; i++) {
+        request.arguments[i + 1] = bands[i];
+    }
+    request.transaction_id.id = transaction_id;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return count;
+}
+
+/**
+ * Read device file "audio_eq_bands"
+ */
+static ssize_t razer_attr_read_audio_eq_bands(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char transaction_id;
+    int err;
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: audio_eq_bands not supported for this model\n");
+        return -EINVAL;
+    }
+
+    request = get_razer_report(0x08, 0x84, RAZER_AUDIO_EQ_BANDS + 1);
+    request.transaction_id.id = transaction_id;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return sysfs_emit(buf, "%u %u %u %u %u %u %u %u %u %u\n",
+                      response.arguments[1], response.arguments[2], response.arguments[3],
+                      response.arguments[4], response.arguments[5], response.arguments[6],
+                      response.arguments[7], response.arguments[8], response.arguments[9],
+                      response.arguments[10]);
+}
+
+/**
+ * Write device file "audio_bass"
+ *
+ * Subwoofer bass level as an ASCII number, 1-7
+ */
+static ssize_t razer_attr_write_audio_bass(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char transaction_id;
+    unsigned char bass = 0;
+    int err;
+
+    err = kstrtou8(buf, 0, &bass);
+    if (err < 0)
+        return err;
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: audio_bass not supported for this model\n");
+        return -EINVAL;
+    }
+
+    request = get_razer_report(0x08, 0x07, 0x02);
+    request.arguments[1] = clamp(bass, (unsigned char)1, (unsigned char)7);
+    request.transaction_id.id = transaction_id;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return count;
+}
+
+/**
+ * Read device file "audio_bass"
+ */
+static ssize_t razer_attr_read_audio_bass(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char transaction_id;
+    int err;
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: audio_bass not supported for this model\n");
+        return -EINVAL;
+    }
+
+    request = get_razer_report(0x08, 0x87, 0x02);
+    request.transaction_id.id = transaction_id;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return sysfs_emit(buf, "%u\n", response.arguments[1]);
+}
+
+/**
+ * Write device file "device_idle_time"
+ *
+ * Auto-standby timeout in seconds as an ASCII number; 0 disables standby.
+ */
+static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char transaction_id;
+    unsigned short idle_time = 0;
+    int err;
+
+    err = kstrtou16(buf, 0, &idle_time);
+    if (err < 0)
+        return err;
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: device_idle_time not supported for this model\n");
+        return -EINVAL;
+    }
+
+    request = get_razer_report(0x07, 0x08, 0x02);
+    request.arguments[1] = idle_time > 0 ? 0x01 : 0x00;
+    request.transaction_id.id = transaction_id;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    if (idle_time > 0) {
+        request = get_razer_report(0x07, 0x03, 0x02);
+        request.arguments[0] = (idle_time >> 8) & 0xFF;
+        request.arguments[1] = idle_time & 0xFF;
+        request.transaction_id.id = transaction_id;
+
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+    }
+
+    return count;
+}
+
+/**
+ * Read device file "device_idle_time"
+ *
+ * Returns 0 when auto-standby is disabled
+ */
+static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char transaction_id;
+    int err;
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: device_idle_time not supported for this model\n");
+        return -EINVAL;
+    }
+
+    request = get_razer_report(0x07, 0x88, 0x02);
+    request.transaction_id.id = transaction_id;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    if (response.arguments[1] == 0x00) {
+        return sysfs_emit(buf, "0\n");
+    }
+
+    request = get_razer_report(0x07, 0x83, 0x02);
+    request.transaction_id.id = transaction_id;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return sysfs_emit(buf, "%u\n", (response.arguments[0] << 8) | response.arguments[1]);
+}
+
+/**
  * Set up the device driver files
 
  *
@@ -2435,6 +2879,11 @@ static DEVICE_ATTR(channel5_led_brightness,                 0660, razer_attr_rea
 static DEVICE_ATTR(channel6_led_brightness,                 0660, razer_attr_read_channel6_led_brightness,        razer_attr_write_channel6_led_brightness);
 
 static DEVICE_ATTR(is_mug_present,                          0440, razer_attr_read_is_mug_present,                 NULL);
+
+static DEVICE_ATTR(audio_eq_preset,                         0660, razer_attr_read_audio_eq_preset,                razer_attr_write_audio_eq_preset);
+static DEVICE_ATTR(audio_eq_bands,                          0660, razer_attr_read_audio_eq_bands,                 razer_attr_write_audio_eq_bands);
+static DEVICE_ATTR(audio_bass,                              0660, razer_attr_read_audio_bass,                     razer_attr_write_audio_bass);
+static DEVICE_ATTR(device_idle_time,                        0660, razer_attr_read_device_idle_time,               razer_attr_write_device_idle_time);
 
 static void razer_accessory_init(struct razer_accessory_device *dev, struct usb_interface *intf, struct hid_device *hdev)
 {
@@ -2559,6 +3008,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
         expected_protocol = 0;
         break;
 
@@ -2599,9 +3049,41 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);                   // Custom effect frame
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);                    // No effect
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);                  // Static effect
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);                  // Breathing effect
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);                  // Custom effect
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);                     // Brightness
+
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_FIREFLY:
+        case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
+        case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
+        case USB_DEVICE_ID_RAZER_CORE:
+        case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
+        case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+        case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+        case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
+        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
+        case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        case USB_DEVICE_ID_RAZER_RAPTOR_27:
+        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
+        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
+        case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
+        case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);              // Breathing effect
+            break;
+        }
 
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
@@ -2626,6 +3108,13 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_breath);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fully_charged_matrix_effect_none);
+            break;
+
+        case USB_DEVICE_ID_RAZER_NOMMO_V2:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_eq_preset);                   // Audio EQ preset
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_eq_bands);                    // Audio custom EQ bands
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_bass);                        // Subwoofer bass level
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);                  // Auto-standby timeout
             break;
         }
 
@@ -2671,6 +3160,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
         case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+        case USB_DEVICE_ID_RAZER_NOMMO_V2:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
             break;
         }
@@ -2758,6 +3248,9 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         // Needs to be in "Normal" mode for idle effects to function properly
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        // Forcing "Driver" mode on plug-in would kill the active hardware
+        // spectrum effect; effect writers set the mode they need instead
+        case USB_DEVICE_ID_RAZER_NOMMO_V2:
             break;
 
         default:
@@ -2814,6 +3307,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
         expected_protocol = 0;
         break;
 
@@ -2853,9 +3347,43 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);                   // Custom effect frame
         device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);                    // No effect
         device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);                  // Static effect
-        device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);                  // Breathing effect
         device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);                  // Custom effect
         device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);                     // Brightness
+
+        // The Nommo V2 has no hardware breathing effect, so it is the only
+        // device that does not get this file
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_FIREFLY:
+        case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2:
+        case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_EXTENDED:
+        case USB_DEVICE_ID_RAZER_GOLIATHUS_CHROMA_3XL:
+        case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
+        case USB_DEVICE_ID_RAZER_CORE:
+        case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
+        case USB_DEVICE_ID_RAZER_CHROMA_HDK:
+        case USB_DEVICE_ID_RAZER_CHROMA_BASE:
+        case USB_DEVICE_ID_RAZER_NOMMO_PRO:
+        case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
+        case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
+        case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
+        case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
+        case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
+        case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        case USB_DEVICE_ID_RAZER_RAPTOR_27:
+        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
+        case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
+        case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
+        case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);              // Breathing effect
+            break;
+        }
 
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
@@ -2877,6 +3405,13 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_breath);
             device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_static);
             device_remove_file(&hdev->dev, &dev_attr_fully_charged_matrix_effect_none);
+            break;
+
+        case USB_DEVICE_ID_RAZER_NOMMO_V2:
+            device_remove_file(&hdev->dev, &dev_attr_audio_eq_preset);                   // Audio EQ preset
+            device_remove_file(&hdev->dev, &dev_attr_audio_eq_bands);                    // Audio custom EQ bands
+            device_remove_file(&hdev->dev, &dev_attr_audio_bass);                        // Subwoofer bass level
+            device_remove_file(&hdev->dev, &dev_attr_device_idle_time);                  // Auto-standby timeout
             break;
         }
 
@@ -2909,6 +3444,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
         case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+        case USB_DEVICE_ID_RAZER_NOMMO_V2:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
             break;
         }
@@ -3038,6 +3574,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_BASE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA) },
