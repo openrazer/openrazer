@@ -2505,6 +2505,7 @@ static ssize_t razer_attr_write_audio_eq_preset(struct device *dev, struct devic
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char transaction_id;
     unsigned char preset = 0;
     int err;
 
@@ -2512,9 +2513,19 @@ static ssize_t razer_attr_write_audio_eq_preset(struct device *dev, struct devic
     if (err < 0)
         return err;
 
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: audio_eq_preset not supported for this model\n");
+        return -EINVAL;
+    }
+
     request = get_razer_report(0x08, 0x02, 0x02);
     request.arguments[1] = preset;
-    request.transaction_id.id = 0x3F;
+    request.transaction_id.id = transaction_id;
 
     err = razer_send_payload(device, &request, &response);
     if (err)
@@ -2531,10 +2542,21 @@ static ssize_t razer_attr_read_audio_eq_preset(struct device *dev, struct device
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char transaction_id;
     int err;
 
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: audio_eq_preset not supported for this model\n");
+        return -EINVAL;
+    }
+
     request = get_razer_report(0x08, 0x82, 0x02);
-    request.transaction_id.id = 0x3F;
+    request.transaction_id.id = transaction_id;
 
     err = razer_send_payload(device, &request, &response);
     if (err)
@@ -2556,30 +2578,41 @@ static ssize_t razer_attr_write_audio_eq_bands(struct device *dev, struct device
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned char bands[RAZER_NOMMO_V2_EQ_BANDS];
+    unsigned char transaction_id;
+    unsigned char bands[RAZER_AUDIO_EQ_BANDS];
     int err, i;
 
     if (sscanf(buf, "%hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu",
                &bands[0], &bands[1], &bands[2], &bands[3], &bands[4],
-               &bands[5], &bands[6], &bands[7], &bands[8], &bands[9]) != RAZER_NOMMO_V2_EQ_BANDS) {
+               &bands[5], &bands[6], &bands[7], &bands[8], &bands[9]) != RAZER_AUDIO_EQ_BANDS) {
         dev_warn(dev, "razeraccessory: audio_eq_bands takes 10 space-separated numbers\n");
+        return -EINVAL;
+    }
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: audio_eq_bands not supported for this model\n");
         return -EINVAL;
     }
 
     // Bands apply to the currently active preset, so select custom first
     request = get_razer_report(0x08, 0x02, 0x02);
     request.arguments[1] = 0x10; // custom preset
-    request.transaction_id.id = 0x3F;
+    request.transaction_id.id = transaction_id;
 
     err = razer_send_payload(device, &request, &response);
     if (err)
         return err;
 
-    request = get_razer_report(0x08, 0x04, RAZER_NOMMO_V2_EQ_BANDS + 1);
-    for (i = 0; i < RAZER_NOMMO_V2_EQ_BANDS; i++) {
+    request = get_razer_report(0x08, 0x04, RAZER_AUDIO_EQ_BANDS + 1);
+    for (i = 0; i < RAZER_AUDIO_EQ_BANDS; i++) {
         request.arguments[i + 1] = bands[i];
     }
-    request.transaction_id.id = 0x3F;
+    request.transaction_id.id = transaction_id;
 
     err = razer_send_payload(device, &request, &response);
     if (err)
@@ -2596,10 +2629,21 @@ static ssize_t razer_attr_read_audio_eq_bands(struct device *dev, struct device_
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char transaction_id;
     int err;
 
-    request = get_razer_report(0x08, 0x84, RAZER_NOMMO_V2_EQ_BANDS + 1);
-    request.transaction_id.id = 0x3F;
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: audio_eq_bands not supported for this model\n");
+        return -EINVAL;
+    }
+
+    request = get_razer_report(0x08, 0x84, RAZER_AUDIO_EQ_BANDS + 1);
+    request.transaction_id.id = transaction_id;
 
     err = razer_send_payload(device, &request, &response);
     if (err)
@@ -2622,6 +2666,7 @@ static ssize_t razer_attr_write_audio_bass(struct device *dev, struct device_att
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char transaction_id;
     unsigned char bass = 0;
     int err;
 
@@ -2629,9 +2674,19 @@ static ssize_t razer_attr_write_audio_bass(struct device *dev, struct device_att
     if (err < 0)
         return err;
 
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: audio_bass not supported for this model\n");
+        return -EINVAL;
+    }
+
     request = get_razer_report(0x08, 0x07, 0x02);
     request.arguments[1] = clamp(bass, (unsigned char)1, (unsigned char)7);
-    request.transaction_id.id = 0x3F;
+    request.transaction_id.id = transaction_id;
 
     err = razer_send_payload(device, &request, &response);
     if (err)
@@ -2648,10 +2703,21 @@ static ssize_t razer_attr_read_audio_bass(struct device *dev, struct device_attr
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char transaction_id;
     int err;
 
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: audio_bass not supported for this model\n");
+        return -EINVAL;
+    }
+
     request = get_razer_report(0x08, 0x87, 0x02);
-    request.transaction_id.id = 0x3F;
+    request.transaction_id.id = transaction_id;
 
     err = razer_send_payload(device, &request, &response);
     if (err)
@@ -2670,6 +2736,7 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char transaction_id;
     unsigned short idle_time = 0;
     int err;
 
@@ -2677,9 +2744,19 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
     if (err < 0)
         return err;
 
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: device_idle_time not supported for this model\n");
+        return -EINVAL;
+    }
+
     request = get_razer_report(0x07, 0x08, 0x02);
     request.arguments[1] = idle_time > 0 ? 0x01 : 0x00;
-    request.transaction_id.id = 0x3F;
+    request.transaction_id.id = transaction_id;
 
     err = razer_send_payload(device, &request, &response);
     if (err)
@@ -2689,7 +2766,7 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
         request = get_razer_report(0x07, 0x03, 0x02);
         request.arguments[0] = (idle_time >> 8) & 0xFF;
         request.arguments[1] = idle_time & 0xFF;
-        request.transaction_id.id = 0x3F;
+        request.transaction_id.id = transaction_id;
 
         err = razer_send_payload(device, &request, &response);
         if (err)
@@ -2709,10 +2786,21 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char transaction_id;
     int err;
 
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NOMMO_V2:
+        transaction_id = 0x3F;
+        break;
+
+    default:
+        dev_warn(dev, "razeraccessory: device_idle_time not supported for this model\n");
+        return -EINVAL;
+    }
+
     request = get_razer_report(0x07, 0x88, 0x02);
-    request.transaction_id.id = 0x3F;
+    request.transaction_id.id = transaction_id;
 
     err = razer_send_payload(device, &request, &response);
     if (err)
@@ -2723,7 +2811,7 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     }
 
     request = get_razer_report(0x07, 0x83, 0x02);
-    request.transaction_id.id = 0x3F;
+    request.transaction_id.id = transaction_id;
 
     err = razer_send_payload(device, &request, &response);
     if (err)
