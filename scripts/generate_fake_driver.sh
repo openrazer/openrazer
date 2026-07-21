@@ -131,6 +131,7 @@ declare -A files_metadata=(
     ["headphone_eq"]="rw;0 0 0 0 0 0 0 0 0 0"
     ["mic_eq"]="w;"
     ["mic_eq_preset"]="w;"
+    ["mic_mute"]="r;0"
     ["mic_volume"]="rw;100"
     ["sidetone"]="w;"
     ["thx_spatial_audio"]="rw;0"

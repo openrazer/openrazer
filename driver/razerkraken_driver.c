@@ -1431,6 +1431,10 @@ static ssize_t razer_attr_read_headphone_eq(struct device *dev, struct device_at
     int len = 0, i;
 
     mutex_lock(&device->lock);
+    /* "<active_preset> b0 b1 .. b9" — the leading preset index is what the
+     * control app reads as the active EQ profile; raw_event updates
+     * cached_v3_eq_active from the on-board EQ button (cls=0x60 push). */
+    len += sprintf(buf + len, "%d ", (int)device->cached_v3_eq_active);
     for (i = 0; i < 10; i++) {
         len += sprintf(buf + len, "%d", (int)device->eq_bands[i]);
         if (i < 9) len += sprintf(buf + len, " ");
@@ -1986,7 +1990,13 @@ static DEVICE_ATTR(headphone_eq,            0660, razer_attr_read_headphone_eq, 
 static DEVICE_ATTR(thx_spatial_audio,       0660, razer_attr_read_thx_spatial_audio,       razer_attr_write_thx_spatial_audio);
 static DEVICE_ATTR(sidetone,                0660, razer_attr_read_sidetone,                razer_attr_write_sidetone);
 static DEVICE_ATTR(mic_eq,                  0220, NULL,                                    razer_attr_write_mic_eq);
+static ssize_t razer_attr_read_mic_mute(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    return sprintf(buf, "%d\n", device->cached_mic_muted);
+}
 static DEVICE_ATTR(mic_eq_preset,           0660, razer_attr_read_mic_eq_preset,           razer_attr_write_mic_eq_preset);
+static DEVICE_ATTR(mic_mute,                0440, razer_attr_read_mic_mute,                NULL);
 static DEVICE_ATTR(audio_function_button,   0660, razer_attr_read_audio_function_button,   razer_attr_write_audio_function_button);
 /* BlackShark V3 Pro (PID 0x0577) — distinct attribute names so they don't collide
  * with V3's headphone_eq (which has 10-band write semantics). */
@@ -2035,6 +2045,7 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
     dev->cached_game_chat_balance  = -1;
     dev->cached_in_call_audio_mix  = -1;
     dev->cached_audio_prompts      = -1;
+    dev->cached_mic_muted          = -1;
     dev->pushed_battery_pct        = -1;
     dev->pushed_charging           = -1;
 
@@ -2131,6 +2142,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_sidetone);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq_preset);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_mute);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_function_button);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_chat_balance);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_in_call_audio_mix);
@@ -2150,6 +2162,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_v3pro_headphone_eq);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq_preset);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_mute);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_function_button);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_chat_balance);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_in_call_audio_mix);
@@ -2259,6 +2272,7 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_sidetone);
             device_remove_file(&hdev->dev, &dev_attr_mic_eq);
             device_remove_file(&hdev->dev, &dev_attr_mic_eq_preset);
+            device_remove_file(&hdev->dev, &dev_attr_mic_mute);
             device_remove_file(&hdev->dev, &dev_attr_audio_function_button);
             device_remove_file(&hdev->dev, &dev_attr_game_chat_balance);
             device_remove_file(&hdev->dev, &dev_attr_in_call_audio_mix);
@@ -2278,6 +2292,7 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_v3pro_headphone_eq);
             device_remove_file(&hdev->dev, &dev_attr_mic_eq);
             device_remove_file(&hdev->dev, &dev_attr_mic_eq_preset);
+            device_remove_file(&hdev->dev, &dev_attr_mic_mute);
             device_remove_file(&hdev->dev, &dev_attr_audio_function_button);
             device_remove_file(&hdev->dev, &dev_attr_game_chat_balance);
             device_remove_file(&hdev->dev, &dev_attr_in_call_audio_mix);
@@ -2303,20 +2318,84 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
                               device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED)) {
         memcpy(&device->data[0], &data[0], size);
 
-        /* Capture unsolicited state-change pushes (sub=0x02) into a
-         * separate cache so they're not clobbered by the next
-         * send_cmd's data[1]=0 clear. Lets sysfs readers fall back to
-         * push-cache when their own GET reply never arrives — battery
-         * transitions like 96→97 in the wired pcap are pushed, not
-         * replied to. */
-        if (data[11] == 0x02 && data[12] >= 1) {
+        /* Capture BOTH replies (sub=0x01) and unsolicited pushes (sub=0x02)
+         * into a separate cache so they survive the next send_cmd's
+         * data[1]=0 clear and the read handler's query race. With the
+         * config-desc-255 quirk arming the channel, the armed dongle answers
+         * cls=0x21/0x2a queries with sub=0x01 replies (val at data[13]);
+         * without caching those (stock only cached sub=0x02) the value
+         * arrived in raw_event but was thrown away — charge_level read -1. */
+        if ((data[11] == 0x01 || data[11] == 0x02) && data[12] >= 1) {
             switch (data[10]) {
             case 0x21: /* battery percent */
                 if (data[13] <= 100)
                     device->pushed_battery_pct = data[13];
                 break;
-            case 0x2a: /* charging flag */
-                device->pushed_charging = data[13] ? 1 : 0;
+            case 0x2a: /* charging flag — only a real 0/1 state reply.
+                        * The dir=0x00 capability/handshake replies also use
+                        * cls=0x2a but carry data[13]=0xff; caching those would
+                        * flip charging to "1" (false positive). */
+                if (data[13] <= 1)
+                    device->pushed_charging = data[13] ? 1 : 0;
+                break;
+
+            /* ---- On-board change listening ----
+             * The headset pushes these on ep 0x84 when a setting is changed
+             * via its physical buttons/dials; caching them here keeps the
+             * sysfs read handlers (which return the cached_* value) in sync
+             * with on-device changes. data[13]==0xff = capability/handshake
+             * reply, not a real value — reject it. */
+            case BLACKSHARK_PARAM_SIDETONE_VOLUME: /* 0x19 sidetone level */
+                if (data[13] <= 15) {
+                    device->cached_v3_sidetone = data[13];
+                    device->cached_v3pro_sidetone = data[13];
+                }
+                break;
+            case BLACKSHARK_PARAM_GAME_CHAT_BAL_PRO: /* 0x5c */
+            case BLACKSHARK_PARAM_GAME_CHAT_BAL_V3:  /* 0x65 */
+                if (data[13] != 0xff)
+                    device->cached_game_chat_balance = data[13];
+                break;
+            case BLACKSHARK_PARAM_IN_CALL_AUDIO_MIX: /* 0x5d */
+                if (data[13] != 0xff)
+                    device->cached_in_call_audio_mix = data[13];
+                break;
+            case BLACKSHARK_PARAM_ULTRA_LOW_LATENCY: /* 0x5f */
+                if (data[13] <= 1) {
+                    device->cached_v3_ull = data[13];
+                    device->cached_v3pro_ull = data[13];
+                }
+                break;
+            case BLACKSHARK_PARAM_AUDIO_PROMPTS_GET: /* 0x66 */
+                if (data[13] <= 1)
+                    device->cached_audio_prompts = data[13];
+                break;
+            case BLACKSHARK_PARAM_AUDIO_FN_GET: /* 0x6a fn-button mode */
+                if (data[13] <= 3)
+                    device->cached_v3_fn_button = data[13];
+                break;
+            case BLACKSHARK_PARAM_THX: /* 0x9e THX spatial */
+                if (data[13] <= 1) {
+                    device->cached_v3_thx = data[13];
+                    device->cached_v3pro_thx = data[13];
+                }
+                break;
+            case BLACKSHARK_PARAM_MIC_EQ_PRESET: /* 0x16 mic EQ preset */
+                if (data[13] != 0xff)
+                    device->cached_v3_mic_eq_preset = data[13];
+                break;
+            case BLACKSHARK_PARAM_MIC_STATUS: /* 0x55 mic mute (boom flip / mute button) */
+                if (data[13] <= 1)
+                    device->cached_mic_muted = data[13];
+                break;
+            case BLACKSHARK_PARAM_EQ_SLOT_META: /* 0x60 EQ preset — the on-board
+                        * EQ button pushes cls=0x60 sub=0x02 cnt=6 with the
+                        * active preset index in data[13] (verified on hardware
+                        * 2026-07-21: cycling the button pushed 5/0/1/2/3). */
+                if (data[13] < BLACKSHARK_V3_PRO_EQ_PRESET_COUNT) {
+                    device->cached_v3pro_eq_profile = data[13];
+                    device->cached_v3_eq_active = data[13];
+                }
                 break;
             default:
                 break;

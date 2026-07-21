@@ -37,6 +37,7 @@
 #define BLACKSHARK_PARAM_SIDETONE_VOLUME   0x19  /* GET; cnt=1 [level 0..15]. Synapse 4 enum: SIDETONE_VOLUME=25 (0x19). */
 #define BLACKSHARK_PARAM_CHARGE_STATE      0x2a  /* GET; cnt=1 [charging? 0/1] */
 #define BLACKSHARK_PARAM_AUTO_POWER_OFF    0x2c  /* GET; cnt=1 [minutes]. Synapse 4 enum: AUTO_POWER_OFF_STATUS=44 (0x2c). Previously misnamed SIDETONE_LEVEL; both reply 0..15 so the bug was masked until 2026-05-03 Synapse webapp source decode. */
+#define BLACKSHARK_PARAM_MIC_STATUS        0x55  /* GET/push; cnt=1 [1=muted, 0=live]. Synapse MIC_STATUS=85. */
 #define BLACKSHARK_PARAM_GAME_CHAT_BAL_PRO 0x5c  /* GET; cnt=1 [balance]. V3 Pro variant (Synapse Eu enum: 92). Pair: SET 0xdc. */
 #define BLACKSHARK_PARAM_IN_CALL_AUDIO_MIX 0x5d  /* GET; cnt=1 [mode]. Pair: SET 0xdd. */
 #define BLACKSHARK_PARAM_ULTRA_LOW_LATENCY 0x5f  /* GET; cnt=1 [on/off]. Confirmed via readback. */
@@ -193,6 +194,7 @@ struct razer_kraken_device {
     s8 cached_game_chat_balance;
     s8 cached_in_call_audio_mix;
     s8 cached_audio_prompts;
+    s8 cached_mic_muted;
 };
 
 union razer_kraken_effect_byte {
