@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 """
-DBus methods for headset audio settings (equalizer, presets, mic monitoring)
-and related device toggles.
+DBus methods for headset audio settings (equalizer, presets, sidetone) and
+related device toggles.
 
-Currently used by the Razer BlackShark V2 Pro 2.4 (razerblackshark module),
-whose DSP applies a 10-band equalizer on the device itself. See
-BLACKSHARK_NOTES.md for the protocol.
+Used by the BlackShark headsets (razerblackshark module), whose DSP applies a
+10-band equalizer on the device itself. The protocol is documented in
+driver/razerblackshark_driver.h.
 """
 
 from openrazer_daemon.dbus_services import endpoint
@@ -21,6 +21,9 @@ EQUALIZER_LIMIT = 5
 EQUALIZER_PRESETS = {'game': 7, 'music': 8, 'movie': 9,
                      'game1': 250, 'game2': 254, 'game3': 251,
                      'game4': 253, 'game5': 252, 'custom': 255}
+
+#: Fallback for devices that do not declare their own sidetone range.
+DEFAULT_SIDETONE_MAX = 10
 
 
 @endpoint('razer.device.audio', 'setEqualizer', in_sig='ai')
@@ -105,91 +108,108 @@ def get_equalizer_preset(self):
     return 'custom'
 
 
-@endpoint('razer.device.audio', 'setMicMonitoring', in_sig='b')
-def set_mic_monitoring(self, enabled):
+@endpoint('razer.device.audio', 'setSidetone', in_sig='y')
+def set_sidetone(self, level):
     """
-    Toggle mic monitoring (sidetone): hear your own mic in the headset.
+    Set the sidetone (mic monitoring) level: hear your own mic in the headset.
 
-    :param enabled: True to enable
-    :type enabled: bool
+    The value is a percentage so the API is the same across headsets whose
+    hardware ranges differ; it is scaled to the device's own range on the way
+    to the driver.
+
+    :param level: 0-100, where 0 disables sidetone
+    :type level: int
     """
-    self.logger.debug("DBus call set_mic_monitoring")
+    self.logger.debug("DBus call set_sidetone")
 
-    driver_path = self.get_driver_path('mic_monitoring')
+    percent = max(0, min(100, int(level)))
+    device_max = getattr(self, 'SIDETONE_MAX', DEFAULT_SIDETONE_MAX)
+    value = round(percent * device_max / 100)
+
+    driver_path = self.get_driver_path('sidetone')
     with open(driver_path, 'w') as driver_file:
-        driver_file.write('1' if enabled else '0')
+        driver_file.write(str(value))
 
 
-@endpoint('razer.device.audio', 'getMicMonitoring', out_sig='b')
-def get_mic_monitoring(self):
+@endpoint('razer.device.audio', 'getSidetone', out_sig='y')
+def get_sidetone(self):
     """
-    Get whether mic monitoring (sidetone) is enabled.
+    Get the sidetone (mic monitoring) level as a percentage.
 
+    :return: 0-100, where 0 means sidetone is off
+    :rtype: int
+    """
+    self.logger.debug("DBus call get_sidetone")
+
+    driver_path = self.get_driver_path('sidetone')
+    with open(driver_path, 'r') as driver_file:
+        value = int(driver_file.read().strip())
+
+    device_max = getattr(self, 'SIDETONE_MAX', DEFAULT_SIDETONE_MAX)
+    if device_max <= 0:
+        return 0
+    return round(value * 100 / device_max)
+
+
+@endpoint('razer.device.audio', 'getMicMute', out_sig='b')
+def get_mic_mute(self):
+    """
+    Get the state of the headset's hardware mic-mute button.
+
+    Read-only: the button is the only thing that changes it.
+
+    :return: True if the microphone is muted
     :rtype: bool
     """
-    self.logger.debug("DBus call get_mic_monitoring")
+    self.logger.debug("DBus call get_mic_mute")
 
-    driver_path = self.get_driver_path('mic_monitoring')
+    driver_path = self.get_driver_path('mic_mute')
     with open(driver_path, 'r') as driver_file:
         return bool(int(driver_file.read().strip()))
 
 
-@endpoint('razer.device.audio', 'setMicMonitoringLevel', in_sig='y')
-def set_mic_monitoring_level(self, level):
+@endpoint('razer.device.misc', 'getHardwareModel', out_sig='s')
+def get_hardware_model(self):
     """
-    Set the mic monitoring (sidetone) loudness, 0-10.
+    Get the product id the headset reports for itself, as a 4-digit hex string.
 
-    :param level: Level 0-10
-    :type level: int
+    Over a 2.4GHz dongle this identifies the paired headset rather than the
+    dongle, so it can differ from the USB product id.
+
+    :return: product id (e.g. "0556")
+    :rtype: str
     """
-    self.logger.debug("DBus call set_mic_monitoring_level")
+    self.logger.debug("DBus call get_hardware_model")
 
-    level = max(0, min(10, int(level)))
-
-    driver_path = self.get_driver_path('mic_monitoring_level')
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write(str(level))
-
-
-@endpoint('razer.device.audio', 'getMicMonitoringLevel', out_sig='y')
-def get_mic_monitoring_level(self):
-    """
-    Get the mic monitoring (sidetone) loudness, 0-10.
-
-    :rtype: int
-    """
-    self.logger.debug("DBus call get_mic_monitoring_level")
-
-    driver_path = self.get_driver_path('mic_monitoring_level')
+    driver_path = self.get_driver_path('hw_model')
     with open(driver_path, 'r') as driver_file:
-        return int(driver_file.read().strip())
+        return driver_file.read().strip()
 
 
-@endpoint('razer.device.misc', 'setBluetoothDnd', in_sig='b')
-def set_bluetooth_dnd(self, enabled):
+@endpoint('razer.device.misc', 'setDnd', in_sig='b')
+def set_dnd(self, enabled):
     """
-    Toggle Bluetooth "Do Not Disturb" on a dual-mode (2.4GHz + Bluetooth)
-    headset: suppress Bluetooth interruptions while in 2.4GHz mode.
+    Toggle the headset's "Do Not Disturb" mode.
 
     :param enabled: True to enable
     :type enabled: bool
     """
-    self.logger.debug("DBus call set_bluetooth_dnd")
+    self.logger.debug("DBus call set_dnd")
 
-    driver_path = self.get_driver_path('bt_dnd')
+    driver_path = self.get_driver_path('dnd')
     with open(driver_path, 'w') as driver_file:
         driver_file.write('1' if enabled else '0')
 
 
-@endpoint('razer.device.misc', 'getBluetoothDnd', out_sig='b')
-def get_bluetooth_dnd(self):
+@endpoint('razer.device.misc', 'getDnd', out_sig='b')
+def get_dnd(self):
     """
-    Get whether Bluetooth "Do Not Disturb" is enabled.
+    Get whether "Do Not Disturb" is enabled.
 
     :rtype: bool
     """
-    self.logger.debug("DBus call get_bluetooth_dnd")
+    self.logger.debug("DBus call get_dnd")
 
-    driver_path = self.get_driver_path('bt_dnd')
+    driver_path = self.get_driver_path('dnd')
     with open(driver_path, 'r') as driver_file:
         return bool(int(driver_file.read().strip()))

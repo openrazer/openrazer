@@ -1,24 +1,28 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /*
- * Razer BlackShark V2 Pro (2.4GHz) wireless headset driver.
+ * Razer BlackShark headset driver.
  *
- * This headset does NOT use the standard Razer "Chroma" report protocol. Its
+ * These headsets do NOT use the standard Razer "Chroma" report protocol. Their
  * vendor HID interface (Usage Page 0xFF00, Report ID 0x02) uses 64-byte
- * interrupt Output/Input reports carrying the "MXIC" command protocol:
+ * interrupt Output/Input reports carrying a vendor command protocol whose
+ * sub-frame is common to the model family:
  *
- *   command (host->device):
- *     [0]=0x02 report id  [1]=0x80 dir  [2]=total_len  [5]='P' [6]='A'
- *     [7]=inner_len  [9]=cmd_type  [10]=cmd_id  [11..]=params
- *   reply (device->host):
- *     the echoed cmd_id appears at offset 12; its value sits at offset 15.
+ *   [10]=cmd id  [11]=flag (0 request / 0x01 ACK in a reply)
+ *   [12]=payload length  [13..]=payload
+ *
+ * The command ids are common to the family too; only the envelope around the
+ * sub-frame, a few hardware ranges and the exposed attribute set differ per
+ * model, which is why all of that lives in struct blackshark_model rather than
+ * in the command paths. The V2 Pro 2.4 (1532:0555) wraps the sub-frame in a
+ * 'P'/'A' marked envelope carrying a command type at [9], and needs a
+ * set_remote_mode (0xE1) handshake around writes, matching Razer Synapse.
  *
  * Battery level (cmd_type 0x03, cmd_id 0x21) returns 0-100 directly; charging
- * state (cmd_id 0x2a) returns 0 on battery / nonzero on the cable. A
- * set_remote_mode (cmd_id 0xE1) is sent first, matching Razer Synapse.
+ * state (cmd_id 0x2a) returns 0 on battery / nonzero on the cable.
  *
  * Protocol reverse-engineered from Ashesh3/razer-device-control and a local
- * hidraw capture of this exact device (1532:0555); see BLACKSHARK_NOTES.md.
- * Replies arrive on the interrupt IN endpoint and are matched in .raw_event.
+ * hidraw capture of this exact device (1532:0555). Replies arrive on the
+ * interrupt IN endpoint and are matched in .raw_event.
  *
  * Copyright (c) 2024 Openrazer contributors
  */
@@ -42,28 +46,49 @@ MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE(DRIVER_LICENSE);
 
 /* ------------------------------------------------------------------ */
-/* MXIC protocol helpers                                              */
+/* Per-model framing                                                  */
 /* ------------------------------------------------------------------ */
 
 /**
- * Build a 64-byte MXIC command into dev->cmd_buf.
+ * V2 Pro 2.4 envelope: 'P'/'A' markers, a command type at [9] and a total
+ * length that counts the payload.
+ */
+static void blackshark_v2pro_write_header(u8 *buf, u8 cmd_type, u8 data_len)
+{
+    buf[BS_OFF_DIR]       = BS_DIR_OUT;
+    buf[BS_OFF_TOTAL_LEN] = BS_TOTAL_LEN_BASE + data_len;
+    buf[BS_OFF_MARK_P]    = BS_MARK_P;
+    buf[BS_OFF_MARK_A]    = BS_MARK_A;
+    buf[BS_OFF_INNER_LEN] = BS_INNER_LEN_STD;
+    buf[BS_OFF_CMD_TYPE]  = cmd_type;
+}
+
+/* The model table itself lives below, next to the attributes it references. */
+
+/* ------------------------------------------------------------------ */
+/* Command helpers                                                    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Build a 64-byte command into dev->cmd_buf: the common sub-frame plus the
+ * model's envelope.
  */
 static void blackshark_build_cmd(struct razer_blackshark_device *dev,
-                                 u8 total_len, u8 inner_len,
                                  u8 cmd_type, u8 cmd_id,
-                                 const u8 *params, size_t params_len)
+                                 const u8 *data, size_t data_len)
 {
     memset(dev->cmd_buf, 0, BLACKSHARK_REPORT_LEN);
-    dev->cmd_buf[0]                = BLACKSHARK_REPORT_ID;
-    dev->cmd_buf[BS_OFF_DIR]       = BS_DIR_OUT;
-    dev->cmd_buf[BS_OFF_TOTAL_LEN] = total_len;
-    dev->cmd_buf[BS_OFF_MARK_P]    = BS_MARK_P;
-    dev->cmd_buf[BS_OFF_MARK_A]    = BS_MARK_A;
-    dev->cmd_buf[BS_OFF_INNER_LEN] = inner_len;
-    dev->cmd_buf[BS_OFF_CMD_TYPE]  = cmd_type;
-    dev->cmd_buf[BS_OFF_CMD_ID]    = cmd_id;
-    if (params && params_len)
-        memcpy(&dev->cmd_buf[BS_OFF_PARAMS], params, params_len);
+    dev->cmd_buf[0] = BLACKSHARK_REPORT_ID;
+
+    dev->model->write_header(dev->cmd_buf, cmd_type, data_len);
+
+    dev->cmd_buf[BS_OFF_CMD_ID]   = cmd_id;
+    dev->cmd_buf[BS_OFF_DATA_LEN] = data_len;
+    if (data && data_len)
+        memcpy(&dev->cmd_buf[BS_OFF_DATA], data, data_len);
+
+    if (dev->model->finalize)
+        dev->model->finalize(dev->cmd_buf);
 }
 
 /**
@@ -81,21 +106,40 @@ static int blackshark_send_cmd(struct razer_blackshark_device *dev)
 /**
  * set_remote_mode: hand software control to/from the host. Synapse sends this
  * before querying, so we mirror it.
+ *
+ * This frame does not follow the common sub-frame layout: it carries its
+ * parameter in the flag byte and uses its own length pair, so it is built
+ * directly rather than through blackshark_build_cmd().
  */
 static void blackshark_set_remote(struct razer_blackshark_device *dev, bool on)
 {
-    u8 param = on ? 1 : 0;
+    if (!dev->model->needs_remote_mode)
+        return;
 
-    blackshark_build_cmd(dev, 0x07, 0x0E, BS_TYPE_REMOTE, BS_CMD_REMOTE, &param, 1);
+    memset(dev->cmd_buf, 0, BLACKSHARK_REPORT_LEN);
+    dev->cmd_buf[0]                   = BLACKSHARK_REPORT_ID;
+    dev->cmd_buf[BS_OFF_DIR]          = BS_DIR_OUT;
+    dev->cmd_buf[BS_OFF_TOTAL_LEN]    = 0x07;
+    dev->cmd_buf[BS_OFF_MARK_P]       = BS_MARK_P;
+    dev->cmd_buf[BS_OFF_MARK_A]       = BS_MARK_A;
+    dev->cmd_buf[BS_OFF_INNER_LEN]    = BS_INNER_LEN_REMOTE;
+    dev->cmd_buf[BS_OFF_CMD_TYPE]     = BS_TYPE_REMOTE;
+    dev->cmd_buf[BS_OFF_CMD_ID]       = BS_CMD_REMOTE;
+    dev->cmd_buf[BS_OFF_FLAG]         = on ? 1 : 0;
+
+    if (dev->model->finalize)
+        dev->model->finalize(dev->cmd_buf);
+
     blackshark_send_cmd(dev);
     msleep(35);
 }
 
 /**
- * Query via cmd_type 0x03 / cmd_id, copying out_len reply bytes (scalar
- * getters use 1 byte; the EQ bands getter returns 10). Sequence mirrors the
- * working userspace probe: remote on, query, remote off. Serialised by
- * req_lock.
+ * Query via cmd_type 0x03 / cmd_id, copying up to out_len reply bytes.
+ * Sequence mirrors the working userspace probe: remote on, query, remote off.
+ * Serialised by req_lock.
+ *
+ * Returns the number of payload bytes copied, or a negative errno.
  */
 static int blackshark_query_buf(struct razer_blackshark_device *dev, u8 cmd_id,
                                 u8 *out, size_t out_len)
@@ -112,8 +156,9 @@ static int blackshark_query_buf(struct razer_blackshark_device *dev, u8 cmd_id,
 
     WRITE_ONCE(dev->expected_cmd, cmd_id);
     reinit_completion(&dev->resp_done);
+    WRITE_ONCE(dev->resp_pending, true);
 
-    blackshark_build_cmd(dev, 0x08, 0x08, BS_TYPE_QUERY, cmd_id, NULL, 0);
+    blackshark_build_cmd(dev, BS_TYPE_QUERY, cmd_id, NULL, 0);
     ret = blackshark_send_cmd(dev);
     if (ret < 0)
         goto out;
@@ -121,66 +166,91 @@ static int blackshark_query_buf(struct razer_blackshark_device *dev, u8 cmd_id,
     left = wait_for_completion_timeout(&dev->resp_done,
                                        msecs_to_jiffies(BLACKSHARK_RESPONSE_TIMEOUT_MS));
     if (!left) {
-        hid_warn(dev->hdev, "blackshark: timeout waiting for reply to cmd 0x%02x\n", cmd_id);
+        /*
+         * Not an error worth a warning: the dongle enumerates whether or not
+         * the headset is powered on, so an unlinked headset makes every
+         * poll time out. At hid_warn that floods the kernel log, since the
+         * daemon polls the battery on a timer.
+         */
+        hid_dbg(dev->hdev, "blackshark: timeout waiting for reply to cmd 0x%02x\n", cmd_id);
         ret = -ETIMEDOUT;
         goto out;
     }
 
-    memcpy(out, dev->resp_buf, out_len);
-    ret = 0;
+    ret = min_t(size_t, out_len, dev->resp_len);
+    memcpy(out, dev->resp_buf, ret);
 
 out:
-    WRITE_ONCE(dev->expected_cmd, 0);
+    WRITE_ONCE(dev->resp_pending, false);
     blackshark_set_remote(dev, false);
     mutex_unlock(&dev->req_lock);
     return ret;
 }
 
+/* Read a single-byte value. Returns 0 on success, or a negative errno. */
 static int blackshark_query(struct razer_blackshark_device *dev, u8 cmd_id, u8 *out)
 {
-    return blackshark_query_buf(dev, cmd_id, out, 1);
+    int ret = blackshark_query_buf(dev, cmd_id, out, 1);
+
+    if (ret < 0)
+        return ret;
+    return ret == 1 ? 0 : -EIO;
 }
 
 /**
  * raw_event: replies (and unsolicited telemetry) arrive here. When a request is
- * pending, match the echoed cmd id at the fixed reply offset and capture the
- * value byte.
+ * pending, match the echoed cmd id at the model's reply offset and capture the
+ * payload.
  */
 static int blackshark_raw_event(struct hid_device *hdev, struct hid_report *report,
                                 u8 *data, int size)
 {
     struct razer_blackshark_device *dev = hid_get_drvdata(hdev);
+    u8 cmd_off, data_off;
     u8 want;
 
-    if (!dev || size <= BS_REPLY_VAL_OFF || data[0] != BLACKSHARK_REPORT_ID)
+    if (!dev)
+        return 0;
+
+    cmd_off  = dev->model->reply_cmd_off;
+    data_off = BS_REPLY_DATA_OFF(dev->model);
+    if (size <= data_off || data[0] != BLACKSHARK_REPORT_ID)
         return 0;
 
     /* The headset's EQ button emits unsolicited preset-change events (same id
      * as the preset query); track them so the cached preset stays fresh. */
-    if (data[BS_REPLY_CMD_OFF] == BS_CMD_PRESET_GET) {
-        switch (data[BS_REPLY_VAL_OFF]) {
+    if (data[cmd_off] == BS_CMD_PRESET_GET) {
+        switch (data[data_off]) {
         case BS_PRESET_GAME:
         case BS_PRESET_MUSIC:
         case BS_PRESET_MOVIE:
         case BS_PRESET_CUSTOM:
-            WRITE_ONCE(dev->eq_preset, data[BS_REPLY_VAL_OFF]);
+            WRITE_ONCE(dev->eq_preset, data[data_off]);
             break;
         default:
-            if (BS_PRESET_IS_GAME_EQ(data[BS_REPLY_VAL_OFF]))
-                WRITE_ONCE(dev->eq_preset, data[BS_REPLY_VAL_OFF]);
+            if (BS_PRESET_IS_GAME_EQ(data[data_off]))
+                WRITE_ONCE(dev->eq_preset, data[data_off]);
             break;
         }
     }
 
-    want = READ_ONCE(dev->expected_cmd);
-    if (!want)
+    if (!READ_ONCE(dev->resp_pending))
         return 0;
 
-    if (data[BS_REPLY_CMD_OFF] == want) {
-        size_t n = min_t(size_t, sizeof(dev->resp_buf),
-                         (size_t)(size - BS_REPLY_VAL_OFF));
+    want = READ_ONCE(dev->expected_cmd);
 
-        memcpy(dev->resp_buf, &data[BS_REPLY_VAL_OFF], n);
+    /* Match on the echoed id *and* the ACK byte: the device also emits
+     * unsolicited 'PI' telemetry frames, which would otherwise satisfy an
+     * id-only match by coincidence. */
+    if (data[cmd_off] == want && data[BS_REPLY_ACK_OFF(dev->model)] == 0x01) {
+        /* The device reports the payload length at [cmd + 2]; trust it only
+         * as far as the report actually reaches. */
+        size_t n = min3((size_t)data[BS_REPLY_LEN_OFF(dev->model)],
+                        sizeof(dev->resp_buf),
+                        (size_t)(size - data_off));
+
+        memcpy(dev->resp_buf, &data[data_off], n);
+        dev->resp_len = n;
         complete(&dev->resp_done);
     }
 
@@ -203,25 +273,23 @@ static int blackshark_raw_event(struct hid_device *hdev, struct hid_report *repo
  */
 static void blackshark_apply_preset(struct razer_blackshark_device *dev)
 {
-    u8 preset[3] = { 0x00, 0x01, dev->eq_preset };
-    u8 flag[3] = { 0x00, 0x01,
-                   BS_PRESET_IS_GAME_EQ(dev->eq_preset) ? 0x02 : 0x01
-                 };
+    u8 preset = dev->eq_preset;
+    u8 flag = BS_PRESET_IS_GAME_EQ(dev->eq_preset) ? 0x02 : 0x01;
 
     mutex_lock(&dev->req_lock);
 
     blackshark_set_remote(dev, true);
     blackshark_set_remote(dev, true);
 
-    blackshark_build_cmd(dev, 0x08, 0x08, BS_TYPE_QUERY, BS_CMD_PREP, NULL, 0);
+    blackshark_build_cmd(dev, BS_TYPE_QUERY, BS_CMD_PREP, NULL, 0);
     blackshark_send_cmd(dev);
 
     blackshark_set_remote(dev, true);
-    blackshark_build_cmd(dev, 0x09, 0x08, BS_TYPE_AUDIO, BS_CMD_PRESET, preset, sizeof(preset));
+    blackshark_build_cmd(dev, BS_TYPE_AUDIO, BS_CMD_PRESET, &preset, 1);
     blackshark_send_cmd(dev);
 
     blackshark_set_remote(dev, true);
-    blackshark_build_cmd(dev, 0x09, 0x08, BS_TYPE_AUDIO, BS_CMD_ENHANCE, flag, sizeof(flag));
+    blackshark_build_cmd(dev, BS_TYPE_AUDIO, BS_CMD_ENHANCE, &flag, 1);
     blackshark_send_cmd(dev);
 
     blackshark_set_remote(dev, true);
@@ -275,34 +343,37 @@ static int blackshark_apply_preset_verified(struct razer_blackshark_device *dev)
  */
 static void blackshark_write_bands(struct razer_blackshark_device *dev)
 {
-    u8 preset[3] = { 0x00, 0x01, BS_PRESET_CUSTOM };
-    u8 flag[3] = { 0x00, 0x01, 0x01 };
-    u8 eq[2 + BS_EQ_BANDS];
+    u8 preset = BS_PRESET_CUSTOM;
+    u8 flag = 0x01;
+    u8 eq[BS_EQ_BANDS];
     int i;
 
-    eq[0] = 0x00;
-    eq[1] = BS_EQ_BANDS;
+    /*
+     * Some models store (written - eq_write_offset), so the gain has to be
+     * pre-biased on the way out; reads come back as the plain gain either
+     * way. The V2 Pro round-trips exactly and sets the offset to 0.
+     */
     for (i = 0; i < BS_EQ_BANDS; i++)
-        eq[2 + i] = (u8)dev->eq_bands[i];
+        eq[i] = (u8)(s8)(dev->eq_bands[i] + dev->model->eq_write_offset);
 
     mutex_lock(&dev->req_lock);
 
     blackshark_set_remote(dev, true);
     blackshark_set_remote(dev, true);
 
-    blackshark_build_cmd(dev, 0x08, 0x08, BS_TYPE_QUERY, BS_CMD_PREP, NULL, 0);
+    blackshark_build_cmd(dev, BS_TYPE_QUERY, BS_CMD_PREP, NULL, 0);
     blackshark_send_cmd(dev);
 
     blackshark_set_remote(dev, true);
-    blackshark_build_cmd(dev, 0x09, 0x08, BS_TYPE_AUDIO, BS_CMD_PRESET, preset, sizeof(preset));
+    blackshark_build_cmd(dev, BS_TYPE_AUDIO, BS_CMD_PRESET, &preset, 1);
     blackshark_send_cmd(dev);
 
     blackshark_set_remote(dev, true);
-    blackshark_build_cmd(dev, 0x09, 0x08, BS_TYPE_AUDIO, BS_CMD_ENHANCE, flag, sizeof(flag));
+    blackshark_build_cmd(dev, BS_TYPE_AUDIO, BS_CMD_ENHANCE, &flag, 1);
     blackshark_send_cmd(dev);
 
     blackshark_set_remote(dev, true);
-    blackshark_build_cmd(dev, 0x12, 0x08, BS_TYPE_EQ, BS_CMD_EQ, eq, sizeof(eq));
+    blackshark_build_cmd(dev, BS_TYPE_EQ, BS_CMD_EQ, eq, sizeof(eq));
     blackshark_send_cmd(dev);
 
     blackshark_set_remote(dev, true);
@@ -311,17 +382,14 @@ static void blackshark_write_bands(struct razer_blackshark_device *dev)
 }
 
 /**
- * Write a single-byte 0x04-family setting (power-off timeout, mic monitoring,
- * mic level). These need no prep query, just remote mode. Serialised by
- * req_lock.
+ * Write a single-byte 0x04-family setting (power-off timeout, sidetone).
+ * These need no prep query, just remote mode. Serialised by req_lock.
  */
 static void blackshark_write_value(struct razer_blackshark_device *dev, u8 cmd_id, u8 value)
 {
-    u8 p[3] = { 0x00, 0x01, value };
-
     mutex_lock(&dev->req_lock);
     blackshark_set_remote(dev, true);
-    blackshark_build_cmd(dev, 0x09, 0x08, BS_TYPE_AUDIO, cmd_id, p, sizeof(p));
+    blackshark_build_cmd(dev, BS_TYPE_AUDIO, cmd_id, &value, 1);
     blackshark_send_cmd(dev);
     blackshark_set_remote(dev, false);
     mutex_unlock(&dev->req_lock);
@@ -333,7 +401,7 @@ static void blackshark_write_value(struct razer_blackshark_device *dev, u8 cmd_i
 
 static ssize_t razer_attr_read_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "%s\n", DRIVER_VERSION);
+    return sysfs_emit(buf, "%s\n", DRIVER_VERSION);
 }
 
 static ssize_t razer_attr_read_device_type(struct device *dev, struct device_attribute *attr, char *buf)
@@ -351,7 +419,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
     }
 
-    return sprintf(buf, "%s\n", device_type);
+    return sysfs_emit(buf, "%s\n", device_type);
 }
 
 static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -361,23 +429,129 @@ static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute
 
 static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "\n");
+    return sysfs_emit(buf, "\n");
+}
+
+/**
+ * Fetch the serial number (cmd 0x00) and firmware version (cmd 0x02) from the
+ * device, replacing the probe-time fallbacks. Best-effort and idempotent: a
+ * query right after enumeration can time out before the link has settled, so
+ * the read handlers call this until it succeeds once, after which @ids_read
+ * latches and further calls return immediately.
+ */
+static void blackshark_read_ids(struct razer_blackshark_device *device)
+{
+    u8 tmp[BS_RESP_BUF_LEN];
+    bool got_serial = false;
+    bool got_fw = false;
+    int n;
+
+    if (READ_ONCE(device->ids_read))
+        return;
+
+    mutex_lock(&device->ids_lock);
+
+    /* another reader may have completed the fetch while we waited */
+    if (device->ids_read)
+        goto out;
+
+    n = blackshark_query_buf(device, BS_CMD_SERIAL, tmp, sizeof(tmp));
+    if (n > 0) {
+        n = min_t(int, n, (int)sizeof(device->serial) - 1);
+        memcpy(device->serial, tmp, n);
+        device->serial[n] = '\0';
+        got_serial = true;
+    }
+
+    n = blackshark_query_buf(device, BS_CMD_FW_VER, tmp, sizeof(tmp));
+    if (n >= 2) {
+        device->fw_major = tmp[0];
+        device->fw_minor = tmp[1];
+        got_fw = true;
+    }
+
+    if (got_serial && got_fw)
+        WRITE_ONCE(device->ids_read, true);
+
+out:
+    mutex_unlock(&device->ids_lock);
 }
 
 /*
- * Firmware version is not queryable over the MXIC protocol (no known command),
- * so report a stub to keep the daemon happy.
+ * Background half of the above: runs once just after probe so the identity is
+ * in place before anything reads it, without blocking the hotplug path. If it
+ * fails (headset asleep) the read handlers keep retrying lazily.
  */
+static void blackshark_ids_work(struct work_struct *work)
+{
+    struct razer_blackshark_device *device =
+        container_of(to_delayed_work(work), struct razer_blackshark_device, ids_work);
+
+    blackshark_read_ids(device);
+}
+
 static ssize_t razer_attr_read_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "v1.0\n");
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    ssize_t ret;
+
+    blackshark_read_ids(device);
+
+    /* under ids_lock: a concurrent first fetch may still be publishing */
+    mutex_lock(&device->ids_lock);
+    ret = sysfs_emit(buf, "v%u.%u\n", device->fw_major, device->fw_minor);
+    mutex_unlock(&device->ids_lock);
+
+    return ret;
 }
 
 static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    ssize_t ret;
 
-    return sprintf(buf, "%s\n", device->serial);
+    blackshark_read_ids(device);
+
+    mutex_lock(&device->ids_lock);
+    ret = sysfs_emit(buf, "%s\n", device->serial);
+    mutex_unlock(&device->ids_lock);
+
+    return ret;
+}
+
+/*
+ * hw_model: the product id the headset reports for itself (cmd 0x03), high
+ * byte first. Over the 2.4GHz dongle this identifies the paired headset, so it
+ * differs from the USB product id the driver is bound to (0x0555 -> 0x0556).
+ */
+static ssize_t razer_attr_read_hw_model(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 id[2];
+    int n = blackshark_query_buf(device, BS_CMD_HW_MODEL, id, sizeof(id));
+
+    if (n < 0)
+        return n;
+    if (n != sizeof(id))
+        return -EIO;
+
+    return sysfs_emit(buf, "%04x\n", (id[0] << 8) | id[1]);
+}
+
+/*
+ * mic_mute: state of the headset's hardware mic-mute button (cmd 0x55).
+ * Read-only - the button is the only thing that changes it.
+ */
+static ssize_t razer_attr_read_mic_mute(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 muted = 0;
+    int ret = blackshark_query(device, BS_CMD_MIC_MUTE, &muted);
+
+    if (ret)
+        return ret;
+
+    return sysfs_emit(buf, "%d\n", muted ? 1 : 0);
 }
 
 /*
@@ -395,7 +569,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     if (capacity > 100)
         capacity = 100;
 
-    return sprintf(buf, "%d\n", DIV_ROUND_CLOSEST(capacity * 255, 100));
+    return sysfs_emit(buf, "%d\n", DIV_ROUND_CLOSEST(capacity * 255, 100));
 }
 
 /*
@@ -411,7 +585,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     if (ret)
         return ret;
 
-    return sprintf(buf, "%d\n", state ? 1 : 0);
+    return sysfs_emit(buf, "%d\n", state ? 1 : 0);
 }
 
 /*
@@ -471,7 +645,7 @@ static ssize_t razer_attr_read_equalizer(struct device *dev, struct device_attri
     u8 bands[BS_EQ_BANDS];
     int ret = blackshark_query_buf(device, BS_CMD_EQ_GET, bands, sizeof(bands));
 
-    if (ret) /* device unreachable: fall back to the last known curve */
+    if (ret != BS_EQ_BANDS) /* device unreachable: fall back to the last curve */
         memcpy(buf, device->eq_bands, BS_EQ_BANDS);
     else {
         memcpy(device->eq_bands, bands, BS_EQ_BANDS);
@@ -521,7 +695,7 @@ static ssize_t razer_attr_read_idle_time(struct device *dev, struct device_attri
         return ret;
 
     device->idle_minutes = minutes;
-    return sprintf(buf, "%u\n", minutes * 60);
+    return sysfs_emit(buf, "%u\n", minutes * 60);
 }
 
 /*
@@ -568,99 +742,84 @@ static ssize_t razer_attr_read_equalizer_preset(struct device *dev, struct devic
     else
         device->eq_preset = preset;
 
-    return sprintf(buf, "%d\n", preset);
+    return sysfs_emit(buf, "%d\n", preset);
 }
 
 /*
- * mic_monitoring: sidetone on/off (cmd 0x98). Reading queries the device (0x18).
+ * sidetone: microphone monitoring - hear your own mic in the headset. One
+ * value in device units, 0 = off, 1..model->sidetone_max = active at that
+ * level.
+ *
+ * The device keeps the enable flag (0x98) and the level (0x99) as two
+ * registers; folding them into one attribute keeps the sysfs surface the same
+ * across BlackShark models, whose levels differ only in range.
  */
-static ssize_t razer_attr_write_mic_monitoring(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+static ssize_t razer_attr_write_sidetone(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_blackshark_device *device = dev_get_drvdata(dev);
     unsigned long val;
 
     if (kstrtoul(buf, 10, &val))
         return -EINVAL;
+    if (val > device->model->sidetone_max)
+        val = device->model->sidetone_max;
 
-    device->mic_monitoring = val ? 1 : 0;
-    blackshark_write_value(device, BS_CMD_MIC_MON, device->mic_monitoring);
+    device->sidetone = val;
+    blackshark_write_value(device, BS_CMD_SIDETONE, val ? 1 : 0);
+    if (val)
+        blackshark_write_value(device, BS_CMD_SIDETONE_LVL, val);
     return count;
 }
 
-static ssize_t razer_attr_read_mic_monitoring(struct device *dev, struct device_attribute *attr, char *buf)
+static ssize_t razer_attr_read_sidetone(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_blackshark_device *device = dev_get_drvdata(dev);
-    u8 state = 0;
-
-    if (blackshark_query(device, BS_CMD_MIC_MON_GET, &state))
-        state = device->mic_monitoring; /* device unreachable: cached value */
-    else
-        device->mic_monitoring = state ? 1 : 0;
-
-    return sprintf(buf, "%d\n", state ? 1 : 0);
-}
-
-/*
- * bt_dnd: Bluetooth "Do Not Disturb" (cmd 0xa7) — Synapse's toggle for this
- * dual-mode (2.4GHz + Bluetooth) headset. Stored on-device; reading queries
- * the device (0x27). A pure connectivity flag: no effect on the audio path.
- */
-static ssize_t razer_attr_write_bt_dnd(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    struct razer_blackshark_device *device = dev_get_drvdata(dev);
-    unsigned long val;
-
-    if (kstrtoul(buf, 10, &val))
-        return -EINVAL;
-
-    device->bt_dnd = val ? 1 : 0;
-    blackshark_write_value(device, BS_CMD_BT_DND, device->bt_dnd);
-    return count;
-}
-
-static ssize_t razer_attr_read_bt_dnd(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    struct razer_blackshark_device *device = dev_get_drvdata(dev);
-    u8 state = 0;
-
-    if (blackshark_query(device, BS_CMD_BT_DND_GET, &state))
-        state = device->bt_dnd; /* device unreachable: cached value */
-    else
-        device->bt_dnd = state ? 1 : 0;
-
-    return sprintf(buf, "%d\n", state ? 1 : 0);
-}
-
-/*
- * mic_monitoring_level: sidetone loudness (cmd 0x99). Synapse uses a 0-10
- * scale on the wire. Reading queries the device (0x19).
- */
-static ssize_t razer_attr_write_mic_monitoring_level(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-    struct razer_blackshark_device *device = dev_get_drvdata(dev);
-    unsigned long val;
-
-    if (kstrtoul(buf, 10, &val))
-        return -EINVAL;
-    if (val > BS_MIC_LEVEL_MAX)
-        val = BS_MIC_LEVEL_MAX;
-
-    device->mic_level = val;
-    blackshark_write_value(device, BS_CMD_MIC_LVL, device->mic_level);
-    return count;
-}
-
-static ssize_t razer_attr_read_mic_monitoring_level(struct device *dev, struct device_attribute *attr, char *buf)
-{
-    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 enabled = 0;
     u8 level = 0;
 
-    if (blackshark_query(device, BS_CMD_MIC_LVL_GET, &level))
-        level = device->mic_level; /* device unreachable: cached value */
-    else
-        device->mic_level = level;
+    if (blackshark_query(device, BS_CMD_SIDETONE_GET, &enabled))
+        return sysfs_emit(buf, "%d\n", device->sidetone); /* unreachable: cached */
 
-    return sprintf(buf, "%d\n", level);
+    if (enabled && blackshark_query(device, BS_CMD_SIDETONE_LVL_GET, &level))
+        level = device->sidetone;
+
+    device->sidetone = enabled ? level : 0;
+    return sysfs_emit(buf, "%d\n", device->sidetone);
+}
+
+/*
+ * dnd: the headset's "Do Not Disturb" toggle (cmd 0xa7), stored on-device and
+ * read back via 0x27. On this dual-mode (2.4GHz + Bluetooth) model Synapse
+ * presents it alongside the Bluetooth settings.
+ *
+ * It has no effect on the audio path, and - tested by power-cycling the
+ * headset with it both on and off - it does not silence the spoken power/
+ * battery prompts either, so it is purely a connectivity flag here.
+ */
+static ssize_t razer_attr_write_dnd(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    unsigned long val;
+
+    if (kstrtoul(buf, 10, &val))
+        return -EINVAL;
+
+    device->dnd = val ? 1 : 0;
+    blackshark_write_value(device, BS_CMD_DND, device->dnd);
+    return count;
+}
+
+static ssize_t razer_attr_read_dnd(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 state = 0;
+
+    if (blackshark_query(device, BS_CMD_DND_GET, &state))
+        state = device->dnd; /* device unreachable: cached value */
+    else
+        device->dnd = state ? 1 : 0;
+
+    return sysfs_emit(buf, "%d\n", state ? 1 : 0);
 }
 
 static DEVICE_ATTR(version,          0440, razer_attr_read_version,          NULL);
@@ -668,30 +827,83 @@ static DEVICE_ATTR(test,             0660, razer_attr_read_test,             raz
 static DEVICE_ATTR(firmware_version, 0440, razer_attr_read_firmware_version, NULL);
 static DEVICE_ATTR(device_type,      0440, razer_attr_read_device_type,      NULL);
 static DEVICE_ATTR(device_serial,    0440, razer_attr_read_device_serial,    NULL);
+static DEVICE_ATTR(hw_model,         0440, razer_attr_read_hw_model,         NULL);
+static DEVICE_ATTR(mic_mute,         0440, razer_attr_read_mic_mute,         NULL);
 static DEVICE_ATTR(charge_level,     0440, razer_attr_read_charge_level,     NULL);
 static DEVICE_ATTR(charge_status,    0440, razer_attr_read_charge_status,    NULL);
 static DEVICE_ATTR(equalizer,        0660, razer_attr_read_equalizer,        razer_attr_write_equalizer);
 static DEVICE_ATTR(equalizer_preset, 0660, razer_attr_read_equalizer_preset, razer_attr_write_equalizer_preset);
-static DEVICE_ATTR(device_idle_time,  0660, razer_attr_read_idle_time,        razer_attr_write_idle_time);
-static DEVICE_ATTR(mic_monitoring,    0660, razer_attr_read_mic_monitoring,   razer_attr_write_mic_monitoring);
-static DEVICE_ATTR(mic_monitoring_level, 0660, razer_attr_read_mic_monitoring_level, razer_attr_write_mic_monitoring_level);
-static DEVICE_ATTR(bt_dnd,            0660, razer_attr_read_bt_dnd,           razer_attr_write_bt_dnd);
+static DEVICE_ATTR(device_idle_time, 0660, razer_attr_read_idle_time,        razer_attr_write_idle_time);
+static DEVICE_ATTR(sidetone,         0660, razer_attr_read_sidetone,         razer_attr_write_sidetone);
+static DEVICE_ATTR(dnd,              0660, razer_attr_read_dnd,              razer_attr_write_dnd);
+
+/* ------------------------------------------------------------------ */
+/* Model table                                                        */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Which attributes each model exposes is expressed in probe()/disconnect()
+ * below rather than as an attribute_group here: the fake-driver generator
+ * (scripts/generate_fake_driver.sh) derives each device's sysfs surface by
+ * parsing the per-PID CREATE_DEVICE_FILE lines out of the probe function.
+ *
+ * Deliberately absent for this model: status_indicator (0x66/0xe6), because
+ * the setter acknowledges every write and the mode never actually changes -
+ * see the register notes in the header.
+ */
+static const struct blackshark_model blackshark_models[] = {
+    {
+        .usb_pid          = USB_DEVICE_ID_RAZER_BLACKSHARK_V2_PRO_2_4,
+        .serial_fallback  = "BLACKSHARKV2PRO",
+
+        .write_header     = blackshark_v2pro_write_header,
+        .finalize         = NULL,
+        .reply_cmd_off    = 12,
+        .needs_remote_mode = true,
+
+        .sidetone_max     = BS_V2PRO_SIDETONE_MAX,
+        .sidetone_default = BS_V2PRO_SIDETONE_DEFAULT,
+        .eq_write_offset  = 0, /* this model round-trips the written gain exactly */
+    },
+};
+
+/*
+ * No fallback entry: a PID in razer_devices[] without a descriptor here would
+ * otherwise be framed like some unrelated model and appear to half-work.
+ */
+static const struct blackshark_model *blackshark_model_for(unsigned short pid)
+{
+    int i;
+
+    for (i = 0; i < ARRAY_SIZE(blackshark_models); i++)
+        if (blackshark_models[i].usb_pid == pid)
+            return &blackshark_models[i];
+
+    return NULL;
+}
 
 /* ------------------------------------------------------------------ */
 /* probe / disconnect                                                 */
 /* ------------------------------------------------------------------ */
 
-static void razer_blackshark_init(struct razer_blackshark_device *dev, struct usb_interface *intf, struct hid_device *hdev)
+static int razer_blackshark_init(struct razer_blackshark_device *dev, struct usb_interface *intf, struct hid_device *hdev)
 {
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     dev->hdev = hdev;
-    dev->usb_vid = usb_dev->descriptor.idVendor;
     dev->usb_pid = usb_dev->descriptor.idProduct;
     dev->usb_interface_protocol = intf->cur_altsetting->desc.bInterfaceProtocol;
 
+    dev->model = blackshark_model_for(dev->usb_pid);
+    if (!dev->model) {
+        hid_err(hdev, "blackshark: no model descriptor for pid %04x\n", dev->usb_pid);
+        return -ENODEV;
+    }
+
     mutex_init(&dev->req_lock);
+    mutex_init(&dev->ids_lock);
     init_completion(&dev->resp_done);
+    INIT_DELAYED_WORK(&dev->ids_work, blackshark_ids_work);
 
     /* The driver never writes to the device on its own: presets are
      * selector-only (curves live in per-preset slots on the device) and
@@ -699,13 +911,25 @@ static void razer_blackshark_init(struct razer_blackshark_device *dev, struct us
      * custom preset is confirmed active. eq_bands is just a read fallback. */
     dev->eq_preset = BS_PRESET_CUSTOM;
     dev->idle_minutes = 0;
-    dev->mic_level = 7; /* Synapse's observed resting level */
+    dev->sidetone = dev->model->sidetone_default;
 
-    /* Use the USB serial number if present, else a fixed fallback. */
-    if (hdev->uniq[0])
-        strscpy(dev->serial, hdev->uniq, sizeof(dev->serial));
-    else
-        strscpy(dev->serial, "BLACKSHARKV2PRO", sizeof(dev->serial));
+    /*
+     * Placeholders until blackshark_read_ids() gets the real values off the
+     * device.
+     *
+     * Deliberately NOT hdev->uniq: over a 2.4GHz dongle that is the dongle's
+     * own USB iSerial, not the headset's, so reporting it is a wrong answer
+     * rather than a degraded one - and it is indistinguishable from a real
+     * serial to everything downstream. The daemon reads device_serial exactly
+     * once and keys the D-Bus object path and its persistence store off it, so
+     * handing it a plausible-looking wrong value is worse than an obvious
+     * placeholder.
+     */
+    strscpy(dev->serial, dev->model->serial_fallback, sizeof(dev->serial));
+    dev->fw_major = 1;
+    dev->fw_minor = 0;
+
+    return 0;
 }
 
 static int razer_blackshark_probe(struct hid_device *hdev, const struct hid_device_id *id)
@@ -720,20 +944,23 @@ static int razer_blackshark_probe(struct hid_device *hdev, const struct hid_devi
         return -ENOMEM;
     }
 
-    razer_blackshark_init(dev, intf, hdev);
+    retval = razer_blackshark_init(dev, intf, hdev);
+    if (retval)
+        goto exit_kfree;
+
     hid_set_drvdata(hdev, dev);
     dev_set_drvdata(&hdev->dev, dev);
 
     retval = hid_parse(hdev);
     if (retval) {
         hid_err(hdev, "parse failed\n");
-        goto exit_free;
+        goto exit_kfree;
     }
 
     retval = hid_hw_start(hdev, HID_CONNECT_DEFAULT);
     if (retval) {
         hid_err(hdev, "hw start failed\n");
-        goto exit_free;
+        goto exit_kfree;
     }
 
     /* Open the device so the interrupt IN endpoint is polled and replies reach
@@ -753,25 +980,46 @@ static int razer_blackshark_probe(struct hid_device *hdev, const struct hid_devi
 
         switch (dev->usb_pid) {
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V2_PRO_2_4:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_hw_model);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_mute);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_equalizer);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_equalizer_preset);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_monitoring);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_monitoring_level);
-            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_bt_dnd);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_sidetone);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dnd);
             break;
         }
     }
+
+    /*
+     * Kick off the identity fetch, once the attributes that expose it exist.
+     * It matters that this happens early: the daemon reads device_serial
+     * exactly once, on discovery, and caches the result for the lifetime of
+     * the device - so a placeholder read there is never corrected, it becomes
+     * the device's identity (D-Bus object path and persistence key) until the
+     * next reboot.
+     *
+     * Deferred rather than run inline because with the headset asleep both
+     * queries time out: done inline that blocked probe, and so the hotplug
+     * path, for ~2.3s and still yielded only the placeholder.
+     *
+     * Scheduled last so that the CREATE_DEVICE_FILE failure path above, which
+     * jumps straight to kfree(), cannot free the device out from under it.
+     */
+    schedule_delayed_work(&dev->ids_work, 0);
 
     usb_disable_autosuspend(interface_to_usbdev(intf));
 
     return 0;
 
+exit_free:
+    /* attribute creation failed with the device open: unwind that too */
+    hid_hw_close(hdev);
 exit_stop:
     hid_hw_stop(hdev);
-exit_free:
+exit_kfree:
     kfree(dev);
     return retval;
 }
@@ -779,6 +1027,12 @@ exit_free:
 static void razer_blackshark_disconnect(struct hid_device *hdev)
 {
     struct razer_blackshark_device *dev = hid_get_drvdata(hdev);
+
+    /*
+     * First: the background identity fetch does HID I/O and dereferences dev,
+     * so it must be finished before the device is stopped or freed below.
+     */
+    cancel_delayed_work_sync(&dev->ids_work);
 
     if (dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE) {
         device_remove_file(&hdev->dev, &dev_attr_version);
@@ -789,14 +1043,15 @@ static void razer_blackshark_disconnect(struct hid_device *hdev)
 
         switch (dev->usb_pid) {
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V2_PRO_2_4:
+            device_remove_file(&hdev->dev, &dev_attr_hw_model);
+            device_remove_file(&hdev->dev, &dev_attr_mic_mute);
             device_remove_file(&hdev->dev, &dev_attr_charge_level);
             device_remove_file(&hdev->dev, &dev_attr_charge_status);
             device_remove_file(&hdev->dev, &dev_attr_equalizer);
             device_remove_file(&hdev->dev, &dev_attr_equalizer_preset);
             device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
-            device_remove_file(&hdev->dev, &dev_attr_mic_monitoring);
-            device_remove_file(&hdev->dev, &dev_attr_mic_monitoring_level);
-            device_remove_file(&hdev->dev, &dev_attr_bt_dnd);
+            device_remove_file(&hdev->dev, &dev_attr_sidetone);
+            device_remove_file(&hdev->dev, &dev_attr_dnd);
             break;
         }
     }

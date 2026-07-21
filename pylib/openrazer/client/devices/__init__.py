@@ -59,9 +59,10 @@ class RazerDevice(object):
 
             'equalizer': self._has_feature('razer.device.audio', ('getEqualizer', 'setEqualizer')),
             'equalizer_preset': self._has_feature('razer.device.audio', ('getEqualizerPreset', 'setEqualizerPreset')),
-            'mic_monitoring': self._has_feature('razer.device.audio', ('getMicMonitoring', 'setMicMonitoring')),
-            'mic_monitoring_level': self._has_feature('razer.device.audio', ('getMicMonitoringLevel', 'setMicMonitoringLevel')),
-            'bluetooth_dnd': self._has_feature('razer.device.misc', ('getBluetoothDnd', 'setBluetoothDnd')),
+            'sidetone': self._has_feature('razer.device.audio', ('getSidetone', 'setSidetone')),
+            'mic_mute': self._has_feature('razer.device.audio', 'getMicMute'),
+            'dnd': self._has_feature('razer.device.misc', ('getDnd', 'setDnd')),
+            'hardware_model': self._has_feature('razer.device.misc', 'getHardwareModel'),
 
             'macro_logic': self._has_feature('razer.device.macro'),
             'keyboard_layout': self._has_feature('razer.device.misc', 'getKeyboardLayout'),
@@ -247,7 +248,7 @@ class RazerDevice(object):
             self._dbus_interfaces['dpi'] = _dbus.Interface(self._dbus, "razer.device.dpi")
         if self.has('battery'):
             self._dbus_interfaces['power'] = _dbus.Interface(self._dbus, "razer.device.power")
-        if self.has('equalizer') or self.has('mic_monitoring'):
+        if self.has('equalizer') or self.has('sidetone') or self.has('mic_mute'):
             self._dbus_interfaces['audio'] = _dbus.Interface(self._dbus, "razer.device.audio")
         if self.has('game_mode_led'):
             self._dbus_interfaces['game_mode_led'] = _dbus.Interface(self._dbus, "razer.device.led.gamemode")
@@ -607,95 +608,96 @@ class RazerDevice(object):
         self._dbus_interfaces['audio'].setEqualizerPreset(preset)
 
     @property
-    def mic_monitoring(self) -> bool:
+    def sidetone(self) -> int:
         """
-        Get whether mic monitoring (sidetone) is enabled
+        Get the sidetone (mic monitoring) level as a percentage
 
-        :rtype: bool
-
-        :raises NotImplementedError: If function is not supported
-        """
-        if self.has('mic_monitoring'):
-            return bool(self._dbus_interfaces['audio'].getMicMonitoring())
-        else:
-            raise NotImplementedError()
-
-    @mic_monitoring.setter
-    def mic_monitoring(self, enabled: bool) -> None:
-        """
-        Enable or disable mic monitoring (sidetone)
-
-        :param enabled: True to hear your own mic in the headset
-        :type enabled: bool
-
-        :raises NotImplementedError: If function is not supported
-        """
-        if self.has('mic_monitoring'):
-            self._dbus_interfaces['audio'].setMicMonitoring(bool(enabled))
-        else:
-            raise NotImplementedError()
-
-    @property
-    def mic_monitoring_level(self) -> int:
-        """
-        Get the mic monitoring (sidetone) loudness (0-10)
-
+        :return: 0-100, where 0 means sidetone is off
         :rtype: int
 
         :raises NotImplementedError: If function is not supported
         """
-        if self.has('mic_monitoring_level'):
-            return int(self._dbus_interfaces['audio'].getMicMonitoringLevel())
+        if self.has('sidetone'):
+            return int(self._dbus_interfaces['audio'].getSidetone())
         else:
             raise NotImplementedError()
 
-    @mic_monitoring_level.setter
-    def mic_monitoring_level(self, level: int) -> None:
+    @sidetone.setter
+    def sidetone(self, level: int) -> None:
         """
-        Set the mic monitoring (sidetone) loudness
+        Set the sidetone (mic monitoring) level: hear your own mic in the headset
 
-        :param level: Level 0-10
+        :param level: 0-100, where 0 disables sidetone
         :type level: int
 
         :raises NotImplementedError: If function is not supported
-        :raises ValueError: If level is not 0-10
+        :raises ValueError: If level is not 0-100
         """
-        if not self.has('mic_monitoring_level'):
+        if not self.has('sidetone'):
             raise NotImplementedError()
 
         level = int(level)
-        if not 0 <= level <= 10:
-            raise ValueError("Mic monitoring level must be 0-10")
-        self._dbus_interfaces['audio'].setMicMonitoringLevel(level)
+        if not 0 <= level <= 100:
+            raise ValueError("Sidetone level must be 0-100")
+        self._dbus_interfaces['audio'].setSidetone(level)
 
     @property
-    def bluetooth_dnd(self) -> bool:
+    def mic_mute(self) -> bool:
         """
-        Get whether Bluetooth "Do Not Disturb" is enabled (dual-mode headsets:
-        suppress Bluetooth interruptions while in 2.4GHz mode)
+        Get the state of the headset's hardware mic-mute button (read-only)
+
+        :return: True if the microphone is muted
+        :rtype: bool
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('mic_mute'):
+            return bool(self._dbus_interfaces['audio'].getMicMute())
+        else:
+            raise NotImplementedError()
+
+    @property
+    def hardware_model(self) -> str:
+        """
+        Get the product id the headset reports for itself, as a 4-digit hex
+        string. Over a 2.4GHz dongle this identifies the paired headset.
+
+        :rtype: str
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('hardware_model'):
+            return str(self._dbus_interfaces['device'].getHardwareModel())
+        else:
+            raise NotImplementedError()
+
+    @property
+    def dnd(self) -> bool:
+        """
+        Get whether the headset's "Do Not Disturb" mode is enabled
 
         :rtype: bool
 
         :raises NotImplementedError: If function is not supported
         """
-        if self.has('bluetooth_dnd'):
-            return bool(self._dbus_interfaces['device'].getBluetoothDnd())
+        if self.has('dnd'):
+            return bool(self._dbus_interfaces['device'].getDnd())
         else:
             raise NotImplementedError()
 
-    @bluetooth_dnd.setter
-    def bluetooth_dnd(self, enabled: bool) -> None:
+    @dnd.setter
+    def dnd(self, enabled: bool) -> None:
         """
-        Toggle Bluetooth "Do Not Disturb"
+        Toggle the headset's "Do Not Disturb" mode
 
         :param enabled: True to enable
         :type enabled: bool
 
         :raises NotImplementedError: If function is not supported
         """
-        if not self.has('bluetooth_dnd'):
+        if not self.has('dnd'):
             raise NotImplementedError()
-        self._dbus_interfaces['device'].setBluetoothDnd(bool(enabled))
+        self._dbus_interfaces['device'].setDnd(bool(enabled))
 
     @property
     def poll_rate(self) -> int:
