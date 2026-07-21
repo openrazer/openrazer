@@ -1464,7 +1464,7 @@ static ssize_t razer_attr_write_headphone_eq(struct device *dev, struct device_a
                &vals[5], &vals[6], &vals[7], &vals[8], &vals[9], &vals[10]);
 
     if (n == 11) {
-        profile_idx = (u8)clamp(vals[0], 0, 4);
+        profile_idx = (u8)clamp(vals[0], 0, BLACKSHARK_V3_PRO_EQ_PRESET_COUNT - 1);
         for (i = 0; i < 10; i++) {
             vals[i] = clamp(vals[i + 1], -6, 6);
             bands[i] = (s8)vals[i];
@@ -1489,6 +1489,10 @@ static ssize_t razer_attr_write_headphone_eq(struct device *dev, struct device_a
         razer_blackshark_send_cmd(device, cmds[i]);
     for (i = 0; i < 10; i++)
         device->eq_bands[i] = bands[i];
+    /* Writing a profile also activates it, so reflect it as the active preset.
+     * Without this, read_headphone_eq keeps reporting the previously active
+     * slot and the control app's live-sync reverts the user's selection. */
+    device->cached_v3_eq_active = profile_idx;
     mutex_unlock(&device->lock);
 
     return count;
@@ -1680,6 +1684,70 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     mutex_unlock(&device->lock);
 
     return sprintf(buf, "%d\n", device->pushed_charging);
+}
+
+/*
+ * Query the firmware-stored EQ bands for one slot. cls=0x15 GET arg=[slot];
+ * the reply is cls=0x15 sub=0x01 cnt=0x0b with data[13]=slot and
+ * data[14..23]=b0..b9 (sign-magnitude). Caller must NOT hold device->lock.
+ * On success fills device->eq_query_{slot,bands} and returns 0.
+ */
+static int razer_blackshark_v3_eq_query(struct razer_kraken_device *device, u8 slot)
+{
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    const u8 args[1] = { slot };
+    int i;
+
+    /* Mark pending. The 0x15 reply arrives asynchronously on ep 0x84 and is
+     * cached by razer_blackshark_v3_cache() into eq_query_{slot,bands}; we do
+     * not read it off device->data because send_cmd's completion also fires
+     * for the keepalive and unrelated pushes, so device->data can hold a
+     * different frame by the time send_cmd returns. */
+    device->eq_query_slot = -1;
+
+    razer_blackshark_v3_handshake(device);
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_PARAM_EQ_BANDS, 0x01, args, sizeof(args));
+    mutex_lock(&device->lock);
+    razer_blackshark_send_cmd(device, cmdbuf);
+    mutex_unlock(&device->lock);
+
+    /* Wait (up to ~300ms) for the callback to cache the matching slot. */
+    for (i = 0; i < 30 && device->eq_query_slot != (s8)slot; i++)
+        msleep(10);
+
+    return (device->eq_query_slot == (s8)slot) ? 0 : -ETIMEDOUT;
+}
+
+/*
+ * eq_slot: write a slot index (0..8) to read that slot's firmware-stored EQ
+ * bands; the read returns "<slot> b0 b1 .. b9" from the last query. Lets the
+ * control app load the headset's real per-slot bands (including custom slots
+ * edited on-device or in Synapse) instead of assuming factory values.
+ */
+static ssize_t razer_attr_write_eq_slot(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    unsigned long slot;
+
+    if (kstrtoul(buf, 10, &slot) || slot >= BLACKSHARK_V3_PRO_EQ_PRESET_COUNT)
+        return -EINVAL;
+    razer_blackshark_v3_eq_query(device, (u8)slot);
+    return count;
+}
+
+static ssize_t razer_attr_read_eq_slot(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    int len = 0, i;
+
+    mutex_lock(&device->lock);
+    len += sprintf(buf + len, "%d", (int)device->eq_query_slot);
+    for (i = 0; i < 10; i++)
+        len += sprintf(buf + len, " %d", (int)device->eq_query_bands[i]);
+    mutex_unlock(&device->lock);
+    len += sprintf(buf + len, "\n");
+    return len;
 }
 
 static ssize_t razer_attr_write_v3pro_sidetone(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2006,6 +2074,7 @@ static ssize_t razer_attr_read_mic_mute(struct device *dev, struct device_attrib
 }
 static DEVICE_ATTR(mic_eq_preset,           0660, razer_attr_read_mic_eq_preset,           razer_attr_write_mic_eq_preset);
 static DEVICE_ATTR(mic_mute,                0440, razer_attr_read_mic_mute,                NULL);
+static DEVICE_ATTR(eq_slot,                 0660, razer_attr_read_eq_slot,                 razer_attr_write_eq_slot);
 static DEVICE_ATTR(audio_function_button,   0660, razer_attr_read_audio_function_button,   razer_attr_write_audio_function_button);
 /* BlackShark V3 Pro (PID 0x0577) — distinct attribute names so they don't collide
  * with V3's headphone_eq (which has 10-band write semantics). */
@@ -2055,6 +2124,7 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
     dev->cached_in_call_audio_mix  = -1;
     dev->cached_audio_prompts      = -1;
     dev->cached_mic_muted          = -1;
+    dev->eq_query_slot             = -1;
     dev->pushed_battery_pct        = -1;
     dev->pushed_charging           = -1;
 
@@ -2092,6 +2162,217 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
 /**
  * Probe method is ran whenever a device is binded to the driver
  */
+static inline bool razer_blackshark_is_v3(u16 pid)
+{
+    return pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3 ||
+           pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED ||
+           pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
+           pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED;
+}
+
+/*
+ * Cache one 64-byte V3/V3 Pro frame into device state. Shared by raw_event()
+ * (when the HID stack delivers a report, e.g. wired) and the private ep 0x84
+ * URB callback (the wireless path, where usbhid never polls the endpoint).
+ * Copies the frame to device->data, updates the push/on-board caches, and
+ * wakes any send_cmd() waiting on vendor_response. Runs in softirq / URB
+ * completion context — must not sleep or take device->lock.
+ */
+static void razer_blackshark_v3_cache(struct razer_kraken_device *device, u8 *data, int size)
+{
+    memcpy(&device->data[0], &data[0], size);
+
+    /* Capture BOTH replies (sub=0x01) and unsolicited pushes (sub=0x02).
+     * data[13]==0xff on a class marks a capability/handshake reply, not a
+     * real value, so each case rejects it. */
+    if ((data[11] == 0x01 || data[11] == 0x02) && data[12] >= 1) {
+        switch (data[10]) {
+        case 0x21: /* battery percent */
+            if (data[13] <= 100)
+                device->pushed_battery_pct = data[13];
+            break;
+        case 0x2a: /* charging flag (real 0/1 state only; 0xff = capability) */
+            if (data[13] <= 1)
+                device->pushed_charging = data[13] ? 1 : 0;
+            break;
+        case 0x20: /* RF link re-established — cached battery/charging from
+                    * before the drop may be stale, so invalidate them. */
+            if (data[13] == 0x01) {
+                device->pushed_charging = -1;
+                device->pushed_battery_pct = -1;
+            }
+            break;
+        case BLACKSHARK_PARAM_SIDETONE_VOLUME: /* 0x19 */
+            if (data[13] <= 15) {
+                device->cached_v3_sidetone = data[13];
+                device->cached_v3pro_sidetone = data[13];
+            }
+            break;
+        case BLACKSHARK_PARAM_GAME_CHAT_BAL_PRO: /* 0x5c */
+        case BLACKSHARK_PARAM_GAME_CHAT_BAL_V3:  /* 0x65 */
+            if (data[13] != 0xff)
+                device->cached_game_chat_balance = data[13];
+            break;
+        case BLACKSHARK_PARAM_IN_CALL_AUDIO_MIX: /* 0x5d */
+            if (data[13] != 0xff)
+                device->cached_in_call_audio_mix = data[13];
+            break;
+        case BLACKSHARK_PARAM_ULTRA_LOW_LATENCY: /* 0x5f */
+            if (data[13] <= 1) {
+                device->cached_v3_ull = data[13];
+                device->cached_v3pro_ull = data[13];
+            }
+            break;
+        case BLACKSHARK_PARAM_AUDIO_PROMPTS_GET: /* 0x66 */
+            if (data[13] <= 1)
+                device->cached_audio_prompts = data[13];
+            break;
+        case BLACKSHARK_PARAM_AUDIO_FN_GET: /* 0x6a */
+            if (data[13] <= 3)
+                device->cached_v3_fn_button = data[13];
+            break;
+        case BLACKSHARK_PARAM_THX: /* 0x9e */
+            if (data[13] <= 1) {
+                device->cached_v3_thx = data[13];
+                device->cached_v3pro_thx = data[13];
+            }
+            break;
+        case BLACKSHARK_PARAM_MIC_EQ_PRESET: /* 0x16 */
+            if (data[13] != 0xff)
+                device->cached_v3_mic_eq_preset = data[13];
+            break;
+        case BLACKSHARK_PARAM_MIC_STATUS: /* 0x55 mic mute */
+            if (data[13] <= 1)
+                device->cached_mic_muted = data[13];
+            break;
+        case BLACKSHARK_PARAM_EQ_SLOT_META: /* 0x60 on-board EQ preset */
+            if (data[13] < BLACKSHARK_V3_PRO_EQ_PRESET_COUNT) {
+                device->cached_v3pro_eq_profile = data[13];
+                device->cached_v3_eq_active = data[13];
+            }
+            break;
+        case BLACKSHARK_PARAM_EQ_BANDS: /* 0x15 EQ band readback reply:
+                    * cnt=0x0b [slot, b0..b9] sign-magnitude. Cache it here (not
+                    * off device->data after send_cmd) because the completion
+                    * also fires for the keepalive and other pushes. */
+            if (data[12] >= 11) {
+                int i;
+
+                for (i = 0; i < 10; i++)
+                    device->eq_query_bands[i] = bs_gain_decode(data[14 + i]);
+                device->eq_query_slot = data[13];  /* set last: readers gate on it */
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+    if (device->vendor_response_inited)
+        complete(&device->vendor_response);
+}
+
+/*
+ * RF_WAKE keep-alive: Output Report 5, payload [0x05, 0x00]. Sending it
+ * ~every 3.5s keeps the dongle's RF telemetry channel from going idle and
+ * dropping pushes. Ported from the standalone V3 Pro driver.
+ */
+static void razer_blackshark_v3_rf_wake(struct razer_kraken_device *device)
+{
+    static const u8 rpid5[2] = { 0x05, 0x00 };
+    struct usb_interface *intf = to_usb_interface(device->hdev->dev.parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    int intf_num = intf->cur_altsetting->desc.bInterfaceNumber;
+    u8 *r5 = kmemdup(rpid5, sizeof(rpid5), GFP_KERNEL);
+
+    if (!r5)
+        return;
+    usb_control_msg(usb_dev, usb_sndctrlpipe(usb_dev, 0),
+                    HID_REQ_SET_REPORT,
+                    USB_DIR_OUT | USB_TYPE_CLASS | USB_RECIP_INTERFACE,
+                    (HID_OUTPUT_REPORT + 1) << 8 | 0x05, /* Output Report, ID 5 */
+                    intf_num, r5, sizeof(rpid5), USB_CTRL_SET_TIMEOUT);
+    kfree(r5);
+}
+
+static void razer_blackshark_v3_rf_wake_keepalive(struct work_struct *work)
+{
+    struct razer_kraken_device *dev =
+        container_of(work, struct razer_kraken_device, rf_wake_work.work);
+
+    razer_blackshark_v3_rf_wake(dev);
+    schedule_delayed_work(&dev->rf_wake_work, msecs_to_jiffies(3500));
+}
+
+/*
+ * -EPROTO recovery: usb_clear_halt resets the ep 0x84 data toggle so the next
+ * submission re-syncs. Must run in process context (not the URB callback).
+ */
+static void razer_blackshark_v3_intr_recover(struct work_struct *work)
+{
+    struct razer_kraken_device *dev =
+        container_of(work, struct razer_kraken_device, intr_recover_work);
+    struct usb_interface *intf = to_usb_interface(dev->hdev->dev.parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    if (atomic_inc_return(&dev->intr_eproto_count) > 5)
+        return;   /* cap CLEAR_FEATURE floods during hot-unplug */
+    usb_clear_halt(usb_dev, usb_rcvintpipe(usb_dev, 4));
+    if (dev->intr_urb)
+        usb_submit_urb(dev->intr_urb, GFP_KERNEL);
+}
+
+/*
+ * Completion callback for the private ep 0x84 interrupt-IN URB. Feeds the
+ * received frame through the shared cache path (same as raw_event) and
+ * resubmits so the endpoint stays polled.
+ */
+static void razer_blackshark_v3_intr_callback(struct urb *urb)
+{
+    struct razer_kraken_device *dev = urb->context;
+    int status = urb->status;
+
+    if (status == 0) {
+        atomic_set(&dev->intr_eproto_count, 0);
+        if (urb->actual_length == RAZER_BLACKSHARK_REPORT_LEN)
+            razer_blackshark_v3_cache(dev, urb->transfer_buffer, urb->actual_length);
+        /* Always resubmit on status 0 — short reports (button/consumer
+         * events) must not permanently kill the URB. */
+        usb_submit_urb(urb, GFP_ATOMIC);
+    } else if (status == -EPROTO) {
+        schedule_work(&dev->intr_recover_work);
+    } else if (status != -ENOENT && status != -ESHUTDOWN && status != -ENODEV) {
+        usb_submit_urb(urb, GFP_ATOMIC);
+    }
+    /* -ENOENT/-ESHUTDOWN/-ENODEV: device gone, do not resubmit. */
+}
+
+/*
+ * Allocate and pre-submit the private ep 0x84 URB. Called before hid_hw_start
+ * so the endpoint is polled the moment usbhid_start's SET_IDLE activates it.
+ * Best-effort: on failure the HID path still delivers whatever it can.
+ */
+static void razer_blackshark_v3_intr_start(struct razer_kraken_device *dev,
+        struct usb_device *usb_dev)
+{
+    INIT_WORK(&dev->intr_recover_work, razer_blackshark_v3_intr_recover);
+    INIT_DELAYED_WORK(&dev->rf_wake_work, razer_blackshark_v3_rf_wake_keepalive);
+    atomic_set(&dev->intr_eproto_count, 0);
+
+    dev->intr_buf = usb_alloc_coherent(usb_dev, RAZER_BLACKSHARK_REPORT_LEN,
+                                       GFP_KERNEL, &dev->intr_dma);
+    dev->intr_urb = usb_alloc_urb(0, GFP_KERNEL);
+    if (dev->intr_buf && dev->intr_urb) {
+        usb_fill_int_urb(dev->intr_urb, usb_dev,
+                         usb_rcvintpipe(usb_dev, 4), /* ep 0x84 */
+                         dev->intr_buf, RAZER_BLACKSHARK_REPORT_LEN,
+                         razer_blackshark_v3_intr_callback, dev, 1);
+        dev->intr_urb->transfer_dma = dev->intr_dma;
+        dev->intr_urb->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
+        usb_submit_urb(dev->intr_urb, GFP_KERNEL);
+    }
+}
+
 static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
     int retval = 0;
@@ -2152,6 +2433,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq_preset);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_mute);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_eq_slot);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_function_button);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_chat_balance);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_in_call_audio_mix);
@@ -2172,6 +2454,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_eq_preset);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_mute);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_eq_slot);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_audio_function_button);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_game_chat_balance);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_in_call_audio_mix);
@@ -2182,6 +2465,12 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
 
     dev_set_drvdata(&hdev->dev, dev);
 
+    /* Bring up the private ep 0x84 URB BEFORE hid_hw_start so it is already on
+     * the endpoint when usbhid_start's SET_IDLE activates it (the dongle
+     * starts sending on ep 0x84 ~2.7ms after that SET_IDLE). */
+    if (razer_blackshark_is_v3(dev->usb_pid))
+        razer_blackshark_v3_intr_start(dev, usb_dev);
+
     if(hid_parse(hdev)) {
         hid_err(hdev, "parse failed\n");
         goto exit_free;
@@ -2190,6 +2479,20 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
     if (hid_hw_start(hdev, HID_CONNECT_DEFAULT)) {
         hid_err(hdev, "hw start failed\n");
         goto exit_free;
+    }
+
+    /* hid_hw_start's usb_set_interface killed our pre-submitted URB; resubmit
+     * (kill first so its giveback has run and the resubmit doesn't race
+     * -EBUSY). Keep the HID open count up, and start the RF_WAKE keep-alive so
+     * the wireless telemetry channel doesn't go idle. */
+    if (razer_blackshark_is_v3(dev->usb_pid)) {
+        if (hid_hw_open(hdev))
+            hid_warn(hdev, "hid_hw_open failed; ep 0x84 URB still drives telemetry\n");
+        if (dev->intr_urb) {
+            usb_kill_urb(dev->intr_urb);
+            usb_submit_urb(dev->intr_urb, GFP_KERNEL);
+        }
+        schedule_delayed_work(&dev->rf_wake_work, msecs_to_jiffies(750));
     }
 
     /* V3 / V3 Pro: replicate Synapse's pre-GET init handshake. Without
@@ -2230,6 +2533,19 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
     return 0;
 
 exit_free:
+    /* On a probe failure after the private URB was set up, tear it (and its
+     * work) down before freeing dev — the URB callback holds a dev pointer. */
+    if (razer_blackshark_is_v3(dev->usb_pid)) {
+        cancel_delayed_work_sync(&dev->rf_wake_work);
+        cancel_work_sync(&dev->intr_recover_work);
+        if (dev->intr_urb) {
+            usb_kill_urb(dev->intr_urb);
+            usb_free_urb(dev->intr_urb);
+        }
+        if (dev->intr_buf)
+            usb_free_coherent(usb_dev, RAZER_BLACKSHARK_REPORT_LEN,
+                              dev->intr_buf, dev->intr_dma);
+    }
     kfree(dev);
     return retval;
 }
@@ -2282,6 +2598,7 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_mic_eq);
             device_remove_file(&hdev->dev, &dev_attr_mic_eq_preset);
             device_remove_file(&hdev->dev, &dev_attr_mic_mute);
+            device_remove_file(&hdev->dev, &dev_attr_eq_slot);
             device_remove_file(&hdev->dev, &dev_attr_audio_function_button);
             device_remove_file(&hdev->dev, &dev_attr_game_chat_balance);
             device_remove_file(&hdev->dev, &dev_attr_in_call_audio_mix);
@@ -2302,12 +2619,35 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_mic_eq);
             device_remove_file(&hdev->dev, &dev_attr_mic_eq_preset);
             device_remove_file(&hdev->dev, &dev_attr_mic_mute);
+            device_remove_file(&hdev->dev, &dev_attr_eq_slot);
             device_remove_file(&hdev->dev, &dev_attr_audio_function_button);
             device_remove_file(&hdev->dev, &dev_attr_game_chat_balance);
             device_remove_file(&hdev->dev, &dev_attr_in_call_audio_mix);
             device_remove_file(&hdev->dev, &dev_attr_audio_prompts);
             break;
         }
+    }
+
+    /* Tear down the private ep 0x84 URB and its keep-alive/recovery work.
+     * Guard on the PID: the work items are INIT'd and rf_wake scheduled for
+     * every V3 in probe (even if URB allocation later failed), so they must be
+     * cancelled here before dev is freed regardless of intr_urb. */
+    if (razer_blackshark_is_v3(dev->usb_pid)) {
+        cancel_delayed_work_sync(&dev->rf_wake_work);
+        cancel_work_sync(&dev->intr_recover_work);
+    }
+    if (dev->intr_urb) {
+        usb_kill_urb(dev->intr_urb);
+        usb_free_urb(dev->intr_urb);
+        dev->intr_urb = NULL;
+    }
+    if (dev->intr_buf) {
+        struct usb_interface *intf2 = to_usb_interface(hdev->dev.parent);
+        struct usb_device *usb_dev2 = interface_to_usbdev(intf2);
+
+        usb_free_coherent(usb_dev2, RAZER_BLACKSHARK_REPORT_LEN,
+                          dev->intr_buf, dev->intr_dma);
+        dev->intr_buf = NULL;
     }
 
     hid_hw_stop(hdev);
@@ -2321,100 +2661,11 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 
     if (size == 33) { // Should be a response to a Control packet
         memcpy(&device->data[0], &data[0], size);
-    } else if (size == 64 && (device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3 ||
-                              device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED ||
-                              device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
-                              device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED)) {
-        memcpy(&device->data[0], &data[0], size);
-
-        /* Capture BOTH replies (sub=0x01) and unsolicited pushes (sub=0x02)
-         * into a separate cache so they survive the next send_cmd's
-         * data[1]=0 clear and the read handler's query race. With the
-         * config-desc-255 quirk arming the channel, the armed dongle answers
-         * cls=0x21/0x2a queries with sub=0x01 replies (val at data[13]);
-         * without caching those (stock only cached sub=0x02) the value
-         * arrived in raw_event but was thrown away — charge_level read -1. */
-        if ((data[11] == 0x01 || data[11] == 0x02) && data[12] >= 1) {
-            switch (data[10]) {
-            case 0x21: /* battery percent */
-                if (data[13] <= 100)
-                    device->pushed_battery_pct = data[13];
-                break;
-            case 0x2a: /* charging flag — only a real 0/1 state reply.
-                        * The dir=0x00 capability/handshake replies also use
-                        * cls=0x2a but carry data[13]=0xff; caching those would
-                        * flip charging to "1" (false positive). */
-                if (data[13] <= 1)
-                    device->pushed_charging = data[13] ? 1 : 0;
-                break;
-
-            /* ---- On-board change listening ----
-             * The headset pushes these on ep 0x84 when a setting is changed
-             * via its physical buttons/dials; caching them here keeps the
-             * sysfs read handlers (which return the cached_* value) in sync
-             * with on-device changes. data[13]==0xff = capability/handshake
-             * reply, not a real value — reject it. */
-            case BLACKSHARK_PARAM_SIDETONE_VOLUME: /* 0x19 sidetone level */
-                if (data[13] <= 15) {
-                    device->cached_v3_sidetone = data[13];
-                    device->cached_v3pro_sidetone = data[13];
-                }
-                break;
-            case BLACKSHARK_PARAM_GAME_CHAT_BAL_PRO: /* 0x5c */
-            case BLACKSHARK_PARAM_GAME_CHAT_BAL_V3:  /* 0x65 */
-                if (data[13] != 0xff)
-                    device->cached_game_chat_balance = data[13];
-                break;
-            case BLACKSHARK_PARAM_IN_CALL_AUDIO_MIX: /* 0x5d */
-                if (data[13] != 0xff)
-                    device->cached_in_call_audio_mix = data[13];
-                break;
-            case BLACKSHARK_PARAM_ULTRA_LOW_LATENCY: /* 0x5f */
-                if (data[13] <= 1) {
-                    device->cached_v3_ull = data[13];
-                    device->cached_v3pro_ull = data[13];
-                }
-                break;
-            case BLACKSHARK_PARAM_AUDIO_PROMPTS_GET: /* 0x66 */
-                if (data[13] <= 1)
-                    device->cached_audio_prompts = data[13];
-                break;
-            case BLACKSHARK_PARAM_AUDIO_FN_GET: /* 0x6a fn-button mode */
-                if (data[13] <= 3)
-                    device->cached_v3_fn_button = data[13];
-                break;
-            case BLACKSHARK_PARAM_THX: /* 0x9e THX spatial */
-                if (data[13] <= 1) {
-                    device->cached_v3_thx = data[13];
-                    device->cached_v3pro_thx = data[13];
-                }
-                break;
-            case BLACKSHARK_PARAM_MIC_EQ_PRESET: /* 0x16 mic EQ preset */
-                if (data[13] != 0xff)
-                    device->cached_v3_mic_eq_preset = data[13];
-                break;
-            case BLACKSHARK_PARAM_MIC_STATUS: /* 0x55 mic mute (boom flip / mute button) */
-                if (data[13] <= 1)
-                    device->cached_mic_muted = data[13];
-                break;
-            case BLACKSHARK_PARAM_EQ_SLOT_META: /* 0x60 EQ preset — the on-board
-                        * EQ button pushes cls=0x60 sub=0x02 cnt=6 with the
-                        * active preset index in data[13] (verified on hardware
-                        * 2026-07-21: cycling the button pushed 5/0/1/2/3). */
-                if (data[13] < BLACKSHARK_V3_PRO_EQ_PRESET_COUNT) {
-                    device->cached_v3pro_eq_profile = data[13];
-                    device->cached_v3_eq_active = data[13];
-                }
-                break;
-            default:
-                break;
-            }
-        }
-
-        /* Wake up razer_blackshark_send_cmd() which is waiting on this
-         * completion. Safe in interrupt/softirq context. */
-        if (device->vendor_response_inited)
-            complete(&device->vendor_response);
+    } else if (size == 64 && razer_blackshark_is_v3(device->usb_pid)) {
+        /* HID stack delivered a V3 report (wired, or whenever usbhid does
+         * poll ep 0x84). On wireless the private ep 0x84 URB is the primary
+         * source; both feed the same cache path. */
+        razer_blackshark_v3_cache(device, data, size);
     } else {
         hid_warn(hdev, "razerkraken: Got raw message, length: %d\n", size);
     }
