@@ -1635,53 +1635,27 @@ static int razer_blackshark_v3_battery_query(struct razer_kraken_device *device)
  */
 static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_attribute *attr, char *buf)
 {
+    /* Pure cache read (see charge_status). Battery arrives as a cls=0x21 push
+     * cached into pushed_battery_pct; the cache is primed once at probe. A live
+     * query on every read reset the wireless link under the daemon's ~2s
+     * polling, which power-cycled the headset. */
     struct razer_kraken_device *device = dev_get_drvdata(dev);
     int level = -1;
 
-    razer_blackshark_v3_handshake(device);
-
-    mutex_lock(&device->lock);
-    if (razer_blackshark_v3_battery_query(device) == 0 &&
-        device->data[1] == 0x02 &&
-        device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
-        level = (device->data[13] * 255) / 100;
-    mutex_unlock(&device->lock);
-
-    if (level < 0 && device->pushed_battery_pct >= 0)
+    if (device->pushed_battery_pct >= 0)
         level = (device->pushed_battery_pct * 255) / 100;
 
     return sprintf(buf, "%d\n", level);
 }
 
-/*
- * Charging is its own cls=0x2a class (reply data[13]=0/1), NOT data[14] of the
- * cls=0x21 battery reply. That byte is not a live charging flag on this
- * firmware and read a flickering / flat value on the V3 Pro. Built exactly like
- * handshake step 3: no-arg GET, dir=0x80 and CRC handled by the builder.
- * Caller must NOT hold device->lock (send_cmd sleeps).
- */
-static int razer_blackshark_v3_charge_query(struct razer_kraken_device *device)
-{
-    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
-
-    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_PARAM_CHARGE_STATE, 0x00, NULL, 0);
-    return razer_blackshark_send_cmd(device, cmdbuf);
-}
-
 static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_attribute *attr, char *buf)
 {
+    /* Pure cache read. Charging arrives on cls=0x2a (data[13]=0/1) as a push
+     * that raw_event() / the ep 0x84 URB caches into pushed_charging. Issuing a
+     * live query here on every read (as this used to) meant the daemon polling
+     * charge_status every ~2s hammered the wireless link with SET_REPORTs and
+     * reset the dongle — which showed up as the headset power-cycling. */
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-
-    /* Prime the link (handshake replays cls=0x2a dir=0x00 then dir=0x80), then
-     * query cls=0x2a; raw_event() caches the reply's data[13] into
-     * pushed_charging, which is the value we return. Wired variants sit on USB
-     * power whenever connected, so a stale/absent push there is harmless; only
-     * the wireless link actually depends on this cache staying fresh. */
-    razer_blackshark_v3_handshake(device);
-
-    mutex_lock(&device->lock);
-    razer_blackshark_v3_charge_query(device);
-    mutex_unlock(&device->lock);
 
     return sprintf(buf, "%d\n", device->pushed_charging);
 }
@@ -2163,6 +2137,19 @@ static inline bool razer_blackshark_is_v3(u16 pid)
            pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED;
 }
 
+/* Only the V3 Pro gets the private ep 0x84 URB, the RF_WAKE keep-alive and the
+ * battery prime query. The plain V3 (0579/057a) is served by the normal usbhid
+ * path: binding our own URB there competed with usbhid for the interface's
+ * consumer (volume/scroll dial) reports, and its firmware treats the battery
+ * GET as link-disrupting (it drops the RF link and needs a replug). So on the
+ * plain V3 we never query — charge_level/charge_status are pure cache reads fed
+ * only by the headset's own pushes. */
+static inline bool razer_blackshark_is_v3pro(u16 pid)
+{
+    return pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
+           pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED;
+}
+
 /*
  * Cache one 64-byte V3/V3 Pro frame into device state. Shared by raw_event()
  * (when the HID stack delivers a report, e.g. wired) and the private ep 0x84
@@ -2342,9 +2329,22 @@ static void razer_blackshark_v3_intr_callback(struct urb *urb)
     int status = urb->status;
 
     if (status == 0) {
+        u8 *data = urb->transfer_buffer;
+        int len = urb->actual_length;
+
         atomic_set(&dev->intr_eproto_count, 0);
-        if (urb->actual_length == RAZER_BLACKSHARK_REPORT_LEN)
-            razer_blackshark_v3_cache(dev, urb->transfer_buffer, urb->actual_length);
+        if (len == RAZER_BLACKSHARK_REPORT_LEN && data[0] == 0x02) {
+            /* Razer vendor report (report id 0x02): telemetry + on-board
+             * pushes + query replies. */
+            razer_blackshark_v3_cache(dev, data, len);
+        } else if (len > 0) {
+            /* Consumer-control / other input reports (the volume/scroll dial,
+             * media keys) also arrive on ep 0x84. Our private URB would
+             * otherwise swallow them, breaking the dial — feed them into the
+             * HID input stack exactly as usbhid's own interrupt handler would
+             * so they keep working. */
+            hid_input_report(dev->hdev, HID_INPUT_REPORT, data, len, 1);
+        }
         /* Always resubmit on status 0 — short reports (button/consumer
          * events) must not permanently kill the URB. */
         usb_submit_urb(urb, GFP_ATOMIC);
@@ -2477,7 +2477,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
     /* Bring up the private ep 0x84 URB BEFORE hid_hw_start so it is already on
      * the endpoint when usbhid_start's SET_IDLE activates it (the dongle
      * starts sending on ep 0x84 ~2.7ms after that SET_IDLE). */
-    if (razer_blackshark_is_v3(dev->usb_pid))
+    if (razer_blackshark_is_v3pro(dev->usb_pid))
         razer_blackshark_v3_intr_start(dev, usb_dev);
 
     if(hid_parse(hdev)) {
@@ -2494,7 +2494,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
      * (kill first so its giveback has run and the resubmit doesn't race
      * -EBUSY). Keep the HID open count up, and start the RF_WAKE keep-alive so
      * the wireless telemetry channel doesn't go idle. */
-    if (razer_blackshark_is_v3(dev->usb_pid)) {
+    if (razer_blackshark_is_v3pro(dev->usb_pid)) {
         if (hid_hw_open(hdev))
             hid_warn(hdev, "hid_hw_open failed; ep 0x84 URB still drives telemetry\n");
         if (dev->intr_urb) {
@@ -2504,37 +2504,20 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
         schedule_delayed_work(&dev->rf_wake_work, msecs_to_jiffies(750));
     }
 
-    /* V3 / V3 Pro: replicate Synapse's pre-GET init handshake. Without
-     * cls=0x02 dir=0x00 first, the firmware silently ignores subsequent
-     * GETs (cls=0x21 battery, cls=0x2a charging, cls=0x00 serial, ...).
-     * Verified in 2.4GHz pcap (frame 1811 is Synapse's first command).
-     * Best-effort — if the device hasn't woken up yet at probe time the
-     * handshake will time out and that's fine; subsequent reads will
-     * just retry their own send_cmd. */
-    switch (dev->usb_pid) {
-    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3:
-    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED:
-    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO:
-    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED: {
-        u8 init_buf[RAZER_BLACKSHARK_REPORT_LEN] = {0};
-        u8 crc = 0;
-        int i;
-
-        init_buf[0]  = 0x02;
-        init_buf[2]  = 0x60;
-        init_buf[6]  = 0x04;
-        init_buf[9]  = razer_blackshark_dir_byte(dev->usb_pid);
-        init_buf[10] = 0x02; /* class = capability init handshake */
-        for (i = 0; i < 62; i++) crc ^= init_buf[i];
-        init_buf[62] = crc;
-
+    /* V3 / V3 Pro: prime the telemetry cache once at probe. The handshake
+     * replays Synapse's wake sequence (cls=0x02, then cls=0x2a dir=0x00/0x80)
+     * that the firmware needs before it answers GETs, and which pushes back the
+     * charging state; a single battery query then fills pushed_battery_pct.
+     * After this the charge_level/charge_status handlers are pure cache reads
+     * fed by ep 0x84 pushes — there is no per-read query to reset the wireless
+     * link (the daemon's ~2s polling of that reset path power-cycled the
+     * headset). Best-effort: if the channel is not up yet the queries just time
+     * out and later pushes fill the cache. */
+    if (razer_blackshark_is_v3pro(dev->usb_pid)) {
+        razer_blackshark_v3_handshake(dev);
         mutex_lock(&dev->lock);
-        razer_blackshark_send_cmd(dev, init_buf);
+        razer_blackshark_v3_battery_query(dev);
         mutex_unlock(&dev->lock);
-        break;
-    }
-    default:
-        break;
     }
 
     usb_disable_autosuspend(usb_dev);
@@ -2544,7 +2527,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
 exit_free:
     /* On a probe failure after the private URB was set up, tear it (and its
      * work) down before freeing dev — the URB callback holds a dev pointer. */
-    if (razer_blackshark_is_v3(dev->usb_pid)) {
+    if (razer_blackshark_is_v3pro(dev->usb_pid)) {
         cancel_delayed_work_sync(&dev->rf_wake_work);
         cancel_work_sync(&dev->intr_recover_work);
         if (dev->intr_urb) {
@@ -2641,7 +2624,7 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
      * Guard on the PID: the work items are INIT'd and rf_wake scheduled for
      * every V3 in probe (even if URB allocation later failed), so they must be
      * cancelled here before dev is freed regardless of intr_urb. */
-    if (razer_blackshark_is_v3(dev->usb_pid)) {
+    if (razer_blackshark_is_v3pro(dev->usb_pid)) {
         cancel_delayed_work_sync(&dev->rf_wake_work);
         cancel_work_sync(&dev->intr_recover_work);
     }
