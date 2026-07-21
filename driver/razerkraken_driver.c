@@ -1776,23 +1776,16 @@ static ssize_t razer_attr_write_v3pro_sidetone(struct device *dev, struct device
 
 static ssize_t razer_attr_read_v3pro_sidetone(struct device *dev, struct device_attribute *attr, char *buf)
 {
+    /* Pure cache read, like every other on-board-push-backed attr (game_chat,
+     * in_call_mix, audio_fn_button, ...). raw_event caches sidetone from the
+     * headset's own pushes (BLACKSHARK_PARAM_SIDETONE_VOLUME 0x19). The old
+     * version issued a live blocking query on every read — same anti-pattern
+     * as the charge_status bug; besides being slow, polling it every 700ms
+     * from the control app contended with the push channel enough to make
+     * on-board sidetone changes unreliable to observe. */
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
-    const u8 args[1] = { 0x00 };
-    s8 level = -1;
 
-    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_SIDETONE_READ_CL, 0x00, args, sizeof(args));
-    mutex_lock(&device->lock);
-    razer_blackshark_send_cmd(device, cmdbuf);
-    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_SIDETONE_READ_CL) {
-        level = device->data[13];
-        device->cached_v3pro_sidetone = level;
-    } else {
-        level = device->cached_v3pro_sidetone;
-    }
-    mutex_unlock(&device->lock);
-
-    return sprintf(buf, "%d\n", level);
+    return sprintf(buf, "%d\n", device->cached_v3pro_sidetone);
 }
 
 static ssize_t razer_attr_write_v3pro_thx(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2244,6 +2237,22 @@ static void razer_blackshark_v3_cache(struct razer_kraken_device *device, u8 *da
         case BLACKSHARK_PARAM_MIC_STATUS: /* 0x55 mic mute */
             if (data[13] <= 1)
                 device->cached_mic_muted = data[13];
+            break;
+        case BLACKSHARK_V3_PRO_ANC_POLL_CLASS: /* 0x12 on-board ANC button —
+                    * verified on hardware 2026-07-21: cycling Off/ANC/Ambient
+                    * pushed data[13]=0/1/0x50 and data[14]=level. The push
+                    * arrives on the GET/poll class, not the 0x92 SET class.
+                    * Translate the raw mode back to the driver's 0/1/2 scheme
+                    * (matching razer_attr_write_v3pro_anc's forward mapping). */
+            if (data[13] == BLACKSHARK_V3_PRO_ANC_MODE_OFF)
+                device->cached_v3pro_anc_mode = 0;
+            else if (data[13] == BLACKSHARK_V3_PRO_ANC_MODE_ANC)
+                device->cached_v3pro_anc_mode = 1;
+            else if (data[13] == BLACKSHARK_V3_PRO_ANC_MODE_AMBIENT)
+                device->cached_v3pro_anc_mode = 2;
+            if (data[14] >= BLACKSHARK_V3_PRO_ANC_LEVEL_MIN &&
+                data[14] <= BLACKSHARK_V3_PRO_ANC_LEVEL_MAX)
+                device->cached_v3pro_anc_level = data[14];
             break;
         case BLACKSHARK_PARAM_EQ_SLOT_META: /* 0x60 on-board EQ preset */
             if (data[13] < BLACKSHARK_V3_PRO_EQ_PRESET_COUNT) {

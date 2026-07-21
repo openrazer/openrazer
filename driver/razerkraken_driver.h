@@ -92,6 +92,7 @@
 #define BLACKSHARK_V3_PRO_ULL_CLASS        0xdf  /* SET; args=[on/off]; Ultra-Low Latency */
 #define BLACKSHARK_V3_PRO_ULL_ID           0x01
 #define BLACKSHARK_V3_PRO_ANC_CLASS        0x92  /* SET; args=[mode, level]; mode 0=off 1=ANC 0x50=ambient */
+#define BLACKSHARK_V3_PRO_ANC_POLL_CLASS   0x12  /* GET/poll class; the on-board ANC button pushes state back here (data[13]=mode, data[14]=level), not the 0x92 SET class — same pattern as battery/charging (0x21/0x2a). */
 #define BLACKSHARK_V3_PRO_ANC_ID           0x02
 #define BLACKSHARK_V3_PRO_ANC_MODE_OFF     0x00
 #define BLACKSHARK_V3_PRO_ANC_MODE_ANC     0x01
