@@ -1649,28 +1649,37 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     return sprintf(buf, "%d\n", level);
 }
 
+/*
+ * Charging is its own cls=0x2a class (reply data[13]=0/1), NOT data[14] of the
+ * cls=0x21 battery reply. That byte is not a live charging flag on this
+ * firmware and read a flickering / flat value on the V3 Pro. Built exactly like
+ * handshake step 3: no-arg GET, dir=0x80 and CRC handled by the builder.
+ * Caller must NOT hold device->lock (send_cmd sleeps).
+ */
+static int razer_blackshark_v3_charge_query(struct razer_kraken_device *device)
+{
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+
+    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_PARAM_CHARGE_STATE, 0x00, NULL, 0);
+    return razer_blackshark_send_cmd(device, cmdbuf);
+}
+
 static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    /* Verbatim restore of working V3 Pro charging logic from 8c944f2d.
-     * V3 Pro returns charging in data[14] of the same cls=0x21 reply that
-     * has the percentage in data[13]. Same envelope works for V3 too. */
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
-    const u8 args[1] = { 0x00 };
-    int charging = -1;
 
-    razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_BATTERY_CLASS,
-                                 BLACKSHARK_V3_PRO_BATTERY_ID, args, sizeof(args));
+    /* Prime the link (handshake replays cls=0x2a dir=0x00 then dir=0x80), then
+     * query cls=0x2a; raw_event() caches the reply's data[13] into
+     * pushed_charging, which is the value we return. Wired variants sit on USB
+     * power whenever connected, so a stale/absent push there is harmless; only
+     * the wireless link actually depends on this cache staying fresh. */
+    razer_blackshark_v3_handshake(device);
+
     mutex_lock(&device->lock);
-    razer_blackshark_send_cmd(device, cmdbuf);
-    if (device->data[1] == 0x02 && device->data[10] == BLACKSHARK_V3_PRO_BATTERY_CLASS)
-        charging = device->data[14] ? 1 : 0;
+    razer_blackshark_v3_charge_query(device);
     mutex_unlock(&device->lock);
 
-    if (charging < 0 && device->pushed_charging >= 0)
-        charging = device->pushed_charging;
-
-    return sprintf(buf, "%d\n", charging);
+    return sprintf(buf, "%d\n", device->pushed_charging);
 }
 
 static ssize_t razer_attr_write_v3pro_sidetone(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
