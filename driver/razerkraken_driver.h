@@ -24,9 +24,11 @@
 #define RAZER_BLACKSHARK_REPORT_LEN  64
 #define RAZER_BLACKSHARK_IFACE        5
 
-/* GET params (class byte at buf[10]; SET shares the same class — direction
- * byte at buf[9] picks 0x80 wireless / 0x00 wired, not request type).
- * Verified from Synapse responses in the 2026-05-02 V3 wired + 2.4GHz pcaps. */
+/* GET params (class byte at buf[10]; buf[9] picks 0x80 wireless / 0x00 wired,
+ * not request type, see the envelope notes below). Getter and setter are
+ * separate classes related by get = set - 0x80, so a GET is just its own class
+ * with no args. Verified from Synapse responses in the 2026-05-02 V3 wired +
+ * 2.4GHz pcaps, and re-swept live on a V3 dongle 2026-07-22. */
 #define BLACKSHARK_PARAM_SERIAL            0x00  /* GET; cnt=15 ASCII serial */
 #define BLACKSHARK_PARAM_INIT              0x02  /* GET; capability handshake — Synapse sends FIRST before any other GET */
 #define BLACKSHARK_PARAM_EQ_BANDS          0x15  /* GET; cnt=11 [slot, b0..b9] sign-magnitude — paired SET 0x95 */
@@ -42,6 +44,9 @@
 #define BLACKSHARK_PARAM_IN_CALL_AUDIO_MIX 0x5d  /* GET; cnt=1 [mode]. Pair: SET 0xdd. */
 #define BLACKSHARK_PARAM_ULTRA_LOW_LATENCY 0x5f  /* GET; cnt=1 [on/off]. Confirmed via readback. */
 #define BLACKSHARK_PARAM_EQ_SLOT_META      0x60  /* GET; cnt=6 [slot, ?, enabled?, 00, ?, 00] */
+#define BLACKSHARK_PARAM_EQ_PRESET         0x13  /* GET; cnt=1 [slot]. Pair: SET 0x93 (get = set - 0x80).
+                                                  * Verified on a V3 dongle 2026-07-22: returns the same
+                                                  * slot as the cnt=6 0x60 reply, in one byte. */
 #define BLACKSHARK_PARAM_GAME_CHAT_BAL_V3  0x65  /* GET; cnt=1 [balance]. V3 wireless variant (Synapse Eu enum: 229=0xe5). Pair: SET 0xe5 sub=0x01. */
 #define BLACKSHARK_PARAM_AUDIO_PROMPTS_GET 0x66  /* GET; cnt=1 [on/off]. Pair: SET 0xe5 sub=0x02 (cls byte multiplexes by sub). */
 #define BLACKSHARK_PARAM_AUDIO_FN_GET      0x6a  /* GET; cnt=1 [mode 0..3]. Pair: SET 0xea. */
@@ -71,12 +76,23 @@
  * V3 and V3 Pro share most commands — only ANC/Ambient is V3 Pro–exclusive.
  *
  * Layout:
- *   buf[6]   = data_size (3 + args_len)
- *   buf[9]   = direction (0x80 SET, 0x00 GET, 0x84 ACK)
+ *   buf[6]   = data_size (4 + args_len: direction + class + sub + argc + args)
+ *   buf[9]   = transport (0x80 wireless, 0x00 wired), NOT a request type
  *   buf[10]  = command class
- *   buf[11]  = subclass (always 0x00)
+ *   buf[11]  = subclass in a request; in a reply 0x01 = ACK, 0x02 = unsolicited push
  *   buf[12]  = arg count (number of meaningful bytes at buf[13..])
  *   buf[13..]= args
+ *
+ * buf[9] does not distinguish GET from SET. Both use the transport byte for
+ * the link the device is on; the class alone selects the operation, with
+ * getters at (setter - 0x80): 0x93/0x13 preset, 0xac/0x2c power save,
+ * 0x9e/0x1e audio mode. Swept on a V3 dongle 2026-07-22: all 19 known getter
+ * classes answered with buf[9]=0x80 and flag=0x01. The 0x00-then-0x80 pair the
+ * handshake sends on 0x2a is a firmware wake quirk, not a direction switch.
+ *
+ * (The older "0x80 SET / 0x00 GET / 0x84 ACK" and "data_size = 3 + args_len"
+ * readings were both wrong; the size formula was corrected in code in the ANC
+ * fix, where a trailing arg byte was being dropped, but this comment lagged.)
  */
 #define BLACKSHARK_V3_PRO_BATTERY_CLASS    0x21  /* GET; resp[0]=%, resp[1]=charging */
 #define BLACKSHARK_V3_PRO_BATTERY_ID       0x00
@@ -217,6 +233,11 @@ struct razer_kraken_device {
      * ~every 3.5s is what keeps the dongle's RF telemetry channel from going
      * idle and dropping pushes over a long session. */
     struct delayed_work rf_wake_work;
+    /* One-shot cache prime, deferred off probe(): frames sent from probe get
+     * answered but the replies are dropped, because usbhid is not polling the
+     * interrupt IN endpoint yet. Runs once, a beat after the HID stack has
+     * settled. */
+    struct delayed_work prime_work;
 };
 
 union razer_kraken_effect_byte {

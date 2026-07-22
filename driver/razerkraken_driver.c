@@ -1666,6 +1666,102 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
  * data[14..23]=b0..b9 (sign-magnitude). Caller must NOT hold device->lock.
  * On success fills device->eq_query_{slot,bands} and returns 0.
  */
+/*
+ * Fill every telemetry cache once, at connect.
+ *
+ * The read attrs are pure cache reads: they never query, because the daemon
+ * polls them every ~2s and a query per read power-cycled the headset. The cost
+ * was that anything the device never pushes unprompted sat at -1 until the user
+ * happened to write it: THX, ULL, power save, sidetone, ANC, EQ slot, mic EQ
+ * preset, game/chat, in-call mix and the audio-prompt/FN toggles all read as
+ * "unknown" on a fresh plug even though the headset knew the answer.
+ *
+ * One GET each at connect fixes that without reintroducing per-read traffic:
+ * afterwards the caches stay correct via write-through on sysfs writes and via
+ * the headset's own pushes for the on-board controls.
+ *
+ * Every class here was swept against a V3 dongle (1532:057a) on 2026-07-22 and
+ * answered with flag=0x01 and a plausible value; none disturbed the RF link.
+ * The replies are cached in razer_blackshark_v3_cache() off ep 0x84. Nothing
+ * is read back from device->data here, since the completion also fires for the
+ * keepalive and unrelated pushes.
+ *
+ * Best-effort: a class that does not answer just leaves its cache at -1, which
+ * is the behaviour every attr had before this existed. Must NOT hold
+ * device->lock, as this sleeps between frames.
+ */
+static void razer_blackshark_v3_prime_caches(struct razer_kraken_device *device)
+{
+    static const u8 getters[] = {
+        BLACKSHARK_PARAM_SIDETONE_VOLUME,   /* 0x19 */
+        BLACKSHARK_PARAM_AUTO_POWER_OFF,    /* 0x2c */
+        BLACKSHARK_PARAM_ULTRA_LOW_LATENCY, /* 0x5f */
+        BLACKSHARK_PARAM_THX,               /* 0x9e */
+        BLACKSHARK_V3_PRO_ANC_POLL_CLASS,   /* 0x12 */
+        BLACKSHARK_PARAM_EQ_PRESET,         /* 0x13 */
+        BLACKSHARK_PARAM_EQ_SLOT_META,      /* 0x60 */
+        BLACKSHARK_PARAM_MIC_EQ_PRESET,     /* 0x16 */
+        BLACKSHARK_PARAM_MIC_STATUS,        /* 0x55 */
+        BLACKSHARK_PARAM_GAME_CHAT_BAL_PRO, /* 0x5c */
+        BLACKSHARK_PARAM_GAME_CHAT_BAL_V3,  /* 0x65 */
+        BLACKSHARK_PARAM_IN_CALL_AUDIO_MIX, /* 0x5d */
+        BLACKSHARK_PARAM_AUDIO_PROMPTS_GET, /* 0x66 */
+        BLACKSHARK_PARAM_AUDIO_FN_GET,      /* 0x6a */
+    };
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+    bool opened;
+    int i;
+
+    /*
+     * The replies come back on the interrupt IN endpoint, and usbhid only
+     * polls it while something holds the device open. At probe nothing does
+     * (the V3 Pro is unaffected: it keeps its own hid_hw_open plus a private
+     * ep 0x84 URB), so without this every prime frame is sent, answered, and
+     * dropped before raw_event ever runs. Observed exactly that on a V3 dongle
+     * 2026-07-22: all caches stayed -1 after a reload until the sweep was run
+     * from userspace, where opening /dev/hidraw started the polling.
+     */
+    opened = !hid_hw_open(device->hdev);
+    if (!opened)
+        hid_warn(device->hdev, "blackshark: prime: hid_hw_open failed; replies may be missed\n");
+
+    for (i = 0; i < (int)ARRAY_SIZE(getters); i++) {
+        razer_blackshark_v3pro_build(cmdbuf, getters[i], 0x00, NULL, 0);
+        mutex_lock(&device->lock);
+        razer_blackshark_send_cmd(device, cmdbuf);
+        mutex_unlock(&device->lock);
+        /* Unlike the handshake's back-to-back 2ms pacing, space these out: a
+         * prime is not latency-sensitive, each class has to round-trip to the
+         * headset over RF (~50ms observed), and firing fourteen GETs at once
+         * gives the firmware a burst it has no reason to absorb. One every
+         * 120ms keeps the whole sweep under two seconds and leaves each reply
+         * a clear window to arrive in. */
+        msleep(120);
+    }
+
+    /* Let the last reply land before dropping the open count. */
+    msleep(150);
+    if (opened)
+        hid_hw_close(device->hdev);
+}
+
+/*
+ * Deferred entry point for the prime. Frames sent from probe() are answered by
+ * the device but the replies never reach raw_event(), because usbhid is not
+ * polling the interrupt IN endpoint that early. Verified on a V3 dongle
+ * 2026-07-22: every cache stayed -1 after an inline prime, then filled
+ * correctly the moment the same sweep ran from userspace (opening
+ * /dev/hidraw is what starts the polling). hid_hw_open() from inside probe()
+ * succeeds but is not sufficient on its own, so run a beat later instead.
+ */
+static void razer_blackshark_v3_prime_work(struct work_struct *work)
+{
+    struct razer_kraken_device *dev =
+        container_of(work, struct razer_kraken_device, prime_work.work);
+
+    razer_blackshark_v3_prime_caches(dev);
+}
+
 static int razer_blackshark_v3_eq_query(struct razer_kraken_device *device, u8 slot)
 {
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
@@ -2072,6 +2168,11 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
     dev->usb_vid = usb_dev->descriptor.idVendor;
     dev->usb_pid = usb_dev->descriptor.idProduct;
 
+    /* prime_work is scheduled for every V3, but intr_start() (where the other
+     * work items are INIT'd) only runs for the Pro, so init it here, where
+     * every device passes through. */
+    INIT_DELAYED_WORK(&dev->prime_work, razer_blackshark_v3_prime_work);
+
     /* -1 = "unknown" (no SET seen this session). GUI falls back to JSON cache. */
     dev->cached_v3_power_save      = -1;
     dev->cached_v3_ull             = -1;
@@ -2240,6 +2341,22 @@ static void razer_blackshark_v3_cache(struct razer_kraken_device *device, u8 *da
             if (data[14] >= BLACKSHARK_V3_PRO_ANC_LEVEL_MIN &&
                 data[14] <= BLACKSHARK_V3_PRO_ANC_LEVEL_MAX)
                 device->cached_v3pro_anc_level = data[14];
+            break;
+        case BLACKSHARK_PARAM_AUTO_POWER_OFF: /* 0x2c auto power-off minutes.
+                    * Verified on a V3 dongle 2026-07-22: wrote 30 via sysfs,
+                    * 0x2c read back 0x1e. Until this case existed the power
+                    * save attrs echoed only what the driver itself had
+                    * written, so they read -1 until first write. */
+            if (data[13] <= 60) {
+                device->cached_v3_power_save = data[13];
+                device->cached_v3pro_power_save = data[13];
+            }
+            break;
+        case BLACKSHARK_PARAM_EQ_PRESET: /* 0x13 active EQ slot, cnt=1 */
+            if (data[13] < BLACKSHARK_V3_PRO_EQ_PRESET_COUNT) {
+                device->cached_v3pro_eq_profile = data[13];
+                device->cached_v3_eq_active = data[13];
+            }
             break;
         case BLACKSHARK_PARAM_EQ_SLOT_META: /* 0x60 on-board EQ preset */
             if (data[13] < BLACKSHARK_V3_PRO_EQ_PRESET_COUNT) {
@@ -2520,6 +2637,16 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
         mutex_unlock(&dev->lock);
     }
 
+    /*
+     * Everything else the device knows but never pushes unprompted. Runs for
+     * the plain V3 too, unlike the battery query above: the prime list contains
+     * no 0x21, which is the class this model's firmware treats as
+     * link-disrupting. All 14 classes were swept against a live V3 dongle
+     * (1532:057a) on 2026-07-22 and answered without dropping the link.
+     */
+    if (razer_blackshark_is_v3(dev->usb_pid))
+        schedule_delayed_work(&dev->prime_work, msecs_to_jiffies(1500));
+
     usb_disable_autosuspend(usb_dev);
 
     return 0;
@@ -2527,6 +2654,10 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
 exit_free:
     /* On a probe failure after the private URB was set up, tear it (and its
      * work) down before freeing dev — the URB callback holds a dev pointer. */
+    /* prime_work is scheduled for every V3, not just the Pro, so it must be
+     * cancelled outside the Pro-only guard, as it holds a dev pointer. */
+    if (razer_blackshark_is_v3(dev->usb_pid))
+        cancel_delayed_work_sync(&dev->prime_work);
     if (razer_blackshark_is_v3pro(dev->usb_pid)) {
         cancel_delayed_work_sync(&dev->rf_wake_work);
         cancel_work_sync(&dev->intr_recover_work);
@@ -2624,6 +2755,10 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
      * Guard on the PID: the work items are INIT'd and rf_wake scheduled for
      * every V3 in probe (even if URB allocation later failed), so they must be
      * cancelled here before dev is freed regardless of intr_urb. */
+    /* prime_work is scheduled for every V3, not just the Pro, so it must be
+     * cancelled outside the Pro-only guard, as it holds a dev pointer. */
+    if (razer_blackshark_is_v3(dev->usb_pid))
+        cancel_delayed_work_sync(&dev->prime_work);
     if (razer_blackshark_is_v3pro(dev->usb_pid)) {
         cancel_delayed_work_sync(&dev->rf_wake_work);
         cancel_work_sync(&dev->intr_recover_work);
