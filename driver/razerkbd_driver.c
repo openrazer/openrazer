@@ -5798,10 +5798,14 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         // Set device to regular mode, not driver mode
         // When the daemon discovers the device it will instruct it to enter driver mode
         // Tartarus Pro resets when it receives this command
+        // Wireless devices that are asleep at enumeration time cannot answer this,
+        // so a failure here must not abort probe: returning early would leave the
+        // device files created above attached to a device with no driver data,
+        // and any read of them would dereference NULL.
         if (usb_dev->descriptor.idProduct != USB_DEVICE_ID_RAZER_TARTARUS_PRO) {
             err = razer_set_device_mode(dev, 0x00, 0x00);
             if (err)
-                return err;
+                hid_warn(hdev, "failed to set device mode: %d\n", err);
         }
     } else if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_super);
