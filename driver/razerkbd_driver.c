@@ -656,6 +656,41 @@ static int razer_set_device_mode(struct razer_kbd_device *device, unsigned char 
 }
 
 /**
+ * Set the active onboard profile
+ */
+static int razer_set_active_profile(struct razer_kbd_device *device, unsigned char profile)
+{
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    request = get_razer_report(0x05, 0x04, 0x01);
+    request.arguments[0] = profile;
+    request.transaction_id.id = 0x1F;
+
+    return razer_send_payload(device, &request, &response);
+}
+
+/**
+ * Activate the onboard profile that lighting commands are stored to
+ *
+ * The Huntsman V3 Pro 8KHz stores lighting commands into the onboard profile
+ * slot given by their variable storage byte (profile 1 for VARSTORE), but
+ * only displays them while that slot is the active profile. Out of the box
+ * the read-only factory default profile is active, and the Fn profile
+ * shortcuts activate other profiles, so activate profile 1 before storing
+ * lighting into it.
+ */
+static void razer_activate_lighting_profile(struct device *dev, struct razer_kbd_device *device)
+{
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ:
+        if (razer_set_active_profile(device, 0x01) != 0)
+            dev_warn(dev, "razerkbd: failed to activate onboard profile 1\n");
+        break;
+    }
+}
+
+/**
  * Read device file "charge_level"
  *
  * Returns an integer which needs to be scaled from 0-255 -> 0-100
@@ -2202,6 +2237,8 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     struct razer_report response = {0};
     int err;
 
+    razer_activate_lighting_profile(dev, device);
+
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
     case USB_DEVICE_ID_RAZER_ORNATA:
@@ -2368,6 +2405,8 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     err = kstrtou8(buf, 0, &direction);
     if (err < 0)
         return err;
+
+    razer_activate_lighting_profile(dev, device);
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORNATA:
@@ -2551,6 +2590,8 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     struct razer_report response = {0};
     int err;
 
+    razer_activate_lighting_profile(dev, device);
+
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORNATA:
     case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
@@ -2723,6 +2764,8 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
 
     speed = (unsigned char)buf[0];
 
+    razer_activate_lighting_profile(dev, device);
+
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORNATA:
     case USB_DEVICE_ID_RAZER_ORNATA_CHROMA:
@@ -2868,6 +2911,8 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     struct razer_report request = {0};
     struct razer_report response = {0};
     int err;
+
+    razer_activate_lighting_profile(dev, device);
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORBWEAVER:
@@ -3103,6 +3148,8 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
     struct razer_report request = {0};
     struct razer_report response = {0};
     int err;
+
+    razer_activate_lighting_profile(dev, device);
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ORNATA:
@@ -3347,6 +3394,8 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     struct razer_report request = {0};
     struct razer_report response = {0};
     int err;
+
+    razer_activate_lighting_profile(dev, device);
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_LITE:
@@ -3942,6 +3991,8 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     err = kstrtou8(buf, 0, &brightness);
     if (err < 0)
         return err;
+
+    razer_activate_lighting_profile(dev, device);
 
     switch (device->usb_pid) {
 
