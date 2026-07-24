@@ -44,9 +44,14 @@
 #define BLACKSHARK_PARAM_IN_CALL_AUDIO_MIX 0x5d  /* GET; cnt=1 [mode]. Pair: SET 0xdd. */
 #define BLACKSHARK_PARAM_ULTRA_LOW_LATENCY 0x5f  /* GET; cnt=1 [on/off]. Confirmed via readback. */
 #define BLACKSHARK_PARAM_EQ_SLOT_META      0x60  /* GET; cnt=6 [slot, ?, enabled?, 00, ?, 00] */
-#define BLACKSHARK_PARAM_EQ_PRESET         0x13  /* GET; cnt=1 [slot]. Pair: SET 0x93 (get = set - 0x80).
-                                                  * Verified on a V3 dongle 2026-07-22: returns the same
-                                                  * slot as the cnt=6 0x60 reply, in one byte. */
+/* 0x13 is NOT the active EQ slot. It answers a constant 0x01 with the headset
+ * on Default, Game and Movie alike (measured 2026-07-22), so it is most likely
+ * an EQ-enabled flag. Caching it as the active preset corrupted a correct
+ * push-fed value. 0x60 and 0x15 do report a slot, but only the one passed as an
+ * argument: with no args both answer for slot 0, which is why the connect prime
+ * clobbered the real preset with 0. There is no known getter for "which preset
+ * is active" - cached_v3_eq_active is fed solely by the 0x60 push the on-board
+ * EQ button emits, and stays -1 (unknown) until then. */
 #define BLACKSHARK_PARAM_GAME_CHAT_BAL_V3  0x65  /* GET; cnt=1 [balance]. V3 wireless variant (Synapse Eu enum: 229=0xe5). Pair: SET 0xe5 sub=0x01. */
 #define BLACKSHARK_PARAM_AUDIO_PROMPTS_GET 0x66  /* GET; cnt=1 [on/off]. Pair: SET 0xe5 sub=0x02 (cls byte multiplexes by sub). */
 #define BLACKSHARK_PARAM_AUDIO_FN_GET      0x6a  /* GET; cnt=1 [mode 0..3]. Pair: SET 0xea. */

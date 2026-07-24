@@ -1740,8 +1740,6 @@ static void razer_blackshark_v3_prime_caches(struct razer_kraken_device *device)
         BLACKSHARK_PARAM_ULTRA_LOW_LATENCY, /* 0x5f */
         BLACKSHARK_PARAM_THX,               /* 0x9e */
         BLACKSHARK_V3_PRO_ANC_POLL_CLASS,   /* 0x12 */
-        BLACKSHARK_PARAM_EQ_PRESET,         /* 0x13 */
-        BLACKSHARK_PARAM_EQ_SLOT_META,      /* 0x60 */
         BLACKSHARK_PARAM_MIC_EQ_PRESET,     /* 0x16 */
         BLACKSHARK_PARAM_MIC_STATUS,        /* 0x55 */
         BLACKSHARK_PARAM_GAME_CHAT_BAL_PRO, /* 0x5c */
@@ -1779,6 +1777,41 @@ static void razer_blackshark_v3_prime_caches(struct razer_kraken_device *device)
          * 120ms keeps the whole sweep under two seconds and leaves each reply
          * a clear window to arrive in. */
         msleep(120);
+    }
+
+    /*
+     * Battery and charging, plain V3 only. The Pro already primes both from
+     * probe() via the handshake plus razer_blackshark_v3_battery_query(); the
+     * plain V3 primed neither, so charge_level read -1 until the headset
+     * happened to push a value on its own.
+     *
+     * 0x21 is the class this model's firmware is documented as treating as
+     * link-disrupting, which is why it is kept out of the main list and why
+     * the per-read query was removed in the first place. It is sent last, so
+     * a drop cannot cost us the other thirteen replies, and it is sent from
+     * this deferred, paced, once-per-connect context rather than the ~2s
+     * daemon poll that caused the original trouble.
+     *
+     * Swept against a live V3 dongle 2026-07-22: 0x21 answered 0x5f and the
+     * link stayed up. That is still a small sample against a firmware quirk
+     * seen repeatedly before, so if a connect starts producing an immediate
+     * re-enumeration, drop this block and leave the plain V3 push-only for
+     * battery.
+     */
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3 ||
+        device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED) {
+        static const u8 batt[] = {
+            BLACKSHARK_PARAM_BATTERY_LEVEL, /* 0x21 */
+            BLACKSHARK_PARAM_CHARGE_STATE,  /* 0x2a */
+        };
+
+        for (i = 0; i < (int)ARRAY_SIZE(batt); i++) {
+            razer_blackshark_v3pro_build(cmdbuf, batt[i], 0x00, NULL, 0);
+            mutex_lock(&device->lock);
+            razer_blackshark_send_cmd(device, cmdbuf);
+            mutex_unlock(&device->lock);
+            msleep(120);
+        }
     }
 
     /* Let the last reply land before dropping the open count. */
@@ -2412,14 +2445,23 @@ static void razer_blackshark_v3_cache(struct razer_kraken_device *device, u8 *da
                 device->cached_v3pro_power_save = data[13];
             }
             break;
-        case BLACKSHARK_PARAM_EQ_PRESET: /* 0x13 active EQ slot, cnt=1 */
-            if (data[13] < BLACKSHARK_V3_PRO_EQ_PRESET_COUNT) {
-                device->cached_v3pro_eq_profile = data[13];
-                device->cached_v3_eq_active = data[13];
-            }
-            break;
-        case BLACKSHARK_PARAM_EQ_SLOT_META: /* 0x60 on-board EQ preset */
-            if (data[13] < BLACKSHARK_V3_PRO_EQ_PRESET_COUNT) {
+        case BLACKSHARK_PARAM_EQ_SLOT_META: /* 0x60 EQ slot metadata, cnt=6:
+                    * [slot, ?, enabled, ACTIVE, ?, ?]
+                    *
+                    * Payload byte 3 marks the active preset, and exactly one
+                    * slot carries it. Measured 2026-07-22 by enumerating slots
+                    * 0..8 while switching presets on the headset: the flag sat
+                    * on slot 4 with Esports selected and moved to slot 5 when
+                    * Esports 2 was selected, with every other slot reading 0.
+                    *
+                    * Gating on it is what makes both sources correct. The
+                    * unsolicited push the on-board EQ button emits carries the
+                    * newly active slot with the flag set, while a reply to a
+                    * query for some other slot carries the flag clear - and
+                    * caching that reply's slot unconditionally is what let a
+                    * queried slot overwrite the real one. */
+            if (data[12] >= 4 && data[16] == 0x01 &&
+                data[13] < BLACKSHARK_V3_PRO_EQ_PRESET_COUNT) {
                 device->cached_v3pro_eq_profile = data[13];
                 device->cached_v3_eq_active = data[13];
             }
