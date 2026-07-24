@@ -75,6 +75,31 @@ class RazerDevice(object):
             'scroll_acceleration': self._has_feature('razer.device.scroll', ('getScrollAcceleration', 'setScrollAcceleration')),
             'scroll_smart_reel': self._has_feature('razer.device.scroll', ('getScrollSmartReel', 'setScrollSmartReel')),
 
+            # Headset audio (BlackShark V3 / V3 Pro and friends)
+            'audio_microphone': self._has_feature('razer.device.audio.microphone', ('getVolume', 'setVolume')),
+            'audio_thx_spatial': self._has_feature('razer.device.audio.effects', ('getThxSpatialAudio', 'setThxSpatialAudio')),
+            'audio_ultra_low_latency': self._has_feature('razer.device.audio.headphone', ('getUltraLowLatency', 'setUltraLowLatency')),
+            'audio_wireless_power_save': self._has_feature('razer.device.audio.headphone', ('getWirelessPowerSave', 'setWirelessPowerSave')),
+            'audio_headphone_eq': self._has_feature('razer.device.audio.equalizer', ('getHeadphoneEQ', 'setHeadphoneEQ')),
+            'audio_sidetone': self._has_feature('razer.device.audio.headphone', ('getSidetone', 'setSidetone')),
+            'audio_mic_eq': self._has_feature('razer.device.audio.equalizer', ('getMicEQ', 'setMicEQ')),
+            'audio_mic_eq_preset': self._has_feature('razer.device.audio.equalizer', ('getMicEQPreset', 'setMicEQPreset')),
+            'audio_function_button': self._has_feature('razer.device.audio.headphone', ('getAudioFunctionButton', 'setAudioFunctionButton')),
+            'audio_game_chat_balance': self._has_feature('razer.device.audio.headphone', ('getGameChatBalance', 'setGameChatBalance')),
+            'audio_in_call_audio_mix': self._has_feature('razer.device.audio.headphone', ('getInCallAudioMix', 'setInCallAudioMix')),
+            'audio_prompts': self._has_feature('razer.device.audio.headphone', ('getAudioPrompts', 'setAudioPrompts')),
+            'audio_anc': self._has_feature('razer.device.audio.effects', ('getAnc', 'setAnc')),
+            'set_thx_spatial_audio': self._has_feature('razer.device.audio.effects', 'setThxSpatialAudio'),
+            'set_ultra_low_latency': self._has_feature('razer.device.audio.headphone', 'setUltraLowLatency'),
+            'set_sidetone': self._has_feature('razer.device.audio.headphone', 'setSidetone'),
+            'set_mic_eq_preset': self._has_feature('razer.device.audio.equalizer', 'setMicEQPreset'),
+            'set_audio_function_button': self._has_feature('razer.device.audio.headphone', 'setAudioFunctionButton'),
+            'set_game_chat_balance': self._has_feature('razer.device.audio.headphone', 'setGameChatBalance'),
+            'set_in_call_audio_mix': self._has_feature('razer.device.audio.headphone', 'setInCallAudioMix'),
+            'set_audio_prompts': self._has_feature('razer.device.audio.headphone', 'setAudioPrompts'),
+            'set_anc': self._has_feature('razer.device.audio.effects', 'setAnc'),
+            'set_wireless_power_save': self._has_feature('razer.device.audio.headphone', 'setWirelessPowerSave'),
+
             # Default device is a chroma so lighting capabilities
             'lighting': self._has_feature('razer.device.lighting.chroma'),
             'lighting_breath_single': self._has_feature('razer.device.lighting.chroma', 'setBreathSingle'),
@@ -251,6 +276,19 @@ class RazerDevice(object):
             self._dbus_interfaces['profile_led'] = _dbus.Interface(self._dbus, "razer.device.lighting.profile_led")
         if self.has('scroll_mode') or self.has('scroll_acceleration') or self.has('scroll_smart_reel'):
             self._dbus_interfaces['scroll'] = _dbus.Interface(self._dbus, "razer.device.scroll")
+
+        # Headset audio interfaces
+        if self.has('audio_microphone'):
+            self._dbus_interfaces['audio_microphone'] = _dbus.Interface(self._dbus, "razer.device.audio.microphone")
+        if (self.has('audio_ultra_low_latency') or self.has('audio_wireless_power_save')
+                or self.has('audio_sidetone') or self.has('audio_function_button')
+                or self.has('audio_game_chat_balance') or self.has('audio_in_call_audio_mix')
+                or self.has('audio_prompts')):
+            self._dbus_interfaces['audio_headphone'] = _dbus.Interface(self._dbus, "razer.device.audio.headphone")
+        if self.has('audio_headphone_eq') or self.has('audio_mic_eq') or self.has('audio_mic_eq_preset'):
+            self._dbus_interfaces['audio_equalizer'] = _dbus.Interface(self._dbus, "razer.device.audio.equalizer")
+        if self.has('audio_thx_spatial') or self.has('audio_anc'):
+            self._dbus_interfaces['audio_effects'] = _dbus.Interface(self._dbus, "razer.device.audio.effects")
 
     def _get_available_features(self) -> dict[str, list[str]]:
         introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')
@@ -523,6 +561,140 @@ class RazerDevice(object):
             return int(self._dbus_interfaces['power'].getLowBatteryThreshold())
         else:
             raise NotImplementedError()
+
+    # ── Headset audio (BlackShark V3 / V3 Pro) ────────────────────────────
+
+    def get_mic_volume(self) -> float:
+        if not self.has('audio_microphone'):
+            raise NotImplementedError()
+        return float(self._dbus_interfaces['audio_microphone'].getVolume())
+
+    def set_mic_volume(self, volume: float) -> None:
+        if not self.has('audio_microphone'):
+            raise NotImplementedError()
+        self._dbus_interfaces['audio_microphone'].setVolume(float(volume))
+
+    def get_thx_spatial_audio(self) -> bool:
+        if not self.has('audio_thx_spatial'):
+            raise NotImplementedError()
+        return bool(self._dbus_interfaces['audio_effects'].getThxSpatialAudio())
+
+    def set_thx_spatial_audio(self, enabled: bool) -> None:
+        if not self.has('audio_thx_spatial'):
+            raise NotImplementedError()
+        self._dbus_interfaces['audio_effects'].setThxSpatialAudio(bool(enabled))
+
+    def get_ultra_low_latency(self) -> bool:
+        if not self.has('audio_ultra_low_latency'):
+            raise NotImplementedError()
+        return bool(self._dbus_interfaces['audio_headphone'].getUltraLowLatency())
+
+    def set_ultra_low_latency(self, enabled: bool) -> None:
+        if not self.has('audio_ultra_low_latency'):
+            raise NotImplementedError()
+        self._dbus_interfaces['audio_headphone'].setUltraLowLatency(bool(enabled))
+
+    def get_wireless_power_save(self) -> int:
+        if not self.has('audio_wireless_power_save'):
+            raise NotImplementedError()
+        return int(self._dbus_interfaces['audio_headphone'].getWirelessPowerSave())
+
+    def set_wireless_power_save(self, minutes: int) -> None:
+        if not self.has('audio_wireless_power_save'):
+            raise NotImplementedError()
+        self._dbus_interfaces['audio_headphone'].setWirelessPowerSave(int(minutes))
+
+    def get_headphone_eq(self) -> list[int]:
+        if not self.has('audio_headphone_eq'):
+            raise NotImplementedError()
+        return [int(band) for band in self._dbus_interfaces['audio_equalizer'].getHeadphoneEQ()]
+
+    def set_headphone_eq(self, bands: list[int]) -> None:
+        if not self.has('audio_headphone_eq'):
+            raise NotImplementedError()
+        self._dbus_interfaces['audio_equalizer'].setHeadphoneEQ(list(bands))
+
+    def get_sidetone(self) -> int:
+        if not self.has('audio_sidetone'):
+            raise NotImplementedError()
+        return int(self._dbus_interfaces['audio_headphone'].getSidetone())
+
+    def set_sidetone(self, level: int) -> None:
+        if not self.has('audio_sidetone'):
+            raise NotImplementedError()
+        self._dbus_interfaces['audio_headphone'].setSidetone(int(level))
+
+    def get_mic_eq(self) -> list[int]:
+        if not self.has('audio_mic_eq'):
+            raise NotImplementedError()
+        return [int(band) for band in self._dbus_interfaces['audio_equalizer'].getMicEQ()]
+
+    def set_mic_eq(self, bands: list[int]) -> None:
+        if not self.has('audio_mic_eq'):
+            raise NotImplementedError()
+        self._dbus_interfaces['audio_equalizer'].setMicEQ(list(bands))
+
+    def get_mic_eq_preset(self) -> int:
+        if not self.has('audio_mic_eq_preset'):
+            raise NotImplementedError()
+        return int(self._dbus_interfaces['audio_equalizer'].getMicEQPreset())
+
+    def set_mic_eq_preset(self, preset: int) -> None:
+        if not self.has('audio_mic_eq_preset'):
+            raise NotImplementedError()
+        self._dbus_interfaces['audio_equalizer'].setMicEQPreset(int(preset))
+
+    def get_audio_function_button(self) -> int:
+        if not self.has('audio_function_button'):
+            raise NotImplementedError()
+        return int(self._dbus_interfaces['audio_headphone'].getAudioFunctionButton())
+
+    def set_audio_function_button(self, mode: int) -> None:
+        if not self.has('audio_function_button'):
+            raise NotImplementedError()
+        self._dbus_interfaces['audio_headphone'].setAudioFunctionButton(int(mode))
+
+    def get_game_chat_balance(self) -> int:
+        if not self.has('audio_game_chat_balance'):
+            raise NotImplementedError()
+        return int(self._dbus_interfaces['audio_headphone'].getGameChatBalance())
+
+    def set_game_chat_balance(self, balance: int) -> None:
+        if not self.has('audio_game_chat_balance'):
+            raise NotImplementedError()
+        self._dbus_interfaces['audio_headphone'].setGameChatBalance(int(balance))
+
+    def get_in_call_audio_mix(self) -> int:
+        if not self.has('audio_in_call_audio_mix'):
+            raise NotImplementedError()
+        return int(self._dbus_interfaces['audio_headphone'].getInCallAudioMix())
+
+    def set_in_call_audio_mix(self, mode: int) -> None:
+        if not self.has('audio_in_call_audio_mix'):
+            raise NotImplementedError()
+        self._dbus_interfaces['audio_headphone'].setInCallAudioMix(int(mode))
+
+    def get_audio_prompts(self) -> bool:
+        if not self.has('audio_prompts'):
+            raise NotImplementedError()
+        return bool(self._dbus_interfaces['audio_headphone'].getAudioPrompts())
+
+    def set_audio_prompts(self, enabled: bool) -> None:
+        if not self.has('audio_prompts'):
+            raise NotImplementedError()
+        self._dbus_interfaces['audio_headphone'].setAudioPrompts(bool(enabled))
+
+    def get_anc(self) -> tuple[int, int]:
+        """Returns (mode, level). mode: 0=off / 1=ANC / 2=ambient. level: 1..4."""
+        if not self.has('audio_anc'):
+            raise NotImplementedError()
+        result = self._dbus_interfaces['audio_effects'].getAnc()
+        return (int(result[0]), int(result[1]))
+
+    def set_anc(self, mode: int, level: int) -> None:
+        if not self.has('audio_anc'):
+            raise NotImplementedError()
+        self._dbus_interfaces['audio_effects'].setAnc(int(mode), int(level))
 
     @property
     def poll_rate(self) -> int:
