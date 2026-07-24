@@ -6,6 +6,8 @@
 #ifndef __HID_RAZER_MOUSE_H
 #define __HID_RAZER_MOUSE_H
 
+#include "razercommon.h"
+
 #define USB_DEVICE_ID_RAZER_OROCHI_2011 0x0013
 #define USB_DEVICE_ID_RAZER_NAGA 0x0015
 #define USB_DEVICE_ID_RAZER_DEATHADDER_3_5G 0x0016
@@ -137,6 +139,7 @@
 struct razer_mouse_device {
     struct hid_device *hdev;
     struct mutex lock;
+    struct razer_power_supply battery;
 
     struct input_dev *input;
     struct hrtimer repeat_timer;

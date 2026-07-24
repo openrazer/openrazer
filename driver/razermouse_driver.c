@@ -112,8 +112,12 @@ static int razer_get_report(struct hid_device *hdev, struct razer_report *reques
 
 /**
  * Function to send to device, get response, and actually check the response
+ *
+ * When quiet is set, all print_erroneous_report() logging is suppressed. The
+ * battery-poll worker uses this: a sleeping/absent wireless device makes every
+ * query time out, and without quiet it would spam dmesg on the poll interval.
  */
-static int __must_check razer_send_payload(struct razer_mouse_device *device, struct razer_report *request, struct razer_report *response)
+static int __must_check __razer_send_payload(struct razer_mouse_device *device, struct razer_report *request, struct razer_report *response, bool quiet)
 {
     int retry;
     int err;
@@ -125,7 +129,8 @@ static int __must_check razer_send_payload(struct razer_mouse_device *device, st
         err = razer_get_report(device->hdev, request, response);
         mutex_unlock(&device->lock);
         if (err) {
-            print_erroneous_report(device->hdev, response, "Invalid Report Length");
+            if (!quiet)
+                print_erroneous_report(device->hdev, response, "Invalid Report Length");
             goto retry;
         }
 
@@ -133,7 +138,8 @@ static int __must_check razer_send_payload(struct razer_mouse_device *device, st
         if (response->remaining_packets != request->remaining_packets ||
             response->command_class != request->command_class ||
             response->command_id.id != request->command_id.id) {
-            print_erroneous_report(device->hdev, response, "Response doesn't match request");
+            if (!quiet)
+                print_erroneous_report(device->hdev, response, "Response doesn't match request");
             err = -EINVAL;
             goto retry;
         }
@@ -158,19 +164,28 @@ retry:
     /* Only "valid" but failed responses should reach this */
     switch (response->status) {
     case RAZER_CMD_FAILURE:
-        print_erroneous_report(device->hdev, response, "Command failed");
+        if (!quiet)
+            print_erroneous_report(device->hdev, response, "Command failed");
         return -EINVAL;
     case RAZER_CMD_NOT_SUPPORTED:
-        print_erroneous_report(device->hdev, response, "Command not supported");
+        if (!quiet)
+            print_erroneous_report(device->hdev, response, "Command not supported");
         return -ENOTSUPP;
     case RAZER_CMD_TIMEOUT:
-        print_erroneous_report(device->hdev, response, "Command timed out");
+        if (!quiet)
+            print_erroneous_report(device->hdev, response, "Command timed out");
         return -ETIMEDOUT;
     default:
-        print_erroneous_report(device->hdev, response, "Unknown error");
+        if (!quiet)
+            print_erroneous_report(device->hdev, response, "Unknown error");
         WARN_ONCE(1, "Unknown response status received: %d\n", response->status);
         return -EIO;
     }
+}
+
+static int __must_check razer_send_payload(struct razer_mouse_device *device, struct razer_report *request, struct razer_report *response)
+{
+    return __razer_send_payload(device, request, response, false);
 }
 
 /*
@@ -297,10 +312,8 @@ static ssize_t razer_attr_read_version(struct device *dev, struct device_attribu
  *
  * Returns friendly string of device type
  */
-static ssize_t razer_attr_read_device_type(struct device *dev, struct device_attribute *attr, char *buf)
+static const char *razer_mouse_device_type_str(struct razer_mouse_device *device)
 {
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-
     char *device_type;
 
     switch (device->usb_pid) {
@@ -754,7 +767,12 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Unknown Device";
     }
 
-    return sysfs_emit(buf, "%s\n", device_type);
+    return device_type;
+}
+
+static ssize_t razer_attr_read_device_type(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return sysfs_emit(buf, "%s\n", razer_mouse_device_type_str(dev_get_drvdata(dev)));
 }
 
 /**
@@ -1529,14 +1547,13 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
  *
  * Returns an integer which needs to be scaled from 0-255 -> 0-100
  */
-static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_attribute *attr, char *buf)
+/* returns 0..100, or negative errno; quiet suppresses timeout logging so the
+ * battery-poll worker can query a sleeping wireless mouse without dmesg spam */
+static int razer_mouse_get_battery_level(struct razer_mouse_device *device, bool quiet)
 {
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
+    struct razer_report request = razer_chroma_misc_get_battery_level();
     struct razer_report response = {0};
     int err;
-
-    request = razer_chroma_misc_get_battery_level();
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
@@ -1614,15 +1631,28 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
         break;
 
     default:
-        dev_warn(dev, "razermouse: charge_level not supported for this model\n");
+        if (!quiet)
+            dev_warn(&device->hdev->dev, "razermouse: charge_level not supported for this model\n");
         return -EINVAL;
     }
 
-    err = razer_send_payload(device, &request, &response);
+    err = __razer_send_payload(device, &request, &response, quiet);
     if (err)
         return err;
 
-    return sysfs_emit(buf, "%d\n", response.arguments[1]);
+    return response.arguments[1];
+}
+
+/**
+ * Read device file "get_battery"
+ *
+ * Returns an integer which needs to be scaled from 0-255 -> 0-100
+ */
+static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    int v = razer_mouse_get_battery_level(dev_get_drvdata(dev), false);
+
+    return v < 0 ? v : sysfs_emit(buf, "%d\n", v);
 }
 
 /**
@@ -1630,14 +1660,11 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
  *
  * Returns 0 when not charging, 1 when charging
  */
-static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_attribute *attr, char *buf)
+static int razer_mouse_get_charging(struct razer_mouse_device *device, bool quiet)
 {
-    struct razer_mouse_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
+    struct razer_report request = razer_chroma_misc_get_charging_status();
     struct razer_report response = {0};
     int err;
-
-    request = razer_chroma_misc_get_charging_status();
 
     switch (device->usb_pid) {
     // Wireless mice that don't support is_charging
@@ -1652,8 +1679,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED:
-        return sysfs_emit(buf, "0\n");
-        break;
+        return 0;
 
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
@@ -1719,15 +1745,122 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
         break;
 
     default:
-        dev_warn(dev, "razermouse: charge_status not supported for this model\n");
+        if (!quiet)
+            dev_warn(&device->hdev->dev, "razermouse: charge_status not supported for this model\n");
         return -EINVAL;
     }
 
-    err = razer_send_payload(device, &request, &response);
+    err = __razer_send_payload(device, &request, &response, quiet);
     if (err)
         return err;
 
-    return sysfs_emit(buf, "%d\n", response.arguments[1]);
+    return response.arguments[1];
+}
+
+static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    int v = razer_mouse_get_charging(dev_get_drvdata(dev), false);
+
+    return v < 0 ? v : sysfs_emit(buf, "%d\n", v);
+}
+
+/* True for the wireless mice that expose a battery. This MUST mirror the set of
+ * PIDs whose case in razer_mouse_probe() creates dev_attr_charge_level; it gates
+ * power_supply registration so wired-only mice get no phantom battery node. */
+static bool razer_mouse_has_battery(unsigned short pid)
+{
+    switch (pid) {
+    case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED_ALT:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS_ALT:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
+    case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
+    case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
+    case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OUROBOROS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_RECEIVER:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_CLICK_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
+    case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
+    case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
+        return true;
+    default:
+        return false;
+    }
+}
+
+/* power_supply refresh worker callback: runs in process context on the helper's
+ * delayed_work. Uses the QUIET query variant so a sleeping/absent wireless mouse
+ * maps to present=false without spamming dmesg. */
+static void razer_mouse_battery_refresh(struct razer_power_supply *rps)
+{
+    struct razer_mouse_device *device = rps->drv_data;
+    int raw = razer_mouse_get_battery_level(device, true);
+    int pct, chg, status;
+
+    if (raw < 0) {                 /* asleep/absent -> hide, no dmesg spam */
+        razer_power_supply_set(rps, -1, POWER_SUPPLY_STATUS_UNKNOWN, false);
+        return;
+    }
+    /* charge_level reports 0..255 (the sysfs attr is scaled to a percent by the
+     * daemon); power_supply CAPACITY is itself a percentage, so scale here. */
+    pct = DIV_ROUND_CLOSEST(raw * 100, 255);
+    chg = razer_mouse_get_charging(device, true);
+    status = (chg > 0)    ? POWER_SUPPLY_STATUS_CHARGING :
+             (pct >= 100) ? POWER_SUPPLY_STATUS_FULL :
+             POWER_SUPPLY_STATUS_DISCHARGING;
+    razer_power_supply_set(rps, pct, status, true);
 }
 
 /**
@@ -7412,6 +7545,24 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     //razer_reset(usb_dev);
     //razer_activate_macro_keys(usb_dev);
     //msleep(3000);
+
+    /* Expose the battery to UPower / the desktop tray via the generic helper.
+     * Poll model: the helper's worker calls razer_mouse_battery_refresh() every
+     * 60s using the quiet query, so a sleeping wireless mouse doesn't spam dmesg.
+     * Gated on exactly the condition that creates dev_attr_charge_level — the same
+     * interface+subclass guard AND the battery PID set — so we register once, on
+     * the control interface only, and wired-only mice get no phantom node.
+     * Registered after hid_hw_start so the first refresh (2s later) can reach the
+     * device; unregistered in disconnect before kfree. */
+    if (dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE
+        && (expected_subclass == 0xFF || dev->usb_interface_subclass == expected_subclass)
+        && razer_mouse_has_battery(dev->usb_pid)) {
+        if (razer_power_supply_register(&dev->battery, &hdev->dev, dev,
+                                        razer_mouse_device_type_str(dev),
+                                        razer_mouse_battery_refresh, 60000))
+            hid_warn(hdev, "failed to register battery power_supply\n");
+    }
+
     return 0;
 
 exit_free:
@@ -8508,6 +8659,10 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 
     hid_hw_stop(hdev);
     hrtimer_cancel(&dev->repeat_timer);
+
+    /* Cancels the refresh worker and unregisters the psy (no-op if never
+     * registered). Must run before kfree(dev): get_property/worker deref dev. */
+    razer_power_supply_unregister(&dev->battery);
 
     kfree(dev);
     hid_info(hdev, "Razer Device disconnected\n");
