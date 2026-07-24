@@ -238,6 +238,13 @@ struct razer_kraken_device {
      * interrupt IN endpoint yet. Runs once, a beat after the HID stack has
      * settled. */
     struct delayed_work prime_work;
+    /* V3 Pro only: the probe-time battery query races the dongle<->headset RF
+     * link coming up on a hot-plug, so the firmware answers cls=0x21 with 0xff
+     * ("not ready") and the following cls=0x20 push invalidates the cache. This
+     * work re-queries battery once the 0x20 "link established" push arrives, and
+     * retries a bounded number of times until pushed_battery_pct is filled. */
+    struct delayed_work battery_query_work;
+    u8 battery_query_tries;
 };
 
 union razer_kraken_effect_byte {

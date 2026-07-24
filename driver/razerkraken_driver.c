@@ -1628,6 +1628,20 @@ static int razer_blackshark_v3_battery_query(struct razer_kraken_device *device)
 }
 
 /*
+ * Issue a cls=0x2a charging-state query. Like battery, the firmware answers
+ * 0xff ("not ready") until the RF link is up, so this is driven from the same
+ * post-link-up re-query work. The reply (data[13]=0/1) lands in pushed_charging
+ * via the ep 0x84 cache. Caller must hold device->lock.
+ */
+static int razer_blackshark_v3_charging_query(struct razer_kraken_device *device)
+{
+    u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+
+    razer_blackshark_v3pro_build(cmdbuf, 0x2a, 0x00, NULL, 0);
+    return razer_blackshark_send_cmd(device, cmdbuf);
+}
+
+/*
  * Both V3 and V3 Pro return battery as a 0..100 byte. The standard openrazer
  * convention for charge_level is a 0..255 byte (mamba.py scales by 255/100
  * to display percent). Multiply by 255/100 here so the daemon's existing
@@ -2277,10 +2291,18 @@ static void razer_blackshark_v3_cache(struct razer_kraken_device *device, u8 *da
                 device->pushed_charging = data[13] ? 1 : 0;
             break;
         case 0x20: /* RF link re-established — cached battery/charging from
-                    * before the drop may be stale, so invalidate them. */
+                    * before the drop may be stale, so invalidate them, then
+                    * re-query battery now that the link is up (the probe-time
+                    * query raced link-up and got 0xff). Deferred to a work item
+                    * since we are in the URB callback (atomic) here. */
             if (data[13] == 0x01) {
                 device->pushed_charging = -1;
                 device->pushed_battery_pct = -1;
+                if (razer_blackshark_is_v3pro(device->usb_pid)) {
+                    device->battery_query_tries = 0;
+                    schedule_delayed_work(&device->battery_query_work,
+                                          msecs_to_jiffies(600));
+                }
             }
             break;
         case BLACKSHARK_PARAM_SIDETONE_VOLUME: /* 0x19 */
@@ -2478,11 +2500,50 @@ static void razer_blackshark_v3_intr_callback(struct urb *urb)
  * so the endpoint is polled the moment usbhid_start's SET_IDLE activates it.
  * Best-effort: on failure the HID path still delivers whatever it can.
  */
+/*
+ * Re-query battery and charging once the dongle<->headset RF link is up.
+ *
+ * The probe-time battery/charging queries race link establishment on a hot-plug:
+ * the firmware answers cls=0x21 and cls=0x2a with 0xff ("not ready") until the
+ * link comes up, then emits a cls=0x20 push which invalidates the cache — so
+ * charge_level/charge_status stay -1 forever even though the headset knows its
+ * state. This work is scheduled from the 0x20 "link established" push (see the
+ * cache handler); each run re-queries whichever of battery/charging is still
+ * unknown and reschedules until both are filled (the replies arrive
+ * asynchronously on the ep 0x84 URB -> cache). It is bounded by
+ * battery_query_tries so it can never become the per-read polling that resets
+ * this firmware's link.
+ */
+#define RAZER_BLACKSHARK_BATTERY_QUERY_MAX 4
+static void razer_blackshark_v3_battery_query_work(struct work_struct *work)
+{
+    struct razer_kraken_device *dev =
+        container_of(work, struct razer_kraken_device, battery_query_work.work);
+
+    if (dev->pushed_battery_pct >= 0 && dev->pushed_charging >= 0)
+        return;                         /* both known; nothing to do */
+    if (dev->battery_query_tries >= RAZER_BLACKSHARK_BATTERY_QUERY_MAX)
+        return;                         /* give up; a later 0x20 push retries */
+    dev->battery_query_tries++;
+
+    mutex_lock(&dev->lock);
+    if (dev->pushed_battery_pct < 0)
+        razer_blackshark_v3_battery_query(dev);
+    if (dev->pushed_charging < 0)
+        razer_blackshark_v3_charging_query(dev);
+    mutex_unlock(&dev->lock);
+
+    /* Replies land asynchronously in the ep 0x84 cache; re-check shortly and
+     * retry if the link is still settling. */
+    schedule_delayed_work(&dev->battery_query_work, msecs_to_jiffies(700));
+}
+
 static void razer_blackshark_v3_intr_start(struct razer_kraken_device *dev,
         struct usb_device *usb_dev)
 {
     INIT_WORK(&dev->intr_recover_work, razer_blackshark_v3_intr_recover);
     INIT_DELAYED_WORK(&dev->rf_wake_work, razer_blackshark_v3_rf_wake_keepalive);
+    INIT_DELAYED_WORK(&dev->battery_query_work, razer_blackshark_v3_battery_query_work);
     atomic_set(&dev->intr_eproto_count, 0);
 
     dev->intr_buf = usb_alloc_coherent(usb_dev, RAZER_BLACKSHARK_REPORT_LEN,
@@ -2660,6 +2721,7 @@ exit_free:
         cancel_delayed_work_sync(&dev->prime_work);
     if (razer_blackshark_is_v3pro(dev->usb_pid)) {
         cancel_delayed_work_sync(&dev->rf_wake_work);
+        cancel_delayed_work_sync(&dev->battery_query_work);
         cancel_work_sync(&dev->intr_recover_work);
         if (dev->intr_urb) {
             usb_kill_urb(dev->intr_urb);
@@ -2761,6 +2823,7 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
         cancel_delayed_work_sync(&dev->prime_work);
     if (razer_blackshark_is_v3pro(dev->usb_pid)) {
         cancel_delayed_work_sync(&dev->rf_wake_work);
+        cancel_delayed_work_sync(&dev->battery_query_work);
         cancel_work_sync(&dev->intr_recover_work);
     }
     if (dev->intr_urb) {
