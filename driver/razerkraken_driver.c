@@ -1034,9 +1034,37 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 
     if (device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
         device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED) {
-        /* V3 Pro serial query path is not yet decoded — return a placeholder. */
+        /* The Pro answers the same cls=0x00 serial GET as the plain V3 — the
+         * envelope razer_blackshark_build_get() produces for these PIDs is
+         * byte-identical to the Pro's. Query on first read and cache it.
+         *
+         * Deliberately do NOT cache a failed attempt: like battery/charging,
+         * this GET returns 0xff until the RF link is up, and the daemon reads
+         * the serial during device init, which can land before link-up. Leaving
+         * serial[] empty lets a later read retry instead of pinning a bogus
+         * value for the lifetime of the device. */
+        if (device->serial[0] == '\0') {
+            u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
+            u8 slen;
+
+            razer_blackshark_build_get(cmdbuf, BLACKSHARK_PARAM_SERIAL, device->usb_pid);
+            mutex_lock(&device->lock);
+            razer_blackshark_send_cmd(device, cmdbuf);
+            if (device->data[1] == 0x02 &&
+                device->data[10] == BLACKSHARK_PARAM_SERIAL &&
+                device->data[12] > 0 &&
+                device->data[12] < sizeof(device->serial) &&
+                device->data[13] != 0xff) {
+                slen = device->data[12];
+                memcpy(device->serial, &device->data[13], slen);
+                device->serial[slen] = '\0';
+            }
+            mutex_unlock(&device->lock);
+        }
+
         if (device->serial[0] == '\0')
-            strncpy(device->serial, "BS_V3PRO_000000", sizeof(device->serial) - 1);
+            return sprintf(buf, "%s\n", "BS_V3PRO_000000");
+
         return sprintf(buf, "%s\n", device->serial);
     }
 
