@@ -2229,6 +2229,10 @@ static DEVICE_ATTR(game_chat_balance,          0660, razer_attr_read_game_chat_b
 static DEVICE_ATTR(in_call_audio_mix,          0660, razer_attr_read_in_call_audio_mix,       razer_attr_write_in_call_audio_mix);
 static DEVICE_ATTR(audio_prompts,              0660, razer_attr_read_audio_prompts,           razer_attr_write_audio_prompts);
 
+/* Defined below, next to the RF-link re-query logic; forward-declared so the
+ * work item can be INIT'd here, where every device passes through. */
+static void razer_blackshark_v3_battery_query_work(struct work_struct *work);
+
 static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf, struct hid_device *hdev)
 {
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -2247,6 +2251,7 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
      * work items are INIT'd) only runs for the Pro, so init it here, where
      * every device passes through. */
     INIT_DELAYED_WORK(&dev->prime_work, razer_blackshark_v3_prime_work);
+    INIT_DELAYED_WORK(&dev->battery_query_work, razer_blackshark_v3_battery_query_work);
 
     /* -1 = "unknown" (no SET seen this session). GUI falls back to JSON cache. */
     dev->cached_v3_power_save      = -1;
@@ -2359,7 +2364,14 @@ static void razer_blackshark_v3_cache(struct razer_kraken_device *device, u8 *da
             if (data[13] == 0x01) {
                 device->pushed_charging = -1;
                 device->pushed_battery_pct = -1;
-                if (razer_blackshark_is_v3pro(device->usb_pid)) {
+                /* Both V3 and V3 Pro. The race is not Pro-specific: the plain
+                 * V3 primes battery from the same deferred sweep, so a plug
+                 * whose link comes up late leaves it -1 in exactly the same
+                 * way. Untested on the plain V3 for want of a 0x20 push to
+                 * observe, and inert there if that firmware never emits one,
+                 * but it cannot make things worse: the only path this adds is
+                 * one taken after the device itself reports the link is up. */
+                if (razer_blackshark_is_v3(device->usb_pid)) {
                     device->battery_query_tries = 0;
                     schedule_delayed_work(&device->battery_query_work,
                                           msecs_to_jiffies(600));
@@ -2623,7 +2635,6 @@ static void razer_blackshark_v3_intr_start(struct razer_kraken_device *dev,
 {
     INIT_WORK(&dev->intr_recover_work, razer_blackshark_v3_intr_recover);
     INIT_DELAYED_WORK(&dev->rf_wake_work, razer_blackshark_v3_rf_wake_keepalive);
-    INIT_DELAYED_WORK(&dev->battery_query_work, razer_blackshark_v3_battery_query_work);
     atomic_set(&dev->intr_eproto_count, 0);
 
     dev->intr_buf = usb_alloc_coherent(usb_dev, RAZER_BLACKSHARK_REPORT_LEN,
@@ -2797,11 +2808,12 @@ exit_free:
      * work) down before freeing dev — the URB callback holds a dev pointer. */
     /* prime_work is scheduled for every V3, not just the Pro, so it must be
      * cancelled outside the Pro-only guard, as it holds a dev pointer. */
-    if (razer_blackshark_is_v3(dev->usb_pid))
+    if (razer_blackshark_is_v3(dev->usb_pid)) {
         cancel_delayed_work_sync(&dev->prime_work);
+        cancel_delayed_work_sync(&dev->battery_query_work);
+    }
     if (razer_blackshark_is_v3pro(dev->usb_pid)) {
         cancel_delayed_work_sync(&dev->rf_wake_work);
-        cancel_delayed_work_sync(&dev->battery_query_work);
         cancel_work_sync(&dev->intr_recover_work);
         if (dev->intr_urb) {
             usb_kill_urb(dev->intr_urb);
@@ -2899,11 +2911,12 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
      * cancelled here before dev is freed regardless of intr_urb. */
     /* prime_work is scheduled for every V3, not just the Pro, so it must be
      * cancelled outside the Pro-only guard, as it holds a dev pointer. */
-    if (razer_blackshark_is_v3(dev->usb_pid))
+    if (razer_blackshark_is_v3(dev->usb_pid)) {
         cancel_delayed_work_sync(&dev->prime_work);
+        cancel_delayed_work_sync(&dev->battery_query_work);
+    }
     if (razer_blackshark_is_v3pro(dev->usb_pid)) {
         cancel_delayed_work_sync(&dev->rf_wake_work);
-        cancel_delayed_work_sync(&dev->battery_query_work);
         cancel_work_sync(&dev->intr_recover_work);
     }
     if (dev->intr_urb) {
