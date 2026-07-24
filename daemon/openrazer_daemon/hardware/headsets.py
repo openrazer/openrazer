@@ -290,7 +290,6 @@ class RazerBlackSharkV3Pro(__RazerDevice):
     USB_VID = 0x1532
     USB_PID = 0x0577
     METHODS = ['get_device_type_headset',
-               'get_mic_volume', 'set_mic_volume',
                'get_wireless_power_save', 'set_wireless_power_save',
                'get_ultra_low_latency', 'set_ultra_low_latency',
                'get_headphone_eq', 'set_headphone_eq',
