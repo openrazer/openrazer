@@ -34,6 +34,6 @@ SUBSYSTEM=="usb|input|hid", GROUP:="plugdev"
 SUBSYSTEM!="hid|usb", GOTO="razer_end"
 
 # Rebind if needed
-SUBSYSTEM=="hid|usb", RUN+="/usr/share/openrazer/razer_mount $env{RAZER_DRIVER} $kernel"
+SUBSYSTEM=="hid|usb", RUN+="razer_mount $env{RAZER_DRIVER} $kernel"
 
 LABEL="razer_end"
