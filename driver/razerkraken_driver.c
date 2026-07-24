@@ -1785,12 +1785,13 @@ static void razer_blackshark_v3_prime_caches(struct razer_kraken_device *device)
      * plain V3 primed neither, so charge_level read -1 until the headset
      * happened to push a value on its own.
      *
-     * 0x21 is the class this model's firmware is documented as treating as
-     * link-disrupting, which is why it is kept out of the main list and why
-     * the per-read query was removed in the first place. It is sent last, so
-     * a drop cannot cost us the other thirteen replies, and it is sent from
-     * this deferred, paced, once-per-connect context rather than the ~2s
-     * daemon poll that caused the original trouble.
+     * What disrupts the RF link is the rate, not the class. Sustained polling
+     * of 0x21 (the daemon reads charge_level every ~2s) drops the link and
+     * power-cycles the headset, which is why the per-read query was removed.
+     * A small number of queries per connect is fine: measured 2026-07-24, two
+     * 0x21 queries ~2s apart during one connect both answered with a real
+     * value and the link held. It is still sent last, so that if this model
+     * ever does object, a drop cannot cost us the other thirteen replies.
      *
      * Swept against a live V3 dongle 2026-07-22: 0x21 answered 0x5f and the
      * link stayed up. That is still a small sample against a firmware quirk
@@ -2321,10 +2322,12 @@ static inline bool razer_blackshark_is_v3(u16 pid)
 /* Only the V3 Pro gets the private ep 0x84 URB, the RF_WAKE keep-alive and the
  * battery prime query. The plain V3 (0579/057a) is served by the normal usbhid
  * path: binding our own URB there competed with usbhid for the interface's
- * consumer (volume/scroll dial) reports, and its firmware treats the battery
- * GET as link-disrupting (it drops the RF link and needs a replug). So on the
- * plain V3 we never query — charge_level/charge_status are pure cache reads fed
- * only by the headset's own pushes. */
+ * consumer (volume/scroll dial) reports. Battery is not queried per read here
+ * either: sustained 0x21 polling at the daemon's ~2s cadence drops the RF link
+ * and needs a replug. That is a rate limit rather than a property of the class,
+ * and a couple of queries per connect are fine (measured 2026-07-24), so
+ * charge_level/charge_status are pure cache reads, filled by the connect-time
+ * prime and by the re-query the 0x20 link-established push triggers. */
 static inline bool razer_blackshark_is_v3pro(u16 pid)
 {
     return pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
@@ -2791,10 +2794,10 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
 
     /*
      * Everything else the device knows but never pushes unprompted. Runs for
-     * the plain V3 too, unlike the battery query above: the prime list contains
-     * no 0x21, which is the class this model's firmware treats as
-     * link-disrupting. All 14 classes were swept against a live V3 dongle
-     * (1532:057a) on 2026-07-22 and answered without dropping the link.
+     * the plain V3 too, unlike the battery query above. All 14 classes were
+     * swept against a live V3 dongle (1532:057a) on 2026-07-22 and answered
+     * without dropping the link; 0x21 is handled separately inside the sweep,
+     * since it is the one class sustained polling is known to upset.
      */
     if (razer_blackshark_is_v3(dev->usb_pid))
         schedule_delayed_work(&dev->prime_work, msecs_to_jiffies(1500));
