@@ -2302,6 +2302,16 @@ static void razer_blackshark_v3_cache(struct razer_kraken_device *device, u8 *da
                     device->battery_query_tries = 0;
                     schedule_delayed_work(&device->battery_query_work,
                                           msecs_to_jiffies(600));
+                    /* The same race hits the connect-time cache prime: classes
+                     * swept before the link is up answer 0xff and are dropped
+                     * by the guards below, so sidetone/ULL/THX/ANC/etc read -1
+                     * on some plugs and not others depending on where the sweep
+                     * happened to straddle link-up. Re-sweep now that the link
+                     * is live. Staggered past the battery re-query above (which
+                     * retries up to ~3s) so the two don't interleave on
+                     * device->data. */
+                    schedule_delayed_work(&device->prime_work,
+                                          msecs_to_jiffies(3500));
                 }
             }
             break;
