@@ -228,7 +228,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
         device_type = "Razer Kraken Kitty V3 Pro (Wireless)";
         break;
 
@@ -778,7 +778,7 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
     case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
         dev->led_mode_address = KYLIE_SET_LED_ADDRESS;
         dev->custom_address = KYLIE_CUSTOM_ADDRESS_START;
         dev->breathing_address[0] = KYLIE_BREATHING1_ADDRESS_START;
