@@ -111,6 +111,10 @@ static union razer_kraken_effect_byte get_kraken_effect_byte(void)
 static unsigned char get_current_effect(struct device *dev)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    // V3 Pro uses hidraw protocol, skip old USB control messages
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED || device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS)
+        return 0;
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x00, 0x01, device->led_mode_address);
     int is_mutex_locked = mutex_is_locked(&device->lock);
     unsigned char result = 0;
@@ -142,6 +146,10 @@ static unsigned char get_current_effect(struct device *dev)
 static unsigned int get_rgb_from_addr(struct device *dev, unsigned short address, unsigned char len, char* buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    // V3 Pro uses hidraw protocol, skip old USB control messages
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED || device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS)
+        return 0;
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x00, len, address);
     int is_mutex_locked = mutex_is_locked(&device->lock);
     unsigned char written = 0;
@@ -220,10 +228,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
-        device_type = "Razer Kraken Kitty V3 Pro (Wired)";
-        break;
-
-    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
         device_type = "Razer Kraken Kitty V3 Pro (Wireless)";
         break;
 
@@ -262,6 +267,10 @@ static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute 
 static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    // V3 Pro uses hidraw protocol, skip old USB control messages
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED || device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS)
+        return -EOPNOTSUPP;
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
     union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
@@ -287,6 +296,10 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
 static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    // V3 Pro uses hidraw protocol, skip old USB control messages
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED || device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS)
+        return -EOPNOTSUPP;
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
     union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
@@ -312,6 +325,10 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
 static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    // V3 Pro uses hidraw protocol, skip old USB control messages
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED || device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS)
+        return -EOPNOTSUPP;
     struct razer_kraken_request_report rgb_report = get_kraken_request_report(0x04, 0x40, count, device->breathing_address[0]);
     struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
     union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
@@ -343,8 +360,6 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_KRAKEN_TE:
     case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
-    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
         razer_kraken_send_control_msg(device->hdev, &rgb_report, 0);
         break;
     }
@@ -364,6 +379,10 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
 static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    // V3 Pro uses hidraw protocol, skip old USB control messages
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED || device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS)
+        return -EOPNOTSUPP;
     struct razer_kraken_request_report rgb_report = get_kraken_request_report(0x04, 0x40, count, device->custom_address);
     struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
     union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
@@ -403,6 +422,11 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
 static ssize_t razer_attr_read_matrix_effect_static(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    // V3 Pro uses hidraw protocol, skip old USB control messages
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED || device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS)
+        return -EOPNOTSUPP;
+
     return get_rgb_from_addr(dev, device->breathing_address[0], 0x04, buf);
 }
 
@@ -414,6 +438,11 @@ static ssize_t razer_attr_read_matrix_effect_static(struct device *dev, struct d
 static ssize_t razer_attr_read_matrix_effect_custom(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    // V3 Pro uses hidraw protocol, skip old USB control messages
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED || device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS)
+        return -EOPNOTSUPP;
+
     return get_rgb_from_addr(dev, device->custom_address, 0x04, buf);
 }
 
@@ -425,6 +454,10 @@ static ssize_t razer_attr_read_matrix_effect_custom(struct device *dev, struct d
 static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    // V3 Pro uses hidraw protocol, skip old USB control messages
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED || device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS)
+        return -EOPNOTSUPP;
     struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
     union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
@@ -527,6 +560,10 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
 static ssize_t razer_attr_read_matrix_effect_breath(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    // V3 Pro uses hidraw protocol; no old-protocol LED effects supported
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED || device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS)
+        return -EOPNOTSUPP;
     union razer_kraken_effect_byte effect_byte;
     unsigned char num_colours = 1;
 
@@ -543,8 +580,6 @@ static ssize_t razer_attr_read_matrix_effect_breath(struct device *dev, struct d
     case USB_DEVICE_ID_RAZER_KRAKEN_TE:
     case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
-    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
         switch(num_colours) {
         case 3:
             return get_rgb_from_addr(dev, device->breathing_address[2], 0x0C, buf);
@@ -576,6 +611,19 @@ static ssize_t razer_attr_read_matrix_effect_breath(struct device *dev, struct d
 static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    // V3 Pro uses hidraw protocol; return safe default without sending USB messages
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED || device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS) {
+        if (device->serial[0] == '\0') {
+            device->serial[0] = 'X';
+            device->serial[1] = 'X';
+            device->serial[2] = '0';
+            device->serial[3] = '1';
+            device->serial[4] = '\0';
+        }
+        return sysfs_emit(buf, "%s\n", device->serial);
+    }
+
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x20, 0x16, 0x7f00);
 
     // Basically some simple caching
@@ -615,6 +663,17 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 static ssize_t razer_attr_read_firmware_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    // V3 Pro uses hidraw protocol; return safe default without sending USB messages
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED || device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS) {
+        if (device->firmware_version[0] != 1) {
+            device->firmware_version[0] = 1;
+            device->firmware_version[1] = 0x00;
+            device->firmware_version[2] = 0x00;
+        }
+        return sysfs_emit(buf, "v%x.%x\n", device->firmware_version[1], device->firmware_version[2]);
+    }
+
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x20, 0x02, 0x0030);
 
     // Basically some simple caching
@@ -719,7 +778,7 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
     case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
         dev->led_mode_address = KYLIE_SET_LED_ADDRESS;
         dev->custom_address = KYLIE_CUSTOM_ADDRESS_START;
         dev->breathing_address[0] = KYLIE_BREATHING1_ADDRESS_START;
@@ -774,13 +833,15 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
             break;
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
+            // V3 Pro uses hidraw protocol; do NOT create old-protocol LED effect files
+            break;
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
         case USB_DEVICE_ID_RAZER_KRAKEN_TE:
         case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
-        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
@@ -837,13 +898,15 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
             break;
 
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
+            // V3 Pro: no LED effect files were created, nothing to remove
+            break;
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
         case USB_DEVICE_ID_RAZER_KRAKEN_TE:
         case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
-        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
@@ -867,12 +930,12 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 
     if(size == 33) { // Should be a response to a Control packet
         memcpy(device->data, data, size);
+        return 0; // Report consumed by the driver
 
     } else {
         hid_warn(hdev, "razerkraken: Got raw message, length: %d\n", size);
+        return 1; // Report not handled, pass through to HID input layer
     }
-
-    return 0;
 }
 
 /**
