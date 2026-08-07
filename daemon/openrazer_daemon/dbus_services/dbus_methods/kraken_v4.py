@@ -166,9 +166,13 @@ def v4_set_static_effect(self, red, green, blue):
     _stop_breathing(self._device_path)
     colors = [(red, green, blue)] * NUM_LEDS
     _send_direct_colors(self._device_path, colors)
-    # Update zone state so getEffect works
-    self.zone["backlight"]["effect"] = "static"
-    self.zone["backlight"]["colors"] = [red, green, blue]
+
+    # Notify others
+    self.send_effect_event('setStatic', red, green, blue)
+
+    # remember effect
+    self.set_persistence("backlight", "effect", 'static')
+    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
 
 
 @endpoint('razer.device.lighting.chroma', 'setSpectrum', in_sig='')
@@ -178,7 +182,12 @@ def v4_set_spectrum_effect(self):
     _stop_breathing(self._device_path)
     report = _build_report(0x00, 0x00, 0x05, bytes([0xC0, 0x00, 0x01, 0x04]))
     _send_report(self._device_path, report)
-    self.zone["backlight"]["effect"] = "spectrum"
+
+    # Notify others
+    self.send_effect_event('setSpectrum')
+
+    # remember effect
+    self.set_persistence("backlight", "effect", 'spectrum')
 
 
 @endpoint('razer.device.lighting.chroma', 'setNone', in_sig='')
@@ -188,7 +197,12 @@ def v4_set_none_effect(self):
     _stop_breathing(self._device_path)
     report = _build_report(0x00, 0x00, 0x05, bytes([0xC1, 0x00, 0x01, 0x00]))
     _send_report(self._device_path, report)
-    self.zone["backlight"]["effect"] = "none"
+
+    # Notify others
+    self.send_effect_event('setNone')
+
+    # remember effect
+    self.set_persistence("backlight", "effect", 'none')
 
 
 @endpoint('razer.device.lighting.chroma', 'setBreathSingle', in_sig='yyy')
@@ -196,8 +210,13 @@ def v4_set_breath_single_effect(self, red, green, blue):
     """Single-color breathing effect (software, V4 hw lacks native breathing)."""
     self.logger.debug("V4 DBus call set_breath_single_effect (%d, %d, %d)", red, green, blue)
     _start_software_breathing(self, [(red, green, blue)])
-    self.zone["backlight"]["effect"] = "breathSingle"
-    self.zone["backlight"]["colors"] = [red, green, blue]
+
+    # Notify others
+    self.send_effect_event('setBreathSingle', red, green, blue)
+
+    # remember effect
+    self.set_persistence("backlight", "effect", 'breathSingle')
+    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
 
 
 @endpoint('razer.device.lighting.chroma', 'setBreathDual', in_sig='yyyyyy')
@@ -205,8 +224,13 @@ def v4_set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
     """Dual-color breathing (software, V4 hw lacks native breathing)."""
     self.logger.debug("V4 DBus call set_breath_dual_effect")
     _start_software_breathing(self, [(red1, green1, blue1), (red2, green2, blue2)])
-    self.zone["backlight"]["effect"] = "breathDual"
-    self.zone["backlight"]["colors"] = [red1, green1, blue1, red2, green2, blue2]
+
+    # Notify others
+    self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
+
+    # remember effect
+    self.set_persistence("backlight", "effect", 'breathDual')
+    self.zone["backlight"]["colors"][0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
 
 
 @endpoint('razer.device.lighting.chroma', 'setBreathTriple', in_sig='yyyyyyyyy')
@@ -214,8 +238,13 @@ def v4_set_breath_triple_effect(self, red1, green1, blue1, red2, green2, blue2, 
     """Triple-color breathing (software, V4 hw lacks native breathing)."""
     self.logger.debug("V4 DBus call set_breath_triple_effect")
     _start_software_breathing(self, [(red1, green1, blue1), (red2, green2, blue2), (red3, green3, blue3)])
-    self.zone["backlight"]["effect"] = "breathTriple"
-    self.zone["backlight"]["colors"] = [red1, green1, blue1, red2, green2, blue2, red3, green3, blue3]
+
+    # Notify others
+    self.send_effect_event('setBreathTriple', red1, green1, blue1, red2, green2, blue2, red3, green3, blue3)
+
+    # remember effect
+    self.set_persistence("backlight", "effect", 'breathTriple')
+    self.zone["backlight"]["colors"][0:9] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2), int(red3), int(green3), int(blue3)
 
 
 @endpoint('razer.device.lighting.chroma', 'setCustom', in_sig='ai')
@@ -230,7 +259,12 @@ def v4_set_custom_kraken(self, rgbi):
         b = rgbi[i * 4 + 2]
         colors.append((r, g, b))
     _send_direct_colors(self._device_path, colors)
-    self.zone["backlight"]["effect"] = "custom"
+
+    # Notify others
+    self.send_effect_event('setCustom', rgbi)
+
+    # remember effect
+    self.set_persistence("backlight", "effect", 'custom')
 
 
 @endpoint('razer.device.lighting.chroma', 'setBrightness', in_sig='d')
@@ -240,6 +274,11 @@ def v4_set_brightness(self, brightness):
     b = max(0, min(255, int(brightness)))
     report = _build_report(0x00, 0x00, 0x05, bytes([0xC1, 0x00, 0x01, b]))
     _send_report(self._device_path, report)
+
+    # Notify others
+    self.send_effect_event('setBrightness', brightness)
+
+    self.set_persistence("backlight", "brightness", int(brightness))
 
 
 @endpoint('razer.device.misc', 'getDeviceTypeHeadset', in_sig='', out_sig='s')
