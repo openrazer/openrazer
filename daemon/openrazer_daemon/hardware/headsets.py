@@ -316,3 +316,6 @@ class RazerKrakenKittyV3ProWireless(RazerKrakenKittyV3ProWired):
     Class for the Razer Kraken Kitty V3 Pro (Wireless)
     """
     USB_PID = 0x0588
+
+    def get_serial(self):
+        return "XX01WIRELESS"
