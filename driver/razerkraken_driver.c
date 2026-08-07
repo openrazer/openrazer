@@ -838,7 +838,14 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             break;
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
-            // V3 Pro uses hidraw protocol; do NOT create old-protocol LED effect files
+            // V3 Pro creates LED effect sysfs files for daemon/CI compatibility,
+            // but actual lighting goes through hidraw (kraken_v4.py)
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
             break;
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
@@ -903,7 +910,12 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
 
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
-            // V3 Pro: no LED effect files were created, nothing to remove
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
             break;
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
