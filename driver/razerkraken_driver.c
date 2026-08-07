@@ -779,8 +779,8 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
         case USB_DEVICE_ID_RAZER_KRAKEN_TE:
         case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
-    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
@@ -842,8 +842,8 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_KRAKEN_TE:
         case USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE:
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
-    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
-    case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
