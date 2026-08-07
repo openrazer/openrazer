@@ -236,3 +236,83 @@ class RazerKrakenKittyV2(__RazerDevice):
                'set_custom_kraken']
 
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/hcc/h6b/9631977570334/kraken-kitty-v2-quartz-500x500.png"
+
+
+class RazerKrakenKittyV3ProWired(__RazerDevice):
+    """
+    Class for the Razer Kraken Kitty V3 Pro (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Kraken_Kitty_V3_Pro_[0-9A-F]+-event-if05')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0587
+    METHODS = ['get_device_type_headset',
+               'set_static_effect', 'set_spectrum_effect', 'set_none_effect',
+               'set_breath_single_effect', 'set_breath_dual_effect', 'set_breath_triple_effect',
+               'set_custom_kraken',
+               'v4_set_brightness',
+               'v4_set_static_effect', 'v4_set_spectrum_effect', 'v4_set_none_effect',
+               'v4_set_breath_single_effect', 'v4_set_breath_dual_effect', 'v4_set_breath_triple_effect',
+               'v4_set_custom_kraken']
+
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 10]
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/kraken-kitty-v3-pro.png"
+
+    def load_methods(self):
+        self._v4_load_methods()
+
+    def _v4_load_methods(self):
+        import types
+        import openrazer_daemon.dbus_services.dbus_methods as dbm
+        from openrazer_daemon.dbus_services.dbus_methods import kraken_v4 as v4
+
+        available_functions = {}
+        for method in dir(dbm):
+            potential_function = getattr(dbm, method)
+            if isinstance(potential_function, types.FunctionType) and hasattr(potential_function, 'endpoint') and potential_function.endpoint:
+                available_functions[potential_function.__name__] = potential_function
+
+        for name in v4.__all__:
+            func = getattr(v4, name)
+            if hasattr(func, 'endpoint') and func.endpoint:
+                available_functions[name] = func
+
+        _skip = {'set_static_effect', 'set_spectrum_effect', 'set_none_effect',
+                 'set_breath_single_effect', 'set_breath_dual_effect', 'set_breath_triple_effect',
+                 'set_custom_kraken'}
+        self.methods_internal.extend(self.METHODS)
+        for method_name in self.methods_internal:
+            if method_name in _skip:
+                continue
+            try:
+                new_function = available_functions[method_name]
+                self.add_dbus_method(new_function.interface, new_function.name, new_function, new_function.in_sig, new_function.out_sig, new_function.byte_arrays)
+            except KeyError as e:
+                self.logger.warning("Couldn't add method %s to DBus: %s", method_name, e)
+
+    def get_serial(self):
+        return self.serial if hasattr(self, 'serial') and self.serial else "XX01"
+
+    def get_firmware(self):
+        return "v1.0.0"
+
+    def has_matrix(self):
+        return True
+
+    def _suspend_device(self):
+        from openrazer_daemon.dbus_services.dbus_methods.kraken_v4 import _send_report, _build_report, _stop_breathing
+        _stop_breathing(self._device_path)
+        _send_report(self._device_path, _build_report(0x00, 0x00, 0x05, bytes([0xC1, 0x00, 0x01, 0x00])))
+
+    def _resume_device(self):
+        from openrazer_daemon.dbus_services.dbus_methods.kraken_v4 import _send_report, _build_report
+        _send_report(self._device_path, _build_report(0x00, 0x00, 0x05, bytes([0xC1, 0x00, 0x01, 0xFF])))
+        _send_report(self._device_path, _build_report(0x00, 0x00, 0x05, bytes([0xC0, 0x00, 0x01, 0x04])))
+
+
+class RazerKrakenKittyV3ProWireless(RazerKrakenKittyV3ProWired):
+    """
+    Class for the Razer Kraken Kitty V3 Pro (Wireless)
+    """
+    USB_PID = 0x0588
