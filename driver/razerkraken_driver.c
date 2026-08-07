@@ -220,8 +220,11 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRED:
+        device_type = "Razer Kraken Kitty V3 Pro (Wired)";
+        break;
+
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V3_PRO_WIRELESS:
-        device_type = "Razer Kraken Kitty V3 Pro";
+        device_type = "Razer Kraken Kitty V3 Pro (Wireless)";
         break;
 
     default:
