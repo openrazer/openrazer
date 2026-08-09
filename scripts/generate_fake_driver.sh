@@ -158,7 +158,12 @@ devices=$(git grep -h "#define USB_DEVICE_ID_RAZER_" driver/${driver}_driver.h |
 
 # https://askubuntu.com/a/849016
 probe_func=$(sed -n '/^static int razer_'${driver_short}'_probe/,/^}$/p' driver/${driver}_driver.c)
-devicetype_func=$(sed -n '/^static ssize_t razer_attr_read_device_type/,/^}$/p' driver/${driver}_driver.c)
+# The device_type switch lives in a dedicated razer_<short>_device_type_str()
+# helper for some drivers, and inline in razer_attr_read_device_type() for others.
+devicetype_func=$(sed -n '/^static const char \*razer_'${driver_short}'_device_type_str/,/^}$/p' driver/${driver}_driver.c)
+if [ -z "$devicetype_func" ]; then
+    devicetype_func=$(sed -n '/^static ssize_t razer_attr_read_device_type/,/^}$/p' driver/${driver}_driver.c)
+fi
 
 probe_lines=$(echo "$probe_func" | grep 'case \|CREATE_DEVICE_FILE\|break;')
 devicetype_lines=$(echo "$devicetype_func" | grep 'case \|device_type = \|break;')
