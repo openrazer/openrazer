@@ -1889,6 +1889,15 @@ class RazerDeathAdderV3ProWireless(RazerDeathAdderV3ProWired):
     USB_PID = 0x00B7
 
 
+class RazerDeathAdderV3ProDocked(RazerMouseDocked, RazerDeathAdderV3ProWireless):
+    """
+    Class for the Razer DeathAdder V3 Pro accessed via the Mouse Dock Pro.
+    """
+
+    WIRELESS_PID = RazerDeathAdderV3ProWireless.USB_PID
+    DEVICE_NAME = "Razer DeathAdder V3 Pro (Docked)"
+
+
 class RazerDeathAdderV3ProWired_Alternate(RazerDeathAdderV3ProWired):
     """
     Class for the Razer DeathAdder V3 Pro (Wired)
