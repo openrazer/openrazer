@@ -981,6 +981,15 @@ class RazerViperUltimateWireless(RazerViperUltimateWired):
     METHODS = RazerViperUltimateWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
 
+class RazerViperUltimateDocked(RazerMouseDocked, RazerViperUltimateWireless):
+    """
+    Class for the Razer Viper Ultimate accessed via the Mouse Dock Pro.
+    """
+
+    WIRELESS_PID = RazerViperUltimateWireless.USB_PID
+    DEVICE_NAME = "Razer Viper Ultimate (Docked)"
+
+
 class RazerViper(__RazerDevice):
     """
     Class for the Razer Viper
