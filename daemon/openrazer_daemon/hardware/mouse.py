@@ -1468,6 +1468,15 @@ class RazerDeathAdderV2ProWireless(RazerDeathAdderV2ProWired):
     METHODS = RazerDeathAdderV2ProWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
 
+class RazerDeathAdderV2ProDocked(RazerMouseDocked, RazerDeathAdderV2ProWireless):
+    """
+    Class for the Razer DeathAdder V2 Pro accessed via the Mouse Dock Pro.
+    """
+
+    WIRELESS_PID = RazerDeathAdderV2ProWireless.USB_PID
+    DEVICE_NAME = "Razer DeathAdder V2 Pro (Docked)"
+
+
 class RazerAtherisReceiver(__RazerDevice):
     """
     Class for the Razer Atheris (Receiver)
