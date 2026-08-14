@@ -2297,6 +2297,15 @@ class RazerDeathAdderV4ProWireless(RazerDeathAdderV4ProWired):
     ]
 
 
+class RazerDeathAdderV4ProDocked(RazerMouseDocked, RazerDeathAdderV4ProWireless):
+    """
+    Class for the Razer DeathAdder V4 Pro accessed via the Mouse Dock Pro.
+    """
+
+    WIRELESS_PID = RazerDeathAdderV4ProWireless.USB_PID
+    DEVICE_NAME = "Razer DeathAdder V4 Pro (Docked)"
+
+
 class RazerViperV3ProWired(__RazerDevice):
     """
     Class for the Razer Viper V3 Pro (Wired)
