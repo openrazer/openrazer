@@ -1782,6 +1782,15 @@ class RazerViperV2ProWireless(RazerViperV2ProWired):
     USB_PID = 0x00A6
 
 
+class RazerViperV2ProDocked(RazerMouseDocked, RazerViperV2ProWireless):
+    """
+    Class for the Razer Viper V2 Pro accessed via the Mouse Dock Pro.
+    """
+
+    WIRELESS_PID = RazerViperV2ProWireless.USB_PID
+    DEVICE_NAME = "Razer Viper V2 Pro (Docked)"
+
+
 class RazerCobraProWired(__RazerDevice):
     """
     Class for the Razer Cobra Pro (Wired)
