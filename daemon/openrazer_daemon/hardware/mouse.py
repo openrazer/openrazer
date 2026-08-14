@@ -2044,6 +2044,15 @@ class RazerBasiliskV3Pro35KWireless(RazerBasiliskV3Pro35KWired):
     USB_PID = 0x00CD
 
 
+class RazerBasiliskV3Pro35KDocked(RazerMouseDocked, RazerBasiliskV3Pro35KWireless):
+    """
+    Class for the Razer Basilisk V3 Pro 35K accessed via the Mouse Dock Pro.
+    """
+
+    WIRELESS_PID = RazerBasiliskV3Pro35KWireless.USB_PID
+    DEVICE_NAME = "Razer Basilisk V3 Pro 35K (Docked)"
+
+
 class RazerBasiliskV3Pro35KPhantomGreenEditionWired(__RazerDevice):
     """
     Class for the Razer Basilisk V3 Pro 35K Phantom Green Edition (Wired)
