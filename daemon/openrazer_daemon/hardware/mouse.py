@@ -2446,3 +2446,12 @@ class RazerProClickV2Wireless(RazerProClickV2Wired):
     Class for the Razer Pro Click V2 (Wireless)
     """
     USB_PID = 0x00D1
+
+
+class RazerProClickV2Docked(RazerMouseDocked, RazerProClickV2Wireless):
+    """
+    Class for the Razer Pro Click V2 accessed via the Mouse Dock Pro.
+    """
+
+    WIRELESS_PID = RazerProClickV2Wireless.USB_PID
+    DEVICE_NAME = "Razer Pro Click V2 (Docked)"
