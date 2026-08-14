@@ -2408,6 +2408,15 @@ class RazerDeathAdderV3HyperSpeedWireless(RazerDeathAdderV3HyperSpeedWired):
     USB_PID = 0x00C5
 
 
+class RazerDeathAdderV3HyperSpeedDocked(RazerMouseDocked, RazerDeathAdderV3HyperSpeedWireless):
+    """
+    Class for the Razer DeathAdder V3 HyperSpeed accessed via the Mouse Dock Pro.
+    """
+
+    WIRELESS_PID = RazerDeathAdderV3HyperSpeedWireless.USB_PID
+    DEVICE_NAME = "Razer DeathAdder V3 HyperSpeed (Docked)"
+
+
 class RazerProClickV2VerticalEditionWired(__RazerDevice):
     """
     Class for the Razer Pro Click V2 Vertical Edition (Wired)
