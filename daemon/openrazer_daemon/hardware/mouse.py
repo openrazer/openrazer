@@ -1630,6 +1630,16 @@ class RazerViperMiniSEWireless(RazerViperMiniSEWired):
     POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
 
+class RazerViperMiniSEDocked(RazerMouseDocked, RazerViperMiniSEWireless):
+    """
+    Class for the Razer Viper Mini SE accessed via the Mouse Dock Pro.
+    """
+
+    WIRELESS_PID = RazerViperMiniSEWireless.USB_PID
+    DEVICE_NAME = "Razer Viper Mini SE (Docked)"
+    METHODS = RazerViperMiniSEWired.METHODS
+
+
 class RazerNagaEpicChromaWired(__RazerDevice):
     """
     Class for the Razer Naga Epic Chroma (Wired)
