@@ -1849,8 +1849,14 @@ static void razer_mouse_battery_refresh(struct razer_power_supply *rps)
     int raw = razer_mouse_get_battery_level(device, true);
     int pct, chg, status;
 
+    /* A dongle that parks the radio link answers the second query but not the
+     * first, so a lone timeout is not evidence the mouse is gone: retry once
+     * here, then let the helper hold the last reading for a few misses. */
+    if (raw < 0)
+        raw = razer_mouse_get_battery_level(device, true);
+
     if (raw < 0) {                 /* asleep/absent -> hide, no dmesg spam */
-        razer_power_supply_set(rps, -1, POWER_SUPPLY_STATUS_UNKNOWN, false);
+        razer_power_supply_query_failed(rps);
         return;
     }
     /* charge_level reports 0..255 (the sysfs attr is scaled to a percent by the
@@ -7559,7 +7565,8 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         && razer_mouse_has_battery(dev->usb_pid)) {
         if (razer_power_supply_register(&dev->battery, &hdev->dev, dev,
                                         razer_mouse_device_type_str(dev),
-                                        razer_mouse_battery_refresh, 60000))
+                                        razer_mouse_battery_refresh, 60000,
+                                        RAZER_POWER_SUPPLY_ABSENT_AFTER))
             hid_warn(hdev, "failed to register battery power_supply\n");
     }
 

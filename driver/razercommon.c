@@ -295,6 +295,34 @@ void razer_power_supply_set(struct razer_power_supply *rps,
     rps->capacity = capacity;
     rps->status = status;
     rps->present = present;
+    rps->fail_count = 0;
+    spin_unlock_irqrestore(&rps->lock, flags);
+
+    if (changed)
+        power_supply_changed(rps->psy);
+}
+
+/* Report a failed (quiet) query. The cached reading is held until absent_after
+ * consecutive misses, so a dongle that parks its radio link between polls does
+ * not blank the tray; see RAZER_POWER_SUPPLY_ABSENT_AFTER. */
+void razer_power_supply_query_failed(struct razer_power_supply *rps)
+{
+    unsigned long flags;
+    bool changed = false;
+
+    if (!rps->psy)
+        return;
+
+    spin_lock_irqsave(&rps->lock, flags);
+    if (rps->fail_count < UINT_MAX)
+        rps->fail_count++;
+
+    if (rps->fail_count >= rps->absent_after && rps->present) {
+        rps->capacity = -1;
+        rps->status = POWER_SUPPLY_STATUS_UNKNOWN;
+        rps->present = false;
+        changed = true;
+    }
     spin_unlock_irqrestore(&rps->lock, flags);
 
     if (changed)
@@ -315,7 +343,7 @@ static atomic_t razer_power_supply_no = ATOMIC_INIT(0);
 int razer_power_supply_register(struct razer_power_supply *rps, struct device *parent,
                                 void *drv_data, const char *model,
                                 void (*refresh_cb)(struct razer_power_supply *),
-                                unsigned int refresh_ms)
+                                unsigned int refresh_ms, unsigned int absent_after)
 {
     struct power_supply_config cfg = { .drv_data = rps };
     int n = atomic_inc_return(&razer_power_supply_no) - 1;
@@ -324,10 +352,12 @@ int razer_power_supply_register(struct razer_power_supply *rps, struct device *p
     rps->capacity = -1;
     rps->status = POWER_SUPPLY_STATUS_UNKNOWN;
     rps->present = false;
+    rps->fail_count = 0;
     rps->model = model;
     rps->drv_data = drv_data;
     rps->refresh_cb = refresh_cb;
     rps->refresh_ms = refresh_ms;
+    rps->absent_after = absent_after ? absent_after : 1;
 
     snprintf(rps->name, sizeof(rps->name), "razer_battery_%d", n);
     rps->desc.name = rps->name;
