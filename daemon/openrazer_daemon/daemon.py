@@ -26,6 +26,7 @@ import threading
 
 import openrazer_daemon.hardware
 from openrazer_daemon.dbus_services.service import DBusService
+from openrazer_daemon.hardware.accessory import RazerMouseDockPro
 from openrazer_daemon.device import DeviceCollection
 from openrazer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 from openrazer_daemon.misc.autosave_persistence import PersistenceAutoSave
@@ -228,6 +229,7 @@ class RazerDaemon(DBusService):
 
     def _init_dock_mouse_monitor(self):
         self._dock_mouse_pending = set()
+        self._dock_mouse_failed = set()
         t = threading.Thread(target=self._dock_mouse_monitor_loop, daemon=True)
         t.start()
 
@@ -240,8 +242,6 @@ class RazerDaemon(DBusService):
             time.sleep(5)
 
     def _check_dock_mouse_state(self):
-        from openrazer_daemon.hardware.accessory import RazerMouseDockPro
-
         for device_id, device_wrapper in list(self._razer_devices.id_items()):
             razer_device = device_wrapper.dbus
             if not isinstance(razer_device, RazerMouseDockPro):
@@ -251,7 +251,12 @@ class RazerDaemon(DBusService):
             child_present = child_id in self._razer_devices
             connected = razer_device.is_mouse_connected()
 
-            if connected == child_present:
+            if not connected:
+                # Clear any earlier failed-add so a future reconnect gets a
+                # fresh attempt.
+                self._dock_mouse_failed.discard(device_id)
+
+            if connected == child_present or device_id in self._dock_mouse_failed:
                 self._dock_mouse_pending.discard(device_id)
                 continue
 
@@ -265,7 +270,16 @@ class RazerDaemon(DBusService):
             self._dock_mouse_pending.discard(device_id)
             if connected:
                 self.logger.info("Mouse connected to dock %s", device_id)
-                self._add_child_devices(device_id, razer_device._device_path, len(self._razer_devices), razer_device)
+                try:
+                    self._add_child_devices(device_id, razer_device._device_path, len(self._razer_devices), razer_device)
+                except Exception:
+                    # A partially constructed child device may have already
+                    # registered its D-Bus object path, so retrying here
+                    # would just fail the same way forever. Give up until
+                    # the mouse disconnects and reconnects.
+                    self._dock_mouse_failed.add(device_id)
+                    self.logger.exception("Failed to add dock %s's mouse child device", device_id)
+                    continue
                 self.device_added()
             else:
                 self.logger.info("Mouse disconnected from dock %s", device_id)
@@ -675,6 +689,7 @@ class RazerDaemon(DBusService):
                 self._teardown_device(device)
 
             self._dock_mouse_pending.discard(device_id)
+            self._dock_mouse_failed.discard(device_id)
 
             self.write_persistence(self._persistence_file)
             self.device_removed()
