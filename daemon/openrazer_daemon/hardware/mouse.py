@@ -44,6 +44,7 @@ class RazerMouseDocked(__RazerDevice):
         "matrix_effect_spectrum": "mouse_matrix_effect_spectrum",
         "matrix_effect_none": "mouse_matrix_effect_none",
         "matrix_effect_breath": "mouse_matrix_effect_breath",
+        "matrix_effect_reactive": "mouse_matrix_effect_reactive",
         "matrix_effect_custom": "mouse_matrix_effect_custom",
         "matrix_custom_frame": "mouse_matrix_custom_frame",
         "logo_led_brightness": "mouse_logo_led_brightness",
@@ -53,11 +54,13 @@ class RazerMouseDocked(__RazerDevice):
         "logo_matrix_effect_spectrum": "mouse_logo_matrix_effect_spectrum",
         "logo_matrix_effect_none": "mouse_logo_matrix_effect_none",
         "logo_matrix_effect_breath": "mouse_logo_matrix_effect_breath",
+        "logo_matrix_effect_reactive": "mouse_logo_matrix_effect_reactive",
         "scroll_matrix_effect_wave": "mouse_scroll_matrix_effect_wave",
         "scroll_matrix_effect_static": "mouse_scroll_matrix_effect_static",
         "scroll_matrix_effect_spectrum": "mouse_scroll_matrix_effect_spectrum",
         "scroll_matrix_effect_none": "mouse_scroll_matrix_effect_none",
         "scroll_matrix_effect_breath": "mouse_scroll_matrix_effect_breath",
+        "scroll_matrix_effect_reactive": "mouse_scroll_matrix_effect_reactive",
         "scroll_mode": "mouse_scroll_mode",
         "scroll_acceleration": "mouse_scroll_acceleration",
         "scroll_smart_reel": "mouse_scroll_smart_reel",
@@ -1116,6 +1119,11 @@ class RazerNagaV2ProDocked(RazerMouseDocked, RazerNagaV2ProWireless):
     WIRELESS_PID = RazerNagaV2ProWireless.USB_PID
     DEVICE_NAME = "Razer Naga V2 Pro (Docked)"
 
+    # Thumbgrid "none" uses a different transaction ID (0xFF) than every other
+    # thumbgrid effect (0x1f), which razer_dock_send_mouse_payload overrides
+    # unconditionally - not relayed correctly, so not advertised.
+    METHODS = [m for m in RazerNagaV2ProWireless.METHODS if m != 'set_none_effect']
+
 
 class RazerDeathAdder1800(__RazerDevice):
     """
@@ -1825,6 +1833,7 @@ class RazerBasiliskV3ProDocked(RazerMouseDocked, RazerBasiliskV3ProWireless):
         'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
         'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
         'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
+        'set_reactive_effect', 'set_logo_reactive', 'set_scroll_reactive',
     ]
 
 
