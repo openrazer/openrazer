@@ -43,11 +43,36 @@ def test_sysfs_consistency(d):
     vid = str(hex(d._vid))[2:].upper().rjust(4, '0')
     pid = str(hex(d._pid))[2:].upper().rjust(4, '0')
 
+    # Sysfs files that belong to a child device sharing the same PID.
+    # The Mouse Dock Pro exposes dock and mouse passthrough sysfs under the
+    # same USB device, but the dock (accessory) class does not claim mouse
+    # capabilities — those live on the RazerDockedMouse child device.
+    _mouse_passthrough_sysfs = {
+        'charge_level', 'charge_low_threshold', 'charge_status',
+        'device_idle_time', 'dpi', 'dpi_stages', 'poll_rate',
+        'scroll_mode', 'scroll_acceleration', 'scroll_smart_reel',
+        'scroll_led_brightness', 'scroll_matrix_effect_none',
+        'scroll_matrix_effect_spectrum', 'scroll_matrix_effect_static',
+        'scroll_matrix_effect_wave',
+        'logo_led_brightness', 'logo_matrix_effect_none',
+        'logo_matrix_effect_spectrum', 'logo_matrix_effect_static',
+        'logo_matrix_effect_wave',
+        'mouse_connected', 'mouse_serial', 'mouse_firmware',
+        'mouse_matrix_brightness', 'mouse_matrix_custom_frame',
+        'mouse_matrix_effect_breath', 'mouse_matrix_effect_custom',
+        'mouse_matrix_effect_none', 'mouse_matrix_effect_spectrum',
+        'mouse_matrix_effect_static', 'mouse_matrix_effect_wave',
+    }
+
     def check_sysfs(capability: str, sysfs_name: str):
         """
         Check the device has either the given pylib capability for the
         given sysfs name, and vice versa.
         """
+        # Skip sysfs that belongs to a child device sharing this PID
+        if d.name == "Razer Mouse Dock Pro" and sysfs_name in _mouse_passthrough_sysfs:
+            return
+
         try:
             expected_path = glob.glob(f"{daemon_test_dir}/*:{vid}:{pid}*/{sysfs_name}", recursive=True)[0]
         except IndexError:
