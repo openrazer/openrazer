@@ -1793,12 +1793,15 @@ class RazerBasiliskV3ProWired(__RazerDevice):
                'get_scroll_mode', 'set_scroll_mode',
                'get_scroll_acceleration', 'set_scroll_acceleration',
                'get_scroll_smart_reel', 'set_scroll_smart_reel',
-               # All LEDs (partial support)
+               # All LEDs
                'set_static_effect', 'set_wave_effect', 'set_spectrum_effect', 'set_none_effect',
-               # Logo (partial support)
+               'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect', 'set_reactive_effect',
+               # Logo
                'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none',
-               # Scroll wheel (partial support)
+               'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual', 'set_logo_reactive',
+               # Scroll wheel
                'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none',
+               'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual', 'set_scroll_reactive',
                # Can set custom matrix effects
                'set_custom_effect', 'set_key_row',
                # Battery
@@ -1827,14 +1830,6 @@ class RazerBasiliskV3ProDocked(RazerMouseDocked, RazerBasiliskV3ProWireless):
 
     WIRELESS_PID = RazerBasiliskV3ProWireless.USB_PID
     DEVICE_NAME = "Razer Basilisk V3 Pro (Docked)"
-
-    # TODO: Verify if the wired version also supports the same capabilities or if this is only for wireless/docked.
-    METHODS = RazerBasiliskV3ProWired.METHODS + [
-        'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
-        'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
-        'set_scroll_breath_random', 'set_scroll_breath_single', 'set_scroll_breath_dual',
-        'set_reactive_effect', 'set_logo_reactive', 'set_scroll_reactive',
-    ]
 
 
 class RazerBasiliskV3Pro35KWired(__RazerDevice):
