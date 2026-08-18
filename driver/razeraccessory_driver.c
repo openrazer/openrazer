@@ -2845,6 +2845,28 @@ static ssize_t razer_attr_write_mouse_matrix_effect_none(struct device *dev, str
     return count;
 }
 
+static ssize_t razer_attr_write_mouse_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    switch (count) {
+    case 3:
+        request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
+        break;
+    case 6:
+        request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, led_id, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+        break;
+    default:
+        request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, led_id);
+        break;
+    }
+
+    razer_dock_send_mouse_payload(device, &request, &response);
+    return count;
+}
+
 static ssize_t razer_attr_write_logo_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_matrix_effect_wave(dev, attr, buf, count, LOGO_LED);
@@ -2865,6 +2887,11 @@ static ssize_t razer_attr_write_logo_matrix_effect_none(struct device *dev, stru
     return razer_attr_write_mouse_matrix_effect_none(dev, attr, buf, count, LOGO_LED);
 }
 
+static ssize_t razer_attr_write_logo_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_breath(dev, attr, buf, count, LOGO_LED);
+}
+
 static ssize_t razer_attr_write_scroll_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_matrix_effect_wave(dev, attr, buf, count, SCROLL_WHEEL_LED);
@@ -2883,6 +2910,11 @@ static ssize_t razer_attr_write_scroll_matrix_effect_spectrum(struct device *dev
 static ssize_t razer_attr_write_scroll_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     return razer_attr_write_mouse_matrix_effect_none(dev, attr, buf, count, SCROLL_WHEEL_LED);
+}
+
+static ssize_t razer_attr_write_scroll_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    return razer_attr_write_mouse_matrix_effect_breath(dev, attr, buf, count, SCROLL_WHEEL_LED);
 }
 
 /* Space-separated four-hex-digit PIDs of mice the dock has seen on its RF
@@ -2937,6 +2969,7 @@ static ssize_t razer_attr_read_mouse_connected(struct device *dev, struct device
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     if (atomic_read(&device->pairing_busy))
         return sprintf(buf, "0\n");
@@ -2949,12 +2982,54 @@ static ssize_t razer_attr_read_mouse_connected(struct device *dev, struct device
      */
     request = get_razer_report(0x00, 0xbf, 0x50);
     request.transaction_id.id = 0x3F;
-    razer_send_payload(device, &request, &response);
-
-    if (response.status != RAZER_CMD_SUCCESSFUL)
+    err = razer_send_payload(device, &request, &response);
+    if (err || response.status != RAZER_CMD_SUCCESSFUL)
         return sprintf(buf, "0\n");
 
-    return sprintf(buf, "%d\n", response.arguments[1] == 1 ? 1 : 0);
+    return sprintf(buf, "%d\n", response.arguments[1] == 1);
+}
+
+static ssize_t razer_attr_read_paired_pid(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned short pid = 0;
+    unsigned long flags;
+    int err;
+
+    if (atomic_read(&device->pairing_busy))
+        goto out;
+
+    /*
+     * Re-issue the 0xbf heartbeat used by mouse_connected.  If the firmware
+     * encodes the paired mouse PID in arguments[2..3] as a big-endian u16
+     * (matching the nearby-mice announcement format), return it directly --
+     * this survives reboot and module reload.
+     *
+     * TODO: verify the exact argument offset against razer_dock_pairing_v2.pcapng
+     * before treating the heartbeat path as authoritative.
+     *
+     * If the heartbeat yields zero (older firmware or pairing done while the
+     * module was not loaded) fall back to the PID cached in shared->paired_pid
+     * at pair_step2 time.
+     */
+    request = get_razer_report(0x00, 0xbf, 0x50);
+    request.transaction_id.id = 0x3F;
+    err = razer_send_payload(device, &request, &response);
+
+    if (!err && response.status == RAZER_CMD_SUCCESSFUL && response.arguments[1] == 1)
+        pid = ((unsigned short)response.arguments[2] << 8) | response.arguments[3];
+
+    /* Heartbeat path unavailable; use the at-pair-time cache */
+    if (!pid && device->shared) {
+        spin_lock_irqsave(&device->shared->nearby_lock, flags);
+        pid = device->shared->paired_pid;
+        spin_unlock_irqrestore(&device->shared->nearby_lock, flags);
+    }
+
+out:
+    return sprintf(buf, "%04x\n", pid);
 }
 
 static ssize_t razer_attr_read_mouse_firmware(struct device *dev, struct device_attribute *attr, char *buf)
@@ -3016,24 +3091,7 @@ static ssize_t razer_attr_write_mouse_main_matrix_effect_none(struct device *dev
 
 static ssize_t razer_attr_write_mouse_main_matrix_effect_breath(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct razer_accessory_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-
-    switch(count) {
-    case 3:
-        request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
-        break;
-    case 6:
-        request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
-        break;
-    default:
-        request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
-        break;
-    }
-
-    razer_dock_send_mouse_payload(device, &request, &response);
-    return count;
+    return razer_attr_write_mouse_matrix_effect_breath(dev, attr, buf, count, ZERO_LED);
 }
 
 static ssize_t razer_attr_write_mouse_main_matrix_effect_custom(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -3089,6 +3147,16 @@ static ssize_t razer_attr_write_mouse_matrix_custom_frame(struct device *dev, st
     return count;
 }
 
+static void razer_set_shared_paired_pid(struct razer_accessory_device *device, unsigned short pid)
+{
+    unsigned long flags;
+    if (!device->shared)
+        return;
+    spin_lock_irqsave(&device->shared->nearby_lock, flags);
+    device->shared->paired_pid = pid;
+    spin_unlock_irqrestore(&device->shared->nearby_lock, flags);
+}
+
 /**
  * Write device file "pair"
  *
@@ -3101,6 +3169,7 @@ static ssize_t razer_attr_write_mouse_dock_pro_pair(struct device *dev, struct d
     struct razer_report request = {0};
     struct razer_report response = {0};
     int i;
+    int err;
 
     atomic_set(&device->pairing_busy, 1);
 
@@ -3112,15 +3181,27 @@ static ssize_t razer_attr_write_mouse_dock_pro_pair(struct device *dev, struct d
      */
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(0x01);
     request.transaction_id.id = 0x1F;
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err) {
+        atomic_set(&device->pairing_busy, 0);
+        return err;
+    }
 
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(0x01);
     request.transaction_id.id = 0x1F;
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err) {
+        atomic_set(&device->pairing_busy, 0);
+        return err;
+    }
 
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step2(pid);
     request.transaction_id.id = 0x1F;
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err) {
+        atomic_set(&device->pairing_busy, 0);
+        return err;
+    }
 
     /*
      * Keep the dock in RF scan mode with periodic 0x86 keepalives (same
@@ -3136,17 +3217,22 @@ static ssize_t razer_attr_write_mouse_dock_pro_pair(struct device *dev, struct d
             break;
         request = get_razer_report(0x00, 0x86, 0x03);
         request.transaction_id.id = 0xFF;
-        razer_send_payload(device, &request, &response);
-        if (response.status == RAZER_CMD_SUCCESSFUL)
+        err = razer_send_payload(device, &request, &response);
+        if (!err && response.status == RAZER_CMD_SUCCESSFUL)
             break;
     }
 
     request = get_razer_report(0x00, 0xb9, 0x01);
     request.transaction_id.id = 0x1F;
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+
+    /* Cache the PID so paired_pid can return it even before a reboot flushes
+     * the heartbeat path (and as a fallback if the heartbeat carries no PID). */
+    if ((unsigned short)pid != 0)
+        razer_set_shared_paired_pid(device, (unsigned short)pid);
 
     atomic_set(&device->pairing_busy, 0);
-    return count;
+    return err ? err : count;
 }
 
 /**
@@ -3160,15 +3246,18 @@ static ssize_t razer_attr_write_mouse_dock_pro_unpair(struct device *dev, struct
     unsigned int pid = (unsigned int)simple_strtoul(buf, NULL, 16);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     atomic_set(&device->pairing_busy, 1);
 
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(pid);
     request.transaction_id.id = 0x3F;
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+
+    razer_set_shared_paired_pid(device, 0);
 
     atomic_set(&device->pairing_busy, 0);
-    return count;
+    return err ? err : count;
 }
 
 /*
@@ -3290,13 +3379,16 @@ static DEVICE_ATTR(logo_matrix_effect_wave,                 0220, NULL,         
 static DEVICE_ATTR(logo_matrix_effect_static,               0220, NULL,                                           razer_attr_write_logo_matrix_effect_static);
 static DEVICE_ATTR(logo_matrix_effect_spectrum,             0220, NULL,                                           razer_attr_write_logo_matrix_effect_spectrum);
 static DEVICE_ATTR(logo_matrix_effect_none,                 0220, NULL,                                           razer_attr_write_logo_matrix_effect_none);
+static DEVICE_ATTR(logo_matrix_effect_breath,               0220, NULL,                                           razer_attr_write_logo_matrix_effect_breath);
 static DEVICE_ATTR(scroll_matrix_effect_wave,               0220, NULL,                                           razer_attr_write_scroll_matrix_effect_wave);
 static DEVICE_ATTR(scroll_matrix_effect_static,             0220, NULL,                                           razer_attr_write_scroll_matrix_effect_static);
 static DEVICE_ATTR(scroll_matrix_effect_spectrum,           0220, NULL,                                           razer_attr_write_scroll_matrix_effect_spectrum);
 static DEVICE_ATTR(scroll_matrix_effect_none,               0220, NULL,                                           razer_attr_write_scroll_matrix_effect_none);
+static DEVICE_ATTR(scroll_matrix_effect_breath,             0220, NULL,                                           razer_attr_write_scroll_matrix_effect_breath);
 
 static DEVICE_ATTR(mouse_serial,                            0440, razer_attr_read_mouse_serial,                  NULL);
 static DEVICE_ATTR(mouse_connected,                         0440, razer_attr_read_mouse_connected,               NULL);
+static DEVICE_ATTR(paired_pid,                              0440, razer_attr_read_paired_pid,                    NULL);
 static DEVICE_ATTR(nearby_mice,                             0440, razer_attr_read_nearby_mice,                   NULL);
 static DEVICE_ATTR(scan_for_mice,                           0220, NULL,                                          razer_attr_write_scan_for_mice);
 static DEVICE_ATTR(mouse_firmware,                          0440, razer_attr_read_mouse_firmware,                NULL);
@@ -3667,12 +3759,15 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_serial);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_connected);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_paired_pid);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_nearby_mice);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scan_for_mice);
 
@@ -3954,12 +4049,15 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
             device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
             device_remove_file(&hdev->dev, &dev_attr_mouse_serial);
             device_remove_file(&hdev->dev, &dev_attr_mouse_connected);
+            device_remove_file(&hdev->dev, &dev_attr_paired_pid);
             device_remove_file(&hdev->dev, &dev_attr_nearby_mice);
             device_remove_file(&hdev->dev, &dev_attr_scan_for_mice);
             device_remove_file(&hdev->dev, &dev_attr_mouse_firmware);
@@ -4018,9 +4116,7 @@ static void razer_dock_pro_update_nearby(struct razer_dock_pro_shared *shared, u
     }
 
     spin_lock_irqsave(&shared->nearby_lock, flags);
-    if (memcmp(shared->nearby_pids, pids, sizeof(pids)) != 0) {
-        memcpy(shared->nearby_pids, pids, sizeof(pids));
-    }
+    memcpy(shared->nearby_pids, pids, sizeof(pids));
     shared->nearby_jiffies = jiffies;
     spin_unlock_irqrestore(&shared->nearby_lock, flags);
 }

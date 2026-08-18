@@ -10,7 +10,7 @@ from openrazer_daemon.hardware.device_base import RazerDevice
 HARDWARE_MODULES = ['openrazer_daemon.hardware.' + os.path.splitext(hw_file)[0] for hw_file in os.listdir(os.path.dirname(__file__)) if hw_file not in ('device_base.py', '__init__.py') and hw_file.endswith('.py')]
 
 # List of classes to exclude from the class finding
-EXCLUDED_CLASSES = ('RazerDevice', 'RazerDeviceBrightnessSuspend')
+EXCLUDED_CLASSES = ('RazerDevice', 'RazerDeviceBrightnessSuspend', 'RazerMouseDocked')
 
 
 def get_device_classes():

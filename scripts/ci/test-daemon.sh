@@ -5,18 +5,8 @@ all_devices=$(ls pylib/openrazer/_fake_driver/*.cfg | wc -l)
 daemon_devices=$(PYTHONPATH="pylib:daemon" python3 -c "from openrazer.client import DeviceManager; mgr = DeviceManager(); print(len(mgr.devices))")
 
 child_device_count=$(PYTHONPATH="pylib:daemon" python3 -c "
-from openrazer_daemon.hardware.device_base import RazerDevice as _RazerDevice
-import inspect, importlib, pkgutil
-import openrazer_daemon.hardware as hw_pkg
-
-count = 0
-for _importer, modname, _ispkg in pkgutil.walk_packages(hw_pkg.__path__, hw_pkg.__name__ + '.'):
-    mod = importlib.import_module(modname)
-    for _name, obj in inspect.getmembers(mod, inspect.isclass):
-        if issubclass(obj, _RazerDevice) and obj is not _RazerDevice:
-            if 'get_child_devices' in obj.__dict__:
-                count += 1
-print(count)
+from openrazer_daemon.hardware import get_device_classes
+print(sum(1 for c in get_device_classes() if 'get_child_devices' in c.__dict__))
 ")
 
 expected_devices=$((all_devices + child_device_count))
