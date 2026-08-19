@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 import json
-import dbus as _dbus
+import dbus as _dbus  # type: ignore
 from openrazer.client.device import RazerDeviceFactory as _RazerDeviceFactory
 from openrazer.client.devices import RazerDevice as _RazerDevice
 
@@ -92,7 +92,8 @@ class DeviceManager(object):
     def supported_devices(self) -> dict[str, tuple[int, int]]:
         json_data = self._dbus_daemon.supportedDevices()
 
-        return json.loads(json_data)
+        data: dict[str, tuple[int, int]] = json.loads(json_data)
+        return data
 
     @property
     def devices(self) -> list[_RazerDevice]:

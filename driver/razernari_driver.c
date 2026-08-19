@@ -183,7 +183,7 @@ static struct razer_nari_request_report get_nari_led_request_report(unsigned cha
  * @intensity: 0..100, passed directly as byte 10 of the report (linear)
  */
 static struct razer_nari_request_report get_nari_haptic_request_report(unsigned char enable,
-                                                                       unsigned char intensity)
+        unsigned char intensity)
 {
     struct razer_nari_request_report report = get_nari_base_request_report();
 
@@ -205,8 +205,8 @@ static struct razer_nari_request_report get_nari_haptic_request_report(unsigned 
  * current colour back. Kept for future reverse-engineering work.
  */
 static struct razer_nari_request_report get_nari_color_request_report(unsigned char red,
-                                                                      unsigned char green,
-                                                                      unsigned char blue)
+        unsigned char green,
+        unsigned char blue)
 {
     struct razer_nari_request_report report = get_nari_base_request_report();
 
@@ -265,52 +265,56 @@ static void set_haptic(struct razer_nari_device *device,
 static ssize_t razer_attr_read_version(struct device *dev,
                                        struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "%s\n", DRIVER_VERSION);
+    return sysfs_emit(buf, "%s\n", DRIVER_VERSION);
 }
 
 static ssize_t razer_attr_read_device_type(struct device *dev,
-                                           struct device_attribute *attr, char *buf)
+        struct device_attribute *attr, char *buf)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
     const char *device_type;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NARI_ULTIMATE_WIRELESS:
+        device_type = "Razer Nari Ultimate (Wireless)";
+        break;
     case USB_DEVICE_ID_RAZER_NARI_ULTIMATE_USB:
-        device_type = "Razer Nari Ultimate\n";
+        device_type = "Razer Nari Ultimate (Wired)";
         break;
     case USB_DEVICE_ID_RAZER_NARI_WIRELESS:
+        device_type = "Razer Nari (Wireless)";
+        break;
     case USB_DEVICE_ID_RAZER_NARI_USB:
-        device_type = "Razer Nari\n";
+        device_type = "Razer Nari (Wired)";
         break;
     default:
-        device_type = "Unknown Device\n";
+        device_type = "Unknown Device";
     }
 
-    return sprintf(buf, "%s", device_type);
+    return sysfs_emit(buf, "%s\n", device_type);
 }
 
 static ssize_t razer_attr_read_device_serial(struct device *dev,
-                                             struct device_attribute *attr, char *buf)
+        struct device_attribute *attr, char *buf)
 {
     /*
      * The Nari does not expose a real serial number over the wire. We
      * return a device-stable placeholder that OpenRazer accepts as a
      * valid serial. Synapse itself can't read the real serial either.
      */
-    return sprintf(buf, "NARIULTIMATE0001\n");
+    return sysfs_emit(buf, "NARIULTIMATE0001\n");
 }
 
 static ssize_t razer_attr_read_firmware_version(struct device *dev,
-                                                struct device_attribute *attr,
-                                                char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
     /*
      * Firmware version is not decoded yet; return a placeholder string
      * in the canonical "vX.Y" format the daemon expects. Polychromatic
      * shows this as a read-only field in the device info panel.
      */
-    return sprintf(buf, "v1.0\n");
+    return sysfs_emit(buf, "v1.0\n");
 }
 
 static ssize_t razer_attr_write_test(struct device *dev,
@@ -323,7 +327,7 @@ static ssize_t razer_attr_write_test(struct device *dev,
 static ssize_t razer_attr_read_test(struct device *dev,
                                     struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "\n");
+    return sysfs_emit(buf, "\n");
 }
 
 /* ---------------------------------------------------------------------
@@ -338,21 +342,21 @@ static ssize_t razer_attr_read_test(struct device *dev,
  * ------------------------------------------------------------------ */
 
 static ssize_t razer_attr_read_matrix_brightness(struct device *dev,
-                                                 struct device_attribute *attr,
-                                                 char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
     unsigned int scaled;
 
     scaled = device->haptic_enabled
-        ? (unsigned int)device->haptic_intensity * 255u / 100u
-        : 0u;
-    return sprintf(buf, "%u\n", scaled);
+             ? (unsigned int)device->haptic_intensity * 255u / 100u
+             : 0u;
+    return sysfs_emit(buf, "%u\n", scaled);
 }
 
 static ssize_t razer_attr_write_matrix_brightness(struct device *dev,
-                                                  struct device_attribute *attr,
-                                                  const char *buf, size_t count)
+        struct device_attribute *attr,
+        const char *buf, size_t count)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
     unsigned long v;
@@ -365,15 +369,6 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev,
 
     intensity = (unsigned char)((v * 100u) / 255u);
     set_haptic(device, v > 0 ? 1 : 0, intensity);
-    return count;
-}
-
-static ssize_t razer_attr_write_matrix_effect_none(struct device *dev,
-                                                   struct device_attribute *attr,
-                                                   const char *buf, size_t count)
-{
-    struct razer_nari_device *device = dev_get_drvdata(dev);
-    set_haptic(device, 0, device->haptic_intensity);
     return count;
 }
 
@@ -394,16 +389,16 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev,
  * ------------------------------------------------------------------ */
 
 static ssize_t razer_attr_read_logo_led_brightness(struct device *dev,
-                                                   struct device_attribute *attr,
-                                                   char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
-    return sprintf(buf, "%u\n", device->led_brightness ? 255u : 0u);
+    return sysfs_emit(buf, "%u\n", device->led_brightness ? 255u : 0u);
 }
 
 static ssize_t razer_attr_write_logo_led_brightness(struct device *dev,
-                                                    struct device_attribute *attr,
-                                                    const char *buf, size_t count)
+        struct device_attribute *attr,
+        const char *buf, size_t count)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
     unsigned long v;
@@ -416,16 +411,16 @@ static ssize_t razer_attr_write_logo_led_brightness(struct device *dev,
 }
 
 static ssize_t razer_attr_read_logo_led_state(struct device *dev,
-                                              struct device_attribute *attr,
-                                              char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
-    return sprintf(buf, "%u\n", device->led_brightness ? 1u : 0u);
+    return sysfs_emit(buf, "%u\n", device->led_brightness ? 1u : 0u);
 }
 
 static ssize_t razer_attr_write_logo_led_state(struct device *dev,
-                                               struct device_attribute *attr,
-                                               const char *buf, size_t count)
+        struct device_attribute *attr,
+        const char *buf, size_t count)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
 
@@ -437,8 +432,8 @@ static ssize_t razer_attr_write_logo_led_state(struct device *dev,
 }
 
 static ssize_t razer_attr_write_logo_matrix_effect_none(struct device *dev,
-                                                        struct device_attribute *attr,
-                                                        const char *buf, size_t count)
+        struct device_attribute *attr,
+        const char *buf, size_t count)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
     set_led_state(device, 0);
@@ -446,8 +441,8 @@ static ssize_t razer_attr_write_logo_matrix_effect_none(struct device *dev,
 }
 
 static ssize_t razer_attr_write_logo_matrix_effect_static(struct device *dev,
-                                                          struct device_attribute *attr,
-                                                          const char *buf, size_t count)
+        struct device_attribute *attr,
+        const char *buf, size_t count)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
 
@@ -481,8 +476,8 @@ static ssize_t razer_attr_write_logo_matrix_effect_static(struct device *dev,
 }
 
 static ssize_t razer_attr_read_logo_matrix_effect_static(struct device *dev,
-                                                         struct device_attribute *attr,
-                                                         char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
     struct razer_nari_device *device = dev_get_drvdata(dev);
     buf[0] = device->red;
@@ -502,7 +497,6 @@ static DEVICE_ATTR(device_serial,             0440, razer_attr_read_device_seria
 static DEVICE_ATTR(firmware_version,          0440, razer_attr_read_firmware_version,           NULL);
 
 static DEVICE_ATTR(matrix_brightness,         0660, razer_attr_read_matrix_brightness,          razer_attr_write_matrix_brightness);
-static DEVICE_ATTR(matrix_effect_none,        0220, NULL,                                       razer_attr_write_matrix_effect_none);
 
 static DEVICE_ATTR(logo_led_brightness,       0660, razer_attr_read_logo_led_brightness,        razer_attr_write_logo_led_brightness);
 static DEVICE_ATTR(logo_led_state,             0660, razer_attr_read_logo_led_state,             razer_attr_write_logo_led_state);
@@ -567,15 +561,22 @@ static int razer_nari_probe(struct hid_device *hdev,
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);
 
-        /* Main zone: haptic motor */
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
-
         /* Logo zone: status LED */
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+
+        switch (dev->usb_pid) {
+        case USB_DEVICE_ID_RAZER_NARI_ULTIMATE_WIRELESS:
+        case USB_DEVICE_ID_RAZER_NARI_ULTIMATE_USB:
+            /* Main zone: haptic motor, only present on Ultimate models. */
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+            break;
+        case USB_DEVICE_ID_RAZER_NARI_WIRELESS:
+        case USB_DEVICE_ID_RAZER_NARI_USB:
+            break;
+        }
     }
 
     dev_set_drvdata(&hdev->dev, dev);
@@ -612,13 +613,20 @@ static void razer_nari_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_device_serial);
         device_remove_file(&hdev->dev, &dev_attr_firmware_version);
 
-        device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
-        device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
-
         device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
         device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
         device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
         device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+
+        switch (dev->usb_pid) {
+        case USB_DEVICE_ID_RAZER_NARI_ULTIMATE_WIRELESS:
+        case USB_DEVICE_ID_RAZER_NARI_ULTIMATE_USB:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+            break;
+        case USB_DEVICE_ID_RAZER_NARI_WIRELESS:
+        case USB_DEVICE_ID_RAZER_NARI_USB:
+            break;
+        }
     }
 
     hid_hw_stop(hdev);

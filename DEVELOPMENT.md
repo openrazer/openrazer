@@ -79,7 +79,7 @@ apt-get install -y make gcc flex bison bc linux-headers-$(uname -r)
 For RedHat/Fedora install the following packages for kernel development:
 
 ```
-dnf install -y binutils make gcc ncurses-devel sed flex bison kernel-headers
+dnf install -y binutils make gcc ncurses-devel sed flex bison kernel-headers kernel-devel
 ```
 
 #### Build the kernel module

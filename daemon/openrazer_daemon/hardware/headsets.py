@@ -273,14 +273,12 @@ class RazerNariUltimateWired(RazerNariUltimate):
     USB_PID = 0x051B
 
 
-class RazerNari(__RazerDeviceBrightnessSuspend):
+class RazerNari(__RazerDevice):
     """
     Class for the non-Ultimate Razer Nari (no haptic motors).
 
     The protocol is identical to the Ultimate, but the headset lacks
-    the bass-response haptic drivers so the matrix_brightness zone is
-    effectively a no-op on the hardware; we still expose it to keep
-    the daemon/Polychromatic UI consistent with the Ultimate class.
+    the bass-response haptic drivers, so only the logo zone is exposed.
     """
     USB_VID = 0x1532
     USB_PID = 0x051C

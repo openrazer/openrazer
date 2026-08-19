@@ -16,15 +16,15 @@ import openrazer._fake_driver as fake_driver
 
 class FakeDevicePrompt(cmd.Cmd):
 
-    def __init__(self, device_map, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, device_map: dict[str, fake_driver.FakeDevice]):
+        super().__init__()
 
         self._device_map = device_map
-        self._current_device = None
+        self._current_device: str | None = None
 
-        self._ep = {}
-        self._read = []
-        self._write = []
+        self._ep: dict[str, str] = {}
+        self._read: list[str] = []
+        self._write: list[str] = []
 
         # If only 1 device, auto use that
         if len(self._device_map) == 1:
@@ -32,7 +32,7 @@ class FakeDevicePrompt(cmd.Cmd):
         else:
             self._change_device(None)
 
-    def _change_device(self, device_name=None):
+    def _change_device(self, device_name: str | None = None) -> None:
         if device_name is not None:
             self._current_device = device_name
             self.prompt = self._current_device + "> "
@@ -46,7 +46,7 @@ class FakeDevicePrompt(cmd.Cmd):
             self._current_device = None
             self.prompt = "> "
 
-    def do_dev(self, arg):
+    def do_dev(self, arg: str | None) -> None:
         """
         Change current device
         """
@@ -58,7 +58,7 @@ class FakeDevicePrompt(cmd.Cmd):
         else:
             print('Invalid device name: {0}'.format(arg))
 
-    def complete_dev(self, text, line, begidx, endidx):
+    def complete_dev(self, text: str, line: str, begidx: int, endidx: int) -> list[str]:
         if not text:
             completions = list(self._device_map.keys())
         else:
@@ -66,7 +66,7 @@ class FakeDevicePrompt(cmd.Cmd):
 
         return completions
 
-    def do_list(self, arg):
+    def do_list(self, arg: str) -> None:
         """List available device files"""
         if self._current_device is not None:
             print('Device files')
@@ -88,11 +88,11 @@ class FakeDevicePrompt(cmd.Cmd):
             for device in list(self._device_map.keys()):
                 print('  {0}'.format(device))
 
-    def do_ls(self, arg):
+    def do_ls(self, arg: str) -> None:
         """List available device files"""
         self.do_list(arg)
 
-    def do_read(self, arg, binary=False):
+    def do_read(self, arg: str, binary: bool = False) -> None:
         """Read ASCII from given device file"""
         if self._current_device is not None:
             if arg in self._ep:
@@ -104,11 +104,11 @@ class FakeDevicePrompt(cmd.Cmd):
             else:
                 print("Device endpoint not found")
 
-    def do_binary_read(self, arg):
+    def do_binary_read(self, arg: str) -> None:
         """Read binary from given device file"""
         self.do_read(arg, binary=True)
 
-    def complete_read(self, text, line, begidx, endidx):
+    def complete_read(self, text: str, line: str, begidx: int, endidx: int) -> list[str]:
         if not text:
             completions = self._read
         else:
@@ -118,7 +118,7 @@ class FakeDevicePrompt(cmd.Cmd):
 
     complete_binary_read = complete_read
 
-    def do_write(self, arg):
+    def do_write(self, arg: str) -> None:
         """Write ASCII to device file. DEVICE_FILE DATA"""
         if self._current_device is not None:
             try:
@@ -128,14 +128,14 @@ class FakeDevicePrompt(cmd.Cmd):
                     if len(data) > 0:
                         self._device_map[self._current_device].set(device_file, data)
 
-                        print("{0}: {1}".format(device_file, self._device_map[self._current_device].get(device_file)))
+                        print("{0}: {1!s}".format(device_file, self._device_map[self._current_device].get(device_file)))
                 else:
                     print("Device endpoint not found")
 
             except ValueError:
                 print("Must specify a device endpoint then a space then data to write")
 
-    def complete_write(self, text, line, begidx, endidx):
+    def complete_write(self, text: str, line: str, begidx: int, endidx: int) -> list[str]:
         if not text:
             completions = self._write
         else:
@@ -143,7 +143,7 @@ class FakeDevicePrompt(cmd.Cmd):
 
         return completions
 
-    def do_event(self, arg):
+    def do_event(self, arg: str) -> None:
         """Emit an event, format: EVENT_ID KEY_ID STATE
 
         Where state in 'up' 'down' and 'repeat'
@@ -164,7 +164,7 @@ class FakeDevicePrompt(cmd.Cmd):
                 except ValueError as err:
                     print("Caught exception: {0}".format(err))
 
-    def do_exit(self, arg):
+    def do_exit(self, arg: str) -> bool:
         """Exit"""
         if self._current_device is not None:
             self._change_device(None)
@@ -172,12 +172,12 @@ class FakeDevicePrompt(cmd.Cmd):
         else:
             return True
 
-    def do_EOF(self, arg):
+    def do_EOF(self, arg: str) -> None:
         """Press Ctrl+D to exit"""
         self.do_exit(arg)
 
 
-def create_envionment(device_name, destination):
+def create_envionment(device_name: str, destination: str) -> fake_driver.FakeDevice | None:
     os.makedirs(destination, exist_ok=True)
 
     try:
@@ -185,9 +185,10 @@ def create_envionment(device_name, destination):
         return fake_device
     except ValueError:
         print('Device {0}.cfg not found'.format(device_name))
+        return None
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument('device', metavar='DEVICE', nargs='*', help='Device config name')
     parser.add_argument('--dest', metavar='DESTDIR', required=False, default=None, help='Directory to create driver files in. If omitted then a tmp directory is used')
@@ -198,7 +199,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def run():
+def run() -> None:
     args = parse_args()
 
     if args.dest is None:
@@ -214,12 +215,12 @@ def run():
     else:
         devices = args.device
 
-    device_map = {}
-    for device in devices:
+    device_map: dict[str, fake_driver.FakeDevice] = {}
+    for device_name in devices:
         # Device name: FakeDriver
-        fake_device = create_envionment(device, destination)
+        fake_device = create_envionment(device_name, destination)
         if fake_device is not None:
-            device_map[device] = fake_device
+            device_map[device_name] = fake_device
 
     if len(device_map) == 0:
         print("ERROR: No valid devices passed to script, you either need to pass devices as arguments or use '--all'")

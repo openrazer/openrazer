@@ -22,12 +22,6 @@
  */
 #define DRIVER_DESC "Razer Mouse Device Driver"
 
-/* REL_HWHEEL_HI_RES was added in Linux 5.0, so define ourselves for older kernels
- * See also https://git.kernel.org/torvalds/c/52ea899 */
-#ifndef REL_HWHEEL_HI_RES
-#define REL_HWHEEL_HI_RES 0x0c
-#endif
-
 MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_VERSION(DRIVER_VERSION);
@@ -36,8 +30,9 @@ MODULE_LICENSE(DRIVER_LICENSE);
 /**
  * Send report to the mouse
  */
-static int razer_get_report(struct usb_device *usb_dev, struct razer_report *request, struct razer_report *response)
+static int razer_get_report(struct hid_device *hdev, struct razer_report *request, struct razer_report *response)
 {
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
     unsigned int index = 0;
     switch (usb_dev->descriptor.idProduct) {
     // These devices require longer waits to read their firmware, serial, and other setting values
@@ -82,13 +77,13 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
-        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_NEW_MOUSE_RECEIVER_WAIT_MIN_US, RAZER_NEW_MOUSE_RECEIVER_WAIT_MAX_US);
+        return razer_get_usb_response(hdev, index, request, index, response, RAZER_NEW_MOUSE_RECEIVER_WAIT_US);
         break;
 
     case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
     case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
     case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
-        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_ATHERIS_RECEIVER_WAIT_MIN_US, RAZER_ATHERIS_RECEIVER_WAIT_MAX_US);
+        return razer_get_usb_response(hdev, index, request, index, response, RAZER_ATHERIS_RECEIVER_WAIT_US);
         break;
 
     case USB_DEVICE_ID_RAZER_VIPER_ULTIMATE_WIRELESS:
@@ -100,63 +95,82 @@ static int razer_get_report(struct usb_device *usb_dev, struct razer_report *req
     case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
-        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_VIPER_MOUSE_RECEIVER_WAIT_MIN_US, RAZER_VIPER_MOUSE_RECEIVER_WAIT_MAX_US);
+        return razer_get_usb_response(hdev, index, request, index, response, RAZER_VIPER_MOUSE_RECEIVER_WAIT_US);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_X:
     case USB_DEVICE_ID_RAZER_BASILISK_V3:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
         index = 0x03;
-        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
+        return razer_get_usb_response(hdev, index, request, index, response, RAZER_MOUSE_WAIT_US);
         break;
 
     default:
-        return razer_get_usb_response(usb_dev, index, request, index, response, RAZER_MOUSE_WAIT_MIN_US, RAZER_MOUSE_WAIT_MAX_US);
+        return razer_get_usb_response(hdev, index, request, index, response, RAZER_MOUSE_WAIT_US);
     }
 }
 
 /**
  * Function to send to device, get response, and actually check the response
  */
-static int razer_send_payload(struct razer_mouse_device *device, struct razer_report *request, struct razer_report *response)
+static int __must_check razer_send_payload(struct razer_mouse_device *device, struct razer_report *request, struct razer_report *response)
 {
+    int retry;
     int err;
 
     request->crc = razer_calculate_crc(request);
 
-    mutex_lock(&device->lock);
-    err = razer_get_report(device->usb_dev, request, response);
-    mutex_unlock(&device->lock);
-    if (err) {
-        print_erroneous_report(response, "razermouse", "Invalid Report Length");
+    for (retry = 5; retry > 0; retry--) {
+        mutex_lock(&device->lock);
+        err = razer_get_report(device->hdev, request, response);
+        mutex_unlock(&device->lock);
+        if (err) {
+            print_erroneous_report(device->hdev, response, "Invalid Report Length");
+            goto retry;
+        }
+
+        /* Check the packet number, class and command are the same */
+        if (response->remaining_packets != request->remaining_packets ||
+            response->command_class != request->command_class ||
+            response->command_id.id != request->command_id.id) {
+            print_erroneous_report(device->hdev, response, "Response doesn't match request");
+            err = -EINVAL;
+            goto retry;
+        }
+
+        /* Some commands respond with 'busy' but succeed. Treat it as success. */
+        if (response->status == RAZER_CMD_SUCCESSFUL ||
+            response->status == RAZER_CMD_BUSY)
+            return 0;
+
+retry:
+        hid_dbg(device->hdev,
+                "Sending command failed: %d, response status: %d, retries left: %d\n",
+                err, response->status, retry);
+
+        /* otherwise try again after a delay of 10ms... */
+        fsleep(10000);
+    }
+
+    if (err)
         return err;
-    }
 
-    /* Check the packet number, class and command are the same */
-    if (response->remaining_packets != request->remaining_packets ||
-        response->command_class != request->command_class ||
-        response->command_id.id != request->command_id.id) {
-        print_erroneous_report(response, "razermouse", "Response doesn't match request");
-        return -EIO;
-    }
-
+    /* Only "valid" but failed responses should reach this */
     switch (response->status) {
-    case RAZER_CMD_BUSY:
-        // TODO: Check if this should be an error.
-        // print_erroneous_report(&response, "razermouse", "Device is busy");
-        break;
     case RAZER_CMD_FAILURE:
-        print_erroneous_report(response, "razermouse", "Command failed");
-        return -EIO;
+        print_erroneous_report(device->hdev, response, "Command failed");
+        return -EINVAL;
     case RAZER_CMD_NOT_SUPPORTED:
-        print_erroneous_report(response, "razermouse", "Command not supported");
-        return -EIO;
+        print_erroneous_report(device->hdev, response, "Command not supported");
+        return -ENOTSUPP;
     case RAZER_CMD_TIMEOUT:
-        print_erroneous_report(response, "razermouse", "Command timed out");
+        print_erroneous_report(device->hdev, response, "Command timed out");
+        return -ETIMEDOUT;
+    default:
+        print_erroneous_report(device->hdev, response, "Unknown error");
+        WARN_ONCE(1, "Unknown response status received: %d\n", response->status);
         return -EIO;
     }
-
-    return 0;
 }
 
 /*
@@ -183,12 +197,12 @@ static int deathadder3_5g_set_led_state(struct razer_mouse_device *device, unsig
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: Invalid led_id on DeathAdder 3.5G\n");
+        hid_warn(device->hdev, "razermouse: Invalid led_id on DeathAdder 3.5G\n");
         return -EINVAL;
     }
 
     mutex_lock(&device->lock);
-    razer_send_control_msg_old_device(device->usb_dev, &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
+    razer_send_control_msg_old_device(device->hdev, &device->da3_5g, 0x10, 0x00, sizeof(device->da3_5g), 3000);
     mutex_unlock(&device->lock);
 
     return 0;
@@ -212,7 +226,7 @@ static void deathadder3_5g_set_poll_rate(struct razer_mouse_device *device, unsi
     }
 
     mutex_lock(&device->lock);
-    razer_send_control_msg_old_device(device->usb_dev, &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
+    razer_send_control_msg_old_device(device->hdev, &device->da3_5g, 0x10, 0x00, sizeof(device->da3_5g), 3000);
     mutex_unlock(&device->lock);
 }
 
@@ -235,7 +249,7 @@ static void deathadder3_5g_set_dpi(struct razer_mouse_device *device, unsigned s
     }
 
     mutex_lock(&device->lock);
-    razer_send_control_msg_old_device(device->usb_dev, &device->da3_5g, 0x10, 0x00, 4, 3000, 3000);
+    razer_send_control_msg_old_device(device->hdev, &device->da3_5g, 0x10, 0x00, sizeof(device->da3_5g), 3000);
     mutex_unlock(&device->lock);
 }
 
@@ -257,7 +271,7 @@ static int orochi_2011_set_led_state(struct razer_mouse_device *device, unsigned
         }
         break;
     default:
-        printk(KERN_WARNING "razermouse: Invalid led_id on Orochi 2011\n");
+        hid_warn(device->hdev, "razermouse: Invalid led_id on Orochi 2011\n");
         return -EINVAL;
     }
 
@@ -275,7 +289,7 @@ static int orochi_2011_set_led_state(struct razer_mouse_device *device, unsigned
  */
 static ssize_t razer_attr_read_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return sprintf(buf, "%s\n", DRIVER_VERSION);
+    return sysfs_emit(buf, "%s\n", DRIVER_VERSION);
 }
 
 /**
@@ -740,7 +754,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Unknown Device";
     }
 
-    return sprintf(buf, "%s\n", device_type);
+    return sysfs_emit(buf, "%s\n", device_type);
 }
 
 /**
@@ -753,17 +767,18 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     request = razer_chroma_standard_get_firmware_version();
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_OROCHI_2011:  // Orochi 2011 doesn't have FW
-        return sprintf(buf, "v%d.%d\n", 9, 99);
+        return sysfs_emit(buf, "v%d.%d\n", 9, 99);
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G: // DA don't think supports fw, its proper old
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
-        return sprintf(buf, "v%d.%d\n", 0x01, 0x00);
+        return sysfs_emit(buf, "v%d.%d\n", 0x01, 0x00);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_X:
@@ -886,13 +901,15 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: firmware_version not supported for this model\n");
+        dev_warn(dev, "razermouse: firmware_version not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
-    return sprintf(buf, "v%d.%d\n", response.arguments[0], response.arguments[1]);
+    return sysfs_emit(buf, "v%d.%d\n", response.arguments[0], response.arguments[1]);
 }
 
 /**
@@ -903,14 +920,21 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
 static ssize_t razer_attr_write_test(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char enabled;
+    int err;
+
+    err = kstrtou8(buf, 0, &enabled);
+    if (err < 0)
+        return err;
 
     request = razer_chroma_standard_set_led_state(VARSTORE, LOGO_LED, enabled);
     request.transaction_id.id = 0xFF;
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -925,6 +949,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_COBRA_PRO_WIRELESS:
@@ -955,11 +980,13 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_none not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_none not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -974,6 +1001,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2: // TODO look into this think its extended effects
@@ -1044,11 +1072,13 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_custom not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_custom not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -1063,9 +1093,10 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     if (count != 3) {
-        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
+        dev_warn(dev, "razermouse: Static mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -1085,7 +1116,9 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         request.arguments[5] = 0x00;
         request.transaction_id.id = 0x1f;
 
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
 
         request = razer_naga_trinity_effect_static((struct razer_rgb*)&buf[0]);
         request.transaction_id.id = 0x1f;
@@ -1098,7 +1131,9 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         request.arguments[2] = 0x08;
         request.transaction_id.id = 0x1f;
 
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
 
         request = razer_basilisk_mobile_effect_static((struct razer_rgb*)&buf[0]);
         request.transaction_id.id = 0x1f;
@@ -1123,11 +1158,13 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_static not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_static not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -1141,9 +1178,14 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
 static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char direction;
+    int err;
+
+    err = kstrtou8(buf, 0, &direction);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_BASILISK_V3:
@@ -1165,11 +1207,13 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_wave not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_wave not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -1184,6 +1228,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
@@ -1213,11 +1258,13 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_spectrum not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_spectrum not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -1233,9 +1280,10 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     struct razer_report request = {0};
     struct razer_report response = {0};
     unsigned char speed;
+    int err;
 
     if (count != 4) {
-        printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
+        dev_warn(dev, "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
         return -EINVAL;
     }
 
@@ -1255,11 +1303,13 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_reactive not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_reactive not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -1274,6 +1324,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
@@ -1303,11 +1354,13 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_breath not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_breath not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -1323,6 +1376,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     char serial_string[23];
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     request = razer_chroma_standard_get_serial();
 
@@ -1332,7 +1386,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED: // Doesn't have proper serial
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRELESS:
-        return sprintf(buf, "%s\n", &device->serial[0]);
+        return sysfs_emit(buf, "%s\n", device->serial);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1456,15 +1510,18 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: device_serial not supported for this model\n");
+        dev_warn(dev, "razermouse: device_serial not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
-    strncpy(&serial_string[0], &response.arguments[0], 22);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    memcpy(serial_string, response.arguments, 22);
     serial_string[22] = '\0';
 
-    return sprintf(buf, "%s\n", &serial_string[0]);
+    return sysfs_emit(buf, "%s\n", serial_string);
 }
 
 /**
@@ -1477,6 +1534,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     request = razer_chroma_misc_get_battery_level();
 
@@ -1556,13 +1614,15 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: charge_level not supported for this model\n");
+        dev_warn(dev, "razermouse: charge_level not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", response.arguments[1]);
 }
 
 /**
@@ -1575,6 +1635,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     request = razer_chroma_misc_get_charging_status();
 
@@ -1591,7 +1652,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED:
-        return sprintf(buf, "0\n");
+        return sysfs_emit(buf, "0\n");
         break;
 
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
@@ -1658,13 +1719,15 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: charge_status not supported for this model\n");
+        dev_warn(dev, "razermouse: charge_status not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", response.arguments[1]);
 }
 
 /**
@@ -1677,9 +1740,10 @@ static ssize_t razer_attr_write_charge_effect(struct device *dev, struct device_
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     if (count != 1) {
-        printk(KERN_WARNING "razermouse: Incorrect number of bytes for setting the charging effect\n");
+        dev_warn(dev, "razermouse: Incorrect number of bytes for setting the charging effect\n");
         return -EINVAL;
     }
 
@@ -1701,11 +1765,13 @@ static ssize_t razer_attr_write_charge_effect(struct device *dev, struct device_
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: charge_effect not supported for this model\n");
+        dev_warn(dev, "razermouse: charge_effect not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -1720,15 +1786,18 @@ static ssize_t razer_attr_write_charge_colour(struct device *dev, struct device_
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     // First enable static charging effect
     request = razer_chroma_misc_set_dock_charge_type(0x01);
     request.transaction_id.id = 0xFF;
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     if (count != 3) {
-        printk(KERN_WARNING "razermouse: Charging colour mode only accepts RGB (3byte)\n");
+        dev_warn(dev, "razermouse: Charging colour mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -1750,11 +1819,13 @@ static ssize_t razer_attr_write_charge_colour(struct device *dev, struct device_
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: charge_colour not supported for this model\n");
+        dev_warn(dev, "razermouse: charge_colour not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -1770,6 +1841,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     struct razer_report request = {0};
     struct razer_report response = {0};
     unsigned short polling_rate = 0;
+    int err;
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
@@ -1785,7 +1857,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
             polling_rate = 125;
             break;
         }
-        return sprintf(buf, "%d\n", polling_rate);
+        return sysfs_emit(buf, "%d\n", polling_rate);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -1865,7 +1937,9 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
         request = razer_chroma_misc_get_polling_rate2();
         request.transaction_id.id = 0x1f;
 
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
 
         switch(response.arguments[1]) {
         case 0x01:
@@ -1888,7 +1962,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
             break;
         }
 
-        return sprintf(buf, "%d\n", polling_rate);
+        return sysfs_emit(buf, "%d\n", polling_rate);
 
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
     case USB_DEVICE_ID_RAZER_NAGA:
@@ -1938,7 +2012,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: poll_rate not supported for this model\n");
+        dev_warn(dev, "razermouse: poll_rate not supported for this model\n");
         return -EINVAL;
     }
 
@@ -1946,7 +2020,9 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     if(device->usb_pid == USB_DEVICE_ID_RAZER_OROCHI_2011) {
         response.arguments[0] = device->orochi2011.poll;
     } else {
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
     }
 
     switch(response.arguments[0]) {
@@ -1961,7 +2037,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
         break;
     }
 
-    return sprintf(buf, "%d\n", polling_rate);
+    return sysfs_emit(buf, "%d\n", polling_rate);
 }
 
 /**
@@ -1972,9 +2048,14 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
 static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned short polling_rate = (unsigned short)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned short polling_rate;
+    int err;
+
+    err = kstrtou16(buf, 0, &polling_rate);
+    if (err < 0)
+        return err;
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
@@ -2113,11 +2194,13 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: poll_rate not supported for this model\n");
+        dev_warn(dev, "razermouse: poll_rate not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     // For certain devices, Razer sends each request once with 0x00 and once with 0x01
     switch(device->usb_pid) {
@@ -2125,7 +2208,9 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
         request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x01);
         request.transaction_id.id = 0xFF;
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
         break;
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
@@ -2135,7 +2220,9 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
         request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x01);
         request.transaction_id.id = 0x1F;
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
         break;
     }
 
@@ -2151,9 +2238,14 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
 static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char brightness;
+    int err;
+
+    err = kstrtou8(buf, 0, &brightness);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
@@ -2198,11 +2290,13 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_brightness not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_brightness not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -2218,6 +2312,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     struct razer_report request = {0};
     struct razer_report response = {0};
     unsigned char brightness_index = 0x02;
+    int err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
@@ -2267,17 +2362,19 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_brightness not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_brightness not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     if (response.status != RAZER_CMD_SUCCESSFUL) {
         return 0;
     }
     // Brightness is at arg[0] for dock and arg[1] for led_brightness
-    return sprintf(buf, "%d\n", response.arguments[brightness_index]);
+    return sysfs_emit(buf, "%d\n", response.arguments[brightness_index]);
 }
 
 /**
@@ -2295,6 +2392,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     unsigned char dpi_x_byte;
     unsigned char dpi_y_byte;
     unsigned char varstore;
+    int err;
 
     // So far I think imperator uses varstore
     switch(device->usb_pid) {
@@ -2304,7 +2402,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
             dpi_x = (buf[0] << 8) | (buf[1] & 0xFF); // TODO make convenience function
             deathadder3_5g_set_dpi(device, dpi_x);
         } else {
-            printk(KERN_WARNING "razermouse: DPI requires 2 bytes\n");
+            dev_warn(dev, "razermouse: DPI requires 2 bytes\n");
             return -EINVAL;
         }
         return count;
@@ -2326,13 +2424,15 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
             dpi_x_byte = buf[0];
             dpi_y_byte = buf[1];
         } else {
-            printk(KERN_WARNING "razermouse: DPI requires 1 byte or 2 bytes\n");
+            dev_warn(dev, "razermouse: DPI requires 1 byte or 2 bytes\n");
             return -EINVAL;
         }
 
         request = razer_chroma_misc_set_dpi_xy_byte(dpi_x_byte, dpi_y_byte);
         request.transaction_id.id = 0xFF;
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
         return count;
 
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
@@ -2343,14 +2443,16 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
             dpi_x_byte = buf[0];
             dpi_y_byte = buf[1];
         } else {
-            printk(KERN_WARNING "razermouse: DPI requires 1 byte or 2 bytes\n");
+            dev_warn(dev, "razermouse: DPI requires 1 byte or 2 bytes\n");
             return -EINVAL;
         }
         device->orochi2011.dpi = dpi_x_byte;
 
         request = razer_chroma_misc_set_orochi2011_poll_dpi(device->orochi2011.poll, dpi_x_byte, dpi_y_byte);
         request.transaction_id.id = 0xFF;
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
         return count;
 
     case USB_DEVICE_ID_RAZER_NAGA_X:
@@ -2372,7 +2474,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     }
 
     if (count != 2 && count != 4) {
-        printk(KERN_WARNING "razermouse: DPI requires 2 bytes or 4 bytes\n");
+        dev_warn(dev, "razermouse: DPI requires 2 bytes or 4 bytes\n");
         return -EINVAL;
     }
 
@@ -2499,11 +2601,13 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: dpi not supported for this model\n");
+        dev_warn(dev, "razermouse: dpi not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -2520,6 +2624,7 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
     struct razer_report response = {0};
     unsigned short dpi_x;
     unsigned short dpi_y;
+    int err;
 
     // So far I think imperator uses varstore
     switch(device->usb_pid) {
@@ -2540,11 +2645,11 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
             dpi_x = 3500;
             break;
         }
-        return sprintf(buf, "%u\n", dpi_x);
+        return sysfs_emit(buf, "%u\n", dpi_x);
         break;
 
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        return sprintf(buf, "%u:%u\n", device->orochi2011.dpi, device->orochi2011.dpi);
+        return sysfs_emit(buf, "%u:%u\n", device->orochi2011.dpi, device->orochi2011.dpi);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_EPIC:
@@ -2677,11 +2782,13 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: dpi not supported for this model\n");
+        dev_warn(dev, "razermouse: dpi not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     // Byte, Byte for DPI not Short, Short
     if (device->usb_pid == USB_DEVICE_ID_RAZER_NAGA_HEX ||
@@ -2698,7 +2805,7 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
         dpi_y = (response.arguments[3] << 8) | (response.arguments[4] & 0xFF);
     }
 
-    return sprintf(buf, "%u:%u\n", dpi_x, dpi_y);
+    return sysfs_emit(buf, "%u:%u\n", dpi_x, dpi_y);
 }
 
 /**
@@ -2712,6 +2819,7 @@ static ssize_t razer_attr_write_scroll_mode(struct device *dev, struct device_at
     struct razer_report request = {0};
     struct razer_report response = {0};
     unsigned int scroll_mode;
+    int err;
 
     if (kstrtouint(buf, 0, &scroll_mode) < 0 || scroll_mode > 1)
         return -EINVAL;
@@ -2719,7 +2827,9 @@ static ssize_t razer_attr_write_scroll_mode(struct device *dev, struct device_at
     request = razer_chroma_misc_set_scroll_mode(scroll_mode);
     request.transaction_id.id = 0x1f;
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -2734,13 +2844,16 @@ static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_att
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     request = razer_chroma_misc_get_scroll_mode();
     request.transaction_id.id = 0x1f;
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", response.arguments[1]);
 }
 
 /**
@@ -2754,6 +2867,7 @@ static ssize_t razer_attr_write_scroll_acceleration(struct device *dev, struct d
     struct razer_report request = {0};
     struct razer_report response = {0};
     bool acceleration;
+    int err;
 
     if (kstrtobool(buf, &acceleration) < 0)
         return -EINVAL;
@@ -2761,7 +2875,9 @@ static ssize_t razer_attr_write_scroll_acceleration(struct device *dev, struct d
     request = razer_chroma_misc_set_scroll_acceleration(acceleration);
     request.transaction_id.id = 0x1f;
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -2776,13 +2892,16 @@ static ssize_t razer_attr_read_scroll_acceleration(struct device *dev, struct de
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     request = razer_chroma_misc_get_scroll_acceleration();
     request.transaction_id.id = 0x1f;
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", response.arguments[1]);
 }
 
 /**
@@ -2796,6 +2915,7 @@ static ssize_t razer_attr_write_scroll_smart_reel(struct device *dev, struct dev
     struct razer_report request = {0};
     struct razer_report response = {0};
     bool smart_reel;
+    int err;
 
     if (kstrtobool(buf, &smart_reel) < 0)
         return -EINVAL;
@@ -2803,7 +2923,9 @@ static ssize_t razer_attr_write_scroll_smart_reel(struct device *dev, struct dev
     request = razer_chroma_misc_set_scroll_smart_reel(smart_reel);
     request.transaction_id.id = 0x1f;
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -2818,13 +2940,16 @@ static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct devi
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     request = razer_chroma_misc_get_scroll_smart_reel();
     request.transaction_id.id = 0x1f;
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
-    return sprintf(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", response.arguments[1]);
 }
 
 static ssize_t razer_attr_write_tilt_hwheel(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2840,7 +2965,7 @@ static ssize_t razer_attr_write_tilt_hwheel(struct device *dev, struct device_at
 static ssize_t razer_attr_read_tilt_hwheel(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    return sprintf(buf, "%u\n", device->tilt_hwheel);
+    return sysfs_emit(buf, "%u\n", device->tilt_hwheel);
 }
 
 static ssize_t razer_attr_write_tilt_repeat(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2856,7 +2981,7 @@ static ssize_t razer_attr_write_tilt_repeat(struct device *dev, struct device_at
 static ssize_t razer_attr_read_tilt_repeat(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    return sprintf(buf, "%u\n", device->tilt_repeat);
+    return sysfs_emit(buf, "%u\n", device->tilt_repeat);
 }
 
 static ssize_t razer_attr_write_tilt_repeat_delay(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -2872,7 +2997,7 @@ static ssize_t razer_attr_write_tilt_repeat_delay(struct device *dev, struct dev
 static ssize_t razer_attr_read_tilt_repeat_delay(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    return sprintf(buf, "%u\n", device->tilt_repeat_delay);
+    return sysfs_emit(buf, "%u\n", device->tilt_repeat_delay);
 }
 
 /**
@@ -2911,9 +3036,10 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
     unsigned char stages_count = 0;
     unsigned char active_stage;
     size_t remaining = count;
+    int err;
 
     if (remaining < 5) {
-        printk(KERN_ALERT "razermouse: At least one DPI stage expected\n");
+        dev_err(dev, "razermouse: At least one DPI stage expected\n");
         return -EINVAL;
     }
 
@@ -2922,7 +3048,7 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
     buf++;
 
     if (active_stage < 1) {
-        printk(KERN_ALERT "razermouse: Invalid active DPI stage: %u < 1\n", active_stage);
+        dev_err(dev, "razermouse: Invalid active DPI stage: %u < 1\n", active_stage);
         return -EINVAL;
     }
 
@@ -2939,7 +3065,7 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
     }
 
     if (active_stage > stages_count) {
-        printk(KERN_ALERT "razermouse: Invalid active DPI stage: %u > %u\n", active_stage, stages_count);
+        dev_err(dev, "razermouse: Invalid active DPI stage: %u > %u\n", active_stage, stages_count);
         return -EINVAL;
     }
 
@@ -3017,11 +3143,13 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: dpi_stages not supported for this model\n");
+        dev_warn(dev, "razermouse: dpi_stages not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     // Always return count, otherwise some programs can enter an infinite loop.
     // Example:
@@ -3054,6 +3182,7 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
     ssize_t count;                 // bytes written
     unsigned int i;                // iterator over stages_count
     unsigned char *args;           // pointer to the next dpi value in response.arguments
+    int err;
 
     request = razer_chroma_misc_get_dpi_stages(VARSTORE);
 
@@ -3129,11 +3258,13 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: dpi_stages not supported for this model\n");
+        dev_warn(dev, "razermouse: dpi_stages not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     // Response format (hex):
     // 01    varstore
@@ -3184,6 +3315,7 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     struct razer_report request = {0};
     struct razer_report response = {0};
     unsigned short idle_time = 0;
+    int err;
 
     request = razer_chroma_misc_get_idle_time();
 
@@ -3260,14 +3392,16 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: device_idle_time not supported for this model\n");
+        dev_warn(dev, "razermouse: device_idle_time not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     idle_time = (response.arguments[0] << 8) | (response.arguments[1] & 0xFF);
-    return sprintf(buf, "%u\n", idle_time);
+    return sysfs_emit(buf, "%u\n", idle_time);
 }
 
 /**
@@ -3278,9 +3412,14 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
 static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned short idle_time = (unsigned short)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned short idle_time;
+    int err;
+
+    err = kstrtou16(buf, 0, &idle_time);
+    if (err < 0)
+        return err;
 
     request = razer_chroma_misc_set_idle_time(idle_time);
 
@@ -3357,11 +3496,13 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: device_idle_time not supported for this model\n");
+        dev_warn(dev, "razermouse: device_idle_time not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -3374,6 +3515,7 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     request = razer_chroma_misc_get_low_battery_threshold();
 
@@ -3450,13 +3592,15 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: charge_low_threshold not supported for this model\n");
+        dev_warn(dev, "razermouse: charge_low_threshold not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
-    return sprintf(buf, "%d\n", response.arguments[0]);
+    return sysfs_emit(buf, "%d\n", response.arguments[0]);
 }
 
 /**
@@ -3467,9 +3611,14 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
 static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char threshold = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char threshold;
+    int err;
+
+    err = kstrtou8(buf, 0, &threshold);
+    if (err < 0)
+        return err;
 
     request = razer_chroma_misc_set_low_battery_threshold(threshold);
 
@@ -3546,11 +3695,13 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: charge_low_threshold not supported for this model\n");
+        dev_warn(dev, "razermouse: charge_low_threshold not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -3569,10 +3720,11 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
     size_t offset = 0;
     unsigned char row_id, start_col, stop_col;
     size_t row_length;
+    int err;
 
     while(offset < count) {
         if(offset + 3 > count) {
-            printk(KERN_ALERT "razermouse: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
+            dev_err(dev, "razermouse: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
             return -EINVAL;
         }
 
@@ -3582,13 +3734,13 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
         // Mouse only has 1 row, row0 (pseudo row as the command actually doesn't take rows)
         if(row_id != 0) {
-            printk(KERN_ALERT "razermouse: Row ID must be 0\n");
+            dev_err(dev, "razermouse: Row ID must be 0\n");
             return -EINVAL;
         }
 
         // Validate parameters
         if(start_col > stop_col) {
-            printk(KERN_ALERT "razermouse: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
+            dev_err(dev, "razermouse: Start column (%u) is greater than end column (%u)\n", start_col, stop_col);
             return -EINVAL;
         }
 
@@ -3596,11 +3748,11 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
         // Make sure we actually got the data that was promised to us
         if(count < offset + row_length) {
-            printk(KERN_ALERT "razermouse: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
+            dev_err(dev, "razermouse: Not enough RGB to fill row (expecting %lu bytes of RGB data, got %lu)\n", row_length, (count - 3));
             return -EINVAL;
         }
 
-        // printk(KERN_INFO "razermouse: Row ID: %u, Start: %u, Stop: %u, row length: %lu\n", row_id, start_col, stop_col, row_length);
+        // dev_info(dev, "razermouse: Row ID: %u, Start: %u, Stop: %u, row length: %lu\n", row_id, start_col, stop_col, row_length);
 
         // Offset now at beginning of RGB data
 
@@ -3677,11 +3829,13 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             break;
 
         default:
-            printk(KERN_WARNING "razermouse: matrix_custom_frame not supported for this model\n");
+            dev_warn(dev, "razermouse: matrix_custom_frame not supported for this model\n");
             return -EINVAL;
         }
 
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
 
         // *3 as its 3 bytes per col (RGB)
         offset += row_length;
@@ -3698,9 +3852,10 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     if (count != 2) {
-        printk(KERN_WARNING "razerkbd: Device mode only takes 2 bytes.\n");
+        dev_warn(dev, "razerkbd: Device mode only takes 2 bytes.\n");
         return -EINVAL;
     }
 
@@ -3833,11 +3988,13 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: device_mode not supported for this model\n");
+        dev_warn(dev, "razermouse: device_mode not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -3852,6 +4009,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     request = razer_chroma_standard_get_device_mode();
 
@@ -3859,7 +4017,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G: // Doesn't support device mode, exit early
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
-        return sprintf(buf, "%d:%d\n", 0, 0);
+        return sysfs_emit(buf, "%d:%d\n", 0, 0);
         break;
 
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -3982,11 +4140,13 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: device_mode not supported for this model\n");
+        dev_warn(dev, "razermouse: device_mode not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     buf[0] = response.arguments[0];
     buf[1] = response.arguments[1];
@@ -4002,6 +4162,7 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -4087,13 +4248,15 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: led_brightness not supported for this model\n");
+        dev_warn(dev, "razermouse: led_brightness not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
-    return sprintf(buf, "%d\n", response.arguments[2]);
+    return sysfs_emit(buf, "%d\n", response.arguments[2]);
 }
 
 /**
@@ -4102,9 +4265,14 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
 static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char brightness = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char brightness;
+    int err;
+
+    err = kstrtou8(buf, 0, &brightness);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
@@ -4190,11 +4358,13 @@ static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: led_brightness not supported for this model\n");
+        dev_warn(dev, "razermouse: led_brightness not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -4285,9 +4455,14 @@ static ssize_t razer_attr_write_backlight_led_brightness(struct device *dev, str
 static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, struct device_attribute *attr, const char *buf, size_t count, unsigned char led_id)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char direction = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char direction;
+    int err;
+
+    err = kstrtou8(buf, 0, &direction);
+    if (err < 0)
+        return err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
@@ -4336,11 +4511,13 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_wave not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_wave not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -4363,6 +4540,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
@@ -4374,7 +4552,9 @@ static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
 
         request = razer_chroma_standard_set_led_effect(VARSTORE, led_id, CLASSIC_EFFECT_SPECTRUM);
         request.transaction_id.id = 0x3F;
@@ -4452,11 +4632,13 @@ static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_spectrum not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_spectrum not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -4480,9 +4662,10 @@ static ssize_t razer_attr_write_matrix_effect_reactive_common(struct device *dev
     struct razer_report request = {0};
     struct razer_report response = {0};
     unsigned char speed;
+    int err;
 
     if (count != 4) {
-        printk(KERN_WARNING "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
+        dev_warn(dev, "razermouse: Reactive only accepts Speed, RGB (4byte)\n");
         return -EINVAL;
     }
 
@@ -4551,11 +4734,13 @@ static ssize_t razer_attr_write_matrix_effect_reactive_common(struct device *dev
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_reactive not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_reactive not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -4578,6 +4763,7 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
@@ -4587,16 +4773,20 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
         if (count != 3) {
-            printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
+            dev_warn(dev, "razermouse: Static mode only accepts RGB (3byte)\n");
             return -EINVAL;
         }
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
 
         request = razer_chroma_standard_set_led_rgb(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
         request.transaction_id.id = 0x3F;
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
 
         request = razer_chroma_standard_set_led_effect(VARSTORE, led_id, CLASSIC_EFFECT_BREATHING);
         request.transaction_id.id = 0x3F;
@@ -4606,7 +4796,9 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
         /* Mono-color breath effect */
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
 
         request = razer_chroma_standard_set_led_effect(VARSTORE, led_id, CLASSIC_EFFECT_BREATHING);
         request.transaction_id.id = 0x3F;
@@ -4706,7 +4898,7 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_breath not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_breath not supported for this model\n");
         return -EINVAL;
     }
 
@@ -4773,11 +4965,13 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_breath not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_breath not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -4800,9 +4994,10 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     if (count != 3) {
-        printk(KERN_WARNING "razermouse: Static mode only accepts RGB (3byte)\n");
+        dev_warn(dev, "razermouse: Static mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -4818,11 +5013,15 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
 
         request = razer_chroma_standard_set_led_rgb(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
         request.transaction_id.id = 0x3F;
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
 
         request = razer_chroma_standard_set_led_effect(VARSTORE, led_id, CLASSIC_EFFECT_STATIC);
         request.transaction_id.id = 0x3F;
@@ -4903,11 +5102,13 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_static not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_static not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -4930,9 +5131,10 @@ static ssize_t razer_attr_write_matrix_effect_blinking_common(struct device *dev
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     if (count != 3) {
-        printk(KERN_WARNING "razermouse: Blinking mode only accepts RGB (3byte)\n");
+        dev_warn(dev, "razermouse: Blinking mode only accepts RGB (3byte)\n");
         return -EINVAL;
     }
 
@@ -4943,22 +5145,28 @@ static ssize_t razer_attr_write_matrix_effect_blinking_common(struct device *dev
     case USB_DEVICE_ID_RAZER_DEATHADDER_2013:
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
 
         request = razer_chroma_standard_set_led_rgb(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
         request.transaction_id.id = 0x3F;
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
 
         request = razer_chroma_standard_set_led_effect(VARSTORE, led_id, CLASSIC_EFFECT_BLINKING);
         request.transaction_id.id = 0x3F;
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_blinking not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_blinking not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -4987,6 +5195,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
@@ -5108,11 +5317,13 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_none not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_none not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -5135,6 +5346,7 @@ static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, stru
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int err;
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
@@ -5168,18 +5380,22 @@ static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, stru
         /* Could also be called a mono-color static effect */
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
-        razer_send_payload(device, &request, &response);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
 
         request = razer_chroma_standard_set_led_effect(VARSTORE, led_id, CLASSIC_EFFECT_STATIC);
         request.transaction_id.id = 0x3F;
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: matrix_effect_none not supported for this model\n");
+        dev_warn(dev, "razermouse: matrix_effect_none not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -5445,9 +5661,14 @@ static ssize_t razer_attr_write_backlight_matrix_effect_none(struct device *dev,
 static ssize_t razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned char mode = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned char mode;
+    int err;
+
+    err = kstrtou8(buf, 0, &mode);
+    if (err < 0)
+        return err;
 
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_indicator_led_mode(mode);
 
@@ -5462,11 +5683,13 @@ static ssize_t razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode(
         break;
 
     default:
-        printk(KERN_WARNING "razermouse: hyperpolling_wireless_dongle_indicator_led_mode not supported for this model\n");
+        dev_warn(dev, "razermouse: hyperpolling_wireless_dongle_indicator_led_mode not supported for this model\n");
         return -EINVAL;
     }
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -5477,21 +5700,30 @@ static ssize_t razer_attr_write_hyperpolling_wireless_dongle_indicator_led_mode(
 static ssize_t razer_attr_write_hyperpolling_wireless_dongle_pair(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned int pid = (unsigned int)simple_strtoul(buf, NULL, 16);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned short pid;
+    int err;
+
+    err = kstrtou16(buf, 0, &pid);
+    if (err < 0)
+        return err;
 
     // Step 1: Put in pairing mode
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(0x01);
     request.transaction_id.id = 0x1F;
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     // Step 2: Pair with PID
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step2(pid);
     request.transaction_id.id = 0x1F;
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -5502,14 +5734,21 @@ static ssize_t razer_attr_write_hyperpolling_wireless_dongle_pair(struct device 
 static ssize_t razer_attr_write_hyperpolling_wireless_dongle_unpair(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
-    unsigned int pid = (unsigned int)simple_strtoul(buf, NULL, 16);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned short pid;
+    int err;
+
+    err = kstrtou16(buf, 0, &pid);
+    if (err < 0)
+        return err;
 
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(pid);
     request.transaction_id.id = 0xFF;
 
-    razer_send_payload(device, &request, &response);
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
 
     return count;
 }
@@ -5881,7 +6120,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
             int i;
 
             if (!m_rdev) {
-                printk(KERN_WARNING "razermouse: Couldn't find mouse intf from kbd intf\n");
+                hid_warn(hdev, "razermouse: Couldn't find mouse intf from kbd intf\n");
                 return 1;
             }
 
@@ -6008,15 +6247,17 @@ static int razer_input_configured(struct hid_device *hdev,
 /**
  * Mouse init function
  */
-static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interface *intf, struct hid_device *hdev)
+static void razer_mouse_init(struct razer_mouse_device *dev, struct hid_device *hdev)
 {
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
+
     unsigned int rand_serial = 0;
 
     // Initialise mutex
     mutex_init(&dev->lock);
     // Setup values
-    dev->usb_dev = usb_dev;
+    dev->hdev = hdev;
     dev->usb_vid = usb_dev->descriptor.idVendor;
     dev->usb_pid = usb_dev->descriptor.idProduct;
     dev->usb_interface_protocol = intf->cur_altsetting->desc.bInterfaceProtocol;
@@ -6024,7 +6265,7 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
 
     // Get a "random" integer
     get_random_bytes(&rand_serial, sizeof(unsigned int));
-    sprintf(&dev->serial[0], "PM%012u", rand_serial);
+    sprintf(dev->serial, "PM%012u", rand_serial);
 
     // Setup orochi2011
     dev->orochi2011.dpi = 0x4c;
@@ -6054,19 +6295,18 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interfac
 static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
     int retval = 0;
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct razer_mouse_device *dev = NULL;
     unsigned char expected_subclass = 0xFF;
 
-    dev = kzalloc(sizeof(struct razer_mouse_device), GFP_KERNEL);
+    dev = kzalloc_obj(*dev);
 
     if(dev == NULL) {
-        dev_err(&intf->dev, "out of memory\n");
+        hid_err(hdev, "out of memory\n");
         return -ENOMEM;
     }
 
     // Init data
-    razer_mouse_init(dev, intf, hdev);
+    razer_mouse_init(dev, hdev);
 
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
@@ -8270,7 +8510,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
     hrtimer_cancel(&dev->repeat_timer);
 
     kfree(dev);
-    dev_info(&intf->dev, "Razer Device disconnected\n");
+    hid_info(hdev, "Razer Device disconnected\n");
 }
 
 /**

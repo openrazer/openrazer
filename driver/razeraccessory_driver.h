@@ -35,14 +35,12 @@
 #define USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA 0x0F26
 #define USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2 0x0F2B
 
-#define RAZER_ACCESSORY_WAIT_MIN_US 600
-#define RAZER_ACCESSORY_WAIT_MAX_US 1000
-
-#define RAZER_NEW_DEVICE_WAIT_MIN_US 31000
-#define RAZER_NEW_DEVICE_WAIT_MAX_US 31100
+#define RAZER_ACCESSORY_WAIT_US 600
+#define RAZER_NEW_DEVICE_WAIT_US 31000
 
 struct razer_accessory_device {
-    struct usb_device *usb_dev;
+    struct hid_device *hdev;
+    struct usb_device *usb_dev; // TODO: remove usages, replace with hdev
     struct input_dev *input;
     struct mutex lock;
     unsigned char usb_interface_protocol;
