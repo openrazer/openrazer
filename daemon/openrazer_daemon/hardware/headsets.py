@@ -236,3 +236,16 @@ class RazerKrakenKittyV2(__RazerDevice):
                'set_custom_kraken']
 
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/hcc/h6b/9631977570334/kraken-kitty-v2-quartz-500x500.png"
+
+
+class RazerBlackSharkV3XUSB(__RazerDevice):
+    """
+    Class for the wired Razer BlackShark V3 X.
+
+    The kernel driver currently exposes only the validated battery query.
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackShark_V3_X_USB_.*-event-if00')
+
+    USB_VID = 0x1532
+    USB_PID = 0x057C
+    METHODS = ['get_device_type_headset', 'get_battery', 'is_charging']
