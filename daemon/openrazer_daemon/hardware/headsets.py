@@ -255,3 +255,5 @@ class RazerBlackSharkV3XUSB(__RazerDevice):
                'get_equalizer_preset', 'set_equalizer_preset',
                'get_custom_equalizer', 'set_custom_equalizer',
                'get_mic_noise_cancel', 'set_mic_noise_cancel']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/20181/20181-1-en-v3.png"
