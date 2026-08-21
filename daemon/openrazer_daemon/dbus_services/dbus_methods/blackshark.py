@@ -14,9 +14,19 @@ def _read_int(self, filename):
 
 
 def _write_value(self, filename, value):
+    import os
     driver_path = self.get_driver_path(filename)
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write(str(value))
+    # NB: dbus.Byte/IntXX stringify to raw characters, so go via int()
+    payload = str(int(value)).encode()
+    try:
+        fd = os.open(driver_path, os.O_WRONLY)
+        try:
+            os.write(fd, payload)
+        finally:
+            os.close(fd)
+    except OSError:
+        self.logger.error("write failed path=%r value=%r", driver_path, value)
+        raise
 
 
 @endpoint('razer.device.audio.headset', 'getSidetone', out_sig='y')
