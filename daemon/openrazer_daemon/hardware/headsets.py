@@ -248,4 +248,10 @@ class RazerBlackSharkV3XUSB(__RazerDevice):
 
     USB_VID = 0x1532
     USB_PID = 0x057C
-    METHODS = ['get_device_type_headset', 'get_battery', 'is_charging']
+    METHODS = ['get_device_type_headset', 'get_battery', 'is_charging',
+               'get_idle_time', 'set_idle_time',
+               'get_sidetone', 'set_sidetone',
+               'get_power_saving', 'set_power_saving',
+               'get_equalizer_preset', 'set_equalizer_preset',
+               'get_custom_equalizer', 'set_custom_equalizer',
+               'get_mic_noise_cancel', 'set_mic_noise_cancel']
