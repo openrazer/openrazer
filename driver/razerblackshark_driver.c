@@ -60,511 +60,523 @@ MODULE_LICENSE(DRIVER_LICENSE);
 
 static u8 razer_blackshark_crc(const u8 *report)
 {
-	u8 crc = 0;
-	int i;
+    u8 crc = 0;
+    int i;
 
-	for (i = 3; i <= 60; i++)
-		crc ^= report[i];
+    for (i = 3; i <= 60; i++)
+        crc ^= report[i];
 
-	return crc;
+    return crc;
 }
 
 static void razer_blackshark_build_command(struct razer_blackshark_device *device,
-					   u8 cmd_class, u8 cmd_id,
-					   u8 args_len, const u8 *args,
-					   u8 *report)
+        u8 cmd_class, u8 cmd_id,
+        u8 args_len, const u8 *args,
+        u8 *report)
 {
-	memset(report, 0, RAZER_BLACKSHARK_REPORT_LEN);
+    memset(report, 0, RAZER_BLACKSHARK_REPORT_LEN);
 
-	report[0] = RAZER_BLACKSHARK_REPORT_ID;
-	report[2] = device->transaction_id++;
-	report[6] = args_len;
-	report[7] = cmd_class;
-	report[8] = cmd_id;
-	memcpy(&report[9], args, args_len);
-	report[62] = razer_blackshark_crc(report);
+    report[0] = RAZER_BLACKSHARK_REPORT_ID;
+    report[2] = device->transaction_id++;
+    report[6] = args_len;
+    report[7] = cmd_class;
+    report[8] = cmd_id;
+    memcpy(&report[9], args, args_len);
+    report[62] = razer_blackshark_crc(report);
 }
 
 /* Send a command and collect its reply arguments. Caller provides buffers. */
 static int razer_blackshark_get_args(struct razer_blackshark_device *device,
-				     u8 cmd_class, u8 cmd_id,
-				     u8 *args, u8 *args_len)
+                                     u8 cmd_class, u8 cmd_id,
+                                     u8 *args, u8 *args_len)
 {
-	u8 *request;
-	u8 *response;
-	int ret;
+    u8 *request;
+    u8 *response;
+    int ret;
 
-	mutex_lock(&device->lock);
+    mutex_lock(&device->lock);
 
-	request = kzalloc(RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
-	response = kzalloc(RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
-	if (!request || !response) {
-		ret = -ENOMEM;
-		goto out_free;
-	}
+    request = kzalloc(RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
+    response = kzalloc(RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
+    if (!request || !response) {
+        ret = -ENOMEM;
+        goto out_free;
+    }
 
-	razer_blackshark_build_command(device, cmd_class, cmd_id,
-				       0x02, (const u8 []) { 0x00, 0x00 },
-				       request);
+    razer_blackshark_build_command(device, cmd_class, cmd_id,
+    0x02, (const u8 []) {
+        0x00, 0x00
+    },
+    request);
 
-	ret = hid_hw_raw_request(device->hdev, RAZER_BLACKSHARK_REPORT_ID,
-				 request, RAZER_BLACKSHARK_REPORT_LEN,
-				 HID_FEATURE_REPORT, HID_REQ_SET_REPORT);
-	if (ret < 0)
-		goto out_unlock;
+    ret = hid_hw_raw_request(device->hdev, RAZER_BLACKSHARK_REPORT_ID,
+                             request, RAZER_BLACKSHARK_REPORT_LEN,
+                             HID_FEATURE_REPORT, HID_REQ_SET_REPORT);
+    if (ret < 0)
+        goto out_unlock;
 
-	fsleep(RAZER_BS_WAIT_US);
+    fsleep(RAZER_BS_WAIT_US);
 
-	response[0] = RAZER_BLACKSHARK_REPORT_ID;
-	ret = hid_hw_raw_request(device->hdev, RAZER_BLACKSHARK_REPORT_ID,
-				 response, RAZER_BLACKSHARK_REPORT_LEN,
-				 HID_FEATURE_REPORT, HID_REQ_GET_REPORT);
-	if (ret < 0)
-		goto out_unlock;
+    response[0] = RAZER_BLACKSHARK_REPORT_ID;
+    ret = hid_hw_raw_request(device->hdev, RAZER_BLACKSHARK_REPORT_ID,
+                             response, RAZER_BLACKSHARK_REPORT_LEN,
+                             HID_FEATURE_REPORT, HID_REQ_GET_REPORT);
+    if (ret < 0)
+        goto out_unlock;
 
-	if (ret < RAZER_BLACKSHARK_REPORT_LEN ||
-	    response[0] != RAZER_BLACKSHARK_REPORT_ID ||
-	    response[2] != request[2] ||
-	    response[7] != cmd_class || response[8] != cmd_id ||
-	    response[62] != razer_blackshark_crc(response)) {
-		hid_err(device->hdev,
-			"invalid response: ret=%d id=%02x transaction=%02x/%02x class=%02x command=%02x\n",
-			ret, response[0], response[2], request[2],
-			response[7], response[8]);
-		ret = -EPROTO;
-		goto out_unlock;
-	}
+    if (ret < RAZER_BLACKSHARK_REPORT_LEN ||
+        response[0] != RAZER_BLACKSHARK_REPORT_ID ||
+        response[2] != request[2] ||
+        response[7] != cmd_class || response[8] != cmd_id ||
+        response[62] != razer_blackshark_crc(response)) {
+        hid_err(device->hdev,
+                "invalid response: ret=%d id=%02x transaction=%02x/%02x class=%02x command=%02x\n",
+                ret, response[0], response[2], request[2],
+                response[7], response[8]);
+        ret = -EPROTO;
+        goto out_unlock;
+    }
 
-	if (response[6] > RAZER_BS_MAX_ARGS) {
-		hid_err(device->hdev, "oversized response: %u bytes\n",
-			response[6]);
-		ret = -EPROTO;
-		goto out_unlock;
-	}
+    if (response[6] > RAZER_BS_MAX_ARGS) {
+        hid_err(device->hdev, "oversized response: %u bytes\n",
+                response[6]);
+        ret = -EPROTO;
+        goto out_unlock;
+    }
 
-	memcpy(args, &response[9], response[6]);
-	*args_len = response[6];
-	ret = 0;
+    memcpy(args, &response[9], response[6]);
+    *args_len = response[6];
+    ret = 0;
 
 out_unlock:
-	kfree(response);
-	kfree(request);
+    kfree(response);
+    kfree(request);
 out_free:
-	mutex_unlock(&device->lock);
-	return ret;
+    mutex_unlock(&device->lock);
+    return ret;
 }
 
 static int razer_blackshark_set_args(struct razer_blackshark_device *device,
-				     u8 cmd_class, u8 cmd_id,
-				     u8 args_len, const u8 *args)
+                                     u8 cmd_class, u8 cmd_id,
+                                     u8 args_len, const u8 *args)
 {
-	u8 *request;
-	int ret;
+    u8 *request;
+    int ret;
 
-	mutex_lock(&device->lock);
+    mutex_lock(&device->lock);
 
-	request = kzalloc(RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
-	if (!request) {
-		ret = -ENOMEM;
-		goto out_free;
-	}
+    request = kzalloc(RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
+    if (!request) {
+        ret = -ENOMEM;
+        goto out_free;
+    }
 
-	razer_blackshark_build_command(device, cmd_class, cmd_id,
-				       args_len, args, request);
+    razer_blackshark_build_command(device, cmd_class, cmd_id,
+                                   args_len, args, request);
 
-	ret = hid_hw_raw_request(device->hdev, RAZER_BLACKSHARK_REPORT_ID,
-				 request, RAZER_BLACKSHARK_REPORT_LEN,
-				 HID_FEATURE_REPORT, HID_REQ_SET_REPORT);
-	if (ret >= 0)
-		ret = 0;
+    ret = hid_hw_raw_request(device->hdev, RAZER_BLACKSHARK_REPORT_ID,
+                             request, RAZER_BLACKSHARK_REPORT_LEN,
+                             HID_FEATURE_REPORT, HID_REQ_SET_REPORT);
+    if (ret >= 0)
+        ret = 0;
 
-	fsleep(RAZER_BS_WAIT_US);
+    fsleep(RAZER_BS_WAIT_US);
 
-	kfree(request);
+    kfree(request);
 out_free:
-	mutex_unlock(&device->lock);
-	return ret;
+    mutex_unlock(&device->lock);
+    return ret;
 }
 
 static int razer_blackshark_get_byte(struct razer_blackshark_device *device,
-				     u8 cmd_class, u8 cmd_id,
-				     u8 index, u8 *value)
+                                     u8 cmd_class, u8 cmd_id,
+                                     u8 index, u8 *value)
 {
-	u8 args[RAZER_BS_MAX_ARGS];
-	u8 args_len;
-	int ret;
+    u8 args[RAZER_BS_MAX_ARGS];
+    u8 args_len;
+    int ret;
 
-	ret = razer_blackshark_get_args(device, cmd_class, cmd_id,
-					args, &args_len);
-	if (ret)
-		return ret;
+    ret = razer_blackshark_get_args(device, cmd_class, cmd_id,
+                                    args, &args_len);
+    if (ret)
+        return ret;
 
-	if (index >= args_len)
-		return -EPROTO;
+    if (index >= args_len)
+        return -EPROTO;
 
-	*value = args[index];
-	return 0;
+    *value = args[index];
+    return 0;
 }
 
 static ssize_t razer_blackshark_read_version(struct device *dev,
-					     struct device_attribute *attr,
-					     char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
-	return sysfs_emit(buf, "%s\n", DRIVER_VERSION);
+    return sysfs_emit(buf, "%s\n", DRIVER_VERSION);
 }
 
 static ssize_t razer_attr_read_device_type(struct device *dev,
-					   struct device_attribute *attr,
-					   char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	char *device_type;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    char *device_type;
 
-	switch (device->usb_pid) {
-	case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X_USB:
-		device_type = "Razer BlackShark V3 X (Wired)";
-		break;
-	case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X:
-		device_type = "Razer BlackShark V3 X (Wireless)";
-		break;
-	default:
-		device_type = "Unknown Device";
-	}
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X_USB:
+        device_type = "Razer BlackShark V3 X (Wired)";
+        break;
+    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X:
+        device_type = "Razer BlackShark V3 X (Wireless)";
+        break;
+    default:
+        device_type = "Unknown Device";
+    }
 
-	return sysfs_emit(buf, "%s\n", device_type);
+    return sysfs_emit(buf, "%s\n", device_type);
 }
 
 static ssize_t razer_blackshark_read_device_serial(struct device *dev,
-						   struct device_attribute *attr,
-						   char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	const char *serial = device->hdev->uniq;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    const char *serial = device->hdev->uniq;
 
-	return sysfs_emit(buf, "%s%04X\n", serial ? serial : "BSV3X",
-			  device->usb_pid);
+    return sysfs_emit(buf, "%s%04X\n", serial ? serial : "BSV3X",
+                      device->usb_pid);
 }
 
 static ssize_t razer_blackshark_read_firmware_version(struct device *dev,
-						      struct device_attribute *attr,
-						      char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
-	return sysfs_emit(buf, "unknown\n");
+    return sysfs_emit(buf, "unknown\n");
 }
 
 static ssize_t razer_attr_read_charge_level(struct device *dev,
-					    struct device_attribute *attr,
-					    char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	u8 level;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 level;
+    int ret;
 
-	ret = razer_blackshark_get_byte(device, RAZER_BS_CLASS_POWER,
-					RAZER_BS_BATTERY_GET, 1, &level);
-	if (ret)
-		return ret;
-	if (level > 100)
-		return -EPROTO;
+    ret = razer_blackshark_get_byte(device, RAZER_BS_CLASS_POWER,
+                                    RAZER_BS_BATTERY_GET, 1, &level);
+    if (ret)
+        return ret;
+    if (level > 100)
+        return -EPROTO;
 
-	/* OpenRazer's existing get_battery DBus method expects 0..255. */
-	return sysfs_emit(buf, "%u\n",
-			  DIV_ROUND_CLOSEST((unsigned int)level * 255, 100));
+    /* OpenRazer's existing get_battery DBus method expects 0..255. */
+    return sysfs_emit(buf, "%u\n",
+                      DIV_ROUND_CLOSEST((unsigned int)level * 255, 100));
 }
 
 static ssize_t razer_attr_read_charge_status(struct device *dev,
-					     struct device_attribute *attr,
-					     char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	u8 status;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 status;
+    int ret;
 
-	ret = razer_blackshark_get_byte(device, RAZER_BS_CLASS_POWER,
-					RAZER_BS_CHARGING_GET, 1, &status);
-	if (ret)
-		return ret;
-	if (status > 1)
-		return -EPROTO;
+    ret = razer_blackshark_get_byte(device, RAZER_BS_CLASS_POWER,
+                                    RAZER_BS_CHARGING_GET, 1, &status);
+    if (ret)
+        return ret;
+    if (status > 1)
+        return -EPROTO;
 
-	return sysfs_emit(buf, "%u\n", status);
+    return sysfs_emit(buf, "%u\n", status);
 }
 
 static ssize_t razer_attr_read_sidetone(struct device *dev,
-					struct device_attribute *attr,
-					char *buf)
+                                        struct device_attribute *attr,
+                                        char *buf)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	u8 level;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 level;
+    int ret;
 
-	ret = razer_blackshark_get_byte(device, RAZER_BS_CLASS_AUDIO,
-					RAZER_BS_TONE_GET, 2, &level);
-	if (ret)
-		return ret;
-	if (level > 15)
-		return -EPROTO;
+    ret = razer_blackshark_get_byte(device, RAZER_BS_CLASS_AUDIO,
+                                    RAZER_BS_TONE_GET, 2, &level);
+    if (ret)
+        return ret;
+    if (level > 15)
+        return -EPROTO;
 
-	return sysfs_emit(buf, "%u\n", level);
+    return sysfs_emit(buf, "%u\n", level);
 }
 
 static ssize_t razer_attr_write_sidetone(struct device *dev,
-					 struct device_attribute *attr,
-					 const char *buf, size_t count)
+        struct device_attribute *attr,
+        const char *buf, size_t count)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	u8 level;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 level;
+    int ret;
 
-	if (kstrtou8(buf, 10, &level))
-		return -EINVAL;
-	if (level > 15)
-		return -EINVAL;
+    if (kstrtou8(buf, 10, &level))
+        return -EINVAL;
+    if (level > 15)
+        return -EINVAL;
 
-	ret = razer_blackshark_set_args(device, RAZER_BS_CLASS_AUDIO,
-					RAZER_BS_TONE_SET, 3,
-					(const u8 []) { 0x00, 0x03, level });
-	if (ret)
-		return ret;
+    ret = razer_blackshark_set_args(device, RAZER_BS_CLASS_AUDIO,
+                                    RAZER_BS_TONE_SET, 3,
+    (const u8 []) {
+        0x00, 0x03, level
+    });
+    if (ret)
+        return ret;
 
-	return count;
+    return count;
 }
 
 static ssize_t razer_attr_read_idle_time(struct device *dev,
-					 struct device_attribute *attr,
-					 char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	u8 args[RAZER_BS_MAX_ARGS];
-	u8 args_len;
-	unsigned int seconds;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 args[RAZER_BS_MAX_ARGS];
+    u8 args_len;
+    unsigned int seconds;
+    int ret;
 
-	ret = razer_blackshark_get_args(device, RAZER_BS_CLASS_POWER,
-					RAZER_BS_SLEEP_GET, args, &args_len);
-	if (ret)
-		return ret;
-	if (args_len < 2)
-		return -EPROTO;
+    ret = razer_blackshark_get_args(device, RAZER_BS_CLASS_POWER,
+                                    RAZER_BS_SLEEP_GET, args, &args_len);
+    if (ret)
+        return ret;
+    if (args_len < 2)
+        return -EPROTO;
 
-	seconds = (args[0] << 8) | args[1];
-	return sysfs_emit(buf, "%u\n", seconds);
+    seconds = (args[0] << 8) | args[1];
+    return sysfs_emit(buf, "%u\n", seconds);
 }
 
 static ssize_t razer_attr_write_idle_time(struct device *dev,
-					  struct device_attribute *attr,
-					  const char *buf, size_t count)
+        struct device_attribute *attr,
+        const char *buf, size_t count)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	unsigned int seconds;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    unsigned int seconds;
+    int ret;
 
-	if (kstrtouint(buf, 10, &seconds))
-		return -EINVAL;
-	if (seconds > 0xFFFF)
-		return -EINVAL;
+    if (kstrtouint(buf, 10, &seconds))
+        return -EINVAL;
+    if (seconds > 0xFFFF)
+        return -EINVAL;
 
-	ret = razer_blackshark_set_args(device, RAZER_BS_CLASS_POWER,
-					RAZER_BS_SLEEP_SET, 2,
-					(const u8 []) { seconds >> 8,
-							seconds & 0xFF });
-	if (ret)
-		return ret;
+    ret = razer_blackshark_set_args(device, RAZER_BS_CLASS_POWER,
+                                    RAZER_BS_SLEEP_SET, 2,
+    (const u8 []) {
+        seconds >> 8,
+                seconds & 0xFF
+    });
+    if (ret)
+        return ret;
 
-	return count;
+    return count;
 }
 
 static ssize_t razer_attr_read_power_saving(struct device *dev,
-					    struct device_attribute *attr,
-					    char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	u8 enabled;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 enabled;
+    int ret;
 
-	ret = razer_blackshark_get_byte(device, RAZER_BS_CLASS_POWER,
-					RAZER_BS_SAVE_GET, 1, &enabled);
-	if (ret)
-		return ret;
-	if (enabled > 1)
-		return -EPROTO;
+    ret = razer_blackshark_get_byte(device, RAZER_BS_CLASS_POWER,
+                                    RAZER_BS_SAVE_GET, 1, &enabled);
+    if (ret)
+        return ret;
+    if (enabled > 1)
+        return -EPROTO;
 
-	return sysfs_emit(buf, "%u\n", enabled);
+    return sysfs_emit(buf, "%u\n", enabled);
 }
 
 static ssize_t razer_attr_write_power_saving(struct device *dev,
-					     struct device_attribute *attr,
-					     const char *buf, size_t count)
+        struct device_attribute *attr,
+        const char *buf, size_t count)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	u8 enabled;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 enabled;
+    int ret;
 
-	if (kstrtou8(buf, 10, &enabled))
-		return -EINVAL;
-	if (enabled > 1)
-		return -EINVAL;
+    if (kstrtou8(buf, 10, &enabled))
+        return -EINVAL;
+    if (enabled > 1)
+        return -EINVAL;
 
-	ret = razer_blackshark_set_args(device, RAZER_BS_CLASS_POWER,
-					RAZER_BS_SAVE_SET, 2,
-					(const u8 []) { 0x00, enabled });
-	if (ret)
-		return ret;
+    ret = razer_blackshark_set_args(device, RAZER_BS_CLASS_POWER,
+                                    RAZER_BS_SAVE_SET, 2,
+    (const u8 []) {
+        0x00, enabled
+    });
+    if (ret)
+        return ret;
 
-	return count;
+    return count;
 }
 
 static int razer_blackshark_encode_db(int db)
 {
-	int clamped = clamp(db, -6, 6);
+    int clamped = clamp(db, -6, 6);
 
-	if (clamped < 0)
-		return 0x80 | -clamped;
-	return clamped;
+    if (clamped < 0)
+        return 0x80 | -clamped;
+    return clamped;
 }
 
 static int razer_blackshark_decode_db(u8 raw)
 {
-	if (raw & 0x80)
-		return -(raw & 0x7F);
-	return raw;
+    if (raw & 0x80)
+        return -(raw & 0x7F);
+    return raw;
 }
 
 static ssize_t razer_attr_read_equalizer_preset(struct device *dev,
-						struct device_attribute *attr,
-						char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	u8 preset;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 preset;
+    int ret;
 
-	ret = razer_blackshark_get_byte(device, RAZER_BS_CLASS_AUDIO,
-					RAZER_BS_PRESET_GET, 3, &preset);
-	if (ret)
-		return ret;
-	if (preset > 3)
-		return -EPROTO;
+    ret = razer_blackshark_get_byte(device, RAZER_BS_CLASS_AUDIO,
+                                    RAZER_BS_PRESET_GET, 3, &preset);
+    if (ret)
+        return ret;
+    if (preset > 3)
+        return -EPROTO;
 
-	return sysfs_emit(buf, "%u\n", preset);
+    return sysfs_emit(buf, "%u\n", preset);
 }
 
 static ssize_t razer_attr_write_equalizer_preset(struct device *dev,
-						 struct device_attribute *attr,
-						 const char *buf, size_t count)
+        struct device_attribute *attr,
+        const char *buf, size_t count)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	u8 preset;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 preset;
+    int ret;
 
-	if (kstrtou8(buf, 10, &preset))
-		return -EINVAL;
-	if (preset > 3)
-		return -EINVAL;
+    if (kstrtou8(buf, 10, &preset))
+        return -EINVAL;
+    if (preset > 3)
+        return -EINVAL;
 
-	ret = razer_blackshark_set_args(device, RAZER_BS_CLASS_AUDIO,
-					RAZER_BS_PRESET_SET, 4,
-					(const u8 []) { 0x00, 0x01, 0x00,
-							preset });
-	if (ret)
-		return ret;
+    ret = razer_blackshark_set_args(device, RAZER_BS_CLASS_AUDIO,
+                                    RAZER_BS_PRESET_SET, 4,
+    (const u8 []) {
+        0x00, 0x01, 0x00,
+              preset
+    });
+    if (ret)
+        return ret;
 
-	return count;
+    return count;
 }
 
 static ssize_t razer_attr_read_equalizer(struct device *dev,
-					 struct device_attribute *attr,
-					 char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	u8 args[RAZER_BS_MAX_ARGS];
-	u8 args_len;
-	int bands[RAZER_BS_EQ_BANDS];
-	int i;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 args[RAZER_BS_MAX_ARGS];
+    u8 args_len;
+    int bands[RAZER_BS_EQ_BANDS];
+    int i;
+    int ret;
 
-	ret = razer_blackshark_get_args(device, RAZER_BS_CLASS_AUDIO,
-					RAZER_BS_EQ_GET, args, &args_len);
-	if (ret)
-		return ret;
-	if (args_len < 2 + RAZER_BS_EQ_BANDS)
-		return -EPROTO;
+    ret = razer_blackshark_get_args(device, RAZER_BS_CLASS_AUDIO,
+                                    RAZER_BS_EQ_GET, args, &args_len);
+    if (ret)
+        return ret;
+    if (args_len < 2 + RAZER_BS_EQ_BANDS)
+        return -EPROTO;
 
-	for (i = 0; i < RAZER_BS_EQ_BANDS; i++)
-		bands[i] = razer_blackshark_decode_db(args[2 + i]);
+    for (i = 0; i < RAZER_BS_EQ_BANDS; i++)
+        bands[i] = razer_blackshark_decode_db(args[2 + i]);
 
-	return sysfs_emit(buf, "%d %d %d %d %d %d %d %d %d %d\n",
-			  bands[0], bands[1], bands[2], bands[3], bands[4],
-			  bands[5], bands[6], bands[7], bands[8], bands[9]);
+    return sysfs_emit(buf, "%d %d %d %d %d %d %d %d %d %d\n",
+                      bands[0], bands[1], bands[2], bands[3], bands[4],
+                      bands[5], bands[6], bands[7], bands[8], bands[9]);
 }
 
 static ssize_t razer_attr_write_equalizer(struct device *dev,
-					  struct device_attribute *attr,
-					  const char *buf, size_t count)
+        struct device_attribute *attr,
+        const char *buf, size_t count)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	int bands[RAZER_BS_EQ_BANDS];
-	u8 args[2 + RAZER_BS_EQ_BANDS];
-	int i;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    int bands[RAZER_BS_EQ_BANDS];
+    u8 args[2 + RAZER_BS_EQ_BANDS];
+    int i;
+    int ret;
 
-	ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d",
-		     &bands[0], &bands[1], &bands[2], &bands[3], &bands[4],
-		     &bands[5], &bands[6], &bands[7], &bands[8], &bands[9]);
-	if (ret != RAZER_BS_EQ_BANDS)
-		return -EINVAL;
+    ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d",
+                 &bands[0], &bands[1], &bands[2], &bands[3], &bands[4],
+                 &bands[5], &bands[6], &bands[7], &bands[8], &bands[9]);
+    if (ret != RAZER_BS_EQ_BANDS)
+        return -EINVAL;
 
-	args[0] = 0x00;
-	args[1] = 0x01;
-	for (i = 0; i < RAZER_BS_EQ_BANDS; i++)
-		args[2 + i] = razer_blackshark_encode_db(bands[i]);
+    args[0] = 0x00;
+    args[1] = 0x01;
+    for (i = 0; i < RAZER_BS_EQ_BANDS; i++)
+        args[2 + i] = razer_blackshark_encode_db(bands[i]);
 
-	ret = razer_blackshark_set_args(device, RAZER_BS_CLASS_AUDIO,
-					RAZER_BS_EQ_SET,
-					2 + RAZER_BS_EQ_BANDS, args);
-	if (ret)
-		return ret;
+    ret = razer_blackshark_set_args(device, RAZER_BS_CLASS_AUDIO,
+                                    RAZER_BS_EQ_SET,
+                                    2 + RAZER_BS_EQ_BANDS, args);
+    if (ret)
+        return ret;
 
-	return count;
+    return count;
 }
 
 static ssize_t razer_attr_read_mic_noise_cancel(struct device *dev,
-						struct device_attribute *attr,
-						char *buf)
+        struct device_attribute *attr,
+        char *buf)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	u8 enabled;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 enabled;
+    int ret;
 
-	ret = razer_blackshark_get_byte(device, RAZER_BS_CLASS_AUDIO,
-					RAZER_BS_MICNC_GET, 1, &enabled);
-	if (ret)
-		return ret;
-	if (enabled > 1)
-		return -EPROTO;
+    ret = razer_blackshark_get_byte(device, RAZER_BS_CLASS_AUDIO,
+                                    RAZER_BS_MICNC_GET, 1, &enabled);
+    if (ret)
+        return ret;
+    if (enabled > 1)
+        return -EPROTO;
 
-	return sysfs_emit(buf, "%u\n", enabled);
+    return sysfs_emit(buf, "%u\n", enabled);
 }
 
 static ssize_t razer_attr_write_mic_noise_cancel(struct device *dev,
-						 struct device_attribute *attr,
-						 const char *buf, size_t count)
+        struct device_attribute *attr,
+        const char *buf, size_t count)
 {
-	struct razer_blackshark_device *device = dev_get_drvdata(dev);
-	u8 enabled;
-	int ret;
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 enabled;
+    int ret;
 
-	if (kstrtou8(buf, 10, &enabled))
-		return -EINVAL;
-	if (enabled > 1)
-		return -EINVAL;
+    if (kstrtou8(buf, 10, &enabled))
+        return -EINVAL;
+    if (enabled > 1)
+        return -EINVAL;
 
-	ret = razer_blackshark_set_args(device, RAZER_BS_CLASS_AUDIO,
-					RAZER_BS_MICNC_SET, 2,
-					(const u8 []) { 0x00, enabled });
-	if (ret)
-		return ret;
+    ret = razer_blackshark_set_args(device, RAZER_BS_CLASS_AUDIO,
+                                    RAZER_BS_MICNC_SET, 2,
+    (const u8 []) {
+        0x00, enabled
+    });
+    if (ret)
+        return ret;
 
-	return count;
+    return count;
 }
 
 static DEVICE_ATTR(version, 0440, razer_blackshark_read_version, NULL);
@@ -582,115 +594,115 @@ static DEVICE_ATTR(mic_noise_cancel, 0660, razer_attr_read_mic_noise_cancel, raz
 
 static void razer_blackshark_remove_files(struct hid_device *hdev)
 {
-	device_remove_file(&hdev->dev, &dev_attr_mic_noise_cancel);
-	device_remove_file(&hdev->dev, &dev_attr_equalizer);
-	device_remove_file(&hdev->dev, &dev_attr_equalizer_preset);
-	device_remove_file(&hdev->dev, &dev_attr_power_saving);
-	device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
-	device_remove_file(&hdev->dev, &dev_attr_sidetone);
-	device_remove_file(&hdev->dev, &dev_attr_charge_status);
-	device_remove_file(&hdev->dev, &dev_attr_charge_level);
-	device_remove_file(&hdev->dev, &dev_attr_firmware_version);
-	device_remove_file(&hdev->dev, &dev_attr_device_serial);
-	device_remove_file(&hdev->dev, &dev_attr_device_type);
-	device_remove_file(&hdev->dev, &dev_attr_version);
+    device_remove_file(&hdev->dev, &dev_attr_mic_noise_cancel);
+    device_remove_file(&hdev->dev, &dev_attr_equalizer);
+    device_remove_file(&hdev->dev, &dev_attr_equalizer_preset);
+    device_remove_file(&hdev->dev, &dev_attr_power_saving);
+    device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
+    device_remove_file(&hdev->dev, &dev_attr_sidetone);
+    device_remove_file(&hdev->dev, &dev_attr_charge_status);
+    device_remove_file(&hdev->dev, &dev_attr_charge_level);
+    device_remove_file(&hdev->dev, &dev_attr_firmware_version);
+    device_remove_file(&hdev->dev, &dev_attr_device_serial);
+    device_remove_file(&hdev->dev, &dev_attr_device_type);
+    device_remove_file(&hdev->dev, &dev_attr_version);
 }
 
 static int razer_blackshark_probe(struct hid_device *hdev,
-				  const struct hid_device_id *id)
+                                  const struct hid_device_id *id)
 {
-	struct razer_blackshark_device *device;
-	int ret;
+    struct razer_blackshark_device *device;
+    int ret;
 
-	device = kzalloc(sizeof(*device), GFP_KERNEL);
-	if (!device)
-		return -ENOMEM;
+    device = kzalloc(sizeof(*device), GFP_KERNEL);
+    if (!device)
+        return -ENOMEM;
 
-	device->hdev = hdev;
-	device->usb_pid = hdev->product;
-	mutex_init(&device->lock);
-	hid_set_drvdata(hdev, device);
+    device->hdev = hdev;
+    device->usb_pid = hdev->product;
+    mutex_init(&device->lock);
+    hid_set_drvdata(hdev, device);
 
-	ret = hid_parse(hdev);
-	if (ret)
-		goto free_device;
+    ret = hid_parse(hdev);
+    if (ret)
+        goto free_device;
 
-	ret = hid_hw_start(hdev, HID_CONNECT_DEFAULT);
-	if (ret)
-		goto free_device;
+    ret = hid_hw_start(hdev, HID_CONNECT_DEFAULT);
+    if (ret)
+        goto free_device;
 
-	ret = hid_hw_open(hdev);
-	if (ret)
-		goto stop_hardware;
+    ret = hid_hw_open(hdev);
+    if (ret)
+        goto stop_hardware;
 
-	ret = -ENOMEM;
-	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
-	ret = -ENOMEM;
-	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);
-	ret = -ENOMEM;
-	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);
-	ret = -ENOMEM;
-	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);
-	ret = -ENOMEM;
-	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_sidetone);
-	ret = -ENOMEM;
-	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
-	ret = -ENOMEM;
-	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_power_saving);
-	ret = -ENOMEM;
-	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_equalizer_preset);
-	ret = -ENOMEM;
-	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_equalizer);
-	ret = -ENOMEM;
-	CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_noise_cancel);
+    ret = -ENOMEM;
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
+    ret = -ENOMEM;
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);
+    ret = -ENOMEM;
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);
+    ret = -ENOMEM;
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);
+    ret = -ENOMEM;
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_sidetone);
+    ret = -ENOMEM;
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+    ret = -ENOMEM;
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_power_saving);
+    ret = -ENOMEM;
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_equalizer_preset);
+    ret = -ENOMEM;
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_equalizer);
+    ret = -ENOMEM;
+    CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_noise_cancel);
 
-	switch (device->usb_pid) {
-	case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X_USB:
-	case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X:
-		ret = -ENOMEM;
-		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
-		ret = -ENOMEM;
-		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
-		break;
-	}
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X_USB:
+    case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X:
+        ret = -ENOMEM;
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+        ret = -ENOMEM;
+        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+        break;
+    }
 
-	return 0;
+    return 0;
 
 exit_free:
-	razer_blackshark_remove_files(hdev);
-	hid_hw_close(hdev);
+    razer_blackshark_remove_files(hdev);
+    hid_hw_close(hdev);
 stop_hardware:
-	hid_hw_stop(hdev);
+    hid_hw_stop(hdev);
 free_device:
-	hid_set_drvdata(hdev, NULL);
-	kfree(device);
-	return ret;
+    hid_set_drvdata(hdev, NULL);
+    kfree(device);
+    return ret;
 }
 
 static void razer_blackshark_disconnect(struct hid_device *hdev)
 {
-	struct razer_blackshark_device *device = hid_get_drvdata(hdev);
+    struct razer_blackshark_device *device = hid_get_drvdata(hdev);
 
-	razer_blackshark_remove_files(hdev);
-	hid_hw_close(hdev);
-	hid_hw_stop(hdev);
-	hid_set_drvdata(hdev, NULL);
-	kfree(device);
+    razer_blackshark_remove_files(hdev);
+    hid_hw_close(hdev);
+    hid_hw_stop(hdev);
+    hid_set_drvdata(hdev, NULL);
+    kfree(device);
 }
 
 static const struct hid_device_id razer_blackshark_devices[] = {
-	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X_USB) },
-	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X) },
-	{ 0 }
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X_USB) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X) },
+    { 0 }
 };
 
 MODULE_DEVICE_TABLE(hid, razer_blackshark_devices);
 
 static struct hid_driver razer_blackshark_driver = {
-	.name = "razerblackshark",
-	.id_table = razer_blackshark_devices,
-	.probe = razer_blackshark_probe,
-	.remove = razer_blackshark_disconnect,
+    .name = "razerblackshark",
+    .id_table = razer_blackshark_devices,
+    .probe = razer_blackshark_probe,
+    .remove = razer_blackshark_disconnect,
 };
 
 module_hid_driver(razer_blackshark_driver);
