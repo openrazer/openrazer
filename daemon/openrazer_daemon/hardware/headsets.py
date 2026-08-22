@@ -257,3 +257,15 @@ class RazerBlackSharkV3XUSB(__RazerDevice):
                'get_mic_noise_cancel', 'set_mic_noise_cancel']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/20181/20181-1-en-v3.png"
+
+
+class RazerBlackSharkV3XWireless(RazerBlackSharkV3XUSB):
+    """
+    Class for the Razer BlackShark V3 X HyperSpeed dongle.
+
+    The dongle relays the same vendor protocol to the headset; when the
+    headset is not linked, device queries fail until it reconnects.
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackShark_V3_X_[0-9A-F]+-event-if00')
+
+    USB_PID = 0x057D

@@ -224,6 +224,9 @@ static ssize_t razer_attr_read_device_type(struct device *dev,
 	case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X_USB:
 		device_type = "Razer BlackShark V3 X (Wired)";
 		break;
+	case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X:
+		device_type = "Razer BlackShark V3 X (Wireless)";
+		break;
 	default:
 		device_type = "Unknown Device";
 	}
@@ -643,6 +646,7 @@ static int razer_blackshark_probe(struct hid_device *hdev,
 
 	switch (device->usb_pid) {
 	case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X_USB:
+	case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X:
 		ret = -ENOMEM;
 		CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
 		ret = -ENOMEM;
@@ -676,6 +680,7 @@ static void razer_blackshark_disconnect(struct hid_device *hdev)
 
 static const struct hid_device_id razer_blackshark_devices[] = {
 	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X_USB) },
+	{ HID_USB_DEVICE(USB_VENDOR_ID_RAZER, USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X) },
 	{ 0 }
 };
 
