@@ -53,9 +53,15 @@
 #define RAZER_BS_MICNC_SET  0x0F /* args 00 VV, 0/1 */
 #define RAZER_BS_MICNC_GET  0x8F
 
+#define RAZER_BS_INFO_CLASS   0x00
+#define RAZER_BS_FIRMWARE_GET 0x81
+#define RAZER_BS_SERIAL_GET   0x82
+
+#define RAZER_BS_SERIAL_LEN 22
+
 #define RAZER_BS_EQ_BANDS   10
 #define RAZER_BS_EQ_DB_MAX  6
-#define RAZER_BS_MAX_ARGS   16
+#define RAZER_BS_MAX_ARGS   52 /* response args span [9..60] */
 #define RAZER_BS_WAIT_US    50000
 
 MODULE_AUTHOR(DRIVER_AUTHOR);
@@ -140,6 +146,16 @@ static int razer_blackshark_get_args(struct razer_blackshark_device *device,
                 "invalid response: ret=%d id=%02x transaction=%02x/%02x class=%02x command=%02x\n",
                 ret, response[0], response[2], request[2],
                 response[7], response[8]);
+        ret = -EPROTO;
+        goto out_unlock;
+    }
+
+    /*
+     * A command the firmware does not run comes back as an untouched echo
+     * of the request, which satisfies every check above. Only status 0x02
+     * means the reply actually carries data.
+     */
+    if (response[1] != RAZER_CMD_SUCCESSFUL) {
         ret = -EPROTO;
         goto out_unlock;
     }
@@ -246,18 +262,60 @@ static ssize_t razer_attr_read_device_serial(struct device *dev,
         char *buf)
 {
     struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 args[RAZER_BS_MAX_ARGS];
+    char serial[RAZER_BS_SERIAL_LEN + 1];
+    u8 args_len;
+    int i;
+    int ret;
 
     /* hdev->uniq is an array, so it is empty rather than NULL when unset. */
-    const char *serial = device->hdev->uniq[0] ? device->hdev->uniq : "BSV3X";
+    const char *fallback = device->hdev->uniq[0] ? device->hdev->uniq : "BSV3X";
 
+    ret = razer_blackshark_get_args(device, RAZER_BS_INFO_CLASS,
+                                    RAZER_BS_SERIAL_GET, args, &args_len);
+    if (ret || args_len > RAZER_BS_SERIAL_LEN)
+        goto fallback;
+
+    /* NUL padded ASCII; reject anything that is not printable */
+    for (i = 0; i < args_len && args[i]; i++) {
+        if (args[i] < 0x20 || args[i] > 0x7E)
+            goto fallback;
+        serial[i] = args[i];
+    }
+    if (i == 0)
+        goto fallback;
+    serial[i] = '\0';
+
+    /*
+     * The wired connection and the dongle report the same headset serial,
+     * so keep the PID suffix: the daemon keys its DBus object path off
+     * this and both can be plugged in at once.
+     */
     return sysfs_emit(buf, "%s%04X\n", serial, device->usb_pid);
+
+fallback:
+    return sysfs_emit(buf, "%s%04X\n", fallback, device->usb_pid);
 }
 
 static ssize_t razer_attr_read_firmware_version(struct device *dev,
         struct device_attribute *attr,
         char *buf)
 {
-    return sysfs_emit(buf, "unknown\n");
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+    u8 args[RAZER_BS_MAX_ARGS];
+    u8 args_len;
+    int ret;
+
+    /*
+     * Only the dongle answers this; the wired connection reports the
+     * command as not executed, which get_args() rejects on status.
+     */
+    ret = razer_blackshark_get_args(device, RAZER_BS_INFO_CLASS,
+                                    RAZER_BS_FIRMWARE_GET, args, &args_len);
+    if (ret || args_len < 2)
+        return sysfs_emit(buf, "unknown\n");
+
+    return sysfs_emit(buf, "v%u.%u\n", args[0], args[1]);
 }
 
 static ssize_t razer_attr_read_charge_level(struct device *dev,
