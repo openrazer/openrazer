@@ -7,26 +7,25 @@ backed by the razerblackshark kernel driver's sysfs attributes.
 from openrazer_daemon.dbus_services import endpoint
 
 
-def _read_int(self, filename):
+def _read_str(self, filename):
     driver_path = self.get_driver_path(filename)
     with open(driver_path, 'r') as driver_file:
-        return int(driver_file.read().strip())
+        return driver_file.read().strip()
 
 
-def _write_value(self, filename, value):
-    import os
+def _read_int(self, filename):
+    return int(_read_str(self, filename))
+
+
+def _write_str(self, filename, value):
     driver_path = self.get_driver_path(filename)
-    # NB: dbus.Byte/IntXX stringify to raw characters, so go via int()
-    payload = str(int(value)).encode()
-    try:
-        fd = os.open(driver_path, os.O_WRONLY)
-        try:
-            os.write(fd, payload)
-        finally:
-            os.close(fd)
-    except OSError:
-        self.logger.error("write failed path=%r value=%r", driver_path, value)
-        raise
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write(value)
+
+
+def _write_int(self, filename, value):
+    # NB: str(dbus.Byte(5)) is '\x05', so the value must go via int() first
+    _write_str(self, filename, str(int(value)))
 
 
 @endpoint('razer.device.audio.headset', 'getSidetone', out_sig='y')
@@ -52,7 +51,7 @@ def set_sidetone(self, level):
     if level > 15:
         raise ValueError("Sidetone level must be 0..15")
 
-    _write_value(self, 'sidetone', level)
+    _write_int(self, 'sidetone', level)
 
 
 @endpoint('razer.device.audio.headset', 'getPowerSaving', out_sig='y')
@@ -78,7 +77,7 @@ def set_power_saving(self, enabled):
     if enabled > 1:
         raise ValueError("Power saving must be 0 or 1")
 
-    _write_value(self, 'power_saving', enabled)
+    _write_int(self, 'power_saving', enabled)
 
 
 @endpoint('razer.device.audio.headset', 'getEqualizerPreset', out_sig='y')
@@ -104,7 +103,7 @@ def set_equalizer_preset(self, preset):
     if preset > 3:
         raise ValueError("Preset must be 0..3")
 
-    _write_value(self, 'equalizer_preset', preset)
+    _write_int(self, 'equalizer_preset', preset)
 
 
 @endpoint('razer.device.audio.headset', 'getCustomEqualizer', out_sig='s')
@@ -115,9 +114,7 @@ def get_custom_equalizer(self):
     """
     self.logger.debug("DBus call get_custom_equalizer")
 
-    driver_path = self.get_driver_path('equalizer')
-    with open(driver_path, 'r') as driver_file:
-        return driver_file.read().strip()
+    return _read_str(self, 'equalizer')
 
 
 @endpoint('razer.device.audio.headset', 'setCustomEqualizer', in_sig='s')
@@ -141,7 +138,7 @@ def set_custom_equalizer(self, values):
         if not -6 <= band <= 6:
             raise ValueError("Band values must be within -6..+6 dB")
 
-    _write_value(self, 'equalizer', ' '.join(str(b) for b in bands))
+    _write_str(self, 'equalizer', ' '.join(str(b) for b in bands))
 
 
 @endpoint('razer.device.audio.headset', 'getMicNoiseCancel', out_sig='y')
@@ -167,4 +164,4 @@ def set_mic_noise_cancel(self, enabled):
     if enabled > 1:
         raise ValueError("Mic noise cancellation must be 0 or 1")
 
-    _write_value(self, 'mic_noise_cancel', enabled)
+    _write_int(self, 'mic_noise_cancel', enabled)

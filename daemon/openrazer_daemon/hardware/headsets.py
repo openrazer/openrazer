@@ -242,7 +242,8 @@ class RazerBlackSharkV3XUSB(__RazerDevice):
     """
     Class for the wired Razer BlackShark V3 X.
 
-    The kernel driver currently exposes only the validated battery query.
+    Audio and power controls are exposed by the razerblackshark kernel
+    driver over the razer.device.audio.headset DBus interface.
     """
     EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackShark_V3_X_USB_.*-event-if00')
 
