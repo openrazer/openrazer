@@ -63,6 +63,13 @@
 #define RAZER_BS_EQ_DB_MAX  6
 #define RAZER_BS_MAX_ARGS   52 /* response args span [9..60] */
 #define RAZER_BS_WAIT_US    50000
+/*
+ * A setting can take up to ~200ms to commit; reading before then yields
+ * either the previous value or an empty payload. Measured worst case was
+ * 183ms on a 1532:057D dongle.
+ */
+#define RAZER_BS_SETTLE_US  250000
+#define RAZER_BS_RETRIES    4
 
 MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
@@ -108,6 +115,7 @@ static int razer_blackshark_get_args(struct razer_blackshark_device *device,
     static const u8 query[] = { 0x00, 0x00 };
     u8 *request;
     u8 *response;
+    int attempt;
     int ret;
 
     request = kzalloc(RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
@@ -119,43 +127,59 @@ static int razer_blackshark_get_args(struct razer_blackshark_device *device,
 
     mutex_lock(&device->lock);
 
-    razer_blackshark_build_command(device, cmd_class, cmd_id,
-                                   sizeof(query), query, request);
+    for (attempt = 0; attempt < RAZER_BS_RETRIES; attempt++) {
+        razer_blackshark_build_command(device, cmd_class, cmd_id,
+                                       sizeof(query), query, request);
 
-    ret = hid_hw_raw_request(device->hdev, RAZER_BLACKSHARK_REPORT_ID,
-                             request, RAZER_BLACKSHARK_REPORT_LEN,
-                             HID_FEATURE_REPORT, HID_REQ_SET_REPORT);
-    if (ret < 0)
-        goto out_unlock;
+        ret = hid_hw_raw_request(device->hdev, RAZER_BLACKSHARK_REPORT_ID,
+                                 request, RAZER_BLACKSHARK_REPORT_LEN,
+                                 HID_FEATURE_REPORT, HID_REQ_SET_REPORT);
+        if (ret < 0)
+            goto out_unlock;
 
-    fsleep(RAZER_BS_WAIT_US);
+        fsleep(RAZER_BS_WAIT_US);
 
-    response[0] = RAZER_BLACKSHARK_REPORT_ID;
-    ret = hid_hw_raw_request(device->hdev, RAZER_BLACKSHARK_REPORT_ID,
-                             response, RAZER_BLACKSHARK_REPORT_LEN,
-                             HID_FEATURE_REPORT, HID_REQ_GET_REPORT);
-    if (ret < 0)
-        goto out_unlock;
+        memset(response, 0, RAZER_BLACKSHARK_REPORT_LEN);
+        response[0] = RAZER_BLACKSHARK_REPORT_ID;
+        ret = hid_hw_raw_request(device->hdev, RAZER_BLACKSHARK_REPORT_ID,
+                                 response, RAZER_BLACKSHARK_REPORT_LEN,
+                                 HID_FEATURE_REPORT, HID_REQ_GET_REPORT);
+        if (ret < 0)
+            goto out_unlock;
 
-    if (ret < RAZER_BLACKSHARK_REPORT_LEN ||
-        response[0] != RAZER_BLACKSHARK_REPORT_ID ||
-        response[2] != request[2] ||
-        response[7] != cmd_class || response[8] != cmd_id ||
-        response[62] != razer_blackshark_crc(response)) {
-        hid_err(device->hdev,
-                "invalid response: ret=%d id=%02x transaction=%02x/%02x class=%02x command=%02x\n",
-                ret, response[0], response[2], request[2],
-                response[7], response[8]);
-        ret = -EPROTO;
-        goto out_unlock;
+        if (ret < RAZER_BLACKSHARK_REPORT_LEN ||
+            response[0] != RAZER_BLACKSHARK_REPORT_ID ||
+            response[2] != request[2] ||
+            response[7] != cmd_class || response[8] != cmd_id ||
+            response[62] != razer_blackshark_crc(response)) {
+            hid_err(device->hdev,
+                    "invalid response: ret=%d id=%02x transaction=%02x/%02x class=%02x command=%02x\n",
+                    ret, response[0], response[2], request[2],
+                    response[7], response[8]);
+            ret = -EPROTO;
+            goto out_unlock;
+        }
+
+        /*
+         * A command the firmware does not run comes back as an untouched
+         * echo of the request, which satisfies every check above. Only
+         * status 0x02 means the reply actually carries data. A busy or
+         * empty reply is transient while a setting is still committing,
+         * so retry those; anything else is a real refusal.
+         */
+        if (response[1] == RAZER_CMD_SUCCESSFUL && response[6] != 0)
+            break;
+
+        if (response[1] != RAZER_CMD_BUSY &&
+            response[1] != RAZER_CMD_SUCCESSFUL) {
+            ret = -EPROTO;
+            goto out_unlock;
+        }
+
+        fsleep(RAZER_BS_WAIT_US);
     }
 
-    /*
-     * A command the firmware does not run comes back as an untouched echo
-     * of the request, which satisfies every check above. Only status 0x02
-     * means the reply actually carries data.
-     */
-    if (response[1] != RAZER_CMD_SUCCESSFUL) {
+    if (response[1] != RAZER_CMD_SUCCESSFUL || response[6] == 0) {
         ret = -EPROTO;
         goto out_unlock;
     }
@@ -201,7 +225,7 @@ static int razer_blackshark_set_args(struct razer_blackshark_device *device,
     if (ret >= 0)
         ret = 0;
 
-    fsleep(RAZER_BS_WAIT_US);
+    fsleep(RAZER_BS_SETTLE_US);
 
     mutex_unlock(&device->lock);
 
