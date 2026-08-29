@@ -3,6 +3,8 @@
 """
 DBus methods for BlackShark V3 X audio and power controls,
 backed by the razerblackshark kernel driver's sysfs attributes.
+
+The device keeps one band set per EQ preset; there is no separate custom bank.
 """
 from openrazer_daemon.dbus_services import endpoint
 
@@ -122,30 +124,29 @@ def set_equalizer_preset(self, preset):
     _write_int(self, 'equalizer_preset', preset)
 
 
-@endpoint('razer.device.audio.headset', 'getCustomEqualizer', out_sig='s')
-def get_custom_equalizer(self):
+@endpoint('razer.device.audio.headset', 'getEqualizerBands', out_sig='s')
+def get_equalizer_bands(self):
     """
     Get the active preset's EQ band values in dB (-6..+6), space
     separated, ordered 31 Hz, 63, 125, 250, 500 Hz, 1, 2, 4, 8, 16 kHz
     """
-    self.logger.debug("DBus call get_custom_equalizer")
+    self.logger.debug("DBus call get_equalizer_bands")
 
     return _read_str(self, 'equalizer')
 
 
-@endpoint('razer.device.audio.headset', 'setCustomEqualizer', in_sig='s')
-def set_custom_equalizer(self, values):
+@endpoint('razer.device.audio.headset', 'setEqualizerBands', in_sig='s')
+def set_equalizer_bands(self, values):
     """
     Set the active preset's EQ band values in dB (-6..+6), space
     separated, ordered 31 Hz, 63, 125, 250, 500 Hz, 1, 2, 4, 8, 16 kHz
 
-    The device stores one band set per preset, so this overwrites the
-    bands of whichever preset is currently selected.
+    Overwrites the bands of the currently selected preset.
 
     :param values: Example '-1 -2 -1 -2 0 1 2 1 0 2'
     :type values: str
     """
-    self.logger.debug("DBus call set_custom_equalizer")
+    self.logger.debug("DBus call set_equalizer_bands")
 
     try:
         bands = [int(v) for v in values.split()]
