@@ -6,4 +6,4 @@ razerkbd-y := razerkbd_driver.o razercommon.o razerchromacommon.o compat.o
 razermouse-y := razermouse_driver.o razercommon.o razerchromacommon.o compat.o
 razerkraken-y := razerkraken_driver.o razercommon.o compat.o
 razeraccessory-y := razeraccessory_driver.o razercommon.o razerchromacommon.o compat.o
-razerblackshark-y := razerblackshark_driver.o
+razerblackshark-y := razerblackshark_driver.o compat.o
