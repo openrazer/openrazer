@@ -17,7 +17,7 @@ struct razer_blackshark_device {
     struct hid_device *hdev;
     struct mutex lock;
     u16 usb_pid;
-    char serial[24];
+    char serial[32];
     u8 usb_interface_protocol;
     u8 transaction_id;
 };

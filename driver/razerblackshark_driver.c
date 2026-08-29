@@ -476,7 +476,8 @@ static ssize_t razer_attr_write_idle_time(struct device *dev,
 
     if (kstrtouint(buf, 10, &seconds))
         return -EINVAL;
-    if (seconds > 0xFFFF)
+    /* 0xFFFF is the unlinked-headset marker the read side rejects */
+    if (seconds >= 0xFFFF)
         return -EINVAL;
 
     ret = razer_blackshark_set_args(device, RAZER_BS_CLASS_POWER,
@@ -608,8 +609,11 @@ static ssize_t razer_attr_read_equalizer(struct device *dev,
     if (args_len < 2 + RAZER_BS_EQ_BANDS)
         return -EPROTO;
 
-    for (i = 0; i < RAZER_BS_EQ_BANDS; i++)
+    for (i = 0; i < RAZER_BS_EQ_BANDS; i++) {
         bands[i] = razer_blackshark_decode_db(args[2 + i]);
+        if (bands[i] < -RAZER_BS_EQ_DB_MAX || bands[i] > RAZER_BS_EQ_DB_MAX)
+            return -EPROTO;
+    }
 
     return sysfs_emit(buf, "%d %d %d %d %d %d %d %d %d %d\n",
                       bands[0], bands[1], bands[2], bands[3], bands[4],
@@ -758,25 +762,17 @@ static int razer_blackshark_probe(struct hid_device *hdev,
     if (device->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE) {
         razer_blackshark_init_serial(device);
 
+        /* CREATE_DEVICE_FILE jumps to exit_free, so seed the error once */
         ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
-        ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);
-        ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_serial);
-        ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);
-        ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_sidetone);
-        ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
-        ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_power_saving);
-        ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_equalizer_preset);
-        ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_equalizer);
-        ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_noise_cancel);
 
         /*
@@ -787,9 +783,7 @@ static int razer_blackshark_probe(struct hid_device *hdev,
         switch (device->usb_pid) {
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X_USB:
         case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X:
-            ret = -ENOMEM;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
-            ret = -ENOMEM;
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
             break;
         }
