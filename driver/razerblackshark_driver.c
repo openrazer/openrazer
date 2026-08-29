@@ -104,32 +104,34 @@ static void razer_blackshark_build_command(struct razer_blackshark_device *devic
 }
 
 /*
- * Send a command and collect its reply arguments.
+ * Send a command and collect the reply.
  *
- * args must have room for RAZER_BS_MAX_ARGS bytes.
+ * Mirrors razer_send_payload() in the other drivers: the device answers
+ * every command, set or get. A busy or not-yet-ready reply is transient
+ * while a setting commits, so retry those; anything else is a refusal.
+ *
+ * min_args is the number of reply arguments the caller needs, so that a
+ * get is retried when the device answers before it has the value.
  */
-static int razer_blackshark_get_args(struct razer_blackshark_device *device,
+static int razer_blackshark_exchange(struct razer_blackshark_device *device,
                                      u8 cmd_class, u8 cmd_id,
-                                     u8 *args, u8 *args_len)
+                                     u8 args_len, const u8 *args,
+                                     u8 min_args, u8 *response)
 {
-    static const u8 query[] = { 0x00, 0x00 };
     u8 *request;
-    u8 *response;
     int attempt;
     int ret;
 
     request = kzalloc(RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
-    response = kzalloc(RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
-    if (!request || !response) {
-        ret = -ENOMEM;
-        goto out_free;
-    }
+    if (!request)
+        return -ENOMEM;
 
     mutex_lock(&device->lock);
 
+    ret = -EPROTO;
     for (attempt = 0; attempt < RAZER_BS_RETRIES; attempt++) {
         razer_blackshark_build_command(device, cmd_class, cmd_id,
-                                       sizeof(query), query, request);
+                                       args_len, args, request);
 
         ret = hid_hw_raw_request(device->hdev, RAZER_BLACKSHARK_REPORT_ID,
                                  request, RAZER_BLACKSHARK_REPORT_LEN,
@@ -147,59 +149,88 @@ static int razer_blackshark_get_args(struct razer_blackshark_device *device,
         if (ret < 0)
             goto out_unlock;
 
+        /* A reply that is not ready yet fails these; retry it. */
         if (ret < RAZER_BLACKSHARK_REPORT_LEN ||
             response[0] != RAZER_BLACKSHARK_REPORT_ID ||
             response[2] != request[2] ||
             response[7] != cmd_class || response[8] != cmd_id ||
-            response[62] != razer_blackshark_crc(response)) {
-            hid_err(device->hdev,
-                    "invalid response: ret=%d id=%02x transaction=%02x/%02x class=%02x command=%02x\n",
-                    ret, response[0], response[2], request[2],
-                    response[7], response[8]);
+            response[62] != razer_blackshark_crc(response) ||
+            response[6] < min_args) {
             ret = -EPROTO;
-            goto out_unlock;
+            fsleep(RAZER_BS_WAIT_US);
+            continue;
         }
 
-        /*
-         * A command the firmware does not run comes back as an untouched
-         * echo of the request, which satisfies every check above. Only
-         * status 0x02 means the reply actually carries data. A busy or
-         * empty reply is transient while a setting is still committing,
-         * so retry those; anything else is a real refusal.
-         */
-        if (response[1] == RAZER_CMD_SUCCESSFUL && response[6] != 0)
+        switch (response[1]) {
+        case RAZER_CMD_BUSY:
+        /* Some commands answer busy but succeed */
+        case RAZER_CMD_SUCCESSFUL:
+            ret = 0;
             break;
-
-        if (response[1] != RAZER_CMD_BUSY &&
-            response[1] != RAZER_CMD_SUCCESSFUL) {
+        case RAZER_CMD_FAILURE:
+            ret = -EINVAL;
+            break;
+        case RAZER_CMD_NOT_SUPPORTED:
+            ret = -ENOTSUPP;
+            break;
+        case RAZER_CMD_TIMEOUT:
+            ret = -ETIMEDOUT;
+            break;
+        default:
+            /*
+             * Status 0x00 means the firmware never ran the command and
+             * handed the request straight back.
+             */
             ret = -EPROTO;
-            goto out_unlock;
+            break;
         }
-
-        fsleep(RAZER_BS_WAIT_US);
-    }
-
-    if (response[1] != RAZER_CMD_SUCCESSFUL || response[6] == 0) {
-        ret = -EPROTO;
         goto out_unlock;
     }
+
+    hid_err(device->hdev,
+            "no valid response after %d attempts: class=%02x command=%02x\n",
+            RAZER_BS_RETRIES, cmd_class, cmd_id);
+
+out_unlock:
+    mutex_unlock(&device->lock);
+    kfree(request);
+    return ret;
+}
+
+/*
+ * Collect a command's reply arguments.
+ *
+ * args must have room for RAZER_BS_MAX_ARGS bytes.
+ */
+static int razer_blackshark_get_args(struct razer_blackshark_device *device,
+                                     u8 cmd_class, u8 cmd_id,
+                                     u8 *args, u8 *args_len)
+{
+    static const u8 query[] = { 0x00, 0x00 };
+    u8 *response;
+    int ret;
+
+    response = kzalloc(RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
+    if (!response)
+        return -ENOMEM;
+
+    ret = razer_blackshark_exchange(device, cmd_class, cmd_id,
+                                    sizeof(query), query, 1, response);
+    if (ret)
+        goto out_free;
 
     if (response[6] > RAZER_BS_MAX_ARGS) {
         hid_err(device->hdev, "oversized response: %u bytes\n",
                 response[6]);
         ret = -EPROTO;
-        goto out_unlock;
+        goto out_free;
     }
 
     memcpy(args, &response[9], response[6]);
     *args_len = response[6];
-    ret = 0;
 
-out_unlock:
-    mutex_unlock(&device->lock);
 out_free:
     kfree(response);
-    kfree(request);
     return ret;
 }
 
@@ -207,29 +238,20 @@ static int razer_blackshark_set_args(struct razer_blackshark_device *device,
                                      u8 cmd_class, u8 cmd_id,
                                      u8 args_len, const u8 *args)
 {
-    u8 *request;
+    u8 *response;
     int ret;
 
-    request = kzalloc(RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
-    if (!request)
+    response = kzalloc(RAZER_BLACKSHARK_REPORT_LEN, GFP_KERNEL);
+    if (!response)
         return -ENOMEM;
 
-    mutex_lock(&device->lock);
+    ret = razer_blackshark_exchange(device, cmd_class, cmd_id,
+                                    args_len, args, 0, response);
 
-    razer_blackshark_build_command(device, cmd_class, cmd_id,
-                                   args_len, args, request);
-
-    ret = hid_hw_raw_request(device->hdev, RAZER_BLACKSHARK_REPORT_ID,
-                             request, RAZER_BLACKSHARK_REPORT_LEN,
-                             HID_FEATURE_REPORT, HID_REQ_SET_REPORT);
-    if (ret >= 0)
-        ret = 0;
-
+    /* Give the setting time to commit before anything reads it back */
     fsleep(RAZER_BS_SETTLE_US);
 
-    mutex_unlock(&device->lock);
-
-    kfree(request);
+    kfree(response);
     return ret;
 }
 
