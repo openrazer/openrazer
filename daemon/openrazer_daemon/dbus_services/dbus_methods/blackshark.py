@@ -99,7 +99,7 @@ def set_power_saving(self, enabled):
 @endpoint('razer.device.audio.headset', 'getEqualizerPreset', out_sig='y')
 def get_equalizer_preset(self):
     """
-    Get active EQ preset: 0 Default, 1 Game, 2 Movie, 3 Music
+    Get active EQ preset: 0 Default, 1 Game, 2 Music, 3 Movie
     """
     self.logger.debug("DBus call get_equalizer_preset")
 
@@ -111,7 +111,7 @@ def set_equalizer_preset(self, preset):
     """
     Set active EQ preset
 
-    :param preset: 0 Default, 1 Game, 2 Movie, 3 Music
+    :param preset: 0 Default, 1 Game, 2 Music, 3 Movie
     :type preset: int
     """
     self.logger.debug("DBus call set_equalizer_preset")
@@ -125,8 +125,8 @@ def set_equalizer_preset(self, preset):
 @endpoint('razer.device.audio.headset', 'getCustomEqualizer', out_sig='s')
 def get_custom_equalizer(self):
     """
-    Get custom EQ band values in dB (-6..+6), space separated,
-    ordered 31 Hz, 63, 125, 250, 500 Hz, 1, 2, 4, 8, 16 kHz
+    Get the active preset's EQ band values in dB (-6..+6), space
+    separated, ordered 31 Hz, 63, 125, 250, 500 Hz, 1, 2, 4, 8, 16 kHz
     """
     self.logger.debug("DBus call get_custom_equalizer")
 
@@ -136,8 +136,11 @@ def get_custom_equalizer(self):
 @endpoint('razer.device.audio.headset', 'setCustomEqualizer', in_sig='s')
 def set_custom_equalizer(self, values):
     """
-    Set custom EQ band values in dB (-6..+6), space separated,
-    ordered 31 Hz, 63, 125, 250, 500 Hz, 1, 2, 4, 8, 16 kHz
+    Set the active preset's EQ band values in dB (-6..+6), space
+    separated, ordered 31 Hz, 63, 125, 250, 500 Hz, 1, 2, 4, 8, 16 kHz
+
+    The device stores one band set per preset, so this overwrites the
+    bands of whichever preset is currently selected.
 
     :param values: Example '-1 -2 -1 -2 0 1 2 1 0 2'
     :type values: str
