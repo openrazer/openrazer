@@ -54,8 +54,15 @@
 #define RAZER_BS_MICNC_GET  0x8F
 
 #define RAZER_BS_INFO_CLASS   0x00
-#define RAZER_BS_FIRMWARE_GET 0x81
 #define RAZER_BS_SERIAL_GET   0x82
+/*
+ * Razer's own updater library maps this to GetFWVersionEx, the headset
+ * firmware. Command 0x81 is GetSpeakerFWVersion, a separate audio
+ * component, and 0x93 is GetDongleFWVersionEx, which reports the same
+ * value as 0x87 on this hardware.
+ */
+#define RAZER_BS_FIRMWARE_GET 0x87
+#define RAZER_BS_FIRMWARE_LEN 3
 
 #define RAZER_BS_SERIAL_LEN 22
 
@@ -364,16 +371,20 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev,
     u8 args_len;
     int ret;
 
-    /*
-     * Only the dongle answers this; the wired connection reports the
-     * command as not executed, which get_args() rejects on status.
-     */
     ret = razer_blackshark_get_args(device, RAZER_BS_INFO_CLASS,
                                     RAZER_BS_FIRMWARE_GET, args, &args_len);
-    if (ret || args_len < 2)
+    if (ret || args_len < RAZER_BS_FIRMWARE_LEN)
         return sysfs_emit(buf, "unknown\n");
 
-    return sysfs_emit(buf, "v%u.%u\n", args[0], args[1]);
+    /* An all zero reply means the dongle has not learnt it yet */
+    if (!args[0] && !args[1] && !args[2])
+        return sysfs_emit(buf, "unknown\n");
+
+    /*
+     * Three components, unlike the two the other drivers report: the
+     * third is the revision that actually changes between releases.
+     */
+    return sysfs_emit(buf, "v%u.%u.%u\n", args[0], args[1], args[2]);
 }
 
 static ssize_t razer_attr_read_charge_level(struct device *dev,
