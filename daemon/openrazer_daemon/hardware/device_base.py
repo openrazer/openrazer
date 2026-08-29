@@ -111,6 +111,17 @@ class RazerDevice(DBusService):
         else:
             self.dpi = [1800, 1800]
 
+        # Last known headset audio settings. Returned when the device cannot
+        # answer, e.g. a dongle whose headset is powered off.
+        if 'set_sidetone' in self.METHODS:
+            self.headset_audio = {
+                'sidetone': 0,
+                'power_saving': 0,
+                'equalizer_preset': 0,
+                'mic_noise_cancel': 0,
+                'equalizer': '0 0 0 0 0 0 0 0 0 0',
+            }
+
         self.poll_rate = 500
         if 'set_poll_rate' in self.METHODS and not self.POLL_RATES:
             self.POLL_RATES = [125, 500, 1000]

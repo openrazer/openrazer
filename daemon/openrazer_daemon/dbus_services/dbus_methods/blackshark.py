@@ -8,9 +8,23 @@ from openrazer_daemon.dbus_services import endpoint
 
 
 def _read_str(self, filename):
+    """
+    Read an attribute, falling back to the last known value.
+
+    The dongle cannot answer while the headset is unlinked, so follow the
+    same approach as the DPI methods and return what is held locally
+    rather than letting the error reach the DBus client.
+    """
     driver_path = self.get_driver_path(filename)
-    with open(driver_path, 'r') as driver_file:
-        return driver_file.read().strip()
+    try:
+        with open(driver_path, 'r') as driver_file:
+            value = driver_file.read().strip()
+    except OSError:
+        self.logger.debug("Device did not answer for %s, using last known value", filename)
+        return str(self.headset_audio[filename])
+
+    self.headset_audio[filename] = value
+    return value
 
 
 def _read_int(self, filename):
@@ -21,6 +35,8 @@ def _write_str(self, filename, value):
     driver_path = self.get_driver_path(filename)
     with open(driver_path, 'w') as driver_file:
         driver_file.write(value)
+
+    self.headset_audio[filename] = value
 
 
 def _write_int(self, filename, value):
