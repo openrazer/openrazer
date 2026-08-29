@@ -729,10 +729,6 @@ static int razer_blackshark_probe(struct hid_device *hdev,
         ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);
         ret = -ENOMEM;
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
-        ret = -ENOMEM;
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
-        ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_sidetone);
         ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
@@ -744,6 +740,21 @@ static int razer_blackshark_probe(struct hid_device *hdev,
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_equalizer);
         ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mic_noise_cancel);
+
+        /*
+         * Keep the per-PID switch even though both cases share a body:
+         * scripts/generate_fake_driver.sh parses these case/break blocks
+         * to build the pylib/openrazer/_fake_driver cfg files.
+         */
+        switch (device->usb_pid) {
+        case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X_USB:
+        case USB_DEVICE_ID_RAZER_BLACKSHARK_V3_X:
+            ret = -ENOMEM;
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+            ret = -ENOMEM;
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+            break;
+        }
     }
 
     usb_disable_autosuspend(usb_dev);
