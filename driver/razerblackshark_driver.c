@@ -281,19 +281,22 @@ static ssize_t razer_attr_read_device_type(struct device *dev,
     return sysfs_emit(buf, "%s\n", device_type);
 }
 
-static ssize_t razer_attr_read_device_serial(struct device *dev,
-        struct device_attribute *attr,
-        char *buf)
+/*
+ * Resolve the serial once, at probe.
+ *
+ * The dongle answers this with all zeroes while the headset is unlinked,
+ * so querying per read would make the serial change as the headset is
+ * powered on and off - and the daemon keys its DBus object path off it.
+ * Both the wired connection and the dongle report the same headset
+ * serial, hence the PID suffix: both can be plugged in at once.
+ */
+static void razer_blackshark_init_serial(struct razer_blackshark_device *device)
 {
-    struct razer_blackshark_device *device = dev_get_drvdata(dev);
     u8 args[RAZER_BS_MAX_ARGS];
     char serial[RAZER_BS_SERIAL_LEN + 1];
     u8 args_len;
     int i;
     int ret;
-
-    /* hdev->uniq is an array, so it is empty rather than NULL when unset. */
-    const char *fallback = device->hdev->uniq[0] ? device->hdev->uniq : "BSV3X";
 
     ret = razer_blackshark_get_args(device, RAZER_BS_INFO_CLASS,
                                     RAZER_BS_SERIAL_GET, args, &args_len);
@@ -310,15 +313,24 @@ static ssize_t razer_attr_read_device_serial(struct device *dev,
         goto fallback;
     serial[i] = '\0';
 
-    /*
-     * The wired connection and the dongle report the same headset serial,
-     * so keep the PID suffix: the daemon keys its DBus object path off
-     * this and both can be plugged in at once.
-     */
-    return sysfs_emit(buf, "%s%04X\n", serial, device->usb_pid);
+    scnprintf(device->serial, sizeof(device->serial), "%s%04X",
+              serial, device->usb_pid);
+    return;
 
 fallback:
-    return sysfs_emit(buf, "%s%04X\n", fallback, device->usb_pid);
+    /* hdev->uniq is an array, so it is empty rather than NULL when unset. */
+    scnprintf(device->serial, sizeof(device->serial), "%s%04X",
+              device->hdev->uniq[0] ? device->hdev->uniq : "BSV3X",
+              device->usb_pid);
+}
+
+static ssize_t razer_attr_read_device_serial(struct device *dev,
+        struct device_attribute *attr,
+        char *buf)
+{
+    struct razer_blackshark_device *device = dev_get_drvdata(dev);
+
+    return sysfs_emit(buf, "%s\n", device->serial);
 }
 
 static ssize_t razer_attr_read_firmware_version(struct device *dev,
@@ -744,6 +756,8 @@ static int razer_blackshark_probe(struct hid_device *hdev,
      * keyboard/mouse interface the device may expose is left alone.
      */
     if (device->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE) {
+        razer_blackshark_init_serial(device);
+
         ret = -ENOMEM;
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
         ret = -ENOMEM;
