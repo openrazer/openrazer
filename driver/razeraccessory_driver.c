@@ -35,11 +35,11 @@ static int razer_get_report(struct hid_device *hdev, struct razer_report *reques
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
-        return razer_get_usb_response(hdev, 0x00, request, 0x00, response, RAZER_NEW_DEVICE_WAIT_US);
+        return razer_get_usb_response(hdev, 0x00, request, 0x00, response, sizeof(*response), RAZER_NEW_DEVICE_WAIT_US);
         break;
 
     default:
-        return razer_get_usb_response(hdev, 0x00, request, 0x00, response, RAZER_ACCESSORY_WAIT_US);
+        return razer_get_usb_response(hdev, 0x00, request, 0x00, response, sizeof(*response), RAZER_ACCESSORY_WAIT_US);
     }
 }
 

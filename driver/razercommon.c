@@ -12,6 +12,28 @@
 
 #include "razercommon.h"
 
+/*
+ * Some devices (e.g. the Razer Leviathan V2 X) talk over HID feature report
+ * ID 7 (wValue 0x0307) rather than the default report ID 0 (wValue 0x0300).
+ * Their transfers are one byte longer than a struct razer_report: a leading
+ * 0x07 report-ID byte followed by the usual 90-byte payload.
+ *
+ * Instead of special-casing individual USB ids in this shared code, callers
+ * request this behaviour by asking for a report length one byte larger than
+ * struct razer_report; the matching wValue is derived from that length. Which
+ * length to use is decided per-device in the individual drivers (see
+ * razeraccessory_driver.c).
+ */
+static inline bool razer_uses_report_id_7(u16 size)
+{
+    return size == sizeof(struct razer_report) + 1;
+}
+
+static inline u16 razer_report_wvalue(u16 size)
+{
+    return razer_uses_report_id_7(size) ? 0x0307 : 0x0300;
+}
+
 /**
  * Send USB control report to the keyboard
  * USUALLY index = 0x02
@@ -20,22 +42,36 @@
 int razer_send_control_msg(struct hid_device *hdev, const void *data, u16 size, u16 index, ulong wait)
 {
     struct usb_device *usb_dev = hid_to_usb_dev(hdev);
+    const void *out = data;
+    u8 *buf = NULL;
     int ret;
+
+    // Report-ID-7 devices expect the payload prefixed with a 0x07 report-ID byte
+    if (razer_uses_report_id_7(size)) {
+        buf = kzalloc(size, GFP_KERNEL);
+        if (!buf)
+            return -ENOMEM;
+        buf[0] = 0x07;
+        memcpy(buf + 1, data, sizeof(struct razer_report));
+        out = buf;
+    }
 
     // Send usb control message
     ret = usb_control_msg_send(usb_dev,
                                0, // endpoint to send the message to
                                HID_REQ_SET_REPORT, // USB message request value (0x09)
                                USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT, // USB message request type value (0x21)
-                               0x300, // USB message value
+                               razer_report_wvalue(size), // USB message value
                                index, // USB message index value
-                               data, // pointer to the data to send
+                               out, // pointer to the data to send
                                size, // length in bytes of the data to send
                                USB_CTRL_SET_TIMEOUT, // time in msecs to wait for the message to complete before timing out
                                GFP_KERNEL);
 
     // Wait
     fsleep(wait);
+
+    kfree(buf);
 
     if (ret)
         hid_warn(hdev, "Failed to send USB control message: %d\n", ret);
@@ -60,9 +96,11 @@ int razer_send_control_msg(struct hid_device *hdev, const void *data, u16 size, 
  *
  * Returns 0 when successful, 1 if the report length is invalid.
  */
-int razer_get_usb_response(struct hid_device *hdev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, ulong wait)
+int razer_get_usb_response(struct hid_device *hdev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, u16 report_len, ulong wait)
 {
     struct usb_device *usb_dev = hid_to_usb_dev(hdev);
+    bool has_report_id = razer_uses_report_id_7(report_len);
+    u8 *buf;
     int err;
 
     if (WARN_ON(request_report->transaction_id.id == 0x00)) {
@@ -70,25 +108,34 @@ int razer_get_usb_response(struct hid_device *hdev, uint report_index, struct ra
     }
 
     // Send the request to the device.
-    err = razer_send_control_msg(hdev, request_report, sizeof(*request_report), report_index, wait);
+    err = razer_send_control_msg(hdev, request_report, report_len, report_index, wait);
     if (err)
         return err;
+
+    buf = kzalloc(report_len, GFP_KERNEL);
+    if (!buf)
+        return -ENOMEM;
 
     // Now ask for response
     err = usb_control_msg_recv(usb_dev,
                                0, // endpoint to send the message to
                                HID_REQ_GET_REPORT, // USB message request value (0x01)
                                USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN, // USB message request type value (0xA1)
-                               0x300, // USB message value
+                               razer_report_wvalue(report_len), // USB message value
                                response_index, // USB message index value
-                               response_report, // pointer to the data to be filled in by the message
-                               sizeof(*response_report), // length in bytes of the data to be received
+                               buf, // pointer to the data to be filled in by the message
+                               report_len, // length in bytes of the data to be received
                                USB_CTRL_SET_TIMEOUT, // time in msecs to wait for the message to complete before timing out
                                GFP_KERNEL);
     if (err) {
         hid_warn(hdev, "Failed to receive USB control message: %d\n", err);
+        kfree(buf);
         return err;
     }
+
+    // Report-ID-7 devices prefix the response with the 0x07 report-ID byte
+    memcpy(response_report, has_report_id ? buf + 1 : buf, sizeof(*response_report));
+    kfree(buf);
 
     if (WARN_ONCE(response_report->data_size > ARRAY_SIZE(response_report->arguments),
                   "Field data_size %d in response is bigger than arguments\n",
