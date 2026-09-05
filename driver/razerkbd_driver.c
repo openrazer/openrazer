@@ -396,7 +396,7 @@ static int razer_get_report(struct hid_device *hdev, struct razer_report *reques
 
     razer_get_report_params(usb_dev, &report_index, &response_index, &wait);
 
-    return razer_get_usb_response(hdev, report_index, request, response_index, response, wait);
+    return razer_get_usb_response(hdev, report_index, request, response_index, response, sizeof(*response), wait);
 }
 
 /**
