@@ -316,6 +316,217 @@ static bool is_blade_laptop(struct razer_kbd_device *device)
 }
 
 /**
+ * Whether laptop power/fan control (power_mode, fan_rpm) is supported
+ *
+ * PID list from the razer-laptop-control reference tables. The 2024/2025
+ * models are not in that table; they inherit the nearest 2023 sibling and
+ * still need device testing.
+ */
+static bool razer_laptop_supports_control(u16 pid)
+{
+    switch (pid) {
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_2018:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_STUDIO_EDITION_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_QHD:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BOOK_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2025:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2025:
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Minimum fan RPM supported for the given laptop, else 0
+ */
+static unsigned int razer_laptop_fan_min_rpm(u16 pid)
+{
+    switch (pid) {
+    case USB_DEVICE_ID_RAZER_BLADE_QHD:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2017_FULLHD:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_MID_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2017:
+    case USB_DEVICE_ID_RAZER_BLADE_2018:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_2018_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_EARLY_2020_BASE:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_LATE_2020:
+    case USB_DEVICE_ID_RAZER_BOOK_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_BASE_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+        return 3500;
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2020_BASE:
+        return 3600;
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+        return 2300;
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2025:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2025:
+        return 2200;
+    }
+    return 0;
+}
+
+/**
+ * Maximum fan RPM supported for the given laptop, else 0
+ */
+static unsigned int razer_laptop_fan_max_rpm(u16 pid)
+{
+    switch (pid) {
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_STEALTH_2019:
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
+        return 5300;
+    case USB_DEVICE_ID_RAZER_BLADE_LATE_2020_BASE:
+        return 5200;
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+        return 4300;
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2025:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2025:
+        return 5000;
+    default:
+        return 0;
+    }
+}
+
+/**
+ * Whether the laptop supports the Creator power mode (power_mode == 2)
+ */
+static bool razer_laptop_supports_creator(u16 pid)
+{
+    switch (pid) {
+    case USB_DEVICE_ID_RAZER_BLADE_2019_ADV:
+    case USB_DEVICE_ID_RAZER_BLADE_MID_2019_MERCURY:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Whether the laptop supports CPU/GPU boost (Custom mode, power_mode == 4)
+ */
+static bool razer_laptop_supports_boost(u16 pid)
+{
+    switch (pid) {
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_17_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2025:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2025:
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Whether the laptop allows the highest CPU boost level (level 3)
+ */
+static bool razer_laptop_supports_boost3(u16 pid)
+{
+    switch (pid) {
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2022:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2023:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2024:
+    case USB_DEVICE_ID_RAZER_BLADE_14_2025:
+    case USB_DEVICE_ID_RAZER_BLADE_16_2025:
+    case USB_DEVICE_ID_RAZER_BLADE_18_2025:
+        return true;
+    }
+    return false;
+}
+
+/**
  * Get request/response indices and timing parameters for the device
  */
 static void razer_get_report_params(struct usb_device *usb_dev, uint *report_index, uint *response_index, ulong *wait)
@@ -499,6 +710,350 @@ static ssize_t razer_attr_read_kbd_layout(struct device *dev, struct device_attr
         return err;
 
     return sysfs_emit(buf, "%02x\n", response.arguments[0]);
+}
+
+/**
+ * Read device file "power_mode"
+ *
+ * Returns the cached power mode (0 = Balanced, 1 = Gaming, 2 = Creator, 4 = Custom)
+ */
+static ssize_t razer_attr_read_laptop_power_mode(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+    return sysfs_emit(buf, "%u\n", device->laptop_power_mode);
+}
+
+/**
+ * Write device file "power_mode"
+ *
+ * 0 = Balanced, 1 = Gaming, 2 = Creator (falls back to Gaming on unsupported
+ * models), 4 = Custom (boost handled by the cpu_boost/gpu_boost attributes)
+ */
+static ssize_t razer_attr_write_laptop_power_mode(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned int power_mode;
+    int err;
+
+    err = kstrtouint(buf, 10, &power_mode);
+    if (err)
+        return err;
+
+    if (!razer_laptop_supports_control(device->usb_pid))
+        return -EINVAL;
+
+    if (power_mode > 2 && power_mode != 4)
+        return -EINVAL;
+
+    if (power_mode == 2 && !razer_laptop_supports_creator(device->usb_pid))
+        power_mode = 1;
+
+    request = get_razer_report(0x0d, 0x02, 0x04);
+    request.transaction_id.id = 0xFF;
+    request.arguments[0] = 0x00;
+    request.arguments[1] = 0x01;
+    request.arguments[2] = power_mode;
+    /* Manual RPM is only meaningful outside of Custom mode */
+    request.arguments[3] = (power_mode != 4 && device->laptop_fan_rpm) ? 0x01 : 0x00;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    device->laptop_power_mode = power_mode;
+    return count;
+}
+
+/**
+ * Read device file "fan_rpm"
+ *
+ * Returns the cached fan RPM (0 = auto/EC controlled curve)
+ */
+static ssize_t razer_attr_read_laptop_fan_rpm(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+    return sysfs_emit(buf, "%u\n", device->laptop_fan_rpm);
+}
+
+/**
+ * Write device file "fan_rpm"
+ *
+ * 0 = auto (factory/firmware fan curve), any other value sets a literal RPM,
+ * clamped to the model's safe range. The EC will additionally clamp out-of-range
+ * requests.
+ */
+static ssize_t razer_attr_write_laptop_fan_rpm(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned int fan_min = razer_laptop_fan_min_rpm(device->usb_pid);
+    unsigned int fan_max = razer_laptop_fan_max_rpm(device->usb_pid);
+    unsigned int rpm;
+    unsigned char power_mode = device->laptop_power_mode;
+    int err;
+
+    err = kstrtouint(buf, 10, &rpm);
+    if (err)
+        return err;
+
+    if (!razer_laptop_supports_control(device->usb_pid))
+        return -EINVAL;
+
+    if (rpm == 0) {
+        /* (auto) nothing else to clamp */
+    } else if (!fan_min || !fan_max) {
+        return -EINVAL;
+    } else {
+        /* Never allow values above (or below) the model's known-safe range */
+        if (rpm < fan_min)
+            rpm = fan_min;
+        if (rpm > fan_max)
+            rpm = fan_max;
+    }
+
+    if (power_mode != 0 && power_mode != 1 && power_mode != 2 && power_mode != 4)
+        power_mode = 0;
+
+    if (rpm > 0) {
+        /* (a) dispatch/read, begin */
+        request = get_razer_report(0x0d, 0x82, 0x04);
+        request.transaction_id.id = 0xFF;
+        request.arguments[1] = 0x00;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+
+        /* (b) set power mode with the manual-rpm flag */
+        request = get_razer_report(0x0d, 0x02, 0x04);
+        request.transaction_id.id = 0xFF;
+        request.arguments[1] = 0x01;
+        request.arguments[2] = power_mode;
+        request.arguments[3] = 0x01;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+
+        /* (c) set RPM (value is rpm/100) */
+        request = get_razer_report(0x0d, 0x01, 0x03);
+        request.transaction_id.id = 0xFF;
+        request.arguments[1] = 0x01;
+        request.arguments[2] = rpm / 100;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+
+        /* (d) dispatch/read, end */
+        request = get_razer_report(0x0d, 0x82, 0x04);
+        request.transaction_id.id = 0xFF;
+        request.arguments[1] = 0x02;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+    }
+
+    /* Fan-mode packet: toggles auto vs manual across the whole feature */
+    request = get_razer_report(0x0d, 0x82, 0x04);
+    request.transaction_id.id = 0xFF;
+    request.arguments[1] = 0x02;
+    request.arguments[2] = power_mode;
+    request.arguments[3] = rpm ? 0x01 : 0x00;
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    if (rpm > 0) {
+        /* Re-issue the RPM packet */
+        request = get_razer_report(0x0d, 0x01, 0x03);
+        request.transaction_id.id = 0xFF;
+        request.arguments[1] = 0x02;
+        request.arguments[2] = rpm / 100;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+    }
+
+    device->laptop_fan_rpm = rpm;
+    return count;
+}
+
+/**
+ * Read device file "cpu_boost"
+ *
+ * Returns the cached CPU boost level (0..3, maximum depends on the model)
+ */
+static ssize_t razer_attr_read_laptop_cpu_boost(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+    return sysfs_emit(buf, "%u\n", device->laptop_cpu_boost);
+}
+
+/**
+ * Read device file "gpu_boost"
+ *
+ * Returns the cached GPU boost level (0..2)
+ */
+static ssize_t razer_attr_read_laptop_gpu_boost(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+
+    return sysfs_emit(buf, "%u\n", device->laptop_gpu_boost);
+}
+
+/**
+ * Set the Custom-mode CPU/GPU boost levels on the EC
+ *
+ * The EC expects the exact read/set sequence below; do not reorder or skip
+ * the dispatch/re-read packets. Only valid while power_mode == 4 (Custom).
+ */
+static int razer_laptop_set_custom_boost(struct razer_kbd_device *device, unsigned char cpu_boost, unsigned char gpu_boost)
+{
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    int err;
+
+    if (device->laptop_power_mode != 4)
+        return -EINVAL;
+
+    /* (a) dispatch read, args1=0x01 */
+    request = get_razer_report(0x0d, 0x82, 0x04);
+    request.transaction_id.id = 0xFF;
+    request.arguments[1] = 0x01;
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    /* (b) set power mode (Custom) with boost flag 0 */
+    request = get_razer_report(0x0d, 0x02, 0x04);
+    request.transaction_id.id = 0xFF;
+    request.arguments[1] = 0x01;
+    request.arguments[2] = 0x04;
+    request.arguments[3] = 0x00;
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    /* (c) read CPU boost */
+    request = get_razer_report(0x0d, 0x87, 0x03);
+    request.transaction_id.id = 0xFF;
+    request.arguments[1] = 0x01;
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    /* (d) set CPU boost */
+    request = get_razer_report(0x0d, 0x07, 0x03);
+    request.transaction_id.id = 0xFF;
+    request.arguments[1] = 0x01;
+    request.arguments[2] = cpu_boost;
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    /* (e) read GPU boost */
+    request = get_razer_report(0x0d, 0x87, 0x03);
+    request.transaction_id.id = 0xFF;
+    request.arguments[1] = 0x02;
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    /* (f) set GPU boost */
+    request = get_razer_report(0x0d, 0x07, 0x03);
+    request.transaction_id.id = 0xFF;
+    request.arguments[1] = 0x02;
+    request.arguments[2] = gpu_boost;
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    /* (g) dispatch read */
+    request = get_razer_report(0x0d, 0x82, 0x04);
+    request.transaction_id.id = 0xFF;
+    request.arguments[1] = 0x02;
+    request.arguments[2] = 0x00;
+    request.arguments[3] = 0x00;
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    /* (h) dispatch "set mode" with the whole Custom state */
+    request = get_razer_report(0x0d, 0x82, 0x04);
+    request.transaction_id.id = 0xFF;
+    request.arguments[1] = 0x02;
+    request.arguments[2] = 0x04;
+    request.arguments[3] = 0x00;
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    device->laptop_cpu_boost = cpu_boost;
+    device->laptop_gpu_boost = gpu_boost;
+    return 0;
+}
+
+/**
+ * Write device file "cpu_boost"
+ *
+ * CPU boost level, 0..3 on models that support it, else 0..2. Only honoured
+ * while power_mode == 4 (Custom); the EC ignores it otherwise.
+ */
+static ssize_t razer_attr_write_laptop_cpu_boost(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+    unsigned int cpu_boost;
+    unsigned int cpu_max = razer_laptop_supports_boost3(device->usb_pid) ? 3 : 2;
+    int err;
+
+    err = kstrtouint(buf, 10, &cpu_boost);
+    if (err)
+        return err;
+
+    if (!razer_laptop_supports_boost(device->usb_pid))
+        return -EINVAL;
+
+    if (cpu_boost > cpu_max)
+        return -EINVAL;
+
+    err = razer_laptop_set_custom_boost(device, cpu_boost, device->laptop_gpu_boost);
+    if (err)
+        return err;
+
+    return count;
+}
+
+/**
+ * Write device file "gpu_boost"
+ *
+ * GPU boost level, 0..2. Only honoured while power_mode == 4 (Custom);
+ * the EC ignores it otherwise.
+ */
+static ssize_t razer_attr_write_laptop_gpu_boost(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kbd_device *device = dev_get_drvdata(dev);
+    unsigned int gpu_boost;
+    int err;
+
+    err = kstrtouint(buf, 10, &gpu_boost);
+    if (err)
+        return err;
+
+    if (!razer_laptop_supports_boost(device->usb_pid))
+        return -EINVAL;
+
+    if (gpu_boost > 2)
+        return -EINVAL;
+
+    err = razer_laptop_set_custom_boost(device, device->laptop_cpu_boost, gpu_boost);
+    if (err)
+        return err;
+
+    return count;
 }
 
 /**
@@ -4751,6 +5306,11 @@ static DEVICE_ATTR(test,                    0660, razer_attr_read_test,         
 static DEVICE_ATTR(version,                 0440, razer_attr_read_version,                    NULL);
 static DEVICE_ATTR(kbd_layout,              0440, razer_attr_read_kbd_layout,                 NULL);
 
+static DEVICE_ATTR(power_mode,              0660, razer_attr_read_laptop_power_mode,          razer_attr_write_laptop_power_mode);
+static DEVICE_ATTR(fan_rpm,                 0660, razer_attr_read_laptop_fan_rpm,             razer_attr_write_laptop_fan_rpm);
+static DEVICE_ATTR(cpu_boost,               0660, razer_attr_read_laptop_cpu_boost,           razer_attr_write_laptop_cpu_boost);
+static DEVICE_ATTR(gpu_boost,               0660, razer_attr_read_laptop_gpu_boost,           razer_attr_write_laptop_gpu_boost);
+
 static DEVICE_ATTR(firmware_version,        0440, razer_attr_read_firmware_version,           NULL);
 static DEVICE_ATTR(fn_toggle,               0220, NULL,                                       razer_attr_write_fn_toggle);
 static DEVICE_ATTR(poll_rate,               0660, razer_attr_read_poll_rate,                  razer_attr_write_poll_rate);
@@ -5408,6 +5968,8 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
@@ -5674,6 +6236,8 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
@@ -5687,6 +6251,8 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets whether FN is requires for F-Keys
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_QHD:
@@ -5705,6 +6271,8 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fn_toggle);                     // Sets whether FN is requires for F-Keys
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
@@ -5715,17 +6283,31 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
         case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+        case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+        case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
+            break;
+
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
         case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
         case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
-        case USB_DEVICE_ID_RAZER_BLADE_14_2021:
         case USB_DEVICE_ID_RAZER_BLADE_17_2022:
         case USB_DEVICE_ID_RAZER_BLADE_14_2022:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
         case USB_DEVICE_ID_RAZER_BLADE_14_2023:
-        case USB_DEVICE_ID_RAZER_BLADE_15_2023:
         case USB_DEVICE_ID_RAZER_BLADE_16_2023:
         case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         case USB_DEVICE_ID_RAZER_BLADE_18_2023:
@@ -5743,6 +6325,10 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_cpu_boost);                     // Laptop CPU boost level
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_gpu_boost);                     // Laptop GPU boost level
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
@@ -5753,6 +6339,8 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:
@@ -5955,6 +6543,8 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            device_remove_file(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            device_remove_file(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2016:
@@ -6221,6 +6811,8 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+            device_remove_file(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            device_remove_file(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_LATE_2016:
@@ -6234,6 +6826,8 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
             device_remove_file(&hdev->dev, &dev_attr_fn_toggle);                     // Sets whether FN is requires for F-Keys
+            device_remove_file(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            device_remove_file(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_QHD:
@@ -6252,6 +6846,8 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
             device_remove_file(&hdev->dev, &dev_attr_fn_toggle);                     // Sets whether FN is requires for F-Keys
             device_remove_file(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
+            device_remove_file(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            device_remove_file(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2016:
@@ -6262,17 +6858,31 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_BLADE_PRO_2019:
         case USB_DEVICE_ID_RAZER_BLADE_PRO_LATE_2019:
         case USB_DEVICE_ID_RAZER_BLADE_ADV_LATE_2019:
+        case USB_DEVICE_ID_RAZER_BLADE_14_2021:
+        case USB_DEVICE_ID_RAZER_BLADE_15_2023:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
+            device_remove_file(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            device_remove_file(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
+            break;
+
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_2020:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
         case USB_DEVICE_ID_RAZER_BLADE_17_PRO_EARLY_2021:
         case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
-        case USB_DEVICE_ID_RAZER_BLADE_14_2021:
         case USB_DEVICE_ID_RAZER_BLADE_17_2022:
         case USB_DEVICE_ID_RAZER_BLADE_14_2022:
         case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
         case USB_DEVICE_ID_RAZER_BLADE_14_2023:
-        case USB_DEVICE_ID_RAZER_BLADE_15_2023:
         case USB_DEVICE_ID_RAZER_BLADE_16_2023:
         case USB_DEVICE_ID_RAZER_BLADE_16_2025:
         case USB_DEVICE_ID_RAZER_BLADE_18_2023:
@@ -6290,6 +6900,10 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
             device_remove_file(&hdev->dev, &dev_attr_logo_led_state);                // Enable/Disable the logo
+            device_remove_file(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            device_remove_file(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
+            device_remove_file(&hdev->dev, &dev_attr_cpu_boost);                     // Laptop CPU boost level
+            device_remove_file(&hdev->dev, &dev_attr_gpu_boost);                     // Laptop GPU boost level
             break;
 
         case USB_DEVICE_ID_RAZER_BLADE_PRO_EARLY_2020:
@@ -6300,6 +6914,8 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+            device_remove_file(&hdev->dev, &dev_attr_power_mode);                    // Laptop power mode
+            device_remove_file(&hdev->dev, &dev_attr_fan_rpm);                       // Laptop fan RPM (0 = auto)
             break;
 
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_CHROMA:

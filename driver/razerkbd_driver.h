@@ -174,6 +174,12 @@ struct razer_kbd_device {
 
     unsigned char block_keys[3];
     unsigned char left_alt_on;
+
+    /* Laptop (Blade) power/fan/boost state, cached so reads need no USB round-trip */
+    unsigned char laptop_power_mode;
+    unsigned int laptop_fan_rpm;
+    unsigned char laptop_cpu_boost;
+    unsigned char laptop_gpu_boost;
 };
 
 struct razer_kbd_usb_device_data {
