@@ -3,6 +3,7 @@
 """
 Keyboards class
 """
+import configparser
 import re
 
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
@@ -37,11 +38,121 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         self.key_manager.close()
 
 
-class _RippleKeyboard(_MacroKeyboard):
+class _Laptop(_MacroKeyboard):
+    """
+    Laptop class (Razer Blade)
+
+    Has power mode, fan speed and boost control, and keeps the laptop state
+    across sessions and suspend/resume
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.power_mode = 0
+        self.fan_rpm = 0
+        self.cpu_boost = 0
+        self.gpu_boost = 0
+        super().__init__(*args, **kwargs)
+        # Methods are loaded into DBus by this point
+
+        if not any(name in self.METHODS for name in ('set_power_mode', 'set_fan_rpm', 'set_cpu_boost', 'set_gpu_boost')):
+            return
+
+        self.zone['laptop'] = {}
+        self.restore_laptop_state()
+
+    def restore_laptop_state(self):
+        """
+        Set the laptop power mode, fan speed and boost levels to the saved value
+        """
+        if self.persistence.has_section(self.storage_name):
+            try:
+                self.power_mode = int(self.persistence[self.storage_name]['laptop_power_mode'])
+            except (KeyError, configparser.NoOptionError):
+                self.logger.info("Failed to get power mode from persistence storage, using default.")
+
+            try:
+                self.fan_rpm = int(self.persistence[self.storage_name]['laptop_fan_rpm'])
+            except (KeyError, configparser.NoOptionError):
+                self.logger.info("Failed to get fan speed from persistence storage, using default.")
+
+            try:
+                self.cpu_boost = int(self.persistence[self.storage_name]['laptop_cpu_boost'])
+            except (KeyError, configparser.NoOptionError):
+                self.logger.info("Failed to get CPU boost from persistence storage, using default.")
+
+            try:
+                self.gpu_boost = int(self.persistence[self.storage_name]['laptop_gpu_boost'])
+            except (KeyError, configparser.NoOptionError):
+                self.logger.info("Failed to get GPU boost from persistence storage, using default.")
+
+        power_mode_func = getattr(self, "setPowerMode", None)
+        if power_mode_func is not None:
+            try:
+                power_mode_func(self.power_mode)
+            except OSError:
+                self.logger.exception("Failed to restore power mode!")
+
+        fan_rpm_func = getattr(self, "setFanRpm", None)
+        if fan_rpm_func is not None:
+            try:
+                fan_rpm_func(self.fan_rpm)
+            except OSError:
+                self.logger.exception("Failed to restore fan speed!")
+
+        cpu_boost_func = getattr(self, "setCpuBoost", None)
+        if cpu_boost_func is not None:
+            try:
+                cpu_boost_func(self.cpu_boost)
+            except OSError:
+                self.logger.exception("Failed to restore CPU boost!")
+
+        gpu_boost_func = getattr(self, "setGpuBoost", None)
+        if gpu_boost_func is not None:
+            try:
+                gpu_boost_func(self.gpu_boost)
+            except OSError:
+                self.logger.exception("Failed to restore GPU boost!")
+
+    def _resume_device(self):
+        """
+        Reapply the laptop power mode, fan speed and boost levels after resume
+        """
+        super()._resume_device()
+
+        power_mode_func = getattr(self, "setPowerMode", None)
+        if power_mode_func is not None:
+            try:
+                power_mode_func(self.power_mode)
+            except OSError:
+                self.logger.exception("Failed to reapply power mode after resume!")
+
+        fan_rpm_func = getattr(self, "setFanRpm", None)
+        if fan_rpm_func is not None:
+            try:
+                fan_rpm_func(self.fan_rpm)
+            except OSError:
+                self.logger.exception("Failed to reapply fan speed after resume!")
+
+        cpu_boost_func = getattr(self, "setCpuBoost", None)
+        if cpu_boost_func is not None:
+            try:
+                cpu_boost_func(self.cpu_boost)
+            except OSError:
+                self.logger.exception("Failed to reapply CPU boost after resume!")
+
+        gpu_boost_func = getattr(self, "setGpuBoost", None)
+        if gpu_boost_func is not None:
+            try:
+                gpu_boost_func(self.gpu_boost)
+            except OSError:
+                self.logger.exception("Failed to reapply GPU boost after resume!")
+
+
+class _RippleKeyboard(_Laptop):
     """
     Keyboard class
 
-    Inherits _MacroKeyboard and has a ripple manager
+    Inherits _Laptop and has a ripple manager
     """
 
     def __init__(self, *args, **kwargs):
@@ -69,6 +180,15 @@ class _RippleKeyboard(_MacroKeyboard):
         super()._close()
 
         self.ripple_manager.close()
+
+
+class _LaptopBoost(_RippleKeyboard):
+    """
+    Laptop class (Razer Blade) with boost support
+
+    Inherits _RippleKeyboard; the CPU/GPU boost DBus methods are provided to
+    the leaf classes through their METHODS list
+    """
 
 
 class RazerNostromo(_RazerDeviceBrightnessSuspend):
@@ -744,7 +864,7 @@ class RazerBladeStealth(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/667/667_blade_stealth_2016_6500u.png"
 
@@ -763,12 +883,12 @@ class RazerBladeStealthLate2016(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/667/667_blade_stealth_2016_6500u.png"
 
 
-class RazerBladeProLate2016(_MacroKeyboard):
+class RazerBladeProLate2016(_Laptop):
     """
     Class for the Razer Blade Pro (Late 2016)
     """
@@ -781,7 +901,7 @@ class RazerBladeProLate2016(_MacroKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/736/736_blade_pro_2016.png"
 
@@ -799,7 +919,7 @@ class RazerBladeLate2016(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/736/736_blade_pro_2016.png"
 
@@ -819,7 +939,7 @@ class RazerBladeQHD(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
 
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/736/736_blade_pro_2016.png"
 
@@ -1513,7 +1633,7 @@ class RazerBladeStealthMid2017(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1213/1213_blade_stealth_2017_7500u.png"
 
@@ -1531,7 +1651,7 @@ class RazerBladePro2017(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1200/1200_blade_pro_2017.png"
 
@@ -1549,7 +1669,7 @@ class RazerBladePro2017FullHD(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1200/1200_blade_pro_2017.png"
 
@@ -1568,7 +1688,7 @@ class RazerBladeStealthLate2017(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1213/1213_blade_stealth_2017_7500u.png"
 
@@ -1586,7 +1706,7 @@ class RazerBlade2018(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_logo_active', 'set_logo_active', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1418/1418_blade_2018__base.png"
 
@@ -1604,12 +1724,12 @@ class RazerBlade2018Mercury(_RippleKeyboard):
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'set_starlight_random_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1552/1552-blade-stealth-mercury-white.png"
 
 
-class RazerBlade2018Base(_MacroKeyboard):
+class RazerBlade2018Base(_Laptop):
     """
     Class for the Razer Blade 15 (2018) Base Model
     """
@@ -1618,12 +1738,12 @@ class RazerBlade2018Base(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x023B
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1418/1418_blade_2018__base.png"
 
 
-class RazerBladeStealth2019(_MacroKeyboard):
+class RazerBladeStealth2019(_Laptop):
     """
     Class for the Razer Blade Stealth (2019)
     """
@@ -1632,12 +1752,12 @@ class RazerBladeStealth2019(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0239
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1475/1475_bladestealth13(2019).png"
 
 
-class RazerBladeStealthLate2019(_MacroKeyboard):
+class RazerBladeStealthLate2019(_Laptop):
     """
     Class for the Razer Blade Stealth (Late 2019)
     """
@@ -1646,12 +1766,12 @@ class RazerBladeStealthLate2019(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x024A
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-stealth-13/shop/stealth-l2p-1.jpg"
 
 
-class RazerBladeStealthEarly2020(_MacroKeyboard):
+class RazerBladeStealthEarly2020(_Laptop):
     """
     Class for the Razer Blade Stealth (Early 2020)
     """
@@ -1660,12 +1780,12 @@ class RazerBladeStealthEarly2020(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0252
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-stealth-13/shop/sl25p-fhd-4.jpg"
 
 
-class RazerBladeStealthLate2020(_MacroKeyboard):
+class RazerBladeStealthLate2020(_Laptop):
     """
     Class for the Razer Blade Stealth (Late 2020)
     """
@@ -1674,12 +1794,12 @@ class RazerBladeStealthLate2020(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0259
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-stealth-13/shop/sl25p-fhd-4.jpg"
 
 
-class RazerBook2020(_MacroKeyboard):
+class RazerBook2020(_Laptop):
     """
     Class for the Razer Book (2020)
     """
@@ -1688,7 +1808,7 @@ class RazerBook2020(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x026A
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1743/razerbook132020.png"
 
@@ -1707,7 +1827,7 @@ class RazerBlade2019Adv(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1482/blade15.png"
 
@@ -1726,12 +1846,12 @@ class RazerBladeMid2019Mercury(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-15/shop/blade15-mercury-1.jpg"
 
 
-class RazerBlade2019Base(_MacroKeyboard):
+class RazerBlade2019Base(_Laptop):
     """
     Class for the Razer Blade 15 (Mid 2019) Base Model
     """
@@ -1740,12 +1860,12 @@ class RazerBlade2019Base(_MacroKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0246
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
-               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect']
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1518/1518_blade15_mid2019-base.png"
 
 
-class RazerBladeEarly2020Base(_MacroKeyboard):
+class RazerBladeEarly2020Base(_Laptop):
     """
     Class for the Razer Blade Base (Early 2020)
     """
@@ -1755,12 +1875,12 @@ class RazerBladeEarly2020Base(_MacroKeyboard):
     USB_PID = 0x0255
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
-               'set_breath_dual_effect']
+               'set_breath_dual_effect', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-15/blade-15-base-model-spec-image-v2.png"
 
 
-class RazerBladeLate2020Base(_MacroKeyboard):
+class RazerBladeLate2020Base(_Laptop):
     """
     Class for the Razer Blade Late 2020 Base
     """
@@ -1770,7 +1890,7 @@ class RazerBladeLate2020Base(_MacroKeyboard):
     USB_PID = 0x0268
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
-               'set_breath_dual_effect']
+               'set_breath_dual_effect', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-15/shop/blade15-base-model-spec-image-v2.png"
 
@@ -1789,7 +1909,7 @@ class RazerBladeProLate2019(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/razer-blade-pro-17/razer-blade-pro-17-2019-OGimage-1200x630.jpg"
 
@@ -1808,7 +1928,7 @@ class RazerBladeAdvancedLate2019(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/razer-blade-pro-17/razer-blade-pro-17-2019-OGimage-1200x630.jpg"
 
@@ -1825,7 +1945,7 @@ class RazerBladeProEarly2020(_RippleKeyboard):
     MATRIX_DIMS = [6, 16]
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_custom_effect', 'set_key_row',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1654/blade-pro-17-2020-2.png"
 
@@ -1844,7 +1964,7 @@ class RazerBlade2019StudioEdition(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/blade-15/shop/studio-ch41-1.jpg"
 
@@ -1864,12 +1984,12 @@ class RazerBladePro2019(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/razer-blade-pro-17/razer-blade-pro-17-2019-OGimage-1200x630.jpg"
 
 
-class RazerBlade15Advanced2020(_RippleKeyboard):
+class RazerBlade15Advanced2020(_LaptopBoost):
     """
     Class for the Razer Blade 15 Advanced (2020)
     """
@@ -1883,12 +2003,12 @@ class RazerBlade15Advanced2020(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1651/razer-blade-15-advanced-2020.png"
 
 
-class RazerBlade15Advanced2021(_RippleKeyboard):
+class RazerBlade15Advanced2021(_LaptopBoost):
     """
     Class for the Razer Blade 15 Advanced (Mid 2021)
     """
@@ -1902,12 +2022,12 @@ class RazerBlade15Advanced2021(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1778/1778-razerblade15advanced2021rz09-0409x-2.png"
 
 
-class RazerBlade17Pro2021(_RippleKeyboard):
+class RazerBlade17Pro2021(_LaptopBoost):
     """
     Class for the Razer Blade 17 Pro (Mid 2021)
     """
@@ -1921,7 +2041,7 @@ class RazerBlade17Pro2021(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/5524/5524-1-en-v2.png"
 
@@ -1940,7 +2060,7 @@ class RazerBlade142021(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/og-image/razer-blade-14-og-image-1200x630.jpg"
 
@@ -1985,7 +2105,7 @@ class RazerHuntsmanMiniJP(_RippleKeyboard):
     DEVICE_IMAGE = "https://rzrwarranty.s3.amazonaws.com/4403e5e6b96d59dc95a278e257688e64a68f7b24945617653d68e3273877c01e.png"
 
 
-class RazerBlade15AdvancedEarly2021(_RippleKeyboard):
+class RazerBlade15AdvancedEarly2021(_LaptopBoost):
     """
     Class for the Razer Blade 15 Advanced (Early 2021)
     """
@@ -1999,12 +2119,12 @@ class RazerBlade15AdvancedEarly2021(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1761/blade-15-advanced-2021-rz09-0367x.png"
 
 
-class RazerBlade17ProEarly2021(_RippleKeyboard):
+class RazerBlade17ProEarly2021(_LaptopBoost):
     """
     Class for the Razer Blade 17 Pro (Early 2021)
     """
@@ -2018,12 +2138,12 @@ class RazerBlade17ProEarly2021(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/4025-16-EN-v1.png"
 
 
-class RazerBladeEarly2021Base(_MacroKeyboard):
+class RazerBladeEarly2021Base(_Laptop):
     """
     Class for the Razer Blade Base (Early 2021)
     """
@@ -2033,12 +2153,12 @@ class RazerBladeEarly2021Base(_MacroKeyboard):
     USB_PID = 0x026F
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
-               'set_breath_dual_effect']
+               'set_breath_dual_effect', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1756/blade-15-base-2021-rz09-0369x.png"
 
 
-class RazerBladeEarly2022Base(_MacroKeyboard):
+class RazerBladeEarly2022Base(_Laptop):
     """
     Class for the Razer Blade Base (Early 2022)
     """
@@ -2048,12 +2168,12 @@ class RazerBladeEarly2022Base(_MacroKeyboard):
     USB_PID = 0x027A
     METHODS = ['get_device_type_keyboard', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
-               'set_breath_dual_effect']
+               'set_breath_dual_effect', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1756/blade-15-base-2021-rz09-0369x.png"
 
 
-class RazerBlade172022(_RippleKeyboard):
+class RazerBlade172022(_LaptopBoost):
     """
     Class for the Razer Blade 17 (2022)
     """
@@ -2067,12 +2187,12 @@ class RazerBlade172022(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/5896/5896-1-en-v2.png"
 
 
-class RazerBlade142022(_RippleKeyboard):
+class RazerBlade142022(_LaptopBoost):
     """
     Class for the Razer Blade 14 (2022)
     """
@@ -2086,12 +2206,12 @@ class RazerBlade142022(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/5896/5896-1-en-v2.png"
 
 
-class RazerBlade15AdvancedEarly2022(_RippleKeyboard):
+class RazerBlade15AdvancedEarly2022(_LaptopBoost):
     """
     Class for the Razer Blade 15 Advanced (Early 2022)
     """
@@ -2105,7 +2225,7 @@ class RazerBlade15AdvancedEarly2022(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/a1ee4c5a780a401444be898fe93ade69/thumbnail-blade15-new-model.png"
 
@@ -2177,7 +2297,7 @@ class RazerBlackWidowV4Pro(_RippleKeyboard):
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/9703/9703-1-en-v1.png"
 
 
-class RazerBlade142023(_RippleKeyboard):
+class RazerBlade142023(_LaptopBoost):
     """
     Class for the Razer Blade 14 (2023)
     """
@@ -2191,12 +2311,12 @@ class RazerBlade142023(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/13031/13031-1-en-v2.png"
 
 
-class RazerBlade142024(_RippleKeyboard):
+class RazerBlade142024(_LaptopBoost):
     """
     Class for the Razer Blade 14 (2024)
     """
@@ -2210,7 +2330,7 @@ class RazerBlade142024(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/13031/13031-1-en-v2.png"
 
@@ -2229,12 +2349,12 @@ class RazerBlade152023(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/9696/9696-1-en-v2.png"
 
 
-class RazerBlade162023(_RippleKeyboard):
+class RazerBlade162023(_LaptopBoost):
     """
     Class for the Razer Blade 16 (2023)
     """
@@ -2248,12 +2368,12 @@ class RazerBlade162023(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src/9668/9668-1-en-v2.png"
 
 
-class RazerBlade162025(_RippleKeyboard):
+class RazerBlade162025(_LaptopBoost):
     """
     Class for the Razer Blade 16 (2025)
     """
@@ -2267,12 +2387,12 @@ class RazerBlade162025(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/14806/14806-en-v1.png"
 
 
-class RazerBlade182023(_RippleKeyboard):
+class RazerBlade182023(_LaptopBoost):
     """
     Class for the Razer Blade 18 (2023)
     """
@@ -2286,12 +2406,12 @@ class RazerBlade182023(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/9676/9676-1-en-v1.png"
 
 
-class RazerBlade182024(_RippleKeyboard):
+class RazerBlade182024(_LaptopBoost):
     """
     Class for the Razer Blade 18 (2024)
     """
@@ -2305,12 +2425,12 @@ class RazerBlade182024(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/9676/9676-1-en-v1.png"
 
 
-class RazerBlade142025(_RippleKeyboard):
+class RazerBlade142025(_LaptopBoost):
     """
     Class for the Razer Blade 14 (2025)
     """
@@ -2324,12 +2444,12 @@ class RazerBlade142025(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/15088/15088-1-en-v1.png"
 
 
-class RazerBlade182025(_RippleKeyboard):
+class RazerBlade182025(_LaptopBoost):
     """
     Class for the Razer Blade 18 (2025)
     """
@@ -2343,7 +2463,7 @@ class RazerBlade182025(_RippleKeyboard):
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
                'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
-               'set_ripple_effect', 'set_ripple_effect_random_colour']
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_power_mode', 'set_power_mode', 'get_fan_rpm', 'set_fan_rpm', 'get_cpu_boost', 'set_cpu_boost', 'get_gpu_boost', 'set_gpu_boost']
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/14968/14968-1-en-v1.png"
 
