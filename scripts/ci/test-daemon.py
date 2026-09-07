@@ -103,6 +103,11 @@ def test_sysfs_consistency(d):
     check_sysfs("serial", "device_serial")
     check_sysfs("type", "device_type")
 
+    check_sysfs("power_mode", "power_mode")
+    check_sysfs("fan_rpm", "fan_rpm")
+    check_sysfs("cpu_boost", "cpu_boost")
+    check_sysfs("gpu_boost", "gpu_boost")
+
     if d.type == "keyboard":
         check_sysfs("keyboard_layout", "kbd_layout")
 
