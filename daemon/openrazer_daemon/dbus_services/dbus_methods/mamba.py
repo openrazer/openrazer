@@ -83,6 +83,14 @@ def set_low_battery_threshold(self, threshold):
 
     driver_path = self.get_driver_path('charge_low_threshold')
 
+    if threshold > 25:
+        threshold = 25
+    elif threshold < 5:
+        threshold = 5
+
+    self.low_battery_threshold = threshold
+    self.set_persistence(None, "low_battery_threshold", int(threshold))
+
     threshold = math.floor((threshold / 100) * 255)
 
     with open(driver_path, 'w') as driver_file:
@@ -101,11 +109,22 @@ def get_low_battery_threshold(self):
 
     driver_path = self.get_driver_path('charge_low_threshold')
 
-    with open(driver_path, 'r') as driver_file:
-        result = driver_file.read()
-        result = int(result.strip())
+    try:
+        with open(driver_path, 'r') as driver_file:
+            result = driver_file.read()
+            result = int(result.strip())
+    except (OSError, ValueError):
+        self.logger.exception("Failed to read low battery threshold, using cached value.")
+        return int(self.low_battery_threshold)
 
-    return round((result / 255) * 100)
+    threshold = round((result / 255) * 100)
+    if threshold > 25:
+        threshold = 25
+    elif threshold < 5:
+        threshold = 5
+
+    self.low_battery_threshold = threshold
+    return int(threshold)
 
 
 @endpoint('razer.device.lighting.power', 'setChargeEffect', in_sig='y')

@@ -112,6 +112,7 @@ class RazerDevice(DBusService):
             self.dpi = [1800, 1800]
 
         self.poll_rate = 500
+        self.low_battery_threshold = 5
         if 'set_poll_rate' in self.METHODS and not self.POLL_RATES:
             self.POLL_RATES = [125, 500, 1000]
 
@@ -265,6 +266,16 @@ class RazerDevice(DBusService):
                     self.poll_rate = int(self.persistence[self.storage_name]['poll_rate'])
                 except (KeyError, configparser.NoOptionError):
                     self.logger.info("Failed to get poll rate from persistence storage, using default.")
+
+            if 'set_low_battery_threshold' in self.METHODS:
+                try:
+                    self.low_battery_threshold = int(self.persistence[self.storage_name]['low_battery_threshold'])
+                    if self.low_battery_threshold > 25:
+                        self.low_battery_threshold = 25
+                    elif self.low_battery_threshold < 5:
+                        self.low_battery_threshold = 5
+                except (KeyError, configparser.NoOptionError, ValueError):
+                    self.logger.info("Failed to get low battery threshold from persistence storage, using default.")
 
         # load last effects
         for i in self.ZONES:
