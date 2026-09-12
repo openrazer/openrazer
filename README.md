@@ -171,6 +171,8 @@ This will output something similar to this:
 | Razer Blade 16 (2025)                                         |  1532:02C6  |
 | Razer Blade 18 (2025)                                         |  1532:02C7  |
 | Razer Huntsman V3 Pro 8KHz                                    |  1532:02CF  |
+| Razer BlackWidow V4 Low-Profile Tenkeyless HyperSpeed (Wireless) |  1532:02D2  |
+| Razer BlackWidow V4 Low-Profile Tenkeyless HyperSpeed (Wired) |  1532:02D4  |
 | Razer BlackWidow V4 Tenkeyless HyperSpeed (Wireless)          |  1532:02D5  |
 | Razer BlackWidow V4 Tenkeyless HyperSpeed (Wired)             |  1532:02D7  |
 | Razer BlackWidow V3 Tenkeyless                                |  1532:0A24  |
