@@ -333,7 +333,16 @@ class RazerDevice(DBusService):
 
         if self.DRIVER_MODE:
             self.logger.info('Setting device to "driver" mode. Daemon will handle special functionality')
-            self.set_device_mode(0x03, 0x00)  # Driver mode
+            try:
+                self.set_device_mode(0x03, 0x00)  # Driver mode
+            except OSError as err:
+                # Wireless devices that are asleep when their dongle enumerates
+                # cannot answer this, and the write fails with ETIMEDOUT. Letting
+                # that escape __init__ aborts device registration entirely, so the
+                # device is dropped even though the driver bound it correctly.
+                # Driver mode is re-applied on resume, so warn and carry on.
+                self.logger.warning('Failed to set "driver" mode (%s). Continuing; '
+                                    'special functionality may be unavailable until resume.', err)
 
         self.restore_dpi_poll_rate()
         self.restore_brightness()
@@ -1179,7 +1188,15 @@ class RazerDevice(DBusService):
         # suspend.
         if self.DRIVER_MODE:
             self.logger.info('Setting device back to "driver" mode.')
-            self.set_device_mode(0x03, 0x00)  # Driver mode
+            try:
+                self.set_device_mode(0x03, 0x00)  # Driver mode
+            except OSError as err:
+                # A device that is asleep at unlock time cannot answer. This must
+                # not abort the rest of the resume: disable_notify and
+                # disable_persistence are set True above and are only cleared at
+                # the end of this method, so an exception here would leave the
+                # device with notifications and persistence disabled for good.
+                self.logger.warning('Failed to restore "driver" mode (%s). Continuing resume.', err)
 
         self.restore_brightness()
         self._resume_device()
@@ -1218,13 +1235,20 @@ class RazerDevice(DBusService):
             if 'get_dpi_xy' in self.METHODS:
                 dpi_func = getattr(self, "getDPI", None)
                 if dpi_func is not None:
-                    self.dpi = dpi_func()
+                    try:
+                        self.dpi = dpi_func()
+                    except OSError:
+                        # A sleeping wireless device cannot answer. Keep the stored
+                        # value rather than aborting close() and leaking resources.
+                        self.logger.exception("Failed to read DPI while closing!")
 
             if self.DRIVER_MODE:
                 # Set back to device mode
                 try:
                     self.set_device_mode(0x00, 0x00)  # Device mode
-                except FileNotFoundError:
+                except OSError:
+                    # FileNotFoundError (device already gone) and ETIMEDOUT
+                    # (device asleep) are both expected here.
                     pass
 
             self._close()

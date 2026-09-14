@@ -59,7 +59,20 @@ class BatteryNotifier(threading.Thread):
         now = datetime.datetime.now()
 
         if (now - self._last_notify_time).seconds > self.frequency:
-            battery_level = self._get_battery_func()
+            try:
+                battery_level = self._get_battery_func()
+            except OSError as err:
+                # Reading charge_level from a sleeping wireless device fails with
+                # ETIMEDOUT. run() has no exception handling around this call, so
+                # letting it escape kills the notifier thread for the rest of the
+                # daemon's lifetime. Skip this round and retry on the next tick;
+                # _last_notify_time is deliberately not updated.
+                self._logger.debug("Failed to read battery level (%s), will retry.", err)
+                # Same throttle as the bogus-value path below, so a device that
+                # stays asleep is not polled in a tight loop.
+                time.sleep(10)
+                return
+
             battery_percent = round(battery_level)
 
             # Sometimes due to various issues we don't get the percentage correctly.

@@ -97,11 +97,19 @@ def get_keyboard_layout(self):
 
     driver_path = self.get_driver_path('kbd_layout')
 
-    with open(driver_path, 'r') as driver_file:
-        try:
+    try:
+        with open(driver_path, 'r') as driver_file:
             return layout_ids[driver_file.read().strip()]
-        except KeyError:
-            return "unknown"
+    except KeyError:
+        return "unknown"
+    except OSError as err:
+        # Reading this queries the device, so a wireless device that is asleep
+        # answers with ETIMEDOUT. pylib calls getKeyboardLayout() while building
+        # RazerDevice, so letting the error out breaks enumeration of every
+        # device. The layout is unknown in that case, which this method already
+        # has a defined return value for.
+        self.logger.warning('getting keyboard layout: %s', err)
+        return "unknown"
 
 
 # Functions to define a hardware class
