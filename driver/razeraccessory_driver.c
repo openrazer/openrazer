@@ -2641,15 +2641,6 @@ static ssize_t razer_attr_write_mouse_poll_rate(struct device *dev, struct devic
     if (err < 0)
         return err;
 
-    switch (polling_rate) {
-    case 125:
-    case 500:
-    case 1000:
-        break;
-    default:
-        return -EINVAL;
-    }
-
     request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x01);
     err = razer_dock_send_mouse_payload_ext(device, &request, &response, true);
     if (!err)
