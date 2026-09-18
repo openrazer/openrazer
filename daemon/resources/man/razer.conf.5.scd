@@ -33,6 +33,9 @@ The *[Startup]* section in the configuration file contains values to be used dur
 *devices_off_on_screensaver* _bool_
 	This flag specifies if the functionality to turn off razer devices when the screensaver is activated is active when the daemon starts.
 
+*devices_off_on_shutdown* _bool_
+	This flag specifies if razer devices should be turned off when the daemon is stopped, e.g. on system shutdown or reboot.
+
 *battery_notifier* _bool_
 	This flag specifies that notifications should be shown regularly with the remaining battery level.
 
