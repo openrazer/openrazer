@@ -161,8 +161,12 @@ retry:
 
 /**
  * Send a mouse command through the Mouse Dock Pro receiver.
+ *
+ * With quiet_unsupported set, a "not supported" reply returns -ENOTSUPP
+ * without logging, so callers can probe which command family the docked
+ * mouse speaks and fall back silently.
  */
-static int __must_check razer_dock_send_mouse_payload(struct razer_accessory_device *device, struct razer_report *request, struct razer_report *response)
+static int __must_check razer_dock_send_mouse_payload_ext(struct razer_accessory_device *device, struct razer_report *request, struct razer_report *response, bool quiet_unsupported)
 {
     int err;
 
@@ -191,6 +195,8 @@ static int __must_check razer_dock_send_mouse_payload(struct razer_accessory_dev
         print_erroneous_report(device->hdev, response, "Mouse command failed");
         return -EIO;
     case RAZER_CMD_NOT_SUPPORTED:
+        if (quiet_unsupported)
+            return -ENOTSUPP;
         print_erroneous_report(device->hdev, response, "Mouse command not supported");
         return -EIO;
     case RAZER_CMD_TIMEOUT:
@@ -199,6 +205,11 @@ static int __must_check razer_dock_send_mouse_payload(struct razer_accessory_dev
     }
 
     return 0;
+}
+
+static int __must_check razer_dock_send_mouse_payload(struct razer_accessory_device *device, struct razer_report *request, struct razer_report *response)
+{
+    return razer_dock_send_mouse_payload_ext(device, request, response, false);
 }
 
 /**
@@ -2576,6 +2587,26 @@ static ssize_t razer_attr_read_mouse_dpi_stages(struct device *dev, struct devic
     return razer_parse_dpi_stages(&response, buf, RAZER_ACCESSORY_MOUSE_MAX_DPI_STAGES);
 }
 
+static unsigned short razer_dock_parse_poll_rate_plain(struct razer_report *response)
+{
+    switch (response->arguments[0]) {
+    case 0x01:
+        return 1000;
+    case 0x02:
+        return 500;
+    case 0x08:
+        return 125;
+    default:
+        return 0;
+    }
+}
+
+/*
+ * Docked mice differ in which poll-rate command family they accept: the
+ * Basilisk V3 Pro takes the hyperpolling commands (0xC0/0x40), the Naga V2
+ * Pro only the plain ones (0x85/0x05). The hyperpolling form is tried first
+ * and the plain form used when the mouse reports it unsupported.
+ */
 static ssize_t razer_attr_read_mouse_poll_rate(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
@@ -2584,22 +2615,49 @@ static ssize_t razer_attr_read_mouse_poll_rate(struct device *dev, struct device
     int err;
 
     request = razer_chroma_misc_get_polling_rate2();
+    err = razer_dock_send_mouse_payload_ext(device, &request, &response, true);
+    if (!err)
+        return sysfs_emit(buf, "%d\n", razer_parse_poll_rate_hyperpolling(&response));
+    if (err != -ENOTSUPP)
+        return err;
+
+    request = razer_chroma_misc_get_polling_rate();
     err = razer_dock_send_mouse_payload(device, &request, &response);
     if (err)
         return err;
 
-    return sysfs_emit(buf, "%d\n", razer_parse_poll_rate_hyperpolling(&response));
+    return sysfs_emit(buf, "%d\n", razer_dock_parse_poll_rate_plain(&response));
 }
 
 static ssize_t razer_attr_write_mouse_poll_rate(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_accessory_device *device = dev_get_drvdata(dev);
-    unsigned short polling_rate = (unsigned short)simple_strtoul(buf, NULL, 10);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    unsigned short polling_rate;
     int err;
 
+    err = kstrtou16(buf, 0, &polling_rate);
+    if (err < 0)
+        return err;
+
+    switch (polling_rate) {
+    case 125:
+    case 500:
+    case 1000:
+        break;
+    default:
+        return -EINVAL;
+    }
+
     request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x01);
+    err = razer_dock_send_mouse_payload_ext(device, &request, &response, true);
+    if (!err)
+        return count;
+    if (err != -ENOTSUPP)
+        return err;
+
+    request = razer_chroma_misc_set_polling_rate(polling_rate);
     err = razer_dock_send_mouse_payload(device, &request, &response);
     if (err)
         return err;
