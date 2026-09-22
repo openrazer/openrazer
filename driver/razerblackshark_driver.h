@@ -234,7 +234,13 @@ struct blackshark_model {
      */
     u8 reply_cmd_off;
 
-    /* Writes must be wrapped in remote-mode (0xE1) handshakes. */
+    /* Writes must be wrapped in remote-mode (0xE1) handshakes.
+     *
+     * This also selects the wake frame: blackshark_wake() sends a remote-mode
+     * frame as the sacrificial first frame into a dozing link. A model that
+     * sets this false therefore gets no wake at all and must supply its own,
+     * or its first query after ~0.4s of idle is silently dropped.
+     */
     bool needs_remote_mode;
 
     /* --- hardware ranges ---------------------------------------------- */

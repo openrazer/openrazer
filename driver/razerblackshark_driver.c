@@ -630,8 +630,11 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
  * equalizer: 10 signed bytes, one gain (dB) per band (31Hz..16kHz). Writing
  * stores a custom curve: the driver switches to the custom preset first and
  * only sends the bands once the device confirms it is active, so they can
- * never land in another preset's slot. Reading returns the ACTIVE preset's
- * stored curve (0x15 follows the selected preset).
+ * never land in another preset's slot.
+ *
+ * Reading (0x15) follows the selected preset only within the game-EQ family
+ * (0xfa-0xfe). The four classic presets all answer with the CUSTOM slot's
+ * curve, so a read cannot show what game/music/movie actually apply.
  */
 static ssize_t razer_attr_write_equalizer(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
