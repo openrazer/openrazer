@@ -193,7 +193,11 @@
 /* Sidetone level the V2 Pro rests at in Synapse; used until the device is read. */
 #define BS_V2PRO_SIDETONE_DEFAULT 7
 
-#define BLACKSHARK_RESPONSE_TIMEOUT_MS 1000
+/* Per-attempt reply wait: a live headset answers in ~10ms, and this must stay
+ * below the link's ~0.3s doze threshold so a retry finds it still awake. */
+#define BLACKSHARK_RESPONSE_TIMEOUT_MS 150
+/* Attempts per query before giving up (headset off or out of range). */
+#define BLACKSHARK_QUERY_ATTEMPTS 3
 
 /*
  * Per-model descriptor.

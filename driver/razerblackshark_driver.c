@@ -134,6 +134,17 @@ static void blackshark_set_remote(struct razer_blackshark_device *dev, bool on)
     msleep(35);
 }
 
+/*
+ * Wake a dozing link: the first frame after an idle period is dropped by the
+ * dongle/headset and serves only to wake it, so send one we can afford to
+ * lose. set_remote() already sleeps 35ms afterwards, which is enough for the
+ * next frame to land.
+ */
+static void blackshark_wake(struct razer_blackshark_device *dev)
+{
+    blackshark_set_remote(dev, true);
+}
+
 /**
  * Query via cmd_type 0x03 / cmd_id, copying up to out_len reply bytes.
  * Sequence mirrors the working userspace probe: remote on, query, remote off.
@@ -145,26 +156,53 @@ static int blackshark_query_buf(struct razer_blackshark_device *dev, u8 cmd_id,
                                 u8 *out, size_t out_len)
 {
     int ret;
-    long left;
+    int attempt;
+    long left = 0;
 
     if (out_len > sizeof(dev->resp_buf))
         return -EINVAL;
 
     mutex_lock(&dev->req_lock);
 
-    blackshark_set_remote(dev, true);
+    /*
+     * After roughly 0.3s without traffic the 2.4GHz link dozes, and the first
+     * frame sent into a dozing link is dropped - it only wakes the link. In a
+     * query that first frame is "remote on", so the query that follows
+     * reaches a headset that is not in remote mode and is ignored, however
+     * often it is resent. (Synapse sends remote-on twice at the start of a
+     * sequence, presumably for this reason.) So: blackshark_wake() sends a
+     * sacrificial remote-on, and each attempt re-asserts remote mode before
+     * its query. The per-attempt wait is kept under the doze threshold so a
+     * retry never lands in a link that has gone back to sleep.
+     *
+     * Tools that retry a failed read (cat) hide all of this; callers that do
+     * not (python, and therefore the daemon) saw ETIMEDOUT on nearly every
+     * poll.
+     */
+    blackshark_wake(dev);
 
-    WRITE_ONCE(dev->expected_cmd, cmd_id);
-    reinit_completion(&dev->resp_done);
-    WRITE_ONCE(dev->resp_pending, true);
+    for (attempt = 0; attempt < BLACKSHARK_QUERY_ATTEMPTS; attempt++) {
+        blackshark_set_remote(dev, true);
 
-    blackshark_build_cmd(dev, BS_TYPE_QUERY, cmd_id, NULL, 0);
-    ret = blackshark_send_cmd(dev);
-    if (ret < 0)
-        goto out;
+        WRITE_ONCE(dev->expected_cmd, cmd_id);
+        reinit_completion(&dev->resp_done);
+        WRITE_ONCE(dev->resp_pending, true);
 
-    left = wait_for_completion_timeout(&dev->resp_done,
-                                       msecs_to_jiffies(BLACKSHARK_RESPONSE_TIMEOUT_MS));
+        blackshark_build_cmd(dev, BS_TYPE_QUERY, cmd_id, NULL, 0);
+        ret = blackshark_send_cmd(dev);
+        if (ret < 0)
+            goto out;
+
+        left = wait_for_completion_timeout(&dev->resp_done,
+                                           msecs_to_jiffies(BLACKSHARK_RESPONSE_TIMEOUT_MS));
+        if (left)
+            break;
+
+        WRITE_ONCE(dev->resp_pending, false);
+        hid_dbg(dev->hdev, "blackshark: no reply to cmd 0x%02x (attempt %d/%d)\n",
+                cmd_id, attempt + 1, BLACKSHARK_QUERY_ATTEMPTS);
+    }
+
     if (!left) {
         /*
          * Not an error worth a warning: the dongle enumerates whether or not
@@ -172,7 +210,6 @@ static int blackshark_query_buf(struct razer_blackshark_device *dev, u8 cmd_id,
          * poll time out. At hid_warn that floods the kernel log, since the
          * daemon polls the battery on a timer.
          */
-        hid_dbg(dev->hdev, "blackshark: timeout waiting for reply to cmd 0x%02x\n", cmd_id);
         ret = -ETIMEDOUT;
         goto out;
     }
@@ -388,6 +425,7 @@ static void blackshark_write_bands(struct razer_blackshark_device *dev)
 static void blackshark_write_value(struct razer_blackshark_device *dev, u8 cmd_id, u8 value)
 {
     mutex_lock(&dev->req_lock);
+    blackshark_wake(dev);
     blackshark_set_remote(dev, true);
     blackshark_build_cmd(dev, BS_TYPE_AUDIO, cmd_id, &value, 1);
     blackshark_send_cmd(dev);
