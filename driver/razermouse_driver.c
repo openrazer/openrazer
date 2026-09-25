@@ -3044,7 +3044,7 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
     }
 
     active_stage = buf[0];
-    remaining++;
+    remaining--;
     buf++;
 
     if (active_stage < 1) {
@@ -3621,6 +3621,9 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
         return err;
 
     request = razer_chroma_misc_set_low_battery_threshold(threshold);
+    /* Its receiver reports 0x4D (30%) as the default, above the generic cap. */
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED)
+        request.arguments[0] = clamp_val(threshold, 0x0C, 0x4D);
 
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
