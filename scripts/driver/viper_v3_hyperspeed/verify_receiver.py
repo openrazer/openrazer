@@ -124,7 +124,7 @@ def main():
         print("packet codec: pass")
         return
 
-    import hid  # Optional dependency; import only for hardware checks.
+    import hid  # pylint: disable=import-error  # Optional hardware dependency.
     device, item = open_receiver(hid)
     try:
         result = {
