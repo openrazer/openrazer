@@ -1218,7 +1218,11 @@ class RazerDevice(DBusService):
             if 'get_dpi_xy' in self.METHODS:
                 dpi_func = getattr(self, "getDPI", None)
                 if dpi_func is not None:
-                    self.dpi = dpi_func()
+                    # Still release everything if the device no longer answers
+                    try:
+                        self.dpi = dpi_func()
+                    except (OSError, ValueError):
+                        self.logger.warning("Failed to read DPI while closing")
 
             if self.DRIVER_MODE:
                 # Set back to device mode

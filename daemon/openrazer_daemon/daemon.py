@@ -113,6 +113,13 @@ class RazerDaemon(DBusService):
         # Load Classes
         self._device_classes = openrazer_daemon.hardware.get_device_classes()
 
+        # Guards device (un)exporting between hotplug threads and the main loop
+        self._devices_lock = threading.RLock()
+        # Set by quit, nothing is exported or scheduled afterwards
+        self._stopping = False
+        self._collecting_udev = False
+        self._collecting_udev_devices = []
+
         self.logger.info("Initialising Daemon (v%s). Pid: %d", __version__, os.getpid())
         self._init_screensaver_monitor()
 
@@ -135,9 +142,6 @@ class RazerDaemon(DBusService):
         for m in methods:
             self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
             self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
-
-        self._collecting_udev = False
-        self._collecting_udev_devices = []
 
         self._init_autosave_persistence()
 
@@ -515,6 +519,38 @@ class RazerDaemon(DBusService):
 
                     device_number += 1
 
+    def _create_device(self, device_class, **kwargs):
+        """
+        Create a device object, removing it from D-Bus again if initialisation fails
+
+        :return: Device object or None
+        :rtype: openrazer_daemon.hardware.device_base.RazerDevice or None
+        """
+        # Keep a reference to the partially initialised object for cleanup
+        razer_device = device_class.__new__(device_class)
+        try:
+            razer_device.__init__(config=self._config, persistence=self._persistence, testing=self._test_dir is not None,
+                                  additional_methods=[], unknown_serial_counter=self._unknown_serial_counter, **kwargs)
+        except Exception:  # pylint: disable=broad-except
+            self.logger.exception('Failed to initialise %s', kwargs['device_path'])
+            self._discard_device(razer_device)
+            return None
+        return razer_device
+
+    @staticmethod
+    def _discard_device(razer_device):
+        """
+        Remove a device object that never became part of the collection
+        """
+        try:
+            razer_device.remove_from_connection()
+        except (LookupError, AttributeError):
+            pass  # Failed before it was exported
+        try:
+            razer_device.close()
+        except Exception:  # pylint: disable=broad-except
+            pass
+
     def _add_device(self, device):
         """
         Add device event from udev
@@ -532,31 +568,36 @@ class RazerDaemon(DBusService):
 
             if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
                 self.logger.info('Found valid device.%d: %s', device_number, sys_name)
-                razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
-                                            persistence=self._persistence, testing=self._test_dir is not None,
-                                            additional_interfaces=None, additional_methods=[],
-                                            unknown_serial_counter=self._unknown_serial_counter)
+                # Created and added in one step: quit either comes first or waits for it
+                with self._devices_lock:
+                    if self._stopping:
+                        return
+                    razer_device = self._create_device(device_class, device_path=sys_path, device_number=device_number,
+                                                       additional_interfaces=None)
+                    if razer_device is None:
+                        return
 
-                # Its a udev event so currently the device hasn't been chmodded yet
-                time.sleep(0.2)
+                    # Its a udev event so currently the device hasn't been chmodded yet
+                    time.sleep(0.2)
 
-                # Wireless devices sometimes don't listen
-                device_serial = razer_device.get_serial()
+                    # Wireless devices sometimes don't listen
+                    device_serial = razer_device.get_serial()
 
-                if len(device_serial) > 0:
-                    # Add Device
-                    self._razer_devices.add(sys_name, device_serial, razer_device)
-                    self.device_added()
-                else:
-                    logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
+                    if len(device_serial) > 0:
+                        # Add Device
+                        self._razer_devices.add(sys_name, device_serial, razer_device)
+                        self.device_added()
+                    else:
+                        logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
             else:
                 # Basically find the other usb interfaces
                 device_match = sys_name.split('.')[0]
-                for d in self._razer_devices:
-                    if device_match in d.device_id and d.device_id != sys_name:
-                        if not sys_path in d.dbus.additional_interfaces:
-                            d.dbus.additional_interfaces.append(sys_path)
-                            return
+                with self._devices_lock:
+                    for d in self._razer_devices:
+                        if device_match in d.device_id and d.device_id != sys_name:
+                            if not sys_path in d.dbus.additional_interfaces:
+                                d.dbus.additional_interfaces.append(sys_path)
+                                return
 
     def _remove_device(self, device):
         """
@@ -567,21 +608,41 @@ class RazerDaemon(DBusService):
         """
         device_id = device.sys_name
 
-        try:
-            device = self._razer_devices[device_id]
-
-            device.dbus.close()
-            device.dbus.remove_from_connection()
-            self.write_persistence(self._persistence_file)
-            self.logger.warning("Removing %s", device_id)
-
-            # Delete device
-            del self._razer_devices[device.device_id]
-            self.device_removed()
-
-        except IndexError:  # Why didn't i set it up as KeyError
+        with self._devices_lock:
             # It will return "extra" events for the additional usb interfaces bound to the driver
-            pass
+            if device_id in self._razer_devices:
+                self._unexport_device(device_id)
+
+    def _unexport_device(self, device_id):
+        """
+        Close a device and remove it from D-Bus
+
+        :return: False if it is still exported, it stays in the collection then
+        :rtype: bool
+        """
+        device = self._razer_devices[device_id]
+
+        # Remove it from D-Bus anyway, its path may be needed for a replacement
+        try:
+            device.dbus.close()
+        except Exception:  # pylint: disable=broad-except
+            self.logger.exception('Failed to close %s', device_id)
+        try:
+            device.dbus.remove_from_connection()
+        except LookupError:
+            pass  # Not exported
+        except Exception:  # pylint: disable=broad-except
+            self.logger.exception('Failed to remove %s from D-Bus', device_id)
+            return False
+        try:
+            self.write_persistence(self._persistence_file)
+        except Exception:  # pylint: disable=broad-except
+            self.logger.exception('Failed to write persistence')
+        self.logger.warning("Removing %s", device_id)
+
+        del self._razer_devices[device.device_id]
+        self.device_removed()
+        return True
 
     def _udev_input_event(self, device):
         """
@@ -592,24 +653,42 @@ class RazerDaemon(DBusService):
         """
         self.logger.debug('Device event [%s]: %s', device.action, device.device_path)
         if device.action == 'add':
-            if self._collecting_udev:
+            with self._devices_lock:
+                if self._stopping:
+                    return
                 self._collecting_udev_devices.append(device)
-                return
-            else:
-                self._collecting_udev_devices = [device]
+                if self._collecting_udev:
+                    return
                 self._collecting_udev = True
-                t = threading.Thread(target=self._collecting_udev_method, args=(device,))
-                t.start()
+            t = threading.Thread(target=self._collecting_udev_method, args=(device,))
+            t.start()
         elif device.action == 'remove':
             self._remove_device(device)
 
     def _collecting_udev_method(self, device):
         time.sleep(2)  # delay to let udev add all devices that we want
-        # Sort the devices
-        self._collecting_udev_devices.sort(key=lambda x: x.sys_path, reverse=True)
-        for d in self._collecting_udev_devices:
-            self._add_device(d)
-        self._collecting_udev = False
+        try:
+            while True:
+                # Events arriving meanwhile are added in the next pass
+                with self._devices_lock:
+                    devices = self._collecting_udev_devices
+                    self._collecting_udev_devices = []
+                    if not devices:
+                        self._collecting_udev = False
+                        return
+
+                # Sort the devices
+                devices.sort(key=lambda x: x.sys_path, reverse=True)
+                for d in devices:
+                    try:
+                        self._add_device(d)
+                    except Exception:  # pylint: disable=broad-except
+                        self.logger.exception('Failed to add device %s', d.sys_name)
+        except BaseException:
+            # Never leave later events waiting for this thread
+            with self._devices_lock:
+                self._collecting_udev = False
+            raise
 
     def run(self):
         """
@@ -642,17 +721,34 @@ class RazerDaemon(DBusService):
         else:
             self.logger.info('Stopping daemon on signal %d', signum)
 
-        # "Resume" all devices, in case they're still "suspended"
-        # (lights off because of screensaver)
-        self.resume_devices()
+        # Hotplug threads wait for this, then stop exporting devices
+        with self._devices_lock:
+            if self._stopping:
+                return
+            self._stopping = True
+            self._collecting_udev_devices = []
 
-        self._main_loop.quit()
+            # "Resume" all devices, in case they're still "suspended"
+            # (lights off because of screensaver). One failing device must not stop the rest.
+            for device in self._razer_devices:
+                try:
+                    device.dbus.resume_device()
+                except Exception:  # pylint: disable=broad-except
+                    self.logger.exception('Failed to resume %s', device.device_id)
 
-        # Stop udev monitor
-        self._udev_observer.send_stop()
+            self._main_loop.quit()
 
-        for device in self._razer_devices:
-            device.dbus.close()
+            # Stop udev monitor
+            self._udev_observer.send_stop()
 
-        # Write config
-        self.write_persistence(self._persistence_file)
+            for device in self._razer_devices:
+                try:
+                    device.dbus.close()
+                except Exception:  # pylint: disable=broad-except
+                    self.logger.exception('Failed to close %s', device.device_id)
+
+            # Write config
+            try:
+                self.write_persistence(self._persistence_file)
+            except Exception:  # pylint: disable=broad-except
+                self.logger.exception('Failed to write persistence')
