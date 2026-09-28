@@ -102,6 +102,7 @@ This will output something similar to this:
 | Razer Blade Stealth (2019)                                    |  1532:0239  |
 | Razer Blade 15 Advanced (2019)                                |  1532:023A  |
 | Razer Blade 15 Base (2018)                                    |  1532:023B  |
+| Razer Turret Keyboard for Xbox One (Wired)                    |  1532:023E  |
 | Razer Cynosa Lite                                             |  1532:023F  |
 | Razer Blade 15 Mercury (2018)                                 |  1532:0240  |
 | Razer BlackWidow (2019)                                       |  1532:0241  |
@@ -173,6 +174,7 @@ This will output something similar to this:
 | Razer Huntsman V3 Pro 8KHz                                    |  1532:02CF  |
 | Razer BlackWidow V4 Tenkeyless HyperSpeed (Wireless)          |  1532:02D5  |
 | Razer BlackWidow V4 Tenkeyless HyperSpeed (Wired)             |  1532:02D7  |
+| Razer Turret Keyboard for Xbox One (Wireless)                 |  1532:0904  |
 | Razer BlackWidow V3 Tenkeyless                                |  1532:0A24  |
 
 ### Mice
@@ -228,6 +230,7 @@ This will output something similar to this:
 | Razer DeathAdder Essential (White Edition)                    |  1532:0071  |
 | Razer Mamba Wireless (Receiver)                               |  1532:0072  |
 | Razer Mamba Wireless (Wired)                                  |  1532:0073  |
+| Razer Turret Mouse for Xbox One (Wired)                       |  1532:0075  |
 | Razer Pro Click (Receiver)                                    |  1532:0077  |
 | Razer Viper                                                   |  1532:0078  |
 | Razer Viper Ultimate (Wired)                                  |  1532:007A  |
@@ -291,6 +294,7 @@ This will output something similar to this:
 | Razer Basilisk Mobile (Receiver)                              |  1532:00D4  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wired)       |  1532:00D6  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wireless)    |  1532:00D7  |
+| Razer Turret Mouse for Xbox One (Wireless)                    |  1532:0904  |
 
 ### Mousemats
 | Device                                                        | USB VID:PID |

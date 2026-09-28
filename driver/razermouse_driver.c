@@ -98,6 +98,10 @@ static int razer_get_report(struct hid_device *hdev, struct razer_report *reques
         return razer_get_usb_response(hdev, index, request, index, response, RAZER_VIPER_MOUSE_RECEIVER_WAIT_US);
         break;
 
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        return razer_get_usb_response(hdev, index, request, index, response, RAZER_TURRET_MOUSE_WAIT_US);
+        break;
+
     case USB_DEVICE_ID_RAZER_NAGA_X:
     case USB_DEVICE_ID_RAZER_BASILISK_V3:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
@@ -750,6 +754,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Pro Click V2 (Wireless)";
         break;
 
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        device_type = "Razer Turret Mouse for Xbox One (Wired)";
+        break;
+
     default:
         device_type = "Unknown Device";
     }
@@ -834,6 +842,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -977,6 +986,11 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
         request = razer_chroma_standard_matrix_effect_none();
         request.transaction_id.id = 0xFF;
+        break;
+
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        request = razer_chroma_extended_matrix_effect_none(NOSTORE, ZERO_LED);
+        request.transaction_id.id = 0x1f;
         break;
 
     default:
@@ -1157,6 +1171,11 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         request.transaction_id.id = 0x1f;
         break;
 
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        request = razer_chroma_extended_matrix_effect_static(NOSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
+        request.transaction_id.id = 0x1f;
+        break;
+
     default:
         dev_warn(dev, "razermouse: matrix_effect_static not supported for this model\n");
         return -EINVAL;
@@ -1257,6 +1276,11 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
         request.transaction_id.id = 0x1f;
         break;
 
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        request = razer_chroma_extended_matrix_effect_spectrum(NOSTORE, ZERO_LED);
+        request.transaction_id.id = 0x1f;
+        break;
+
     default:
         dev_warn(dev, "razermouse: matrix_effect_spectrum not supported for this model\n");
         return -EINVAL;
@@ -1299,6 +1323,11 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
         request = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+        request.transaction_id.id = 0x1f;
+        break;
+
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        request = razer_chroma_extended_matrix_effect_reactive(NOSTORE, ZERO_LED, speed, (struct razer_rgb*)&buf[1]);
         request.transaction_id.id = 0x1f;
         break;
 
@@ -1351,6 +1380,26 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
             request.transaction_id.id = 0x1f;
             break;
         }
+        break;
+
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        switch(count) {
+        case 3: // Single colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_single(NOSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
+            break;
+
+        case 6: // Dual colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_dual(NOSTORE, ZERO_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            break;
+
+        case 1: // "Random" colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_random(NOSTORE, ZERO_LED);
+            break;
+
+        default:
+            return -EINVAL;
+        }
+        request.transaction_id.id = 0x1f;
         break;
 
     default:
@@ -1458,6 +1507,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -1596,6 +1646,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -1702,6 +1753,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -2011,6 +2063,29 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
         request.transaction_id.id = 0xFF;
         break;
 
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        // 0x01 = 1000Hz, 0x02 = 500Hz in arg[1]
+        request = get_razer_report(0x00, 0x8e, 0x02);
+        request.arguments[0] = 0x01;
+        request.transaction_id.id = 0x1f;
+
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+
+        switch(response.arguments[1]) {
+        case 0x01:
+            polling_rate = 1000;
+            break;
+        case 0x02:
+            polling_rate = 500;
+            break;
+        default:
+            return -EIO;
+        }
+
+        return sysfs_emit(buf, "%d\n", polling_rate);
+
     default:
         dev_warn(dev, "razermouse: poll_rate not supported for this model\n");
         return -EINVAL;
@@ -2193,6 +2268,23 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
         request.transaction_id.id = 0xFF;
         break;
 
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        request = get_razer_report(0x00, 0x0e, 0x02);
+        request.arguments[0] = 0x01;
+        switch(polling_rate) {
+        case 1000:
+            request.arguments[1] = 0x01;
+            break;
+        case 500:
+            request.arguments[1] = 0x02;
+            break;
+        default:
+            dev_warn(dev, "razermouse: Turret only supports 500 and 1000 Hz poll rates\n");
+            return -EINVAL;
+        }
+        request.transaction_id.id = 0x1f;
+        break;
+
     default:
         dev_warn(dev, "razermouse: poll_rate not supported for this model\n");
         return -EINVAL;
@@ -2278,6 +2370,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         request.transaction_id.id = 0x1F;
         break;
@@ -2358,6 +2451,12 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED:
         request = razer_chroma_extended_matrix_get_brightness(VARSTORE, ZERO_LED);
+        request.transaction_id.id = 0x1F;
+        break;
+
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        // Brightness is set with ZERO_LED but read back with LED ID 0x01
+        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, SCROLL_WHEEL_LED);
         request.transaction_id.id = 0x1F;
         break;
 
@@ -2561,6 +2660,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -2779,6 +2879,11 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
     case USB_DEVICE_ID_RAZER_COBRA:
         request = razer_chroma_misc_get_dpi_xy(NOSTORE);
         request.transaction_id.id = 0xFF;
+        break;
+
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        request = razer_chroma_misc_get_dpi_xy(VARSTORE);
+        request.transaction_id.id = 0x1f;
         break;
 
     default:
@@ -3043,6 +3148,12 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
         return -EINVAL;
     }
 
+    // Reject partial stage records on the Turret
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED && (count - 1) % 4 != 0) {
+        dev_err(dev, "razermouse: Each DPI stage takes 4 bytes\n");
+        return -EINVAL;
+    }
+
     active_stage = buf[0];
     remaining++;
     buf++;
@@ -3140,6 +3251,11 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_COBRA:
         request.transaction_id.id = 0xFF;
+        break;
+
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        request.data_size = 3 + 7 * stages_count;
+        request.transaction_id.id = 0x1f;
         break;
 
     default:
@@ -3255,6 +3371,11 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_COBRA:
         request.transaction_id.id = 0xFF;
+        break;
+
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        request.data_size = 0x50;
+        request.transaction_id.id = 0x1f;
         break;
 
     default:
@@ -3920,6 +4041,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -4089,6 +4211,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -6295,8 +6418,10 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct hid_device *
 static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
     int retval = 0;
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct razer_mouse_device *dev = NULL;
     unsigned char expected_subclass = 0xFF;
+    unsigned char expected_interface = 0xFF;
 
     dev = kzalloc_obj(*dev);
 
@@ -6316,10 +6441,16 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
         expected_subclass = 0x01;
         break;
+
+    // Interface 3 also reports as a mouse, the control interface is 0
+    case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+        expected_interface = 0x00;
+        break;
     }
 
     if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE
-       && (expected_subclass == 0xFF || dev->usb_interface_subclass == expected_subclass)) {
+       && (expected_subclass == 0xFF || dev->usb_interface_subclass == expected_subclass)
+       && (expected_interface == 0xFF || intf->cur_altsetting->desc.bInterfaceNumber == expected_interface)) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_firmware_version);
@@ -7391,6 +7522,20 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat_delay);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat);
             break;
+
+        case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);
+            break;
         }
 
     }
@@ -7430,7 +7575,8 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 
     dev = hid_get_drvdata(hdev);
 
-    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+    if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE &&
+       (dev->usb_pid != USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED || intf->cur_altsetting->desc.bInterfaceNumber == 0)) {
         device_remove_file(&hdev->dev, &dev_attr_version);
         device_remove_file(&hdev->dev, &dev_attr_test);
         device_remove_file(&hdev->dev, &dev_attr_firmware_version);
@@ -8502,6 +8648,20 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_tilt_repeat_delay);
             device_remove_file(&hdev->dev, &dev_attr_tilt_repeat);
             break;
+
+        case USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED:
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);
+            break;
         }
 
     }
@@ -8630,6 +8790,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TURRET_MOUSE_WIRED) },
     { 0 }
 };
 

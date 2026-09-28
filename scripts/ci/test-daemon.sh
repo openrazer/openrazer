@@ -14,3 +14,4 @@ fi
 
 PYTHONPATH="pylib:daemon" python3 scripts/ci/test-daemon.py
 PYTHONPATH="pylib:daemon" python3 scripts/ci/test-pids.py
+PYTHONPATH="pylib:daemon" python3 -m unittest discover -s daemon/tests -p test_turret_discovery.py

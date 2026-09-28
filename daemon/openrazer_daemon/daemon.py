@@ -11,6 +11,7 @@ import configparser
 import logging
 import logging.handlers
 import os
+import re
 import sys
 import signal
 import time
@@ -29,6 +30,37 @@ from openrazer_daemon.dbus_services.service import DBusService
 from openrazer_daemon.device import DeviceCollection
 from openrazer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 from openrazer_daemon.misc.autosave_persistence import PersistenceAutoSave
+
+# Retry interval for role interfaces without a readable serial, e.g. an asleep receiver role
+ROLE_RETRY_SECONDS = 5
+ROLE_RETRY_MAX_SECONDS = 60
+
+
+class RoleInterface(object):
+    """
+    HID interface of a wired device or of a receiver role that reports the same serial
+
+    The serial is verified once per interface and kept until udev removes it.
+    """
+
+    def __init__(self, device_class, sys_path, additional_interfaces):
+        self.device_class = device_class
+        self.sys_path = sys_path
+        self.additional_interfaces = additional_interfaces
+        self.serial = None
+        self.retry_at = 0.0
+        self.retry_delay = ROLE_RETRY_SECONDS
+
+    @property
+    def is_receiver(self):
+        return self.device_class.DEVICE_TYPE is not None
+
+    def defer(self, now):
+        """
+        Back off exponentially, so asleep roles are rarely queried
+        """
+        self.retry_at = now + self.retry_delay
+        self.retry_delay = min(self.retry_delay * 2, ROLE_RETRY_MAX_SECONDS)
 
 
 class RazerDaemon(DBusService):
@@ -112,6 +144,15 @@ class RazerDaemon(DBusService):
 
         # Load Classes
         self._device_classes = openrazer_daemon.hardware.get_device_classes()
+
+        # Receiver role classes and the wired classes they share serials with
+        receiver_classes = [cls for cls in self._device_classes if cls.DEVICE_TYPE is not None]
+        self._role_classes = receiver_classes + [base for cls in receiver_classes for base in cls.__mro__[1:] if base in self._device_classes]
+        self._role_interfaces: dict[str, RoleInterface] = {}
+        self._role_retry_source = None
+        self._role_removal_failed = False
+        # Objects still exported after udev removed their interface, by device ID
+        self._orphaned_devices = {}
 
         # Guards device (un)exporting between hotplug threads and the main loop
         self._devices_lock = threading.RLock()
@@ -454,6 +495,8 @@ class RazerDaemon(DBusService):
 
         device_number = 0
         for device in device_list:
+            if self._add_role_interface(device, device_list, test_mode):
+                continue
 
             for device_class in self._device_classes:
                 # Interoperability between generic list of 0000:0000:0000.0000 and pyudev
@@ -519,6 +562,140 @@ class RazerDaemon(DBusService):
 
                     device_number += 1
 
+        self._reconcile_roles()
+
+    def _add_role_interface(self, device, device_list=None, test_mode=False):
+        """
+        Remember a wired or receiver role interface, exported later by _reconcile_roles
+
+        :return: True if the interface belongs to a role class
+        :rtype: bool
+        """
+        if test_mode:
+            sys_name = device
+            sys_path = os.path.join(self._test_dir, device)
+        else:
+            sys_name = device.sys_name
+            sys_path = device.sys_path
+
+        device_class = next((cls for cls in self._role_classes if cls.match(sys_name, sys_path)), None)
+        if device_class is None:
+            return False
+
+        # Like other wired devices, but receiver roles are independent of their siblings
+        additional_interfaces = []
+        if device_list is not None and not test_mode and device_class.DEVICE_TYPE is None:
+            device_match = sys_name.split('.')[0]
+            additional_interfaces = sorted(alt.sys_path for alt in device_list if device_match in alt.sys_name and alt.sys_name != sys_name)
+
+        with self._devices_lock:
+            if sys_name not in self._role_interfaces:
+                self.logger.info('Found %s interface: %s', device_class.__name__, sys_name)
+                self._role_interfaces[sys_name] = RoleInterface(device_class, sys_path, additional_interfaces)
+        return True
+
+    def _read_role_serial(self, sys_path, attempts):
+        """
+        Read a serial before any object is created for it
+
+        :return: Serial, or None when missing, unreadable or malformed
+        :rtype: str or None
+        """
+        for attempt in range(attempts):
+            if attempt > 0:
+                time.sleep(0.1)
+            try:
+                with open(os.path.join(sys_path, 'device_serial'), 'rb') as serial_file:
+                    serial = serial_file.read().decode('ascii').strip()
+            except (OSError, UnicodeDecodeError) as err:
+                self.logger.debug('Could not read serial of %s: %s', sys_path, err)
+                continue
+
+            # Same check as RazerDevice.get_serial, but never a generated serial
+            if re.fullmatch(r'[\dA-Z]+', serial):
+                return serial
+            self.logger.warning('Invalid serial %r for %s', serial, sys_path)
+        return None
+
+    def _reconcile_roles(self, limit=None):
+        """
+        Export one object per serial across role interfaces, preferring wired
+
+        Serials are read without holding the lock. Only interfaces still present
+        afterwards are selected, so results for removed ones are ignored.
+
+        :param limit: Maximum number of pending interfaces to read
+        :type limit: int or None
+        """
+        now = time.monotonic()
+        with self._devices_lock:
+            if self._stopping:
+                return
+            pending = sorted((iface.retry_at, name, iface) for name, iface in self._role_interfaces.items()
+                             if iface.serial is None and iface.retry_at <= now and not self._role_waits(iface))
+        pending = pending[:limit]
+
+        # Periodic retries read once; hotplug allows for a slow wireless answer
+        attempts = 1 if limit else 3
+        results = [(iface, self._read_role_serial(iface.sys_path, attempts)) for _retry_at, _name, iface in pending]
+
+        with self._devices_lock:
+            if self._stopping:
+                return  # Stopped during the reads
+
+            for device_id, device_dbus in list(self._orphaned_devices.items()):
+                if device_id not in self._razer_devices or self._razer_devices[device_id].dbus is not device_dbus or self._unexport_device(device_id):
+                    del self._orphaned_devices[device_id]
+
+            for iface, serial in results:
+                if iface.serial is not None:
+                    continue  # Already answered through a concurrent call
+                if serial is None:
+                    iface.defer(now)
+                else:
+                    iface.serial = serial
+                    iface.retry_delay = ROLE_RETRY_SECONDS
+
+            winners = {}
+            for name, iface in self._role_interfaces.items():
+                if iface.serial is not None:
+                    rank = (iface.is_receiver, name not in self._razer_devices, name)
+                    if iface.serial not in winners or rank < winners[iface.serial][0]:
+                        winners[iface.serial] = (rank, name)
+            selected = {name for _rank, name in winners.values()}
+
+            # Remove replaced objects first, their serial is the new object's D-Bus path
+            self._role_removal_failed = False
+            for name in list(self._role_interfaces):
+                if name in self._razer_devices and name not in selected:
+                    if not self._unexport_device(name):
+                        self._role_removal_failed = True
+
+            for serial, (_rank, name) in sorted(winners.items()):
+                if name in self._razer_devices:
+                    continue  # Exported, or its old object still is
+                if serial in self._razer_devices:
+                    self.logger.warning('Serial %s of %s is already in use. Skipping', serial, name)
+                    continue
+                self._export_role(name, self._role_interfaces[name], now)
+
+            if self._role_retry_source is None and self._roles_need_retry():
+                self._role_retry_source = GLib.timeout_add_seconds(ROLE_RETRY_SECONDS, self._retry_roles)
+
+    def _roles_need_retry(self):
+        return self._role_removal_failed or bool(self._orphaned_devices) or \
+            any(iface.serial is None and not self._role_waits(iface) for iface in self._role_interfaces.values())
+
+    def _role_waits(self, iface):
+        """
+        A receiver role isn't queried while a wired device of its kind answers
+
+        That device is most likely the one missing from the receiver. Unplugging
+        it queries the receiver role again at once.
+        """
+        return iface.is_receiver and any(not other.is_receiver and other.serial is not None and issubclass(iface.device_class, other.device_class)
+                                         for other in self._role_interfaces.values())
+
     def _create_device(self, device_class, **kwargs):
         """
         Create a device object, removing it from D-Bus again if initialisation fails
@@ -551,6 +728,36 @@ class RazerDaemon(DBusService):
         except Exception:  # pylint: disable=broad-except
             pass
 
+    def _export_role(self, name, iface, now):
+        """
+        Create the D-Bus object of a role interface
+        """
+        razer_device = self._create_device(iface.device_class, device_path=iface.sys_path, device_number=len(self._razer_devices),
+                                           additional_interfaces=iface.additional_interfaces, serial=iface.serial)
+        if razer_device is None:
+            # Verify the serial again first, e.g. the role may have gone to sleep
+            iface.serial = None
+            iface.defer(now)
+            return
+
+        self._razer_devices.add(name, iface.serial, razer_device)
+        self.device_added()
+
+    def _retry_roles(self):
+        """
+        GLib timeout: retry one pending role interface per call
+        """
+        try:
+            self._reconcile_roles(limit=1)
+        except Exception:  # pylint: disable=broad-except
+            self.logger.exception('Failed to retry role interfaces')
+
+        with self._devices_lock:
+            if not self._stopping and self._roles_need_retry():
+                return True
+            self._role_retry_source = None
+            return False
+
     def _add_device(self, device):
         """
         Add device event from udev
@@ -558,6 +765,10 @@ class RazerDaemon(DBusService):
         :param device: Udev Device
         :type device: pyudev.device._device.Device
         """
+        # Exported after the whole batch
+        if self._add_role_interface(device):
+            return
+
         device_number = len(self._razer_devices)
         for device_class in self._device_classes:
             sys_name = device.sys_name
@@ -594,6 +805,9 @@ class RazerDaemon(DBusService):
                 device_match = sys_name.split('.')[0]
                 with self._devices_lock:
                     for d in self._razer_devices:
+                        # Receiver roles are separate devices
+                        if d.dbus.DEVICE_TYPE is not None:
+                            continue
                         if device_match in d.device_id and d.device_id != sys_name:
                             if not sys_path in d.dbus.additional_interfaces:
                                 d.dbus.additional_interfaces.append(sys_path)
@@ -609,9 +823,29 @@ class RazerDaemon(DBusService):
         device_id = device.sys_name
 
         with self._devices_lock:
+            iface = self._role_interfaces.pop(device_id, None)
+
             # It will return "extra" events for the additional usb interfaces bound to the driver
             if device_id in self._razer_devices:
-                self._unexport_device(device_id)
+                device_dbus = self._razer_devices[device_id].dbus
+                if self._unexport_device(device_id):
+                    self._orphaned_devices.pop(device_id, None)
+                else:
+                    self._orphaned_devices[device_id] = device_dbus
+
+            if iface is not None:
+                # Verify a remaining interface with this serial before it takes over. A device
+                # unplugged from its cable may also connect to an asleep receiver role soon.
+                for other_id, other in self._role_interfaces.items():
+                    if other_id in self._razer_devices:
+                        continue
+                    if other.serial == iface.serial or (other.serial is None and not iface.is_receiver):
+                        other.serial = None
+                        other.retry_at = 0.0
+                        other.retry_delay = ROLE_RETRY_SECONDS
+
+        if iface is not None or device_id in self._orphaned_devices:
+            self._reconcile_roles()
 
     def _unexport_device(self, device_id):
         """
@@ -684,6 +918,7 @@ class RazerDaemon(DBusService):
                         self._add_device(d)
                     except Exception:  # pylint: disable=broad-except
                         self.logger.exception('Failed to add device %s', d.sys_name)
+                self._reconcile_roles()
         except BaseException:
             # Never leave later events waiting for this thread
             with self._devices_lock:
@@ -721,12 +956,15 @@ class RazerDaemon(DBusService):
         else:
             self.logger.info('Stopping daemon on signal %d', signum)
 
-        # Hotplug threads wait for this, then stop exporting devices
+        # Hotplug threads and retries wait for this, then stop exporting devices
         with self._devices_lock:
             if self._stopping:
                 return
             self._stopping = True
             self._collecting_udev_devices = []
+            if self._role_retry_source is not None:
+                GLib.source_remove(self._role_retry_source)
+                self._role_retry_source = None
 
             # "Resume" all devices, in case they're still "suspended"
             # (lights off because of screensaver). One failing device must not stop the rest.
