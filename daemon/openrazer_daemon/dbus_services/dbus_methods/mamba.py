@@ -253,6 +253,16 @@ def set_dpi_stages(self, active_stage, dpi_stages):
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(dpi_bytes)
 
+    # The mouse switches to the active stage, so persist that DPI; otherwise
+    # the next restore would put back the previous value.
+    if 1 <= active_stage <= len(dpi_stages):
+        dpi_x, dpi_y = dpi_stages[active_stage - 1]
+        self.dpi[0] = dpi_x
+        self.dpi[1] = dpi_y
+
+        self.set_persistence(None, "dpi_x", dpi_x)
+        self.set_persistence(None, "dpi_y", dpi_y)
+
 
 @endpoint('razer.device.dpi', 'getDPIStages', out_sig='(ya(qq))')
 def get_dpi_stages(self):

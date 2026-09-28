@@ -8,6 +8,12 @@ from openrazer_daemon.hardware.device_base import RazerDevice as __RazerDevice, 
     RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend
 
 
+class DockedMouseNotReady(Exception):
+    """
+    The docked mouse did not answer with a valid serial over RF yet
+    """
+
+
 class RazerMouseDocked(__RazerDevice):
     """
     Base class for mice accessed via the Razer Mouse Dock Pro.
@@ -70,6 +76,69 @@ class RazerMouseDocked(__RazerDevice):
     def get_driver_path(self, driver_filename):
         driver_filename = self._MOUSE_SYSFS_MAP.get(driver_filename, driver_filename)
         return super().get_driver_path(driver_filename)
+
+    def get_serial(self):
+        # The serial keys the persistence section, so a generated placeholder
+        # would restore defaults instead of the saved DPI and effects.  Raise
+        # instead and let the caller retry once the RF link has settled.
+        if self._serial is None:
+            serial = self._read_driver_serial()
+            if not self._is_valid_serial(serial):
+                raise DockedMouseNotReady("no valid serial from docked mouse: {0!r}".format(serial))
+            self._serial = serial
+
+        return self._serial
+
+    def read_reported_dpi(self):
+        """
+        DPI the mouse last announced to the dock, without RF traffic
+
+        :return: [x, y], or None if the mouse has not announced one since
+                 the link came up
+        :rtype: list of int or None
+        """
+        try:
+            with open(self.get_driver_path('mouse_reported_dpi'), 'r') as driver_file:
+                result = driver_file.read().strip()
+        except OSError:
+            return None
+        if not result:
+            return None
+        try:
+            return [int(dpi) for dpi in result.split(':')]
+        except ValueError:
+            return None
+
+    def update_dpi_from_report(self, dpi):
+        """
+        Take over a DPI the mouse announced (DPI button, wake from sleep)
+
+        :param dpi: [x, y] from read_reported_dpi()
+        :type dpi: list of int or None
+        """
+        if dpi is None or dpi == self.dpi:
+            return
+        self.logger.info("Mouse reported DPI %d:%d", dpi[0], dpi[1])
+        self.dpi[0] = dpi[0]
+        self.dpi[1] = dpi[1]
+        self.set_persistence(None, "dpi_x", dpi[0])
+        self.set_persistence(None, "dpi_y", dpi[1])
+
+    def _restore_dpi(self):
+        # After a wake the mouse has already announced its DPI, which wins
+        # over the saved one; after a power-on it announces none and the
+        # saved value is restored.
+        dpi = self.read_reported_dpi()
+        if dpi is None:
+            super()._restore_dpi()
+        else:
+            self.update_dpi_from_report(dpi)
+
+    def close(self, read_hardware=True):
+        # The DPI cache follows every change (setDPI, stage sync, the
+        # mouse's own reports), and an RF read here may hit a mouse that is
+        # already gone and return a bogus value.
+        super().close(read_hardware=False)
 
     @classmethod
     def match(cls, device_id, dev_path):  # noqa: ARG003

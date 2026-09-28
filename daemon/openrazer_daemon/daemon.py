@@ -11,6 +11,7 @@ import configparser
 import logging
 import logging.handlers
 import os
+import select
 import sys
 import signal
 import time
@@ -27,6 +28,7 @@ import threading
 import openrazer_daemon.hardware
 from openrazer_daemon.dbus_services.service import DBusService
 from openrazer_daemon.hardware.accessory import RazerMouseDockPro
+from openrazer_daemon.hardware.mouse import DockedMouseNotReady
 from openrazer_daemon.device import DeviceCollection
 from openrazer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 from openrazer_daemon.misc.autosave_persistence import PersistenceAutoSave
@@ -235,11 +237,55 @@ class RazerDaemon(DBusService):
 
     def _dock_mouse_monitor_loop(self):
         while True:
+            # Arm before sampling so a link change during the check still
+            # wakes the wait below.
+            files = self._arm_dock_mouse_notifications()
             try:
-                self._check_dock_mouse_state()
-            except Exception:
-                self.logger.exception("Error in dock mouse monitor")
-            time.sleep(5)
+                try:
+                    self._check_dock_mouse_state()
+                except Exception:
+                    self.logger.exception("Error in dock mouse monitor")
+                self._wait_for_dock_mouse_event(files)
+            finally:
+                for f in files:
+                    f.close()
+
+    def _arm_dock_mouse_notifications(self):
+        """
+        Open and read each dock's mouse_connected and mouse_reported_dpi
+
+        The driver signals POLLPRI on them when the dock reports a link or
+        DPI change; sysfs only does so for changes after the file was read.
+        """
+        files = []
+        for _, device_wrapper in list(self._razer_devices.id_items()):
+            razer_device = device_wrapper.dbus
+            if not isinstance(razer_device, RazerMouseDockPro):
+                continue
+            for attribute in ("mouse_connected", "mouse_reported_dpi"):
+                try:
+                    f = open(razer_device.get_driver_path(attribute))
+                except OSError:
+                    continue
+                try:
+                    f.read()
+                except OSError:
+                    f.close()
+                    continue
+                files.append(f)
+        return files
+
+    def _wait_for_dock_mouse_event(self, files):
+        # The short timeout confirms a pending change quickly; the long one is
+        # the polling fallback for drivers that never signal.
+        timeout = 1 if self._dock_mouse_pending else 5
+        if not files:
+            time.sleep(timeout)
+            return
+        poller = select.poll()
+        for f in files:
+            poller.register(f, select.POLLPRI | select.POLLERR)
+        poller.poll(timeout * 1000)
 
     def _check_dock_mouse_state(self):
         for device_id, device_wrapper in list(self._razer_devices.id_items()):
@@ -249,6 +295,9 @@ class RazerDaemon(DBusService):
 
             child_id = device_id + ':mouse'
             child_present = child_id in self._razer_devices
+            if child_present:
+                child = self._razer_devices[child_id].dbus
+                child.update_dpi_from_report(child.read_reported_dpi())
             connected = razer_device.is_mouse_connected()
 
             if not connected:
@@ -261,8 +310,8 @@ class RazerDaemon(DBusService):
                 continue
 
             # Sampled state differs from reality. Require two consecutive
-            # matching samples (~10 s) before acting, to avoid reacting to a
-            # transient RF blip during pair/unpair or a missed heartbeat.
+            # matching samples (~1 s apart) before acting, to avoid reacting
+            # to a transient RF blip during pair/unpair or a missed heartbeat.
             if device_id not in self._dock_mouse_pending:
                 self._dock_mouse_pending.add(device_id)
                 continue
@@ -280,20 +329,23 @@ class RazerDaemon(DBusService):
                     self._dock_mouse_failed.add(device_id)
                     self.logger.exception("Failed to add dock %s's mouse child device", device_id)
                     continue
-                self.device_added()
+                if child_id in self._razer_devices:
+                    self.device_added()
             else:
                 self.logger.info("Mouse disconnected from dock %s", device_id)
                 self._remove_dock_child_device(child_id)
 
-    def _teardown_device(self, device):
-        device.dbus.close()
+    def _teardown_device(self, device, read_hardware=True):
+        device.dbus.close(read_hardware=read_hardware)
         device.dbus.remove_from_connection()
         self.logger.warning("Removing %s", device.device_id)
         del self._razer_devices[device.device_id]
 
     def _remove_dock_child_device(self, child_id):
         try:
-            self._teardown_device(self._razer_devices[child_id])
+            # The dock reports the mouse gone, so reading its DPI over RF
+            # would only time out.
+            self._teardown_device(self._razer_devices[child_id], read_hardware=False)
             self.write_persistence(self._persistence_file)
             self.device_removed()
         except (IndexError, KeyError):
@@ -613,10 +665,16 @@ class RazerDaemon(DBusService):
                 continue
 
             self.logger.info('Found logical child device.%d: %s', device_number, child_sys_name)
-            child_device = child_class(device_path=sys_path, device_number=device_number, config=self._config,
-                                       persistence=self._persistence, testing=self._test_dir is not None,
-                                       additional_interfaces=None, additional_methods=[],
-                                       unknown_serial_counter=self._unknown_serial_counter)
+            try:
+                child_device = child_class(device_path=sys_path, device_number=device_number, config=self._config,
+                                           persistence=self._persistence, testing=self._test_dir is not None,
+                                           additional_interfaces=None, additional_methods=[],
+                                           unknown_serial_counter=self._unknown_serial_counter)
+            except DockedMouseNotReady as err:
+                # Raised before any D-Bus registration; the dock monitor
+                # retries on its next sample.
+                self.logger.warning('Skipping %s for now: %s', child_sys_name, err)
+                continue
 
             self._razer_devices.add(child_sys_name, child_device.get_serial(), child_device)
             self._razer_devices[sys_name].child_ids.append(child_sys_name)

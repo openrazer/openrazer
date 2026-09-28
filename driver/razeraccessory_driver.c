@@ -41,6 +41,27 @@ static void razer_dock_pro_shared_release(struct kref *ref)
     kfree(shared);
 }
 
+static void razer_dock_pro_link_work(struct work_struct *work)
+{
+    struct razer_dock_pro_shared *shared = container_of(work, struct razer_dock_pro_shared, link_work);
+
+    mutex_lock(&shared->ctrl_lock);
+    if (shared->ctrl_hdev) {
+        sysfs_notify(&shared->ctrl_hdev->dev.kobj, NULL, "mouse_connected");
+        sysfs_notify(&shared->ctrl_hdev->dev.kobj, NULL, "mouse_reported_dpi");
+    }
+    mutex_unlock(&shared->ctrl_lock);
+}
+
+static void razer_dock_pro_clear_reported_dpi(struct razer_dock_pro_shared *shared)
+{
+    unsigned long flags;
+
+    spin_lock_irqsave(&shared->nearby_lock, flags);
+    shared->reported_dpi_valid = false;
+    spin_unlock_irqrestore(&shared->nearby_lock, flags);
+}
+
 static struct razer_dock_pro_shared *razer_dock_pro_shared_get(struct usb_device *usb_dev)
 {
     struct razer_dock_pro_shared *shared;
@@ -63,6 +84,9 @@ static struct razer_dock_pro_shared *razer_dock_pro_shared_get(struct usb_device
     kref_init(&shared->ref);
     shared->usb_dev = usb_dev;
     spin_lock_init(&shared->nearby_lock);
+    atomic_set(&shared->link_state, RAZER_DOCK_PRO_LINK_UNKNOWN);
+    INIT_WORK(&shared->link_work, razer_dock_pro_link_work);
+    mutex_init(&shared->ctrl_lock);
     list_add(&shared->list, &dock_pro_shared_list);
 
     mutex_unlock(&dock_pro_shared_list_lock);
@@ -3219,10 +3243,17 @@ static ssize_t razer_attr_read_mouse_connected(struct device *dev, struct device
     struct razer_accessory_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
+    int link;
     int err;
 
     if (atomic_read(&device->pairing_busy))
         return sysfs_emit(buf, "0\n");
+
+    /* The '05 09' link report leads the heartbeat below by up to ~1 s, so
+     * prefer it once the dock has sent one. */
+    link = atomic_read(&device->shared->link_state);
+    if (link != RAZER_DOCK_PRO_LINK_UNKNOWN)
+        return sysfs_emit(buf, "%d\n", link == RAZER_DOCK_PRO_LINK_UP);
 
     /*
      * Query dock firmware via cmd=0xbf heartbeat instead of relaying a battery
@@ -3284,6 +3315,32 @@ static ssize_t razer_attr_read_paired_pid(struct device *dev, struct device_attr
     struct razer_accessory_device *device = dev_get_drvdata(dev);
 
     return sysfs_emit(buf, "%04x\n", razer_dock_pro_query_paired_pid(device));
+}
+
+/**
+ * Read device file "mouse_reported_dpi"
+ *
+ * Returns "x:y" as last announced by the paired mouse, or an empty line when
+ * it has not announced one since the link came up.  No RF traffic.
+ */
+static ssize_t razer_attr_read_mouse_reported_dpi(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_dock_pro_shared *shared = device->shared;
+    unsigned short dpi_x, dpi_y;
+    unsigned long flags;
+    bool valid;
+
+    spin_lock_irqsave(&shared->nearby_lock, flags);
+    valid = shared->reported_dpi_valid;
+    dpi_x = shared->reported_dpi_x;
+    dpi_y = shared->reported_dpi_y;
+    spin_unlock_irqrestore(&shared->nearby_lock, flags);
+
+    if (!valid)
+        return sysfs_emit(buf, "\n");
+
+    return sysfs_emit(buf, "%u:%u\n", dpi_x, dpi_y);
 }
 
 static ssize_t razer_attr_read_mouse_firmware(struct device *dev, struct device_attribute *attr, char *buf)
@@ -3559,6 +3616,16 @@ static void razer_set_shared_paired_pid(struct razer_accessory_device *device, u
     spin_unlock_irqrestore(&device->shared->nearby_lock, flags);
 }
 
+/* The cached link state and DPI describe the previous pairing (or the time
+ * before a host suspend), so drop them until the dock reports again. */
+static void razer_reset_shared_link_state(struct razer_accessory_device *device)
+{
+    if (!device->shared)
+        return;
+    atomic_set(&device->shared->link_state, RAZER_DOCK_PRO_LINK_UNKNOWN);
+    razer_dock_pro_clear_reported_dpi(device->shared);
+}
+
 /**
  * Write device file "pair"
  *
@@ -3574,6 +3641,7 @@ static ssize_t razer_attr_write_mouse_dock_pro_pair(struct device *dev, struct d
     int err;
 
     atomic_set(&device->pairing_busy, 1);
+    razer_reset_shared_link_state(device);
 
     /*
      * tid=0x1F is the dock's RF relay channel.  When no mouse is associated
@@ -3651,6 +3719,7 @@ static ssize_t razer_attr_write_mouse_dock_pro_unpair(struct device *dev, struct
     int err;
 
     atomic_set(&device->pairing_busy, 1);
+    razer_reset_shared_link_state(device);
 
     request = razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(pid);
     request.transaction_id.id = 0x3F;
@@ -3794,6 +3863,7 @@ static DEVICE_ATTR(mouse_scroll_matrix_effect_reactive,     0220, NULL,         
 static DEVICE_ATTR(mouse_serial,                            0440, razer_attr_read_mouse_serial,                  NULL);
 static DEVICE_ATTR(mouse_connected,                         0440, razer_attr_read_mouse_connected,               NULL);
 static DEVICE_ATTR(paired_pid,                              0440, razer_attr_read_paired_pid,                    NULL);
+static DEVICE_ATTR(mouse_reported_dpi,                      0440, razer_attr_read_mouse_reported_dpi,            NULL);
 static DEVICE_ATTR(nearby_mice,                             0440, razer_attr_read_nearby_mice,                   NULL);
 static DEVICE_ATTR(scan_for_mice,                           0220, NULL,                                          razer_attr_write_scan_for_mice);
 static DEVICE_ATTR(mouse_firmware,                          0440, razer_attr_read_mouse_firmware,                NULL);
@@ -4158,6 +4228,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_serial);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_connected);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_paired_pid);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_reported_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_nearby_mice);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scan_for_mice);
 
@@ -4194,6 +4265,10 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_scroll_mode);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_scroll_acceleration);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_scroll_smart_reel);
+
+            mutex_lock(&dev->shared->ctrl_lock);
+            dev->shared->ctrl_hdev = hdev;
+            mutex_unlock(&dev->shared->ctrl_lock);
             break;
         }
 
@@ -4224,6 +4299,17 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     if (hid_hw_start(hdev, HID_CONNECT_DEFAULT)) {
         hid_err(hdev, "hw start failed\n");
         goto exit_free;
+    }
+
+    /* usbhid only polls the interrupt endpoint while the device is open, so
+     * without this the link and nearby-mice reports on interface 1 would be
+     * lost whenever no userspace process holds its input device. */
+    if (dev->shared && intf->cur_altsetting->desc.bInterfaceNumber == 1) {
+        err = hid_hw_open(hdev);
+        if (err)
+            hid_warn(hdev, "failed to open for link reports: %d\n", err);
+        else
+            dev->hw_opened = true;
     }
 
     usb_disable_autosuspend(usb_dev);
@@ -4434,6 +4520,10 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
 
         switch(usb_dev->descriptor.idProduct) {
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+            mutex_lock(&dev->shared->ctrl_lock);
+            dev->shared->ctrl_hdev = NULL;
+            mutex_unlock(&dev->shared->ctrl_lock);
+
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
@@ -4446,6 +4536,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_mouse_serial);
             device_remove_file(&hdev->dev, &dev_attr_mouse_connected);
             device_remove_file(&hdev->dev, &dev_attr_paired_pid);
+            device_remove_file(&hdev->dev, &dev_attr_mouse_reported_dpi);
             device_remove_file(&hdev->dev, &dev_attr_nearby_mice);
             device_remove_file(&hdev->dev, &dev_attr_scan_for_mice);
             device_remove_file(&hdev->dev, &dev_attr_mouse_firmware);
@@ -4481,7 +4572,15 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         }
     }
 
+    if (dev->hw_opened)
+        hid_hw_close(hdev);
+
     hid_hw_stop(hdev);
+
+    /* No report can queue link_work once interface 1 has stopped; whichever
+     * interface drops the last reference has flushed it here. */
+    if (dev->shared)
+        cancel_work_sync(&dev->shared->link_work);
 
     razer_dock_pro_shared_put(dev->shared);
     kfree(dev);
@@ -4528,12 +4627,77 @@ static void razer_dock_pro_update_nearby(struct razer_dock_pro_shared *shared, u
     spin_unlock_irqrestore(&shared->nearby_lock, flags);
 }
 
+/*
+ * Link report on EP 0x82 of the Mouse Dock Pro:
+ *
+ *   05 09 <state> 01 00 ...
+ *
+ * state 0x03 = RF link to the paired mouse up, 0x02 = down (mouse off, asleep
+ * or out of range).  The dock repeats it without a change, so only a
+ * transition wakes userspace.  Meaning of byte 3 is not characterised.
+ */
+static void razer_dock_pro_update_link(struct razer_dock_pro_shared *shared, u8 state)
+{
+    int link;
+
+    switch (state) {
+    case 0x02:
+        link = RAZER_DOCK_PRO_LINK_DOWN;
+        break;
+    case 0x03:
+        link = RAZER_DOCK_PRO_LINK_UP;
+        break;
+    default:
+        return;
+    }
+
+    if (link == RAZER_DOCK_PRO_LINK_DOWN)
+        razer_dock_pro_clear_reported_dpi(shared);
+
+    if (atomic_xchg(&shared->link_state, link) != link)
+        schedule_work(&shared->link_work);
+}
+
+/*
+ * DPI report on EP 0x82 of the Mouse Dock Pro:
+ *
+ *   05 02 <x_hi> <x_lo> <y_hi> <y_lo> 00 ...
+ *
+ * Sent by the mouse after a press of its DPI button and on wake from sleep,
+ * not on power-on and not when the host sets the DPI.
+ */
+static void razer_dock_pro_update_dpi(struct razer_dock_pro_shared *shared, const u8 *data)
+{
+    unsigned short dpi_x = ((unsigned short)data[2] << 8) | data[3];
+    unsigned short dpi_y = ((unsigned short)data[4] << 8) | data[5];
+    unsigned long flags;
+    bool changed;
+
+    spin_lock_irqsave(&shared->nearby_lock, flags);
+    changed = !shared->reported_dpi_valid ||
+              shared->reported_dpi_x != dpi_x ||
+              shared->reported_dpi_y != dpi_y;
+    shared->reported_dpi_x = dpi_x;
+    shared->reported_dpi_y = dpi_y;
+    shared->reported_dpi_valid = true;
+    spin_unlock_irqrestore(&shared->nearby_lock, flags);
+
+    if (changed)
+        schedule_work(&shared->link_work);
+}
+
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
     struct razer_accessory_device *device = hid_get_drvdata(hdev);
 
     if (device->shared && size >= 16 && data[0] == 0x05 && data[1] == 0x37)
         razer_dock_pro_update_nearby(device->shared, data);
+
+    if (device->shared && size >= 3 && data[0] == 0x05 && data[1] == 0x09)
+        razer_dock_pro_update_link(device->shared, data[2]);
+
+    if (device->shared && size >= 6 && data[0] == 0x05 && data[1] == 0x02)
+        razer_dock_pro_update_dpi(device->shared, data);
 
     if(size == 16 && data[0] == 0x04) {
         input_report_key(device->input, KEY_PROG1, 0x01);
@@ -4585,6 +4749,25 @@ MODULE_DEVICE_TABLE(hid, razer_devices);
 /**
  * Describes the contents of the driver
  */
+#ifdef CONFIG_PM
+/*
+ * Link reports sent while the host was suspended are lost, so the cached
+ * state may be stale: fall back to the heartbeat and wake pollers so they
+ * re-sample.
+ */
+static int razer_accessory_resume(struct hid_device *hdev)
+{
+    struct razer_accessory_device *device = hid_get_drvdata(hdev);
+
+    if (device->shared) {
+        razer_reset_shared_link_state(device);
+        schedule_work(&device->shared->link_work);
+    }
+
+    return 0;
+}
+#endif
+
 static struct hid_driver razer_accessory_driver = {
     .name = "razeraccessory",
     .id_table = razer_devices,
@@ -4593,7 +4776,11 @@ static struct hid_driver razer_accessory_driver = {
     .remove = razer_accessory_disconnect,
     .raw_event = razer_raw_event,
     .input_mapping = razer_input_mapping,
-    .input_configured = razer_input_configured
+    .input_configured = razer_input_configured,
+#ifdef CONFIG_PM
+    .resume = razer_accessory_resume,
+    .reset_resume = razer_accessory_resume,
+#endif
 };
 
 module_hid_driver(razer_accessory_driver);

@@ -35,8 +35,11 @@
 #define USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA 0x0F26
 #define USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2 0x0F2B
 
+#include <linux/atomic.h>
 #include <linux/kref.h>
+#include <linux/mutex.h>
 #include <linux/spinlock.h>
+#include <linux/workqueue.h>
 
 #define RAZER_ACCESSORY_WAIT_MIN_US 600
 
@@ -46,6 +49,11 @@
  * Per the v2 capture format (16-byte HID input report on EP 0x82, "05 37 ..."),
  * the slot count is small; 8 covers any realistic environment. */
 #define RAZER_DOCK_PRO_MAX_NEARBY 8
+
+/* Paired-mouse RF link state, from the dock's '05 09 <state>' input report. */
+#define RAZER_DOCK_PRO_LINK_UNKNOWN (-1)
+#define RAZER_DOCK_PRO_LINK_DOWN 0
+#define RAZER_DOCK_PRO_LINK_UP 1
 
 /*
  * State shared between the two HID interfaces the Mouse Dock Pro exposes.
@@ -72,6 +80,28 @@ struct razer_dock_pro_shared {
      * Protected by nearby_lock.
      */
     unsigned short paired_pid;
+
+    /*
+     * Last DPI the paired mouse announced with '05 02' (cycle button, wake
+     * from sleep).  Cleared when the link drops, since the mouse sends none
+     * on power-on and a stale value must not be taken for the current one.
+     * Protected by nearby_lock.
+     */
+    unsigned short reported_dpi_x;
+    unsigned short reported_dpi_y;
+    bool reported_dpi_valid;
+
+    /*
+     * RAZER_DOCK_PRO_LINK_* as last reported on interface 1; UNKNOWN until the
+     * first report, and again from the start of a pair/unpair until the next
+     * one.  A change to it or to the reported DPI queues link_work, which
+     * wakes pollers of mouse_connected and mouse_reported_dpi on the
+     * interface that owns the sysfs tree (ctrl_hdev, NULL once it detaches).
+     */
+    atomic_t link_state;
+    struct work_struct link_work;
+    struct mutex ctrl_lock;      /* protects ctrl_hdev */
+    struct hid_device *ctrl_hdev;
 };
 
 struct razer_accessory_device {
@@ -99,6 +129,10 @@ struct razer_accessory_device {
     /* Non-NULL only on Mouse Dock Pro interfaces.  Lazily allocated by the
      * first interface to probe; released when both interfaces detach. */
     struct razer_dock_pro_shared *shared;
+
+    /* Set when probe called hid_hw_open() to keep the interrupt endpoint
+     * polled without a userspace reader. */
+    bool hw_opened;
 };
 
 /*

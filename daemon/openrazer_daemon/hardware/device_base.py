@@ -58,6 +58,10 @@ class RazerDevice(DBusService):
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
 
+        # Nothing to close until construction gets past get_serial(), which
+        # may raise; __del__ still runs on the half-built object.
+        self._is_closed = True
+
         # Serial cache
         self._serial = None
 
@@ -379,6 +383,13 @@ class RazerDevice(DBusService):
         """
         Set the device DPI & poll rate to the saved value
         """
+        self._restore_dpi()
+        self._restore_poll_rate()
+
+    def _restore_dpi(self):
+        """
+        Set the device DPI to the saved value
+        """
         dpi_func = getattr(self, "setDPI", None)
         if dpi_func is not None:
             # Constrain value in case the max has changed, e.g. wired/wireless might different maximums
@@ -394,6 +405,10 @@ class RazerDevice(DBusService):
             except OSError:
                 self.logger.exception("Failed to restore DPI!")
 
+    def _restore_poll_rate(self):
+        """
+        Set the device poll rate to the saved value
+        """
         poll_rate_func = getattr(self, "setPollRate", None)
         if poll_rate_func is not None:
             # Constrain value in case the available values have changed, e.g. wired/wireless might different values available
@@ -985,36 +1000,9 @@ class RazerDevice(DBusService):
         """
         # TODO raise exception if serial can't be got and handle during device add
         if self._serial is None:
-            serial_path = self.get_driver_path('device_serial')
-            count = 0
-            serial = ''
-            while len(serial) == 0:
-                if count >= 5:
-                    break
+            serial = self._read_driver_serial()
 
-                try:
-                    with open(serial_path, 'r') as f:
-                        serial = f.read().strip()
-                except (PermissionError, OSError) as err:
-                    self.logger.warning('getting serial: {0}'.format(err))
-                    serial = ''
-                except UnicodeDecodeError as err:
-                    self.logger.warning('malformed serial: {0}'.format(err))
-                    serial = ''
-
-                count += 1
-
-                if len(serial) == 0:
-                    time.sleep(0.1)
-                    self.logger.debug('getting serial: {0} count:{1}'.format(serial, count))
-
-            # Known bad serials:
-            # - just an empty string
-            # - "Default string"
-            # - "empty (NULL)"
-            # - "As printed in the D cover"
-            # - hex: 01 01 01 01 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16
-            if not re.fullmatch(r"[\dA-Z]+", serial):
+            if not self._is_valid_serial(serial):
                 self.logger.warning("Invalid serial number found, using a generated one.")
                 self.logger.warning("Original value: %s" % serial)
                 vid, pid = self.get_vid_pid()
@@ -1025,6 +1013,50 @@ class RazerDevice(DBusService):
             self._serial = serial.replace(' ', '_')
 
         return self._serial
+
+    def _read_driver_serial(self):
+        """
+        Read the serial from the driver, retrying while it comes back empty
+
+        :return: Serial as reported, or an empty string
+        :rtype: str
+        """
+        serial_path = self.get_driver_path('device_serial')
+        count = 0
+        serial = ''
+        while len(serial) == 0:
+            if count >= 5:
+                break
+
+            try:
+                with open(serial_path, 'r') as f:
+                    serial = f.read().strip()
+            except (PermissionError, OSError) as err:
+                self.logger.warning('getting serial: {0}'.format(err))
+                serial = ''
+            except UnicodeDecodeError as err:
+                self.logger.warning('malformed serial: {0}'.format(err))
+                serial = ''
+
+            count += 1
+
+            if len(serial) == 0:
+                time.sleep(0.1)
+                self.logger.debug('getting serial: {0} count:{1}'.format(serial, count))
+
+        return serial
+
+    @staticmethod
+    def _is_valid_serial(serial):
+        """
+        Known bad serials:
+        - just an empty string
+        - "Default string"
+        - "empty (NULL)"
+        - "As printed in the D cover"
+        - hex: 01 01 01 01 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16
+        """
+        return re.fullmatch(r"[\dA-Z]+", serial) is not None
 
     def get_child_devices(self):
         """
@@ -1221,15 +1253,19 @@ class RazerDevice(DBusService):
         if self._battery_manager:
             self._battery_manager.close()
 
-    def close(self):
+    def close(self, read_hardware=True):
         """
         Close any resources opened by subclasses
+
+        :param read_hardware: False when the device is known to be unreachable,
+                              so the last known DPI is kept instead of queried
+        :type read_hardware: bool
         """
         if not self._is_closed:
             # If this is a mouse, retrieve current DPI for local storage
             # in case the user has changed the DPI on-the-fly
             # (e.g. the DPI buttons)
-            if 'get_dpi_xy' in self.METHODS:
+            if read_hardware and 'get_dpi_xy' in self.METHODS:
                 dpi_func = getattr(self, "getDPI", None)
                 if dpi_func is not None:
                     self.dpi = dpi_func()
