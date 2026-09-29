@@ -2132,3 +2132,30 @@ class RazerProClickV2Wireless(RazerProClickV2Wired):
     Class for the Razer Pro Click V2 (Wireless)
     """
     USB_PID = 0x00D1
+
+
+class RazerTurretMouseWired(__RazerDevice):
+    """
+    Class for the Razer Turret Mouse for Xbox One (Wired)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x0075
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               'get_battery', 'is_charging',
+               'get_brightness', 'set_brightness', 'set_static_effect', 'set_spectrum_effect', 'set_none_effect',
+               'set_reactive_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect']
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/4ae9980b8033273f47626e2584cad15e/razer-turret-xbox-category-500x500.jpg"
+
+    DPI_MAX = 16000
+
+    POLL_RATES = [500, 1000]
+
+
+class RazerTurretMouseWireless(RazerTurretMouseWired):
+    """
+    Class for the Razer Turret Mouse for Xbox One (Wireless)
+    """
+    USB_PID = 0x0904
+    DEVICE_TYPE = 'Razer Turret Mouse for Xbox One (Wireless)'

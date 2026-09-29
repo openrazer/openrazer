@@ -2377,3 +2377,27 @@ class RazerHuntsmanV3Pro8KHz(_RazerDeviceBrightnessSuspend):
         """
         super()._close()
         self.key_manager.close()
+
+
+class RazerTurretKeyboardWired(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Turret Keyboard for Xbox One (Wired)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x023E
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 18]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_battery', 'is_charging']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/4ae9980b8033273f47626e2584cad15e/razer-turret-xbox-category-500x500.jpg"
+
+
+class RazerTurretKeyboardWireless(RazerTurretKeyboardWired):
+    """
+    Class for the Razer Turret Keyboard for Xbox One (Wireless)
+    """
+    USB_PID = 0x0904
+    DEVICE_TYPE = 'Razer Turret Keyboard for Xbox One (Wireless)'

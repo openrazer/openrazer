@@ -41,6 +41,9 @@ class RazerDevice(DBusService):
     POLL_RATES: Optional[list[int]] = None
     DPI_MAX: Optional[int] = None
     DRIVER_MODE = False
+    # Receivers exposing several devices under one USB ID: the driver's
+    # device_type string selects the class for each interface.
+    DEVICE_TYPE: Optional[str] = None
 
     WAVE_DIRS = (1, 2)
 
@@ -48,13 +51,13 @@ class RazerDevice(DBusService):
 
     DEVICE_IMAGE: Optional[str] = None
 
-    def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter):
+    def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter, serial=None):
 
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
 
-        # Serial cache
-        self._serial = None
+        # Serial cache, or the serial the daemon already read and validated
+        self._serial = serial
 
         # map of vid+pid to counter for serial numbers for unknown devices
         self._unknown_serial_counter: dict[tuple[int, int], int] = unknown_serial_counter
@@ -1218,7 +1221,11 @@ class RazerDevice(DBusService):
             if 'get_dpi_xy' in self.METHODS:
                 dpi_func = getattr(self, "getDPI", None)
                 if dpi_func is not None:
-                    self.dpi = dpi_func()
+                    # Still release everything if the device no longer answers
+                    try:
+                        self.dpi = dpi_func()
+                    except (OSError, ValueError):
+                        self.logger.warning("Failed to read DPI while closing")
 
             if self.DRIVER_MODE:
                 # Set back to device mode
@@ -1308,7 +1315,13 @@ class RazerDevice(DBusService):
 
         if re.match(pattern, device_id) is not None:
             if 'device_type' in os.listdir(dev_path):
-                return True
+                if cls.DEVICE_TYPE is None:
+                    return True
+                try:
+                    with open(os.path.join(dev_path, 'device_type'), 'r') as type_file:
+                        return type_file.read().strip() == cls.DEVICE_TYPE
+                except (OSError, UnicodeDecodeError):
+                    return False
 
         return False
 

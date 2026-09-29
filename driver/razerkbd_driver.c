@@ -16,6 +16,7 @@
 #include "usb_hid_keys.h"
 
 #include "razerkbd_driver.h"
+#include "razerkbd_turret.h"
 #include "razercommon.h"
 #include "razerchromacommon.h"
 
@@ -377,6 +378,11 @@ static void razer_get_report_params(struct usb_device *usb_dev, uint *report_ind
         *response_index = 0x02;
         *wait = RAZER_DEATHSTALKER_V2_WIRELESS_WAIT_US;
         break;
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
+        *report_index = 0x02;
+        *response_index = 0x02;
+        *wait = RAZER_TURRET_KEYBOARD_WAIT_US;
+        break;
     default:
         *report_index = 0x01;
         *response_index = 0x01;
@@ -543,6 +549,7 @@ static int razer_set_device_mode(struct razer_kbd_device *device, unsigned char 
     case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
     case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
         request.transaction_id.id = 0x1F;
         break;
 
@@ -675,6 +682,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -723,6 +731,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -1681,6 +1690,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Blade 18 (2025)";
         break;
 
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
+        device_type = "Razer Turret Keyboard for Xbox One (Wired)";
+        break;
+
     default:
         device_type = "Unknown Device";
     }
@@ -2255,6 +2268,11 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
         request.transaction_id.id = 0x1F;
         break;
 
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
+        request = razer_chroma_extended_matrix_effect_none(NOSTORE, ZERO_LED);
+        request.transaction_id.id = 0x1F;
+        break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
@@ -2426,6 +2444,11 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, direction);
+        request.transaction_id.id = 0x1F;
+        break;
+
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
+        request = razer_chroma_extended_matrix_effect_wave(NOSTORE, ZERO_LED, direction);
         request.transaction_id.id = 0x1F;
         break;
 
@@ -2601,6 +2624,11 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
         request.transaction_id.id = 0x1F;
         break;
 
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
+        request = razer_chroma_extended_matrix_effect_spectrum(NOSTORE, ZERO_LED);
+        request.transaction_id.id = 0x1F;
+        break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
@@ -2769,6 +2797,11 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         request = razer_chroma_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+        request.transaction_id.id = 0x1F;
+        break;
+
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
+        request = razer_chroma_extended_matrix_effect_reactive(NOSTORE, ZERO_LED, speed, (struct razer_rgb*)&buf[1]);
         request.transaction_id.id = 0x1F;
         break;
 
@@ -3039,6 +3072,18 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
             return err;
         break;
 
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
+        if (count != 3) {
+            dev_warn(dev, "razerkbd: Static mode only accepts RGB (3byte)\n");
+            return -EINVAL;
+        }
+        request = razer_chroma_extended_matrix_effect_static(NOSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
+        request.transaction_id.id = 0x1F;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
@@ -3178,6 +3223,23 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
             request = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1]);
         } else if(count == 1) {
             request = razer_chroma_extended_matrix_effect_starlight_random(VARSTORE, BACKLIGHT_LED, buf[0]);
+        } else {
+            dev_warn(dev, "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
+            return -EINVAL;
+        }
+        request.transaction_id.id = 0x1F;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        break;
+
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
+        if (count == 7) {
+            request = razer_chroma_extended_matrix_effect_starlight_dual(NOSTORE, ZERO_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
+        } else if(count == 4) {
+            request = razer_chroma_extended_matrix_effect_starlight_single(NOSTORE, ZERO_LED, buf[0], (struct razer_rgb*)&buf[1]);
+        } else if(count == 1) {
+            request = razer_chroma_extended_matrix_effect_starlight_random(NOSTORE, ZERO_LED, buf[0]);
         } else {
             dev_warn(dev, "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
             return -EINVAL;
@@ -3490,6 +3552,23 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
             return err;
         break;
 
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
+        if (count == 3) { // Single colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_single(NOSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
+        } else if (count == 6) { // Dual colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_dual(NOSTORE, ZERO_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+        } else if (count == 1) { // "Random" colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_random(NOSTORE, ZERO_LED);
+        } else {
+            dev_warn(dev, "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
+            return -EINVAL;
+        }
+        request.transaction_id.id = 0x1F;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
@@ -3785,6 +3864,12 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
         want_response = false;
         break;
 
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
+        request = razer_chroma_extended_matrix_effect_custom_frame();
+        request.data_size = 0x06; // Turret uses a 6 byte payload
+        request.transaction_id.id = 0x1F;
+        break;
+
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
@@ -3947,6 +4032,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
     case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         request.transaction_id.id = 0x1F;
         break;
@@ -4121,6 +4207,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
 
     case USB_DEVICE_ID_RAZER_TARTARUS_V2:
     case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
+    case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
         request = razer_chroma_extended_matrix_get_brightness(VARSTORE, ZERO_LED);
         request.transaction_id.id = 0x1F;
         break;
@@ -4356,6 +4443,16 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
     bool want_response = true;
     int err;
 
+    // The Turret Keyboard shows rows sent after the custom effect is activated
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED) {
+        request = razer_chroma_extended_matrix_effect_custom_frame();
+        request.data_size = 0x06; // Turret uses a 6 byte payload
+        request.transaction_id.id = 0x1F;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+    }
+
     while(offset < count) {
         if(offset + 3 > count) {
             dev_err(dev, "razerkbd: Wrong Amount of data provided: Should be ROW_ID, START_COL, STOP_COL, N_RGB\n");
@@ -4436,6 +4533,14 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_75PCT:
             request = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             request.transaction_id.id = 0x1F;
+            want_response = false;
+            break;
+
+        case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
+            request = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
+            request.transaction_id.id = 0x1F;
+            // Rows get no response, so the checksum is set here
+            request.crc = razer_calculate_crc(&request);
             want_response = false;
             break;
 
@@ -4792,6 +4897,10 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     struct usb_device *usb_dev = hid_to_usb_dev(hdev);
     struct razer_kbd_usb_device_data *usb_dev_data = dev_get_drvdata(&usb_dev->dev);
     const struct razer_key_translation *translation;
+
+    // The Turret receiver keeps generic HID input and has no keyboard data
+    if (hdev->product == USB_DEVICE_ID_RAZER_TURRET_WIRELESS)
+        return 0;
 
     // No translations needed on the Blades
     if (is_blade_laptop(device)) {
@@ -5184,6 +5293,10 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     struct usb_device *usb_dev = hid_to_usb_dev(hdev);
     struct razer_kbd_usb_device_data *usb_dev_data = dev_get_drvdata(&usb_dev->dev);
 
+    // The Turret receiver keeps generic HID input and has no keyboard data
+    if (hdev->product == USB_DEVICE_ID_RAZER_TURRET_WIRELESS)
+        return 0;
+
     // No translations needed on the Pro...
     if (is_blade_laptop(device)) {
         return 0;
@@ -5281,6 +5394,10 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
     struct razer_kbd_usb_device_data *usb_dev_data = NULL;
     int err;
 
+    // The Turret receiver serves a keyboard and a mouse, it has its own handling
+    if (hdev->product == USB_DEVICE_ID_RAZER_TURRET_WIRELESS)
+        return razer_turret_receiver_probe(hdev);
+
     dev = kzalloc_obj(*dev);
     if(dev == NULL) {
         hid_err(hdev, "out of memory\n");
@@ -5310,7 +5427,11 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);                                  // Test mode
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
-        CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_kbd_layout);                            // Gets the physical layout
+        // Left out for the Turret Keyboard: clients read it while listing devices, and
+        // through its receiver the read fails while the keyboard sleeps
+        if (usb_dev->descriptor.idProduct != USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED) {
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_kbd_layout);                        // Gets the physical layout
+        }
 
         switch(usb_dev->descriptor.idProduct) {
 
@@ -5793,6 +5914,20 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
             break;
+
+        case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);                  // Charge level
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);                 // Charge status
+            break;
         }
 
         // Set device to regular mode, not driver mode
@@ -5845,6 +5980,11 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
+    if (hdev->product == USB_DEVICE_ID_RAZER_TURRET_WIRELESS) {
+        razer_turret_receiver_remove(hdev);
+        return;
+    }
+
     dev = hid_get_drvdata(hdev);
 
     // Other interfaces are actual key-emitting devices
@@ -5857,7 +5997,9 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
         device_remove_file(&hdev->dev, &dev_attr_test);                                  // Test mode
         device_remove_file(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
         device_remove_file(&hdev->dev, &dev_attr_device_mode);                           // Get device mode
-        device_remove_file(&hdev->dev, &dev_attr_kbd_layout);                            // Gets the physical layout
+        if (usb_dev->descriptor.idProduct != USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED) {
+            device_remove_file(&hdev->dev, &dev_attr_kbd_layout);                        // Gets the physical layout
+        }
 
         switch(usb_dev->descriptor.idProduct) {
 
@@ -6340,6 +6482,20 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_macro_led_state);               // Enable macro LED
             device_remove_file(&hdev->dev, &dev_attr_macro_led_effect);              // Change macro LED effect (static, flashing)
             break;
+
+        case USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_starlight);       // Starlight effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);        // Reactive effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);           // Set LED matrix
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);                  // Charge level
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);                 // Charge status
+            break;
         }
     } else if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD) {
         device_remove_file(&hdev->dev, &dev_attr_key_super);
@@ -6371,6 +6527,9 @@ static void razer_setup_key_bits(struct input_dev *input)
  */
 static int razer_input_configured(struct hid_device *hdev, struct hid_input *hi)
 {
+    if (hdev->product == USB_DEVICE_ID_RAZER_TURRET_WIRELESS)
+        return 0;
+
     razer_setup_key_bits(hi->input);
     return 0;
 }
@@ -6498,6 +6657,8 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_18_2024) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLADE_18_2025) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TURRET_KEYBOARD_WIRED) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TURRET_WIRELESS) },
     { 0 }
 };
 

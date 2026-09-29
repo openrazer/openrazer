@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import openrazer.client
 import glob
+import os
 
 daemon_test_dir = "/tmp/daemon_test"
 devmgr = openrazer.client.DeviceManager()
@@ -43,13 +44,24 @@ def test_sysfs_consistency(d):
     vid = str(hex(d._vid))[2:].upper().rjust(4, '0')
     pid = str(hex(d._pid))[2:].upper().rjust(4, '0')
 
+    # A shared receiver can expose different roles under the same PID.
+    device_paths = []
+    for type_path in glob.glob(f"{daemon_test_dir}/*:{vid}:{pid}*/device_type"):
+        with open(type_path, 'r') as type_file:
+            if type_file.read().strip() == d.name:
+                device_paths.append(os.path.dirname(type_path))
+    if len(device_paths) != 1:
+        _test_failed(d.name, "Expected one matching sysfs device, found {}".format(len(device_paths)))
+        return
+    device_path = device_paths[0]
+
     def check_sysfs(capability: str, sysfs_name: str):
         """
         Check the device has either the given pylib capability for the
         given sysfs name, and vice versa.
         """
         try:
-            expected_path = glob.glob(f"{daemon_test_dir}/*:{vid}:{pid}*/{sysfs_name}", recursive=True)[0]
+            expected_path = glob.glob(f"{device_path}/{sysfs_name}", recursive=True)[0]
         except IndexError:
             expected_path = ""
 
@@ -67,7 +79,7 @@ def test_sysfs_consistency(d):
         found_capability = []
 
         for sysfs_name in sysfs_names:
-            if glob.glob(f"{daemon_test_dir}/*:{vid}:{pid}*/{sysfs_name}", recursive=True):
+            if glob.glob(f"{device_path}/{sysfs_name}", recursive=True):
                 found_sysfs.append(sysfs_name)
 
         for capability in capabilities:
