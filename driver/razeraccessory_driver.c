@@ -238,6 +238,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Raptor 27";
         break;
 
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
+        device_type = "Razer Raptor 27 165Hz";
+        break;
+
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         device_type = "Razer Chroma Addressable RGB Controller";
         break;
@@ -324,6 +328,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
@@ -501,6 +506,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
@@ -619,6 +625,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
@@ -692,6 +699,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
@@ -824,6 +832,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA:
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
@@ -912,6 +921,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
@@ -1126,6 +1136,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
         case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         case USB_DEVICE_ID_RAZER_RAPTOR_27:
+        case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
         case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
@@ -1225,6 +1236,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
@@ -1290,6 +1302,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request.transaction_id.id = 0x3F;
         break;
@@ -1357,6 +1370,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request.transaction_id.id = 0xFF;
         break;
@@ -1434,6 +1448,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         request.transaction_id.id = 0xFF;
         break;
@@ -1495,6 +1510,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
@@ -1605,6 +1621,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         brightness = device->saved_brightness;
         break;
@@ -2558,6 +2575,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         expected_protocol = 0;
         break;
@@ -2667,6 +2685,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         case USB_DEVICE_ID_RAZER_RAPTOR_27:
+        case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
@@ -2695,6 +2714,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         case USB_DEVICE_ID_RAZER_RAPTOR_27:
+        case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
@@ -2813,6 +2833,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
+    case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         expected_protocol = 0;
         break;
@@ -2905,6 +2926,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         case USB_DEVICE_ID_RAZER_RAPTOR_27:
+        case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
@@ -2932,6 +2954,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         case USB_DEVICE_ID_RAZER_RAPTOR_27:
+        case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
@@ -3051,6 +3074,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TOMAHAWK_ATX) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ) },
     { 0 }
 };
 
