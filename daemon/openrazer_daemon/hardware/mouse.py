@@ -2132,3 +2132,21 @@ class RazerProClickV2Wireless(RazerProClickV2Wired):
     Class for the Razer Pro Click V2 (Wireless)
     """
     USB_PID = 0x00D1
+
+
+class RazerViperV3ProSEWired(RazerViperV3ProWired):
+    """
+    Class for the Razer Viper V3 Pro SE (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Viper_V3_Pro_SE_000000000000-if0(1|2)-event-kbd')
+
+    USB_PID = 0x00DE
+
+
+class RazerViperV3ProSEWireless(RazerViperV3ProWireless):
+    """
+    Class for the Razer Viper V3 Pro SE (Wireless)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Viper_V3_Pro_SE_000000000000-if0(1|2)-event-kbd')
+
+    USB_PID = 0x00DF
