@@ -626,6 +626,7 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
         device_type = "Razer DeathAdder 2000";
         break;
 
@@ -926,6 +927,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
@@ -1575,6 +1577,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
@@ -2096,6 +2099,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
@@ -2287,6 +2291,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
@@ -2709,6 +2714,7 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
@@ -2896,6 +2902,7 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
@@ -4151,6 +4158,7 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
@@ -4309,6 +4317,7 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_OROCHI_CHROMA:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
@@ -4425,6 +4434,7 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
 
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
@@ -4537,6 +4547,7 @@ static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device
 
     case USB_DEVICE_ID_RAZER_ABYSSUS_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
     case USB_DEVICE_ID_RAZER_DIAMONDBACK_CHROMA:
@@ -4993,6 +5004,7 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
         /* Mono-color breath effect */
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
@@ -5128,6 +5140,7 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
     case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_NAGA_CHROMA:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
@@ -5429,6 +5442,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_OUROBOROS:
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA:
     case USB_DEVICE_ID_RAZER_NAGA_EPIC_CHROMA_DOCK:
@@ -5581,6 +5595,7 @@ static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, stru
         break;
 
     case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
         /* Could also be called a mono-color static effect */
         request = razer_chroma_standard_set_led_state(VARSTORE, led_id, true);
         request.transaction_id.id = 0x3F;
@@ -7188,6 +7203,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             break;
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+        case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
@@ -8393,6 +8409,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             break;
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_2000:
+        case USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT:
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
@@ -8982,6 +8999,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_2000) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_2000_ALT) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_X) },
