@@ -360,6 +360,13 @@ class RazerDeathAdder2000(__RazerDevice):
     DPI_MAX = 2000
 
 
+class RazerDeathAdder2000_Alternate(RazerDeathAdder2000):
+    """
+    Class for the Razer DeathAdder 2000
+    """
+    USB_PID = 0x005F
+
+
 class RazerDeathAdder2013(__RazerDevice):
     """
     Class for the Razer DeathAdder 2013
