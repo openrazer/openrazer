@@ -20,6 +20,12 @@ def run_daemon(daemon_dir, driver_dir):
 
 
 class DeviceManagerTest(unittest.TestCase):
+    def test_plugdev_group(self):
+        with unittest.mock.patch('os.getgroups', return_value=[100, 101, 102]), \
+             unittest.mock.patch('grp.getgrnam') as mock_getgrnam:
+            mock_getgrnam.return_value.gr_gid = 101
+            self.assertTrue(openrazer_daemon.daemon.RazerDaemon()._check_plugdev_group())
+
     @classmethod
     def setUpClass(cls):
         cls._daemon_dir = tempfile.mkdtemp(prefix='tmp_', suffix='_daemondata')
