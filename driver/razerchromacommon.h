@@ -140,6 +140,11 @@ struct razer_report razer_chroma_misc_set_orochi2011_poll_dpi(unsigned short pol
 
 struct razer_report razer_basilisk_mobile_effect_static(struct razer_rgb* rgb);
 struct razer_report razer_naga_trinity_effect_static(struct razer_rgb* rgb);
+struct razer_report razer_naga_trinity_effect_breathing_single(struct razer_rgb* rgb);
+struct razer_report razer_naga_trinity_effect_breathing_dual(struct razer_rgb* rgb1, struct razer_rgb* rgb2);
+struct razer_report razer_naga_trinity_effect_breathing_random(void);
+struct razer_report razer_naga_trinity_effect_spectrum(void);
+struct razer_report razer_naga_trinity_effect_none(void);
 
 struct razer_report razer_chroma_misc_set_scroll_mode(unsigned int scroll_mode);
 struct razer_report razer_chroma_misc_get_scroll_mode(void);
@@ -150,7 +155,10 @@ struct razer_report razer_chroma_misc_get_scroll_acceleration(void);
 struct razer_report razer_chroma_misc_set_scroll_smart_reel(bool smart_reel);
 struct razer_report razer_chroma_misc_get_scroll_smart_reel(void);
 
+struct razer_report razer_chroma_misc_get_hyperpolling_wireless_dongle_indicator_led_mode(void);
 struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_indicator_led_mode(unsigned char mode);
+struct razer_report razer_chroma_misc_get_hyperpolling_wireless_dongle_multi_indicator_led_modes(void);
+struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_multi_indicator_led_modes(unsigned char mode1, unsigned char mode2, unsigned char mode3);
 struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step1(unsigned short pid);
 struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step2(unsigned short pid);
 struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(unsigned short pid);
