@@ -75,6 +75,12 @@ class RazerDevice(object):
             'scroll_acceleration': self._has_feature('razer.device.scroll', ('getScrollAcceleration', 'setScrollAcceleration')),
             'scroll_smart_reel': self._has_feature('razer.device.scroll', ('getScrollSmartReel', 'setScrollSmartReel')),
 
+            # Laptop attrs
+            'power_mode': self._has_feature('razer.device.laptop', 'getPowerMode'),
+            'fan_rpm': self._has_feature('razer.device.laptop', 'getFanRpm'),
+            'cpu_boost': self._has_feature('razer.device.laptop', 'getCpuBoost'),
+            'gpu_boost': self._has_feature('razer.device.laptop', 'getGpuBoost'),
+
             # Default device is a chroma so lighting capabilities
             'lighting': self._has_feature('razer.device.lighting.chroma'),
             'lighting_breath_single': self._has_feature('razer.device.lighting.chroma', 'setBreathSingle'),
@@ -251,6 +257,8 @@ class RazerDevice(object):
             self._dbus_interfaces['profile_led'] = _dbus.Interface(self._dbus, "razer.device.lighting.profile_led")
         if self.has('scroll_mode') or self.has('scroll_acceleration') or self.has('scroll_smart_reel'):
             self._dbus_interfaces['scroll'] = _dbus.Interface(self._dbus, "razer.device.scroll")
+        if self.has('power_mode'):
+            self._dbus_interfaces['laptop'] = _dbus.Interface(self._dbus, "razer.device.laptop")
 
     def _get_available_features(self) -> dict[str, list[str]]:
         introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')
@@ -572,6 +580,138 @@ class RazerDevice(object):
             dbuslist = self._dbus_interfaces['device'].getSupportedPollRates()
             # Repack list from dbus ints to normal ints
             return [int(d) for d in dbuslist]
+        else:
+            raise NotImplementedError()
+
+    @property
+    def power_mode(self) -> int:
+        """
+        Get the laptop power mode
+
+        :return: Power mode (0 balanced, 1 gaming, 2 creator, 4 custom)
+        :rtype: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('power_mode'):
+            return int(self._dbus_interfaces['laptop'].getPowerMode())
+        else:
+            raise NotImplementedError()
+
+    @power_mode.setter
+    def power_mode(self, power_mode: int) -> None:
+        """
+        Set the laptop power mode
+
+        :param power_mode: Power mode (0 balanced, 1 gaming, 2 creator, 4 custom)
+        :type power_mode: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('power_mode'):
+            if not isinstance(power_mode, int):
+                raise ValueError("Power mode is not an integer: {0}".format(power_mode))
+
+            self._dbus_interfaces['laptop'].setPowerMode(power_mode)
+        else:
+            raise NotImplementedError()
+
+    @property
+    def fan_rpm(self) -> int:
+        """
+        Get the laptop fan speed
+
+        :return: Fan speed in RPM (0 means auto)
+        :rtype: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('fan_rpm'):
+            return int(self._dbus_interfaces['laptop'].getFanRpm())
+        else:
+            raise NotImplementedError()
+
+    @fan_rpm.setter
+    def fan_rpm(self, fan_rpm: int) -> None:
+        """
+        Set the laptop fan speed, 0 for automatic
+
+        :param fan_rpm: Fan speed in RPM (0 means auto)
+        :type fan_rpm: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('fan_rpm'):
+            if not isinstance(fan_rpm, int):
+                raise ValueError("Fan speed is not an integer: {0}".format(fan_rpm))
+
+            self._dbus_interfaces['laptop'].setFanRpm(fan_rpm)
+        else:
+            raise NotImplementedError()
+
+    @property
+    def cpu_boost(self) -> int:
+        """
+        Get the laptop CPU boost level
+
+        :return: CPU boost level
+        :rtype: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('cpu_boost'):
+            return int(self._dbus_interfaces['laptop'].getCpuBoost())
+        else:
+            raise NotImplementedError()
+
+    @cpu_boost.setter
+    def cpu_boost(self, cpu_boost: int) -> None:
+        """
+        Set the laptop CPU boost level
+
+        :param cpu_boost: CPU boost level
+        :type cpu_boost: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('cpu_boost'):
+            if not isinstance(cpu_boost, int):
+                raise ValueError("CPU boost is not an integer: {0}".format(cpu_boost))
+
+            self._dbus_interfaces['laptop'].setCpuBoost(cpu_boost)
+        else:
+            raise NotImplementedError()
+
+    @property
+    def gpu_boost(self) -> int:
+        """
+        Get the laptop GPU boost level
+
+        :return: GPU boost level
+        :rtype: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('gpu_boost'):
+            return int(self._dbus_interfaces['laptop'].getGpuBoost())
+        else:
+            raise NotImplementedError()
+
+    @gpu_boost.setter
+    def gpu_boost(self, gpu_boost: int) -> None:
+        """
+        Set the laptop GPU boost level
+
+        :param gpu_boost: GPU boost level
+        :type gpu_boost: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('gpu_boost'):
+            if not isinstance(gpu_boost, int):
+                raise ValueError("GPU boost is not an integer: {0}".format(gpu_boost))
+
+            self._dbus_interfaces['laptop'].setGpuBoost(gpu_boost)
         else:
             raise NotImplementedError()
 

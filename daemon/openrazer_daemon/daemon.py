@@ -338,6 +338,14 @@ class RazerDaemon(DBusService):
             if 'set_poll_rate' in device.dbus.METHODS:
                 self._persistence[device.dbus.storage_name]['poll_rate'] = str(device.dbus.poll_rate)
 
+            if 'set_power_mode' in device.dbus.METHODS:
+                self._persistence[device.dbus.storage_name]['laptop_power_mode'] = str(device.dbus.power_mode)
+                self._persistence[device.dbus.storage_name]['laptop_fan_rpm'] = str(device.dbus.fan_rpm)
+
+            if 'set_cpu_boost' in device.dbus.METHODS:
+                self._persistence[device.dbus.storage_name]['laptop_cpu_boost'] = str(device.dbus.cpu_boost)
+                self._persistence[device.dbus.storage_name]['laptop_gpu_boost'] = str(device.dbus.gpu_boost)
+
             for i in device.dbus.ZONES:
                 if device.dbus.zone[i]["present"]:
                     self._persistence[device.dbus.storage_name][i + '_active'] = str(device.dbus.zone[i]["active"])
