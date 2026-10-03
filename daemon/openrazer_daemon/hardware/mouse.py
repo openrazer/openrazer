@@ -1342,6 +1342,25 @@ class RazerOrochiV2Bluetooth(RazerOrochiV2Receiver):
     USB_PID = 0x0095
 
 
+class RazerOrochiV22026Receiver(__RazerDevice):
+    """
+    Class for the Razer Orochi V2 (2026) (Receiver)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Raze_Razer_Orochi_V2__Null_-if0(1|2)-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x00E0
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+               'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate',
+               'set_poll_rate', 'get_battery', 'is_charging', 'get_idle_time',
+               'set_idle_time', 'get_low_battery_threshold',
+               'set_low_battery_threshold']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src/OrochiV2-1-en-v1.png"
+
+    DPI_MAX = 18000
+
+
 class RazerNagaX(__RazerDevice):
     """
     Class for the Razer Naga X

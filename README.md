@@ -292,6 +292,7 @@ This will output something similar to this:
 | Razer Basilisk Mobile (Receiver)                              |  1532:00D4  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wired)       |  1532:00D6  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wireless)    |  1532:00D7  |
+| Razer Orochi V2 2026 (Receiver)                               |  1532:00E0  |
 
 ### Mousemats
 | Device                                                        | USB VID:PID |
