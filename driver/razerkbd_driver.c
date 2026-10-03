@@ -1608,11 +1608,11 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRED:
-        device_type = "Razer BlackWidow V4 Mini Hyperspeed (Wired)";
+        device_type = "Razer BlackWidow V4 Mini HyperSpeed (Wired)";
         break;
 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
-        device_type = "Razer BlackWidow V4 Mini Hyperspeed (Wireless)";
+        device_type = "Razer BlackWidow V4 Mini HyperSpeed (Wireless)";
         break;
 
     case USB_DEVICE_ID_RAZER_BLADE_17_2022:
