@@ -207,6 +207,7 @@ This will output something similar to this:
 | Razer Orochi (Wired)                                          |  1532:0048  |
 | Razer Diamondback Chroma                                      |  1532:004C  |
 | Razer DeathAdder 2000                                         |  1532:004F  |
+| Razer DeathAdder 2000 (Retail)                                |  1532:005F  |
 | Razer Naga Hex V2                                             |  1532:0050  |
 | Razer Naga Chroma                                             |  1532:0053  |
 | Razer DeathAdder 3500                                         |  1532:0054  |
