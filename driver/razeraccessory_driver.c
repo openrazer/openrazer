@@ -2668,6 +2668,9 @@ static ssize_t razer_attr_write_mouse_poll_rate(struct device *dev, struct devic
         return err;
 
     request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x01);
+    /* Reject rates that the command encoder silently substitutes with 500 Hz. */
+    if (razer_parse_poll_rate_hyperpolling(&request) != polling_rate)
+        return -EINVAL;
     err = razer_dock_send_mouse_payload_ext(device, &request, &response, true);
     if (!err)
         return count;
@@ -2675,6 +2678,8 @@ static ssize_t razer_attr_write_mouse_poll_rate(struct device *dev, struct devic
         return err;
 
     request = razer_chroma_misc_set_polling_rate(polling_rate);
+    if (razer_dock_parse_poll_rate_plain(&request) != polling_rate)
+        return -ENOTSUPP;
     err = razer_dock_send_mouse_payload(device, &request, &response);
     if (err)
         return err;
@@ -4263,10 +4268,6 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_nearby_mice);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scan_for_mice);
 
-            /* Kick off one scan at probe so the cache has something to show
-             * before userspace asks; subsequent scans are on-demand via
-             * scan_for_mice (the dock's scan is one-shot, not continuous). */
-            razer_mouse_dock_pro_start_scan(dev);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_firmware);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_pair);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_unpair);

@@ -69,6 +69,7 @@ class RazerDevice(object):
             'hyperpolling_multi_indicator_led_modes': self._has_feature('razer.device.misc', ('getHyperPollingMultiLEDModes', 'setHyperPollingMultiLEDModes')),
             'dock_pro_pair': self._has_feature('razer.device.misc', ('setMouseDockProPair', 'setMouseDockProUnpair')),
             'dock_pro_nearby_discovery': self._has_feature('razer.device.misc', ('getNearbyMice', 'pairAnyNearbyMouse', 'scanForNearbyMice')),
+            'dock_pro_paired_slots': self._has_feature('razer.device.misc', 'getPairedSlots'),
 
             'poll_rate': self._has_feature('razer.device.misc', ('getPollRate', 'setPollRate')),
             'supported_poll_rates': self._has_feature('razer.device.misc', 'getSupportedPollRates'),
@@ -685,6 +686,18 @@ class RazerDevice(object):
             self._dbus_interfaces['device'].scanForNearbyMice()
         else:
             raise NotImplementedError()
+
+    @property
+    def paired_slots(self) -> list[tuple[int, bool, str]]:
+        """Dock slot inventory as (slot number, available, PID) tuples.
+
+        A PID remains listed while its mouse is unavailable. ``ffff`` is an
+        empty slot. Only slot 1 has a characterized control route.
+        """
+        if self.has('dock_pro_paired_slots'):
+            return [(int(slot), bool(available), str(pid))
+                    for slot, available, pid in self._dbus_interfaces['device'].getPairedSlots()]
+        raise NotImplementedError()
 
     @property
     def nearby_mice(self) -> list[str]:

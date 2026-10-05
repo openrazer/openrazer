@@ -358,6 +358,36 @@ class RazerDaemon(DBusService):
         except (IndexError, KeyError):
             pass
 
+    def _release_dock_child_for_serial(self, sys_path, device_class):
+        """Give a physical device its serial's D-Bus path when it appears."""
+        if not any(device_id.endswith(':mouse') for device_id, _ in self._razer_devices.id_items()):
+            return
+        serial = None
+        for attempt in range(5):
+            try:
+                with open(os.path.join(sys_path, 'device_serial')) as serial_file:
+                    serial = serial_file.read().strip()
+                if serial:
+                    break
+            except (OSError, UnicodeDecodeError):
+                pass
+            if attempt < 4:
+                time.sleep(0.1)
+
+        if not serial:
+            # This physical mouse may claim the child serial once udev settles.
+            for child_id, child in list(self._razer_devices.id_items()):
+                if child_id.endswith(':mouse') and child.dbus.WIRELESS_PID == device_class.USB_PID:
+                    self._remove_dock_child_device(child_id)
+            return
+
+        try:
+            existing = self._razer_devices[serial]
+        except IndexError:
+            return
+        if existing.device_id.endswith(':mouse'):
+            self._remove_dock_child_device(existing.device_id)
+
     def _init_signals(self):
         """
         Heinous hack to properly handle signals on the mainloop. Necessary
@@ -626,6 +656,7 @@ class RazerDaemon(DBusService):
                         self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
                         break
 
+                    self._release_dock_child_for_serial(sys_path, device_class)
                     razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
                                                 persistence=self._persistence, testing=self._test_dir is not None,
                                                 additional_interfaces=sorted(additional_interfaces),
@@ -717,13 +748,13 @@ class RazerDaemon(DBusService):
 
             if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
                 self.logger.info('Found valid device.%d: %s', device_number, sys_name)
+                # Udev permissions may still be changing when this event arrives.
+                time.sleep(0.2)
+                self._release_dock_child_for_serial(sys_path, device_class)
                 razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
                                             persistence=self._persistence, testing=self._test_dir is not None,
                                             additional_interfaces=None, additional_methods=[],
                                             unknown_serial_counter=self._unknown_serial_counter)
-
-                # Its a udev event so currently the device hasn't been chmodded yet
-                time.sleep(0.2)
 
                 # Wireless devices sometimes don't listen
                 device_serial = razer_device.get_serial()

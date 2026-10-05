@@ -7,14 +7,14 @@ from pathlib import Path
 import tempfile
 import types
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 from openrazer_daemon.daemon import RazerDaemon
 from openrazer_daemon.device import DeviceCollection
 from openrazer_daemon.dbus_services.dbus_methods import mamba
 from openrazer_daemon.hardware.accessory import RazerMouseDockPro
 from openrazer_daemon.hardware.mouse import (
-    DockedMouseNotReady, RazerBasiliskV3ProDocked,
+    DockedMouseNotReady, RazerBasiliskV3ProDocked, RazerBasiliskV3ProWireless,
 )
 
 
@@ -182,6 +182,13 @@ class DockLifecycleTest(unittest.TestCase):
         self.daemon.device_removed.assert_called_once_with()
         self.daemon.device_added.assert_not_called()
 
+    def test_physical_serial_takes_over_logical_child_path(self):
+        (Path(self.tmp.name) / 'device_serial').write_text('MOUSEOLD\n')
+        self.daemon._release_dock_child_for_serial(self.tmp.name, RazerBasiliskV3ProWireless)
+        self.assertNotIn('MOUSEOLD', self.daemon._razer_devices)
+        self.assertEqual(self.daemon._razer_devices[self.dock_id].child_ids, [])
+        self.old_mouse.remove_from_connection.assert_called_once_with()
+
     def test_existing_physical_serial_blocks_duplicate_logical_child(self):
         physical_mouse = FakeDockedMouse('MOUSENEW')
         self.daemon._razer_devices.add('physical-mouse', 'MOUSENEW', physical_mouse)
@@ -192,6 +199,20 @@ class DockLifecycleTest(unittest.TestCase):
         self.assertIs(self.daemon._razer_devices['MOUSENEW'].dbus, physical_mouse)
         self.assertEqual(self.daemon._razer_devices[self.dock_id].child_ids, [])
         self.daemon.device_added.assert_not_called()
+
+    def test_malformed_physical_serial_does_not_crash_or_release_other_mouse(self):
+        serial_file = MagicMock()
+        serial_file.__enter__.return_value = serial_file
+        serial_file.read.side_effect = UnicodeDecodeError(
+            'utf-8', b'\xff', 0, 1, 'invalid start byte',
+        )
+        other_device = types.SimpleNamespace(USB_PID=0x0F13)
+        with patch('builtins.open', return_value=serial_file), \
+                patch('openrazer_daemon.daemon.time.sleep'):
+            self.daemon._release_dock_child_for_serial(self.tmp.name, other_device)
+
+        self.assertIn(self.child_id, self.daemon._razer_devices)
+        self.old_mouse.close.assert_not_called()
 
     def test_identity_change_during_child_discovery_is_not_registered(self):
         self.dock.get_active_mouse_identity.return_value = (0x00AB, 'MOUSEOTHER')

@@ -8,6 +8,12 @@ import time
 from openrazer_daemon.dbus_services import endpoint
 
 
+@endpoint('razer.device.misc', 'getPairedSlots', out_sig='a(ybs)')
+def get_paired_slots(self):
+    """Return (slot number, available, PID) from the dock's read-only inventory."""
+    return self.get_paired_slots()
+
+
 @endpoint('razer.device.misc', 'setMouseDockProPair', in_sig='s')
 def set_mouse_dock_pro_pair(self, pid):
     """

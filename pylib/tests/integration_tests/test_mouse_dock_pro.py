@@ -83,7 +83,21 @@ class MouseDockProClientTest(unittest.TestCase):
     def setUp(self):
         self.fake_dock.set('paired_slots', '1:1:00ab 2:0:ffff')
         self.fake_dock.set('poll_rate', '1000')
+        self.dock = RazerDevice('XX00000000A4')
         self.mouse = RazerDevice('MM00000000A4')
+
+    def test_slot_inventory_preserves_offline_unknown_and_empty_entries_through_dbus(self):
+        self.fake_dock.set('paired_slots', '1:0:00ab 2:1:1234 3:0:ffff')
+        self.assertTrue(self.dock.has('dock_pro_paired_slots'))
+        self.assertEqual(self.dock.paired_slots, [
+            (1, False, '00ab'), (2, True, '1234'), (3, False, 'ffff'),
+        ])
+        slot, available, pid = self.dock.paired_slots[0]
+        self.assertIs(type(slot), int)
+        self.assertIs(type(available), bool)
+        self.assertIs(type(pid), str)
+        self.fake_dock.set('paired_slots', '1:1:00ab 2:0:ffff')
+        self.assertEqual(self.dock.paired_slots, [(1, True, '00ab'), (2, False, 'ffff')])
 
     def test_polling_getter_refreshes_hardware_instead_of_returning_prior_write(self):
         self.mouse.poll_rate = 1000
