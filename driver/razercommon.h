@@ -9,6 +9,9 @@
 
 #include <linux/hid.h>
 #include <linux/usb/input.h>
+#include <linux/power_supply.h>
+#include <linux/workqueue.h>
+#include <linux/spinlock.h>
 #include "compat.h"
 
 #define DRIVER_VERSION "3.12.1"
@@ -156,5 +159,47 @@ void print_erroneous_report(struct hid_device *hdev, struct razer_report* report
 /* Borrowed from drivers/hid/usbhid/usbhid.h */
 #define	hid_to_usb_dev(hid_dev) \
 	to_usb_device(hid_dev->dev.parent->parent)
+
+/* Consecutive failed queries tolerated before a polled battery is reported
+ * absent. A dongle that parks the radio link while the device is idle fails the
+ * first query and answers the next, so treating one timeout as "gone" makes the
+ * tray blank on healthy hardware; holding the last reading across a few misses
+ * rides that out while a device that is really switched off still disappears
+ * within absent_after * refresh_ms. Pass 1 for no tolerance. */
+#define RAZER_POWER_SUPPLY_ABSENT_AFTER 3
+
+/* Generic battery -> power_supply helper (see docs spec 2026-07-24). Any driver
+ * embeds one per battery-bearing device. get_property serves a cache only (never
+ * blocks); poll devices set refresh_cb (runs on a worker with a QUIET query) and
+ * report a failed query with razer_power_supply_query_failed(), push devices
+ * leave it NULL and call razer_power_supply_set() from their push path.
+ * power_supply_changed() fires only on a real change (dedup). */
+struct razer_power_supply {
+    struct power_supply     *psy;
+    struct power_supply_desc desc;      /* per-device; register stores the ptr */
+    char                     name[32];
+    const char              *model;     /* MODEL_NAME string, stable for lifetime */
+
+    spinlock_t               lock;      /* guards the cache below */
+    int                      capacity;  /* 0..100, -1 = unknown */
+    int                      status;    /* POWER_SUPPLY_STATUS_* */
+    bool                     present;
+    unsigned int             fail_count;   /* consecutive failed queries */
+
+    void                   (*refresh_cb)(struct razer_power_supply *rps);
+    void                    *drv_data;  /* driver device ptr for refresh_cb */
+    struct delayed_work      refresh_work;
+    unsigned int             refresh_ms;
+    unsigned int             absent_after; /* misses before present=0, >= 1 */
+};
+
+int  razer_power_supply_register(struct razer_power_supply *rps, struct device *parent,
+                                 void *drv_data, const char *model,
+                                 void (*refresh_cb)(struct razer_power_supply *),
+                                 unsigned int refresh_ms, unsigned int absent_after);
+void razer_power_supply_unregister(struct razer_power_supply *rps);
+void razer_power_supply_set(struct razer_power_supply *rps,
+                            int capacity, int status, bool present);
+void razer_power_supply_query_failed(struct razer_power_supply *rps);
 
 #endif /* DRIVER_RAZERCOMMON_H_ */

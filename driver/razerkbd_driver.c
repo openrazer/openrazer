@@ -434,8 +434,12 @@ static int __must_check razer_send_payload_no_response(struct razer_kbd_device *
 
 /**
  * Function to send to device, get response, and actually check the response
+ *
+ * When quiet is set, all print_erroneous_report() logging is suppressed. The
+ * battery-poll worker uses this: a sleeping/absent wireless device makes every
+ * query time out, and without quiet it would spam dmesg on the poll interval.
  */
-static int __must_check razer_send_payload(struct razer_kbd_device *device, struct razer_report *request, struct razer_report *response)
+static int __must_check __razer_send_payload(struct razer_kbd_device *device, struct razer_report *request, struct razer_report *response, bool quiet)
 {
     int retry;
     int err;
@@ -447,7 +451,8 @@ static int __must_check razer_send_payload(struct razer_kbd_device *device, stru
         err = razer_get_report(device->hdev, request, response);
         mutex_unlock(&device->lock);
         if (err) {
-            print_erroneous_report(device->hdev, response, "Invalid Report Length");
+            if (!quiet)
+                print_erroneous_report(device->hdev, response, "Invalid Report Length");
             goto retry;
         }
 
@@ -455,7 +460,8 @@ static int __must_check razer_send_payload(struct razer_kbd_device *device, stru
         if (response->remaining_packets != request->remaining_packets ||
             response->command_class != request->command_class ||
             response->command_id.id != request->command_id.id) {
-            print_erroneous_report(device->hdev, response, "Response doesn't match request");
+            if (!quiet)
+                print_erroneous_report(device->hdev, response, "Response doesn't match request");
             err = -EINVAL;
             goto retry;
         }
@@ -480,19 +486,28 @@ retry:
     /* Only "valid" but failed responses should reach this */
     switch (response->status) {
     case RAZER_CMD_FAILURE:
-        print_erroneous_report(device->hdev, response, "Command failed");
+        if (!quiet)
+            print_erroneous_report(device->hdev, response, "Command failed");
         return -EINVAL;
     case RAZER_CMD_NOT_SUPPORTED:
-        print_erroneous_report(device->hdev, response, "Command not supported");
+        if (!quiet)
+            print_erroneous_report(device->hdev, response, "Command not supported");
         return -ENOTSUPP;
     case RAZER_CMD_TIMEOUT:
-        print_erroneous_report(device->hdev, response, "Command timed out");
+        if (!quiet)
+            print_erroneous_report(device->hdev, response, "Command timed out");
         return -ETIMEDOUT;
     default:
-        print_erroneous_report(device->hdev, response, "Unknown error");
+        if (!quiet)
+            print_erroneous_report(device->hdev, response, "Unknown error");
         WARN_ONCE(1, "Unknown response status received: %d\n", response->status);
         return -EIO;
     }
+}
+
+static int __must_check razer_send_payload(struct razer_kbd_device *device, struct razer_report *request, struct razer_report *response)
+{
+    return __razer_send_payload(device, request, response, false);
 }
 
 /**
@@ -717,14 +732,13 @@ static unsigned char razer_get_active_varstore(struct razer_kbd_device *device)
  *
  * Returns an integer which needs to be scaled from 0-255 -> 0-100
  */
-static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_attribute *attr, char *buf)
+/* returns 0..100, or negative errno; quiet suppresses timeout logging so the
+ * battery-poll worker can query a sleeping wireless keyboard without dmesg spam */
+static int razer_kbd_get_battery_level(struct razer_kbd_device *device, bool quiet)
 {
-    struct razer_kbd_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
+    struct razer_report request = razer_chroma_misc_get_battery_level();
     struct razer_report response = {0};
     int err;
-
-    request = razer_chroma_misc_get_battery_level();
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_HYPERSPEED_WIRED:
@@ -750,15 +764,28 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
         break;
 
     default:
-        dev_warn(dev, "razerkbd: charge_level not supported for this model\n");
+        if (!quiet)
+            dev_warn(&device->hdev->dev, "razerkbd: charge_level not supported for this model\n");
         return -EINVAL;
     }
 
-    err = razer_send_payload(device, &request, &response);
+    err = __razer_send_payload(device, &request, &response, quiet);
     if (err)
         return err;
 
-    return sysfs_emit(buf, "%d\n", response.arguments[1]);
+    return response.arguments[1];
+}
+
+/**
+ * Read device file "charge_level"
+ *
+ * Returns an integer which needs to be scaled from 0-255 -> 0-100
+ */
+static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    int v = razer_kbd_get_battery_level(dev_get_drvdata(dev), false);
+
+    return v < 0 ? v : sysfs_emit(buf, "%d\n", v);
 }
 
 /**
@@ -766,14 +793,12 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
  *
  * Returns 0 when not charging, 1 when charging
  */
-static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_attribute *attr, char *buf)
+/* returns 0/1, or negative errno; quiet suppresses timeout logging */
+static int razer_kbd_get_charging(struct razer_kbd_device *device, bool quiet)
 {
-    struct razer_kbd_device *device = dev_get_drvdata(dev);
-    struct razer_report request = {0};
+    struct razer_report request = razer_chroma_misc_get_charging_status();
     struct razer_report response = {0};
     int err;
-
-    request = razer_chroma_misc_get_charging_status();
 
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_HYPERSPEED_WIRED:
@@ -799,15 +824,76 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
         break;
 
     default:
-        dev_warn(dev, "razerkbd: charge_status not supported for this model\n");
+        if (!quiet)
+            dev_warn(&device->hdev->dev, "razerkbd: charge_status not supported for this model\n");
         return -EINVAL;
     }
 
-    err = razer_send_payload(device, &request, &response);
+    err = __razer_send_payload(device, &request, &response, quiet);
     if (err)
         return err;
 
-    return sysfs_emit(buf, "%d\n", response.arguments[1]);
+    return response.arguments[1];
+}
+
+static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    int v = razer_kbd_get_charging(dev_get_drvdata(dev), false);
+
+    return v < 0 ? v : sysfs_emit(buf, "%d\n", v);
+}
+
+/* True for the wireless keyboards that expose a battery. This MUST mirror the set
+ * of PIDs whose case in razer_kbd_probe() creates dev_attr_charge_level; it gates
+ * power_supply registration so wired-only keyboards get no phantom battery node. */
+static bool razer_kbd_has_battery(unsigned short pid)
+{
+    switch (pid) {
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_HYPERSPEED_WIRED:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_MINI_HYPERSPEED_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRED:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
+    case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
+    case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+        return true;
+    default:
+        return false;
+    }
+}
+
+/* power_supply refresh worker callback: runs in process context on the helper's
+ * delayed_work. Uses the QUIET query variant so a sleeping/absent wireless
+ * keyboard maps to present=false without spamming dmesg. */
+static void razer_kbd_battery_refresh(struct razer_power_supply *rps)
+{
+    struct razer_kbd_device *device = rps->drv_data;
+    int raw = razer_kbd_get_battery_level(device, true);
+    int pct, chg, status;
+
+    /* A dongle that parks the radio link answers the second query but not the
+     * first, so a lone timeout is not evidence the keyboard is gone: retry once
+     * here, then let the helper hold the last reading for a few misses. */
+    if (raw < 0)
+        raw = razer_kbd_get_battery_level(device, true);
+
+    if (raw < 0) {                 /* asleep/absent -> hide, no dmesg spam */
+        razer_power_supply_query_failed(rps);
+        return;
+    }
+    /* charge_level reports 0..255 (the sysfs attr is scaled to a percent by the
+     * daemon); power_supply CAPACITY is itself a percentage, so scale here. */
+    pct = DIV_ROUND_CLOSEST(raw * 100, 255);
+    chg = razer_kbd_get_charging(device, true);
+    status = (chg > 0)    ? POWER_SUPPLY_STATUS_CHARGING :
+             (pct >= 100) ? POWER_SUPPLY_STATUS_FULL :
+             POWER_SUPPLY_STATUS_DISCHARGING;
+    razer_power_supply_set(rps, pct, status, true);
 }
 
 /**
@@ -1265,10 +1351,8 @@ static ssize_t razer_attr_read_version(struct device *dev, struct device_attribu
  *
  * Returns friendly string of device type
  */
-static ssize_t razer_attr_read_device_type(struct device *dev, struct device_attribute *attr, char *buf)
+static const char *razer_kbd_device_type_str(struct razer_kbd_device *device)
 {
-    struct razer_kbd_device *device = dev_get_drvdata(dev);
-
     char *device_type;
 
     switch (device->usb_pid) {
@@ -1758,7 +1842,12 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Unknown Device";
     }
 
-    return sysfs_emit(buf, "%s\n", device_type);
+    return device_type;
+}
+
+static ssize_t razer_attr_read_device_type(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    return sysfs_emit(buf, "%s\n", razer_kbd_device_type_str(dev_get_drvdata(dev)));
 }
 
 /**
@@ -6014,6 +6103,24 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 
     //razer_activate_macro_keys(usb_dev);
     //msleep(3000);
+
+    /* Expose the battery to UPower / the desktop tray via the generic helper.
+     * Poll model: the helper's worker calls razer_kbd_battery_refresh() every 60s
+     * using the quiet query, so a sleeping wireless keyboard doesn't spam dmesg.
+     * Gated on exactly the condition that creates dev_attr_charge_level — the
+     * mouse-protocol control interface AND the battery PID set — so we register
+     * once (the other interfaces are key-emitting) and wired-only keyboards get no
+     * phantom node. Registered after hid_hw_start so the first refresh (2s later)
+     * can reach the device; unregistered in disconnect. */
+    if (dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE
+        && razer_kbd_has_battery(dev->usb_pid)) {
+        if (razer_power_supply_register(&dev->battery, &hdev->dev, dev,
+                                        razer_kbd_device_type_str(dev),
+                                        razer_kbd_battery_refresh, 60000,
+                                        RAZER_POWER_SUPPLY_ABSENT_AFTER))
+            hid_warn(hdev, "failed to register battery power_supply\n");
+    }
+
     return 0;
 
 exit_free:
@@ -6536,6 +6643,11 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     }
 
     hid_hw_stop(hdev);
+
+    /* Cancels the refresh worker and unregisters the psy (no-op if never
+     * registered). Must run before kfree(dev): get_property/worker deref dev. */
+    razer_power_supply_unregister(&dev->battery);
+
     kfree(dev);
     hid_info(hdev, "Razer Device disconnected\n");
 }
