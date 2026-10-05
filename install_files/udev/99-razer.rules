@@ -15,9 +15,17 @@ ATTRS{idProduct}=="010d|010e|010f|0111|0113|0118|011a|011b|011c|0201|0202|0203|0
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerkbd"
 
 # Kraken
-ATTRS{idProduct}=="0501|0504|0506|0510|0520|0527|0560", \
+ATTRS{idProduct}=="0501|0504|0506|0510|0520|0527|052c|0560", \
     ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razerkraken"
+
+# Kraken V3 Pro: ignore ModemManager; unbind cdc_acm so the driver can use bulk.
+ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_interface", \
+    ATTRS{idVendor}=="1532", ATTRS{idProduct}=="052c", \
+    ATTR{bInterfaceClass}=="02|0a", ENV{ID_MM_DEVICE_IGNORE}="1"
+ACTION=="add", SUBSYSTEM=="usb", DRIVER=="cdc_acm", \
+    ATTRS{idVendor}=="1532", ATTRS{idProduct}=="052c", \
+    RUN+="/bin/sh -c 'echo -n $kernel > /sys/bus/usb/drivers/cdc_acm/unbind'"
 
 # Accessories (Speakers, Mousemats, Razer Core, etc)
 ATTRS{idProduct}=="0068|007e|00a4|0215|0517|0518|0c00|0c01|0c02|0c04|0c05|0c06|0c08|0f07|0f08|0f09|0f0d|0f12|0f13|0f17|0f19|0f1a|0f1d|0f1f|0f20|0f21|0f26|0f2b", \
