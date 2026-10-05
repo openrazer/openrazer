@@ -2131,6 +2131,8 @@ class RazerBasiliskV3ProDocked(RazerMouseDocked, RazerBasiliskV3ProWireless):
 
     WIRELESS_PID = RazerBasiliskV3ProWireless.USB_PID
     DEVICE_NAME = "Razer Basilisk V3 Pro (Docked)"
+    METHODS = RazerBasiliskV3ProWireless.METHODS + ['get_supported_poll_rates']
+    POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
 
 class RazerBasiliskV3Pro35KWired(__RazerDevice):
@@ -2185,6 +2187,8 @@ class RazerBasiliskV3Pro35KDocked(RazerMouseDocked, RazerBasiliskV3Pro35KWireles
 
     WIRELESS_PID = RazerBasiliskV3Pro35KWireless.USB_PID
     DEVICE_NAME = "Razer Basilisk V3 Pro 35K (Docked)"
+    METHODS = RazerBasiliskV3Pro35KWireless.METHODS + ['get_supported_poll_rates']
+    POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
 
 class RazerBasiliskV3Pro35KPhantomGreenEditionWired(__RazerDevice):

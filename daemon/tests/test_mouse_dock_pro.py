@@ -15,6 +15,8 @@ from openrazer_daemon.dbus_services.dbus_methods import mamba
 from openrazer_daemon.hardware.accessory import RazerMouseDockPro
 from openrazer_daemon.hardware.mouse import (
     DockedMouseNotReady, RazerBasiliskV3ProDocked, RazerBasiliskV3ProWireless,
+    RazerBasiliskV3Pro35KDocked, RazerBasiliskV3Pro35KWireless, RazerBasiliskV3Pro35KWired,
+    RazerNagaV2ProDocked,
 )
 
 
@@ -321,6 +323,42 @@ class DockRestoreTest(unittest.TestCase):
         self.assertEqual(self.mouse.dpi, [800, 800])
         self.assertFalse(self.mouse.persistence.status['changed'])
         self.assertEqual(self.mouse.zone, {})
+
+    def test_original_basilisk_dock_advertises_8k_without_broadening_other_models(self):
+        self.assertIn('get_supported_poll_rates', self.mouse.METHODS)
+        self.assertEqual(mamba.get_supported_poll_rates(self.mouse), [125, 500, 1000, 2000, 4000, 8000])
+        self.assertNotIn(8000, RazerBasiliskV3ProWireless.POLL_RATES or [])
+        self.assertNotIn(8000, RazerNagaV2ProDocked.POLL_RATES)
+
+    def assert_docked_8k_profile(self, docked, wireless, wired):
+        registry = dict(RazerMouseDockPro._get_wireless_pid_registry())
+        self.assertIs(registry[wireless.USB_PID], docked)
+        dock = object.__new__(RazerMouseDockPro)
+        dock._is_closed = True
+        dock._get_wireless_pid_registry = Mock(return_value=registry)
+        dock.get_active_mouse_identity = Mock(return_value=(wireless.USB_PID, 'MOUSESERIAL'))
+        self.assertEqual(dock.get_child_devices(), [
+            (docked, {'id_suffix': ':mouse', 'serial': 'MOUSESERIAL'}),
+        ])
+        self.assertEqual(docked.USB_PID, RazerMouseDockPro.USB_PID)
+        self.assertIn('get_supported_poll_rates', docked.METHODS)
+        self.assertEqual(docked.POLL_RATES, [125, 500, 1000, 2000, 4000, 8000])
+        for direct in (wired, wireless):
+            self.assertEqual(direct.POLL_RATES or [125, 500, 1000], [125, 500, 1000])
+        mouse = object.__new__(docked)
+        mouse._is_closed = True
+        mouse.logger = Mock()
+        mouse.poll_rate = 1000
+        mouse._device_path = self.tmp.name
+        poll_rate_path = self.path / 'poll_rate'
+        poll_rate_path.write_text('1000\n')
+        mamba.set_poll_rate(mouse, 8000)
+        self.assertEqual(poll_rate_path.read_text(), '8000')
+        self.assertEqual(mamba.get_poll_rate(mouse), 8000)
+        self.assertEqual(mamba.get_supported_poll_rates(mouse), docked.POLL_RATES)
+
+    def test_basilisk_35k_dock_profile_keeps_direct_mode_unchanged(self):
+        self.assert_docked_8k_profile(RazerBasiliskV3Pro35KDocked, RazerBasiliskV3Pro35KWireless, RazerBasiliskV3Pro35KWired)
 
     def test_successful_polling_write_is_read_back_before_becoming_saved_state(self):
         driver_file = mock_open(read_data='1000\n')

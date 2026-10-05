@@ -99,6 +99,13 @@ class MouseDockProClientTest(unittest.TestCase):
         self.fake_dock.set('paired_slots', '1:1:00ab 2:0:ffff')
         self.assertEqual(self.dock.paired_slots, [(1, True, '00ab'), (2, False, 'ffff')])
 
+    def test_original_basilisk_exposes_and_sets_8k_through_client(self):
+        self.assertTrue(self.mouse.has('supported_poll_rates'))
+        self.assertEqual(self.mouse.supported_poll_rates, [125, 500, 1000, 2000, 4000, 8000])
+        self.mouse.poll_rate = 8000
+        self.assertEqual(self.fake_dock.get('poll_rate'), '8000')
+        self.assertEqual(self.mouse.poll_rate, 8000)
+
     def test_polling_getter_refreshes_hardware_instead_of_returning_prior_write(self):
         self.mouse.poll_rate = 1000
         self.fake_dock.set('poll_rate', '500')
