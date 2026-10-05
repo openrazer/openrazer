@@ -5453,7 +5453,6 @@ static void razer_kbd_init(struct razer_kbd_device *dev, struct hid_device *hdev
  */
 static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
-    int retval = 0;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = hid_to_usb_dev(hdev);
     struct razer_kbd_device *dev = NULL;
@@ -5470,8 +5469,10 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
     usb_dev_data = dev_get_drvdata(&usb_dev->dev);
     if (!usb_dev_data) {
         usb_dev_data = devm_kzalloc(&usb_dev->dev, sizeof(struct razer_kbd_usb_device_data), GFP_KERNEL);
-        if (!usb_dev_data)
-            return -ENOMEM;
+        if (!usb_dev_data) {
+            err = -ENOMEM;
+            goto exit_free;
+        }
 
         dev_set_drvdata(&usb_dev->dev, usb_dev_data);
     }
@@ -5983,7 +5984,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         if (usb_dev->descriptor.idProduct != USB_DEVICE_ID_RAZER_TARTARUS_PRO) {
             err = razer_set_device_mode(dev, 0x00, 0x00);
             if (err)
-                return err;
+                goto exit_free;
         }
     } else if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_key_super);
@@ -5994,13 +5995,15 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
     hid_set_drvdata(hdev, dev);
     dev_set_drvdata(&hdev->dev, dev);
 
-    if(hid_parse(hdev)) {
-        hid_err(hdev, "parse failed\n");
+    err = hid_parse(hdev);
+    if (err) {
+        hid_err(hdev, "parse failed: %d\n", err);
         goto exit_free;
     }
 
-    if (hid_hw_start(hdev, HID_CONNECT_DEFAULT)) {
-        hid_err(hdev, "hw start failed\n");
+    err = hid_hw_start(hdev, HID_CONNECT_DEFAULT);
+    if (err) {
+        hid_err(hdev, "hw start failed: %d\n", err);
         goto exit_free;
     }
 
@@ -6015,7 +6018,7 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 
 exit_free:
     kfree(dev);
-    return retval;
+    return err;
 }
 
 /**
