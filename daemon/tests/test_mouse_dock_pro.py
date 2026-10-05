@@ -16,7 +16,10 @@ from openrazer_daemon.hardware.accessory import RazerMouseDockPro
 from openrazer_daemon.hardware.mouse import (
     DockedMouseNotReady, RazerBasiliskV3ProDocked, RazerBasiliskV3ProWireless,
     RazerBasiliskV3Pro35KDocked, RazerBasiliskV3Pro35KWireless, RazerBasiliskV3Pro35KWired,
-    RazerNagaV2ProDocked,
+    RazerBasiliskV3Pro35KPhantomGreenEditionDocked, RazerBasiliskV3Pro35KPhantomGreenEditionWireless,
+    RazerBasiliskV3Pro35KPhantomGreenEditionWired,
+    RazerCobraHyperSpeedDocked, RazerCobraHyperSpeedWireless, RazerCobraHyperSpeed,
+    RazerCobraProDocked, RazerCobraProWireless, RazerCobraProWired, RazerNagaV2ProDocked,
 )
 
 
@@ -359,6 +362,17 @@ class DockRestoreTest(unittest.TestCase):
 
     def test_basilisk_35k_dock_profile_keeps_direct_mode_unchanged(self):
         self.assert_docked_8k_profile(RazerBasiliskV3Pro35KDocked, RazerBasiliskV3Pro35KWireless, RazerBasiliskV3Pro35KWired)
+
+    def test_additional_dock_8k_profiles_keep_direct_modes_unchanged(self):
+        for docked, wireless, wired in (
+                (RazerBasiliskV3Pro35KPhantomGreenEditionDocked,
+                 RazerBasiliskV3Pro35KPhantomGreenEditionWireless,
+                 RazerBasiliskV3Pro35KPhantomGreenEditionWired),
+                (RazerCobraProDocked, RazerCobraProWireless, RazerCobraProWired),
+                (RazerCobraHyperSpeedDocked, RazerCobraHyperSpeedWireless, RazerCobraHyperSpeed)):
+            with self.subTest(model=docked.DEVICE_NAME):
+                self.assert_docked_8k_profile(docked, wireless, wired)
+        self.assertNotIn(8000, RazerNagaV2ProDocked.POLL_RATES)
 
     def test_successful_polling_write_is_read_back_before_becoming_saved_state(self):
         driver_file = mock_open(read_data='1000\n')

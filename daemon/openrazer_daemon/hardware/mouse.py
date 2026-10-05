@@ -1997,6 +1997,14 @@ class RazerCobraHyperSpeedWireless(RazerCobraHyperSpeed):
     USB_PID = 0x00DB
 
 
+class RazerCobraHyperSpeedDocked(RazerMouseDocked, RazerCobraHyperSpeedWireless):
+    """Razer Cobra HyperSpeed accessed via the Mouse Dock Pro."""
+
+    WIRELESS_PID = RazerCobraHyperSpeedWireless.USB_PID
+    DEVICE_NAME = "Razer Cobra HyperSpeed (Docked)"
+    POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
+
+
 class RazerCobraProDocked(RazerMouseDocked, RazerCobraProWireless):
     """
     Class for the Razer Cobra Pro accessed via the Mouse Dock Pro.
@@ -2004,6 +2012,8 @@ class RazerCobraProDocked(RazerMouseDocked, RazerCobraProWireless):
 
     WIRELESS_PID = RazerCobraProWireless.USB_PID
     DEVICE_NAME = "Razer Cobra Pro (Docked)"
+    METHODS = RazerCobraProWireless.METHODS + ['get_supported_poll_rates']
+    POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
 
 class RazerDeathAdderV3(__RazerDevice):
@@ -2229,6 +2239,15 @@ class RazerBasiliskV3Pro35KPhantomGreenEditionWireless(RazerBasiliskV3Pro35KPhan
     """
 
     USB_PID = 0x00D7
+
+
+class RazerBasiliskV3Pro35KPhantomGreenEditionDocked(RazerMouseDocked, RazerBasiliskV3Pro35KPhantomGreenEditionWireless):
+    """Razer Basilisk V3 Pro 35K Phantom Green Edition via Mouse Dock Pro."""
+
+    WIRELESS_PID = RazerBasiliskV3Pro35KPhantomGreenEditionWireless.USB_PID
+    DEVICE_NAME = "Razer Basilisk V3 Pro 35K Phantom Green Edition (Docked)"
+    METHODS = RazerBasiliskV3Pro35KPhantomGreenEditionWireless.METHODS + ['get_supported_poll_rates']
+    POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
 
 
 class RazerBasiliskV3_35K(__RazerDevice):
