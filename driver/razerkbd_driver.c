@@ -2224,7 +2224,10 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
 
     /* For Blade laptops we get the serial number from DMI */
     if (is_blade_laptop(device)) {
-        strscpy(serial_string, dmi_get_system_info(DMI_PRODUCT_SERIAL), sizeof(serial_string));
+        const char *dmi_serial = dmi_get_system_info(DMI_PRODUCT_SERIAL);
+        if (!dmi_serial)
+            return -ENODEV;
+        strscpy(serial_string, dmi_serial, sizeof(serial_string));
         goto exit;
     }
 
