@@ -3108,8 +3108,8 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
     }
 
     active_stage = buf[0];
-    remaining++;
     buf++;
+    remaining--;
 
     if (active_stage < 1) {
         dev_err(dev, "razermouse: Invalid active DPI stage: %u < 1\n", active_stage);
