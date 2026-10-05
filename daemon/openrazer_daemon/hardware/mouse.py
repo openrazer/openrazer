@@ -38,6 +38,65 @@ class RazerMouseDocked(__RazerDevice):
     # to look up which concrete subclass to instantiate.  Must be set by every
     # concrete subclass.
     WIRELESS_PID: int
+    HARDWARE_POLL_RATE = True
+    POLL_RATES = [125, 500, 1000]
+
+    def __init__(self, *args, expected_serial=None, **kwargs):
+        self._expected_serial = expected_serial
+        try:
+            super().__init__(*args, **kwargs)
+        except Exception:
+            if hasattr(self, '_observer_list'):
+                try:
+                    self._close()
+                except Exception:
+                    pass
+            try:
+                self.remove_from_connection()
+            except Exception:
+                pass
+            raise
+
+    def restore_dpi_poll_rate(self):
+        """Restore only explicit values; retain failed writes for a later retry."""
+        saved = self.persistence[self.storage_name] if self.persistence.has_section(self.storage_name) else {}
+        self._dock_restore_dpi = 'dpi_x' in saved and 'dpi_y' in saved
+        self._dock_restore_poll_rate = 'poll_rate' in saved
+        if self._dock_restore_dpi:
+            self.dpi = [min(value, self.DPI_MAX) for value in self.dpi]
+        if self._dock_restore_poll_rate and self.poll_rate not in self.POLL_RATES:
+            self.poll_rate = min(self.POLL_RATES, key=lambda rate: abs(rate - self.poll_rate))
+        self._dock_dpi_known = self._dock_restore_dpi
+        self._dock_poll_rate_known = self._dock_restore_poll_rate
+        reported_dpi = self.read_reported_dpi()
+        self.update_dpi_from_report(reported_dpi)
+        self.retry_pending_restore()
+        if not self._dock_restore_dpi and reported_dpi is None:
+            try:
+                self.dpi = list(getattr(self, 'getDPI')())
+                self._dock_dpi_known = True
+            except (OSError, ValueError):
+                pass
+        if not self._dock_restore_poll_rate:
+            try:
+                self.poll_rate = getattr(self, 'getPollRate')()
+                self._dock_poll_rate_known = True
+            except (OSError, ValueError):
+                pass
+
+    def retry_pending_restore(self):
+        if getattr(self, '_dock_restore_dpi', False):
+            try:
+                getattr(self, 'setDPI')(*self.dpi)
+                self._dock_restore_dpi = False
+            except (OSError, RuntimeError):
+                self.logger.warning('Docked mouse DPI restore deferred until RF is ready')
+        if getattr(self, '_dock_restore_poll_rate', False):
+            try:
+                getattr(self, 'setPollRate')(self.poll_rate)
+                self._dock_restore_poll_rate = False
+            except (OSError, RuntimeError):
+                self.logger.warning('Docked mouse polling restore deferred until RF is ready')
 
     # Map logical sysfs filenames to the dock-prefixed names the driver exposes.
     # All mouse relay attributes use the mouse_ prefix so it is clear they are
@@ -85,6 +144,8 @@ class RazerMouseDocked(__RazerDevice):
             serial = self._read_driver_serial()
             if not self._is_valid_serial(serial):
                 raise DockedMouseNotReady("no valid serial from docked mouse: {0!r}".format(serial))
+            if self._expected_serial is not None and serial != self._expected_serial:
+                raise DockedMouseNotReady('Docked mouse changed during discovery')
             self._serial = serial
 
         return self._serial
@@ -116,7 +177,11 @@ class RazerMouseDocked(__RazerDevice):
         :param dpi: [x, y] from read_reported_dpi()
         :type dpi: list of int or None
         """
-        if dpi is None or dpi == self.dpi:
+        if dpi is None:
+            return
+        self._dock_restore_dpi = False
+        self._dock_dpi_known = True
+        if dpi == self.dpi:
             return
         self.logger.info("Mouse reported DPI %d:%d", dpi[0], dpi[1])
         self.dpi[0] = dpi[0]

@@ -192,15 +192,21 @@ def set_dpi_xy(self, dpi_x, dpi_y):
     else:
         dpi_bytes = struct.pack('>HH', dpi_x, dpi_y)
 
-    # store to local variable (TODO: can we replace this by getting from persistence?)
+    if getattr(self, 'HARDWARE_POLL_RATE', False):
+        with open(driver_path, 'wb') as driver_file:
+            driver_file.write(dpi_bytes)
+
+    # Keep the prior direct-device order, but never persist a rejected dock relay.
     self.dpi[0] = dpi_x
     self.dpi[1] = dpi_y
-
+    if getattr(self, 'HARDWARE_POLL_RATE', False):
+        self._dock_dpi_known = True
     self.set_persistence(None, "dpi_x", dpi_x)
     self.set_persistence(None, "dpi_y", dpi_y)
 
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(dpi_bytes)
+    if not getattr(self, 'HARDWARE_POLL_RATE', False):
+        with open(driver_path, 'wb') as driver_file:
+            driver_file.write(dpi_bytes)
 
 
 @endpoint('razer.device.dpi', 'getDPI', out_sig='ai')
@@ -323,11 +329,15 @@ def set_poll_rate(self, rate):
 
     driver_path = self.get_driver_path('poll_rate')
 
-    # remember poll rate
-    self.poll_rate = rate
+    if not getattr(self, 'HARDWARE_POLL_RATE', False):
+        self.poll_rate = rate
 
     with open(driver_path, 'w') as driver_file:
         driver_file.write(str(rate))
+
+    if getattr(self, 'HARDWARE_POLL_RATE', False):
+        self.poll_rate = rate
+        self._dock_poll_rate_known = True
 
 
 @endpoint('razer.device.misc', 'getPollRate', out_sig='i')
@@ -340,6 +350,13 @@ def get_poll_rate(self):
     """
     self.logger.debug("DBus call get_poll_rate")
 
+    if getattr(self, 'HARDWARE_POLL_RATE', False):
+        with open(self.get_driver_path('poll_rate'), 'r') as driver_file:
+            actual_rate = int(driver_file.read().strip())
+        if not getattr(self, '_dock_restore_poll_rate', False):
+            self.poll_rate = actual_rate
+            self._dock_poll_rate_known = True
+        return actual_rate
     return int(self.poll_rate)
 
 

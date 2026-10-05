@@ -213,8 +213,10 @@ static int __must_check razer_dock_send_mouse_payload_ext(struct razer_accessory
     }
 
     switch (response->status) {
+    case RAZER_CMD_SUCCESSFUL:
+        return 0;
     case RAZER_CMD_BUSY:
-        break;
+        return -EBUSY;
     case RAZER_CMD_FAILURE:
         print_erroneous_report(device->hdev, response, "Mouse command failed");
         return -EIO;
@@ -226,9 +228,9 @@ static int __must_check razer_dock_send_mouse_payload_ext(struct razer_accessory
     case RAZER_CMD_TIMEOUT:
         print_erroneous_report(device->hdev, response, "Mouse command timed out");
         return -EIO;
+    default:
+        return -EIO;
     }
-
-    return 0;
 }
 
 static int __must_check razer_dock_send_mouse_payload(struct razer_accessory_device *device, struct razer_report *request, struct razer_report *response)
@@ -3258,56 +3260,57 @@ static ssize_t razer_attr_read_mouse_connected(struct device *dev, struct device
     /*
      * Query dock firmware via cmd=0xbf heartbeat instead of relaying a battery
      * GET to the mouse over RF.  args[1] of the response is the dock's
-     * paired-flag (1 = mouse paired, 0 = no mouse).  This is a pure firmware
+     * availability flag (1 = live, 0 = unavailable). This is a pure firmware
      * round-trip with no RF traffic, so it can be polled safely.
      */
-    request = get_razer_report(0x00, 0xbf, 0x50);
+    request = get_razer_report(0x00, 0xbf, 0x1f);
     request.transaction_id.id = 0x3F;
     err = razer_send_payload(device, &request, &response);
-    if (err || response.status != RAZER_CMD_SUCCESSFUL)
+    if (err || response.status != RAZER_CMD_SUCCESSFUL || response.data_size < 2)
         return sysfs_emit(buf, "0\n");
 
     return sysfs_emit(buf, "%d\n", response.arguments[1] == 1);
 }
 
 /*
- * Re-issues the 0xbf heartbeat used by mouse_connected. If the firmware
- * encodes the paired mouse PID in arguments[2..3] as a big-endian u16
- * (matching the nearby-mice announcement format), returns it directly --
- * this survives reboot and module reload.
- *
- * TODO: verify the exact argument offset before treating the heartbeat
- * path as authoritative.
- *
- * If the heartbeat yields zero (older firmware or pairing done while the
- * module was not loaded) falls back to the PID cached in shared->paired_pid
- * at pair_step2 time.
+ * 0xbf reports a slot count followed by three bytes per slot: availability,
+ * PID high byte and PID low byte. A stored PID remains present when its
+ * availability flag is zero. Only slot 1 is a characterized relay target.
  */
-static unsigned short razer_dock_pro_query_paired_pid(struct razer_accessory_device *device)
+static int razer_dock_pro_query_slots(struct razer_accessory_device *device, struct razer_report *response)
 {
-    struct razer_report request = {0};
-    struct razer_report response = {0};
-    unsigned short pid = 0;
-    unsigned long flags;
+    struct razer_report request = get_razer_report(0x00, 0xbf, 0x1f);
     int err;
 
     if (atomic_read(&device->pairing_busy))
+        return -EBUSY;
+
+    request.transaction_id.id = 0x3F;
+    err = razer_send_payload(device, &request, response);
+    if (err)
+        return err;
+    if (response->status != RAZER_CMD_SUCCESSFUL)
+        return -EIO;
+    if (response->data_size < 1)
+        return -EIO;
+    if (response->arguments[0] > (sizeof(response->arguments) - 1) / 3)
+        return -EIO;
+    if (response->data_size < 1 + 3 * response->arguments[0])
+        return -EIO;
+
+    return 0;
+}
+
+static unsigned short razer_dock_pro_query_paired_pid(struct razer_accessory_device *device)
+{
+    struct razer_report response = {0};
+    unsigned short pid;
+
+    if (razer_dock_pro_query_slots(device, &response) || response.arguments[0] < 1)
         return 0;
 
-    request = get_razer_report(0x00, 0xbf, 0x50);
-    request.transaction_id.id = 0x3F;
-    err = razer_send_payload(device, &request, &response);
-
-    if (!err && response.status == RAZER_CMD_SUCCESSFUL && response.arguments[1] == 1)
-        pid = ((unsigned short)response.arguments[2] << 8) | response.arguments[3];
-
-    if (!pid && device->shared) {
-        spin_lock_irqsave(&device->shared->nearby_lock, flags);
-        pid = device->shared->paired_pid;
-        spin_unlock_irqrestore(&device->shared->nearby_lock, flags);
-    }
-
-    return pid;
+    pid = ((unsigned short)response.arguments[2] << 8) | response.arguments[3];
+    return pid == 0xffff ? 0 : pid;
 }
 
 static ssize_t razer_attr_read_paired_pid(struct device *dev, struct device_attribute *attr, char *buf)
@@ -3341,6 +3344,32 @@ static ssize_t razer_attr_read_mouse_reported_dpi(struct device *dev, struct dev
         return sysfs_emit(buf, "\n");
 
     return sysfs_emit(buf, "%u:%u\n", dpi_x, dpi_y);
+}
+
+/* Format: slot:available:pid, including unknown PIDs and empty 0xffff slots. */
+static ssize_t razer_attr_read_paired_slots(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report response = {0};
+    size_t count, i;
+    ssize_t written = 0;
+    int err;
+
+    err = razer_dock_pro_query_slots(device, &response);
+    if (err)
+        return err;
+
+    count = response.arguments[0];
+    for (i = 0; i < count; i++) {
+        size_t offset = 1 + 3 * i;
+        unsigned short pid = ((unsigned short)response.arguments[offset + 1] << 8) |
+                             response.arguments[offset + 2];
+
+        written += sysfs_emit_at(buf, written, "%s%zu:%u:%04x", i ? " " : "",
+                                 i + 1, response.arguments[offset], pid);
+    }
+
+    return written + sysfs_emit_at(buf, written, "\n");
 }
 
 static ssize_t razer_attr_read_mouse_firmware(struct device *dev, struct device_attribute *attr, char *buf)
@@ -3864,6 +3893,7 @@ static DEVICE_ATTR(mouse_serial,                            0440, razer_attr_rea
 static DEVICE_ATTR(mouse_connected,                         0440, razer_attr_read_mouse_connected,               NULL);
 static DEVICE_ATTR(paired_pid,                              0440, razer_attr_read_paired_pid,                    NULL);
 static DEVICE_ATTR(mouse_reported_dpi,                      0440, razer_attr_read_mouse_reported_dpi,            NULL);
+static DEVICE_ATTR(paired_slots,                            0440, razer_attr_read_paired_slots,                  NULL);
 static DEVICE_ATTR(nearby_mice,                             0440, razer_attr_read_nearby_mice,                   NULL);
 static DEVICE_ATTR(scan_for_mice,                           0220, NULL,                                          razer_attr_write_scan_for_mice);
 static DEVICE_ATTR(mouse_firmware,                          0440, razer_attr_read_mouse_firmware,                NULL);
@@ -4229,6 +4259,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_connected);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_paired_pid);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_mouse_reported_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_paired_slots);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_nearby_mice);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scan_for_mice);
 
@@ -4537,6 +4568,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_mouse_connected);
             device_remove_file(&hdev->dev, &dev_attr_paired_pid);
             device_remove_file(&hdev->dev, &dev_attr_mouse_reported_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_paired_slots);
             device_remove_file(&hdev->dev, &dev_attr_nearby_mice);
             device_remove_file(&hdev->dev, &dev_attr_scan_for_mice);
             device_remove_file(&hdev->dev, &dev_attr_mouse_firmware);
