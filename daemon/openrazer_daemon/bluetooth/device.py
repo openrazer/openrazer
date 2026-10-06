@@ -133,6 +133,10 @@ class BasiliskV3ProBluetooth(DBusService):
     def setDPI(self, x, y):
         self.invoke('set_dpi', x, y)
 
+    @dbus.service.method(DPI, in_signature='ya(qq)')
+    def setDPIStages(self, active_stage, stages):
+        self.invoke('set_dpi_stages', active_stage, stages)
+
     @dbus.service.method(DPI, out_signature='(ya(qq))')
     def getDPIStages(self):
         active, stages = self.invoke('dpi_stages')

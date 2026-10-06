@@ -104,6 +104,28 @@ class BasiliskSettings:
         if parse_dpi(await self.session.read(bytes.fromhex('0b840100'))) != parse_dpi(payload):
             raise ValueError('DPI readback differed; setting state is uncertain')
 
+    async def _set_dpi_stages(self, active_stage, stages):
+        stages = list(stages)
+        if len(stages) != 5 or not 1 <= int(active_stage) <= 5:
+            raise ValueError('Bluetooth DPI editing currently requires five stages and active stage 1..5')
+        if any(len(stage) != 2 or any(not 100 <= int(value) <= 30000 for value in stage) for stage in stages):
+            raise ValueError('DPI must be 100..30000 on both axes')
+        original = await self.session.read(bytes.fromhex('0b840100'))
+        state = parse_dpi(original)
+        ids = [stage['id'] for stage in state['stages']]
+        if len(ids) != 5 or len(set(ids)) != 5 or state['active_raw'] not in ids or len(original) not in (36, 37, 38):
+            raise ValueError('DPI stage editing requires a validated five-stage table with distinct IDs')
+        payload = bytearray(original.ljust(38, b'\x00'))
+        payload[0] = ids[int(active_stage) - 1]
+        for index, (x, y) in enumerate(stages):
+            offset = 2 + index * 7
+            payload[offset+1:offset+3] = int(x).to_bytes(2, 'little')
+            payload[offset+3:offset+5] = int(y).to_bytes(2, 'little')
+        await self.session.write(bytes.fromhex('0b040100'), bytes(payload))
+        await asyncio.sleep(0.25)
+        if parse_dpi(await self.session.read(bytes.fromhex('0b840100'))) != parse_dpi(payload):
+            raise ValueError('DPI stages readback differed; setting state is uncertain')
+
     async def _brightness(self, zone):
         raw = await self.read_exact(bytes([0x10, 0x85, 1, ZONE_IDS[zone]]), 1)
         return raw[0] * 100.0 / 255.0
