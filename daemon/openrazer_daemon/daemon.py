@@ -94,7 +94,10 @@ class RazerDaemon(DBusService):
         self._unknown_serial_counter: dict[tuple[int, int], int] = {}
 
         # Check for plugdev group
-        if not self._check_plugdev_group():
+        bluetooth_only = self._config.getboolean('General', 'bluetooth_only', fallback=False)
+        if bluetooth_only and not self._config.getboolean('General', 'bluetooth_enabled', fallback=False):
+            raise ValueError("bluetooth_only requires bluetooth_enabled")
+        if not bluetooth_only and not self._check_plugdev_group():
             self.logger.critical("User is not a member of the plugdev group")
             self.logger.critical("Please run the command 'sudo gpasswd -a $USER plugdev' and then reboot!")
             sys.exit(1)
@@ -117,7 +120,9 @@ class RazerDaemon(DBusService):
         self._init_screensaver_monitor()
 
         self._razer_devices = DeviceCollection()
-        self._load_devices(first_run=True)
+        if not bluetooth_only:
+            self._load_devices(first_run=True)
+        self._bluetooth_manager = None
 
         # Add DBus methods
         methods = {
@@ -143,6 +148,12 @@ class RazerDaemon(DBusService):
 
         # TODO remove
         self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
+        if self._test_dir is None and self._config.getboolean('General', 'bluetooth_enabled', fallback=False):
+            try:
+                from openrazer_daemon.bluetooth.manager import BluetoothManager
+                self._bluetooth_manager = BluetoothManager(self)
+            except Exception:
+                self.logger.warning('Cannot start optional Bluetooth backend', exc_info=True)
         # TODO ======
 
     @dbus.service.signal('razer.devices')
@@ -281,6 +292,8 @@ class RazerDaemon(DBusService):
 
         self._config['General'] = {
             'verbose_logging': False,
+            'bluetooth_enabled': False,
+            'bluetooth_only': False,
         }
         self._config['Startup'] = {
             'sync_effects_enabled': True,
@@ -368,6 +381,9 @@ class RazerDaemon(DBusService):
     def supported_devices(self):
         result = {cls.__name__: (cls.USB_VID, cls.USB_PID) for cls in self._device_classes}
 
+        if self._bluetooth_manager is not None:
+            from openrazer_daemon.bluetooth.device import BasiliskV3ProBluetooth
+            result['BasiliskV3ProBluetooth'] = (BasiliskV3ProBluetooth.USB_VID, BasiliskV3ProBluetooth.USB_PID)
         return json.dumps(result)
 
     def version(self):
@@ -522,6 +538,8 @@ class RazerDaemon(DBusService):
         :param device: Udev Device
         :type device: pyudev.device._device.Device
         """
+        if self._config.getboolean('General', 'bluetooth_only', fallback=False):
+            return
         device_number = len(self._razer_devices)
         for device_class in self._device_classes:
             sys_name = device.sys_name
@@ -641,6 +659,10 @@ class RazerDaemon(DBusService):
             self.logger.info('Stopping daemon.')
         else:
             self.logger.info('Stopping daemon on signal %d', signum)
+
+        if self._bluetooth_manager is not None:
+            self._bluetooth_manager.close()
+            self._bluetooth_manager = None
 
         # "Resume" all devices, in case they're still "suspended"
         # (lights off because of screensaver)
