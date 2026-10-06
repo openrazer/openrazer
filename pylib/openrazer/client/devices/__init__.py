@@ -225,11 +225,6 @@ class RazerDevice(object):
         else:
             self._matrix_dimensions = None
 
-        if self.has('keyboard_layout'):
-            self._kbd_layout = str(self._dbus_interfaces['device'].getKeyboardLayout())
-        else:
-            self._kbd_layout = None
-
         # Setup FX
         self.fx = _RazerFX(serial, capabilities=self._capabilities, daemon_dbus=self._dbus, matrix_dims=self._matrix_dimensions)
 
@@ -382,8 +377,10 @@ class RazerDevice(object):
         """
         if self._kbd_layout:
             return self._kbd_layout
-        else:
-            raise NotImplementedError()
+        if self.has('keyboard_layout'):
+            self._kbd_layout = str(self._dbus_interfaces['device'].getKeyboardLayout())
+            return self._kbd_layout
+        raise NotImplementedError()
 
     @property
     def brightness(self) -> float:
