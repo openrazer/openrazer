@@ -106,6 +106,337 @@ retry:
     }
 }
 
+
+/*
+ * Razer Seiren V3 Chroma
+ * VID:PID 1532:056F
+ *
+ * Verified hardware:
+ *   USB interface 3
+ *   HID Feature Report ID 0x07
+ *   64-byte report
+ *   command class 0x0F
+ *   command ID 0x03
+ *   1 row x 10 RGB LEDs
+ */
+#define SEIREN_V3_CHROMA_REPORT_LEN 64
+#define SEIREN_V3_CHROMA_REPORT_ID  0x07
+#define SEIREN_V3_CHROMA_LED_COUNT  10
+
+
+static int razer_seiren_v3_chroma_send_razer_report(
+    struct razer_accessory_device *device,
+    struct razer_report *request)
+{
+    unsigned char report[SEIREN_V3_CHROMA_REPORT_LEN] = {0};
+    unsigned char checksum = 0;
+    int ret;
+    int i;
+
+    /*
+     * The Seiren's 64-byte packet is the ordinary Razer report structure,
+     * prefixed by HID Report ID 0x07 and truncated to fit the report.
+     *
+     * Bytes:
+     *   0      HID report ID
+     *   1..62  beginning of struct razer_report
+     *   63     compact-report XOR checksum
+     */
+    request->transaction_id.id = 0x52;
+
+    report[0] = SEIREN_V3_CHROMA_REPORT_ID;
+
+    memcpy(
+        &report[1],
+        request,
+        62
+    );
+
+    for (i = 1; i < 63; i++)
+        checksum ^= report[i];
+
+    report[63] = checksum;
+
+    mutex_lock(&device->lock);
+
+    ret = razer_send_control_msg_old_device(
+              device->hdev,
+              report,
+              0x0307,
+              0x0003,
+              sizeof(report),
+              1000
+          );
+
+    mutex_unlock(&device->lock);
+
+    if (ret < 0)
+        return ret;
+
+    return 0;
+}
+
+
+/*
+ * Send a standard Razer command through the Seiren V3 Chroma's compact
+ * 64-byte HID Feature Report transport and read the matching response.
+ *
+ * Request:
+ *   SET_REPORT, Feature Report ID 0x07
+ *   wValue = 0x0307
+ *   wIndex = 0x0003
+ *
+ * Response:
+ *   GET_REPORT, Feature Report ID 0x07
+ *   wValue = 0x0307
+ *   wIndex = 0x0003
+ *
+ * The compact response stores its CRC at byte 62 and reserved byte at 63.
+ */
+static int razer_seiren_v3_chroma_send_payload(
+    struct razer_accessory_device *device,
+    struct razer_report *request,
+    struct razer_report *response)
+{
+    struct usb_device *usb_dev = hid_to_usb_dev(device->hdev);
+    unsigned char tx[SEIREN_V3_CHROMA_REPORT_LEN] = {0};
+    unsigned char rx[SEIREN_V3_CHROMA_REPORT_LEN] = {0};
+    unsigned char checksum = 0;
+    int ret;
+    int i;
+
+    request->transaction_id.id = 0x52;
+
+    tx[0] = SEIREN_V3_CHROMA_REPORT_ID;
+
+    /*
+     * The Seiren request packet contains the first 62 bytes of the
+     * ordinary Razer report after the HID report ID.
+     */
+    memcpy(&tx[1], request, 62);
+
+    for (i = 1; i < 63; i++)
+        checksum ^= tx[i];
+
+    tx[63] = checksum;
+
+    mutex_lock(&device->lock);
+
+    ret = razer_send_control_msg_old_device(
+              device->hdev,
+              tx,
+              0x0307,
+              0x0003,
+              sizeof(tx),
+              10000
+          );
+    if (ret)
+        goto out_unlock;
+
+    ret = usb_control_msg_recv(
+              usb_dev,
+              0,
+              HID_REQ_GET_REPORT,
+              USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN,
+              0x0307,
+              0x0003,
+              rx,
+              sizeof(rx),
+              USB_CTRL_SET_TIMEOUT,
+              GFP_KERNEL
+          );
+    if (ret) {
+        hid_warn(
+            device->hdev,
+            "Failed to receive Seiren V3 Chroma USB control message: %d\n",
+            ret
+        );
+        goto out_unlock;
+    }
+
+    if (rx[0] != SEIREN_V3_CHROMA_REPORT_ID) {
+        hid_warn(
+            device->hdev,
+            "Seiren V3 Chroma returned unexpected report ID: 0x%02x\n",
+            rx[0]
+        );
+        ret = -EINVAL;
+        goto out_unlock;
+    }
+
+    /*
+     * Verified on physical hardware:
+     * response CRC is XOR of compact response bytes 2 through 61.
+     */
+    checksum = 0;
+    for (i = 2; i < 62; i++)
+        checksum ^= rx[i];
+
+    if (checksum != rx[62]) {
+        hid_warn(
+            device->hdev,
+            "Seiren V3 Chroma response CRC mismatch: got 0x%02x expected 0x%02x\n",
+            rx[62],
+            checksum
+        );
+        ret = -EIO;
+        goto out_unlock;
+    }
+
+    /*
+     * Compact response:
+     *
+     * rx[1..61] -> beginning of struct razer_report
+     * rx[62]    -> CRC
+     * rx[63]    -> reserved
+     */
+    memset(response, 0, sizeof(*response));
+    memcpy(response, &rx[1], 61);
+    response->crc = rx[62];
+    response->reserved = rx[63];
+
+    if (response->remaining_packets != request->remaining_packets ||
+        response->command_class != request->command_class ||
+        response->command_id.id != request->command_id.id) {
+        print_erroneous_report(
+            device->hdev,
+            response,
+            "Seiren V3 Chroma response does not match request"
+        );
+        ret = -EINVAL;
+        goto out_unlock;
+    }
+
+    switch (response->status) {
+    case RAZER_CMD_SUCCESSFUL:
+    case RAZER_CMD_BUSY:
+        ret = 0;
+        break;
+
+    case RAZER_CMD_FAILURE:
+        ret = -EINVAL;
+        break;
+
+    case RAZER_CMD_NOT_SUPPORTED:
+        ret = -ENOTSUPP;
+        break;
+
+    case RAZER_CMD_TIMEOUT:
+        ret = -ETIMEDOUT;
+        break;
+
+    default:
+        hid_warn(
+            device->hdev,
+            "Seiren V3 Chroma returned unknown status: 0x%02x\n",
+            response->status
+        );
+        ret = -EIO;
+        break;
+    }
+
+out_unlock:
+    mutex_unlock(&device->lock);
+    return ret;
+}
+
+
+static int razer_seiren_v3_chroma_send_custom_frame(
+    struct razer_accessory_device *device,
+    unsigned char row_id,
+    unsigned char start_col,
+    unsigned char stop_col,
+    const unsigned char *rgb)
+{
+    unsigned char report[SEIREN_V3_CHROMA_REPORT_LEN] = {0};
+    unsigned char checksum = 0;
+    size_t rgb_len;
+    int ret;
+    int i;
+
+    if (row_id != 0 ||
+        start_col > stop_col ||
+        stop_col >= SEIREN_V3_CHROMA_LED_COUNT)
+        return -EINVAL;
+
+    rgb_len = ((stop_col + 1) - start_col) * 3;
+
+    /*
+     * Polychromatic may update only part of the row.
+     * Preserve the rest and always transmit a full 10-LED frame.
+     */
+    memcpy(
+        &device->seiren_v3_chroma_frame[start_col * 3],
+        rgb,
+        rgb_len
+    );
+
+    /*
+     * Exact report format verified against the physical microphone.
+     */
+    report[0]  = 0x07; /* Report ID */
+    report[1]  = 0x00; /* Status */
+    report[2]  = 0x52; /* Transaction ID */
+    report[3]  = 0x00;
+    report[4]  = 0x00;
+    report[5]  = 0x00; /* Protocol */
+    report[6]  = 0x22; /* Data size */
+    report[7]  = 0x0F; /* Command class */
+    report[8]  = 0x03; /* Command ID */
+    report[9]  = 0x00;
+    report[10] = 0x00;
+
+    report[11] = 0x00; /* Row */
+    report[12] = 0x00; /* First LED */
+    report[13] = 0x09; /* Last LED */
+
+    memcpy(
+        &report[14],
+        device->seiren_v3_chroma_frame,
+        sizeof(device->seiren_v3_chroma_frame)
+    );
+
+    /*
+     * XOR checksum across bytes 1-62.
+     */
+    for (i = 1; i < 63; i++)
+        checksum ^= report[i];
+
+    report[63] = checksum;
+
+    mutex_lock(&device->lock);
+
+    /*
+     * Send the exact USB HID SET_REPORT transaction observed from
+     * Razer's Windows software:
+     *
+     *   bmRequestType = 0x21
+     *   bRequest      = 0x09
+     *   wValue        = 0x0307
+     *   wIndex        = 0x0003
+     *   wLength       = 64
+     *
+     * Using the raw USB control path is important for this device;
+     * hid_hw_raw_request() returns -EAGAIN for this vendor-defined
+     * feature report.
+     */
+    ret = razer_send_control_msg_old_device(
+              device->hdev,
+              report,
+              0x0307,
+              0x0003,
+              sizeof(report),
+              1000
+          );
+
+    mutex_unlock(&device->lock);
+
+    if (ret < 0)
+        return ret;
+
+    return 0;
+}
+
 /**
  * Device mode function
  */
@@ -209,6 +540,9 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_NOMMO_CHROMA:
         device_type = "Razer Nommo Chroma";
         break;
+    case USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA:
+        device_type = "Razer Seiren V3 Chroma";
+        break;
 
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         device_type = "Razer Kraken Kitty Edition";
@@ -293,6 +627,16 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     struct razer_report request = {0};
     struct razer_report response = {0};
     int err;
+
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA) {
+        request = razer_chroma_extended_matrix_effect_spectrum(
+                      VARSTORE, ZERO_LED);
+
+        if (razer_seiren_v3_chroma_send_razer_report(device, &request) < 0)
+            return -EIO;
+
+        return count;
+    }
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY:
@@ -471,6 +815,16 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     struct razer_report response = {0};
     int err;
 
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA) {
+        request = razer_chroma_extended_matrix_effect_none(
+                      VARSTORE, ZERO_LED);
+
+        if (razer_seiren_v3_chroma_send_razer_report(device, &request) < 0)
+            return -EIO;
+
+        return count;
+    }
+
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_CORE:
@@ -588,6 +942,19 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     struct razer_report response = {0};
     int err;
 
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA) {
+        request = razer_chroma_extended_matrix_effect_custom_frame();
+
+        err = razer_seiren_v3_chroma_send_razer_report(
+                  device,
+                  &request
+              );
+        if (err)
+            return err;
+
+        return count;
+    }
+
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_CORE:
@@ -660,6 +1027,19 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     if (count != 3) {
         dev_warn(dev, "razeraccessory: Static mode only accepts RGB (3byte)\n");
         return -EINVAL;
+    }
+
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA) {
+        request = razer_chroma_extended_matrix_effect_static(
+                      VARSTORE,
+                      ZERO_LED,
+                      (struct razer_rgb *)&buf[0]
+                  );
+
+        if (razer_seiren_v3_chroma_send_razer_report(device, &request) < 0)
+            return -EIO;
+
+        return count;
     }
 
     switch (device->usb_dev->descriptor.idProduct) {
@@ -798,6 +1178,19 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     if (err < 0)
         return err;
 
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA) {
+        request = razer_chroma_extended_matrix_effect_wave(
+                      VARSTORE,
+                      ZERO_LED,
+                      direction
+                  );
+
+        if (razer_seiren_v3_chroma_send_razer_report(device, &request) < 0)
+            return -EIO;
+
+        return count;
+    }
+
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY:
     case USB_DEVICE_ID_RAZER_CORE:
@@ -876,6 +1269,39 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     struct razer_report request = {0};
     struct razer_report response = {0};
     int err;
+
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA) {
+        switch (count) {
+        case 3:
+            request = razer_chroma_extended_matrix_effect_breathing_single(
+                          VARSTORE,
+                          ZERO_LED,
+                          (struct razer_rgb *)&buf[0]
+                      );
+            break;
+
+        case 6:
+            request = razer_chroma_extended_matrix_effect_breathing_dual(
+                          VARSTORE,
+                          ZERO_LED,
+                          (struct razer_rgb *)&buf[0],
+                          (struct razer_rgb *)&buf[3]
+                      );
+            break;
+
+        default:
+            request = razer_chroma_extended_matrix_effect_breathing_random(
+                          VARSTORE,
+                          ZERO_LED
+                      );
+            break;
+        }
+
+        if (razer_seiren_v3_chroma_send_razer_report(device, &request) < 0)
+            return -EIO;
+
+        return count;
+    }
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -1094,6 +1520,21 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         // dev_info(dev, "razeraccessory: Row ID: %u, Start: %u, Stop: %u, row length: %lu\n", row_id, start_col, stop_col, row_length);
 
         switch (device->usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA: {
+            int err = razer_seiren_v3_chroma_send_custom_frame(
+                          device,
+                          row_id,
+                          start_col,
+                          stop_col,
+                          (const unsigned char *)&buf[offset]
+                      );
+
+            if (err < 0)
+                return err;
+
+            offset += row_length;
+            continue;
+        }
         case USB_DEVICE_ID_RAZER_CORE:
             request = razer_chroma_standard_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             request.transaction_id.id = 0xFF;
@@ -1193,6 +1634,11 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     request = razer_chroma_standard_get_serial();
 
     switch (device->usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA:
+        if (!device->usb_dev->serial)
+            return -ENODATA;
+        strscpy(serial_string, device->usb_dev->serial, sizeof(serial_string));
+        break;
     case USB_DEVICE_ID_RAZER_CHROMA_MUG:
         strscpy(serial_string, device->serial, sizeof(serial_string));
         break;
@@ -1260,6 +1706,25 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     struct razer_report response = {0};
     int err;
 
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA) {
+        request = razer_chroma_standard_get_firmware_version();
+
+        err = razer_seiren_v3_chroma_send_payload(
+                  device,
+                  &request,
+                  &response
+              );
+        if (err)
+            return err;
+
+        return sysfs_emit(
+                   buf,
+                   "v%u.%u\n",
+                   response.arguments[0],
+                   response.arguments[1]
+               );
+    }
+
     request = razer_chroma_standard_get_firmware_version();
 
     switch(device->usb_pid) {
@@ -1325,6 +1790,20 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     if (count != 2) {
         dev_warn(dev, "razeraccessory: Device mode only takes 2 bytes.\n");
         return -EINVAL;
+    }
+
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA) {
+        request = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
+
+        err = razer_seiren_v3_chroma_send_payload(
+                  device,
+                  &request,
+                  &response
+              );
+        if (err)
+            return err;
+
+        return count;
     }
 
     request = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
@@ -1404,6 +1883,23 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     struct razer_report response = {0};
     int err;
 
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA) {
+        request = razer_chroma_standard_get_device_mode();
+
+        err = razer_seiren_v3_chroma_send_payload(
+                  device,
+                  &request,
+                  &response
+              );
+        if (err)
+            return err;
+
+        buf[0] = response.arguments[0];
+        buf[1] = response.arguments[1];
+
+        return 2;
+    }
+
     request = razer_chroma_standard_get_device_mode();
 
     switch(device->usb_pid) {
@@ -1476,6 +1972,24 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     err = kstrtou8(buf, 0, &brightness);
     if (err < 0)
         return err;
+
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA) {
+        request = razer_chroma_extended_matrix_brightness(
+                      VARSTORE,
+                      ZERO_LED,
+                      brightness
+                  );
+
+        err = razer_seiren_v3_chroma_send_payload(
+                  device,
+                  &request,
+                  &response
+              );
+        if (err)
+            return err;
+
+        return count;
+    }
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -1590,6 +2104,25 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     size_t sum = 0;
     size_t i;
     int err;
+
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA) {
+        request = razer_chroma_extended_matrix_get_brightness(
+                      VARSTORE,
+                      ZERO_LED
+                  );
+
+        err = razer_seiren_v3_chroma_send_payload(
+                  device,
+                  &request,
+                  &response
+              );
+        if (err)
+            return err;
+
+        brightness = response.arguments[2];
+
+        return sysfs_emit(buf, "%d\n", brightness);
+    }
 
     switch (device->usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY_HYPERFLUX:
@@ -2508,6 +3041,13 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
+    if (usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA) {
+        if (intf->cur_altsetting->desc.bInterfaceNumber != 3)
+            return false;
+
+        return true;
+    }
+
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
     case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
@@ -2552,6 +3092,9 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     razer_accessory_init(dev, intf, hdev);
 
     switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA:
+        expected_protocol = dev->usb_interface_protocol;
+        break;
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
@@ -2673,6 +3216,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
         case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+        case USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
             break;
         }
@@ -2701,6 +3245,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
         case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+        case USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);                // Wave effect
             break;
         }
@@ -2756,6 +3301,8 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         }
 
         switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA:
+            break;
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         // Needs to be in "Normal" mode for idle effects to function properly
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
@@ -2806,6 +3353,9 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     dev = hid_get_drvdata(hdev);
 
     switch(usb_dev->descriptor.idProduct) {
+    case USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA:
+        expected_protocol = dev->usb_interface_protocol;
+        break;
     case USB_DEVICE_ID_RAZER_CORE:
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
     case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
@@ -2911,6 +3461,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
         case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+        case USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
             break;
         }
@@ -2938,6 +3489,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
         case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+        case USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);                // Wave effect
             break;
         }
@@ -3040,6 +3592,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_BASE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NOMMO_CHROMA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_SEIREN_V3_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MOUSE_BUNGEE_V3_CHROMA) },
