@@ -93,8 +93,8 @@ class BasiliskSettings:
             raise ValueError('DPI must be 100..30000 on both axes')
         original = await self.session.read(bytes.fromhex('0b840100'))
         state = parse_dpi(original)
-        if len(state['stages']) != 5 or len(original) not in (36, 37, 38):
-            raise ValueError('DPI write requires the validated five-stage table')
+        if len(original) not in (1 + 7 * len(state['stages']), 2 + 7 * len(state['stages']), 38):
+            raise ValueError('DPI write requires the validated five-slot table')
         payload = bytearray(original.ljust(38, b'\x00'))
         offset = 2 + state['active_index'] * 7
         payload[offset+1:offset+3] = int(x).to_bytes(2, 'little')
@@ -106,19 +106,27 @@ class BasiliskSettings:
 
     async def _set_dpi_stages(self, active_stage, stages):
         stages = list(stages)
-        if len(stages) != 5 or not 1 <= int(active_stage) <= 5:
-            raise ValueError('Bluetooth DPI editing currently requires five stages and active stage 1..5')
+        if not 1 <= len(stages) <= 5 or not 1 <= int(active_stage) <= len(stages):
+            raise ValueError('DPI editing requires one to five stages and a valid active stage')
         if any(len(stage) != 2 or any(not 100 <= int(value) <= 30000 for value in stage) for stage in stages):
             raise ValueError('DPI must be 100..30000 on both axes')
         original = await self.session.read(bytes.fromhex('0b840100'))
         state = parse_dpi(original)
+        if len(original) not in (1 + 7 * len(state['stages']), 2 + 7 * len(state['stages']), 38):
+            raise ValueError('DPI stage editing requires the validated five-slot table')
         ids = [stage['id'] for stage in state['stages']]
-        if len(ids) != 5 or len(set(ids)) != 5 or state['active_raw'] not in ids or len(original) not in (36, 37, 38):
-            raise ValueError('DPI stage editing requires a validated five-stage table with distinct IDs')
+        if len(set(ids)) != len(ids) or state['active_raw'] not in ids:
+            raise ValueError('DPI stage IDs must be distinct and include the active stage')
+        if len(stages) > len(ids):
+            if ids != list(range(1, len(ids) + 1)):
+                raise ValueError('Adding stages requires validated sequential stage IDs')
+            ids = list(range(1, len(stages) + 1))
         payload = bytearray(original.ljust(38, b'\x00'))
         payload[0] = ids[int(active_stage) - 1]
+        payload[1] = len(stages)
         for index, (x, y) in enumerate(stages):
             offset = 2 + index * 7
+            payload[offset] = ids[index]
             payload[offset+1:offset+3] = int(x).to_bytes(2, 'little')
             payload[offset+3:offset+5] = int(y).to_bytes(2, 'little')
         await self.session.write(bytes.fromhex('0b040100'), bytes(payload))
