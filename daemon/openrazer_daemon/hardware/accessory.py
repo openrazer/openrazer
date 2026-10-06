@@ -138,6 +138,29 @@ class RazerNommoPro(_RazerDeviceBrightnessSuspend):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1419/1419_nommo_pro.png"
 
 
+class RazerSeirenV3Chroma(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Seiren V3 Chroma (Microphone)
+
+    On-hardware testing showed the RGB ring behaves as a single zone: the
+    device-side effects (static, spectrum, wave, breath) and brightness work,
+    but per-LED custom frames light no additional LEDs. MATRIX_DIMS is
+    therefore [1, 1], matching other single-zone accessories.
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x056F
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
+    WAVE_DIRS = (1, 2)
+    METHODS = ['get_device_type_accessory',
+               'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
+               'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row',
+               'set_brightness', 'get_brightness']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/5679/5679-1-en-v1.png"
+
+
 class RazerMouseBungeeV3Chroma(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Mouse Bungee V3 Chroma
