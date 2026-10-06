@@ -247,11 +247,11 @@ class RazerDaemon(DBusService):
             """
             self.quit(signum)
 
-        def idle_handler():
+        def idle_handler(signum, _frame):
             """
             GLib idle handler to propagate signals
             """
-            GLib.idle_add(signal_action, priority=GLib.PRIORITY_HIGH)
+            GLib.idle_add(signal_action, signum, priority=GLib.PRIORITY_HIGH)
 
         def handler(*args):
             """

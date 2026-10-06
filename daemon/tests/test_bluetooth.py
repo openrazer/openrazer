@@ -123,6 +123,43 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
             await BasiliskSettings(session).perform('set_static', 'logo', 255, 0, 0)
         self.assertEqual(session.writes, [])
 
+    async def test_spectrum_updates_saved_and_live_state(self):
+        from openrazer_daemon.bluetooth.backend import SPECTRUM_PAYLOAD, lighting_effect
+        session = FakeSession()
+        settings = BasiliskSettings(session)
+        await settings.perform('set_spectrum', 'logo')
+        self.assertEqual(session.values[bytes.fromhex('10830104')], SPECTRUM_PAYLOAD)
+        self.assertEqual(session.values[bytes.fromhex('10830004')], SPECTRUM_PAYLOAD)
+        self.assertEqual(lighting_effect(await settings.perform('lighting', 'logo')), 'spectrum')
+
+    async def test_breathing_preserves_selected_rgb_in_both_states(self):
+        from openrazer_daemon.bluetooth.backend import lighting_effect
+        session = FakeSession()
+        settings = BasiliskSettings(session)
+        await settings.perform('set_breath_single', 'scroll', 255, 0, 255)
+        expected = bytes.fromhex('02010001ff00ff000000')
+        self.assertEqual(session.values[bytes.fromhex('10830101')], expected)
+        self.assertEqual(await settings.perform('lighting', 'scroll'), expected)
+        self.assertEqual(lighting_effect(expected), 'breathSingle')
+        with self.assertRaises(ValueError):
+            await settings.perform('set_breath_single', 'scroll', 256, 0, 0)
+
+    async def test_wave_directions_and_invalid_direction(self):
+        from openrazer_daemon.bluetooth.backend import lighting_effect
+        session = FakeSession()
+        settings = BasiliskSettings(session)
+        for direction in (1, 2):
+            await settings.perform('set_wave', 'backlight', direction)
+            raw = await settings.perform('lighting', 'backlight')
+            self.assertEqual(raw, bytes([4, direction, 0x28, 0, 0, 0, 0, 0, 0, 0]))
+            self.assertEqual(session.values[bytes.fromhex('1083010a')], raw)
+            self.assertEqual(lighting_effect(raw), 'wave')
+            self.assertEqual(await settings.perform('wave_direction', 'backlight'), direction)
+        before = len(session.writes)
+        with self.assertRaises(ValueError):
+            await settings.perform('set_wave', 'backlight', 3)
+        self.assertEqual(len(session.writes), before)
+
     async def test_rmw_operations_do_not_interleave(self):
         session = FakeSession()
         settings = BasiliskSettings(session)
@@ -177,6 +214,28 @@ class ManagerTests(unittest.TestCase):
 
 
 class CompatibilityTests(unittest.TestCase):
+    def test_unvalidated_effect_is_not_misreported(self):
+        from openrazer_daemon.bluetooth.backend import lighting_effect
+        self.assertEqual(lighting_effect(bytes.fromhex('07000000000000000000')), 'unknown')
+        with self.assertRaises(ValueError):
+            lighting_effect(b'\x03')
+
+    def test_signal_during_startup_is_queued_with_signal_number(self):
+        import signal
+        from unittest.mock import MagicMock
+        from openrazer_daemon.daemon import RazerDaemon
+        daemon = RazerDaemon.__new__(RazerDaemon)
+        daemon.quit = MagicMock()
+        with patch('openrazer_daemon.daemon.signal.signal') as register, patch('openrazer_daemon.daemon.GLib.idle_add') as queue:
+            daemon._init_signals()
+            callback = register.call_args_list[1].args[1]
+            callback(signal.SIGTERM, None)
+            action, signum = queue.call_args.args
+            self.assertEqual(signum, signal.SIGTERM)
+            daemon.quit.assert_not_called()
+            action(signum)
+            daemon.quit.assert_called_once_with(signal.SIGTERM)
+
     def test_legacy_image_dictionary_required_by_razergenie(self):
         import json
         from openrazer_daemon.bluetooth.device import BasiliskV3ProBluetooth
