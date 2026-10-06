@@ -110,6 +110,34 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(payload, expected)
         self.assertEqual(await settings.perform('dpi'), (1700, 1800))
 
+    async def test_stage_editing_preserves_wire_ids_and_reserved_bytes(self):
+        session = FakeSession()
+        original = bytearray(DPI_RAW.ljust(38, b'\x00'))
+        for i, wire_id in enumerate((11, 22, 33, 44, 55)):
+            original[2 + 7*i] = wire_id
+            original[7 + 7*i:9 + 7*i] = bytes([0xaa, 0xbb])
+        original[0] = 33
+        session.values[bytes.fromhex('0b840100')] = bytes(original)
+        stages = [(500, 600), (900, 1000), (1700, 1800), (3300, 3400), (6500, 6600)]
+        await BasiliskSettings(session).perform('set_dpi_stages', 2, stages)
+        payload = session.writes[0][1]
+        expected = bytearray(original)
+        expected[0] = 22
+        for i, (x, y) in enumerate(stages):
+            expected[3+7*i:5+7*i] = x.to_bytes(2, 'little')
+            expected[5+7*i:7+7*i] = y.to_bytes(2, 'little')
+        self.assertEqual(payload, expected)
+        self.assertEqual(await BasiliskSettings(session).perform('dpi_stages'), (1, stages))
+
+    async def test_invalid_stage_edits_send_no_commands(self):
+        session = FakeSession()
+        settings = BasiliskSettings(session)
+        for active, stages in [(0, [(800, 800)]*5), (6, [(800, 800)]*5), (1, [(800, 800)]*4), (1, [(0, 800)]*5)]:
+            with self.assertRaises(ValueError):
+                await settings.perform('set_dpi_stages', active, stages)
+        self.assertEqual(session.reads, [])
+        self.assertEqual(session.writes, [])
+
     async def test_invalid_settings_send_no_commands(self):
         session = FakeSession()
         settings = BasiliskSettings(session)
