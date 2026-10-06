@@ -102,7 +102,18 @@ class BasiliskSettings:
             raise ValueError('RGB components must be 0..255')
         led = ZONE_IDS[zone]
         payload = bytes([1, 0, 0, 1, int(red), int(green), int(blue), 0, 0, 0])
-        await self.write_verified(bytes([0x10, 0x83, 0, led]), bytes([0x10, 3, 0, led]), payload)
+        # Target 0 changes only the live state. Target 1 is the base profile
+        # and has been verified to retain static RGB through a power cycle.
+        active = await self.read_exact(bytes.fromhex('03820000'), 1)
+        inventory = await self.session.read(bytes.fromhex('03800000'))
+        if active != b'\x01' or 1 not in inventory or len(set(inventory)) != len(inventory) or any(target not in range(1, 6) for target in inventory):
+            raise ValueError('Persistent static lighting is validated only for the active base profile')
+        await self.write_verified(bytes([0x10, 0x83, 1, led]), bytes([0x10, 3, 1, led]), payload)
+        live_key = bytes([0x10, 0x83, 0, led])
+        if await self.read_exact(live_key, 10) != payload:
+            # Apply immediately if the profile write did not update the live mirror.
+            # This is a distinct live operation, not a retry of the stored write.
+            await self.write_verified(live_key, bytes([0x10, 3, 0, led]), payload)
 
 
 class BlueZBackend:

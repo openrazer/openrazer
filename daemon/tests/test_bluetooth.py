@@ -43,7 +43,9 @@ class ProtocolTests(unittest.TestCase):
 
 class FakeSession:
     def __init__(self):
-        self.values = {bytes.fromhex('0b840100'): DPI_RAW}
+        self.values = {bytes.fromhex('0b840100'): DPI_RAW, bytes.fromhex('03820000'): b'\x01', bytes.fromhex('03800000'): b'\x01'}
+        for led in (1, 4, 10):
+            self.values[bytes([0x10, 0x83, 0, led])] = bytes.fromhex('03000000000000000000')
         self.writes = []
         self.reads = []
         self.bad_readback = False
@@ -92,10 +94,34 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
         session = FakeSession()
         settings = BasiliskSettings(session)
         await settings.perform('set_static', 'scroll', 255, 0, 0)
-        self.assertEqual(session.writes[0], (bytes.fromhex('10030001'), bytes.fromhex('01000001ff0000000000')))
+        self.assertEqual(session.writes[0], (bytes.fromhex('10030101'), bytes.fromhex('01000001ff0000000000')))
+        self.assertEqual(session.writes[1], (bytes.fromhex('10030001'), bytes.fromhex('01000001ff0000000000')))
         await settings.perform('set_brightness', 'logo', 50.0)
-        self.assertEqual(session.writes[1], (bytes.fromhex('10050104'), b'\x80'))
+        self.assertEqual(session.writes[2], (bytes.fromhex('10050104'), b'\x80'))
         self.assertAlmostEqual(await settings.perform('brightness', 'logo'), 128*100/255)
+
+    async def test_persistent_color_survives_live_state_reset(self):
+        session = FakeSession()
+        settings = BasiliskSettings(session)
+        await settings.perform('set_static', 'logo', 255, 0, 255)
+        # Firmware reloads the base profile after reconnect/power-on.
+        session.values[bytes.fromhex('10830004')] = session.values[bytes.fromhex('10830104')]
+        self.assertEqual(await settings.perform('lighting', 'logo'), bytes.fromhex('01000001ff00ff000000'))
+
+    async def test_other_active_profile_is_not_overwritten(self):
+        session = FakeSession()
+        session.values[bytes.fromhex('03820000')] = b'\x03'
+        session.values[bytes.fromhex('03800000')] = b'\x01\x03'
+        with self.assertRaises(ValueError):
+            await BasiliskSettings(session).perform('set_static', 'logo', 255, 0, 0)
+        self.assertEqual(session.writes, [])
+
+    async def test_missing_base_profile_is_not_written(self):
+        session = FakeSession()
+        session.values[bytes.fromhex('03800000')] = b'\x03'
+        with self.assertRaises(ValueError):
+            await BasiliskSettings(session).perform('set_static', 'logo', 255, 0, 0)
+        self.assertEqual(session.writes, [])
 
     async def test_rmw_operations_do_not_interleave(self):
         session = FakeSession()
