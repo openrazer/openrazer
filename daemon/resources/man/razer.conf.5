@@ -5,7 +5,7 @@
 .nh
 .ad l
 .\" Begin generated content:
-.TH "razer.conf" "5" "2026-04-18"
+.TH "razer.conf" "5" "2026-07-01"
 .PP
 .SH NAME
 .PP
@@ -78,6 +78,21 @@ Additional per-device sections can be defined with the name "Device:XXXX" where 
 \fBdriver_mode\fR \fIbool\fR
 .RS 4
 This flag specifies an override whether the device should be switched into "driver mode" (as opposed to keeping it in "device mode").\& Ideally the OpenRazer stack should support all functionality in software and support the devices being in driver mode, but that'\&s not the case for a wide variety of devices yet, especially mice.\& However some users may want to explicitly force a device into driver mode to enable some functionality like horizontal scrolling.\&
+.PP
+.RE
+\fBtilt_hwheel\fR \fIbool\fR
+.RS 4
+Enable or disable horizontal wheel tilt emulation via HWHEEL events for the device.\&
+.PP
+.RE
+\fBtilt_hwheel_repeat_interval\fR \fIint\fR
+.RS 4
+Interval in milliseconds between repeated horizontal tilt events while tilt is held.\&
+.PP
+.RE
+\fBtilt_hwheel_repeat_start_delay\fR \fIint\fR
+.RS 4
+Delay in milliseconds before repeated horizontal tilt events start after initial tilt event.\&
 .PP
 .RE
 .SH SEE ALSO

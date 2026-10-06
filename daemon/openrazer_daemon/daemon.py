@@ -496,7 +496,8 @@ class RazerDaemon(DBusService):
                                                 persistence=self._persistence, testing=self._test_dir is not None,
                                                 additional_interfaces=sorted(additional_interfaces),
                                                 additional_methods=[],
-                                                unknown_serial_counter=self._unknown_serial_counter)
+                                                unknown_serial_counter=self._unknown_serial_counter,
+                                                reinit_callback=self._reinit_device_callback(device))
 
                     # Wireless devices sometimes don't listen
                     count = 0
@@ -514,6 +515,13 @@ class RazerDaemon(DBusService):
                     self._razer_devices.add(sys_name, device_serial, razer_device)
 
                     device_number += 1
+
+    def _reinit_device_callback(self, device):
+        def inner():
+            self._remove_device(device)
+            self._add_device(device)
+        # Run this in a thread so execution isn't stopped when the device is deleted.
+        return lambda: threading.Thread(target=inner).start()
 
     def _add_device(self, device):
         """
@@ -535,7 +543,8 @@ class RazerDaemon(DBusService):
                 razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
                                             persistence=self._persistence, testing=self._test_dir is not None,
                                             additional_interfaces=None, additional_methods=[],
-                                            unknown_serial_counter=self._unknown_serial_counter)
+                                            unknown_serial_counter=self._unknown_serial_counter,
+                                            reinit_callback=self._reinit_device_callback(device))
 
                 # Its a udev event so currently the device hasn't been chmodded yet
                 time.sleep(0.2)
