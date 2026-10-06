@@ -41,6 +41,21 @@ class ProtocolTests(unittest.TestCase):
             parse_dpi(DPI_RAW[:10])
 
 
+class LightingClientTests(unittest.TestCase):
+    def test_dual_color_readback_exposes_both_colors_and_random_exposes_none(self):
+        from openrazer_daemon.bluetooth.device import BasiliskV3ProBluetooth
+        class Device:
+            raw = bytes.fromhex('02020002ff00ff00ffff')
+            def invoke(self, operation, zone):
+                return self.raw
+        device = Device()
+        self.assertEqual(BasiliskV3ProBluetooth.colors(device, 'logo'), [255, 0, 255, 0, 255, 255])
+        device.raw = bytes.fromhex('02000000000000000000')
+        self.assertEqual(BasiliskV3ProBluetooth.colors(device, 'logo'), [])
+        device.raw = bytes(10)
+        self.assertEqual(BasiliskV3ProBluetooth.colors(device, 'logo'), [])
+
+
 class FakeSession:
     def __init__(self):
         self.values = {bytes.fromhex('0b840100'): DPI_RAW, bytes.fromhex('03820000'): b'\x01', bytes.fromhex('03800000'): b'\x01'}
@@ -143,6 +158,37 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(lighting_effect(expected), 'breathSingle')
         with self.assertRaises(ValueError):
             await settings.perform('set_breath_single', 'scroll', 256, 0, 0)
+
+    async def test_dual_and_random_breathing_preserve_saved_and_live_states(self):
+        from openrazer_daemon.bluetooth.backend import lighting_effect
+        session = FakeSession()
+        settings = BasiliskSettings(session)
+        await settings.perform('set_breath_dual', 'logo', 255, 0, 255, 0, 255, 255)
+        dual = bytes.fromhex('02020002ff00ff00ffff')
+        self.assertEqual(await settings.perform('lighting', 'logo'), dual)
+        self.assertEqual(session.values[bytes.fromhex('10830104')], dual)
+        self.assertEqual(lighting_effect(dual), 'breathDual')
+        before = len(session.writes)
+        with self.assertRaises(ValueError):
+            await settings.perform('set_breath_dual', 'logo', 0, 0, 0, 0, -1, 0)
+        self.assertEqual(len(session.writes), before)
+        await settings.perform('set_breath_random', 'logo')
+        random = bytes.fromhex('02000000000000000000')
+        self.assertEqual(await settings.perform('lighting', 'logo'), random)
+        self.assertEqual(session.values[bytes.fromhex('10830104')], random)
+        self.assertEqual(lighting_effect(random), 'breathRandom')
+
+    async def test_off_preserves_brightness_and_updates_both_lighting_states(self):
+        from openrazer_daemon.bluetooth.backend import lighting_effect
+        session = FakeSession()
+        brightness_key = bytes.fromhex('10850104')
+        session.values[brightness_key] = b'\x59'
+        settings = BasiliskSettings(session)
+        await settings.perform('set_none', 'logo')
+        self.assertEqual(await settings.perform('lighting', 'logo'), bytes(10))
+        self.assertEqual(session.values[bytes.fromhex('10830104')], bytes(10))
+        self.assertEqual(session.values[brightness_key], b'\x59')
+        self.assertEqual(lighting_effect(bytes(10)), 'none')
 
     async def test_wave_directions_and_invalid_direction(self):
         from openrazer_daemon.bluetooth.backend import lighting_effect

@@ -17,10 +17,16 @@ SPECTRUM_PAYLOAD = bytes.fromhex('03000000000000000000')
 def lighting_effect(payload):
     if len(payload) != 10:
         raise ValueError('Unexpected lighting state length')
+    if payload == bytes(10):
+        return 'none'
     if payload[:4] == bytes([1, 0, 0, 1]):
         return 'static'
     if payload == SPECTRUM_PAYLOAD:
         return 'spectrum'
+    if payload == bytes([2, 0, 0, 0, 0, 0, 0, 0, 0, 0]):
+        return 'breathRandom'
+    if payload[:4] == bytes([2, 2, 0, 2]):
+        return 'breathDual'
     if payload[:4] == bytes([2, 1, 0, 1]) and payload[7:] == bytes(3):
         return 'breathSingle'
     if payload[0] == 4 and payload[1] in (1, 2) and payload[2] == 0x28 and payload[3:] == bytes(7):
@@ -118,6 +124,9 @@ class BasiliskSettings:
         payload = bytes([1, 0, 0, 1, int(red), int(green), int(blue), 0, 0, 0])
         await self._set_lighting_payload(zone, payload)
 
+    async def _set_none(self, zone):
+        await self._set_lighting_payload(zone, bytes(10))
+
     async def _set_spectrum(self, zone):
         await self._set_lighting_payload(zone, SPECTRUM_PAYLOAD)
 
@@ -126,6 +135,15 @@ class BasiliskSettings:
             raise ValueError('RGB components must be 0..255')
         payload = bytes([2, 1, 0, 1, int(red), int(green), int(blue), 0, 0, 0])
         await self._set_lighting_payload(zone, payload)
+
+    async def _set_breath_random(self, zone):
+        await self._set_lighting_payload(zone, bytes([2, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+
+    async def _set_breath_dual(self, zone, red, green, blue, red2, green2, blue2):
+        colors = (red, green, blue, red2, green2, blue2)
+        if not all(0 <= int(value) <= 255 for value in colors):
+            raise ValueError('RGB components must be 0..255')
+        await self._set_lighting_payload(zone, bytes([2, 2, 0, 2, *map(int, colors)]))
 
     async def _set_wave(self, zone, direction):
         if direction not in (1, 2):
