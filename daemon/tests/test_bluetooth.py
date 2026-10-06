@@ -150,5 +150,15 @@ class ManagerTests(unittest.TestCase):
         daemon.device_removed.assert_called_once()
 
 
+class CompatibilityTests(unittest.TestCase):
+    def test_legacy_image_dictionary_required_by_razergenie(self):
+        import json
+        from openrazer_daemon.bluetooth.device import BasiliskV3ProBluetooth
+        # No Bluetooth or session bus is needed for metadata.
+        device = BasiliskV3ProBluetooth.__new__(BasiliskV3ProBluetooth)
+        self.assertEqual(json.loads(device.getRazerUrls()), {
+            key: device.DEVICE_IMAGE for key in ('top_img', 'side_img', 'perspective_img')})
+
+
 if __name__ == '__main__':
     unittest.main()
