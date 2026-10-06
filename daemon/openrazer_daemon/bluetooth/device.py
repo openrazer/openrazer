@@ -13,6 +13,7 @@ CHROMA = 'razer.device.lighting.chroma'
 BRIGHTNESS = 'razer.device.lighting.brightness'
 LOGO = 'razer.device.lighting.logo'
 SCROLL = 'razer.device.lighting.scroll'
+WHEEL = 'razer.device.scroll'
 
 
 class BasiliskV3ProBluetooth(DBusService):
@@ -120,6 +121,30 @@ class BasiliskV3ProBluetooth(DBusService):
     @dbus.service.method(POWER, in_signature='q')
     def setIdleTime(self, seconds):
         self.invoke('set_idle', seconds)
+
+    @dbus.service.method(WHEEL, out_signature='y')
+    def getScrollMode(self):
+        return self.invoke('scroll_setting', 'mode')
+
+    @dbus.service.method(WHEEL, in_signature='y')
+    def setScrollMode(self, value):
+        self.invoke('set_scroll_setting', 'mode', value)
+
+    @dbus.service.method(WHEEL, out_signature='b')
+    def getScrollAcceleration(self):
+        return bool(self.invoke('scroll_setting', 'acceleration'))
+
+    @dbus.service.method(WHEEL, in_signature='b')
+    def setScrollAcceleration(self, value):
+        self.invoke('set_scroll_setting', 'acceleration', value)
+
+    @dbus.service.method(WHEEL, out_signature='b')
+    def getScrollSmartReel(self):
+        return bool(self.invoke('scroll_setting', 'smart_reel'))
+
+    @dbus.service.method(WHEEL, in_signature='b')
+    def setScrollSmartReel(self, value):
+        self.invoke('set_scroll_setting', 'smart_reel', value)
 
     @dbus.service.method(DPI, out_signature='i')
     def maxDPI(self):
