@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """OpenRazer-compatible D-Bus surface for validated Basilisk Bluetooth features."""
+import json
 import logging
 import dbus.service
 from openrazer_daemon.dbus_services.service import DBusService
@@ -89,6 +90,11 @@ class BasiliskV3ProBluetooth(DBusService):
     @dbus.service.method(MISC, out_signature='s')
     def getDeviceImage(self):
         return self.DEVICE_IMAGE
+
+    @dbus.service.method(MISC, out_signature='s')
+    def getRazerUrls(self):
+        # libopenrazer/RazerGenie still uses the legacy image dictionary.
+        return json.dumps({key: self.DEVICE_IMAGE for key in ('top_img', 'side_img', 'perspective_img')})
 
     @dbus.service.method(MISC, out_signature='b')
     def hasDedicatedMacroKeys(self):
