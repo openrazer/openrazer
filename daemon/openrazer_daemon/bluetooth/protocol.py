@@ -38,7 +38,9 @@ def parse_dpi(payload):
             raise ValueError('DPI outside supported model range')
         stages.append({'id': payload[offset], 'x': x, 'y': y})
     ids = [stage['id'] for stage in stages]
-    active = ids.index(raw_active) if raw_active in ids else (raw_active - 1 if 1 <= raw_active <= count else min(raw_active, count - 1))
+    if len(set(ids)) != count or raw_active not in ids:
+        raise ValueError('Malformed DPI stage IDs or active stage')
+    active = ids.index(raw_active)
     return {'active_index': active, 'active_raw': raw_active, 'stages': stages}
 
 
@@ -83,6 +85,9 @@ class VendorSession:
                 self.queue.get_nowait()
             request = self.request
             self.request = (self.request + 1) % 256
+            if self.request in (0, 1):
+                # Firmware emits unsolicited notifications using request ID 1.
+                self.request = 2
             header = bytes([request, len(payload), 0, 0]) + key
             self.trace.append({'tx': header.hex(), 'rx': []})
             self.trace[:] = self.trace[-64:]

@@ -68,6 +68,10 @@ class BasiliskSettings:
         async with self.lock:
             return await getattr(self, '_' + operation)(*args)
 
+    async def _require_base_profile(self):
+        if await self.read_exact(bytes.fromhex('03820000'), 1) != b'\x01':
+            raise ValueError('Profile settings writes are validated only for the active base profile')
+
     async def _battery(self):
         raw = await self.read_exact(bytes.fromhex('05810001'), 1)
         # Vendor charge level is 0..255, as in the OpenRazer USB API.
@@ -92,6 +96,7 @@ class BasiliskSettings:
     async def _set_dpi(self, x, y):
         if not all(100 <= int(value) <= 30000 for value in (x, y)):
             raise ValueError('DPI must be 100..30000 on both axes')
+        await self._require_base_profile()
         original = await self.session.read(bytes.fromhex('0b840100'))
         state = parse_dpi(original)
         if len(original) not in (1 + 7 * len(state['stages']), 2 + 7 * len(state['stages']), 38):
@@ -111,6 +116,7 @@ class BasiliskSettings:
             raise ValueError('DPI editing requires one to five stages and a valid active stage')
         if any(len(stage) != 2 or any(not 100 <= int(value) <= 30000 for value in stage) for stage in stages):
             raise ValueError('DPI must be 100..30000 on both axes')
+        await self._require_base_profile()
         original = await self.session.read(bytes.fromhex('0b840100'))
         state = parse_dpi(original)
         if len(original) not in (1 + 7 * len(state['stages']), 2 + 7 * len(state['stages']), 38):
@@ -146,8 +152,7 @@ class BasiliskSettings:
         if value not in (0, 1):
             raise ValueError('Scroll setting must be 0 or 1')
         command = SCROLL_COMMANDS[setting]
-        if await self.read_exact(bytes.fromhex('03820000'), 1) != b'\x01':
-            raise ValueError('Scroll writes are validated only for the active base profile')
+        await self._require_base_profile()
         await self.write_verified(bytes([8, command | 0x80, 1, 0]), bytes([8, command, 1, 0]), bytes([int(value)]))
 
     async def _brightness(self, zone):
@@ -157,6 +162,7 @@ class BasiliskSettings:
     async def _set_brightness(self, zone, percent):
         if not math.isfinite(float(percent)) or not 0 <= percent <= 100:
             raise ValueError('Brightness must be 0..100 percent')
+        await self._require_base_profile()
         led = ZONE_IDS[zone]
         payload = bytes([round(percent * 255 / 100)])
         await self.write_verified(bytes([0x10, 0x85, 1, led]), bytes([0x10, 5, 1, led]), payload)
