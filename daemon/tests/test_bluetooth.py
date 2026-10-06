@@ -168,6 +168,30 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(session.reads, [])
         self.assertEqual(session.writes, [])
 
+    async def test_scroll_settings_are_independent_and_verified(self):
+        session = FakeSession()
+        for command in (5, 6, 7):
+            session.values[bytes([8, command | 128, 1, 0])] = b'\x00'
+        settings = BasiliskSettings(session)
+        for name, command in [('mode', 5), ('acceleration', 6), ('smart_reel', 7)]:
+            before = dict(session.values)
+            await settings.perform('set_scroll_setting', name, 1)
+            self.assertEqual(await settings.perform('scroll_setting', name), 1)
+            for key, value in before.items():
+                if key != bytes([8, command | 128, 1, 0]):
+                    self.assertEqual(session.values[key], value)
+        before = len(session.writes)
+        with self.assertRaises(ValueError):
+            await settings.perform('set_scroll_setting', 'mode', 2)
+        self.assertEqual(len(session.writes), before)
+        session.values[bytes.fromhex('03820000')] = b'\x02'
+        with self.assertRaises(ValueError):
+            await settings.perform('set_scroll_setting', 'mode', 0)
+        self.assertEqual(len(session.writes), before)
+        session.values[bytes.fromhex('08850100')] = b'\x02'
+        with self.assertRaises(ValueError):
+            await settings.perform('scroll_setting', 'mode')
+
     async def test_invalid_settings_send_no_commands(self):
         session = FakeSession()
         settings = BasiliskSettings(session)

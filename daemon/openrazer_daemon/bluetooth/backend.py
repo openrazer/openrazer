@@ -11,6 +11,7 @@ from .protocol import BlueZClient, VendorSession, SERVICE, PNP, NOTIFY, parse_dp
 DEVICE_INTERFACE = 'org.bluez.Device1'
 ZONE_IDS = {'backlight': 10, 'logo': 4, 'scroll': 1}
 EXPECTED_PNP = bytes.fromhex('028e06ac00')
+SCROLL_COMMANDS = {'mode': 5, 'acceleration': 6, 'smart_reel': 7}
 SPECTRUM_PAYLOAD = bytes.fromhex('03000000000000000000')
 
 
@@ -133,6 +134,21 @@ class BasiliskSettings:
         await asyncio.sleep(0.25)
         if parse_dpi(await self.session.read(bytes.fromhex('0b840100'))) != parse_dpi(payload):
             raise ValueError('DPI stages readback differed; setting state is uncertain')
+
+    async def _scroll_setting(self, setting):
+        command = SCROLL_COMMANDS[setting]
+        raw = await self.read_exact(bytes([8, command | 0x80, 1, 0]), 1)
+        if raw[0] not in (0, 1):
+            raise ValueError('Unexpected scroll setting value')
+        return raw[0]
+
+    async def _set_scroll_setting(self, setting, value):
+        if value not in (0, 1):
+            raise ValueError('Scroll setting must be 0 or 1')
+        command = SCROLL_COMMANDS[setting]
+        if await self.read_exact(bytes.fromhex('03820000'), 1) != b'\x01':
+            raise ValueError('Scroll writes are validated only for the active base profile')
+        await self.write_verified(bytes([8, command | 0x80, 1, 0]), bytes([8, command, 1, 0]), bytes([int(value)]))
 
     async def _brightness(self, zone):
         raw = await self.read_exact(bytes([0x10, 0x85, 1, ZONE_IDS[zone]]), 1)
