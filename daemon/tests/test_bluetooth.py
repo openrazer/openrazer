@@ -129,10 +129,40 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(payload, expected)
         self.assertEqual(await BasiliskSettings(session).perform('dpi_stages'), (1, stages))
 
+    async def test_stage_counts_preserve_hidden_slots_and_can_expand_again(self):
+        session = FakeSession()
+        settings = BasiliskSettings(session)
+        original = DPI_RAW.ljust(38, b'\x00')
+        for count in (4, 2, 1, 3, 5):
+            stages = [(400, 400), (800, 800), (1600, 1600), (3200, 3200), (6400, 6400)][:count]
+            await settings.perform('set_dpi_stages', count, stages)
+            payload = session.writes[-1][1]
+            self.assertEqual(payload[2:], original[2:])
+            self.assertEqual(payload[1], count)
+            self.assertEqual(await settings.perform('dpi_stages'), (count-1, stages))
+        await settings.perform('set_dpi_stages', 1, [(400, 400)])
+        await settings.perform('set_dpi', 500, 600)
+        self.assertEqual(await settings.perform('dpi'), (500, 600))
+        self.assertEqual(session.writes[-1][1][9:], original[9:])
+
+    async def test_short_hardware_table_can_expand_and_edit_current_dpi(self):
+        session = FakeSession()
+        short = bytearray(DPI_RAW[:8])
+        short[0:2] = bytes([1, 1])
+        session.values[bytes.fromhex('0b840100')] = bytes(short)
+        settings = BasiliskSettings(session)
+        await settings.perform('set_dpi', 500, 600)
+        self.assertEqual(await settings.perform('dpi'), (500, 600))
+        session.values[bytes.fromhex('0b840100')] = bytes(short)
+        stages = [(400, 400), (800, 800), (1300, 1300), (3200, 3200), (6400, 6400)]
+        await settings.perform('set_dpi_stages', 2, stages)
+        self.assertEqual(await settings.perform('dpi_stages'), (1, stages))
+        self.assertEqual([session.writes[-1][1][2 + 7*i] for i in range(5)], [1, 2, 3, 4, 5])
+
     async def test_invalid_stage_edits_send_no_commands(self):
         session = FakeSession()
         settings = BasiliskSettings(session)
-        for active, stages in [(0, [(800, 800)]*5), (6, [(800, 800)]*5), (1, [(800, 800)]*4), (1, [(0, 800)]*5)]:
+        for active, stages in [(0, [(800, 800)]*5), (6, [(800, 800)]*5), (1, []), (1, [(0, 800)]*5)]:
             with self.assertRaises(ValueError):
                 await settings.perform('set_dpi_stages', active, stages)
         self.assertEqual(session.reads, [])
