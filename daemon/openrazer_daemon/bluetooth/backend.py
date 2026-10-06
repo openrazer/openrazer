@@ -11,6 +11,21 @@ from .protocol import BlueZClient, VendorSession, SERVICE, PNP, NOTIFY, parse_dp
 DEVICE_INTERFACE = 'org.bluez.Device1'
 ZONE_IDS = {'backlight': 10, 'logo': 4, 'scroll': 1}
 EXPECTED_PNP = bytes.fromhex('028e06ac00')
+SPECTRUM_PAYLOAD = bytes.fromhex('03000000000000000000')
+
+
+def lighting_effect(payload):
+    if len(payload) != 10:
+        raise ValueError('Unexpected lighting state length')
+    if payload[:4] == bytes([1, 0, 0, 1]):
+        return 'static'
+    if payload == SPECTRUM_PAYLOAD:
+        return 'spectrum'
+    if payload[:4] == bytes([2, 1, 0, 1]) and payload[7:] == bytes(3):
+        return 'breathSingle'
+    if payload[0] == 4 and payload[1] in (1, 2) and payload[2] == 0x28 and payload[3:] == bytes(7):
+        return 'wave'
+    return 'unknown'
 
 
 def connected_candidates(objects):
@@ -100,14 +115,36 @@ class BasiliskSettings:
     async def _set_static(self, zone, red, green, blue):
         if not all(0 <= int(value) <= 255 for value in (red, green, blue)):
             raise ValueError('RGB components must be 0..255')
-        led = ZONE_IDS[zone]
         payload = bytes([1, 0, 0, 1, int(red), int(green), int(blue), 0, 0, 0])
+        await self._set_lighting_payload(zone, payload)
+
+    async def _set_spectrum(self, zone):
+        await self._set_lighting_payload(zone, SPECTRUM_PAYLOAD)
+
+    async def _set_breath_single(self, zone, red, green, blue):
+        if not all(0 <= int(value) <= 255 for value in (red, green, blue)):
+            raise ValueError('RGB components must be 0..255')
+        payload = bytes([2, 1, 0, 1, int(red), int(green), int(blue), 0, 0, 0])
+        await self._set_lighting_payload(zone, payload)
+
+    async def _set_wave(self, zone, direction):
+        if direction not in (1, 2):
+            raise ValueError('Wave direction must be 1 or 2')
+        payload = bytes([4, int(direction), 0x28, 0, 0, 0, 0, 0, 0, 0])
+        await self._set_lighting_payload(zone, payload)
+
+    async def _wave_direction(self, zone):
+        payload = await self._lighting(zone)
+        return payload[1] if lighting_effect(payload) == 'wave' else 1
+
+    async def _set_lighting_payload(self, zone, payload):
+        led = ZONE_IDS[zone]
         # Target 0 changes only the live state. Target 1 is the base profile
-        # and has been verified to retain static RGB through a power cycle.
+        # and has been verified to retain RGB effects through a power cycle.
         active = await self.read_exact(bytes.fromhex('03820000'), 1)
         inventory = await self.session.read(bytes.fromhex('03800000'))
         if active != b'\x01' or 1 not in inventory or len(set(inventory)) != len(inventory) or any(target not in range(1, 6) for target in inventory):
-            raise ValueError('Persistent static lighting is validated only for the active base profile')
+            raise ValueError('Persistent lighting is validated only for the active base profile')
         await self.write_verified(bytes([0x10, 0x83, 1, led]), bytes([0x10, 3, 1, led]), payload)
         live_key = bytes([0x10, 0x83, 0, led])
         if await self.read_exact(live_key, 10) != payload:

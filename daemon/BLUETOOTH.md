@@ -12,17 +12,32 @@ Validated features exposed through existing interfaces:
 - current X/Y DPI (100..30000), changing only the active entry of the existing five-stage table
 - a read-only DPI-stage query (existing API uses one-based active stage)
 - per-zone brightness: underglow/backlight, logo and scroll wheel
-- whole-device and per-zone static RGB colors
+- whole-device and per-zone static RGB, spectrum cycling, single-color breathing, and wave (both directions)
 - sleep timeout (60..900 seconds)
 
-Every settings setter checks device readback. Startup, reconnect and shutdown do not apply saved settings or change hardware state. Hardware retains ownership of settings. Static RGB setters now write and verify the base profile (target `1`) and confirm the hardware-active mirror (target `0`), applying a distinct live write only if necessary. The chosen static color was verified to survive a physical power cycle on all three zones without daemon reapplication. Persistent static setters are restricted to the active, inventory-listed base profile; no other stored profile is modified. Other settings do not gain a new persistence guarantee from this change. A multi-zone static setter can fail after earlier zones have already changed; errors are surfaced without retry or guessing at a rollback.
+Every settings setter checks device readback. Startup, reconnect and shutdown do not apply saved settings or change hardware state. Hardware retains ownership of settings. Lighting setters write and verify the base profile (target `1`) and confirm the hardware-active mirror (target `0`), applying a distinct live write only if necessary. Static, spectrum and reverse-wave effects were verified to survive physical power cycles on all three zones without daemon reapplication. Single-color breathing was visually confirmed and verified in both stored/live readback; it was not separately power-cycled. Persistent lighting setters are restricted to the active, inventory-listed base profile; no other stored profile is modified. Other settings do not gain a new persistence guarantee from this change. A multi-zone static setter can fail after earlier zones have already changed; errors are surfaced without retry or guessing at a rollback.
 
-Not exposed: charging status (unknown over Bluetooth), firmware version (reported as `unknown`), polling rate, DPI stage-table editing, low battery threshold, unvalidated lighting modes, per-LED frames, scroll controls, profiles, remapping, macros, screensaver lighting or daemon persistence restoration. Only validated incoming static/brightness synchronization is recognized. RazerGenie can use the existing discovery, DPI, power and lighting APIs; its current power widget may log a warning and display “Not Charging” when a charging query is unavailable. The Python client now checks the separate `charging_status` capability before querying it.
+Not exposed: charging status (unknown over Bluetooth), firmware version (reported as `unknown`), polling rate, DPI stage-table editing, low battery threshold, unvalidated lighting modes, per-LED frames, scroll controls, profiles, remapping, macros, screensaver lighting or daemon persistence restoration. Only validated incoming static/brightness synchronization is recognized; the new effects are not synchronized across devices. RazerGenie can use the existing discovery, DPI, power and lighting APIs; its current power widget may log a warning and display “Not Charging” when a charging query is unavailable. The Python client now checks the separate `charging_status` capability before querying it.
 
 ## Validation
 
-Run `PYTHONPATH=daemon python -m unittest discover -s daemon/tests -p test_bluetooth.py -v` for protocol, settings, input validation, serialized read/modify/write, failed-readback/no-retry, timeout and device reconnect lifecycle coverage. No hardware is required for those tests. The 15 tests include the legacy image API required by RazerGenie, stored/live color updates, and rejection of unvalidated profile targets.
+Run `PYTHONPATH=daemon python -m unittest discover -s daemon/tests -p test_bluetooth.py -v` for protocol, settings, input validation, serialized read/modify/write, failed-readback/no-retry, timeout and device reconnect lifecycle coverage. No hardware is required for those tests. The 20 tests include the legacy image API required by RazerGenie, stored/live effect updates, breathing RGB, wave direction validation, unknown-effect decoding, rejection of unvalidated profile targets, and correct queuing of signals received during daemon startup.
 
 The real Bluetooth mouse was exercised through an isolated full daemon and the standard `openrazer.client.DeviceManager`: discovery, DPI write/readback, brightness write/readback, idle timeout write/readback, and static red write/readback. DPI, brightness and idle timeout were restored and verified; static red was left applied at the user's request. Earlier raw tests covered all three lighting zones. A pre-existing `test_effect_sync.test_notify_run_effect_edge_case_3` failure reproduces on the unmodified upstream snapshot with Python 3.14.
 
 Additional physical validation: the live magenta color was written to the base profile for wheel, logo and underglow; after the user powered the mouse off for ten seconds and reconnected it, both live and base-profile reads still returned magenta for all zones. The integrated persistent setter then changed the wheel to `112233`, verified both states, and restored magenta in both states. No profiles were created, deleted or selected, and the assigned inventory remained target `1`. Natural idle sleep was not separately timed in that test.
+
+
+## Additional effect validation
+
+Per-zone 10-byte state payloads (write `10 03 01 <led>`, read `10 83 01 <led>`; live mirror `10 83 00 <led>`):
+
+| Effect | Payload | Standard API |
+|---|---|---|
+| Spectrum | `03 00 00 00 00 00 00 00 00 00` | `setSpectrum`, `setLogoSpectrum`, `setScrollSpectrum` |
+| Single-color breathing | `02 01 00 01 R G B 00 00 00` | `setBreathSingle`, corresponding logo/scroll variants |
+| Wave | `04 direction 28 00 00 00 00 00 00 00` (`direction` 1 or 2) | `setWave`, corresponding logo/scroll variants and wave-direction getters |
+
+The user visually confirmed color cycling, breathing, the moving underglow rainbow, and direction reversal. Spectrum and reversed wave were read back unchanged in all three live/base zones after physical reconnects. The standard Python client and independent logo/scroll D-Bus endpoints were then exercised on the real mouse; all effects and direction getters read back correctly. The original magenta static colors were restored. Existing RazerGenie and libopenrazer discover the new standard methods through introspection; no frontend patch is required.
+
+Random/dual-color breathing, reactive, off and speed controls remain unvalidated and are not advertised. The effect decoder recognizes only tested payload layouts. A startup SIGTERM race encountered during repeated test restarts was also fixed: the temporary Python signal handler now accepts the signal/frame arguments and queues the actual signal number for GLib.

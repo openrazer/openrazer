@@ -4,6 +4,7 @@ import json
 import logging
 import dbus.service
 from openrazer_daemon.dbus_services.service import DBusService
+from .backend import lighting_effect
 
 MISC = 'razer.device.misc'
 POWER = 'razer.device.power'
@@ -151,13 +152,64 @@ class BasiliskV3ProBluetooth(DBusService):
         for zone in ('backlight', 'logo', 'scroll'):
             self.invoke('set_static', zone, red, green, blue)
 
+    @dbus.service.method(CHROMA)
+    def setSpectrum(self):
+        for zone in ('backlight', 'logo', 'scroll'):
+            self.invoke('set_spectrum', zone)
+
+    @dbus.service.method(LOGO)
+    def setLogoSpectrum(self):
+        self.invoke('set_spectrum', 'logo')
+
+    @dbus.service.method(SCROLL)
+    def setScrollSpectrum(self):
+        self.invoke('set_spectrum', 'scroll')
+
+    @dbus.service.method(CHROMA, in_signature='yyy')
+    def setBreathSingle(self, red, green, blue):
+        for zone in ('backlight', 'logo', 'scroll'):
+            self.invoke('set_breath_single', zone, red, green, blue)
+
+    @dbus.service.method(LOGO, in_signature='yyy')
+    def setLogoBreathSingle(self, red, green, blue):
+        self.invoke('set_breath_single', 'logo', red, green, blue)
+
+    @dbus.service.method(SCROLL, in_signature='yyy')
+    def setScrollBreathSingle(self, red, green, blue):
+        self.invoke('set_breath_single', 'scroll', red, green, blue)
+
+    @dbus.service.method(CHROMA, in_signature='i')
+    def setWave(self, direction):
+        for zone in ('backlight', 'logo', 'scroll'):
+            self.invoke('set_wave', zone, direction)
+
+    @dbus.service.method(LOGO, in_signature='i')
+    def setLogoWave(self, direction):
+        self.invoke('set_wave', 'logo', direction)
+
+    @dbus.service.method(SCROLL, in_signature='i')
+    def setScrollWave(self, direction):
+        self.invoke('set_wave', 'scroll', direction)
+
+    @dbus.service.method(CHROMA, out_signature='i')
+    def getWaveDir(self):
+        return self.invoke('wave_direction', 'backlight')
+
+    @dbus.service.method(LOGO, out_signature='i')
+    def getLogoWaveDir(self):
+        return self.invoke('wave_direction', 'logo')
+
+    @dbus.service.method(SCROLL, out_signature='i')
+    def getScrollWaveDir(self):
+        return self.invoke('wave_direction', 'scroll')
+
     def effect(self, zone):
         raw = self.invoke('lighting', zone)
-        return 'static' if raw[:4] == bytes([1, 0, 0, 1]) else 'unknown'
+        return lighting_effect(raw)
 
     def colors(self, zone):
         raw = self.invoke('lighting', zone)
-        return list(raw[4:7]) if raw[:4] == bytes([1, 0, 0, 1]) else []
+        return list(raw[4:7]) if lighting_effect(raw) in ('static', 'breathSingle') else []
 
     @dbus.service.method(CHROMA, out_signature='s')
     def getEffect(self):
