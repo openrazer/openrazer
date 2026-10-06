@@ -1,43 +1,59 @@
 # Experimental Basilisk V3 Pro Bluetooth backend
 
-This branch adds a userspace BlueZ GATT transport to the existing OpenRazer daemon. It requires the optional `dbus-fast` dependency (`openrazer_daemon[bluetooth]`) and a mouse already paired and connected using the desktop's Bluetooth settings. No kernel module, udev rule, scanning, pairing, or device disconnect is required for this transport.
+This opt-in userspace backend controls the Basilisk V3 Pro using its BlueZ vendor GATT service. It needs the optional `dbus-fast` dependency (`openrazer_daemon[bluetooth]`). Pair and connect the mouse through the desktop Bluetooth settings first. The backend does not scan, pair, connect, disconnect the mouse, or require a Bluetooth kernel driver.
 
-Enable `bluetooth_enabled = True` in `[General]` of the daemon configuration. The default is disabled. `bluetooth_only = True` disables USB discovery and its plugdev requirement; leave that option false if USB devices are needed. Fake-driver tests do not start BlueZ.
+In the daemon configuration:
 
-Discovery uses cached BlueZ objects, connected/paired/resolved state, the vendor GATT service and a PnP identity matching VID `068e`, PID `00ac`. The D-Bus serial is a stable `BT_` prefix plus the paired Bluetooth address, rather than a manufactured hardware serial. Disconnect removes the device object; reconnect recreates it and emits the standard device signals. Polling runs every three seconds and sends no vendor commands for already registered devices. Commands are serialized on a worker event loop so notification reception does not depend on the daemon's GLib callback returning. Vendor exchanges time out, do not automatically retry, and fault the session after a timeout; recovery requires reconnecting the mouse.
+```ini
+[General]
+bluetooth_enabled = True
+# Optional: skip USB discovery and its plugdev requirement.
+bluetooth_only = False
+```
 
-Validated features exposed through existing interfaces:
+The defaults preserve existing USB operation. Fake-driver tests do not initialize BlueZ. Discovery checks paired, connected, services-resolved state, vendor service UUID and Bluetooth PnP VID/PID `068e:00ac`. Only this model is supported. The stable D-Bus identifier is `BT_` plus the Bluetooth address; it is not a hardware serial number.
 
-- battery charge level (0..255 scaled to percent)
-- current X/Y DPI (100..30000), changing only the active entry of the existing five-stage table
-- a read-only DPI-stage query (existing API uses one-based active stage)
-- per-zone brightness: underglow/backlight, logo and scroll wheel
-- whole-device and per-zone static RGB, spectrum cycling, single-color breathing, and wave (both directions)
-- sleep timeout (60..900 seconds)
+## Features
 
-Every settings setter checks device readback. Startup, reconnect and shutdown do not apply saved settings or change hardware state. Hardware retains ownership of settings. Lighting setters write and verify the base profile (target `1`) and confirm the hardware-active mirror (target `0`), applying a distinct live write only if necessary. Static, spectrum and reverse-wave effects were verified to survive physical power cycles on all three zones without daemon reapplication. Single-color breathing was visually confirmed and verified in both stored/live readback; it was not separately power-cycled. Persistent lighting setters are restricted to the active, inventory-listed base profile; no other stored profile is modified. Other settings do not gain a new persistence guarantee from this change. A multi-zone static setter can fail after earlier zones have already changed; errors are surfaced without retry or guessing at a rollback.
+Existing OpenRazer interfaces expose:
 
-Not exposed: charging status (unknown over Bluetooth), firmware version (reported as `unknown`), polling rate, DPI stage-table editing, low battery threshold, unvalidated lighting modes, per-LED frames, scroll controls, profiles, remapping, macros, screensaver lighting or daemon persistence restoration. Only validated incoming static/brightness synchronization is recognized; the new effects are not synchronized across devices. RazerGenie can use the existing discovery, DPI, power and lighting APIs; its current power widget may log a warning and display “Not Charging” when a charging query is unavailable. The Python client now checks the separate `charging_status` capability before querying it.
+- Battery percentage and idle timeout (60..900 seconds).
+- Current X/Y DPI (100..30000), one to five editable stages and active-stage selection.
+- Independent body/underglow, logo and wheel brightness and effects: off, static, spectrum, single/dual/random breathing and wave in either direction.
+- Tactile/free-spin mode, Smart-Reel and scroll acceleration through `razer.device.scroll`.
 
-## Validation
+RazerGenie discovers standard lighting and DPI-stage controls through introspection. Its body effect changes only underglow; logo and wheel are independent. RazerGenie has no scroll-mechanics controls, but `openrazer.client` exposes `scroll_mode`, `scroll_smart_reel` and `scroll_acceleration`.
 
-Run `PYTHONPATH=daemon python -m unittest discover -s daemon/tests -p test_bluetooth.py -v` for protocol, settings, input validation, serialized read/modify/write, failed-readback/no-retry, timeout and device reconnect lifecycle coverage. No hardware is required for those tests. The 20 tests include the legacy image API required by RazerGenie, stored/live effect updates, breathing RGB, wave direction validation, unknown-effect decoding, rejection of unvalidated profile targets, and correct queuing of signals received during daemon startup.
+Not implemented: charging status, firmware version (reported as `unknown`), polling rate, low-battery threshold, reactive lighting, adjustable effect speed, per-LED frames, onboard profile management, remapping/macros, screensaver lighting and daemon persistence restoration. A separate `charging_status` client capability avoids calling an unavailable method. Current RazerGenie may still display “Not Charging” as a fallback when its charging query fails.
 
-The real Bluetooth mouse was exercised through an isolated full daemon and the standard `openrazer.client.DeviceManager`: discovery, DPI write/readback, brightness write/readback, idle timeout write/readback, and static red write/readback. DPI, brightness and idle timeout were restored and verified; static red was left applied at the user's request. Earlier raw tests covered all three lighting zones. A pre-existing `test_effect_sync.test_notify_run_effect_edge_case_3` failure reproduces on the unmodified upstream snapshot with Python 3.14.
+## Transport and restrictions
 
-Additional physical validation: the live magenta color was written to the base profile for wheel, logo and underglow; after the user powered the mouse off for ten seconds and reconnected it, both live and base-profile reads still returned magenta for all zones. The integrated persistent setter then changed the wheel to `112233`, verified both states, and restored magenta in both states. No profiles were created, deleted or selected, and the assigned inventory remained target `1`. Natural idle sleep was not separately timed in that test.
+Vendor exchanges are serialized on an asyncio worker so notifications keep flowing while GLib dispatches synchronous requests. Frames are fragmented into at most 20-byte writes. Exchanges time out and are never automatically retried. Timeout, cancellation or transport failure poisons the session until the mouse reconnects. Firmware notification IDs 0/1 are excluded from request rollover. Complete device rejections are reported without losing synchronization.
 
+Cached BlueZ objects are reconciled every three seconds; already registered devices receive no discovery vendor queries. Disconnection removes the D-Bus device and reconnection recreates it with standard signals. Calls remain synchronous to the daemon and discovery/commands may block GLib until their bounded timeout. BlueZ service restart recovery is not separately validated; restart the OpenRazer daemon if needed.
 
-## Additional effect validation
+DPI, brightness, lighting and scroll writes are restricted to the active base profile, target 1. No profile is created, deleted or selected. Setters verify readback and surface differences without retrying or guessing a rollback. DPI edits preserve visible stage IDs and reserved bytes; expanding a shortened table is restricted to the validated sequential IDs 1..5. The mouse omits final reserved bytes in some readbacks, and setters send the validated complete 38-byte DPI command.
 
-Per-zone 10-byte state payloads (write `10 03 01 <led>`, read `10 83 01 <led>`; live mirror `10 83 00 <led>`):
+Lighting writes verify target 1 and the live target-0 mirror, with a distinct live write only if needed. Startup, reconnect and shutdown do not apply cached settings. Only incoming static/brightness synchronization is recognized; effect synchronization with other devices is incomplete.
 
-| Effect | Payload | Standard API |
-|---|---|---|
-| Spectrum | `03 00 00 00 00 00 00 00 00 00` | `setSpectrum`, `setLogoSpectrum`, `setScrollSpectrum` |
-| Single-color breathing | `02 01 00 01 R G B 00 00 00` | `setBreathSingle`, corresponding logo/scroll variants |
-| Wave | `04 direction 28 00 00 00 00 00 00 00` (`direction` 1 or 2) | `setWave`, corresponding logo/scroll variants and wave-direction getters |
+## Hardware validation
 
-The user visually confirmed color cycling, breathing, the moving underglow rainbow, and direction reversal. Spectrum and reversed wave were read back unchanged in all three live/base zones after physical reconnects. The standard Python client and independent logo/scroll D-Bus endpoints were then exercised on the real mouse; all effects and direction getters read back correctly. The original magenta static colors were restored. Existing RazerGenie and libopenrazer discover the new standard methods through introspection; no frontend patch is required.
+Tested on one Linux/BlueZ Basilisk V3 Pro, Bluetooth PnP `068e:00ac`, through the normal daemon, standard Python client and RazerGenie:
 
-Random/dual-color breathing, reactive, off and speed controls remain unvalidated and are not advertised. The effect decoder recognizes only tested payload layouts. A startup SIGTERM race encountered during repeated test restarts was also fixed: the temporary Python signal handler now accepts the signal/frame arguments and queues the actual signal number for GLib.
+- DPI edits, independent X/Y values, selection, and counts 4, 2, 1, 3, 5; original presets and selected stage restored.
+- Brightness and idle-time changes with verified restoration.
+- Independent zone RGB and every advertised effect, with visual confirmation of animations and wave reversal.
+- Static, spectrum, reversed wave and lighting off retained their stored/live states after physical power cycles. Breathing variants were visually confirmed and read back, but not separately power-cycled.
+- Software tactile/free-spin switching and Smart-Reel automatic switching physically confirmed. Acceleration toggles/readback verified; its effect on scroll distance was tentatively confirmed by the user.
+- Free-spin, Smart-Reel off and acceleration on all retained after a physical off/on cycle, with smooth wheel feel and standard-client readback.
+- Legacy image API supplied for RazerGenie startup compatibility; normal reconnect rediscovery verified.
+
+Other model variants, USB/BT coexistence on physical hardware, BlueZ restart, system suspend and natural idle-sleep retention are not separately validated.
+
+## Tests
+
+```sh
+PYTHONPATH=daemon python -m unittest discover -s daemon/tests -p test_bluetooth.py -v
+```
+
+Tests cover framing, fragmentation, timeout poisoning, request rollover, malformed DPI, preserved reserved data, profile guards, count changes, independent zone controls, effect readback, scroll settings, lifecycle signals and RazerGenie metadata. The complete daemon suite also has a pre-existing `test_effect_sync.test_notify_run_effect_edge_case_3` failure reproduced on the unmodified upstream snapshot under Python 3.14.

@@ -39,6 +39,13 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(parse_dpi(DPI_RAW)['active_index'], 2)
         with self.assertRaises(ValueError):
             parse_dpi(DPI_RAW[:10])
+    def test_malformed_dpi_ids_are_rejected(self):
+        for active, first, second in [(99, 1, 2), (1, 1, 1)]:
+            raw = bytearray(DPI_RAW)
+            raw[0], raw[2], raw[9] = active, first, second
+            with self.assertRaises(ValueError):
+                parse_dpi(raw)
+
 
 
 class LightingClientTests(unittest.TestCase):
@@ -192,6 +199,16 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(ValueError):
             await settings.perform('scroll_setting', 'mode')
 
+    async def test_profile_scoped_writes_reject_other_active_profiles(self):
+        session = FakeSession()
+        session.values[bytes.fromhex('03820000')] = b'\x02'
+        settings = BasiliskSettings(session)
+        for operation, args in [('set_dpi', (800, 800)), ('set_dpi_stages', (1, [(800, 800)])), ('set_brightness', ('logo', 50))]:
+            with self.assertRaises(ValueError):
+                await settings.perform(operation, *args)
+        self.assertEqual(session.writes, [])
+        self.assertEqual(set(session.reads), {bytes.fromhex('03820000')})
+
     async def test_invalid_settings_send_no_commands(self):
         session = FakeSession()
         settings = BasiliskSettings(session)
@@ -325,6 +342,20 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
         session = VendorSession(Client())
         await session.write(bytes.fromhex('0b040100'), bytes(38))
         self.assertEqual([len(value) for value in writes], [8, 20, 18])
+
+    async def test_request_rollover_skips_unsolicited_notification_ids(self):
+        requests = []
+        class Client:
+            async def write_gatt_char(self, uuid, payload, response):
+                request = payload[0]
+                requests.append(request)
+                session.notify(None, bytes([1, 0, 0, 0, 0, 0, 0, 2]))
+                session.notify(None, bytes([request, 0, 0, 0, 0, 0, 0, 2]))
+        session = VendorSession(Client())
+        session.request = 255
+        await session.read(bytes.fromhex('05810001'))
+        await session.read(bytes.fromhex('05810001'))
+        self.assertEqual(requests, [255, 2])
 
     async def test_timeout_faults_session_before_next_write(self):
         class Client:
