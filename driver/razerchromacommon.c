@@ -1644,9 +1644,25 @@ struct razer_report razer_chroma_misc_get_scroll_acceleration(void)
  * 00     1f    0000   00    02       02    17  0101    | SET SCROLL WHEEL SMART REEL (VARSTR, ON)
  * 00     1f    0000   00    02       02    17  0100    | SET SCROLL WHEEL SMART REEL (VARSTR, OFF)
  */
-struct razer_report razer_chroma_misc_set_scroll_smart_reel(bool smart_reel)
+struct razer_report razer_chroma_misc_set_scroll_smart_reel_v1(bool smart_reel)
 {
     struct razer_report report = get_razer_report(0x02, 0x17, 0x02);
+
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = smart_reel;
+
+    return report;
+}
+
+/**
+ * Set scroll wheel "smart reel" on/off on the device (Naga V3 Pro variant)
+ *
+ * Unlike the other devices, the Naga V3 Pro expects the full 80-byte argument
+ * block even though only arguments[1] carries information.
+ */
+struct razer_report razer_chroma_misc_set_scroll_smart_reel_v2(bool smart_reel)
+{
+    struct razer_report report = get_razer_report(0x02, 0x17, 0x50);
 
     report.arguments[0] = VARSTORE;
     report.arguments[1] = smart_reel;
@@ -1662,22 +1678,6 @@ struct razer_report razer_chroma_misc_get_scroll_smart_reel(void)
     struct razer_report report = get_razer_report(0x02, 0x97, 0x02);
 
     report.arguments[0] = VARSTORE;
-
-    return report;
-}
-
-/**
- * Set scroll wheel "smart reel" on/off on the device (Naga V3 Pro variant)
- *
- * Unlike the other devices, the Naga V3 Pro expects the full 80-byte argument
- * block even though only arguments[1] carries information.
- */
-struct razer_report razer_chroma_misc_set_scroll_smart_reel_naga_v3_pro(bool smart_reel)
-{
-    struct razer_report report = get_razer_report(0x02, 0x17, 0x50);
-
-    report.arguments[0] = VARSTORE;
-    report.arguments[1] = smart_reel;
 
     return report;
 }

@@ -3111,11 +3111,11 @@ static ssize_t razer_attr_write_scroll_smart_reel(struct device *dev, struct dev
     switch (device->usb_pid) {
     case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
-        request = razer_chroma_misc_set_scroll_smart_reel_naga_v3_pro(smart_reel);
+        request = razer_chroma_misc_set_scroll_smart_reel_v2(smart_reel);
         break;
 
     default:
-        request = razer_chroma_misc_set_scroll_smart_reel(smart_reel);
+        request = razer_chroma_misc_set_scroll_smart_reel_v1(smart_reel);
         break;
     }
     request.transaction_id.id = 0x1f;
