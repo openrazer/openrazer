@@ -22,6 +22,7 @@ declare -A files_metadata=(
     ["charging_matrix_effect_static"]="w;"
     ["charging_matrix_effect_wave"]="w;"
     ["device_idle_time"]="rw;600"
+    ["device_last_activity"]="r;0"
     ["device_mode"]="rw;0x0000"
     ["device_serial"]="r;XX0000000000" # default value will get overwritten
     ["device_type"]="r;%(name)s"

@@ -264,6 +264,8 @@ This will output something similar to this:
 | Razer Viper V2 Pro (Wireless)                                 |  1532:00A6  |
 | Razer Naga V2 Pro (Wired)                                     |  1532:00A7  |
 | Razer Naga V2 Pro (Wireless)                                  |  1532:00A8  |
+| Razer Naga V3 Pro (Wired)                                     |  1532:00E7  |
+| Razer Naga V3 Pro (Wireless)                                  |  1532:00E8  |
 | Razer Basilisk V3 Pro (Wired)                                 |  1532:00AA  |
 | Razer Basilisk V3 Pro (Wireless)                              |  1532:00AB  |
 | Razer Cobra Pro (Wired)                                       |  1532:00AF  |
