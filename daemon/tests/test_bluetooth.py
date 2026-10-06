@@ -42,6 +42,27 @@ class ProtocolTests(unittest.TestCase):
 
 
 class LightingClientTests(unittest.TestCase):
+    def test_body_effect_controls_never_write_logo_or_scroll(self):
+        from openrazer_daemon.bluetooth.device import BasiliskV3ProBluetooth
+        class Device:
+            def __init__(self):
+                self.calls = []
+            def invoke(self, *args):
+                self.calls.append(args)
+        device = Device()
+        cases = [('setStatic', (0, 255, 0), 'set_static'),
+                 ('setNone', (), 'set_none'),
+                 ('setSpectrum', (), 'set_spectrum'),
+                 ('setBreathSingle', (0, 255, 0), 'set_breath_single'),
+                 ('setBreathDual', (0, 255, 0, 255, 0, 0), 'set_breath_dual'),
+                 ('setBreathRandom', (), 'set_breath_random'),
+                 ('setWave', (2,), 'set_wave')]
+        for method, args, operation in cases:
+            with self.subTest(method=method):
+                device.calls.clear()
+                getattr(BasiliskV3ProBluetooth, method)(device, *args)
+                self.assertEqual(device.calls, [(operation, 'backlight', *args)])
+
     def test_dual_color_readback_exposes_both_colors_and_random_exposes_none(self):
         from openrazer_daemon.bluetooth.device import BasiliskV3ProBluetooth
         class Device:
