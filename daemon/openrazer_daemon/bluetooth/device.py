@@ -153,6 +153,19 @@ class BasiliskV3ProBluetooth(DBusService):
             self.invoke('set_static', zone, red, green, blue)
 
     @dbus.service.method(CHROMA)
+    def setNone(self):
+        for zone in ('backlight', 'logo', 'scroll'):
+            self.invoke('set_none', zone)
+
+    @dbus.service.method(LOGO)
+    def setLogoNone(self):
+        self.invoke('set_none', 'logo')
+
+    @dbus.service.method(SCROLL)
+    def setScrollNone(self):
+        self.invoke('set_none', 'scroll')
+
+    @dbus.service.method(CHROMA)
     def setSpectrum(self):
         for zone in ('backlight', 'logo', 'scroll'):
             self.invoke('set_spectrum', zone)
@@ -177,6 +190,32 @@ class BasiliskV3ProBluetooth(DBusService):
     @dbus.service.method(SCROLL, in_signature='yyy')
     def setScrollBreathSingle(self, red, green, blue):
         self.invoke('set_breath_single', 'scroll', red, green, blue)
+
+    @dbus.service.method(CHROMA)
+    def setBreathRandom(self):
+        for zone in ('backlight', 'logo', 'scroll'):
+            self.invoke('set_breath_random', zone)
+
+    @dbus.service.method(LOGO)
+    def setLogoBreathRandom(self):
+        self.invoke('set_breath_random', 'logo')
+
+    @dbus.service.method(SCROLL)
+    def setScrollBreathRandom(self):
+        self.invoke('set_breath_random', 'scroll')
+
+    @dbus.service.method(CHROMA, in_signature='yyyyyy')
+    def setBreathDual(self, red, green, blue, red2, green2, blue2):
+        for zone in ('backlight', 'logo', 'scroll'):
+            self.invoke('set_breath_dual', zone, red, green, blue, red2, green2, blue2)
+
+    @dbus.service.method(LOGO, in_signature='yyyyyy')
+    def setLogoBreathDual(self, red, green, blue, red2, green2, blue2):
+        self.invoke('set_breath_dual', 'logo', red, green, blue, red2, green2, blue2)
+
+    @dbus.service.method(SCROLL, in_signature='yyyyyy')
+    def setScrollBreathDual(self, red, green, blue, red2, green2, blue2):
+        self.invoke('set_breath_dual', 'scroll', red, green, blue, red2, green2, blue2)
 
     @dbus.service.method(CHROMA, in_signature='i')
     def setWave(self, direction):
@@ -209,7 +248,10 @@ class BasiliskV3ProBluetooth(DBusService):
 
     def colors(self, zone):
         raw = self.invoke('lighting', zone)
-        return list(raw[4:7]) if lighting_effect(raw) in ('static', 'breathSingle') else []
+        effect = lighting_effect(raw)
+        if effect == 'breathDual':
+            return list(raw[4:10])
+        return list(raw[4:7]) if effect in ('static', 'breathSingle') else []
 
     @dbus.service.method(CHROMA, out_signature='s')
     def getEffect(self):
