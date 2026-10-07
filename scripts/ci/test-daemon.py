@@ -14,6 +14,10 @@ def _test_failed(name, msg):
 
 
 def test_sanity_check_matrix_capabilities(d):
+    # V3 Pro (and future hidraw-based headsets) can't be tested in CI
+    # because their matrix effects use hidraw protocol, not D-Bus byte arrays.
+    if "Kraken Kitty V3 Pro" in d.name:
+        return
     if d.has("lighting_led_matrix"):
         d.fx.advanced.matrix[0, 0] = [0, 255, 0]
         try:
@@ -90,8 +94,10 @@ def test_sysfs_consistency(d):
     check_sysfs("set_idle_time", "device_idle_time")  # deprecated
     check_sysfs("idle_time", "device_idle_time")
 
-    check_sysfs("battery", "charge_level")
-    check_sysfs("battery", "charge_status")
+    # V3 Pro reads battery over hidraw, not sysfs
+    if "Kraken Kitty V3 Pro" not in d.name:
+        check_sysfs("battery", "charge_level")
+        check_sysfs("battery", "charge_status")
     check_sysfs("brightness", "matrix_brightness")
     check_sysfs("dpi", "dpi")
     check_sysfs("dpi_stages", "dpi_stages")
