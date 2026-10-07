@@ -2667,7 +2667,8 @@ static ssize_t razer_attr_write_mouse_poll_rate(struct device *dev, struct devic
     if (err < 0)
         return err;
 
-    request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x01);
+    /* Apply the polling rate to the live slot. */
+    request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x00);
     /* Reject rates that the command encoder silently substitutes with 500 Hz. */
     if (razer_parse_poll_rate_hyperpolling(&request) != polling_rate)
         return -EINVAL;
