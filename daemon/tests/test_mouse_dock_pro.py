@@ -7,7 +7,7 @@ from pathlib import Path
 import tempfile
 import types
 import unittest
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock, mock_open, patch
 
 from openrazer_daemon.daemon import RazerDaemon
 from openrazer_daemon.device import DeviceCollection
@@ -321,6 +321,25 @@ class DockRestoreTest(unittest.TestCase):
         self.assertEqual(self.mouse.dpi, [800, 800])
         self.assertFalse(self.mouse.persistence.status['changed'])
         self.assertEqual(self.mouse.zone, {})
+
+    def test_successful_polling_write_is_read_back_before_becoming_saved_state(self):
+        driver_file = mock_open(read_data='1000\n')
+        with patch('openrazer_daemon.dbus_services.dbus_methods.mamba.open', driver_file):
+            self.mouse.setPollRate(1000)
+        self.assertEqual([args[0][1] for args in driver_file.call_args_list], ['w', 'r'])
+        driver_file().write.assert_called_once_with('1000')
+        self.assertEqual(self.mouse.poll_rate, 1000)
+        self.assertTrue(self.mouse._dock_poll_rate_known)
+        self.assertEqual(self.persisted_values(), {'poll_rate': '1000'})
+
+    def test_rejected_polling_readback_preserves_previous_polling_state(self):
+        self.mouse.poll_rate = 500
+        self.mouse._dock_poll_rate_known = True
+        with patch('openrazer_daemon.dbus_services.dbus_methods.mamba.open', mock_open(read_data='500\n')):
+            with self.assertRaisesRegex(RuntimeError, 'reported polling rate 500'):
+                self.mouse.setPollRate(1000)
+        self.assertEqual(self.mouse.poll_rate, 500)
+        self.assertEqual(self.persisted_values(), {'poll_rate': '500'})
 
     def test_polling_getter_reads_actual_rate_but_retains_pending_saved_intent(self):
         self.mouse.poll_rate = 1000

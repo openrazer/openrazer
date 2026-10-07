@@ -336,6 +336,12 @@ def set_poll_rate(self, rate):
         driver_file.write(str(rate))
 
     if getattr(self, 'HARDWARE_POLL_RATE', False):
+        with open(driver_path, 'r') as driver_file:
+            actual_rate = int(driver_file.read().strip())
+        if actual_rate != rate:
+            raise RuntimeError('Docked mouse reported polling rate {}'.format(actual_rate))
+
+    if getattr(self, 'HARDWARE_POLL_RATE', False):
         self.poll_rate = rate
         self._dock_poll_rate_known = True
 
