@@ -16,6 +16,7 @@ import logging
 import threading
 import time
 import math
+import select
 
 from openrazer_daemon.dbus_services import endpoint
 
@@ -26,6 +27,13 @@ REPORT_ID = 0x02
 TRANSACTION_ID = 0x60
 WIRELESS_FLAG = 0x80
 NUM_LEDS = 10
+
+# Readable features (query with a zero-length args[0] = feature request).
+# Response: status 0x02 = OK, 0x05 = unsupported; args = [feature, 0x01, len, data...]
+# The headset also pushes FEATURE_CHARGING as an event (args[1] = 0x02) about once a minute.
+FEATURE_BATTERY = 0x21    # battery level, 0-100 %
+FEATURE_CHARGING = 0x2A   # 1 = charging, 0 = not charging
+STATUS_OK = 0x02
 
 
 def _find_hidraw(sys_path):
@@ -46,7 +54,7 @@ def _calc_crc(data):
     return crc & 0xFF
 
 
-def _build_report(cmd_class, cmd_id, data_size, args=b''):
+def _build_report(cmd_class, cmd_id, data_size, args=b'', wireless_flag=WIRELESS_FLAG):
     """Build a 64-byte V4 HID report with CRC."""
     report = bytearray(64)
     report[0] = REPORT_ID
@@ -58,7 +66,7 @@ def _build_report(cmd_class, cmd_id, data_size, args=b''):
     report[6] = data_size     # data_size
     report[7] = cmd_class     # command_class
     report[8] = cmd_id        # command_id
-    report[9] = WIRELESS_FLAG
+    report[9] = wireless_flag
     for i, b in enumerate(args):
         if 10 + i < 62:
             report[10 + i] = b
@@ -78,6 +86,44 @@ def _send_report(sys_path, report):
         os.close(fd)
     except Exception as e:
         logger.error("Failed to send V4 report to %s: %s", hidraw, e)
+
+
+def _query_feature(sys_path, feature, wireless_flag, timeout=0.3):
+    """
+    Read a feature value from the device via hidraw.
+    Returns the data bytes, or None if the device didn't answer.
+    Reads require the correct wireless flag (0x00 wired, 0x80 wireless), unlike writes.
+    """
+    hidraw = _find_hidraw(sys_path)
+    if not hidraw:
+        logger.error("Cannot find hidraw device for %s", sys_path)
+        return None
+    report = _build_report(0x00, 0x00, 0x04, bytes([feature]), wireless_flag)
+    try:
+        fd = os.open(hidraw, os.O_RDWR | os.O_NONBLOCK)
+    except OSError as e:
+        logger.error("Failed to open %s: %s", hidraw, e)
+        return None
+    try:
+        os.write(fd, report)
+        deadline = time.monotonic() + timeout
+        while (remaining := deadline - time.monotonic()) > 0:
+            if not select.select([fd], [], [], remaining)[0]:
+                break
+            try:
+                resp = os.read(fd, 64)
+            except BlockingIOError:
+                continue
+            # Skip unrelated input (media keys, periodic events) until our response arrives
+            if len(resp) >= 13 and resp[0] == REPORT_ID and resp[10] == feature and resp[11] == 0x01:
+                if resp[1] != STATUS_OK:
+                    return None
+                return resp[13:13 + resp[12]]
+    except OSError as e:
+        logger.error("Failed to query feature 0x%02X on %s: %s", feature, hidraw, e)
+    finally:
+        os.close(fd)
+    return None
 
 
 def _send_direct_colors(sys_path, colors):
@@ -288,6 +334,24 @@ def v4_get_device_type_headset(self):
     return "Razer Kraken Kitty V3 Pro (Wireless)"
 
 
+@endpoint('razer.device.power', 'getBattery', out_sig='d')
+def v4_get_battery(self):
+    """Get battery level as a percentage (-1 if unavailable)."""
+    self.logger.debug("V4 DBus call get_battery")
+    data = _query_feature(self._device_path, FEATURE_BATTERY, self.V4_WIRELESS_FLAG)
+    if not data:
+        return -1.0
+    return float(min(data[0], 100))
+
+
+@endpoint('razer.device.power', 'isCharging', out_sig='b')
+def v4_is_charging(self):
+    """Get charging status."""
+    self.logger.debug("V4 DBus call is_charging")
+    data = _query_feature(self._device_path, FEATURE_CHARGING, self.V4_WIRELESS_FLAG)
+    return bool(data and data[0])
+
+
 def v4_get_serial(device_path):
     """Low-level: get serial via V4 HID protocol."""
     report = _build_report(0x00, 0x00, 0x04, bytes([0x00]))
@@ -339,6 +403,7 @@ __all__ = [
     'v4_set_static_effect', 'v4_set_spectrum_effect', 'v4_set_none_effect',
     'v4_set_breath_single_effect', 'v4_set_breath_dual_effect', 'v4_set_breath_triple_effect',
     'v4_set_custom_kraken', 'v4_set_brightness', 'v4_get_device_type_headset',
+    'v4_get_battery', 'v4_is_charging',
     '_build_report', '_send_report', '_find_hidraw', '_send_direct_colors',
     '_stop_breathing', 'v4_get_serial', 'v4_get_firmware',
 ]

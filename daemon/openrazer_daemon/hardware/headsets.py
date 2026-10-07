@@ -253,7 +253,11 @@ class RazerKrakenKittyV3ProWired(__RazerDevice):
                'v4_set_brightness',
                'v4_set_static_effect', 'v4_set_spectrum_effect', 'v4_set_none_effect',
                'v4_set_breath_single_effect', 'v4_set_breath_dual_effect', 'v4_set_breath_triple_effect',
-               'v4_set_custom_kraken']
+               'v4_set_custom_kraken',
+               'v4_get_battery', 'v4_is_charging']
+
+    # Wireless flag for V4 reads (0x00 wired, 0x80 via dongle)
+    V4_WIRELESS_FLAG = 0x00
 
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 10]
@@ -316,6 +320,7 @@ class RazerKrakenKittyV3ProWireless(RazerKrakenKittyV3ProWired):
     Class for the Razer Kraken Kitty V3 Pro (Wireless)
     """
     USB_PID = 0x0588
+    V4_WIRELESS_FLAG = 0x80
 
     def get_serial(self):
         return "XX01WIRELESS"
