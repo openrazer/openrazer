@@ -998,6 +998,14 @@ class RazerBlackWidowV4_75PCT(_RippleKeyboard):
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/13256/13256-1-en-v2.png"
 
+class RazerBlackWidowV4Pro75PCTWired(RazerBlackWidowV4_75PCT):
+    """
+    Class for the Razer BlackWidow V4 Pro 75% (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackWidow_V4_Pro_75_(-if01)?-event-kbd')
+    USB_PID = 0x02B3
+
+
 
 class RazerJoro(_RippleKeyboard):
     """
