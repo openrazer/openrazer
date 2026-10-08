@@ -450,6 +450,22 @@ class RazerBlackWidowV4TenkeylessHyperSpeedWireless(RazerBlackWidowV4TenkeylessH
     USB_PID = 0x02D5
 
 
+class RazerBlackWidowV4LowProfileTenkeylessHyperSpeedWired(RazerBlackWidowV4TenkeylessHyperSpeedWired):
+    """
+    Class for the Razer BlackWidow V4 Low-profile Tenkeyless HyperSpeed (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_BlackWidow_V4_Low-profile_Tenkeyless_HyperSpeed(-if01)?-event-kbd')
+    USB_PID = 0x02D4
+
+
+class RazerBlackWidowV4LowProfileTenkeylessHyperSpeedWireless(RazerBlackWidowV4TenkeylessHyperSpeedWired):
+    """
+    Class for the Razer BlackWidow V4 Low-profile Tenkeyless HyperSpeed (Wireless)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_BlackWidow_V4_Low-profile_Tenkeyless_HyperSpeed(_\d+)?(-if01)?-event-mouse')
+    USB_PID = 0x02D2
+
+
 class RazerBlackWidowChroma(_RippleKeyboard):
     """
     Class for the Razer BlackWidow Chroma
