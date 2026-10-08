@@ -351,6 +351,7 @@ This will output something similar to this:
 | Razer Base Station V2 Chroma                                  |  1532:0F20  |
 | Razer Thunderbolt 4 Dock Chroma                               |  1532:0F21  |
 | Razer Charging Pad Chroma                                     |  1532:0F26  |
+| Razer Raptor 27 (165Hz)                                       |  1532:0F28  |
 | Razer Laptop Stand Chroma V2                                  |  1532:0F2B  |
 
 ---
