@@ -102,6 +102,97 @@ int razer_get_usb_response(struct hid_device *hdev, uint report_index, struct ra
 }
 
 /**
+ * Send USB control report using a numbered HID report ID
+ *
+ * Some devices (e.g. the Nommo V2) expose the Razer report as a numbered
+ * feature report. Per the HID spec the report ID goes into the low byte of
+ * wValue and is prepended to the payload.
+ */
+int razer_send_control_msg_report_id(struct hid_device *hdev, const void *data, u16 size, u16 index, u8 report_id, ulong wait)
+{
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
+    u8 buf[sizeof(struct razer_report) + 1];
+    int ret;
+
+    if (WARN_ON(size + 1 > ARRAY_SIZE(buf)))
+        return -EINVAL;
+
+    buf[0] = report_id;
+    memcpy(&buf[1], data, size);
+
+    // Send usb control message
+    ret = usb_control_msg_send(usb_dev,
+                               0, // endpoint to send the message to
+                               HID_REQ_SET_REPORT, // USB message request value (0x09)
+                               USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT, // USB message request type value (0x21)
+                               0x300 | report_id, // USB message value
+                               index, // USB message index value
+                               buf, // pointer to the data to send
+                               size + 1, // length in bytes of the data to send
+                               USB_CTRL_SET_TIMEOUT, // time in msecs to wait for the message to complete before timing out
+                               GFP_KERNEL);
+
+    // Wait
+    fsleep(wait);
+
+    if (ret)
+        hid_warn(hdev, "Failed to send USB control message: %d\n", ret);
+
+    return ret;
+}
+
+/**
+ * Get a response from a razer device using a numbered HID report ID
+ *
+ * Same as razer_get_usb_response but for devices whose Razer report is a
+ * numbered feature report; the report ID byte prefixes both the request and
+ * the response payload.
+ */
+int razer_get_usb_response_report_id(struct hid_device *hdev, uint report_index, struct razer_report* request_report, uint response_index, struct razer_report* response_report, u8 report_id, ulong wait)
+{
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
+    u8 buf[sizeof(struct razer_report) + 1];
+    int err;
+
+    if (WARN_ON(request_report->transaction_id.id == 0x00)) {
+        request_report->transaction_id.id = 0xFF;
+    }
+
+    // Send the request to the device.
+    err = razer_send_control_msg_report_id(hdev, request_report, sizeof(*request_report), report_index, report_id, wait);
+    if (err)
+        return err;
+
+    // Now ask for response
+    err = usb_control_msg_recv(usb_dev,
+                               0, // endpoint to send the message to
+                               HID_REQ_GET_REPORT, // USB message request value (0x01)
+                               USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_IN, // USB message request type value (0xA1)
+                               0x300 | report_id, // USB message value
+                               response_index, // USB message index value
+                               buf, // pointer to the data to be filled in by the message
+                               sizeof(buf), // length in bytes of the data to be received
+                               USB_CTRL_SET_TIMEOUT, // time in msecs to wait for the message to complete before timing out
+                               GFP_KERNEL);
+    if (err) {
+        hid_warn(hdev, "Failed to receive USB control message: %d\n", err);
+        return err;
+    }
+
+    memcpy(response_report, &buf[1], sizeof(*response_report));
+
+    if (WARN_ONCE(response_report->data_size > ARRAY_SIZE(response_report->arguments),
+                  "Field data_size %d in response is bigger than arguments\n",
+                  response_report->data_size)) {
+        /* Sanitize the value since at the moment callers don't respect the return code */
+        response_report->data_size = ARRAY_SIZE(response_report->arguments);
+        return -EINVAL;
+    }
+
+    return err;
+}
+
+/**
  * Calculate the checksum for the usb message
  *
  * Checksum byte is stored in the 2nd last byte in the messages payload.
