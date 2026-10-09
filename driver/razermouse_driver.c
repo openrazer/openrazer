@@ -6546,6 +6546,7 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct hid_device *
 static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
     int retval = 0;
+    bool hw_started = false;
     struct razer_mouse_device *dev = NULL;
     unsigned char expected_subclass = 0xFF;
 
@@ -6558,6 +6559,21 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 
     // Init data
     razer_mouse_init(dev, hdev);
+
+    hid_set_drvdata(hdev, dev);
+    dev_set_drvdata(&hdev->dev, dev);
+
+    retval = hid_parse(hdev);
+    if (retval) {
+        hid_err(hdev, "parse failed\n");
+        goto exit_free;
+    }
+    retval = hid_hw_start(hdev, HID_CONNECT_DEFAULT);
+    if (retval) {
+        hid_err(hdev, "hw start failed\n");
+        goto exit_free;
+    }
+    hw_started = true;
 
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
@@ -7683,26 +7699,16 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 
     }
 
-    hid_set_drvdata(hdev, dev);
-    dev_set_drvdata(&hdev->dev, dev);
-
-    retval = hid_parse(hdev);
-    if(retval)    {
-        hid_err(hdev, "parse failed\n");
-        goto exit_free;
-    }
-    retval = hid_hw_start(hdev, HID_CONNECT_DEFAULT);
-    if (retval) {
-        hid_err(hdev, "hw start failed\n");
-        goto exit_free;
-    }
-
     //razer_reset(usb_dev);
     //razer_activate_macro_keys(usb_dev);
     //msleep(3000);
     return 0;
 
 exit_free:
+    if (hw_started)
+        hid_hw_stop(hdev);
+    dev_set_drvdata(&hdev->dev, NULL);
+    hid_set_drvdata(hdev, NULL);
     kfree(dev);
     return retval;
 }
