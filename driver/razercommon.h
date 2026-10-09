@@ -157,4 +157,19 @@ void print_erroneous_report(struct hid_device *hdev, struct razer_report* report
 #define	hid_to_usb_dev(hid_dev) \
 	to_usb_device(hid_dev->dev.parent->parent)
 
+/* Shared response decoders for razermouse and razeraccessory.
+ * Argument indices match the wire protocol; dispatch wrappers differ per
+ * driver, the response layout does not. */
+void razer_parse_dpi_xy(const struct razer_report *response, unsigned short *dpi_x, unsigned short *dpi_y);
+unsigned char razer_parse_battery_level(const struct razer_report *response);
+unsigned char razer_parse_charging_status(const struct razer_report *response);
+unsigned char razer_parse_scroll_arg(const struct razer_report *response);
+unsigned short razer_parse_idle_time(const struct razer_report *response);
+unsigned char razer_parse_low_battery_threshold(const struct razer_report *response);
+unsigned short razer_parse_poll_rate_hyperpolling(const struct razer_report *response);
+/* dpi_stages enforces the security bounds-check (clamp count against
+ * max_stages, bound the per-stage copy against sizeof(response->arguments))
+ * so a crafted response can't walk past the fixed-size buffer. */
+ssize_t razer_parse_dpi_stages(const struct razer_report *response, char *buf, unsigned char max_stages);
+
 #endif /* DRIVER_RAZERCOMMON_H_ */

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import openrazer.client
 import glob
+from openrazer_daemon.hardware.mouse import RazerMouseDocked
 
 daemon_test_dir = "/tmp/daemon_test"
 devmgr = openrazer.client.DeviceManager()
@@ -43,13 +44,46 @@ def test_sysfs_consistency(d):
     vid = str(hex(d._vid))[2:].upper().rjust(4, '0')
     pid = str(hex(d._pid))[2:].upper().rjust(4, '0')
 
+    # Sysfs files that belong to a child device sharing the same PID.
+    # The Mouse Dock Pro exposes dock and mouse passthrough sysfs under the
+    # same USB device, but the dock (accessory) class does not claim mouse
+    # capabilities — those live on the docked mouse child device (e.g. RazerBasiliskV3ProDocked).
+    _mouse_passthrough_sysfs = {
+        'charge_level', 'charge_low_threshold', 'charge_status',
+        'device_idle_time', 'dpi', 'dpi_stages', 'poll_rate',
+        'scroll_mode', 'scroll_acceleration', 'scroll_smart_reel',
+        'scroll_led_brightness', 'scroll_matrix_effect_none',
+        'scroll_matrix_effect_spectrum', 'scroll_matrix_effect_static',
+        'scroll_matrix_effect_wave',
+        'logo_led_brightness', 'logo_matrix_effect_none',
+        'logo_matrix_effect_spectrum', 'logo_matrix_effect_static',
+        'logo_matrix_effect_wave',
+        'mouse_connected', 'mouse_serial', 'mouse_firmware',
+        'mouse_matrix_brightness', 'mouse_matrix_custom_frame',
+        'mouse_matrix_effect_breath', 'mouse_matrix_effect_custom',
+        'mouse_matrix_effect_none', 'mouse_matrix_effect_spectrum',
+        'mouse_matrix_effect_static', 'mouse_matrix_effect_wave',
+    }
+
+    def _map_sysfs(sysfs_name: str) -> str:
+        """Translate a logical sysfs name to the actual on-disk name for this device."""
+        if d.name.endswith("(Docked)"):
+            return RazerMouseDocked._MOUSE_SYSFS_MAP.get(sysfs_name, sysfs_name)
+        return sysfs_name
+
     def check_sysfs(capability: str, sysfs_name: str):
         """
         Check the device has either the given pylib capability for the
         given sysfs name, and vice versa.
         """
+        # Skip sysfs that belongs to a child device sharing this PID
+        if d.name == "Razer Mouse Dock Pro" and sysfs_name in _mouse_passthrough_sysfs:
+            return
+
+        actual_sysfs = _map_sysfs(sysfs_name)
+
         try:
-            expected_path = glob.glob(f"{daemon_test_dir}/*:{vid}:{pid}*/{sysfs_name}", recursive=True)[0]
+            expected_path = glob.glob(f"{daemon_test_dir}/*:{vid}:{pid}*/{actual_sysfs}", recursive=True)[0]
         except IndexError:
             expected_path = ""
 
@@ -67,7 +101,7 @@ def test_sysfs_consistency(d):
         found_capability = []
 
         for sysfs_name in sysfs_names:
-            if glob.glob(f"{daemon_test_dir}/*:{vid}:{pid}*/{sysfs_name}", recursive=True):
+            if glob.glob(f"{daemon_test_dir}/*:{vid}:{pid}*/{_map_sysfs(sysfs_name)}", recursive=True):
                 found_sysfs.append(sysfs_name)
 
         for capability in capabilities:

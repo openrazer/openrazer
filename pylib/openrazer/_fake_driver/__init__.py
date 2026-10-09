@@ -50,8 +50,8 @@ class FakeDevice(object):
     def create_endpoint(path: str, chmod: int, default: str | None = None) -> None:
         if os.path.exists(path):
             os.chmod(path, 0o660)
-            os.remove(path)
 
+        default_bin = b''
         if default is not None:
             # Convert to bytes
             if default.startswith("0x"):
@@ -59,10 +59,9 @@ class FakeDevice(object):
             else:
                 default_bin = default.encode('UTF-8')
 
-            with open(path, 'wb') as f:
-                f.write(default_bin)
-        else:
-            touch(path)
+        # Reset in place: the fake sysfs directory is read-only after setup.
+        with open(path, 'wb') as f:
+            f.write(default_bin)
         os.chmod(path, chmod)
 
     def __init__(self, spec_name: str, serial: str | None = None, tmp_dir: str = os.environ.get('TMPDIR', '/tmp')):

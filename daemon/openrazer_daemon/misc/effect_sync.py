@@ -52,6 +52,12 @@ class EffectSync(object):
         :param args: Arguments for the specified effect
         :type args: list
         """
+        # Random ripple uses the same internal event with None for its colors.
+        # Its public endpoint accepts only the refresh rate.
+        if effect_name == 'setRipple' and len(args) == 4 and args[:3] == (None, None, None):
+            effect_name = 'setRippleRandomColour'
+            args = args[3:]
+
         # Disable notifications
         self._parent.disable_notify = True
 
@@ -246,8 +252,9 @@ class EffectSync(object):
                             effect_func(*args)
 
                     if effect_name == 'setBreathSingle':
+                        effect_func = getattr(self._parent, 'setPulsate', None)
                         if effect_func is not None:
-                            effect_func(*pargs)
+                            effect_func()
                         effect_func = getattr(self._parent, 'setScrollPulsate', None)
                         if effect_func is not None:
                             effect_func(*pargs)

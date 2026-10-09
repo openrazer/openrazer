@@ -1342,6 +1342,12 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
         request.transaction_id.id = 0x1f;
         break;
 
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
+        request = razer_chroma_extended_matrix_effect_reactive(VARSTORE, ZERO_LED, speed, (struct razer_rgb*)&buf[1]);
+        request.transaction_id.id = 0x1f;
+        break;
+
     default:
         dev_warn(dev, "razermouse: matrix_effect_reactive not supported for this model\n");
         return -EINVAL;
@@ -1406,6 +1412,26 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
 
         default: // "Random" colour mode
             request = razer_chroma_mouse_extended_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
+            request.transaction_id.id = 0x1f;
+            break;
+        }
+        break;
+
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
+        switch(count) {
+        case 3: // Single colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
+            request.transaction_id.id = 0x1f;
+            break;
+
+        case 6: // Dual colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            request.transaction_id.id = 0x1f;
+            break;
+
+        default: // "Random" colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
             request.transaction_id.id = 0x1f;
             break;
         }
@@ -1688,7 +1714,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     if (err)
         return err;
 
-    return sysfs_emit(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", razer_parse_battery_level(&response));
 }
 
 /**
@@ -1797,7 +1823,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     if (err)
         return err;
 
-    return sysfs_emit(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", razer_parse_charging_status(&response));
 }
 
 /**
@@ -2015,28 +2041,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
         if (err)
             return err;
 
-        switch(response.arguments[1]) {
-        case 0x01:
-            polling_rate = 8000;
-            break;
-        case 0x02:
-            polling_rate = 4000;
-            break;
-        case 0x04:
-            polling_rate = 2000;
-            break;
-        case 0x08:
-            polling_rate = 1000;
-            break;
-        case  0x10:
-            polling_rate = 500;
-            break;
-        case  0x40:
-            polling_rate = 125;
-            break;
-        }
-
-        return sysfs_emit(buf, "%d\n", polling_rate);
+        return sysfs_emit(buf, "%d\n", razer_parse_poll_rate_hyperpolling(&response));
 
     case USB_DEVICE_ID_RAZER_OROCHI_2011:
     case USB_DEVICE_ID_RAZER_NAGA:
@@ -2891,8 +2896,7 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
         dpi_x = response.arguments[0];
         dpi_y = response.arguments[1];
     } else {
-        dpi_x = (response.arguments[1] << 8) | (response.arguments[2] & 0xFF); // Apparently the char buffer is rubbish, as buf[1] somehow can equal FFFFFF80????
-        dpi_y = (response.arguments[3] << 8) | (response.arguments[4] & 0xFF);
+        razer_parse_dpi_xy(&response, &dpi_x, &dpi_y);
     }
 
     return sysfs_emit(buf, "%u:%u\n", dpi_x, dpi_y);
@@ -2943,7 +2947,7 @@ static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_att
     if (err)
         return err;
 
-    return sysfs_emit(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", razer_parse_scroll_arg(&response));
 }
 
 /**
@@ -2991,7 +2995,7 @@ static ssize_t razer_attr_read_scroll_acceleration(struct device *dev, struct de
     if (err)
         return err;
 
-    return sysfs_emit(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", razer_parse_scroll_arg(&response));
 }
 
 /**
@@ -3039,7 +3043,7 @@ static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct devi
     if (err)
         return err;
 
-    return sysfs_emit(buf, "%d\n", response.arguments[1]);
+    return sysfs_emit(buf, "%d\n", razer_parse_scroll_arg(&response));
 }
 
 static ssize_t razer_attr_write_tilt_hwheel(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -3272,10 +3276,6 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned char stages_count;
-    ssize_t count;                 // bytes written
-    unsigned int i;                // iterator over stages_count
-    unsigned char *args;           // pointer to the next dpi value in response.arguments
     int err;
 
     request = razer_chroma_misc_get_dpi_stages(VARSTORE);
@@ -3382,24 +3382,7 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
     // 03    third DPI stage
     // ...
 
-    stages_count = response.arguments[2];
-
-    buf[0] = response.arguments[1];
-
-    count = 1;
-    args = response.arguments + 4;
-    for (i = 0; i < stages_count; i++) {
-        // Check that we don't read past response.data_size
-        if (args + 4 > response.arguments + response.data_size) {
-            break;
-        }
-
-        memcpy(buf + count, args, 4);
-        count += 4;
-        args += 7;
-    }
-
-    return count;
+    return razer_parse_dpi_stages(&response, buf, RAZER_MOUSE_MAX_DPI_STAGES);
 }
 
 /**
@@ -3412,7 +3395,6 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report request = {0};
     struct razer_report response = {0};
-    unsigned short idle_time = 0;
     int err;
 
     request = razer_chroma_misc_get_idle_time();
@@ -3502,8 +3484,7 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     if (err)
         return err;
 
-    idle_time = (response.arguments[0] << 8) | (response.arguments[1] & 0xFF);
-    return sysfs_emit(buf, "%u\n", idle_time);
+    return sysfs_emit(buf, "%u\n", razer_parse_idle_time(&response));
 }
 
 /**
@@ -3710,7 +3691,7 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
     if (err)
         return err;
 
-    return sysfs_emit(buf, "%d\n", response.arguments[0]);
+    return sysfs_emit(buf, "%d\n", razer_parse_low_battery_threshold(&response));
 }
 
 /**
@@ -4850,6 +4831,8 @@ static ssize_t razer_attr_write_matrix_effect_reactive_common(struct device *dev
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
         request = razer_chroma_extended_matrix_effect_reactive(VARSTORE, led_id, speed, (struct razer_rgb*)&buf[1]);
         request.transaction_id.id = 0x1f;
         break;
@@ -4992,6 +4975,8 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
         switch(count) {
         case 3: // Single colour mode
             request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, led_id, (struct razer_rgb*)&buf[0]);
@@ -5050,6 +5035,8 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -6746,6 +6733,49 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_mode);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_acceleration);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_smart_reel);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_hwheel);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat_delay);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_tilt_repeat);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_reactive);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_reactive);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+            break;
+
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
@@ -7948,6 +7978,49 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRELESS:
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_mode);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_acceleration);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_smart_reel);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_hwheel);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_repeat_delay);
+            device_remove_file(&hdev->dev, &dev_attr_tilt_repeat);
+
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_reactive);
+
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_reactive);
+
+            device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);
+
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
+
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);
+            device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
+            device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
+            break;
+
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
