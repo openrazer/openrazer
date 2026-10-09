@@ -120,6 +120,8 @@ class RazerDaemon(DBusService):
         self._init_screensaver_monitor()
 
         self._razer_devices = DeviceCollection()
+        # Keep receiver registration and dock child discovery atomic.
+        self._device_lock = threading.RLock()
         self._load_devices(first_run=True)
 
         # Add DBus methods
@@ -241,7 +243,8 @@ class RazerDaemon(DBusService):
             files = self._arm_dock_mouse_notifications()
             try:
                 try:
-                    self._check_dock_mouse_state()
+                    with self._device_lock:
+                        self._check_dock_mouse_state()
                 except Exception:
                     self.logger.exception("Error in dock mouse monitor")
                 self._wait_for_dock_mouse_event(files)
@@ -358,29 +361,8 @@ class RazerDaemon(DBusService):
         except (IndexError, KeyError):
             pass
 
-    def _release_dock_child_for_serial(self, sys_path, device_class):
-        """Give a physical device its serial's D-Bus path when it appears."""
-        if not any(device_id.endswith(':mouse') for device_id, _ in self._razer_devices.id_items()):
-            return
-        serial = None
-        for attempt in range(5):
-            try:
-                with open(os.path.join(sys_path, 'device_serial')) as serial_file:
-                    serial = serial_file.read().strip()
-                if serial:
-                    break
-            except (OSError, UnicodeDecodeError):
-                pass
-            if attempt < 4:
-                time.sleep(0.1)
-
-        if not serial:
-            # This physical mouse may claim the child serial once udev settles.
-            for child_id, child in list(self._razer_devices.id_items()):
-                if child_id.endswith(':mouse') and child.dbus.WIRELESS_PID == device_class.USB_PID:
-                    self._remove_dock_child_device(child_id)
-            return
-
+    def _release_dock_child_for_serial(self, serial):
+        """Release only the serial the physical device will register on D-Bus."""
         try:
             existing = self._razer_devices[serial]
         except IndexError:
@@ -656,12 +638,12 @@ class RazerDaemon(DBusService):
                         self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
                         break
 
-                    self._release_dock_child_for_serial(sys_path, device_class)
                     razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
                                                 persistence=self._persistence, testing=self._test_dir is not None,
                                                 additional_interfaces=sorted(additional_interfaces),
                                                 additional_methods=[],
-                                                unknown_serial_counter=self._unknown_serial_counter)
+                                                unknown_serial_counter=self._unknown_serial_counter,
+                                                prepare_registration=self._release_dock_child_for_serial)
 
                     # Wireless devices sometimes don't listen
                     count = 0
@@ -750,11 +732,11 @@ class RazerDaemon(DBusService):
                 self.logger.info('Found valid device.%d: %s', device_number, sys_name)
                 # Udev permissions may still be changing when this event arrives.
                 time.sleep(0.2)
-                self._release_dock_child_for_serial(sys_path, device_class)
                 razer_device = device_class(device_path=sys_path, device_number=device_number, config=self._config,
                                             persistence=self._persistence, testing=self._test_dir is not None,
                                             additional_interfaces=None, additional_methods=[],
-                                            unknown_serial_counter=self._unknown_serial_counter)
+                                            unknown_serial_counter=self._unknown_serial_counter,
+                                            prepare_registration=self._release_dock_child_for_serial)
 
                 # Wireless devices sometimes don't listen
                 device_serial = razer_device.get_serial()
@@ -822,14 +804,16 @@ class RazerDaemon(DBusService):
                 t = threading.Thread(target=self._collecting_udev_method, args=(device,))
                 t.start()
         elif device.action == 'remove':
-            self._remove_device(device)
+            with self._device_lock:
+                self._remove_device(device)
 
     def _collecting_udev_method(self, device):
         time.sleep(2)  # delay to let udev add all devices that we want
         # Sort the devices
         self._collecting_udev_devices.sort(key=lambda x: x.sys_path, reverse=True)
         for d in self._collecting_udev_devices:
-            self._add_device(d)
+            with self._device_lock:
+                self._add_device(d)
         self._collecting_udev = False
 
     def run(self):

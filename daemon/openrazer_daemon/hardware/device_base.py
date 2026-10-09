@@ -53,7 +53,7 @@ class RazerDevice(DBusService):
     DEVICE_NAME: Optional[str] = None
     DEVICE_IMAGE: Optional[str] = None
 
-    def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter):
+    def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter, prepare_registration=None):
 
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
@@ -146,6 +146,10 @@ class RazerDevice(DBusService):
                     self.event_files.append(os.path.join(search_dir, event_file))
 
         object_path = os.path.join(self.OBJECT_PATH, self.serial)
+        # The daemon may need to release a logical child with this exact serial.
+        # Use the selected serial, including retries and malformed-value handling.
+        if prepare_registration is not None:
+            prepare_registration(self.serial)
         super().__init__(object_path)
 
         # Set up methods to suspend and restore device operation

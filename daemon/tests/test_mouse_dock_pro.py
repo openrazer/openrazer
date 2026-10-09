@@ -5,14 +5,16 @@
 import configparser
 from pathlib import Path
 import tempfile
+import threading
 import types
 import unittest
-from unittest.mock import MagicMock, Mock, mock_open, patch
+from unittest.mock import Mock, mock_open, patch
 
 from openrazer_daemon.daemon import RazerDaemon
 from openrazer_daemon.device import DeviceCollection
 from openrazer_daemon.dbus_services.dbus_methods import mamba
 from openrazer_daemon.hardware.accessory import RazerMouseDockPro
+from openrazer_daemon.hardware.device_base import RazerDevice
 from openrazer_daemon.hardware.mouse import (
     DockedMouseNotReady, RazerBasiliskV3ProDocked, RazerBasiliskV3ProWireless,
     RazerBasiliskV3Pro35KDocked, RazerBasiliskV3Pro35KWireless, RazerBasiliskV3Pro35KWired,
@@ -112,6 +114,7 @@ class DockLifecycleTest(unittest.TestCase):
         self.daemon._persistence_file = None
         self.daemon._test_dir = self.tmp.name
         self.daemon._unknown_serial_counter = {}
+        self.daemon._device_lock = threading.RLock()
         self.daemon.device_added = Mock()
         self.daemon.device_removed = Mock()
         self.daemon.write_persistence = Mock()
@@ -188,8 +191,7 @@ class DockLifecycleTest(unittest.TestCase):
         self.daemon.device_added.assert_not_called()
 
     def test_physical_serial_takes_over_logical_child_path(self):
-        (Path(self.tmp.name) / 'device_serial').write_text('MOUSEOLD\n')
-        self.daemon._release_dock_child_for_serial(self.tmp.name, RazerBasiliskV3ProWireless)
+        self.daemon._release_dock_child_for_serial('MOUSEOLD')
         self.assertNotIn('MOUSEOLD', self.daemon._razer_devices)
         self.assertEqual(self.daemon._razer_devices[self.dock_id].child_ids, [])
         self.old_mouse.remove_from_connection.assert_called_once_with()
@@ -205,19 +207,132 @@ class DockLifecycleTest(unittest.TestCase):
         self.assertEqual(self.daemon._razer_devices[self.dock_id].child_ids, [])
         self.daemon.device_added.assert_not_called()
 
-    def test_malformed_physical_serial_does_not_crash_or_release_other_mouse(self):
-        serial_file = MagicMock()
-        serial_file.__enter__.return_value = serial_file
-        serial_file.read.side_effect = UnicodeDecodeError(
-            'utf-8', b'\xff', 0, 1, 'invalid start byte',
-        )
-        other_device = types.SimpleNamespace(USB_PID=0x0F13)
-        with patch('builtins.open', return_value=serial_file), \
-                patch('openrazer_daemon.daemon.time.sleep'):
-            self.daemon._release_dock_child_for_serial(self.tmp.name, other_device)
+    def test_unavailable_physical_serial_preserves_same_model_dock_children(self):
+        other_dock_id = '0003:1532:00A4.0002'
+        other_child_id = other_dock_id + ':mouse'
+        other_mouse = FakeDockedMouse('MOUSEOTHER')
+        self.daemon._razer_devices.add(other_child_id, 'MOUSEOTHER', other_mouse)
+        (Path(self.tmp.name) / 'device_serial').write_text('')
 
+        def check_registration(physical, _object_path):
+            physical._is_closed = True
+            self.assertTrue(physical.serial.startswith('UNKNOWN_'))
+            self.assertIn(self.child_id, self.daemon._razer_devices)
+            self.assertIn(other_child_id, self.daemon._razer_devices)
+            raise RuntimeError('registration reached')
+
+        with patch('openrazer_daemon.hardware.device_base.DBusService.__init__', autospec=True, side_effect=check_registration), \
+                patch('openrazer_daemon.hardware.device_base.time.sleep'):
+            with self.assertRaisesRegex(RuntimeError, 'registration reached'):
+                RazerBasiliskV3ProWireless(
+                    device_path=self.tmp.name, device_number=2, config=self.daemon._config,
+                    persistence=self.daemon._persistence, testing=True,
+                    additional_interfaces=None, additional_methods=[], unknown_serial_counter={},
+                    prepare_registration=self.daemon._release_dock_child_for_serial,
+                )
+        self.old_mouse.close.assert_not_called()
+        other_mouse.close.assert_not_called()
+
+    def test_constructor_serial_controls_handover_for_startup_and_hotplug(self):
+        class PhysicalMouse(RazerDevice):
+            USB_VID = 0x1532
+            USB_PID = 0x00AA
+
+            @staticmethod
+            def match(_sys_name, _sys_path):
+                return True
+
+        self.daemon._device_classes = [PhysicalMouse]
+        self.daemon._udev_context = Mock()
+        physical = types.SimpleNamespace(sys_name='0003:1532:00AA.0003', sys_path=self.tmp.name)
+        (Path(self.tmp.name) / 'device_type').write_text('Basilisk')
+        (Path(self.tmp.name) / 'device_serial').write_text('')
+
+        def check_registration(mouse, object_path):
+            mouse._is_closed = True
+            self.assertEqual(object_path, '/org/razer/device/MOUSEOLD')
+            self.assertNotIn(self.child_id, self.daemon._razer_devices)
+            self.assertEqual(self.daemon._razer_devices[self.dock_id].child_ids, [])
+            raise RuntimeError('registration reached')
+
+        for route in ('startup', 'hotplug'):
+            with self.subTest(route=route):
+                if self.child_id not in self.daemon._razer_devices:
+                    self.daemon._razer_devices.add(self.child_id, 'MOUSEOLD', self.old_mouse)
+                    self.daemon._razer_devices[self.dock_id].child_ids.append(self.child_id)
+                with patch.object(PhysicalMouse, '_read_driver_serial', return_value='MOUSEOLD'), \
+                        patch('openrazer_daemon.hardware.device_base.DBusService.__init__', autospec=True, side_effect=check_registration), \
+                        patch('openrazer_daemon.daemon.time.sleep'):
+                    with self.assertRaisesRegex(RuntimeError, 'registration reached'):
+                        if route == 'startup':
+                            self.daemon._test_dir = None
+                            self.daemon._udev_context.list_devices.return_value = [physical]
+                            self.daemon._load_devices()
+                        else:
+                            self.daemon._add_device(physical)
+
+    def test_malformed_physical_serial_does_not_crash_or_release_other_mouse(self):
+        (Path(self.tmp.name) / 'device_serial').write_bytes(b'\xff\xff\n')
+        mouse = object.__new__(RazerBasiliskV3ProWireless)
+        mouse._is_closed = True
+        mouse._serial = None
+        mouse._device_path = self.tmp.name
+        mouse._unknown_serial_counter = {}
+        mouse.logger = Mock()
+        with patch('openrazer_daemon.hardware.device_base.time.sleep'):
+            serial = mouse.get_serial()
+        self.daemon._release_dock_child_for_serial(serial)
+        self.assertTrue(serial.startswith('UNKNOWN_'))
         self.assertIn(self.child_id, self.daemon._razer_devices)
         self.old_mouse.close.assert_not_called()
+
+    def test_monitor_waits_until_physical_registration_finishes(self):
+        constructing = threading.Event()
+        release = threading.Event()
+        armed = threading.Event()
+        checked = threading.Event()
+        errors = []
+        self.daemon._collecting_udev_devices = [types.SimpleNamespace(sys_path=self.tmp.name)]
+
+        def construct(_device):
+            constructing.set()
+            if not release.wait(5):
+                raise RuntimeError('registration was never released')
+
+        class StopMonitoring(Exception):
+            pass
+
+        def monitor():
+            try:
+                self.daemon._dock_mouse_monitor_loop()
+            except StopMonitoring:
+                pass
+            except Exception as error:
+                errors.append(error)
+
+        self.daemon._add_device = Mock(side_effect=construct)
+        self.daemon._arm_dock_mouse_notifications = Mock(side_effect=lambda: (armed.set(), [])[1])
+        self.daemon._check_dock_mouse_state = Mock(side_effect=checked.set)
+        self.daemon._wait_for_dock_mouse_event = Mock(side_effect=StopMonitoring)
+        collector = threading.Thread(target=self.daemon._collecting_udev_method, args=(None,))
+        monitor_thread = threading.Thread(target=monitor)
+        with patch('openrazer_daemon.daemon.time.sleep'):
+            collector.start()
+            self.addCleanup(collector.join, 5)
+            self.addCleanup(release.set)
+            self.assertTrue(constructing.wait(5))
+            monitor_thread.start()
+            self.addCleanup(monitor_thread.join, 5)
+            self.addCleanup(release.set)
+            self.assertTrue(armed.wait(5))
+            self.assertFalse(checked.wait(0.1))
+            release.set()
+            collector.join(5)
+            monitor_thread.join(5)
+        self.assertFalse(collector.is_alive())
+        self.assertFalse(monitor_thread.is_alive())
+        self.assertEqual(errors, [])
+        self.assertTrue(checked.is_set())
 
     def test_identity_change_during_child_discovery_is_not_registered(self):
         self.dock.get_active_mouse_identity.return_value = (0x00AB, 'MOUSEOTHER')
