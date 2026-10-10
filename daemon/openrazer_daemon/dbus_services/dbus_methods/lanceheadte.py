@@ -639,7 +639,7 @@ def set_backlight_static(self, red, green, blue):
 
     # remember effect
     self.set_persistence("backlight", "effect", 'static')
-    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
+    self.set_persistence_colors("backlight", int(red), int(green), int(blue))
 
     rgb_driver_path = self.get_driver_path('backlight_matrix_effect_static')
 
@@ -732,7 +732,7 @@ def set_backlight_reactive(self, red, green, blue, speed):
 
     # remember effect
     self.set_persistence("backlight", "effect", 'reactive')
-    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
+    self.set_persistence_colors("backlight", int(red), int(green), int(blue))
 
     if speed not in (1, 2, 3, 4):
         speed = 4
@@ -787,7 +787,7 @@ def set_backlight_breath_single(self, red, green, blue):
 
     # remember effect
     self.set_persistence("backlight", "effect", 'breathSingle')
-    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
+    self.set_persistence_colors("backlight", int(red), int(green), int(blue))
 
     driver_path = self.get_driver_path('backlight_matrix_effect_breath')
 
@@ -827,7 +827,7 @@ def set_backlight_breath_dual(self, red1, green1, blue1, red2, green2, blue2):
 
     # remember effect
     self.set_persistence("backlight", "effect", 'breathDual')
-    self.zone["backlight"]["colors"][0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
+    self.set_persistence_colors("backlight", int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2))
 
     driver_path = self.get_driver_path('backlight_matrix_effect_breath')
 

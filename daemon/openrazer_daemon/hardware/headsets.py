@@ -236,3 +236,48 @@ class RazerKrakenKittyV2(__RazerDevice):
                'set_custom_kraken']
 
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/hcc/h6b/9631977570334/kraken-kitty-v2-quartz-500x500.png"
+
+
+class RazerKrakenKittyV2Pro(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Kraken Kitty V2 Pro
+
+    Matrix columns are the left cat ear, the right cat ear, the left ear cup
+    and the right ear cup. The same four zones also take effects and
+    brightness on their own, the cups through the left/right zones and the
+    cat ears through left_ear/right_ear.
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Kraken_Kitty_V2_Pro_[0-9]+-event-if03')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0554
+
+    METHODS = ['get_device_type_headset',
+               'set_none_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row',
+               # Left cat ear
+               'set_left_ear_none', 'set_left_ear_static', 'set_left_ear_spectrum',
+               'set_left_ear_breath_random', 'set_left_ear_breath_single', 'set_left_ear_breath_dual',
+               'get_left_ear_brightness', 'set_left_ear_brightness',
+               # Right cat ear
+               'set_right_ear_none', 'set_right_ear_static', 'set_right_ear_spectrum',
+               'set_right_ear_breath_random', 'set_right_ear_breath_single', 'set_right_ear_breath_dual',
+               'get_right_ear_brightness', 'set_right_ear_brightness',
+               # Left ear cup
+               'set_left_none', 'set_left_static', 'set_left_spectrum',
+               'set_left_breath_random', 'set_left_breath_single', 'set_left_breath_dual',
+               'get_left_brightness', 'set_left_brightness',
+               # Right ear cup
+               'set_right_none', 'set_right_static', 'set_right_spectrum',
+               'set_right_breath_random', 'set_right_breath_single', 'set_right_breath_dual',
+               'get_right_brightness', 'set_right_brightness']
+
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 4]
+
+    # The whole-device commands carry a zone mask covering all four zones, so
+    # they drive exactly the same LEDs the per-zone commands do
+    MAIN_ZONE_COVERS = ('left', 'right', 'left_ear', 'right_ear')
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/6313/6313-1-en-v1.png"

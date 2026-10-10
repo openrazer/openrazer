@@ -44,7 +44,14 @@ class RazerDevice(DBusService):
 
     WAVE_DIRS = (1, 2)
 
-    ZONES = ('backlight', 'logo', 'scroll', 'left', 'right', 'charging', 'fast_charging', 'fully_charged', 'channel1', 'channel2', 'channel3', 'channel4', 'channel5', 'channel6')
+    ZONES = ('backlight', 'logo', 'scroll', 'left', 'right', 'left_ear', 'right_ear', 'charging', 'fast_charging', 'fully_charged', 'channel1', 'channel2', 'channel3', 'channel4', 'channel5', 'channel6')
+
+    # Zones that the main (backlight) zone physically covers. Normally zones are
+    # separate LEDs and this stays empty, but a device whose main commands drive
+    # the same LEDs as its per-zone commands lists them here, so that setting
+    # the main zone does not leave the per-zone state lying about what the
+    # hardware is doing.
+    MAIN_ZONE_COVERS: tuple = ()
 
     DEVICE_IMAGE: Optional[str] = None
 
@@ -66,6 +73,7 @@ class RazerDevice(DBusService):
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
         self._disable_persistence = False
+        self._restoring = False
         self.additional_interfaces = []
         if additional_interfaces is not None:
             self.additional_interfaces.extend(additional_interfaces)
@@ -196,6 +204,20 @@ class RazerDevice(DBusService):
                 ('razer.device.lighting.left', 'getLeftEffectColors', self.get_current_left_effect_colors, None, 'ay'),
                 ('razer.device.lighting.left', 'getLeftEffectSpeed', self.get_current_left_effect_speed, None, 'i'),
                 ('razer.device.lighting.left', 'getLeftWaveDir', self.get_current_left_wave_dir, None, 'i'),
+            },
+
+            "left_ear": {
+                ('razer.device.lighting.left_ear', 'getLeftEarEffect', self.get_current_left_ear_effect, None, 's'),
+                ('razer.device.lighting.left_ear', 'getLeftEarEffectColors', self.get_current_left_ear_effect_colors, None, 'ay'),
+                ('razer.device.lighting.left_ear', 'getLeftEarEffectSpeed', self.get_current_left_ear_effect_speed, None, 'i'),
+                ('razer.device.lighting.left_ear', 'getLeftEarWaveDir', self.get_current_left_ear_wave_dir, None, 'i'),
+            },
+
+            "right_ear": {
+                ('razer.device.lighting.right_ear', 'getRightEarEffect', self.get_current_right_ear_effect, None, 's'),
+                ('razer.device.lighting.right_ear', 'getRightEarEffectColors', self.get_current_right_ear_effect_colors, None, 'ay'),
+                ('razer.device.lighting.right_ear', 'getRightEarEffectSpeed', self.get_current_right_ear_effect_speed, None, 'i'),
+                ('razer.device.lighting.right_ear', 'getRightEarWaveDir', self.get_current_right_ear_wave_dir, None, 'i'),
             },
 
             "right": {
@@ -407,26 +429,30 @@ class RazerDevice(DBusService):
 
         This is used at launch time.
         """
-        for i in self.ZONES:
-            if self.zone[i]["present"]:
-                # load active state
-                if 'set_' + i + '_active' in self.METHODS:
-                    active_func = getattr(self, "set" + self.capitalize_first_char(i) + "Active", None)
-                    if active_func is not None:
-                        active_func(self.zone[i]["active"])
+        self._restoring = True
+        try:
+            for i in self.ZONES:
+                if self.zone[i]["present"]:
+                    # load active state
+                    if 'set_' + i + '_active' in self.METHODS:
+                        active_func = getattr(self, "set" + self.handle_underscores(self.capitalize_first_char(i)) + "Active", None)
+                        if active_func is not None:
+                            active_func(self.zone[i]["active"])
 
-                # load brightness level
-                bright_func = None
-                if i == "backlight":
-                    bright_func = getattr(self, "setBrightness", None)
-                elif 'set_' + i + '_brightness' in self.METHODS:
-                    bright_func = getattr(self, "set" + self.capitalize_first_char(i) + "Brightness", None)
+                    # load brightness level
+                    bright_func = None
+                    if i == "backlight":
+                        bright_func = getattr(self, "setBrightness", None)
+                    elif 'set_' + i + '_brightness' in self.METHODS:
+                        bright_func = getattr(self, "set" + self.handle_underscores(self.capitalize_first_char(i)) + "Brightness", None)
 
-                if bright_func is not None:
-                    try:
-                        bright_func(self.zone[i]["brightness"])
-                    except OSError:
-                        self.logger.exception("Failed to restore brightness!")
+                    if bright_func is not None:
+                        try:
+                            bright_func(self.zone[i]["brightness"])
+                        except OSError:
+                            self.logger.exception("Failed to restore brightness!")
+        finally:
+            self._restoring = False
 
     def disable_brightness(self):
         """
@@ -436,7 +462,7 @@ class RazerDevice(DBusService):
             if self.zone[i]["present"]:
                 # set active state
                 if 'set_' + i + '_active' in self.METHODS:
-                    active_func = getattr(self, "set" + self.capitalize_first_char(i) + "Active", None)
+                    active_func = getattr(self, "set" + self.handle_underscores(self.capitalize_first_char(i)) + "Active", None)
                     if active_func is not None:
                         active_func(False)
 
@@ -445,7 +471,7 @@ class RazerDevice(DBusService):
                 if i == "backlight":
                     bright_func = getattr(self, "setBrightness", None)
                 elif 'set_' + i + '_brightness' in self.METHODS:
-                    bright_func = getattr(self, "set" + self.capitalize_first_char(i) + "Brightness", None)
+                    bright_func = getattr(self, "set" + self.handle_underscores(self.capitalize_first_char(i)) + "Brightness", None)
 
                 if bright_func is not None:
                     bright_func(0)
@@ -457,71 +483,75 @@ class RazerDevice(DBusService):
         This is used at launch time and can be called by applications
         that use custom matrix frames after they exit
         """
-        for i in self.ZONES:
-            if self.zone[i]["present"]:
-                # prepare the effect method name
-                # yes, we need to handle the backlight zone separately too.
-                # the backlight effect methods don't have a prefix.
-                if i == "backlight":
-                    effect_func_name = 'set' + self.capitalize_first_char(self.zone[i]["effect"])
-                else:
-                    effect_func_name = 'set' + self.handle_underscores(self.capitalize_first_char(i)) + self.capitalize_first_char(self.zone[i]["effect"])
-
-                # find the effect method
-                effect_func = getattr(self, effect_func_name, None)
-
-                # check if the effect method exists only if we didn't look for spectrum (because resetting to Spectrum when the effect is Spectrum is in vain)
-                if effect_func == None and not self.zone[i]["effect"] == "spectrum":
-                    # not found. restoring to Spectrum
-                    self.logger.info("%s: Invalid effect name %s; restoring to Spectrum.", self.__class__.__name__, effect_func_name)
-                    self.zone[i]["effect"] = 'spectrum'
+        self._restoring = True
+        try:
+            for i in self.ZONES:
+                if self.zone[i]["present"]:
+                    # prepare the effect method name
+                    # yes, we need to handle the backlight zone separately too.
+                    # the backlight effect methods don't have a prefix.
                     if i == "backlight":
-                        effect_func_name = 'setSpectrum'
+                        effect_func_name = 'set' + self.capitalize_first_char(self.zone[i]["effect"])
                     else:
-                        effect_func_name = 'set' + self.capitalize_first_char(i) + 'Spectrum'
+                        effect_func_name = 'set' + self.handle_underscores(self.capitalize_first_char(i)) + self.capitalize_first_char(self.zone[i]["effect"])
+
+                    # find the effect method
                     effect_func = getattr(self, effect_func_name, None)
 
-                # we check again here because there is a possibility the device may not even have Spectrum
-                if effect_func is not None:
-                    effect = self.zone[i]["effect"]
-                    colors = self.zone[i]["colors"]
-                    speed = self.zone[i]["speed"]
-                    wave_dir = self.zone[i]["wave_dir"]
-                    if self.get_num_arguments(effect_func) == 0:
-                        effect_func()
-                    elif self.get_num_arguments(effect_func) == 1:
-                        # there are 2 effects which require 1 argument.
-                        # these are: Starlight (Random) and Wave.
-                        if effect == 'starlightRandom':
-                            effect_func(speed)
-                        elif effect == 'wave':
-                            effect_func(wave_dir)
-                        elif effect == 'wheel':
-                            effect_func(wave_dir)
-                        elif effect == 'rippleRandomColour':
-                            # do nothing. this is handled in the ripple manager.
-                            pass
+                    # check if the effect method exists only if we didn't look for spectrum (because resetting to Spectrum when the effect is Spectrum is in vain)
+                    if effect_func == None and not self.zone[i]["effect"] == "spectrum":
+                        # not found. restoring to Spectrum
+                        self.logger.info("%s: Invalid effect name %s; restoring to Spectrum.", self.__class__.__name__, effect_func_name)
+                        self.zone[i]["effect"] = 'spectrum'
+                        if i == "backlight":
+                            effect_func_name = 'setSpectrum'
                         else:
-                            self.logger.error("%s: Effect requires 1 argument but don't know how to handle it!", self.__class__.__name__)
-                    elif self.get_num_arguments(effect_func) == 3:
-                        effect_func(colors[0], colors[1], colors[2])
-                    elif self.get_num_arguments(effect_func) == 4:
-                        # starlight/reactive have different arguments.
-                        if effect == 'starlightSingle' or effect == 'reactive':
-                            effect_func(colors[0], colors[1], colors[2], speed)
-                        elif effect == 'ripple':
-                            # do nothing. this is handled in the ripple manager.
-                            pass
+                            effect_func_name = 'set' + self.handle_underscores(self.capitalize_first_char(i)) + 'Spectrum'
+                        effect_func = getattr(self, effect_func_name, None)
+
+                    # we check again here because there is a possibility the device may not even have Spectrum
+                    if effect_func is not None:
+                        effect = self.zone[i]["effect"]
+                        colors = self.zone[i]["colors"]
+                        speed = self.zone[i]["speed"]
+                        wave_dir = self.zone[i]["wave_dir"]
+                        if self.get_num_arguments(effect_func) == 0:
+                            effect_func()
+                        elif self.get_num_arguments(effect_func) == 1:
+                            # there are 2 effects which require 1 argument.
+                            # these are: Starlight (Random) and Wave.
+                            if effect == 'starlightRandom':
+                                effect_func(speed)
+                            elif effect == 'wave':
+                                effect_func(wave_dir)
+                            elif effect == 'wheel':
+                                effect_func(wave_dir)
+                            elif effect == 'rippleRandomColour':
+                                # do nothing. this is handled in the ripple manager.
+                                pass
+                            else:
+                                self.logger.error("%s: Effect requires 1 argument but don't know how to handle it!", self.__class__.__name__)
+                        elif self.get_num_arguments(effect_func) == 3:
+                            effect_func(colors[0], colors[1], colors[2])
+                        elif self.get_num_arguments(effect_func) == 4:
+                            # starlight/reactive have different arguments.
+                            if effect == 'starlightSingle' or effect == 'reactive':
+                                effect_func(colors[0], colors[1], colors[2], speed)
+                            elif effect == 'ripple':
+                                # do nothing. this is handled in the ripple manager.
+                                pass
+                            else:
+                                self.logger.error("%s: Effect requires 4 arguments but don't know how to handle it!", self.__class__.__name__)
+                        elif self.get_num_arguments(effect_func) == 6:
+                            effect_func(colors[0], colors[1], colors[2], colors[3], colors[4], colors[5])
+                        elif self.get_num_arguments(effect_func) == 7:
+                            effect_func(colors[0], colors[1], colors[2], colors[3], colors[4], colors[5], speed)
+                        elif self.get_num_arguments(effect_func) == 9:
+                            effect_func(colors[0], colors[1], colors[2], colors[3], colors[4], colors[5], colors[6], colors[7], colors[8])
                         else:
-                            self.logger.error("%s: Effect requires 4 arguments but don't know how to handle it!", self.__class__.__name__)
-                    elif self.get_num_arguments(effect_func) == 6:
-                        effect_func(colors[0], colors[1], colors[2], colors[3], colors[4], colors[5])
-                    elif self.get_num_arguments(effect_func) == 7:
-                        effect_func(colors[0], colors[1], colors[2], colors[3], colors[4], colors[5], speed)
-                    elif self.get_num_arguments(effect_func) == 9:
-                        effect_func(colors[0], colors[1], colors[2], colors[3], colors[4], colors[5], colors[6], colors[7], colors[8])
-                    else:
-                        self.logger.error("%s: Couldn't detect effect argument count!", self.__class__.__name__)
+                            self.logger.error("%s: Couldn't detect effect argument count!", self.__class__.__name__)
+        finally:
+            self._restoring = False
 
     def set_persistence(self, zone, key, value):
         """
@@ -544,8 +574,36 @@ class RazerDevice(DBusService):
 
         if zone:
             self.zone[zone][key] = value
+
+            # The main zone's commands drive these zones too, so their state
+            # would otherwise go stale the moment the main zone is set. Not
+            # while restoring: each zone is being replayed from its own saved
+            # value there, and mirroring would overwrite the ones still to come
+            if zone == 'backlight' and not self._restoring:
+                for covered in self.MAIN_ZONE_COVERS:
+                    self.zone[covered][key] = value
         else:
             self.zone[key] = value
+
+    def set_persistence_colors(self, zone, *colors):
+        """
+        Remember the colours a zone is showing.
+
+        Kept separate from set_persistence because the colours are a slice of a
+        list rather than a single value, but it mirrors into covered zones the
+        same way and for the same reason.
+
+        :param zone: Zone
+        :type zone: string
+
+        :param colors: Colour components, three per colour
+        :type colors: int
+        """
+        self.zone[zone]["colors"][0:len(colors)] = colors
+
+        if zone == 'backlight' and not self._restoring:
+            for covered in self.MAIN_ZONE_COVERS:
+                self.zone[covered]["colors"][0:len(colors)] = colors
 
     def get_current_effect(self):
         """
@@ -722,6 +780,94 @@ class RazerDevice(DBusService):
         self.logger.debug("DBus call get_current_left_wave_dir")
 
         return self.zone["left"]["wave_dir"]
+
+    def get_current_left_ear_effect(self):
+        """
+        Get the device's current left ear effect
+
+        :return: Effect
+        :rtype: string
+        """
+        self.logger.debug("DBus call get_current_left_ear_effect")
+
+        return self.zone["left_ear"]["effect"]
+
+    def get_current_left_ear_effect_colors(self):
+        """
+        Get the device's current left ear effect's colors
+
+        :return: 3 colors
+        :rtype: list of byte
+        """
+        self.logger.debug("DBus call get_current_left_ear_effect_colors")
+
+        return self.zone["left_ear"]["colors"]
+
+    def get_current_left_ear_effect_speed(self):
+        """
+        Get the device's current left ear effect's speed
+
+        :return: Speed
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_left_ear_effect_speed")
+
+        return self.zone["left_ear"]["speed"]
+
+    def get_current_left_ear_wave_dir(self):
+        """
+        Get the device's current left ear wave direction
+
+        :return: Direction
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_left_ear_wave_dir")
+
+        return self.zone["left_ear"]["wave_dir"]
+
+    def get_current_right_ear_effect(self):
+        """
+        Get the device's current right ear effect
+
+        :return: Effect
+        :rtype: string
+        """
+        self.logger.debug("DBus call get_current_right_ear_effect")
+
+        return self.zone["right_ear"]["effect"]
+
+    def get_current_right_ear_effect_colors(self):
+        """
+        Get the device's current right ear effect's colors
+
+        :return: 3 colors
+        :rtype: list of byte
+        """
+        self.logger.debug("DBus call get_current_right_ear_effect_colors")
+
+        return self.zone["right_ear"]["colors"]
+
+    def get_current_right_ear_effect_speed(self):
+        """
+        Get the device's current right ear effect's speed
+
+        :return: Speed
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_right_ear_effect_speed")
+
+        return self.zone["right_ear"]["speed"]
+
+    def get_current_right_ear_wave_dir(self):
+        """
+        Get the device's current right ear wave direction
+
+        :return: Direction
+        :rtype: int
+        """
+        self.logger.debug("DBus call get_current_right_ear_wave_dir")
+
+        return self.zone["right_ear"]["wave_dir"]
 
     def get_current_right_effect(self):
         """
