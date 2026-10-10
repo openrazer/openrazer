@@ -142,6 +142,9 @@ struct razer_mouse_device {
     struct hid_device *hdev;
     struct mutex lock;
 
+    struct work_struct scroll_toggle_work;
+    unsigned char scroll_mode;
+
     struct input_dev *input;
     struct hrtimer repeat_timer;
     unsigned int tilt_hwheel;
