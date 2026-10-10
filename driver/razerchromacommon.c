@@ -1578,6 +1578,38 @@ struct razer_report razer_chroma_misc_get_scroll_mode(void)
 }
 
 /**
+ * Set scroll wheel mode on the device (HyperScroll Tilt Wheel Gen-2)
+ *
+ * Newer devices (e.g. Razer Naga V3 Pro) use command id 0x30 instead of 0x14
+ * and support a third mode:
+ * 0 = tactile, 1 = free spin, 2 = precision tactile
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    02       02    30  0102    | SET SCROLL WHEEL MODE (VARSTR, PRECISION TACTILE)
+ */
+struct razer_report razer_chroma_misc_set_scroll_mode_v2(unsigned int scroll_mode)
+{
+    struct razer_report report = get_razer_report(0x02, 0x30, 0x02);
+
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = scroll_mode;
+
+    return report;
+}
+
+/**
+ * Get scroll wheel mode from the device (HyperScroll Tilt Wheel Gen-2)
+ */
+struct razer_report razer_chroma_misc_get_scroll_mode_v2(void)
+{
+    struct razer_report report = get_razer_report(0x02, 0xB0, 0x02);
+
+    report.arguments[0] = VARSTORE;
+
+    return report;
+}
+
+/**
  * Set scroll wheel acceleration on/off on the device
  *
  * Status Trans Packet Proto DataSize Class CMD Args
