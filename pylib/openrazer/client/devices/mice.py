@@ -205,6 +205,21 @@ class RazerMouse(__RazerDevice):
             raise NotImplementedError()
 
     @property
+    def scroll_mode_options(self) -> list[int]:
+        """
+        Get the scroll modes supported by the device
+
+        :return: Supported scroll modes (0 = tactile, 1 = free spin, 2 = precision tactile)
+        :rtype: list of int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_mode_options'):
+            return [int(m) for m in self._dbus_interfaces['scroll'].getScrollModeOptions()]
+        else:
+            raise NotImplementedError()
+
+    @property
     def scroll_acceleration(self) -> bool:
         """
         Get the device's scroll acceleration state

@@ -1058,7 +1058,7 @@ class RazerNagaV3ProWired(__RazerDeviceBrightnessSuspend):
                # Battery
                'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold',
                # Scroll wheel controls (uses the v2 scroll_mode command: 0 = tactile, 1 = free spin, 2 = precision tactile)
-               'get_scroll_mode', 'set_scroll_mode',
+               'get_scroll_mode', 'set_scroll_mode', 'get_scroll_mode_options',
                'get_scroll_acceleration', 'set_scroll_acceleration',
                'get_scroll_smart_reel', 'set_scroll_smart_reel',
                # Logo
@@ -1068,6 +1068,9 @@ class RazerNagaV3ProWired(__RazerDeviceBrightnessSuspend):
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
                # Custom frame
                'set_custom_effect', 'set_key_row']
+
+    # Scroll modes exposed over D-Bus: 0 = tactile, 1 = free spin, 2 = precision tactile
+    SCROLL_MODE_OPTIONS = [0, 1, 2]
 
     DPI_MAX = 50000
 
