@@ -8,13 +8,13 @@ def set_scroll_mode(self, mode):
     """
     Set the device's scroll mode
 
-    :param mode: The mode to set (0 = tactile, 1 = free spin)
+    :param mode: The mode to set (0 = tactile, 1 = free spin, 2 = precision tactile)
     :type mode: int
     """
     self.logger.debug("DBus call set_scroll_mode")
 
-    if mode not in (0, 1):
-        raise ValueError("mode has to be 0 or 1")
+    if mode not in (0, 1, 2):
+        raise ValueError("mode has to be 0, 1 or 2")
 
     driver_path = self.get_driver_path('scroll_mode')
 
@@ -27,7 +27,7 @@ def get_scroll_mode(self):
     """
     Get the device's current scroll mode
 
-    :return: The device's current scroll mode (0 = tactile, 1 = free spin)
+    :return: The device's current scroll mode (0 = tactile, 1 = free spin, 2 = precision tactile)
     :rtype: int
     """
     self.logger.debug("DBus call get_scroll_mode")
@@ -36,6 +36,19 @@ def get_scroll_mode(self):
 
     with open(driver_path, 'r') as driver_file:
         return int(driver_file.read().strip())
+
+
+@endpoint('razer.device.scroll', 'getScrollModeOptions', out_sig='ay')
+def get_scroll_mode_options(self):
+    """
+    Get the scroll modes supported by the device
+
+    :return: Supported scroll modes (0 = tactile, 1 = free spin, 2 = precision tactile)
+    :rtype: list of int
+    """
+    self.logger.debug("DBus call get_scroll_mode_options")
+
+    return getattr(self, 'SCROLL_MODE_OPTIONS', [0, 1])
 
 
 @endpoint('razer.device.scroll', 'setScrollAcceleration', in_sig='b')

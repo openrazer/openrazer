@@ -148,6 +148,8 @@ struct razer_report razer_naga_trinity_effect_none(void);
 
 struct razer_report razer_chroma_misc_set_scroll_mode(unsigned int scroll_mode);
 struct razer_report razer_chroma_misc_get_scroll_mode(void);
+struct razer_report razer_chroma_misc_set_scroll_mode_v2(unsigned int scroll_mode);
+struct razer_report razer_chroma_misc_get_scroll_mode_v2(void);
 
 struct razer_report razer_chroma_misc_set_scroll_acceleration(bool acceleration);
 struct razer_report razer_chroma_misc_get_scroll_acceleration(void);

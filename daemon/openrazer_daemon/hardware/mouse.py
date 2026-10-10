@@ -1043,6 +1043,49 @@ class RazerNagaV2ProWireless(RazerNagaV2ProWired):
     METHODS = RazerNagaV2ProWired.METHODS + ['set_charge_effect', 'set_charge_colour']
 
 
+class RazerNagaV3ProWired(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Naga V3 Pro (Wired)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x00E7
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [1, 3]
+
+    DEDICATED_MACRO_KEYS = True
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_dpi_stages', 'set_dpi_stages',
+               # Battery
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold',
+               # Scroll wheel controls (uses the v2 scroll_mode command: 0 = tactile, 1 = free spin, 2 = precision tactile)
+               'get_scroll_mode', 'set_scroll_mode', 'get_scroll_mode_options',
+               'get_scroll_acceleration', 'set_scroll_acceleration',
+               'get_scroll_smart_reel', 'set_scroll_smart_reel',
+               # Logo
+               'get_logo_brightness', 'set_logo_brightness',
+               'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
+               # Thumbgrid
+               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               # Custom frame
+               'set_custom_effect', 'set_key_row']
+
+    # Scroll modes exposed over D-Bus: 0 = tactile, 1 = free spin, 2 = precision tactile
+    SCROLL_MODE_OPTIONS = [0, 1, 2]
+
+    DPI_MAX = 50000
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/6292/6292-1-en-v1.png"
+
+
+class RazerNagaV3ProWireless(RazerNagaV3ProWired):
+    """
+    Class for the Razer Naga V3 Pro (Wireless)
+    """
+    # Battery level/status are reported, but the charging-indicator colour/effect
+    # commands (class 0x03) are not supported by this device's firmware.
+    USB_PID = 0x00E8
+
+
 class RazerDeathAdder1800(__RazerDevice):
     """
     Class for the Razer DeathAdder 1800
