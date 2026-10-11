@@ -41,6 +41,7 @@ class RazerDevice(DBusService):
     POLL_RATES: Optional[list[int]] = None
     DPI_MAX: Optional[int] = None
     DRIVER_MODE = False
+    USE_KEY_MANAGER = False
 
     WAVE_DIRS = (1, 2)
 
@@ -328,6 +329,13 @@ class RazerDevice(DBusService):
             driver_mode_default = self.DRIVER_MODE
             self.DRIVER_MODE = self.config.getboolean(f"Device:{self.serial}", "driver_mode")
             self.logger.info('Overriding DRIVER_MODE with "%s" from config (default: "%s")', self.DRIVER_MODE, driver_mode_default)
+        except (configparser.NoSectionError, configparser.NoOptionError):
+            pass
+
+        try:
+            key_manager_default = self.USE_KEY_MANAGER
+            self.USE_KEY_MANAGER = self.config.getboolean(f"Device:{self.serial}", "use_key_manager")
+            self.logger.info('Overriding USE_KEY_MANAGER with "%s" from config (default: "%s")', self.USE_KEY_MANAGER, key_manager_default)
         except (configparser.NoSectionError, configparser.NoOptionError):
             pass
 
