@@ -514,6 +514,7 @@ class RazerNagaTrinity(__RazerDevice):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1251/1251_razer_naga_trinity.png"
 
     DPI_MAX = 16000
+    DRIVER_MODE = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
