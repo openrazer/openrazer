@@ -3460,6 +3460,8 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -3488,8 +3490,6 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
-    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
         request.transaction_id.id = 0xFF;
         break;
 
@@ -3568,6 +3568,8 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -3596,8 +3598,6 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
-    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
         request.transaction_id.id = 0xFF;
         break;
 
@@ -3655,6 +3655,8 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -3683,8 +3685,6 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
     case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
-    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS:
@@ -3761,6 +3761,8 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
+    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
         request.transaction_id.id = 0x1f;
         break;
 
@@ -3789,8 +3791,6 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BASILISK_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-    case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
-    case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V2_PRO_WIRELESS:
