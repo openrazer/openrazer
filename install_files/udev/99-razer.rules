@@ -24,6 +24,11 @@ ATTRS{idProduct}=="0068|007e|00a4|0215|0517|0518|0c00|0c01|0c02|0c04|0c05|0c06|0
     ATTRS{idVendor}=="1532", \
     ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razeraccessory"
 
+# Nari (Ultimate Wireless, Ultimate USB, Nari Wireless, Nari USB)
+ATTRS{idProduct}=="051a|051b|051c|051d", \
+    ATTRS{idVendor}=="1532", \
+    ENV{ID_RAZER_CHROMA}="1", ENV{RAZER_DRIVER}="razernari"
+
 # Get out if no match
 ENV{ID_RAZER_CHROMA}!="1", GOTO="razer_end"
 
