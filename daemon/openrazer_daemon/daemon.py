@@ -285,6 +285,7 @@ class RazerDaemon(DBusService):
         self._config['Startup'] = {
             'sync_effects_enabled': True,
             'devices_off_on_screensaver': True,
+            'devices_off_on_shutdown': False,
             'restore_persistence': True,
             'persistence_dual_boot_quirk': False,
         }
@@ -642,9 +643,13 @@ class RazerDaemon(DBusService):
         else:
             self.logger.info('Stopping daemon on signal %d', signum)
 
-        # "Resume" all devices, in case they're still "suspended"
-        # (lights off because of screensaver)
-        self.resume_devices()
+        if self._config.getboolean('Startup', 'devices_off_on_shutdown'):
+            # Turn the devices off before the daemon terminates
+            self.suspend_devices()
+        else:
+            # "Resume" all devices, in case they're still "suspended"
+            # (lights off because of screensaver)
+            self.resume_devices()
 
         self._main_loop.quit()
 
