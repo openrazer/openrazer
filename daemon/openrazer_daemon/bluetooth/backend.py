@@ -256,8 +256,11 @@ class BlueZBackend:
             raise TimeoutError('BlueZ operation timed out; no command retry') from None
 
     async def _connect(self):
-        from dbus_fast.aio import MessageBus
-        from dbus_fast.constants import BusType
+        try:
+            from dbus_fast.aio import MessageBus
+            from dbus_fast.constants import BusType
+        except ImportError as exc:
+            raise RuntimeError('Bluetooth support requires the optional dbus-fast dependency') from exc
         self.bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
 
     async def discover(self):

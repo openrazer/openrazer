@@ -148,7 +148,10 @@ class BlueZClient:
             obj.get_interface('org.bluez.GattCharacteristic1').call_read_value({}), timeout=5)
 
     async def write_gatt_char(self, uuid, data, response=True):
-        from dbus_fast import Variant
+        try:
+            from dbus_fast import Variant
+        except ImportError as exc:
+            raise RuntimeError('Bluetooth support requires the optional dbus-fast dependency') from exc
         obj = await self.interface(uuid)
         await asyncio.wait_for(
             obj.get_interface('org.bluez.GattCharacteristic1').call_write_value(data, {'type': Variant('s', 'request')}), timeout=5)
