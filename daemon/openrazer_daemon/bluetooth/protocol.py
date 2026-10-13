@@ -32,8 +32,8 @@ def parse_dpi(payload):
         offset = 2 + 7 * i
         if len(payload) < offset + 5:
             raise ValueError('Truncated DPI stage')
-        x = int.from_bytes(payload[offset+1:offset+3], 'little')
-        y = int.from_bytes(payload[offset+3:offset+5], 'little')
+        x = int.from_bytes(payload[offset + 1:offset + 3], 'little')
+        y = int.from_bytes(payload[offset + 3:offset + 5], 'little')
         if not (100 <= x <= 30000 and 100 <= y <= 30000):
             raise ValueError('DPI outside supported model range')
         stages.append({'id': payload[offset], 'x': x, 'y': y})
@@ -46,6 +46,7 @@ def parse_dpi(payload):
 
 class VendorSession:
     """Serialize vendor exchanges; never automatically retry commands."""
+
     def __init__(self, client):
         self.client = client
         self.request = 0x30
@@ -97,7 +98,8 @@ class VendorSession:
                 self.trace[-1].setdefault("payload_tx", []).append(chunk.hex())
                 await self.client.write_gatt_char(WRITE, chunk, response=True)
             frames = []
-            async with asyncio.timeout(5):
+
+            async def receive_reply():
                 while True:
                     frames.append(await self.queue.get())
                     self.trace[-1]['rx'].append(frames[-1].hex())
@@ -105,9 +107,12 @@ class VendorSession:
                     if result is not None:
                         return result
 
+            return await asyncio.wait_for(receive_reply(), timeout=5)
+
 
 class BlueZClient:
     """Use the existing BlueZ connection without disconnecting the user's mouse."""
+
     def __init__(self, bus, address, objects):
         self.bus = bus
         self.address = address
@@ -139,18 +144,19 @@ class BlueZClient:
 
     async def read_gatt_char(self, uuid):
         obj = await self.interface(uuid)
-        async with asyncio.timeout(5):
-            return await obj.get_interface('org.bluez.GattCharacteristic1').call_read_value({})
+        return await asyncio.wait_for(
+            obj.get_interface('org.bluez.GattCharacteristic1').call_read_value({}), timeout=5)
 
     async def write_gatt_char(self, uuid, data, response=True):
         from dbus_fast import Variant
         obj = await self.interface(uuid)
-        async with asyncio.timeout(5):
-            await obj.get_interface('org.bluez.GattCharacteristic1').call_write_value(data, {'type': Variant('s', 'request')})
+        await asyncio.wait_for(
+            obj.get_interface('org.bluez.GattCharacteristic1').call_write_value(data, {'type': Variant('s', 'request')}), timeout=5)
 
     async def start_notify(self, uuid, callback):
         obj = await self.interface(uuid)
         props = obj.get_interface('org.freedesktop.DBus.Properties')
+
         def changed(interface, updates, invalidated):
             if interface == 'org.bluez.GattCharacteristic1' and 'Value' in updates:
                 callback(uuid, bytes(updates['Value'].value))
@@ -169,4 +175,3 @@ class BlueZClient:
             await char.call_stop_notify()
         finally:
             props.off_properties_changed(handler)
-

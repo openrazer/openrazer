@@ -26,19 +26,20 @@ class ProtocolTests(unittest.TestCase):
         path = '/org/bluez/hci0/dev_AA'
         props = {key: Value(True) for key in ('Paired', 'Connected', 'ServicesResolved')}
         props['Address'] = Value('AA:BB:CC:DD:EE:FF')
-        objects = {path: {'org.bluez.Device1': props}, path+'/service': {'org.bluez.GattService1': {'Device': Value(path), 'UUID': Value(SERVICE)}}}
+        objects = {path: {'org.bluez.Device1': props}, path + '/service': {'org.bluez.GattService1': {'Device': Value(path), 'UUID': Value(SERVICE)}}}
         self.assertEqual(connected_candidates(objects), {path: 'AA:BB:CC:DD:EE:FF'})
         for key in ('Paired', 'Connected', 'ServicesResolved'):
             props[key] = Value(False)
             self.assertEqual(connected_candidates(objects), {})
             props[key] = Value(True)
-        objects.pop(path+'/service')
+        objects.pop(path + '/service')
         self.assertEqual(connected_candidates(objects), {})
 
     def test_truncated_dpi_and_missing_last_marker(self):
         self.assertEqual(parse_dpi(DPI_RAW)['active_index'], 2)
         with self.assertRaises(ValueError):
             parse_dpi(DPI_RAW[:10])
+
     def test_malformed_dpi_ids_are_rejected(self):
         for active, first, second in [(99, 1, 2), (1, 1, 1)]:
             raw = bytearray(DPI_RAW)
@@ -47,13 +48,14 @@ class ProtocolTests(unittest.TestCase):
                 parse_dpi(raw)
 
 
-
 class LightingClientTests(unittest.TestCase):
     def test_body_effect_controls_never_write_logo_or_scroll(self):
         from openrazer_daemon.bluetooth.device import BasiliskV3ProBluetooth
+
         class Device:
             def __init__(self):
                 self.calls = []
+
             def invoke(self, *args):
                 self.calls.append(args)
         device = Device()
@@ -72,8 +74,10 @@ class LightingClientTests(unittest.TestCase):
 
     def test_dual_color_readback_exposes_both_colors_and_random_exposes_none(self):
         from openrazer_daemon.bluetooth.device import BasiliskV3ProBluetooth
+
         class Device:
             raw = bytes.fromhex('02020002ff00ff00ffff')
+
             def invoke(self, operation, zone):
                 return self.raw
         device = Device()
@@ -121,8 +125,8 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
         session = FakeSession()
         original = bytearray(DPI_RAW.ljust(38, b'\x00'))
         for i, wire_id in enumerate((11, 22, 33, 44, 55)):
-            original[2 + 7*i] = wire_id
-            original[7 + 7*i:9 + 7*i] = bytes([0xaa, 0xbb])
+            original[2 + 7 * i] = wire_id
+            original[7 + 7 * i:9 + 7 * i] = bytes([0xaa, 0xbb])
         original[0] = 33
         session.values[bytes.fromhex('0b840100')] = bytes(original)
         stages = [(500, 600), (900, 1000), (1700, 1800), (3300, 3400), (6500, 6600)]
@@ -131,8 +135,8 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
         expected = bytearray(original)
         expected[0] = 22
         for i, (x, y) in enumerate(stages):
-            expected[3+7*i:5+7*i] = x.to_bytes(2, 'little')
-            expected[5+7*i:7+7*i] = y.to_bytes(2, 'little')
+            expected[3 + 7 * i:5 + 7 * i] = x.to_bytes(2, 'little')
+            expected[5 + 7 * i:7 + 7 * i] = y.to_bytes(2, 'little')
         self.assertEqual(payload, expected)
         self.assertEqual(await BasiliskSettings(session).perform('dpi_stages'), (1, stages))
 
@@ -146,7 +150,7 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
             payload = session.writes[-1][1]
             self.assertEqual(payload[2:], original[2:])
             self.assertEqual(payload[1], count)
-            self.assertEqual(await settings.perform('dpi_stages'), (count-1, stages))
+            self.assertEqual(await settings.perform('dpi_stages'), (count - 1, stages))
         await settings.perform('set_dpi_stages', 1, [(400, 400)])
         await settings.perform('set_dpi', 500, 600)
         self.assertEqual(await settings.perform('dpi'), (500, 600))
@@ -164,12 +168,12 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
         stages = [(400, 400), (800, 800), (1300, 1300), (3200, 3200), (6400, 6400)]
         await settings.perform('set_dpi_stages', 2, stages)
         self.assertEqual(await settings.perform('dpi_stages'), (1, stages))
-        self.assertEqual([session.writes[-1][1][2 + 7*i] for i in range(5)], [1, 2, 3, 4, 5])
+        self.assertEqual([session.writes[-1][1][2 + 7 * i] for i in range(5)], [1, 2, 3, 4, 5])
 
     async def test_invalid_stage_edits_send_no_commands(self):
         session = FakeSession()
         settings = BasiliskSettings(session)
-        for active, stages in [(0, [(800, 800)]*5), (6, [(800, 800)]*5), (1, []), (1, [(0, 800)]*5)]:
+        for active, stages in [(0, [(800, 800)] * 5), (6, [(800, 800)] * 5), (1, []), (1, [(0, 800)] * 5)]:
             with self.assertRaises(ValueError):
                 await settings.perform('set_dpi_stages', active, stages)
         self.assertEqual(session.reads, [])
@@ -233,7 +237,7 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(session.writes[1], (bytes.fromhex('10030001'), bytes.fromhex('01000001ff0000000000')))
         await settings.perform('set_brightness', 'logo', 50.0)
         self.assertEqual(session.writes[2], (bytes.fromhex('10050104'), b'\x80'))
-        self.assertAlmostEqual(await settings.perform('brightness', 'logo'), 128*100/255)
+        self.assertAlmostEqual(await settings.perform('brightness', 'logo'), 128 * 100 / 255)
 
     async def test_persistent_color_survives_live_state_reset(self):
         session = FakeSession()
@@ -345,6 +349,7 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_request_rollover_skips_unsolicited_notification_ids(self):
         requests = []
+
         class Client:
             async def write_gatt_char(self, uuid, payload, response):
                 request = payload[0]
@@ -356,6 +361,25 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
         await session.read(bytes.fromhex('05810001'))
         await session.read(bytes.fromhex('05810001'))
         self.assertEqual(requests, [255, 2])
+
+    async def test_reply_timeout_cancels_wait_and_faults_session(self):
+        class Client:
+            async def write_gatt_char(self, *args, **kwargs):
+                pass
+
+        session = VendorSession(Client())
+        wait_for = asyncio.wait_for
+
+        async def short_timeout(coroutine, timeout):
+            self.assertEqual(timeout, 5)
+            return await wait_for(coroutine, timeout=0.01)
+
+        with patch('openrazer_daemon.bluetooth.protocol.asyncio.wait_for', short_timeout):
+            with self.assertRaises(asyncio.TimeoutError):
+                await session.read(bytes.fromhex('05810001'))
+        self.assertTrue(session.faulted)
+        with self.assertRaises(ConnectionError):
+            await session.read(bytes.fromhex('05810001'))
 
     async def test_timeout_faults_session_before_next_write(self):
         class Client:

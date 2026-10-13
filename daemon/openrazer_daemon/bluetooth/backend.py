@@ -43,11 +43,12 @@ def connected_candidates(objects):
     return {path: props['Address'].value for path, interfaces in objects.items()
             if DEVICE_INTERFACE in interfaces for props in [interfaces[DEVICE_INTERFACE]]
             if path in service_devices and all(props.get(key) and props[key].value
-                                                for key in ('Paired', 'Connected', 'ServicesResolved'))}
+                                               for key in ('Paired', 'Connected', 'ServicesResolved'))}
 
 
 class BasiliskSettings:
     """Only hardware-validated features. Keep complete exchanges and RMW atomic."""
+
     def __init__(self, session):
         self.session = session
         self.lock = asyncio.Lock()
@@ -103,8 +104,8 @@ class BasiliskSettings:
             raise ValueError('DPI write requires the validated five-slot table')
         payload = bytearray(original.ljust(38, b'\x00'))
         offset = 2 + state['active_index'] * 7
-        payload[offset+1:offset+3] = int(x).to_bytes(2, 'little')
-        payload[offset+3:offset+5] = int(y).to_bytes(2, 'little')
+        payload[offset + 1:offset + 3] = int(x).to_bytes(2, 'little')
+        payload[offset + 3:offset + 5] = int(y).to_bytes(2, 'little')
         await self.session.write(bytes.fromhex('0b040100'), bytes(payload))
         await asyncio.sleep(0.25)
         if parse_dpi(await self.session.read(bytes.fromhex('0b840100'))) != parse_dpi(payload):
@@ -134,8 +135,8 @@ class BasiliskSettings:
         for index, (x, y) in enumerate(stages):
             offset = 2 + index * 7
             payload[offset] = ids[index]
-            payload[offset+1:offset+3] = int(x).to_bytes(2, 'little')
-            payload[offset+3:offset+5] = int(y).to_bytes(2, 'little')
+            payload[offset + 1:offset + 3] = int(x).to_bytes(2, 'little')
+            payload[offset + 3:offset + 5] = int(y).to_bytes(2, 'little')
         await self.session.write(bytes.fromhex('0b040100'), bytes(payload))
         await asyncio.sleep(0.25)
         if parse_dpi(await self.session.read(bytes.fromhex('0b840100'))) != parse_dpi(payload):
@@ -225,6 +226,7 @@ class BasiliskSettings:
 
 class BlueZBackend:
     """Keep BlueZ notifications flowing while GLib dispatches synchronous client calls."""
+
     def __init__(self):
         self.logger = logging.getLogger('razer.bluetooth')
         self.loop = asyncio.new_event_loop()
@@ -259,9 +261,11 @@ class BlueZBackend:
         self.bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
 
     async def discover(self):
-        async with asyncio.timeout(5):
+        async def get_objects():
             obj = self.bus.get_proxy_object('org.bluez', '/', await self.bus.introspect('org.bluez', '/'))
-            objects = await obj.get_interface('org.freedesktop.DBus.ObjectManager').call_get_managed_objects()
+            return await obj.get_interface('org.freedesktop.DBus.ObjectManager').call_get_managed_objects()
+
+        objects = await asyncio.wait_for(get_objects(), timeout=5)
         candidates = connected_candidates(objects)
         self.rejected.intersection_update(candidates)
         for path in list(self.devices):
