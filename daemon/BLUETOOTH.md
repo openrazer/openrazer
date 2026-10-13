@@ -22,7 +22,7 @@ Existing OpenRazer interfaces expose:
 - Independent body/underglow, logo and wheel brightness and effects: off, static, spectrum, single/dual/random breathing and wave in either direction.
 - Tactile/free-spin mode, Smart-Reel and scroll acceleration through `razer.device.scroll`.
 
-RazerGenie discovers standard lighting and DPI-stage controls through introspection. Its body effect changes only underglow; logo and wheel are independent. RazerGenie has no scroll-mechanics controls, but `openrazer.client` exposes `scroll_mode`, `scroll_smart_reel` and `scroll_acceleration`.
+RazerGenie discovers standard lighting and DPI-stage controls through introspection. Its body effect changes only underglow; logo and wheel are independent. Upstream RazerGenie has no scroll-mechanics controls; the [scroll-wheel-controls fork](https://github.com/titandrive/RazerGenie/tree/scroll-wheel-controls) adds them. Independently, `openrazer.client` exposes `scroll_mode`, `scroll_smart_reel` and `scroll_acceleration`.
 
 Not implemented: charging status, firmware version (reported as `unknown`), polling rate, low-battery threshold, reactive lighting, adjustable effect speed, per-LED frames, onboard profile management, remapping/macros, screensaver lighting and daemon persistence restoration. A separate `charging_status` client capability avoids calling an unavailable method. Current RazerGenie may still display “Not Charging” as a fallback when its charging query fails.
 
