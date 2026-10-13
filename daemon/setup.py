@@ -7,6 +7,7 @@ setup(
     name="openrazer_daemon",
     version="3.12.1",
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    extras_require={"bluetooth": ["dbus-fast >= 2.0"]},
     install_requires=[
         "daemonize >= 2.4.7",
         "dbus-python >= 1.2.0",
