@@ -362,6 +362,20 @@ class SettingsTests(unittest.IsolatedAsyncioTestCase):
         await session.read(bytes.fromhex('05810001'))
         self.assertEqual(requests, [255, 2])
 
+    async def test_optional_dependency_missing_has_clear_startup_error(self):
+        from openrazer_daemon.bluetooth.backend import BlueZBackend
+        backend = BlueZBackend.__new__(BlueZBackend)
+        with patch.dict('sys.modules', {'dbus_fast': None, 'dbus_fast.aio': None, 'dbus_fast.constants': None}):
+            with self.assertRaisesRegex(RuntimeError, 'optional dbus-fast dependency'):
+                await backend._connect()
+
+    async def test_optional_dependency_missing_has_clear_write_error(self):
+        from openrazer_daemon.bluetooth.protocol import BlueZClient
+        client = BlueZClient.__new__(BlueZClient)
+        with patch.dict('sys.modules', {'dbus_fast': None}):
+            with self.assertRaisesRegex(RuntimeError, 'optional dbus-fast dependency'):
+                await client.write_gatt_char('unused', b'')
+
     async def test_reply_timeout_cancels_wait_and_faults_session(self):
         class Client:
             async def write_gatt_char(self, *args, **kwargs):
