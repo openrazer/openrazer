@@ -6341,6 +6341,8 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER:
+    case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
         /* Detect wheel tilt edges */
@@ -6363,6 +6365,16 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
                 }
             }
             rdev->button_byte = data[0];
+        }
+
+        /* Detect Basilisk Mobile lower thumb button (Report 0x01/0x04, usage 0xD2) */
+        if (intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
+            size == 16 && (data[0] == 0x01 || data[0] == 0x04)) {
+            if (rdev && rdev->input) {
+                input_report_key(rdev->input, KEY_F22, search(data + 1, 0xD2, size - 1));
+                input_sync(rdev->input);
+            }
+            return 1;
         }
 
         /* Detect buttons reported on the keyboard interface */
@@ -6466,6 +6478,11 @@ static int razer_input_configured(struct hid_device *hdev,
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
+        case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER:
+        case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED:
+            input_set_capability(hidinput->input, EV_REL, REL_HWHEEL);
+            input_set_capability(hidinput->input, EV_REL, REL_HWHEEL_HI_RES);
+            fallthrough;
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
         case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
             /* Linux HID doesn't detect the Basilisk V2's tilt wheel
