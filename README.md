@@ -167,6 +167,8 @@ This will output something similar to this:
 | Razer Blade 18 (2024)                                         |  1532:02B8  |
 | Razer BlackWidow V4 Mini HyperSpeed (Wired)                   |  1532:02B9  |
 | Razer BlackWidow V4 Mini HyperSpeed (Wireless)                |  1532:02BA  |
+| Razer Pro Type Ergo (Wireless) | 1532:02C2 |
+| Razer Pro Type Ergo (Wired) | 1532:02C4 |
 | Razer Blade 14 (2025)                                         |  1532:02C5  |
 | Razer Blade 16 (2025)                                         |  1532:02C6  |
 | Razer Blade 18 (2025)                                         |  1532:02C7  |
