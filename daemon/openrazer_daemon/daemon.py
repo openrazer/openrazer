@@ -86,7 +86,7 @@ class RazerDaemon(DBusService):
         self.logger = self._create_logger(log_dir, log_level, console_log)
 
         self._persistence_file = persistence_file
-        self._persistence = configparser.ConfigParser()
+        self._persistence = PersistenceConfigParser()
         self._persistence.status = {"changed": False}
         self.read_persistence(persistence_file)
 
