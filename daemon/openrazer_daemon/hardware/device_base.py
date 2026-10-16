@@ -11,7 +11,6 @@ import inspect
 import logging
 import time
 import json
-from typing import Optional
 
 from openrazer_daemon.dbus_services.service import DBusService
 import openrazer_daemon.dbus_services.dbus_methods
@@ -31,22 +30,22 @@ class RazerDevice(DBusService):
     OBJECT_PATH = '/org/razer/device/'
     METHODS: list[str] = []
 
-    EVENT_FILE_REGEX: Optional[re.Pattern] = None
+    EVENT_FILE_REGEX: re.Pattern | None = None
 
     USB_VID: int
     USB_PID: int
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = False
-    MATRIX_DIMS: Optional[list[int]] = None
-    POLL_RATES: Optional[list[int]] = None
-    DPI_MAX: Optional[int] = None
+    MATRIX_DIMS: list[int] | None = None
+    POLL_RATES: list[int] | None = None
+    DPI_MAX: int | None = None
     DRIVER_MODE = False
 
     WAVE_DIRS = (1, 2)
 
     ZONES = ('backlight', 'logo', 'scroll', 'left', 'right', 'charging', 'fast_charging', 'fully_charged', 'channel1', 'channel2', 'channel3', 'channel4', 'channel5', 'channel6')
 
-    DEVICE_IMAGE: Optional[str] = None
+    DEVICE_IMAGE: str | None = None
 
     def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter):
 
