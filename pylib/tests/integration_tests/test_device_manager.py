@@ -13,15 +13,21 @@ import openrazer_daemon.daemon
 import openrazer._fake_driver as fake_driver
 
 
-def run_daemon(daemon_dir, driver_dir):
+def run_daemon(daemon_dir: str, driver_dir: str) -> None:
     # TODO console_log false
     daemon = openrazer_daemon.daemon.RazerDaemon(verbose=True, console_log=False, test_dir=driver_dir)
     daemon.run()
 
 
 class DeviceManagerTest(unittest.TestCase):
+    _daemon_dir: str
+    _tmp_dir: str
+    _bw_serial: str
+    _bw_chroma: fake_driver.FakeDevice
+    _daemon_proc: multiprocessing.Process
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         cls._daemon_dir = tempfile.mkdtemp(prefix='tmp_', suffix='_daemondata')
         cls._tmp_dir = tempfile.mkdtemp(prefix='tmp_', suffix='_daemontest')
 
@@ -35,9 +41,9 @@ class DeviceManagerTest(unittest.TestCase):
         time.sleep(5)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         print("Stopping daemon")
-        os.kill(cls._daemon_proc.pid, signal.SIGINT)
+        cls._daemon_proc.interrupt()
         time.sleep(3)
         if cls._daemon_proc.is_alive():
             print("Daemon still alive...")
@@ -55,35 +61,35 @@ class DeviceManagerTest(unittest.TestCase):
 
         time.sleep(5)
 
-    def setUp(self):
+    def setUp(self) -> None:
         self._bw_chroma.create_endpoints()
 
         self.device_manager = openrazer.client.DeviceManager()
 
-    def test_device_list(self):
+    def test_device_list(self) -> None:
         self.assertEqual(len(self.device_manager.devices), 1)
 
-    def test_serial(self):
+    def test_serial(self) -> None:
         device = self.device_manager.devices[0]
 
         self.assertEqual(device.serial, self._bw_chroma.get('device_serial'))
 
-    def test_name(self):
+    def test_name(self) -> None:
         device = self.device_manager.devices[0]
 
         self.assertEqual(device.name, self._bw_chroma.get('device_type'))
 
-    def test_type(self):
+    def test_type(self) -> None:
         device = self.device_manager.devices[0]
 
         self.assertEqual(device.type, 'keyboard')
 
-    def test_fw_version(self):
+    def test_fw_version(self) -> None:
         device = self.device_manager.devices[0]
 
         self.assertEqual(device.firmware_version, self._bw_chroma.get('firmware_version'))
 
-    def test_brightness(self):
+    def test_brightness(self) -> None:
         device = self.device_manager.devices[0]
 
         # Test 100%
@@ -105,12 +111,12 @@ class DeviceManagerTest(unittest.TestCase):
 
         self.assertEqual(0, device.brightness)
 
-    def test_capabilities(self):
+    def test_capabilities(self) -> None:
         device = self.device_manager.devices[0]
 
         self.assertEqual(device.capabilities, device._capabilities)
 
-    def test_device_keyboard_game_mode(self):
+    def test_device_keyboard_game_mode(self) -> None:
         device = self.device_manager.devices[0]
 
         self._bw_chroma.set('mode_game', '1')
@@ -120,7 +126,7 @@ class DeviceManagerTest(unittest.TestCase):
         device.game_mode_led = True
         self.assertEqual(self._bw_chroma.get('mode_game'), '1')
 
-    def test_device_keyboard_macro_mode(self):
+    def test_device_keyboard_macro_mode(self) -> None:
         device = self.device_manager.devices[0]
 
         self._bw_chroma.set('mode_macro', '1')
@@ -135,21 +141,21 @@ class DeviceManagerTest(unittest.TestCase):
         device.macro_mode_led_effect = openrazer.client.constants.MACRO_LED_BLINK
         self.assertEqual(self._bw_chroma.get('mode_macro'), str(openrazer.client.constants.MACRO_LED_BLINK))
 
-    def test_device_keyboard_effect_none(self):
+    def test_device_keyboard_effect_none(self) -> None:
         device = self.device_manager.devices[0]
 
         device.fx.none()
 
         self.assertEqual(self._bw_chroma.get('matrix_effect_none'), '1')
 
-    def test_device_keyboard_effect_spectrum(self):
+    def test_device_keyboard_effect_spectrum(self) -> None:
         device = self.device_manager.devices[0]
 
         device.fx.spectrum()
 
         self.assertEqual(self._bw_chroma.get('matrix_effect_spectrum'), '1')
 
-    def test_device_keyboard_effect_wave(self):
+    def test_device_keyboard_effect_wave(self) -> None:
         device = self.device_manager.devices[0]
 
         device.fx.wave(openrazer.client.constants.WAVE_LEFT)
@@ -160,7 +166,7 @@ class DeviceManagerTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             device.fx.wave('lalala')
 
-    def test_device_keyboard_effect_wheel(self):
+    def test_device_keyboard_effect_wheel(self) -> None:
         device = self.device_manager.devices[0]
 
         device.fx.wheel(openrazer.client.constants.WHEEL_LEFT)
@@ -171,7 +177,7 @@ class DeviceManagerTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             device.fx.wheel('lalala')
 
-    def test_device_keyboard_effect_static(self):
+    def test_device_keyboard_effect_static(self) -> None:
         device = self.device_manager.devices[0]
 
         device.fx.static(255, 0, 255)
@@ -184,7 +190,7 @@ class DeviceManagerTest(unittest.TestCase):
         device.fx.static(256, 0, 700)
         self.assertEqual(b'\xFF\x00\xFF', self._bw_chroma.get('matrix_effect_static', binary=True))
 
-    def test_device_keyboard_effect_reactive(self):
+    def test_device_keyboard_effect_reactive(self) -> None:
         device = self.device_manager.devices[0]
 
         time = openrazer.client.constants.REACTIVE_500MS
@@ -201,7 +207,7 @@ class DeviceManagerTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             device.fx.reactive(255, 0, 255, 'lalala')
 
-    def test_device_keyboard_effect_breath_single(self):
+    def test_device_keyboard_effect_breath_single(self) -> None:
         device = self.device_manager.devices[0]
 
         device.fx.breath_single(255, 0, 255)
@@ -214,7 +220,7 @@ class DeviceManagerTest(unittest.TestCase):
         device.fx.breath_single(256, 0, 700)
         self.assertEqual(b'\xFF\x00\xFF', self._bw_chroma.get('matrix_effect_breath', binary=True))
 
-    def test_device_keyboard_effect_breath_dual(self):
+    def test_device_keyboard_effect_breath_dual(self) -> None:
         device = self.device_manager.devices[0]
 
         device.fx.breath_dual(255, 0, 255, 255, 0, 0)
@@ -228,14 +234,14 @@ class DeviceManagerTest(unittest.TestCase):
         device.fx.breath_dual(256, 0, 700, 255, 0, 0)
         self.assertEqual(b'\xFF\x00\xFF\xFF\x00\x00', self._bw_chroma.get('matrix_effect_breath', binary=True))
 
-    def test_device_keyboard_effect_breath_random(self):
+    def test_device_keyboard_effect_breath_random(self) -> None:
         device = self.device_manager.devices[0]
 
         device.fx.breath_random()
 
         self.assertEqual(self._bw_chroma.get('matrix_effect_breath'), '1')
 
-    def test_device_keyboard_effect_ripple(self):
+    def test_device_keyboard_effect_ripple(self) -> None:
         device = self.device_manager.devices[0]
 
         refresh_rate = 0.01
@@ -255,7 +261,7 @@ class DeviceManagerTest(unittest.TestCase):
 
         device.fx.none()
 
-    def test_device_keyboard_effect_random_ripple(self):
+    def test_device_keyboard_effect_random_ripple(self) -> None:
         device = self.device_manager.devices[0]
 
         refresh_rate = 0.01
@@ -271,7 +277,7 @@ class DeviceManagerTest(unittest.TestCase):
 
         device.fx.none()
 
-    def test_device_keyboard_effect_framebuffer(self):
+    def test_device_keyboard_effect_framebuffer(self) -> None:
         device = self.device_manager.devices[0]
 
         device.fx.advanced.matrix.set(0, 0, (255, 0, 255))
@@ -300,14 +306,14 @@ class DeviceManagerTest(unittest.TestCase):
 
         self.assertEqual(binary, custom_effect_payload)
 
-    def test_device_keyboard_macro_enable(self):
+    def test_device_keyboard_macro_enable(self) -> None:
         device = self.device_manager.devices[0]
 
         device.macro.enable_macros()
 
         self.assertEqual(self._bw_chroma.get('macro_keys'), '1')
 
-    def test_device_keyboard_macro_add(self):
+    def test_device_keyboard_macro_add(self) -> None:
         device = self.device_manager.devices[0]
 
         url_macro = device.macro.create_url_macro_item('http://example.org')
@@ -325,7 +331,7 @@ class DeviceManagerTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             device.macro.add_macro('M1', ['lalala'])  # Bad element in sequence
 
-    def test_device_keyboard_macro_del(self):
+    def test_device_keyboard_macro_del(self) -> None:
         device = self.device_manager.devices[0]
 
         url_macro = device.macro.create_url_macro_item('http://example.org')
