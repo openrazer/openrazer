@@ -7,7 +7,7 @@
 
 import os
 import time
-from typing import Sequence
+from collections.abc import Sequence
 
 import openrazer.client
 from openrazer.client.devices import RazerDevice
