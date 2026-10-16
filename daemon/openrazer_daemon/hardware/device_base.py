@@ -11,6 +11,7 @@ import inspect
 import logging
 import time
 import json
+from dataclasses import dataclass
 
 from openrazer_daemon.dbus_services.service import DBusService
 import openrazer_daemon.dbus_services.dbus_methods
@@ -44,6 +45,16 @@ class RazerDevice(DBusService):
     WAVE_DIRS = (1, 2)
 
     ZONES = ('backlight', 'logo', 'scroll', 'left', 'right', 'charging', 'fast_charging', 'fully_charged', 'channel1', 'channel2', 'channel3', 'channel4', 'channel5', 'channel6')
+
+    @dataclass
+    class Zone:
+        present: bool
+        active: bool
+        brightness: float
+        effect: str
+        colors: list[int]
+        speed: int
+        wave_dir: int
 
     DEVICE_IMAGE: str | None = None
 
@@ -91,18 +102,18 @@ class RazerDevice(DBusService):
         else:
             self.storage_name = self.serial
 
-        self.zone = dict()
+        self.zone: dict[str, RazerDevice.Zone] = {}
 
         for i in self.ZONES:
-            self.zone[i] = {
-                "present": False,
-                "active": True,
-                "brightness": 75.0,
-                "effect": 'spectrum',
-                "colors": [0, 255, 0, 0, 255, 255, 0, 0, 255],
-                "speed": 1,
-                "wave_dir": 1,
-            }
+            self.zone[i] = RazerDevice.Zone(
+                present = False,
+                active = True,
+                brightness = 75.0,
+                effect = 'spectrum',
+                colors = [0, 255, 0, 0, 255, 255, 0, 0, 255],
+                speed = 1,
+                wave_dir = 1,
+            )
 
         # Check for a DPI X only device since they need a Y value of 0
         if 'available_dpi' in self.METHODS:
@@ -232,7 +243,7 @@ class RazerDevice(DBusService):
 
         # this check is separate from the rest because backlight effects don't have prefixes in their names
         if 'set_static_effect' in self.METHODS or 'bw_set_static' in self.METHODS:
-            self.zone["backlight"]["present"] = True
+            self.zone["backlight"].present = True
             for m in effect_methods["backlight_chroma"]:
                 self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
                 self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
@@ -242,7 +253,7 @@ class RazerDevice(DBusService):
                     or 'set_' + i + '_static' in self.METHODS \
                     or 'set_' + i + '_active' in self.METHODS \
                     or 'set_' + i + '_on' in self.METHODS:
-                self.zone[i]["present"] = True
+                self.zone[i].present = True
                 for m in effect_methods[i]:
                     self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
                     self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
@@ -267,24 +278,24 @@ class RazerDevice(DBusService):
 
         # load last effects
         for i in self.ZONES:
-            if self.zone[i]["present"]:
+            if self.zone[i].present:
                 # check if we have the device in the persistence file
                 if self.persistence.has_section(self.storage_name):
                     # try reading the effect name from the persistence
                     try:
-                        self.zone[i]["effect"] = self.persistence[self.storage_name][i + '_effect']
+                        self.zone[i].effect = self.persistence[self.storage_name][i + '_effect']
                     except (KeyError, configparser.NoOptionError):
                         self.logger.info("Failed to get " + i + " effect from persistence storage, using default.")
 
                     # zone active status
                     try:
-                        self.zone[i]["active"] = self.persistence.getboolean(self.storage_name, i + '_active')
+                        self.zone[i].active = self.persistence.getboolean(self.storage_name, i + '_active')
                     except (KeyError, configparser.NoOptionError):
                         self.logger.info("Failed to get " + i + " active from persistence storage, using default.")
 
                     # brightness
                     try:
-                        self.zone[i]["brightness"] = float(self.persistence[self.storage_name][i + '_brightness'])
+                        self.zone[i].brightness = float(self.persistence[self.storage_name][i + '_brightness'])
                     except (KeyError, configparser.NoOptionError):
                         self.logger.info("Failed to get " + i + " brightness from persistence storage, using default.")
 
@@ -292,30 +303,30 @@ class RazerDevice(DBusService):
                     # these are stored as a string that must contain 9 numbers, separated with spaces.
                     try:
                         for index, item in enumerate(self.persistence[self.storage_name][i + '_colors'].split(" ")):
-                            self.zone[i]["colors"][index] = int(item)
+                            self.zone[i].colors[index] = int(item)
                             # check if the color is in range
-                            if not 0 <= self.zone[i]["colors"][index] <= 255:
+                            if not 0 <= self.zone[i].colors[index] <= 255:
                                 raise ValueError('Color out of range')
 
                         # check if we have exactly 9 colors
-                        if len(self.zone[i]["colors"]) != 9:
+                        if len(self.zone[i].colors) != 9:
                             raise ValueError('There must be exactly 9 colors')
                     except ValueError:
                         # invalid colors. reinitialize
-                        self.zone[i]["colors"] = [0, 255, 0, 0, 255, 255, 0, 0, 255]
+                        self.zone[i].colors = [0, 255, 0, 0, 255, 255, 0, 0, 255]
                         self.logger.info("%s: Invalid colors; restoring to defaults.", self.__class__.__name__)
                     except (KeyError, configparser.NoOptionError):
                         self.logger.info("Failed to get " + i + " colors from persistence storage, using default.")
 
                     # speed
                     try:
-                        self.zone[i]["speed"] = int(self.persistence[self.storage_name][i + '_speed'])
+                        self.zone[i].speed = int(self.persistence[self.storage_name][i + '_speed'])
                     except (KeyError, configparser.NoOptionError):
                         self.logger.info("Failed to get " + i + " speed from persistence storage, using default.")
 
                     # wave direction
                     try:
-                        self.zone[i]["wave_dir"] = int(self.persistence[self.storage_name][i + '_wave_dir'])
+                        self.zone[i].wave_dir = int(self.persistence[self.storage_name][i + '_wave_dir'])
                     except (KeyError, configparser.NoOptionError):
                         self.logger.info("Failed to get " + i + " wave direction from persistence storage, using default.")
 
@@ -407,12 +418,12 @@ class RazerDevice(DBusService):
         This is used at launch time.
         """
         for i in self.ZONES:
-            if self.zone[i]["present"]:
+            if self.zone[i].present:
                 # load active state
                 if 'set_' + i + '_active' in self.METHODS:
                     active_func = getattr(self, "set" + self.capitalize_first_char(i) + "Active", None)
                     if active_func is not None:
-                        active_func(self.zone[i]["active"])
+                        active_func(self.zone[i].active)
 
                 # load brightness level
                 bright_func = None
@@ -423,7 +434,7 @@ class RazerDevice(DBusService):
 
                 if bright_func is not None:
                     try:
-                        bright_func(self.zone[i]["brightness"])
+                        bright_func(self.zone[i].brightness)
                     except OSError:
                         self.logger.exception("Failed to restore brightness!")
 
@@ -432,7 +443,7 @@ class RazerDevice(DBusService):
         Set brightness to 0 and/or active state to false.
         """
         for i in self.ZONES:
-            if self.zone[i]["present"]:
+            if self.zone[i].present:
                 # set active state
                 if 'set_' + i + '_active' in self.METHODS:
                     active_func = getattr(self, "set" + self.capitalize_first_char(i) + "Active", None)
@@ -457,23 +468,23 @@ class RazerDevice(DBusService):
         that use custom matrix frames after they exit
         """
         for i in self.ZONES:
-            if self.zone[i]["present"]:
+            if self.zone[i].present:
                 # prepare the effect method name
                 # yes, we need to handle the backlight zone separately too.
                 # the backlight effect methods don't have a prefix.
                 if i == "backlight":
-                    effect_func_name = 'set' + self.capitalize_first_char(self.zone[i]["effect"])
+                    effect_func_name = 'set' + self.capitalize_first_char(self.zone[i].effect)
                 else:
-                    effect_func_name = 'set' + self.handle_underscores(self.capitalize_first_char(i)) + self.capitalize_first_char(self.zone[i]["effect"])
+                    effect_func_name = 'set' + self.handle_underscores(self.capitalize_first_char(i)) + self.capitalize_first_char(self.zone[i].effect)
 
                 # find the effect method
                 effect_func = getattr(self, effect_func_name, None)
 
                 # check if the effect method exists only if we didn't look for spectrum (because resetting to Spectrum when the effect is Spectrum is in vain)
-                if effect_func == None and not self.zone[i]["effect"] == "spectrum":
+                if effect_func == None and not self.zone[i].effect == "spectrum":
                     # not found. restoring to Spectrum
                     self.logger.info("%s: Invalid effect name %s; restoring to Spectrum.", self.__class__.__name__, effect_func_name)
-                    self.zone[i]["effect"] = 'spectrum'
+                    self.zone[i].effect = 'spectrum'
                     if i == "backlight":
                         effect_func_name = 'setSpectrum'
                     else:
@@ -482,10 +493,10 @@ class RazerDevice(DBusService):
 
                 # we check again here because there is a possibility the device may not even have Spectrum
                 if effect_func is not None:
-                    effect = self.zone[i]["effect"]
-                    colors = self.zone[i]["colors"]
-                    speed = self.zone[i]["speed"]
-                    wave_dir = self.zone[i]["wave_dir"]
+                    effect = self.zone[i].effect
+                    colors = self.zone[i].colors
+                    speed = self.zone[i].speed
+                    wave_dir = self.zone[i].wave_dir
                     if self.get_num_arguments(effect_func) == 0:
                         effect_func()
                     elif self.get_num_arguments(effect_func) == 1:
@@ -522,18 +533,9 @@ class RazerDevice(DBusService):
                     else:
                         self.logger.error("%s: Couldn't detect effect argument count!", self.__class__.__name__)
 
-    def set_persistence(self, zone, key, value):
+    def set_persistence(self, zone: str, key: str, value: bool | int | str) -> None:
         """
         Set a device's current state for persisting across sessions.
-
-        :param zone: Zone
-        :type zone: string
-
-        :param key: Key
-        :type key: string
-
-        :param value: Value
-        :type value: string
         """
         if self._disable_persistence:
             return
@@ -541,10 +543,36 @@ class RazerDevice(DBusService):
 
         self.persistence.status["changed"] = True
 
-        if zone:
-            self.zone[zone][key] = value
+        if key == "present":
+            if not isinstance(value, bool):
+                raise ValueError("key present must have value bool")
+            self.zone[zone].present = value
+        elif key == "active":
+            if not isinstance(value, bool):
+                raise ValueError("key active must have value bool")
+            self.zone[zone].active = value
+        elif key == "brightness":
+            if not isinstance(value, float):
+                raise ValueError("key active must have value float")
+            self.zone[zone].brightness = value
+        elif key == "effect":
+            if not isinstance(value, str):
+                raise ValueError("key effect must have value str")
+            self.zone[zone].effect = value
+        elif key == "colors":
+            if not isinstance(value, list):
+                raise ValueError("key colors must have value list")
+            self.zone[zone].colors = value
+        elif key == "speed":
+            if not isinstance(value, int):
+                raise ValueError("key speed must have value int")
+            self.zone[zone].speed = value
+        elif key == "wave_dir":
+            if not isinstance(value, int):
+                raise ValueError("key wave_dir must have value int")
+            self.zone[zone].wave_dir = value
         else:
-            self.zone[key] = value
+            raise ValueError(f"Unknown key '{key}'")
 
     def get_current_effect(self):
         """
@@ -555,7 +583,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_effect")
 
-        return self.zone["backlight"]["effect"]
+        return self.zone["backlight"].effect
 
     def get_current_effect_colors(self):
         """
@@ -566,7 +594,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_effect_colors")
 
-        return self.zone["backlight"]["colors"]
+        return self.zone["backlight"].colors
 
     def get_current_effect_speed(self):
         """
@@ -577,7 +605,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_effect_speed")
 
-        return self.zone["backlight"]["speed"]
+        return self.zone["backlight"].speed
 
     def get_current_wave_dir(self):
         """
@@ -588,7 +616,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_wave_dir")
 
-        return self.zone["backlight"]["wave_dir"]
+        return self.zone["backlight"].wave_dir
 
     def get_current_logo_effect(self):
         """
@@ -599,7 +627,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_logo_effect")
 
-        return self.zone["logo"]["effect"]
+        return self.zone["logo"].effect
 
     def get_current_logo_effect_colors(self):
         """
@@ -610,7 +638,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_logo_effect_colors")
 
-        return self.zone["logo"]["colors"]
+        return self.zone["logo"].colors
 
     def get_current_logo_effect_speed(self):
         """
@@ -621,7 +649,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_logo_effect_speed")
 
-        return self.zone["logo"]["speed"]
+        return self.zone["logo"].speed
 
     def get_current_logo_wave_dir(self):
         """
@@ -632,7 +660,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_logo_wave_dir")
 
-        return self.zone["logo"]["wave_dir"]
+        return self.zone["logo"].wave_dir
 
     def get_current_scroll_effect(self):
         """
@@ -643,7 +671,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_scroll_effect")
 
-        return self.zone["scroll"]["effect"]
+        return self.zone["scroll"].effect
 
     def get_current_scroll_effect_colors(self):
         """
@@ -654,7 +682,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_scroll_effect_colors")
 
-        return self.zone["scroll"]["colors"]
+        return self.zone["scroll"].colors
 
     def get_current_scroll_effect_speed(self):
         """
@@ -665,7 +693,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_scroll_effect_speed")
 
-        return self.zone["scroll"]["speed"]
+        return self.zone["scroll"].speed
 
     def get_current_scroll_wave_dir(self):
         """
@@ -676,7 +704,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_scroll_wave_dir")
 
-        return self.zone["scroll"]["wave_dir"]
+        return self.zone["scroll"].wave_dir
 
     def get_current_left_effect(self):
         """
@@ -687,7 +715,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_left_effect")
 
-        return self.zone["left"]["effect"]
+        return self.zone["left"].effect
 
     def get_current_left_effect_colors(self):
         """
@@ -698,7 +726,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_left_effect_colors")
 
-        return self.zone["left"]["colors"]
+        return self.zone["left"].colors
 
     def get_current_left_effect_speed(self):
         """
@@ -709,7 +737,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_left_effect_speed")
 
-        return self.zone["left"]["speed"]
+        return self.zone["left"].speed
 
     def get_current_left_wave_dir(self):
         """
@@ -720,7 +748,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_left_wave_dir")
 
-        return self.zone["left"]["wave_dir"]
+        return self.zone["left"].wave_dir
 
     def get_current_right_effect(self):
         """
@@ -731,7 +759,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_right_effect")
 
-        return self.zone["right"]["effect"]
+        return self.zone["right"].effect
 
     def get_current_right_effect_colors(self):
         """
@@ -742,7 +770,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_right_effect_colors")
 
-        return self.zone["right"]["colors"]
+        return self.zone["right"].colors
 
     def get_current_right_effect_speed(self):
         """
@@ -753,7 +781,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_right_effect_speed")
 
-        return self.zone["right"]["speed"]
+        return self.zone["right"].speed
 
     def get_current_right_wave_dir(self):
         """
@@ -764,7 +792,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_right_wave_dir")
 
-        return self.zone["right"]["wave_dir"]
+        return self.zone["right"].wave_dir
 
     def get_current_charging_effect(self):
         """
@@ -775,7 +803,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_charging_effect")
 
-        return self.zone["charging"]["effect"]
+        return self.zone["charging"].effect
 
     def get_current_charging_effect_colors(self):
         """
@@ -786,7 +814,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_charging_effect_colors")
 
-        return self.zone["charging"]["colors"]
+        return self.zone["charging"].colors
 
     def get_current_charging_effect_speed(self):
         """
@@ -797,7 +825,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_charging_effect_speed")
 
-        return self.zone["charging"]["speed"]
+        return self.zone["charging"].speed
 
     def get_current_charging_wave_dir(self):
         """
@@ -808,7 +836,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_charging_wave_dir")
 
-        return self.zone["charging"]["wave_dir"]
+        return self.zone["charging"].wave_dir
 
     def get_current_fast_charging_effect(self):
         """
@@ -819,7 +847,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_fast_charging_effect")
 
-        return self.zone["fast_charging"]["effect"]
+        return self.zone["fast_charging"].effect
 
     def get_current_fast_charging_effect_colors(self):
         """
@@ -830,7 +858,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_fast_charging_effect_colors")
 
-        return self.zone["fast_charging"]["colors"]
+        return self.zone["fast_charging"].colors
 
     def get_current_fast_charging_effect_speed(self):
         """
@@ -841,7 +869,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_fast_charging_effect_speed")
 
-        return self.zone["fast_charging"]["speed"]
+        return self.zone["fast_charging"].speed
 
     def get_current_fast_charging_wave_dir(self):
         """
@@ -852,7 +880,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_fast_charging_wave_dir")
 
-        return self.zone["fast_charging"]["wave_dir"]
+        return self.zone["fast_charging"].wave_dir
 
     def get_current_fully_charged_effect(self):
         """
@@ -863,7 +891,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_fully_charged_effect")
 
-        return self.zone["fully_charged"]["effect"]
+        return self.zone["fully_charged"].effect
 
     def get_current_fully_charged_effect_colors(self):
         """
@@ -874,7 +902,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_fully_charged_effect_colors")
 
-        return self.zone["fully_charged"]["colors"]
+        return self.zone["fully_charged"].colors
 
     def get_current_fully_charged_effect_speed(self):
         """
@@ -885,7 +913,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_fully_charged_effect_speed")
 
-        return self.zone["fully_charged"]["speed"]
+        return self.zone["fully_charged"].speed
 
     def get_current_fully_charged_wave_dir(self):
         """
@@ -896,7 +924,7 @@ class RazerDevice(DBusService):
         """
         self.logger.debug("DBus call get_current_fully_charged_wave_dir")
 
-        return self.zone["fully_charged"]["wave_dir"]
+        return self.zone["fully_charged"].wave_dir
 
     @property
     def effect_sync(self):
