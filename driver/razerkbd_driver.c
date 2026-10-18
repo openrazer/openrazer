@@ -520,6 +520,12 @@ static ssize_t razer_attr_read_kbd_layout(struct device *dev, struct device_attr
     return sysfs_emit(buf, "%02x\n", response.arguments[0]);
 }
 
+static bool is_pro_type_ergo(struct razer_kbd_device *device)
+{
+    return device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED ||
+           device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS;
+}
+
 /**
  * Device mode function
  */
@@ -4515,7 +4521,14 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     request = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
     request.transaction_id.id = 0xFF;
 
+    if (is_pro_type_ergo(device))
+        mutex_lock(&device->mode_state->lock);
     err = razer_send_payload(device, &request, &response);
+    if (is_pro_type_ergo(device)) {
+        if (!err)
+            device->mode_state->restore_driver_mode = buf[0] == 0x03 && buf[1] == 0x00;
+        mutex_unlock(&device->mode_state->lock);
+    }
     if (err)
         return err;
 
@@ -5000,33 +5013,28 @@ static DEVICE_ATTR(charge_effect,           0220, NULL,                         
 static DEVICE_ATTR(charge_colour,           0220, NULL,                                       razer_attr_write_charge_colour);
 static DEVICE_ATTR(charge_low_threshold,    0660, razer_attr_read_charge_low_threshold,       razer_attr_write_charge_low_threshold);
 
-/**
- * Deal with FN toggle
- */
-static struct hid_device *ergo_bl_hdev;
-static int ergo_bl_delta, ergo_last_br = 128;
-
+/* Brightness changes run outside the HID input callback and belong to this interface. */
 static void ergo_bl_work_fn(struct work_struct *work)
 {
-    struct hid_device *hdev = READ_ONCE(ergo_bl_hdev);
-    struct razer_kbd_device *dev = hdev ? hid_get_drvdata(hdev) : NULL;
+    struct razer_kbd_device *dev = container_of(work, struct razer_kbd_device, ergo_bl_work);
     struct razer_report req = {0}, resp = {0};
-    unsigned char tx;
-    if (!dev) return;
-    tx = (dev->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS) ? 0x9F : 0x1F;
-    req = razer_chroma_extended_matrix_get_brightness(VARSTORE, BACKLIGHT_LED);
-    req.transaction_id.id = tx;
-    if (razer_send_payload(dev, &req, &resp) == 0)
-        ergo_last_br = resp.arguments[2];
-    ergo_last_br = clamp(ergo_last_br + READ_ONCE(ergo_bl_delta), 0, 255);
-    memset(&req, 0, sizeof(req));
-    memset(&resp, 0, sizeof(resp));
-    req = razer_chroma_extended_matrix_brightness(VARSTORE, BACKLIGHT_LED, (unsigned char)ergo_last_br);
-    req.transaction_id.id = tx;
-    if (razer_send_payload(dev, &req, &resp) != 0)
-        hid_warn(hdev, "razerkbd: failed to update backlight brightness\n");
+    unsigned char tx = dev->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS ? 0x9F : 0x1F;
+    int delta, brightness;
+
+    while ((delta = atomic_xchg(&dev->ergo_bl_delta, 0)) != 0) {
+        req = razer_chroma_extended_matrix_get_brightness(VARSTORE, BACKLIGHT_LED);
+        req.transaction_id.id = tx;
+        if (razer_send_payload(dev, &req, &resp) == 0)
+            dev->ergo_last_brightness = resp.arguments[2];
+        brightness = clamp(dev->ergo_last_brightness + delta, 0, 255);
+        req = razer_chroma_extended_matrix_brightness(VARSTORE, BACKLIGHT_LED, brightness);
+        req.transaction_id.id = tx;
+        if (razer_send_payload(dev, &req, &resp) != 0)
+            hid_warn(dev->hdev, "razerkbd: failed to update backlight brightness\n");
+        else
+            dev->ergo_last_brightness = brightness;
+    }
 }
-static DECLARE_WORK(ergo_bl_work, ergo_bl_work_fn);
 
 static int razer_event(struct hid_device *hdev, struct hid_field *field, struct hid_usage *usage, __s32 value)
 {
@@ -5140,17 +5148,15 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
             break;
         case KEY_F11:
             if (value == 1) {
-                WRITE_ONCE(ergo_bl_hdev, hdev);
-                WRITE_ONCE(ergo_bl_delta, -25);
-                schedule_work(&ergo_bl_work);
+                atomic_add(-25, &device->ergo_bl_delta);
+                queue_work(system_freezable_wq, &device->ergo_bl_work);
             }
             input_report_key(in, KEY_KBDILLUMDOWN, value);
             break;
         case KEY_F12:
             if (value == 1) {
-                WRITE_ONCE(ergo_bl_hdev, hdev);
-                WRITE_ONCE(ergo_bl_delta, 25);
-                schedule_work(&ergo_bl_work);
+                atomic_add(25, &device->ergo_bl_delta);
+                queue_work(system_freezable_wq, &device->ergo_bl_work);
             }
             input_report_key(in, KEY_KBDILLUMUP, value);
             break;
@@ -5552,6 +5558,21 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_us
  *
  * Handles provided HID reports, branched out for specific keyboard models, since some keyboards need specific handling.
  */
+static void razer_kbd_restore_mode_work(struct work_struct *work)
+{
+    struct razer_kbd_device *device = container_of(to_delayed_work(work), struct razer_kbd_device, restore_mode_work);
+    struct razer_report request = razer_chroma_standard_set_device_mode(0x03, 0x00);
+    struct razer_report response = {0};
+
+    /* Match device_mode writes, which use 0xFF for this command on both models. */
+    request.transaction_id.id = 0xFF;
+    mutex_lock(&device->mode_state->lock);
+    if (device->mode_state->restore_driver_mode &&
+        razer_send_payload(device, &request, &response) != 0)
+        hid_warn(device->hdev, "razerkbd: failed to restore driver mode after wakeup\n");
+    mutex_unlock(&device->mode_state->lock);
+}
+
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
     struct razer_kbd_device *device = hid_get_drvdata(hdev);
@@ -5561,6 +5582,14 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 
     // No translations needed on the Pro...
     if (is_blade_laptop(device)) {
+        return 0;
+    }
+
+    if (device && device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS &&
+        intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
+        size == 16 && data[0] == 0x05 && data[1] == 0x09 && data[2] == 0x03) {
+        /* The keyboard MCU needs time to become ready after reconnecting. */
+        mod_delayed_work(system_freezable_wq, &device->restore_mode_work, msecs_to_jiffies(400));
         return 0;
     }
 
@@ -5660,6 +5689,10 @@ static void razer_kbd_init(struct razer_kbd_device *dev, struct hid_device *hdev
     dev->usb_vid = usb_dev->descriptor.idVendor;
     dev->usb_pid = usb_dev->descriptor.idProduct;
     dev->usb_interface_protocol = intf->cur_altsetting->desc.bInterfaceProtocol;
+    INIT_DELAYED_WORK(&dev->restore_mode_work, razer_kbd_restore_mode_work);
+    INIT_WORK(&dev->ergo_bl_work, ergo_bl_work_fn);
+    atomic_set(&dev->ergo_bl_delta, 0);
+    dev->ergo_last_brightness = 128;
 }
 
 /**
@@ -5679,6 +5712,8 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         return -ENOMEM;
     }
 
+    razer_kbd_init(dev, hdev);
+
     // Allocate data in context to the usb device if not already done.
     usb_dev_data = dev_get_drvdata(&usb_dev->dev);
     if (!usb_dev_data) {
@@ -5690,9 +5725,13 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 
         dev_set_drvdata(&usb_dev->dev, usb_dev_data);
     }
-
-    // Init data
-    razer_kbd_init(dev, hdev);
+    if (is_pro_type_ergo(dev)) {
+        dev->mode_state = razer_mode_state_get(usb_dev);
+        if (!dev->mode_state) {
+            err = -ENOMEM;
+            goto exit_free;
+        }
+    }
 
     // Other interfaces are actual key-emitting devices
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
@@ -6233,6 +6272,9 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
     return 0;
 
 exit_free:
+    cancel_delayed_work_sync(&dev->restore_mode_work);
+    cancel_work_sync(&dev->ergo_bl_work);
+    razer_mode_state_put(dev->mode_state);
     kfree(dev);
     return err;
 }
@@ -6754,6 +6796,9 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     }
 
     hid_hw_stop(hdev);
+    cancel_delayed_work_sync(&dev->restore_mode_work);
+    cancel_work_sync(&dev->ergo_bl_work);
+    razer_mode_state_put(dev->mode_state);
     kfree(dev);
     hid_info(hdev, "Razer Device disconnected\n");
 }
@@ -6917,6 +6962,22 @@ MODULE_DEVICE_TABLE(hid, razer_devices);
 /**
  * Describes the contents of the driver
  */
+#ifdef CONFIG_PM
+static int razer_kbd_resume(struct hid_device *hdev)
+{
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct razer_kbd_device *device = hid_get_drvdata(hdev);
+
+    if (device &&
+        (device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED ||
+         device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS) &&
+        intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+        mod_delayed_work(system_freezable_wq, &device->restore_mode_work, msecs_to_jiffies(400));
+    }
+    return 0;
+}
+#endif
+
 static struct hid_driver razer_kbd_driver = {
     .name = "razerkbd",
     .id_table = razer_devices,
@@ -6926,6 +6987,10 @@ static struct hid_driver razer_kbd_driver = {
     .event = razer_event,
     .raw_event = razer_raw_event,
     .input_configured = razer_input_configured,
+#ifdef CONFIG_PM
+    .resume = razer_kbd_resume,
+    .reset_resume = razer_kbd_resume,
+#endif
 };
 
 module_hid_driver(razer_kbd_driver);

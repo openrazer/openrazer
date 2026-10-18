@@ -3958,6 +3958,12 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
     return count;
 }
 
+static bool is_basilisk_mobile(struct razer_mouse_device *device)
+{
+    return device->usb_pid == USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED ||
+           device->usb_pid == USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER;
+}
+
 /**
  * Write device file "device_mode"
  */
@@ -4110,7 +4116,14 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
         return -EINVAL;
     }
 
+    if (is_basilisk_mobile(device))
+        mutex_lock(&device->mode_state->lock);
     err = razer_send_payload(device, &request, &response);
+    if (is_basilisk_mobile(device)) {
+        if (!err)
+            device->mode_state->restore_driver_mode = buf[0] == 0x03 && buf[1] == 0x00;
+        mutex_unlock(&device->mode_state->lock);
+    }
     if (err)
         return err;
 
@@ -6319,6 +6332,20 @@ static int search(u8 *array, u8 value, unsigned n)
 /**
  * Raw event function
  */
+static void razer_mouse_restore_mode_work(struct work_struct *work)
+{
+    struct razer_mouse_device *device = container_of(to_delayed_work(work), struct razer_mouse_device, restore_mode_work);
+    struct razer_report request = razer_chroma_standard_set_device_mode(0x03, 0x00);
+    struct razer_report response = {0};
+
+    request.transaction_id.id = 0x1f;
+    mutex_lock(&device->mode_state->lock);
+    if (device->mode_state->restore_driver_mode &&
+        razer_send_payload(device, &request, &response) != 0)
+        hid_warn(device->hdev, "razermouse: failed to restore driver mode after wakeup\n");
+    mutex_unlock(&device->mode_state->lock);
+}
+
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
@@ -6367,8 +6394,18 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
             rdev->button_byte = data[0];
         }
 
+        /* Basilisk Mobile reconnect notification; allow its MCU to finish waking. */
+        if (hdev->product == USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER &&
+            intf->cur_altsetting->desc.bInterfaceNumber == 1 &&
+            intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
+            size == 16 && data[0] == 0x05 && data[1] == 0x09 && data[2] == 0x03) {
+            mod_delayed_work(system_freezable_wq, &rdev->restore_mode_work, msecs_to_jiffies(350));
+            return 0;
+        }
+
         /* Detect Basilisk Mobile lower thumb button (Report 0x01/0x04, usage 0xD2) */
-        if (intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
+        if (is_basilisk_mobile(rdev) &&
+            intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
             size == 16 && (data[0] == 0x01 || data[0] == 0x04)) {
             if (rdev && rdev->input) {
                 input_report_key(rdev->input, KEY_F22, search(data + 1, 0xD2, size - 1));
@@ -6467,6 +6504,9 @@ static int razer_input_configured(struct hid_device *hdev,
 
     dev->input = hidinput->input;
 
+    if (is_basilisk_mobile(dev) && dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_KEYBOARD)
+        input_set_capability(hidinput->input, EV_KEY, KEY_F22);
+
     if (intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
         switch (hdev->product) {
         case USB_DEVICE_ID_RAZER_BASILISK_V2:
@@ -6524,6 +6564,7 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct hid_device *
 
     // Initialise mutex
     mutex_init(&dev->lock);
+    INIT_DELAYED_WORK(&dev->restore_mode_work, razer_mouse_restore_mode_work);
     // Setup values
     dev->hdev = hdev;
     dev->usb_vid = usb_dev->descriptor.idVendor;
@@ -6575,6 +6616,14 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 
     // Init data
     razer_mouse_init(dev, hdev);
+
+    if (is_basilisk_mobile(dev)) {
+        dev->mode_state = razer_mode_state_get(hid_to_usb_dev(hdev));
+        if (!dev->mode_state) {
+            retval = -ENOMEM;
+            goto exit_free;
+        }
+    }
 
     switch(dev->usb_pid) {
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
@@ -7720,6 +7769,8 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     return 0;
 
 exit_free:
+    cancel_delayed_work_sync(&dev->restore_mode_work);
+    razer_mode_state_put(dev->mode_state);
     kfree(dev);
     return retval;
 }
@@ -8849,7 +8900,9 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
     }
 
     hid_hw_stop(hdev);
+    cancel_delayed_work_sync(&dev->restore_mode_work);
     hrtimer_cancel(&dev->repeat_timer);
+    razer_mode_state_put(dev->mode_state);
 
     kfree(dev);
     hid_info(hdev, "Razer Device disconnected\n");
@@ -8984,6 +9037,23 @@ MODULE_DEVICE_TABLE(hid, razer_devices);
 /**
  * Describes the contents of the driver
  */
+#ifdef CONFIG_PM
+static int razer_mouse_resume(struct hid_device *hdev)
+{
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct razer_mouse_device *rdev = hid_get_drvdata(hdev);
+
+    if (rdev &&
+        (rdev->usb_pid == USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED ||
+         rdev->usb_pid == USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER) &&
+        intf->cur_altsetting->desc.bInterfaceNumber == 0 &&
+        intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+        mod_delayed_work(system_freezable_wq, &rdev->restore_mode_work, msecs_to_jiffies(350));
+    }
+    return 0;
+}
+#endif
+
 static struct hid_driver razer_mouse_driver = {
     .name      = "razermouse",
     .id_table  = razer_devices,
@@ -8993,6 +9063,10 @@ static struct hid_driver razer_mouse_driver = {
     .raw_event = razer_raw_event,
     .input_mapping = razer_input_mapping,
     .input_configured = razer_input_configured,
+#ifdef CONFIG_PM
+    .resume = razer_mouse_resume,
+    .reset_resume = razer_mouse_resume,
+#endif
 };
 
 module_hid_driver(razer_mouse_driver);
