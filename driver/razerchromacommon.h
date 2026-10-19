@@ -155,6 +155,14 @@ struct razer_report razer_chroma_misc_get_scroll_acceleration(void);
 struct razer_report razer_chroma_misc_set_scroll_smart_reel(bool smart_reel);
 struct razer_report razer_chroma_misc_get_scroll_smart_reel(void);
 
+struct razer_report razer_chroma_misc_set_scroll_profile_position(unsigned char position);
+struct razer_report razer_chroma_misc_set_scroll_profile_list(unsigned char position, const unsigned char *ids, unsigned char count);
+struct razer_report razer_chroma_misc_get_scroll_profile_list(void);
+struct razer_report razer_chroma_misc_set_scroll_curve_header(unsigned char profile, const unsigned char *up_peak, const unsigned char *down_peak,
+        unsigned short up_points, unsigned short down_points, unsigned short speed_points);
+struct razer_report razer_chroma_misc_set_scroll_curve_points(unsigned char profile, unsigned char segment, unsigned short offset,
+        const unsigned char *points, unsigned char count);
+
 struct razer_report razer_chroma_misc_get_hyperpolling_wireless_dongle_indicator_led_mode(void);
 struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_indicator_led_mode(unsigned char mode);
 struct razer_report razer_chroma_misc_get_hyperpolling_wireless_dongle_multi_indicator_led_modes(void);
