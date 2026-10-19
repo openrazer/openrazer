@@ -6381,7 +6381,7 @@ out:
 }
 
 static void razer_mouse_check_idle_wake(struct razer_mouse_device *device,
-                                      struct usb_interface *intf, const u8 *data, int size)
+                                        struct usb_interface *intf, const u8 *data, int size)
 {
     unsigned long now = jiffies;
 
