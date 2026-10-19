@@ -12,6 +12,11 @@
 #include <linux/hrtimer.h>
 #include <linux/random.h>
 #include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 0)
+#include <linux/unaligned.h>
+#else
+#include <asm/unaligned.h>
+#endif
 
 #include "razermouse_driver.h"
 #include "razercommon.h"
@@ -3042,6 +3047,302 @@ static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct devi
     return sysfs_emit(buf, "%d\n", response.arguments[1]);
 }
 
+#define RAZER_SCROLL_PROFILE_COUNT 6
+#define RAZER_SCROLL_PROFILE_CUSTOM 6
+#define RAZER_SCROLL_CURVE_MAX_POINTS 80
+
+/* Synapse's limits: tension 100 peaks at 0.2, 8 steps per turn is a 45 degree notch. */
+#define RAZER_SCROLL_NOTCH_STRENGTH_MAX 0x3e4ccccd /* 0.2f */
+#define RAZER_SCROLL_NOTCH_WIDTH_MAX    0x42340000 /* 45.0f */
+#define RAZER_SCROLL_SPEED_FACTOR_MAX   0x3f800000 /* 1.0f */
+
+struct razer_scroll_profile_list {
+    unsigned char position;
+    unsigned char count;
+    unsigned char ids[RAZER_SCROLL_PROFILE_COUNT];
+};
+
+static int razer_get_scroll_profile_list(struct razer_mouse_device *device, struct razer_scroll_profile_list *list)
+{
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char seen = 0;
+    unsigned char i;
+    int err;
+
+    request = razer_chroma_misc_get_scroll_profile_list();
+    request.transaction_id.id = 0x1f;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    list->position = response.arguments[1];
+    list->count = response.arguments[2];
+    if (list->count < 1 || list->count > RAZER_SCROLL_PROFILE_COUNT ||
+        list->position < 1 || list->position > list->count)
+        return -EBADMSG;
+
+    for (i = 0; i < list->count; i++) {
+        list->ids[i] = response.arguments[3 + i] & 0x7f;
+        if (list->ids[i] < 1 || list->ids[i] > RAZER_SCROLL_PROFILE_COUNT || seen & BIT(list->ids[i] - 1))
+            return -EBADMSG;
+        seen |= BIT(list->ids[i] - 1);
+    }
+
+    return 0;
+}
+
+/**
+ * Write device file "scroll_profile"
+ *
+ * Activates a HyperScroll profile: 1 = standard, 2 = distinct, 3 = precise, 4 = adaptive,
+ * 5 = smooth, 6 = custom. The profile must be enabled in "scroll_profiles_enabled".
+ */
+static ssize_t razer_attr_write_scroll_profile(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_scroll_profile_list list;
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned int profile;
+    unsigned char i;
+    int err;
+
+    if (kstrtouint(buf, 0, &profile) < 0 || profile < 1 || profile > RAZER_SCROLL_PROFILE_COUNT)
+        return -EINVAL;
+
+    mutex_lock(&device->scroll_lock);
+    err = razer_get_scroll_profile_list(device, &list);
+    if (err)
+        goto out;
+
+    for (i = 0; i < list.count && list.ids[i] != profile; i++)
+        ;
+    if (i == list.count) {
+        err = -EINVAL;
+        goto out;
+    }
+
+    /* The device selects by position in the cycle list, not by profile ID. */
+    request = razer_chroma_misc_set_scroll_profile_position(i + 1);
+    request.transaction_id.id = 0x1f;
+
+    err = razer_send_payload(device, &request, &response);
+out:
+    mutex_unlock(&device->scroll_lock);
+    return err ? err : count;
+}
+
+/**
+ * Read device file "scroll_profile"
+ */
+static ssize_t razer_attr_read_scroll_profile(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_scroll_profile_list list;
+    int err;
+
+    err = razer_get_scroll_profile_list(device, &list);
+    if (err)
+        return err;
+
+    return sysfs_emit(buf, "%u\n", list.ids[list.position - 1]);
+}
+
+/**
+ * Write device file "scroll_profiles_enabled"
+ *
+ * Sets which HyperScroll profiles the profile button cycles through, as a bitmask where bit
+ * n-1 is profile n. If the active profile is disabled, the first enabled profile becomes active.
+ */
+static ssize_t razer_attr_write_scroll_profiles_enabled(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_scroll_profile_list list;
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned char ids[RAZER_SCROLL_PROFILE_COUNT];
+    unsigned char active = 0, position = 1, n = 0, id;
+    unsigned int mask;
+    int err;
+
+    if (kstrtouint(buf, 0, &mask) < 0 || mask < 1 || mask >= BIT(RAZER_SCROLL_PROFILE_COUNT))
+        return -EINVAL;
+
+    mutex_lock(&device->scroll_lock);
+    /* A malformed stored list must not block the write that replaces it. */
+    err = razer_get_scroll_profile_list(device, &list);
+    if (!err)
+        active = list.ids[list.position - 1];
+    else if (err != -EBADMSG)
+        goto out;
+
+    for (id = 1; id <= RAZER_SCROLL_PROFILE_COUNT; id++) {
+        if (!(mask & BIT(id - 1)))
+            continue;
+        ids[n++] = id;
+        if (id == active)
+            position = n;
+    }
+
+    request = razer_chroma_misc_set_scroll_profile_list(position, ids, n);
+    request.transaction_id.id = 0x1f;
+
+    err = razer_send_payload(device, &request, &response);
+out:
+    mutex_unlock(&device->scroll_lock);
+    return err ? err : count;
+}
+
+/**
+ * Read device file "scroll_profiles_enabled"
+ */
+static ssize_t razer_attr_read_scroll_profiles_enabled(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_scroll_profile_list list;
+    unsigned int mask = 0;
+    unsigned char i;
+    int err;
+
+    err = razer_get_scroll_profile_list(device, &list);
+    if (err)
+        return err;
+
+    for (i = 0; i < list.count; i++)
+        mask |= BIT(list.ids[i] - 1);
+
+    return sysfs_emit(buf, "%u\n", mask);
+}
+
+/* Maps float32 bits to an unsigned value that sorts in the same order as the float. */
+static u32 razer_float_order(u32 bits)
+{
+    return (bits & 0x80000000) ? ~bits : bits | 0x80000000;
+}
+
+static bool razer_float_is_finite(u32 bits)
+{
+    return (bits & 0x7f800000) != 0x7f800000;
+}
+
+/*
+ * Checks one curve segment of n (x, y) little-endian float32 pairs: finite, x strictly
+ * ascending, 0 <= y <= y_max. Notch segments must also run from x = 0 to at most 45.
+ */
+static bool razer_scroll_curve_segment_valid(const unsigned char *points, unsigned int n, bool notch, u32 y_max)
+{
+    u32 x, y, prev = 0;
+    unsigned int i;
+
+    for (i = 0; i < n; i++) {
+        x = get_unaligned_le32(&points[i * 8]);
+        y = get_unaligned_le32(&points[i * 8 + 4]);
+
+        if (!razer_float_is_finite(x) || (y & 0x80000000) || y > y_max)
+            return false;
+        if (notch && ((x & 0x80000000) || (i == 0 && x != 0) || x > RAZER_SCROLL_NOTCH_WIDTH_MAX))
+            return false;
+        if (i > 0 && razer_float_order(x) <= prev)
+            return false;
+        prev = razer_float_order(x);
+    }
+
+    return true;
+}
+
+/* Returns the x of the first strongest point; non-negative floats compare like integers. */
+static const unsigned char *razer_scroll_curve_peak(const unsigned char *points, unsigned int n)
+{
+    unsigned int i, peak = 0;
+
+    for (i = 1; i < n; i++)
+        if (get_unaligned_le32(&points[i * 8 + 4]) > get_unaligned_le32(&points[peak * 8 + 4]))
+            peak = i;
+
+    return &points[peak * 8];
+}
+
+static int razer_send_scroll_curve_segment(struct razer_mouse_device *device, unsigned char segment,
+        const unsigned char *points, unsigned int n)
+{
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned int offset, chunk;
+    int err;
+
+    for (offset = 0; offset < n; offset += 8) {
+        chunk = min(n - offset, 8u);
+        request = razer_chroma_misc_set_scroll_curve_points(RAZER_SCROLL_PROFILE_CUSTOM, segment, offset,
+                  &points[offset * 8], chunk);
+        request.transaction_id.id = 0x1f;
+
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+    }
+
+    return 0;
+}
+
+/**
+ * Write device file "scroll_custom_profile"
+ *
+ * Sets the detent curves of the custom HyperScroll profile. Binary format, little-endian:
+ *   u8 up_points, u8 down_points, u8 speed_points, then that many (x, y) f32 pairs for
+ *   scrolling up, scrolling down, and the strength multiplier over signed wheel speed.
+ * Notch x is in degrees from 0 to the notch width (at most 45); y is the strength, at most 0.2.
+ */
+static ssize_t razer_attr_write_scroll_custom_profile(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    const unsigned char *data = (const unsigned char *)buf;
+    const unsigned char *up, *down, *speed;
+    unsigned int up_points, down_points, speed_points;
+    int err;
+
+    if (count < 3)
+        return -EINVAL;
+
+    up_points = data[0];
+    down_points = data[1];
+    speed_points = data[2];
+    if (up_points < 2 || up_points > RAZER_SCROLL_CURVE_MAX_POINTS ||
+        down_points < 2 || down_points > RAZER_SCROLL_CURVE_MAX_POINTS ||
+        speed_points < 2 || speed_points > RAZER_SCROLL_CURVE_MAX_POINTS ||
+        count != 3 + (up_points + down_points + speed_points) * 8)
+        return -EINVAL;
+
+    up = &data[3];
+    down = up + up_points * 8;
+    speed = down + down_points * 8;
+    if (!razer_scroll_curve_segment_valid(up, up_points, true, RAZER_SCROLL_NOTCH_STRENGTH_MAX) ||
+        !razer_scroll_curve_segment_valid(down, down_points, true, RAZER_SCROLL_NOTCH_STRENGTH_MAX) ||
+        !razer_scroll_curve_segment_valid(speed, speed_points, false, RAZER_SCROLL_SPEED_FACTOR_MAX))
+        return -EINVAL;
+
+    /* The header only takes effect once every point it announces has been written. */
+    request = razer_chroma_misc_set_scroll_curve_header(RAZER_SCROLL_PROFILE_CUSTOM,
+              razer_scroll_curve_peak(up, up_points), razer_scroll_curve_peak(down, down_points),
+              up_points, down_points, speed_points);
+    request.transaction_id.id = 0x1f;
+
+    mutex_lock(&device->scroll_lock);
+    err = razer_send_payload(device, &request, &response);
+    if (!err)
+        err = razer_send_scroll_curve_segment(device, 1, up, up_points);
+    if (!err)
+        err = razer_send_scroll_curve_segment(device, 2, down, down_points);
+    if (!err)
+        err = razer_send_scroll_curve_segment(device, 3, speed, speed_points);
+    mutex_unlock(&device->scroll_lock);
+
+    return err ? err : count;
+}
+
 static ssize_t razer_attr_write_tilt_hwheel(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
@@ -6025,6 +6326,9 @@ static DEVICE_ATTR(device_idle_time,          0660, razer_attr_read_device_idle_
 static DEVICE_ATTR(scroll_mode,               0660, razer_attr_read_scroll_mode,           razer_attr_write_scroll_mode);
 static DEVICE_ATTR(scroll_acceleration,       0660, razer_attr_read_scroll_acceleration,   razer_attr_write_scroll_acceleration);
 static DEVICE_ATTR(scroll_smart_reel,         0660, razer_attr_read_scroll_smart_reel,     razer_attr_write_scroll_smart_reel);
+static DEVICE_ATTR(scroll_profile,            0660, razer_attr_read_scroll_profile,        razer_attr_write_scroll_profile);
+static DEVICE_ATTR(scroll_profiles_enabled,   0660, razer_attr_read_scroll_profiles_enabled, razer_attr_write_scroll_profiles_enabled);
+static DEVICE_ATTR(scroll_custom_profile,     0220, NULL,                                  razer_attr_write_scroll_custom_profile);
 
 static DEVICE_ATTR(tilt_hwheel,               0660, razer_attr_read_tilt_hwheel,           razer_attr_write_tilt_hwheel);
 static DEVICE_ATTR(tilt_repeat,               0660, razer_attr_read_tilt_repeat,           razer_attr_write_tilt_repeat);
@@ -6507,6 +6811,7 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct hid_device *
 
     // Initialise mutex
     mutex_init(&dev->lock);
+    mutex_init(&dev->scroll_lock);
     // Setup values
     dev->hdev = hdev;
     dev->usb_vid = usb_dev->descriptor.idVendor;
@@ -7264,6 +7569,11 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_acceleration);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_profile);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_profiles_enabled);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_custom_profile);
 
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
@@ -8466,6 +8776,11 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+
+            device_remove_file(&hdev->dev, &dev_attr_scroll_acceleration);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_profile);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_profiles_enabled);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_custom_profile);
 
             device_remove_file(&hdev->dev, &dev_attr_charge_level);
             device_remove_file(&hdev->dev, &dev_attr_charge_status);

@@ -141,6 +141,8 @@
 struct razer_mouse_device {
     struct hid_device *hdev;
     struct mutex lock;
+    /* Serialises multi-report HyperScroll updates; lock is taken per report. */
+    struct mutex scroll_lock;
 
     struct input_dev *input;
     struct hrtimer repeat_timer;
