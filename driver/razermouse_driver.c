@@ -6335,21 +6335,78 @@ static int search(u8 *array, u8 value, unsigned n)
 static void razer_mouse_restore_mode_work(struct work_struct *work)
 {
     struct razer_mouse_device *device = container_of(to_delayed_work(work), struct razer_mouse_device, restore_mode_work);
-    struct razer_report request = razer_chroma_standard_set_device_mode(0x03, 0x00);
+    struct razer_report request = razer_chroma_standard_get_device_mode();
     struct razer_report response = {0};
+    int err;
 
     request.transaction_id.id = 0x1f;
     mutex_lock(&device->mode_state->lock);
-    if (device->mode_state->restore_driver_mode &&
-        razer_send_payload(device, &request, &response) != 0)
-        hid_warn(device->hdev, "razermouse: failed to restore driver mode after wakeup\n");
+    if (!device->mode_state->restore_driver_mode) {
+        device->restore_mode_retries = 0;
+        goto out;
+    }
+
+    err = razer_send_payload(device, &request, &response);
+    if (err || response.status != RAZER_CMD_SUCCESSFUL)
+        goto retry;
+    if (response.arguments[0] == 0x03 && response.arguments[1] == 0x00)
+        goto restored;
+
+    request = razer_chroma_standard_set_device_mode(0x03, 0x00);
+    request.transaction_id.id = 0x1f;
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        goto retry;
+
+    /* A busy/successful acknowledgement alone does not prove the MCU applied it. */
+    request = razer_chroma_standard_get_device_mode();
+    request.transaction_id.id = 0x1f;
+    err = razer_send_payload(device, &request, &response);
+    if (err || response.status != RAZER_CMD_SUCCESSFUL ||
+        response.arguments[0] != 0x03 || response.arguments[1] != 0x00)
+        goto retry;
+
+restored:
+    device->restore_mode_retries = 0;
+    goto out;
+retry:
+    if (++device->restore_mode_retries < 3) {
+        mod_delayed_work(system_freezable_wq, &device->restore_mode_work, msecs_to_jiffies(500));
+    } else {
+        device->restore_mode_retries = 0;
+        hid_warn(device->hdev, "razermouse: failed to verify driver mode after wakeup\n");
+    }
+out:
     mutex_unlock(&device->mode_state->lock);
+}
+
+static void razer_mouse_check_idle_wake(struct razer_mouse_device *device,
+                                      struct usb_interface *intf, const u8 *data, int size)
+{
+    unsigned long now = jiffies;
+
+    if (device->usb_pid != USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER ||
+        intf->cur_altsetting->desc.bInterfaceNumber != 0 ||
+        intf->cur_altsetting->desc.bInterfaceProtocol != USB_INTERFACE_PROTOCOL_MOUSE ||
+        size != 8)
+        return;
+
+    /* Byte 1 is padding. Ignore empty reports, but count button releases. */
+    if (!data[0] && data[0] == device->button_byte && !memchr_inv(data + 2, 0, size - 2))
+        return;
+
+    /* Some wakes omit the status report. Check once activity resumes after a gap. */
+    if (time_after(now, device->last_mode_activity + msecs_to_jiffies(5000)))
+        mod_delayed_work(system_freezable_wq, &device->restore_mode_work, msecs_to_jiffies(350));
+    device->last_mode_activity = now;
 }
 
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct razer_mouse_device *rdev = hid_get_drvdata(hdev);
+
+    razer_mouse_check_idle_wake(rdev, intf, data, size);
 
     switch (hdev->product) {
     case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
@@ -6565,6 +6622,7 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct hid_device *
     // Initialise mutex
     mutex_init(&dev->lock);
     INIT_DELAYED_WORK(&dev->restore_mode_work, razer_mouse_restore_mode_work);
+    dev->last_mode_activity = jiffies;
     // Setup values
     dev->hdev = hdev;
     dev->usb_vid = usb_dev->descriptor.idVendor;

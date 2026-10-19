@@ -145,6 +145,8 @@ struct razer_mouse_device {
     struct mutex lock;
     struct razer_mode_state *mode_state;
     struct delayed_work restore_mode_work;
+    unsigned int restore_mode_retries;
+    unsigned long last_mode_activity;
 
     struct input_dev *input;
     struct hrtimer repeat_timer;
