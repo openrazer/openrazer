@@ -7,6 +7,9 @@
 #ifndef __HID_RAZER_KBD_H
 #define __HID_RAZER_KBD_H
 
+#include <linux/atomic.h>
+#include <linux/workqueue.h>
+
 #define USB_DEVICE_ID_RAZER_BLACKWIDOW_ULTIMATE_2012 0x010D
 // 2011 or so edition, see https://web.archive.org/web/20111113132427/http://store.razerzone.com:80/store/razerusa/en_US/pd/productID.235228400/categoryId.49136200/parentCategoryId.35156900
 #define USB_DEVICE_ID_RAZER_BLACKWIDOW_STEALTH_EDITION 0x010E
@@ -126,6 +129,8 @@
 #define USB_DEVICE_ID_RAZER_JORO 0x02CD
 #define USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ 0x02CF
 #define USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS 0x02D5
+#define USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS 0x02C2
+#define USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED 0x02C4
 #define USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED 0x02D7
 #define USB_DEVICE_ID_RAZER_BLADE_16_2026 0x02E0
 #define USB_DEVICE_ID_RAZER_BLADE_18_2026 0x02E1
@@ -171,6 +176,11 @@
 struct razer_kbd_device {
     struct hid_device *hdev;
     struct mutex lock;
+    struct razer_mode_state *mode_state;
+    struct delayed_work restore_mode_work;
+    struct work_struct ergo_bl_work;
+    atomic_t ergo_bl_delta;
+    unsigned char ergo_last_brightness;
     unsigned char usb_interface_protocol;
     unsigned short usb_vid;
     unsigned short usb_pid;

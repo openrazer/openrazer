@@ -6,6 +6,7 @@
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/module.h>
+#include <linux/workqueue.h>
 #include <linux/init.h>
 #include <linux/usb/input.h>
 #include <linux/hid.h>
@@ -354,6 +355,7 @@ static void razer_get_report_params(struct usb_device *usb_dev, uint *report_ind
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         *report_index = 0x03;
         *response_index = 0x03;
@@ -382,6 +384,7 @@ static void razer_get_report_params(struct usb_device *usb_dev, uint *report_ind
         *wait = RAZER_BLACKWIDOW_CHROMA_WAIT_US;
         break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         *report_index = 0x02;
         *response_index = 0x02;
@@ -517,6 +520,12 @@ static ssize_t razer_attr_read_kbd_layout(struct device *dev, struct device_attr
     return sysfs_emit(buf, "%02x\n", response.arguments[0]);
 }
 
+static bool is_pro_type_ergo(struct razer_kbd_device *device)
+{
+    return device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED ||
+           device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS;
+}
+
 /**
  * Device mode function
  */
@@ -558,6 +567,7 @@ static int razer_set_device_mode(struct razer_kbd_device *device, unsigned char 
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_X_ALT:
     case USB_DEVICE_ID_RAZER_ORNATA_V3_TENKEYLESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
     case USB_DEVICE_ID_RAZER_TARTARUS_PRO:
         request.transaction_id.id = 0x1F;
@@ -568,6 +578,7 @@ static int razer_set_device_mode(struct razer_kbd_device *device, unsigned char 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         request.transaction_id.id = 0x9F;
         break;
@@ -732,6 +743,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_JORO:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         request.transaction_id.id = 0x1f;
         break;
@@ -741,6 +753,7 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         request.transaction_id.id = 0x9f;
         break;
@@ -781,6 +794,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_JORO:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         request.transaction_id.id = 0x1f;
         break;
@@ -790,6 +804,7 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         request.transaction_id.id = 0x9f;
         break;
@@ -1005,7 +1020,9 @@ static ssize_t razer_attr_write_game_led_state(struct device *dev, struct device
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_75PCT:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
@@ -1105,7 +1122,9 @@ static ssize_t razer_attr_read_game_led_state(struct device *dev, struct device_
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_75PCT:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_TK:
@@ -1694,10 +1713,15 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer BlackWidow V4 75%";
         break;
 
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
+        device_type = "Razer Pro Type Ergo (Wired)";
+        break;
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
+        device_type = "Razer Pro Type Ergo (Wireless)";
+        break;
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         device_type = "Razer BlackWidow V4 Tenkeyless HyperSpeed (Wired)";
         break;
-
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         device_type = "Razer BlackWidow V4 Tenkeyless HyperSpeed (Wireless)";
         break;
@@ -2327,6 +2351,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         request = razer_chroma_extended_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
         request.transaction_id.id = 0x1F;
@@ -2342,6 +2367,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         request = razer_chroma_extended_matrix_effect_none(VARSTORE, BACKLIGHT_LED);
         request.transaction_id.id = 0x9F;
@@ -2508,6 +2534,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, direction);
         request.transaction_id.id = 0x1F;
@@ -2523,6 +2550,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, BACKLIGHT_LED, direction);
         request.transaction_id.id = 0x9F;
@@ -2687,6 +2715,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, BACKLIGHT_LED);
         request.transaction_id.id = 0x1F;
@@ -2702,6 +2731,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, BACKLIGHT_LED);
         request.transaction_id.id = 0x9F;
@@ -2865,6 +2895,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         request = razer_chroma_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
         request.transaction_id.id = 0x1F;
@@ -2880,6 +2911,7 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         request = razer_chroma_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
         request.transaction_id.id = 0x9F;
@@ -3134,6 +3166,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         if (count != 3) {
             dev_warn(dev, "razerkbd: Static mode only accepts RGB (3byte)\n");
@@ -3163,6 +3196,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         if (count != 3) {
             dev_warn(dev, "razerkbd: Static mode only accepts RGB (3byte)\n");
@@ -3290,6 +3324,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         if (count == 7) {
             request = razer_chroma_extended_matrix_effect_starlight_dual(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
@@ -3329,6 +3364,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         if (count == 7) {
             request = razer_chroma_extended_matrix_effect_starlight_dual(VARSTORE, BACKLIGHT_LED, buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
@@ -3611,6 +3647,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         if (count == 3) { // Single colour mode
             request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
@@ -3650,6 +3687,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         if (count == 3) { // Single colour mode
             request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
@@ -3929,6 +3967,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         request = razer_chroma_extended_matrix_effect_custom_frame();
         request.transaction_id.id = 0x1F;
@@ -3948,6 +3987,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         request = razer_chroma_extended_matrix_effect_custom_frame();
         request.transaction_id.id = 0x9F;
@@ -4156,6 +4196,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
     case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, BACKLIGHT_LED, brightness);
         request.transaction_id.id = 0x1F;
@@ -4171,6 +4212,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, BACKLIGHT_LED, brightness);
         request.transaction_id.id = 0x9F;
@@ -4332,6 +4374,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
     case USB_DEVICE_ID_RAZER_JORO:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_75PCT:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         request = razer_chroma_extended_matrix_get_brightness(VARSTORE, BACKLIGHT_LED);
         request.transaction_id.id = 0x1F;
@@ -4342,6 +4385,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         request = razer_chroma_extended_matrix_get_brightness(VARSTORE, BACKLIGHT_LED);
         request.transaction_id.id = 0x9F;
@@ -4477,7 +4521,14 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     request = razer_chroma_standard_set_device_mode(buf[0], buf[1]);
     request.transaction_id.id = 0xFF;
 
+    if (is_pro_type_ergo(device))
+        mutex_lock(&device->mode_state->lock);
     err = razer_send_payload(device, &request, &response);
+    if (is_pro_type_ergo(device)) {
+        if (!err)
+            device->mode_state->restore_driver_mode = buf[0] == 0x03 && buf[1] == 0x00;
+        mutex_unlock(&device->mode_state->lock);
+    }
     if (err)
         return err;
 
@@ -4596,6 +4647,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_TKL:
         case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_MINI:
         case USB_DEVICE_ID_RAZER_HUNTSMAN_V3_PRO_8KHZ:
+        case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
             request = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             request.transaction_id.id = 0x1F;
@@ -4615,6 +4667,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_MINI_HYPERSPEED_WIRELESS:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRELESS:
+        case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
             request = razer_chroma_extended_matrix_set_custom_frame(row_id, start_col, stop_col, (unsigned char*)&buf[offset]);
             request.transaction_id.id = 0x9F;
@@ -4725,11 +4778,13 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_75PCT:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         request = razer_chroma_misc_get_polling_rate2();
         request.transaction_id.id = 0x1f;
         break;
 
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         request = razer_chroma_misc_get_polling_rate2();
         request.transaction_id.id = 0x9f;
@@ -4794,11 +4849,13 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_75PCT:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
         request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x00);
         request.transaction_id.id = 0x1f;
         break;
 
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x00);
         request.transaction_id.id = 0x9f;
@@ -4956,9 +5013,29 @@ static DEVICE_ATTR(charge_effect,           0220, NULL,                         
 static DEVICE_ATTR(charge_colour,           0220, NULL,                                       razer_attr_write_charge_colour);
 static DEVICE_ATTR(charge_low_threshold,    0660, razer_attr_read_charge_low_threshold,       razer_attr_write_charge_low_threshold);
 
-/**
- * Deal with FN toggle
- */
+/* Brightness changes run outside the HID input callback and belong to this interface. */
+static void ergo_bl_work_fn(struct work_struct *work)
+{
+    struct razer_kbd_device *dev = container_of(work, struct razer_kbd_device, ergo_bl_work);
+    struct razer_report req = {0}, resp = {0};
+    unsigned char tx = dev->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS ? 0x9F : 0x1F;
+    int delta, brightness;
+
+    while ((delta = atomic_xchg(&dev->ergo_bl_delta, 0)) != 0) {
+        req = razer_chroma_extended_matrix_get_brightness(VARSTORE, BACKLIGHT_LED);
+        req.transaction_id.id = tx;
+        if (razer_send_payload(dev, &req, &resp) == 0)
+            dev->ergo_last_brightness = resp.arguments[2];
+        brightness = clamp(dev->ergo_last_brightness + delta, 0, 255);
+        req = razer_chroma_extended_matrix_brightness(VARSTORE, BACKLIGHT_LED, brightness);
+        req.transaction_id.id = tx;
+        if (razer_send_payload(dev, &req, &resp) != 0)
+            hid_warn(dev->hdev, "razerkbd: failed to update backlight brightness\n");
+        else
+            dev->ergo_last_brightness = brightness;
+    }
+}
+
 static int razer_event(struct hid_device *hdev, struct hid_field *field, struct hid_usage *usage, __s32 value)
 {
     struct razer_kbd_device *device = hid_get_drvdata(hdev);
@@ -4966,15 +5043,37 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     struct razer_kbd_usb_device_data *usb_dev_data = dev_get_drvdata(&usb_dev->dev);
     const struct razer_key_translation *translation;
 
-    // No translations needed on the Blades
-    if (is_blade_laptop(device)) {
+    if (is_blade_laptop(device))
         return 0;
+
+    if ((device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED ||
+         device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS) &&
+        field && field->hidinput && field->hidinput->input) {
+        struct input_dev *in = field->hidinput->input;
+        if (usage->hid == HID_GD_WHEEL || (usage->type == EV_REL && usage->code == REL_WHEEL)) {
+            if (value != 0) {
+                unsigned int k = (value > 0) ? KEY_VOLUMEUP : KEY_VOLUMEDOWN;
+                input_report_key(in, k, 1);
+                input_sync(in);
+                input_report_key(in, k, 0);
+                input_sync(in);
+            }
+            return 1;
+        }
+        if (usage->hid == 0x000c0238 || (usage->type == EV_REL && usage->code == REL_HWHEEL)) {
+            if (value != 0) {
+                unsigned int k = (value > 0) ? KEY_F14 : KEY_F13;
+                input_report_key(in, k, 1);
+                input_sync(in);
+                input_report_key(in, k, 0);
+                input_sync(in);
+            }
+            return 1;
+        }
     }
 
-    if(device->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE) {
-        // Skip this if its control (mouse) interface
+    if (device->usb_interface_protocol == USB_INTERFACE_PROTOCOL_MOUSE)
         return 0;
-    }
 
     // Block win key
     if(device->block_keys[0] && (usage->code == KEY_LEFTMETA || usage->code == KEY_RIGHTMETA)) {
@@ -4991,6 +5090,78 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
     }
     // Block Alt-F4
     if(device->block_keys[2] && device->left_alt_on && usage->code == KEY_F4) {
+        return 1;
+    }
+
+    if ((device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED ||
+         device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS) &&
+        field && field->hidinput && field->hidinput->input &&
+        usage->type == EV_KEY && ((usage->code >= KEY_F1 && usage->code <= KEY_F10) || usage->code == KEY_F11 || usage->code == KEY_F12)) {
+        struct input_dev *in = field->hidinput->input;
+        bool media = false;
+        if (value) {
+            if (!usb_dev_data->fn_on || test_bit(usage->code, usb_dev_data->pressed_fn)) {
+                set_bit(usage->code, usb_dev_data->pressed_fn);
+                media = true;
+            }
+        } else if (test_bit(usage->code, usb_dev_data->pressed_fn)) {
+            clear_bit(usage->code, usb_dev_data->pressed_fn);
+            media = true;
+        }
+        if (!media) return 0;
+        switch (usage->code) {
+        case KEY_F1:
+            input_report_key(in, KEY_BRIGHTNESSDOWN, value);
+            break;
+        case KEY_F2:
+            input_report_key(in, KEY_BRIGHTNESSUP, value);
+            break;
+        case KEY_F3:
+            input_report_key(in, KEY_LEFTMETA, value);
+            input_report_key(in, KEY_TAB, value);
+            break;
+        case KEY_F4:
+            input_report_key(in, KEY_SEARCH, value);
+            break;
+        case KEY_F5:
+            input_report_key(in, KEY_LEFTMETA, value);
+            input_report_key(in, KEY_H, value);
+            break;
+        case KEY_F6:
+            input_report_key(in, KEY_LEFTMETA, value);
+            input_report_key(in, KEY_L, value);
+            break;
+        case KEY_F7:
+            input_report_key(in, KEY_COMPOSE, value);
+            break;
+        case KEY_F8:
+            input_report_key(in, KEY_CALC, value);
+            break;
+        case KEY_F9:
+            input_report_key(in, KEY_LEFTMETA, value);
+            input_report_key(in, KEY_LEFTSHIFT, value);
+            input_report_key(in, KEY_S, value);
+            break;
+        case KEY_F10:
+            input_report_key(in, KEY_LEFTMETA, value);
+            input_report_key(in, KEY_I, value);
+            break;
+        case KEY_F11:
+            if (value == 1) {
+                atomic_add(-25, &device->ergo_bl_delta);
+                queue_work(system_freezable_wq, &device->ergo_bl_work);
+            }
+            input_report_key(in, KEY_KBDILLUMDOWN, value);
+            break;
+        case KEY_F12:
+            if (value == 1) {
+                atomic_add(25, &device->ergo_bl_delta);
+                queue_work(system_freezable_wq, &device->ergo_bl_work);
+            }
+            input_report_key(in, KEY_KBDILLUMUP, value);
+            break;
+        }
+        input_sync(in);
         return 1;
     }
 
@@ -5046,7 +5217,9 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
         translation = find_translation(chroma_keys_8, usage->code);
         break;
 
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         translation = find_translation(chroma_keys_9, usage->code);
         break;
@@ -5099,9 +5272,11 @@ static int razer_event(struct hid_device *hdev, struct hid_field *field, struct 
  *
  * HID Usage Table http://www.freebsddiary.org/APC/usb_hid_usages.php
  */
+static bool ergo_split_keys = false;
+module_param(ergo_split_keys, bool, 0644);
+
 static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_usb_device_data *usb_dev_data, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
 {
-    // The event were looking for is 16, 22 or 48 bytes long and starts with 0x04.
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
        ((size == 48) || (size == 22) || (size == 16)) && data[0] == 0x04) {
         // Convert 04... to 0100...
@@ -5156,8 +5331,23 @@ static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_us
             case 0x54: // Prev (song)
                 cur_value = USB_HID_KEY_MEDIA_PREVIOUSSONG;
                 break;
-            case 0x60: // BlackWidow V4 Pro command dial button
-                cur_value = USB_HID_KEY_F24; // F24 (not sure if we want it this way)
+            case 0x41:
+                cur_value = USB_HID_KEY_F21;
+                break;
+            case 0xF7:
+                cur_value = 0x72;
+                break; // AI button -> KEY_F23
+            case 0x60:
+                cur_value = USB_HID_KEY_F24;
+                break;
+            case 0xFB:
+                cur_value = ergo_split_keys ? USB_HID_KEY_F19 : USB_HID_KEY_BACKSPACE;
+                break;
+            case 0xFC:
+                cur_value = ergo_split_keys ? USB_HID_KEY_F18 : USB_HID_KEY_B;
+                break;
+            case 0xFD:
+                cur_value = ergo_split_keys ? USB_HID_KEY_F20 : USB_HID_KEY_SPACE;
                 break;
             case 0x63: // BlackWidow V4 Pro Side button 1
                 cur_value = USB_HID_KEY_F18; // F18
@@ -5201,7 +5391,6 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_us
 {
     DECLARE_BITMAP(bitfield, RAW_EVENT_BITFIELD_BITS) = { 0 };
 
-    // The event were looking for is 16, 22 or 48 bytes long and starts with 0x04.
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
        ((size == 48) || (size == 22) || (size == 16)) && data[0] == 0x04) {
         // Convert 04... to 0100...
@@ -5258,8 +5447,23 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_us
             case 0x54: // Prev (song)
                 cur_value = USB_HID_KEY_MEDIA_PREVIOUSSONG;
                 break;
-            case 0x60: // BlackWidow V4 Pro command dial button
-                cur_value = USB_HID_KEY_F24; // F24 (not sure if we want it this way)
+            case 0x41:
+                cur_value = USB_HID_KEY_F21;
+                break;
+            case 0xF7:
+                cur_value = 0x72;
+                break; // AI button -> KEY_F23
+            case 0x60:
+                cur_value = USB_HID_KEY_F24;
+                break;
+            case 0xFB:
+                cur_value = ergo_split_keys ? USB_HID_KEY_F19 : USB_HID_KEY_BACKSPACE;
+                break;
+            case 0xFC:
+                cur_value = ergo_split_keys ? USB_HID_KEY_F18 : USB_HID_KEY_B;
+                break;
+            case 0xFD:
+                cur_value = ergo_split_keys ? USB_HID_KEY_F20 : USB_HID_KEY_SPACE;
                 break;
             case 0x63: // BlackWidow V4 Pro Side button 1
                 cur_value = USB_HID_KEY_F18; // F18
@@ -5354,6 +5558,21 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_us
  *
  * Handles provided HID reports, branched out for specific keyboard models, since some keyboards need specific handling.
  */
+static void razer_kbd_restore_mode_work(struct work_struct *work)
+{
+    struct razer_kbd_device *device = container_of(to_delayed_work(work), struct razer_kbd_device, restore_mode_work);
+    struct razer_report request = razer_chroma_standard_set_device_mode(0x03, 0x00);
+    struct razer_report response = {0};
+
+    /* Match device_mode writes, which use 0xFF for this command on both models. */
+    request.transaction_id.id = 0xFF;
+    mutex_lock(&device->mode_state->lock);
+    if (device->mode_state->restore_driver_mode &&
+        razer_send_payload(device, &request, &response) != 0)
+        hid_warn(device->hdev, "razerkbd: failed to restore driver mode after wakeup\n");
+    mutex_unlock(&device->mode_state->lock);
+}
+
 static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u8 *data, int size)
 {
     struct razer_kbd_device *device = hid_get_drvdata(hdev);
@@ -5363,6 +5582,14 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 
     // No translations needed on the Pro...
     if (is_blade_laptop(device)) {
+        return 0;
+    }
+
+    if (device && device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS &&
+        intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
+        size == 16 && data[0] == 0x05 && data[1] == 0x09 && data[2] == 0x03) {
+        /* The keyboard MCU needs time to become ready after reconnecting. */
+        mod_delayed_work(system_freezable_wq, &device->restore_mode_work, msecs_to_jiffies(400));
         return 0;
     }
 
@@ -5382,7 +5609,9 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
     case USB_DEVICE_ID_RAZER_JORO:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
         return razer_raw_event_bitfield(hdev, usb_dev_data, intf, report, data, size);
     default:
@@ -5428,6 +5657,20 @@ static int razer_kbd_input_mapping(struct hid_device *hdev, struct hid_input *hi
             return 1;
         }
         return 0;
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
+    case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS: {
+        static const unsigned int keys[] = {
+            KEY_VOLUMEUP, KEY_VOLUMEDOWN, KEY_MUTE, KEY_PLAYPAUSE,
+            KEY_F13, KEY_F14, KEY_F18, KEY_F19, KEY_F20, KEY_F21, KEY_F23, KEY_F24,
+            KEY_BRIGHTNESSDOWN, KEY_BRIGHTNESSUP, KEY_SEARCH, KEY_CALC, KEY_COMPOSE,
+            KEY_KBDILLUMDOWN, KEY_KBDILLUMUP, KEY_LEFTMETA, KEY_LEFTSHIFT,
+            KEY_TAB, KEY_H, KEY_L, KEY_S, KEY_I
+        };
+        int i;
+        for (i = 0; i < ARRAY_SIZE(keys); i++)
+            input_set_capability(hidinput->input, EV_KEY, keys[i]);
+        return 0;
+    }
 
     default:
         return 0;
@@ -5446,6 +5689,10 @@ static void razer_kbd_init(struct razer_kbd_device *dev, struct hid_device *hdev
     dev->usb_vid = usb_dev->descriptor.idVendor;
     dev->usb_pid = usb_dev->descriptor.idProduct;
     dev->usb_interface_protocol = intf->cur_altsetting->desc.bInterfaceProtocol;
+    INIT_DELAYED_WORK(&dev->restore_mode_work, razer_kbd_restore_mode_work);
+    INIT_WORK(&dev->ergo_bl_work, ergo_bl_work_fn);
+    atomic_set(&dev->ergo_bl_delta, 0);
+    dev->ergo_last_brightness = 128;
 }
 
 /**
@@ -5465,6 +5712,8 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
         return -ENOMEM;
     }
 
+    razer_kbd_init(dev, hdev);
+
     // Allocate data in context to the usb device if not already done.
     usb_dev_data = dev_get_drvdata(&usb_dev->dev);
     if (!usb_dev_data) {
@@ -5476,9 +5725,13 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
 
         dev_set_drvdata(&usb_dev->dev, usb_dev_data);
     }
-
-    // Init data
-    razer_kbd_init(dev, hdev);
+    if (is_pro_type_ergo(dev)) {
+        dev->mode_state = razer_mode_state_get(usb_dev);
+        if (!dev->mode_state) {
+            err = -ENOMEM;
+            goto exit_free;
+        }
+    }
 
     // Other interfaces are actual key-emitting devices
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
@@ -5732,7 +5985,9 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);                     // Poll Rate
             break;
 
+        case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
+        case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
@@ -6017,6 +6272,9 @@ static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *
     return 0;
 
 exit_free:
+    cancel_delayed_work_sync(&dev->restore_mode_work);
+    cancel_work_sync(&dev->ergo_bl_work);
+    razer_mode_state_put(dev->mode_state);
     kfree(dev);
     return err;
 }
@@ -6284,7 +6542,9 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);                     // Poll Rate
             break;
 
+        case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED:
+        case USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS:
         case USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS:
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);            // Wave effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);        // Spectrum effect
@@ -6536,6 +6796,9 @@ static void razer_kbd_disconnect(struct hid_device *hdev)
     }
 
     hid_hw_stop(hdev);
+    cancel_delayed_work_sync(&dev->restore_mode_work);
+    cancel_work_sync(&dev->ergo_bl_work);
+    razer_mode_state_put(dev->mode_state);
     kfree(dev);
     hid_info(hdev, "Razer Device disconnected\n");
 }
@@ -6674,6 +6937,8 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_X) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_75PCT) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BLACKWIDOW_V4_TENKEYLESS_HYPERSPEED_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHSTALKER_V2_PRO_TKL_WIRED) },
@@ -6697,6 +6962,22 @@ MODULE_DEVICE_TABLE(hid, razer_devices);
 /**
  * Describes the contents of the driver
  */
+#ifdef CONFIG_PM
+static int razer_kbd_resume(struct hid_device *hdev)
+{
+    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
+    struct razer_kbd_device *device = hid_get_drvdata(hdev);
+
+    if (device &&
+        (device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRED ||
+         device->usb_pid == USB_DEVICE_ID_RAZER_PRO_TYPE_ERGO_WIRELESS) &&
+        intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+        mod_delayed_work(system_freezable_wq, &device->restore_mode_work, msecs_to_jiffies(400));
+    }
+    return 0;
+}
+#endif
+
 static struct hid_driver razer_kbd_driver = {
     .name = "razerkbd",
     .id_table = razer_devices,
@@ -6706,6 +6987,10 @@ static struct hid_driver razer_kbd_driver = {
     .event = razer_event,
     .raw_event = razer_raw_event,
     .input_configured = razer_input_configured,
+#ifdef CONFIG_PM
+    .resume = razer_kbd_resume,
+    .reset_resume = razer_kbd_resume,
+#endif
 };
 
 module_hid_driver(razer_kbd_driver);

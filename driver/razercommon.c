@@ -12,6 +12,47 @@
 
 #include "razercommon.h"
 
+/* Per-module list: do not retain recovery state in USB drvdata across module reloads. */
+static LIST_HEAD(razer_mode_states);
+static DEFINE_MUTEX(razer_mode_states_lock);
+
+struct razer_mode_state *razer_mode_state_get(struct usb_device *usb_dev)
+{
+    struct razer_mode_state *state;
+
+    mutex_lock(&razer_mode_states_lock);
+    list_for_each_entry(state, &razer_mode_states, node) {
+        if (state->usb_dev == usb_dev) {
+            state->users++;
+            goto out;
+        }
+    }
+
+    state = kzalloc(sizeof(*state), GFP_KERNEL);
+    if (state) {
+        state->usb_dev = usb_dev;
+        state->users = 1;
+        mutex_init(&state->lock);
+        list_add(&state->node, &razer_mode_states);
+    }
+out:
+    mutex_unlock(&razer_mode_states_lock);
+    return state;
+}
+
+void razer_mode_state_put(struct razer_mode_state *state)
+{
+    if (!state)
+        return;
+
+    mutex_lock(&razer_mode_states_lock);
+    if (--state->users == 0) {
+        list_del(&state->node);
+        kfree(state);
+    }
+    mutex_unlock(&razer_mode_states_lock);
+}
+
 /**
  * Send USB control report to the keyboard
  * USUALLY index = 0x02
