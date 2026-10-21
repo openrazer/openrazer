@@ -2011,18 +2011,24 @@ class RazerBasiliskV4HyperSpeedWired(__RazerDevice):
 
     USB_VID = 0x1532
     USB_PID = 0x00EB
-    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages', 'get_poll_rate', 'set_poll_rate',
-               # Battery
-               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold',
-               # Base Lighting
-               'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_reactive_effect', 'set_breath_random_effect',
-               'set_breath_single_effect', 'set_breath_dual_effect',
-               # Custom frame
-               'set_custom_effect', 'set_key_row']
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 1]
+    METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_dpi_stages', 'set_dpi_stages',
+            'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+            # Battery
+            'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold',
+            # Lighting (single-zone underglow)
+            'get_brightness', 'set_brightness', 'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect',
+            'set_breath_single_effect', 'set_breath_dual_effect',
+            # Custom frame
+            'set_custom_effect', 'set_key_row']
 
-    DEVICE_IMAGE = "https://assets3.razerzone.com/eELjqcEhuszJMDDRld0BZTGrdAE=/1500x1000/https%3A%2F%2Fmedias-p1.phoenix.razer.com%2Fsys-master-phoenix-images-container%2Fh3e%2Fhe6%2F10458043056158%2F261008-basilisk-v4-hyperspeed-black-1500X1000-6.jpg "
+    DEVICE_IMAGE = "https://assets3.razerzone.com/eELjqcEhuszJMDDRld0BZTGrdAE=/1500x1000/https%3A%2F%2Fmedias-p1.phoenix.razer.com%2Fsys-master-phoenix-images-container%2Fh3e%2Fhe6%2F10458043056158%2F261008-basilisk-v4-hyperspeed-black-1500X1000-6.jpg"
     # TODO: Find better image URL for mouse
-    DRIVER_MODE = True
+    DRIVER_MODE = False
+
+    POLL_RATES = [125, 500, 1000]
+    DPI_MAX = 33000
 
 
 class RazerBasiliskV4HyperSpeedReceiver(RazerBasiliskV4HyperSpeedWired):
@@ -2033,6 +2039,7 @@ class RazerBasiliskV4HyperSpeedReceiver(RazerBasiliskV4HyperSpeedWired):
     EVENT_FILE_REGEX = re.compile(r'.*usb-1532_Razer_Basilisk_V4_HyperSpeed_[0-9A-Z]+-if0(1|2)-event-kbd')
 
     USB_PID = 0x00EA
+    DRIVER_MODE = False
 
 
 class RazerBasiliskMobileWired(__RazerDevice):
