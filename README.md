@@ -30,6 +30,27 @@ Community supported packages are available for:
 * [Solus](https://openrazer.github.io/#solus)
 * [Void Linux](https://openrazer.github.io/#voidlinux)
 
+### Basilisk Mobile special controls
+
+The Basilisk Mobile's AI button requires driver mode. OpenRazer's daemon enables
+this mode by default for both the wired mouse and its receiver, which also enables
+the driver's sleep/wake recovery. The AI button emits F22 and wheel tilt emits
+horizontal scrolling; assign application actions with your input remapping tool.
+
+If you use the kernel driver without the OpenRazer daemon, you must enable driver
+mode separately. For automatic initialization, create
+`/etc/udev/rules.d/99-razer-basilisk-mobile.rules` with this single line:
+
+```udev
+ACTION=="add|bind|change", SUBSYSTEM=="hid", KERNEL=="0003:1532:00D[34].*", DRIVER=="razermouse", ATTRS{bInterfaceNumber}=="00", TEST=="device_mode", RUN+="/bin/sh -c 'printf \"\\003\\000\" > /sys%p/device_mode'"
+```
+
+Reload the rules with `sudo udevadm control --reload-rules`, then reconnect the
+mouse receiver or wired mouse. Matching the driver bind event ensures that mode
+is initialized even when the HID device's add event precedes driver binding.
+This optional rule always selects driver mode on matching events; remove it if
+you want another application to manage mode selection.
+
 ## Applications
 
 The following applications complement and interact with this driver:
