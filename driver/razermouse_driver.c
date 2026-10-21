@@ -1438,15 +1438,15 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BASILISK_V4_HYPERSPEED_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V4_HYPERSPEED_RECEIVER:
         switch(count) {
-            case 3: // Single colour mode
-                request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
-                break;
-            case 6: // Dual colour mode
-                request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
-                break;
-            default: // "Random" colour mode
-                request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
-                break;
+        case 3: // Single colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0]);
+            break;
+        case 6: // Dual colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            break;
+        default: // "Random" colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
+            break;
         }
         request.transaction_id.id = 0x1f;
         break;
@@ -2142,15 +2142,15 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
             return err;
 
         switch(response.arguments[1]) {
-            case 0x01:
-                polling_rate = 1000;
-                break;
-            case 0x02:
-                polling_rate = 500;
-                break;
-            case 0x08:
-                polling_rate = 125;
-                break;
+        case 0x01:
+            polling_rate = 1000;
+            break;
+        case 0x02:
+            polling_rate = 500;
+            break;
+        case 0x08:
+            polling_rate = 125;
+            break;
         }
         return sysfs_emit(buf, "%d\n", polling_rate);
 
@@ -2345,17 +2345,17 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
         request = get_razer_report(0x00, 0x0E, 0x02);
         request.arguments[0] = 0x01;
         switch(polling_rate) {
-            case 1000:
-                request.arguments[1] = 0x01;
-                break;
-            case 500:
-                request.arguments[1] = 0x02;
-                break;
-            case 125:
-                request.arguments[1] = 0x08;
-                break;
-            default:
-                return -EINVAL;
+        case 1000:
+            request.arguments[1] = 0x01;
+            break;
+        case 500:
+            request.arguments[1] = 0x02;
+            break;
+        case 125:
+            request.arguments[1] = 0x08;
+            break;
+        default:
+            return -EINVAL;
         }
         request.transaction_id.id = 0x1f;
         break;
