@@ -163,4 +163,16 @@ struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step
 struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_pair_step2(unsigned short pid);
 struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(unsigned short pid);
 
+struct razer_report razer_chroma_misc_get_side_plate(void);
+struct razer_report razer_chroma_misc_set_button_action(unsigned char variable_storage, unsigned char button, unsigned char layer, const unsigned char *action, unsigned char action_len);
+struct razer_report razer_chroma_misc_get_button_action(unsigned char variable_storage, unsigned char button, unsigned char layer);
+
+struct razer_report razer_chroma_misc_get_macro_count(void);
+struct razer_report razer_chroma_misc_get_macro_list(unsigned short start, unsigned char count);
+struct razer_report razer_chroma_misc_get_macro_length(unsigned short macro_id);
+struct razer_report razer_chroma_misc_get_macro_storage(void);
+struct razer_report razer_chroma_misc_create_macro(unsigned short macro_id, unsigned int length);
+struct razer_report razer_chroma_misc_write_macro(unsigned short macro_id, unsigned int offset, const unsigned char *data, unsigned char len);
+struct razer_report razer_chroma_misc_delete_macro(unsigned short macro_id);
+
 #endif

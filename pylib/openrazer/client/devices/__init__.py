@@ -76,6 +76,8 @@ class RazerDevice(object):
             'scroll_mode': self._has_feature('razer.device.scroll', ('getScrollMode', 'setScrollMode')),
             'scroll_acceleration': self._has_feature('razer.device.scroll', ('getScrollAcceleration', 'setScrollAcceleration')),
             'scroll_smart_reel': self._has_feature('razer.device.scroll', ('getScrollSmartReel', 'setScrollSmartReel')),
+            'onboard_buttons': self._has_feature('razer.device.onboard', ('getSidePlate', 'getButtons', 'getButtonAction', 'setButtonAction')),
+            'onboard_macros': self._has_feature('razer.device.onboard', ('addMacro', 'deleteMacro', 'getMacros', 'getMacroStorage')),
 
             # Default device is a chroma so lighting capabilities
             'lighting': self._has_feature('razer.device.lighting.chroma'),
@@ -253,6 +255,8 @@ class RazerDevice(object):
             self._dbus_interfaces['profile_led'] = _dbus.Interface(self._dbus, "razer.device.lighting.profile_led")
         if self.has('scroll_mode') or self.has('scroll_acceleration') or self.has('scroll_smart_reel'):
             self._dbus_interfaces['scroll'] = _dbus.Interface(self._dbus, "razer.device.scroll")
+        if self.has('onboard_buttons') or self.has('onboard_macros'):
+            self._dbus_interfaces['onboard'] = _dbus.Interface(self._dbus, "razer.device.onboard")
 
     def _get_available_features(self) -> dict[str, list[str]]:
         introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')

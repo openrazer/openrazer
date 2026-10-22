@@ -142,6 +142,9 @@ struct razer_mouse_device {
     struct hid_device *hdev;
     struct mutex lock;
 
+    struct mutex onboard_lock; // Serialises multi-report button and macro operations
+    unsigned char button_action_query[3]; // <storage> <button> <layer> read by button_action
+
     struct input_dev *input;
     struct hrtimer repeat_timer;
     unsigned int tilt_hwheel;
