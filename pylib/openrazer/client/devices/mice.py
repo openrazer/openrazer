@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
+import dbus as _dbus  # type: ignore
+
 from openrazer.client.devices import RazerDevice as __RazerDevice
 
 
@@ -261,5 +263,202 @@ class RazerMouse(__RazerDevice):
         """
         if self.has('scroll_smart_reel'):
             self._dbus_interfaces['scroll'].setScrollSmartReel(enabled)
+        else:
+            raise NotImplementedError()
+
+    @property
+    def side_plate(self) -> int:
+        """
+        Get the attached side plate
+
+        :return: 0 = none, 1 = 2-button, 3 = 12-button, 4 = 6-button
+        :rtype: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('onboard_buttons'):
+            return int(self._dbus_interfaces['onboard'].getSidePlate())
+        else:
+            raise NotImplementedError()
+
+    def get_button_action(self, button: int, layer: int = 0, store: int = 1) -> bytes:
+        """
+        Get the action stored on the device for a button
+
+        :param button: Button id
+        :type button: int
+
+        :param layer: 0 = standard, 1 = Hypershift
+        :type layer: int
+
+        :param store: 1 = the live profile, 2-5 = onboard profiles
+        :type store: int
+
+        :return: <type> <length> <data...>
+        :rtype: bytes
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('onboard_buttons'):
+            return bytes(self._dbus_interfaces['onboard'].getButtonAction(store, button, layer))
+        else:
+            raise NotImplementedError()
+
+    def set_button_action(self, button: int, action: bytes, layer: int = 0, stores: tuple[int, ...] = (1,)) -> None:
+        """
+        Store an action on the device for a button
+
+        The device runs store 1 and keeps it across power cycles. Synapse also writes onboard profile 2.
+
+        :param button: Button id
+        :type button: int
+
+        :param action: <type> <length> <data...>, 2 to 7 bytes
+        :type action: bytes
+
+        :param layer: 0 = standard, 1 = Hypershift
+        :type layer: int
+
+        :param stores: Stores to write, in order
+        :type stores: tuple of int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('onboard_buttons'):
+            for store in stores:
+                self._dbus_interfaces['onboard'].setButtonAction(store, button, layer, _dbus.ByteArray(action))
+        else:
+            raise NotImplementedError()
+
+    def set_button_key(self, button: int, usage: int, modifiers: int = 0, layer: int = 0) -> None:
+        """
+        Make a button send a key
+
+        :param button: Button id
+        :type button: int
+
+        :param usage: HID keyboard usage, e.g. 0x04 for A
+        :type usage: int
+
+        :param modifiers: HID modifier bitmask, e.g. 0x01 for left Ctrl
+        :type modifiers: int
+
+        :param layer: 0 = standard, 1 = Hypershift
+        :type layer: int
+        """
+        self.set_button_action(button, bytes((0x02, 0x02, modifiers, usage)), layer)
+
+    def set_button_mouse(self, button: int, mouse_button: int, layer: int = 0) -> None:
+        """
+        Make a button act as a mouse button
+
+        :param button: Button id
+        :type button: int
+
+        :param mouse_button: 1 = left, 2 = right, 3 = middle, 4 = back, 5 = forward
+        :type mouse_button: int
+
+        :param layer: 0 = standard, 1 = Hypershift
+        :type layer: int
+        """
+        self.set_button_action(button, bytes((0x01, 0x01, mouse_button)), layer)
+
+    def set_button_macro(self, button: int, macro_id: int, layer: int = 0, while_held: bool = False) -> None:
+        """
+        Make a button play an onboard macro
+
+        :param button: Button id
+        :type button: int
+
+        :param macro_id: Id of a macro added with add_onboard_macro
+        :type macro_id: int
+
+        :param layer: 0 = standard, 1 = Hypershift
+        :type layer: int
+
+        :param while_held: Repeat while the button is held instead of playing once
+        :type while_held: bool
+        """
+        if while_held:
+            action = bytes((0x04, 0x02)) + macro_id.to_bytes(2, 'big')
+        else:
+            action = bytes((0x03, 0x03)) + macro_id.to_bytes(2, 'big') + b'\x01'
+        self.set_button_action(button, action, layer)
+
+    @property
+    def onboard_macros(self) -> list[int]:
+        """
+        Get the ids of the macros in the device's memory
+
+        After a delete the device can leave live ids out of this list.
+
+        :return: Macro ids
+        :rtype: list of int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('onboard_macros'):
+            return [int(macro_id) for macro_id in self._dbus_interfaces['onboard'].getMacros()]
+        else:
+            raise NotImplementedError()
+
+    @property
+    def onboard_macro_storage(self) -> dict[str, int]:
+        """
+        Get the device's macro memory usage
+
+        :return: max_macros, total, free and deleted (bytes of deleted macros not yet reclaimed)
+        :rtype: dict
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('onboard_macros'):
+            values = [int(value) for value in self._dbus_interfaces['onboard'].getMacroStorage()]
+            return dict(zip(('max_macros', 'total', 'free', 'deleted'), values))
+        else:
+            raise NotImplementedError()
+
+    def add_onboard_macro(self, macro_id: int, events: bytes) -> None:
+        """
+        Upload a macro to the device's memory
+
+        Deleted macros keep their space until the device reclaims it, so prefer reusing ids.
+
+        :param macro_id: Macro id, 1 to 65535, not yet in use
+        :type macro_id: int
+
+        :param events: 0x01 <usage> key down, 0x02 <usage> key up, 0x11 <ms> and 0x12 <ms u16 BE> delays
+        :type events: bytes
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('onboard_macros'):
+            self._dbus_interfaces['onboard'].addMacro(macro_id, _dbus.ByteArray(events))
+        else:
+            raise NotImplementedError()
+
+    def delete_onboard_macro(self, macro_id: int) -> None:
+        """
+        Delete a macro from the device's memory
+
+        Refused while a button in any store is bound to it, so rebind those first. The check takes about 15 s.
+
+        :param macro_id: Macro id
+        :type macro_id: int
+
+        :raises ValueError: If a button is still bound to the macro
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('onboard_macros'):
+            bound = []
+            for button in self._dbus_interfaces['onboard'].getButtons():
+                for store in range(1, 6):
+                    for layer in (0, 1):
+                        action = self.get_button_action(int(button), layer, store)
+                        if action[0] in (0x03, 0x04) and int.from_bytes(action[2:4], 'big') == macro_id:
+                            bound.append("store {0} button 0x{1:02x} layer {2}".format(store, button, layer))
+            if bound:
+                raise ValueError("macro 0x{0:04x} is still bound to {1}".format(macro_id, ", ".join(bound)))
+            self._dbus_interfaces['onboard'].deleteMacro(macro_id)
         else:
             raise NotImplementedError()
