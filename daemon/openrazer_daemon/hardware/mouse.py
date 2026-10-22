@@ -1022,6 +1022,9 @@ class RazerNagaV2ProWired(__RazerDeviceBrightnessSuspend):
     METHODS = ['get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'get_dpi_stages', 'set_dpi_stages',
                # Battery
                'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time', 'get_low_battery_threshold', 'set_low_battery_threshold',
+               # Onboard buttons and macros
+               'get_side_plate', 'get_onboard_buttons', 'get_button_action', 'set_button_action',
+               'add_onboard_macro', 'delete_onboard_macro', 'get_onboard_macros', 'get_onboard_macro_storage',
                # Logo
                'get_logo_brightness', 'set_logo_brightness',
                'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none', 'set_logo_reactive', 'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
@@ -1031,6 +1034,9 @@ class RazerNagaV2ProWired(__RazerDeviceBrightnessSuspend):
                'set_custom_effect', 'set_key_row']
 
     DPI_MAX = 30000
+
+    # Every button id across all side plates
+    ONBOARD_BUTTONS = (0x01, 0x02, 0x03, 0x04, 0x05, 0x09, 0x0a, 0x0e, 0x34, 0x35, 0x60, 0x6d, *range(0x40, 0x4c), *range(0x50, 0x56))
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6292/6292-1-en-v1.png"
 

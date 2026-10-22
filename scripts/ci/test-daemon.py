@@ -100,6 +100,8 @@ def test_sysfs_consistency(d):
     check_sysfs("macro_mode_led", "macro_led_state")
     check_sysfs("macro_mode_led_effect", "macro_led_effect")
     check_sysfs("poll_rate", "poll_rate")
+    check_sysfs("onboard_buttons", "button_action")
+    check_sysfs("onboard_macros", "macro")
     check_sysfs("serial", "device_serial")
     check_sysfs("type", "device_type")
 

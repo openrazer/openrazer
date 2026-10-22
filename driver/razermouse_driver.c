@@ -6003,6 +6003,291 @@ static ssize_t razer_attr_write_hyperpolling_wireless_dongle_unpair(struct devic
 }
 
 /**
+ * Send an onboard memory command, resending a read while the device reports busy
+ *
+ * Busy replies to reads carry zeroed arguments. A write answered busy has been taken, and
+ * resending it would store it again.
+ */
+static int razer_onboard_send(struct razer_mouse_device *device, struct razer_report *request, struct razer_report *response)
+{
+    int tries, err;
+
+    for (tries = 0; tries < 40; tries++) {
+        err = razer_send_payload(device, request, response);
+        if (err || response->status != RAZER_CMD_BUSY || !(request->command_id.id & 0x80))
+            return err;
+        fsleep(25000);
+    }
+    return -EBUSY;
+}
+
+/**
+ * Read device file "side_plate"
+ *
+ * Returns 0 (none), 1 (2-button), 3 (12-button) or 4 (6-button)
+ */
+static ssize_t razer_attr_read_side_plate(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = razer_chroma_misc_get_side_plate();
+    struct razer_report response = {0};
+    int err;
+
+    request.transaction_id.id = 0x1f;
+    err = razer_onboard_send(device, &request, &response);
+    if (err)
+        return err;
+
+    return sysfs_emit(buf, "%u\n", response.arguments[0]);
+}
+
+/**
+ * Make the firmware forget keys it believes are held
+ *
+ * Rebinding a button while it is held leaves its old key held in the firmware's own report
+ * state. A round trip through driver mode makes it send an empty report and drop that key.
+ */
+static int razer_onboard_release_keys(struct razer_mouse_device *device)
+{
+    struct razer_report request = razer_chroma_standard_get_device_mode();
+    struct razer_report response = {0};
+    int err;
+
+    request.transaction_id.id = 0x1f;
+    err = razer_onboard_send(device, &request, &response);
+    if (err || response.arguments[0] != 0x00) // Onboard bindings only act in normal mode
+        return err;
+
+    request = razer_chroma_standard_set_device_mode(0x03, 0x00);
+    request.transaction_id.id = 0x1f;
+    err = razer_onboard_send(device, &request, &response);
+    if (err)
+        return err;
+
+    request = razer_chroma_standard_set_device_mode(0x00, 0x00);
+    request.transaction_id.id = 0x1f;
+    return razer_onboard_send(device, &request, &response);
+}
+
+/**
+ * Write device file "button_action"
+ *
+ * 3 bytes <storage> <button> <layer> select the button that reading returns. 5-10 bytes
+ * <storage> <button> <layer> <type> <length> <data...> also set that button's action.
+ */
+static ssize_t razer_attr_write_button_action(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    int err = 0;
+
+    if (count != 3 && (count < 5 || count > 10))
+        return -EINVAL;
+
+    mutex_lock(&device->onboard_lock);
+    if (count > 3) {
+        request = razer_chroma_misc_set_button_action(buf[0], buf[1], buf[2], (const unsigned char *)&buf[3], count - 3);
+        request.transaction_id.id = 0x1f;
+        err = razer_onboard_send(device, &request, &response);
+        // Only store 01 is live, so only its bindings can leave a key held
+        if (!err && buf[0] == 0x01 && razer_onboard_release_keys(device))
+            hid_warn(device->hdev, "razermouse: Failed to release keys held by the old binding\n");
+    }
+    if (!err)
+        memcpy(device->button_action_query, buf, 3);
+    mutex_unlock(&device->onboard_lock);
+
+    return err ? err : count;
+}
+
+/**
+ * Read device file "button_action"
+ *
+ * Returns 10 bytes <storage> <button> <flag> <type> <length> <data...> for the button last
+ * written. Flag is 1 on both layers when the button is the Hypershift key, else 0.
+ */
+static ssize_t razer_attr_read_button_action(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    int err;
+
+    mutex_lock(&device->onboard_lock);
+    request = razer_chroma_misc_get_button_action(device->button_action_query[0],
+              device->button_action_query[1],
+              device->button_action_query[2]);
+    mutex_unlock(&device->onboard_lock);
+    request.transaction_id.id = 0x1f;
+
+    err = razer_onboard_send(device, &request, &response);
+    if (err)
+        return err;
+
+    memcpy(buf, response.arguments, 10);
+    return 10;
+}
+
+/**
+ * Write device file "macro"
+ *
+ * <u16 id> <event stream> creates macro id on the device and uploads its events. A failed
+ * upload deletes the partial macro again.
+ */
+static ssize_t razer_attr_write_macro(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned short macro_id;
+    unsigned int size, offset, len;
+    int err;
+
+    if (count < 3)
+        return -EINVAL;
+
+    macro_id = ((unsigned char)buf[0] << 8) | (unsigned char)buf[1];
+    size = count - 2;
+
+    mutex_lock(&device->onboard_lock);
+    request = razer_chroma_misc_create_macro(macro_id, size);
+    request.transaction_id.id = 0x1f;
+    err = razer_onboard_send(device, &request, &response);
+    if (err)
+        goto out;
+
+    for (offset = 0; offset < size; offset += len) {
+        len = min(size - offset, 73u);
+        request = razer_chroma_misc_write_macro(macro_id, offset, (const unsigned char *)&buf[2 + offset], len);
+        request.transaction_id.id = 0x1f;
+        err = razer_onboard_send(device, &request, &response);
+        if (err)
+            break;
+    }
+
+    // The device drops commands while it stores the macro; this read waits that out
+    if (!err) {
+        request = razer_chroma_misc_get_macro_length(macro_id);
+        request.transaction_id.id = 0x1f;
+        err = razer_onboard_send(device, &request, &response);
+        if (!err && (((u32)response.arguments[2] << 24) | (response.arguments[3] << 16) |
+                     (response.arguments[4] << 8) | response.arguments[5]) != size)
+            err = -EIO;
+    }
+
+    if (err) {
+        request = razer_chroma_misc_delete_macro(macro_id);
+        request.transaction_id.id = 0x1f;
+        if (razer_onboard_send(device, &request, &response))
+            hid_warn(device->hdev, "razermouse: Failed to delete partial macro %04x\n", macro_id);
+    }
+
+out:
+    mutex_unlock(&device->onboard_lock);
+    return err ? err : count;
+}
+
+/**
+ * Write device file "macro_delete"
+ *
+ * Deletes the macro with the given id. Buttons bound to it keep the binding.
+ */
+static ssize_t razer_attr_write_macro_delete(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned short macro_id;
+    int err;
+
+    err = kstrtou16(buf, 0, &macro_id);
+    if (err < 0)
+        return err;
+
+    request = razer_chroma_misc_delete_macro(macro_id);
+    request.transaction_id.id = 0x1f;
+
+    mutex_lock(&device->onboard_lock);
+    err = razer_onboard_send(device, &request, &response);
+    mutex_unlock(&device->onboard_lock);
+    if (err)
+        return err;
+
+    return count;
+}
+
+/**
+ * Read device file "macro_list"
+ *
+ * Returns the ids of the stored macros as big-endian u16s. After a delete the firmware can
+ * hide live ids, so a missing id is not proof that the macro is gone.
+ */
+static ssize_t razer_attr_read_macro_list(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned int total, start, n, i;
+    ssize_t len = 0;
+    int err;
+
+    mutex_lock(&device->onboard_lock);
+    request = razer_chroma_misc_get_macro_count();
+    request.transaction_id.id = 0x1f;
+    err = razer_onboard_send(device, &request, &response);
+    if (err)
+        goto out;
+
+    total = min_t(unsigned int, (response.arguments[0] << 8) | response.arguments[1], PAGE_SIZE / 2);
+    for (start = 0; start < total; start += n) {
+        n = min(total - start, 38u);
+        request = razer_chroma_misc_get_macro_list(start, n);
+        request.transaction_id.id = 0x1f;
+        err = razer_onboard_send(device, &request, &response);
+        if (err)
+            goto out;
+
+        for (i = 0; i < n; i++) {
+            unsigned char *id = &response.arguments[4 + 2 * i];
+
+            if (id[0] || id[1]) {
+                buf[len++] = id[0];
+                buf[len++] = id[1];
+            }
+        }
+    }
+
+out:
+    mutex_unlock(&device->onboard_lock);
+    return err ? err : len;
+}
+
+/**
+ * Read device file "macro_storage"
+ *
+ * Returns "<max macros> <total bytes> <free bytes> <deleted bytes not yet reclaimed>"
+ */
+static ssize_t razer_attr_read_macro_storage(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    struct razer_report request = razer_chroma_misc_get_macro_storage();
+    struct razer_report response = {0};
+    unsigned char *a = response.arguments;
+    int err;
+
+    request.transaction_id.id = 0x1f;
+    err = razer_onboard_send(device, &request, &response);
+    if (err)
+        return err;
+
+    return sysfs_emit(buf, "%u %u %u %u\n", (a[0] << 8) | a[1],
+                      ((u32)a[2] << 24) | (a[3] << 16) | (a[4] << 8) | a[5],
+                      ((u32)a[6] << 24) | (a[7] << 16) | (a[8] << 8) | a[9],
+                      ((u32)a[10] << 24) | (a[11] << 16) | (a[12] << 8) | a[13]);
+}
+
+/**
  * Set up the device driver files
  *
  * Read-only is  0444
@@ -6103,6 +6388,13 @@ static DEVICE_ATTR(hyperpolling_wireless_dongle_indicator_led_mode,             
 static DEVICE_ATTR(hyperpolling_wireless_dongle_pair,                           0220, NULL, razer_attr_write_hyperpolling_wireless_dongle_pair);
 static DEVICE_ATTR(hyperpolling_wireless_dongle_unpair,                         0220, NULL, razer_attr_write_hyperpolling_wireless_dongle_unpair);
 static DEVICE_ATTR(hyperpolling_wireless_dongle_multi_indicator_led_modes,      0660, razer_attr_read_hyperpolling_wireless_dongle_multi_indicator_led_modes, razer_attr_write_hyperpolling_wireless_dongle_multi_indicator_led_modes);
+
+static DEVICE_ATTR(side_plate,                0440, razer_attr_read_side_plate,            NULL);
+static DEVICE_ATTR(button_action,             0660, razer_attr_read_button_action,         razer_attr_write_button_action);
+static DEVICE_ATTR(macro,                     0220, NULL,                                  razer_attr_write_macro);
+static DEVICE_ATTR(macro_delete,              0220, NULL,                                  razer_attr_write_macro_delete);
+static DEVICE_ATTR(macro_list,                0440, razer_attr_read_macro_list,            NULL);
+static DEVICE_ATTR(macro_storage,             0440, razer_attr_read_macro_storage,         NULL);
 
 
 #define REP4_DPI_UP  0x20
@@ -6507,6 +6799,7 @@ static void razer_mouse_init(struct razer_mouse_device *dev, struct hid_device *
 
     // Initialise mutex
     mutex_init(&dev->lock);
+    mutex_init(&dev->onboard_lock);
     // Setup values
     dev->hdev = hdev;
     dev->usb_vid = usb_dev->descriptor.idVendor;
@@ -7261,6 +7554,13 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_colour);
             fallthrough;
         case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_side_plate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_button_action);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_delete);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_list);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_macro_storage);
+
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
@@ -8463,6 +8763,13 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_charge_colour);
             fallthrough;
         case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+            device_remove_file(&hdev->dev, &dev_attr_side_plate);
+            device_remove_file(&hdev->dev, &dev_attr_button_action);
+            device_remove_file(&hdev->dev, &dev_attr_macro);
+            device_remove_file(&hdev->dev, &dev_attr_macro_delete);
+            device_remove_file(&hdev->dev, &dev_attr_macro_list);
+            device_remove_file(&hdev->dev, &dev_attr_macro_storage);
+
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
