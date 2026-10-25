@@ -44,6 +44,7 @@ do { \
 #define RED_PROFILE_LED   0x0C
 #define GREEN_PROFILE_LED 0x0D
 #define BLUE_PROFILE_LED  0x0E
+#define DOCK_LED          0x0F
 #define RIGHT_SIDE_LED    0x10
 #define LEFT_SIDE_LED     0x11
 #define ARGB_CH_1_LED     0x1A
