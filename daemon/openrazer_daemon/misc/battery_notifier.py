@@ -67,9 +67,10 @@ class BatteryNotifier(threading.Thread):
             # See also: https://github.com/openrazer/openrazer/issues/2122
             if battery_level in (0.0, -1.0):
                 self._logger.debug("Got bogus battery value: {0}, ignoring.".format(battery_level))
-                # Since we don't update _last_notify_time here we're going to retry very soon again.
-                # Sleep a bit so we don't spam the device with requests.
-                time.sleep(10)
+                # Retry at the configured frequency. A sleeping wireless device
+                # keeps answering bogus values, and retrying every few seconds
+                # turns each attempt into a driver command timeout.
+                self._last_notify_time = now
                 return
 
             # Update the last notified time so that we alert in the configured frequency.
