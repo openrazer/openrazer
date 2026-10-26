@@ -328,6 +328,7 @@ This will output something similar to this:
 | ------------------------------------------------------------- | ----------- |
 | Razer Mouse Dock                                              |  1532:007E  |
 | Razer Mouse Dock Pro                                          |  1532:00A4  |
+| Razer Mouse Dock V2 Pro                                       |  1532:00F1  |
 | Razer Nostromo                                                |  1532:0111  |
 | Razer Orbweaver                                               |  1532:0113  |
 | Razer Tartarus                                                |  1532:0201  |

@@ -38,6 +38,10 @@ static int razer_get_report(struct hid_device *hdev, struct razer_report *reques
         return razer_get_usb_response(hdev, 0x00, request, 0x00, response, RAZER_NEW_DEVICE_WAIT_US);
         break;
 
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
+        return razer_get_usb_response(hdev, 0x03, request, 0x03, response, RAZER_NEW_DEVICE_WAIT_US);
+        break;
+
     default:
         return razer_get_usb_response(hdev, 0x00, request, 0x00, response, RAZER_ACCESSORY_WAIT_US);
     }
@@ -230,6 +234,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Mouse Dock Pro";
         break;
 
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
+        device_type = "Razer Mouse Dock V2 Pro";
+        break;
+
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         device_type = "Razer Thunderbolt 4 Dock Chroma";
         break;
@@ -347,6 +355,11 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
         err = razer_set_device_mode(device, 0x00, 0x00);
         if (err)
             return err;
+        request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
+        request.transaction_id.id = 0xFF;
+        break;
+
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
         request.transaction_id.id = 0xFF;
         break;
@@ -528,6 +541,11 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
         request.transaction_id.id = 0xFF;
         break;
 
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
+        request = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
+        request.transaction_id.id = 0xFF;
+        break;
+
     default:
         dev_warn(dev, "razeraccessory: Unknown device\n");
         return -EINVAL;
@@ -629,6 +647,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
         break;
 
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
         request = razer_chroma_extended_matrix_effect_custom_frame();
         request.transaction_id.id = 0xFF;
         break;
@@ -768,6 +787,11 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         request.transaction_id.id = 0xFF;
         break;
 
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
+        request = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
+        request.transaction_id.id = 0xFF;
+        break;
+
     default:
         dev_warn(dev, "razeraccessory: Unknown device\n");
         break;
@@ -851,6 +875,13 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
             request.transaction_id.id = 0x1F;
         }
 
+        break;
+
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
+        // Direction values are flipped like prior mouse dock pro
+        direction ^= ((1<<0) | (1<<1));
+        request = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
+        request.transaction_id.id = 0xFF;
         break;
 
     default:
@@ -959,6 +990,23 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
         err = razer_set_device_mode(device, 0x00, 0x00);
         if (err)
             return err;
+        switch(count) {
+        case 3: // Single colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
+            break;
+
+        case 6: // Dual colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0], (struct razer_rgb *)&buf[3]);
+            break;
+
+        default: // "Random" colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, ZERO_LED);
+            break;
+        }
+        request.transaction_id.id = 0xFF;
+        break;
+
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
         switch(count) {
         case 3: // Single colour mode
             request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
@@ -1153,6 +1201,11 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
             request.transaction_id.id = 0xFF;
             break;
 
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
+            request = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
+            request.transaction_id.id = 0xFF;
+            break;
+
         case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
             mutex_lock(&device->lock);
             err = razer_send_argb_msg(device->hdev, row_id, (stop_col - start_col) + 1, (unsigned char*)&buf[offset]);
@@ -1213,6 +1266,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
         request.transaction_id.id = 0xFF;
         err = razer_send_payload(device, &request, &response);
         if (err)
@@ -1297,6 +1351,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
         break;
 
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
         request.transaction_id.id = 0xFF;
         break;
 
@@ -1508,6 +1563,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
         break;
 
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         request.transaction_id.id = 0xFF;
         device->saved_brightness = brightness;
@@ -1622,6 +1678,15 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
             sum += response.arguments[2];
         }
         brightness = sum / 6;
+        break;
+
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
+        request = razer_chroma_extended_matrix_get_brightness(VARSTORE, DOCK_LED);
+        request.transaction_id.id = 0xFF;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        brightness = response.arguments[2];
         break;
 
     case USB_DEVICE_ID_RAZER_CORE:
@@ -2517,6 +2582,7 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
     case USB_DEVICE_ID_RAZER_BASE_STATION_V2_CHROMA:
     case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
@@ -2574,6 +2640,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     case USB_DEVICE_ID_RAZER_CHROMA_HDK:
     case USB_DEVICE_ID_RAZER_CHROMA_BASE:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
@@ -2668,6 +2735,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
         case USB_DEVICE_ID_RAZER_RAPTOR_27:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
@@ -2696,6 +2764,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
         case USB_DEVICE_ID_RAZER_RAPTOR_27:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
@@ -2760,6 +2829,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         // Needs to be in "Normal" mode for idle effects to function properly
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
             break;
 
         default:
@@ -2831,6 +2901,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_STRIDER_CHROMA:
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+    case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
         expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
         break;
 
@@ -2906,6 +2977,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
         case USB_DEVICE_ID_RAZER_RAPTOR_27:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
@@ -2933,6 +3005,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         case USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
+        case USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO:
         case USB_DEVICE_ID_RAZER_RAPTOR_27:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
@@ -3048,6 +3121,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MOUSE_DOCK) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MOUSE_DOCK_V2_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_RAPTOR_27) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2) },
