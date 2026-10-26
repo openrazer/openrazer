@@ -26,7 +26,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>
   <provides>' > ${output_appstream_file}
 
 # Autogeneration of supported devices list
-grep -rh "USB_PID = " daemon/openrazer_daemon/hardware/ | cut -d '=' -f2 | grep -v None | sort -f | sed -E 's| 0x([0-9A-Fa-f]{4})|    <modalias>usb:v1532p\1d*</modalias>|g' >> ${output_appstream_file}
+grep -rh "USB_PID = " daemon/openrazer_daemon/hardware/ | cut -d '=' -f2 | grep -v None | sort -fu | sed -E 's| 0x([0-9A-Fa-f]{4})|    <modalias>usb:v1532p\1d*</modalias>|g' >> ${output_appstream_file}
 
 # First last of AppStream file
 echo '  </provides>

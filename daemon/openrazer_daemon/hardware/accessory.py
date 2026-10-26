@@ -3,6 +3,7 @@
 """
 Mug class
 """
+import errno
 import re
 
 from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as _RazerDeviceBrightnessSuspend
@@ -103,9 +104,94 @@ class RazerMouseDockPro(_RazerDeviceBrightnessSuspend):
     HAS_MATRIX = True
     WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [1, 8]
-    METHODS = ['get_device_type_accessory', 'set_brightness', 'get_brightness', 'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect']
+    EVENT_FILE_REGEX = re.compile(r'.*(Razer_)?Mouse_Dock_Pro-if0(1|2)-event-kbd')
+    METHODS = [
+        'get_device_type_accessory', 'set_brightness', 'get_brightness',
+        'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_static_effect',
+        'set_spectrum_effect', 'set_none_effect', 'set_breath_random_effect',
+        'set_breath_single_effect', 'set_breath_dual_effect',
+        'set_mouse_dock_pro_pair', 'set_mouse_dock_pro_unpair',
+        'scan_for_nearby_mice', 'get_nearby_mice', 'pair_any_nearby_mouse',
+    ]
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/6229/6229-1-en-v2.png"
+
+    _wireless_pid_registry = None
+
+    @classmethod
+    def _get_wireless_pid_registry(cls):
+        if cls._wireless_pid_registry is None:
+            from openrazer_daemon.hardware import get_device_classes
+            cls._wireless_pid_registry = {
+                c.WIRELESS_PID: c
+                for c in get_device_classes()
+                if getattr(c, 'WIRELESS_PID', None) is not None
+            }
+        return cls._wireless_pid_registry
+
+    def get_child_devices(self):
+        try:
+            identity = self.get_active_mouse_identity()
+        except OSError:
+            return []
+        if identity is None:
+            return []
+
+        paired_pid, serial = identity
+        registry = self._get_wireless_pid_registry()
+        docked_class = registry.get(paired_pid)
+        if docked_class is None:
+            return []
+
+        return [(docked_class, {"id_suffix": ":mouse", "serial": serial})]
+
+    def get_paired_slots(self):
+        """
+        Return (slot, available, PID) for every reported dock slot.
+
+        A malformed token raises OSError(EIO), the same transient class as a
+        failed read. Any decimal availability value is accepted; only 1 means
+        available.
+        """
+        with open(self.get_driver_path("paired_slots")) as f:
+            values = f.read().split()
+        slots = []
+        for value in values:
+            fields = value.split(':')
+            if (len(fields) != 3 or not fields[0].isdecimal()
+                    or not fields[1].isdecimal()
+                    or not re.fullmatch(r'[0-9a-fA-F]{4}', fields[2])):
+                raise OSError(errno.EIO, 'malformed paired_slots: ' + value)
+            slots.append((int(fields[0]), fields[1] == '1', fields[2]))
+        return slots
+
+    def get_active_mouse_identity(self, expected=None):
+        """
+        Only slot 1 has a characterized control route; require a real serial.
+
+        If slot 1 is available with the PID of the (pid, serial) tuple in
+        expected, return expected without the RF serial read.
+        """
+        slots = self.get_paired_slots()
+        if not slots or slots[0][0] != 1 or not slots[0][1]:
+            return None
+        pid = int(slots[0][2], 16)
+        if pid not in self._get_wireless_pid_registry():
+            return None
+        if expected is not None and expected[0] == pid:
+            return expected
+        with open(self.get_driver_path("mouse_serial"), errors='replace') as f:
+            serial = f.read().strip()
+        confirmed_slots = self.get_paired_slots()
+        if not confirmed_slots or confirmed_slots[0] != slots[0]:
+            return None
+        if not re.fullmatch(r'[\dA-Z]+', serial):
+            return None
+        return pid, serial
+
+    def is_mouse_connected(self):
+        with open(self.get_driver_path("mouse_connected")) as f:
+            return f.read().strip() == '1'
 
 
 class RazerNommoChroma(_RazerDeviceBrightnessSuspend):

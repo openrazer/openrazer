@@ -3,6 +3,9 @@
 import unittest
 import unittest.mock
 
+from openrazer_daemon.dbus_services.dbus_methods import chroma_keyboard
+from openrazer_daemon.hardware.device_base import RazerDevice
+from openrazer_daemon.misc.ripple_effect import RippleEffectThread, RippleManager
 import openrazer_daemon.misc.effect_sync
 
 # msg type = effect, arg = orig_device, arg = effect_name, arg.. = arg..
@@ -60,6 +63,29 @@ class DummyHardwareBlackWidowChroma(DummyHardwareDevice):
 
     def setBreathSingle(self, red, green, blue):
         self.effect_call = ('setBreathSingle', red, green, blue)
+
+
+class DummyHardwareRipple(DummyHardwareDevice):
+    MATRIX_DIMS = (6, 22)
+    setRipple = chroma_keyboard.set_ripple_effect
+    setRippleRandomColour = chroma_keyboard.set_ripple_effect_random_colour
+    notify = RazerDevice.notify
+
+    def __init__(self):
+        super().__init__()
+        self.logger = unittest.mock.Mock()
+        self.key_manager = unittest.mock.Mock(temp_key_store_state=False)
+        self._observer_list = self.observer_list
+        self.zone = {'backlight': {'colors': [0, 0, 0]}}
+        self.persisted_effect = None
+
+    def send_effect_event(self, effect_name, *args):
+        if not self.disable_notify:
+            for observer in self.observer_list:
+                observer.notify(('effect', self, effect_name, *args))
+
+    def set_persistence(self, zone, setting, value):
+        self.persisted_effect = (zone, setting, value)
 
 
 class EffectSyncTest(unittest.TestCase):
@@ -158,3 +184,48 @@ class EffectSyncTest(unittest.TestCase):
 
         # Logger should have called .exception
         self.assertTrue(self.effect_sync._logger.exception.called)
+
+    def make_ripple_pair(self):
+        source = DummyHardwareRipple()
+        target = DummyHardwareRipple()
+        self.effect_sync._parent = target
+        target.register_observer(self.effect_sync)
+        source.register_observer(target)
+        return source, target
+
+    def test_random_ripple_sync_preserves_random_effect(self):
+        # Run the real observer and worker state transitions without a thread.
+        with unittest.mock.patch.object(RippleEffectThread, 'start'), unittest.mock.patch.object(RippleEffectThread, 'join'):
+            source, target = self.make_ripple_pair()
+            ripple = RippleManager(target, 2)
+            try:
+                source.setRippleRandomColour(0.01)
+
+                self.assertEqual(target.persisted_effect, ('backlight', 'effect', 'rippleRandomColour'))
+                self.assertEqual(target.zone['backlight']['colors'], [0, 0, 0])
+                self.assertTrue(target.key_manager.temp_key_store_state)
+                self.assertTrue(ripple._ripple_thread.active)
+                self.assertIsNone(ripple._ripple_thread._colour)
+                self.assertEqual(ripple._ripple_thread._refresh_rate, 0.01)
+                self.assertFalse(target.disable_notify)
+                self.effect_sync._logger.exception.assert_not_called()
+            finally:
+                ripple.close()
+
+    def test_colored_ripple_sync_preserves_color(self):
+        with unittest.mock.patch.object(RippleEffectThread, 'start'), unittest.mock.patch.object(RippleEffectThread, 'join'):
+            source, target = self.make_ripple_pair()
+            ripple = RippleManager(target, 2)
+            try:
+                source.setRipple(255, 0, 255, 0.02)
+
+                self.assertEqual(target.persisted_effect, ('backlight', 'effect', 'ripple'))
+                self.assertEqual(target.zone['backlight']['colors'], [255, 0, 255])
+                self.assertTrue(target.key_manager.temp_key_store_state)
+                self.assertTrue(ripple._ripple_thread.active)
+                self.assertEqual(ripple._ripple_thread._colour, (255, 0, 255))
+                self.assertEqual(ripple._ripple_thread._refresh_rate, 0.02)
+                self.assertFalse(target.disable_notify)
+                self.effect_sync._logger.exception.assert_not_called()
+            finally:
+                ripple.close()
