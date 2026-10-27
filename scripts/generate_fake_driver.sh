@@ -40,6 +40,7 @@ declare -A files_metadata=(
     ["fully_charged_matrix_effect_spectrum"]="w;"
     ["fully_charged_matrix_effect_static"]="w;"
     ["fully_charged_matrix_effect_wave"]="w;"
+    ["fan_rpm"]="rw;0"
     ["game_led_state"]="rw;0"
     ["hyperpolling_wireless_dongle_indicator_led_mode"]="rw;1"
     ["hyperpolling_wireless_dongle_multi_indicator_led_modes"]="rw;0x010101"

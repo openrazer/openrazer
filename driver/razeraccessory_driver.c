@@ -254,6 +254,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Tomahawk ATX";
         break;
 
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
+        device_type = "Razer Laptop Cooling Pad";
+        break;
+
     default:
         device_type = "Unknown Device";
         break;
@@ -329,6 +333,7 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
         request.transaction_id.id = 0x1F;
         break;
@@ -506,6 +511,7 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
         request = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
         request.transaction_id.id = 0x1F;
         break;
@@ -624,6 +630,7 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
         request = razer_chroma_extended_matrix_effect_custom_frame();
         request.transaction_id.id = 0x1F;
         break;
@@ -697,6 +704,7 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
         request = razer_chroma_extended_matrix_effect_static(VARSTORE, ZERO_LED, (struct razer_rgb*) & buf[0]);
         request.transaction_id.id = 0x1F;
         break;
@@ -828,6 +836,7 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
         request.transaction_id.id = 0x1F;
         break;
@@ -917,6 +926,7 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
         switch(count) {
         case 3: // Single colour mode
             request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, ZERO_LED, (struct razer_rgb *)&buf[0]);
@@ -1024,6 +1034,7 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
     case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
     case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
         switch(count) {
         case 4: // Single colour mode
             request = razer_chroma_extended_matrix_effect_starlight_single(VARSTORE, ZERO_LED, speed, (struct razer_rgb *)&buf[1]);
@@ -1131,6 +1142,7 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
         case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+        case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
             request = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
             request.transaction_id.id = 0x1F;
             break;
@@ -1232,6 +1244,7 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
         request.transaction_id.id = 0x1F;
         err = razer_send_payload(device, &request, &response);
         if (err)
@@ -1273,6 +1286,7 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
         request.transaction_id.id = 0x1F;
         break;
 
@@ -1502,6 +1516,7 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
     case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
     case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, ZERO_LED, brightness);
         request.transaction_id.id = 0x1F;
         device->saved_brightness = brightness;
@@ -1608,6 +1623,7 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
     case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
         brightness = device->saved_brightness;
         break;
 
@@ -2373,6 +2389,80 @@ static ssize_t razer_attr_read_channel6_led_brightness(struct device *dev, struc
 }
 
 /**
+ * Write fan RPM to the cooling pad
+ *
+ * Values are rounded to the nearest 50 RPM and clamped to
+ * RAZER_COOLING_PAD_FAN_RPM_MIN..RAZER_COOLING_PAD_FAN_RPM_MAX.
+ * Writing 0 releases control of the fans (they turn off).
+ */
+static ssize_t razer_attr_write_fan_rpm(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned int rpm = 0;
+    unsigned int raw_rpm = 0;
+    int err;
+
+    if (count < 1) {
+        dev_warn(dev, "razeraccessory: Fan RPM takes an ascii number\n");
+        return -EINVAL;
+    }
+
+    err = kstrtouint(buf, 0, &rpm);
+    if (err < 0)
+        return err;
+
+    if (rpm == 0) {
+        /* Command 0x0D 0x10: release control of the fans (fan off) */
+        request = get_razer_report(0x0D, 0x10, 0x03);
+        request.transaction_id.id = 0x02;
+        request.arguments[0] = 0x00;
+        request.arguments[1] = 0x06;
+        device->last_fan_rpm = 0;
+    } else {
+        /* Round to the nearest 50 RPM and clamp into the supported range */
+        raw_rpm = (rpm + RAZER_COOLING_PAD_FAN_RPM_STEP / 2) / RAZER_COOLING_PAD_FAN_RPM_STEP;
+        if (raw_rpm < RAZER_COOLING_PAD_FAN_RPM_RAW_MIN)
+            raw_rpm = RAZER_COOLING_PAD_FAN_RPM_RAW_MIN;
+        if (raw_rpm > RAZER_COOLING_PAD_FAN_RPM_RAW_MAX)
+            raw_rpm = RAZER_COOLING_PAD_FAN_RPM_RAW_MAX;
+
+        /*
+         * Command 0x0D 0x01: mode 0x01, fan 0x05 and the RPM divided by 50,
+         * little endian (captured from Synapse; the device uses a data size
+         * of 3 for these arguments despite the two-byte RPM value)
+         */
+        request = get_razer_report(0x0D, 0x01, 0x03);
+        request.transaction_id.id = 0x02;
+        request.arguments[0] = 0x01;
+        request.arguments[1] = 0x05;
+        request.arguments[2] = (unsigned char)(raw_rpm & 0xFFu);
+        request.arguments[3] = (unsigned char)(raw_rpm >> 8);
+        device->last_fan_rpm = (unsigned short)(raw_rpm * RAZER_COOLING_PAD_FAN_RPM_STEP);
+    }
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    return count;
+}
+
+/**
+ * Read back the last commanded fan RPM of the cooling pad
+ *
+ * The pad has no tachometer, so this reflects the last value written to
+ * this attribute. 0 means the fans are off or control has not been taken.
+ */
+static ssize_t razer_attr_read_fan_rpm(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_accessory_device *device = dev_get_drvdata(dev);
+
+    return sprintf(buf, "%u\n", device->last_fan_rpm);
+}
+
+/**
  * Set up the device driver files
 
  *
@@ -2387,6 +2477,7 @@ static DEVICE_ATTR(device_type,                             0440, razer_attr_rea
 static DEVICE_ATTR(device_mode,                             0660, razer_attr_read_device_mode,                    razer_attr_write_device_mode);
 static DEVICE_ATTR(device_serial,                           0440, razer_attr_read_device_serial,                  NULL);
 static DEVICE_ATTR(firmware_version,                        0440, razer_attr_read_firmware_version,               NULL);
+static DEVICE_ATTR(fan_rpm,                                 0660, razer_attr_read_fan_rpm,                        razer_attr_write_fan_rpm);
 
 static DEVICE_ATTR(matrix_effect_none,                      0220, NULL,                                           razer_attr_write_matrix_effect_none);
 static DEVICE_ATTR(matrix_effect_spectrum,                  0220, NULL,                                           razer_attr_write_matrix_effect_spectrum);
@@ -2537,6 +2628,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
 {
     int retval = 0;
     unsigned char expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
+    unsigned char expose_driver_attrs = 1;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_accessory_device *dev = NULL;
@@ -2562,6 +2654,15 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         expected_protocol = 0;
+        break;
+
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
+        expected_protocol = 0;
+        /* The pad has two HID interfaces (with the same protocol); only the
+         * second one (bInterfaceNumber 1) carries the control/feature
+         * reports, so only expose driver attributes on that interface. */
+        if (intf->cur_altsetting->desc.bInterfaceNumber != 0x01)
+            expose_driver_attrs = 0;
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY:
@@ -2590,7 +2691,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         break;
     }
 
-    if(dev->usb_interface_protocol == expected_protocol) {
+    if(expose_driver_attrs && dev->usb_interface_protocol == expected_protocol) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);                               // Get driver version
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);                                  // Test mode
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
@@ -2673,6 +2774,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
         case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+        case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);            // Spectrum effect
             break;
         }
@@ -2701,6 +2803,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
         case USB_DEVICE_ID_RAZER_TOMAHAWK_ATX:
+        case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);                // Wave effect
             break;
         }
@@ -2733,7 +2836,19 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_EDITION:
         case USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA:
         case USB_DEVICE_ID_RAZER_CORE_X_CHROMA:
+        case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_starlight);
+            break;
+        }
+
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_fan_rpm);                          // Fan RPM control
+            break;
+        }
+
+        switch(usb_dev->descriptor.idProduct) {
+        case USB_DEVICE_ID_RAZER_CHROMA_MUG:
             break;
         }
 
@@ -2799,6 +2914,7 @@ exit_free:
 static void razer_accessory_disconnect(struct hid_device *hdev)
 {
     unsigned char expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
+    unsigned char expose_driver_attrs = 1;
     struct razer_accessory_device *dev;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
@@ -2817,6 +2933,12 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
     case USB_DEVICE_ID_RAZER_RAPTOR_27:
     case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
         expected_protocol = 0;
+        break;
+
+    case USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD:
+        expected_protocol = 0;
+        if (intf->cur_altsetting->desc.bInterfaceNumber != 0x01)
+            expose_driver_attrs = 0;
         break;
 
     case USB_DEVICE_ID_RAZER_FIREFLY:
@@ -2844,7 +2966,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         break;
     }
 
-    if(dev->usb_interface_protocol == expected_protocol) {
+    if(expose_driver_attrs && dev->usb_interface_protocol == expected_protocol) {
         device_remove_file(&hdev->dev, &dev_attr_version);                               // Get driver version
         device_remove_file(&hdev->dev, &dev_attr_test);                                  // Test mode
         device_remove_file(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
@@ -3053,6 +3175,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_TOMAHAWK_ATX) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD) },
     { 0 }
 };
 

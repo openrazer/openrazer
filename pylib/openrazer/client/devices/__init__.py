@@ -48,6 +48,7 @@ class RazerDevice(object):
             'serial': True,
             'brightness': self._has_feature('razer.device.lighting.brightness'),
 
+            'fan_rpm': self._has_feature('razer.device.fan'),
             'battery': self._has_feature('razer.device.power', 'getBattery'),
             'idle_time': self._has_feature('razer.device.power', ('getIdleTime', 'setIdleTime')),
             'low_battery_threshold': self._has_feature('razer.device.power', ('getLowBatteryThreshold', 'setLowBatteryThreshold')),
@@ -253,6 +254,8 @@ class RazerDevice(object):
             self._dbus_interfaces['profile_led'] = _dbus.Interface(self._dbus, "razer.device.lighting.profile_led")
         if self.has('scroll_mode') or self.has('scroll_acceleration') or self.has('scroll_smart_reel'):
             self._dbus_interfaces['scroll'] = _dbus.Interface(self._dbus, "razer.device.scroll")
+        if self.has('fan_rpm'):
+            self._dbus_interfaces['fan'] = _dbus.Interface(self._dbus, "razer.device.fan")
 
     def _get_available_features(self) -> dict[str, list[str]]:
         introspect_interface = _dbus.Interface(self._dbus, 'org.freedesktop.DBus.Introspectable')
@@ -641,6 +644,42 @@ class RazerDevice(object):
             if not all(isinstance(m, int) for m in (mode1, mode2, mode3)):
                 raise ValueError("Modes must be integers")
             self._dbus_interfaces['device'].setHyperPollingMultiLEDModes(mode1, mode2, mode3)
+        else:
+            raise NotImplementedError()
+
+    def set_fan_rpm(self, rpm: int) -> None:
+        """
+        Set the fan speed (RPM) of the device
+
+        Values are rounded to the nearest 50 RPM and clamped to 500-3200 by
+        the kernel driver. A value of 0 releases control of the fans (i.e.
+        turns them off).
+
+        :param rpm: Fan speed in RPM
+        :type rpm: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('fan_rpm'):
+            self._dbus_interfaces['fan'].setFanRPM(rpm)
+        else:
+            raise NotImplementedError()
+
+    def get_fan_rpm(self) -> int:
+        """
+        Get the last commanded fan speed (RPM) of the device
+
+        Most devices do not provide a tachometer, so this reflects the last
+        value written by the software. 0 means the fans are off (or their
+        state is unknown).
+
+        :return: Fan speed in RPM
+        :rtype: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('fan_rpm'):
+            return int(self._dbus_interfaces['fan'].getFanRPM())
         else:
             raise NotImplementedError()
 

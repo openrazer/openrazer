@@ -34,6 +34,14 @@
 #define USB_DEVICE_ID_RAZER_THUNDERBOLT_4_DOCK_CHROMA 0x0F21
 #define USB_DEVICE_ID_RAZER_CHARGING_PAD_CHROMA 0x0F26
 #define USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2 0x0F2B
+#define USB_DEVICE_ID_RAZER_LAPTOP_COOLING_PAD 0x0F43
+
+/* Razer Laptop Cooling Pad fan speed range and resolution */
+#define RAZER_COOLING_PAD_FAN_RPM_MIN 500
+#define RAZER_COOLING_PAD_FAN_RPM_MAX 3200
+#define RAZER_COOLING_PAD_FAN_RPM_STEP 50
+#define RAZER_COOLING_PAD_FAN_RPM_RAW_MIN (RAZER_COOLING_PAD_FAN_RPM_MIN / RAZER_COOLING_PAD_FAN_RPM_STEP)
+#define RAZER_COOLING_PAD_FAN_RPM_RAW_MAX (RAZER_COOLING_PAD_FAN_RPM_MAX / RAZER_COOLING_PAD_FAN_RPM_STEP)
 
 #define RAZER_ACCESSORY_WAIT_US 600
 #define RAZER_NEW_DEVICE_WAIT_US 31000
@@ -49,6 +57,7 @@ struct razer_accessory_device {
     unsigned short usb_pid;
 
     unsigned char saved_brightness;
+    unsigned short last_fan_rpm;
 
     char serial[23];
 };
