@@ -344,6 +344,7 @@ class RazerDaemon(DBusService):
                     self._persistence[device.dbus.storage_name][i + '_brightness'] = str(device.dbus.zone[i]["brightness"])
                     self._persistence[device.dbus.storage_name][i + '_effect'] = device.dbus.zone[i]["effect"]
                     self._persistence[device.dbus.storage_name][i + '_colors'] = ' '.join(str(i) for i in device.dbus.zone[i]["colors"])
+                    self._persistence[device.dbus.storage_name][i + '_config'] = device.dbus.zone[i]["config"]
                     self._persistence[device.dbus.storage_name][i + '_speed'] = str(device.dbus.zone[i]["speed"])
                     self._persistence[device.dbus.storage_name][i + '_wave_dir'] = str(device.dbus.zone[i]["wave_dir"])
 
