@@ -5526,11 +5526,17 @@ static void razer_kbd_init(struct razer_kbd_device *dev, struct hid_device *hdev
  */
 static int razer_kbd_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
+    struct usb_interface *intf;
+    struct usb_device *usb_dev;
     struct razer_kbd_device *dev = NULL;
     struct razer_kbd_usb_device_data *usb_dev_data = NULL;
     int err;
+
+    if (!hid_is_usb(hdev))
+        return -ENODEV;
+
+    intf = to_usb_interface(hdev->dev.parent);
+    usb_dev = hid_to_usb_dev(hdev);
 
     dev = kzalloc_obj(*dev);
     if(dev == NULL) {

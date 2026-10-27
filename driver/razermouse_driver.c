@@ -6636,6 +6636,9 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
     struct razer_mouse_device *dev = NULL;
     unsigned char expected_subclass = 0xFF;
 
+    if (!hid_is_usb(hdev))
+        return -ENODEV;
+
     dev = kzalloc_obj(*dev);
 
     if(dev == NULL) {

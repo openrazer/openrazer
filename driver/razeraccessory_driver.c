@@ -2522,8 +2522,14 @@ static int razer_input_mapping(struct hid_device *hdev, struct hid_input *hi, st
  */
 static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_driver)
 {
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct usb_interface *intf;
+    struct usb_device *usb_dev;
+
+    if (!hid_is_usb(hdev))
+        return false;
+
+    intf = to_usb_interface(hdev->dev.parent);
+    usb_dev = interface_to_usbdev(intf);
 
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
@@ -2554,10 +2560,16 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
 {
     int retval = 0;
     unsigned char expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct usb_interface *intf;
+    struct usb_device *usb_dev;
     struct razer_accessory_device *dev = NULL;
     int err;
+
+    if (!hid_is_usb(hdev))
+        return -ENODEV;
+
+    intf = to_usb_interface(hdev->dev.parent);
+    usb_dev = interface_to_usbdev(intf);
 
     dev = kzalloc_obj(*dev);
     if(dev == NULL) {
