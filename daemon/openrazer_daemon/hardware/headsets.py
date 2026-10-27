@@ -9,6 +9,28 @@ from openrazer_daemon.hardware.device_base import RazerDevice as __RazerDevice, 
 from openrazer_daemon.dbus_services.dbus_methods import kraken as _dbus_kraken, chroma_keyboard as _dbus_chroma
 
 
+class RazerBlackSharkV2HyperSpeedWireless(__RazerDevice):
+    """MediaTek headset through its HyperSpeed receiver; no startup settings writes."""
+    USB_VID = 0x1532
+    USB_PID = 0x0565
+    METHODS = ['get_device_type_headset', 'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time',
+               'get_headset_sidetone_enabled', 'set_headset_sidetone_enabled',
+               'get_headset_sidetone_level', 'set_headset_sidetone_level',
+               'get_headset_equalizer_enabled', 'set_headset_equalizer_enabled',
+               'get_headset_equalizer_preset', 'set_headset_equalizer_preset',
+               'get_headset_equalizer_bands', 'set_headset_equalizer_bands',
+               'get_headset_do_not_disturb', 'set_headset_do_not_disturb',
+               'get_headset_microphone_muted', 'get_headset_serial', 'get_headset_firmware',
+               'get_headset_dongle_led_mode', 'set_headset_dongle_led_mode', 'get_headset_wireless_connected']
+
+
+class RazerBlackSharkV2HyperSpeedWired(RazerBlackSharkV2HyperSpeedWireless):
+    """The wired headset uses the local domain and has no receiver LED."""
+    USB_PID = 0x056E
+    METHODS = [method for method in RazerBlackSharkV2HyperSpeedWireless.METHODS
+               if method not in ('get_headset_dongle_led_mode', 'set_headset_dongle_led_mode', 'get_headset_wireless_connected')]
+
+
 class RazerKraken71(__RazerDevice):
     """
     Class for the Razer Kraken 7.1

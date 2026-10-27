@@ -1,6 +1,17 @@
 #!/bin/bash
 
 declare -A files_metadata=(
+    ["do_not_disturb"]="rw;0"
+    ["dongle_led_mode"]="rw;2"
+    ["equalizer_bands"]="rw;0 0 0 0 0 0 0 0 0 0"
+    ["equalizer_enabled"]="rw;1"
+    ["equalizer_preset"]="rw;9"
+    ["headset_firmware_version"]="r;v1.7.0.0"
+    ["headset_serial"]="r;XX0000000565"
+    ["microphone_muted"]="r;0"
+    ["sidetone_enabled"]="rw;0"
+    ["sidetone_level"]="rw;7"
+    ["wireless_connected"]="r;1"
     ["backlight_led_brightness"]="rw;0"
     ["backlight_led_state"]="rw;0"
     ["backlight_matrix_effect_breath"]="w;"

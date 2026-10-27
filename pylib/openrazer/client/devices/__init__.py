@@ -49,6 +49,13 @@ class RazerDevice(object):
             'brightness': self._has_feature('razer.device.lighting.brightness'),
 
             'battery': self._has_feature('razer.device.power', 'getBattery'),
+            'sidetone': self._has_feature('razer.device.audio.blacksharkv2', ('getSidetoneEnabled', 'setSidetoneEnabled', 'getSidetoneLevel', 'setSidetoneLevel')),
+            'equalizer': self._has_feature('razer.device.audio.blacksharkv2', ('getEqualizerEnabled', 'setEqualizerEnabled', 'getEqualizerPreset', 'setEqualizerPreset', 'getEqualizerBands', 'setEqualizerBands')),
+            'do_not_disturb': self._has_feature('razer.device.audio.blacksharkv2', ('getDnd', 'setDnd')),
+            'microphone_mute': self._has_feature('razer.device.audio.blacksharkv2', 'getMicrophoneMuted'),
+            'dongle_led_mode': self._has_feature('razer.device.audio.blacksharkv2', ('getDongleLedMode', 'setDongleLedMode')),
+            'wireless_connected': self._has_feature('razer.device.audio.blacksharkv2', 'getWirelessConnected'),
+            'headset_identity': self._has_feature('razer.device.audio.blacksharkv2', ('getHeadsetSerial', 'getHeadsetFirmware')),
             'idle_time': self._has_feature('razer.device.power', ('getIdleTime', 'setIdleTime')),
             'low_battery_threshold': self._has_feature('razer.device.power', ('getLowBatteryThreshold', 'setLowBatteryThreshold')),
             # Deprecated, use idle_time & low_battery_threshold
