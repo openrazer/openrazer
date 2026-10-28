@@ -1578,6 +1578,30 @@ struct razer_report razer_chroma_misc_get_scroll_mode(void)
 }
 
 /**
+ * Set scroll wheel mode on the device (newer devices)
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    02       02    30  0000    | SET SCROLL WHEEL MODE (TACTILE)
+ * 00     1f    0000   00    02       02    30  0001    | SET SCROLL WHEEL MODE (FREESPIN)
+ */
+struct razer_report razer_chroma_misc_set_scroll_mode2(unsigned int scroll_mode)
+{
+    struct razer_report report = get_razer_report(0x02, 0x30, 0x02);
+
+    report.arguments[1] = scroll_mode;
+
+    return report;
+}
+
+/**
+ * Get scroll wheel mode from the device (newer devices)
+ */
+struct razer_report razer_chroma_misc_get_scroll_mode2(void)
+{
+    return get_razer_report(0x02, 0xB0, 0x02);
+}
+
+/**
  * Set scroll wheel acceleration on/off on the device
  *
  * Status Trans Packet Proto DataSize Class CMD Args

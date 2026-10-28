@@ -3106,10 +3106,24 @@ static ssize_t razer_attr_write_scroll_mode(struct device *dev, struct device_at
     unsigned int scroll_mode;
     int err;
 
-    if (kstrtouint(buf, 0, &scroll_mode) < 0 || scroll_mode > 1)
+    if (kstrtouint(buf, 0, &scroll_mode) < 0)
         return -EINVAL;
 
-    request = razer_chroma_misc_set_scroll_mode(scroll_mode);
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        // 0 = tactile (24 notches), 1 = free spin, 2 = tactile (48 notches)
+        if (scroll_mode > 2)
+            return -EINVAL;
+        request = razer_chroma_misc_set_scroll_mode2(scroll_mode);
+        break;
+
+    default:
+        if (scroll_mode > 1)
+            return -EINVAL;
+        request = razer_chroma_misc_set_scroll_mode(scroll_mode);
+        break;
+    }
     request.transaction_id.id = 0x1f;
 
     err = razer_send_payload(device, &request, &response);
@@ -3131,7 +3145,16 @@ static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_att
     struct razer_report response = {0};
     int err;
 
-    request = razer_chroma_misc_get_scroll_mode();
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request = razer_chroma_misc_get_scroll_mode2();
+        break;
+
+    default:
+        request = razer_chroma_misc_get_scroll_mode();
+        break;
+    }
     request.transaction_id.id = 0x1f;
 
     err = razer_send_payload(device, &request, &response);
@@ -7075,6 +7098,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_mode);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_acceleration);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_smart_reel);
 
@@ -8314,6 +8338,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_mode);
             device_remove_file(&hdev->dev, &dev_attr_scroll_acceleration);
             device_remove_file(&hdev->dev, &dev_attr_scroll_smart_reel);
 
