@@ -2567,6 +2567,57 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
  *
  * Sets the mouse DPI to the unsigned short integer written to this file.
  */
+/**
+ * Set the DPI by changing the value of the active DPI stage
+ *
+ * Some devices ignore the plain DPI command and only use the DPI stages of
+ * their active onboard profile, so update the active stage in place.
+ */
+static int razer_set_active_stage_dpi(struct razer_mouse_device *device, unsigned short dpi_x, unsigned short dpi_y)
+{
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned short dpi[2 * RAZER_MOUSE_MAX_DPI_STAGES] = {0};
+    unsigned char variable_storage = razer_get_variable_storage(device);
+    unsigned char stages_count;
+    unsigned char active_stage;
+    unsigned char *args;
+    unsigned int i;
+    int err;
+
+    request = razer_chroma_misc_get_dpi_stages(variable_storage);
+    request.transaction_id.id = 0x1f;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    active_stage = response.arguments[1];
+    stages_count = min_t(unsigned char, response.arguments[2], RAZER_MOUSE_MAX_DPI_STAGES);
+
+    if (active_stage < 1 || active_stage > stages_count)
+        return -EINVAL;
+
+    // Each stage is 7 bytes: stage number, DPI X, DPI Y, 2 reserved bytes
+    args = response.arguments + 4;
+    for (i = 0; i < stages_count; i++) {
+        if (args + 4 > response.arguments + response.data_size)
+            return -EINVAL;
+
+        dpi[i * 2]     = (args[0] << 8) | args[1];
+        dpi[i * 2 + 1] = (args[2] << 8) | args[3];
+        args += 7;
+    }
+
+    dpi[(active_stage - 1) * 2]     = dpi_x;
+    dpi[(active_stage - 1) * 2 + 1] = dpi_y;
+
+    request = razer_chroma_misc_set_dpi_stages(variable_storage, stages_count, active_stage, dpi);
+    request.transaction_id.id = 0x1f;
+
+    return razer_send_payload(device, &request, &response);
+}
+
 static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
@@ -2581,6 +2632,20 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
 
     // So far I think imperator uses varstore
     switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        if (count != 2 && count != 4) {
+            dev_warn(dev, "razermouse: DPI requires 2 bytes or 4 bytes\n");
+            return -EINVAL;
+        }
+
+        dpi_x = (buf[0] << 8) | (buf[1] & 0xFF);
+        dpi_y = (count == 4) ? ((buf[2] << 8) | (buf[3] & 0xFF)) : dpi_x;
+
+        err = razer_set_active_stage_dpi(device, dpi_x, dpi_y);
+        if (err)
+            return err;
+        return count;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
         if(count == 2) {
@@ -2745,7 +2810,6 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
-    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED:
