@@ -1637,6 +1637,17 @@ struct razer_report razer_chroma_misc_get_scroll_smart_reel(void)
 }
 
 /**
+ * Get the active onboard profile of the device
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    01       05    84  02    | GET ACTIVE PROFILE (Profile 2)
+ */
+struct razer_report razer_chroma_misc_get_active_profile(void)
+{
+    return get_razer_report(0x05, 0x84, 0x01);
+}
+
+/**
  * Get LED mode for HyperPolling Wireless Dongle
  */
 struct razer_report razer_chroma_misc_get_hyperpolling_wireless_dongle_indicator_led_mode(void)
