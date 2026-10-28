@@ -2137,14 +2137,14 @@ class RazerViperV3ProSEWireless(RazerViperV3ProSEWired):
     USB_PID = 0x00DF
 
 
-class RazerBasiliskV4ProWireless(__RazerDevice):
+class RazerBasiliskV4ProWired(__RazerDevice):
     """
-    Class for the Razer Basilisk V4 Pro (Wireless)
+    Class for the Razer Basilisk V4 Pro (Wired)
     """
     EVENT_FILE_REGEX = re.compile(r'.*usb-Razer_Razer_Basilisk_V4_Pro_[0-9A-Z]+-if0(1|2)-event-kbd')
 
     USB_VID = 0x1532
-    USB_PID = 0x00E3
+    USB_PID = 0x00E2
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 7]
     METHODS = ['get_device_type_mouse',
@@ -2170,6 +2170,14 @@ class RazerBasiliskV4ProWireless(__RazerDevice):
 
     POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
     DPI_MAX = 50000
+
+
+class RazerBasiliskV4ProWireless(RazerBasiliskV4ProWired):
+    """
+    Class for the Razer Basilisk V4 Pro (Wireless)
+    """
+
+    USB_PID = 0x00E3
 
 
 class RazerDeathAdderV3HyperSpeedWired(__RazerDevice):
