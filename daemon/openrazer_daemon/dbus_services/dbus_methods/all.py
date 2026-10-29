@@ -5,6 +5,7 @@ DBus methods available for all devices.
 """
 import os
 from openrazer_daemon.dbus_services import endpoint
+from openrazer_daemon.hardware.device_base import RazerDevice
 
 # Keyboard layout IDs
 # There are more than listed here, but others are not known yet.
@@ -27,7 +28,7 @@ layout_ids = {
 
 
 @endpoint('razer.device.misc', 'getDriverVersion', out_sig='s')
-def version(self):
+def version(self: RazerDevice) -> str:
     """
     Get the devices driver version
 
@@ -54,7 +55,7 @@ def version(self):
 
 
 @endpoint('razer.device.misc', 'getFirmware', out_sig='s')
-def get_firmware(self):
+def get_firmware(self: RazerDevice) -> str:
     """
     Get the devices firmware version
 
@@ -70,7 +71,7 @@ def get_firmware(self):
 
 
 @endpoint('razer.device.misc', 'getDeviceName', out_sig='s')
-def get_device_name(self):
+def get_device_name(self: RazerDevice) -> str:
     """
     Get the device's descriptive string
 
@@ -86,7 +87,7 @@ def get_device_name(self):
 
 
 @endpoint('razer.device.misc', 'getKeyboardLayout', out_sig='s')
-def get_keyboard_layout(self):
+def get_keyboard_layout(self: RazerDevice) -> str:
     """
     Get the device's keyboard layout
 
@@ -106,7 +107,7 @@ def get_keyboard_layout(self):
 
 # Functions to define a hardware class
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
-def get_device_type_keyboard(self):
+def get_device_type_keyboard(self: RazerDevice) -> str:
     """
     Get the device's type
 
@@ -118,7 +119,7 @@ def get_device_type_keyboard(self):
 
 
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
-def get_device_type_mouse(self):
+def get_device_type_mouse(self: RazerDevice) -> str:
     """
     Get the device's type
 
@@ -130,7 +131,7 @@ def get_device_type_mouse(self):
 
 
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
-def get_device_type_mousemat(self):
+def get_device_type_mousemat(self: RazerDevice) -> str:
     """
     Get the device's type
 
@@ -142,7 +143,7 @@ def get_device_type_mousemat(self):
 
 
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
-def get_device_type_core(self):
+def get_device_type_core(self: RazerDevice) -> str:
     """
     Get the device's type
 
@@ -154,7 +155,7 @@ def get_device_type_core(self):
 
 
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
-def get_device_type_keypad(self):
+def get_device_type_keypad(self: RazerDevice) -> str:
     """
     Get the device's type
 
@@ -166,7 +167,7 @@ def get_device_type_keypad(self):
 
 
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
-def get_device_type_headset(self):
+def get_device_type_headset(self: RazerDevice) -> str:
     """
     Get the device's type
 
@@ -178,7 +179,7 @@ def get_device_type_headset(self):
 
 
 @endpoint('razer.device.misc', 'getDeviceType', out_sig='s')
-def get_device_type_accessory(self):
+def get_device_type_accessory(self: RazerDevice) -> str:
     """
     Get the device's type
 
@@ -190,7 +191,7 @@ def get_device_type_accessory(self):
 
 
 @endpoint('razer.device.misc', 'hasMatrix', out_sig='b')
-def has_matrix(self):
+def has_matrix(self: RazerDevice) -> bool:
     """
     If the device has an LED matrix
     """
@@ -200,7 +201,7 @@ def has_matrix(self):
 
 
 @endpoint('razer.device.misc', 'getMatrixDimensions', out_sig='ai')
-def get_matrix_dims(self):
+def get_matrix_dims(self: RazerDevice) -> list[int]:
     """
     If the device has an LED matrix
     """
