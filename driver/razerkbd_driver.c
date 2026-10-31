@@ -9,6 +9,7 @@
 #include <linux/init.h>
 #include <linux/usb/input.h>
 #include <linux/hid.h>
+#include <linux/delay.h>
 #include <linux/dmi.h>
 #include <linux/input-event-codes.h>
 #include <linux/version.h>
@@ -3043,7 +3044,6 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_TARTARUS_CHROMA:
     case USB_DEVICE_ID_RAZER_BLADE_17_2022:
     case USB_DEVICE_ID_RAZER_BLADE_14_2022:
-    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
     case USB_DEVICE_ID_RAZER_BLADE_15_2023:
     case USB_DEVICE_ID_RAZER_BLADE_16_2023:
@@ -3061,6 +3061,26 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         }
         request = razer_chroma_standard_matrix_effect_static((struct razer_rgb*)&buf[0]);
         request.transaction_id.id = 0xFF;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        break;
+
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+        /* Firmware v1.0 stores the colour but does not apply it until the
+         * same static command is received a second time. A single write is
+         * why Polychromatic/RazerGenie need the colour picked twice.
+         */
+        if (count != 3) {
+            dev_warn(dev, "razerkbd: Static mode only accepts RGB (3byte)\n");
+            return -EINVAL;
+        }
+        request = razer_chroma_standard_matrix_effect_static((struct razer_rgb*)&buf[0]);
+        request.transaction_id.id = 0xFF;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        msleep(100);
         err = razer_send_payload(device, &request, &response);
         if (err)
             return err;
@@ -3449,7 +3469,6 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2021:
     case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
     case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
-    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
     case USB_DEVICE_ID_RAZER_BLADE_17_2022:
     case USB_DEVICE_ID_RAZER_BLADE_14_2022:
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
@@ -3463,6 +3482,33 @@ static ssize_t razer_attr_write_matrix_effect_starlight(struct device *dev, stru
     case USB_DEVICE_ID_RAZER_BLADE_18_2026:
         request = razer_chroma_standard_matrix_effect_starlight_single(0x01, &rgb1);
         request.transaction_id.id = 0xFF;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        break;
+
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+        /* The shared Blade case above ignores the written colour and always
+         * sends green. This firmware renders the colour from the legacy
+         * starlight packet (class 0x03, command 0x0A), not the extended matrix
+         * dialect, which it silently ignores. Repeat the command so a colour
+         * change applies on the first write, same as static.
+         */
+        if (count == 7) {
+            request = razer_chroma_standard_matrix_effect_starlight_dual(buf[0], (struct razer_rgb*)&buf[1], (struct razer_rgb*)&buf[4]);
+        } else if (count == 4) {
+            request = razer_chroma_standard_matrix_effect_starlight_single(buf[0], (struct razer_rgb*)&buf[1]);
+        } else if (count == 1) {
+            request = razer_chroma_standard_matrix_effect_starlight_random(buf[0]);
+        } else {
+            dev_warn(dev, "razerkbd: Starlight only accepts Speed (1byte). Speed, RGB (4byte). Speed, RGB, RGB (7byte)\n");
+            return -EINVAL;
+        }
+        request.transaction_id.id = 0xFF;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        msleep(100);
         err = razer_send_payload(device, &request, &response);
         if (err)
             return err;
@@ -3739,7 +3785,6 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BLADE_14_2021:
     case USB_DEVICE_ID_RAZER_BLADE_15_ADV_MID_2021:
     case USB_DEVICE_ID_RAZER_BLADE_17_PRO_MID_2021:
-    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
     case USB_DEVICE_ID_RAZER_BLADE_17_2022:
     case USB_DEVICE_ID_RAZER_BLADE_14_2022:
     case USB_DEVICE_ID_RAZER_BLADE_14_2023:
@@ -3779,6 +3824,38 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
             break;
             // TODO move default to case 1:. Then default: dev_warn(). Also remove pointless buffer
         }
+        break;
+
+    case USB_DEVICE_ID_RAZER_BLADE_15_ADV_EARLY_2022:
+        /* Firmware v1.0 accepts the legacy breathing packet but does not
+         * start the effect until the same command is received again. A single
+         * write is why breathing appears to do nothing.
+         */
+        switch(count) {
+        case 3: // Single colour mode
+            request = razer_chroma_standard_matrix_effect_breathing_single((struct razer_rgb*)&buf[0]);
+            break;
+
+        case 6: // Dual colour mode
+            request = razer_chroma_standard_matrix_effect_breathing_dual((struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            break;
+
+        case 1: // "Random" colour mode
+            request = razer_chroma_standard_matrix_effect_breathing_random();
+            break;
+
+        default:
+            dev_warn(dev, "razerkbd: Breathing only accepts '1' (1byte). RGB (3byte). RGB, RGB (6byte)\n");
+            return -EINVAL;
+        }
+        request.transaction_id.id = 0xFF;
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
+        msleep(100);
+        err = razer_send_payload(device, &request, &response);
+        if (err)
+            return err;
         break;
 
     default:
