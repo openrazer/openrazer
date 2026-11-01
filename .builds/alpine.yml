@@ -7,6 +7,7 @@ packages:
   - py3-daemonize
   - py3-dbus
   - py3-gobject3
+  - py3-mypy
   - py3-numpy
   - py3-pylint
   - py3-setproctitle
@@ -35,6 +36,8 @@ tasks:
       ./scripts/ci/test-hex-casing.sh
       # Check for Python version compatibility
       ./scripts/ci/test-vermin.sh
+      # Check for Python typing issues
+      ./scripts/ci/test-mypy.sh
 
   - compile-driver: |
       cd openrazer

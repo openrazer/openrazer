@@ -324,6 +324,13 @@ class RazerDevice(DBusService):
         if 'get_battery' in self.METHODS:
             self._init_battery_manager()
 
+        try:
+            driver_mode_default = self.DRIVER_MODE
+            self.DRIVER_MODE = self.config.getboolean(f"Device:{self.serial}", "driver_mode")
+            self.logger.info('Overriding DRIVER_MODE with "%s" from config (default: "%s")', self.DRIVER_MODE, driver_mode_default)
+        except (configparser.NoSectionError, configparser.NoOptionError):
+            pass
+
         if self.DRIVER_MODE:
             self.logger.info('Setting device to "driver" mode. Daemon will handle special functionality')
             self.set_device_mode(0x03, 0x00)  # Driver mode
@@ -377,7 +384,10 @@ class RazerDevice(DBusService):
                 self.logger.warning("Constraining DPI Y to maximum of " + str(self.DPI_MAX) + " because stored value " + str(self.dpi[1]) + " is larger.")
                 self.dpi[1] = self.DPI_MAX
 
-            dpi_func(self.dpi[0], self.dpi[1])
+            try:
+                dpi_func(self.dpi[0], self.dpi[1])
+            except OSError:
+                self.logger.exception("Failed to restore DPI!")
 
         poll_rate_func = getattr(self, "setPollRate", None)
         if poll_rate_func is not None:
@@ -386,7 +396,10 @@ class RazerDevice(DBusService):
                 self.logger.warning("Constraining poll rate because stored value " + str(self.poll_rate) + " is not available.")
                 self.poll_rate = min(self.POLL_RATES, key=lambda x: abs(x - self.poll_rate))
 
-            poll_rate_func(self.poll_rate)
+            try:
+                poll_rate_func(self.poll_rate)
+            except OSError:
+                self.logger.exception("Failed to restore poll rate!")
 
     def restore_brightness(self):
         """
@@ -410,7 +423,10 @@ class RazerDevice(DBusService):
                     bright_func = getattr(self, "set" + self.capitalize_first_char(i) + "Brightness", None)
 
                 if bright_func is not None:
-                    bright_func(self.zone[i]["brightness"])
+                    try:
+                        bright_func(self.zone[i]["brightness"])
+                    except OSError:
+                        self.logger.exception("Failed to restore brightness!")
 
     def disable_brightness(self):
         """

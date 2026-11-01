@@ -3,9 +3,9 @@
 import json as _json
 from collections.abc import Iterable
 
-import dbus as _dbus
+import dbus as _dbus  # type: ignore
 
-import openrazer_daemon.misc.macro as _daemon_macro
+import openrazer_daemon.misc.macro as _daemon_macro  # type: ignore
 from openrazer_daemon import keyboard
 
 

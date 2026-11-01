@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-import dbus
+import dbus  # type: ignore
 from openrazer.client.devices import RazerDevice, BaseDeviceFactory
 from openrazer.client.devices.mousemat import RazerMousemat
 from openrazer.client.devices.keyboard import RazerKeyboard

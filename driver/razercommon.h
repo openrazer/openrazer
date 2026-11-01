@@ -7,21 +7,13 @@
 #ifndef DRIVER_RAZERCOMMON_H_
 #define DRIVER_RAZERCOMMON_H_
 
+#include <linux/hid.h>
 #include <linux/usb/input.h>
+#include "compat.h"
 
 #define DRIVER_VERSION "3.12.1"
 #define DRIVER_LICENSE "GPL v2"
 #define DRIVER_AUTHOR "Terri Cain <terri@dolphincorp.co.uk>"
-
-// Compatbility for fallthrough pseudo keyword for Linux versions older than v5.4
-// See also https://git.kernel.org/torvalds/c/294f69e
-#ifndef fallthrough
-#if __has_attribute(__fallthrough__)
-# define fallthrough                    __attribute__((__fallthrough__))
-#else
-# define fallthrough                    do {} while (0)  /* fallthrough */
-#endif
-#endif
 
 // Macro to create device files
 #define CREATE_DEVICE_FILE(dev, type) \
@@ -32,9 +24,6 @@ do { \
 } while (0)
 
 #define USB_VENDOR_ID_RAZER 0x1532
-
-/* Each USB report has 90 bytes*/
-#define RAZER_USB_REPORT_LEN 0x5A
 
 // LED STATE
 #define OFF 0x00
@@ -93,25 +82,25 @@ enum razer_matrix_effect_id {
 #define RAZER_CMD_TIMEOUT       0x04
 #define RAZER_CMD_NOT_SUPPORTED 0x05
 
-struct razer_report;
-
 struct razer_rgb {
-    unsigned char r,g,b;
+    u8 r;
+    u8 g;
+    u8 b;
 };
 
 union transaction_id_union {
-    unsigned char id;
+    u8 id;
     struct transaction_parts {
-        unsigned char device : 3;
-        unsigned char id : 5;
+        u8 device : 3;
+        u8 id : 5;
     } parts;
 };
 
 union command_id_union {
-    unsigned char id;
+    u8 id;
     struct command_id_parts {
-        unsigned char direction : 1;
-        unsigned char id : 7;
+        u8 direction : 1;
+        u8 id : 7;
     } parts;
 };
 
@@ -133,43 +122,39 @@ union command_id_union {
  * */
 
 struct razer_report {
-    unsigned char status;
+    u8 status;
     union transaction_id_union transaction_id; /* */
-    unsigned short remaining_packets; /* Big Endian */
-    unsigned char protocol_type; /*0x0*/
-    unsigned char data_size;
-    unsigned char command_class;
+    __be16 remaining_packets; /* Big Endian */
+    u8 protocol_type; /*0x0*/
+    u8 data_size;
+    u8 command_class;
     union command_id_union command_id;
-    unsigned char arguments[80];
-    unsigned char crc;/*xor'ed bytes of report*/
-    unsigned char reserved; /*0x0*/
+    u8 arguments[80];
+    u8 crc;/*xor'ed bytes of report*/
+    u8 reserved; /*0x0*/
 };
+static_assert(sizeof(struct razer_report) == 90);
 
 struct razer_argb_report {
-    unsigned char report_id;
-    unsigned char channel_1;
-    unsigned char channel_2;
-    unsigned char pad;
-    unsigned char last_idx;
-    unsigned char color_data[315];
+    u8 report_id;
+    u8 channel_1;
+    u8 channel_2;
+    u8 pad;
+    u8 last_idx;
+    u8 color_data[315];
 };
+static_assert(sizeof(struct razer_argb_report) == 320);
 
-struct razer_key_translation {
-    u16 from;
-    u16 to;
-};
-
-int razer_send_control_msg(struct usb_device *usb_dev,void const *data, unsigned int report_index, unsigned long wait_min, unsigned long wait_max);
-int razer_send_control_msg_old_device(struct usb_device *usb_dev,void const *data, uint report_value, uint report_index, uint report_size, ulong wait_min, ulong wait_max);
-int razer_get_usb_response(struct usb_device *usb_dev, unsigned int report_index, struct razer_report* request_report, unsigned int response_index, struct razer_report* response_report, unsigned long wait_min, unsigned long wait_max);
-int razer_send_argb_msg(struct usb_device* usb_dev, unsigned char channel, unsigned char size, void const* data);
+int razer_send_control_msg(struct hid_device *hdev, const void *data, u16 size, u16 index, ulong wait);
+int razer_send_control_msg_old_device(struct hid_device *hdev, const void *data, uint value, uint index, uint size, ulong wait);
+int razer_get_usb_response(struct hid_device *hdev, unsigned int report_index, struct razer_report* request_report, unsigned int response_index, struct razer_report* response_report, unsigned long wait);
+int razer_send_argb_msg(struct hid_device *hdev, unsigned char channel, size_t size, void const* data);
 unsigned char razer_calculate_crc(struct razer_report *report);
 struct razer_report get_razer_report(unsigned char command_class, unsigned char command_id, unsigned char data_size);
-struct razer_report get_empty_razer_report(void);
-void print_erroneous_report(struct razer_report* report, char* driver_name, char* message);
+void print_erroneous_report(struct hid_device *hdev, struct razer_report* report, const char *message);
 
-// Convenience functions
-unsigned char clamp_u8(unsigned char value, unsigned char min, unsigned char max);
-unsigned short clamp_u16(unsigned short value, unsigned short min, unsigned short max);
+/* Borrowed from drivers/hid/usbhid/usbhid.h */
+#define	hid_to_usb_dev(hid_dev) \
+	to_usb_device(hid_dev->dev.parent->parent)
 
 #endif /* DRIVER_RAZERCOMMON_H_ */
