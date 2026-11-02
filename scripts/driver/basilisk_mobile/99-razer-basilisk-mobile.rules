@@ -1,0 +1,3 @@
+# Optional initialization for Basilisk Mobile without the OpenRazer daemon.
+ACTION=="unbind", SUBSYSTEM=="hid", KERNEL=="0003:1532:00D[34].*", ATTRS{bInterfaceNumber}=="00", ENV{SYSTEMD_READY}="0"
+ACTION=="add|bind|change", SUBSYSTEM=="hid", KERNEL=="0003:1532:00D[34].*", ATTRS{bInterfaceNumber}=="00", DRIVER=="razermouse", TEST=="device_mode", TAG+="systemd", ENV{SYSTEMD_READY}="1", ENV{SYSTEMD_WANTS}+="openrazer-mouse-init@%k.service"

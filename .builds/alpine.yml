@@ -38,6 +38,7 @@ tasks:
       ./scripts/ci/test-vermin.sh
       # Check for Python typing issues
       ./scripts/ci/test-mypy.sh
+      python3 -m unittest discover -s scripts/driver/basilisk_mobile -p 'test_*.py'
 
   - compile-driver: |
       cd openrazer
