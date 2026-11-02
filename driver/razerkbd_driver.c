@@ -5390,6 +5390,16 @@ static int razer_raw_event_standard(struct hid_device *hdev, struct razer_kbd_us
 static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_usb_device_data *usb_dev_data, struct usb_interface *intf, struct hid_report *report, u8 *data, int size)
 {
     DECLARE_BITMAP(bitfield, RAW_EVENT_BITFIELD_BITS) = { 0 };
+    struct razer_kbd_device *device = hid_get_drvdata(hdev);
+    bool preserve_modifiers = is_pro_type_ergo(device) && size == 22 &&
+                              intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD;
+
+    /* Split-key reports omit modifiers. Keep the last ordinary report's state
+     * when translating them, rather than generating spurious modifier releases.
+     * Store it per HID interface so other interfaces cannot overwrite it.
+     */
+    if (preserve_modifiers && data[0] == 0x01)
+        device->ergo_modifiers = data[1];
 
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
        ((size == 48) || (size == 22) || (size == 16)) && data[0] == 0x04) {
@@ -5540,7 +5550,7 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_us
         usb_dev_data->fn_on = !!found_fn;
 
         data[0] = 0x01;
-        data[1] = 0x00;
+        data[1] = preserve_modifiers ? device->ergo_modifiers : 0x00;
         if (size == 22) {
             memcpy(data + 2, bitfield, RAW_EVENT_BITFIELD_BYTES);
         }
