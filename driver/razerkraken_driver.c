@@ -496,7 +496,21 @@ static const u8 bs_v3pro_eq_commit[5][12] = {
  *   4. APPLY        cls=0xe1 cmd=0x01 args=[0x02, 0x00]
  *   5. COMMIT       cls=0xeb cmd=0x0b args=[idx, ...]
  */
-static int razer_blackshark_v3pro_apply_eq(struct razer_kraken_device *device, u8 preset)
+/* Sign-magnitude band byte used by the 0x95 bands frame: 0x00..0x06 = 0..+6 dB,
+ * 0x81..0x86 = -1..-6 dB. */
+static u8 razer_blackshark_v3pro_band_byte(int db)
+{
+    db = clamp(db, -6, 6);
+    return db < 0 ? (u8)(0x80 | -db) : (u8)db;
+}
+
+/* custom: NULL = the slot's factory curve; otherwise 10 gains (-6..+6 dB,
+ * 31Hz..16kHz) written into that slot in place of the factory curve. The
+ * meta/commit frames stay the slot's own, so the slot keeps its identity
+ * (name/icon on the headset) and only its curve changes - the same thing
+ * Synapse does when a preset's curve is dragged ("RESET CURRENT EQ" restores
+ * it). */
+static int razer_blackshark_v3pro_apply_eq(struct razer_kraken_device *device, u8 preset, const s8 *custom)
 {
     u8 cmdbuf[RAZER_BLACKSHARK_REPORT_LEN];
     const u8 gate_get[2] = { 0x01, 0x00 };
@@ -519,6 +533,12 @@ static int razer_blackshark_v3pro_apply_eq(struct razer_kraken_device *device, u
         meta[0] = preset;
         memcpy(commit, bs_v3pro_eq_commit[0], sizeof(commit));
         commit[0] = preset;
+    }
+
+    if (custom) {
+        int i;
+        for (i = 0; i < 10; i++)
+            bands[1 + i] = razer_blackshark_v3pro_band_byte(custom[i]);
     }
 
     razer_blackshark_v3pro_build(cmdbuf, BLACKSHARK_V3_PRO_EQ_STATE_CLASS,
@@ -2203,22 +2223,30 @@ static ssize_t razer_attr_read_v3pro_power_save(struct device *dev, struct devic
     return sprintf(buf, "%d\n", device->cached_v3pro_power_save);
 }
 
-/* Headphone EQ: writes a single byte = preset slot index (0..8). */
+/* Headphone EQ write formats:
+ *   "<slot>"            switch to preset slot 0..8 with its factory curve
+ *   "<slot> b0 .. b9"   switch to that slot with a custom curve: 10 gains in dB
+ *                       (-6..+6, 31Hz 63Hz 125Hz 250Hz 500Hz 1k 2k 4k 8k 16k).
+ *                       Same layout as the plain V3's headphone_eq. */
 static ssize_t razer_attr_write_v3pro_headphone_eq(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-    unsigned long val;
-    int ret;
+    int slot, v[10], n, i, ret;
+    s8 bands[10];
 
-    if (kstrtoul(buf, 10, &val))
+    n = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d %d", &slot,
+               &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &v[6], &v[7], &v[8], &v[9]);
+    if (n != 1 && n != 11)
         return -EINVAL;
-    if (val >= BLACKSHARK_V3_PRO_EQ_PRESET_COUNT)
+    if (slot < 0 || slot >= BLACKSHARK_V3_PRO_EQ_PRESET_COUNT)
         return -EINVAL;
+    for (i = 0; i < 10 && n == 11; i++)
+        bands[i] = (s8)clamp(v[i], -6, 6);
 
     mutex_lock(&device->lock);
-    ret = razer_blackshark_v3pro_apply_eq(device, (u8)val);
+    ret = razer_blackshark_v3pro_apply_eq(device, (u8)slot, n == 11 ? bands : NULL);
     if (ret >= 0)
-        device->cached_v3pro_eq_profile = (s8)val;
+        device->cached_v3pro_eq_profile = (s8)slot;
     mutex_unlock(&device->lock);
 
     return ret < 0 ? ret : count;
