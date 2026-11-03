@@ -336,6 +336,7 @@ This will output something similar to this:
 | Razer Core                                                    |  1532:0215  |
 | Razer Tartarus V2                                             |  1532:022B  |
 | Razer Tartarus Pro                                            |  1532:0244  |
+| Razer Tartarus V2 Pro                                         |  1532:02EB  |
 | Razer Nommo Chroma                                            |  1532:0517  |
 | Razer Nommo Pro                                               |  1532:0518  |
 | Razer Chroma Mug Holder                                       |  1532:0F07  |
