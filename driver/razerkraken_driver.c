@@ -1171,6 +1171,9 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
         device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_WIRED ||
         device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO ||
         device->usb_pid == USB_DEVICE_ID_RAZER_BLACKSHARK_V3_PRO_WIRED) {
+        /* Version from the cached INIT reply; "v1.0" until it has arrived. */
+        if (device->v3_fw_valid)
+            return sprintf(buf, "v%u.%u.%u\n", device->v3_fw[0], device->v3_fw[1], device->v3_fw[2]);
         return sprintf(buf, "v1.0\n");
     }
 
@@ -2476,6 +2479,18 @@ static void razer_blackshark_v3_cache(struct razer_kraken_device *device, u8 *da
                     schedule_delayed_work(&device->prime_work,
                                           msecs_to_jiffies(3500));
                 }
+            }
+            break;
+        case BLACKSHARK_PARAM_INIT: /* 0x02: INIT reply carries the firmware
+                                     * version, e.g. 01 03 03 00 = v1.3.3
+                                     * (seen 2026-11-02 on 1532:0577 via
+                                     * usbmon; Synapse reports 1.3.3_r1).
+                                     * Answered before RF link-up, so it may
+                                     * be the dongle's version. */
+            if (data[11] == 0x01 && data[12] >= 3 && data[12] <= 4 &&
+                data[13] != 0xff && (data[13] | data[14] | data[15])) {
+                memcpy(device->v3_fw, &data[13], 4);
+                device->v3_fw_valid = true;
             }
             break;
         case BLACKSHARK_PARAM_SIDETONE_VOLUME: /* 0x19 */

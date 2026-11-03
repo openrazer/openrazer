@@ -189,6 +189,10 @@ struct razer_kraken_device {
     char serial[23];
     // 3 Bytes, first byte is whether fw version is collected, 2nd byte is major version, 3rd is minor, should be printed out in hex form as are bcd
     unsigned char firmware_version[3];
+    /* BlackShark V3 family: version bytes from the cls=0x02 INIT reply
+     * (payload 01 03 03 00 = v1.3.3), cached from the ep 0x84 URB. */
+    u8 v3_fw[4];
+    bool v3_fw_valid;
 
     u8 data[64];
     s8 eq_bands[10];
