@@ -182,6 +182,8 @@ struct razer_kbd_device {
     atomic_t ergo_bl_delta;
     unsigned char ergo_last_brightness;
     unsigned char ergo_modifiers;
+    unsigned char ergo_standard_keys[20];
+    unsigned char ergo_special_keys[20];
     unsigned char usb_interface_protocol;
     unsigned short usb_vid;
     unsigned short usb_pid;

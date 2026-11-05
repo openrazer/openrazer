@@ -5391,15 +5391,19 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_us
 {
     DECLARE_BITMAP(bitfield, RAW_EVENT_BITFIELD_BITS) = { 0 };
     struct razer_kbd_device *device = hid_get_drvdata(hdev);
-    bool preserve_modifiers = is_pro_type_ergo(device) && size == 22 &&
+    bool merge_ergo_reports = is_pro_type_ergo(device) && size == 22 &&
                               intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD;
 
-    /* Split-key reports omit modifiers. Keep the last ordinary report's state
-     * when translating them, rather than generating spurious modifier releases.
-     * Store it per HID interface so other interfaces cannot overwrite it.
+    /* Ordinary and vendor reports describe separate sets of held keys.
+     * Merge them per HID interface so either report cannot release keys
+     * still held in the other set. Only ordinary reports carry modifiers.
      */
-    if (preserve_modifiers && data[0] == 0x01)
+    if (merge_ergo_reports && data[0] == 0x01) {
         device->ergo_modifiers = data[1];
+        memcpy(device->ergo_standard_keys, data + 2, RAW_EVENT_BITFIELD_BYTES);
+        for (int i = 0; i < RAW_EVENT_BITFIELD_BYTES; i++)
+            data[i + 2] |= device->ergo_special_keys[i];
+    }
 
     if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD &&
        ((size == 48) || (size == 22) || (size == 16)) && data[0] == 0x04) {
@@ -5550,9 +5554,14 @@ static int razer_raw_event_bitfield(struct hid_device *hdev, struct razer_kbd_us
         usb_dev_data->fn_on = !!found_fn;
 
         data[0] = 0x01;
-        data[1] = preserve_modifiers ? device->ergo_modifiers : 0x00;
+        data[1] = merge_ergo_reports ? device->ergo_modifiers : 0x00;
         if (size == 22) {
             memcpy(data + 2, bitfield, RAW_EVENT_BITFIELD_BYTES);
+            if (merge_ergo_reports) {
+                memcpy(device->ergo_special_keys, data + 2, RAW_EVENT_BITFIELD_BYTES);
+                for (int i = 0; i < RAW_EVENT_BITFIELD_BYTES; i++)
+                    data[i + 2] |= device->ergo_standard_keys[i];
+            }
         }
 
         // Some reason just by editing data, it generates a normal event above. (Could quite possibly work like that, no clue)
