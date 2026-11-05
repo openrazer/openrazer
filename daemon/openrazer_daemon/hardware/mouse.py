@@ -2020,6 +2020,8 @@ class RazerBasiliskMobileWired(__RazerDevice):
 
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/15485/15485-1-en-v2.png"
 
+    DRIVER_MODE = True
+
     DPI_MAX = 18000
 
 

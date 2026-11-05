@@ -450,6 +450,26 @@ class RazerBlackWidowV4TenkeylessHyperSpeedWireless(RazerBlackWidowV4TenkeylessH
     USB_PID = 0x02D5
 
 
+class RazerProTypeErgoWired(RazerBlackWidowV4TenkeylessHyperSpeedWired):
+    """
+    Class for the Razer Pro Type Ergo (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Pro_Type_Ergo(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02C4
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [1, 19]
+
+
+class RazerProTypeErgoWireless(RazerProTypeErgoWired):
+    """
+    Class for the Razer Pro Type Ergo (Wireless)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Pro_Type_Ergo(_\d+)?(-if01)?-event-(kbd|mouse)')
+    USB_PID = 0x02C2
+
+
 class RazerBlackWidowChroma(_RippleKeyboard):
     """
     Class for the Razer BlackWidow Chroma

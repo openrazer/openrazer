@@ -30,6 +30,18 @@ Community supported packages are available for:
 * [Solus](https://openrazer.github.io/#solus)
 * [Void Linux](https://openrazer.github.io/#voidlinux)
 
+### Basilisk Mobile special controls
+
+The Basilisk Mobile's AI button requires driver mode. OpenRazer's daemon enables
+this mode by default for both the wired mouse and its receiver, which also enables
+the driver's sleep/wake recovery. The AI button emits F22 and wheel tilt emits
+horizontal scrolling; assign application actions with your input remapping tool.
+
+For installations using the kernel driver without the OpenRazer daemon, see the
+[optional Basilisk Mobile startup helper](scripts/driver/basilisk_mobile/README.md).
+It verifies initialization and retries on mouse activity if the receiver was not
+ready at startup. This replaces the earlier single-command udev example.
+
 ## Applications
 
 The following applications complement and interact with this driver:
@@ -167,6 +179,8 @@ This will output something similar to this:
 | Razer Blade 18 (2024)                                         |  1532:02B8  |
 | Razer BlackWidow V4 Mini HyperSpeed (Wired)                   |  1532:02B9  |
 | Razer BlackWidow V4 Mini HyperSpeed (Wireless)                |  1532:02BA  |
+| Razer Pro Type Ergo (Wireless) | 1532:02C2 |
+| Razer Pro Type Ergo (Wired) | 1532:02C4 |
 | Razer Blade 14 (2025)                                         |  1532:02C5  |
 | Razer Blade 16 (2025)                                         |  1532:02C6  |
 | Razer Blade 18 (2025)                                         |  1532:02C7  |

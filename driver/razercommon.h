@@ -8,6 +8,8 @@
 #define DRIVER_RAZERCOMMON_H_
 
 #include <linux/hid.h>
+#include <linux/list.h>
+#include <linux/mutex.h>
 #include <linux/usb/input.h>
 #include "compat.h"
 
@@ -144,6 +146,18 @@ struct razer_argb_report {
     u8 color_data[315];
 };
 static_assert(sizeof(struct razer_argb_report) == 320);
+
+/* Shared by HID interfaces, released after their recovery work has stopped. */
+struct razer_mode_state {
+    struct list_head node;
+    struct usb_device *usb_dev;
+    unsigned int users;
+    struct mutex lock;
+    bool restore_driver_mode;
+};
+
+struct razer_mode_state *razer_mode_state_get(struct usb_device *usb_dev);
+void razer_mode_state_put(struct razer_mode_state *state);
 
 int razer_send_control_msg(struct hid_device *hdev, const void *data, u16 size, u16 index, ulong wait);
 int razer_send_control_msg_old_device(struct hid_device *hdev, const void *data, uint value, uint index, uint size, ulong wait);
