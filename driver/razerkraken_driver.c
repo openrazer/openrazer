@@ -664,6 +664,44 @@ static ssize_t razer_attr_read_matrix_effect_breath(struct device *dev, struct d
 }
 
 /**
+ * Write device file "matrix_brightness"
+ *
+ * Takes an ascii number from 0 to 255
+ */
+static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    struct razer_kraken_v3_report report = get_kraken_v3_report(KRAKEN_V3_CMD_SET_BRIGHTNESS);
+    int ret;
+
+    ret = kstrtou8(buf, 10, &report.arguments[2]);
+    if(ret) {
+        return ret;
+    }
+
+    ret = razer_kraken_v3_send_report(device, &report);
+    if(ret) {
+        return ret;
+    }
+
+    device->brightness = report.arguments[2];
+
+    return count;
+}
+
+/**
+ * Read device file "matrix_brightness"
+ *
+ * Returns an ascii number
+ */
+static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    return sysfs_emit(buf, "%d\n", device->brightness);
+}
+
+/**
  * Read device file "serial"
  *
  * Returns a string
@@ -793,6 +831,7 @@ static DEVICE_ATTR(matrix_effect_spectrum,  0220, NULL,                         
 static DEVICE_ATTR(matrix_effect_static,    0660, razer_attr_read_matrix_effect_static,       razer_attr_write_matrix_effect_static);
 static DEVICE_ATTR(matrix_effect_custom,    0660, razer_attr_read_matrix_effect_custom,       razer_attr_write_matrix_effect_custom);
 static DEVICE_ATTR(matrix_effect_breath,    0660, razer_attr_read_matrix_effect_breath,       razer_attr_write_matrix_effect_breath);
+static DEVICE_ATTR(matrix_brightness,       0660, razer_attr_read_matrix_brightness,          razer_attr_write_matrix_brightness);
 
 static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *intf, struct hid_device *hdev)
 {
@@ -885,6 +924,7 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);             // Brightness
             break;
         }
     }
@@ -954,6 +994,7 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);             // Brightness
             break;
         }
     }

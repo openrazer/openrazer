@@ -38,6 +38,7 @@ struct razer_kraken_device {
 
     u8 data[33];
 
+    unsigned char brightness;
 };
 
 union razer_kraken_effect_byte {
@@ -162,12 +163,14 @@ struct razer_kraken_response_report {
  * the memory addresses above, and can't read it back. Reports are zero padded:
  *   40 01 01 00 EE NN RGB...  Set effect EE using NN colours
  *   40 01 00 00 08            Enter direct mode
+ *   40 02 00 00 LL            Set brightness to LL
  *   40 03 00 RR GG BB         Set the colour in direct mode
  */
 #define KRAKEN_V3_REPORT_ID 0x40
 #define KRAKEN_V3_REPORT_DELAY_MS 15
 
 #define KRAKEN_V3_CMD_SET_MODE 0x01
+#define KRAKEN_V3_CMD_SET_BRIGHTNESS 0x02
 #define KRAKEN_V3_CMD_SET_COLOUR 0x03
 
 #define KRAKEN_V3_EFFECT_NONE 0x00

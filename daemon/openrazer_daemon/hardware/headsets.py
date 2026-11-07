@@ -202,7 +202,7 @@ class RazerKrakenUltimate(__RazerDevice):
             _dbus_chroma.set_breath_triple_effect(self, *args)
 
 
-class RazerKrakenV3HyperSense(__RazerDevice):
+class RazerKrakenV3HyperSense(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Kraken V3 HyperSense
     """
@@ -213,7 +213,8 @@ class RazerKrakenV3HyperSense(__RazerDevice):
     METHODS = ['get_device_type_headset',
                'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_single_effect',
                'set_breath_dual_effect',
-               'set_custom_kraken']
+               'set_custom_kraken',
+               'set_brightness', 'get_brightness']
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/f65662e5f0d8e35e1570e42b3e050a08/kraken-v3-hypersense-3-500x500.png"
 
