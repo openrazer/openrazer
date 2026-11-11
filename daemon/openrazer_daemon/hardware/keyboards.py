@@ -1072,7 +1072,7 @@ class RazerBlackWidowElite(_RippleKeyboard):
     USB_VID = 0x1532
     USB_PID = 0x0228
     HAS_MATRIX = True
-    WAVE_DIRS = (0, 1)
+    WAVE_DIRS = (1, 2)
     MATRIX_DIMS = [6, 22]
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
