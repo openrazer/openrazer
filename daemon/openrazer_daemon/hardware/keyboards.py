@@ -999,6 +999,28 @@ class RazerBlackWidowV4_75PCT(_RippleKeyboard):
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/13256/13256-1-en-v2.png"
 
 
+class RazerJoro(_RippleKeyboard):
+    """
+    Class for the Razer Joro
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Joro(_000000000000)?(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02CD
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 16]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode', 'get_macro_mode', 'set_macro_mode',
+               'get_macro_effect', 'set_macro_effect', 'get_macros', 'delete_macro', 'add_macro',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour',
+               # Battery
+               'get_battery', 'is_charging']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/19771/19771-01-en-v1.png"
+
+
 class RazerHuntsmanElite(_RippleKeyboard):
     """
     Class for the Razer Huntsman Elite
@@ -2272,6 +2294,25 @@ class RazerBlade162025(_RippleKeyboard):
     DEVICE_IMAGE = "https://dl.razerzone.com/src2/14806/14806-en-v1.png"
 
 
+class RazerBlade162026(_RippleKeyboard):
+    """
+    Class for the Razer Blade 16 (2026)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02E0
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 17]
+    METHODS = ['get_device_type_keyboard', 'get_logo_active', 'set_logo_active', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
+               'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
+
+    DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/h31/h27/10040018731038/blade16-s12-black-500x500.png"
+
+
 class RazerBlade182023(_RippleKeyboard):
     """
     Class for the Razer Blade 18 (2023)
@@ -2337,6 +2378,25 @@ class RazerBlade182025(_RippleKeyboard):
 
     USB_VID = 0x1532
     USB_PID = 0x02C7
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 19]
+    METHODS = ['get_device_type_keyboard', 'get_logo_active', 'set_logo_active', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
+               'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/14968/14968-1-en-v1.png"
+
+
+class RazerBlade182026(_RippleKeyboard):
+    """
+    Class for the Razer Blade 18 (2026)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Blade(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02E1
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 19]
     METHODS = ['get_device_type_keyboard', 'get_logo_active', 'set_logo_active', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',

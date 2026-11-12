@@ -1155,8 +1155,10 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
 
         case USB_DEVICE_ID_RAZER_CHROMA_ADDRESSABLE_RGB_CONTROLLER:
             mutex_lock(&device->lock);
-            razer_send_argb_msg(device->hdev, row_id, (stop_col - start_col) + 1, (unsigned char*)&buf[offset]);
+            err = razer_send_argb_msg(device->hdev, row_id, (stop_col - start_col) + 1, (unsigned char*)&buf[offset]);
             mutex_unlock(&device->lock);
+            if (err)
+                return err;
             return count;
 
         default:

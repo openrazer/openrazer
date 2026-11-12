@@ -1464,6 +1464,91 @@ struct razer_report razer_naga_trinity_effect_static(struct razer_rgb *rgb)
 }
 
 /**
+ * Set the Naga Trinity to "Breathing Single" effect
+ */
+struct razer_report razer_naga_trinity_effect_breathing_single(struct razer_rgb *rgb)
+{
+    struct razer_report report = get_razer_report(0x0f, 0x02, 0x09);
+
+    report.arguments[0] = 0x00;
+    report.arguments[1] = 0x00;
+    report.arguments[2] = 0x02;
+    report.arguments[3] = 0x01;
+    report.arguments[4] = 0x00;
+    report.arguments[5] = 0x01;
+    report.arguments[6] = rgb->r;
+    report.arguments[7] = rgb->g;
+    report.arguments[8] = rgb->b;
+
+    return report;
+}
+
+/**
+ * Set the Naga Trinity to "Breathing Dual" effect
+ */
+struct razer_report razer_naga_trinity_effect_breathing_dual(struct razer_rgb *rgb1, struct razer_rgb *rgb2)
+{
+    struct razer_report report = get_razer_report(0x0f, 0x02, 0x0c);
+
+    report.arguments[0] = 0x00;
+    report.arguments[1] = 0x00;
+    report.arguments[2] = 0x02;
+    report.arguments[3] = 0x02;
+    report.arguments[4] = 0x00;
+    report.arguments[5] = 0x02;
+    report.arguments[6] = rgb1->r;
+    report.arguments[7] = rgb1->g;
+    report.arguments[8] = rgb1->b;
+    report.arguments[9] = rgb2->r;
+    report.arguments[10] = rgb2->g;
+    report.arguments[11] = rgb2->b;
+
+    return report;
+}
+
+/**
+ * Set the Naga Trinity to "Breathing Random" effect
+ */
+struct razer_report razer_naga_trinity_effect_breathing_random(void)
+{
+    struct razer_report report = get_razer_report(0x0f, 0x02, 0x06);
+
+    report.arguments[0] = 0x00;
+    report.arguments[1] = 0x00;
+    report.arguments[2] = 0x02;
+
+    return report;
+}
+
+/**
+ * Set the Naga Trinity to "Spectrum Cycle" effect
+ */
+struct razer_report razer_naga_trinity_effect_spectrum(void)
+{
+    struct razer_report report = get_razer_report(0x0f, 0x02, 0x06);
+
+    report.arguments[0] = 0x00;
+    report.arguments[1] = 0x00;
+    report.arguments[2] = 0x03;
+
+    return report;
+}
+
+/**
+ * Set the Naga Trinity to "None" effect
+ */
+struct razer_report razer_naga_trinity_effect_none(void)
+{
+    struct razer_report report = get_razer_report(0x0f, 0x02, 0x06);
+
+    report.arguments[0] = 0x00;
+    report.arguments[1] = 0x00;
+    report.arguments[2] = 0x00;
+
+    return report;
+}
+
+/**
  * Set scroll wheel mode on the device
  *
  * Status Trans Packet Proto DataSize Class CMD Args
@@ -1552,6 +1637,14 @@ struct razer_report razer_chroma_misc_get_scroll_smart_reel(void)
 }
 
 /**
+ * Get LED mode for HyperPolling Wireless Dongle
+ */
+struct razer_report razer_chroma_misc_get_hyperpolling_wireless_dongle_indicator_led_mode(void)
+{
+    return get_razer_report(0x07, 0x90, 0x01);
+}
+
+/**
  * Set LED mode for HyperPolling Wireless Dongle
  * 1 = Connection Status
  * 2 = Battery Status
@@ -1607,6 +1700,36 @@ struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_unpair(un
 
     report.arguments[0] = (pid >> 8) & 0xFF;
     report.arguments[1] = pid & 0xFF;
+
+    return report;
+}
+
+/**
+ * Get dongle indicator LED modes
+ * Returns 3 bytes for left, middle, right LEDs
+ */
+struct razer_report razer_chroma_misc_get_hyperpolling_wireless_dongle_multi_indicator_led_modes(void)
+{
+    return get_razer_report(0x07, 0x95, 0x03);
+}
+
+/**
+ * Set dongle indicator LED mode
+ * Off = 0
+ * Battery status = 1
+ * Connection status = 2
+ * Polling rate indicator = 3
+ * DPI indicator = 4
+ *
+ * left, middle, right leds
+ */
+struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_multi_indicator_led_modes(unsigned char mode1, unsigned char mode2, unsigned char mode3)
+{
+    struct razer_report report = get_razer_report(0x07, 0x15, 0x03);
+
+    report.arguments[0] = mode1;
+    report.arguments[1] = mode2;
+    report.arguments[2] = mode3;
 
     return report;
 }
