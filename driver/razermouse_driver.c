@@ -1970,7 +1970,6 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED_ALT:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS_ALT:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
@@ -2004,6 +2003,7 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
     case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS_ALT:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED:
@@ -2187,7 +2187,6 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRED_ALT:
-    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS_ALT:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3_HYPERSPEED_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_WIRED:
@@ -2221,6 +2220,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
     case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS_ALT:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V3:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED:
@@ -2284,6 +2284,7 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     switch(device->usb_pid) {
     case USB_DEVICE_ID_RAZER_VIPER_8K:
     case USB_DEVICE_ID_RAZER_HYPERPOLLING_WIRELESS_DONGLE:
+    case USB_DEVICE_ID_RAZER_DEATHADDER_V3_PRO_WIRELESS_ALT:
         request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x01);
         request.transaction_id.id = 0xFF;
         err = razer_send_payload(device, &request, &response);

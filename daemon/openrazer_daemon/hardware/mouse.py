@@ -1690,6 +1690,8 @@ class RazerDeathAdderV3ProWireless_Alternate(RazerDeathAdderV3ProWireless):
     """
     USB_PID = 0x00C3
 
+    POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
+
 
 class RazerBasiliskV3ProWired(__RazerDevice):
     """
