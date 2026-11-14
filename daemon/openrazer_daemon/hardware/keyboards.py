@@ -17,6 +17,7 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
     Has macro functionality and brightness based suspend
     """
     DRIVER_MODE = True
+    USE_KEY_MANAGER = True
 
     def __init__(self, *args, **kwargs):
         if 'additional_methods' in kwargs:
@@ -26,7 +27,9 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         super().__init__(*args, **kwargs)
         # Methods are loaded into DBus by this point
 
-        self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
+        self.key_manager = None
+        if self.USE_KEY_MANAGER:
+            self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
 
     def _close(self):
         """
@@ -34,7 +37,8 @@ class _MacroKeyboard(_RazerDeviceBrightnessSuspend):
         """
         super()._close()
 
-        self.key_manager.close()
+        if isinstance(self.key_manager, _KeyboardKeyManager):
+            self.key_manager.close()
 
 
 class _RippleKeyboard(_MacroKeyboard):

@@ -55,6 +55,13 @@ Additional per-device sections can be defined with the name "Device:XXXX" where 
 *driver_mode* _bool_
 	This flag specifies an override whether the device should be switched into "driver mode" (as opposed to keeping it in "device mode"). Ideally the OpenRazer stack should support all functionality in software and support the devices being in driver mode, but that's not the case for a wide variety of devices yet, especially mice. However some users may want to explicitly force a device into driver mode to enable some functionality like horizontal scrolling.
 
+*use_key_manager* _bool_
+	This flag specifies an override for the function of the openrazer-daemon key manager. It mainly impacts keyboards and gamepads allowing functions such as ripple, macro keys, and function key management. You may wish to disable the key manager for a device if you are using a separate input management application for macros, events and special keys, particularly if conflicts are observed. Note that some functionality provided by the OpenRazer daemon and applications leveraging it may be degraded for that device if disabled. This does not impact the kernel driver.
+
+	Defaults:++
+	True for keyboards & gamepads++
+	False for all other devices
+
 # SEE ALSO
 
 *openrazer-daemon*(8)
