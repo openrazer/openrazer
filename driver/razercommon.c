@@ -9,6 +9,9 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/hid.h>
+#include <linux/power_supply.h>
+#include <linux/workqueue.h>
+#include <linux/jiffies.h>
 
 #include "razercommon.h"
 
@@ -229,4 +232,131 @@ int razer_send_argb_msg(struct hid_device* hdev, unsigned char channel, size_t s
         hid_warn(hdev, "Failed to send USB control message: %d\n", ret);
 
     return ret;
+}
+
+static const enum power_supply_property razer_power_supply_props[] = {
+    POWER_SUPPLY_PROP_PRESENT,
+    POWER_SUPPLY_PROP_STATUS,
+    POWER_SUPPLY_PROP_CAPACITY,
+    POWER_SUPPLY_PROP_SCOPE,
+    POWER_SUPPLY_PROP_MODEL_NAME,
+    POWER_SUPPLY_PROP_MANUFACTURER,
+};
+
+static int razer_power_supply_get_property(struct power_supply *psy,
+        enum power_supply_property prop, union power_supply_propval *val)
+{
+    struct razer_power_supply *rps = power_supply_get_drvdata(psy);
+    unsigned long flags;
+    int ret = 0;
+
+    spin_lock_irqsave(&rps->lock, flags);
+    switch (prop) {
+    case POWER_SUPPLY_PROP_PRESENT:
+        val->intval = rps->present;
+        break;
+    case POWER_SUPPLY_PROP_STATUS:
+        val->intval = rps->present ? rps->status : POWER_SUPPLY_STATUS_UNKNOWN;
+        break;
+    case POWER_SUPPLY_PROP_CAPACITY:
+        val->intval = (rps->capacity >= 0) ? rps->capacity : 0;
+        break;
+    case POWER_SUPPLY_PROP_SCOPE:
+        val->intval = POWER_SUPPLY_SCOPE_DEVICE;
+        break;
+    case POWER_SUPPLY_PROP_MODEL_NAME:
+        val->strval = rps->model;
+        break;
+    case POWER_SUPPLY_PROP_MANUFACTURER:
+        val->strval = "Razer";
+        break;
+    default:
+        ret = -EINVAL;
+        break;
+    }
+    spin_unlock_irqrestore(&rps->lock, flags);
+    return ret;
+}
+
+/* Update the cache; fire power_supply_changed() only if a value changed.
+ * Safe from softirq (headset push) and process (worker) context. */
+void razer_power_supply_set(struct razer_power_supply *rps,
+                            int capacity, int status, bool present)
+{
+    unsigned long flags;
+    bool changed;
+
+    if (!rps->psy)
+        return;
+
+    spin_lock_irqsave(&rps->lock, flags);
+    changed = rps->capacity != capacity || rps->status != status ||
+              rps->present != present;
+    rps->capacity = capacity;
+    rps->status = status;
+    rps->present = present;
+    spin_unlock_irqrestore(&rps->lock, flags);
+
+    if (changed)
+        power_supply_changed(rps->psy);
+}
+
+static void razer_power_supply_work(struct work_struct *work)
+{
+    struct razer_power_supply *rps =
+        container_of(work, struct razer_power_supply, refresh_work.work);
+
+    rps->refresh_cb(rps);
+    schedule_delayed_work(&rps->refresh_work, msecs_to_jiffies(rps->refresh_ms));
+}
+
+static atomic_t razer_power_supply_no = ATOMIC_INIT(0);
+
+int razer_power_supply_register(struct razer_power_supply *rps, struct device *parent,
+                                void *drv_data, const char *model,
+                                void (*refresh_cb)(struct razer_power_supply *),
+                                unsigned int refresh_ms)
+{
+    struct power_supply_config cfg = { .drv_data = rps };
+    int n = atomic_inc_return(&razer_power_supply_no) - 1;
+
+    spin_lock_init(&rps->lock);
+    rps->capacity = -1;
+    rps->status = POWER_SUPPLY_STATUS_UNKNOWN;
+    rps->present = false;
+    rps->model = model;
+    rps->drv_data = drv_data;
+    rps->refresh_cb = refresh_cb;
+    rps->refresh_ms = refresh_ms;
+
+    snprintf(rps->name, sizeof(rps->name), "razer_battery_%d", n);
+    rps->desc.name = rps->name;
+    rps->desc.type = POWER_SUPPLY_TYPE_BATTERY;
+    rps->desc.properties = razer_power_supply_props;
+    rps->desc.num_properties = ARRAY_SIZE(razer_power_supply_props);
+    rps->desc.get_property = razer_power_supply_get_property;
+
+    rps->psy = power_supply_register(parent, &rps->desc, &cfg);
+    if (IS_ERR(rps->psy)) {
+        int err = PTR_ERR(rps->psy);
+
+        rps->psy = NULL;
+        return err;
+    }
+
+    if (refresh_cb) {
+        INIT_DELAYED_WORK(&rps->refresh_work, razer_power_supply_work);
+        schedule_delayed_work(&rps->refresh_work, msecs_to_jiffies(2000));
+    }
+    return 0;
+}
+
+void razer_power_supply_unregister(struct razer_power_supply *rps)
+{
+    if (!rps->psy)
+        return;
+    if (rps->refresh_cb)
+        cancel_delayed_work_sync(&rps->refresh_work);
+    power_supply_unregister(rps->psy);
+    rps->psy = NULL;
 }
