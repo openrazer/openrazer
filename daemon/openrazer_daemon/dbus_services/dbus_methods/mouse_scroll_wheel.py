@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 from openrazer_daemon.dbus_services import endpoint
+from openrazer_daemon.hardware.device_base import RazerDevice
 
 
 @endpoint('razer.device.scroll', 'setScrollMode', in_sig='y')
-def set_scroll_mode(self, mode):
+def set_scroll_mode(self: RazerDevice, mode: int) -> None:
     """
     Set the device's scroll mode
 
@@ -23,7 +24,7 @@ def set_scroll_mode(self, mode):
 
 
 @endpoint('razer.device.scroll', 'getScrollMode', out_sig='y')
-def get_scroll_mode(self):
+def get_scroll_mode(self: RazerDevice) -> int:
     """
     Get the device's current scroll mode
 
@@ -39,7 +40,7 @@ def get_scroll_mode(self):
 
 
 @endpoint('razer.device.scroll', 'setScrollAcceleration', in_sig='b')
-def set_scroll_acceleration(self, enabled):
+def set_scroll_acceleration(self: RazerDevice, enabled: bool) -> None:
     """
     Set the device's scroll acceleration state
 
@@ -55,7 +56,7 @@ def set_scroll_acceleration(self, enabled):
 
 
 @endpoint('razer.device.scroll', 'getScrollAcceleration', out_sig='b')
-def get_scroll_acceleration(self):
+def get_scroll_acceleration(self: RazerDevice) -> bool:
     """
     Get the device's scroll acceleration state
 
@@ -71,7 +72,7 @@ def get_scroll_acceleration(self):
 
 
 @endpoint('razer.device.scroll', 'setScrollSmartReel', in_sig='b')
-def set_scroll_smart_reel(self, enabled):
+def set_scroll_smart_reel(self: RazerDevice, enabled: bool) -> None:
     """
     Set the device's "smart reel" state
 
@@ -87,7 +88,7 @@ def set_scroll_smart_reel(self, enabled):
 
 
 @endpoint('razer.device.scroll', 'getScrollSmartReel', out_sig='b')
-def get_scroll_smart_reel(self):
+def get_scroll_smart_reel(self: RazerDevice) -> bool:
     """
     Get the device's "smart reel" state
 

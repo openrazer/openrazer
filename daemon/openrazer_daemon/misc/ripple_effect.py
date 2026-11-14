@@ -9,6 +9,7 @@ import math
 import threading
 import time
 
+from openrazer_daemon.hardware import DeviceObserver
 # pylint: disable=import-error
 from openrazer_daemon.keyboard import KeyboardColour
 
@@ -170,7 +171,7 @@ class RippleEffectThread(threading.Thread):
             time.sleep(self._refresh_rate)
 
 
-class RippleManager(object):
+class RippleManager(DeviceObserver):
     """
     Class which manages the overall process of performing a ripple effect
     """

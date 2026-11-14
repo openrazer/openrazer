@@ -11,11 +11,13 @@ import inspect
 import logging
 import time
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from openrazer_daemon.dbus_services.service import DBusService
 import openrazer_daemon.dbus_services.dbus_methods
-from openrazer_daemon.misc import effect_sync
+from openrazer_daemon.hardware import DeviceObserver
+from openrazer_daemon.misc import effect_sync, PersistenceConfigParser
 from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 
 
@@ -58,13 +60,13 @@ class RazerDevice(DBusService):
 
     DEVICE_IMAGE: str | None = None
 
-    def __init__(self, device_path, device_number, config, persistence, testing, additional_interfaces, additional_methods, unknown_serial_counter):
+    def __init__(self, device_path: str, device_number: int, config: configparser.ConfigParser, persistence: PersistenceConfigParser, testing: str | None, additional_interfaces: list[str], additional_methods: list[str], unknown_serial_counter: dict[tuple[int, int], int]):
 
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
 
         # Serial cache
-        self._serial = None
+        self._serial: str | None = None
 
         # map of vid+pid to counter for serial numbers for unknown devices
         self._unknown_serial_counter: dict[tuple[int, int], int] = unknown_serial_counter
@@ -72,14 +74,14 @@ class RazerDevice(DBusService):
         # Local storage key name
         self.storage_name = "UnknownDevice"
 
-        self._observer_list = []
+        self._observer_list: list[DeviceObserver] = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
         self._disable_persistence = False
         self.additional_interfaces = []
         if additional_interfaces is not None:
             self.additional_interfaces.extend(additional_interfaces)
-        self._battery_manager = None
+        self._battery_manager: _BatteryManager | None = None
 
         self.config = config
         self.persistence = persistence
@@ -150,8 +152,8 @@ class RazerDevice(DBusService):
         super().__init__(object_path)
 
         # Set up methods to suspend and restore device operation
-        self.suspend_args = {}
-        self.method_args = {}
+        self.suspend_args: dict[str, str] = {}
+        self.method_args: dict[str, str | int] = {}
 
         methods = {
             # interface, method, callback, in-args, out-args
@@ -356,7 +358,7 @@ class RazerDevice(DBusService):
                 self.logger.debug("Restoring effect persistence again (dual boot quirk)")
                 self.restore_effect()
 
-    def send_effect_event(self, effect_name, *args):
+    def send_effect_event(self, effect_name: str, *args) -> None:
         """
         Send effect event
 
@@ -371,7 +373,7 @@ class RazerDevice(DBusService):
 
         self.notify_observers(tuple(payload))
 
-    def dedicated_macro_keys(self):
+    def dedicated_macro_keys(self) -> bool:
         """
         Returns if the device has dedicated macro keys
 
@@ -380,7 +382,7 @@ class RazerDevice(DBusService):
         """
         return self.DEDICATED_MACRO_KEYS
 
-    def restore_dpi_poll_rate(self):
+    def restore_dpi_poll_rate(self) -> None:
         """
         Set the device DPI & poll rate to the saved value
         """
@@ -411,7 +413,7 @@ class RazerDevice(DBusService):
             except OSError:
                 self.logger.exception("Failed to restore poll rate!")
 
-    def restore_brightness(self):
+    def restore_brightness(self) -> None:
         """
         Set the device to the current brightness/active state.
 
@@ -438,7 +440,7 @@ class RazerDevice(DBusService):
                     except OSError:
                         self.logger.exception("Failed to restore brightness!")
 
-    def disable_brightness(self):
+    def disable_brightness(self) -> None:
         """
         Set brightness to 0 and/or active state to false.
         """
@@ -460,7 +462,7 @@ class RazerDevice(DBusService):
                 if bright_func is not None:
                     bright_func(0)
 
-    def restore_effect(self):
+    def restore_effect(self) -> None:
         """
         Set the device to the current effect
 
@@ -574,7 +576,7 @@ class RazerDevice(DBusService):
         else:
             raise ValueError(f"Unknown key '{key}'")
 
-    def get_current_effect(self):
+    def get_current_effect(self) -> str:
         """
         Get the device's current effect
 
@@ -585,7 +587,7 @@ class RazerDevice(DBusService):
 
         return self.zone["backlight"].effect
 
-    def get_current_effect_colors(self):
+    def get_current_effect_colors(self) -> list[int]:
         """
         Get the device's current effect's colors
 
@@ -596,7 +598,7 @@ class RazerDevice(DBusService):
 
         return self.zone["backlight"].colors
 
-    def get_current_effect_speed(self):
+    def get_current_effect_speed(self) -> int:
         """
         Get the device's current effect's speed
 
@@ -607,7 +609,7 @@ class RazerDevice(DBusService):
 
         return self.zone["backlight"].speed
 
-    def get_current_wave_dir(self):
+    def get_current_wave_dir(self) -> int:
         """
         Get the device's current wave direction
 
@@ -618,7 +620,7 @@ class RazerDevice(DBusService):
 
         return self.zone["backlight"].wave_dir
 
-    def get_current_logo_effect(self):
+    def get_current_logo_effect(self) -> str:
         """
         Get the device's current logo effect
 
@@ -629,7 +631,7 @@ class RazerDevice(DBusService):
 
         return self.zone["logo"].effect
 
-    def get_current_logo_effect_colors(self):
+    def get_current_logo_effect_colors(self) -> list[int]:
         """
         Get the device's current logo effect's colors
 
@@ -640,7 +642,7 @@ class RazerDevice(DBusService):
 
         return self.zone["logo"].colors
 
-    def get_current_logo_effect_speed(self):
+    def get_current_logo_effect_speed(self) -> int:
         """
         Get the device's current logo effect's speed
 
@@ -651,7 +653,7 @@ class RazerDevice(DBusService):
 
         return self.zone["logo"].speed
 
-    def get_current_logo_wave_dir(self):
+    def get_current_logo_wave_dir(self) -> int:
         """
         Get the device's current logo wave direction
 
@@ -662,7 +664,7 @@ class RazerDevice(DBusService):
 
         return self.zone["logo"].wave_dir
 
-    def get_current_scroll_effect(self):
+    def get_current_scroll_effect(self) -> str:
         """
         Get the device's current scroll effect
 
@@ -673,7 +675,7 @@ class RazerDevice(DBusService):
 
         return self.zone["scroll"].effect
 
-    def get_current_scroll_effect_colors(self):
+    def get_current_scroll_effect_colors(self) -> list[int]:
         """
         Get the device's current scroll effect's colors
 
@@ -684,7 +686,7 @@ class RazerDevice(DBusService):
 
         return self.zone["scroll"].colors
 
-    def get_current_scroll_effect_speed(self):
+    def get_current_scroll_effect_speed(self) -> int:
         """
         Get the device's current scroll effect's speed
 
@@ -695,7 +697,7 @@ class RazerDevice(DBusService):
 
         return self.zone["scroll"].speed
 
-    def get_current_scroll_wave_dir(self):
+    def get_current_scroll_wave_dir(self) -> int:
         """
         Get the device's current scroll wave direction
 
@@ -706,7 +708,7 @@ class RazerDevice(DBusService):
 
         return self.zone["scroll"].wave_dir
 
-    def get_current_left_effect(self):
+    def get_current_left_effect(self) -> str:
         """
         Get the device's current left effect
 
@@ -717,7 +719,7 @@ class RazerDevice(DBusService):
 
         return self.zone["left"].effect
 
-    def get_current_left_effect_colors(self):
+    def get_current_left_effect_colors(self) -> list[int]:
         """
         Get the device's current left effect's colors
 
@@ -728,7 +730,7 @@ class RazerDevice(DBusService):
 
         return self.zone["left"].colors
 
-    def get_current_left_effect_speed(self):
+    def get_current_left_effect_speed(self) -> int:
         """
         Get the device's current left effect's speed
 
@@ -739,7 +741,7 @@ class RazerDevice(DBusService):
 
         return self.zone["left"].speed
 
-    def get_current_left_wave_dir(self):
+    def get_current_left_wave_dir(self) -> int:
         """
         Get the device's current left wave direction
 
@@ -750,7 +752,7 @@ class RazerDevice(DBusService):
 
         return self.zone["left"].wave_dir
 
-    def get_current_right_effect(self):
+    def get_current_right_effect(self) -> str:
         """
         Get the device's current right effect
 
@@ -761,7 +763,7 @@ class RazerDevice(DBusService):
 
         return self.zone["right"].effect
 
-    def get_current_right_effect_colors(self):
+    def get_current_right_effect_colors(self) -> list[int]:
         """
         Get the device's current right effect's colors
 
@@ -772,7 +774,7 @@ class RazerDevice(DBusService):
 
         return self.zone["right"].colors
 
-    def get_current_right_effect_speed(self):
+    def get_current_right_effect_speed(self) -> int:
         """
         Get the device's current right effect's speed
 
@@ -783,7 +785,7 @@ class RazerDevice(DBusService):
 
         return self.zone["right"].speed
 
-    def get_current_right_wave_dir(self):
+    def get_current_right_wave_dir(self) -> int:
         """
         Get the device's current right wave direction
 
@@ -794,7 +796,7 @@ class RazerDevice(DBusService):
 
         return self.zone["right"].wave_dir
 
-    def get_current_charging_effect(self):
+    def get_current_charging_effect(self) -> str:
         """
         Get the device's current charging effect
 
@@ -805,7 +807,7 @@ class RazerDevice(DBusService):
 
         return self.zone["charging"].effect
 
-    def get_current_charging_effect_colors(self):
+    def get_current_charging_effect_colors(self) -> list[int]:
         """
         Get the device's current charging effect's colors
 
@@ -816,7 +818,7 @@ class RazerDevice(DBusService):
 
         return self.zone["charging"].colors
 
-    def get_current_charging_effect_speed(self):
+    def get_current_charging_effect_speed(self) -> int:
         """
         Get the device's current charging effect's speed
 
@@ -827,7 +829,7 @@ class RazerDevice(DBusService):
 
         return self.zone["charging"].speed
 
-    def get_current_charging_wave_dir(self):
+    def get_current_charging_wave_dir(self) -> int:
         """
         Get the device's current charging wave direction
 
@@ -838,7 +840,7 @@ class RazerDevice(DBusService):
 
         return self.zone["charging"].wave_dir
 
-    def get_current_fast_charging_effect(self):
+    def get_current_fast_charging_effect(self) -> str:
         """
         Get the device's current fast_charging effect
 
@@ -849,7 +851,7 @@ class RazerDevice(DBusService):
 
         return self.zone["fast_charging"].effect
 
-    def get_current_fast_charging_effect_colors(self):
+    def get_current_fast_charging_effect_colors(self) -> list[int]:
         """
         Get the device's current fast_charging effect's colors
 
@@ -860,7 +862,7 @@ class RazerDevice(DBusService):
 
         return self.zone["fast_charging"].colors
 
-    def get_current_fast_charging_effect_speed(self):
+    def get_current_fast_charging_effect_speed(self) -> int:
         """
         Get the device's current fast_charging effect's speed
 
@@ -871,7 +873,7 @@ class RazerDevice(DBusService):
 
         return self.zone["fast_charging"].speed
 
-    def get_current_fast_charging_wave_dir(self):
+    def get_current_fast_charging_wave_dir(self) -> int:
         """
         Get the device's current fast_charging wave direction
 
@@ -882,7 +884,7 @@ class RazerDevice(DBusService):
 
         return self.zone["fast_charging"].wave_dir
 
-    def get_current_fully_charged_effect(self):
+    def get_current_fully_charged_effect(self) -> str:
         """
         Get the device's current fully_charged effect
 
@@ -893,7 +895,7 @@ class RazerDevice(DBusService):
 
         return self.zone["fully_charged"].effect
 
-    def get_current_fully_charged_effect_colors(self):
+    def get_current_fully_charged_effect_colors(self) -> list[int]:
         """
         Get the device's current fully_charged effect's colors
 
@@ -904,7 +906,7 @@ class RazerDevice(DBusService):
 
         return self.zone["fully_charged"].colors
 
-    def get_current_fully_charged_effect_speed(self):
+    def get_current_fully_charged_effect_speed(self) -> int:
         """
         Get the device's current fully_charged effect's speed
 
@@ -915,7 +917,7 @@ class RazerDevice(DBusService):
 
         return self.zone["fully_charged"].speed
 
-    def get_current_fully_charged_wave_dir(self):
+    def get_current_fully_charged_wave_dir(self) -> int:
         """
         Get the device's current fully_charged wave direction
 
@@ -927,7 +929,7 @@ class RazerDevice(DBusService):
         return self.zone["fully_charged"].wave_dir
 
     @property
-    def effect_sync(self):
+    def effect_sync(self) -> bool:
         """
         Propagate the obsever call upwards, used for syncing effects
 
@@ -937,7 +939,7 @@ class RazerDevice(DBusService):
         return self._effect_sync_propagate_up
 
     @effect_sync.setter
-    def effect_sync(self, value):
+    def effect_sync(self, value: bool) -> None:
         """
         Setting to true will propagate observer events upwards
 
@@ -947,7 +949,7 @@ class RazerDevice(DBusService):
         self._effect_sync_propagate_up = value
 
     @property
-    def disable_notify(self):
+    def disable_notify(self) -> bool:
         """
         Disable notifications flag
 
@@ -957,7 +959,7 @@ class RazerDevice(DBusService):
         return self._disable_notifications
 
     @disable_notify.setter
-    def disable_notify(self, value):
+    def disable_notify(self, value: bool) -> None:
         """
         Set the disable notifications flag
 
@@ -967,7 +969,7 @@ class RazerDevice(DBusService):
         self._disable_notifications = value
 
     @property
-    def disable_persistence(self):
+    def disable_persistence(self) -> bool:
         """
         Disable persistence flag
 
@@ -977,7 +979,7 @@ class RazerDevice(DBusService):
         return self._disable_persistence
 
     @disable_persistence.setter
-    def disable_persistence(self, value):
+    def disable_persistence(self, value: bool) -> None:
         """
         Set the disable persistence flag
 
@@ -986,7 +988,7 @@ class RazerDevice(DBusService):
         """
         self._disable_persistence = value
 
-    def get_driver_path(self, driver_filename):
+    def get_driver_path(self, driver_filename: str) -> str:
         """
         Get the path to a driver file
 
@@ -998,7 +1000,7 @@ class RazerDevice(DBusService):
         """
         return os.path.join(self._device_path, driver_filename)
 
-    def get_serial(self):
+    def get_serial(self) -> str:
         """
         Get serial number for device
 
@@ -1048,7 +1050,7 @@ class RazerDevice(DBusService):
 
         return self._serial
 
-    def get_device_mode(self):
+    def get_device_mode(self) -> str:
         """
         Get device mode
 
@@ -1069,7 +1071,7 @@ class RazerDevice(DBusService):
 
             return "{0}:{1}".format(mode[0], mode[1])
 
-    def set_device_mode(self, mode_id, param):
+    def set_device_mode(self, mode_id: int, param: int) -> None:
         """
         Set device mode
 
@@ -1090,7 +1092,7 @@ class RazerDevice(DBusService):
 
             mode_file.write(bytes([mode_id, param]))
 
-    def _set_custom_effect(self):
+    def _set_custom_effect(self) -> None:
         """
         Set the device to use custom LED matrix
         """
@@ -1103,7 +1105,7 @@ class RazerDevice(DBusService):
         with open(driver_path, 'wb') as driver_file:
             driver_file.write(payload)
 
-    def _set_key_row(self, payload):
+    def _set_key_row(self, payload: bytes) -> None:
         """
         Set the RGB matrix on the device
 
@@ -1123,7 +1125,7 @@ class RazerDevice(DBusService):
         with open(driver_path, 'wb') as driver_file:
             driver_file.write(payload)
 
-    def _init_battery_manager(self):
+    def _init_battery_manager(self) -> None:
         """
         Initializes the BatteryManager using the provided name
         """
@@ -1132,7 +1134,7 @@ class RazerDevice(DBusService):
         self._battery_manager.frequency = self.config.getint('Startup', 'battery_notifier_freq', fallback=10 * 60)
         self._battery_manager.percent = self.config.getint('Startup', 'battery_notifier_percent', fallback=33)
 
-    def get_vid_pid(self):
+    def get_vid_pid(self) -> list[int]:
         """
         Get the usb VID PID
 
@@ -1142,7 +1144,7 @@ class RazerDevice(DBusService):
         result = [self.USB_VID, self.USB_PID]
         return result
 
-    def get_image_json(self):
+    def get_image_json(self) -> str:
         # Deprecated API, but kept for backwards compatibility
         return json.dumps({
             "top_img": self.get_device_image(),
@@ -1150,10 +1152,10 @@ class RazerDevice(DBusService):
             "perspective_img": self.get_device_image()
         })
 
-    def get_device_image(self):
+    def get_device_image(self) -> str:
         return self.DEVICE_IMAGE
 
-    def load_methods(self):
+    def load_methods(self) -> None:
         """
         Load DBus methods
 
@@ -1175,7 +1177,7 @@ class RazerDevice(DBusService):
             except KeyError as e:
                 raise RuntimeError("Couldn't add method to DBus: " + str(e)) from None
 
-    def suspend_device(self):
+    def suspend_device(self) -> None:
         """
         Suspend device
         """
@@ -1189,7 +1191,7 @@ class RazerDevice(DBusService):
         self.disable_notify = False
         self.disable_persistence = False
 
-    def resume_device(self):
+    def resume_device(self) -> None:
         """
         Resume device
         """
@@ -1214,17 +1216,17 @@ class RazerDevice(DBusService):
         self.disable_notify = False
         self.disable_persistence = False
 
-    def _suspend_device(self):
+    def _suspend_device(self) -> None:
         """
         Override to implement custom suspend behavior
         """
 
-    def _resume_device(self):
+    def _resume_device(self) -> None:
         """
         Override to implement custom resume behavior
         """
 
-    def _close(self):
+    def _close(self) -> None:
         """
         To be overridden by any subclasses to do cleanup
         """
@@ -1234,7 +1236,7 @@ class RazerDevice(DBusService):
         if self._battery_manager:
             self._battery_manager.close()
 
-    def close(self):
+    def close(self) -> None:
         """
         Close any resources opened by subclasses
         """
@@ -1258,7 +1260,7 @@ class RazerDevice(DBusService):
 
             self._is_closed = True
 
-    def register_observer(self, observer):
+    def register_observer(self, observer: DeviceObserver) -> None:
         """
         Observer design pattern, register
 
@@ -1268,7 +1270,7 @@ class RazerDevice(DBusService):
         if observer not in self._observer_list:
             self._observer_list.append(observer)
 
-    def register_parent(self, parent):
+    def register_parent(self, parent: object) -> None:
         """
         Register the parent as an observer to be optionally notified (sends to other devices)
 
@@ -1277,7 +1279,7 @@ class RazerDevice(DBusService):
         """
         self._parent = parent
 
-    def remove_observer(self, observer):
+    def remove_observer(self, observer: DeviceObserver) -> None:
         """
         Obsever design pattern, remove
 
@@ -1289,7 +1291,7 @@ class RazerDevice(DBusService):
         except ValueError:
             pass
 
-    def notify_observers(self, msg):
+    def notify_observers(self, msg: tuple) -> None:
         """
         Notify observers with msg
 
@@ -1305,7 +1307,7 @@ class RazerDevice(DBusService):
             for observer in self._observer_list:
                 observer.notify(msg)
 
-    def notify(self, msg):
+    def notify(self, msg: tuple) -> None:
         """
         Receive observer messages
 
@@ -1318,7 +1320,7 @@ class RazerDevice(DBusService):
             observer.notify(msg)
 
     @classmethod
-    def match(cls, device_id, dev_path):
+    def match(cls, device_id: str, dev_path: str) -> bool:
         """
         Match against the device ID
 
@@ -1340,7 +1342,7 @@ class RazerDevice(DBusService):
         return False
 
     @staticmethod
-    def get_num_arguments(func):
+    def get_num_arguments(func: Callable) -> int:
         """
         Get number of arguments in a function
 
@@ -1354,17 +1356,17 @@ class RazerDevice(DBusService):
         return len(func_sig.parameters)
 
     @staticmethod
-    def handle_underscores(string):
+    def handle_underscores(string: str) -> str:
         return re.sub(r'[_]+(?P<first>[a-z])', lambda m: m.group('first').upper(), string)
 
     @staticmethod
-    def capitalize_first_char(string):
+    def capitalize_first_char(string: str) -> str:
         return string[0].upper() + string[1:]
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.close()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "{0}:{1}".format(self.__class__.__name__, self.serial)
 
 

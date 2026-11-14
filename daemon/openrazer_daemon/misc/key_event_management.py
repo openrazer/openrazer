@@ -25,6 +25,7 @@ import struct
 import threading
 import time
 
+from openrazer_daemon.hardware import DeviceObserver
 # pylint: disable=import-error
 from openrazer_daemon.keyboard import KEY_MAPPING, TARTARUS_KEY_MAPPING, EVENT_MAPPING, TARTARUS_EVENT_MAPPING, NAGA_HEX_V2_EVENT_MAPPING, NAGA_HEX_V2_KEY_MAPPING, ORBWEAVER_EVENT_MAPPING, ORBWEAVER_KEY_MAPPING
 from .macro import MacroKey, MacroRunner, macro_dict_to_obj
@@ -214,7 +215,7 @@ class KeyWatcher(threading.Thread):
         self._shutdown = value
 
 
-class KeyboardKeyManager(object):
+class KeyboardKeyManager(DeviceObserver):
     """
     Key management class.
 

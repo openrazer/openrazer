@@ -4,10 +4,11 @@
 Module for accessory methods
 """
 from openrazer_daemon.dbus_services import endpoint
+from openrazer_daemon.hardware.device_base import RazerDevice
 
 
 @endpoint('razer.device.misc.mug', 'isMugPresent', out_sig='b')
-def is_mug_present(self):
+def is_mug_present(self: RazerDevice) -> bool:
     """
     Get if the mug is present
 

@@ -1,21 +1,22 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 from openrazer_daemon.dbus_services import endpoint
+from openrazer_daemon.hardware.device_base import RazerDevice
 
 
 @endpoint('razer.device.lighting.channel', 'getNumChannels', out_sig='q')
-def get_num_channels(self):
+def get_num_channels(self: RazerDevice) -> int:
     return self.NUM_CHANNELS
 
 
-def _get_channel_brightness(self, channel):
+def _get_channel_brightness(self: RazerDevice, channel: str) -> float:
     driver_path = self.get_driver_path(channel + '_led_brightness')
     with open(driver_path, 'r') as driver_file:
         return float(driver_file.read().strip()) / (255.0 / 100.0)
 
 
 @endpoint('razer.device.lighting.channel', 'getChannelBrightness', in_sig='q', out_sig='d')
-def get_channel_brightness(self, channel):
+def get_channel_brightness(self: RazerDevice, channel: str) -> float:
     """
     Get the channel brightness
 
@@ -30,7 +31,7 @@ def get_channel_brightness(self, channel):
     return _get_channel_brightness(self, channel_name)
 
 
-def _set_channel_brightness(self, channel, brightness):
+def _set_channel_brightness(self: RazerDevice, channel: str, brightness: int) -> None:
     driver_path = self.get_driver_path(channel + '_led_brightness')
 
     self.method_args['brightness'] = brightness
@@ -52,7 +53,7 @@ def _set_channel_brightness(self, channel, brightness):
 
 
 @endpoint('razer.device.lighting.channel', 'setChannelBrightness', in_sig='qd')
-def set_channel_brightness(self, channel, brightness):
+def set_channel_brightness(self: RazerDevice, channel: str, brightness: int) -> None:
     """
     Set the device's brightness
 
@@ -67,14 +68,14 @@ def set_channel_brightness(self, channel, brightness):
     _set_channel_brightness(self, channel_name, brightness)
 
 
-def _get_channel_size(self, channel):
+def _get_channel_size(self: RazerDevice, channel: str) -> int:
     driver_path = self.get_driver_path(channel + '_size')
     with open(driver_path, 'r') as driver_file:
         return int(driver_file.read().strip())
 
 
 @endpoint('razer.device.lighting.channel', 'getChannelSize', in_sig='q', out_sig='i')
-def get_channel_size(self, channel):
+def get_channel_size(self: RazerDevice, channel: str) -> int:
     """
     Get the device's size
 
@@ -89,7 +90,7 @@ def get_channel_size(self, channel):
     return _get_channel_size(self, channel_name)
 
 
-def _set_channel_size(self, channel, size):
+def _set_channel_size(self: RazerDevice, channel: str, size: int) -> None:
     driver_path = self.get_driver_path(channel + '_size')
 
     self.method_args['size'] = size
@@ -109,7 +110,7 @@ def _set_channel_size(self, channel, size):
 
 
 @endpoint('razer.device.lighting.channel', 'setChannelSize', in_sig='qi')
-def set_channel_size(self, channel, size):
+def set_channel_size(self: RazerDevice, channel: str, size: int) -> None:
     """
     Set the device's size
     :param channel: Channel

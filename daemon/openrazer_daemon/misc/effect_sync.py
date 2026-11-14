@@ -3,11 +3,13 @@
 """
 Class to manage syncing of effects
 """
+from openrazer_daemon.hardware.device_base import RazerDevice
+from openrazer_daemon.hardware import DeviceObserver
 import inspect
 import logging
 
 
-class EffectSync(object):
+class EffectSync(DeviceObserver):
     """
     Class which deals with receiving effect events from other devices
     """
@@ -23,7 +25,7 @@ class EffectSync(object):
     def close(self):
         self._parent.remove_observer(self)
 
-    def notify(self, msg):
+    def notify(self, msg: tuple[str, RazerDevice, str, ...]) -> None:
         """
         Receive notificatons from the device (we only care about effects)
 

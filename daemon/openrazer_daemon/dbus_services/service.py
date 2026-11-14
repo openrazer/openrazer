@@ -12,7 +12,7 @@ import dbus
 import dbus.service
 
 
-def copy_func(function_reference, name=None):
+def copy_func(function_reference: types.FunctionType, name: str | None = None) -> types.FunctionType:
     """
     Copy function
 

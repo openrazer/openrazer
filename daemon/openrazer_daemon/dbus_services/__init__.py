@@ -5,10 +5,11 @@ DBus module
 
 Has an endpoint decorator to wrap a method for DBus
 """
+import types
 from functools import wraps
 
 
-def endpoint(interface_name, function_name, in_sig=None, out_sig=None, byte_arrays=False):
+def endpoint(interface_name: str, function_name: str, in_sig: str | None = None, out_sig: str | None = None, byte_arrays: bool = False) -> types.FunctionType:
     """
     DBus Endpoint
 

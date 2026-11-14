@@ -4,6 +4,7 @@
 Hardware collection
 """
 import os
+from collections.abc import Callable
 from openrazer_daemon.hardware.device_base import RazerDevice
 
 # Hack to get a list of hardware modules to import
@@ -13,7 +14,7 @@ HARDWARE_MODULES = ['openrazer_daemon.hardware.' + os.path.splitext(hw_file)[0] 
 EXCLUDED_CLASSES = ('RazerDevice', 'RazerDeviceBrightnessSuspend')
 
 
-def get_device_classes():
+def get_device_classes() -> list[Callable[[], RazerDevice]]:
     """
     Get a list of hardware classes
 
@@ -32,3 +33,8 @@ def get_device_classes():
             classes.append(class_instance)
 
     return sorted(classes, key=lambda cls: cls.__name__)
+
+class DeviceObserver:
+    # Format of msg: ('effect', Device, 'effectName', 'effectparams'...)
+    def notify(self, msg: tuple[str, RazerDevice, str, ...]) -> None:
+        pass
