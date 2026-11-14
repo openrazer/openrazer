@@ -1,0 +1,8 @@
+[Unit]
+Description=Initialize Basilisk Mobile driver mode for %I
+After=systemd-udevd.service
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/python3 /usr/local/libexec/openrazer-mouse-init %I
+NoNewPrivileges=yes

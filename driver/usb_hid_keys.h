@@ -7,6 +7,9 @@
 #ifndef __USB_HID_KEYS_H
 #define __USB_HID_KEYS_H
 
+#define USB_HID_KEY_B 0x05
+#define USB_HID_KEY_BACKSPACE 0x2A
+#define USB_HID_KEY_SPACE 0x2C
 #define USB_HID_KEY_F13 0x68
 #define USB_HID_KEY_F14 0x69
 #define USB_HID_KEY_F15 0x6A
