@@ -7,6 +7,7 @@
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/init.h>
+#include <linux/jiffies.h>
 #include <linux/usb/input.h>
 #include <linux/hid.h>
 #include <linux/hrtimer.h>
@@ -67,6 +68,7 @@ static int razer_get_report(struct hid_device *hdev, struct razer_report *reques
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
@@ -107,6 +109,11 @@ static int razer_get_report(struct hid_device *hdev, struct razer_report *reques
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
         index = 0x03;
         return razer_get_usb_response(hdev, index, request, index, response, RAZER_MOUSE_WAIT_US);
+        break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
+        index = 0x03;
+        return razer_get_usb_response(hdev, index, request, index, response, RAZER_NAGA_V3_PRO_WAIT_US);
         break;
 
     default:
@@ -754,6 +761,14 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Naga V2 Pro (Wireless)";
         break;
 
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+        device_type = "Razer Naga V3 Pro (Wired)";
+        break;
+
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
+        device_type = "Razer Naga V3 Pro (Wireless)";
+        break;
+
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
         device_type = "Razer Pro Click V2 Vertical Edition (Wireless)";
         break;
@@ -842,6 +857,8 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
@@ -993,6 +1010,8 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_MOBILE_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
         request = razer_chroma_extended_matrix_effect_none(VARSTORE, ZERO_LED);
         request.transaction_id.id = 0x1f;
         break;
@@ -1080,6 +1099,8 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
@@ -1134,6 +1155,8 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_TRINITY:
         // Some sort of mode switcher required after initialization and before color switching
@@ -1293,6 +1316,8 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
         request.transaction_id.id = 0x1f;
         break;
@@ -1339,6 +1364,11 @@ static ssize_t razer_attr_write_matrix_effect_reactive(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
         request = razer_chroma_mouse_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
+        request.transaction_id.id = 0x1f;
+        break;
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
+        request = razer_chroma_extended_matrix_effect_reactive(VARSTORE, BACKLIGHT_LED, speed, (struct razer_rgb*)&buf[1]);
         request.transaction_id.id = 0x1f;
         break;
 
@@ -1406,6 +1436,25 @@ static ssize_t razer_attr_write_matrix_effect_breath(struct device *dev, struct 
 
         default: // "Random" colour mode
             request = razer_chroma_mouse_extended_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
+            request.transaction_id.id = 0x1f;
+            break;
+        }
+        break;
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
+        switch(count) {
+        case 3: // Single colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_single(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0]);
+            request.transaction_id.id = 0x1f;
+            break;
+
+        case 6: // Dual colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_dual(VARSTORE, BACKLIGHT_LED, (struct razer_rgb*)&buf[0], (struct razer_rgb*)&buf[3]);
+            request.transaction_id.id = 0x1f;
+            break;
+
+        default: // "Random" colour mode
+            request = razer_chroma_extended_matrix_effect_breathing_random(VARSTORE, BACKLIGHT_LED);
             request.transaction_id.id = 0x1f;
             break;
         }
@@ -1504,6 +1553,8 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
@@ -1646,6 +1697,8 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
@@ -1761,6 +1814,8 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
@@ -1983,6 +2038,8 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
@@ -2200,6 +2257,8 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
@@ -2353,6 +2412,8 @@ static ssize_t razer_attr_write_matrix_brightness(struct device *dev, struct dev
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
@@ -2423,6 +2484,8 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
@@ -2542,6 +2605,8 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_OROCHI_2013:
     case USB_DEVICE_ID_RAZER_IMPERATOR:
@@ -2631,6 +2696,8 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
@@ -2791,6 +2858,8 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
@@ -2909,12 +2978,32 @@ static ssize_t razer_attr_write_scroll_mode(struct device *dev, struct device_at
     struct razer_report request = {0};
     struct razer_report response = {0};
     unsigned int scroll_mode;
+    unsigned int scroll_mode_max;
     int err;
 
-    if (kstrtouint(buf, 0, &scroll_mode) < 0 || scroll_mode > 1)
-        return -EINVAL;
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
+        scroll_mode_max = 2; // Tactile, free-spin, precision tactile
+        break;
 
-    request = razer_chroma_misc_set_scroll_mode(scroll_mode);
+    default:
+        scroll_mode_max = 1; // Tactile, free-spin
+        break;
+    }
+
+    if (kstrtouint(buf, 0, &scroll_mode) < 0 || scroll_mode > scroll_mode_max)
+        return -EINVAL;
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
+        request = razer_chroma_misc_set_scroll_mode_v2(scroll_mode);
+        break;
+
+    default:
+        request = razer_chroma_misc_set_scroll_mode_v1(scroll_mode);
+        break;
+    }
     request.transaction_id.id = 0x1f;
 
     err = razer_send_payload(device, &request, &response);
@@ -2936,7 +3025,16 @@ static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_att
     struct razer_report response = {0};
     int err;
 
-    request = razer_chroma_misc_get_scroll_mode();
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
+        request = razer_chroma_misc_get_scroll_mode_v2();
+        break;
+
+    default:
+        request = razer_chroma_misc_get_scroll_mode_v1();
+        break;
+    }
     request.transaction_id.id = 0x1f;
 
     err = razer_send_payload(device, &request, &response);
@@ -3010,7 +3108,16 @@ static ssize_t razer_attr_write_scroll_smart_reel(struct device *dev, struct dev
     if (kstrtobool(buf, &smart_reel) < 0)
         return -EINVAL;
 
-    request = razer_chroma_misc_set_scroll_smart_reel(smart_reel);
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
+        request = razer_chroma_misc_set_scroll_smart_reel_v2(smart_reel);
+        break;
+
+    default:
+        request = razer_chroma_misc_set_scroll_smart_reel_v1(smart_reel);
+        break;
+    }
     request.transaction_id.id = 0x1f;
 
     err = razer_send_payload(device, &request, &response);
@@ -3194,6 +3301,8 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
@@ -3313,6 +3422,8 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
@@ -3403,6 +3514,28 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
 }
 
 /**
+ * Read device file "device_last_activity"
+ *
+ * Gets the time since the last input report caused by the user, as a number
+ * of milliseconds, or -1 if no such report has been seen since the device was
+ * bound.
+ */
+static ssize_t razer_attr_read_device_last_activity(struct device *dev, struct device_attribute *attr, char *buf)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+    unsigned long last_activity;
+
+    /* Pairs with the smp_store_release() in razer_note_activity(): if the flag
+     * is set, the timestamp stored before it is visible here as well. */
+    if (!smp_load_acquire(&device->last_activity_valid))
+        return sysfs_emit(buf, "-1\n");
+
+    last_activity = READ_ONCE(device->last_activity);
+
+    return sysfs_emit(buf, "%u\n", jiffies_to_msecs(jiffies - last_activity));
+}
+
+/**
  * Read device file "device_idle_time"
  *
  * Gets the time this device will go into powersave as a number of seconds.
@@ -3444,6 +3577,8 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
@@ -3552,6 +3687,8 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
@@ -3632,6 +3769,8 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
@@ -3739,6 +3878,8 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_VIPER_MINI_SE_WIRELESS:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
@@ -3936,6 +4077,8 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
         case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
             request = razer_chroma_extended_matrix_set_custom_frame2(row_id, start_col, stop_col, (unsigned char*)&buf[offset], 0);
@@ -4023,6 +4166,8 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_HYPERSPEED_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
@@ -4196,6 +4341,8 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_PRO_CLICK_MINI_RECEIVER:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
@@ -4316,6 +4463,8 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
@@ -4428,6 +4577,8 @@ static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
@@ -4620,6 +4771,8 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
     case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
@@ -4742,6 +4895,8 @@ static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
@@ -4843,6 +4998,8 @@ static ssize_t razer_attr_write_matrix_effect_reactive_common(struct device *dev
     case USB_DEVICE_ID_RAZER_BASILISK_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_COBRA:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
@@ -4985,6 +5142,8 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_COBRA:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
@@ -5044,6 +5203,8 @@ static ssize_t razer_attr_write_matrix_effect_breath_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_BASILISK_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS:
@@ -5213,6 +5374,8 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_COBRA:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
@@ -5431,6 +5594,8 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_COBRA:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
@@ -6021,6 +6186,7 @@ static DEVICE_ATTR(device_type,               0440, razer_attr_read_device_type,
 static DEVICE_ATTR(device_mode,               0660, razer_attr_read_device_mode,           razer_attr_write_device_mode);
 static DEVICE_ATTR(device_serial,             0440, razer_attr_read_device_serial,         NULL);
 static DEVICE_ATTR(device_idle_time,          0660, razer_attr_read_device_idle_time,      razer_attr_write_device_idle_time);
+static DEVICE_ATTR(device_last_activity,      0440, razer_attr_read_device_last_activity,  NULL);
 
 static DEVICE_ATTR(scroll_mode,               0660, razer_attr_read_scroll_mode,           razer_attr_write_scroll_mode);
 static DEVICE_ATTR(scroll_acceleration,       0660, razer_attr_read_scroll_acceleration,   razer_attr_write_scroll_acceleration);
@@ -6281,6 +6447,46 @@ static struct razer_mouse_device *find_mouse(struct hid_device *hdev)
 }
 
 /**
+ * Checks if an input report was caused by the user
+ *
+ * The receiver keeps sending reports while the mouse sits idle, so the report
+ * has to be looked at to tell real input apart from that chatter.
+ */
+static bool razer_report_has_input(struct hid_report *report, unsigned char protocol, u8 *data, int size)
+{
+    if (protocol != USB_INTERFACE_PROTOCOL_MOUSE && protocol != USB_INTERFACE_PROTOCOL_KEYBOARD)
+        return false;
+
+    if (report->id) {
+        data++;
+        size--;
+    }
+
+    return size > 0 && memchr_inv(data, 0, size) != NULL;
+}
+
+/**
+ * Timestamp the last input report caused by the user
+ *
+ * The device files live on the mouse interface, so reports seen on the
+ * keyboard interfaces are recorded on the mouse device as well.
+ */
+static void razer_note_activity(struct hid_device *hdev, struct razer_mouse_device *rdev, struct hid_report *report, unsigned char protocol, u8 *data, int size)
+{
+    if (!razer_report_has_input(report, protocol, data, size))
+        return;
+
+    if (protocol != USB_INTERFACE_PROTOCOL_MOUSE) {
+        rdev = find_mouse(hdev);
+        if (!rdev)
+            return;
+    }
+
+    WRITE_ONCE(rdev->last_activity, jiffies);
+    smp_store_release(&rdev->last_activity_valid, true);
+}
+
+/**
  * Test if a bit is cleared in 'prev' and set in 'cur'
  */
 static int rising_bit(u8 prev, u8 cur, u8 mask)
@@ -6382,6 +6588,66 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
                     input_rep4_code(m_rdev->input, rdev->rep4[i], 0);
             }
             memcpy(rdev->rep4, data, 16);
+            return 1;
+        }
+        break;
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
+        razer_note_activity(hdev, rdev, report, intf->cur_altsetting->desc.bInterfaceProtocol, data, size);
+
+        /* Detect wheel tilt edges
+         * tilting produces data[0] 0x00->0x20->0x00 (left) or
+         * 0x00->0x40->0x00 (right), nothing else changes. Map that straight
+         * to F15/F16
+        */
+        if (intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_MOUSE) {
+            if (edge_bit(rdev->button_byte, data[0], 1 << BIT_TILT_L)) {
+                input_report_key(rdev->input, KEY_F15, !!(data[0] & (1 << BIT_TILT_L)));
+                input_sync(rdev->input);
+            }
+            if (edge_bit(rdev->button_byte, data[0], 1 << BIT_TILT_R)) {
+                input_report_key(rdev->input, KEY_F16, !!(data[0] & (1 << BIT_TILT_R)));
+                input_sync(rdev->input);
+            }
+            rdev->button_byte = data[0];
+        }
+
+        /* Default behaviour +  Hypershift mode toggle workaround + AI Prompt Master button */
+        if(intf->cur_altsetting->desc.bInterfaceProtocol == USB_INTERFACE_PROTOCOL_KEYBOARD && size == 16 && data[0] == 0x04) {
+            int index = size-1;
+
+            while(--index > 0) {
+                u8 cur_value = data[index];
+                if(cur_value == 0x00) { // Skip 0x00
+                    continue;
+                }
+
+                switch(cur_value) {
+                case 0x20: // DPI Up
+                    cur_value = 0x68; // F13
+                    break;
+                case 0x21: // DPI Down
+                    cur_value = 0x69; // F14
+                    break;
+                case 0x22: // Wheel Left
+                    cur_value = 0x6A; // F15
+                    break;
+                case 0x23: // Wheel Right
+                    cur_value = 0x6B; // F16
+                    break;
+                case 0x59: // Hypershift mode toggle (workaround: don't change the "scroll mode" in this button)
+                    cur_value = 0x6C; // F17
+                    break;
+                case 0xD2: // AI Prompt Master button
+                    cur_value = 0x6D; // F18
+                    break;
+                }
+
+                data[index+1] = cur_value;
+            }
+
+            data[0] = 0x01;
+            data[1] = 0x00;
             return 1;
         }
         break;
@@ -6488,6 +6754,12 @@ static int razer_input_configured(struct hid_device *hdev,
             input_set_capability(hidinput->input, EV_REL, REL_HWHEEL_HI_RES);
             input_set_capability(hidinput->input, EV_KEY, BTN_FORWARD);
             input_set_capability(hidinput->input, EV_KEY, BTN_BACK);
+            break;
+
+        case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
+            input_set_capability(hidinput->input, EV_KEY, KEY_F15);
+            input_set_capability(hidinput->input, EV_KEY, KEY_F16);
             break;
         }
     }
@@ -7277,6 +7549,49 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_reactive);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
+            break;
+
+        case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
+        case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_last_activity);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_reactive);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_reactive);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_mode);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_acceleration);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_smart_reel);
 
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
@@ -8491,6 +8806,48 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
             break;
 
+        case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS:
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);
+            device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
+            device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
+
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_reactive);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_reactive);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+
+            device_remove_file(&hdev->dev, &dev_attr_scroll_mode);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_acceleration);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_smart_reel);
+
+            device_remove_file(&hdev->dev, &dev_attr_matrix_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_reactive);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
+            break;
+
         case USB_DEVICE_ID_RAZER_MAMBA_ELITE:
             device_remove_file(&hdev->dev, &dev_attr_dpi);
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
@@ -8913,7 +9270,9 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRELESS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_8K) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH) },

@@ -123,6 +123,8 @@
 #define USB_DEVICE_ID_RAZER_COBRA_HYPERSPEED_WIRELESS 0x00DB
 #define USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED 0x00DE
 #define USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRELESS 0x00DF
+#define USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRED 0x00E7
+#define USB_DEVICE_ID_RAZER_NAGA_V3_PRO_WIRELESS 0x00E8
 
 /* Each keyboard report has 90 bytes*/
 #define RAZER_REPORT_LEN 0x5A
@@ -135,6 +137,7 @@
 #define RAZER_NEW_MOUSE_RECEIVER_WAIT_US 31000
 #define RAZER_ATHERIS_RECEIVER_WAIT_US 400000
 #define RAZER_VIPER_MOUSE_RECEIVER_WAIT_US 59900
+#define RAZER_NAGA_V3_PRO_WAIT_US 99900
 
 #define RAZER_MOUSE_MAX_DPI_STAGES 5
 
@@ -150,6 +153,9 @@ struct razer_mouse_device {
     __s32 hwheel_value;
     u8 button_byte; // Previous value of mouse button byte in HID record
     u8 rep4[16]; // Previous value of report 4 on the keyboard intf
+
+    unsigned long last_activity; // jiffies at the last input report caused by the user
+    bool last_activity_valid; // False until the first such activity is seen
 
     unsigned char usb_interface_protocol;
     unsigned char usb_interface_subclass;

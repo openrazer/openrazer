@@ -1213,8 +1213,8 @@ struct razer_report razer_chroma_misc_set_dpi_xy(unsigned char variable_storage,
     struct razer_report report = get_razer_report(0x04, 0x05, 0x07);
 
     // Keep the DPI within bounds
-    dpi_x = clamp(dpi_x, 100, 45000);
-    dpi_y = clamp(dpi_y, 100, 45000);
+    dpi_x = clamp(dpi_x, 100, 50000);
+    dpi_y = clamp(dpi_y, 100, 50000);
 
     report.arguments[0] = VARSTORE;
 
@@ -1549,13 +1549,13 @@ struct razer_report razer_naga_trinity_effect_none(void)
 }
 
 /**
- * Set scroll wheel mode on the device
+ * Set scroll wheel mode on the device (protocol v1: tactile / free-spin)
  *
  * Status Trans Packet Proto DataSize Class CMD Args
  * 00     1f    0000   00    02       02    14  0100    | SET SCROLL WHEEL MODE (VARSTR, TACTILE)
  * 00     1f    0000   00    02       02    14  0101    | SET SCROLL WHEEL MODE (VARSTR, FREESPIN)
  */
-struct razer_report razer_chroma_misc_set_scroll_mode(unsigned int scroll_mode)
+struct razer_report razer_chroma_misc_set_scroll_mode_v1(unsigned int scroll_mode)
 {
     struct razer_report report = get_razer_report(0x02, 0x14, 0x02);
 
@@ -1566,11 +1566,41 @@ struct razer_report razer_chroma_misc_set_scroll_mode(unsigned int scroll_mode)
 }
 
 /**
- * Get scroll wheel mode from the device
+ * Get scroll wheel mode from the device (protocol v1)
  */
-struct razer_report razer_chroma_misc_get_scroll_mode(void)
+struct razer_report razer_chroma_misc_get_scroll_mode_v1(void)
 {
     struct razer_report report = get_razer_report(0x02, 0x94, 0x02);
+
+    report.arguments[0] = VARSTORE;
+
+    return report;
+}
+
+/**
+ * Set scroll wheel mode on the device (protocol v2: tactile / free-spin / precision tactile)
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    02       02    30  0100    | SET SCROLL WHEEL MODE (VARSTR, TACTILE)
+ * 00     1f    0000   00    02       02    30  0101    | SET SCROLL WHEEL MODE (VARSTR, FREE-SPIN)
+ * 00     1f    0000   00    02       02    30  0102    | SET SCROLL WHEEL MODE (VARSTR, PRECISION TACTILE)
+ */
+struct razer_report razer_chroma_misc_set_scroll_mode_v2(unsigned int scroll_mode)
+{
+    struct razer_report report = get_razer_report(0x02, 0x30, 0x02);
+
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = scroll_mode;
+
+    return report;
+}
+
+/**
+ * Get scroll wheel mode from the device (protocol v2)
+ */
+struct razer_report razer_chroma_misc_get_scroll_mode_v2(void)
+{
+    struct razer_report report = get_razer_report(0x02, 0xB0, 0x02);
 
     report.arguments[0] = VARSTORE;
 
@@ -1614,9 +1644,25 @@ struct razer_report razer_chroma_misc_get_scroll_acceleration(void)
  * 00     1f    0000   00    02       02    17  0101    | SET SCROLL WHEEL SMART REEL (VARSTR, ON)
  * 00     1f    0000   00    02       02    17  0100    | SET SCROLL WHEEL SMART REEL (VARSTR, OFF)
  */
-struct razer_report razer_chroma_misc_set_scroll_smart_reel(bool smart_reel)
+struct razer_report razer_chroma_misc_set_scroll_smart_reel_v1(bool smart_reel)
 {
     struct razer_report report = get_razer_report(0x02, 0x17, 0x02);
+
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = smart_reel;
+
+    return report;
+}
+
+/**
+ * Set scroll wheel "smart reel" on/off on the device (Naga V3 Pro variant)
+ *
+ * Unlike the other devices, the Naga V3 Pro expects the full 80-byte argument
+ * block even though only arguments[1] carries information.
+ */
+struct razer_report razer_chroma_misc_set_scroll_smart_reel_v2(bool smart_reel)
+{
+    struct razer_report report = get_razer_report(0x02, 0x17, 0x50);
 
     report.arguments[0] = VARSTORE;
     report.arguments[1] = smart_reel;

@@ -74,6 +74,7 @@ class RazerDevice(object):
             'dpi_stages': self._has_feature('razer.device.dpi', ('getDPIStages', 'setDPIStages')),
             'available_dpi': self._has_feature('razer.device.dpi', 'availableDPI'),
             'scroll_mode': self._has_feature('razer.device.scroll', ('getScrollMode', 'setScrollMode')),
+            'scroll_mode_options': self._has_feature('razer.device.scroll', 'getScrollModeOptions'),
             'scroll_acceleration': self._has_feature('razer.device.scroll', ('getScrollAcceleration', 'setScrollAcceleration')),
             'scroll_smart_reel': self._has_feature('razer.device.scroll', ('getScrollSmartReel', 'setScrollSmartReel')),
 

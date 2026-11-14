@@ -40,6 +40,7 @@ class RazerDevice(DBusService):
     MATRIX_DIMS: Optional[list[int]] = None
     POLL_RATES: Optional[list[int]] = None
     DPI_MAX: Optional[int] = None
+    SCROLL_MODE_VERSION: Optional[int] = None
     DRIVER_MODE = False
 
     WAVE_DIRS = (1, 2)
@@ -114,6 +115,9 @@ class RazerDevice(DBusService):
         self.poll_rate = 500
         if 'set_poll_rate' in self.METHODS and not self.POLL_RATES:
             self.POLL_RATES = [125, 500, 1000]
+
+        if 'set_scroll_mode' in self.METHODS and not self.SCROLL_MODE_VERSION:
+            self.SCROLL_MODE_VERSION = 1
 
         self._effect_sync = effect_sync.EffectSync(self, device_number)
 
