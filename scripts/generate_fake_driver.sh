@@ -1,6 +1,9 @@
 #!/bin/bash
 
 declare -A files_metadata=(
+    ["audio_bass"]="rw;4"
+    ["audio_eq_bands"]="rw;12 12 12 12 12 12 12 12 12 12"
+    ["audio_eq_preset"]="rw;0"
     ["backlight_led_brightness"]="rw;0"
     ["backlight_led_state"]="rw;0"
     ["backlight_matrix_effect_breath"]="w;"
