@@ -231,6 +231,29 @@ class RazerTartarusPro(_RippleKeyboard):
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1591/1591_tartaruspro.png"
 
 
+class RazerTartarusV2Pro(_RippleKeyboard):
+    """
+    Class for Razer Tartarus V2 Pro
+    """
+
+    DRIVER_MODE = False
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Tartarus_V2_Pro.*-if02-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02EB
+    HAS_MATRIX = True
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [5, 6]
+
+    METHODS = ['get_device_type_keypad',
+               'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'set_wave_effect', 'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_brightness', 'set_brightness']
+
+    DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/h76/h49/10386753650718/tartarus-v2-pro-black-500x500.png"
+
+
 class RazerOrbweaver(_RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Orbweaver
