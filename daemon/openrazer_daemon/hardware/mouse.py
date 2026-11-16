@@ -2171,6 +2171,8 @@ class RazerBasiliskV4ProWired(__RazerDevice):
 
     POLL_RATES = [125, 500, 1000, 2000, 4000, 8000]
     DPI_MAX = 50000
+    # 0 = tactile (24 notches), 1 = free spin, 2 = tactile (48 notches)
+    SCROLL_MODES = (0, 1, 2)
 
 
 class RazerBasiliskV4ProWireless(RazerBasiliskV4ProWired):
