@@ -49,6 +49,7 @@ class RazerDevice(object):
             'brightness': self._has_feature('razer.device.lighting.brightness'),
 
             'battery': self._has_feature('razer.device.power', 'getBattery'),
+            'charging_status': self._has_feature('razer.device.power', 'isCharging'),
             'idle_time': self._has_feature('razer.device.power', ('getIdleTime', 'setIdleTime')),
             'low_battery_threshold': self._has_feature('razer.device.power', ('getLowBatteryThreshold', 'setLowBatteryThreshold')),
             # Deprecated, use idle_time & low_battery_threshold
@@ -475,7 +476,7 @@ class RazerDevice(object):
 
         :return: Boolean
         """
-        if self.has('battery'):
+        if self.has('charging_status'):
             return bool(self._dbus_interfaces['power'].isCharging())
         else:
             raise NotImplementedError()
