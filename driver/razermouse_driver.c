@@ -5431,6 +5431,7 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_MAMBA_2012_WIRED:
     case USB_DEVICE_ID_RAZER_NAGA:
     case USB_DEVICE_ID_RAZER_NAGA_2012:
+    case USB_DEVICE_ID_RAZER_NAGA_2014:
     case USB_DEVICE_ID_RAZER_ABYSSUS:
     case USB_DEVICE_ID_RAZER_IMPERATOR:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
@@ -5579,6 +5580,7 @@ static ssize_t razer_attr_write_matrix_effect_on_common(struct device *dev, stru
 
     case USB_DEVICE_ID_RAZER_NAGA:
     case USB_DEVICE_ID_RAZER_NAGA_2012:
+    case USB_DEVICE_ID_RAZER_NAGA_2014:
     case USB_DEVICE_ID_RAZER_ABYSSUS:
     case USB_DEVICE_ID_RAZER_IMPERATOR:
     case USB_DEVICE_ID_RAZER_NAGA_HEX:
