@@ -236,3 +236,29 @@ class RazerKrakenKittyV2(__RazerDevice):
                'set_custom_kraken']
 
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/hcc/h6b/9631977570334/kraken-kitty-v2-quartz-500x500.png"
+
+
+class RazerBlackSharkV2Pro2_4(__RazerDevice):
+    """
+    Class for the Razer BlackShark V2 Pro 2.4
+
+    Wireless headset without RGB. Uses the razerblackshark kernel module to
+    expose battery status, the auto-power-off timeout, sidetone, do-not-disturb
+    and the on-device 10-band equalizer.
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*BlackShark_V2_Pro-event-if03')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0555
+    #: Sidetone range this model accepts on the wire (Synapse sends 0-10).
+    SIDETONE_MAX = 10
+    METHODS = ['get_device_type_headset',
+               'get_battery', 'is_charging',
+               'set_idle_time', 'get_idle_time',
+               'set_equalizer', 'get_equalizer',
+               'set_equalizer_preset', 'get_equalizer_preset',
+               'set_sidetone', 'get_sidetone', 'get_mic_mute',
+               'set_dnd', 'get_dnd',
+               'get_hardware_model']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/9542/9542-1-en-v2.png"

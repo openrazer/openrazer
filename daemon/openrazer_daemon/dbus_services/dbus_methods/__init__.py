@@ -20,3 +20,4 @@ from openrazer_daemon.dbus_services.dbus_methods.accessory import *
 from openrazer_daemon.dbus_services.dbus_methods.charging_pad_chroma import *
 from openrazer_daemon.dbus_services.dbus_methods.mouse_scroll_wheel import *
 from openrazer_daemon.dbus_services.dbus_methods.argb_controller import *
+from openrazer_daemon.dbus_services.dbus_methods.headset_audio import *
