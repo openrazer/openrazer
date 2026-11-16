@@ -39,6 +39,8 @@ class RazerDevice(DBusService):
     MATRIX_DIMS: Optional[list[int]] = None
     POLL_RATES: Optional[list[int]] = None
     DPI_MAX: Optional[int] = None
+    # Accepted values for setScrollMode (0 = tactile, 1 = free spin)
+    SCROLL_MODES: tuple[int, ...] = (0, 1)
     DRIVER_MODE = False
 
     WAVE_DIRS = (1, 2)
