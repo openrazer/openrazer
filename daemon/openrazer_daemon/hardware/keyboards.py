@@ -450,6 +450,36 @@ class RazerBlackWidowV4TenkeylessHyperSpeedWireless(RazerBlackWidowV4TenkeylessH
     USB_PID = 0x02D5
 
 
+class RazerBlackWidowV4LowProfileTenkeylessHyperSpeedWired(_RippleKeyboard):
+    """
+    Class for the Razer BlackWidow V4 Low-profile Tenkeyless HyperSpeed (Wired)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_BlackWidow_V4_Low-[Pp]rofile_Tenkeyless_HyperSpeed(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02D4
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [6, 18]
+    POLL_RATES = [125, 250, 500, 1000]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'get_poll_rate', 'set_poll_rate', 'get_supported_poll_rates',
+               'set_ripple_effect', 'set_ripple_effect_random_colour', 'get_battery', 'is_charging']
+
+    DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/h9f/h4f/9946834763806/bw-v4-low-tkl-hyperspeed-500x500.png"
+
+
+class RazerBlackWidowV4LowProfileTenkeylessHyperSpeedWireless(RazerBlackWidowV4LowProfileTenkeylessHyperSpeedWired):
+    """
+    Class for the Razer BlackWidow V4 Low-profile Tenkeyless HyperSpeed (Wireless)
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_BlackWidow_V4_Low-[Pp]rofile_Tenkeyless_HyperSpeed(_\d+)?(-if01)?-event-mouse')
+    USB_PID = 0x02D2
+
+
 class RazerBlackWidowChroma(_RippleKeyboard):
     """
     Class for the Razer BlackWidow Chroma
@@ -1845,7 +1875,7 @@ class RazerBladeProEarly2020(_RippleKeyboard):
     USB_PID = 0x0256
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 16]
-    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+    METHODS = ['get_device_type_keyboard', 'get_logo_active', 'set_logo_active', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_custom_effect', 'set_key_row',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
 
@@ -2426,6 +2456,36 @@ class RazerHuntsmanV3Pro8KHz(_RazerDeviceBrightnessSuspend):
                'get_game_mode', 'set_game_mode', 'set_custom_effect', 'set_key_row', 'get_keyboard_layout']
 
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/h62/h24/9980311044126/huntsman-v3-pro-8khz-b-500x500.png"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.key_manager = _KeyboardKeyManager(self._device_number, self.event_files, self, use_epoll=True, testing=self._testing)
+
+    def _close(self):
+        """
+        Close the key manager
+        """
+        super()._close()
+        self.key_manager.close()
+
+
+class RazerHuntsmanV3HEMagneticTKL8KHz(_RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Huntsman V3 HE Magnetic Tenkeyless 8KHz
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Huntsman_V3_HE_Magnetic_Tenkeyless_8KHz(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02EA
+    HAS_MATRIX = True
+    MATRIX_DIMS = [6, 22]
+    DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/h85/h2c/10362342113310/260908-huntsman-v3-he-mag-tkl-8k-1500x1000-5.jpg"
+    # TODO Remove get_keyboard_layout once not _RazerDeviceBrightnessSuspend anymore
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'get_macro_mode', 'set_macro_mode', 'get_macro_effect', 'set_macro_effect',
+               'get_game_mode', 'set_game_mode', 'set_custom_effect', 'set_key_row', 'get_keyboard_layout']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
