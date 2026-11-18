@@ -5,6 +5,7 @@ from openrazer.client.devices import RazerDevice, BaseDeviceFactory
 from openrazer.client.devices.mousemat import RazerMousemat
 from openrazer.client.devices.keyboard import RazerKeyboard
 from openrazer.client.devices.mice import RazerMouse
+from openrazer.client.devices.headsets import RazerBlackSharkV2HyperSpeed
 
 
 DEVICE_MAP = {
@@ -42,6 +43,11 @@ class RazerDeviceFactory(BaseDeviceFactory):
         device_dbus = dbus.Interface(daemon_dbus, "razer.device.misc")
 
         device_type = device_dbus.getDeviceType()
+
+        if device_type == 'headset':
+            vid, pid = device_dbus.getVidPid()
+            if int(vid) == 0x1532 and int(pid) in (0x0565, 0x056E):
+                return RazerBlackSharkV2HyperSpeed(serial)
 
         device_class = DEVICE_MAP.get(device_type, RazerDevice)
 
