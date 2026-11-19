@@ -48,7 +48,7 @@ tasks:
       sudo truncate -s 0 "$kerneldir"/scripts/Makefile.gcc-plugins
 
       # Compile the kernel driver
-      echo "ccflags-y := -Wall -Werror" >> driver/Makefile
+      echo "ccflags-y += -Wall -Werror" >> driver/Makefile
       make KERNELDIR="$kerneldir"
 
   - functional-test-setup: |
