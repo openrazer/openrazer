@@ -12,6 +12,7 @@
 #include <linux/dmi.h>
 #include <linux/input-event-codes.h>
 #include <linux/version.h>
+#include <generated/utsrelease.h>
 
 #include "usb_hid_keys.h"
 
@@ -49,6 +50,9 @@ MODULE_LICENSE(DRIVER_LICENSE);
     (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 176) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)) || \
     (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 210) && LINUX_VERSION_CODE < KERNEL_VERSION(5, 16, 0)) || \
     (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 259) && LINUX_VERSION_CODE < KERNEL_VERSION(5, 11, 0))
+#define LINUX_HID_REPORT_RAW_EVENT_WITH_BUFFER_SIZE
+#endif
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(6, 8, 12) && UTS_UBUNTU_RELEASE_ABI >= 150)
 #define LINUX_HID_REPORT_RAW_EVENT_WITH_BUFFER_SIZE
 #endif
 
