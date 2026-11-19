@@ -274,39 +274,48 @@ class EffectSync(object):
                         if effect_func is not None:
                             effect_func(*args)
 
-                    if effect_name == 'setBreathDual':
+                    if effect_name in ('setBreathDual', 'setBreathTriple'):
+                        effect_args = args[0:6] if effect_name == 'setBreathTriple' else args
                         effect_func = getattr(self._parent, 'setScrollBreathDual', None)
                         if effect_func is not None:
-                            effect_func(*args)
+                            effect_func(*effect_args)
                         effect_func = getattr(self._parent, 'setLogoBreathDual', None)
                         if effect_func is not None:
-                            effect_func(*args)
+                            effect_func(*effect_args)
                         effect_func = getattr(self._parent, 'setLeftBreathDual', None)
                         if effect_func is not None:
-                            effect_func(*args)
+                            effect_func(*effect_args)
                         effect_func = getattr(self._parent, 'setRightBreathDual', None)
                         if effect_func is not None:
-                            effect_func(*args)
+                            effect_func(*effect_args)
                         effect_func = getattr(self._parent, 'setBacklightBreathDual', None)
                         if effect_func is not None:
-                            effect_func(*args)
+                            effect_func(*effect_args)
+
+                elif effect_name == 'triggerReactive':
+                    effect_func = getattr(self._parent, 'triggerReactive', None)
+                    if effect_func is not None:
+                        effect_func()
+
+                elif effect_name in ('setStarlightRandom', 'setStarlightSingle', 'setStarlightDual'):
+                    target_func = getattr(self._parent, effect_name, None)
+                    if target_func is not None:
+                        target_func(*args)
+                    else:
+                        if effect_name == 'setStarlightRandom':
+                            self.run_effect('setBreathRandom')
+                        elif effect_name == 'setStarlightSingle':
+                            self.run_effect('setBreathSingle', *args[1:4])
+                        elif effect_name == 'setStarlightDual':
+                            self.run_effect('setBreathDual', *args[1:7])
 
                 elif effect_name == 'setBrightness':
-                    effect_func = getattr(self._parent, 'setScrollBrightness', None)
-                    if effect_func is not None:
-                        effect_func(*args)
-                    effect_func = getattr(self._parent, 'setLogoBrightness', None)
-                    if effect_func is not None:
-                        effect_func(*args)
-                    effect_func = getattr(self._parent, 'setLeftBrightness', None)
-                    if effect_func is not None:
-                        effect_func(*args)
-                    effect_func = getattr(self._parent, 'setRightBrightness', None)
-                    if effect_func is not None:
-                        effect_func(*args)
-                    effect_func = getattr(self._parent, 'setBacklightBrightness', None)
-                    if effect_func is not None:
-                        effect_func(*args)
+                    b_val = args[0]
+                    b_pct = int(round(b_val * 100.0 / 255.0)) if b_val > 100 else int(round(b_val))
+                    for m in ('setScrollBrightness', 'setLogoBrightness', 'setLeftBrightness', 'setRightBrightness', 'setBacklightBrightness'):
+                        effect_func = getattr(self._parent, m, None)
+                        if effect_func is not None:
+                            effect_func(b_pct)
 
         except Exception as err:
             self._logger.exception("Caught exception trying to sync effects.", exc_info=err)

@@ -236,3 +236,58 @@ class RazerKrakenKittyV2(__RazerDevice):
                'set_custom_kraken']
 
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/hcc/h6b/9631977570334/kraken-kitty-v2-quartz-500x500.png"
+
+
+class RazerNariUltimate(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Nari Ultimate (Wireless)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x051A
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 2]
+    METHODS = ['get_device_type_headset',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time',
+               'get_logo_brightness', 'set_logo_brightness',
+               'get_logo_active', 'set_logo_active',
+               'set_logo_static', 'set_logo_spectrum', 'set_logo_wave',
+               'set_logo_reactive', 'set_logo_none',
+               'set_logo_breath_random', 'set_logo_breath_single', 'set_logo_breath_dual',
+               'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/razer-nari-ultimate/shop/nariultimate-ch5-v1.png"
+
+
+class RazerNariUltimateWired(RazerNariUltimate):
+    """
+    Class for the Razer Nari Ultimate (Wired)
+    """
+    USB_PID = 0x051B
+
+
+class RazerNari(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Nari (Wireless)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x051C
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 2]
+    WAVE_DIRS = (1, 2)
+    METHODS = ['get_device_type_headset',
+               'get_battery', 'is_charging', 'get_idle_time', 'set_idle_time',
+               'set_static_effect', 'set_spectrum_effect', 'set_wave_effect',
+               'set_reactive_effect', 'trigger_reactive_effect', 'set_none_effect',
+               'set_breath_random_effect', 'set_breath_single_effect',
+               'set_breath_dual_effect', 'set_breath_triple_effect',
+               'set_starlight_random_effect', 'set_starlight_single_effect',
+               'set_starlight_dual_effect', 'set_custom_effect', 'set_key_row']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/razer-nari/shop/nari-ch5-v1.png"
+
+
+class RazerNariWired(RazerNari):
+    """
+    Class for the Razer Nari (Wired)
+    """
+    USB_PID = 0x051D
