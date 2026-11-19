@@ -2138,6 +2138,9 @@ class RazerBasiliskV4ProWired(__RazerDevice):
                'set_logo_wave', 'set_logo_static', 'set_logo_spectrum', 'set_logo_none',
                # Scroll wheel (partial support)
                'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum', 'set_scroll_none',
+               # Underglow
+               'get_backlight_brightness_from_device', 'set_backlight_brightness',
+               'set_backlight_wave', 'set_backlight_static', 'set_backlight_spectrum', 'set_backlight_none',
                # Can set custom matrix effects
                'set_custom_effect', 'set_key_row',
                # Battery

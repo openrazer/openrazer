@@ -4854,12 +4854,23 @@ static ssize_t razer_attr_write_right_led_brightness(struct device *dev, struct 
     return razer_attr_write_led_brightness(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
 
+static unsigned char razer_backlight_led_id(struct device *dev)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED ||
+        device->usb_pid == USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS)
+        return UNDERGLOW_LED;
+
+    return BACKLIGHT_LED;
+}
+
 /**
  * Read device file "backlight_led_brightness"
  */
 static ssize_t razer_attr_read_backlight_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return razer_attr_read_led_brightness(dev, attr, buf, BACKLIGHT_LED);
+    return razer_attr_read_led_brightness(dev, attr, buf, razer_backlight_led_id(dev));
 }
 
 /**
@@ -4867,7 +4878,7 @@ static ssize_t razer_attr_read_backlight_led_brightness(struct device *dev, stru
  */
 static ssize_t razer_attr_write_backlight_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_led_brightness(dev, attr, buf, count, BACKLIGHT_LED);
+    return razer_attr_write_led_brightness(dev, attr, buf, count, razer_backlight_led_id(dev));
 }
 
 /**
@@ -6061,7 +6072,7 @@ static ssize_t razer_attr_write_right_matrix_effect_none(struct device *dev, str
  */
 static ssize_t razer_attr_write_backlight_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_matrix_effect_wave_common(dev, attr, buf, count, BACKLIGHT_LED);
+    return razer_attr_write_matrix_effect_wave_common(dev, attr, buf, count, razer_backlight_led_id(dev));
 }
 
 /**
@@ -6071,7 +6082,7 @@ static ssize_t razer_attr_write_backlight_matrix_effect_wave(struct device *dev,
  */
 static ssize_t razer_attr_write_backlight_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_matrix_effect_spectrum_common(dev, attr, buf, count, BACKLIGHT_LED);
+    return razer_attr_write_matrix_effect_spectrum_common(dev, attr, buf, count, razer_backlight_led_id(dev));
 }
 
 /**
@@ -6101,7 +6112,7 @@ static ssize_t razer_attr_write_backlight_matrix_effect_breath(struct device *de
  */
 static ssize_t razer_attr_write_backlight_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_matrix_effect_static_common(dev, attr, buf, count, BACKLIGHT_LED);
+    return razer_attr_write_matrix_effect_static_common(dev, attr, buf, count, razer_backlight_led_id(dev));
 }
 
 /**
@@ -6111,7 +6122,7 @@ static ssize_t razer_attr_write_backlight_matrix_effect_static(struct device *de
  */
 static ssize_t razer_attr_write_backlight_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_matrix_effect_none_common(dev, attr, buf, count, BACKLIGHT_LED);
+    return razer_attr_write_matrix_effect_none_common(dev, attr, buf, count, razer_backlight_led_id(dev));
 }
 
 /**
@@ -7130,6 +7141,12 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_none);
 
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
@@ -8371,6 +8388,12 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
             device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+
+            device_remove_file(&hdev->dev, &dev_attr_backlight_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_none);
 
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);

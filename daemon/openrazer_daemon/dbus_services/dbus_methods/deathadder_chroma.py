@@ -13,6 +13,13 @@ def get_backlight_brightness(self):
     return self.zone["backlight"]["brightness"]
 
 
+@endpoint('razer.device.lighting.backlight', 'getBacklightBrightness', out_sig='d')
+def get_backlight_brightness_from_device(self):
+    """Read the current onboard profile's backlight brightness."""
+    with open(self.get_driver_path('backlight_led_brightness'), 'r') as driver_file:
+        return round(int(driver_file.read()) * 100 / 255)
+
+
 @endpoint('razer.device.lighting.backlight', 'setBacklightBrightness', in_sig='d')
 def set_backlight_brightness(self, brightness):
     """
