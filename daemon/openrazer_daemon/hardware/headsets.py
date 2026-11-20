@@ -236,3 +236,37 @@ class RazerKrakenKittyV2(__RazerDevice):
                'set_custom_kraken']
 
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/hcc/h6b/9631977570334/kraken-kitty-v2-quartz-500x500.png"
+
+
+class RazerBlackSharkV3XUSB(__RazerDevice):
+    """
+    Class for the wired Razer BlackShark V3 X.
+
+    Audio and power controls are exposed by the razerblackshark kernel
+    driver over the razer.device.audio.headset DBus interface.
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackShark_V3_X_USB_.*-event-if00')
+
+    USB_VID = 0x1532
+    USB_PID = 0x057C
+    METHODS = ['get_device_type_headset', 'get_battery', 'is_charging',
+               'get_idle_time', 'set_idle_time',
+               'get_sidetone', 'set_sidetone',
+               'get_power_saving', 'set_power_saving',
+               'get_equalizer_preset', 'set_equalizer_preset',
+               'get_equalizer_bands', 'set_equalizer_bands',
+               'get_mic_noise_cancel', 'set_mic_noise_cancel']
+
+    DEVICE_IMAGE = "https://dl.razerzone.com/src2/20181/20181-1-en-v3.png"
+
+
+class RazerBlackSharkV3XWireless(RazerBlackSharkV3XUSB):
+    """
+    Class for the Razer BlackShark V3 X HyperSpeed dongle.
+
+    The dongle relays the same vendor protocol to the headset; when the
+    headset is not linked, device queries fail until it reconnects.
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_BlackShark_V3_X_[0-9A-F]+-event-if00')
+
+    USB_PID = 0x057D
