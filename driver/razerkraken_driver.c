@@ -10,6 +10,8 @@
 #include <linux/usb/input.h>
 #include <linux/hid.h>
 #include <linux/random.h>
+#include <linux/workqueue.h>
+#include <linux/delay.h>
 
 #include "razerkraken_driver.h"
 #include "razercommon.h"
@@ -70,6 +72,352 @@ static int razer_kraken_send_control_msg(struct hid_device *hdev,struct razer_kr
         hid_warn(hdev, "Failed to send USB control message: %d\n", ret);
 
     return ret;
+}
+
+/*
+ * Kraken V3 Pro HyperSpeed dongle: lighting over CDC bulk (not HID reports).
+ *
+ * Protocol (Synapse USBPcap + scripts/kraken_v3_pro):
+ *   CMD 0x8e brightness: 01 f3 ff 18 02 21 40 8e 00 00 LV 00 00*14 CS
+ *                        CS = (0x72 - LV) & 0xff
+ *   CMD 0x8c colour:     01 f3 ff 18 02 21 40 8c 00 00 08 P1 RR GG BB 00*12 CS
+ *                        CS = (0x6c - RR - GG - BB - P1) & 0xff
+ *
+ * 28-byte URB_BULK on EP 0x06; DTR|RTS via SET_CONTROL_LINE_STATE (0x22) on if4.
+ * cdc_acm is unbound from if4/if5 so we can usb_bulk_msg; it may rebind after
+ * probe, so writes re-check and re-claim.
+ */
+
+#define KRAKEN_V3_PRO_CDC_CTRL_IFACE 4
+#define KRAKEN_V3_PRO_SPECTRUM_MS 40
+#define KRAKEN_V3_PRO_CDC_SET_CONTROL_LINE_STATE 0x22
+
+static bool razer_kraken_v3_pro_cdc_busy(struct razer_kraken_device *device)
+{
+    struct usb_interface *ctrl =
+        usb_ifnum_to_if(device->usb_dev, KRAKEN_V3_PRO_CDC_CTRL_IFACE);
+    struct usb_interface *data =
+        usb_ifnum_to_if(device->usb_dev, KRAKEN_V3_PRO_CDC_DATA_IFACE);
+
+    return (ctrl && ctrl->dev.driver) || (data && data->dev.driver);
+}
+
+static void razer_kraken_v3_pro_unbind_cdc(struct razer_kraken_device *device)
+{
+    int ifnums[] = {
+        KRAKEN_V3_PRO_CDC_CTRL_IFACE,
+        KRAKEN_V3_PRO_CDC_DATA_IFACE,
+    };
+    int i;
+
+    for (i = 0; i < ARRAY_SIZE(ifnums); i++) {
+        struct usb_interface *intf = usb_ifnum_to_if(device->usb_dev, ifnums[i]);
+
+        if (!intf || !intf->dev.driver)
+            continue;
+
+        hid_info(device->hdev, "Unbinding %s from interface %d for lighting\n",
+                 intf->dev.driver->name, ifnums[i]);
+        device_release_driver(&intf->dev);
+    }
+}
+
+/* bit0=DTR, bit1=RTS */
+static int razer_kraken_v3_pro_set_line_state(struct razer_kraken_device *device,
+        u16 line)
+{
+    struct usb_device *udev = device->usb_dev;
+    int ret;
+
+    ret = usb_control_msg(udev,
+                          usb_sndctrlpipe(udev, 0),
+                          KRAKEN_V3_PRO_CDC_SET_CONTROL_LINE_STATE,
+                          USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT,
+                          line,
+                          KRAKEN_V3_PRO_CDC_CTRL_IFACE,
+                          NULL, 0,
+                          USB_CTRL_SET_TIMEOUT);
+    if (ret < 0) {
+        hid_warn(device->hdev, "SET_CONTROL_LINE_STATE 0x%04x failed: %d\n",
+                 line, ret);
+        device->cdc_line_up = false;
+        return ret;
+    }
+
+    device->cdc_line_up = (line & 0x03) != 0;
+    return 0;
+}
+
+/* Unbind foreign drivers from if4/if5 and raise DTR|RTS. */
+static int razer_kraken_v3_pro_claim_cdc(struct razer_kraken_device *device)
+{
+    int i;
+    int ret;
+
+    for (i = 0; i < 6; i++) {
+        if (razer_kraken_v3_pro_cdc_busy(device)) {
+            razer_kraken_v3_pro_unbind_cdc(device);
+            device->cdc_line_up = false;
+            msleep(20);
+            continue;
+        }
+        break;
+    }
+
+    if (razer_kraken_v3_pro_cdc_busy(device)) {
+        hid_err(device->hdev,
+                "CDC interfaces still held by a class driver; cannot light\n");
+        return -EBUSY;
+    }
+
+    ret = razer_kraken_v3_pro_set_line_state(device, 0x0003);
+    if (ret)
+        return ret;
+
+    usleep_range(3000, 8000);
+    return 0;
+}
+
+static int razer_kraken_v3_pro_bulk_write(struct razer_kraken_device *device,
+        const unsigned char *pkt)
+{
+    struct usb_device *udev = device->usb_dev;
+    unsigned char *buf;
+    unsigned int pipe;
+    int actual;
+    int ret;
+    int tries;
+
+    if (razer_kraken_v3_pro_cdc_busy(device) || !device->cdc_line_up) {
+        ret = razer_kraken_v3_pro_claim_cdc(device);
+        if (ret)
+            return ret;
+    }
+
+    buf = kmemdup(pkt, KRAKEN_V3_PRO_BULK_LEN, GFP_KERNEL);
+    if (!buf)
+        return -ENOMEM;
+
+    pipe = usb_sndbulkpipe(udev, KRAKEN_V3_PRO_BULK_OUT_EP & 0x7f);
+
+    for (tries = 0; tries < 8; tries++) {
+        if (razer_kraken_v3_pro_cdc_busy(device)) {
+            ret = razer_kraken_v3_pro_claim_cdc(device);
+            if (ret) {
+                kfree(buf);
+                return ret;
+            }
+        }
+
+        actual = 0;
+        ret = usb_bulk_msg(udev, pipe, buf, KRAKEN_V3_PRO_BULK_LEN,
+                           &actual, 1000);
+        if (ret == 0 && actual == KRAKEN_V3_PRO_BULK_LEN) {
+            kfree(buf);
+            return 0;
+        }
+
+        /* Retry soft failures (common under VM USB redirect). */
+        if (ret == -EAGAIN || ret == -ETIMEDOUT || ret == -EPIPE ||
+            ret == -EBUSY || ret == -ENXIO || ret == -ENODEV ||
+            (ret == 0 && actual != KRAKEN_V3_PRO_BULK_LEN)) {
+            if (ret == -EPIPE)
+                usb_clear_halt(udev, pipe);
+            device->cdc_line_up = false;
+            razer_kraken_v3_pro_claim_cdc(device);
+            usleep_range(5000, 15000);
+            continue;
+        }
+
+        hid_warn(device->hdev, "bulk OUT failed: %d actual=%d\n", ret, actual);
+        kfree(buf);
+        return ret ? ret : -EIO;
+    }
+
+    hid_warn(device->hdev, "bulk OUT gave up after retries (last ret=%d actual=%d)\n",
+             ret, actual);
+    kfree(buf);
+    return ret ? ret : -EIO;
+}
+
+static int razer_kraken_v3_pro_set_brightness(struct razer_kraken_device *device,
+        unsigned char level)
+{
+    unsigned char pkt[KRAKEN_V3_PRO_BULK_LEN];
+    int ret;
+
+    memset(pkt, 0, sizeof(pkt));
+    pkt[0] = 0x01;
+    pkt[1] = 0xf3;
+    pkt[2] = 0xff;
+    pkt[3] = 0x18;
+    pkt[4] = 0x02;
+    pkt[5] = 0x21;
+    pkt[6] = 0x40;
+    pkt[7] = 0x8e;
+    pkt[10] = level;
+    pkt[27] = (unsigned char)((0x72 - level) & 0xff);
+
+    ret = razer_kraken_v3_pro_bulk_write(device, pkt);
+    if (ret)
+        return ret;
+
+    device->last_brightness = level;
+    usleep_range(15000, 25000);
+    return 0;
+}
+
+static int razer_kraken_v3_pro_set_color_zone(struct razer_kraken_device *device,
+        unsigned char r, unsigned char g,
+        unsigned char b, unsigned char zone)
+{
+    unsigned char pkt[KRAKEN_V3_PRO_BULK_LEN];
+
+    memset(pkt, 0, sizeof(pkt));
+    pkt[0] = 0x01;
+    pkt[1] = 0xf3;
+    pkt[2] = 0xff;
+    pkt[3] = 0x18;
+    pkt[4] = 0x02;
+    pkt[5] = 0x21;
+    pkt[6] = 0x40;
+    pkt[7] = 0x8c;
+    pkt[10] = 0x08;
+    pkt[11] = zone;
+    pkt[12] = r;
+    pkt[13] = g;
+    pkt[14] = b;
+    pkt[27] = (unsigned char)((0x6c - r - g - b - zone) & 0xff);
+
+    return razer_kraken_v3_pro_bulk_write(device, pkt);
+}
+
+/*
+ * send_brightness: send CMD 0x8e first (needed after power-on / none).
+ * Both zone flags match Synapse dual-zone updates. Caller holds device->lock.
+ */
+static int razer_kraken_v3_pro_set_color(struct razer_kraken_device *device,
+        unsigned char r, unsigned char g,
+        unsigned char b, bool send_brightness)
+{
+    int ret;
+
+    if (send_brightness) {
+        ret = razer_kraken_v3_pro_set_brightness(device, device->last_brightness);
+        if (ret)
+            return ret;
+    }
+
+    ret = razer_kraken_v3_pro_set_color_zone(device, r, g, b, 0x00);
+    if (ret)
+        return ret;
+
+    usleep_range(5000, 10000);
+
+    ret = razer_kraken_v3_pro_set_color_zone(device, r, g, b, 0x01);
+    if (ret)
+        return ret;
+
+    device->last_rgb[0] = r;
+    device->last_rgb[1] = g;
+    device->last_rgb[2] = b;
+    return 0;
+}
+
+/* Must not be called with device->lock held (cancel_delayed_work_sync). */
+static void razer_kraken_v3_pro_stop_spectrum(struct razer_kraken_device *device)
+{
+    if (!device->spectrum_active)
+        return;
+    device->spectrum_active = false;
+    cancel_delayed_work_sync(&device->spectrum_work);
+}
+
+static void razer_kraken_v3_pro_spectrum_work(struct work_struct *work)
+{
+    struct razer_kraken_device *device =
+        container_of(to_delayed_work(work), struct razer_kraken_device, spectrum_work);
+    unsigned char r, g, b;
+    bool cont;
+
+    mutex_lock(&device->lock);
+    if (!device->spectrum_active) {
+        mutex_unlock(&device->lock);
+        return;
+    }
+
+    r = device->last_rgb[0];
+    g = device->last_rgb[1];
+    b = device->last_rgb[2];
+
+    /* red -> yellow -> green -> cyan -> blue -> magenta -> red */
+    if (r == 0xff && g < 0xff && b == 0x00)
+        g = (g + 5 > 0xff) ? 0xff : g + 5;
+    else if (g == 0xff && r > 0x00 && b == 0x00)
+        r = (r < 5) ? 0 : r - 5;
+    else if (g == 0xff && b < 0xff && r == 0x00)
+        b = (b + 5 > 0xff) ? 0xff : b + 5;
+    else if (b == 0xff && g > 0x00 && r == 0x00)
+        g = (g < 5) ? 0 : g - 5;
+    else if (b == 0xff && r < 0xff && g == 0x00)
+        r = (r + 5 > 0xff) ? 0xff : r + 5;
+    else if (r == 0xff && b > 0x00 && g == 0x00)
+        b = (b < 5) ? 0 : b - 5;
+    else {
+        r = 0xff;
+        g = 0x00;
+        b = 0x00;
+    }
+
+    razer_kraken_v3_pro_set_color(device, r, g, b, false);
+    cont = device->spectrum_active;
+    mutex_unlock(&device->lock);
+
+    if (cont)
+        schedule_delayed_work(&device->spectrum_work,
+                              msecs_to_jiffies(KRAKEN_V3_PRO_SPECTRUM_MS));
+}
+
+static void razer_kraken_v3_pro_release_cdc(struct razer_kraken_device *device)
+{
+    if (device->cdc_line_up)
+        razer_kraken_v3_pro_set_line_state(device, 0x0000);
+    device->cdc_line_up = false;
+}
+
+static int razer_kraken_v3_pro_setup_bulk(struct razer_kraken_device *device)
+{
+    struct usb_interface *ctrl_intf;
+    struct usb_interface *data_intf;
+    int ret;
+
+    ctrl_intf = usb_ifnum_to_if(device->usb_dev, KRAKEN_V3_PRO_CDC_CTRL_IFACE);
+    data_intf = usb_ifnum_to_if(device->usb_dev, KRAKEN_V3_PRO_CDC_DATA_IFACE);
+    if (!ctrl_intf || !data_intf) {
+        hid_err(device->hdev, "CDC interfaces %d/%d not found\n",
+                KRAKEN_V3_PRO_CDC_CTRL_IFACE, KRAKEN_V3_PRO_CDC_DATA_IFACE);
+        return -ENODEV;
+    }
+
+    device->use_cdc_bulk = true;
+    device->last_brightness = 0xff;
+    device->spectrum_active = false;
+    device->cdc_line_up = false;
+    INIT_DELAYED_WORK(&device->spectrum_work, razer_kraken_v3_pro_spectrum_work);
+
+    msleep(100);
+    ret = razer_kraken_v3_pro_claim_cdc(device);
+    if (ret) {
+        /* Keep sysfs; first effect write retries claim. */
+        hid_warn(device->hdev,
+                 "CDC claim at probe failed (%d); will retry on first light command\n",
+                 ret);
+    }
+
+    hid_info(device->hdev,
+             "Using CDC bulk EP 0x%02x for lighting (re-claim if cdc_acm binds)\n",
+             KRAKEN_V3_PRO_BULK_OUT_EP);
+    return 0;
 }
 
 /**
@@ -219,6 +567,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Kraken Kitty V2";
         break;
 
+    case USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO:
+        device_type = "Razer Kraken V3 Pro";
+        break;
+
     default:
         device_type = "Unknown Device";
     }
@@ -254,8 +606,34 @@ static ssize_t razer_attr_read_test(struct device *dev, struct device_attribute 
 static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-    struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
-    union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
+    struct razer_kraken_request_report report;
+    union razer_kraken_effect_byte effect_byte;
+
+    /* V3 Pro has no hardware spectrum; emulate with delayed_work colour steps. */
+    if (device->use_cdc_bulk) {
+        int ret;
+
+        razer_kraken_v3_pro_stop_spectrum(device);
+        mutex_lock(&device->lock);
+        device->last_brightness = 0xff;
+        device->last_rgb[0] = 0xff;
+        device->last_rgb[1] = 0x00;
+        device->last_rgb[2] = 0x00;
+        ret = razer_kraken_v3_pro_set_color(device, 0xff, 0x00, 0x00, true);
+        if (ret) {
+            mutex_unlock(&device->lock);
+            return ret;
+        }
+        device->last_effect = 0x04;
+        device->spectrum_active = true;
+        mutex_unlock(&device->lock);
+        schedule_delayed_work(&device->spectrum_work,
+                              msecs_to_jiffies(KRAKEN_V3_PRO_SPECTRUM_MS));
+        return count;
+    }
+
+    report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
+    effect_byte = get_kraken_effect_byte();
 
     // Spectrum Cycling | ON
     effect_byte.bits.on_off_static = 1;
@@ -279,8 +657,27 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
 static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-    struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
-    union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
+    struct razer_kraken_request_report report;
+    union razer_kraken_effect_byte effect_byte;
+
+    if (device->use_cdc_bulk) {
+        int ret;
+
+        razer_kraken_v3_pro_stop_spectrum(device);
+        mutex_lock(&device->lock);
+        device->last_brightness = 0x00;
+        ret = razer_kraken_v3_pro_set_color(device, 0x00, 0x00, 0x00, true);
+        if (ret) {
+            mutex_unlock(&device->lock);
+            return ret;
+        }
+        device->last_effect = 0x00;
+        mutex_unlock(&device->lock);
+        return count;
+    }
+
+    report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
+    effect_byte = get_kraken_effect_byte();
 
     // Spectrum Cycling | OFF
     effect_byte.bits.on_off_static = 0;
@@ -304,14 +701,38 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
 static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
-    struct razer_kraken_request_report rgb_report = get_kraken_request_report(0x04, 0x40, count, device->breathing_address[0]);
-    struct razer_kraken_request_report effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
-    union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
+    struct razer_kraken_request_report rgb_report;
+    struct razer_kraken_request_report effect_report;
+    union razer_kraken_effect_byte effect_byte;
 
     if (count != 3 && count != 4) {
         dev_warn(dev, "razerkraken: Static mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
         return -EINVAL;
     }
+
+    if (device->use_cdc_bulk) {
+        int ret;
+
+        razer_kraken_v3_pro_stop_spectrum(device);
+        mutex_lock(&device->lock);
+        /* Optional 4th byte is brightness (CMD 0x8e). */
+        if (count == 4)
+            device->last_brightness = buf[3];
+        else if (device->last_brightness == 0)
+            device->last_brightness = 0xff;
+        ret = razer_kraken_v3_pro_set_color(device, buf[0], buf[1], buf[2], true);
+        if (ret) {
+            mutex_unlock(&device->lock);
+            return ret;
+        }
+        device->last_effect = 0x01;
+        mutex_unlock(&device->lock);
+        return count;
+    }
+
+    rgb_report = get_kraken_request_report(0x04, 0x40, count, device->breathing_address[0]);
+    effect_report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
+    effect_byte = get_kraken_effect_byte();
 
     rgb_report.arguments[0] = buf[0];
     rgb_report.arguments[1] = buf[1];
@@ -393,6 +814,14 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
 static ssize_t razer_attr_read_matrix_effect_static(struct device *dev, struct device_attribute *attr, char *buf)
 {
     struct razer_kraken_device *device = dev_get_drvdata(dev);
+
+    if (device->use_cdc_bulk) {
+        buf[0] = device->last_rgb[0];
+        buf[1] = device->last_rgb[1];
+        buf[2] = device->last_rgb[2];
+        buf[3] = 0x00;
+        return 4;
+    }
     return get_rgb_from_addr(dev, device->breathing_address[0], 0x04, buf);
 }
 
@@ -569,6 +998,13 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     // Basically some simple caching
     // Also skips going to device if it doesn't contain the serial
     if(device->serial[0] == '\0') {
+        if (device->use_cdc_bulk) {
+            unsigned int rand_serial = 0;
+
+            get_random_bytes(&rand_serial, sizeof(unsigned int));
+            sprintf(device->serial, "KV3P%015u", rand_serial);
+            return sysfs_emit(buf, "%s\n", device->serial);
+        }
 
         mutex_lock(&device->lock);
         device->data[0] = 0x00;
@@ -607,6 +1043,12 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
 
     // Basically some simple caching
     if(device->firmware_version[0] != 1) {
+        if (device->use_cdc_bulk) {
+            device->firmware_version[0] = 1;
+            device->firmware_version[1] = 0x01;
+            device->firmware_version[2] = 0x00;
+            return sysfs_emit(buf, "v%x.%x\n", device->firmware_version[1], device->firmware_version[2]);
+        }
 
         mutex_lock(&device->lock);
         device->data[0] = 0x00;
@@ -638,7 +1080,13 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
  */
 static ssize_t razer_attr_read_matrix_current_effect(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    unsigned char current_effect = get_current_effect(dev);
+    struct razer_kraken_device *device = dev_get_drvdata(dev);
+    unsigned char current_effect;
+
+    if (device->use_cdc_bulk)
+        current_effect = device->last_effect;
+    else
+        current_effect = get_current_effect(dev);
 
     return sysfs_emit(buf, "%02x\n", current_effect);
 }
@@ -723,6 +1171,12 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
         get_random_bytes(&rand_serial, sizeof(unsigned int));
         sprintf(dev->serial, "HN%015u", rand_serial);
         break;
+    case USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO:
+        dev->use_cdc_bulk = true;
+        dev->last_brightness = 0xff;
+        get_random_bytes(&rand_serial, sizeof(unsigned int));
+        sprintf(dev->serial, "KV3P%015u", rand_serial);
+        break;
     }
 }
 
@@ -745,7 +1199,9 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
     // Init data
     razer_kraken_init(dev, intf, hdev);
 
-    if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE) {
+    /* V3 Pro control HID is Boot Keyboard (protocol 1), not PROTOCOL_NONE. */
+    if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE ||
+       dev->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO) {
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_version);                               // Get driver version
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_test);                                  // Test mode
         CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
@@ -772,6 +1228,12 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
             break;
+        case USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_current_effect);
+            break;
         }
     }
 
@@ -787,10 +1249,35 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
         goto exit_free;
     }
 
+    if (dev->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO) {
+        retval = razer_kraken_v3_pro_setup_bulk(dev);
+        if (retval) {
+            hid_err(hdev, "Failed to set up CDC bulk path: %d\n", retval);
+            hid_hw_stop(hdev);
+            goto exit_free_files;
+        }
+    }
+
     usb_disable_autosuspend(usb_dev);
 
     return 0;
 
+exit_free_files:
+    if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE ||
+       dev->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO) {
+        device_remove_file(&hdev->dev, &dev_attr_version);
+        device_remove_file(&hdev->dev, &dev_attr_test);
+        device_remove_file(&hdev->dev, &dev_attr_device_type);
+        device_remove_file(&hdev->dev, &dev_attr_device_serial);
+        device_remove_file(&hdev->dev, &dev_attr_firmware_version);
+        device_remove_file(&hdev->dev, &dev_attr_device_mode);
+        if (dev->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO) {
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_current_effect);
+        }
+    }
 exit_free:
     kfree(dev);
     return retval;
@@ -805,7 +1292,13 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
 
     dev = hid_get_drvdata(hdev);
 
-    if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE) {
+    if (dev->use_cdc_bulk) {
+        razer_kraken_v3_pro_stop_spectrum(dev);
+        razer_kraken_v3_pro_release_cdc(dev);
+    }
+
+    if(dev->usb_interface_protocol == USB_INTERFACE_PROTOCOL_NONE ||
+       dev->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO) {
         device_remove_file(&hdev->dev, &dev_attr_version);                               // Get driver version
         device_remove_file(&hdev->dev, &dev_attr_test);                                  // Test mode
         device_remove_file(&hdev->dev, &dev_attr_device_type);                           // Get string of device type
@@ -832,6 +1325,13 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);          // Custom effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_effect_breath);          // Breathing effect
             device_remove_file(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
+            break;
+
+        case USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_current_effect);
             break;
         }
     }
@@ -867,6 +1367,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_TE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2) },
     { 0 }
 };

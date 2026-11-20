@@ -12,9 +12,16 @@
 #define USB_DEVICE_ID_RAZER_KRAKEN_V2 0x0510 // Codename Kylie
 #define USB_DEVICE_ID_RAZER_KRAKEN_TE 0x0520
 #define USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE 0x0527
+#define USB_DEVICE_ID_RAZER_KRAKEN_V3_PRO 0x052C
 #define USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2 0x0560
 
 #define USB_INTERFACE_PROTOCOL_NONE 0
+
+/* Kraken V3 Pro HyperSpeed dongle CDC bulk lighting */
+#define KRAKEN_V3_PRO_CDC_DATA_IFACE 5
+#define KRAKEN_V3_PRO_BULK_OUT_EP    0x06
+#define KRAKEN_V3_PRO_BULK_IN_EP     0x86
+#define KRAKEN_V3_PRO_BULK_LEN       28
 
 // #define RAZER_KRAKEN_V2_REPORT_LEN ?
 
@@ -36,6 +43,15 @@ struct razer_kraken_device {
     unsigned char firmware_version[3];
 
     u8 data[33];
+
+    /* V3 Pro CDC bulk path */
+    bool use_cdc_bulk;
+    bool spectrum_active;
+    bool cdc_line_up;
+    struct delayed_work spectrum_work;
+    unsigned char last_effect; /* 0=none, 1=static, 4=spectrum */
+    unsigned char last_rgb[3];
+    unsigned char last_brightness;
 
 };
 
