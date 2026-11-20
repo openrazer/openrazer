@@ -2525,6 +2525,9 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
 
+    if (!hid_is_usb(hdev))
+        return false;
+
     switch (usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_FIREFLY_V2:
     case USB_DEVICE_ID_RAZER_FIREFLY_V2_PRO:
@@ -2558,6 +2561,9 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_accessory_device *dev = NULL;
     int err;
+
+    if (!hid_is_usb(hdev))
+        return -ENODEV;
 
     dev = kzalloc_obj(*dev);
     if(dev == NULL) {
