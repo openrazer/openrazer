@@ -196,7 +196,8 @@ class RazerDaemon(DBusService):
             return True
 
         try:
-            return grp.getgrnam('plugdev').gr_gid in os.getgroups()
+            plugdev_gid = grp.getgrnam('plugdev').gr_gid
+            return plugdev_gid == os.getgid() or plugdev_gid in os.getgroups()
         except KeyError:
             pass
 
