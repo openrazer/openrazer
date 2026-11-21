@@ -1,0 +1,87 @@
+name: Package
+on:
+  push:
+  pull_request:
+
+jobs:
+  archlinux:
+    name: Arch Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Get version
+        run: |
+          git fetch --unshallow
+          git fetch --tags --force
+
+      - name: Build packages
+        run: |
+          podman run -v $GITHUB_WORKSPACE:/build archlinux:base-devel /build/scripts/ci/package/archlinux.sh
+          sudo rm openrazer-git/*meta*
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: archlinux-pkgs
+          path: openrazer-git/*.pkg.tar.zst
+
+  fedora:
+    name: Fedora
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Get version
+        run: |
+          git fetch --unshallow
+          git fetch --tags --force
+
+          echo "DISTRO=$(podman run --rm fedora:latest sh -c '. /etc/os-release; echo $ID-$VERSION_ID')" >> $GITHUB_ENV
+
+      - name: Build packages
+        run: |
+          podman run -v $GITHUB_WORKSPACE:/build fedora:latest /build/scripts/ci/package/fedora.sh
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.DISTRO }}-rpms
+          path: fedora-rpms/*.rpm
+
+  ubuntu:
+    name: Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Get version
+        run: |
+          git fetch --unshallow
+          git fetch --tags --force
+
+          . /etc/os-release
+          echo "DISTRO=$ID-$VERSION_ID" >> $GITHUB_ENV
+
+      # GitHub Actions already uses Ubuntu, build natively.
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+          sudo apt install debhelper dh-dkms dh-python linux-headers-generic python3-setuptools lsb-release dkms devscripts
+
+      - name: Build packages
+        run: |
+          sed -i "1s/(\([^)]*\))/(\1-1~g$(git rev-parse --short=8 HEAD))/" debian/changelog
+          debuild -b -us -uc
+          rm ../*meta*.deb
+          mv ../*.deb .
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.DISTRO }}-debs
+          path: '*.deb'
