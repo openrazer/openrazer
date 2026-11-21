@@ -98,7 +98,7 @@ if __name__ == '__main__':
             write_binary(driver_path, 'matrix_effect_none', b'\x00')
             time.sleep(5)
             print("Wave Left")
-            write_string(driver_path, 'matrix_effect_wave', '0')
+            write_string(driver_path, 'matrix_effect_wave', '2')
             time.sleep(5)
             print("Wave Right")
             write_string(driver_path, 'matrix_effect_wave', '1')
