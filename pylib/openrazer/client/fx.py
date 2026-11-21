@@ -959,6 +959,8 @@ class MiscLighting(BaseRazerFX):
     _scroll: SingleLed | None
     _left: SingleLed | None
     _right: SingleLed | None
+    _left_ear: SingleLed | None
+    _right_ear: SingleLed | None
     _charging: SingleLed | None
     _fast_charging: SingleLed | None
     _fully_charged: SingleLed | None
@@ -988,6 +990,16 @@ class MiscLighting(BaseRazerFX):
             self._right = SingleLed(serial, capabilities, daemon_dbus, 'right')
         else:
             self._right = None
+
+        if self.has('left_ear'):
+            self._left_ear = SingleLed(serial, capabilities, daemon_dbus, 'left_ear')
+        else:
+            self._left_ear = None
+
+        if self.has('right_ear'):
+            self._right_ear = SingleLed(serial, capabilities, daemon_dbus, 'right_ear')
+        else:
+            self._right_ear = None
 
         if self.has('charging'):
             self._charging = SingleLed(serial, capabilities, daemon_dbus, 'charging')
@@ -1024,6 +1036,14 @@ class MiscLighting(BaseRazerFX):
     @property
     def right(self) -> SingleLed | None:
         return self._right
+
+    @property
+    def left_ear(self) -> SingleLed | None:
+        return self._left_ear
+
+    @property
+    def right_ear(self) -> SingleLed | None:
+        return self._right_ear
 
     @property
     def charging(self) -> SingleLed | None:

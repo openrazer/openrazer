@@ -297,7 +297,7 @@ def set_static_effect(self, red, green, blue):
 
     # remember effect
     self.set_persistence("backlight", "effect", 'static')
-    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
+    self.set_persistence_colors("backlight", int(red), int(green), int(blue))
 
     driver_path = self.get_driver_path('matrix_effect_static')
 
@@ -328,7 +328,7 @@ def set_blinking_effect(self, red, green, blue):
 
     # remember effect
     self.set_persistence("backlight", "effect", 'blinking')
-    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
+    self.set_persistence_colors("backlight", int(red), int(green), int(blue))
 
     driver_path = self.get_driver_path('matrix_effect_blinking')
 
@@ -418,7 +418,7 @@ def set_reactive_effect(self, red, green, blue, speed):
 
     # remember effect
     self.set_persistence("backlight", "effect", 'reactive')
-    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
+    self.set_persistence_colors("backlight", int(red), int(green), int(blue))
 
     if speed not in (1, 2, 3, 4):
         speed = 4
@@ -473,7 +473,7 @@ def set_breath_single_effect(self, red, green, blue):
 
     # remember effect
     self.set_persistence("backlight", "effect", 'breathSingle')
-    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
+    self.set_persistence_colors("backlight", int(red), int(green), int(blue))
 
     driver_path = self.get_driver_path('matrix_effect_breath')
 
@@ -513,7 +513,7 @@ def set_breath_dual_effect(self, red1, green1, blue1, red2, green2, blue2):
 
     # remember effect
     self.set_persistence("backlight", "effect", 'breathDual')
-    self.zone["backlight"]["colors"][0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
+    self.set_persistence_colors("backlight", int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2))
 
     driver_path = self.get_driver_path('matrix_effect_breath')
 
@@ -562,7 +562,7 @@ def set_breath_triple_effect(self, red1, green1, blue1, red2, green2, blue2, red
 
     # remember effect
     self.set_persistence("backlight", "effect", 'breathTriple')
-    self.zone["backlight"]["colors"][0:9] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2), int(red3), int(green3), int(blue3)
+    self.set_persistence_colors("backlight", int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2), int(red3), int(green3), int(blue3))
 
     driver_path = self.get_driver_path('matrix_effect_breath')
 
@@ -625,7 +625,7 @@ def set_ripple_effect(self, red, green, blue, refresh_rate):
 
     # remember effect
     self.set_persistence("backlight", "effect", 'ripple')
-    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
+    self.set_persistence_colors("backlight", int(red), int(green), int(blue))
 
 
 @endpoint('razer.device.lighting.custom', 'setRippleRandomColour', in_sig='d')
@@ -683,7 +683,7 @@ def set_starlight_single_effect(self, red, green, blue, speed):
     # remember effect
     self.set_persistence("backlight", "effect", 'starlightSingle')
     self.set_persistence("backlight", "speed", int(speed))
-    self.zone["backlight"]["colors"][0:3] = int(red), int(green), int(blue)
+    self.set_persistence_colors("backlight", int(red), int(green), int(blue))
 
 
 @endpoint('razer.device.lighting.chroma', 'setStarlightDual', in_sig='yyyyyyy')
@@ -704,4 +704,4 @@ def set_starlight_dual_effect(self, red1, green1, blue1, red2, green2, blue2, sp
     # remember effect
     self.set_persistence("backlight", "effect", 'starlightDual')
     self.set_persistence("backlight", "speed", int(speed))
-    self.zone["backlight"]["colors"][0:6] = int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2)
+    self.set_persistence_colors("backlight", int(red1), int(green1), int(blue1), int(red2), int(green2), int(blue2))
