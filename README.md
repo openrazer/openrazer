@@ -161,6 +161,7 @@ This will output something similar to this:
 | Razer BlackWidow V4 75%                                       |  1532:02A5  |
 | Razer Huntsman V3 Pro                                         |  1532:02A6  |
 | Razer Huntsman V3 Pro TKL                                     |  1532:02A7  |
+| Razer Huntsman V3 X Tenkeyless                                |  1532:02B1  |
 | Razer Huntsman V3 Pro Mini                                    |  1532:02B0  |
 | Razer Blade 14 (2024)                                         |  1532:02B6  |
 | Razer Blade 18 (2024)                                         |  1532:02B8  |
